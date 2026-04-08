@@ -6,10 +6,23 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@gravity-ui/icons": "^2.18.0",
+    "@heroui/react": "^3.0.2",
+    "@heroui/styles": "^3.0.2",
+    "@platejs/basic-nodes": "^52.3.10",
+    "@platejs/basic-styles": "^52.3.10",
+    "@platejs/floating": "^52.3.10",
+    "@platejs/link": "^52.3.17",
+    "@platejs/suggestion": "^52.3.10",
+    "@udecode/cn": "^52.3.4",
+    "motion": "^12.38.0",
     "next": "16.2.2",
+    "platejs": "^52.3.21",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -20,6 +33,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
