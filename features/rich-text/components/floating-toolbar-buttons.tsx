@@ -4,10 +4,11 @@ import { Button, ButtonGroup, ToggleButtonGroup } from "@heroui/react";
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
 import { MarkToolbarButton } from "./toolbar-kit";
-import { Bold, Italic, Strikethrough, Underline } from "@gravity-ui/icons";
+import { Bold, Italic, Strikethrough, Underline, Superscript } from "@gravity-ui/icons";
 import { FontSizeToolbarButton } from "./font-size-toolbar-button";
 import { LineHeightToolbarButton } from "./line-height-toolbar-button";
 import { FontFamilyToolbarButton } from "./font-family-toolbar-button";
+import { AlignToolbarButton } from "./align-toolbar-button";
 
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
@@ -37,6 +38,13 @@ export function FloatingToolbarButtons() {
               icon={<Strikethrough />}
             />
           </ToggleButtonGroup>
+
+          <ToggleButtonGroup size="sm">
+            <MarkToolbarButton nodeType={KEYS.sup} tooltip="Sup (⌘+,)" icon={<Superscript />} />
+            <MarkToolbarButton nodeType={KEYS.sub} tooltip="Sub (⌘+.)" icon={<Superscript />} />
+          </ToggleButtonGroup>
+
+          <AlignToolbarButton />
         </>
       )}
     </>
