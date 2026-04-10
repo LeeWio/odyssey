@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { LinkSlash } from "@gravity-ui/icons";
+import { LinkSlash, Link as LinkIcon } from "@gravity-ui/icons";
 
 import { type UseVirtualFloatingOptions, flip, offset } from "@platejs/floating";
 import {
@@ -15,65 +15,78 @@ import {
   useFloatingLinkUrlInput,
   useFloatingLinkUrlInputState,
   useLink,
+  useLinkOpenButtonState,
 } from "@platejs/link/react";
-import { KEYS } from "platejs";
-import { useElement, useFormInputProps, usePluginOption } from "platejs/react";
-import { Button, ButtonGroup, Input, Link, Separator, Surface, Toolbar } from "@heroui/react";
+import { KEYS, OperationApi, TLinkElement } from "platejs";
+import { useEditorRef, useEditorSelection, useElement, useFormInputProps, usePluginOption } from "platejs/react";
+import { Button, ButtonGroup, buttonVariants, Input, Link, Separator, Surface, Toolbar } from "@heroui/react";
+import { AnimatePresence } from "motion/react";
+import { useMemo } from "react";
+import { getLinkAttributes } from "@platejs/link";
 
 export function LinkEdit({
-  inputProps,
-  textInputProps,
+  textDefaultValue,
+  textRef,
+  textOnChange,
+  onKeyDownCapture
 }: {
-  inputProps: React.HTMLAttributes<HTMLDivElement>;
-  textInputProps: React.InputHTMLAttributes<HTMLInputElement>;
+  onKeyDownCapture?: React.KeyboardEventHandler<HTMLDivElement>;
+  textDefaultValue?: string;
+  textRef?: React.Ref<HTMLInputElement>;
+  textOnChange?: React.ChangeEventHandler<HTMLInputElement>;
 }) {
   const state = useFloatingLinkUrlInputState();
-  const { props, ref } = useFloatingLinkUrlInput(state);
+  const { props: urlInputProps, ref } = useFloatingLinkUrlInput(state);
 
   return (
-    <Surface className="bg-overlay/80 flex transform-gpu flex-col items-center justify-center gap-1 rounded-3xl p-1.5 backdrop-blur-md backdrop-saturate-150">
+    <Surface className="toolbar toolbar--vertical toolbar--attached rounded-xl">
       <Input
-        fullWidth
-        defaultValue={props.defaultValue}
-        onChange={props.onChange}
         ref={ref}
+        fullWidth
         variant="secondary"
+        defaultValue={urlInputProps.defaultValue}
+        onChange={urlInputProps.onChange}
       />
+
       <Input
         fullWidth
+        variant="secondary"
         placeholder="Text to display"
         data-plate-focus
-        {...textInputProps}
-        variant="secondary"
+        defaultValue={textDefaultValue}
+        ref={textRef}
+        onChange={textOnChange}
       />
     </Surface>
   );
 }
 
+type LinkPreviewProps = {
+  onEdit?: () => void;
+  onUnlink?: () => void;
+};
+
 export function LinkPreview({
-  editButtonProps,
-  unlinkButtonProps,
+  onEdit,
+  onUnlink,
 }: {
-  editButtonProps: React.ButtonHTMLAttributes<HTMLButtonElement>;
-  unlinkButtonProps: React.ButtonHTMLAttributes<HTMLButtonElement>;
+  onEdit?: () => void;
+  onUnlink?: () => void;
 }) {
-  const urlState = useFloatingLinkUrlInputState();
-  const { props } = useFloatingLinkUrlInput(urlState);
+  const state = useLinkOpenButtonState();
+  const url = state.element?.url;
 
   return (
     <Toolbar isAttached>
-      <Button size="sm" onPress={editButtonProps.onClick} variant="tertiary">
-        Edit link
+      <Button size="sm" onPress={onEdit} variant="ghost">
+        {url}
       </Button>
 
       <Separator orientation="vertical" />
 
-      <button type="button" {...unlinkButtonProps}>
-        unlink
-      </button>
-
-      <ButtonGroup orientation="horizontal" variant="tertiary">
-        <Button isIconOnly onPress={unlinkButtonProps.onClick}>
+      <ButtonGroup orientation="horizontal" variant="tertiary" size="sm">
+        <LinkOpenButton />
+        <Button isIconOnly onPress={onUnlink}>
           <LinkSlash />
         </Button>
       </ButtonGroup>
@@ -133,19 +146,72 @@ export function LinkFloatingToolbar({ state }: { state?: LinkFloatingToolbarStat
     preventDefaultOnEnterKeydown: true,
   });
 
+  const input = (
+    <LinkEdit
+      onKeyDownCapture={inputProps.onKeyDownCapture}
+      textDefaultValue={textInputProps.defaultValue}
+      textRef={textInputProps.ref}
+      textOnChange={textInputProps.onChange}
+    />
+  )
+
+  const editContent = editState.isEditing ? (
+    input
+  ) : (
+    <LinkPreview
+      onEdit={editButtonProps.onClick}
+      onUnlink={unlinkButtonProps.onClick}
+    />
+  )
+
   return (
     <>
-      <div ref={insertRef} {...insertProps}>
-        <LinkEdit inputProps={inputProps} textInputProps={textInputProps} />
-      </div>
+      <AnimatePresence>
+        {!hidden && (
+          <>
+            <div ref={insertRef} {...insertProps}>
+              {input}
+            </div>
 
-      <div ref={editRef} {...editProps}>
-        {editState.isEditing ? (
-          <LinkEdit inputProps={inputProps} textInputProps={textInputProps} />
-        ) : (
-          <LinkPreview editButtonProps={editButtonProps} unlinkButtonProps={unlinkButtonProps} />
+            <div ref={editRef} {...editProps}>
+              {editContent}
+            </div>
+          </>
         )}
-      </div>
+      </AnimatePresence>
     </>
+  );
+}
+
+function LinkOpenButton() {
+  const editor = useEditorRef();
+  const selection = useEditorSelection();
+
+  const attributes = useMemo(
+    () => {
+      const entry = editor.api.node<TLinkElement>({
+        match: { type: editor.getType(KEYS.link) },
+      });
+      if (!entry) {
+        return {};
+      }
+      const [element] = entry;
+      return getLinkAttributes(editor, element);
+    },
+    [editor, selection]
+  );
+
+  return (
+    <Link
+      {...attributes}
+      onMouseOver={(e) => {
+        e.stopPropagation();
+      }}
+      aria-label="Open link in a new tab"
+      target="_blank"
+      className={buttonVariants({ size: "sm", isIconOnly: true, variant: "tertiary" })}
+    >
+      <LinkIcon />
+    </Link>
   );
 }
