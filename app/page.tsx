@@ -22,12 +22,14 @@ export default function Home() {
         <Modal.Container size="cover">
           <Modal.Dialog>
             <Modal.Body>
-                <Plate editor={editor}>
-                  <PlateContent className="outline-none scroll-smooth" placeholder="Type your amazing content here..." />
-                </Plate>
+              <Plate editor={editor}>
+                <PlateContent
+                  className="scroll-smooth outline-none"
+                  placeholder="Type your amazing content here..."
+                />
+              </Plate>
             </Modal.Body>
-            <Modal.Footer>
-            </Modal.Footer>
+            <Modal.Footer></Modal.Footer>
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>

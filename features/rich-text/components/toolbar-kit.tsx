@@ -1,6 +1,7 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import React, { forwardRef, ReactNode } from "react";
+import { ChevronDown } from "@gravity-ui/icons";
 import {
   Button,
   ToggleButton,
@@ -14,7 +15,9 @@ import {
 } from "@heroui/react";
 import { useMarkToolbarButton, useMarkToolbarButtonState } from "platejs/react";
 
-export const ToolbarButton = React.forwardRef<
+
+
+export const ToolbarButton = forwardRef<
   HTMLButtonElement,
   (ButtonProps | ToggleButtonProps) & {
     tooltip?: string;
@@ -22,10 +25,15 @@ export const ToolbarButton = React.forwardRef<
     children: ReactNode;
   }
 >(({ children, tooltip, isSelected, ...props }, ref) => {
-  const isToggle = typeof isSelected === "boolean";
+  const isToggle = typeof isSelected !== "undefined";
 
   const buttonContent = isToggle ? (
-    <ToggleButton {...(props as ToggleButtonProps)} ref={ref} isSelected={isSelected} isIconOnly>
+    <ToggleButton
+      {...(props as ToggleButtonProps)}
+      ref={ref as any}
+      isSelected={isSelected}
+      isIconOnly
+    >
       {children}
     </ToggleButton>
   ) : (
@@ -119,9 +127,6 @@ export function ToolbarColorPicker({
   );
 }
 
-/**
- * 下拉菜单按钮 (ToolbarDropdown)
- */
 export function ToolbarDropdown({
   tooltip,
   label,

@@ -18,8 +18,23 @@ import {
   useLinkOpenButtonState,
 } from "@platejs/link/react";
 import { KEYS, OperationApi, TLinkElement } from "platejs";
-import { useEditorRef, useEditorSelection, useElement, useFormInputProps, usePluginOption } from "platejs/react";
-import { Button, ButtonGroup, buttonVariants, Input, Link, Separator, Surface, Toolbar } from "@heroui/react";
+import {
+  useEditorRef,
+  useEditorSelection,
+  useElement,
+  useFormInputProps,
+  usePluginOption,
+} from "platejs/react";
+import {
+  Button,
+  ButtonGroup,
+  buttonVariants,
+  Input,
+  Link,
+  Separator,
+  Surface,
+  Toolbar,
+} from "@heroui/react";
 import { AnimatePresence } from "motion/react";
 import { useMemo } from "react";
 import { getLinkAttributes } from "@platejs/link";
@@ -28,7 +43,7 @@ export function LinkEdit({
   textDefaultValue,
   textRef,
   textOnChange,
-  onKeyDownCapture
+  onKeyDownCapture,
 }: {
   onKeyDownCapture?: React.KeyboardEventHandler<HTMLDivElement>;
   textDefaultValue?: string;
@@ -66,13 +81,7 @@ type LinkPreviewProps = {
   onUnlink?: () => void;
 };
 
-export function LinkPreview({
-  onEdit,
-  onUnlink,
-}: {
-  onEdit?: () => void;
-  onUnlink?: () => void;
-}) {
+export function LinkPreview({ onEdit, onUnlink }: { onEdit?: () => void; onUnlink?: () => void }) {
   const state = useLinkOpenButtonState();
   const url = state.element?.url;
 
@@ -153,16 +162,13 @@ export function LinkFloatingToolbar({ state }: { state?: LinkFloatingToolbarStat
       textRef={textInputProps.ref}
       textOnChange={textInputProps.onChange}
     />
-  )
+  );
 
   const editContent = editState.isEditing ? (
     input
   ) : (
-    <LinkPreview
-      onEdit={editButtonProps.onClick}
-      onUnlink={unlinkButtonProps.onClick}
-    />
-  )
+    <LinkPreview onEdit={editButtonProps.onClick} onUnlink={unlinkButtonProps.onClick} />
+  );
 
   return (
     <>
@@ -187,19 +193,16 @@ function LinkOpenButton() {
   const editor = useEditorRef();
   const selection = useEditorSelection();
 
-  const attributes = useMemo(
-    () => {
-      const entry = editor.api.node<TLinkElement>({
-        match: { type: editor.getType(KEYS.link) },
-      });
-      if (!entry) {
-        return {};
-      }
-      const [element] = entry;
-      return getLinkAttributes(editor, element);
-    },
-    [editor, selection]
-  );
+  const attributes = useMemo(() => {
+    const entry = editor.api.node<TLinkElement>({
+      match: { type: editor.getType(KEYS.link) },
+    });
+    if (!entry) {
+      return {};
+    }
+    const [element] = entry;
+    return getLinkAttributes(editor, element);
+  }, [editor, selection]);
 
   return (
     <Link

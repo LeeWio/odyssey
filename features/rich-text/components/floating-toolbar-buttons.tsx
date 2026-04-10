@@ -9,6 +9,8 @@ import { FontSizeToolbarButton } from "./font-size-toolbar-button";
 import { LineHeightToolbarButton } from "./line-height-toolbar-button";
 import { FontFamilyToolbarButton } from "./font-family-toolbar-button";
 import { AlignToolbarButton } from "./align-toolbar-button";
+import { LinkToolbarButton } from "./link-toolbar-button";
+import { Link } from "@gravity-ui/icons";
 
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
@@ -45,6 +47,10 @@ export function FloatingToolbarButtons() {
           </ToggleButtonGroup>
 
           <AlignToolbarButton />
+
+          <LinkToolbarButton size="sm" tooltip="Insert Link (⌘+K)" variant="tertiary">
+            <Link />
+          </LinkToolbarButton>
         </>
       )}
     </>

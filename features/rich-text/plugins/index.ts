@@ -23,5 +23,5 @@ export const Plugins = [
   ...ExitBreakKit,
   ...BlockSelectionKit,
   ...MentionKit,
-  ...BlockPlaceholderKit
+  ...BlockPlaceholderKit,
 ];
