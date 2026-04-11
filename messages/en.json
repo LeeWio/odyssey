@@ -1,12 +1,21 @@
 {
   "Navbar": {
-    "features": "Features",
-    "docs": "Docs",
-    "blog": "Blog",
-    "pricing": "Pricing",
+    "journey": "Journey",
+    "projects": "Projects",
+    "experience": "Experience",
+    "writings": "Writings",
+    "technical": "Technical",
+    "columns": "Columns",
+    "reflections": "Reflections",
+    "culture": "Culture",
+    "music": "Music",
+    "gaming": "Gaming",
+    "gear": "Gear",
+    "moments": "Moments",
+    "about": "About",
     "login": "Log in",
     "logout": "Log out",
-    "getStarted": "Get Started"
+    "getStarted": "Join Me"
   },
   "HomePage": {
     "title": "Welcome to Odyssey",

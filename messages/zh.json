@@ -1,12 +1,21 @@
 {
   "Navbar": {
-    "features": "特性",
-    "docs": "文档",
-    "blog": "博客",
-    "pricing": "价格",
+    "journey": "旅程",
+    "projects": "开源项目",
+    "experience": "职业生涯",
+    "writings": "创作",
+    "technical": "技术深度",
+    "columns": "专题专栏",
+    "reflections": "人生感悟",
+    "culture": "兴趣",
+    "music": "音乐律动",
+    "gaming": "第九艺术",
+    "gear": "好物推荐",
+    "moments": "瞬间",
+    "about": "关于",
     "login": "登录",
-    "logout": "退出登录",
-    "getStarted": "立即开始"
+    "logout": "退出",
+    "getStarted": "加入我"
   },
   "HomePage": {
     "title": "欢迎来到 Odyssey",
