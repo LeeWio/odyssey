@@ -12,13 +12,17 @@ This project is a Next.js web application built using the modern App Router arch
 - **Component Library:** HeroUI (`@heroui/react`, `@heroui/styles`)
 - **Rich Text Editor:** PlateJS (`platejs`, `@platejs/*`)
 - **Animations:** Motion
+- **State Management:** Redux Toolkit (`@reduxjs/toolkit`, `react-redux`)
+- **Internationalization:** next-intl (supporting URL locale prefixes `/en`, `/zh`)
 - **Package Manager:** Bun (indicated by `bun.lock`)
 
 ## Directory Structure
 
-- `app/`: Contains the Next.js App Router definitions (`page.tsx`, `layout.tsx`, etc.).
-- `app/store/`: Contains Next.js App Router specific providers (e.g. Redux `StoreProvider`).
-- `components/`: Houses reusable, shared UI components (e.g., `icons.tsx`).
+- `app/`: Contains the Next.js App Router definitions.
+- `app/[locale]/`: Localized route segments for multi-language support.
+- `components/`: Houses reusable, shared UI components (e.g., `icons.tsx`, `navbar.tsx`).
+- `i18n/`: Internationalization configuration (routing, middleware integration).
+- `messages/`: Translation dictionaries in JSON format.
 - `features/rich-text/`: A domain-specific feature folder containing all logic, components, plugins, toolbars, and custom nodes necessary for the PlateJS rich-text editor integration.
 - `hooks/`: Custom React hooks, notably `use-rich-text.ts` which encapsulates the editor's initialization and configuration.
 - `store/`: Contains the Redux Toolkit root store configuration, typed hooks, and state slices (e.g., `auth/authSlice.ts`).
@@ -41,7 +45,12 @@ The project uses Bun as the primary package manager. Run the following commands 
 
 - **UI Framework Integration:** The project heavily relies on HeroUI for modals, buttons, and other foundational UI pieces (e.g., `Modal`, `Button`, `ScrollShadow`). Ensure adherence to HeroUI's paradigms when building new interfaces.
 - **Rich Text Architecture:** The PlateJS editor is abstracted behind the `useRichText` hook (in `hooks/use-rich-text.ts`). It loads its plugin ecosystem from `features/rich-text/plugins`. Any new editor capabilities (nodes, marks, toolbars) should be contained within the `features/rich-text/` folder structure.
+- **Internationalization (i18n):**
+  - Use `next-intl` for translations.
+  - Define messages in `messages/*.json`.
+  - Use `useTranslations` in components.
+  - Use `Link` from `@/i18n/routing` for automatic locale prefixing in links.
 - **Absolute Imports:** The project uses path aliases. Use `@/*` to import from the root of the project (e.g., `import { useRichText } from "@/hooks/use-rich-text";`).
+- **Global State Management:** Redux Toolkit is used for global state (e.g., authentication). The root store and typed hooks are located in `store/`. State slices are grouped by feature under `store/<feature>/<feature>Slice.ts`. The client-side `<StoreProvider>` is injected at the root layout via `app/[locale]/layout.tsx`.
 - **Strict Mode:** TypeScript is configured strictly (`"strict": true` in `tsconfig.json`). Ensure type safety is maintained across new additions.
 - **Formatting & Linting:** Code style is enforced through Prettier and ESLint. Use the provided scripts to maintain consistency.
-ng:** Code style is enforced through Prettier and ESLint. Use the provided scripts to maintain consistency.

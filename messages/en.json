@@ -1,0 +1,15 @@
+{
+  "Navbar": {
+    "features": "Features",
+    "docs": "Docs",
+    "blog": "Blog",
+    "pricing": "Pricing",
+    "login": "Log in",
+    "logout": "Log out",
+    "getStarted": "Get Started"
+  },
+  "HomePage": {
+    "title": "Welcome to Odyssey",
+    "description": "Experience a modern rich-text editor built with Plate and HeroUI."
+  }
+}

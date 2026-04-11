@@ -1,0 +1,15 @@
+{
+  "Navbar": {
+    "features": "特性",
+    "docs": "文档",
+    "blog": "博客",
+    "pricing": "价格",
+    "login": "登录",
+    "logout": "退出登录",
+    "getStarted": "立即开始"
+  },
+  "HomePage": {
+    "title": "欢迎来到 Odyssey",
+    "description": "体验由 Plate 和 HeroUI 构建的现代富文本编辑器。"
+  }
+}
