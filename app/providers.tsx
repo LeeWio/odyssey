@@ -3,14 +3,30 @@
 import { useRef } from "react";
 import { Provider } from "react-redux";
 import { makeStore, AppStore } from "@/store";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-export default function StoreProvider({ children }: { children: React.ReactNode }) {
+export default function Providers({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const storeRef = useRef<AppStore>(undefined);
-
+  
   if (storeRef.current == null) {
     // Create the store instance the first time this renders
     storeRef.current = makeStore();
   }
 
-  return <Provider store={storeRef.current}>{children}</Provider>;
+  return (
+    <Provider store={storeRef.current}>
+      <NextThemesProvider 
+        attribute="class" 
+        defaultTheme="dark" 
+        enableSystem
+        enableColorScheme={false}
+      >
+        {children}
+      </NextThemesProvider>
+    </Provider>
+  );
 }
