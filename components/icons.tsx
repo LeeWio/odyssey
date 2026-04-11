@@ -9,15 +9,7 @@ import { IconSvgProps } from "@/types";
  * Optimized for small-scale visibility with heavy line weights and organic motion.
  */
 export const Logo = ({ size = 24, className, ...props }: IconSvgProps) => {
-  const {
-    width,
-    height,
-    onAnimationStart,
-    onDragStart,
-    onDragEnd,
-    onDrag,
-    ...rest
-  } = props as any;
+  const { width, height, onAnimationStart, onDragStart, onDragEnd, onDrag, ...rest } = props as any;
 
   const pathVariants: Variants = {
     hidden: { pathLength: 0, opacity: 0 },
@@ -58,10 +50,7 @@ export const Logo = ({ size = 24, className, ...props }: IconSvgProps) => {
     >
       <g stroke="currentColor" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round">
         {/* O */}
-        <motion.path
-          variants={pathVariants}
-          d="M45,30 A15,15 0 1,1 15,30 A15,15 0 1,1 45,30"
-        />
+        <motion.path variants={pathVariants} d="M45,30 A15,15 0 1,1 15,30 A15,15 0 1,1 45,30" />
         {/* d */}
         <motion.path
           variants={pathVariants}
