@@ -15,8 +15,6 @@ import {
 } from "@heroui/react";
 import { useMarkToolbarButton, useMarkToolbarButtonState } from "platejs/react";
 
-
-
 export const ToolbarButton = forwardRef<
   HTMLButtonElement,
   (ButtonProps | ToggleButtonProps) & {
