@@ -10,6 +10,8 @@ import {
   Label,
   Chip,
   Badge,
+  Header,
+  Description
 } from "@heroui/react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -23,19 +25,26 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter, usePathname } from "@/i18n/routing";
 import { useTheme } from "next-themes";
 import { useMounted } from "@/hooks/use-mounted";
-import { 
-  Magnifier, 
-  Sun, 
-  Moon, 
+import {
+  Magnifier,
+  Sun,
+  Moon,
   ChevronDown,
   Code,
-  Briefcase,
-  Layers,
-  Bulb,
+  Terminal,
+  Database,
+  CloudGear,
   MusicNote,
   Play,
-  Gear,
-  SquareArticle
+  Palette,
+  PencilToSquare,
+  Bulb,
+  BookOpen,
+  MapPin,
+  Person,
+  ArrowRight,
+  Rocket,
+  Sparkles
 } from "@gravity-ui/icons";
 import { Logo } from "@/components/icons";
 
@@ -117,7 +126,7 @@ export const Navbar = () => {
       variants={containerVariants}
       aria-label="Main Navigation"
       isAttached
-      className="bg-background/50 dark:bg-background/40 fixed inset-x-0 top-4 z-50 mx-auto flex w-max items-center gap-4 border-white/8 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl backdrop-saturate-[1.8] dark:border-white/8 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+      className="bg-background/50 dark:bg-background/40 fixed inset-x-0 top-4 z-50 mx-auto flex w-max items-center gap-4 border-white/8 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl backdrop-saturate-[1.8] dark:border-white/8 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] px-2 py-1.5"
     >
       {/* Left: Logo */}
       <MotionLink
@@ -134,7 +143,7 @@ export const Navbar = () => {
         className="hidden lg:flex items-center gap-3 px-3 py-1.5 rounded-full bg-default/40 hover:bg-default/60 border border-border/50 text-muted transition-all duration-200"
       >
         <Magnifier width="14" height="14" />
-        <span className="text-xs font-medium">Search...</span>
+        <span className="text-xs font-medium text-muted/80 tracking-tight">Search...</span>
         <Kbd className="bg-background/50 py-0 px-1 border-none shadow-none text-[10px]">
           <Kbd.Abbr>⌘</Kbd.Abbr>K
         </Kbd>
@@ -142,148 +151,190 @@ export const Navbar = () => {
 
       {/* Center: Nav */}
       <nav className="hidden items-center gap-1 md:flex px-2">
-        {/* 1. Journey - Grid 2 Column Layout */}
+        {/* 1. Tech Sharing - Detailed Grid with Sidebar */}
         <Dropdown>
           <Dropdown.Trigger
             variant="ghost"
             size="sm"
-            className="text-muted hover:text-foreground text-sm font-medium border-none data-[pressed=true]:scale-95 transition-all h-9 px-3"
+            className="text-muted hover:text-foreground text-[11px] font-black border-none uppercase tracking-widest data-[pressed=true]:scale-95 transition-all h-9 px-3"
           >
-            <div className="flex items-center gap-1 pointer-events-none uppercase tracking-wider text-[11px] font-bold">
-              {t("journey")}
+            <div className="flex items-center gap-1 pointer-events-none text-left">
+              {t("tech")}
               <ChevronDown width="12" height="12" className="opacity-50" />
             </div>
           </Dropdown.Trigger>
-          <Dropdown.Popover className="min-w-[400px]">
-            <Dropdown.Menu 
-              onAction={(key) => router.push(key as any)}
-              className="grid grid-cols-2 gap-2 p-2"
-            >
-              <Dropdown.Item id="/projects" textValue="Projects" className="p-3 bg-default/40 hover:bg-default/80 rounded-xl transition-all">
-                <div className="flex flex-col gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
-                    <Code width="18" height="18" />
+          <Dropdown.Popover className="min-w-[560px] p-0 overflow-hidden border-border/50 shadow-2xl backdrop-blur-3xl rounded-[32px]">
+            <div className="flex h-full text-left">
+              {/* Feature Sidebar */}
+              <div className="w-[180px] bg-default/30 p-5 border-r border-border/50 flex flex-col justify-between text-left">
+                <div className="flex flex-col gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-accent text-accent-foreground flex items-center justify-center shadow-lg shadow-accent/20">
+                    <Code width="22" height="22" />
                   </div>
-                  <div>
-                    <Label className="font-bold text-sm block">{t("projects")}</Label>
-                    <span className="text-[10px] text-muted leading-tight block mt-0.5">My open-source ecosystem.</span>
-                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-tighter leading-tight text-foreground">{t("tech")}</h3>
+                  <p className="text-[10px] text-muted leading-relaxed font-medium">{t("techDesc")}</p>
                 </div>
-              </Dropdown.Item>
-              <Dropdown.Item id="/experience" textValue="Experience" className="p-3 bg-default/40 hover:bg-default/80 rounded-xl transition-all">
-                <div className="flex flex-col gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
-                    <Briefcase width="18" height="18" />
-                  </div>
-                  <div>
-                    <Label className="font-bold text-sm block">{t("experience")}</Label>
-                    <span className="text-[10px] text-muted leading-tight block mt-0.5">Career path & expertise.</span>
-                  </div>
-                </div>
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown.Popover>
-        </Dropdown>
-
-        {/* 2. Writings - magazine style with sectioning */}
-        <Dropdown>
-          <Dropdown.Trigger
-            variant="ghost"
-            size="sm"
-            className="text-muted hover:text-foreground text-sm font-medium border-none data-[pressed=true]:scale-95 transition-all h-9 px-3"
-          >
-            <div className="flex items-center gap-1 pointer-events-none uppercase tracking-wider text-[11px] font-bold">
-              {t("writings")}
-              <ChevronDown width="12" height="12" className="opacity-50" />
-            </div>
-          </Dropdown.Trigger>
-          <Dropdown.Popover className="min-w-[280px]">
-            <Dropdown.Menu onAction={(key) => router.push(key as any)} className="p-1.5">
-              <Dropdown.Section>
-                <Dropdown.Header className="px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-muted/50">Intellectual Space</Dropdown.Header>
-                <Dropdown.Item id="/tech" textValue="Technical" className="py-2.5 rounded-lg group">
-                  <div className="flex items-center gap-3">
-                    <SquareArticle width="16" height="16" className="text-muted group-hover:text-accent transition-colors" />
-                    <div className="flex flex-col">
-                      <Label className="font-bold text-sm">{t("technical")}</Label>
-                      <span className="text-[10px] text-muted">Code & Systems Architecture.</span>
+                <Button size="sm" variant="ghost" className="w-full text-[10px] uppercase font-black tracking-widest border-border/50 rounded-full h-8">
+                  View All <ArrowRight width="12" height="12" className="ml-1" />
+                </Button>
+              </div>
+              {/* Content Grid */}
+              <Dropdown.Menu onAction={(key) => router.push(key as any)} className="flex-1 p-3 grid grid-cols-2 gap-1.5">
+                <Dropdown.Item id="/tech/frontend" textValue="Frontend" className="p-3 rounded-2xl bg-transparent hover:bg-accent/[0.03] transition-all group border border-transparent hover:border-accent/10">
+                  <div className="flex flex-col gap-2 text-left">
+                    <div className="flex items-center justify-between">
+                      <Code width="18" height="18" className="text-accent group-hover:scale-110 transition-transform" />
+                      <span className="text-[9px] font-bold text-accent/40 group-hover:text-accent transition-colors uppercase tracking-widest">UI/UX</span>
+                    </div>
+                    <div>
+                      <Label className="font-black text-sm block tracking-tight text-foreground">{t("frontend")}</Label>
+                      <p className="text-[10px] text-muted mt-0.5 line-clamp-1 font-medium">React, Next.js, Framer.</p>
                     </div>
                   </div>
                 </Dropdown.Item>
-                <Dropdown.Item id="/columns" textValue="Columns" className="py-2.5 rounded-lg group">
-                  <div className="flex items-center gap-3">
-                    <Layers width="16" height="16" className="text-muted group-hover:text-accent transition-colors" />
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <Label className="font-bold text-sm">{t("columns")}</Label>
-                        <div className="w-1 h-1 rounded-full bg-accent animate-pulse" />
-                      </div>
-                      <span className="text-[10px] text-muted">Deep dive series & tutorials.</span>
+                <Dropdown.Item id="/tech/backend" textValue="Backend" className="p-3 rounded-2xl bg-transparent hover:bg-success/[0.03] transition-all group border border-transparent hover:border-success/10">
+                  <div className="flex flex-col gap-2 text-left">
+                    <div className="flex items-center justify-between">
+                      <Terminal width="18" height="18" className="text-success group-hover:scale-110 transition-transform" />
+                      <span className="text-[9px] font-bold text-success/40 group-hover:text-success transition-colors uppercase tracking-widest">Arch</span>
+                    </div>
+                    <div>
+                      <Label className="font-black text-sm block tracking-tight text-foreground">{t("backend")}</Label>
+                      <p className="text-[10px] text-muted mt-0.5 line-clamp-1 font-medium">Node, Go, Microservices.</p>
                     </div>
                   </div>
                 </Dropdown.Item>
-              </Dropdown.Section>
-              <Separator className="my-1 mx-2" />
-              <Dropdown.Item id="/reflections" textValue="Reflections" className="py-2.5 rounded-lg group italic">
-                <div className="flex items-center gap-3">
-                  <Bulb width="16" height="16" className="text-muted group-hover:text-warning transition-colors" />
-                  <Label className="font-medium text-sm text-muted/90 group-hover:text-foreground">“{t("reflections")}”</Label>
+                <Dropdown.Item id="/tech/database" textValue="Database" className="p-3 rounded-2xl bg-transparent hover:bg-warning/[0.03] transition-all group border border-transparent hover:border-warning/10">
+                  <div className="flex flex-col gap-2 text-left">
+                    <div className="flex items-center justify-between">
+                      <Database width="18" height="18" className="text-warning group-hover:scale-110 transition-transform" />
+                      <span className="text-[9px] font-bold text-warning/40 group-hover:text-warning transition-colors uppercase tracking-widest">Data</span>
+                    </div>
+                    <div>
+                      <Label className="font-black text-sm block tracking-tight text-foreground">{t("database")}</Label>
+                      <p className="text-[10px] text-muted mt-0.5 line-clamp-1 font-medium">SQL, Redis, VectorDB.</p>
+                    </div>
+                  </div>
+                </Dropdown.Item>
+                <Dropdown.Item id="/tech/devops" textValue="DevOps" className="p-3 rounded-2xl bg-transparent hover:bg-danger/[0.03] transition-all group border border-transparent hover:border-danger/10">
+                  <div className="flex flex-col gap-2 text-left">
+                    <div className="flex items-center justify-between">
+                      <CloudGear width="18" height="18" className="text-danger group-hover:scale-110 transition-transform" />
+                      <span className="text-[9px] font-bold text-danger/40 group-hover:text-danger transition-colors uppercase tracking-widest">Cloud</span>
+                    </div>
+                    <div>
+                      <Label className="font-black text-sm block tracking-tight text-foreground">{t("devops")}</Label>
+                      <p className="text-[10px] text-muted mt-0.5 line-clamp-1 font-medium">CI/CD, Docker, Scaling.</p>
+                    </div>
+                  </div>
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </div>
+          </Dropdown.Popover>
+        </Dropdown>
+
+        <Dropdown aria-label={t("creative")}>
+          <Button size="sm" variant="ghost" className="font-bold uppercase tracking-wide">
+            {t("creative")}
+            <ChevronDown aria-hidden="true" />
+          </Button>
+          <Dropdown.Popover>
+            <Dropdown.Menu className="grid grid-cols-1 gap-4 sm:grid-cols-2 ">
+              <Dropdown.Item id="/creative/music" textValue={t("music")} >
+                <MusicNote width="20" height="20" className="text-indigo-500" />
+                <div className="flex flex-col">
+                  <Label>{t("music")}</Label>
+                  <Description className="">Create & explore sound</Description>
+                </div>
+              </Dropdown.Item>
+              <Dropdown.Item id="/creative/gaming" textValue={t("gaming")}>
+                <Rocket width="20" height="20" className="text-green-500" />
+                <div className="flex flex-col">
+                  <Label>{t("gaming")}</Label>
+                  <Description>Build, play, share</Description>
+                </div>
+              </Dropdown.Item>
+              <Dropdown.Item id="/creative/design" textValue={t("design")}>
+                <Palette width="20" height="20" className="text-yellow-500" />
+                <div className="flex flex-col">
+                  <Label >{t("design")}</Label>
+                  <Description>Shape ideas into visuals</Description>
+                </div>
+              </Dropdown.Item>
+              <Dropdown.Item id="/creative/literature" textValue={t("literature")}  >
+                <PencilToSquare width="20" height="20" className="text-pink-500" />
+                <div className="flex flex-col">
+                  <Label>{t("literature")}</Label>
+                  <Description>Write, publish, connect</Description>
                 </div>
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown.Popover>
         </Dropdown>
 
-        {/* 3. Culture - App Launcher Grid Style */}
+        {/* 3. Life Essays Megamenu */}
         <Dropdown>
           <Dropdown.Trigger
-            variant="ghost"
             size="sm"
-            className="text-muted hover:text-foreground text-sm font-medium border-none data-[pressed=true]:scale-95 transition-all h-9 px-3"
+            className="text-muted hover:text-foreground text-[11px] font-black border-none uppercase tracking-widest data-[pressed=true]:scale-95 transition-all h-9 px-3"
           >
-            <div className="flex items-center gap-1 pointer-events-none uppercase tracking-wider text-[11px] font-bold">
-              {t("culture")}
+            <div className="flex items-center gap-1 pointer-events-none text-left">
+              {t("essays")}
               <ChevronDown width="12" height="12" className="opacity-50" />
             </div>
           </Dropdown.Trigger>
-          <Dropdown.Popover className="min-w-[320px]">
-            <Dropdown.Menu 
-              onAction={(key) => router.push(key as any)}
-              className="grid grid-cols-3 gap-1 p-2"
-            >
-              <Dropdown.Item id="/music" textValue="Music" className="flex flex-col items-center justify-center p-4 rounded-2xl hover:bg-success/5 group text-center border border-transparent hover:border-success/10">
-                <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success mb-2 group-hover:scale-110 transition-transform relative">
-                  <MusicNote width="20" height="20" />
-                  <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success"></span>
-                  </span>
+          <Dropdown.Popover className="min-w-[360px] border-border/50 shadow-2xl backdrop-blur-3xl p-3 rounded-[28px]">
+            <Header className="px-4 pt-2 pb-4 mb-2 border-b border-border/50 text-left">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted">{t("essays")}</span>
+            </Header>
+            <Dropdown.Menu onAction={(key) => router.push(key as any)} className="gap-1">
+              <Dropdown.Item id="/essays/thoughts" textValue="Thoughts" className="px-4 py-3.5 rounded-2xl hover:bg-default/60 group">
+                <div className="flex items-center gap-4 text-left">
+                  <div className="w-2.5 h-2.5 rounded-full bg-warning/40 group-hover:scale-125 transition-transform shadow-lg shadow-warning/20" />
+                  <div className="flex flex-col text-left">
+                    <Label className="font-black text-sm tracking-tight text-foreground">{t("thoughts")}</Label>
+                    <p className="text-[10px] text-muted font-medium mt-0.5">Philosophy & Musings.</p>
+                  </div>
                 </div>
-                <Label className="text-[11px] font-bold">{t("music")}</Label>
               </Dropdown.Item>
-              <Dropdown.Item id="/gaming" textValue="Gaming" className="flex flex-col items-center justify-center p-4 rounded-2xl hover:bg-accent/5 group text-center border border-transparent hover:border-accent/10">
-                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent mb-2 group-hover:scale-110 transition-transform">
-                  <Play width="20" height="20" />
+              <Dropdown.Item id="/essays/reading" textValue="Reading" className="px-4 py-3.5 rounded-2xl hover:bg-default/60 group">
+                <div className="flex items-center gap-4 text-left">
+                  <div className="w-2.5 h-2.5 rounded-full bg-success/40 group-hover:scale-125 transition-transform shadow-lg shadow-success/20" />
+                  <div className="flex flex-col text-left">
+                    <Label className="font-black text-sm tracking-tight text-foreground">{t("reading")}</Label>
+                    <p className="text-[10px] text-muted font-medium mt-0.5">Bibliographic Dialogues.</p>
+                  </div>
                 </div>
-                <Label className="text-[11px] font-bold">{t("gaming")}</Label>
               </Dropdown.Item>
-              <Dropdown.Item id="/gear" textValue="Gear" className="flex flex-col items-center justify-center p-4 rounded-2xl hover:bg-warning/5 group text-center border border-transparent hover:border-warning/10">
-                <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning mb-2 group-hover:scale-110 transition-transform">
-                  <Gear width="20" height="20" />
+              <Dropdown.Item id="/essays/travel" textValue="Travel" className="px-4 py-3.5 rounded-2xl hover:bg-default/60 group">
+                <div className="flex items-center gap-4 text-left">
+                  <div className="w-2.5 h-2.5 rounded-full bg-accent/40 group-hover:scale-125 transition-transform shadow-lg shadow-accent/20" />
+                  <div className="flex flex-col text-left">
+                    <Label className="font-black text-sm tracking-tight text-foreground">{t("travel")}</Label>
+                    <p className="text-[10px] text-muted font-medium mt-0.5">Geographic Chronicles.</p>
+                  </div>
                 </div>
-                <Label className="text-[11px] font-bold">{t("gear")}</Label>
+              </Dropdown.Item>
+              <Dropdown.Item id="/essays/daily" textValue="Daily" className="px-4 py-3.5 rounded-2xl hover:bg-default/60 group">
+                <div className="flex items-center gap-4 text-left">
+                  <div className="w-2.5 h-2.5 rounded-full bg-secondary/40 group-hover:scale-125 transition-transform shadow-lg shadow-secondary/20" />
+                  <div className="flex flex-col text-left">
+                    <Label className="font-black text-sm tracking-tight text-foreground">{t("daily")}</Label>
+                    <p className="text-[10px] text-muted font-medium mt-0.5">Fragments of Routine.</p>
+                  </div>
+                </div>
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown.Popover>
         </Dropdown>
 
-        {/* 4. Moments - Single Direct Link */}
+        {/* 4. About - Minimalist Link */}
         <MotionLink
           variants={itemVariants}
-          href="/moments"
-          className="text-muted hover:text-foreground text-[11px] font-bold uppercase tracking-wider transition-colors px-3 py-2"
+          href="/about"
+          className="text-muted hover:text-foreground text-[11px] font-black uppercase tracking-widest transition-colors px-3 py-2"
         >
-          {t("moments")}
+          {t("about")}
         </MotionLink>
       </nav>
 
@@ -331,26 +382,26 @@ export const Navbar = () => {
                     <Badge color="success" size="sm" className="border-2 border-background" />
                   </Badge.Anchor>
                 </Dropdown.Trigger>
-                <Dropdown.Popover className="min-w-[220px]">
+                <Dropdown.Popover className="min-w-[220px] rounded-[24px] border-border/50 shadow-2xl backdrop-blur-3xl">
                   <Dropdown.Menu onAction={(key) => key === "logout" ? handleLogout() : router.push(key as any)}>
                     <Dropdown.Section>
-                      <Dropdown.Header className="flex flex-col gap-0.5 px-3 py-2 border-b border-border/50 mb-1">
-                        <span className="text-xs font-bold text-foreground truncate">{user.name}</span>
-                        <span className="text-[10px] text-muted truncate">{user.email}</span>
-                      </Dropdown.Header>
-                      <Dropdown.Item id="/profile" textValue="Profile">
-                        <div className="flex items-center justify-between w-full">
-                          <Label className="text-sm">Profile</Label>
+                      <Header className="flex flex-col gap-0.5 px-3 py-2 border-b border-border/50 mb-1 text-left">
+                        <span className="text-xs font-black text-foreground truncate uppercase tracking-tighter">{user.name}</span>
+                        <span className="text-[10px] text-muted truncate font-medium">{user.email}</span>
+                      </Header>
+                      <Dropdown.Item id="/profile" textValue="Profile" className="rounded-xl">
+                        <div className="flex items-center justify-between w-full text-left">
+                          <Label className="text-sm font-bold text-foreground">Profile</Label>
                           <Kbd className="bg-transparent p-0 border-none shadow-none text-[10px] text-muted">⇧P</Kbd>
                         </div>
                       </Dropdown.Item>
-                      <Dropdown.Item id="/settings" textValue="Settings">
-                        <Label className="text-sm">Settings</Label>
+                      <Dropdown.Item id="/settings" textValue="Settings" className="rounded-xl">
+                        <Label className="text-sm font-bold text-foreground text-left block w-full text-foreground">Settings</Label>
                       </Dropdown.Item>
                     </Dropdown.Section>
-                    <Separator />
-                    <Dropdown.Item id="logout" variant="danger" textValue="Logout">
-                      <Label className="text-sm font-medium">{t("logout")}</Label>
+                    <Separator className="my-1 mx-2" />
+                    <Dropdown.Item id="logout" variant="danger" textValue="Logout" className="rounded-xl">
+                      <Label className="text-sm font-black text-left block w-full uppercase tracking-widest text-danger">{t("logout")}</Label>
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown.Popover>
@@ -365,10 +416,10 @@ export const Navbar = () => {
               exit="exit"
               className="flex items-center gap-2"
             >
-              <Button size="sm" variant="ghost" onPress={handleLogin} className="hidden sm:flex border-none text-muted hover:text-foreground">
+              <Button size="sm" variant="ghost" onPress={handleLogin} className="hidden sm:flex border-none text-muted hover:text-foreground font-black uppercase text-[10px] tracking-widest">
                 {t("login")}
               </Button>
-              <Button size="sm" onPress={handleLogin} className="rounded-full bg-foreground text-background font-bold shadow-sm hover:scale-105 transition-transform px-4 text-xs">
+              <Button size="sm" onPress={handleLogin} className="rounded-full bg-foreground text-background font-black shadow-sm hover:scale-105 transition-transform px-4 text-[10px] uppercase tracking-widest">
                 {t("getStarted")}
               </Button>
             </motion.div>
