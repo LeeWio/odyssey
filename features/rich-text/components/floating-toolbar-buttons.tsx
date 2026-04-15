@@ -2,18 +2,31 @@
 
 import { Button, ButtonGroup, ToggleButtonGroup } from "@heroui/react";
 import { KEYS } from "platejs";
-import { useEditorReadOnly } from "platejs/react";
+import { PlateEditor, useEditorReadOnly, usePlateEditor } from "platejs/react";
 import { MarkToolbarButton } from "./toolbar-kit";
-import { Bold, Italic, Strikethrough, Underline, Superscript } from "@gravity-ui/icons";
+import {
+  Bold,
+  Italic,
+  Strikethrough,
+  Underline,
+  Superscript,
+  CurlyBracketsFunction,
+} from "@gravity-ui/icons";
 import { FontSizeToolbarButton } from "./font-size-toolbar-button";
 import { LineHeightToolbarButton } from "./line-height-toolbar-button";
 import { FontFamilyToolbarButton } from "./font-family-toolbar-button";
 import { AlignToolbarButton } from "./align-toolbar-button";
 import { LinkToolbarButton } from "./link-toolbar-button";
 import { Link } from "@gravity-ui/icons";
+import { ListCheckLock } from "@gravity-ui/icons";
+import { ToggleToolbarButton } from "./toggle-toolbar-button";
+import { InlineEquationToolbarButton } from "./equation-toolbar-button";
+import { insertInlineElement } from "../transforms";
+import { insertColumnGroup } from "@platejs/layout";
 
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
+  const editor = usePlateEditor()
 
   return (
     <>
@@ -51,6 +64,15 @@ export function FloatingToolbarButtons() {
           <LinkToolbarButton size="sm" tooltip="Insert Link (⌘+K)" variant="tertiary">
             <Link />
           </LinkToolbarButton>
+
+          <ToggleToolbarButton size="sm" variant="tertiary">
+            <ListCheckLock />
+          </ToggleToolbarButton>
+
+          <InlineEquationToolbarButton size="sm" variant="tertiary">
+            <CurlyBracketsFunction />
+          </InlineEquationToolbarButton>
+
         </>
       )}
     </>

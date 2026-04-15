@@ -21,7 +21,8 @@ This project is a Next.js web application built using the modern App Router arch
 - `app/`: Contains the Next.js App Router definitions.
 - `app/[locale]/`: Localized route segments for multi-language support.
 - `components/`: Houses reusable, shared UI components (e.g., `icons.tsx`, `navbar.tsx`).
-- `i18n/`: Internationalization configuration (routing, middleware integration).
+- `i18n/`: Internationalization configuration (routing).
+- `proxy.ts`: Next.js proxy (formerly middleware) for locale routing.
 - `messages/`: Translation dictionaries in JSON format.
 - `features/rich-text/`: A domain-specific feature folder containing all logic, components, plugins, toolbars, and custom nodes necessary for the PlateJS rich-text editor integration.
 - `hooks/`: Custom React hooks, notably `use-rich-text.ts` which encapsulates the editor's initialization and configuration.

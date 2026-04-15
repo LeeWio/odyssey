@@ -5,6 +5,7 @@ import { useRichText } from "@/hooks/use-rich-text";
 import { initialValue } from "./value";
 import { Button, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { insertColumnGroup } from "@platejs/layout";
 
 export default function Home() {
   const t = useTranslations("HomePage");
@@ -26,6 +27,8 @@ export default function Home() {
             <Modal.Dialog>
               <Modal.Body>
                 <Plate editor={editor}>
+                  <Button onPress={() => insertColumnGroup(editor, { columns: 3, select: true })}>column</Button>
+
                   <PlateContent
                     className="scroll-smooth outline-none"
                     placeholder="Type your amazing content here..."
@@ -37,6 +40,9 @@ export default function Home() {
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>
+      <div className="h-screen"></div>
+      <div className="h-screen"></div>
+      <div className="h-screen"></div>
     </div>
   );
 }

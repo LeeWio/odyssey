@@ -10,6 +10,11 @@ import { ExitBreakKit } from "./exit-break-kit";
 import { BlockSelectionKit } from "./block-selection-kit";
 import { MentionKit } from "./mention-kit";
 import { BlockPlaceholderKit } from "./block-placeholder-kit";
+import { ToggleKit } from "./toggle-kit";
+import { MathKit } from "./math-kit";
+import { DndKit } from "./dnd-kit";
+import { BlockMenuKit } from "./block-menu-kit";
+import { ColumnKit } from "./column-kit";
 
 export const Plugins = [
   ...BlocksKit,
@@ -24,4 +29,9 @@ export const Plugins = [
   ...BlockSelectionKit,
   ...MentionKit,
   ...BlockPlaceholderKit,
+  ...ToggleKit,
+  ...MathKit,
+  ...DndKit,
+  ...BlockMenuKit,
+  ...ColumnKit
 ];
