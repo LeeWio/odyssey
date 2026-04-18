@@ -15,13 +15,13 @@ export interface ToolbarButtonProps extends ButtonProps {
  * It automatically handles onMouseDown to prevent the editor from losing focus.
  */
 export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
-  ({ children, tooltip, ...props }, ref) => {
+  ({ children, tooltip, size = "sm", variant = "ghost", isIconOnly = true, ...props }, ref) => {
     const button = (
       <Button
         ref={ref}
-        isIconOnly
-        size="sm"
-        variant="ghost"
+        size={size}
+        variant={variant}
+        isIconOnly={isIconOnly}
         // Prevent loss of focus in the editor when clicking the toolbar
         onMouseDown={(e) => {
           e.preventDefault();

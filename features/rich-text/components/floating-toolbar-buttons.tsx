@@ -3,6 +3,7 @@
 import { ButtonGroup, ToggleButtonGroup } from "@heroui/react";
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
+import { Icon } from "@iconify/react";
 import {
   MarkToolbarButton,
   AlignToolbarButton,
@@ -15,7 +16,6 @@ import {
   Italic,
   Strikethrough,
   Underline,
-  Superscript,
   CurlyBracketsFunction,
   Link,
   ListCheckLock,
@@ -53,22 +53,30 @@ export function FloatingToolbarButtons() {
             />
           </ToggleButtonGroup>
 
-          <ToggleButtonGroup size="sm">
-            <MarkToolbarButton nodeType={KEYS.sup} tooltip="Sup (⌘+,)" icon={<Superscript />} />
-            <MarkToolbarButton nodeType={KEYS.sub} tooltip="Sub (⌘+.)" icon={<Superscript />} />
+          <ToggleButtonGroup size="sm" selectionMode="multiple">
+            <MarkToolbarButton
+              nodeType={KEYS.sup}
+              tooltip="Superscript (⌘+.)"
+              icon={<Icon icon="lucide:superscript" />}
+            />
+            <MarkToolbarButton
+              nodeType={KEYS.sub}
+              tooltip="Subscript (⌘+,)"
+              icon={<Icon icon="lucide:subscript" />}
+            />
           </ToggleButtonGroup>
 
           <AlignToolbarButton />
 
-          <LinkToolbarButton size="sm" variant="tertiary">
+          <LinkToolbarButton size="sm" variant="ghost">
             <Link />
           </LinkToolbarButton>
 
-          <ToggleToolbarButton size="sm" variant="tertiary">
+          <ToggleToolbarButton size="sm" variant="ghost">
             <ListCheckLock />
           </ToggleToolbarButton>
 
-          <InlineEquationToolbarButton size="sm" variant="tertiary">
+          <InlineEquationToolbarButton size="sm" variant="ghost">
             <CurlyBracketsFunction />
           </InlineEquationToolbarButton>
         </>

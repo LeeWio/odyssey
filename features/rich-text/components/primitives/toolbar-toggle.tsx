@@ -15,13 +15,13 @@ export interface ToolbarToggleProps extends ToggleButtonProps {
  * Maps 'isSelected' state to visual highlights.
  */
 export const ToolbarToggle = forwardRef<HTMLButtonElement, ToolbarToggleProps>(
-  ({ children, tooltip, isSelected, ...props }, ref) => {
+  ({ children, tooltip, isSelected, size = "sm", variant = "default", isIconOnly = true, ...props }, ref) => {
     const button = (
       <ToggleButton
         ref={ref as React.Ref<HTMLButtonElement>}
-        isIconOnly
-        size="sm"
-        variant="ghost"
+        size={size}
+        variant={variant}
+        isIconOnly={isIconOnly}
         isSelected={isSelected}
         // Prevent loss of focus in the editor when clicking the toolbar
         onMouseDown={(e) => {
@@ -38,7 +38,7 @@ export const ToolbarToggle = forwardRef<HTMLButtonElement, ToolbarToggleProps>(
 
     return (
       <Tooltip delay={0}>
-        <Tooltip.Trigger>{button}</Tooltip.Trigger>
+        {button}
         <Tooltip.Content showArrow className="px-2 py-1 text-sm">
           {tooltip}
         </Tooltip.Content>
