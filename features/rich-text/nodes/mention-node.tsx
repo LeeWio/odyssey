@@ -1,6 +1,6 @@
 "use client";
 
-import { ComboBox, Input, ListBox } from "@heroui/react";
+import { ComboBox, ListBox } from "@heroui/react";
 
 import * as React from "react";
 import type { TComboboxInputElement, TMentionElement } from "platejs";
@@ -11,6 +11,7 @@ import { PlateElement, useFocused, useReadOnly, useSelected } from "platejs/reac
 
 import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@heroui/styles";
+import { ChevronDown } from "@gravity-ui/icons";
 
 export function MentionElement(
   props: PlateElementProps<TMentionElement> & {
@@ -65,44 +66,50 @@ const onSelectItem = getMentionOnSelectItem();
 export function MentionInputElement(props: PlateElementProps<TComboboxInputElement>) {
   const { editor } = props;
   const [search, setSearch] = React.useState("");
-
-  // TODO: 当前 ui 实现很糟糕，需要重新设计才行
   const [selectedKey, setSelectedKey] = React.useState<string | null>(null);
 
   return (
-    <PlateElement {...props} as="span">
+    <PlateElement {...props} as="span" className="inline-block align-middle">
       <ComboBox
         selectedKey={selectedKey}
         onSelectionChange={(key) => {
           setSelectedKey(key as string);
-
           const item = MENTIONABLES.find((i) => i.text === key);
-
           if (item) {
             onSelectItem(editor, item, search);
           }
         }}
         inputValue={search}
         onInputChange={setSearch}
-        className="inline-block w-40"
+        className="w-48"
       >
-        <ComboBox.InputGroup>
-          <Input placeholder="@mention" className="h-6 text-sm" />
-          <ComboBox.Trigger />
+        <ComboBox.InputGroup className="bg-surface-secondary h-7 min-h-7 rounded-md border border-border/50 px-1 shadow-none transition-colors focus-within:border-primary">
+          <div className="text-muted-foreground flex items-center px-1 text-xs font-bold">@</div>
+          <ComboBox.Input
+            placeholder="mention..."
+            className="h-full bg-transparent px-1 py-0 text-sm outline-none"
+          />
+          <ComboBox.Trigger className="text-muted-foreground/50 size-4">
+            <ChevronDown className="size-3" />
+          </ComboBox.Trigger>
         </ComboBox.InputGroup>
 
-        <ComboBox.Popover>
-          <ListBox>
+        <ComboBox.Popover className="min-w-[200px] rounded-xl border p-1 shadow-xl">
+          <ListBox className="max-h-60 overflow-y-auto">
             {MENTIONABLES.map((item) => (
               <ListBox.Item key={item.key} id={item.text} textValue={item.text}>
-                {item.text}
+                <div className="flex items-center gap-2">
+                  <div className="bg-primary/10 flex size-6 items-center justify-center rounded-full text-[10px] font-bold text-primary">
+                    {item.text.charAt(0)}
+                  </div>
+                  <span>{item.text}</span>
+                </div>
                 <ListBox.ItemIndicator />
               </ListBox.Item>
             ))}
           </ListBox>
         </ComboBox.Popover>
       </ComboBox>
-
       {props.children}
     </PlateElement>
   );

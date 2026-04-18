@@ -4,6 +4,7 @@ import { FontFamilyPlugin } from "@platejs/basic-styles/react";
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorSelector } from "platejs/react";
 import { ToolbarDropdown } from "./primitives/toolbar-dropdown";
+import { Dropdown, type Selection } from "@heroui/react";
 
 const DEFAULT_FONT_FAMILY = "Default";
 
@@ -38,7 +39,8 @@ export function FontFamilyToolbarButton() {
     return (fontFamily as string) || DEFAULT_FONT_FAMILY;
   }, []);
 
-  const handleDropdownChange = (selectedKey: string) => {
+  const handleDropdownChange = (keys: Selection) => {
+    const selectedKey = Array.from(keys)[0] as string;
     if (selectedKey === "Default") {
       editor.tf.removeMarks([KEYS.fontFamily]);
     } else {
@@ -56,12 +58,24 @@ export function FontFamilyToolbarButton() {
 
   return (
     <ToolbarDropdown
-      items={FONT_FAMILIES}
-      selectedKey={currentSelectedKey}
-      onSelectionChange={handleDropdownChange}
       label={currentFontName}
       tooltip="Font Family"
       buttonProps={{ variant: "tertiary" }}
-    />
+    >
+      <Dropdown.Popover className="min-w-[150px] rounded-xl border p-1 shadow-xl">
+        <Dropdown.Menu
+          disallowEmptySelection
+          selectionMode="single"
+          selectedKeys={new Set([currentSelectedKey])}
+          onSelectionChange={handleDropdownChange}
+        >
+          {FONT_FAMILIES.map((font) => (
+            <Dropdown.Item key={font.id} id={font.font === "inherit" ? "Default" : font.font} textValue={font.label}>
+              <span style={{ fontFamily: font.font }}>{font.label}</span>
+            </Dropdown.Item>
+          ))}
+        </Dropdown.Menu>
+      </Dropdown.Popover>
+    </ToolbarDropdown>
   );
 }

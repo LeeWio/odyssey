@@ -102,11 +102,18 @@ export default function Home() {
                           >
                             Add Columns
                           </Button>
-                          <Modal.CloseTrigger>
-                            <Button size="sm" variant="ghost" className="font-bold uppercase">
-                              Close
-                            </Button>
-                          </Modal.CloseTrigger>
+                          <Modal.CloseTrigger
+                            render={(props) => (
+                              <Button
+                                {...props}
+                                size="sm"
+                                variant="ghost"
+                                className="font-bold uppercase"
+                              >
+                                Close
+                              </Button>
+                            )}
+                          />
                         </div>
                       </div>
                     </Modal.Header>
