@@ -78,7 +78,7 @@ export const FloatingToolbar = React.forwardRef<HTMLDivElement, FloatingToolbarP
               }}
               aria-label="Floating toolbar"
               className={cn(
-                "bg-overlay/80 transform-gpu backdrop-blur-xl backdrop-saturate-150 will-change-transform shadow-2xl rounded-full border border-border/50",
+                "bg-overlay/70 transform-gpu backdrop-blur-2xl backdrop-saturate-[1.6] will-change-transform shadow-2xl",
                 className,
               )}
             >

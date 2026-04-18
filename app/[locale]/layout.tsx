@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
+import { GlobalOverlay } from "@/components/global-overlay";
 
 export const metadata: Metadata = {
   title: "Odyssey",
@@ -34,6 +35,7 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <Navbar />
+      <GlobalOverlay />
       {children}
     </NextIntlClientProvider>
   );
