@@ -4,7 +4,6 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useFocused, useReadOnly, useSelected } from "platejs/react";
 
 import { cn } from "@heroui/styles";
-import { Separator } from "@heroui/react";
 
 export function HrElement(props: PlateElementProps) {
   const readOnly = useReadOnly();

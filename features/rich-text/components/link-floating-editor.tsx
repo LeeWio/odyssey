@@ -1,7 +1,7 @@
 // components/LinkFloatingEditor.tsx
 "use client";
 
-import { Input, Link, Separator, Toolbar } from "@heroui/react";
+import { Link, Separator, Toolbar } from "@heroui/react";
 import { FloatingLinkUrlInput } from "@platejs/link/react";
 
 export interface LinkFloatingEditorProps {

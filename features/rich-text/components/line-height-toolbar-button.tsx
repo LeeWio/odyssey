@@ -1,7 +1,7 @@
 import { LineHeightPlugin } from "@platejs/basic-styles/react";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
 
-import { Dropdown, Button, Label, ButtonGroup } from "@heroui/react";
+import { Dropdown, Button, Label } from "@heroui/react";
 import { ChevronDown, ArrowsExpandVertical } from "@gravity-ui/icons";
 import React from "react";
 
@@ -16,8 +16,7 @@ const LINE_HEIGHTS = [
 
 export const LineHeightToolbarButton = React.memo(() => {
   const editor = useEditorRef();
-  const { defaultNodeValue, validNodeValues: values = [] } =
-    editor.getInjectProps(LineHeightPlugin);
+  const { defaultNodeValue } = editor.getInjectProps(LineHeightPlugin);
   const value = useSelectionFragmentProp({
     defaultValue: defaultNodeValue,
     getProp: (node) => node.lineHeight,

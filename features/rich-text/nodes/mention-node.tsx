@@ -1,6 +1,6 @@
 "use client";
 
-import { ComboBox, Input, Label, ListBox } from "@heroui/react";
+import { ComboBox, Input, ListBox } from "@heroui/react";
 
 import * as React from "react";
 import type { TComboboxInputElement, TMentionElement } from "platejs";
@@ -63,7 +63,7 @@ export function MentionElement(
 const onSelectItem = getMentionOnSelectItem();
 
 export function MentionInputElement(props: PlateElementProps<TComboboxInputElement>) {
-  const { editor, element } = props;
+  const { editor } = props;
   const [search, setSearch] = React.useState("");
 
   // TODO: 当前 ui 实现很糟糕，需要重新设计才行

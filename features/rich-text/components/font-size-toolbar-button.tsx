@@ -1,17 +1,13 @@
 "use client";
 
-import type { Selection } from "@heroui/react";
-
 import { toUnitLess } from "@platejs/basic-styles";
 import { FontSizePlugin } from "@platejs/basic-styles/react";
 import type { TElement } from "platejs";
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorSelector } from "platejs/react";
-import { useState } from "react";
-
-import { Button, ButtonGroup, Dropdown, Label } from "@heroui/react";
-
+import { Button, ButtonGroup } from "@heroui/react";
 import { Minus, Plus } from "@gravity-ui/icons";
+import { ToolbarDropdown } from "./primitives/toolbar-dropdown";
 
 const DEFAULT_FONT_SIZE = "16";
 
@@ -22,25 +18,10 @@ const FONT_SIZE_MAP = {
 } as const;
 
 const FONT_SIZES = [
-  "8",
-  "9",
-  "10",
-  "12",
-  "14",
-  "16",
-  "18",
-  "24",
-  "30",
-  "36",
-  "48",
-  "60",
-  "72",
-  "96",
-] as const;
+  "8", "9", "10", "12", "14", "16", "18", "24", "30", "36", "48", "60", "72", "96",
+].map(size => ({ id: size, label: size }));
 
 export function FontSizeToolbarButton() {
-  const [inputValue, setInputValue] = useState(DEFAULT_FONT_SIZE);
-  const [isFocused, setIsFocused] = useState(false);
   const { editor, tf } = useEditorPlugin(FontSizePlugin);
 
   const cursorFontSize = useEditorSelector((editor) => {
@@ -59,64 +40,39 @@ export function FontSizeToolbarButton() {
       : DEFAULT_FONT_SIZE;
   }, []);
 
-  const handleInputChange = () => {
-    const newSize = toUnitLess(inputValue);
-
-    if (Number.parseInt(newSize, 10) < 1 || Number.parseInt(newSize, 10) > 100) {
-      editor.tf.focus();
-
-      return;
-    }
-    if (newSize !== toUnitLess(cursorFontSize)) {
-      tf.fontSize.addMark(`${newSize}px`);
-    }
-
-    editor.tf.focus();
-  };
-
   const handleFontSizeChange = (delta: number) => {
-    const newSize = Number(displayValue) + delta;
+    const newSize = Number(cursorFontSize) + delta;
     tf.fontSize.addMark(`${newSize}px`);
     editor.tf.focus();
   };
 
-  const displayValue = isFocused ? inputValue : cursorFontSize;
-
-  const handleDropdownChange = (keys: Selection) => {
-    const selectedKey = Array.from(keys)[0];
-    if (typeof selectedKey === "string") {
-      tf.fontSize.addMark(`${selectedKey}px`);
-      editor.tf.focus();
-    }
+  const handleDropdownChange = (selectedKey: string) => {
+    tf.fontSize.addMark(`${selectedKey}px`);
+    editor.tf.focus();
   };
 
   return (
     <ButtonGroup size="sm" variant="tertiary">
-      <Button isIconOnly onPress={() => handleFontSizeChange(-1)}>
+      <Button
+        isIconOnly
+        onPress={() => handleFontSizeChange(-1)}
+        onMouseDown={(e) => e.preventDefault()}
+      >
         <Minus />
       </Button>
-      <Dropdown>
-        <Button aria-label="font size" variant="tertiary" size="sm">
-          {displayValue}
-        </Button>
-        <Dropdown.Popover>
-          <Dropdown.Menu
-            selectedKeys={new Set([displayValue || ""])}
-            selectionMode="single"
-            onSelectionChange={handleDropdownChange}
-          >
-            <Dropdown.Section>
-              {FONT_SIZES.map((size) => (
-                <Dropdown.Item id={size} textValue={size} key={size}>
-                  <Dropdown.ItemIndicator />
-                  <Label>{size}</Label>
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Section>
-          </Dropdown.Menu>
-        </Dropdown.Popover>
-      </Dropdown>
-      <Button isIconOnly onPress={() => handleFontSizeChange(1)}>
+      <ToolbarDropdown
+        items={FONT_SIZES}
+        selectedKey={cursorFontSize}
+        onSelectionChange={handleDropdownChange}
+        label={cursorFontSize}
+        tooltip="Font Size"
+        buttonProps={{ variant: "tertiary" }}
+      />
+      <Button
+        isIconOnly
+        onPress={() => handleFontSizeChange(1)}
+        onMouseDown={(e) => e.preventDefault()}
+      >
         <Plus />
       </Button>
     </ButtonGroup>

@@ -7,7 +7,7 @@ import { useIsTouchDevice } from "@/hooks/use-is-touch-device";
 import { Dropdown } from "@heroui/react";
 
 export function BlockContextMenu({ children }: { children: React.ReactNode }) {
-  const { api, editor } = useEditorPlugin(BlockMenuPlugin);
+  const { editor } = useEditorPlugin(BlockMenuPlugin);
   const readOnly = useEditorReadOnly();
   const isTouch = useIsTouchDevice();
 

@@ -7,21 +7,17 @@ import { LinkSlash, Link as LinkIcon } from "@gravity-ui/icons";
 import { type UseVirtualFloatingOptions, flip, offset } from "@platejs/floating";
 import {
   type LinkFloatingToolbarState,
-  FloatingLinkUrlInput,
   useFloatingLinkEdit,
   useFloatingLinkEditState,
   useFloatingLinkInsert,
   useFloatingLinkInsertState,
   useFloatingLinkUrlInput,
   useFloatingLinkUrlInputState,
-  useLink,
   useLinkOpenButtonState,
 } from "@platejs/link/react";
-import { KEYS, OperationApi, TLinkElement } from "platejs";
+import { KEYS, TLinkElement } from "platejs";
 import {
   useEditorRef,
-  useEditorSelection,
-  useElement,
   useFormInputProps,
   usePluginOption,
 } from "platejs/react";
@@ -43,9 +39,7 @@ export function LinkEdit({
   textDefaultValue,
   textRef,
   textOnChange,
-  onKeyDownCapture,
 }: {
-  onKeyDownCapture?: React.KeyboardEventHandler<HTMLDivElement>;
   textDefaultValue?: string;
   textRef?: React.Ref<HTMLInputElement>;
   textOnChange?: React.ChangeEventHandler<HTMLInputElement>;
@@ -75,11 +69,6 @@ export function LinkEdit({
     </Surface>
   );
 }
-
-type LinkPreviewProps = {
-  onEdit?: () => void;
-  onUnlink?: () => void;
-};
 
 export function LinkPreview({ onEdit, onUnlink }: { onEdit?: () => void; onUnlink?: () => void }) {
   const state = useLinkOpenButtonState();
@@ -191,7 +180,6 @@ export function LinkFloatingToolbar({ state }: { state?: LinkFloatingToolbarStat
 
 function LinkOpenButton() {
   const editor = useEditorRef();
-  const selection = useEditorSelection();
 
   const attributes = useMemo(() => {
     const entry = editor.api.node<TLinkElement>({
@@ -202,7 +190,7 @@ function LinkOpenButton() {
     }
     const [element] = entry;
     return getLinkAttributes(editor, element);
-  }, [editor, selection]);
+  }, [editor]);
 
   return (
     <Link

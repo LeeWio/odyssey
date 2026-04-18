@@ -4,10 +4,9 @@ import type { TEquationElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { CurlyBracketsFunction } from "@gravity-ui/icons";
 
-import { useEquationElement, useEquationInput } from "@platejs/math/react";
+import { useEquationElement } from "@platejs/math/react";
 import { BlockSelectionPlugin } from "@platejs/selection/react";
 import {
-  createPrimitiveComponent,
   PlateElement,
   useEditorRef,
   useEditorSelector,
@@ -16,7 +15,7 @@ import {
   useSelected,
 } from "platejs/react";
 import { cn } from "@heroui/styles";
-import { Popover, PopoverTrigger } from "@heroui/react/popover";
+import { Popover } from "@heroui/react/popover";
 import { Button, Input } from "@heroui/react";
 
 export function EquationElement(props: PlateElementProps<TEquationElement>) {

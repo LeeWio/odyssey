@@ -14,7 +14,7 @@ export function ToggleToolbarButton(props: React.ComponentProps<typeof ToolbarBu
     <ToolbarButton
       onPress={buttonProps.onClick}
       isSelected={buttonProps.pressed}
-      onMouseDown={buttonProps.onMouseDown as any}
+      onMouseDown={buttonProps.onMouseDown}
       {...props}
       tooltip="Toggle"
     >

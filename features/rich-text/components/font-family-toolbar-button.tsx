@@ -1,14 +1,9 @@
 "use client";
 
-import type { Selection } from "@heroui/react";
-
 import { FontFamilyPlugin } from "@platejs/basic-styles/react";
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorSelector } from "platejs/react";
-import { useEffect, useState } from "react";
-
-import { Button, Dropdown } from "@heroui/react";
-import { ChevronDown } from "@gravity-ui/icons";
+import { ToolbarDropdown } from "./primitives/toolbar-dropdown";
 
 const DEFAULT_FONT_FAMILY = "Default";
 
@@ -43,16 +38,13 @@ export function FontFamilyToolbarButton() {
     return (fontFamily as string) || DEFAULT_FONT_FAMILY;
   }, []);
 
-  const handleDropdownChange = (keys: Selection) => {
-    const selectedKey = Array.from(keys)[0];
-    if (typeof selectedKey === "string") {
-      if (selectedKey === "Default") {
-        editor.tf.removeMarks([KEYS.fontFamily]);
-      } else {
-        tf.fontFamily.addMark(selectedKey);
-      }
-      editor.tf.focus();
+  const handleDropdownChange = (selectedKey: string) => {
+    if (selectedKey === "Default") {
+      editor.tf.removeMarks([KEYS.fontFamily]);
+    } else {
+      tf.fontFamily.addMark(selectedKey);
     }
+    editor.tf.focus();
   };
 
   const currentFont =
@@ -63,31 +55,13 @@ export function FontFamilyToolbarButton() {
     currentFont?.font === "inherit" ? "Default" : currentFont?.font || "Default";
 
   return (
-    <Dropdown>
-      <Button aria-label="Font Family" variant="tertiary" size="sm">
-        {currentFontName}
-        <ChevronDown className="size-4 opacity-50" />
-      </Button>
-      <Dropdown.Popover>
-        <Dropdown.Menu
-          selectedKeys={new Set([currentSelectedKey])}
-          selectionMode="single"
-          onSelectionChange={handleDropdownChange}
-        >
-          <Dropdown.Section>
-            {FONT_FAMILIES.map((font) => (
-              <Dropdown.Item
-                id={font.font === "inherit" ? "Default" : font.font}
-                textValue={font.label}
-                key={font.id}
-              >
-                <Dropdown.ItemIndicator />
-                <span style={{ fontFamily: font.font }}>{font.label}</span>
-              </Dropdown.Item>
-            ))}
-          </Dropdown.Section>
-        </Dropdown.Menu>
-      </Dropdown.Popover>
-    </Dropdown>
+    <ToolbarDropdown
+      items={FONT_FAMILIES}
+      selectedKey={currentSelectedKey}
+      onSelectionChange={handleDropdownChange}
+      label={currentFontName}
+      tooltip="Font Family"
+      buttonProps={{ variant: "tertiary" }}
+    />
   );
 }

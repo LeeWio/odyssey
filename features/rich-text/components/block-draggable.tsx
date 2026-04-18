@@ -1,7 +1,7 @@
 "use client";
 
 import { DndPlugin, useDraggable, useDropLine } from "@platejs/dnd";
-import { BlockSelectionPlugin, useBlockSelected } from "@platejs/selection/react";
+import { BlockSelectionPlugin } from "@platejs/selection/react";
 import {
   MemoizedChildren,
   PlateEditor,
@@ -12,7 +12,7 @@ import {
   usePluginOption,
   useSelected,
 } from "platejs/react";
-import { buttonVariants, cn, tv } from "@heroui/styles";
+import { buttonVariants, cn } from "@heroui/styles";
 import { getPluginByType, isType, KEYS, TElement } from "platejs";
 import { memo, useEffect, useMemo, useState } from "react";
 import { Button, Tooltip } from "@heroui/react";
@@ -60,7 +60,7 @@ export const BlockDraggable: RenderNodeWrapper = (props) => {
 
   if (!enabled) return;
 
-  return (props) => <Draggable {...props} />;
+  return Draggable;
 };
 
 function Draggable(props: PlateElementProps) {

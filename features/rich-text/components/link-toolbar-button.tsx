@@ -1,7 +1,6 @@
 "use client";
 
 import { useLinkToolbarButton, useLinkToolbarButtonState } from "@platejs/link/react";
-import { Link } from "@gravity-ui/icons";
 
 import { ToolbarButton } from "./toolbar-kit";
 
@@ -14,7 +13,7 @@ export function LinkToolbarButton(props: React.ComponentProps<typeof ToolbarButt
       {...props}
       isSelected={buttonProps.pressed}
       onPress={buttonProps.onClick}
-      onMouseDown={buttonProps.onMouseDown as any}
+      onMouseDown={buttonProps.onMouseDown}
     >
       {props.children}
     </ToolbarButton>

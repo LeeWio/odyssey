@@ -3,20 +3,16 @@ import * as React from "react";
 import type { TColumnElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { useDraggable, useDropLine } from "@platejs/dnd";
-import { setColumns } from "@platejs/layout";
 import { ResizableProvider } from "@platejs/resizable";
 import { BlockSelectionPlugin } from "@platejs/selection/react";
 import { useComposedRef } from "@udecode/cn";
 import { PathApi } from "platejs";
 import {
   PlateElement,
-  useEditorRef,
   useEditorSelector,
-  useElement,
   useFocusedLast,
   usePluginOption,
   useReadOnly,
-  useRemoveNodeButton,
   useSelected,
   withHOC,
 } from "platejs/react";
@@ -116,22 +112,12 @@ export function ColumnGroupElement(props: PlateElementProps) {
 }
 
 function ColumnFloatingToolbar({ children }: React.PropsWithChildren) {
-  const editor = useEditorRef();
   const readOnly = useReadOnly();
-  const element = useElement<TColumnElement>();
-  const { props: buttonProps } = useRemoveNodeButton({ element });
   const selected = useSelected();
   const isCollapsed = useEditorSelector((editor) => editor.api.isCollapsed(), []);
   const isFocusedLast = useFocusedLast();
 
   const open = isFocusedLast && !readOnly && selected && isCollapsed;
-
-  const onColumnChange = (widths: string[]) => {
-    setColumns(editor, {
-      at: element,
-      widths,
-    });
-  };
 
   return (
     <>

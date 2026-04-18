@@ -1,8 +1,8 @@
 "use client";
 
-import { Button, ButtonGroup, ToggleButtonGroup } from "@heroui/react";
+import { ButtonGroup, ToggleButtonGroup } from "@heroui/react";
 import { KEYS } from "platejs";
-import { PlateEditor, useEditorReadOnly, usePlateEditor } from "platejs/react";
+import { useEditorReadOnly } from "platejs/react";
 import { MarkToolbarButton } from "./toolbar-kit";
 import {
   Bold,
@@ -21,12 +21,9 @@ import { Link } from "@gravity-ui/icons";
 import { ListCheckLock } from "@gravity-ui/icons";
 import { ToggleToolbarButton } from "./toggle-toolbar-button";
 import { InlineEquationToolbarButton } from "./equation-toolbar-button";
-import { insertInlineElement } from "../transforms";
-import { insertColumnGroup } from "@platejs/layout";
 
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
-  const editor = usePlateEditor();
 
   return (
     <>
