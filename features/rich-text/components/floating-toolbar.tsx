@@ -68,13 +68,17 @@ export const FloatingToolbar = React.forwardRef<HTMLDivElement, FloatingToolbarP
           {!hidden && (
             <MotionToolbar
               key="floating-toolbar"
-              layout
+              layout="size"
               isAttached
               orientation="horizontal"
               {...motionProps}
+              transition={{
+                layout: { type: "spring", stiffness: 300, damping: 30 },
+                ...motionProps.transition,
+              }}
               aria-label="Floating toolbar"
               className={cn(
-                "bg-overlay/80 transform-gpu backdrop-blur-md backdrop-saturate-150 will-change-transform",
+                "bg-overlay/80 transform-gpu backdrop-blur-xl backdrop-saturate-150 will-change-transform shadow-2xl rounded-full border border-border/50",
                 className,
               )}
             >
