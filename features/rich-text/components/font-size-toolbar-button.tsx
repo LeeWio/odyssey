@@ -66,7 +66,7 @@ export function FontSizeToolbarButton() {
         tooltip="Font Size"
         buttonProps={{ variant: "tertiary" }}
       >
-        <Dropdown.Popover className="min-w-[80px] rounded-xl border p-1 shadow-xl">
+        <Dropdown.Popover className="min-w-20">
           <Dropdown.Menu
             disallowEmptySelection
             selectionMode="single"

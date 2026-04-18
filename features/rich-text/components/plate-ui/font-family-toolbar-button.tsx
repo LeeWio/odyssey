@@ -3,7 +3,7 @@
 import { FontFamilyPlugin } from "@platejs/basic-styles/react";
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorSelector } from "platejs/react";
-import { ToolbarDropdown } from "./primitives/toolbar-dropdown";
+import { ToolbarDropdown } from "../primitives/toolbar-dropdown";
 import { Dropdown, type Selection } from "@heroui/react";
 
 const DEFAULT_FONT_FAMILY = "Default";
@@ -62,7 +62,7 @@ export function FontFamilyToolbarButton() {
       tooltip="Font Family"
       buttonProps={{ variant: "tertiary" }}
     >
-      <Dropdown.Popover className="min-w-[150px] rounded-xl border p-1 shadow-xl">
+      <Dropdown.Popover>
         <Dropdown.Menu
           disallowEmptySelection
           selectionMode="single"

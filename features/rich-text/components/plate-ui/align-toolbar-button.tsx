@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Popover, ToggleButton, ToggleButtonGroup } from "@heroui/react";
 import {
   TextAlignCenter,
@@ -54,6 +55,8 @@ export function AlignToolbarButton() {
               id={itemValue}
               isIconOnly
               aria-label={itemValue}
+              variant="ghost"
+              size="sm"
             >
               <Icon />
             </ToggleButton>

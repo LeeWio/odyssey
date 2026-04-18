@@ -10,6 +10,8 @@ import {
   LinkToolbarButton,
   ToggleToolbarButton,
   InlineEquationToolbarButton,
+  LineHeightToolbarButton,
+  FontFamilyToolbarButton,
 } from "./toolbar-kit";
 import {
   Bold,
@@ -21,8 +23,6 @@ import {
   ListCheckLock,
 } from "@gravity-ui/icons";
 import { FontSizeToolbarButton } from "./font-size-toolbar-button";
-import { LineHeightToolbarButton } from "./line-height-toolbar-button";
-import { FontFamilyToolbarButton } from "./font-family-toolbar-button";
 
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();

@@ -16,3 +16,5 @@ export * from "./plate-ui/toggle-toolbar-button";
 export * from "./plate-ui/equation-toolbar-button";
 export * from "./plate-ui/link-toolbar-button";
 export * from "./plate-ui/link-toolbar";
+export * from "./plate-ui/line-height-toolbar-button";
+export * from "./plate-ui/font-family-toolbar-button";
