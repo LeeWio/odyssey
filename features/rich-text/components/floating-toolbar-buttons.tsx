@@ -26,7 +26,7 @@ import { insertColumnGroup } from "@platejs/layout";
 
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
-  const editor = usePlateEditor()
+  const editor = usePlateEditor();
 
   return (
     <>
@@ -72,7 +72,6 @@ export function FloatingToolbarButtons() {
           <InlineEquationToolbarButton size="sm" variant="tertiary">
             <CurlyBracketsFunction />
           </InlineEquationToolbarButton>
-
         </>
       )}
     </>

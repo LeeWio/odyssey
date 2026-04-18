@@ -1,16 +1,10 @@
-'use client';
-import * as React from 'react';
-import {
-    BlockMenuPlugin,
-  BlockSelectionPlugin,
-} from '@platejs/selection/react';
-import {
-  useEditorPlugin,
-  useEditorReadOnly,
-} from 'platejs/react';
+"use client";
+import * as React from "react";
+import { BlockMenuPlugin, BlockSelectionPlugin } from "@platejs/selection/react";
+import { useEditorPlugin, useEditorReadOnly } from "platejs/react";
 
-import { useIsTouchDevice } from '@/hooks/use-is-touch-device';
-import { Dropdown } from '@heroui/react';
+import { useIsTouchDevice } from "@/hooks/use-is-touch-device";
+import { Dropdown } from "@heroui/react";
 
 export function BlockContextMenu({ children }: { children: React.ReactNode }) {
   const { api, editor } = useEditorPlugin(BlockMenuPlugin);
@@ -26,9 +20,9 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
     if (!open) return;
 
     const handleClick = () => setOpen(false);
-    window.addEventListener('click', handleClick);
+    window.addEventListener("click", handleClick);
 
-    return () => window.removeEventListener('click', handleClick);
+    return () => window.removeEventListener("click", handleClick);
   }, [open]);
 
   if (isTouch) {
@@ -81,23 +75,19 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
                 aria-label="Block actions"
                 onAction={(key) => {
                   switch (key) {
-                    case 'askAI': {
+                    case "askAI": {
                       // 👉 这里你可以接 AIChatPlugin
-                      console.log('Ask AI');
+                      console.log("Ask AI");
                       break;
                     }
 
-                    case 'duplicate': {
-                      editor
-                        .getTransforms(BlockSelectionPlugin)
-                        .blockSelection.duplicate();
+                    case "duplicate": {
+                      editor.getTransforms(BlockSelectionPlugin).blockSelection.duplicate();
                       break;
                     }
 
-                    case 'delete': {
-                      editor
-                        .getTransforms(BlockSelectionPlugin)
-                        .blockSelection.removeNodes();
+                    case "delete": {
+                      editor.getTransforms(BlockSelectionPlugin).blockSelection.removeNodes();
                       break;
                     }
                   }
@@ -105,13 +95,9 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
                   setOpen(false);
                 }}
               >
-                <Dropdown.Item key="askAI">
-                  Ask AI
-                </Dropdown.Item>
+                <Dropdown.Item key="askAI">Ask AI</Dropdown.Item>
 
-                <Dropdown.Item key="duplicate">
-                  Duplicate
-                </Dropdown.Item>
+                <Dropdown.Item key="duplicate">Duplicate</Dropdown.Item>
 
                 <Dropdown.Item key="delete" className="text-danger">
                   Delete

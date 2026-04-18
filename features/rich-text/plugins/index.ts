@@ -33,5 +33,5 @@ export const Plugins = [
   ...MathKit,
   ...DndKit,
   ...BlockMenuKit,
-  ...ColumnKit
+  ...ColumnKit,
 ];

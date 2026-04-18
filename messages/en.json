@@ -24,7 +24,17 @@
     "getStarted": "Join Me"
   },
   "HomePage": {
+    "badge": "New Release v2.0",
     "title": "Welcome to Odyssey",
-    "description": "Experience a modern rich-text editor built with Plate and HeroUI."
+    "heroSubtitle": "Craft beautiful documents with a next-generation rich text editor. Odyssey provides an intuitive interface, robust features, and seamless performance.",
+    "openEditor": "Open Editor",
+    "viewGithub": "View GitHub",
+    "featuresTitle": "Why Choose Odyssey?",
+    "feature1Title": "Powerful Rich Text",
+    "feature1Desc": "Built on PlateJS for uncompromised editing capabilities.",
+    "feature2Title": "Beautiful UI",
+    "feature2Desc": "Designed with HeroUI to deliver a modern, accessible experience.",
+    "feature3Title": "Performant",
+    "feature3Desc": "Optimized for speed and reliability, enabling smooth workflows."
   }
 }

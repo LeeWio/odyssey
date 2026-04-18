@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { BlockMenuPlugin } from '@platejs/selection/react';
+import { BlockMenuPlugin } from "@platejs/selection/react";
 
-import { BlockSelectionKit } from './block-selection-kit';
-import { BlockContextMenu } from '../components/block-context-menu';
+import { BlockSelectionKit } from "./block-selection-kit";
+import { BlockContextMenu } from "../components/block-context-menu";
 
 export const BlockMenuKit = [
   ...BlockSelectionKit,

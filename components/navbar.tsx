@@ -123,12 +123,11 @@ export const Navbar = () => {
   };
 
   return (
-    <MotionToolbar
+    <motion.div
       initial="hidden"
       animate="visible"
       variants={containerVariants}
       aria-label="Main Navigation"
-      isAttached
       layout
       className={cn(
         "fixed inset-x-0 z-50 backdrop-blur-xl backdrop-saturate-[1.8] transition-all duration-500 ease-in-out",
@@ -497,6 +496,6 @@ export const Navbar = () => {
           </Dropdown>
         </div>
       </div>
-    </MotionToolbar>
+    </motion.div>
   );
 };

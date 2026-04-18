@@ -125,7 +125,7 @@ function Draggable(props: PlateElementProps) {
           <div className={cn("slate-blockToolbarWrapper", "flex h-[1.5em]", isInColumn && "h-4")}>
             <div
               className={cn(
-                "slate-blockToolbar relative w-4.5 ",
+                "slate-blockToolbar relative w-4.5",
                 "pointer-events-auto mr-1 flex items-center",
                 isInColumn && "mr-1.5",
               )}
@@ -214,7 +214,7 @@ const DragHandle = memo(function DragHandle({
   return (
     <Tooltip delay={0}>
       <div
-        className={cn(buttonVariants({ isIconOnly: true, variant: 'ghost' }))}
+        className={cn(buttonVariants({ isIconOnly: true, variant: "ghost" }))}
         data-plate-prevent-deselect
         onClick={(e) => {
           e.preventDefault();
@@ -238,9 +238,7 @@ const DragHandle = memo(function DragHandle({
           }
 
           // Process selection nodes to include list children
-          const blocks = expandListItemsWithChildren(editor, selectionNodes).map(
-            ([node]) => node,
-          );
+          const blocks = expandListItemsWithChildren(editor, selectionNodes).map(([node]) => node);
 
           if (blockSelection.length === 0) {
             editor.tf.blur();

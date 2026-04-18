@@ -24,7 +24,17 @@
     "getStarted": "加入我"
   },
   "HomePage": {
+    "badge": "全新版本发布 v2.0",
     "title": "欢迎来到 Odyssey",
-    "description": "体验由 Plate 和 HeroUI 构建的现代富文本编辑器。"
+    "heroSubtitle": "使用下一代富文本编辑器制作精美的文档。Odyssey 提供直观的界面、强大的功能和无缝的性能。",
+    "openEditor": "打开编辑器",
+    "viewGithub": "查看 GitHub",
+    "featuresTitle": "为什么选择 Odyssey？",
+    "feature1Title": "强大的富文本",
+    "feature1Desc": "基于 PlateJS 构建，提供毫不妥协的编辑功能。",
+    "feature2Title": "精美的界面",
+    "feature2Desc": "采用 HeroUI 设计，提供现代、无障碍的使用体验。",
+    "feature3Title": "卓越的性能",
+    "feature3Desc": "为速度和可靠性而优化，实现流畅的工作流。"
   }
 }
