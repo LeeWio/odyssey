@@ -14,7 +14,7 @@ import { TextAlignPlugin } from "@platejs/basic-styles/react";
 import { useEditorPlugin, useSelectionFragmentProp } from "platejs/react";
 
 import { ToolbarButton } from "./toolbar-kit";
-import { Alignment } from "@platejs/basic-styles";
+import { type Alignment } from "@platejs/basic-styles";
 
 const items = [
   { icon: TextAlignLeft, value: "left" },
