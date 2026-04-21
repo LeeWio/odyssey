@@ -21,8 +21,10 @@ import {
   CurlyBracketsFunction,
   Link,
   ListCheckLock,
+  BucketPaint,
 } from "@gravity-ui/icons";
 import { FontSizeToolbarButton } from "./font-size-toolbar-button";
+import { FontColorToolbarButton } from "./plate-ui/font-color-toolbar-button";
 
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
@@ -79,6 +81,10 @@ export function FloatingToolbarButtons() {
           <InlineEquationToolbarButton size="sm" variant="ghost">
             <CurlyBracketsFunction />
           </InlineEquationToolbarButton>
+
+          <FontColorToolbarButton nodeType={KEYS.color} tooltip="Text color">
+            <BucketPaint />
+          </FontColorToolbarButton>
         </>
       )}
     </>
