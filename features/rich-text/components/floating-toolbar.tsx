@@ -63,7 +63,11 @@ export const FloatingToolbar = React.forwardRef<HTMLDivElement, FloatingToolbarP
     const ref = useComposedRef<HTMLDivElement>(forwardedRef, floatingRef, clickOutsideRef);
 
     return (
-      <div ref={ref} {...rootProps} className={cn("absolute z-50", hidden && "pointer-events-none")}>
+      <div
+        ref={ref}
+        {...rootProps}
+        className={cn("absolute z-50", hidden && "pointer-events-none")}
+      >
         <AnimatePresence>
           {!hidden && (
             <MotionToolbar
@@ -78,7 +82,7 @@ export const FloatingToolbar = React.forwardRef<HTMLDivElement, FloatingToolbarP
               }}
               aria-label="Floating toolbar"
               className={cn(
-                "bg-overlay/70 transform-gpu backdrop-blur-2xl backdrop-saturate-[1.6] will-change-transform shadow-2xl",
+                "bg-overlay/70 transform-gpu shadow-2xl backdrop-blur-2xl backdrop-saturate-[1.6] will-change-transform",
                 className,
               )}
             >

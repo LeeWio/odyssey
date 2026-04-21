@@ -1,13 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Button,
-  Dropdown,
-  Tooltip,
-  type ButtonProps,
-  type DropdownProps,
-} from "@heroui/react";
+import { Button, Dropdown, Tooltip, type ButtonProps, type DropdownProps } from "@heroui/react";
 import { ChevronDown } from "@gravity-ui/icons";
 
 export interface ToolbarDropdownProps extends Omit<DropdownProps, "children"> {

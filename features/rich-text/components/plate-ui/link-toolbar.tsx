@@ -26,18 +26,16 @@ import {
   ButtonGroup,
   buttonVariants,
   cn,
-  Input,
+  InputGroup,
   Link,
-  Separator,
-  Surface,
+  TextField,
   Toolbar,
   Tooltip,
 } from "@heroui/react";
 import { AnimatePresence, motion } from "motion/react";
 import { motionProps } from "../../types";
 
-const MotionSurface = motion.create(Surface);
-const MotionToolbar = motion.create(Toolbar)
+const MotionToolbar = motion.create(Toolbar);
 
 export function LinkEdit({
   textInputProps,
@@ -49,36 +47,29 @@ export function LinkEdit({
   const state = useFloatingLinkUrlInputState();
   const { props: urlInputProps, ref: urlRef } = useFloatingLinkUrlInput(state);
 
-  return (
-    <div className="flex flex-col gap-2 p-2">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
-          <LinkIcon className="size-3" />
-          URL
-        </div>
-        <Input
-          ref={urlRef}
-          variant="secondary"
-          className="w-full"
-          placeholder="Paste or type a link..."
-          {...urlInputProps}
-        />
-      </div>
+  const { defaultValue: urlDefaultValue, ...restUrlProps } = urlInputProps;
+  const { defaultValue: textDefaultValue, ...restTextProps } = textInputProps;
 
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
-          <TextIcon className="size-3" />
-          Display Text
-        </div>
-        <Input
-          variant="secondary"
-          className="w-full"
-          placeholder="Text to display"
-          data-plate-focus
-          {...(textInputProps as any)}
-        />
-      </div>
-    </div>
+  return (
+    <MotionToolbar isAttached {...motionProps} className="flex items-center justify-center gap-2">
+      <TextField defaultValue={urlDefaultValue}>
+        <InputGroup>
+          <InputGroup.Prefix>
+            <LinkIcon />
+          </InputGroup.Prefix>
+          <InputGroup.Input {...restUrlProps} ref={urlRef} placeholder="Paste or type a link..." />
+        </InputGroup>
+      </TextField>
+
+      <TextField defaultValue={textDefaultValue?.toString()}>
+        <InputGroup>
+          <InputGroup.Prefix>
+            <TextIcon />
+          </InputGroup.Prefix>
+          <InputGroup.Input {...restTextProps} data-plate-focus placeholder="Text to display" />
+        </InputGroup>
+      </TextField>
+    </MotionToolbar>
   );
 }
 
@@ -99,12 +90,8 @@ export function LinkPreview({ onEdit, onUnlink }: { onEdit?: () => void; onUnlin
             {url}
           </Button>
         </Tooltip.Trigger>
-        <Tooltip.Content showArrow>
-          Edit link
-        </Tooltip.Content>
+        <Tooltip.Content showArrow>Edit link</Tooltip.Content>
       </Tooltip>
-
-      <Separator orientation="vertical" className="mx-1 h-4" />
 
       <ButtonGroup variant="tertiary" size="sm">
         <LinkOpenButton />
@@ -144,9 +131,7 @@ function LinkOpenButton() {
       >
         <ArrowUpRightFromSquare />
       </Link>
-      <Tooltip.Content showArrow >
-        Open link
-      </Tooltip.Content>
+      <Tooltip.Content showArrow>Open link</Tooltip.Content>
     </Tooltip>
   );
 }
@@ -201,14 +186,7 @@ export function LinkFloatingToolbar({ state }: { state?: LinkFloatingToolbarStat
 
   if (hidden) return null;
 
-  const input = (
-    <MotionSurface
-      {...motionProps}
-      className="min-w-[280px] overflow-hidden rounded-xl border border-border/50 bg-overlay/80 shadow-2xl backdrop-blur-md "
-    >
-      <LinkEdit textInputProps={textInputProps} />
-    </MotionSurface>
-  );
+  const input = <LinkEdit textInputProps={textInputProps} />;
 
   const editContent = editState.isEditing ? (
     input

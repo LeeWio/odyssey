@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 export const Background = () => {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0 bg-background" />
+      <div className="bg-background absolute inset-0" />
       <motion.div
         animate={{
           scale: [1, 1.2, 1],
@@ -18,7 +18,7 @@ export const Background = () => {
           repeat: Infinity,
           ease: "linear",
         }}
-        className="absolute -top-[10%] -left-[10%] h-[60%] w-[60%] rounded-full bg-accent/20 blur-[120px]"
+        className="bg-accent/20 absolute -top-[10%] -left-[10%] h-[60%] w-[60%] rounded-full blur-[120px]"
       />
       <motion.div
         animate={{
@@ -32,9 +32,9 @@ export const Background = () => {
           repeat: Infinity,
           ease: "linear",
         }}
-        className="absolute -bottom-[10%] -right-[10%] h-[60%] w-[60%] rounded-full bg-success/10 blur-[120px]"
+        className="bg-success/10 absolute -right-[10%] -bottom-[10%] h-[60%] w-[60%] rounded-full blur-[120px]"
       />
-      <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] [background-size:16px_16px] opacity-20 dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
     </div>
   );
 };

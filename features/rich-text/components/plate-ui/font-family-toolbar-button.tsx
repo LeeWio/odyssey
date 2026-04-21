@@ -70,7 +70,11 @@ export function FontFamilyToolbarButton() {
           onSelectionChange={handleDropdownChange}
         >
           {FONT_FAMILIES.map((font) => (
-            <Dropdown.Item key={font.id} id={font.font === "inherit" ? "Default" : font.font} textValue={font.label}>
+            <Dropdown.Item
+              key={font.id}
+              id={font.font === "inherit" ? "Default" : font.font}
+              textValue={font.label}
+            >
               <span style={{ fontFamily: font.font }}>{font.label}</span>
             </Dropdown.Item>
           ))}

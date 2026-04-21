@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { Provider } from "react-redux";
 import { makeStore, AppStore } from "@/store";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { Toast } from "@heroui/react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const storeRef = useRef<AppStore>(undefined);
@@ -15,6 +16,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <Provider store={storeRef.current}>
+      <Toast.Provider />
       <NextThemesProvider
         attribute="class"
         defaultTheme="dark"

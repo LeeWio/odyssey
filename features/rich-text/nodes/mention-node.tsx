@@ -83,7 +83,7 @@ export function MentionInputElement(props: PlateElementProps<TComboboxInputEleme
         onInputChange={setSearch}
         className="w-48"
       >
-        <ComboBox.InputGroup className="bg-surface-secondary h-7 min-h-7 rounded-md border border-border/50 px-1 shadow-none transition-colors focus-within:border-primary">
+        <ComboBox.InputGroup className="bg-surface-secondary border-border/50 focus-within:border-primary h-7 min-h-7 rounded-md border px-1 shadow-none transition-colors">
           <div className="text-muted-foreground flex items-center px-1 text-xs font-bold">@</div>
           <ComboBox.Input
             placeholder="mention..."
@@ -99,7 +99,7 @@ export function MentionInputElement(props: PlateElementProps<TComboboxInputEleme
             {MENTIONABLES.map((item) => (
               <ListBox.Item key={item.key} id={item.text} textValue={item.text}>
                 <div className="flex items-center gap-2">
-                  <div className="bg-primary/10 flex size-6 items-center justify-center rounded-full text-[10px] font-bold text-primary">
+                  <div className="bg-primary/10 text-primary flex size-6 items-center justify-center rounded-full text-[10px] font-bold">
                     {item.text.charAt(0)}
                   </div>
                   <span>{item.text}</span>

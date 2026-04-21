@@ -27,7 +27,7 @@ export const LineHeightToolbarButton = React.memo(() => {
     <ToolbarDropdown
       label={
         <div className="flex items-center gap-1">
-          <ArrowsExpandVertical/>
+          <ArrowsExpandVertical />
           <span>{value || "1.5"}</span>
         </div>
       }
@@ -46,7 +46,7 @@ export const LineHeightToolbarButton = React.memo(() => {
           }}
         >
           {LINE_HEIGHTS.map((item) => (
-            <Dropdown.Item key={item.id} id={item.id} textValue={item.label} >
+            <Dropdown.Item key={item.id} id={item.id} textValue={item.label}>
               <Label>{item.label}</Label>
               <Dropdown.ItemIndicator />
             </Dropdown.Item>

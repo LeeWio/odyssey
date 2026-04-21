@@ -38,9 +38,7 @@ export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
     return (
       <Tooltip delay={0}>
         <Tooltip.Trigger>{button}</Tooltip.Trigger>
-        <Tooltip.Content showArrow>
-          {tooltip}
-        </Tooltip.Content>
+        <Tooltip.Content showArrow>{tooltip}</Tooltip.Content>
       </Tooltip>
     );
   },

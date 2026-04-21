@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  Modal,
-  type UseOverlayStateReturn,
-} from "@heroui/react";
+import { Modal, type UseOverlayStateReturn } from "@heroui/react";
 import { Plate, PlateContent } from "platejs/react";
 import { useRichText } from "@/hooks/use-rich-text";
 import { initialValue } from "@/app/[locale]/value";

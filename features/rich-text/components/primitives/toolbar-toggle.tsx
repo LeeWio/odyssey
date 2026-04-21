@@ -15,7 +15,18 @@ export interface ToolbarToggleProps extends ToggleButtonProps {
  * Maps 'isSelected' state to visual highlights.
  */
 export const ToolbarToggle = forwardRef<HTMLButtonElement, ToolbarToggleProps>(
-  ({ children, tooltip, isSelected, size = "sm", variant = "default", isIconOnly = true, ...props }, ref) => {
+  (
+    {
+      children,
+      tooltip,
+      isSelected,
+      size = "sm",
+      variant = "default",
+      isIconOnly = true,
+      ...props
+    },
+    ref,
+  ) => {
     const button = (
       <ToggleButton
         ref={ref as React.Ref<HTMLButtonElement>}

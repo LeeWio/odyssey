@@ -15,17 +15,18 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 30, filter: "blur(8px)" },
   visible: {
     opacity: 1,
     y: 0,
+    filter: "blur(0px)",
     transition: {
       duration: 0.8,
       ease: [0.16, 1, 0.3, 1],
@@ -42,7 +43,7 @@ export default function Home() {
   }
 
   return (
-    <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-start pt-16 pb-24 md:pt-32 overflow-hidden">
+    <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-start overflow-hidden pt-20 pb-24 md:pt-32">
       <Background />
 
       <motion.div
@@ -52,52 +53,69 @@ export default function Home() {
         className="relative z-10 flex w-full flex-col items-center"
       >
         {/* Hero Section */}
-        <section className="flex w-full max-w-4xl flex-col items-center justify-center px-6 text-center">
+        <section className="flex w-full max-w-5xl flex-col items-center justify-center px-6 text-center">
           <motion.div variants={itemVariants}>
             <Chip
-              variant="secondary"
-              color="accent"
+              variant="flat"
+              color="primary"
               size="sm"
-              className="mb-8 font-bold tracking-widest uppercase bg-accent/10 border-accent/20"
+              className="bg-primary/10 text-primary border-primary/20 mb-8 px-3 py-4 font-medium tracking-wide backdrop-blur-md"
             >
-              {t("badge")}
+              ✨ {t("badge")}
             </Chip>
           </motion.div>
 
           <motion.h1
             variants={itemVariants}
-            className="mb-8 text-6xl font-black tracking-tighter sm:text-7xl lg:text-8xl bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70"
+            className="from-foreground via-foreground/90 to-foreground/40 mb-8 max-w-4xl bg-gradient-to-br bg-clip-text text-5xl font-extrabold tracking-tight text-transparent drop-shadow-sm sm:text-7xl lg:text-8xl"
           >
             {t("title")}
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
-            className="text-muted mx-auto mb-12 max-w-2xl text-lg leading-relaxed sm:text-xl font-medium"
+            className="text-foreground/60 mx-auto mb-12 max-w-2xl text-lg leading-relaxed font-medium sm:text-xl"
           >
             {t("heroSubtitle")}
           </motion.p>
 
-          <motion.div variants={itemVariants} className="flex flex-col items-center gap-6 sm:flex-row">
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6"
+          >
             <Modal>
-              <Button size="lg" color="accent" className="h-14 px-8 text-base font-bold shadow-xl shadow-accent/20 group">
+              <Button
+                size="lg"
+                color="primary"
+                className="shadow-primary/30 group hover:shadow-primary/40 h-14 px-8 text-base font-bold shadow-2xl transition-all hover:scale-105"
+              >
                 {t("openEditor")}
                 <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
               </Button>
-              <Modal.Backdrop variant="blur">
-                <Modal.Container size="cover">
-                  <Modal.Dialog className="bg-background/80 backdrop-blur-2xl">
-                    <Modal.Header className="border-b border-border/50 px-8 py-6">
+              <Modal.Backdrop variant="blur" className="bg-background/40 backdrop-blur-md">
+                <Modal.Container
+                  size="cover"
+                  className="flex items-center justify-center p-4 sm:p-8"
+                >
+                  <Modal.Dialog className="bg-background/80 max-h-full w-full max-w-6xl overflow-hidden rounded-2xl border border-white/10 shadow-2xl backdrop-blur-3xl">
+                    <Modal.Header className="border-b border-white/10 bg-white/5 px-6 py-4">
                       <div className="flex w-full items-center justify-between">
-                        <div>
-                          <Modal.Heading className="text-2xl font-black tracking-tight">Odyssey Editor</Modal.Heading>
-                          <p className="text-muted text-sm font-medium">Craft your story with power.</p>
+                        <div className="flex items-center gap-4">
+                          <div className="flex gap-2 pl-1">
+                            <div className="bg-danger/90 size-3.5 rounded-full shadow-sm" />
+                            <div className="bg-warning/90 size-3.5 rounded-full shadow-sm" />
+                            <div className="bg-success/90 size-3.5 rounded-full shadow-sm" />
+                          </div>
+                          <Modal.Heading className="text-foreground/80 ml-2 text-sm font-semibold tracking-wide">
+                            Odyssey Editor
+                          </Modal.Heading>
                         </div>
                         <div className="flex items-center gap-3">
                           <Button
                             size="sm"
-                            variant="secondary"
-                            className="font-bold uppercase tracking-wider"
+                            variant="flat"
+                            color="primary"
+                            className="font-semibold"
                             onPress={() => insertColumnGroup(editor, { columns: 3, select: true })}
                           >
                             Add Columns
@@ -107,8 +125,8 @@ export default function Home() {
                               <Button
                                 {...props}
                                 size="sm"
-                                variant="ghost"
-                                className="font-bold uppercase"
+                                variant="light"
+                                className="text-foreground/60 hover:text-foreground font-semibold"
                               >
                                 Close
                               </Button>
@@ -117,11 +135,11 @@ export default function Home() {
                         </div>
                       </div>
                     </Modal.Header>
-                    <Modal.Body className="p-0 overflow-hidden">
-                      <ScrollShadow className="mx-auto w-full max-w-5xl px-8 py-12 h-[80vh]">
+                    <Modal.Body className="bg-background/50 p-0">
+                      <ScrollShadow className="mx-auto h-[calc(100vh-120px)] w-full max-w-4xl px-8 py-12 sm:h-[75vh]">
                         <Plate editor={editor}>
                           <PlateContent
-                            className="min-h-full text-lg outline-none selection:bg-accent/20"
+                            className="selection:bg-primary/20 min-h-full text-lg outline-none"
                             placeholder="Type your amazing content here..."
                           />
                         </Plate>
@@ -134,8 +152,8 @@ export default function Home() {
 
             <Button
               size="lg"
-              variant="secondary"
-              className="h-14 px-8 text-base font-bold bg-white/5 border-white/10 hover:bg-white/10 backdrop-blur-md"
+              variant="bordered"
+              className="border-foreground/10 hover:bg-foreground/5 hover:border-foreground/20 h-14 px-8 text-base font-bold backdrop-blur-md transition-all"
               onPress={() => window.open("https://github.com/heroui-inc/heroui", "_blank")}
             >
               <LogoGithub className="mr-2 size-5" />
@@ -146,20 +164,20 @@ export default function Home() {
 
         {/* Features Section */}
         <section className="mt-40 flex w-full max-w-6xl flex-col items-center px-6">
-          <motion.h2
-            variants={itemVariants}
-            className="mb-16 text-4xl font-black tracking-tight sm:text-5xl"
-          >
-            {t("featuresTitle")}
-          </motion.h2>
+          <motion.div variants={itemVariants} className="mb-20 text-center">
+            <h2 className="from-foreground to-foreground/60 bg-gradient-to-r bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-5xl">
+              {t("featuresTitle")}
+            </h2>
+            <div className="via-primary/50 mx-auto mt-6 h-1 w-24 rounded-full bg-gradient-to-r from-transparent to-transparent" />
+          </motion.div>
 
-          <div className="grid w-full grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 title: t("feature1Title"),
                 desc: t("feature1Desc"),
                 icon: PencilToSquare,
-                color: "accent",
+                color: "primary",
               },
               {
                 title: t("feature2Title"),
@@ -176,23 +194,31 @@ export default function Home() {
             ].map((feature, index) => (
               <motion.div key={index} variants={itemVariants}>
                 <Card
-                  variant="secondary"
-                  className="group relative h-full overflow-hidden border-border/50 bg-surface/30 p-8 backdrop-blur-md transition-all hover:-translate-y-2 hover:bg-surface/50 hover:shadow-2xl hover:shadow-accent/5"
+                  className="group relative h-full overflow-hidden border border-white/5 bg-white/5 p-8 backdrop-blur-lg transition-all duration-500 hover:-translate-y-2 hover:border-white/10 hover:bg-white/10 hover:shadow-2xl"
+                  style={{
+                    boxShadow: "0 4px 30px rgba(0, 0, 0, 0.05)",
+                  }}
                 >
-                  <div className={cn(
-                    "mb-6 flex size-14 items-center justify-center rounded-2xl transition-transform group-hover:scale-110 group-hover:rotate-3",
-                    feature.color === "accent" ? "bg-accent/10 text-accent" :
-                    feature.color === "success" ? "bg-success/10 text-success" :
-                    "bg-warning/10 text-warning"
-                  )}>
+                  <div
+                    className={cn(
+                      "mb-6 flex size-14 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3",
+                      feature.color === "primary"
+                        ? "bg-primary/20 text-primary"
+                        : feature.color === "success"
+                          ? "bg-success/20 text-success"
+                          : "bg-warning/20 text-warning",
+                    )}
+                  >
                     <feature.icon className="size-7" />
                   </div>
-                  <h3 className="mb-4 text-2xl font-black tracking-tight">{feature.title}</h3>
-                  <p className="text-muted text-lg font-medium leading-relaxed">
-                    {feature.desc}
-                  </p>
-                  <div className="absolute -right-8 -bottom-8 opacity-[0.03] transition-opacity group-hover:opacity-[0.08]">
-                    <feature.icon className="size-40" />
+                  <h3 className="text-foreground mb-3 text-2xl font-bold tracking-tight">
+                    {feature.title}
+                  </h3>
+                  <p className="text-foreground/70 text-base leading-relaxed">{feature.desc}</p>
+
+                  {/* Decorative Background Icon */}
+                  <div className="pointer-events-none absolute -right-6 -bottom-6 opacity-[0.02] transition-all duration-500 group-hover:scale-110 group-hover:opacity-[0.06]">
+                    <feature.icon className="size-48" />
                   </div>
                 </Card>
               </motion.div>

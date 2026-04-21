@@ -24,11 +24,14 @@ const alignmentItems = [
 export function AlignToolbarButton() {
   const { editor, tf } = useEditorPlugin(TextAlignPlugin);
 
-  const value =
+  let value =
     useSelectionFragmentProp({
-      defaultValue: "start",
+      defaultValue: "left",
       getProp: (node) => node.align,
     }) ?? "left";
+
+  if (value === "start") value = "left";
+  if (value === "end") value = "right";
 
   return (
     <Popover>

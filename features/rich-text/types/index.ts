@@ -1,4 +1,4 @@
-import { scale, type Transition } from "framer-motion";
+import { type Transition } from "framer-motion";
 
 export const motionProps = {
   initial: { opacity: 0, scale: 0.95, y: 8, filter: "blur(4px)" },
@@ -11,4 +11,3 @@ export const motionProps = {
     mass: 1,
   } as Transition,
 };
-
