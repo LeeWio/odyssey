@@ -99,7 +99,7 @@ export function MentionInputElement(props: PlateElementProps<TComboboxInputEleme
             {MENTIONABLES.map((item) => (
               <ListBox.Item key={item.key} id={item.text} textValue={item.text}>
                 <div className="flex items-center gap-2">
-                  <div className="bg-primary/10 text-primary flex size-6 items-center justify-center rounded-full text-[10px] font-bold">
+                  <div className="bg-accent/10 text-primary flex size-6 items-center justify-center rounded-full text-[10px] font-bold">
                     {item.text.charAt(0)}
                   </div>
                   <span>{item.text}</span>

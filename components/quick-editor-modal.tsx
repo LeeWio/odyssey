@@ -12,13 +12,13 @@ export function QuickEditorModal({ state }: { state: UseOverlayStateReturn }) {
     <Modal isOpen={state.isOpen} onOpenChange={state.setOpen}>
       <Modal.Backdrop>
         <Modal.Container size="cover">
-          <Modal.Dialog className="bg-background/45 backdrop-blur-2xl backdrop-saturate-[1.6]">
+          <Modal.Dialog className="bg-background/45 backdrop-blur-2xl backdrop-saturate-[1.6] overflow-visible">
             <Modal.Header>
               {/* <Modal.Icon className="bg-default text-foreground">
               </Modal.Icon>
               <Modal.Heading>Welcome to HeroUI</Modal.Heading> */}
             </Modal.Header>
-            <Modal.Body className="[&::-webkit-scrollbar]:hidden">
+            <Modal.Body className="overflow-visible [&::-webkit-scrollbar]:hidden">
               <Plate editor={editor}>
                 <PlateContent
                   autoFocusOnEditable
