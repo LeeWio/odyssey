@@ -18,12 +18,12 @@ export function QuickEditorModal({ state }: { state: UseOverlayStateReturn }) {
               </Modal.Icon>
               <Modal.Heading>Welcome to HeroUI</Modal.Heading> */}
             </Modal.Header>
-            <Modal.Body>
+            <Modal.Body className="[&::-webkit-scrollbar]:hidden">
               <Plate editor={editor}>
                 <PlateContent
                   autoFocusOnEditable
                   placeholder="Type your amazing content here..."
-                  className="min-h-full w-full outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  className="min-h-full w-full outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden no-scrollbar"
                 />
               </Plate>
             </Modal.Body>

@@ -15,6 +15,10 @@ import { MathKit } from "./math-kit";
 import { DndKit } from "./dnd-kit";
 import { BlockMenuKit } from "./block-menu-kit";
 import { ColumnKit } from "./column-kit";
+import { CodeBlockKit } from "./code-block-kit";
+import { MarkdownKit } from "./markdown-kit";
+import { AutoformatKit } from "./autoformat";
+import { ListKit } from "./list-kit";
 
 export const Plugins = [
   ...BlocksKit,
@@ -34,4 +38,8 @@ export const Plugins = [
   ...DndKit,
   ...BlockMenuKit,
   ...ColumnKit,
+  ...CodeBlockKit,
+  ...MarkdownKit,
+  ...AutoformatKit,
+  ...ListKit
 ];
