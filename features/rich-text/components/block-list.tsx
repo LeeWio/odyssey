@@ -58,27 +58,31 @@ function TodoMarker(props: PlateElementProps) {
   const readOnly = useReadOnly();
 
   return (
-    <div contentEditable={false}>
+    <div
+      contentEditable={false}
+      className={cn(
+        '-left-6 absolute top-1 flex items-center justify-center',
+        readOnly && 'pointer-events-none'
+      )}
+      onMouseDown={checkboxProps.onMouseDown}
+    >
       <Checkbox
-        className={cn(
-          '-left-6 absolute top-1',
-          readOnly && 'pointer-events-none'
-        )}
-        {...checkboxProps}
-      />
+        isSelected={checkboxProps.checked}
+        onChange={(isSelected) => {
+          checkboxProps.onCheckedChange(isSelected);
+        }}
+      >
+        <Checkbox.Control>
+          <Checkbox.Indicator />
+        </Checkbox.Control>
+      </Checkbox>
     </div>
   );
 }
 
 function TodoLi(props: PlateElementProps) {
   return (
-    <li
-      className={cn(
-        'list-none',
-        (props.element.checked as boolean) &&
-          'text-muted-foreground line-through'
-      )}
-    >
+    <li className="list-none">
       {props.children}
     </li>
   );
