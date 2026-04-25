@@ -49,6 +49,12 @@ Do not write inline styles. If you need to override colors, do it via CSS variab
 
 Odyssey leverages HeroUI's robust styling methodologies.
 
+### 🚨 CRITICAL: Do Not Override Component Defaults
+**HeroUI components come with highly polished, accessible, and mathematically calculated default styles.** 
+- **NEVER** attempt to manually override internal aesthetics via the `className` prop. 
+- **DO NOT** add inline utility classes for padding (`p-4`), borders (`border`, `border-white`), border-radius (`rounded-xl`), or interactive states (`hover:bg-gray-100`) directly onto HeroUI components like `<Button>`, `<Card>`, or `<Chip>`.
+- **ALLOWED USAGE:** The `className` prop on HeroUI components must be strictly reserved for **Layout and Positioning** purposes. It is acceptable to pass classes like `w-full`, `max-w-md`, `mt-4`, `flex-1`, or `col-span-2` to align the component within your page's grid or flexbox structure. All other aesthetic changes must be done via standard HeroUI props (e.g., `variant`, `color`, `size`).
+
 ### Utilizing BEM Classes
 HeroUI exposes standard BEM classes for every component. For simple semantic styling without React overhead (e.g., inside native `<a>` tags or Next.js `<Link>`), use them directly:
 ```tsx
