@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, useSpring } from "motion/react";
 import { Button, Chip } from "@heroui/react";
 import { Playfair_Display } from "next/font/google";
@@ -57,7 +57,7 @@ export default function Home() {
   return (
     <motion.main
       ref={containerRef}
-      className="selection:bg-accent/20 relative z-10 mx-auto flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-6 text-center font-sans md:px-12"
+      className="selection:bg-accent-soft-hover relative z-10 mx-auto flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-6 text-center font-sans md:px-12"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -104,59 +104,35 @@ export default function Home() {
         variants={itemVariants}
         className="relative z-10 mt-12 flex flex-wrap justify-center gap-4"
       >
-        <Chip
-          variant="soft"
-          color="default"
-          size="md"
-          className="border-default-200/50 bg-default-100/50 border backdrop-blur-sm"
-        >
-          <span className="text-foreground/80 flex items-center gap-2 font-medium">
-            <Icon icon="lucide:layers" className="size-4" />
-            <span>Next-Gen Architecture</span>
+        <Chip variant="secondary" color="default" size="md">
+          <span className="text-default-500 flex items-center gap-2 font-medium">
+            <Icon icon="lucide:target" className="size-4" />
+            <span>Intentional Design</span>
           </span>
         </Chip>
-        <Chip
-          variant="soft"
-          color="default"
-          size="md"
-          className="border-default-200/50 bg-default-100/50 border backdrop-blur-sm"
-        >
-          <span className="text-foreground/80 flex items-center gap-2 font-medium">
-            <Icon icon="lucide:monitor-smartphone" className="size-4" />
-            <span>Pixel Perfect</span>
+        <Chip variant="secondary" color="default" size="md">
+          <span className="text-default-500 flex items-center gap-2 font-medium">
+            <Icon icon="lucide:settings-2" className="size-4" />
+            <span>Meticulous Execution</span>
           </span>
         </Chip>
-        <Chip
-          variant="soft"
-          color="default"
-          size="md"
-          className="border-default-200/50 bg-default-100/50 border backdrop-blur-sm"
-        >
-          <span className="text-foreground/80 flex items-center gap-2 font-medium">
-            <Icon icon="lucide:rocket" className="size-4" />
-            <span>Performance First</span>
+        <Chip variant="secondary" color="default" size="md">
+          <span className="text-default-500 flex items-center gap-2 font-medium">
+            <Icon icon="lucide:sparkles" className="size-4" />
+            <span>Relentless Polish</span>
           </span>
         </Chip>
       </motion.div>
 
-      {/* CTAs */}
       <motion.div
         variants={itemVariants}
         className="relative z-10 mt-16 flex w-full flex-col items-center justify-center gap-6 sm:w-auto sm:flex-row"
       >
-        <Button
-          variant="primary"
-          size="lg"
-          className="h-14 w-full px-10 text-sm tracking-widest uppercase sm:w-auto"
-        >
+        <Button variant="primary" size="lg">
           Explore Work
-          <Icon icon="lucide:arrow-right" className="ml-2 size-4" />
+          <Icon icon="lucide:arrow-right" />
         </Button>
-        <Button
-          variant="secondary"
-          size="lg"
-          className="h-14 w-full px-10 text-sm tracking-widest uppercase sm:w-auto"
-        >
+        <Button variant="secondary" size="lg">
           Read Philosophy
         </Button>
       </motion.div>
