@@ -107,19 +107,19 @@ export default function Home() {
         <Chip variant="secondary" color="default" size="md">
           <span className="text-default-500 flex items-center gap-2 font-medium">
             <Icon icon="lucide:target" className="size-4" />
-            <span>Intentional Design</span>
+            <span>Intention</span>
           </span>
         </Chip>
         <Chip variant="secondary" color="default" size="md">
           <span className="text-default-500 flex items-center gap-2 font-medium">
             <Icon icon="lucide:settings-2" className="size-4" />
-            <span>Meticulous Execution</span>
+            <span>Execution</span>
           </span>
         </Chip>
         <Chip variant="secondary" color="default" size="md">
           <span className="text-default-500 flex items-center gap-2 font-medium">
             <Icon icon="lucide:sparkles" className="size-4" />
-            <span>Relentless Polish</span>
+            <span>Excellence</span>
           </span>
         </Chip>
       </motion.div>
