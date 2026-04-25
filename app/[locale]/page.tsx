@@ -57,7 +57,7 @@ export default function Home() {
   return (
     <motion.main
       ref={containerRef}
-      className="selection:bg-primary/20 relative z-10 mx-auto flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-6 text-center font-sans md:px-12"
+      className="selection:bg-accent/20 relative z-10 mx-auto flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-6 text-center font-sans md:px-12"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -73,14 +73,14 @@ export default function Home() {
       {/* Cinematic Ambient Glow - Dormant Breathing */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <motion.div
-          animate={{ scale: [1, 1.05, 1], opacity: [0.03, 0.08, 0.03] }}
+          animate={{ scale: [1, 1.05, 1], opacity: [0.1, 0.2, 0.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-          className="bg-foreground absolute top-[-10%] left-1/2 h-[800px] w-[800px] -translate-x-1/2 rounded-full blur-[120px]"
+          className="bg-accent absolute top-[-10%] left-1/2 h-[800px] w-[800px] -translate-x-1/2 rounded-full blur-[120px]"
         />
         <motion.div
-          animate={{ scale: [1, 1.02, 1], opacity: [0.02, 0.06, 0.02] }}
+          animate={{ scale: [1, 1.02, 1], opacity: [0.05, 0.15, 0.05] }}
           transition={{ duration: 30, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="bg-primary absolute top-[20%] right-[-5%] h-[600px] w-[600px] rounded-full blur-[120px]"
+          className="bg-default absolute top-[20%] right-[-5%] h-[600px] w-[600px] rounded-full blur-[120px]"
         />
       </div>
 
@@ -93,7 +93,7 @@ export default function Home() {
           Don’t just do it
         </span>
         <span
-          className={`text-foreground font-normal italic ${playfair.className} relative inline-block`}
+          className={`text-accent font-normal italic ${playfair.className} relative inline-block`}
         >
           do it well.
         </span>
