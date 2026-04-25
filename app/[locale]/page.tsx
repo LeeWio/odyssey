@@ -34,7 +34,6 @@ export default function Home() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Smooth spring for the spotlight
   const springX = useSpring(0, { stiffness: 50, damping: 20 });
   const springY = useSpring(0, { stiffness: 50, damping: 20 });
 
@@ -62,7 +61,6 @@ export default function Home() {
       animate="visible"
       variants={containerVariants}
     >
-      {/* Interactive Spotlight Effect */}
       <motion.div
         className="pointer-events-none absolute inset-0 z-0 hidden opacity-50 mix-blend-screen md:block dark:opacity-30 dark:mix-blend-lighten"
         style={{
@@ -70,17 +68,16 @@ export default function Home() {
         }}
       />
 
-      {/* Cinematic Ambient Glow - Dormant Breathing */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <motion.div
           animate={{ scale: [1, 1.05, 1], opacity: [0.1, 0.2, 0.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-          className="bg-accent absolute top-[-10%] left-1/2 h-[800px] w-[800px] -translate-x-1/2 rounded-full blur-[120px]"
+          className="bg-accent absolute top-[-10%] left-1/2 h-200 w-200 -translate-x-1/2 rounded-full blur-[120px]"
         />
         <motion.div
           animate={{ scale: [1, 1.02, 1], opacity: [0.05, 0.15, 0.05] }}
           transition={{ duration: 30, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="bg-default absolute top-[20%] right-[-5%] h-[600px] w-[600px] rounded-full blur-[120px]"
+          className="bg-default absolute top-[20%] right-[-5%] h-150 w-150 rounded-full blur-[120px]"
         />
       </div>
 
@@ -102,25 +99,20 @@ export default function Home() {
       {/* Decorative Chips */}
       <motion.div
         variants={itemVariants}
-        className="relative z-10 mt-12 flex flex-wrap justify-center gap-4"
+        className="relative z-10 mt-12 flex flex-wrap items-center justify-center gap-3"
       >
-        <Chip variant="secondary" color="accent" size="md">
-          <span className="text-default-500 flex items-center gap-2 font-medium">
-            <Icon icon="lucide:target" className="text-accent size-4" />
-            <span>Intention</span>
-          </span>
+        <Chip variant="soft" color="accent" size="md">
+          <Icon width={12} icon="lucide:target" />
+          <Chip.Label>Intention</Chip.Label>
         </Chip>
-        <Chip variant="secondary" color="default" size="md">
-          <span className="text-default-500 flex items-center gap-2 font-medium">
-            <Icon icon="lucide:settings-2" className="text-success size-4" />
-            <span>Execution</span>
-          </span>
+
+        <Chip variant="soft" color="success" size="md">
+          <Icon icon="lucide:settings-2" />
+          <Chip.Label>Execution</Chip.Label>
         </Chip>
-        <Chip variant="secondary" color="default" size="md">
-          <span className="text-default-500 flex items-center gap-2 font-medium">
-            <Icon icon="lucide:sparkles" className="text-warning size-4" />
-            <span>Excellence</span>
-          </span>
+        <Chip variant="soft" color="warning" size="md">
+          <Icon width={12} icon="lucide:sparkles" />
+          <Chip.Label>Excellence</Chip.Label>
         </Chip>
       </motion.div>
 
@@ -128,16 +120,14 @@ export default function Home() {
         variants={itemVariants}
         className="relative z-10 mt-16 flex w-full flex-col items-center justify-center gap-6 sm:w-auto sm:flex-row"
       >
-        <Button variant="primary" size="lg">
-          Explore Work
-          <Icon icon="lucide:arrow-right" />
+        <Button size="md" variant="primary">
+          See the Execution
         </Button>
-        <Button variant="secondary" size="lg">
-          Read Philosophy
+        <Button variant="tertiary" size="md">
+          Understand the Intent
         </Button>
       </motion.div>
 
-      {/* The Proof Scroll */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
