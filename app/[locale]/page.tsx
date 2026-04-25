@@ -1,231 +1,244 @@
 "use client";
 
-import { Plate, PlateContent } from "platejs/react";
-import { useRichText } from "@/hooks/use-rich-text";
-import { initialValue } from "./value";
-import { Button, Modal, Card, Chip, cn, ScrollShadow } from "@heroui/react";
-import { useTranslations } from "next-intl";
-import { insertColumnGroup } from "@platejs/layout";
+import React from "react";
 import { motion } from "motion/react";
-import { Background } from "@/components/background";
-import { ArrowRight, PencilToSquare, Palette, Rocket, LogoGithub } from "@gravity-ui/icons";
+import { 
+  Button, 
+  Card, 
+  Chip, 
+  Avatar, 
+  ProgressCircle,
+  Separator
+} from "@heroui/react";
+import { Playfair_Display } from "next/font/google";
+import { Icon } from "@iconify/react";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.2,
-    },
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 30, filter: "blur(8px)" },
+  hidden: { x: -40, opacity: 0 },
   visible: {
+    x: 0,
     opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: {
-      duration: 0.8,
-      ease: [0.16, 1, 0.3, 1],
-    },
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const },
   },
 };
 
 export default function Home() {
-  const t = useTranslations("HomePage");
-  const { editor } = useRichText({ value: initialValue });
-
-  if (!editor) {
-    return null;
-  }
-
   return (
-    <div className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-start overflow-hidden pt-20 pb-24 md:pt-32">
-      <Background />
+    <div className="bg-background text-foreground relative min-h-screen w-full font-sans selection:bg-primary/20">
+      
+      {/* Background ambient glow - typical in modern UI to give depth without overwhelming */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-1/2 top-[-10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-primary/5 opacity-50 blur-[120px] mix-blend-screen" />
+        <div className="absolute right-[-5%] top-[20%] h-[500px] w-[500px] rounded-full bg-secondary/5 opacity-50 blur-[100px] mix-blend-screen" />
+      </div>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 flex w-full flex-col items-center"
-      >
-        {/* Hero Section */}
-        <section className="flex w-full max-w-5xl flex-col items-center justify-center px-6 text-center">
+      <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-6 pt-32 pb-24 md:px-12">
+        
+        {/* --- HERO SECTION --- */}
+        <motion.div 
+          className="flex flex-col items-center text-center max-w-4xl"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
           <motion.div variants={itemVariants}>
-            <Chip
-              variant="flat"
-              color="primary"
+            <Chip 
+              variant="secondary" 
+              color="accent" 
+              className="mb-8 border-default-200 bg-content1/50 backdrop-blur-md"
               size="sm"
-              className="bg-primary/10 text-primary border-primary/20 mb-8 px-3 py-4 font-medium tracking-wide backdrop-blur-md"
             >
-              ✨ {t("badge")}
+              <span className="font-semibold tracking-widest uppercase text-[10px]">Odyssey Framework</span>
             </Chip>
           </motion.div>
-
-          <motion.h1
+          
+          <motion.h1 
             variants={itemVariants}
-            className="from-foreground via-foreground/90 to-foreground/40 mb-8 max-w-4xl bg-gradient-to-br bg-clip-text text-5xl font-extrabold tracking-tight text-transparent drop-shadow-sm sm:text-7xl lg:text-8xl"
+            className="text-[3.5rem] leading-[1.05] tracking-tight md:text-[5.5rem] lg:text-[6.5rem] font-extrabold text-foreground"
           >
-            {t("title")}
+            Don’t just do it — <br />
+            <span className={`text-primary italic font-normal ${playfair.className}`}>
+              do it well.
+            </span>
           </motion.h1>
 
-          <motion.p
+          <motion.p 
             variants={itemVariants}
-            className="text-foreground/60 mx-auto mb-12 max-w-2xl text-lg leading-relaxed font-medium sm:text-xl"
+            className="text-default-500 mt-8 max-w-2xl text-lg md:text-xl font-medium leading-relaxed"
           >
-            {t("heroSubtitle")}
+            We craft digital experiences that transcend the ordinary. Engineering robust, scalable, and meticulously detailed solutions.
           </motion.p>
 
-          <motion.div
+          <motion.div 
             variants={itemVariants}
-            className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6"
+            className="mt-12 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
           >
-            <Modal>
-              <Button
-                size="lg"
-                color="primary"
-                className="shadow-primary/30 group hover:shadow-primary/40 h-14 px-8 text-base font-bold shadow-2xl transition-all hover:scale-105"
-              >
-                {t("openEditor")}
-                <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
-              </Button>
-              <Modal.Backdrop variant="blur" className="bg-background/40 backdrop-blur-md">
-                <Modal.Container
-                  size="cover"
-                  className="flex items-center justify-center p-4 sm:p-8"
-                >
-                  <Modal.Dialog className="bg-background/80 max-h-full w-full max-w-6xl overflow-hidden rounded-2xl border border-white/10 shadow-2xl backdrop-blur-3xl">
-                    <Modal.Header className="border-b border-white/10 bg-white/5 px-6 py-4">
-                      <div className="flex w-full items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="flex gap-2 pl-1">
-                            <div className="bg-danger/90 size-3.5 rounded-full shadow-sm" />
-                            <div className="bg-warning/90 size-3.5 rounded-full shadow-sm" />
-                            <div className="bg-success/90 size-3.5 rounded-full shadow-sm" />
-                          </div>
-                          <Modal.Heading className="text-foreground/80 ml-2 text-sm font-semibold tracking-wide">
-                            Odyssey Editor
-                          </Modal.Heading>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Button
-                            size="sm"
-                            variant="flat"
-                            color="primary"
-                            className="font-semibold"
-                            onPress={() => insertColumnGroup(editor, { columns: 3, select: true })}
-                          >
-                            Add Columns
-                          </Button>
-                          <Modal.CloseTrigger
-                            render={(props) => (
-                              <Button
-                                {...props}
-                                size="sm"
-                                variant="light"
-                                className="text-foreground/60 hover:text-foreground font-semibold"
-                              >
-                                Close
-                              </Button>
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </Modal.Header>
-                    <Modal.Body className="bg-background/50 p-0">
-                      <ScrollShadow className="mx-auto h-[calc(100vh-120px)] w-full max-w-4xl px-8 py-12 sm:h-[75vh]">
-                        <Plate editor={editor}>
-                          <PlateContent
-                            className="selection:bg-primary/20 min-h-full text-lg outline-none"
-                            placeholder="Type your amazing content here..."
-                          />
-                        </Plate>
-                      </ScrollShadow>
-                    </Modal.Body>
-                  </Modal.Dialog>
-                </Modal.Container>
-              </Modal.Backdrop>
-            </Modal>
-
-            <Button
+            <Button 
+              variant="primary"
               size="lg"
-              variant="bordered"
-              className="border-foreground/10 hover:bg-foreground/5 hover:border-foreground/20 h-14 px-8 text-base font-bold backdrop-blur-md transition-all"
-              onPress={() => window.open("https://github.com/heroui-inc/heroui", "_blank")}
+              className="w-full sm:w-auto font-bold tracking-wide px-8 shadow-xl shadow-foreground/10 bg-foreground text-background hover:bg-foreground/90 gap-2 flex items-center justify-center"
             >
-              <LogoGithub className="mr-2 size-5" />
-              {t("viewGithub")}
+              Explore Work
+              <Icon icon="lucide:arrow-right" className="size-4" />
+            </Button>
+            <Button 
+              variant="secondary"
+              size="lg"
+              className="w-full sm:w-auto font-bold tracking-wide px-8 bg-default-100 hover:bg-default-200 text-foreground"
+            >
+              Read Philosophy
             </Button>
           </motion.div>
-        </section>
+        </motion.div>
 
-        {/* Features Section */}
-        <section className="mt-40 flex w-full max-w-6xl flex-col items-center px-6">
-          <motion.div variants={itemVariants} className="mb-20 text-center">
-            <h2 className="from-foreground to-foreground/60 bg-gradient-to-r bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-5xl">
-              {t("featuresTitle")}
-            </h2>
-            <div className="via-primary/50 mx-auto mt-6 h-1 w-24 rounded-full bg-gradient-to-r from-transparent to-transparent" />
+        <Separator className="my-24 w-full max-w-5xl opacity-50" />
+
+        {/* --- BENTO GRID (Modern UI Showcase) --- */}
+        <motion.div 
+          className="grid w-full max-w-5xl grid-cols-1 md:grid-cols-3 gap-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={containerVariants}
+        >
+          {/* Bento Item 1: Philosophy (Spans 2 columns) */}
+          <motion.div variants={itemVariants} className="md:col-span-2">
+            <Card className="h-full bg-content1/40 border border-default-200/50 backdrop-blur-xl shadow-sm hover:shadow-md transition-shadow">
+              <Card.Content className="p-8 md:p-10 flex flex-col justify-center">
+                <Icon icon="lucide:quote" className="size-8 text-primary/40 mb-6" />
+                <p className={`text-foreground/80 text-xl md:text-2xl leading-relaxed ${playfair.className} italic mb-8`}>
+                  &quot;Excellence is never an accident. It is always the result of high intention, sincere effort, and intelligent execution.&quot;
+                </p>
+                <div className="flex items-center gap-3">
+                  <Avatar className="bg-default-200">
+                    <Avatar.Image src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Aristotle" />
+                    <Avatar.Fallback>AR</Avatar.Fallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-foreground">Aristotle</span>
+                    <span className="text-xs text-default-500">Ancient Greek Philosopher</span>
+                  </div>
+                </div>
+              </Card.Content>
+            </Card>
           </motion.div>
 
-          <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                title: t("feature1Title"),
-                desc: t("feature1Desc"),
-                icon: PencilToSquare,
-                color: "primary",
-              },
-              {
-                title: t("feature2Title"),
-                desc: t("feature2Desc"),
-                icon: Palette,
-                color: "success",
-              },
-              {
-                title: t("feature3Title"),
-                desc: t("feature3Desc"),
-                icon: Rocket,
-                color: "warning",
-              },
-            ].map((feature, index) => (
-              <motion.div key={index} variants={itemVariants}>
-                <Card
-                  className="group relative h-full overflow-hidden border border-white/5 bg-white/5 p-8 backdrop-blur-lg transition-all duration-500 hover:-translate-y-2 hover:border-white/10 hover:bg-white/10 hover:shadow-2xl"
-                  style={{
-                    boxShadow: "0 4px 30px rgba(0, 0, 0, 0.05)",
-                  }}
-                >
-                  <div
-                    className={cn(
-                      "mb-6 flex size-14 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3",
-                      feature.color === "primary"
-                        ? "bg-primary/20 text-primary"
-                        : feature.color === "success"
-                          ? "bg-success/20 text-success"
-                          : "bg-warning/20 text-warning",
-                    )}
-                  >
-                    <feature.icon className="size-7" />
+          {/* Bento Item 2: Performance metrics */}
+          <motion.div variants={itemVariants}>
+            <Card className="h-full bg-content1/40 border border-default-200/50 backdrop-blur-xl shadow-sm hover:shadow-md transition-shadow">
+              <Card.Header className="px-6 pt-6 pb-0 flex-col items-start">
+                <div className="flex items-center gap-2 text-success">
+                  <Icon icon="lucide:zap" className="size-4" />
+                  <span className="text-xs font-bold uppercase tracking-widest">Blazing Fast</span>
+                </div>
+                <h4 className="text-foreground text-lg font-bold mt-2">Performance</h4>
+              </Card.Header>
+              <Card.Content className="px-6 py-6 flex items-center justify-center">
+                <div className="relative size-32 drop-shadow-md">
+                  <ProgressCircle aria-label="Lighthouse Score" value={100} size="lg" color="success" className="size-full">
+                    <ProgressCircle.Track>
+                      <ProgressCircle.TrackCircle className="stroke-success/10 stroke-[3px]" />
+                      <ProgressCircle.FillCircle className="stroke-success stroke-[3px]" />
+                    </ProgressCircle.Track>
+                  </ProgressCircle>
+                  <div className="absolute inset-0 flex items-center justify-center text-3xl font-black text-foreground">
+                    100
                   </div>
-                  <h3 className="text-foreground mb-3 text-2xl font-bold tracking-tight">
-                    {feature.title}
-                  </h3>
-                  <p className="text-foreground/70 text-base leading-relaxed">{feature.desc}</p>
+                </div>
+              </Card.Content>
+              <Card.Footer className="px-6 pb-6 pt-0">
+                <p className="text-default-500 text-xs font-medium">Perfect 100 Lighthouse score. Sub-50ms latency across the globe.</p>
+              </Card.Footer>
+            </Card>
+          </motion.div>
 
-                  {/* Decorative Background Icon */}
-                  <div className="pointer-events-none absolute -right-6 -bottom-6 opacity-[0.02] transition-all duration-500 group-hover:scale-110 group-hover:opacity-[0.06]">
-                    <feature.icon className="size-48" />
+          {/* Bento Item 3: Scalability */}
+          <motion.div variants={itemVariants}>
+            <Card className="h-full bg-content1/40 border border-default-200/50 backdrop-blur-xl shadow-sm hover:shadow-md transition-shadow">
+              <Card.Header className="px-6 pt-6 pb-0 flex-col items-start">
+                <div className="flex items-center gap-2 text-secondary">
+                  <Icon icon="lucide:globe-2" className="size-4" />
+                  <span className="text-xs font-bold uppercase tracking-widest">Global Edge</span>
+                </div>
+                <h4 className="text-foreground text-lg font-bold mt-2">Infinite Scale</h4>
+              </Card.Header>
+              <Card.Content className="px-6 py-6">
+                <div className="flex flex-col gap-4">
+                  <div className="bg-default-100 rounded-lg p-4 flex items-center justify-between">
+                    <span className="text-default-600 text-sm font-semibold">Uptime</span>
+                    <Chip color="success" variant="soft" size="sm">99.99%</Chip>
                   </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-      </motion.div>
+                  <div className="bg-default-100 rounded-lg p-4 flex items-center justify-between">
+                    <span className="text-default-600 text-sm font-semibold">Regions</span>
+                    <span className="text-foreground font-bold">35+</span>
+                  </div>
+                </div>
+              </Card.Content>
+            </Card>
+          </motion.div>
+
+          {/* Bento Item 4: Ecosystem/Lifestyle (Spans 2 columns) */}
+          <motion.div variants={itemVariants} className="md:col-span-2">
+            <Card className="h-full bg-content1/40 border border-default-200/50 backdrop-blur-xl shadow-sm hover:shadow-md transition-shadow">
+              <Card.Header className="px-8 pt-8 pb-0">
+                <div className="flex items-center gap-2 text-primary">
+                  <Icon icon="lucide:blocks" className="size-4" />
+                  <span className="text-xs font-bold uppercase tracking-widest">Ecosystem</span>
+                </div>
+              </Card.Header>
+              <Card.Content className="px-8 py-8 flex flex-row flex-wrap items-center justify-between gap-6">
+                <div className="flex flex-col gap-2">
+                  <h4 className="text-foreground text-xl font-bold">Seamless Integration</h4>
+                  <p className="text-default-500 text-sm max-w-sm">Built for modern lifestyles and workflows. Connects natively with the tools you love.</p>
+                </div>
+                
+                <div className="flex flex-wrap gap-4">
+                  <Chip variant="secondary" size="lg" className="px-2 pl-3">
+                    <span className="flex items-center">
+                      <Icon icon="lucide:dumbbell" className="size-4 mr-2"/>
+                      <span>Fitness</span>
+                    </span>
+                  </Chip>
+                  <Chip variant="secondary" size="lg" className="px-2 pl-3">
+                    <span className="flex items-center">
+                      <Icon icon="lucide:music" className="size-4 mr-2"/>
+                      <span>Music</span>
+                    </span>
+                  </Chip>
+                  <Chip variant="secondary" size="lg" className="px-2 pl-3">
+                    <span className="flex items-center">
+                      <Icon icon="lucide:gamepad-2" className="size-4 mr-2"/>
+                      <span>Gaming</span>
+                    </span>
+                  </Chip>
+                  <Chip variant="secondary" size="lg" className="px-2 pl-3">
+                    <span className="flex items-center">
+                      <Icon icon="lucide:code-2" className="size-4 mr-2"/>
+                      <span>Coding</span>
+                    </span>
+                  </Chip>
+                </div>
+              </Card.Content>
+            </Card>
+          </motion.div>
+
+        </motion.div>
+
+      </main>
     </div>
   );
 }

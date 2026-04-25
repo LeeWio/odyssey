@@ -1,6 +1,6 @@
 "use client";
 
-import { ComboBox, ListBox } from "@heroui/react";
+import { ComboBox, ListBox, Input } from "@heroui/react";
 
 import * as React from "react";
 import type { TComboboxInputElement, TMentionElement } from "platejs";
@@ -85,7 +85,7 @@ export function MentionInputElement(props: PlateElementProps<TComboboxInputEleme
       >
         <ComboBox.InputGroup className="bg-surface-secondary border-border/50 focus-within:border-primary h-7 min-h-7 rounded-md border px-1 shadow-none transition-colors">
           <div className="text-muted-foreground flex items-center px-1 text-xs font-bold">@</div>
-          <ComboBox.Input
+          <Input
             placeholder="mention..."
             className="h-full bg-transparent px-1 py-0 text-sm outline-none"
           />

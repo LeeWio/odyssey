@@ -75,7 +75,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.4, // 更短的时间，更利落
-      ease: [0.16, 1, 0.3, 1], // 保持高级曲线
+      ease: [0.16, 1, 0.3, 1] as const, // 保持高级曲线
     },
   },
 };
