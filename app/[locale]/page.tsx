@@ -37,14 +37,6 @@ export default function Home() {
       animate="visible"
       variants={containerVariants}
     >
-      <motion.div variants={itemVariants} className="mb-8">
-        <Chip variant="secondary" color="accent" size="sm">
-          <span className="text-[10px] font-semibold tracking-widest uppercase">
-            Odyssey Framework
-          </span>
-        </Chip>
-      </motion.div>
-
       <motion.h1
         variants={itemVariants}
         className="text-foreground text-[4rem] leading-[1.05] font-extrabold tracking-tight md:text-[7rem] lg:text-[9rem]"
