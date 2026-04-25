@@ -104,21 +104,21 @@ export default function Home() {
         variants={itemVariants}
         className="relative z-10 mt-12 flex flex-wrap justify-center gap-4"
       >
-        <Chip variant="secondary" color="default" size="md">
+        <Chip variant="secondary" color="accent" size="md">
           <span className="text-default-500 flex items-center gap-2 font-medium">
-            <Icon icon="lucide:target" className="size-4" />
+            <Icon icon="lucide:target" className="text-accent size-4" />
             <span>Intention</span>
           </span>
         </Chip>
         <Chip variant="secondary" color="default" size="md">
           <span className="text-default-500 flex items-center gap-2 font-medium">
-            <Icon icon="lucide:settings-2" className="size-4" />
+            <Icon icon="lucide:settings-2" className="text-success size-4" />
             <span>Execution</span>
           </span>
         </Chip>
         <Chip variant="secondary" color="default" size="md">
           <span className="text-default-500 flex items-center gap-2 font-medium">
-            <Icon icon="lucide:sparkles" className="size-4" />
+            <Icon icon="lucide:sparkles" className="text-warning size-4" />
             <span>Excellence</span>
           </span>
         </Chip>
