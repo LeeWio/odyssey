@@ -16,27 +16,41 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+    transition: { staggerChildren: 0.15, delayChildren: 0.3 },
   },
 };
 
 const itemVariants = {
-  hidden: { x: -40, opacity: 0 },
+  hidden: { y: 30, opacity: 0, filter: "blur(12px)" },
   visible: {
-    x: 0,
+    y: 0,
     opacity: 1,
-    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const },
+    filter: "blur(0px)",
+    transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] as const },
   },
 };
 
 export default function Home() {
   return (
     <motion.main
-      className="selection:bg-primary/20 relative z-10 mx-auto flex min-h-screen w-full flex-col items-center justify-center px-6 text-center font-sans md:px-12"
+      className="selection:bg-primary/20 relative z-10 mx-auto flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-6 text-center font-sans md:px-12"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
+      {/* Cinematic Ambient Glow - Dormant Breathing */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <motion.div
+          animate={{ scale: [1, 1.05, 1], opacity: [0.2, 0.4, 0.2] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          className="bg-primary/5 absolute top-[-10%] left-1/2 h-[800px] w-[800px] -translate-x-1/2 rounded-full blur-[120px]"
+        />
+        <motion.div
+          animate={{ scale: [1, 1.02, 1], opacity: [0.1, 0.3, 0.1] }}
+          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="bg-accent/5 absolute top-[20%] right-[-5%] h-[600px] w-[600px] rounded-full blur-[120px]"
+        />
+      </div>
       <motion.h1
         variants={itemVariants}
         className="text-foreground text-[4rem] leading-[1.05] font-extrabold tracking-tight md:text-[7rem] lg:text-[9rem]"
