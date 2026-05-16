@@ -1,22 +1,13 @@
-"use client";
+'use client'
 
-import {
-  Display,
-  Moon,
-  Sun,
-  Clock,
-  FileText,
-  Gear,
-  Magnifier,
-  Persons,
-  Sparkles,
-} from "@gravity-ui/icons";
+import { Display, Moon, Sun, Clock, FileText, Gear, Magnifier, Persons, Sparkles } from "@gravity-ui/icons";
 import { Kbd, Button, Chip, CloseButton } from "@heroui/react";
 import { useState } from "react";
 import { Navbar as HerouiNavbar, Segment, Command, EmptyState } from "@heroui-pro/react";
 import { SearchIcon } from "./icons";
-import { useHotkeys } from "react-hotkeys-hook";
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useTheme } from "next-themes";
+import { useMounted } from "@/hooks/use-mounted";
 
 const BrandLogo = () => (
   <svg fill="none" height="22" viewBox="0 0 83 26" xmlns="http://www.w3.org/2000/svg">
@@ -173,8 +164,9 @@ export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const { theme, setTheme } = useTheme();
+  const mounted = useMounted();
 
-  useHotkeys("mod+k", (e) => {
+  useHotkeys('mod+k', (e) => {
     e.preventDefault();
     setIsOpen((prev) => !prev);
   });
@@ -206,12 +198,7 @@ export const Navbar = () => {
           </HerouiNavbar.Content>
           <HerouiNavbar.Spacer />
           <HerouiNavbar.Content className="hidden md:flex">
-            <Button
-              variant="tertiary"
-              onPress={() => setIsOpen(true)}
-              size="sm"
-              className="text-muted"
-            >
+            <Button variant="tertiary" onPress={() => setIsOpen(true)} size="sm" className="text-muted">
               <SearchIcon />
               Search docs…
               <Kbd>
@@ -230,13 +217,7 @@ export const Navbar = () => {
               </Command.Backdrop>
             </Command>
 
-            <Segment
-              selectedKey={theme}
-              onSelectionChange={(key) => setTheme(String(key))}
-              className="gap-0"
-              defaultSelectedKey="system"
-              size="sm"
-            >
+            <Segment selectedKey={mounted ? theme : "system"} onSelectionChange={(key) => setTheme(String(key))} className="gap-0" defaultSelectedKey="system" size="sm">
               <Segment.Item aria-label="Light" className="size-[28px] px-0" id="light">
                 <Sun className="size-3.5" />
               </Segment.Item>
@@ -267,4 +248,4 @@ export const Navbar = () => {
       </HerouiNavbar>
     </div>
   );
-};
+}
