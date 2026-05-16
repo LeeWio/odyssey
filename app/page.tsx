@@ -1,5 +1,4 @@
-import { Button } from "@heroui/react";
 
 export default function Home() {
-  return <Button variant="secondary">asdfas</Button>;
+  return <div className="h-screen bg-amber-400">asdfas</div>;
 }

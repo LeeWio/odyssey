@@ -166,74 +166,26 @@ export const Navbar = () => {
   const { theme, setTheme } = useTheme();
   const mounted = useMounted();
 
+  console.log(theme)
+
   useHotkeys('mod+k', (e) => {
     e.preventDefault();
     setIsOpen((prev) => !prev);
   });
 
   return (
-    <div className="border-border w-full overflow-hidden rounded-xl border">
-      <HerouiNavbar position="static" shouldBlockScroll={false}>
-        <HerouiNavbar.Header>
-          <HerouiNavbar.MenuToggle className="md:hidden" />
-          <HerouiNavbar.Brand>
-            <BrandLogo />
-            <span className="sr-only">HeroUI</span>
-          </HerouiNavbar.Brand>
-          <HerouiNavbar.Content className="hidden gap-0 md:flex">
-            {navItems.map((item) => (
-              <HerouiNavbar.Item
-                key={item.href}
-                className="px-2"
-                href={item.href}
-                isCurrent={item.href === currentItem}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setCurrentItem(item.href);
-                }}
-              >
-                {item.label}
-              </HerouiNavbar.Item>
-            ))}
-          </HerouiNavbar.Content>
-          <HerouiNavbar.Spacer />
-          <HerouiNavbar.Content className="hidden md:flex">
-            <Button variant="tertiary" onPress={() => setIsOpen(true)} size="sm" className="text-muted">
-              <SearchIcon />
-              Search docs…
-              <Kbd>
-                <Kbd.Abbr keyValue="command" />
-                <Kbd.Content>K</Kbd.Content>
-              </Kbd>
-            </Button>
-
-            <Command>
-              <Command.Backdrop isOpen={isOpen} onOpenChange={setIsOpen} variant="transparent">
-                <Command.Container size="lg">
-                  <Command.Dialog>
-                    <CommandPalette />
-                  </Command.Dialog>
-                </Command.Container>
-              </Command.Backdrop>
-            </Command>
-
-            <Segment selectedKey={mounted ? theme : "system"} onSelectionChange={(key) => setTheme(String(key))} className="gap-0" defaultSelectedKey="system" size="sm">
-              <Segment.Item aria-label="Light" className="size-[28px] px-0" id="light">
-                <Sun className="size-3.5" />
-              </Segment.Item>
-              <Segment.Item aria-label="Dark" className="size-[28px] px-0" id="dark">
-                <Moon className="size-3.5" />
-              </Segment.Item>
-              <Segment.Item aria-label="System" className="size-[28px] px-0" id="system">
-                <Display className="size-3.5" />
-              </Segment.Item>
-            </Segment>
-          </HerouiNavbar.Content>
-        </HerouiNavbar.Header>
-        <HerouiNavbar.Menu>
+    <HerouiNavbar position="static" shouldBlockScroll={false}>
+      <HerouiNavbar.Header>
+        <HerouiNavbar.MenuToggle className="md:hidden" />
+        <HerouiNavbar.Brand>
+          <BrandLogo />
+          <span className="sr-only">HeroUI</span>
+        </HerouiNavbar.Brand>
+        <HerouiNavbar.Content className="hidden gap-0 md:flex">
           {navItems.map((item) => (
-            <HerouiNavbar.MenuItem
+            <HerouiNavbar.Item
               key={item.href}
+              className="px-2"
               href={item.href}
               isCurrent={item.href === currentItem}
               onClick={(e) => {
@@ -242,10 +194,58 @@ export const Navbar = () => {
               }}
             >
               {item.label}
-            </HerouiNavbar.MenuItem>
+            </HerouiNavbar.Item>
           ))}
-        </HerouiNavbar.Menu>
-      </HerouiNavbar>
-    </div>
+        </HerouiNavbar.Content>
+        <HerouiNavbar.Spacer />
+        <HerouiNavbar.Content className="hidden md:flex">
+          <Button variant="tertiary" onPress={() => setIsOpen(true)} size="sm" className="text-muted">
+            <SearchIcon />
+            Search docs…
+            <Kbd>
+              <Kbd.Abbr keyValue="command" />
+              <Kbd.Content>K</Kbd.Content>
+            </Kbd>
+          </Button>
+
+          <Command>
+            <Command.Backdrop isOpen={isOpen} onOpenChange={setIsOpen} variant="transparent">
+              <Command.Container size="lg">
+                <Command.Dialog>
+                  <CommandPalette />
+                </Command.Dialog>
+              </Command.Container>
+            </Command.Backdrop>
+          </Command>
+
+          <Segment selectedKey={mounted ? theme : "system"} onSelectionChange={(key) => setTheme(String(key))} className="gap-0" defaultSelectedKey="system" size="sm">
+            <Segment.Item aria-label="Light" className="size-[28px] px-0" id="light">
+              <Sun className="size-3.5" />
+            </Segment.Item>
+            <Segment.Item aria-label="Dark" className="size-[28px] px-0" id="dark">
+              <Moon className="size-3.5" />
+            </Segment.Item>
+            <Segment.Item aria-label="System" className="size-[28px] px-0" id="system">
+              <Display className="size-3.5" />
+            </Segment.Item>
+          </Segment>
+        </HerouiNavbar.Content>
+      </HerouiNavbar.Header>
+      <HerouiNavbar.Menu>
+        {navItems.map((item) => (
+          <HerouiNavbar.MenuItem
+            key={item.href}
+            href={item.href}
+            isCurrent={item.href === currentItem}
+            onClick={(e) => {
+              e.preventDefault();
+              setCurrentItem(item.href);
+            }}
+          >
+            {item.label}
+          </HerouiNavbar.MenuItem>
+        ))}
+      </HerouiNavbar.Menu>
+    </HerouiNavbar>
   );
 }

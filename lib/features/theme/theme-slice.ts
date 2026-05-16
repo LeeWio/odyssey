@@ -7,7 +7,7 @@ export interface ThemeState {
 }
 
 const initialState: ThemeState = {
-  variant: "glass",
+  variant: "brutalism",
 };
 
 export const themeSlice = createSlice({

@@ -7,6 +7,7 @@ import { ThemeProvider } from "./theme-provider";
 import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/navbar";
 import { StoreProvider } from "./store-provider";
+import { ThemeCSSLoader } from "@/components/theme-css-loader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,7 +55,8 @@ export default function RootLayout({
       >
         <StoreProvider>
           <ThemeProvider>
-            <div className="relative flex flex-col h-screen">
+            <ThemeCSSLoader />
+            <div className="relative flex flex-col h-screen ">
               <Navbar />
               <main className="w-full flex-grow">{children}</main>
               <footer className="w-full flex items-center justify-center py-3">
