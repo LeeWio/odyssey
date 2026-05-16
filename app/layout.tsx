@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import clsx from "clsx";
+import { cookies, headers } from 'next/headers';
 import { fontSans } from "@/config/fonts";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
@@ -8,6 +9,8 @@ import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/navbar";
 import { StoreProvider } from "./store-provider";
 import { ThemeCSSLoader } from "@/components/theme-css-loader";
+import { IntlProvider } from "./intl-provider";
+import { getMessages } from "next-intl/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,13 +40,21 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+ // Get the user's preferred language from the Accept-Language header.
+  // You could also get this from a database, URL param, etc.
+  const acceptLanguage = (await headers()).get('accept-language');
+  const lang = acceptLanguage?.split(/[,;]/)[0] || 'en-US';
+
+  const messages = await getMessages({ locale: lang });
+
   return (
     <html
+      lang={lang}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
@@ -53,26 +64,28 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <StoreProvider>
-          <ThemeProvider>
-            <ThemeCSSLoader />
-            <div className="relative flex flex-col h-screen ">
-              <Navbar />
-              <main className="w-full flex-grow">{children}</main>
-              <footer className="w-full flex items-center justify-center py-3">
-                <a
-                  className="flex items-center gap-1 text-current no-underline"
-                  href="https://heroui.com?utm_source=next-app-template"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <span className="text-muted">Powered by</span>
-                  <p className="text-accent">HeroUI</p>
-                </a>
-              </footer>
-            </div>
-          </ThemeProvider>
-        </StoreProvider>
+        <IntlProvider lang={lang} messages={messages}>
+          <StoreProvider>
+            <ThemeProvider>
+              <ThemeCSSLoader />
+              <div className="relative flex flex-col h-screen ">
+                <Navbar />
+                <main className="w-full flex-grow">{children}</main>
+                <footer className="w-full flex items-center justify-center py-3">
+                  <a
+                    className="flex items-center gap-1 text-current no-underline"
+                    href="https://heroui.com?utm_source=next-app-template"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <span className="text-muted">Powered by</span>
+                    <p className="text-accent">HeroUI</p>
+                  </a>
+                </footer>
+              </div>
+            </ThemeProvider>
+          </StoreProvider>
+        </IntlProvider>
       </body>
     </html>
   );
