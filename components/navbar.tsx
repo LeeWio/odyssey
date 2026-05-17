@@ -1,9 +1,7 @@
 "use client";
 
 import {
-  Display,
-  Moon,
-  Sun,
+
   Clock,
   FileText,
   Gear,
@@ -15,10 +13,9 @@ import {
 
 import { Kbd, Button, Chip, CloseButton, Avatar, Dropdown, Label } from "@heroui/react";
 import { useRef, useState } from "react";
-import { Navbar as HerouiNavbar, Segment, Command, EmptyState } from "@heroui-pro/react";
+import { Navbar as HerouiNavbar, Command, EmptyState } from "@heroui-pro/react";
 import { SearchIcon } from "./icons";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useTheme } from "next-themes";
 import { useMounted } from "@/hooks/use-mounted";
 import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
@@ -190,7 +187,6 @@ export const Navbar = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUprOpen, setIsSignUpOpen] = useState(false);
 
-  const { theme, setTheme } = useTheme();
   const mounted = useMounted();
   const router = useRouter();
 
@@ -266,24 +262,6 @@ export const Navbar = () => {
                 </Command.Container>
               </Command.Backdrop>
             </Command>
-
-            <Segment
-              selectedKey={mounted ? theme : "system"}
-              onSelectionChange={(key) => setTheme(String(key))}
-              className="gap-0"
-              defaultSelectedKey="system"
-              size="sm"
-            >
-              <Segment.Item aria-label="Light" className="size-[28px] px-0" id="light">
-                <Sun className="size-3.5" />
-              </Segment.Item>
-              <Segment.Item aria-label="Dark" className="size-[28px] px-0" id="dark">
-                <Moon className="size-3.5" />
-              </Segment.Item>
-              <Segment.Item aria-label="System" className="size-[28px] px-0" id="system">
-                <Display className="size-3.5" />
-              </Segment.Item>
-            </Segment>
 
             {mounted ? (
               isAuthenticated ? (

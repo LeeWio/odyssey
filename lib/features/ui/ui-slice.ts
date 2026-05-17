@@ -25,10 +25,6 @@ export const uiSlice = createSlice({
   name: "ui",
   initialState,
   reducers: {
-    // Sheet actions
-    setSheetOpen: (state, action: PayloadAction<boolean>) => {
-      state.sheet.isOpen = action.payload;
-    },
     toggleSheet: (state) => {
       state.sheet.isOpen = !state.sheet.isOpen;
     },
