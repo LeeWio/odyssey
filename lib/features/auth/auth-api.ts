@@ -16,10 +16,21 @@ const AuthResponseSchema = z.object({
   roles: z.array(z.string()),
 });
 
+export const OtpSendRequestSchema = z.object({
+  email: z.string().email(),
+});
+
+export const OtpLoginRequestSchema = z.object({
+  email: z.string().email(),
+  code: z.string().min(1),
+});
+
 /**
  * --- TypeScript Interfaces (Inferred from Schemas) ---
  */
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
+export type OtpSendRequest = z.infer<typeof OtpSendRequestSchema>;
+export type OtpLoginRequest = z.infer<typeof OtpLoginRequestSchema>;
 
 export interface LoginRequest {
   username: string;
@@ -52,13 +63,53 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data));
+          toast.success(`Welcome back!`);
+        } catch (error: any) {
+          const errorMessage = error?.error || "Login failed";
+          toast.danger(typeof errorMessage === "string" ? errorMessage : "Login failed");
+        }
+      },
+      invalidatesTags: ["User", "Post", "Moment", "Project", "Menu", "Dashboard"],
+    }),
 
-          // Trigger menu/permission fetch immediately after login
+    /**
+     * Send OTP to Email.
+     */
+    sendOtp: builder.mutation<ApiResponse<void>, OtpSendRequest>({
+      query: (body) => ({
+        url: "/api/v1/auth/otp/send",
+        method: "POST",
+        body,
+      }),
+      // @ts-ignore
+      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      transformResponse: (response: ApiResponse<void>) => response,
+      transformErrorResponse: transformError,
+    }),
+
+    /**
+     * Login with OTP.
+     */
+    loginWithOtp: builder.mutation<AuthResponse, OtpLoginRequest>({
+      query: (body) => ({
+        url: "/api/v1/auth/otp/login",
+        method: "POST",
+        body,
+      }),
+      // @ts-ignore
+      rawResponseSchema: ApiResponseSchema(AuthResponseSchema),
+      transformResponse: (response: ApiResponse<AuthResponse>) => response.data,
+      transformErrorResponse: transformError,
+      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCredentials(data));
+          
+          // Trigger menu/permission fetch
           const menuResult = await dispatch(
             permissionApi.endpoints.getCurrentUserMenus.initiate()
           ).unwrap();
 
-          // Recursively extract permission codes from menu tree
           const extractPermissions = (menus: any[]): string[] => {
             let codes: string[] = [];
             menus.forEach((m) => {
@@ -70,11 +121,9 @@ export const authApi = baseApi.injectEndpoints({
 
           const permissions = extractPermissions(menuResult);
           dispatch(setPermissions(permissions));
-
+          
           toast.success(`Welcome back!`);
         } catch (error: any) {
-          // In onQueryStarted, if queryFulfilled rejects, the error object
-          // contains the value returned by transformErrorResponse in its 'error' property.
           const errorMessage = error?.error || "Login failed";
           toast.danger(typeof errorMessage === "string" ? errorMessage : "Login failed");
         }
@@ -85,7 +134,7 @@ export const authApi = baseApi.injectEndpoints({
     /**
      * Register a new user account.
      */
-    register: builder.mutation<void, RegisterRequest>({
+    register: builder.mutation<ApiResponse<void>, RegisterRequest>({
       query: (userData) => ({
         url: "/api/v1/auth/register",
         method: "POST",
@@ -93,12 +142,12 @@ export const authApi = baseApi.injectEndpoints({
       }),
       // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
-      transformResponse: (response: ApiResponse<void>) => response.data,
+      transformResponse: (response: ApiResponse<void>) => response,
       transformErrorResponse: transformError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
-          await queryFulfilled;
-          toast.success("Account created successfully!");
+          const { data } = await queryFulfilled;
+          toast.success(data.message || "Account created successfully!");
         } catch (error) {
           if (typeof error === "string") {
             toast.danger(error);
@@ -112,4 +161,9 @@ export const authApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const { 
+  useLoginMutation, 
+  useRegisterMutation, 
+  useSendOtpMutation, 
+  useLoginWithOtpMutation 
+} = authApi;

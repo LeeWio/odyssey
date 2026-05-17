@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, TextField, Label, Input, Button, Separator, Alert, Typography } from "@heroui/react";
+import { Card, TextField, Label, Input, Button, Separator, Alert, Typography, Table, Chip } from "@heroui/react";
 import {
   useLoginMutation,
   useRegisterMutation,
@@ -10,6 +10,7 @@ import {
   selectCurrentUser,
   removeCredentials,
 } from "@/lib/features/auth";
+import { useGetAllUsersQuery } from "@/lib/features/user";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { useMounted } from "@/hooks/use-mounted";
 
@@ -24,6 +25,8 @@ export default function AuthTestPage() {
 
   const [login, { isLoading: isLoginLoading, error: loginError }] = useLoginMutation();
   const [register, { isLoading: isRegLoading, error: regError }] = useRegisterMutation();
+
+  const { data: users, isLoading: isUsersLoading } = useGetAllUsersQuery(undefined, { skip: !mounted });
 
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -167,6 +170,61 @@ export default function AuthTestPage() {
           </Card.Content>
         </Card>
       </div>
+
+      {/* Users List Table */}
+      <Card>
+        <Card.Header>
+          <Card.Title>All Registered Users</Card.Title>
+        </Card.Header>
+        <Card.Content>
+          {isUsersLoading ? (
+            <p className="text-sm text-muted-foreground">Loading users...</p>
+          ) : (
+            <Table aria-label="Users list table">
+              <Table.ScrollContainer>
+                <Table.Content>
+                  <Table.Header>
+                    <Table.Column isRowHeader>ID</Table.Column>
+                    <Table.Column>USERNAME</Table.Column>
+                    <Table.Column>EMAIL</Table.Column>
+                    <Table.Column>STATUS</Table.Column>
+                    <Table.Column>ROLES</Table.Column>
+                  </Table.Header>
+                  <Table.Body renderEmptyState={() => "No users found."}>
+                    {(users || []).map((userItem) => (
+                      <Table.Row key={userItem.id}>
+                        <Table.Cell>{userItem.id}</Table.Cell>
+                        <Table.Cell className="font-medium">{userItem.username}</Table.Cell>
+                        <Table.Cell>{userItem.email}</Table.Cell>
+                        <Table.Cell>
+                          <Chip 
+                            size="sm" 
+                            color={
+                              userItem.status === "ACTIVE" ? "success" :
+                              userItem.status === "BANNED" || userItem.status === "DELETED" ? "danger" :
+                              "warning"
+                            }
+                            variant="soft"
+                          >
+                            {userItem.status}
+                          </Chip>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <div className="flex gap-1 flex-wrap">
+                            {userItem.roles?.map(r => (
+                              <Chip key={r} size="sm" variant="soft" color="accent">{r}</Chip>
+                            ))}
+                          </div>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Content>
+              </Table.ScrollContainer>
+            </Table>
+          )}
+        </Card.Content>
+      </Card>
 
       <Separator className="my-4" />
 

@@ -12,3 +12,4 @@ export * from "./moment";
 export * from "./comment";
 export * from "./dashboard";
 export * from "./permission";
+export * from "./user";
