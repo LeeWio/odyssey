@@ -11,8 +11,11 @@ import {
   Input,
   InputOTP,
   REGEXP_ONLY_DIGITS,
+  FieldError,
   Alert,
+  Spinner,
 } from "@heroui/react";
+import { Envelope } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -22,6 +25,7 @@ import { useSendOtpMutation, useLoginWithOtpMutation } from "@/lib/features/auth
 export interface LogInProps {
   isOpen?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
+  onSwitchToSignUp?: () => void;
 }
 
 const orDivider = (
@@ -32,17 +36,17 @@ const orDivider = (
   </div>
 );
 
-export const LogIn = ({ isOpen, onOpenChange }: LogInProps) => {
+export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) => {
   const router = useRouter();
-  
+
   // State: 1 = email + socials, 2 = otp input
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
-  
+
   const containerRef = useRef<HTMLDivElement>(null);
   const { contextSafe } = useGSAP({ scope: containerRef });
-  
+
   const [sendOtp, { isLoading: isSendingOtp }] = useSendOtpMutation();
   const [loginWithOtp, { isLoading: isLoggingIn, error: loginError }] = useLoginWithOtpMutation();
 
@@ -57,7 +61,7 @@ export const LogIn = ({ isOpen, onOpenChange }: LogInProps) => {
       setEmailError("Please enter a valid email address");
       return;
     }
-    
+
     try {
       await sendOtp({ email }).unwrap();
       setEmailError("");
@@ -70,11 +74,12 @@ export const LogIn = ({ isOpen, onOpenChange }: LogInProps) => {
   const handleOTPComplete = async (otp: string) => {
     try {
       await loginWithOtp({ email, code: otp }).unwrap();
-      
+
       if (onOpenChange) {
         onOpenChange(false);
       }
-      
+      router.push("/");
+
       // Reset state for next time modal opens
       setTimeout(() => {
         setStep(1);
@@ -92,7 +97,7 @@ export const LogIn = ({ isOpen, onOpenChange }: LogInProps) => {
       setStep(nextStep);
       return;
     }
-    
+
     gsap.to(activeViewChildren, {
       autoAlpha: 0,
       y: nextStep > step ? -10 : 10,
@@ -116,16 +121,19 @@ export const LogIn = ({ isOpen, onOpenChange }: LogInProps) => {
 
   return (
     <Modal>
-      <Modal.Backdrop isOpen={isOpen} onOpenChange={(open) => {
-        if (onOpenChange) onOpenChange(open);
-        if (!open) {
-          setTimeout(() => {
-             setStep(1);
-             setEmail("");
-             setEmailError("");
-          }, 300);
-        }
-      }}>
+      <Modal.Backdrop
+        isOpen={isOpen}
+        onOpenChange={(open) => {
+          if (onOpenChange) onOpenChange(open);
+          if (!open) {
+            setTimeout(() => {
+              setStep(1);
+              setEmail("");
+              setEmailError("");
+            }, 300);
+          }
+        }}
+      >
         <Modal.Container>
           <Modal.Dialog className="sm:max-w-[360px]">
             <Modal.CloseTrigger />
@@ -135,31 +143,30 @@ export const LogIn = ({ isOpen, onOpenChange }: LogInProps) => {
             <Modal.Body className="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div ref={containerRef}>
                 {step === 1 ? (
-                  <form
-                    className="flex flex-col gap-y-3 w-full"
-                    onSubmit={handleEmailSubmit}
-                  >
+                  <form className="flex flex-col gap-y-3 w-full" onSubmit={handleEmailSubmit}>
                     <div className="flex flex-col gap-4">
-                      <TextField
-                        isRequired
-                        name="email"
-                        type="email"
-                        isInvalid={!!emailError}
-                      >
+                      <TextField isRequired name="email" type="email" isInvalid={!!emailError}>
                         <Label>Email</Label>
-                        <Input 
-                          placeholder="john@example.com" 
+                        <Input
+                          placeholder="john@example.com"
                           value={email}
                           onChange={(e) => {
                             setEmail(e.target.value);
                             if (emailError) setEmailError("");
                           }}
                         />
-                        {emailError && <div className="text-tiny text-danger mt-1">{emailError}</div>}
+                        {emailError && (
+                          <div className="text-tiny text-danger mt-1">{emailError}</div>
+                        )}
                       </TextField>
 
                       <Button fullWidth type="submit" variant="primary" isPending={isSendingOtp}>
-                        Send Code
+                        {({ isPending }) => (
+                          <>
+                            {isPending && <Spinner color="current" size="sm" />}
+                            Send Code
+                          </>
+                        )}
                       </Button>
                     </div>
                     {orDivider}
@@ -175,7 +182,7 @@ export const LogIn = ({ isOpen, onOpenChange }: LogInProps) => {
                     </div>
                     <p className="text-small mt-3 text-center">
                       Need to create an account?&nbsp;
-                      <Link href="/register" className="no-underline">
+                      <Link className="no-underline cursor-pointer" onPress={onSwitchToSignUp}>
                         Sign Up
                       </Link>
                     </p>
@@ -183,7 +190,7 @@ export const LogIn = ({ isOpen, onOpenChange }: LogInProps) => {
                 ) : (
                   <div className="flex flex-col gap-y-3">
                     <div className="flex flex-col gap-2 mb-2">
-                       {loginError && (
+                      {loginError && (
                         <Alert status="danger">
                           <Alert.Indicator />
                           <Alert.Content>
@@ -193,13 +200,14 @@ export const LogIn = ({ isOpen, onOpenChange }: LogInProps) => {
                         </Alert>
                       )}
                       <p className="text-sm text-default-500">
-                        Enter the 6-digit verification code sent to <span className="font-medium text-foreground">{email}</span>.
+                        Enter the 6-digit verification code sent to{" "}
+                        <span className="font-medium text-foreground">{email}</span>.
                       </p>
                     </div>
-                    
+
                     <div className="flex justify-center w-full mb-4">
-                      <InputOTP 
-                        maxLength={6} 
+                      <InputOTP
+                        maxLength={6}
                         pattern={REGEXP_ONLY_DIGITS}
                         onComplete={handleOTPComplete}
                         isDisabled={isLoggingIn}
@@ -218,7 +226,12 @@ export const LogIn = ({ isOpen, onOpenChange }: LogInProps) => {
                       </InputOTP>
                     </div>
 
-                    <Button fullWidth variant="secondary" onPress={() => switchStep(1)} isDisabled={isLoggingIn}>
+                    <Button
+                      fullWidth
+                      variant="secondary"
+                      onPress={() => switchStep(1)}
+                      isDisabled={isLoggingIn}
+                    >
                       <Icon icon="solar:arrow-left-linear" />
                       Change Email
                     </Button>

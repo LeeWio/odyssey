@@ -1,7 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, TextField, Label, Input, Button, Separator, Alert, Typography, Table, Chip } from "@heroui/react";
+import {
+  Card,
+  TextField,
+  Label,
+  Input,
+  Button,
+  Separator,
+  Alert,
+  Typography,
+  Table,
+  Chip,
+} from "@heroui/react";
 import {
   useLoginMutation,
   useRegisterMutation,
@@ -26,7 +37,9 @@ export default function AuthTestPage() {
   const [login, { isLoading: isLoginLoading, error: loginError }] = useLoginMutation();
   const [register, { isLoading: isRegLoading, error: regError }] = useRegisterMutation();
 
-  const { data: users, isLoading: isUsersLoading } = useGetAllUsersQuery(undefined, { skip: !mounted });
+  const { data: users, isLoading: isUsersLoading } = useGetAllUsersQuery(undefined, {
+    skip: !mounted,
+  });
 
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -197,12 +210,14 @@ export default function AuthTestPage() {
                         <Table.Cell className="font-medium">{userItem.username}</Table.Cell>
                         <Table.Cell>{userItem.email}</Table.Cell>
                         <Table.Cell>
-                          <Chip 
-                            size="sm" 
+                          <Chip
+                            size="sm"
                             color={
-                              userItem.status === "ACTIVE" ? "success" :
-                              userItem.status === "BANNED" || userItem.status === "DELETED" ? "danger" :
-                              "warning"
+                              userItem.status === "ACTIVE"
+                                ? "success"
+                                : userItem.status === "BANNED" || userItem.status === "DELETED"
+                                  ? "danger"
+                                  : "warning"
                             }
                             variant="soft"
                           >
@@ -211,8 +226,10 @@ export default function AuthTestPage() {
                         </Table.Cell>
                         <Table.Cell>
                           <div className="flex gap-1 flex-wrap">
-                            {userItem.roles?.map(r => (
-                              <Chip key={r} size="sm" variant="soft" color="accent">{r}</Chip>
+                            {userItem.roles?.map((r) => (
+                              <Chip key={r} size="sm" variant="soft" color="accent">
+                                {r}
+                              </Chip>
                             ))}
                           </div>
                         </Table.Cell>

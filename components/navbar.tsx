@@ -10,21 +10,10 @@ import {
   Magnifier,
   Persons,
   Sparkles,
-  ArrowRightFromSquare
+  ArrowRightFromSquare,
 } from "@gravity-ui/icons";
 
-import {
-  Kbd,
-  Button,
-  Chip,
-  CloseButton,
-  Avatar,
-  Modal,
-  Typography,
-  ButtonGroup,
-  Dropdown,
-  Label,
-} from "@heroui/react";
+import { Kbd, Button, Chip, CloseButton, Avatar, Dropdown, Label } from "@heroui/react";
 import { useState } from "react";
 import { Navbar as HerouiNavbar, Segment, Command, EmptyState } from "@heroui-pro/react";
 import { SearchIcon } from "./icons";
@@ -37,10 +26,8 @@ import {
   selectIsAuthenticated,
   selectCurrentUser,
   selectUserEmail,
-  selectUserRoles,
   removeCredentials,
 } from "@/lib/features/auth";
-import { ArrowRightToSquare, PersonPlus } from "@gravity-ui/icons";
 import { SignUp } from "./auth/sign-up";
 import { LogIn } from "./auth/log-in";
 
@@ -215,6 +202,18 @@ export const Navbar = () => {
     setIsOpen((prev) => !prev);
   });
 
+  const handleSwitchToSignUp = () => {
+    console.log("Switching to Sign Up");
+    setIsLoginOpen(false);
+    setTimeout(() => setIsSignUpOpen(true), 300);
+  };
+
+  const handleSwitchToLogIn = () => {
+    console.log("Switching to Log In");
+    setIsSignUpOpen(false);
+    setTimeout(() => setIsLoginOpen(true), 300);
+  };
+
   return (
     <>
       <HerouiNavbar position="static" shouldBlockScroll={false}>
@@ -289,22 +288,28 @@ export const Navbar = () => {
                 <Dropdown>
                   <Dropdown.Trigger className="rounded-full">
                     <Avatar size="sm">
-                      <Avatar.Fallback delayMs={600}>{username ? username.charAt(0).toUpperCase() : "U"}</Avatar.Fallback>
+                      <Avatar.Fallback delayMs={600}>
+                        {username ? username.charAt(0).toUpperCase() : "U"}
+                      </Avatar.Fallback>
                     </Avatar>
                   </Dropdown.Trigger>
                   <Dropdown.Popover>
                     <div className="px-3 pt-3 pb-1">
                       <div className="flex items-center gap-2">
                         <Avatar size="sm">
-                          <Avatar.Fallback delayMs={600}>{username ? username.charAt(0).toUpperCase() : "U"}</Avatar.Fallback>
+                          <Avatar.Fallback delayMs={600}>
+                            {username ? username.charAt(0).toUpperCase() : "U"}
+                          </Avatar.Fallback>
                         </Avatar>
                         <div className="flex flex-col gap-0">
                           <p className="text-sm leading-5 font-medium">{username}</p>
-                          <p className="text-xs leading-none text-muted">{email || "User Account"}</p>
+                          <p className="text-xs leading-none text-muted">
+                            {email || "User Account"}
+                          </p>
                         </div>
                       </div>
                     </div>
-                    <Dropdown.Menu 
+                    <Dropdown.Menu
                       onAction={(key) => {
                         if (key === "logout") {
                           dispatch(removeCredentials());
@@ -350,7 +355,9 @@ export const Navbar = () => {
               )
             ) : (
               <div className="flex items-center gap-3 ml-2 opacity-0">
-                <Button size="sm" variant="ghost">Log in</Button>
+                <Button size="sm" variant="ghost">
+                  Log in
+                </Button>
                 <Button size="sm">Sign up</Button>
               </div>
             )}
@@ -372,8 +379,16 @@ export const Navbar = () => {
           ))}
         </HerouiNavbar.Menu>
       </HerouiNavbar>
-      <SignUp isOpen={isSignUprOpen} onOpenChange={setIsSignUpOpen} />
-      <LogIn isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
+      <SignUp
+        isOpen={isSignUprOpen}
+        onOpenChange={setIsSignUpOpen}
+        onSwitchToLogIn={handleSwitchToLogIn}
+      />
+      <LogIn
+        isOpen={isLoginOpen}
+        onOpenChange={setIsLoginOpen}
+        onSwitchToSignUp={handleSwitchToSignUp}
+      />
     </>
   );
 };

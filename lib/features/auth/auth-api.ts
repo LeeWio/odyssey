@@ -104,7 +104,7 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data));
-          
+
           // Trigger menu/permission fetch
           const menuResult = await dispatch(
             permissionApi.endpoints.getCurrentUserMenus.initiate()
@@ -121,7 +121,7 @@ export const authApi = baseApi.injectEndpoints({
 
           const permissions = extractPermissions(menuResult);
           dispatch(setPermissions(permissions));
-          
+
           toast.success(`Welcome back!`);
         } catch (error: any) {
           const errorMessage = error?.error || "Login failed";
@@ -161,9 +161,9 @@ export const authApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { 
-  useLoginMutation, 
-  useRegisterMutation, 
-  useSendOtpMutation, 
-  useLoginWithOtpMutation 
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useSendOtpMutation,
+  useLoginWithOtpMutation,
 } = authApi;

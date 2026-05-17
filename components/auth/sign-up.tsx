@@ -13,6 +13,7 @@ import {
   InputGroup,
   FieldError,
   Alert,
+  Spinner,
 } from "@heroui/react";
 import { Envelope, Eye, EyeSlash } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
@@ -24,6 +25,7 @@ import { useRegisterMutation, useLoginMutation } from "@/lib/features/auth";
 export interface SignUpProps {
   isOpen?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
+  onSwitchToLogIn?: () => void;
 }
 
 const orDivider = (
@@ -34,13 +36,13 @@ const orDivider = (
   </div>
 );
 
-export const SignUp = ({ isOpen, onOpenChange }: SignUpProps) => {
+export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) => {
   const router = useRouter();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { contextSafe } = useGSAP({ scope: containerRef });
-  
+
   const [register, { isLoading: isRegLoading }] = useRegisterMutation();
   const [login] = useLoginMutation();
 
@@ -48,19 +50,19 @@ export const SignUp = ({ isOpen, onOpenChange }: SignUpProps) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
-    
+
     try {
-      await register({ 
+      await register({
         username: data.username as string,
-        email: data.email as string, 
-        password: data.password as string 
+        email: data.email as string,
+        password: data.password as string,
       }).unwrap();
-      
+
       if (onOpenChange) {
         onOpenChange(false);
       }
       // Optionally redirect or show a success state telling them to wait for approval
-      // router.push("/"); 
+      // router.push("/");
     } catch {
       // Error is handled by RTK query state
     }
@@ -72,7 +74,7 @@ export const SignUp = ({ isOpen, onOpenChange }: SignUpProps) => {
       setIsFormVisible(showForm);
       return;
     }
-    
+
     gsap.to(activeViewChildren, {
       autoAlpha: 0,
       y: showForm ? -10 : 10,
@@ -106,10 +108,7 @@ export const SignUp = ({ isOpen, onOpenChange }: SignUpProps) => {
             <Modal.Body className="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div ref={containerRef}>
                 {isFormVisible ? (
-                  <div
-                    className="flex flex-col gap-y-3"
-                    onSubmit={(e) => e.preventDefault()}
-                  >
+                  <div className="flex flex-col gap-y-3">
                     <Form
                       validationBehavior="native"
                       className="flex flex-col gap-4"
@@ -178,7 +177,11 @@ export const SignUp = ({ isOpen, onOpenChange }: SignUpProps) => {
                               variant="ghost"
                               onPress={() => setIsVisible(!isVisible)}
                             >
-                              {isVisible ? <Eye className="size-4" /> : <EyeSlash className="size-4" />}
+                              {isVisible ? (
+                                <Eye className="size-4" />
+                              ) : (
+                                <EyeSlash className="size-4" />
+                              )}
                             </Button>
                           </InputGroup.Suffix>
                         </InputGroup>
@@ -186,7 +189,12 @@ export const SignUp = ({ isOpen, onOpenChange }: SignUpProps) => {
                       </TextField>
 
                       <Button fullWidth type="submit" variant="primary" isPending={isRegLoading}>
-                        Sign Up
+                        {({ isPending }) => (
+                          <>
+                            {isPending && <Spinner color="current" size="sm" />}
+                            Sign Up
+                          </>
+                        )}
                       </Button>
                     </Form>
                     {orDivider}
@@ -196,9 +204,7 @@ export const SignUp = ({ isOpen, onOpenChange }: SignUpProps) => {
                     </Button>
                   </div>
                 ) : (
-                  <div
-                    className="flex flex-col gap-y-2 w-full"
-                  >
+                  <div className="flex flex-col gap-y-2 w-full">
                     <Button fullWidth variant="primary" onPress={() => switchView(true)}>
                       <Envelope className="pointer-events-none text-2xl" />
                       Sign up with Email
@@ -216,7 +222,7 @@ export const SignUp = ({ isOpen, onOpenChange }: SignUpProps) => {
                     </div>
                     <p className="text-small mt-3 text-center">
                       Already have an account?&nbsp;
-                      <Link href="#" className="no-underline">
+                      <Link className="no-underline cursor-pointer" onPress={onSwitchToLogIn}>
                         Log In
                       </Link>
                     </p>
