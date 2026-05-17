@@ -1,7 +1,7 @@
 "use client";
 
-import { I18nProvider } from '@heroui/react';
-import { NextIntlClientProvider } from 'next-intl'
+import { I18nProvider } from "@heroui/react";
+import { NextIntlClientProvider } from "next-intl";
 
 export function IntlProvider({ lang, children, messages }) {
   return (

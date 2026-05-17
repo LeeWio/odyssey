@@ -6,6 +6,30 @@
     "blog": "Blog"
   },
   "Index": {
-    "title": "Welcome to Odyssey"
+    "title": "don't just do it",
+    "subtitle": "do it well",
+    "philosophy": {
+      "intent": {
+        "title": "The Silent 'Why'",
+        "desc": "Action without purpose is noise. Every line, every pixel must have a reason to exist.",
+        "metric": "Intentionality Index"
+      },
+      "precision": {
+        "title": "The 1% Obsession",
+        "desc": "Excellence lives in the unseen. The last 1% of polish is where the soul enters the machine.",
+        "metric": "Refinement Cycles"
+      },
+      "integrity": {
+        "title": "Standard Over Speed",
+        "desc": "Never trade pride for pace. Your work is a mirror of your character when no one is looking.",
+        "metric": "Consistency Streak"
+      },
+      "legacy": {
+        "title": "Echoes in Time",
+        "desc": "Build what outlasts your presence. Quality is the only thing that survives the test of time.",
+        "metric": "Lifetime Impact"
+      }
+    },
+    "quote": "Excellence is not an act, but a habit. It is the result of high intention and intelligent execution."
   }
 }

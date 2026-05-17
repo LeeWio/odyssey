@@ -20,7 +20,7 @@ export function ThemeCSSLoader() {
 
     if (link) {
       if (link.getAttribute("href") !== cssHref) {
-         link.href = cssHref;
+        link.href = cssHref;
       }
     } else {
       link = document.createElement("link");

@@ -1,13 +1,48 @@
-'use client'
+"use client";
 
-import { Display, Moon, Sun, Clock, FileText, Gear, Magnifier, Persons, Sparkles } from "@gravity-ui/icons";
-import { Kbd, Button, Chip, CloseButton } from "@heroui/react";
+import {
+  Display,
+  Moon,
+  Sun,
+  Clock,
+  FileText,
+  Gear,
+  Magnifier,
+  Persons,
+  Sparkles,
+  ArrowRightFromSquare
+} from "@gravity-ui/icons";
+
+import {
+  Kbd,
+  Button,
+  Chip,
+  CloseButton,
+  Avatar,
+  Modal,
+  Typography,
+  ButtonGroup,
+  Dropdown,
+  Label,
+} from "@heroui/react";
 import { useState } from "react";
 import { Navbar as HerouiNavbar, Segment, Command, EmptyState } from "@heroui-pro/react";
 import { SearchIcon } from "./icons";
-import { useHotkeys } from 'react-hotkeys-hook';
+import { useHotkeys } from "react-hotkeys-hook";
 import { useTheme } from "next-themes";
 import { useMounted } from "@/hooks/use-mounted";
+import { useRouter } from "next/navigation";
+import { useAppSelector, useAppDispatch } from "@/lib/hooks";
+import {
+  selectIsAuthenticated,
+  selectCurrentUser,
+  selectUserEmail,
+  selectUserRoles,
+  removeCredentials,
+} from "@/lib/features/auth";
+import { ArrowRightToSquare, PersonPlus } from "@gravity-ui/icons";
+import { SignUp } from "./auth/sign-up";
+import { LogIn } from "./auth/log-in";
 
 const BrandLogo = () => (
   <svg fill="none" height="22" viewBox="0 0 83 26" xmlns="http://www.w3.org/2000/svg">
@@ -163,29 +198,168 @@ export const Navbar = () => {
   const [currentItem, setCurrentItem] = useState("#docs");
   const [isOpen, setIsOpen] = useState(false);
 
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUprOpen, setIsSignUpOpen] = useState(false);
+
   const { theme, setTheme } = useTheme();
   const mounted = useMounted();
+  const router = useRouter();
 
-  console.log(theme)
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const username = useAppSelector(selectCurrentUser);
+  const email = useAppSelector(selectUserEmail);
 
-  useHotkeys('mod+k', (e) => {
+  useHotkeys("mod+k", (e) => {
     e.preventDefault();
     setIsOpen((prev) => !prev);
   });
 
   return (
-    <HerouiNavbar position="static" shouldBlockScroll={false}>
-      <HerouiNavbar.Header>
-        <HerouiNavbar.MenuToggle className="md:hidden" />
-        <HerouiNavbar.Brand>
-          <BrandLogo />
-          <span className="sr-only">HeroUI</span>
-        </HerouiNavbar.Brand>
-        <HerouiNavbar.Content className="hidden gap-0 md:flex">
+    <>
+      <HerouiNavbar position="static" shouldBlockScroll={false}>
+        <HerouiNavbar.Header>
+          <HerouiNavbar.MenuToggle className="md:hidden" />
+          <HerouiNavbar.Brand>
+            <BrandLogo />
+            <span className="sr-only">HeroUI</span>
+          </HerouiNavbar.Brand>
+          <HerouiNavbar.Content className="hidden gap-0 md:flex">
+            {navItems.map((item) => (
+              <HerouiNavbar.Item
+                key={item.href}
+                className="px-2"
+                href={item.href}
+                isCurrent={item.href === currentItem}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentItem(item.href);
+                }}
+              >
+                {item.label}
+              </HerouiNavbar.Item>
+            ))}
+          </HerouiNavbar.Content>
+          <HerouiNavbar.Spacer />
+          <HerouiNavbar.Content className="hidden md:flex">
+            <Button
+              variant="tertiary"
+              onPress={() => setIsOpen(true)}
+              size="sm"
+              className="text-muted"
+            >
+              <SearchIcon />
+              Search docs…
+              <Kbd>
+                <Kbd.Abbr keyValue="command" />
+                <Kbd.Content>K</Kbd.Content>
+              </Kbd>
+            </Button>
+
+            <Command>
+              <Command.Backdrop isOpen={isOpen} onOpenChange={setIsOpen} variant="transparent">
+                <Command.Container size="lg">
+                  <Command.Dialog>
+                    <CommandPalette />
+                  </Command.Dialog>
+                </Command.Container>
+              </Command.Backdrop>
+            </Command>
+
+            <Segment
+              selectedKey={mounted ? theme : "system"}
+              onSelectionChange={(key) => setTheme(String(key))}
+              className="gap-0"
+              defaultSelectedKey="system"
+              size="sm"
+            >
+              <Segment.Item aria-label="Light" className="size-[28px] px-0" id="light">
+                <Sun className="size-3.5" />
+              </Segment.Item>
+              <Segment.Item aria-label="Dark" className="size-[28px] px-0" id="dark">
+                <Moon className="size-3.5" />
+              </Segment.Item>
+              <Segment.Item aria-label="System" className="size-[28px] px-0" id="system">
+                <Display className="size-3.5" />
+              </Segment.Item>
+            </Segment>
+
+            {mounted ? (
+              isAuthenticated ? (
+                <Dropdown>
+                  <Dropdown.Trigger className="rounded-full">
+                    <Avatar size="sm">
+                      <Avatar.Fallback delayMs={600}>{username ? username.charAt(0).toUpperCase() : "U"}</Avatar.Fallback>
+                    </Avatar>
+                  </Dropdown.Trigger>
+                  <Dropdown.Popover>
+                    <div className="px-3 pt-3 pb-1">
+                      <div className="flex items-center gap-2">
+                        <Avatar size="sm">
+                          <Avatar.Fallback delayMs={600}>{username ? username.charAt(0).toUpperCase() : "U"}</Avatar.Fallback>
+                        </Avatar>
+                        <div className="flex flex-col gap-0">
+                          <p className="text-sm leading-5 font-medium">{username}</p>
+                          <p className="text-xs leading-none text-muted">{email || "User Account"}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <Dropdown.Menu 
+                      onAction={(key) => {
+                        if (key === "logout") {
+                          dispatch(removeCredentials());
+                        }
+                      }}
+                    >
+                      <Dropdown.Item id="dashboard" textValue="Dashboard">
+                        <Label>Dashboard</Label>
+                      </Dropdown.Item>
+                      <Dropdown.Item id="profile" textValue="Profile">
+                        <Label>Profile</Label>
+                      </Dropdown.Item>
+                      <Dropdown.Item id="settings" textValue="Settings">
+                        <div className="flex w-full items-center justify-between gap-2">
+                          <Label>Settings</Label>
+                          <Gear className="size-3.5 text-muted" />
+                        </div>
+                      </Dropdown.Item>
+                      <Dropdown.Item id="new-project" textValue="New project">
+                        <div className="flex w-full items-center justify-between gap-2">
+                          <Label>Create Team</Label>
+                          <Persons className="size-3.5 text-muted" />
+                        </div>
+                      </Dropdown.Item>
+                      <Dropdown.Item id="logout" textValue="Logout" variant="danger">
+                        <div className="flex w-full items-center justify-between gap-2">
+                          <Label>Log Out</Label>
+                          <ArrowRightFromSquare className="size-3.5 text-danger" />
+                        </div>
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown.Popover>
+                </Dropdown>
+              ) : (
+                <div className="flex items-center gap-3 ml-2">
+                  <Button size="sm" variant="ghost" onPress={() => setIsLoginOpen(!isLoginOpen)}>
+                    Log in
+                  </Button>
+                  <Button size="sm" onPress={() => setIsSignUpOpen(!isSignUprOpen)}>
+                    Sign up
+                  </Button>
+                </div>
+              )
+            ) : (
+              <div className="flex items-center gap-3 ml-2 opacity-0">
+                <Button size="sm" variant="ghost">Log in</Button>
+                <Button size="sm">Sign up</Button>
+              </div>
+            )}
+          </HerouiNavbar.Content>
+        </HerouiNavbar.Header>
+        <HerouiNavbar.Menu>
           {navItems.map((item) => (
-            <HerouiNavbar.Item
+            <HerouiNavbar.MenuItem
               key={item.href}
-              className="px-2"
               href={item.href}
               isCurrent={item.href === currentItem}
               onClick={(e) => {
@@ -194,58 +368,12 @@ export const Navbar = () => {
               }}
             >
               {item.label}
-            </HerouiNavbar.Item>
+            </HerouiNavbar.MenuItem>
           ))}
-        </HerouiNavbar.Content>
-        <HerouiNavbar.Spacer />
-        <HerouiNavbar.Content className="hidden md:flex">
-          <Button variant="tertiary" onPress={() => setIsOpen(true)} size="sm" className="text-muted">
-            <SearchIcon />
-            Search docs…
-            <Kbd>
-              <Kbd.Abbr keyValue="command" />
-              <Kbd.Content>K</Kbd.Content>
-            </Kbd>
-          </Button>
-
-          <Command>
-            <Command.Backdrop isOpen={isOpen} onOpenChange={setIsOpen} variant="transparent">
-              <Command.Container size="lg">
-                <Command.Dialog>
-                  <CommandPalette />
-                </Command.Dialog>
-              </Command.Container>
-            </Command.Backdrop>
-          </Command>
-
-          <Segment selectedKey={mounted ? theme : "system"} onSelectionChange={(key) => setTheme(String(key))} className="gap-0" defaultSelectedKey="system" size="sm">
-            <Segment.Item aria-label="Light" className="size-[28px] px-0" id="light">
-              <Sun className="size-3.5" />
-            </Segment.Item>
-            <Segment.Item aria-label="Dark" className="size-[28px] px-0" id="dark">
-              <Moon className="size-3.5" />
-            </Segment.Item>
-            <Segment.Item aria-label="System" className="size-[28px] px-0" id="system">
-              <Display className="size-3.5" />
-            </Segment.Item>
-          </Segment>
-        </HerouiNavbar.Content>
-      </HerouiNavbar.Header>
-      <HerouiNavbar.Menu>
-        {navItems.map((item) => (
-          <HerouiNavbar.MenuItem
-            key={item.href}
-            href={item.href}
-            isCurrent={item.href === currentItem}
-            onClick={(e) => {
-              e.preventDefault();
-              setCurrentItem(item.href);
-            }}
-          >
-            {item.label}
-          </HerouiNavbar.MenuItem>
-        ))}
-      </HerouiNavbar.Menu>
-    </HerouiNavbar>
+        </HerouiNavbar.Menu>
+      </HerouiNavbar>
+      <SignUp isOpen={isSignUprOpen} onOpenChange={setIsSignUpOpen} />
+      <LogIn isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
+    </>
   );
-}
+};

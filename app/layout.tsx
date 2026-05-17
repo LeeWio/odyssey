@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import clsx from "clsx";
-import { cookies, headers } from 'next/headers';
+import { headers } from "next/headers";
 import { fontSans } from "@/config/fonts";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
@@ -11,6 +11,7 @@ import { StoreProvider } from "./store-provider";
 import { ThemeCSSLoader } from "@/components/theme-css-loader";
 import { IntlProvider } from "./intl-provider";
 import { getMessages } from "next-intl/server";
+import { Toast } from "@heroui/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,10 +46,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
- // Get the user's preferred language from the Accept-Language header.
+  // Get the user's preferred language from the Accept-Language header.
   // You could also get this from a database, URL param, etc.
-  const acceptLanguage = (await headers()).get('accept-language');
-  const lang = acceptLanguage?.split(/[,;]/)[0] || 'en-US';
+  const acceptLanguage = (await headers()).get("accept-language");
+  const lang = acceptLanguage?.split(/[,;]/)[0] || "en-US";
 
   const messages = await getMessages({ locale: lang });
 
@@ -68,6 +69,7 @@ export default async function RootLayout({
           <StoreProvider>
             <ThemeProvider>
               <ThemeCSSLoader />
+              <Toast.Provider />
               <div className="relative flex flex-col h-screen ">
                 <Navbar />
                 <main className="w-full flex-grow">{children}</main>

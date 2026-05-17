@@ -35,17 +35,17 @@ function BaseThemeApplier() {
 
 export function ThemeProvider({ children, themeProps }: ProvidersProps) {
   const themeVariant = useAppSelector(selectThemeVariant);
-  
+
   const themeValueMap = {
     light: themeVariant === "default" ? "light" : `${themeVariant}-light`,
     dark: themeVariant === "default" ? "dark" : `${themeVariant}-dark`,
   };
 
   return (
-    <NextThemesProvider 
-      attribute="data-theme" 
-      defaultTheme="system" 
-      {...themeProps} 
+    <NextThemesProvider
+      attribute="data-theme"
+      defaultTheme="system"
+      {...themeProps}
       value={themeValueMap}
     >
       <BaseThemeApplier />
