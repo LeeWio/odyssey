@@ -2,7 +2,7 @@
 
 import type { ThemeProviderProps } from "next-themes";
 
-import { selectThemeVariant } from "@/lib/features/theme/theme-slice";
+import { selectThemeVariant } from "@/lib/features/ui";
 
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";

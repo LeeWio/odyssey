@@ -1,4 +1,3 @@
-export * from "./theme";
 export * from "./locale";
 export * from "./auth";
 export * from "./friend-link";
@@ -13,3 +12,4 @@ export * from "./comment";
 export * from "./dashboard";
 export * from "./permission";
 export * from "./user";
+export * from "./ui";

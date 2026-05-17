@@ -14,7 +14,7 @@ import {
 } from "@gravity-ui/icons";
 
 import { Kbd, Button, Chip, CloseButton, Avatar, Dropdown, Label } from "@heroui/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Navbar as HerouiNavbar, Segment, Command, EmptyState } from "@heroui-pro/react";
 import { SearchIcon } from "./icons";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -182,6 +182,8 @@ function CommandPalette() {
 }
 
 export const Navbar = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const [currentItem, setCurrentItem] = useState("#docs");
   const [isOpen, setIsOpen] = useState(false);
 
@@ -216,7 +218,7 @@ export const Navbar = () => {
 
   return (
     <>
-      <HerouiNavbar position="static" shouldBlockScroll={false}>
+      <HerouiNavbar hideOnScroll parentRef={scrollRef} position="sticky" >
         <HerouiNavbar.Header>
           <HerouiNavbar.MenuToggle className="md:hidden" />
           <HerouiNavbar.Brand>

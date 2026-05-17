@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useAppSelector } from "@/lib/hooks";
-import { selectThemeVariant } from "@/lib/features/theme/theme-slice";
+import { selectThemeVariant } from "@/lib/features/ui";
 
 export function ThemeCSSLoader() {
   const themeVariant = useAppSelector(selectThemeVariant);

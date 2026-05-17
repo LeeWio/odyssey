@@ -2,7 +2,7 @@
 
 import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 import { setCredentials, setPermissions, removeCredentials } from "../features/auth/auth-slice";
-import { setThemeVariant } from "../features/theme/theme-slice";
+import { setThemeVariant } from "../features/ui";
 import { setLocale } from "../features/locale/locale-slice";
 import type { RootState } from "../store";
 
