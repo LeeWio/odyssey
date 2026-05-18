@@ -1,6 +1,7 @@
 import { CinematicHero } from "@/components/cinematic-hero";
 import KanbanBoard from "@/components/kanban/kanban-board";
 import { AnimatedTitle } from "@/components/animated-title";
+import { Stocks } from "@/components/dashboard/widgets/stocks";
 
 export default async function Home() {
   return (
@@ -9,6 +10,7 @@ export default async function Home() {
 
       <section className="relative z-10 -mt-20 pb-20 px-6 container mx-auto">
         <div className="flex flex-col gap-8">
+          <Stocks/>
           <header className="flex flex-col gap-2">
             <AnimatedTitle
               text="Operations Center"

@@ -6,7 +6,10 @@ import { Skeleton } from "@heroui/react";
 import { useGetMarketIndicesQuery } from "@/lib/features/market";
 
 export const Stocks = () => {
-    const { data: indices, isLoading } = useGetMarketIndicesQuery();
+    const { data: indices, isLoading } = useGetMarketIndicesQuery(undefined, {
+        pollingInterval: 300000, // 5 minutes
+        refetchOnFocus: true,
+    });
 
     const mapSparkline = (data?: number[]) => {
         if (!data || data.length === 0) return [];
