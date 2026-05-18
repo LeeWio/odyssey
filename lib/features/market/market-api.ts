@@ -16,6 +16,7 @@ export const marketApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getMarketIndices: builder.query<MarketIndexResponse[], void>({
       query: () => "/api/v1/public/market/indices",
+      keepUnusedDataFor: 0,
       // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.array(MarketIndexResponseSchema)),
       transformResponse: (response: ApiResponse<MarketIndexResponse[]>) => response.data || [],

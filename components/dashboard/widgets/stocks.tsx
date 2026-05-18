@@ -2,7 +2,7 @@
 
 import { SquareChartBar, Target, ArrowUp, ArrowDown } from "@gravity-ui/icons";
 import { KPI, TrendChip } from "@heroui-pro/react";
-import { Spinner } from "@heroui/react";
+import { Skeleton } from "@heroui/react";
 import { useGetMarketIndicesQuery } from "@/lib/features/market";
 
 export const Stocks = () => {
@@ -20,7 +20,27 @@ export const Stocks = () => {
     };
 
     if (isLoading) {
-         return <div className="flex h-[150px] w-full items-center justify-center col-span-full"><Spinner /></div>;
+        return (
+            <>
+                {Array.from({ length: 4 }).map((_, index) => (
+                    <KPI key={index}>
+                        <KPI.Header>
+                            <Skeleton className="size-4 rounded-full" />
+                            <Skeleton className="h-4 w-20 rounded" />
+                        </KPI.Header>
+                        <KPI.Content className="grid-cols-[1fr_1fr] items-end">
+                            <div className="flex flex-col gap-2">
+                                <Skeleton className="h-9 w-28 rounded" />
+                                <div className="flex items-center gap-1.5 mt-1">
+                                    <Skeleton className="h-6 w-20 rounded-full" />
+                                </div>
+                            </div>
+                            <Skeleton className="h-[70px] w-full rounded" />
+                        </KPI.Content>
+                    </KPI>
+                ))}
+            </>
+        );
     }
 
     const configs = [
