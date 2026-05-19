@@ -1,7 +1,6 @@
 "use client";
 
 import {
-
   Clock,
   FileText,
   Gear,
@@ -214,7 +213,7 @@ export const Navbar = () => {
 
   return (
     <>
-      <HerouiNavbar hideOnScroll parentRef={scrollRef} position="sticky" >
+      <HerouiNavbar hideOnScroll parentRef={scrollRef} position="sticky">
         <HerouiNavbar.Header>
           <HerouiNavbar.MenuToggle className="md:hidden" />
           <HerouiNavbar.Brand>
