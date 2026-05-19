@@ -4,8 +4,8 @@ import { Sheet } from "@heroui-pro/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { selectIsSheetOpen, toggleSheet } from "@/lib/features/ui";
-import { Surface } from "@heroui/react";
 import { Stocks } from "./widgets/stocks";
+import { AutoplayCarousel } from "./widgets/autoplay-carousel";
 
 export function Dashboard() {
   const isOpen = useAppSelector(selectIsSheetOpen);
@@ -31,7 +31,11 @@ export function Dashboard() {
             <Sheet.Header className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <Stocks />
             </Sheet.Header>
-            <Sheet.Body>{/* Dashboard content goes here */}</Sheet.Body>
+            <Sheet.Body className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 mt-4 auto-rows-[200px]">
+              <div className="col-span-1 sm:col-span-2 row-span-1">
+                <AutoplayCarousel />
+              </div>
+            </Sheet.Body>
             <Sheet.Footer>{/* Footer actions go here */}</Sheet.Footer>
           </Sheet.Dialog>
         </Sheet.Content>

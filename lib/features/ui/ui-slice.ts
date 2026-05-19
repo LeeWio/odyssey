@@ -35,7 +35,7 @@ export const uiSlice = createSlice({
   },
 });
 
-export const { setSheetOpen, toggleSheet, setThemeVariant } = uiSlice.actions;
+export const { toggleSheet, setThemeVariant } = uiSlice.actions;
 
 export const selectIsSheetOpen = (state: RootState) => state.ui.sheet.isOpen;
 export const selectThemeVariant = (state: RootState) => state.ui.theme.variant;
