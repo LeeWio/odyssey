@@ -31,10 +31,8 @@ export function Dashboard() {
             <Sheet.Header className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <Stocks />
             </Sheet.Header>
-            <Sheet.Body className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 mt-4 auto-rows-[200px]">
-              <div className="col-span-1 sm:col-span-2 row-span-1">
-                <AutoplayCarousel />
-              </div>
+            <Sheet.Body className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <AutoplayCarousel />
             </Sheet.Body>
             <Sheet.Footer>{/* Footer actions go here */}</Sheet.Footer>
           </Sheet.Dialog>

@@ -106,7 +106,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
               <Modal.Heading className="mb-4 text-xl font-medium">Sign Up</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div ref={containerRef}>
+              <div ref={containerRef} className="-mx-2 px-2 sm:-mx-3 sm:px-3">
                 {isFormVisible ? (
                   <div className="flex flex-col gap-y-3">
                     <Form
@@ -211,12 +211,12 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                     </Button>
                     {orDivider}
                     <div className="flex flex-col gap-2">
-                      <Button fullWidth variant="tertiary">
+                      <Button fullWidth variant="secondary">
                         <Icon icon="devicon:google" />
                         Sign up with Google
                       </Button>
-                      <Button fullWidth variant="tertiary">
-                        <Icon icon="mdi:github" />
+                      <Button fullWidth variant="secondary">
+                        <Icon icon="devicon:github" />
                         Sign up with Github
                       </Button>
                     </div>

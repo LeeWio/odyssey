@@ -141,7 +141,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
               <Modal.Heading className="mb-4 text-xl font-medium">Log In</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div ref={containerRef}>
+              <div ref={containerRef} className="-mx-2 px-2 sm:-mx-3 sm:px-3">
                 {step === 1 ? (
                   <form className="flex flex-col gap-y-3 w-full" onSubmit={handleEmailSubmit}>
                     <div className="flex flex-col gap-4">
@@ -171,12 +171,12 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                     </div>
                     {orDivider}
                     <div className="flex flex-col gap-2">
-                      <Button fullWidth variant="tertiary">
+                      <Button fullWidth variant="secondary">
                         <Icon icon="devicon:google" />
                         Continue with Google
                       </Button>
-                      <Button fullWidth variant="tertiary">
-                        <Icon icon="mdi:github" />
+                      <Button fullWidth variant="secondary">
+                        <Icon icon="devicon:github" />
                         Continue with Github
                       </Button>
                     </div>
