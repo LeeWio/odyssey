@@ -140,7 +140,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
             <Modal.Header>
               <Modal.Heading className="mb-4 text-xl font-medium">Log In</Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Modal.Body className="scrollbar-none [&::-webkit-scrollbar]:hidden">
               <div ref={containerRef} className="-mx-2 px-2 sm:-mx-3 sm:px-3">
                 {step === 1 ? (
                   <form className="flex flex-col gap-y-3 w-full" onSubmit={handleEmailSubmit}>

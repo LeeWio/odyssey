@@ -100,13 +100,13 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
     <Modal>
       <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
         <Modal.Container>
-          <Modal.Dialog className="sm:max-w-[360px]">
+          <Modal.Dialog className="sm:max-w-90">
             <Modal.CloseTrigger />
             <Modal.Header>
               <Modal.Heading className="mb-4 text-xl font-medium">Sign Up</Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div ref={containerRef} className="-mx-2 px-2 sm:-mx-3 sm:px-3">
+            <Modal.Body className="scrollbar-none [&::-webkit-scrollbar]:hidden">
+              <div ref={containerRef} className="-mx-2 px-2 sm:-mx-3 sm:px-3 ">
                 {isFormVisible ? (
                   <div className="flex flex-col gap-y-3">
                     <Form
