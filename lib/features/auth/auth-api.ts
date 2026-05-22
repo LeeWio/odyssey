@@ -1,9 +1,15 @@
 import { ApiResponse } from "@/types";
-import { baseApi, transformError, ApiResponseSchema } from "../api/base-api";
+import {
+  baseApi,
+  transformError,
+  ApiResponseSchema,
+  getRtkQueryErrorMessage,
+} from "../api/base-api";
 import { setCredentials, setPermissions } from "./auth-slice";
 import { toast } from "@heroui/react";
 import { z } from "zod";
 import { permissionApi } from "../permission/permission-api";
+import type { MenuResponse } from "../permission/permission-api";
 
 /**
  * --- Zod Schemas for Runtime Validation ---
@@ -43,6 +49,24 @@ export interface RegisterRequest {
   password: string;
 }
 
+const extractPermissions = (menus: MenuResponse[]): string[] => {
+  const permissions = new Set<string>();
+
+  const visit = (items: MenuResponse[]) => {
+    for (const item of items) {
+      if (item.permission) {
+        permissions.add(item.permission);
+      }
+      if (item.children?.length) {
+        visit(item.children);
+      }
+    }
+  };
+
+  visit(menus);
+  return Array.from(permissions);
+};
+
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     /**
@@ -54,7 +78,6 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(AuthResponseSchema),
       transformResponse: (response: ApiResponse<AuthResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -64,9 +87,8 @@ export const authApi = baseApi.injectEndpoints({
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data));
           toast.success(`Welcome back!`);
-        } catch (error: any) {
-          const errorMessage = error?.error || "Login failed";
-          toast.danger(typeof errorMessage === "string" ? errorMessage : "Login failed");
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Login failed"));
         }
       },
       invalidatesTags: ["User", "Post", "Moment", "Project", "Menu", "Dashboard"],
@@ -81,7 +103,6 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response,
       transformErrorResponse: transformError,
@@ -96,7 +117,6 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(AuthResponseSchema),
       transformResponse: (response: ApiResponse<AuthResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -110,22 +130,12 @@ export const authApi = baseApi.injectEndpoints({
             permissionApi.endpoints.getCurrentUserMenus.initiate()
           ).unwrap();
 
-          const extractPermissions = (menus: any[]): string[] => {
-            let codes: string[] = [];
-            menus.forEach((m) => {
-              if (m.permission) codes.push(m.permission);
-              if (m.children) codes = [...codes, ...extractPermissions(m.children)];
-            });
-            return Array.from(new Set(codes));
-          };
-
           const permissions = extractPermissions(menuResult);
           dispatch(setPermissions(permissions));
 
           toast.success(`Welcome back!`);
-        } catch (error: any) {
-          const errorMessage = error?.error || "Login failed";
-          toast.danger(typeof errorMessage === "string" ? errorMessage : "Login failed");
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Login failed"));
         }
       },
       invalidatesTags: ["User", "Post", "Moment", "Project", "Menu", "Dashboard"],
@@ -140,7 +150,6 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: userData,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response,
       transformErrorResponse: transformError,
@@ -148,12 +157,8 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           toast.success(data.message || "Account created successfully!");
-        } catch (error) {
-          if (typeof error === "string") {
-            toast.danger(error);
-          } else {
-            toast.danger("Registration failed");
-          }
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Registration failed"));
         }
       },
     }),

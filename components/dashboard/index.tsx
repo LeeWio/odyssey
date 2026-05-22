@@ -9,7 +9,7 @@ import { selectIsSheetOpen, toggleSheet } from "@/lib/features/ui";
 import { Stocks } from "./widgets/stocks";
 import { AutoplayCarousel } from "./widgets/autoplay-carousel";
 import { useThemeSwitch } from "../theme-switch";
-import { ListBox, Surface } from "@heroui/react"
+import { ListBox } from "@heroui/react"
 import { useState } from "react";
 
 

@@ -35,7 +35,6 @@ export const fileApi = baseApi.injectEndpoints({
           // and generate the boundary if the body is a FormData object.
         };
       },
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(FileResponseSchema),
       transformResponse: (response: ApiResponse<FileResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -57,7 +56,6 @@ export const fileApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/files/${fileName}`,
         method: "DELETE",
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformError,

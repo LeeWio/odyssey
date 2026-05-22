@@ -1,5 +1,10 @@
 import { ApiResponse } from "@/types";
-import { baseApi, transformError, ApiResponseSchema } from "../api/base-api";
+import {
+  baseApi,
+  transformError,
+  ApiResponseSchema,
+  getRtkQueryErrorMessage,
+} from "../api/base-api";
 import { toast } from "@heroui/react";
 import { z } from "zod";
 
@@ -30,7 +35,10 @@ export type MenuResponse = z.infer<typeof baseSchema> & {
 const baseSchema = z.object(baseMenuFields);
 
 export const MenuResponseSchema: z.ZodType<MenuResponse> = baseSchema.extend({
-  children: z.lazy(() => z.array(MenuResponseSchema).nullable().default([])),
+  children: z
+    .lazy(() => z.array(MenuResponseSchema))
+    .nullable()
+    .transform((children) => children ?? []),
 });
 
 /**
@@ -55,7 +63,6 @@ export const permissionApi = baseApi.injectEndpoints({
      */
     getCurrentUserMenus: builder.query<MenuResponse[], void>({
       query: () => "/api/v1/admin/menus/current",
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.array(MenuResponseSchema)),
       transformResponse: (response: ApiResponse<MenuResponse[]>) => response.data || [],
       transformErrorResponse: transformError,
@@ -67,7 +74,6 @@ export const permissionApi = baseApi.injectEndpoints({
      */
     getAdminMenuTree: builder.query<MenuResponse[], void>({
       query: () => "/api/v1/admin/menus/tree",
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.array(MenuResponseSchema)),
       transformResponse: (response: ApiResponse<MenuResponse[]>) => response.data || [],
       transformErrorResponse: transformError,
@@ -79,10 +85,10 @@ export const permissionApi = baseApi.injectEndpoints({
      */
     getPublicNavigation: builder.query<MenuResponse[], void>({
       query: () => "/api/v1/public/menus/navigation",
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.array(MenuResponseSchema)),
       transformResponse: (response: ApiResponse<MenuResponse[]>) => response.data || [],
       transformErrorResponse: transformError,
+      providesTags: ["Menu"],
     }),
 
     /**
@@ -94,7 +100,6 @@ export const permissionApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(MenuResponseSchema),
       transformResponse: (response: ApiResponse<MenuResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -102,11 +107,8 @@ export const permissionApi = baseApi.injectEndpoints({
         try {
           await queryFulfilled;
           toast.success("Menu item created successfully!");
-        } catch (error: any) {
-          const errorMessage = error?.error || "Failed to create menu item";
-          toast.danger(
-            typeof errorMessage === "string" ? errorMessage : "Failed to create menu item"
-          );
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Failed to create menu item"));
         }
       },
       invalidatesTags: ["Menu"],
@@ -121,7 +123,6 @@ export const permissionApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(MenuResponseSchema),
       transformResponse: (response: ApiResponse<MenuResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -129,11 +130,8 @@ export const permissionApi = baseApi.injectEndpoints({
         try {
           await queryFulfilled;
           toast.success("Menu item updated successfully!");
-        } catch (error: any) {
-          const errorMessage = error?.error || "Failed to update menu item";
-          toast.danger(
-            typeof errorMessage === "string" ? errorMessage : "Failed to update menu item"
-          );
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Failed to update menu item"));
         }
       },
       invalidatesTags: ["Menu"],
@@ -147,7 +145,6 @@ export const permissionApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/menus/${id}`,
         method: "DELETE",
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformError,
@@ -155,11 +152,8 @@ export const permissionApi = baseApi.injectEndpoints({
         try {
           await queryFulfilled;
           toast.success("Menu item deleted successfully!");
-        } catch (error: any) {
-          const errorMessage = error?.error || "Failed to delete menu item";
-          toast.danger(
-            typeof errorMessage === "string" ? errorMessage : "Failed to delete menu item"
-          );
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Failed to delete menu item"));
         }
       },
       invalidatesTags: ["Menu"],

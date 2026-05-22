@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   Button,
   Modal,
@@ -11,13 +11,10 @@ import {
   Input,
   InputOTP,
   REGEXP_ONLY_DIGITS,
-  FieldError,
   Alert,
   Spinner,
 } from "@heroui/react";
-import { Envelope } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
-import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useRouter } from "next/navigation";
 import { useSendOtpMutation, useLoginWithOtpMutation } from "@/lib/features/auth";
@@ -91,22 +88,24 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
     }
   };
 
-  const switchStep = contextSafe((nextStep: 1 | 2) => {
+  const switchStep = useCallback((nextStep: 1 | 2) => {
     const activeViewChildren = containerRef.current?.firstElementChild?.children;
     if (!activeViewChildren || activeViewChildren.length === 0) {
       setStep(nextStep);
       return;
     }
 
-    gsap.to(activeViewChildren, {
-      autoAlpha: 0,
-      y: nextStep > step ? -10 : 10,
-      duration: 0.2,
-      ease: "power2.in",
-      stagger: 0.02,
-      onComplete: () => setStep(nextStep),
-    });
-  });
+    contextSafe(() => {
+      gsap.to(activeViewChildren, {
+        autoAlpha: 0,
+        y: nextStep > step ? -10 : 10,
+        duration: 0.2,
+        ease: "power2.in",
+        stagger: 0.02,
+        onComplete: () => setStep(nextStep),
+      });
+    })();
+  }, [contextSafe, step]);
 
   useGSAP(() => {
     const activeViewChildren = containerRef.current?.firstElementChild?.children;

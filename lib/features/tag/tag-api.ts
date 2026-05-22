@@ -30,7 +30,6 @@ export const tagApi = baseApi.injectEndpoints({
      */
     getAllTags: builder.query<TagResponse[], void>({
       query: () => "/api/v1/admin/tags",
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.array(TagResponseSchema)),
       transformResponse: (response: ApiResponse<TagResponse[]>) => response.data,
       transformErrorResponse: transformError,
@@ -49,7 +48,6 @@ export const tagApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(TagResponseSchema),
       transformResponse: (response: ApiResponse<TagResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -73,7 +71,6 @@ export const tagApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(TagResponseSchema),
       transformResponse: (response: ApiResponse<TagResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -99,7 +96,6 @@ export const tagApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/tags/${id}`,
         method: "DELETE",
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformError,

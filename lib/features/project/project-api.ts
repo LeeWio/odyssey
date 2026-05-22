@@ -1,5 +1,11 @@
 import { ApiResponse, Pageable, PageResult } from "@/types";
-import { baseApi, transformError, ApiResponseSchema, PageResultSchema } from "../api/base-api";
+import {
+  baseApi,
+  transformError,
+  ApiResponseSchema,
+  PageResultSchema,
+  getRtkQueryErrorMessage,
+} from "../api/base-api";
 import { toast } from "@heroui/react";
 import { z } from "zod";
 
@@ -46,7 +52,6 @@ export const projectApi = baseApi.injectEndpoints({
      */
     getPublicProjects: builder.query<ProjectResponse[], void>({
       query: () => "/api/v1/public/projects",
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.array(ProjectResponseSchema).nullable().default([])),
       transformResponse: (response: ApiResponse<ProjectResponse[]>) => response.data || [],
       transformErrorResponse: transformError,
@@ -67,7 +72,6 @@ export const projectApi = baseApi.injectEndpoints({
         url: "/api/v1/admin/projects",
         params: { page, size },
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PageResultSchema(ProjectResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<ProjectResponse>>) => response.data,
       transformErrorResponse: transformError,
@@ -85,7 +89,6 @@ export const projectApi = baseApi.injectEndpoints({
      */
     getProjectById: builder.query<ProjectResponse, number>({
       query: (id) => `/api/v1/admin/projects/${id}`,
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(ProjectResponseSchema),
       transformResponse: (response: ApiResponse<ProjectResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -101,7 +104,6 @@ export const projectApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(ProjectResponseSchema),
       transformResponse: (response: ApiResponse<ProjectResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -109,11 +111,8 @@ export const projectApi = baseApi.injectEndpoints({
         try {
           await queryFulfilled;
           toast.success("Project created successfully!");
-        } catch (err: any) {
-          const errorMessage = err?.error || "Failed to create project";
-          toast.danger(
-            typeof errorMessage === "string" ? errorMessage : "Failed to create project"
-          );
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Failed to create project"));
         }
       },
       invalidatesTags: [
@@ -131,7 +130,6 @@ export const projectApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(ProjectResponseSchema),
       transformResponse: (response: ApiResponse<ProjectResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -139,11 +137,8 @@ export const projectApi = baseApi.injectEndpoints({
         try {
           await queryFulfilled;
           toast.success("Project updated successfully!");
-        } catch (err: any) {
-          const errorMessage = err?.error || "Failed to update project";
-          toast.danger(
-            typeof errorMessage === "string" ? errorMessage : "Failed to update project"
-          );
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Failed to update project"));
         }
       },
       invalidatesTags: (_result, _error, { id }) => [
@@ -166,11 +161,8 @@ export const projectApi = baseApi.injectEndpoints({
         try {
           await queryFulfilled;
           toast.success("Project deleted successfully");
-        } catch (err: any) {
-          const errorMessage = err?.error || "Failed to delete project";
-          toast.danger(
-            typeof errorMessage === "string" ? errorMessage : "Failed to delete project"
-          );
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Failed to delete project"));
         }
       },
       invalidatesTags: [

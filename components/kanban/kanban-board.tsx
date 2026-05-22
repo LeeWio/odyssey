@@ -10,7 +10,7 @@ import {
 } from "@heroui-pro/react";
 import { Button, Tooltip } from "@heroui/react";
 import { Plus, Ellipsis } from "@gravity-ui/icons";
-import { KanbanBoard as IKanbanBoard, KanbanTask, KanbanColumn as IKanbanColumn } from "./type";
+import { KanbanTask, KanbanColumn as IKanbanColumn } from "./type";
 import { MOCK_TASKS, MOCK_BOARD } from "./mock-data";
 import { TaskCard } from "./task-card";
 
@@ -145,7 +145,7 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({ column, kanban }) 
 };
 
 export default function KanbanBoard() {
-  const kanban = useKanban<KanbanTask>({
+  const kanban = useKanban < KanbanTask > ({
     initialItems: MOCK_TASKS,
     getColumn: (item) => item.columnId,
     setColumn: (item, columnId) => ({ ...item, columnId }),

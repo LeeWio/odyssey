@@ -21,8 +21,7 @@ export const marketApi = baseApi.injectEndpoints({
         url: "/api/v1/public/market/indices",
         params: { period: period || "1D" },
       }),
-      keepUnusedDataFor: 0,
-      // @ts-ignore
+      keepUnusedDataFor: 60,
       rawResponseSchema: ApiResponseSchema(z.array(MarketIndexResponseSchema)),
       transformResponse: (response: ApiResponse<MarketIndexResponse[]>) => response.data || [],
       transformErrorResponse: transformError,
@@ -35,8 +34,7 @@ export const marketApi = baseApi.injectEndpoints({
         url: `/api/v1/public/market/indices/${symbol}`,
         params: { period: period || "1D" },
       }),
-      keepUnusedDataFor: 0,
-      // @ts-ignore
+      keepUnusedDataFor: 60,
       rawResponseSchema: ApiResponseSchema(MarketIndexResponseSchema),
       transformResponse: (response: ApiResponse<MarketIndexResponse>) => response.data!,
       transformErrorResponse: transformError,

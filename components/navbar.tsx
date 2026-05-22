@@ -16,7 +16,6 @@ import { Navbar as HerouiNavbar, Command, EmptyState } from "@heroui-pro/react";
 import { SearchIcon } from "./icons";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useMounted } from "@/hooks/use-mounted";
-import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import {
   selectIsAuthenticated,
@@ -24,6 +23,7 @@ import {
   selectUserEmail,
   removeCredentials,
 } from "@/lib/features/auth";
+import { baseApi } from "@/lib/features/api/base-api";
 import { SignUp } from "./auth/sign-up";
 import { LogIn } from "./auth/log-in";
 
@@ -187,7 +187,6 @@ export const Navbar = () => {
   const [isSignUprOpen, setIsSignUpOpen] = useState(false);
 
   const mounted = useMounted();
-  const router = useRouter();
 
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -292,6 +291,7 @@ export const Navbar = () => {
                       onAction={(key) => {
                         if (key === "logout") {
                           dispatch(removeCredentials());
+                          dispatch(baseApi.util.resetApiState());
                         }
                       }}
                     >

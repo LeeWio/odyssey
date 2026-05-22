@@ -46,7 +46,6 @@ export const friendLinkApi = baseApi.injectEndpoints({
      */
     getPublicFriendLinks: builder.query<FriendLinkResponse[], void>({
       query: () => "/api/v1/public/friend-links",
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.array(FriendLinkResponseSchema)),
       transformResponse: (response: ApiResponse<FriendLinkResponse[]>) => response.data,
       transformErrorResponse: transformError,
@@ -62,7 +61,6 @@ export const friendLinkApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformError,
@@ -93,7 +91,6 @@ export const friendLinkApi = baseApi.injectEndpoints({
           ...(sort && { sort: sort.join(",") }),
         },
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PageResultSchema(FriendLinkResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<FriendLinkResponse>>) => response.data,
       transformErrorResponse: transformError,
@@ -105,7 +102,6 @@ export const friendLinkApi = baseApi.injectEndpoints({
      */
     getAdminFriendLinkById: builder.query<FriendLinkResponse, number>({
       query: (id) => `/api/v1/admin/friend-links/${id}`,
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(FriendLinkResponseSchema),
       transformResponse: (response: ApiResponse<FriendLinkResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -121,7 +117,6 @@ export const friendLinkApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(FriendLinkResponseSchema),
       transformResponse: (response: ApiResponse<FriendLinkResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -138,7 +133,6 @@ export const friendLinkApi = baseApi.injectEndpoints({
           method: "PUT",
           body,
         }),
-        // @ts-ignore
         rawResponseSchema: ApiResponseSchema(FriendLinkResponseSchema),
         transformResponse: (response: ApiResponse<FriendLinkResponse>) => response.data,
         transformErrorResponse: transformError,
@@ -155,7 +149,6 @@ export const friendLinkApi = baseApi.injectEndpoints({
         method: "PATCH",
         params: { status },
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformError,
@@ -182,7 +175,6 @@ export const friendLinkApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/friend-links/${id}`,
         method: "DELETE",
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformError,

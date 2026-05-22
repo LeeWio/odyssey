@@ -20,7 +20,7 @@ export const AnalyticsOverviewResponseSchema = z.object({
   yesterdayPv: z.number(),
   yesterdayUv: z.number(),
   pvGrowthRate: z.number(),
-  topContent: z.array(z.record(z.any())),
+  topContent: z.array(z.record(z.string(), z.any())),
 });
 
 /**
@@ -36,7 +36,6 @@ export const dashboardApi = baseApi.injectEndpoints({
      */
     getDashboardStats: builder.query<DashboardStatsResponse, void>({
       query: () => "/api/v1/admin/dashboard/stats",
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(DashboardStatsResponseSchema),
       transformResponse: (response: ApiResponse<DashboardStatsResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -48,7 +47,6 @@ export const dashboardApi = baseApi.injectEndpoints({
      */
     getAnalyticsOverview: builder.query<AnalyticsOverviewResponse, void>({
       query: () => "/api/v1/admin/analytics/overview",
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(AnalyticsOverviewResponseSchema),
       transformResponse: (response: ApiResponse<AnalyticsOverviewResponse>) => response.data,
       transformErrorResponse: transformError,

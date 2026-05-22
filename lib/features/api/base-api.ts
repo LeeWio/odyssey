@@ -46,10 +46,34 @@ export const transformError = (error: FetchBaseQueryError): string => {
         return "Too many requests. Please slow down and try again later.";
       case "FETCH_ERROR":
         return "Network error. Please check your connection.";
+      case "PARSING_ERROR":
+        return "Invalid server response.";
+      case "TIMEOUT_ERROR":
+        return "Request timed out. Please try again.";
+      case "CUSTOM_ERROR":
+        return error.error || "Request failed.";
     }
   }
 
   return "An unexpected error occurred";
+};
+
+export const getRtkQueryErrorMessage = (error: unknown, fallback: string): string => {
+  if (typeof error === "string") return error;
+
+  if (error && typeof error === "object") {
+    const value = error as {
+      error?: unknown;
+      message?: unknown;
+      data?: { message?: unknown };
+    };
+
+    if (typeof value.error === "string") return value.error;
+    if (typeof value.data?.message === "string") return value.data.message;
+    if (typeof value.message === "string") return value.message;
+  }
+
+  return fallback;
 };
 
 const baseQuery = fetchBaseQuery({
@@ -65,6 +89,7 @@ const baseQuery = fetchBaseQuery({
 
 export const baseApi = createApi({
   reducerPath: "api",
+  refetchOnReconnect: true,
   baseQuery: async (args, api, extraOptions) => {
     const result = await baseQuery(args, api, extraOptions);
 

@@ -1,5 +1,11 @@
 import { ApiResponse, Pageable, PageResult } from "@/types";
-import { baseApi, transformError, ApiResponseSchema, PageResultSchema } from "../api/base-api";
+import {
+  baseApi,
+  transformError,
+  ApiResponseSchema,
+  PageResultSchema,
+  getRtkQueryErrorMessage,
+} from "../api/base-api";
 import { toast } from "@heroui/react";
 import { z } from "zod";
 
@@ -24,7 +30,10 @@ export type CommentResponse = z.infer<typeof baseSchema> & {
 const baseSchema = z.object(baseCommentFields);
 
 export const CommentResponseSchema: z.ZodType<CommentResponse> = baseSchema.extend({
-  children: z.lazy(() => z.array(CommentResponseSchema).nullable().default([])),
+  children: z
+    .lazy(() => z.array(CommentResponseSchema))
+    .nullable()
+    .transform((children) => children ?? []),
 });
 
 /**
@@ -48,17 +57,17 @@ export const commentApi = baseApi.injectEndpoints({
         url: `/api/v1/public/comments/post/${postId}`,
         params: { page, size },
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PageResultSchema(CommentResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
       transformErrorResponse: transformError,
       providesTags: (result, _error, { postId }) =>
         result
           ? [
+              "Comment",
               ...result.list.map(({ id }) => ({ type: "Comment" as const, id })),
               { type: "Comment", id: `POST_${postId}` },
             ]
-          : [{ type: "Comment", id: `POST_${postId}` }],
+          : ["Comment", { type: "Comment", id: `POST_${postId}` }],
     }),
 
     /**
@@ -75,19 +84,17 @@ export const commentApi = baseApi.injectEndpoints({
         try {
           await queryFulfilled;
           toast.success("Comment published successfully!");
-        } catch (err: any) {
-          // In onQueryStarted, if queryFulfilled rejects, the error object
-          // contains the value returned by transformErrorResponse in its 'error' property.
-          const errorMessage = err?.error || "Failed to publish comment";
-          toast.danger(
-            typeof errorMessage === "string" ? errorMessage : "Failed to publish comment"
-          );
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Failed to publish comment"));
         }
       },
-      invalidatesTags: (_result, _error, { postId }) => [
-        { type: "Comment", id: `POST_${postId}` },
-        { type: "Comment", id: "ADMIN_LIST" },
-      ],
+      invalidatesTags: (_result, _error, { postId }) =>
+        postId
+          ? [
+              { type: "Comment", id: `POST_${postId}` },
+              { type: "Comment", id: "ADMIN_LIST" },
+            ]
+          : ["Comment", { type: "Comment", id: "ADMIN_LIST" }],
     }),
 
     /**
@@ -98,7 +105,6 @@ export const commentApi = baseApi.injectEndpoints({
         url: "/api/v1/admin/comments",
         params: { page, size },
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PageResultSchema(CommentResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
       transformErrorResponse: transformError,
@@ -125,11 +131,12 @@ export const commentApi = baseApi.injectEndpoints({
         try {
           await queryFulfilled;
           toast.success(`Comment status updated to ${status}`);
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Moderation failed");
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Moderation failed"));
         }
       },
       invalidatesTags: (_result, _error, { id }) => [
+        "Comment",
         { type: "Comment", id },
         { type: "Comment", id: "ADMIN_LIST" },
       ],
@@ -148,11 +155,12 @@ export const commentApi = baseApi.injectEndpoints({
         try {
           await queryFulfilled;
           toast.success("Comment deleted permanently");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Deletion failed");
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Deletion failed"));
         }
       },
       invalidatesTags: (_result, _error, id) => [
+        "Comment",
         { type: "Comment", id },
         { type: "Comment", id: "ADMIN_LIST" },
       ],

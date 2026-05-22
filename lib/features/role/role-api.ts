@@ -31,7 +31,6 @@ export const roleApi = baseApi.injectEndpoints({
      */
     getAllRoles: builder.query<RoleResponse[], void>({
       query: () => "/api/v1/admin/roles",
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.array(RoleResponseSchema)),
       transformResponse: (response: ApiResponse<RoleResponse[]>) => response.data,
       transformErrorResponse: transformError,
@@ -53,7 +52,6 @@ export const roleApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(RoleResponseSchema),
       transformResponse: (response: ApiResponse<RoleResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -77,7 +75,6 @@ export const roleApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(RoleResponseSchema),
       transformResponse: (response: ApiResponse<RoleResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -103,7 +100,6 @@ export const roleApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/roles/${id}`,
         method: "DELETE",
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformError,

@@ -118,7 +118,6 @@ export const postApi = baseApi.injectEndpoints({
         url: "/api/v1/admin/posts",
         params: { page, size, ...(sort && { sort: sort.join(",") }) },
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PageResultSchema(PostResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<PostResponse>>) => response.data,
       transformErrorResponse: transformError,
@@ -136,7 +135,6 @@ export const postApi = baseApi.injectEndpoints({
      */
     getAdminPostById: builder.query<PostResponse, number>({
       query: (id) => `/api/v1/admin/posts/${id}`,
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -152,7 +150,6 @@ export const postApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -176,7 +173,6 @@ export const postApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -202,7 +198,6 @@ export const postApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/posts/${id}`,
         method: "DELETE",
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformError,
@@ -228,11 +223,16 @@ export const postApi = baseApi.injectEndpoints({
         url: "/api/v1/public/blog/posts",
         params: { page, size, categoryId, tagId, keyword },
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PageResultSchema(PostResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<PostResponse>>) => response.data,
       transformErrorResponse: transformError,
-      providesTags: ["Post"],
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.list.map(({ id }) => ({ type: "Post" as const, id })),
+              { type: "Post", id: "LIST" },
+            ]
+          : [{ type: "Post", id: "LIST" }],
     }),
 
     /**
@@ -240,7 +240,6 @@ export const postApi = baseApi.injectEndpoints({
      */
     getPublicPostBySlug: builder.query<PostResponse, string>({
       query: (slug) => `/api/v1/public/blog/posts/${slug}`,
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -255,7 +254,6 @@ export const postApi = baseApi.injectEndpoints({
         url: "/api/v1/public/search/posts",
         params: { keyword, page, size },
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PageResultSchema(PostDocumentSchema)),
       transformResponse: (response: ApiResponse<PageResult<PostDocument>>) => response.data,
       transformErrorResponse: transformError,
@@ -290,7 +288,6 @@ export const postApi = baseApi.injectEndpoints({
      */
     getPostRevisions: builder.query<PostRevision[], number>({
       query: (id) => `/api/v1/admin/posts/${id}/revisions`,
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.array(PostRevisionSchema)),
       transformResponse: (response: ApiResponse<PostRevision[]>) => response.data,
       transformErrorResponse: transformError,
@@ -304,7 +301,6 @@ export const postApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/posts/${id}/revisions/${revisionId}/revert`,
         method: "POST",
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -339,7 +335,6 @@ export const postApi = baseApi.injectEndpoints({
      */
     getAutosave: builder.query<string, string>({
       query: (identifier) => `/api/v1/admin/posts/autosave/${identifier}`,
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.string()),
       transformResponse: (response: ApiResponse<string>) => response.data,
       transformErrorResponse: transformError,

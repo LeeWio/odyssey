@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   Button,
   Modal,
@@ -12,15 +12,13 @@ import {
   Input,
   InputGroup,
   FieldError,
-  Alert,
   Spinner,
 } from "@heroui/react";
 import { Envelope, Eye, EyeSlash } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { useRouter } from "next/navigation";
-import { useRegisterMutation, useLoginMutation } from "@/lib/features/auth";
+import { useRegisterMutation } from "@/lib/features/auth";
 
 export interface SignUpProps {
   isOpen?: boolean;
@@ -37,14 +35,12 @@ const orDivider = (
 );
 
 export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) => {
-  const router = useRouter();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef < HTMLDivElement > (null);
   const { contextSafe } = useGSAP({ scope: containerRef });
 
   const [register, { isLoading: isRegLoading }] = useRegisterMutation();
-  const [login] = useLoginMutation();
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -68,22 +64,24 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
     }
   };
 
-  const switchView = contextSafe((showForm: boolean) => {
+  const switchView = useCallback((showForm: boolean) => {
     const activeViewChildren = containerRef.current?.firstElementChild?.children;
     if (!activeViewChildren || activeViewChildren.length === 0) {
       setIsFormVisible(showForm);
       return;
     }
 
-    gsap.to(activeViewChildren, {
-      autoAlpha: 0,
-      y: showForm ? -10 : 10,
-      duration: 0.2,
-      ease: "power2.in",
-      stagger: 0.02,
-      onComplete: () => setIsFormVisible(showForm),
-    });
-  });
+    contextSafe(() => {
+      gsap.to(activeViewChildren, {
+        autoAlpha: 0,
+        y: showForm ? -10 : 10,
+        duration: 0.2,
+        ease: "power2.in",
+        stagger: 0.02,
+        onComplete: () => setIsFormVisible(showForm),
+      });
+    })();
+  }, [contextSafe, setIsFormVisible]);
 
   useGSAP(() => {
     const activeViewChildren = containerRef.current?.firstElementChild?.children;

@@ -35,7 +35,6 @@ export const momentApi = baseApi.injectEndpoints({
         url: "/api/v1/public/moments",
         params: { page, size },
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PageResultSchema(MomentResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<MomentResponse>>) => response.data,
       transformErrorResponse: transformError,
@@ -68,7 +67,6 @@ export const momentApi = baseApi.injectEndpoints({
         url: "/api/v1/admin/moments",
         params: { page, size },
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(PageResultSchema(MomentResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<MomentResponse>>) => response.data,
       transformErrorResponse: transformError,
@@ -90,7 +88,6 @@ export const momentApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(MomentResponseSchema),
       transformResponse: (response: ApiResponse<MomentResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -114,7 +111,6 @@ export const momentApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(MomentResponseSchema),
       transformResponse: (response: ApiResponse<MomentResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -140,7 +136,6 @@ export const momentApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/moments/${id}`,
         method: "DELETE",
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformError,

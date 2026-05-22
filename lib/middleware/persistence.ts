@@ -61,7 +61,7 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
     const theme = localStorage.getItem("odyssey_theme");
     const locale = localStorage.getItem("odyssey_locale");
 
-    const preloadedState: any = {};
+    const preloadedState: Record<string, unknown> = {};
 
     if (auth) preloadedState.auth = JSON.parse(auth);
     if (theme) preloadedState.ui = { theme: { variant: theme }, sheet: { isOpen: false } };

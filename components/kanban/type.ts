@@ -97,7 +97,7 @@ export interface KanbanBoard {
   title: string;
   description?: string;
   columns: KanbanColumn[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**

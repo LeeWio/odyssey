@@ -32,7 +32,6 @@ export const categoryApi = baseApi.injectEndpoints({
      */
     getCategories: builder.query<CategoryResponse[], void>({
       query: () => "/api/v1/admin/categories",
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.array(CategoryResponseSchema)),
       transformResponse: (response: ApiResponse<CategoryResponse[]>) => response.data,
       transformErrorResponse: transformError,
@@ -54,7 +53,6 @@ export const categoryApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(CategoryResponseSchema),
       transformResponse: (response: ApiResponse<CategoryResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -78,7 +76,6 @@ export const categoryApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(CategoryResponseSchema),
       transformResponse: (response: ApiResponse<CategoryResponse>) => response.data,
       transformErrorResponse: transformError,
@@ -104,7 +101,6 @@ export const categoryApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/categories/${id}`,
         method: "DELETE",
       }),
-      // @ts-ignore
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformError,
