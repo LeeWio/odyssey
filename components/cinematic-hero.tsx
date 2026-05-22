@@ -38,31 +38,29 @@ export function CinematicHero() {
       ref={containerRef}
       className="relative flex min-h-[calc(100vh-64px)] w-full flex-col items-center justify-center overflow-hidden bg-background px-6 selection:bg-foreground selection:text-background"
     >
-      <main className="z-10 flex w-full max-w-6xl flex-col items-center justify-center">
+      <main className="z-10 flex w-full max-w-5xl flex-col items-center justify-center text-center">
         
         {/* Core Typography Stack */}
-        <div className="flex flex-col items-start pointer-events-none w-full max-w-fit">
-          <div className="relative">
-            <Typography
-              type="h1"
-              className="reveal-text font-sans text-[4rem] font-black uppercase tracking-tight text-foreground sm:text-[7rem] md:text-[9rem] lg:text-[10rem] xl:text-[12rem] leading-[0.9] text-left"
-            >
-              {t("title")}
-            </Typography>
-          </div>
+        <div className="flex flex-col items-center pointer-events-none w-full">
+          
+          <Typography
+            type="h1"
+            className="reveal-text font-sans text-5xl sm:text-7xl md:text-8xl lg:text-[8.5rem] xl:text-[9.5rem] font-black uppercase tracking-tighter text-foreground leading-[0.85] w-full text-center"
+          >
+            {t("title")}
+          </Typography>
 
-          <div className="relative self-end mt-4 sm:mt-6 mr-4 sm:mr-12">
-            <Typography
-              type="h2"
-              className="reveal-text font-serif text-3xl italic tracking-normal text-muted-foreground sm:text-5xl md:text-6xl lg:text-7xl xl:text-[6rem] leading-none"
-            >
-              {t("subtitle")}
-            </Typography>
-          </div>
+          <Typography
+            type="h2"
+            className="reveal-text mt-6 sm:mt-10 font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem] italic tracking-tight text-muted-foreground leading-none text-center"
+          >
+            {t("subtitle")}
+          </Typography>
+          
         </div>
 
         {/* Minimal Quote */}
-        <div className="reveal-fade mt-24 sm:mt-32 max-w-3xl pointer-events-none text-center">
+        <div className="reveal-fade mt-20 sm:mt-28 max-w-2xl pointer-events-none">
           <Typography 
             type="body" 
             className="text-base sm:text-lg md:text-xl font-light leading-relaxed tracking-wide text-muted-foreground/60"
