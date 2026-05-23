@@ -15,12 +15,12 @@ interface AnimatedNumberProps {
 export function AnimatedNumber({
   value,
   className,
-  duration = 1,
-  ease = "power2.out",
+  duration = 1.2,
+  ease = "power3.out",
   format,
 }: AnimatedNumberProps) {
-  const [displayValue, setDisplayValue] = useState(value);
-  const proxy = useRef({ val: value });
+  const [displayValue, setDisplayValue] = useState(0); // Start from 0 to trigger mount animation
+  const proxy = useRef({ val: 0 });
   const containerRef = useRef<HTMLSpanElement>(null);
 
   useGSAP(
