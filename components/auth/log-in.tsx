@@ -99,8 +99,11 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
   }, []);
 
   useGSAP(() => {
+    const target = containerRef.current?.firstElementChild?.children;
+    if (!target || target.length === 0) return;
+
     gsap.fromTo(
-      "> * > *",
+      target,
       { autoAlpha: 0, y: step === 2 ? 12 : -12 },
       { autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out", stagger: 0.04, clearProps: "opacity,visibility,transform" }
     );

@@ -72,15 +72,15 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
   }, []);
 
   useGSAP(() => {
-    const activeViewChildren = containerRef.current?.firstElementChild?.children;
-    if (!activeViewChildren || activeViewChildren.length === 0) return;
+    const target = containerRef.current?.firstElementChild?.children;
+    if (!target || target.length === 0) return;
 
     gsap.fromTo(
-      activeViewChildren,
-      { autoAlpha: 0, y: isFormVisible ? 15 : -15 },
-      { autoAlpha: 1, y: 0, duration: 0.5, ease: "back.out(1.2)", stagger: 0.05, clearProps: "all" }
+      target,
+      { autoAlpha: 0, y: isFormVisible ? 12 : -12 },
+      { autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out", stagger: 0.04, clearProps: "opacity,visibility,transform" }
     );
-  }, [isFormVisible]);
+  }, { dependencies: [isFormVisible], scope: containerRef });
 
   return (
     <Modal>
