@@ -42,7 +42,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
   const [emailError, setEmailError] = useState("");
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const { contextSafe } = useGSAP({ scope: containerRef });
+  useGSAP({ scope: containerRef });
 
   const [sendOtp, { isLoading: isSendingOtp }] = useSendOtpMutation();
   const [loginWithOtp, { isLoading: isLoggingIn, error: loginError }] = useLoginWithOtpMutation();
@@ -89,23 +89,8 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
   };
 
   const switchStep = useCallback((nextStep: 1 | 2) => {
-    const activeViewChildren = containerRef.current?.firstElementChild?.children;
-    if (!activeViewChildren || activeViewChildren.length === 0) {
-      setStep(nextStep);
-      return;
-    }
-
-    contextSafe(() => {
-      gsap.to(activeViewChildren, {
-        autoAlpha: 0,
-        y: nextStep > step ? -10 : 10,
-        duration: 0.2,
-        ease: "power2.in",
-        stagger: 0.02,
-        onComplete: () => setStep(nextStep),
-      });
-    })();
-  }, [contextSafe, step]);
+    setStep(nextStep);
+  }, []);
 
   useGSAP(() => {
     const activeViewChildren = containerRef.current?.firstElementChild?.children;

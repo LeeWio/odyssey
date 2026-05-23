@@ -38,7 +38,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef < HTMLDivElement > (null);
-  const { contextSafe } = useGSAP({ scope: containerRef });
+  useGSAP({ scope: containerRef });
 
   const [register, { isLoading: isRegLoading }] = useRegisterMutation();
 
@@ -65,23 +65,8 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
   };
 
   const switchView = useCallback((showForm: boolean) => {
-    const activeViewChildren = containerRef.current?.firstElementChild?.children;
-    if (!activeViewChildren || activeViewChildren.length === 0) {
-      setIsFormVisible(showForm);
-      return;
-    }
-
-    contextSafe(() => {
-      gsap.to(activeViewChildren, {
-        autoAlpha: 0,
-        y: showForm ? -10 : 10,
-        duration: 0.2,
-        ease: "power2.in",
-        stagger: 0.02,
-        onComplete: () => setIsFormVisible(showForm),
-      });
-    })();
-  }, [contextSafe, setIsFormVisible]);
+    setIsFormVisible(showForm);
+  }, []);
 
   useGSAP(() => {
     const activeViewChildren = containerRef.current?.firstElementChild?.children;
