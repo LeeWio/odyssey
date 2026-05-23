@@ -106,6 +106,14 @@ export const authApi = baseApi.injectEndpoints({
       rawResponseSchema: ApiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response,
       transformErrorResponse: transformError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          toast.success("Verification code sent successfully");
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Failed to send verification code"));
+        }
+      },
     }),
 
     /**
