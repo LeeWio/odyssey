@@ -6,7 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 export function IntlProvider({ lang, children, messages }) {
   return (
     <I18nProvider locale={lang}>
-      <NextIntlClientProvider locale={lang} messages={messages}>
+      <NextIntlClientProvider locale={lang} messages={messages} timeZone="UTC">
         {children}
       </NextIntlClientProvider>
     </I18nProvider>
