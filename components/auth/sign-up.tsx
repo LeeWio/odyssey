@@ -37,8 +37,7 @@ const orDivider = (
 export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) => {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const containerRef = useRef < HTMLDivElement > (null);
-  useGSAP({ scope: containerRef });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [register, { isLoading: isRegLoading }] = useRegisterMutation();
 

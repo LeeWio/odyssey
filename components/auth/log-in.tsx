@@ -99,15 +99,12 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
   }, []);
 
   useGSAP(() => {
-    const activeViewChildren = containerRef.current?.firstElementChild?.children;
-    if (!activeViewChildren || activeViewChildren.length === 0) return;
-
     gsap.fromTo(
-      activeViewChildren,
-      { autoAlpha: 0, y: step > 1 ? 15 : -15 },
-      { autoAlpha: 1, y: 0, duration: 0.5, ease: "back.out(1.2)", stagger: 0.05, clearProps: "all" }
+      "> * > *",
+      { autoAlpha: 0, y: step === 2 ? 12 : -12 },
+      { autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out", stagger: 0.04, clearProps: "opacity,visibility,transform" }
     );
-  }, [step]);
+  }, { dependencies: [step], scope: containerRef });
 
   return (
     <Modal>
