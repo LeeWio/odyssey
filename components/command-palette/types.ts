@@ -1,12 +1,20 @@
 import React from "react";
 
-export const COMMAND_CATEGORIES = ["System", "Management", "Analytics", "Developer", "AI"] as const;
+export const COMMAND_CATEGORIES = ["AI", "Management", "Analytics", "Developer", "System"] as const;
 
 export type CommandCategory = (typeof COMMAND_CATEGORIES)[number];
 
 export const COMMAND_CATEGORY_ORDER: readonly CommandCategory[] = COMMAND_CATEGORIES;
 
-export type CommandSource = "navigation" | "theme" | "ai" | "system";
+export const COMMAND_CATEGORY_METADATA: Record<CommandCategory, { label: string }> = {
+  AI: { label: "Smart Prompt Examples" },
+  Management: { label: "Results (4)" },
+  System: { label: "System Actions" },
+  Analytics: { label: "Analytics" },
+  Developer: { label: "Developer" },
+};
+
+export type CommandSource = "navigation" | "theme" | "ai" | "system" | "search";
 
 export enum CommandIntent {
   NAVIGATE = "NAVIGATE",
@@ -33,6 +41,8 @@ export interface BaseCommand {
   source: CommandSource;
   shortcut?: readonly string[];
   order?: number;
+  defaultVisible?: boolean;
+  isActive?: boolean;
 }
 
 export interface NavigationCommand extends BaseCommand {
@@ -49,6 +59,6 @@ export type CommandItem = NavigationCommand | ActionCommand;
 
 export interface CommandGroup {
   id: string;
-  heading: string;
+  heading: CommandCategory;
   commands: CommandItem[];
 }

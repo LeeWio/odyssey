@@ -63,6 +63,18 @@ export const PostDocumentSchema = z.object({
   views: z.number(),
 });
 
+export const QuickSearchItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  path: z.string(),
+});
+
+export const QuickSearchResponseSchema = z.object({
+  posts: z.array(QuickSearchItemSchema).default([]),
+  categories: z.array(QuickSearchItemSchema).default([]),
+  tags: z.array(QuickSearchItemSchema).default([]),
+});
+
 // Post Revision
 export const PostRevisionSchema = z.object({
   id: z.number(),
@@ -81,6 +93,8 @@ export const PostRevisionSchema = z.object({
 export type PostResponse = z.infer<typeof PostResponseSchema>;
 export type PostDocument = z.infer<typeof PostDocumentSchema>;
 export type PostRevision = z.infer<typeof PostRevisionSchema>;
+export type QuickSearchItem = z.infer<typeof QuickSearchItemSchema>;
+export type QuickSearchResponse = z.infer<typeof QuickSearchResponseSchema>;
 
 export interface PostRequest {
   title: string;
@@ -260,6 +274,19 @@ export const postApi = baseApi.injectEndpoints({
     }),
 
     /**
+     * Public: Quick search for command palette
+     */
+    quickSearch: builder.query<QuickSearchResponse, { keyword: string }>({
+      query: ({ keyword }) => ({
+        url: "/api/v1/public/search/quick",
+        params: { keyword },
+      }),
+      rawResponseSchema: ApiResponseSchema(QuickSearchResponseSchema),
+      transformResponse: (response: ApiResponse<QuickSearchResponse>) => response.data,
+      transformErrorResponse: transformError,
+    }),
+
+    /**
      * User: Like post
      */
     likePost: builder.mutation<void, number>({
@@ -352,6 +379,7 @@ export const {
   useGetPublicPostsQuery,
   useGetPublicPostBySlugQuery,
   useSearchPublicPostsQuery,
+  useQuickSearchQuery,
   useLikePostMutation,
   useFavoritePostMutation,
   useGetPostRevisionsQuery,
