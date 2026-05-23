@@ -25,9 +25,9 @@ export function Dashboard() {
   // Mock real weather data - in a real app, this would come from a weather API hook
   const [weather] = useState({ tempMin: 10, tempMax: 30 });
 
-  const [theme, setTheme] = useState < Key | null > ("default");
-  const [language, setLanguage] = useState < Key | null > ("en");
-  const [fontSize, setFontSize] = useState < Key | null > ("md");
+  const [theme, setTheme] = useState<Key | null>("default");
+  const [language, setLanguage] = useState<Key | null>("en");
+  const [fontSize, setFontSize] = useState<Key | null>("md");
 
   useHotkeys(
     "mod+j",
@@ -57,16 +57,18 @@ export function Dashboard() {
                   </Chip>
                 </Card.Header>
 
-                <Card.Content className="flex flex-row justify-center items-center text-[6rem] font-bold leading-none tabular-nums">
+                <Card.Content className="flex flex-row justify-center items-center">
                   <AnimatedNumber
                     value={parseInt(hours)}
-                    className="text-muted"
+                    className="text-muted text-[6rem] font-bold leading-none tabular-nums"
                     format={{ minimumIntegerDigits: 2 }}
                   />
-                  <span className="text-accent relative top-[-0.06em]">:</span>
+                  <span className="text-accent relative top-[-0.06em] text-[6rem] font-bold leading-none tabular-nums">
+                    :
+                  </span>
                   <AnimatedNumber
                     value={parseInt(minutes)}
-                    className="text-warning"
+                    className="text-warning text-[6rem] font-bold leading-none tabular-nums"
                     format={{ minimumIntegerDigits: 2 }}
                   />
                 </Card.Content>

@@ -10,7 +10,7 @@ export function useRealTime() {
   useEffect(() => {
     // Update every minute (on the minute)
     const update = () => setTime(new Date());
-    
+
     // Initial delay to sync with the next minute start
     const delay = 60000 - (Date.now() % 60000);
     const timeout = setTimeout(() => {
