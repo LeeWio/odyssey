@@ -53,20 +53,25 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
     return err?.data?.message || err?.error || "An unknown error occurred";
   };
 
-  const handleEmailSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleEmailSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
-      setEmailError("Please enter a valid email address");
-      return;
-    }
+    
+    const submit = async () => {
+      if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
+        setEmailError("Please enter a valid email address");
+        return;
+      }
 
-    try {
-      await sendOtp({ email }).unwrap();
-      setEmailError("");
-      switchStep(2); // Move to OTP step only after success
-    } catch {
-      // Error is handled by global transformError and toast
-    }
+      try {
+        await sendOtp({ email }).unwrap();
+        setEmailError("");
+        switchStep(2); // Move to OTP step only after success
+      } catch {
+        // Error is handled by global transformError and toast
+      }
+    };
+    
+    void submit();
   };
 
   const handleOTPComplete = async (otp: string) => {

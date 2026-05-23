@@ -42,26 +42,30 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
 
   const [register, { isLoading: isRegLoading }] = useRegisterMutation();
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
 
-    try {
-      await register({
-        username: data.username as string,
-        email: data.email as string,
-        password: data.password as string,
-      }).unwrap();
+    const submit = async () => {
+      try {
+        await register({
+          username: data.username as string,
+          email: data.email as string,
+          password: data.password as string,
+        }).unwrap();
 
-      if (onOpenChange) {
-        onOpenChange(false);
+        if (onOpenChange) {
+          onOpenChange(false);
+        }
+        // Optionally redirect or show a success state telling them to wait for approval
+        // router.push("/");
+      } catch {
+        // Error is handled by RTK query state
       }
-      // Optionally redirect or show a success state telling them to wait for approval
-      // router.push("/");
-    } catch {
-      // Error is handled by RTK query state
-    }
+    };
+    
+    void submit();
   };
 
   const switchView = useCallback((showForm: boolean) => {
