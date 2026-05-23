@@ -2,18 +2,18 @@
 
 import type { Key } from "@heroui/react";
 
-import { Sheet, CellSelect } from "@heroui-pro/react";
+import { Sheet } from "@heroui-pro/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { selectIsSheetOpen, toggleSheet } from "@/lib/features/ui";
 import { Stocks } from "./widgets/stocks";
-import { AutoplayCarousel } from "./widgets/autoplay-carousel";
 import { useThemeSwitch } from "../theme-switch";
-import { Card, Chip, ListBox, Typography } from "@heroui/react";
+import { Avatar, Button, Card, Chip, ListBox, Typography } from "@heroui/react";
 import { useState } from "react";
-import { Sun } from "@gravity-ui/icons";
+import { Car, Sun } from "@gravity-ui/icons";
 import { useRealTime } from "@/hooks/use-real-time";
 import { AnimatedNumber } from "../ui/animated-number";
+import { BackwardFillIcon, ForwardFillIcon, PlayFillIcon } from "../icons";
 
 export function Dashboard() {
   const isOpen = useAppSelector(selectIsSheetOpen);
@@ -49,7 +49,7 @@ export function Dashboard() {
             <Sheet.Header className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <Stocks />
             </Sheet.Header>
-            <Sheet.Body className="flex flex-col gap-4">
+            <Sheet.Body className="flex gap-4">
               <Card className="max-w-80">
                 <Card.Header className="flex items-center justify-center">
                   <Chip variant="primary" color="success" size="lg">
@@ -80,81 +80,33 @@ export function Dashboard() {
                   </Typography>
                 </Card.Footer>
               </Card>
+              <Card>
+                <Card.Header className="flex items-center justify-center">
+                  <Avatar className="w-16 h-16 rounded-full ring-8">
+                    <Avatar.Image
+                      alt="Small Avatar"
+                      src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+                    />
+                    <Avatar.Fallback>SM</Avatar.Fallback>
+                  </Avatar>
+                </Card.Header>
+                <Card.Content className="flex items-center justify-center font-extrabold text-xl">
+                  Music Player
+                </Card.Content>
+                <Card.Footer className="flex items-center justify-center gap-4">
+                  <Button isIconOnly size="lg" variant="secondary" aria-label="">
+                    <BackwardFillIcon />
+                  </Button>
+                  <Button isIconOnly size="lg" variant="primary" aria-label="">
+                    <PlayFillIcon />
+                  </Button>
+                  <Button isIconOnly size="lg" variant="secondary" aria-label="">
+                    <ForwardFillIcon />
+                  </Button>
+                </Card.Footer>
+              </Card>
             </Sheet.Body>
-            <Sheet.Footer className="flex! flex-row! items-center justify-start">
-              <CellSelect
-                aria-label="Theme"
-                value={theme}
-                onChange={(v) => setTheme(v as Key | null)}
-              >
-                <CellSelect.Trigger>
-                  <CellSelect.Label>Theme</CellSelect.Label>
-                  <CellSelect.Value />
-                  <CellSelect.Indicator />
-                </CellSelect.Trigger>
-                <CellSelect.Popover>
-                  <ListBox>
-                    <ListBox.Item id="default" textValue="Default">
-                      Default
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    <ListBox.Item id="dark" textValue="Dark">
-                      Dark
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    <ListBox.Item id="system" textValue="System">
-                      System
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  </ListBox>
-                </CellSelect.Popover>
-              </CellSelect>
-              <CellSelect aria-label="Language" value={language} onChange={(v) => setLanguage(v)}>
-                <CellSelect.Trigger>
-                  <CellSelect.Label>Language</CellSelect.Label>
-                  <CellSelect.Value />
-                  <CellSelect.Indicator />
-                </CellSelect.Trigger>
-                <CellSelect.Popover>
-                  <ListBox>
-                    <ListBox.Item id="en" textValue="English">
-                      English
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    <ListBox.Item id="es" textValue="Spanish">
-                      Spanish
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    <ListBox.Item id="fr" textValue="French">
-                      French
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  </ListBox>
-                </CellSelect.Popover>
-              </CellSelect>
-              <CellSelect aria-label="Font size" value={fontSize} onChange={(v) => setFontSize(v)}>
-                <CellSelect.Trigger>
-                  <CellSelect.Label>Font size</CellSelect.Label>
-                  <CellSelect.Value />
-                  <CellSelect.Indicator />
-                </CellSelect.Trigger>
-                <CellSelect.Popover>
-                  <ListBox>
-                    <ListBox.Item id="sm" textValue="Small">
-                      Small
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    <ListBox.Item id="md" textValue="Medium">
-                      Medium
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    <ListBox.Item id="lg" textValue="Large">
-                      Large
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  </ListBox>
-                </CellSelect.Popover>
-              </CellSelect>
+            <Sheet.Footer className="flex! flex-row! items-center justify-center">
               <ModeSwitch />
             </Sheet.Footer>
           </Sheet.Dialog>

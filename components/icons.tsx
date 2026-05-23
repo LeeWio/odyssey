@@ -129,3 +129,116 @@ export const SearchIcon = (props: IconSvgProps) => (
     />
   </svg>
 );
+
+export const PlayFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+  <svg
+    aria-hidden="true"
+    height={size || height}
+    viewBox="0 0 16.2891 16.416"
+    width={size || width}
+    {...props}
+  >
+    <defs>
+      <linearGradient id="play-gradient" gradientUnits="userSpaceOnUse" x1="5" x2="5" y2="16.4062">
+        <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
+        <stop offset="1" stopColor="currentColor" />
+      </linearGradient>
+    </defs>
+    <g>
+      <rect height="16.416" opacity="0" width="16.2891" x="0" y="0" />
+      <path
+        d="M1.70898 14.9805C1.70898 15.9473 2.26562 16.4062 2.92969 16.4062C3.22266 16.4062 3.52539 16.3086 3.82812 16.1523L15.2051 9.50195C16.0156 9.0332 16.2891 8.71094 16.2891 8.20312C16.2891 7.68555 16.0156 7.37305 15.2051 6.9043L3.82812 0.253906C3.52539 0.0878906 3.22266 0 2.92969 0C2.26562 0 1.70898 0.458984 1.70898 1.42578Z"
+        fill="url(#play-gradient)"
+      />
+    </g>
+  </svg>
+);
+
+export const PauseFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+  <svg
+    aria-hidden="true"
+    height={size || height}
+    viewBox="0 0 12.2754 16.1621"
+    width={size || width}
+    {...props}
+  >
+    <defs>
+      <linearGradient id="pause-gradient" gradientUnits="userSpaceOnUse" x1="5" x2="5" y2="16.1523">
+        <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
+        <stop offset="1" stopColor="currentColor" />
+      </linearGradient>
+    </defs>
+    <g>
+      <rect height="16.1621" opacity="0" width="12.2754" x="0" y="0" />
+      <path
+        d="M1.29883 16.1523L3.52539 16.1523C4.375 16.1523 4.82422 15.7031 4.82422 14.8438L4.82422 1.29883C4.82422 0.400391 4.375 0 3.52539 0L1.29883 0C0.449219 0 0 0.439453 0 1.29883L0 14.8438C0 15.7031 0.449219 16.1523 1.29883 16.1523ZM8.39844 16.1523L10.6152 16.1523C11.4746 16.1523 11.9141 15.7031 11.9141 14.8438L11.9141 1.29883C11.9141 0.400391 11.4746 0 10.6152 0L8.39844 0C7.53906 0 7.08984 0.439453 7.08984 1.29883L7.08984 14.8438C7.08984 15.7031 7.53906 16.1523 8.39844 16.1523Z"
+        fill="url(#pause-gradient)"
+      />
+    </g>
+  </svg>
+);
+
+export const ForwardFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+  <svg
+    aria-hidden="true"
+    height={size || height}
+    viewBox="0 0 28.252 14.9316"
+    width={size || width}
+    {...props}
+  >
+    <defs>
+      <linearGradient
+        id="forward-gradient"
+        gradientUnits="userSpaceOnUse"
+        x1="5"
+        x2="5"
+        y2="14.9219"
+      >
+        <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
+        <stop offset="1" stopColor="currentColor" />
+      </linearGradient>
+    </defs>
+    <g>
+      <rect height="14.9316" opacity="0" width="28.252" x="0" y="0" />
+      <path
+        d="M1.71875 13.5645C1.71875 14.4824 2.25586 14.9219 2.88086 14.9219C3.16406 14.9219 3.44727 14.834 3.73047 14.6777L13.9941 8.70117C14.7266 8.27148 15.0098 7.94922 15.0098 7.46094C15.0098 6.97266 14.7266 6.65039 13.9941 6.2207L3.73047 0.244141C3.44727 0.078125 3.16406 0 2.88086 0C2.25586 0 1.71875 0.429688 1.71875 1.34766ZM14.9609 13.5645C14.9609 14.4824 15.4883 14.9219 16.123 14.9219C16.3965 14.9219 16.6895 14.834 16.9727 14.6777L27.2266 8.70117C27.9688 8.27148 28.252 7.94922 28.252 7.46094C28.252 6.97266 27.9688 6.65039 27.2266 6.2207L16.9727 0.244141C16.6895 0.078125 16.3965 0 16.123 0C15.4883 0 14.9609 0.429688 14.9609 1.34766Z"
+        fill="url(#forward-gradient)"
+      />
+    </g>
+  </svg>
+);
+
+export const BackwardFillIcon: React.FC<IconSvgProps> = ({
+  size = 36,
+  width,
+  height,
+  ...props
+}) => (
+  <svg
+    aria-hidden="true"
+    height={size || height}
+    viewBox="0 0 28.252 14.9316"
+    width={size || width}
+    {...props}
+  >
+    <defs>
+      <linearGradient
+        id="backward-gradient"
+        gradientUnits="userSpaceOnUse"
+        x1="5"
+        x2="5"
+        y2="14.9219"
+      >
+        <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
+        <stop offset="1" stopColor="currentColor" />
+      </linearGradient>
+    </defs>
+    <g transform="scale(-1, 1)" transformOrigin="center">
+      <rect height="14.9316" opacity="0" width="28.252" x="0" y="0" />
+      <path
+        d="M1.71875 13.5645C1.71875 14.4824 2.25586 14.9219 2.88086 14.9219C3.16406 14.9219 3.44727 14.834 3.73047 14.6777L13.9941 8.70117C14.7266 8.27148 15.0098 7.94922 15.0098 7.46094C15.0098 6.97266 14.7266 6.65039 13.9941 6.2207L3.73047 0.244141C3.44727 0.078125 3.16406 0 2.88086 0C2.25586 0 1.71875 0.429688 1.71875 1.34766ZM14.9609 13.5645C14.9609 14.4824 15.4883 14.9219 16.123 14.9219C16.3965 14.9219 16.6895 14.834 16.9727 14.6777L27.2266 8.70117C27.9688 8.27148 28.252 7.94922 28.252 7.46094C28.252 6.97266 27.9688 6.65039 27.2266 6.2207L16.9727 0.244141C16.6895 0.078125 16.3965 0 16.123 0C15.4883 0 14.9609 0.429688 14.9609 1.34766Z"
+        fill="url(#backward-gradient)"
+      />
+    </g>
+  </svg>
+);
