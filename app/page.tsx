@@ -28,9 +28,11 @@ export default function Home() {
         {/* Time Display */}
         <Card.Content className="p-0 py-4 flex justify-center w-full">
           <Typography 
-            className="text-white text-[7.5rem] font-bold tracking-tighter leading-[0.8] flex items-baseline"
+            className="text-white text-[7.5rem] font-bold tracking-tighter leading-[0.8] flex items-center tabular-nums"
           >
-            12:<span className="text-[#fdba74]">11</span>
+            <span>12</span>
+            <span className="relative -top-[0.06em] text-[#fdba74]/80 mx-1">:</span>
+            <span className="text-[#fdba74]">11</span>
           </Typography>
         </Card.Content>
 
