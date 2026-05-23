@@ -14,7 +14,9 @@
         "embla-carousel": ">=8.6.0",
         "embla-carousel-autoplay": "^8.6.0",
         "embla-carousel-react": ">=8.6.0",
+        "fuzzysort": "^3.1.0",
         "gsap": "^3.15.0",
+        "match-sorter": "^8.3.0",
         "motion": "^12.38.0",
         "next": "16.2.6",
         "next-intl": "^4.12.0",
@@ -716,6 +718,8 @@
 
     "functions-have-names": ["functions-have-names@1.2.3", "", {}, ""],
 
+    "fuzzysort": ["fuzzysort@3.1.0", "", {}, "sha512-sR9BNCjBg6LNgwvxlBd0sBABvQitkLzoVY9MYYROQVX/FvfJ4Mai9LsGhDgd8qYdds0bY77VzYd5iuB+v5rwQQ=="],
+
     "generator-function": ["generator-function@2.0.1", "", {}, ""],
 
     "gensync": ["gensync@1.0.0-beta.2", "", {}, ""],
@@ -896,6 +900,8 @@
 
     "magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, ""],
 
+    "match-sorter": ["match-sorter@8.3.0", "", { "dependencies": { "@babel/runtime": "^7.23.8", "remove-accents": "0.5.0" } }, "sha512-8Py1GbZi5zsclYSFcPAH4H5xfTbeD0bOREA7qP/t8bW4MbOSlPl8sbqHOedEV7O+Bxyvxm6xs/v6BXJGe+JDNA=="],
+
     "math-intrinsics": ["math-intrinsics@1.1.0", "", {}, ""],
 
     "merge2": ["merge2@1.4.1", "", {}, ""],
@@ -1025,6 +1031,8 @@
     "reflect.getprototypeof": ["reflect.getprototypeof@1.0.10", "", { "dependencies": { "call-bind": "^1.0.8", "define-properties": "^1.2.1", "es-abstract": "^1.23.9", "es-errors": "^1.3.0", "es-object-atoms": "^1.0.0", "get-intrinsic": "^1.2.7", "get-proto": "^1.0.1", "which-builtin-type": "^1.2.1" } }, ""],
 
     "regexp.prototype.flags": ["regexp.prototype.flags@1.5.4", "", { "dependencies": { "call-bind": "^1.0.8", "define-properties": "^1.2.1", "es-errors": "^1.3.0", "get-proto": "^1.0.1", "gopd": "^1.2.0", "set-function-name": "^2.0.2" } }, ""],
+
+    "remove-accents": ["remove-accents@0.5.0", "", {}, "sha512-8g3/Otx1eJaVD12e31UbJj1YzdtVvzH85HV7t+9MJYk/u3XmkOUJ5Ys9wQrf9PCPK8+xn4ymzqYCiZl6QWKn+A=="],
 
     "reselect": ["reselect@5.1.1", "", {}, ""],
 

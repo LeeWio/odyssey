@@ -13,7 +13,7 @@ import {
 } from "@/components/icons";
 import { selectThemeVariant, setThemeVariant, type ThemeVariant } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { createActionCommand } from "../command-model";
+import { createActionCommand, createNavigationCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 
 interface ThemeModeDefinition {
@@ -111,6 +111,8 @@ export const useThemeCommands = (): CommandItem[] => {
         order: 1000 + index,
         keywords: [...mode.keywords, ...SHARED_THEME_KEYWORDS],
         intent: CommandIntent.EXECUTE,
+        isActive: theme === mode.theme,
+        defaultVisible: true,
         payload: {
           action: () => setTheme(mode.theme),
           closeOnExecute: true,
@@ -136,6 +138,7 @@ export const useThemeCommands = (): CommandItem[] => {
           ...SHARED_THEME_KEYWORDS,
         ],
         intent: CommandIntent.EXECUTE,
+        isActive: currentVariant === variant.variant,
         payload: {
           action: () => {
             dispatch(setThemeVariant(variant.variant));
@@ -145,6 +148,20 @@ export const useThemeCommands = (): CommandItem[] => {
       })
     );
 
-    return [...modeCommands, ...variantCommands];
+    const systemSettingsCommand = createNavigationCommand({
+      id: "system-workspace-settings",
+      title: "Open workspace settings",
+      description: "Manage system preferences",
+      icon: GearIcon,
+      category: "System",
+      source: "system",
+      order: 1200,
+      keywords: ["preferences", "config", "setup", "工作区设置", "偏好"],
+      intent: CommandIntent.NAVIGATE,
+      defaultVisible: true,
+      payload: { href: "/" },
+    });
+
+    return [...modeCommands, ...variantCommands, systemSettingsCommand];
   }, [currentVariant, dispatch, setTheme, theme]);
 };

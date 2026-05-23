@@ -1,413 +1,134 @@
 "use client";
 
-import { Key } from "@heroui/react";
-import type React from "react";
-
-import {
-  MagnifierIcon,
-  SparklesIcon,
-  ClockIcon,
-  FileTextIcon,
-  PersonsIcon,
-  GearIcon,
-  SunMaxFillIcon,
-  MoonFillIcon,
-  TargetIcon,
-} from "@/components/icons";
-import { selectThemeVariant, setThemeVariant, type ThemeVariant } from "@/lib/features/ui";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
-import { useState } from "react";
+import { Key, Kbd, Chip, CloseButton } from "@heroui/react";
 import { Command, EmptyState } from "@heroui-pro/react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
-import { Kbd, Chip, CloseButton } from "@heroui/react";
 
-interface ThemeModeItem {
-  id: "system-light-mode" | "system-dark-mode" | "system-theme-mode";
-  label: string;
-  keywords: readonly string[];
-  value: "light" | "dark" | "system";
-  icon: React.ElementType;
-  defaultVisible?: boolean;
-}
+import { MagnifierIcon } from "@/components/icons";
+import { buildCommandSearchText, filterCommands } from "./command-model";
+import { usePostSearchCommands } from "./search/use-post-search-commands";
+import { STATIC_COMMANDS } from "./static-commands";
+import { useThemeCommands } from "./theme/use-theme-commands";
+import { CommandIntent, type CommandItem, type CommandSource } from "./types";
 
-interface ThemeVariantItem {
-  id:
-    | "system-theme-default"
-  | "system-theme-glass"
-  | "system-theme-mouve"
-  | "system-theme-brutalism";
-  label: string;
-  keywords: readonly string[];
-  value: ThemeVariant;
-  icon: React.ElementType;
-  defaultVisible?: boolean;
-}
-
-const THEME_MODE_ITEMS: readonly ThemeModeItem[] = [
-  {
-    id: "system-light-mode",
-    label: "Switch to Light Mode",
-    keywords: ["light", "theme", "bright", "day mode", "appearance", "白天", "亮色", "浅色"],
-    value: "light",
-    icon: SunMaxFillIcon,
-    defaultVisible: true,
-  },
-  {
-    id: "system-dark-mode",
-    label: "Switch to Dark Mode",
-    keywords: ["dark", "theme", "night mode", "appearance", "深色", "暗黑", "夜间"],
-    value: "dark",
-    icon: MoonFillIcon,
-    defaultVisible: true,
-  },
-  {
-    id: "system-theme-mode",
-    label: "Follow System Theme",
-    keywords: ["system", "auto", "os", "device mode", "appearance", "自动", "系统", "跟随系统"],
-    value: "system",
-    icon: GearIcon,
-    defaultVisible: true,
-  },
+const COMMAND_SCOPES: readonly { label: string; source: CommandSource | null }[] = [
+  { label: "All", source: null },
+  { label: "Search", source: "search" },
+  { label: "AI", source: "ai" },
+  { label: "Themes", source: "theme" },
+  { label: "System", source: "system" },
 ];
 
-const THEME_VARIANT_ITEMS: readonly ThemeVariantItem[] = [
-  {
-    id: "system-theme-default",
-    label: "Apply Default Theme",
-    keywords: ["default", "base", "standard", "reset", "variant", "skin", "默认", "基础", "重置"],
-    value: "default",
-    icon: GearIcon,
-  },
-  {
-    id: "system-theme-glass",
-    label: "Apply Glass Theme",
-    keywords: ["glass", "frosted", "blur", "transparent", "variant", "skin", "玻璃", "毛玻璃", "透明"],
-    value: "glass",
-    icon: SparklesIcon,
-  },
-  {
-    id: "system-theme-mouve",
-    label: "Apply Mouve Theme",
-    keywords: ["mouve", "mauve", "soft", "editorial", "variant", "skin", "莫兰迪", "紫灰"],
-    value: "mouve",
-    icon: GearIcon,
-  },
-  {
-    id: "system-theme-brutalism",
-    label: "Apply Brutalism Theme",
-    keywords: ["brutalism", "bold", "graphic", "sharp", "variant", "skin", "野兽派", "粗野"],
-    value: "brutalism",
-    icon: TargetIcon,
-  },
-];
+export interface CommandPaletteProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
 
-interface CommandItemConfig {
+interface VisibleGroup {
   id: string;
-  group: string;
-  groupOrder: number;
-  label: string;
-  keywords: readonly string[];
-  icon: React.ElementType;
-  defaultVisible?: boolean;
-  isCurrent?: boolean;
-  actionId?: CommandActionId;
+  heading: string;
+  commands: CommandItem[];
+  badge?: string;
 }
 
-type CommandActionId =
-  | "set-theme-light"
-  | "set-theme-dark"
-  | "set-theme-system"
-  | "set-theme-default"
-  | "set-theme-glass"
-  | "set-theme-mouve"
-  | "set-theme-brutalism"
-  | "open-workspace-settings";
+function filterBySource(commands: readonly CommandItem[], source: CommandSource | null) {
+  return source ? commands.filter((command) => command.source === source) : [...commands];
+}
 
-const normalizeSearchText = (value: string) =>
-  value
-    .toLowerCase()
-    .normalize("NFKC")
-    .replace(/\s+/g, " ")
-    .trim();
+function getCommandKind(command: CommandItem) {
+  if (command.id.startsWith("search-")) {
+    const parts = command.id.split("-");
+    if (parts.length >= 2) {
+      const type = parts[1];
+      return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+  }
+  if (command.source === "theme") return "Theme";
+  return null;
+}
 
-const matchesSearchToken = (text: string, token: string) => {
-  if (text.includes(token)) return true;
+function shouldShowDescription(command: CommandItem) {
+  return command.id.startsWith("search-");
+}
 
-  let index = 0;
+export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
+  const router = useRouter();
+  const [inputValue, setInputValue] = useState("");
+  const [activeSource, setActiveSource] = useState<CommandSource | null>(null);
 
-  for (const char of token) {
-    index = text.indexOf(char, index);
+  const themeCommands = useThemeCommands();
+  const searchState = usePostSearchCommands(inputValue);
 
-    if (index === -1) {
-      return false;
+  const baseCommands = useMemo(() => [...STATIC_COMMANDS, ...themeCommands], [themeCommands]);
+  const isSearching = inputValue.trim().length > 0;
+
+  const visibleGroups = useMemo<VisibleGroup[]>(() => {
+    const scopedBaseCommands = filterBySource(baseCommands, activeSource);
+    const filteredBaseCommands = filterCommands(scopedBaseCommands, inputValue);
+
+    const aiCommands = filteredBaseCommands.filter((command) => command.source === "ai");
+    const themeSystemCommands = filteredBaseCommands.filter(
+      (command) => command.source === "theme" || command.source === "system"
+    );
+
+    const groups: VisibleGroup[] = [];
+
+    if (activeSource === null || activeSource === "search") {
+      if (searchState.dynamicGroups.length > 0) {
+        groups.push(...searchState.dynamicGroups);
+      }
     }
 
-    index += 1;
-  }
-
-  return true;
-};
-
-const commandFilter = (textValue: string, rawInputValue: string) => {
-  const query = normalizeSearchText(rawInputValue);
-
-  if (!query) return true;
-
-  const normalizedText = normalizeSearchText(textValue);
-  const tokens = query.split(" ");
-
-  return tokens.every((token) => matchesSearchToken(normalizedText, token));
-};
-
-const buildSearchText = (label: string, keywords: readonly string[]) =>
-  [label, ...keywords].join(" ");
-
-const BASE_COMMAND_ITEMS: readonly CommandItemConfig[] = [
-  {
-    group: "Smart Prompt Examples",
-    groupOrder: 1,
-    id: "smart-summarize-week",
-    label: "Summarize this week's progress",
-    keywords: ["weekly progress", "summary", "本周进展", "总结"],
-    icon: SparklesIcon,
-    defaultVisible: true,
-  },
-  {
-    group: "Smart Prompt Examples",
-    groupOrder: 1,
-    id: "smart-create-task",
-    label: "Create a task for the team",
-    keywords: ["task", "todo", "assign", "团队任务"],
-    icon: SparklesIcon,
-    defaultVisible: true,
-  },
-  {
-    group: "Smart Prompt Examples",
-    groupOrder: 1,
-    id: "smart-draft-brief",
-    label: "Draft a project brief",
-    keywords: ["brief", "spec", "outline", "项目简介"],
-    icon: SparklesIcon,
-    defaultVisible: true,
-  },
-  {
-    group: "Smart Prompt Examples",
-    groupOrder: 1,
-    id: "smart-schedule-standup",
-    label: "Schedule a standup meeting",
-    keywords: ["meeting", "sync", "standup", "会议", "站会"],
-    icon: SparklesIcon,
-    defaultVisible: true,
-  },
-  {
-    group: "Results (4)",
-    groupOrder: 2,
-    id: "result-view-activity",
-    label: "View recent activity",
-    keywords: ["activity", "history", "updates", "最近活动"],
-    icon: ClockIcon,
-    defaultVisible: true,
-  },
-  {
-    group: "Results (4)",
-    groupOrder: 2,
-    id: "result-project-roadmap",
-    label: "Open project roadmap",
-    keywords: ["roadmap", "plan", "timeline", "路线图"],
-    icon: FileTextIcon,
-    defaultVisible: true,
-  },
-  {
-    group: "Results (4)",
-    groupOrder: 2,
-    id: "result-team-directory",
-    label: "Browse team directory",
-    keywords: ["people", "members", "coworkers", "团队成员"],
-    icon: PersonsIcon,
-    defaultVisible: true,
-  },
-  {
-    group: "Results (4)",
-    groupOrder: 2,
-    id: "result-workspace-settings",
-    label: "Manage workspace settings",
-    keywords: ["preferences", "config", "设置", "工作区"],
-    icon: GearIcon,
-    defaultVisible: true,
-  },
-  {
-    group: "System Actions",
-    groupOrder: 3,
-    id: "system-light-mode",
-    label: "Switch to Light Mode",
-    keywords: THEME_MODE_ITEMS[0].keywords,
-    icon: SunMaxFillIcon,
-    defaultVisible: true,
-    actionId: "set-theme-light",
-  },
-  {
-    group: "System Actions",
-    groupOrder: 3,
-    id: "system-dark-mode",
-    label: "Switch to Dark Mode",
-    keywords: THEME_MODE_ITEMS[1].keywords,
-    icon: MoonFillIcon,
-    defaultVisible: true,
-    actionId: "set-theme-dark",
-  },
-  {
-    group: "System Actions",
-    groupOrder: 3,
-    id: "system-theme-mode",
-    label: "Follow System Theme",
-    keywords: THEME_MODE_ITEMS[2].keywords,
-    icon: GearIcon,
-    defaultVisible: true,
-    actionId: "set-theme-system",
-  },
-  {
-    group: "System Actions",
-    groupOrder: 3,
-    id: "system-theme-default",
-    label: "Apply Default Theme",
-    keywords: THEME_VARIANT_ITEMS[0].keywords,
-    icon: GearIcon,
-    actionId: "set-theme-default",
-  },
-  {
-    group: "System Actions",
-    groupOrder: 3,
-    id: "system-theme-glass",
-    label: "Apply Glass Theme",
-    keywords: THEME_VARIANT_ITEMS[1].keywords,
-    icon: SparklesIcon,
-    actionId: "set-theme-glass",
-  },
-  {
-    group: "System Actions",
-    groupOrder: 3,
-    id: "system-theme-mouve",
-    label: "Apply Mouve Theme",
-    keywords: THEME_VARIANT_ITEMS[2].keywords,
-    icon: GearIcon,
-    actionId: "set-theme-mouve",
-  },
-  {
-    group: "System Actions",
-    groupOrder: 3,
-    id: "system-theme-brutalism",
-    label: "Apply Brutalism Theme",
-    keywords: THEME_VARIANT_ITEMS[3].keywords,
-    icon: TargetIcon,
-    actionId: "set-theme-brutalism",
-  },
-  {
-    group: "System Actions",
-    groupOrder: 3,
-    id: "system-workspace-settings",
-    label: "Open workspace settings",
-    keywords: ["preferences", "config", "setup", "工作区设置", "偏好"],
-    icon: GearIcon,
-    defaultVisible: true,
-    actionId: "open-workspace-settings",
-  },
-];
-
-export const CommandPalette = () => {
-  const dispatch = useAppDispatch();
-  const router = useRouter();
-  const currentVariant = useAppSelector(selectThemeVariant);
-  const { theme, setTheme } = useTheme();
-  const [isOpen, setIsOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-
-  const isSearching = inputValue.trim().length > 0;
-  const closePalette = () => setIsOpen(false);
-
-  const commandItems: CommandItemConfig[] = BASE_COMMAND_ITEMS.map((item) => {
-    if (item.id === "system-light-mode") return { ...item, isCurrent: theme === "light" };
-    if (item.id === "system-dark-mode") return { ...item, isCurrent: theme === "dark" };
-    if (item.id === "system-theme-mode") return { ...item, isCurrent: theme === "system" };
-    if (item.id === "system-theme-default")
-      return { ...item, isCurrent: currentVariant === "default" };
-    if (item.id === "system-theme-glass")
-      return { ...item, isCurrent: currentVariant === "glass" };
-    if (item.id === "system-theme-mouve")
-      return { ...item, isCurrent: currentVariant === "mouve" };
-    if (item.id === "system-theme-brutalism")
-      return { ...item, isCurrent: currentVariant === "brutalism" };
-
-    return item;
-  });
-
-  const groupedCommandItems = commandItems.reduce<Record<string, CommandItemConfig[]>>(
-    (groups, item) => {
-      if (!groups[item.group]) {
-        groups[item.group] = [];
+    if (activeSource === null || activeSource === "ai") {
+      if (aiCommands.length > 0) {
+        groups.push({
+          id: "smart-prompts",
+          heading: isSearching ? "AI Prompts" : "Prompt Ideas",
+          commands: aiCommands,
+        });
       }
+    }
 
-      groups[item.group].push(item);
-      return groups;
-    },
-    {}
-  );
+    if (activeSource === null || activeSource === "theme" || activeSource === "system") {
+      if (themeSystemCommands.length > 0) {
+        groups.push({
+          id: "workspace-controls",
+          heading: isSearching ? "Workspace" : "Workspace Controls",
+          commands: themeSystemCommands,
+        });
+      }
+    }
 
-  const orderedGroups = Object.entries(groupedCommandItems)
-    .map(([group, items]) => ({
-      group,
-      groupOrder: items[0]?.groupOrder ?? 0,
-      items,
-    }))
-    .sort((a, b) => a.groupOrder - b.groupOrder);
-
-  const actionHandlers: Record<string, () => void> = {
-    "set-theme-light": () => {
-      setTheme("light");
-      closePalette();
-    },
-    "set-theme-dark": () => {
-      setTheme("dark");
-      closePalette();
-    },
-    "set-theme-system": () => {
-      setTheme("system");
-      closePalette();
-    },
-    "set-theme-default": () => {
-      dispatch(setThemeVariant("default"));
-      closePalette();
-    },
-    "set-theme-glass": () => {
-      dispatch(setThemeVariant("glass"));
-      closePalette();
-    },
-    "set-theme-mouve": () => {
-      dispatch(setThemeVariant("mouve"));
-      closePalette();
-    },
-    "set-theme-brutalism": () => {
-      dispatch(setThemeVariant("brutalism"));
-      closePalette();
-    },
-    "open-workspace-settings": () => {
-      router.push("/");
-      closePalette();
-    },
-  };
+    return groups;
+  }, [activeSource, baseCommands, inputValue, isSearching, searchState.dynamicGroups]);
 
   const handleAction = (key: Key) => {
-    const actionId = commandItems.find((item) => item.id === String(key))?.actionId;
+    const allCommands = [
+      ...baseCommands,
+      ...searchState.allCommands,
+    ];
+    const command = allCommands.find((item) => item.id === String(key));
 
-    if (actionId) {
-      actionHandlers[actionId]?.();
+    if (!command) return;
+
+    if (command.intent === CommandIntent.NAVIGATE) {
+      router.push(command.payload.href);
+      setIsOpen(false);
+      return;
+    }
+
+    command.payload.action();
+
+    if (command.payload.closeOnExecute) {
+      setIsOpen(false);
     }
   };
 
-  useHotkeys("mod+k", (e) => {
-    e.preventDefault();
-    setIsOpen((prev) => !prev);
+  useHotkeys("mod+k", (event) => {
+    event.preventDefault();
+    setIsOpen(!isOpen);
   });
 
   return (
@@ -419,38 +140,66 @@ export const CommandPalette = () => {
 
           if (!open) {
             setInputValue("");
+            setActiveSource(null);
           }
         }}
-        variant="transparent"
+        variant="blur"
       >
         <Command.Container size="lg">
-          <Command.Dialog filter={commandFilter} inputValue={inputValue} onInputChange={setInputValue}>
+          <Command.Dialog filter={() => true} inputValue={inputValue} onInputChange={setInputValue}>
+            <Command.Header className="flex flex-wrap items-center gap-2 px-3 pb-0 pt-3">
+              {COMMAND_SCOPES.map((scope) => {
+                const isActive = activeSource === scope.source;
+
+                return (
+                  <Chip
+                    key={scope.label}
+                    aria-pressed={isActive}
+                    className="cursor-pointer transition-colors"
+                    color={isActive ? "accent" : "default"}
+                    onClick={() => {
+                      setActiveSource((current) => (current === scope.source ? null : scope.source));
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setActiveSource((current) => (current === scope.source ? null : scope.source));
+                      }
+                    }}
+                    role="button"
+                    size="sm"
+                    tabIndex={0}
+                    variant={isActive ? "primary" : "soft"}
+                  >
+                    <Chip.Label>{scope.label}</Chip.Label>
+                    {isActive ? (
+                      <CloseButton
+                        aria-label={`Clear ${scope.label} scope`}
+                        className="-mr-px size-4 [&_svg]:size-3"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setActiveSource(null);
+                        }}
+                      />
+                    ) : null}
+                  </Chip>
+                );
+              })}
+            </Command.Header>
+
             <Command.InputGroup>
               <Command.InputGroup.Prefix>
                 <MagnifierIcon />
               </Command.InputGroup.Prefix>
-              <Command.InputGroup.Input placeholder="Search or jump to" />
+              <Command.InputGroup.Input placeholder="Search posts, tags, categories, or actions..." />
               <Command.InputGroup.ClearButton />
               <Command.InputGroup.Suffix>
-                <Kbd className="text-xs">
-                  <Kbd.Abbr keyValue="command" />
-                  <Kbd.Content>K</Kbd.Content>
+                <Kbd className="text-xs" variant="light">
+                  <Kbd.Content>Esc</Kbd.Content>
                 </Kbd>
               </Command.InputGroup.Suffix>
             </Command.InputGroup>
-            <Command.Header className="flex flex-col items-start gap-2 px-4">
-              <div className="flex flex-wrap gap-1.5">
-                {["Projects", "Tasks", "People", "Documents", "Channels"].map((label) => (
-                  <Chip key={label} color="default" size="sm" variant="soft">
-                    <Chip.Label>{label}</Chip.Label>
-                    <CloseButton
-                      aria-label={`Remove ${label}`}
-                      className="-mr-px size-4 [&_svg]:size-3"
-                    />
-                  </Chip>
-                ))}
-              </div>
-            </Command.Header>
+
             <Command.List
               onAction={handleAction}
               renderEmptyState={() => (
@@ -459,82 +208,120 @@ export const CommandPalette = () => {
                     <EmptyState.Media variant="icon">
                       <MagnifierIcon />
                     </EmptyState.Media>
-                    <EmptyState.Title>No results found</EmptyState.Title>
-                    <EmptyState.Description>Try a different search term.</EmptyState.Description>
+                    <EmptyState.Title>
+                      {isSearching ? "No matching results" : "Start with a shortcut or search term"}
+                    </EmptyState.Title>
+                    <EmptyState.Description>
+                      {isSearching
+                        ? "Try a broader keyword or switch scope."
+                        : "Search posts, categories, tags, themes, and workspace actions in one place."}
+                    </EmptyState.Description>
                   </EmptyState.Header>
                 </EmptyState>
               )}
             >
-              {orderedGroups.map(({ group: groupName, items }) => (
+              {visibleGroups.map((group) => (
                 <Command.Group
-                  key={groupName}
+                  key={group.id}
                   heading={
-                    groupName === "Results (4)" ? (
-                      <span className="flex w-full items-center justify-between">
-                        <span>{groupName}</span>
-                        <button className="text-accent text-xs font-medium" type="button">
-                          See All
-                        </button>
-                      </span>
-                    ) : (
-                      groupName
-                    )
+                    <span className="flex w-full items-center justify-between">
+                      <span>{group.heading}</span>
+                      {group.badge ? (
+                        <Chip color="default" size="sm" variant="soft">
+                          <Chip.Label>{group.badge}</Chip.Label>
+                        </Chip>
+                      ) : null}
+                    </span>
                   }
                 >
-                    {items
-                      .filter((item) => isSearching || item.defaultVisible)
-                      .map((item) => {
-                        const Icon = item.icon;
+                  {group.commands
+                    .filter((command) => isSearching || command.defaultVisible)
+                    .map((command) => {
+                      const Icon = command.icon;
+                      const kind = getCommandKind(command);
+                      const showDescription = shouldShowDescription(command) && Boolean(command.description);
 
-                        return (
-                          <Command.Item
-                            key={item.id}
-                            id={item.id}
-                            textValue={buildSearchText(item.label, item.keywords)}
+                      return (
+                        <Command.Item
+                          key={command.id}
+                          className={showDescription ? "items-start gap-3" : "items-center gap-3"}
+                          id={command.id}
+                          textValue={buildCommandSearchText(command)}
+                        >
+                          <div
+                            className={[
+                              "bg-default flex size-8 shrink-0 items-center justify-center rounded-lg",
+                              showDescription ? "mt-0.5" : "",
+                            ].join(" ")}
                           >
                             <Icon />
-                            <span>{item.label}</span>
-                            {item.isCurrent ? (
-                              <Chip className="ms-auto" color="default" size="sm" variant="soft">
-                                <Chip.Label>Current</Chip.Label>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="truncate font-medium">{command.title}</span>
+                              {command.isActive ? (
+                                <Chip color="success" size="sm" variant="soft">
+                                  <Chip.Label>Current</Chip.Label>
+                                </Chip>
+                              ) : null}
+                            </div>
+                            {showDescription ? (
+                              <div className="text-muted mt-0.5 line-clamp-2 text-xs">
+                                {command.description}
+                              </div>
+                            ) : null}
+                          </div>
+                          <div className="ml-auto flex items-center gap-2 pl-3">
+                            {kind ? (
+                              <Chip color="default" size="sm" variant="soft">
+                                <Chip.Label>{kind}</Chip.Label>
                               </Chip>
                             ) : null}
-                            {item.id === "system-workspace-settings" ? (
-                              <Kbd className="ms-auto text-xs" slot="keyboard">
+                            {command.intent === CommandIntent.NAVIGATE ? (
+                              <Kbd className="text-xs" slot="keyboard" variant="light">
                                 <Kbd.Content>↵</Kbd.Content>
                               </Kbd>
                             ) : null}
-                          </Command.Item>
-                        );
-                      })}
+                          </div>
+                        </Command.Item>
+                      );
+                    })}
                 </Command.Group>
               ))}
+
+              {isSearching && searchState.isLoading ? (
+                <div className="text-muted px-3 py-2 text-sm">Searching across posts, categories, and tags...</div>
+              ) : null}
+
+              {isSearching && searchState.isError ? (
+                <div className="text-danger px-3 py-2 text-sm">
+                  Search is temporarily unavailable. Check the quick search API response.
+                </div>
+              ) : null}
             </Command.List>
-            <Command.Footer className="h-10 justify-between [&_kbd]:h-5 [&_kbd]:text-xs">
+
+            <Command.Footer className="justify-between [&_kbd]:h-5 [&_kbd]:text-xs">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-0.5">
-                    <Kbd className="text-xs">
+                    <Kbd className="text-xs" variant="light">
                       <Kbd.Abbr keyValue="up" />
                     </Kbd>
-                    <Kbd className="text-xs">
+                    <Kbd className="text-xs" variant="light">
                       <Kbd.Abbr keyValue="down" />
                     </Kbd>
                   </div>
                   <span>Navigate</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Kbd>
+                  <Kbd variant="light">
                     <Kbd.Abbr keyValue="enter" />
                   </Kbd>
-                  <span>Select</span>
+                  <span>Open</span>
                 </div>
               </div>
-              <span className="text-muted text-xs">
-                Not what you&apos;re looking for? Try the{" "}
-                <button className="text-accent font-medium" type="button">
-                  Help Center
-                </button>
+              <span className="text-xs">
+                {activeSource ? `Scoped to ${activeSource}` : "Searching everything"}
               </span>
             </Command.Footer>
           </Command.Dialog>

@@ -63,6 +63,26 @@ export const PostDocumentSchema = z.object({
   views: z.number(),
 });
 
+export const UnifiedSearchItemSchema = z.object({
+  title: z.string(),
+  subtitle: z.string().nullable().optional(),
+  url: z.string(),
+  icon: z.string().nullable().optional(),
+  iconColor: z.string().nullable().optional(),
+  shortcut: z.array(z.string()).nullable().optional().default([]),
+});
+
+export const UnifiedSearchGroupSchema = z.object({
+  type: z.string(),
+  label: z.string(),
+  priority: z.number().nullable().optional(),
+  items: z.array(UnifiedSearchItemSchema).nullable().optional().default([]),
+});
+
+export const UnifiedSearchResponseSchema = z.object({
+  groups: z.array(UnifiedSearchGroupSchema).nullable().optional().default([]),
+});
+
 // Post Revision
 export const PostRevisionSchema = z.object({
   id: z.number(),
@@ -81,6 +101,9 @@ export const PostRevisionSchema = z.object({
 export type PostResponse = z.infer<typeof PostResponseSchema>;
 export type PostDocument = z.infer<typeof PostDocumentSchema>;
 export type PostRevision = z.infer<typeof PostRevisionSchema>;
+export type UnifiedSearchItem = z.infer<typeof UnifiedSearchItemSchema>;
+export type UnifiedSearchGroup = z.infer<typeof UnifiedSearchGroupSchema>;
+export type UnifiedSearchResponse = z.infer<typeof UnifiedSearchResponseSchema>;
 
 export interface PostRequest {
   title: string;
@@ -260,6 +283,19 @@ export const postApi = baseApi.injectEndpoints({
     }),
 
     /**
+     * Public: Unified search for command palette
+     */
+    unifiedSearch: builder.query<UnifiedSearchResponse, { keyword?: string }>({
+      query: (params) => ({
+        url: "/api/v1/public/search/unified",
+        params: params.keyword ? { keyword: params.keyword } : undefined,
+      }),
+      rawResponseSchema: ApiResponseSchema(UnifiedSearchResponseSchema),
+      transformResponse: (response: ApiResponse<UnifiedSearchResponse>) => response.data,
+      transformErrorResponse: transformError,
+    }),
+
+    /**
      * User: Like post
      */
     likePost: builder.mutation<void, number>({
@@ -352,6 +388,7 @@ export const {
   useGetPublicPostsQuery,
   useGetPublicPostBySlugQuery,
   useSearchPublicPostsQuery,
+  useUnifiedSearchQuery,
   useLikePostMutation,
   useFavoritePostMutation,
   useGetPostRevisionsQuery,

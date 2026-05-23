@@ -140,7 +140,7 @@ export const Navbar = () => {
               </Kbd>
             </Button>
 
-            <CommandPalette />
+            <CommandPalette isOpen={isOpen} setIsOpen={setIsOpen} />
 
             {mounted ? (
               isAuthenticated ? (
