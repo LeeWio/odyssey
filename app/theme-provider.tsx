@@ -13,22 +13,20 @@ export interface ProvidersProps {
   themeProps?: ThemeProviderProps;
 }
 
-// A helper component to safely inject the base "dark" class
-// since next-themes cannot accept strings with spaces in its value map.
 function BaseThemeApplier() {
   const { resolvedTheme } = useTheme();
+  const themeVariant = useAppSelector(selectThemeVariant);
 
   React.useEffect(() => {
     if (!resolvedTheme) return;
 
-    if (resolvedTheme.includes("dark")) {
-      document.documentElement.classList.add("dark");
-      document.documentElement.classList.remove("light");
-    } else {
-      document.documentElement.classList.add("light");
-      document.documentElement.classList.remove("dark");
-    }
-  }, [resolvedTheme]);
+    const colorMode = resolvedTheme.includes("dark") ? "dark" : "light";
+    const themeName = themeVariant === "default" ? colorMode : `${themeVariant}-${colorMode}`;
+
+    document.documentElement.setAttribute("data-theme", themeName);
+    document.documentElement.classList.toggle("dark", colorMode === "dark");
+    document.documentElement.classList.toggle("light", colorMode !== "dark");
+  }, [resolvedTheme, themeVariant]);
 
   return null;
 }

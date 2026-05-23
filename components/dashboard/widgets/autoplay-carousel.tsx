@@ -10,7 +10,7 @@ export function AutoplayCarousel() {
   const plugin = useMemo(() => Autoplay({ delay: 2000, stopOnInteraction: true }), []);
 
   return (
-    <div className="w-full max-w-xs col-span-1 sm:col-span-2 row-span-1">
+    <div className="col-span-1 row-span-1 w-full max-w-xs sm:col-span-2">
       <Carousel opts={{ loop: true }} plugins={[plugin]}>
         <Carousel.Content>
           {Array.from({ length: 5 }, (_, i) => (

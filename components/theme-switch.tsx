@@ -11,7 +11,7 @@ export const ModeSwitch = () => {
   const mounted = useMounted();
 
   if (!mounted) {
-    return <Skeleton className="h-10 w-31 rounded-medium" />;
+    return <Skeleton className="rounded-medium h-10 w-31" />;
   }
 
   return (
@@ -38,7 +38,7 @@ export const ModeSwitch = () => {
 
 export const useThemeSwitch = () => {
   const VariantSwitch = () => (
-    <div className="text-sm text-default-500">Theme Variant Switcher Placeholder</div>
+    <div className="text-default-500 text-sm">Theme Variant Switcher Placeholder</div>
   );
 
   return { ModeSwitch, VariantSwitch };

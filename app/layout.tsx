@@ -62,7 +62,7 @@ export default async function RootLayout({
     >
       <body
         className={clsx(
-          "min-h-screen text-foreground bg-background font-sans antialiased",
+          "text-foreground bg-background min-h-screen font-sans antialiased",
           fontSans.variable
         )}
       >
@@ -71,11 +71,11 @@ export default async function RootLayout({
             <ThemeProvider>
               <ThemeCSSLoader />
               <Toast.Provider />
-              <div className="relative flex flex-col h-screen ">
+              <div className="relative flex h-screen flex-col">
                 <Navbar />
                 <Dashboard />
                 <main className="w-full grow">{children}</main>
-                <footer className="w-full flex items-center justify-center py-3">
+                <footer className="flex w-full items-center justify-center py-3">
                   <a
                     className="flex items-center gap-1 text-current no-underline"
                     href="https://heroui.com?utm_source=next-app-template"

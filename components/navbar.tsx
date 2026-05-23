@@ -1,21 +1,11 @@
 "use client";
 
-import { Kbd, Button, Chip, CloseButton, Avatar, Dropdown, Label } from "@heroui/react";
+import { Kbd, Button, Avatar, Dropdown, Label } from "@heroui/react";
 import { useRef, useState } from "react";
-import { Navbar as HerouiNavbar, Command, EmptyState } from "@heroui-pro/react";
+import { Navbar as HerouiNavbar } from "@heroui-pro/react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import {
-  ClockIcon,
-  GearIcon,
-  MagnifierIcon,
-  SearchIcon,
-  PersonsIcon,
-  SparklesIcon,
-  FileTextIcon,
-  ArrowRightFromSquareIcon,
-} from "./icons";
-import { useHotkeys } from "react-hotkeys-hook";
+import { GearIcon, SearchIcon, PersonsIcon, ArrowRightFromSquareIcon } from "./icons";
 import { useMounted } from "@/hooks/use-mounted";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import {
@@ -27,6 +17,7 @@ import {
 import { baseApi } from "@/lib/features/api/base-api";
 import { SignUp } from "./auth/sign-up";
 import { LogIn } from "./auth/log-in";
+import { CommandPalette } from "./command-palette";
 
 const BrandLogo = () => (
   <svg fill="none" height="22" viewBox="0 0 83 26" xmlns="http://www.w3.org/2000/svg">
@@ -58,125 +49,6 @@ const navItems = [
   { href: "#pro", label: "Pro" },
   { href: "#blog", label: "Blog" },
 ];
-
-function CommandPalette() {
-  return (
-    <>
-      <Command.InputGroup>
-        <Command.InputGroup.Prefix>
-          <MagnifierIcon />
-        </Command.InputGroup.Prefix>
-        <Command.InputGroup.Input placeholder="Search or jump to" />
-        <Command.InputGroup.ClearButton />
-        <Command.InputGroup.Suffix>
-          <Kbd className="text-xs">
-            <Kbd.Abbr keyValue="command" />
-            <Kbd.Content>K</Kbd.Content>
-          </Kbd>
-        </Command.InputGroup.Suffix>
-      </Command.InputGroup>
-      <Command.Header className="flex flex-col items-start gap-2 px-4">
-        <div className="flex flex-wrap gap-1.5">
-          {["Projects", "Tasks", "People", "Documents", "Channels"].map((label) => (
-            <Chip key={label} color="default" size="sm" variant="soft">
-              <Chip.Label>{label}</Chip.Label>
-              <CloseButton
-                aria-label={`Remove ${label}`}
-                className="-mr-px size-4 [&_svg]:size-3"
-              />
-            </Chip>
-          ))}
-        </div>
-      </Command.Header>
-      <Command.List
-        renderEmptyState={() => (
-          <EmptyState size="sm">
-            <EmptyState.Header>
-              <EmptyState.Media variant="icon">
-                <MagnifierIcon />
-              </EmptyState.Media>
-              <EmptyState.Title>No results found</EmptyState.Title>
-              <EmptyState.Description>Try a different search term.</EmptyState.Description>
-            </EmptyState.Header>
-          </EmptyState>
-        )}
-      >
-        <Command.Group heading="Smart Prompt Examples">
-          <Command.Item textValue="Summarize this week's progress">
-            <SparklesIcon />
-            <span>Summarize this week&apos;s progress</span>
-          </Command.Item>
-          <Command.Item textValue="Create a task for the team">
-            <SparklesIcon />
-            <span>Create a task for the team</span>
-          </Command.Item>
-          <Command.Item textValue="Draft a project brief">
-            <SparklesIcon />
-            <span>Draft a project brief</span>
-          </Command.Item>
-          <Command.Item textValue="Schedule a standup meeting">
-            <SparklesIcon />
-            <span>Schedule a standup meeting</span>
-          </Command.Item>
-        </Command.Group>
-        <Command.Group
-          heading={
-            <span className="flex w-full items-center justify-between">
-              <span>Results (4)</span>
-              <button className="text-accent text-xs font-medium" type="button">
-                See All
-              </button>
-            </span>
-          }
-        >
-          <Command.Item textValue="View recent activity">
-            <ClockIcon />
-            <span>View recent activity</span>
-          </Command.Item>
-          <Command.Item textValue="Open project roadmap">
-            <FileTextIcon />
-            <span>Open project roadmap</span>
-          </Command.Item>
-          <Command.Item textValue="Browse team directory">
-            <PersonsIcon />
-            <span>Browse team directory</span>
-          </Command.Item>
-          <Command.Item textValue="Manage workspace settings">
-            <GearIcon />
-            <span>Manage workspace settings</span>
-          </Command.Item>
-        </Command.Group>
-      </Command.List>
-      <Command.Footer className="h-10 justify-between [&_kbd]:h-5 [&_kbd]:text-xs">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-0.5">
-              <Kbd className="text-xs">
-                <Kbd.Abbr keyValue="up" />
-              </Kbd>
-              <Kbd className="text-xs">
-                <Kbd.Abbr keyValue="down" />
-              </Kbd>
-            </div>
-            <span>Navigate</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Kbd>
-              <Kbd.Abbr keyValue="enter" />
-            </Kbd>
-            <span>Select</span>
-          </div>
-        </div>
-        <span className="text-muted text-xs">
-          Not what you&apos;re looking for? Try the{" "}
-          <button className="text-accent font-medium" type="button">
-            Help Center
-          </button>
-        </span>
-      </Command.Footer>
-    </>
-  );
-}
 
 export const Navbar = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -214,11 +86,6 @@ export const Navbar = () => {
     },
     { scope: navbarRef, dependencies: [mounted] }
   );
-
-  useHotkeys("mod+k", (e) => {
-    e.preventDefault();
-    setIsOpen((prev) => !prev);
-  });
 
   const handleSwitchToSignUp = () => {
     console.log("Switching to Sign Up");
@@ -273,15 +140,7 @@ export const Navbar = () => {
               </Kbd>
             </Button>
 
-            <Command>
-              <Command.Backdrop isOpen={isOpen} onOpenChange={setIsOpen} variant="transparent">
-                <Command.Container size="lg">
-                  <Command.Dialog>
-                    <CommandPalette />
-                  </Command.Dialog>
-                </Command.Container>
-              </Command.Backdrop>
-            </Command>
+            <CommandPalette />
 
             {mounted ? (
               isAuthenticated ? (
@@ -303,7 +162,7 @@ export const Navbar = () => {
                         </Avatar>
                         <div className="flex flex-col gap-0">
                           <p className="text-sm leading-5 font-medium">{username}</p>
-                          <p className="text-xs leading-none text-muted">
+                          <p className="text-muted text-xs leading-none">
                             {email || "User Account"}
                           </p>
                         </div>
@@ -326,26 +185,26 @@ export const Navbar = () => {
                       <Dropdown.Item id="settings" textValue="Settings">
                         <div className="flex w-full items-center justify-between gap-2">
                           <Label>Settings</Label>
-                          <GearIcon className="size-3.5 text-muted" />
+                          <GearIcon className="text-muted size-3.5" />
                         </div>
                       </Dropdown.Item>
                       <Dropdown.Item id="new-project" textValue="New project">
                         <div className="flex w-full items-center justify-between gap-2">
                           <Label>Create Team</Label>
-                          <PersonsIcon className="size-3.5 text-muted" />
+                          <PersonsIcon className="text-muted size-3.5" />
                         </div>
                       </Dropdown.Item>
                       <Dropdown.Item id="logout" textValue="Logout" variant="danger">
                         <div className="flex w-full items-center justify-between gap-2">
                           <Label>Log Out</Label>
-                          <ArrowRightFromSquareIcon className="size-3.5 text-danger" />
+                          <ArrowRightFromSquareIcon className="text-danger size-3.5" />
                         </div>
                       </Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown.Popover>
                 </Dropdown>
               ) : (
-                <div className="navbar-auth flex items-center gap-3 ml-2">
+                <div className="navbar-auth ml-2 flex items-center gap-3">
                   <Button size="sm" variant="ghost" onPress={() => setIsLoginOpen(!isLoginOpen)}>
                     Log in
                   </Button>
@@ -355,7 +214,7 @@ export const Navbar = () => {
                 </div>
               )
             ) : (
-              <div className="navbar-auth flex items-center gap-3 ml-2 opacity-0">
+              <div className="navbar-auth ml-2 flex items-center gap-3 opacity-0">
                 <Button size="sm" variant="ghost">
                   Log in
                 </Button>

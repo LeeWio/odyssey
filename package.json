@@ -10,14 +10,11 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@gravity-ui/icons": "^2.18.0",
     "@gsap/react": "^2.1.2",
     "@heroui-pro/react": "^1.0.0-beta.4",
     "@heroui/react": "^3.0.5",
     "@heroui/styles": "^3.0.5",
-    "@iconify/react": "^6.0.2",
     "@number-flow/react": ">=0.5.0",
-    "@reduxjs/toolkit": "^2.12.0",
     "@splinetool/react-spline": "^4.1.0",
     "embla-carousel": ">=8.6.0",
     "embla-carousel-autoplay": "^8.6.0",
@@ -30,7 +27,6 @@
     "react": "19.2.4",
     "react-aria-components": ">=1.17.0",
     "react-dom": "19.2.4",
-    "react-redux": "^9.3.0",
     "react-hotkeys-hook": "^5.3.2",
     "react-resizable-panels": ">=4.10.0",
     "recharts": ">=2.0.0",
@@ -47,6 +43,7 @@
     "eslint-config-next": "16.2.6",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.3",
+    "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

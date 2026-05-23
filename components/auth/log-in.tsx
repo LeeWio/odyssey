@@ -144,7 +144,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
             <Modal.Body className="scrollbar-none [&::-webkit-scrollbar]:hidden">
               <div ref={containerRef} className="-mx-2 px-2 sm:-mx-3 sm:px-3">
                 {step === 1 ? (
-                  <form className="flex flex-col gap-y-3 w-full" onSubmit={handleEmailSubmit}>
+                  <form className="flex w-full flex-col gap-y-3" onSubmit={handleEmailSubmit}>
                     <div className="flex flex-col gap-4">
                       <TextField isRequired name="email" type="email" isInvalid={!!emailError}>
                         <Label>Email</Label>
@@ -183,14 +183,14 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                     </div>
                     <p className="text-small mt-3 text-center">
                       Need to create an account?&nbsp;
-                      <Link className="no-underline cursor-pointer" onPress={onSwitchToSignUp}>
+                      <Link className="cursor-pointer no-underline" onPress={onSwitchToSignUp}>
                         Sign Up
                       </Link>
                     </p>
                   </form>
                 ) : (
                   <div className="flex flex-col gap-y-3">
-                    <div className="flex flex-col gap-2 mb-2">
+                    <div className="mb-2 flex flex-col gap-2">
                       {loginError && (
                         <Alert status="danger">
                           <Alert.Indicator />
@@ -200,13 +200,13 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                           </Alert.Content>
                         </Alert>
                       )}
-                      <p className="text-sm text-default-500">
+                      <p className="text-default-500 text-sm">
                         Enter the 6-digit verification code sent to{" "}
-                        <span className="font-medium text-foreground">{email}</span>.
+                        <span className="text-foreground font-medium">{email}</span>.
                       </p>
                     </div>
 
-                    <div className="flex justify-center w-full mb-4">
+                    <div className="mb-4 flex w-full justify-center">
                       <InputOTP
                         maxLength={6}
                         pattern={REGEXP_ONLY_DIGITS}

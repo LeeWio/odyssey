@@ -29,8 +29,11 @@ export function useRealTime() {
     day: "numeric",
   });
 
+  const day = time.getDate().toString();
+  const weekdayName = time.toLocaleDateString("en-US", { weekday: "short" });
+
   const hours = time.getHours().toString().padStart(2, "0");
   const minutes = time.getMinutes().toString().padStart(2, "0");
 
-  return { formattedDate, hours, minutes };
+  return { formattedDate, day, weekdayName, hours, minutes };
 }

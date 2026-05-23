@@ -31,6 +31,6 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a0b] p-6 gap-12"></main>
+    <main className="flex min-h-screen flex-col items-center justify-center gap-12 p-6"></main>
   );
 }

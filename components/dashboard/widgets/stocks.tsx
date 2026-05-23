@@ -1,12 +1,11 @@
 "use client";
 
-import { SquareChartBar, Target } from "@gravity-ui/icons";
 import { KPI, TrendChip, Segment } from "@heroui-pro/react";
 import { Skeleton } from "@heroui/react";
 import { useGetMarketIndexBySymbolQuery, MarketPeriod } from "@/lib/features/market";
 import { useState } from "react";
 import type { Key } from "react-aria-components";
-import { ArrowDownIcon, ArrowUpIcon } from "@/components/icons";
+import { ArrowDownIcon, ArrowUpIcon, FileTextIcon, TargetIcon } from "@/components/icons";
 
 const mapSparkline = (data?: number[]) => {
   if (!data || data.length === 0) return [];
@@ -44,7 +43,7 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
   if (isLoading && !indexData) {
     return (
       <KPI>
-        <KPI.Header className="flex justify-between items-center">
+        <KPI.Header className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Skeleton className="size-4 rounded-full" />
             <Skeleton className="h-4 w-20 rounded" />
@@ -54,7 +53,7 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
         <KPI.Content className="grid-cols-[1fr_1fr] items-end">
           <div className="flex flex-col gap-2">
             <Skeleton className="h-9 w-28 rounded" />
-            <div className="flex items-center gap-1.5 mt-1">
+            <div className="mt-1 flex items-center gap-1.5">
               <Skeleton className="h-6 w-20 rounded-full" />
             </div>
           </div>
@@ -68,7 +67,7 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
 
   return (
     <KPI>
-      <KPI.Header className="flex items-center justify-between w-full">
+      <KPI.Header className="flex w-full items-center justify-between">
         <div className="flex items-center gap-1">
           <Icon className="text-muted size-4" />
           <KPI.Title>{config.title}</KPI.Title>
@@ -115,14 +114,14 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
 
 export const Stocks = () => {
   const configs: StockConfig[] = [
-    { symbol: ".ixic", icon: Target, color: "var(--color-accent)", title: "NASDAQ" },
-    { symbol: ".inx", icon: Target, color: "var(--color-success)", title: "S&P 500" },
-    { symbol: "sh000001", icon: SquareChartBar, color: "var(--color-danger)", title: "上证指数" },
-    { symbol: "sz399001", icon: SquareChartBar, color: "var(--color-warning)", title: "深证成指" },
+    { symbol: ".ixic", icon: TargetIcon, color: "var(--color-accent)", title: "NASDAQ" },
+    { symbol: ".inx", icon: TargetIcon, color: "var(--color-success)", title: "S&P 500" },
+    { symbol: "sh000001", icon: FileTextIcon, color: "var(--color-danger)", title: "上证指数" },
+    { symbol: "sz399001", icon: FileTextIcon, color: "var(--color-warning)", title: "深证成指" },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 col-span-full">
+    <div className="col-span-full grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       {configs.map((config) => (
         <StockWidget key={config.symbol} config={config} />
       ))}

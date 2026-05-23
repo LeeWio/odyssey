@@ -104,7 +104,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
               <Modal.Heading className="mb-4 text-xl font-medium">Sign Up</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="scrollbar-none [&::-webkit-scrollbar]:hidden">
-              <div ref={containerRef} className="-mx-2 px-2 sm:-mx-3 sm:px-3 ">
+              <div ref={containerRef} className="-mx-2 px-2 sm:-mx-3 sm:px-3">
                 {isFormVisible ? (
                   <div className="flex flex-col gap-y-3">
                     <Form
@@ -202,7 +202,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-y-2 w-full">
+                  <div className="flex w-full flex-col gap-y-2">
                     <Button fullWidth variant="primary" onPress={() => switchView(true)}>
                       <EnvelopeIcon className="pointer-events-none text-2xl" />
                       Sign up with Email
@@ -220,7 +220,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                     </div>
                     <p className="text-small mt-3 text-center">
                       Already have an account?&nbsp;
-                      <Link className="no-underline cursor-pointer" onPress={onSwitchToLogIn}>
+                      <Link className="cursor-pointer no-underline" onPress={onSwitchToLogIn}>
                         Log In
                       </Link>
                     </p>
