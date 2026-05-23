@@ -13,6 +13,8 @@ import {
 import { Kbd, Button, Chip, CloseButton, Avatar, Dropdown, Label } from "@heroui/react";
 import { useRef, useState } from "react";
 import { Navbar as HerouiNavbar, Command, EmptyState } from "@heroui-pro/react";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 import { SearchIcon } from "./icons";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useMounted } from "@/hooks/use-mounted";
@@ -178,7 +180,8 @@ function CommandPalette() {
 }
 
 export const Navbar = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef < HTMLDivElement > (null);
+  const navbarRef = useRef < HTMLElement > (null);
 
   const [currentItem, setCurrentItem] = useState("#docs");
   const [isOpen, setIsOpen] = useState(false);
@@ -192,6 +195,26 @@ export const Navbar = () => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
   const email = useAppSelector(selectUserEmail);
+
+  useGSAP(
+    () => {
+      if (!mounted) return;
+
+      gsap.fromTo(
+        [".navbar-brand", ".navbar-item", ".navbar-search", ".navbar-auth"],
+        { autoAlpha: 0, y: -12 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.06,
+          ease: "power2.out",
+          clearProps: "all",
+        }
+      );
+    },
+    { scope: navbarRef, dependencies: [mounted] }
+  );
 
   useHotkeys("mod+k", (e) => {
     e.preventDefault();
@@ -212,10 +235,10 @@ export const Navbar = () => {
 
   return (
     <>
-      <HerouiNavbar hideOnScroll parentRef={scrollRef} position="sticky">
+      <HerouiNavbar ref={navbarRef} hideOnScroll parentRef={scrollRef} position="sticky">
         <HerouiNavbar.Header>
           <HerouiNavbar.MenuToggle className="md:hidden" />
-          <HerouiNavbar.Brand>
+          <HerouiNavbar.Brand className="navbar-brand">
             <BrandLogo />
             <span className="sr-only">HeroUI</span>
           </HerouiNavbar.Brand>
@@ -223,7 +246,7 @@ export const Navbar = () => {
             {navItems.map((item) => (
               <HerouiNavbar.Item
                 key={item.href}
-                className="px-2"
+                className="navbar-item px-2"
                 href={item.href}
                 isCurrent={item.href === currentItem}
                 onClick={(e) => {
@@ -241,7 +264,7 @@ export const Navbar = () => {
               variant="tertiary"
               onPress={() => setIsOpen(true)}
               size="sm"
-              className="text-muted"
+              className="navbar-search text-muted"
             >
               <SearchIcon />
               Search docs…
@@ -263,15 +286,13 @@ export const Navbar = () => {
 
             {mounted ? (
               isAuthenticated ? (
-                <Dropdown>
+                <Dropdown className="navbar-auth">
                   <Dropdown.Trigger className="rounded-full">
-                    <Button variant="transparent" isIconOnly className="min-w-8 w-8 h-8 p-0 rounded-full border-none">
-                      <Avatar size="sm">
-                        <Avatar.Fallback delayMs={600}>
-                          {username ? username.charAt(0).toUpperCase() : "U"}
-                        </Avatar.Fallback>
-                      </Avatar>
-                    </Button>
+                    <Avatar size="sm">
+                      <Avatar.Fallback delayMs={600}>
+                        {username ? username.charAt(0).toUpperCase() : "U"}
+                      </Avatar.Fallback>
+                    </Avatar>
                   </Dropdown.Trigger>
                   <Dropdown.Popover>
                     <div className="px-3 pt-3 pb-1">
@@ -325,7 +346,7 @@ export const Navbar = () => {
                   </Dropdown.Popover>
                 </Dropdown>
               ) : (
-                <div className="flex items-center gap-3 ml-2">
+                <div className="navbar-auth flex items-center gap-3 ml-2">
                   <Button size="sm" variant="ghost" onPress={() => setIsLoginOpen(!isLoginOpen)}>
                     Log in
                   </Button>
@@ -335,7 +356,7 @@ export const Navbar = () => {
                 </div>
               )
             ) : (
-              <div className="flex items-center gap-3 ml-2 opacity-0">
+              <div className="navbar-auth flex items-center gap-3 ml-2 opacity-0">
                 <Button size="sm" variant="ghost">
                   Log in
                 </Button>
