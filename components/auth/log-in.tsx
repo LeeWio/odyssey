@@ -104,8 +104,16 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
 
     gsap.fromTo(
       target,
-      { autoAlpha: 0, y: step === 2 ? 12 : -12 },
-      { autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out", stagger: 0.04, clearProps: "opacity,visibility,transform" }
+      { autoAlpha: 0, y: step === 2 ? 8 : -8 },
+      { 
+        autoAlpha: 1, 
+        y: 0, 
+        duration: 0.35, 
+        ease: "power2.out", 
+        stagger: 0.03, 
+        clearProps: "all",
+        overwrite: "auto"
+      }
     );
   }, { dependencies: [step], scope: containerRef });
 

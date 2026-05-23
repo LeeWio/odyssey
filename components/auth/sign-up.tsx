@@ -75,10 +75,19 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
     const target = containerRef.current?.firstElementChild?.children;
     if (!target || target.length === 0) return;
 
+    // Use a clean, non-elastic power2.out for maximum smoothness
     gsap.fromTo(
       target,
-      { autoAlpha: 0, y: isFormVisible ? 12 : -12 },
-      { autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out", stagger: 0.04, clearProps: "opacity,visibility,transform" }
+      { autoAlpha: 0, y: isFormVisible ? 8 : -8 },
+      { 
+        autoAlpha: 1, 
+        y: 0, 
+        duration: 0.35, 
+        ease: "power2.out", 
+        stagger: 0.03, 
+        clearProps: "all",
+        overwrite: "auto"
+      }
     );
   }, { dependencies: [isFormVisible], scope: containerRef });
 
