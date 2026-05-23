@@ -48,107 +48,37 @@ export const GithubIcon: React.FC<IconSvgProps> = ({ size = 24, width, height, .
   );
 };
 
-export const MoonFilledIcon = ({ size = 24, width, height, ...props }: IconSvgProps) => (
-  <svg
-    aria-hidden="true"
-    focusable="false"
-    height={size || height}
-    role="presentation"
-    viewBox="0 0 24 24"
-    width={size || width}
-    {...props}
-  >
-    <path
-      d="M21.53 15.93c-.16-.27-.61-.69-1.73-.49a8.46 8.46 0 01-1.88.13 8.409 8.409 0 01-5.91-2.82 8.068 8.068 0 01-1.44-8.66c.44-1.01.13-1.54-.09-1.76s-.77-.55-1.83-.11a10.318 10.318 0 00-6.32 10.21 10.475 10.475 0 007.04 8.99 10 10 0 002.89.55c.16.01.32.02.48.02a10.5 10.5 0 008.47-4.27c.67-.93.49-1.519.32-1.79z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
-export const SunFilledIcon = ({ size = 24, width, height, ...props }: IconSvgProps) => (
-  <svg
-    aria-hidden="true"
-    focusable="false"
-    height={size || height}
-    role="presentation"
-    viewBox="0 0 24 24"
-    width={size || width}
-    {...props}
-  >
-    <g fill="currentColor">
-      <path d="M19 12a7 7 0 11-7-7 7 7 0 017 7z" />
-      <path d="M12 22.96a.969.969 0 01-1-.96v-.08a1 1 0 012 0 1.038 1.038 0 01-1 1.04zm7.14-2.82a1.024 1.024 0 01-.71-.29l-.13-.13a1 1 0 011.41-1.41l.13.13a1 1 0 010 1.41.984.984 0 01-.7.29zm-14.28 0a1.024 1.024 0 01-.71-.29 1 1 0 010-1.41l.13-.13a1 1 0 011.41 1.41l-.13.13a1 1 0 01-.7.29zM22 13h-.08a1 1 0 010-2 1.038 1.038 0 011.04 1 .969.969 0 01-.96 1zM2.08 13H2a1 1 0 010-2 1.038 1.038 0 011.04 1 .969.969 0 01-.96 1zm16.93-7.01a1.024 1.024 0 01-.71-.29 1 1 0 010-1.41l.13-.13a1 1 0 011.41 1.41l-.13.13a.984.984 0 01-.7.29zm-14.02 0a1.024 1.024 0 01-.71-.29l-.13-.14a1 1 0 011.41-1.41l.13.13a1 1 0 010 1.41.97.97 0 01-.7.3zM12 3.04a.969.969 0 01-1-.96V2a1 1 0 012 0 1.038 1.038 0 01-1 1.04z" />
-    </g>
-  </svg>
-);
-
-export const HeartFilledIcon = ({ size = 24, width, height, ...props }: IconSvgProps) => (
-  <svg
-    aria-hidden="true"
-    focusable="false"
-    height={size || height}
-    role="presentation"
-    viewBox="0 0 24 24"
-    width={size || width}
-    {...props}
-  >
-    <path
-      d="M12.62 20.81c-.34.12-.9.12-1.24 0C8.48 19.82 2 15.69 2 8.69 2 5.6 4.49 3.1 7.56 3.1c1.82 0 3.43.88 4.44 2.24a5.53 5.53 0 0 1 4.44-2.24C19.51 3.1 22 5.6 22 8.69c0 7-6.48 11.13-9.38 12.12Z"
-      fill="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={1.5}
-    />
-  </svg>
-);
-
 export const SearchIcon = (props: IconSvgProps) => (
   <svg
-    aria-hidden="true"
-    fill="none"
-    focusable="false"
-    height="1em"
-    role="presentation"
-    viewBox="0 0 24 24"
-    width="1em"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 19.4434 19.2676"
     {...props}
   >
-    <path
-      d="M11.5 21C16.7467 21 21 16.7467 21 11.5C21 6.25329 16.7467 2 11.5 2C6.25329 2 2 6.25329 2 11.5C2 16.7467 6.25329 21 11.5 21Z"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-    />
-    <path
-      d="M22 22L20 20"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-    />
+    <g>
+      <rect height={19.2676} opacity={0} width={19.4434} x={0} y={0} />
+      <path
+        d="M0 7.79297C0 12.0898 3.49609 15.5859 7.79297 15.5859C9.49219 15.5859 11.0449 15.0391 12.3242 14.1211L17.1289 18.9355C17.3535 19.1602 17.6465 19.2676 17.959 19.2676C18.623 19.2676 19.082 18.7695 19.082 18.1152C19.082 17.8027 18.9648 17.5195 18.7598 17.3145L13.9844 12.5098C14.9902 11.2012 15.5859 9.57031 15.5859 7.79297C15.5859 3.49609 12.0898 0 7.79297 0C3.49609 0 0 3.49609 0 7.79297ZM1.66992 7.79297C1.66992 4.41406 4.41406 1.66992 7.79297 1.66992C11.1719 1.66992 13.916 4.41406 13.916 7.79297C13.916 11.1719 11.1719 13.916 7.79297 13.916C4.41406 13.916 1.66992 11.1719 1.66992 7.79297Z"
+        fill="currentColor"
+        fillOpacity={0.85}
+      />
+    </g>
   </svg>
 );
 
 export const PlayFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
   <svg
-    aria-hidden="true"
-    height={size || height}
+    xmlns="http://www.w3.org/2000/svg"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 16.2891 16.416"
-    width={size || width}
     {...props}
   >
-    <defs>
-      <linearGradient id="play-gradient" gradientUnits="userSpaceOnUse" x1="5" x2="5" y2="16.4062">
-        <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
-        <stop offset="1" stopColor="currentColor" />
-      </linearGradient>
-    </defs>
     <g>
-      <rect height="16.416" opacity="0" width="16.2891" x="0" y="0" />
+      <rect height={16.416} opacity={0} width={16.2891} x={0} y={0} />
       <path
         d="M1.70898 14.9805C1.70898 15.9473 2.26562 16.4062 2.92969 16.4062C3.22266 16.4062 3.52539 16.3086 3.82812 16.1523L15.2051 9.50195C16.0156 9.0332 16.2891 8.71094 16.2891 8.20312C16.2891 7.68555 16.0156 7.37305 15.2051 6.9043L3.82812 0.253906C3.52539 0.0878906 3.22266 0 2.92969 0C2.26562 0 1.70898 0.458984 1.70898 1.42578Z"
-        fill="url(#play-gradient)"
+        fill="currentColor"
+        fillOpacity={0.85}
       />
     </g>
   </svg>
@@ -156,23 +86,17 @@ export const PlayFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height,
 
 export const PauseFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
   <svg
-    aria-hidden="true"
-    height={size || height}
+    xmlns="http://www.w3.org/2000/svg"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 12.2754 16.1621"
-    width={size || width}
     {...props}
   >
-    <defs>
-      <linearGradient id="pause-gradient" gradientUnits="userSpaceOnUse" x1="5" x2="5" y2="16.1523">
-        <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
-        <stop offset="1" stopColor="currentColor" />
-      </linearGradient>
-    </defs>
     <g>
-      <rect height="16.1621" opacity="0" width="12.2754" x="0" y="0" />
+      <rect height={16.1621} opacity={0} width={12.2754} x={0} y={0} />
       <path
         d="M1.29883 16.1523L3.52539 16.1523C4.375 16.1523 4.82422 15.7031 4.82422 14.8438L4.82422 1.29883C4.82422 0.400391 4.375 0 3.52539 0L1.29883 0C0.449219 0 0 0.439453 0 1.29883L0 14.8438C0 15.7031 0.449219 16.1523 1.29883 16.1523ZM8.39844 16.1523L10.6152 16.1523C11.4746 16.1523 11.9141 15.7031 11.9141 14.8438L11.9141 1.29883C11.9141 0.400391 11.4746 0 10.6152 0L8.39844 0C7.53906 0 7.08984 0.439453 7.08984 1.29883L7.08984 14.8438C7.08984 15.7031 7.53906 16.1523 8.39844 16.1523Z"
-        fill="url(#pause-gradient)"
+        fill="currentColor"
+        fillOpacity={0.85}
       />
     </g>
   </svg>
@@ -180,29 +104,17 @@ export const PauseFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height
 
 export const ForwardFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
   <svg
-    aria-hidden="true"
-    height={size || height}
+    xmlns="http://www.w3.org/2000/svg"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 28.252 14.9316"
-    width={size || width}
     {...props}
   >
-    <defs>
-      <linearGradient
-        id="forward-gradient"
-        gradientUnits="userSpaceOnUse"
-        x1="5"
-        x2="5"
-        y2="14.9219"
-      >
-        <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
-        <stop offset="1" stopColor="currentColor" />
-      </linearGradient>
-    </defs>
     <g>
-      <rect height="14.9316" opacity="0" width="28.252" x="0" y="0" />
+      <rect height={14.9316} opacity={0} width={28.252} x={0} y={0} />
       <path
         d="M1.71875 13.5645C1.71875 14.4824 2.25586 14.9219 2.88086 14.9219C3.16406 14.9219 3.44727 14.834 3.73047 14.6777L13.9941 8.70117C14.7266 8.27148 15.0098 7.94922 15.0098 7.46094C15.0098 6.97266 14.7266 6.65039 13.9941 6.2207L3.73047 0.244141C3.44727 0.078125 3.16406 0 2.88086 0C2.25586 0 1.71875 0.429688 1.71875 1.34766ZM14.9609 13.5645C14.9609 14.4824 15.4883 14.9219 16.123 14.9219C16.3965 14.9219 16.6895 14.834 16.9727 14.6777L27.2266 8.70117C27.9688 8.27148 28.252 7.94922 28.252 7.46094C28.252 6.97266 27.9688 6.65039 27.2266 6.2207L16.9727 0.244141C16.6895 0.078125 16.3965 0 16.123 0C15.4883 0 14.9609 0.429688 14.9609 1.34766Z"
-        fill="url(#forward-gradient)"
+        fill="currentColor"
+        fillOpacity={0.85}
       />
     </g>
   </svg>
@@ -215,29 +127,17 @@ export const BackwardFillIcon: React.FC<IconSvgProps> = ({
   ...props
 }) => (
   <svg
-    aria-hidden="true"
-    height={size || height}
-    viewBox="0 0 28.252 14.9316"
-    width={size || width}
+    xmlns="http://www.w3.org/2000/svg"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 28.9746 14.9316"
     {...props}
   >
-    <defs>
-      <linearGradient
-        id="backward-gradient"
-        gradientUnits="userSpaceOnUse"
-        x1="5"
-        x2="5"
-        y2="14.9219"
-      >
-        <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
-        <stop offset="1" stopColor="currentColor" />
-      </linearGradient>
-    </defs>
-    <g transform="scale(-1, 1)" transformOrigin="center">
-      <rect height="14.9316" opacity="0" width="28.252" x="0" y="0" />
+    <g>
+      <rect height={14.9316} opacity={0} width={28.9746} x={0} y={0} />
       <path
-        d="M1.71875 13.5645C1.71875 14.4824 2.25586 14.9219 2.88086 14.9219C3.16406 14.9219 3.44727 14.834 3.73047 14.6777L13.9941 8.70117C14.7266 8.27148 15.0098 7.94922 15.0098 7.46094C15.0098 6.97266 14.7266 6.65039 13.9941 6.2207L3.73047 0.244141C3.44727 0.078125 3.16406 0 2.88086 0C2.25586 0 1.71875 0.429688 1.71875 1.34766ZM14.9609 13.5645C14.9609 14.4824 15.4883 14.9219 16.123 14.9219C16.3965 14.9219 16.6895 14.834 16.9727 14.6777L27.2266 8.70117C27.9688 8.27148 28.252 7.94922 28.252 7.46094C28.252 6.97266 27.9688 6.65039 27.2266 6.2207L16.9727 0.244141C16.6895 0.078125 16.3965 0 16.123 0C15.4883 0 14.9609 0.429688 14.9609 1.34766Z"
-        fill="url(#backward-gradient)"
+        d="M26.5332 13.5645L26.5332 1.34766C26.5332 0.429688 25.9961 0 25.3711 0C25.0879 0 24.8047 0.078125 24.5215 0.244141L14.2578 6.2207C13.5254 6.65039 13.2422 6.97266 13.2422 7.46094C13.2422 7.94922 13.5254 8.27148 14.2578 8.70117L24.5215 14.6777C24.8047 14.834 25.0879 14.9219 25.3711 14.9219C25.9961 14.9219 26.5332 14.4824 26.5332 13.5645ZM13.291 13.5645L13.291 1.34766C13.291 0.429688 12.7637 0 12.1289 0C11.8555 0 11.5625 0.078125 11.2793 0.244141L1.02539 6.2207C0.283203 6.65039 0 6.97266 0 7.46094C0 7.94922 0.283203 8.27148 1.02539 8.70117L11.2793 14.6777C11.5625 14.834 11.8555 14.9219 12.1289 14.9219C12.7637 14.9219 13.291 14.4824 13.291 13.5645Z"
+        fill="currentColor"
+        fillOpacity={0.85}
       />
     </g>
   </svg>
@@ -245,106 +145,59 @@ export const BackwardFillIcon: React.FC<IconSvgProps> = ({
 
 export const SunMaxFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
   <svg
-    aria-hidden="true"
-    height={size || height}
+    xmlns="http://www.w3.org/2000/svg"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 21.4844 21.2012"
-    width={size || width}
     {...props}
   >
-    <defs>
-      <linearGradient id="sun-max-gradient" gradientUnits="userSpaceOnUse" x1="5" x2="5" y2="21.1816">
-        <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
-        <stop offset="1" stopColor="currentColor" />
-      </linearGradient>
-    </defs>
     <g>
-      <rect height="21.2012" opacity="0" width="21.4844" x="0" y="0" />
+      <rect height={21.2012} opacity={0} width={21.4844} x={0} y={0} />
       <path
         d="M10.5664 3.79883C11.0254 3.79883 11.4062 3.41797 11.4062 2.94922L11.4062 0.849609C11.4062 0.380859 11.0254 0 10.5664 0C10.0977 0 9.7168 0.380859 9.7168 0.849609L9.7168 2.94922C9.7168 3.41797 10.0977 3.79883 10.5664 3.79883ZM15.3516 5.80078C15.6836 6.12305 16.2207 6.13281 16.5527 5.80078L18.0469 4.30664C18.3691 3.98438 18.3691 3.4375 18.0469 3.10547C17.7246 2.7832 17.1777 2.7832 16.8555 3.10547L15.3516 4.60938C15.0293 4.93164 15.0293 5.47852 15.3516 5.80078ZM17.334 10.5957C17.334 11.0547 17.7246 11.4355 18.1836 11.4355L20.2832 11.4355C20.7422 11.4355 21.123 11.0547 21.123 10.5957C21.123 10.1367 20.7422 9.74609 20.2832 9.74609L18.1836 9.74609C17.7246 9.74609 17.334 10.1367 17.334 10.5957ZM15.3516 15.3906C15.0293 15.7227 15.0293 16.2598 15.3516 16.582L16.8555 18.0957C17.1777 18.418 17.7246 18.3984 18.0469 18.0859C18.3691 17.7539 18.3691 17.2168 18.0469 16.8945L16.543 15.3906C16.2207 15.0684 15.6836 15.0781 15.3516 15.3906ZM10.5664 17.3926C10.0977 17.3926 9.7168 17.7734 9.7168 18.2324L9.7168 20.3418C9.7168 20.8008 10.0977 21.1816 10.5664 21.1816C11.0254 21.1816 11.4062 20.8008 11.4062 20.3418L11.4062 18.2324C11.4062 17.7734 11.0254 17.3926 10.5664 17.3926ZM5.77148 15.3906C5.43945 15.0781 4.89258 15.0684 4.57031 15.3906L3.07617 16.8848C2.75391 17.207 2.75391 17.7441 3.06641 18.0762C3.38867 18.3887 3.94531 18.4082 4.26758 18.0859L5.76172 16.582C6.08398 16.2598 6.08398 15.7227 5.77148 15.3906ZM3.78906 10.5957C3.78906 10.1367 3.39844 9.74609 2.93945 9.74609L0.839844 9.74609C0.380859 9.74609 0 10.1367 0 10.5957C0 11.0547 0.380859 11.4355 0.839844 11.4355L2.93945 11.4355C3.39844 11.4355 3.78906 11.0547 3.78906 10.5957ZM5.76172 5.80078C6.08398 5.48828 6.08398 4.92188 5.77148 4.60938L4.27734 3.10547C3.96484 2.79297 3.4082 2.7832 3.08594 3.10547C2.76367 3.4375 2.76367 3.98438 3.07617 4.29688L4.57031 5.80078C4.89258 6.12305 5.42969 6.12305 5.76172 5.80078Z"
-        fill="url(#sun-max-gradient)"
+        fill="currentColor"
+        fillOpacity={0.85}
       />
       <path
-        d="M10.5566 15.5664C13.3008 15.5664 15.5273 13.3398 15.5273 10.5957C15.5273 7.85156 13.3008 5.61523 10.5566 5.61523C7.8125 5.61523 5.58594 7.85156 5.58594 10.5957C5.58594 13.3398 7.8125 15.5664 10.5566 15.5664Z"
-        fill="url(#sun-max-gradient)"
+        d="M10.5664 15.5664C13.3105 15.5664 15.5371 13.3398 15.5371 10.5957C15.5371 7.85156 13.3105 5.61523 10.5664 5.61523C7.82227 5.61523 5.58594 7.85156 5.58594 10.5957C5.58594 13.3398 7.82227 15.5664 10.5664 15.5664ZM10.5664 14.082C8.63281 14.082 7.07031 12.5293 7.07031 10.5957C7.07031 8.66211 8.63281 7.09961 10.5664 7.09961C12.5 7.09961 14.0527 8.66211 14.0527 10.5957C14.0527 12.5293 12.5 14.082 10.5664 14.082Z"
+        fill="currentColor"
+        fillOpacity={0.85}
       />
     </g>
   </svg>
 );
 
-export const MoonFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => {
-  const h = size || height || 36;
-  const w = width || Number(h) * (19.9414 / 19.7349);
-
-  return (
-    <svg
-      aria-hidden="true"
-      height={h}
-      viewBox="0 0 19.9414 19.7349"
-      width={w}
-      {...props}
-    >
-      <defs>
-        <linearGradient id="moon-gradient" gradientUnits="userSpaceOnUse" x1="5" x2="5" y2="19.7161">
-          <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
-          <stop offset="1" stopColor="currentColor" />
-        </linearGradient>
-      </defs>
-      <g>
-        <rect height="19.7349" opacity="0" width="19.9414" x="0" y="0" />
-        <path
-          d="M10.2344 19.7161C14.4922 19.7161 17.9395 17.1477 19.4727 13.8762C19.8047 13.1926 19.3652 12.7336 18.7109 12.9387C17.9883 13.1829 16.7969 13.4172 15.6934 13.4172C9.83398 13.4172 6.47461 10.0579 6.47461 4.18873C6.47461 3.08521 6.71875 1.84498 7.07031 0.956304C7.35352 0.233648 6.85547-0.205805 6.16211 0.0969294C2.65625 1.62037 0 5.20435 0 9.48169C0 15.136 4.58984 19.7161 10.2344 19.7161Z"
-          fill="url(#moon-gradient)"
-        />
-      </g>
-    </svg>
-  );
-};
+export const MoonFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlnsXlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 19.9414 19.7349"
+    {...props}
+  >
+    <g>
+      <rect height={19.7349} opacity={0} width={19.9414} x={0} y={0} />
+      <path
+        d="M10.2344 19.7161C14.4922 19.7161 17.9395 17.1477 19.4727 13.8762C19.8047 13.1926 19.3652 12.7336 18.7109 12.9387C17.9883 13.1829 16.7969 13.4172 15.6934 13.4172C9.83398 13.4172 6.47461 10.0579 6.47461 4.18873C6.47461 3.08521 6.71875 1.84498 7.07031 0.956304C7.35352 0.233648 6.85547-0.205805 6.16211 0.0969294C2.65625 1.62037 0 5.20435 0 9.48169C0 15.136 4.58984 19.7161 10.2344 19.7161Z"
+        fill="currentColor"
+        fillOpacity={0.85}
+      />
+    </g>
+  </svg>
+);
 
 export const DisplayFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => {
-  const h = size || height || 36;
-  const w = width || Number(h) * (23.6426 / 20.3613);
-
   return (
     <svg
-      aria-hidden="true"
-      height={h}
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
       viewBox="0 0 23.6426 20.3613"
-      width={w}
       {...props}
     >
-      <defs>
-        <linearGradient
-          id="display-gradient-1"
-          gradientUnits="userSpaceOnUse"
-          x1="5"
-          x2="5"
-          y1="0.683594"
-          y2="20.3613"
-        >
-          <stop offset="0" stopColor="currentColor" stopOpacity={0.2125} />
-          <stop offset="1" stopColor="currentColor" stopOpacity={0.2125} />
-        </linearGradient>
-        <linearGradient
-          id="display-gradient-2"
-          gradientUnits="userSpaceOnUse"
-          x1="5"
-          x2="5"
-          y1="0.683594"
-          y2="20.3613"
-        >
-          <stop offset="0" stopColor="currentColor" stopOpacity={0.85} />
-          <stop offset="1" stopColor="currentColor" />
-        </linearGradient>
-      </defs>
       <g>
-        <rect height="20.3613" opacity="0" width="23.6426" x="0" y="0" />
-        <path
-          d="M2.27539 15.3223C1.8457 15.3223 1.57227 15.0488 1.57227 14.6191L1.57227 2.95898C1.57227 2.51953 1.8457 2.25586 2.27539 2.25586L21.0059 2.25586C21.4355 2.25586 21.709 2.51953 21.709 2.95898L21.709 14.6191C21.709 15.0488 21.4355 15.3223 21.0059 15.3223Z"
-          fill="url(#display-gradient-1)"
-        />
+        <rect height={20.3613} opacity={0} width={23.6426} x={0} y={0} />
         <path
           d="M2.24609 16.8945L21.0254 16.8945C22.4316 16.8945 23.2812 16.0449 23.2812 14.6387L23.2812 2.92969C23.2812 1.52344 22.4316 0.683594 21.0254 0.683594L2.24609 0.683594C0.849609 0.683594 0 1.52344 0 2.92969L0 14.6387C0 16.0449 0.849609 16.8945 2.24609 16.8945ZM2.27539 15.3223C1.8457 15.3223 1.57227 15.0488 1.57227 14.6191L1.57227 2.95898C1.57227 2.51953 1.8457 2.25586 2.27539 2.25586L21.0059 2.25586C21.4355 2.25586 21.709 2.51953 21.709 2.95898L21.709 14.6191C21.709 15.0488 21.4355 15.3223 21.0059 15.3223ZM8.55469 19.2188L14.7266 19.2188L14.7266 16.7676L8.55469 16.7676ZM8.49609 20.3613L14.7852 20.3613C15.2148 20.3613 15.5664 20.0098 15.5664 19.5703C15.5664 19.1309 15.2148 18.7793 14.7852 18.7793L8.49609 18.7793C8.06641 18.7793 7.70508 19.1309 7.70508 19.5703C7.70508 20.0098 8.06641 20.3613 8.49609 20.3613Z"
-          fill="url(#display-gradient-2)"
+          fill="currentColor"
+          fillOpacity={0.85}
         />
       </g>
     </svg>
