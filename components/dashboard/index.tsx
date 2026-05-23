@@ -61,13 +61,13 @@ export function Dashboard() {
                   <AnimatedNumber
                     value={parseInt(hours)}
                     className="text-muted"
-                    format={(val) => Math.round(val).toString().padStart(2, "0")}
+                    format={{ minimumIntegerDigits: 2 }}
                   />
                   <span className="text-accent relative top-[-0.06em]">:</span>
                   <AnimatedNumber
                     value={parseInt(minutes)}
                     className="text-warning"
-                    format={(val) => Math.round(val).toString().padStart(2, "0")}
+                    format={{ minimumIntegerDigits: 2 }}
                   />
                 </Card.Content>
 

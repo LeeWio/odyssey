@@ -1,45 +1,30 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
+import { NumberStepper } from "@heroui-pro/react";
+import type { NumberFormatOptions } from "@internationalized/number";
 
 interface AnimatedNumberProps {
   value: number;
   className?: string;
   duration?: number;
-  ease?: string;
-  format?: (val: number) => string;
+  format?: NumberFormatOptions;
 }
 
 export function AnimatedNumber({
   value,
   className,
-  duration = 1.2,
-  ease = "power3.out",
   format,
 }: AnimatedNumberProps) {
-  const [displayValue, setDisplayValue] = useState(0); // Start from 0 to trigger mount animation
-  const proxy = useRef({ val: 0 });
-  const containerRef = useRef<HTMLSpanElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.to(proxy.current, {
-        val: value,
-        duration,
-        ease,
-        onUpdate: () => {
-          setDisplayValue(proxy.current.val);
-        },
-      });
-    },
-    { dependencies: [value], scope: containerRef }
-  );
-
   return (
-    <span ref={containerRef} className={className}>
-      {format ? format(displayValue) : Math.round(displayValue)}
-    </span>
+    <NumberStepper 
+      value={value} 
+      isDisabled 
+      className="bg-transparent border-none p-0 shadow-none min-w-0"
+      formatOptions={format}
+    >
+      <NumberStepper.Group className="bg-transparent border-none p-0 shadow-none gap-0">
+        <NumberStepper.Value className={className} />
+      </NumberStepper.Group>
+    </NumberStepper>
   );
 }

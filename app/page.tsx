@@ -35,13 +35,13 @@ export default function Home() {
           >
             <AnimatedNumber 
               value={parseInt(hours)} 
-              format={(val) => Math.round(val).toString().padStart(2, "0")}
+              format={{ minimumIntegerDigits: 2 }}
             />
             <span className="relative -top-[0.06em] text-[#fdba74]/80 mx-1">:</span>
             <AnimatedNumber 
               value={parseInt(minutes)} 
               className="text-[#fdba74]"
-              format={(val) => Math.round(val).toString().padStart(2, "0")}
+              format={{ minimumIntegerDigits: 2 }}
             />
           </Typography>
         </Card.Content>
