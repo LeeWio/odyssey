@@ -265,11 +265,13 @@ export const Navbar = () => {
               isAuthenticated ? (
                 <Dropdown>
                   <Dropdown.Trigger className="rounded-full">
-                    <Avatar size="sm">
-                      <Avatar.Fallback delayMs={600}>
-                        {username ? username.charAt(0).toUpperCase() : "U"}
-                      </Avatar.Fallback>
-                    </Avatar>
+                    <Button variant="transparent" isIconOnly className="min-w-8 w-8 h-8 p-0 rounded-full border-none">
+                      <Avatar size="sm">
+                        <Avatar.Fallback delayMs={600}>
+                          {username ? username.charAt(0).toUpperCase() : "U"}
+                        </Avatar.Fallback>
+                      </Avatar>
+                    </Button>
                   </Dropdown.Trigger>
                   <Dropdown.Popover>
                     <div className="px-3 pt-3 pb-1">
