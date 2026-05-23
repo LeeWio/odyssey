@@ -1,11 +1,12 @@
 "use client";
 
-import { SquareChartBar, Target, ArrowUp, ArrowDown } from "@gravity-ui/icons";
+import { SquareChartBar, Target } from "@gravity-ui/icons";
 import { KPI, TrendChip, Segment } from "@heroui-pro/react";
 import { Skeleton } from "@heroui/react";
 import { useGetMarketIndexBySymbolQuery, MarketPeriod } from "@/lib/features/market";
 import { useState } from "react";
 import type { Key } from "react-aria-components";
+import { ArrowDownIcon, ArrowUpIcon } from "@/components/icons";
 
 const mapSparkline = (data?: number[]) => {
   if (!data || data.length === 0) return [];
@@ -87,7 +88,9 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
           />
           <div className="flex items-center gap-1.5">
             <TrendChip trend={isPositive ? "up" : "down"} variant="tertiary">
-              <TrendChip.Indicator>{isPositive ? <ArrowUp /> : <ArrowDown />}</TrendChip.Indicator>
+              <TrendChip.Indicator>
+                {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
+              </TrendChip.Indicator>
               {Math.abs(indexData?.changePct || 0).toFixed(2)}%
               <TrendChip.Suffix>
                 {{

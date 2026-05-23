@@ -1,21 +1,20 @@
 "use client";
 
-import {
-  Clock,
-  FileText,
-  Gear,
-  Magnifier,
-  Persons,
-  Sparkles,
-  ArrowRightFromSquare,
-} from "@gravity-ui/icons";
-
 import { Kbd, Button, Chip, CloseButton, Avatar, Dropdown, Label } from "@heroui/react";
 import { useRef, useState } from "react";
 import { Navbar as HerouiNavbar, Command, EmptyState } from "@heroui-pro/react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { SearchIcon } from "./icons";
+import {
+  ClockIcon,
+  GearIcon,
+  MagnifierIcon,
+  SearchIcon,
+  PersonsIcon,
+  SparklesIcon,
+  FileTextIcon,
+  ArrowRightFromSquareIcon,
+} from "./icons";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useMounted } from "@/hooks/use-mounted";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
@@ -65,7 +64,7 @@ function CommandPalette() {
     <>
       <Command.InputGroup>
         <Command.InputGroup.Prefix>
-          <Magnifier />
+          <MagnifierIcon />
         </Command.InputGroup.Prefix>
         <Command.InputGroup.Input placeholder="Search or jump to" />
         <Command.InputGroup.ClearButton />
@@ -94,7 +93,7 @@ function CommandPalette() {
           <EmptyState size="sm">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <Magnifier />
+                <MagnifierIcon />
               </EmptyState.Media>
               <EmptyState.Title>No results found</EmptyState.Title>
               <EmptyState.Description>Try a different search term.</EmptyState.Description>
@@ -104,19 +103,19 @@ function CommandPalette() {
       >
         <Command.Group heading="Smart Prompt Examples">
           <Command.Item textValue="Summarize this week's progress">
-            <Sparkles />
+            <SparklesIcon />
             <span>Summarize this week&apos;s progress</span>
           </Command.Item>
           <Command.Item textValue="Create a task for the team">
-            <Sparkles />
+            <SparklesIcon />
             <span>Create a task for the team</span>
           </Command.Item>
           <Command.Item textValue="Draft a project brief">
-            <Sparkles />
+            <SparklesIcon />
             <span>Draft a project brief</span>
           </Command.Item>
           <Command.Item textValue="Schedule a standup meeting">
-            <Sparkles />
+            <SparklesIcon />
             <span>Schedule a standup meeting</span>
           </Command.Item>
         </Command.Group>
@@ -131,19 +130,19 @@ function CommandPalette() {
           }
         >
           <Command.Item textValue="View recent activity">
-            <Clock />
+            <ClockIcon />
             <span>View recent activity</span>
           </Command.Item>
           <Command.Item textValue="Open project roadmap">
-            <FileText />
+            <FileTextIcon />
             <span>Open project roadmap</span>
           </Command.Item>
           <Command.Item textValue="Browse team directory">
-            <Persons />
+            <PersonsIcon />
             <span>Browse team directory</span>
           </Command.Item>
           <Command.Item textValue="Manage workspace settings">
-            <Gear />
+            <GearIcon />
             <span>Manage workspace settings</span>
           </Command.Item>
         </Command.Group>
@@ -327,19 +326,19 @@ export const Navbar = () => {
                       <Dropdown.Item id="settings" textValue="Settings">
                         <div className="flex w-full items-center justify-between gap-2">
                           <Label>Settings</Label>
-                          <Gear className="size-3.5 text-muted" />
+                          <GearIcon className="size-3.5 text-muted" />
                         </div>
                       </Dropdown.Item>
                       <Dropdown.Item id="new-project" textValue="New project">
                         <div className="flex w-full items-center justify-between gap-2">
                           <Label>Create Team</Label>
-                          <Persons className="size-3.5 text-muted" />
+                          <PersonsIcon className="size-3.5 text-muted" />
                         </div>
                       </Dropdown.Item>
                       <Dropdown.Item id="logout" textValue="Logout" variant="danger">
                         <div className="flex w-full items-center justify-between gap-2">
                           <Label>Log Out</Label>
-                          <ArrowRightFromSquare className="size-3.5 text-danger" />
+                          <ArrowRightFromSquareIcon className="size-3.5 text-danger" />
                         </div>
                       </Dropdown.Item>
                     </Dropdown.Menu>

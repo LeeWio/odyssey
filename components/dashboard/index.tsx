@@ -10,10 +10,9 @@ import { Stocks } from "./widgets/stocks";
 import { useThemeSwitch } from "../theme-switch";
 import { Avatar, Button, Card, Chip, ListBox, Typography } from "@heroui/react";
 import { useState } from "react";
-import { Car, Sun } from "@gravity-ui/icons";
 import { useRealTime } from "@/hooks/use-real-time";
 import { AnimatedNumber } from "../ui/animated-number";
-import { BackwardFillIcon, ForwardFillIcon, PlayFillIcon } from "../icons";
+import { BackwardFillIcon, ForwardFillIcon, PlayFillIcon, SunMaxFillIcon } from "../icons";
 
 export function Dashboard() {
   const isOpen = useAppSelector(selectIsSheetOpen);
@@ -74,7 +73,7 @@ export function Dashboard() {
                 </Card.Content>
 
                 <Card.Footer className="flex gap-2 justify-center items-center">
-                  <Sun className="text-warning-hover size-7" />
+                  <SunMaxFillIcon className="text-warning-hover size-7" />
                   <Typography className="text-2xl font-bold tracking-tight">
                     {weather.tempMin}-{weather.tempMax}°
                   </Typography>

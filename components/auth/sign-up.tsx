@@ -14,11 +14,11 @@ import {
   FieldError,
   Spinner,
 } from "@heroui/react";
-import { Envelope, Eye, EyeSlash } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useRegisterMutation } from "@/lib/features/auth";
+import { EnvelopeIcon, EyeIcon, EyeSlashIcon } from "../icons";
 
 export interface SignUpProps {
   isOpen?: boolean;
@@ -176,9 +176,9 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                               onPress={() => setIsVisible(!isVisible)}
                             >
                               {isVisible ? (
-                                <Eye className="size-4" />
+                                <EyeIcon className="size-4" />
                               ) : (
-                                <EyeSlash className="size-4" />
+                                <EyeSlashIcon className="size-4" />
                               )}
                             </Button>
                           </InputGroup.Suffix>
@@ -204,7 +204,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                 ) : (
                   <div className="flex flex-col gap-y-2 w-full">
                     <Button fullWidth variant="primary" onPress={() => switchView(true)}>
-                      <Envelope className="pointer-events-none text-2xl" />
+                      <EnvelopeIcon className="pointer-events-none text-2xl" />
                       Sign up with Email
                     </Button>
                     {orDivider}
