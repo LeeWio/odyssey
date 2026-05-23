@@ -180,8 +180,8 @@ function CommandPalette() {
 }
 
 export const Navbar = () => {
-  const scrollRef = useRef < HTMLDivElement > (null);
-  const navbarRef = useRef < HTMLElement > (null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const navbarRef = useRef<HTMLElement>(null);
 
   const [currentItem, setCurrentItem] = useState("#docs");
   const [isOpen, setIsOpen] = useState(false);

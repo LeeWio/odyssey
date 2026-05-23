@@ -3,9 +3,12 @@
 import { Card, Chip, Typography } from "@heroui/react";
 import { useMounted } from "@/hooks/use-mounted";
 import { Sun } from "@gravity-ui/icons";
+import { useRealTime } from "@/hooks/use-real-time";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 export default function Home() {
   const mounted = useMounted();
+  const { formattedDate, hours, minutes } = useRealTime();
 
   if (!mounted) return null;
 
@@ -21,7 +24,7 @@ export default function Home() {
             size="lg"
             className="px-4 py-1.5 h-auto text-sm font-semibold text-[#1c1c1e] rounded-2xl bg-[#a3e635]"
           >
-            Sat, 5/23
+            {formattedDate}
           </Chip>
         </Card.Header>
 
@@ -30,9 +33,16 @@ export default function Home() {
           <Typography 
             className="text-white text-[7.5rem] font-bold tracking-tighter leading-[0.8] flex items-center tabular-nums"
           >
-            <span>12</span>
+            <AnimatedNumber 
+              value={parseInt(hours)} 
+              format={(val) => Math.round(val).toString().padStart(2, "0")}
+            />
             <span className="relative -top-[0.06em] text-[#fdba74]/80 mx-1">:</span>
-            <span className="text-[#fdba74]">11</span>
+            <AnimatedNumber 
+              value={parseInt(minutes)} 
+              className="text-[#fdba74]"
+              format={(val) => Math.round(val).toString().padStart(2, "0")}
+            />
           </Typography>
         </Card.Content>
 

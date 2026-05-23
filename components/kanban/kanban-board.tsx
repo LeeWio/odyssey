@@ -145,7 +145,7 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({ column, kanban }) 
 };
 
 export default function KanbanBoard() {
-  const kanban = useKanban < KanbanTask > ({
+  const kanban = useKanban<KanbanTask>({
     initialItems: MOCK_TASKS,
     getColumn: (item) => item.columnId,
     setColumn: (item, columnId) => ({ ...item, columnId }),

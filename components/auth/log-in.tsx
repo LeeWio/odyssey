@@ -55,7 +55,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
 
   const handleEmailSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     const submit = async () => {
       if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
         setEmailError("Please enter a valid email address");
@@ -70,7 +70,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
         // Error is handled by global transformError and toast
       }
     };
-    
+
     void submit();
   };
 
@@ -98,24 +98,27 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
     setStep(nextStep);
   }, []);
 
-  useGSAP(() => {
-    const target = containerRef.current?.firstElementChild?.children;
-    if (!target || target.length === 0) return;
+  useGSAP(
+    () => {
+      const target = containerRef.current?.firstElementChild?.children;
+      if (!target || target.length === 0) return;
 
-    gsap.fromTo(
-      target,
-      { autoAlpha: 0, y: step === 2 ? 8 : -8 },
-      { 
-        autoAlpha: 1, 
-        y: 0, 
-        duration: 0.35, 
-        ease: "power2.out", 
-        stagger: 0.03, 
-        clearProps: "all",
-        overwrite: "auto"
-      }
-    );
-  }, { dependencies: [step], scope: containerRef });
+      gsap.fromTo(
+        target,
+        { autoAlpha: 0, y: step === 2 ? 8 : -8 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.35,
+          ease: "power2.out",
+          stagger: 0.03,
+          clearProps: "all",
+          overwrite: "auto",
+        }
+      );
+    },
+    { dependencies: [step], scope: containerRef }
+  );
 
   return (
     <Modal>

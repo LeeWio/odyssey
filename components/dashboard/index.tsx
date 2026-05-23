@@ -9,20 +9,25 @@ import { selectIsSheetOpen, toggleSheet } from "@/lib/features/ui";
 import { Stocks } from "./widgets/stocks";
 import { AutoplayCarousel } from "./widgets/autoplay-carousel";
 import { useThemeSwitch } from "../theme-switch";
-import { ListBox } from "@heroui/react"
+import { Card, Chip, ListBox, Typography } from "@heroui/react";
 import { useState } from "react";
-
+import { Sun } from "@gravity-ui/icons";
+import { useRealTime } from "@/hooks/use-real-time";
+import { AnimatedNumber } from "../ui/animated-number";
 
 export function Dashboard() {
   const isOpen = useAppSelector(selectIsSheetOpen);
   const dispatch = useAppDispatch();
 
   const { ModeSwitch } = useThemeSwitch();
+  const { formattedDate, hours, minutes } = useRealTime();
+
+  // Mock real weather data - in a real app, this would come from a weather API hook
+  const [weather] = useState({ tempMin: 10, tempMax: 30 });
 
   const [theme, setTheme] = useState < Key | null > ("default");
   const [language, setLanguage] = useState < Key | null > ("en");
   const [fontSize, setFontSize] = useState < Key | null > ("md");
-
 
   useHotkeys(
     "mod+j",
@@ -44,11 +49,42 @@ export function Dashboard() {
             <Sheet.Header className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <Stocks />
             </Sheet.Header>
-            <Sheet.Body className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <AutoplayCarousel />
+            <Sheet.Body className="flex flex-col gap-4">
+              <Card className="max-w-80">
+                <Card.Header className="flex items-center justify-center">
+                  <Chip variant="primary" color="success" size="lg">
+                    {formattedDate}
+                  </Chip>
+                </Card.Header>
+
+                <Card.Content className="flex flex-row justify-center items-center text-[6rem] font-bold leading-none tabular-nums">
+                  <AnimatedNumber
+                    value={parseInt(hours)}
+                    className="text-muted"
+                    format={(val) => Math.round(val).toString().padStart(2, "0")}
+                  />
+                  <span className="text-accent relative top-[-0.06em]">:</span>
+                  <AnimatedNumber
+                    value={parseInt(minutes)}
+                    className="text-warning"
+                    format={(val) => Math.round(val).toString().padStart(2, "0")}
+                  />
+                </Card.Content>
+
+                <Card.Footer className="flex gap-2 justify-center items-center">
+                  <Sun className="text-warning-hover size-7" />
+                  <Typography className="text-2xl font-bold tracking-tight">
+                    {weather.tempMin}-{weather.tempMax}°
+                  </Typography>
+                </Card.Footer>
+              </Card>
             </Sheet.Body>
             <Sheet.Footer className="flex! flex-row! items-center justify-start">
-              <CellSelect aria-label="Theme" value={theme} onChange={(v) => setTheme(v as Key | null)}>
+              <CellSelect
+                aria-label="Theme"
+                value={theme}
+                onChange={(v) => setTheme(v as Key | null)}
+              >
                 <CellSelect.Trigger>
                   <CellSelect.Label>Theme</CellSelect.Label>
                   <CellSelect.Value />
