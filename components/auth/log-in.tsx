@@ -16,6 +16,7 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
 import { useRouter } from "next/navigation";
 import { useSendOtpMutation, useLoginWithOtpMutation } from "@/lib/features/auth";
 
