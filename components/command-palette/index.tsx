@@ -174,12 +174,13 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
               <Command.InputGroup.Input placeholder="Search or jump to" />
               <Command.InputGroup.ClearButton />
               <Command.InputGroup.Suffix>
-                <Kbd className="text-xs">
-                  <Kbd.Abbr keyValue="command" />
-                  <Kbd.Content>K</Kbd.Content>
+                <Kbd className="bg-transparent shadow-none border-none text-xs" variant="light">
+                  <Kbd.Abbr keyValue="escape" />
                 </Kbd>
               </Command.InputGroup.Suffix>
             </Command.InputGroup>
+
+            <Command.Separator />
 
             <Command.List
               onAction={handleAction}
