@@ -38,12 +38,15 @@ import {
   TrashBin,
 } from "@gravity-ui/icons";
 import { Breadcrumbs, Button, Chip, Dropdown, Kbd, Label } from "@heroui/react";
-import { Segment, Sidebar, useSidebar, Sheet } from "@heroui-pro/react";
-
+import { Segment, Sidebar, useSidebar, Sheet, KPI, KPIGroup, Widget, BarChart, AreaChart, TrendChip } from "@heroui-pro/react";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { selectIsDashboardOpen, toggleDashboard } from "@/lib/features/ui";
 import { selectIsAdmin } from "@/lib/features/auth";
 import { useMounted } from "@/hooks/use-mounted";
+import { 
+  useGetDashboardStatsQuery, 
+  useGetAnalyticsOverviewQuery 
+} from "@/lib/features/dashboard";
 
 // --- Sub-components for Complex Sidebar ---
 
@@ -451,6 +454,14 @@ export function DashboardSheet() {
   const isAdmin = useAppSelector(selectIsAdmin);
   const dispatch = useAppDispatch();
 
+  const { data: stats, isLoading: isLoadingStats } = useGetDashboardStatsQuery(undefined, {
+    skip: !isOpen || !isAdmin,
+  });
+
+  const { data: analytics, isLoading: isLoadingAnalytics } = useGetAnalyticsOverviewQuery(undefined, {
+    skip: !isOpen || !isAdmin,
+  });
+
   const handleOpenChange = () => {
     dispatch(toggleDashboard());
   };
@@ -459,54 +470,143 @@ export function DashboardSheet() {
     return null;
   }
 
+  const isDataLoading = isLoadingStats || isLoadingAnalytics;
+
   return (
     <Sheet isOpen={isOpen} onOpenChange={handleOpenChange}>
       <Sheet.Backdrop variant="blur">
         <Sheet.Content className="mx-auto h-[95vh] max-w-[1024px] overflow-hidden rounded-2xl border border-default-200">
           <Sheet.Dialog className="h-full">
-            <Sidebar.Provider 
-              variant="sidebar" 
-              collapsible="icon" 
-            >
+            <Sidebar.Provider variant="sidebar" collapsible="icon">
               <div className="flex h-full w-full overflow-hidden">
-                <Sidebar 
+                <Sidebar
                   style={{"--spacing": "0.2rem"} as CSSProperties}
                   className="border-r border-default-100"
                 >
                   <ComplexSidebarInner idPrefix="dw" />
                   <Sidebar.Rail />
                 </Sidebar>
-                
+
                 <Sidebar.Main className="flex-1 overflow-auto bg-content1/50">
-                  <SidebarStoryHeader items={[{icon: <ChartColumn className="size-4" />, label: "Roadmap"}]} />
-                  <div className="p-8 text-center flex flex-col items-center justify-center h-[calc(100%-64px)]">
-                    <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                      <ChartColumn className="size-8 text-primary" />
+                  <SidebarStoryHeader items={[{icon: <ChartColumn className="size-4" />, label: "Dashboard"}]} />
+                  
+                  <div className="p-8 space-y-8">
+                    {/* Header */}
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground">Overview</h2>
+                      <p className="text-muted-foreground">Real-time site statistics and traffic analytics.</p>
                     </div>
-                    <h2 className="text-2xl font-bold mb-4 text-foreground">Welcome to your Dashboard</h2>
-                    <p className="text-muted-foreground leading-relaxed max-w-md">
-                      This complex layout uses gravity-ui icons and features a multi-section sidebar with nested teamspaces, 
-                      recurrent items, and utility sections.
-                    </p>
-                    
-                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl text-left">
-                       <div className="p-6 rounded-2xl bg-default-100/50 border border-default-200">
-                          <div className="flex items-center gap-3 mb-4">
-                            <Target className="size-5 text-accent" />
-                            <span className="font-semibold">Analytics Overview</span>
-                          </div>
-                          <div className="h-2 bg-default-200 rounded-full w-3/4 mb-2" />
-                          <div className="h-2 bg-default-200 rounded-full w-1/2" />
-                       </div>
-                       <div className="p-6 rounded-2xl bg-default-100/50 border border-default-200">
-                          <div className="flex items-center gap-3 mb-4">
-                            <Rocket className="size-5 text-success" />
-                            <span className="font-semibold">System Status</span>
-                          </div>
-                          <div className="h-2 bg-default-200 rounded-full w-2/3 mb-2" />
-                          <div className="h-2 bg-default-200 rounded-full w-full" />
-                       </div>
-                    </div>
+
+                    {isDataLoading ? (
+                      <div className="flex h-64 items-center justify-center">
+                        <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                      </div>
+                    ) : (
+                      <>
+                        {/* KPI Group */}
+                        <KPIGroup className="bg-transparent shadow-none">
+                          <KPI>
+                            <KPI.Header>
+                              <KPI.Title>Total Users</KPI.Title>
+                            </KPI.Header>
+                            <KPI.Content>
+                              <KPI.Value value={stats?.totalUsers ?? 0} maximumFractionDigits={0} />
+                            </KPI.Content>
+                          </KPI>
+                          <KPIGroup.Separator />
+                          <KPI>
+                            <KPI.Header>
+                              <KPI.Title>Total Posts</KPI.Title>
+                            </KPI.Header>
+                            <KPI.Content>
+                              <KPI.Value value={stats?.totalPosts ?? 0} maximumFractionDigits={0} />
+                            </KPI.Content>
+                          </KPI>
+                          <KPIGroup.Separator />
+                          <KPI>
+                            <KPI.Header>
+                              <KPI.Title>Total Views</KPI.Title>
+                            </KPI.Header>
+                            <KPI.Content>
+                              <KPI.Value value={stats?.totalViews ?? 0} maximumFractionDigits={0} />
+                            </KPI.Content>
+                          </KPI>
+                          <KPIGroup.Separator />
+                          <KPI>
+                            <KPI.Header>
+                              <KPI.Title>Pending Comments</KPI.Title>
+                            </KPI.Header>
+                            <KPI.Content>
+                              <KPI.Value value={stats?.pendingComments ?? 0} maximumFractionDigits={0} />
+                            </KPI.Content>
+                          </KPI>
+                        </KPIGroup>
+
+                        {/* Visualization Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <Widget>
+                            <Widget.Header>
+                              <Widget.Title>Page Views (PV)</Widget.Title>
+                              <Widget.Description>Today vs Yesterday</Widget.Description>
+                              <TrendChip 
+                                trend={(analytics?.pvGrowthRate ?? 0) >= 0 ? "up" : "down"} 
+                                variant="tertiary"
+                              >
+                                {analytics?.pvGrowthRate.toFixed(1)}%
+                              </TrendChip>
+                            </Widget.Header>
+                            <Widget.Content>
+                              <BarChart 
+                                data={[
+                                  { name: "Yesterday", pv: analytics?.yesterdayPv ?? 0 },
+                                  { name: "Today", pv: analytics?.todayPv ?? 0 }
+                                ]} 
+                                height={200}
+                              >
+                                <BarChart.Grid vertical={false} />
+                                <BarChart.XAxis dataKey="name" tickMargin={8} />
+                                <BarChart.YAxis width={40} />
+                                <BarChart.Bar 
+                                  dataKey="pv" 
+                                  fill="var(--chart-3)" 
+                                  radius={[4, 4, 0, 0]} 
+                                  barSize={40} 
+                                />
+                                <BarChart.Tooltip content={<BarChart.TooltipContent />} />
+                              </BarChart>
+                            </Widget.Content>
+                          </Widget>
+
+                          <Widget>
+                            <Widget.Header>
+                              <Widget.Title>Traffic Overview</Widget.Title>
+                              <Widget.Description>UV and PV balance</Widget.Description>
+                            </Widget.Header>
+                            <Widget.Content>
+                              <AreaChart
+                                data={[
+                                  { name: "Yesterday", pv: analytics?.yesterdayPv ?? 0, uv: analytics?.yesterdayUv ?? 0 },
+                                  { name: "Today", pv: analytics?.todayPv ?? 0, uv: analytics?.todayUv ?? 0 }
+                                ]}
+                                height={200}
+                              >
+                                <AreaChart.Grid vertical={false} />
+                                <AreaChart.XAxis dataKey="name" tickMargin={8} />
+                                <AreaChart.YAxis width={40} />
+                                <AreaChart.Area
+                                  dataKey="uv"
+                                  fill="var(--chart-1)"
+                                  fillOpacity={0.1}
+                                  stroke="var(--chart-1)"
+                                  strokeWidth={2}
+                                />
+                                <AreaChart.Tooltip content={<AreaChart.TooltipContent />} />
+                              </AreaChart>
+                            </Widget.Content>
+                          </Widget>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </Sidebar.Main>
               </div>
