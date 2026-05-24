@@ -12,7 +12,6 @@ import { usePostSearchCommands } from "./search/use-post-search-commands";
 import { STATIC_COMMANDS } from "./static-commands";
 import { useThemeCommands } from "./theme/use-theme-commands";
 import { CommandIntent, type CommandItem, type CommandSource } from "./types";
-import { ListBoxContext } from "react-aria-components";
 
 const COMMAND_SCOPES: readonly { label: string; source: CommandSource | null }[] = [
   { label: "All", source: null },
