@@ -1,6 +1,6 @@
 "use client";
 
-import { Key, Kbd, Chip, CloseButton } from "@heroui/react";
+import { Key, Kbd, TagGroup, Tag, Chip } from "@heroui/react";
 import { Command, EmptyState } from "@heroui-pro/react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -35,18 +35,6 @@ interface VisibleGroup {
 
 function filterBySource(commands: readonly CommandItem[], source: CommandSource | null) {
   return source ? commands.filter((command) => command.source === source) : [...commands];
-}
-
-function getCommandKind(command: CommandItem) {
-  if (command.id.startsWith("search-")) {
-    const parts = command.id.split("-");
-    if (parts.length >= 2) {
-      const type = parts[1];
-      return type.charAt(0).toUpperCase() + type.slice(1);
-    }
-  }
-  if (command.source === "theme") return "Theme";
-  return null;
 }
 
 function shouldShowDescription(command: CommandItem) {
@@ -147,44 +135,25 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
       >
         <Command.Container size="lg">
           <Command.Dialog filter={() => true} inputValue={inputValue} onInputChange={setInputValue}>
-            <Command.Header className="flex flex-wrap items-center gap-2 px-3 pb-0 pt-3">
-              {COMMAND_SCOPES.map((scope) => {
-                const isActive = activeSource === scope.source;
-
-                return (
-                  <Chip
-                    key={scope.label}
-                    aria-pressed={isActive}
-                    className="cursor-pointer transition-colors"
-                    color={isActive ? "accent" : "default"}
-                    onClick={() => {
-                      setActiveSource((current) => (current === scope.source ? null : scope.source));
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        setActiveSource((current) => (current === scope.source ? null : scope.source));
-                      }
-                    }}
-                    role="button"
-                    size="sm"
-                    tabIndex={0}
-                    variant={isActive ? "primary" : "soft"}
-                  >
-                    <Chip.Label>{scope.label}</Chip.Label>
-                    {isActive ? (
-                      <CloseButton
-                        aria-label={`Clear ${scope.label} scope`}
-                        className="-mr-px size-4 [&_svg]:size-3"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setActiveSource(null);
-                        }}
-                      />
-                    ) : null}
-                  </Chip>
-                );
-              })}
+            <Command.Header className="px-3 pb-0 pt-3">
+              <TagGroup
+                aria-label="Search scopes"
+                selectedKeys={[activeSource || "all"]}
+                selectionMode="single"
+                size="sm"
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] as CommandSource | "all" | undefined;
+                  setActiveSource(selectedKey === "all" || !selectedKey ? null : selectedKey);
+                }}
+              >
+                <TagGroup.List>
+                  {COMMAND_SCOPES.map((scope) => (
+                    <Tag key={scope.source || "all"} id={scope.source || "all"}>
+                      {scope.label}
+                    </Tag>
+                  ))}
+                </TagGroup.List>
+              </TagGroup>
             </Command.Header>
 
             <Command.InputGroup>
@@ -224,12 +193,10 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                 <Command.Group
                   key={group.id}
                   heading={
-                    <span className="flex w-full items-center justify-between">
-                      <span>{group.heading}</span>
+                    <span className="flex w-full items-center justify-between px-1">
+                      <span className="font-medium text-default-500">{group.heading}</span>
                       {group.badge ? (
-                        <Chip color="default" size="sm" variant="soft">
-                          <Chip.Label>{group.badge}</Chip.Label>
-                        </Chip>
+                        <span className="text-default-400 text-xs">{group.badge}</span>
                       ) : null}
                     </span>
                   }
@@ -238,47 +205,41 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                     .filter((command) => isSearching || command.defaultVisible)
                     .map((command) => {
                       const Icon = command.icon;
-                      const kind = getCommandKind(command);
                       const showDescription = shouldShowDescription(command) && Boolean(command.description);
 
                       return (
                         <Command.Item
                           key={command.id}
-                          className={showDescription ? "items-start gap-3" : "items-center gap-3"}
+                          className={["gap-3", showDescription ? "items-start py-2" : "items-center"].join(" ")}
                           id={command.id}
                           textValue={buildCommandSearchText(command)}
                         >
                           <div
                             className={[
-                              "bg-default flex size-8 shrink-0 items-center justify-center rounded-lg",
+                              "bg-default/40 text-default-500 flex size-7 shrink-0 items-center justify-center rounded-md",
                               showDescription ? "mt-0.5" : "",
                             ].join(" ")}
                           >
-                            <Icon />
+                            <Icon width={16} height={16} />
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="truncate font-medium">{command.title}</span>
+                              <span className="truncate text-sm font-medium">{command.title}</span>
                               {command.isActive ? (
                                 <Chip color="success" size="sm" variant="soft">
-                                  <Chip.Label>Current</Chip.Label>
+                                  Current
                                 </Chip>
                               ) : null}
                             </div>
                             {showDescription ? (
-                              <div className="text-muted mt-0.5 line-clamp-2 text-xs">
+                              <div className="text-muted mt-0.5 line-clamp-1 text-xs">
                                 {command.description}
                               </div>
                             ) : null}
                           </div>
                           <div className="ml-auto flex items-center gap-2 pl-3">
-                            {kind ? (
-                              <Chip color="default" size="sm" variant="soft">
-                                <Chip.Label>{kind}</Chip.Label>
-                              </Chip>
-                            ) : null}
                             {command.intent === CommandIntent.NAVIGATE ? (
-                              <Kbd className="text-xs" slot="keyboard" variant="light">
+                              <Kbd className="bg-transparent shadow-none text-muted-foreground text-xs" slot="keyboard" variant="light">
                                 <Kbd.Content>↵</Kbd.Content>
                               </Kbd>
                             ) : null}
