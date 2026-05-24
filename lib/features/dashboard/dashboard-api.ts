@@ -12,7 +12,16 @@ export const DashboardStatsResponseSchema = z.object({
   totalViews: z.number().default(0),
 });
 
-export const TopContentSchema = z.record(z.string(), z.any()); // From swagger: {"type":"object","additionalProperties":{}}
+export const DailyTrendSchema = z.object({
+  date: z.string(),
+  pv: z.number().default(0),
+  uv: z.number().default(0),
+});
+
+export const TopContentSchema = z.object({
+  url: z.string(),
+  count: z.number().default(0),
+});
 
 export const AnalyticsOverviewResponseSchema = z.object({
   todayPv: z.number().default(0),
@@ -20,6 +29,7 @@ export const AnalyticsOverviewResponseSchema = z.object({
   yesterdayPv: z.number().default(0),
   yesterdayUv: z.number().default(0),
   pvGrowthRate: z.number().default(0),
+  dailyTrends: z.array(DailyTrendSchema).default([]),
   topContent: z.array(TopContentSchema).default([]),
 });
 
@@ -63,7 +73,4 @@ export const dashboardApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const {
-  useGetDashboardStatsQuery,
-  useGetAnalyticsOverviewQuery,
-} = dashboardApi;
+export const { useGetDashboardStatsQuery, useGetAnalyticsOverviewQuery } = dashboardApi;

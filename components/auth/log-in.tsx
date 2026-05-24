@@ -136,13 +136,13 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
         }}
       >
         <Modal.Container>
-          <Modal.Dialog className="sm:max-w-[360px]">
+          <Modal.Dialog className="sm:max-w-90">
             <Modal.CloseTrigger />
             <Modal.Header>
               <Modal.Heading className="mb-4 text-xl font-medium">Log In</Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="scrollbar-none [&::-webkit-scrollbar]:hidden">
-              <div ref={containerRef} className="-mx-2 px-2 sm:-mx-3 sm:px-3">
+            <Modal.Body data-scrollbar="none">
+              <div ref={containerRef}>
                 {step === 1 ? (
                   <form className="flex w-full flex-col gap-y-3" onSubmit={handleEmailSubmit}>
                     <div className="flex flex-col gap-4">

@@ -10,10 +10,12 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@gravity-ui/icons": "^2.18.0",
     "@gsap/react": "^2.1.2",
     "@heroui-pro/react": "^1.0.0-beta.4",
-    "@heroui/react": "^3.0.5",
-    "@heroui/styles": "^3.0.5",
+    "@heroui/react": "3.1.0",
+    "@heroui/styles": "3.1.0",
+    "@iconify/react": "^6.0.2",
     "@number-flow/react": ">=0.5.0",
     "@splinetool/react-spline": "^4.1.0",
     "embla-carousel": ">=8.6.0",

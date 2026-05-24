@@ -36,19 +36,40 @@ import {
   Star,
   Target,
   TrashBin,
+  Globe,
 } from "@gravity-ui/icons";
-import { Breadcrumbs, Button, Chip, Dropdown, Kbd, Label } from "@heroui/react";
-import { Segment, Sidebar, useSidebar, Sheet, KPI, KPIGroup, Widget, BarChart, AreaChart, TrendChip } from "@heroui-pro/react";
+import {
+  Breadcrumbs,
+  Button,
+  Chip,
+  Dropdown,
+  Kbd,
+  Label,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@heroui/react";
+import {
+  Segment,
+  Sidebar,
+  useSidebar,
+  Sheet,
+  KPI,
+  KPIGroup,
+  Widget,
+  BarChart,
+  AreaChart,
+  TrendChip,
+  ListView,
+  ChartTooltip,
+} from "@heroui-pro/react";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { selectIsDashboardOpen, toggleDashboard } from "@/lib/features/ui";
 import { selectIsAdmin } from "@/lib/features/auth";
 import { useMounted } from "@/hooks/use-mounted";
-import { 
-  useGetDashboardStatsQuery, 
-  useGetAnalyticsOverviewQuery 
-} from "@/lib/features/dashboard";
-
-// --- Sub-components for Complex Sidebar ---
+import { useGetDashboardStatsQuery, useGetAnalyticsOverviewQuery } from "@/lib/features/dashboard";
+import { Logo, ArrowRightFromSquareIcon } from "@/components/icons";
 
 const SidebarStoryHeader = ({
   items,
@@ -81,7 +102,7 @@ const SidebarStoryHeader = ({
   </div>
 );
 
-const SidebarItemActions = ({label}: {label: string}) => (
+const SidebarItemActions = ({ label }: { label: string }) => (
   <Dropdown>
     <Dropdown.Trigger
       aria-label={`More actions for ${label}`}
@@ -109,7 +130,7 @@ const SidebarItemActions = ({label}: {label: string}) => (
   </Dropdown>
 );
 
-const TeamspaceGroupActions = ({label}: {label: string}) => (
+const TeamspaceGroupActions = ({ label }: { label: string }) => (
   <Dropdown>
     <Dropdown.Trigger
       aria-label={`${label} section actions`}
@@ -153,61 +174,61 @@ const TeamspaceGroupActions = ({label}: {label: string}) => (
 );
 
 const complexSegmentNav = [
-  {icon: House, id: "home", label: "Home"},
-  {icon: Calendar, id: "meetings", label: "Meetings"},
-  {icon: Sparkles, id: "ai", label: "Acme AI"},
-  {icon: Envelope, id: "inbox", label: "Inbox"},
+  { icon: House, id: "home", label: "Home" },
+  { icon: Calendar, id: "meetings", label: "Meetings" },
+  { icon: Sparkles, id: "ai", label: "Acme AI" },
+  { icon: Envelope, id: "inbox", label: "Inbox" },
 ];
 
 const complexRecents = [
-  {icon: FileText, label: "User Settings"},
-  {icon: FileText, label: "Onboarding Flow"},
-  {icon: FileText, label: "API Gateway"},
-  {icon: FileText, label: "Theme Builder"},
-  {icon: FileText, label: "Navigation"},
+  { icon: FileText, label: "User Settings" },
+  { icon: FileText, label: "Onboarding Flow" },
+  { icon: FileText, label: "API Gateway" },
+  { icon: FileText, label: "Theme Builder" },
+  { icon: FileText, label: "Navigation" },
 ];
 
 const complexFavorites = [
-  {icon: BookOpen, label: "Tutorials"},
-  {icon: SquareCheck, label: "My Tasks"},
+  { icon: BookOpen, label: "Tutorials" },
+  { icon: SquareCheck, label: "My Tasks" },
 ];
 
 const complexTeamspaceItems = [
-  {icon: House, label: "Home"},
-  {icon: SquareCheck, label: "My Tasks"},
-  {icon: Target, label: "Projects"},
-  {icon: Rocket, label: "Epics"},
-  {icon: ChartColumn, isCurrent: true, label: "Roadmap"},
-  {icon: Sparkles, label: "Sprint Board"},
-  {icon: Code, label: "Eng Board"},
-  {icon: Pencil, label: "Design Board"},
-  {icon: Database, label: "Sprints"},
-  {icon: Star, label: "Initiatives"},
-  {icon: Lock, label: "Vault"},
-  {icon: Archive, label: "Archive"},
-  {icon: BookOpen, label: "Wiki"},
-  {icon: Sparkles, label: "Brainstorm"},
-  {icon: Person, label: "Standup"},
-  {icon: Rocket, label: "Launch v3"},
+  { icon: House, label: "Home" },
+  { icon: SquareCheck, label: "My Tasks" },
+  { icon: Target, label: "Projects" },
+  { icon: Rocket, label: "Epics" },
+  { icon: ChartColumn, isCurrent: true, label: "Roadmap" },
+  { icon: Sparkles, label: "Sprint Board" },
+  { icon: Code, label: "Eng Board" },
+  { icon: Pencil, label: "Design Board" },
+  { icon: Database, label: "Sprints" },
+  { icon: Star, label: "Initiatives" },
+  { icon: Lock, label: "Vault" },
+  { icon: Archive, label: "Archive" },
+  { icon: BookOpen, label: "Wiki" },
+  { icon: Sparkles, label: "Brainstorm" },
+  { icon: Person, label: "Standup" },
+  { icon: Rocket, label: "Launch v3" },
 ];
 
 const complexExtraTeamspaces = [
-  {icon: Gear, label: "Engineering"},
-  {badge: Lock, icon: ChartColumn, label: "Metrics"},
-  {icon: Target, label: "Tracker"},
-  {icon: Receipt, label: "Reports"},
+  { icon: Gear, label: "Engineering" },
+  { badge: Lock, icon: ChartColumn, label: "Metrics" },
+  { icon: Target, label: "Tracker" },
+  { icon: Receipt, label: "Reports" },
 ];
 
 const complexUtilityItems = [
-  {icon: Book, label: "Library"},
-  {icon: SquareCheck, label: "My Tasks"},
-  {icon: ShoppingCart, label: "Marketplace"},
-  {icon: CircleQuestion, label: "Help"},
-  {icon: TrashBin, label: "Trash"},
+  { icon: Book, label: "Library" },
+  { icon: SquareCheck, label: "My Tasks" },
+  { icon: ShoppingCart, label: "Marketplace" },
+  { icon: CircleQuestion, label: "Help" },
+  { icon: TrashBin, label: "Trash" },
 ];
 
-const ComplexSidebarInner = ({idPrefix}: {idPrefix: string}) => {
-  const {collapsible, isMobile, isOpen} = useSidebar();
+const ComplexSidebarInner = ({ idPrefix }: { idPrefix: string }) => {
+  const { collapsible, isMobile, isOpen } = useSidebar();
   const isIconCollapsed = collapsible === "icon" && !isMobile && !isOpen;
 
   return (
@@ -215,13 +236,13 @@ const ComplexSidebarInner = ({idPrefix}: {idPrefix: string}) => {
       <Sidebar.Header>
         {!isIconCollapsed && (
           <Segment
-            className="[&_.segment\_\_indicator]:bg-default bg-transparent p-0 [&_.segment\_\_indicator]:shadow-none mt-2"
+            className="[&_.segment\_\_indicator]:bg-default mt-2 bg-transparent p-0 [&_.segment\_\_indicator]:shadow-none"
             defaultSelectedKey="home"
             size="sm"
           >
             {complexSegmentNav.map((tab) => (
               <Segment.Item key={tab.id} className="w-auto" id={tab.id}>
-                {({isSelected}) => (
+                {({ isSelected }) => (
                   <>
                     <tab.icon className="size-4" />
                     <span
@@ -458,9 +479,12 @@ export function DashboardSheet() {
     skip: !isOpen || !isAdmin,
   });
 
-  const { data: analytics, isLoading: isLoadingAnalytics } = useGetAnalyticsOverviewQuery(undefined, {
-    skip: !isOpen || !isAdmin,
-  });
+  const { data: analytics, isLoading: isLoadingAnalytics } = useGetAnalyticsOverviewQuery(
+    undefined,
+    {
+      skip: !isOpen || !isAdmin,
+    }
+  );
 
   const handleOpenChange = () => {
     dispatch(toggleDashboard());
@@ -472,34 +496,42 @@ export function DashboardSheet() {
 
   const isDataLoading = isLoadingStats || isLoadingAnalytics;
 
+  // Calculate trend safely
+  const pvGrowthRate = analytics?.pvGrowthRate ?? 0;
+  const trend: "up" | "down" | "neutral" = pvGrowthRate > 0 ? "up" : pvGrowthRate < 0 ? "down" : "neutral";
+
   return (
     <Sheet isOpen={isOpen} onOpenChange={handleOpenChange}>
       <Sheet.Backdrop variant="blur">
-        <Sheet.Content className="mx-auto h-[95vh] max-w-[1024px] overflow-hidden rounded-2xl border border-default-200">
+        <Sheet.Content className="border-default-200 mx-auto h-[95vh] max-w-[1024px] overflow-hidden rounded-2xl border">
           <Sheet.Dialog className="h-full">
             <Sidebar.Provider variant="sidebar" collapsible="icon">
               <div className="flex h-full w-full overflow-hidden">
                 <Sidebar
-                  style={{"--spacing": "0.2rem"} as CSSProperties}
-                  className="border-r border-default-100"
+                  style={{ "--spacing": "0.2rem" } as CSSProperties}
+                  className="border-default-100 border-r"
                 >
                   <ComplexSidebarInner idPrefix="dw" />
                   <Sidebar.Rail />
                 </Sidebar>
 
-                <Sidebar.Main className="flex-1 overflow-auto bg-content1/50">
-                  <SidebarStoryHeader items={[{icon: <ChartColumn className="size-4" />, label: "Dashboard"}]} />
-                  
-                  <div className="p-8 space-y-8">
+                <Sidebar.Main className="bg-content1/50 flex-1 overflow-auto">
+                  <SidebarStoryHeader
+                    items={[{ icon: <ChartColumn className="size-4" />, label: "Dashboard" }]}
+                  />
+
+                  <div className="space-y-8 p-8">
                     {/* Header */}
                     <div>
-                      <h2 className="text-2xl font-bold text-foreground">Overview</h2>
-                      <p className="text-muted-foreground">Real-time site statistics and traffic analytics.</p>
+                      <h2 className="text-foreground text-2xl font-bold">Overview</h2>
+                      <p className="text-muted-foreground">
+                        Real-time site statistics and traffic analytics.
+                      </p>
                     </div>
 
                     {isDataLoading ? (
                       <div className="flex h-64 items-center justify-center">
-                        <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                        <div className="border-primary size-8 animate-spin rounded-full border-4 border-t-transparent" />
                       </div>
                     ) : (
                       <>
@@ -527,8 +559,25 @@ export function DashboardSheet() {
                             <KPI.Header>
                               <KPI.Title>Total Views</KPI.Title>
                             </KPI.Header>
-                            <KPI.Content>
-                              <KPI.Value value={stats?.totalViews ?? 0} maximumFractionDigits={0} />
+                            <KPI.Content className="grid-cols-[1fr_auto] items-end gap-2">
+                              <div className="flex flex-col gap-1">
+                                <KPI.Value value={stats?.totalViews ?? 0} maximumFractionDigits={0} />
+                                <TrendChip
+                                  trend={trend}
+                                  variant="soft"
+                                >
+                                  {pvGrowthRate > 0 ? "+" : ""}
+                                  {(pvGrowthRate * 100).toFixed(1)}%
+                                  <TrendChip.Suffix>growth</TrendChip.Suffix>
+                                </TrendChip>
+                              </div>
+                              <div className="flex flex-col items-end gap-1">
+                                <span className="text-muted text-[10px] uppercase">Today</span>
+                                <div className="flex flex-col items-end">
+                                  <span className="text-foreground text-xs font-medium">PV: {analytics?.todayPv ?? 0}</span>
+                                  <span className="text-foreground text-xs font-medium">UV: {analytics?.todayUv ?? 0}</span>
+                                </div>
+                              </div>
                             </KPI.Content>
                           </KPI>
                           <KPIGroup.Separator />
@@ -537,74 +586,126 @@ export function DashboardSheet() {
                               <KPI.Title>Pending Comments</KPI.Title>
                             </KPI.Header>
                             <KPI.Content>
-                              <KPI.Value value={stats?.pendingComments ?? 0} maximumFractionDigits={0} />
+                              <KPI.Value
+                                value={stats?.pendingComments ?? 0}
+                                maximumFractionDigits={0}
+                              />
                             </KPI.Content>
                           </KPI>
                         </KPIGroup>
 
                         {/* Visualization Row */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <Widget>
-                            <Widget.Header>
-                              <Widget.Title>Page Views (PV)</Widget.Title>
-                              <Widget.Description>Today vs Yesterday</Widget.Description>
-                              <TrendChip 
-                                trend={(analytics?.pvGrowthRate ?? 0) >= 0 ? "up" : "down"} 
-                                variant="tertiary"
-                              >
-                                {analytics?.pvGrowthRate.toFixed(1)}%
-                              </TrendChip>
-                            </Widget.Header>
-                            <Widget.Content>
-                              <BarChart 
-                                data={[
-                                  { name: "Yesterday", pv: analytics?.yesterdayPv ?? 0 },
-                                  { name: "Today", pv: analytics?.todayPv ?? 0 }
-                                ]} 
-                                height={200}
-                              >
-                                <BarChart.Grid vertical={false} />
-                                <BarChart.XAxis dataKey="name" tickMargin={8} />
-                                <BarChart.YAxis width={40} />
-                                <BarChart.Bar 
-                                  dataKey="pv" 
-                                  fill="var(--chart-3)" 
-                                  radius={[4, 4, 0, 0]} 
-                                  barSize={40} 
+                        <Card className="w-full rounded-2xl">
+                          <CardHeader className="flex-row items-center justify-between">
+                            <CardTitle className="text-base">Daily Trends</CardTitle>
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className="size-3 rounded-full"
+                                  style={{ backgroundColor: "var(--chart-3)" }}
                                 />
-                                <BarChart.Tooltip content={<BarChart.TooltipContent />} />
-                              </BarChart>
-                            </Widget.Content>
-                          </Widget>
+                                <span className="text-muted text-xs">Unique Visitors</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className="size-3 rounded-full"
+                                  style={{ backgroundColor: "var(--chart-1)" }}
+                                />
+                                <span className="text-muted text-xs">Page Views</span>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <AreaChart data={analytics?.dailyTrends ?? []} height={200}>
+                              <defs>
+                                <linearGradient id="custom-pv" x1="0" x2="0" y1="0" y2="1">
+                                  <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.2} />
+                                  <stop
+                                    offset="100%"
+                                    stopColor="var(--chart-1)"
+                                    stopOpacity={0.02}
+                                  />
+                                </linearGradient>
+                                <linearGradient id="custom-uv" x1="0" x2="0" y1="0" y2="1">
+                                  <stop offset="0%" stopColor="var(--chart-3)" stopOpacity={0.2} />
+                                  <stop
+                                    offset="100%"
+                                    stopColor="var(--chart-3)"
+                                    stopOpacity={0.02}
+                                  />
+                                </linearGradient>
+                              </defs>
+                              <AreaChart.Grid vertical={false} />
+                              <AreaChart.XAxis
+                                dataKey="date"
+                                tickMargin={8}
+                                tickFormatter={(v) => v.split("-").slice(1).join("/")}
+                              />
+                              <AreaChart.YAxis
+                                tickFormatter={(v: number) =>
+                                  v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`
+                                }
+                                width={30}
+                              />
+                              <AreaChart.Area
+                                dataKey="uv"
+                                dot={false}
+                                fill="url(#custom-uv)"
+                                name="Unique Visitors"
+                                stroke="var(--chart-3)"
+                                strokeWidth={2}
+                                type="monotone"
+                              />
+                              <AreaChart.Area
+                                dataKey="pv"
+                                dot={false}
+                                fill="url(#custom-pv)"
+                                name="Page Views"
+                                stroke="var(--chart-1)"
+                                strokeWidth={2}
+                                type="monotone"
+                              />
+                              <AreaChart.Tooltip
+                                content={({ active, label, payload }) => {
+                                  if (
+                                    !active ||
+                                    !payload?.length ||
+                                    !payload.every((entry) => typeof entry.value === "number")
+                                  )
+                                    return null;
 
-                          <Widget>
-                            <Widget.Header>
-                              <Widget.Title>Traffic Overview</Widget.Title>
-                              <Widget.Description>UV and PV balance</Widget.Description>
-                            </Widget.Header>
-                            <Widget.Content>
-                              <AreaChart
-                                data={[
-                                  { name: "Yesterday", pv: analytics?.yesterdayPv ?? 0, uv: analytics?.yesterdayUv ?? 0 },
-                                  { name: "Today", pv: analytics?.todayPv ?? 0, uv: analytics?.todayUv ?? 0 }
-                                ]}
-                                height={200}
-                              >
-                                <AreaChart.Grid vertical={false} />
-                                <AreaChart.XAxis dataKey="name" tickMargin={8} />
-                                <AreaChart.YAxis width={40} />
-                                <AreaChart.Area
-                                  dataKey="uv"
-                                  fill="var(--chart-1)"
-                                  fillOpacity={0.1}
-                                  stroke="var(--chart-1)"
-                                  strokeWidth={2}
-                                />
-                                <AreaChart.Tooltip content={<AreaChart.TooltipContent />} />
-                              </AreaChart>
-                            </Widget.Content>
-                          </Widget>
-                        </div>
+                                  const total = payload.reduce(
+                                    (sum, entry) => sum + ((entry.value as number) ?? 0),
+                                    0
+                                  );
+
+                                  return (
+                                    <ChartTooltip indicator="line">
+                                      <ChartTooltip.Header>{label}</ChartTooltip.Header>
+                                      {payload.map((entry, idx) => (
+                                        <ChartTooltip.Item key={idx}>
+                                          <ChartTooltip.Indicator color={entry.stroke} />
+                                          <ChartTooltip.Label>{entry.name}</ChartTooltip.Label>
+                                          <ChartTooltip.Value>
+                                            {Number(entry.value).toLocaleString()}
+                                          </ChartTooltip.Value>
+                                        </ChartTooltip.Item>
+                                      ))}
+                                      <div className="border-separator mt-1 flex items-center justify-between border-t pt-1.5">
+                                        <span className="text-muted text-xs font-medium">
+                                          Total
+                                        </span>
+                                        <span className="text-foreground text-xs font-semibold">
+                                          {total.toLocaleString()}
+                                        </span>
+                                      </div>
+                                    </ChartTooltip>
+                                  );
+                                }}
+                              />
+                            </AreaChart>
+                          </CardContent>
+                        </Card>
                       </>
                     )}
                   </div>

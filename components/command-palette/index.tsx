@@ -12,7 +12,12 @@ import { usePostSearchCommands } from "./search/use-post-search-commands";
 import { STATIC_COMMANDS } from "./static-commands";
 import { useThemeCommands } from "./theme/use-theme-commands";
 import { useAdminCommands } from "./admin/use-admin-commands";
-import { CommandIntent, type CommandItem, type CommandSource } from "./types";
+import {
+  CommandIntent,
+  type CommandItem,
+  type CommandSource,
+  COMMAND_CATEGORY_ORDER,
+} from "./types";
 
 const COMMAND_SCOPES: readonly { label: string; source: CommandSource | null }[] = [
   { label: "All", source: null },
@@ -51,17 +56,15 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   const adminCommands = useAdminCommands();
   const searchState = usePostSearchCommands(inputValue);
 
-  const baseCommands = useMemo(() => [...STATIC_COMMANDS, ...themeCommands, ...adminCommands], [themeCommands, adminCommands]);
+  const baseCommands = useMemo(
+    () => [...STATIC_COMMANDS, ...themeCommands, ...adminCommands],
+    [themeCommands, adminCommands]
+  );
   const isSearching = inputValue.trim().length > 0;
 
   const visibleGroups = useMemo<VisibleGroup[]>(() => {
     const scopedBaseCommands = filterBySource(baseCommands, activeSource);
     const filteredBaseCommands = filterCommands(scopedBaseCommands, inputValue);
-
-    const aiCommands = filteredBaseCommands.filter((command) => command.source === "ai");
-    const themeSystemCommands = filteredBaseCommands.filter(
-      (command) => command.source === "theme" || command.source === "system"
-    );
 
     const groups: VisibleGroup[] = [];
 
@@ -71,25 +74,43 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
       }
     }
 
-    if (activeSource === null || activeSource === "ai") {
-      if (aiCommands.length > 0) {
-        groups.push({
-          id: "smart-prompts",
-          heading: isSearching ? "AI Prompts" : "Prompt Ideas",
-          commands: aiCommands,
-        });
-      }
-    }
+    // Group the remaining base commands by category
+    const baseGroupsMap = new Map<string, CommandItem[]>();
+    filteredBaseCommands.forEach((cmd) => {
+      if (cmd.source === "search") return;
 
-    if (activeSource === null || activeSource === "theme" || activeSource === "system") {
-      if (themeSystemCommands.length > 0) {
-        groups.push({
-          id: "workspace-controls",
-          heading: isSearching ? "Workspace" : "Workspace Controls",
-          commands: themeSystemCommands,
-        });
+      const category = cmd.category;
+      if (!baseGroupsMap.has(category)) {
+        baseGroupsMap.set(category, []);
       }
-    }
+      baseGroupsMap.get(category)?.push(cmd);
+    });
+
+    COMMAND_CATEGORY_ORDER.forEach((category) => {
+      const commands = baseGroupsMap.get(category);
+      if (commands && commands.length > 0) {
+        // Check if the current source filter allows this category
+        const isAI = category === "AI";
+        const isAnalytics = category === "Analytics";
+        const isTheme = commands.some((c) => c.source === "theme");
+        const isSystem = commands.some((c) => c.source === "system");
+
+        const isVisibleBySource =
+          activeSource === null ||
+          (activeSource === "ai" && isAI) ||
+          (activeSource === "theme" && isTheme) ||
+          (activeSource === "system" && isSystem) ||
+          (activeSource === "search" && false); // Search source handled separately
+
+        if (isVisibleBySource) {
+          groups.push({
+            id: `group-${category.toLowerCase()}`,
+            heading: category === "AI" ? (isSearching ? "AI Prompts" : "Prompt Ideas") : category,
+            commands,
+          });
+        }
+      }
+    });
 
     return groups;
   }, [activeSource, baseCommands, inputValue, isSearching, searchState.dynamicGroups]);
@@ -174,8 +195,9 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
               <Command.InputGroup.Input placeholder="Search or jump to" />
               <Command.InputGroup.ClearButton />
               <Command.InputGroup.Suffix>
-                <Kbd className="bg-transparent shadow-none border-none text-xs" variant="light">
-                  <Kbd.Abbr keyValue="escape" />
+                <Kbd className="text-xs">
+                  <Kbd.Abbr keyValue="command" />
+                  <Kbd.Content>K</Kbd.Content>
                 </Kbd>
               </Command.InputGroup.Suffix>
             </Command.InputGroup>

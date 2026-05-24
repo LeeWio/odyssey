@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { ChartColumnIcon } from "@/components/icons";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { selectIsAdmin } from "@/lib/features/auth";
-import { setDashboardOpen } from "@/lib/features/ui";
+import { toggleDashboard } from "@/lib/features/ui";
 import { createActionCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 
@@ -20,19 +20,30 @@ export const useAdminCommands = (): CommandItem[] => {
     return [
       createActionCommand({
         id: "admin-dashboard",
-        title: "Open Dashboard",
+        title: "Open Admin Dashboard",
         description: "View site-wide analytics and statistics",
         icon: ChartColumnIcon,
         category: "Analytics",
         source: "system",
         order: 1,
-        keywords: ["dashboard", "stats", "analytics", "admin", "仪表盘", "数据", "统计"],
+        keywords: [
+          "dashboard",
+          "stats",
+          "analytics",
+          "admin",
+          "open dashboard",
+          "management",
+          "仪表盘",
+          "数据",
+          "统计",
+          "管理员",
+        ],
         intent: CommandIntent.EXECUTE,
-        payload: { 
+        payload: {
           action: () => {
-            dispatch(setDashboardOpen(true));
+            dispatch(toggleDashboard());
           },
-          closeOnExecute: true 
+          closeOnExecute: true,
         },
         defaultVisible: true,
       }),

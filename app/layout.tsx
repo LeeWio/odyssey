@@ -12,7 +12,8 @@ import { ThemeCSSLoader } from "@/components/theme-css-loader";
 import { IntlProvider } from "./intl-provider";
 import { getMessages } from "next-intl/server";
 import { Toast } from "@heroui/react";
-import { Dashboard } from "@/components/dashboard";
+import { SheetPanel } from "@/components/sheet-panel";
+import { DashboardSheet } from "@/components/dashboard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -73,7 +74,8 @@ export default async function RootLayout({
               <Toast.Provider />
               <div className="relative flex h-screen flex-col">
                 <Navbar />
-                <Dashboard />
+                <SheetPanel />
+                <DashboardSheet />
                 <main className="w-full grow">{children}</main>
                 <footer className="flex w-full items-center justify-center py-3">
                   <a
