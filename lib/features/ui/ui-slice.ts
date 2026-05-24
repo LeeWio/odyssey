@@ -39,16 +39,16 @@ export const uiSlice = createSlice({
       state.theme.variant = action.payload;
     },
     // Dashboard actions
-    setDashboardOpen: (state, action: PayloadAction<boolean>) => {
-      state.dashboard.isOpen = action.payload;
+    toggleDashboard: (state) => {
+      state.dashboard.isOpen = !state.dashboard.isOpen;
     },
   },
 });
 
-export const { toggleSheet, setThemeVariant, setDashboardOpen } = uiSlice.actions;
+export const { toggleSheet, setThemeVariant, toggleDashboard } = uiSlice.actions;
 
-export const selectIsSheetOpen = (state: RootState) => state.ui.sheet.isOpen;
-export const selectThemeVariant = (state: RootState) => state.ui.theme.variant;
-export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard.isOpen;
+export const selectIsSheetOpen = (state: RootState) => state.ui.sheet?.isOpen ?? false;
+export const selectThemeVariant = (state: RootState) => state.ui.theme?.variant ?? "glass";
+export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard?.isOpen ?? false;
 
 export default uiSlice.reducer;
