@@ -11,6 +11,7 @@ import { buildCommandSearchText, filterCommands } from "./command-model";
 import { usePostSearchCommands } from "./search/use-post-search-commands";
 import { STATIC_COMMANDS } from "./static-commands";
 import { useThemeCommands } from "./theme/use-theme-commands";
+import { useAdminCommands } from "./admin/use-admin-commands";
 import { CommandIntent, type CommandItem, type CommandSource } from "./types";
 
 const COMMAND_SCOPES: readonly { label: string; source: CommandSource | null }[] = [
@@ -47,9 +48,10 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   const [activeSource, setActiveSource] = useState<CommandSource | null>(null);
 
   const themeCommands = useThemeCommands();
+  const adminCommands = useAdminCommands();
   const searchState = usePostSearchCommands(inputValue);
 
-  const baseCommands = useMemo(() => [...STATIC_COMMANDS, ...themeCommands], [themeCommands]);
+  const baseCommands = useMemo(() => [...STATIC_COMMANDS, ...themeCommands, ...adminCommands], [themeCommands, adminCommands]);
   const isSearching = inputValue.trim().length > 0;
 
   const visibleGroups = useMemo<VisibleGroup[]>(() => {
