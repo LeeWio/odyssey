@@ -11,7 +11,7 @@ import {
   ArrowRightFromSquareIcon,
   GearIcon,
   PersonsIcon,
-  SparklesIcon
+  SparklesIcon,
 } from "@/components/icons";
 import { useUnifiedSearchQuery } from "@/lib/features/post/post-api";
 import { createNavigationCommand } from "../command-model";
@@ -66,8 +66,8 @@ export function usePostSearchCommands(query: string): PostSearchCommandState {
         commandTotal++;
         const Icon = item.icon ? (ICON_MAP[item.icon] ?? MagnifierIcon) : MagnifierIcon;
         const id = `search-${group.type.toLowerCase()}-${itemIndex}-${groupIndex}`;
-        
-        // Since url can be an action or navigation, we default to navigation. 
+
+        // Since url can be an action or navigation, we default to navigation.
         // If it's type ACTION, we could technically map to an action, but payload expects href.
         return createNavigationCommand({
           id,
@@ -96,8 +96,12 @@ export function usePostSearchCommands(query: string): PostSearchCommandState {
 
     // Sort groups by priority if available
     groups.sort((a, b) => {
-      const gA = data.groups?.find(g => `search-group-${g.type.toLowerCase()}-${data.groups?.indexOf(g)}` === a.id);
-      const gB = data.groups?.find(g => `search-group-${g.type.toLowerCase()}-${data.groups?.indexOf(g)}` === b.id);
+      const gA = data.groups?.find(
+        (g) => `search-group-${g.type.toLowerCase()}-${data.groups?.indexOf(g)}` === a.id
+      );
+      const gB = data.groups?.find(
+        (g) => `search-group-${g.type.toLowerCase()}-${data.groups?.indexOf(g)}` === b.id
+      );
       return (gA?.priority ?? 0) - (gB?.priority ?? 0);
     });
 

@@ -93,10 +93,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   }, [activeSource, baseCommands, inputValue, isSearching, searchState.dynamicGroups]);
 
   const handleAction = (key: Key) => {
-    const allCommands = [
-      ...baseCommands,
-      ...searchState.allCommands,
-    ];
+    const allCommands = [...baseCommands, ...searchState.allCommands];
     const command = allCommands.find((item) => item.id === String(key));
 
     if (!command) return;
@@ -135,7 +132,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
       >
         <Command.Container size="lg">
           <Command.Dialog filter={() => true} inputValue={inputValue} onInputChange={setInputValue}>
-            <Command.Header className="flex flex-wrap items-center gap-1.5 px-3 pb-0 pt-3">
+            <Command.Header className="flex items-start gap-2 px-4">
               {COMMAND_SCOPES.map((scope) => {
                 const isActive = activeSource === scope.source;
 
@@ -143,15 +140,18 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                   <Chip
                     key={scope.label}
                     aria-pressed={isActive}
-                    className="cursor-pointer transition-colors"
                     color={isActive ? "accent" : "default"}
                     onClick={() => {
-                      setActiveSource((current) => (current === scope.source ? null : scope.source));
+                      setActiveSource((current) =>
+                        current === scope.source ? null : scope.source
+                      );
                     }}
                     onKeyDown={(event) => {
                       if (event.key === "Enter" || event.key === " ") {
                         event.preventDefault();
-                        setActiveSource((current) => (current === scope.source ? null : scope.source));
+                        setActiveSource((current) =>
+                          current === scope.source ? null : scope.source
+                        );
                       }
                     }}
                     role="button"
@@ -169,11 +169,12 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
               <Command.InputGroup.Prefix>
                 <MagnifierIcon />
               </Command.InputGroup.Prefix>
-              <Command.InputGroup.Input placeholder="Search posts, tags, categories, or actions..." />
+              <Command.InputGroup.Input placeholder="Search or jump to" />
               <Command.InputGroup.ClearButton />
               <Command.InputGroup.Suffix>
-                <Kbd className="text-xs" variant="light">
-                  <Kbd.Content>Esc</Kbd.Content>
+                <Kbd className="text-xs">
+                  <Kbd.Abbr keyValue="command" />
+                  <Kbd.Content>K</Kbd.Content>
                 </Kbd>
               </Command.InputGroup.Suffix>
             </Command.InputGroup>
@@ -203,7 +204,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                   key={group.id}
                   heading={
                     <span className="flex w-full items-center justify-between px-1">
-                      <span className="font-medium text-default-500">{group.heading}</span>
+                      <span className="text-default-500 font-medium">{group.heading}</span>
                       {group.badge ? (
                         <span className="text-default-400 text-xs">{group.badge}</span>
                       ) : null}
@@ -214,12 +215,16 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                     .filter((command) => isSearching || command.defaultVisible)
                     .map((command) => {
                       const Icon = command.icon;
-                      const showDescription = shouldShowDescription(command) && Boolean(command.description);
+                      const showDescription =
+                        shouldShowDescription(command) && Boolean(command.description);
 
                       return (
                         <Command.Item
                           key={command.id}
-                          className={["gap-3", showDescription ? "items-start py-2" : "items-center"].join(" ")}
+                          className={[
+                            "gap-3",
+                            showDescription ? "items-start py-2" : "items-center",
+                          ].join(" ")}
                           id={command.id}
                           textValue={buildCommandSearchText(command)}
                         >
@@ -248,8 +253,12 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                           </div>
                           <div className="ml-auto flex items-center gap-2 pl-3">
                             {command.intent === CommandIntent.NAVIGATE ? (
-                              <Kbd className="bg-transparent shadow-none text-muted-foreground text-xs" slot="keyboard" variant="light">
-                                <Kbd.Content>↵</Kbd.Content>
+                              <Kbd
+                                className="text-muted-foreground border-none bg-transparent text-xs shadow-none"
+                                slot="keyboard"
+                                variant="light"
+                              >
+                                <Kbd.Abbr keyValue="enter" />
                               </Kbd>
                             ) : null}
                           </div>
@@ -260,7 +269,10 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
               ))}
 
               {isSearching && searchState.isLoading ? (
-                <div className="text-muted px-3 py-2 text-sm">Searching across posts, categories, and tags...</div>
+                <div className="text-muted-foreground flex items-center justify-center p-6">
+                  <div className="mr-3 size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  <span className="text-sm">Searching across your workspace...</span>
+                </div>
               ) : null}
 
               {isSearching && searchState.isError ? (
