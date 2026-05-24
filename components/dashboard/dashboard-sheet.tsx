@@ -210,25 +210,9 @@ const ComplexSidebarInner = ({idPrefix}: {idPrefix: string}) => {
   return (
     <>
       <Sidebar.Header>
-        <div className="flex items-center justify-between px-1 py-2">
-          <div className="flex items-center gap-3">
-            <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-amber-700">
-              <span className="text-sm font-bold text-white">A</span>
-            </div>
-            <span className="text-foreground text-sm font-semibold" data-sidebar="label">
-              Acme Labs
-            </span>
-          </div>
-          <div className="flex items-center" data-sidebar="label">
-            <button className="text-foreground hover:bg-default flex items-center gap-0.5 rounded-md p-1">
-              <PencilToSquare className="size-4" />
-              <ChevronDown className="text-muted size-3" />
-            </button>
-          </div>
-        </div>
         {!isIconCollapsed && (
           <Segment
-            className="[&_.segment\_\_indicator]:bg-default bg-transparent p-0 [&_.segment\_\_indicator]:shadow-none"
+            className="[&_.segment\_\_indicator]:bg-default bg-transparent p-0 [&_.segment\_\_indicator]:shadow-none mt-2"
             defaultSelectedKey="home"
             size="sm"
           >
