@@ -22,10 +22,13 @@ import {
   PersonsIcon, 
   FileTextIcon, 
   ClockIcon, 
-  EyeIcon 
+  EyeIcon,
+  ShieldAlertIcon
 } from "@/components/icons";
+import { useMounted } from "@/hooks/use-mounted";
 
 export default function DashboardPage() {
+  const isMounted = useMounted();
   const isAdmin = useAppSelector(selectIsAdmin);
 
   const { 
@@ -40,13 +43,17 @@ export default function DashboardPage() {
     isError: isErrorAnalytics 
   } = useGetAnalyticsOverviewQuery(undefined, { skip: !isAdmin });
 
+  if (!isMounted) {
+    return null;
+  }
+
   if (!isAdmin) {
     return (
       <div className="flex h-[calc(100vh-200px)] w-full items-center justify-center">
         <EmptyState>
           <EmptyState.Header>
             <EmptyState.Media variant="icon">
-              <TargetIcon className="text-danger" width={32} height={32} />
+              <ShieldAlertIcon className="text-danger" width={32} height={32} />
             </EmptyState.Media>
             <EmptyState.Title>Access Denied</EmptyState.Title>
             <EmptyState.Description>
