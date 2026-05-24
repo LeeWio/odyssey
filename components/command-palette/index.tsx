@@ -180,8 +180,6 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
               </Command.InputGroup.Suffix>
             </Command.InputGroup>
 
-            <Command.Separator />
-
             <Command.List
               onAction={handleAction}
               renderEmptyState={() => (
