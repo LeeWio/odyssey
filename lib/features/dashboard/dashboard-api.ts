@@ -1,59 +1,69 @@
-import { ApiResponse } from "@/types";
-import { baseApi, transformError, ApiResponseSchema } from "../api/base-api";
 import { z } from "zod";
 
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
+import { baseApi, ApiResponseSchema, transformError } from "@/lib/features/api/base-api";
+
+// --- Zod Schemas ---
 
 export const DashboardStatsResponseSchema = z.object({
-  totalUsers: z.number(),
-  totalPosts: z.number(),
-  totalComments: z.number(),
-  pendingComments: z.number(),
-  totalViews: z.number(),
+  totalUsers: z.number().default(0),
+  totalPosts: z.number().default(0),
+  totalComments: z.number().default(0),
+  pendingComments: z.number().default(0),
+  totalViews: z.number().default(0),
 });
+
+export const TopContentSchema = z.record(z.string(), z.any()); // From swagger: {"type":"object","additionalProperties":{}}
 
 export const AnalyticsOverviewResponseSchema = z.object({
-  todayPv: z.number(),
-  todayUv: z.number(),
-  yesterdayPv: z.number(),
-  yesterdayUv: z.number(),
-  pvGrowthRate: z.number(),
-  topContent: z.array(z.record(z.string(), z.any())),
+  todayPv: z.number().default(0),
+  todayUv: z.number().default(0),
+  yesterdayPv: z.number().default(0),
+  yesterdayUv: z.number().default(0),
+  pvGrowthRate: z.number().default(0),
+  topContent: z.array(TopContentSchema).default([]),
 });
 
-/**
- * --- TypeScript Interfaces ---
- */
+// --- Types ---
+
 export type DashboardStatsResponse = z.infer<typeof DashboardStatsResponseSchema>;
 export type AnalyticsOverviewResponse = z.infer<typeof AnalyticsOverviewResponseSchema>;
+
+// --- API Injection ---
 
 export const dashboardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     /**
-     * Get overall statistics for the admin dashboard
+     * Admin: Get dashboard overview statistics (users, posts, etc.)
      */
     getDashboardStats: builder.query<DashboardStatsResponse, void>({
-      query: () => "/api/v1/admin/dashboard/stats",
-      rawResponseSchema: ApiResponseSchema(DashboardStatsResponseSchema),
-      transformResponse: (response: ApiResponse<DashboardStatsResponse>) => response.data,
-      transformErrorResponse: transformError,
+      query: () => ({
+        url: "/api/v1/admin/dashboard/stats",
+        method: "GET",
+      }),
       providesTags: ["Dashboard"],
+      rawResponseSchema: ApiResponseSchema(DashboardStatsResponseSchema),
+      transformResponse: (response: { data: DashboardStatsResponse }) => response.data,
+      transformErrorResponse: transformError,
     }),
 
     /**
-     * Retrieve today's traffic overview
+     * Admin: Get traffic analytics overview (PV/UV, growth rates, etc.)
      */
     getAnalyticsOverview: builder.query<AnalyticsOverviewResponse, void>({
-      query: () => "/api/v1/admin/analytics/overview",
-      rawResponseSchema: ApiResponseSchema(AnalyticsOverviewResponseSchema),
-      transformResponse: (response: ApiResponse<AnalyticsOverviewResponse>) => response.data,
-      transformErrorResponse: transformError,
+      query: () => ({
+        url: "/api/v1/admin/analytics/overview",
+        method: "GET",
+      }),
       providesTags: ["Dashboard"],
+      rawResponseSchema: ApiResponseSchema(AnalyticsOverviewResponseSchema),
+      transformResponse: (response: { data: AnalyticsOverviewResponse }) => response.data,
+      transformErrorResponse: transformError,
     }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetDashboardStatsQuery, useGetAnalyticsOverviewQuery } = dashboardApi;
+export const {
+  useGetDashboardStatsQuery,
+  useGetAnalyticsOverviewQuery,
+} = dashboardApi;

@@ -12,7 +12,7 @@ import { useRealTime } from "@/hooks/use-real-time";
 import { AnimatedNumber } from "../ui/animated-number";
 import { BackwardFillIcon, ForwardFillIcon, PlayFillIcon, SunMaxFillIcon } from "../icons";
 
-export function Dashboard() {
+export function SheetPanel() {
   const isOpen = useAppSelector(selectIsSheetOpen);
   const dispatch = useAppDispatch();
 
