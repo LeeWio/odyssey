@@ -1,6 +1,6 @@
 "use client";
 
-import { Key, Kbd, TagGroup, Tag, Chip } from "@heroui/react";
+import { Key, Kbd, Chip } from "@heroui/react";
 import { Command, EmptyState } from "@heroui-pro/react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -135,25 +135,34 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
       >
         <Command.Container size="lg">
           <Command.Dialog filter={() => true} inputValue={inputValue} onInputChange={setInputValue}>
-            <Command.Header className="px-3 pb-0 pt-3">
-              <TagGroup
-                aria-label="Search scopes"
-                selectedKeys={[activeSource || "all"]}
-                selectionMode="single"
-                size="sm"
-                onSelectionChange={(keys) => {
-                  const selectedKey = Array.from(keys)[0] as CommandSource | "all" | undefined;
-                  setActiveSource(selectedKey === "all" || !selectedKey ? null : selectedKey);
-                }}
-              >
-                <TagGroup.List>
-                  {COMMAND_SCOPES.map((scope) => (
-                    <Tag key={scope.source || "all"} id={scope.source || "all"}>
-                      {scope.label}
-                    </Tag>
-                  ))}
-                </TagGroup.List>
-              </TagGroup>
+            <Command.Header className="flex flex-wrap items-center gap-1.5 px-3 pb-0 pt-3">
+              {COMMAND_SCOPES.map((scope) => {
+                const isActive = activeSource === scope.source;
+
+                return (
+                  <Chip
+                    key={scope.label}
+                    aria-pressed={isActive}
+                    className="cursor-pointer transition-colors"
+                    color={isActive ? "accent" : "default"}
+                    onClick={() => {
+                      setActiveSource((current) => (current === scope.source ? null : scope.source));
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setActiveSource((current) => (current === scope.source ? null : scope.source));
+                      }
+                    }}
+                    role="button"
+                    size="sm"
+                    tabIndex={0}
+                    variant={isActive ? "primary" : "soft"}
+                  >
+                    <Chip.Label>{scope.label}</Chip.Label>
+                  </Chip>
+                );
+              })}
             </Command.Header>
 
             <Command.InputGroup>
