@@ -10,6 +10,9 @@ interface UiState {
   theme: {
     variant: ThemeVariant;
   };
+  dashboard: {
+    isOpen: boolean;
+  };
 }
 
 const initialState: UiState = {
@@ -18,6 +21,9 @@ const initialState: UiState = {
   },
   theme: {
     variant: "glass",
+  },
+  dashboard: {
+    isOpen: false,
   },
 };
 
@@ -32,12 +38,17 @@ export const uiSlice = createSlice({
     setThemeVariant: (state, action: PayloadAction<ThemeVariant>) => {
       state.theme.variant = action.payload;
     },
+    // Dashboard actions
+    setDashboardOpen: (state, action: PayloadAction<boolean>) => {
+      state.dashboard.isOpen = action.payload;
+    },
   },
 });
 
-export const { toggleSheet, setThemeVariant } = uiSlice.actions;
+export const { toggleSheet, setThemeVariant, setDashboardOpen } = uiSlice.actions;
 
 export const selectIsSheetOpen = (state: RootState) => state.ui.sheet.isOpen;
 export const selectThemeVariant = (state: RootState) => state.ui.theme.variant;
+export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard.isOpen;
 
 export default uiSlice.reducer;
