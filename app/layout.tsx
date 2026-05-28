@@ -76,7 +76,7 @@ export default async function RootLayout({
                 <Navbar />
                 <SheetPanel />
                 <DashboardSheet />
-                <main className="w-full grow">{children}</main>
+                <main className="mx-auto w-full grow px-4 sm:px-6 lg:px-8">{children}</main>
                 <footer className="flex w-full items-center justify-center py-3">
                   <a
                     className="flex items-center gap-1 text-current no-underline"

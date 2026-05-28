@@ -169,9 +169,9 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                                   onPress={() => setIsVisible(!isVisible)}
                                 >
                                   {isVisible ? (
-                                    <Icon icon="gravity-ui:eye" />
+                                    <Icon icon="gravity-ui:eye" className="size-4" />
                                   ) : (
-                                    <Icon icon="gravity-ui:eye-slash" />
+                                    <Icon icon="gravity-ui:eye-slash" className="size-4" />
                                   )}
                                 </Button>
                               </InputGroup.Suffix>

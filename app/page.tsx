@@ -1,127 +1,183 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Chip, Typography, Button } from "@heroui/react";
-import { Bebas_Neue } from "next/font/google";
 import Galaxy from "@/components/hero/galaxy";
-import { m, LazyMotion, domAnimation } from "motion/react";
+import { Avatar, Card, Surface, Skeleton, Typography } from "@heroui/react";
+import { Icon } from "@iconify/react";
+import { CircleChevronRight, Cloud, Key as KeyIcon, Person } from "@gravity-ui/icons";
+import { ItemCard } from "@heroui-pro/react";
+import { Segment } from "@heroui-pro/react";
+import { Button } from "@heroui/react";
 
-const fontDisplay = Bebas_Neue({
-  subsets: ["latin"],
-  weight: ["400"],
-});
+const tabs = [
+  { icon: "fa7-solid:fire", id: "popular", label: "Popular" },
+  { icon: "gravity-ui:music-note", id: "music", label: "Music" },
+  { icon: "gravity-ui:volume-low", id: "game", label: "Game" },
+];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
-    },
+const users = [
+  {
+    id: 1,
+    image: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg",
+    name: "John Doe",
   },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30, filter: "blur(4px)" },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    filter: "blur(0px)",
-    transition: { 
-      duration: 1.2, 
-      ease: "circOut" 
-    } 
-  }, 
-};
+  {
+    id: 2,
+    image: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg",
+    name: "Kate Wilson",
+  },
+  {
+    id: 3,
+    image: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg",
+    name: "Emily Chen",
+  },
+  {
+    id: 4,
+    image: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/orange.jpg",
+    name: "Michael Brown",
+  },
+];
 
 export default function Home() {
   return (
-    <main className="relative -mt-16 flex w-full flex-col overflow-x-hidden">
-      <section className="relative z-10 flex min-h-screen w-full flex-1 flex-col items-center justify-center overflow-hidden px-6 pt-[calc(4rem+6rem)] pb-32 text-center md:pb-48">
-        <div className="absolute inset-0 z-0">
-          <Galaxy
-            mouseRepulsion
-            mouseInteraction
-            density={1}
-            glowIntensity={0.3}
-            saturation={0}
-            hueShift={140}
-            twinkleIntensity={0.3}
-            rotationSpeed={0.1}
-            repulsionStrength={2}
-            autoCenterRepulsion={0}
-            starSpeed={0.5}
-            speed={1}
-          />
+    <main className="flex min-h-screen w-full flex-col overflow-x-hidden">
+      <Galaxy
+        mouseRepulsion
+        mouseInteraction
+        density={1}
+        glowIntensity={0.3}
+        saturation={0}
+        hueShift={140}
+        twinkleIntensity={0.3}
+        rotationSpeed={0.1}
+        repulsionStrength={2}
+        autoCenterRepulsion={0}
+        starSpeed={0.5}
+        speed={1}
+      />
+
+      <Surface
+        variant="transparent"
+        className="relative z-10 mx-auto grid w-full grid-cols-1 items-stretch gap-6 p-6 md:grid-cols-2 md:p-12 md:pt-32 lg:grid-cols-3"
+      >
+        <Card className="flex min-h-0 w-full flex-col">
+          <Card.Header>
+            <Segment defaultSelectedKey="popular" variant="ghost" className="w-fit">
+              {tabs.map((tab) => (
+                <Segment.Item key={tab.id} className="w-auto" id={tab.id} style={{ gap: 0 }}>
+                  {({ isSelected }) => (
+                    <>
+                      <Icon icon={tab.icon} />
+                      <span
+                        className="inline-grid transition-all duration-200 ease-out motion-reduce:transition-none"
+                        style={{
+                          gridTemplateColumns: isSelected ? "1fr" : "0fr",
+                          minWidth: 0,
+                          opacity: isSelected ? 1 : 0,
+                        }}
+                      >
+                        <span
+                          className="overflow-hidden whitespace-nowrap transition-[padding] duration-200 ease-out motion-reduce:transition-none"
+                          style={{
+                            minWidth: 0,
+                            paddingInlineStart: isSelected ? "0.375rem" : 0,
+                          }}
+                        >
+                          {tab.label}
+                        </span>
+                      </span>
+                    </>
+                  )}
+                </Segment.Item>
+              ))}
+            </Segment>
+          </Card.Header>
+          <Card.Content className="flex flex-1 flex-col gap-4">asdfasdf</Card.Content>
+
+          <Card.Footer className="flex items-center justify-between">
+            <div className="flex -space-x-2">
+              {users.slice(0, 3).map((user) => (
+                <Avatar key={user.id} className="ring-background ring-2" size="sm">
+                  <Avatar.Image alt={user.name} src={user.image} />
+                  <Avatar.Fallback>
+                    {user.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </Avatar.Fallback>
+                </Avatar>
+              ))}
+            </div>
+            <Button size="sm" variant="tertiary">
+              <Icon icon="gravity-ui:thumbs-up-fill" />
+              Search
+            </Button>
+          </Card.Footer>
+        </Card>
+
+        <Card className="flex min-h-0 w-full flex-col">
+          <Card.Header className="flex flex-row items-center justify-between">
+            <Card.Title>Your Statistic</Card.Title>
+          </Card.Header>
+          <Card.Content className="flex flex-1 flex-col items-center justify-center gap-6">
+            asdfasdf
+          </Card.Content>
+        </Card>
+
+        <div className="space-y-2 rounded-2xl">
+          <ItemCard>
+            <ItemCard.Icon>
+              <img
+                alt="Indie Hackers community"
+                className="pointer-events-none aspect-square w-14 rounded-2xl object-cover select-none"
+                loading="lazy"
+                src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg"
+              />
+            </ItemCard.Icon>
+            <ItemCard.Content>
+              <ItemCard.Title>Profile</ItemCard.Title>
+              <ItemCard.Description>Update your personal information</ItemCard.Description>
+            </ItemCard.Content>
+            <ItemCard.Action>
+              <CircleChevronRight className="text-muted size-4" />
+            </ItemCard.Action>
+          </ItemCard>
+          <ItemCard>
+            <ItemCard.Icon>
+              <img
+                alt="Indie Hackers community"
+                className="pointer-events-none aspect-square w-14 rounded-2xl object-cover select-none"
+                loading="lazy"
+                src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg"
+              />
+            </ItemCard.Icon>
+            <ItemCard.Content>
+              <ItemCard.Title>Security</ItemCard.Title>
+              <ItemCard.Description>Manage passwords and 2FA</ItemCard.Description>
+            </ItemCard.Content>
+            <ItemCard.Action>
+              <CircleChevronRight className="text-muted size-4" />
+            </ItemCard.Action>
+          </ItemCard>
+          <ItemCard>
+            <ItemCard.Icon>
+              <img
+                alt="Indie Hackers community"
+                className="pointer-events-none aspect-square w-14 rounded-2xl object-cover select-none"
+                loading="lazy"
+                src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg"
+              />
+            </ItemCard.Icon>
+            <ItemCard.Content>
+              <ItemCard.Title>Cloud sync</ItemCard.Title>
+              <ItemCard.Description>Sync data across your devices</ItemCard.Description>
+            </ItemCard.Content>
+            <ItemCard.Action>
+              <CircleChevronRight className="text-muted size-4" />
+            </ItemCard.Action>
+          </ItemCard>
         </div>
-
-        <LazyMotion features={domAnimation}>
-          <m.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="relative z-10 flex w-full flex-col items-center"
-          >
-            <m.div variants={itemVariants} className="mb-6 flex justify-center">
-              <Chip
-                color="default"
-                variant="soft"
-                size="md"
-                className="border-border/40 bg-surface/30 gap-2 border px-2 backdrop-blur-md"
-              >
-                <div className="bg-foreground size-1.5 animate-pulse rounded-full" />
-                <Chip.Label className="text-xs font-medium tracking-widest uppercase">
-                  Welcome to my digital garden
-                </Chip.Label>
-              </Chip>
-            </m.div>
-
-            <m.div
-              variants={itemVariants}
-              className={`flex flex-col items-center justify-center tracking-normal ${fontDisplay.className}`}
-            >
-              {/* Optical alignment: nudge the top line slightly down to balance the heavy bottom line */}
-              <span className="text-muted-foreground translate-y-2 text-4xl leading-none sm:translate-y-4 sm:text-6xl md:text-7xl lg:text-[7rem]">
-                THIS IS WHERE
-              </span>
-              {/* Minimalist approach: remove excessive shadows, keep gradient subtle */}
-              <span className="from-foreground to-foreground/40 bg-gradient-to-b bg-clip-text text-7xl leading-[0.8] text-transparent sm:text-[9rem] md:text-[11rem] lg:text-[14rem] xl:text-[16rem]">
-                I SHARE IT ALL
-              </span>
-            </m.div>
-
-            <m.div variants={itemVariants} className="mt-8 max-w-2xl px-4 sm:mt-12">
-              <Typography
-                type="body"
-                className="text-muted-foreground text-base leading-relaxed font-medium text-balance sm:text-lg lg:text-xl"
-              >
-                A curated collection of my thoughts, code, and journey. Unfiltered, unpolished, and
-                completely authentic.
-              </Typography>
-            </m.div>
-
-            <m.div
-              variants={itemVariants}
-              className="mt-10 flex flex-wrap items-center justify-center gap-4 sm:mt-12"
-            >
-              <Button
-                size="lg"
-                variant="primary"
-                className="shadow-foreground/10 h-12 rounded-full px-8 text-sm font-semibold shadow-lg sm:h-14 sm:px-10 sm:text-base"
-              >
-                Read the latest
-              </Button>
-              <Button
-                size="lg"
-                variant="secondary"
-                className="border-border/40 bg-surface/30 hover:bg-surface/50 h-12 rounded-full border px-8 text-sm font-semibold backdrop-blur-md transition-colors sm:h-14 sm:px-10 sm:text-base"
-              >
-                Explore topics
-              </Button>
-            </m.div>
-          </m.div>
-        </LazyMotion>
-      </section>
+      </Surface>
     </main>
   );
 }
