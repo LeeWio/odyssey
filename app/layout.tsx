@@ -72,7 +72,7 @@ export default async function RootLayout({
             <ThemeProvider>
               <ThemeCSSLoader />
               <Toast.Provider />
-              <div className="relative flex h-screen flex-col">
+              <div className="relative flex min-h-screen flex-col overflow-x-hidden">
                 <Navbar />
                 <SheetPanel />
                 <DashboardSheet />

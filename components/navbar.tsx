@@ -101,7 +101,7 @@ export const Navbar = () => {
 
   return (
     <>
-      <HerouiNavbar ref={navbarRef} hideOnScroll parentRef={scrollRef} position="sticky">
+      <HerouiNavbar ref={navbarRef} hideOnScroll position="floating" className="mx-auto w-auto">
         <HerouiNavbar.Header>
           <HerouiNavbar.MenuToggle className="md:hidden" />
           <HerouiNavbar.Brand className="navbar-brand">
