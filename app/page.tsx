@@ -10,6 +10,17 @@ const fontDisplay = Bebas_Neue({
   weight: ["400"],
 });
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
+    },
+  },
+};
+
 const itemVariants = {
   hidden: { opacity: 0, y: 30, filter: "blur(4px)" },
   visible: { 
@@ -22,9 +33,6 @@ const itemVariants = {
     } 
   }, 
 };
-
-const MotionChip = m.create(Chip);
-const MotionTypography = m.create(Typography);
 
 export default function Home() {
   return (
@@ -49,14 +57,13 @@ export default function Home() {
 
         <LazyMotion features={domAnimation}>
           <m.div
+            variants={containerVariants}
             initial="hidden"
             animate="visible"
-            transition={{ staggerChildren: 0.15, delayChildren: 0.1 }}
             className="relative z-10 flex w-full flex-col items-center"
           >
-            <div className="mb-6 flex justify-center">
-              <MotionChip
-                variants={itemVariants}
+            <m.div variants={itemVariants} className="mb-6 flex justify-center">
+              <Chip
                 color="default"
                 variant="soft"
                 size="md"
@@ -66,8 +73,8 @@ export default function Home() {
                 <Chip.Label className="text-xs font-medium tracking-widest uppercase">
                   Welcome to my digital garden
                 </Chip.Label>
-              </MotionChip>
-            </div>
+              </Chip>
+            </m.div>
 
             <m.div
               variants={itemVariants}
@@ -83,16 +90,15 @@ export default function Home() {
               </span>
             </m.div>
 
-            <div className="mt-8 max-w-2xl px-4 sm:mt-12">
-              <MotionTypography
-                variants={itemVariants}
+            <m.div variants={itemVariants} className="mt-8 max-w-2xl px-4 sm:mt-12">
+              <Typography
                 type="body"
                 className="text-muted-foreground text-base leading-relaxed font-medium text-balance sm:text-lg lg:text-xl"
               >
                 A curated collection of my thoughts, code, and journey. Unfiltered, unpolished, and
                 completely authentic.
-              </MotionTypography>
-            </div>
+              </Typography>
+            </m.div>
 
             <m.div
               variants={itemVariants}
