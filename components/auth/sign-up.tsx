@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Button,
   Modal,
@@ -15,10 +15,8 @@ import {
   Spinner,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { useRegisterMutation } from "@/lib/features/auth";
-import { EnvelopeIcon, EyeIcon, EyeSlashIcon } from "../icons";
+import { AnimatePresence, m, domAnimation, LazyMotion } from "motion/react";
 
 export interface SignUpProps {
   isOpen?: boolean;
@@ -37,7 +35,19 @@ const orDivider = (
 export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) => {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+
+  const variants = {
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.3, ease: "easeOut" as const },
+    },
+    hidden: {
+      opacity: 0,
+      y: 10,
+      transition: { duration: 0.2, ease: "easeIn" as const },
+    },
+  };
 
   const [register, { isLoading: isRegLoading }] = useRegisterMutation();
 
@@ -57,11 +67,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
         if (onOpenChange) {
           onOpenChange(false);
         }
-        // Optionally redirect or show a success state telling them to wait for approval
-        // router.push("/");
-      } catch {
-        // Error is handled by RTK query state
-      }
+      } catch {}
     };
 
     void submit();
@@ -70,29 +76,6 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
   const switchView = useCallback((showForm: boolean) => {
     setIsFormVisible(showForm);
   }, []);
-
-  useGSAP(
-    () => {
-      const target = containerRef.current?.firstElementChild?.children;
-      if (!target || target.length === 0) return;
-
-      // Use a clean, non-elastic power2.out for maximum smoothness
-      gsap.fromTo(
-        target,
-        { autoAlpha: 0, y: isFormVisible ? 8 : -8 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.35,
-          ease: "power2.out",
-          stagger: 0.03,
-          clearProps: "all",
-          overwrite: "auto",
-        }
-      );
-    },
-    { dependencies: [isFormVisible], scope: containerRef }
-  );
 
   return (
     <Modal>
@@ -104,129 +87,147 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
               <Modal.Heading className="mb-4 text-xl font-medium">Sign Up</Modal.Heading>
             </Modal.Header>
             <Modal.Body data-scrollbar="none">
-              <div ref={containerRef}>
-                {isFormVisible ? (
-                  <div className="flex flex-col gap-y-3">
-                    <Form
-                      validationBehavior="native"
-                      className="flex flex-col gap-4"
-                      onSubmit={handleSubmit}
-                    >
-                      <TextField
-                        isRequired
-                        name="username"
-                        minLength={3}
-                        validate={(value) => {
-                          if (value.length < 3) {
-                            return "Username must be at least 3 characters";
-                          }
-                          return null;
-                        }}
+              <LazyMotion features={domAnimation}>
+                <m.div layout transition={{ duration: 0.3, ease: "easeInOut" }}>
+                  <AnimatePresence initial={false} mode="wait">
+                    {isFormVisible ? (
+                      <m.div
+                        key="form"
+                        className="flex w-full flex-col gap-y-3"
+                        animate="visible"
+                        exit="hidden"
+                        initial="hidden"
+                        variants={variants}
+                        onSubmit={(e) => e.preventDefault()}
                       >
-                        <Label>Username</Label>
-                        <Input placeholder="johndoe" />
-                        <FieldError />
-                      </TextField>
+                        <Form
+                          validationBehavior="native"
+                          className="flex flex-col gap-4"
+                          onSubmit={handleSubmit}
+                        >
+                          <TextField
+                            isRequired
+                            name="username"
+                            minLength={3}
+                            validate={(value) => {
+                              if (value.length < 3) {
+                                return "Username must be at least 3 characters";
+                              }
+                              return null;
+                            }}
+                          >
+                            <Label>Username</Label>
+                            <Input placeholder="johndoe" />
+                            <FieldError />
+                          </TextField>
 
-                      <TextField
-                        isRequired
-                        name="email"
-                        type="email"
-                        validate={(value) => {
-                          if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
-                            return "Please enter a valid email address";
-                          }
-                          return null;
-                        }}
+                          <TextField
+                            isRequired
+                            name="email"
+                            type="email"
+                            validate={(value) => {
+                              if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
+                                return "Please enter a valid email address";
+                              }
+                              return null;
+                            }}
+                          >
+                            <Label>Email</Label>
+                            <Input placeholder="john@example.com" />
+                            <FieldError />
+                          </TextField>
+
+                          <TextField
+                            isRequired
+                            minLength={8}
+                            name="password"
+                            validate={(value) => {
+                              if (value.length < 8) {
+                                return "Password must be at least 8 characters";
+                              }
+                              if (!/[A-Z]/.test(value)) {
+                                return "Password must contain at least one uppercase letter";
+                              }
+                              if (!/[0-9]/.test(value)) {
+                                return "Password must contain at least one number";
+                              }
+                              return null;
+                            }}
+                          >
+                            <Label>Password</Label>
+                            <InputGroup>
+                              <InputGroup.Input
+                                placeholder="Create a password"
+                                type={isVisible ? "text" : "password"}
+                              />
+                              <InputGroup.Suffix className="pr-0">
+                                <Button
+                                  isIconOnly
+                                  aria-label={isVisible ? "Hide password" : "Show password"}
+                                  size="sm"
+                                  variant="ghost"
+                                  onPress={() => setIsVisible(!isVisible)}
+                                >
+                                  {isVisible ? (
+                                    <Icon icon="gravity-ui:eye" />
+                                  ) : (
+                                    <Icon icon="gravity-ui:eye-slash" />
+                                  )}
+                                </Button>
+                              </InputGroup.Suffix>
+                            </InputGroup>
+                            <FieldError />
+                          </TextField>
+
+                          <Button
+                            fullWidth
+                            type="submit"
+                            variant="primary"
+                            isPending={isRegLoading}
+                          >
+                            {({ isPending }) => (
+                              <>
+                                {isPending && <Spinner color="current" size="sm" />}
+                                Sign Up
+                              </>
+                            )}
+                          </Button>
+                        </Form>
+                        {orDivider}
+                        <Button fullWidth variant="secondary" onPress={() => switchView(false)}>
+                          <Icon icon="solar:arrow-left-linear" />
+                          Other Sign Up options
+                        </Button>
+                      </m.div>
+                    ) : (
+                      <m.div
+                        key="options"
+                        className="flex w-full flex-col gap-y-2"
+                        initial="hidden"
+                        animate="visible"
+                        exit="hidden"
+                        variants={variants}
                       >
-                        <Label>Email</Label>
-                        <Input placeholder="john@example.com" />
-                        <FieldError />
-                      </TextField>
-
-                      <TextField
-                        isRequired
-                        minLength={8}
-                        name="password"
-                        validate={(value) => {
-                          if (value.length < 8) {
-                            return "Password must be at least 8 characters";
-                          }
-                          if (!/[A-Z]/.test(value)) {
-                            return "Password must contain at least one uppercase letter";
-                          }
-                          if (!/[0-9]/.test(value)) {
-                            return "Password must contain at least one number";
-                          }
-                          return null;
-                        }}
-                      >
-                        <Label>Password</Label>
-                        <InputGroup>
-                          <InputGroup.Input
-                            placeholder="Create a password"
-                            type={isVisible ? "text" : "password"}
-                          />
-                          <InputGroup.Suffix className="pr-0">
-                            <Button
-                              isIconOnly
-                              aria-label={isVisible ? "Hide password" : "Show password"}
-                              size="sm"
-                              variant="ghost"
-                              onPress={() => setIsVisible(!isVisible)}
-                            >
-                              {isVisible ? (
-                                <EyeIcon className="size-4" />
-                              ) : (
-                                <EyeSlashIcon className="size-4" />
-                              )}
-                            </Button>
-                          </InputGroup.Suffix>
-                        </InputGroup>
-                        <FieldError />
-                      </TextField>
-
-                      <Button fullWidth type="submit" variant="primary" isPending={isRegLoading}>
-                        {({ isPending }) => (
-                          <>
-                            {isPending && <Spinner color="current" size="sm" />}
-                            Sign Up
-                          </>
-                        )}
-                      </Button>
-                    </Form>
-                    {orDivider}
-                    <Button fullWidth variant="secondary" onPress={() => switchView(false)}>
-                      <Icon icon="solar:arrow-left-linear" />
-                      Other Sign Up options
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex w-full flex-col gap-y-2">
-                    <Button fullWidth variant="primary" onPress={() => switchView(true)}>
-                      <EnvelopeIcon className="pointer-events-none text-2xl" />
-                      Sign up with Email
-                    </Button>
-                    {orDivider}
-                    <div className="flex flex-col gap-2">
-                      <Button fullWidth variant="secondary">
-                        <Icon icon="devicon:google" />
-                        Sign up with Google
-                      </Button>
-                      <Button fullWidth variant="secondary">
-                        <Icon icon="devicon:github" />
-                        Sign up with Github
-                      </Button>
-                    </div>
-                    <p className="text-small mt-3 text-center">
-                      Already have an account?&nbsp;
-                      <Link className="cursor-pointer no-underline" onPress={onSwitchToLogIn}>
-                        Log In
-                      </Link>
-                    </p>
-                  </div>
-                )}
-              </div>
+                        <Button fullWidth variant="primary" onPress={() => switchView(true)}>
+                          <Icon icon="gravity-ui:envelope" />
+                          Continue with Email
+                        </Button>
+                        {orDivider}
+                        <Button fullWidth variant="secondary">
+                          <Icon icon="devicon:google" /> Continue with Google
+                        </Button>
+                        <Button fullWidth variant="secondary">
+                          <Icon icon="devicon:github" /> Continue with Github
+                        </Button>
+                        <p className="text-small mt-3 text-center">
+                          Already have an account?&nbsp;
+                          <Link onPress={onSwitchToLogIn}>Log In</Link>
+                        </p>
+                      </m.div>
+                    )}
+                  </AnimatePresence>
+                </m.div>
+              </LazyMotion>
             </Modal.Body>
           </Modal.Dialog>
         </Modal.Container>

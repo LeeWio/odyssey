@@ -498,7 +498,8 @@ export function DashboardSheet() {
 
   // Calculate trend safely
   const pvGrowthRate = analytics?.pvGrowthRate ?? 0;
-  const trend: "up" | "down" | "neutral" = pvGrowthRate > 0 ? "up" : pvGrowthRate < 0 ? "down" : "neutral";
+  const trend: "up" | "down" | "neutral" =
+    pvGrowthRate > 0 ? "up" : pvGrowthRate < 0 ? "down" : "neutral";
 
   return (
     <Sheet isOpen={isOpen} onOpenChange={handleOpenChange}>
@@ -561,11 +562,11 @@ export function DashboardSheet() {
                             </KPI.Header>
                             <KPI.Content className="grid-cols-[1fr_auto] items-end gap-2">
                               <div className="flex flex-col gap-1">
-                                <KPI.Value value={stats?.totalViews ?? 0} maximumFractionDigits={0} />
-                                <TrendChip
-                                  trend={trend}
-                                  variant="soft"
-                                >
+                                <KPI.Value
+                                  value={stats?.totalViews ?? 0}
+                                  maximumFractionDigits={0}
+                                />
+                                <TrendChip trend={trend} variant="soft">
                                   {pvGrowthRate > 0 ? "+" : ""}
                                   {(pvGrowthRate * 100).toFixed(1)}%
                                   <TrendChip.Suffix>growth</TrendChip.Suffix>
@@ -574,8 +575,12 @@ export function DashboardSheet() {
                               <div className="flex flex-col items-end gap-1">
                                 <span className="text-muted text-[10px] uppercase">Today</span>
                                 <div className="flex flex-col items-end">
-                                  <span className="text-foreground text-xs font-medium">PV: {analytics?.todayPv ?? 0}</span>
-                                  <span className="text-foreground text-xs font-medium">UV: {analytics?.todayUv ?? 0}</span>
+                                  <span className="text-foreground text-xs font-medium">
+                                    PV: {analytics?.todayPv ?? 0}
+                                  </span>
+                                  <span className="text-foreground text-xs font-medium">
+                                    UV: {analytics?.todayUv ?? 0}
+                                  </span>
                                 </div>
                               </div>
                             </KPI.Content>

@@ -64,7 +64,12 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
     const preloadedState: Record<string, unknown> = {};
 
     if (auth) preloadedState.auth = JSON.parse(auth);
-    if (theme) preloadedState.ui = { theme: { variant: theme }, sheet: { isOpen: false }, dashboard: { isOpen: false } };
+    if (theme)
+      preloadedState.ui = {
+        theme: { variant: theme },
+        sheet: { isOpen: false },
+        dashboard: { isOpen: false },
+      };
     if (locale) preloadedState.locale = { value: locale };
 
     return preloadedState;

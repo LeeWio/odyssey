@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Button,
   Modal,
@@ -15,8 +15,7 @@ import {
   Spinner,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "gsap";
+import { AnimatePresence, m, domAnimation, LazyMotion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useSendOtpMutation, useLoginWithOtpMutation } from "@/lib/features/auth";
 
@@ -42,8 +41,18 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  useGSAP({ scope: containerRef });
+  const variants = {
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.3, ease: "easeOut" as const },
+    },
+    hidden: {
+      opacity: 0,
+      y: 10,
+      transition: { duration: 0.2, ease: "easeIn" as const },
+    },
+  };
 
   const [sendOtp, { isLoading: isSendingOtp }] = useSendOtpMutation();
   const [loginWithOtp, { isLoading: isLoggingIn, error: loginError }] = useLoginWithOtpMutation();
@@ -98,28 +107,6 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
     setStep(nextStep);
   }, []);
 
-  useGSAP(
-    () => {
-      const target = containerRef.current?.firstElementChild?.children;
-      if (!target || target.length === 0) return;
-
-      gsap.fromTo(
-        target,
-        { autoAlpha: 0, y: step === 2 ? 8 : -8 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.35,
-          ease: "power2.out",
-          stagger: 0.03,
-          clearProps: "all",
-          overwrite: "auto",
-        }
-      );
-    },
-    { dependencies: [step], scope: containerRef }
-  );
-
   return (
     <Modal>
       <Modal.Backdrop
@@ -142,103 +129,116 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
               <Modal.Heading className="mb-4 text-xl font-medium">Log In</Modal.Heading>
             </Modal.Header>
             <Modal.Body data-scrollbar="none">
-              <div ref={containerRef}>
-                {step === 1 ? (
-                  <form className="flex w-full flex-col gap-y-3" onSubmit={handleEmailSubmit}>
-                    <div className="flex flex-col gap-4">
-                      <TextField isRequired name="email" type="email" isInvalid={!!emailError}>
-                        <Label>Email</Label>
-                        <Input
-                          placeholder="john@example.com"
-                          value={email}
-                          onChange={(e) => {
-                            setEmail(e.target.value);
-                            if (emailError) setEmailError("");
-                          }}
-                        />
-                        {emailError && (
-                          <div className="text-tiny text-danger mt-1">{emailError}</div>
-                        )}
-                      </TextField>
-
-                      <Button fullWidth type="submit" variant="primary" isPending={isSendingOtp}>
-                        {({ isPending }) => (
-                          <>
-                            {isPending && <Spinner color="current" size="sm" />}
-                            Send Code
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                    {orDivider}
-                    <div className="flex flex-col gap-2">
-                      <Button fullWidth variant="secondary">
-                        <Icon icon="devicon:google" />
-                        Continue with Google
-                      </Button>
-                      <Button fullWidth variant="secondary">
-                        <Icon icon="devicon:github" />
-                        Continue with Github
-                      </Button>
-                    </div>
-                    <p className="text-small mt-3 text-center">
-                      Need to create an account?&nbsp;
-                      <Link className="cursor-pointer no-underline" onPress={onSwitchToSignUp}>
-                        Sign Up
-                      </Link>
-                    </p>
-                  </form>
-                ) : (
-                  <div className="flex flex-col gap-y-3">
-                    <div className="mb-2 flex flex-col gap-2">
-                      {loginError && (
-                        <Alert status="danger">
-                          <Alert.Indicator />
-                          <Alert.Content>
-                            <Alert.Title>Login Failed</Alert.Title>
-                            <Alert.Description>{getErrorMessage(loginError)}</Alert.Description>
-                          </Alert.Content>
-                        </Alert>
-                      )}
-                      <p className="text-default-500 text-sm">
-                        Enter the 6-digit verification code sent to{" "}
-                        <span className="text-foreground font-medium">{email}</span>.
-                      </p>
-                    </div>
-
-                    <div className="mb-4 flex w-full justify-center">
-                      <InputOTP
-                        maxLength={6}
-                        pattern={REGEXP_ONLY_DIGITS}
-                        onComplete={handleOTPComplete}
-                        isDisabled={isLoggingIn}
+              <LazyMotion features={domAnimation}>
+                <m.div layout transition={{ duration: 0.3, ease: "easeInOut" }}>
+                  <AnimatePresence initial={false} mode="wait">
+                    {step === 1 ? (
+                      <m.form
+                        key="email"
+                        className="flex w-full flex-col gap-y-3"
+                        initial="hidden"
+                        animate="visible"
+                        exit="hidden"
+                        variants={variants}
+                        onSubmit={handleEmailSubmit}
                       >
-                        <InputOTP.Group>
-                          <InputOTP.Slot index={0} />
-                          <InputOTP.Slot index={1} />
-                          <InputOTP.Slot index={2} />
-                        </InputOTP.Group>
-                        <InputOTP.Separator />
-                        <InputOTP.Group>
-                          <InputOTP.Slot index={3} />
-                          <InputOTP.Slot index={4} />
-                          <InputOTP.Slot index={5} />
-                        </InputOTP.Group>
-                      </InputOTP>
-                    </div>
+                        <div className="flex flex-col gap-4">
+                          <TextField isRequired name="email" type="email" isInvalid={!!emailError}>
+                            <Label>Email</Label>
+                            <Input
+                              placeholder="john@example.com"
+                              value={email}
+                              onChange={(e) => {
+                                setEmail(e.target.value);
+                                if (emailError) setEmailError("");
+                              }}
+                            />
+                            {emailError && (
+                              <div className="text-tiny text-danger mt-1">{emailError}</div>
+                            )}
+                          </TextField>
 
-                    <Button
-                      fullWidth
-                      variant="secondary"
-                      onPress={() => switchStep(1)}
-                      isDisabled={isLoggingIn}
-                    >
-                      <Icon icon="solar:arrow-left-linear" />
-                      Change Email
-                    </Button>
-                  </div>
-                )}
-              </div>
+                          <Button
+                            fullWidth
+                            type="submit"
+                            variant="primary"
+                            isPending={isSendingOtp}
+                          >
+                            {({ isPending }) => (
+                              <>
+                                {isPending && <Spinner color="current" size="sm" />}
+                                Send Code
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                        {orDivider}
+                        <div className="flex flex-col gap-2">
+                          <Button fullWidth variant="secondary">
+                            <Icon icon="devicon:google" />
+                            Continue with Google
+                          </Button>
+                          <Button fullWidth variant="secondary">
+                            <Icon icon="devicon:github" />
+                            Continue with Github
+                          </Button>
+                        </div>
+                        <p className="text-small mt-3 text-center">
+                          Need to create an account?&nbsp;
+                          <Link className="cursor-pointer no-underline" onPress={onSwitchToSignUp}>
+                            Sign Up
+                          </Link>
+                        </p>
+                      </m.form>
+                    ) : (
+                      <m.div
+                        key="otp"
+                        className="flex flex-col gap-y-3"
+                        initial="hidden"
+                        animate="visible"
+                        exit="hidden"
+                        variants={variants}
+                      >
+                        <div className="flex flex-col gap-1">
+                          <Label>Verify account</Label>
+                          <p className="text-muted text-sm">
+                            We&apos;ve sent a code to a****@gmail.com
+                          </p>
+                        </div>
+
+                        <InputOTP
+                          maxLength={6}
+                          pattern={REGEXP_ONLY_DIGITS}
+                          onComplete={handleOTPComplete}
+                          isDisabled={isLoggingIn}
+                        >
+                          <InputOTP.Group>
+                            <InputOTP.Slot index={0} />
+                            <InputOTP.Slot index={1} />
+                            <InputOTP.Slot index={2} />
+                          </InputOTP.Group>
+                          <InputOTP.Separator />
+                          <InputOTP.Group>
+                            <InputOTP.Slot index={3} />
+                            <InputOTP.Slot index={4} />
+                            <InputOTP.Slot index={5} />
+                          </InputOTP.Group>
+                        </InputOTP>
+
+                        <Button
+                          fullWidth
+                          variant="secondary"
+                          onPress={() => switchStep(1)}
+                          isDisabled={isLoggingIn}
+                        >
+                          <Icon icon="solar:arrow-left-linear" />
+                          Change Email
+                        </Button>
+                      </m.div>
+                    )}
+                  </AnimatePresence>
+                </m.div>
+              </LazyMotion>
             </Modal.Body>
           </Modal.Dialog>
         </Modal.Container>
