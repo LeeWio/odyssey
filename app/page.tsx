@@ -5,7 +5,7 @@ import Galaxy from "@/components/hero/galaxy";
 import { Avatar, Card, Surface, Skeleton, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { CircleChevronRight, Cloud, Key as KeyIcon, Person } from "@gravity-ui/icons";
-import { ItemCard } from "@heroui-pro/react";
+import { ItemCard, PressableFeedback } from "@heroui-pro/react";
 import { Segment } from "@heroui-pro/react";
 import { Button } from "@heroui/react";
 
@@ -92,7 +92,12 @@ export default function Home() {
               ))}
             </Segment>
           </Card.Header>
-          <Card.Content className="flex flex-1 flex-col gap-4">asdfasdf</Card.Content>
+          <Card.Content className="flex flex-1 flex-col gap-4">
+            <Typography type="h2">Valorant</Typography>
+            <Typography type="body">
+              valorant is a multiplayer computer game developed and published by Riot Games.Valorant is Riot Games'first-person shooter games.
+            </Typography>
+          </Card.Content>
 
           <Card.Footer className="flex items-center justify-between">
             <div className="flex -space-x-2">
@@ -110,7 +115,7 @@ export default function Home() {
             </div>
             <Button size="sm" variant="tertiary">
               <Icon icon="gravity-ui:thumbs-up-fill" />
-              Search
+              +53 Reviews
             </Button>
           </Card.Footer>
         </Card>
@@ -125,55 +130,66 @@ export default function Home() {
         </Card>
 
         <div className="space-y-2 rounded-2xl">
-          <ItemCard>
+          <ItemCard<"button">
+            className="relative w-full cursor-pointer overflow-hidden"
+            render={(props) => <button type="button" {...props} />}
+          >
+            <PressableFeedback.Highlight />
             <ItemCard.Icon>
               <img
                 alt="Indie Hackers community"
-                className="pointer-events-none aspect-square w-14 rounded-2xl object-cover select-none"
+                className="pointer-events-none aspect-square rounded-lg object-cover select-none"
                 loading="lazy"
                 src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg"
               />
             </ItemCard.Icon>
             <ItemCard.Content>
-              <ItemCard.Title>Profile</ItemCard.Title>
-              <ItemCard.Description>Update your personal information</ItemCard.Description>
+              <ItemCard.Title className="font-bold">Unravel 2</ItemCard.Title>
+              <ItemCard.Description>(Standard Edition + Starter Pass)</ItemCard.Description>
             </ItemCard.Content>
             <ItemCard.Action>
-              <CircleChevronRight className="text-muted size-4" />
+              <Icon icon="gravity-ui:circle-chevron-right" className="text-muted size-4" />
             </ItemCard.Action>
           </ItemCard>
-          <ItemCard>
+          <ItemCard<"button">
+            className="relative w-full cursor-pointer overflow-hidden"
+            render={(props) => <button type="button" {...props} />}
+          >
+            <PressableFeedback.Highlight />
             <ItemCard.Icon>
               <img
                 alt="Indie Hackers community"
-                className="pointer-events-none aspect-square w-14 rounded-2xl object-cover select-none"
+                className="pointer-events-none aspect-square rounded-lg object-cover select-none"
                 loading="lazy"
                 src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg"
               />
             </ItemCard.Icon>
             <ItemCard.Content>
-              <ItemCard.Title>Security</ItemCard.Title>
-              <ItemCard.Description>Manage passwords and 2FA</ItemCard.Description>
+              <ItemCard.Title className="font-bold">Subway Surl</ItemCard.Title>
             </ItemCard.Content>
             <ItemCard.Action>
-              <CircleChevronRight className="text-muted size-4" />
+              <Icon icon="gravity-ui:circle-chevron-right" className="text-muted size-4" />
             </ItemCard.Action>
           </ItemCard>
-          <ItemCard>
+          <ItemCard<"button">
+            className="relative w-full cursor-pointer overflow-hidden"
+            render={(props) => <button type="button" {...props} />}
+          >
+            <PressableFeedback.Highlight />
             <ItemCard.Icon>
               <img
-                alt="Indie Hackers community"
-                className="pointer-events-none aspect-square w-14 rounded-2xl object-cover select-none"
+                alt="Cloud sync"
+                className="pointer-events-none aspect-square rounded-lg object-cover select-none"
                 loading="lazy"
                 src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg"
               />
             </ItemCard.Icon>
             <ItemCard.Content>
-              <ItemCard.Title>Cloud sync</ItemCard.Title>
-              <ItemCard.Description>Sync data across your devices</ItemCard.Description>
+              <ItemCard.Title className="font-bold">Red Dead Redemption 3</ItemCard.Title>
+              <ItemCard.Description>(Preminu Pack)</ItemCard.Description>
             </ItemCard.Content>
             <ItemCard.Action>
-              <CircleChevronRight className="text-muted size-4" />
+              <Icon icon="gravity-ui:circle-chevron-right" className="text-muted size-4" />
             </ItemCard.Action>
           </ItemCard>
         </div>
