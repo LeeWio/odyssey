@@ -1,45 +1,36 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import type { Key } from "@heroui/react";
-import { 
-  Modal, 
-  TextArea, 
-  Button, 
-  Select, 
+import { useState, useEffect, useCallback } from "react";
+import type { Key, ModalVariants } from "@heroui/react";
+import {
+  Modal,
+  TextArea,
+  Button,
+  Select,
   ListBox,
   Label,
-  TagGroup, 
-  Tag, 
-  Autocomplete, 
+  TagGroup,
+  Tag,
+  Autocomplete,
   Input,
   SearchField,
   EmptyState,
   useFilter,
   TextField,
-  type ModalContainerProps
 } from "@heroui/react";
 import { DropZone } from "@heroui-pro/react";
 import { motion, AnimatePresence, type Variants } from "motion/react";
 import Image from "next/image";
 
-// API Hooks
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { selectIsRichTextOpen, toggleRichText } from "@/lib/features/ui/ui-slice";
+
 import { useCreatePostMutation } from "@/lib/features/post/post-api";
 import { useGetCategoriesQuery } from "@/lib/features/category/category-api";
 import { useGetAllTagsQuery } from "@/lib/features/tag/tag-api";
 import { useUploadFileMutation } from "@/lib/features/file/file-api";
 
 // --- Types & Constants ---
-
-export type HeroUIModalSize = ModalContainerProps["size"];
-
-export interface RichTextProps {
-  value?: string;
-  onChange?: (value: string) => void;
-  label?: string;
-  placeholder?: string;
-  size?: HeroUIModalSize;
-}
 
 type Step = "editor" | "metadata";
 
@@ -71,7 +62,7 @@ const ANIMATION_VARIANTS: Variants = {
       ease: [0.16, 1, 0.3, 1],
       staggerChildren: 0.08,
       delayChildren: 0.1,
-    }
+    },
   },
   exit: (dir: number) => ({
     x: dir > 0 ? "-10%" : "10%",
@@ -79,7 +70,7 @@ const ANIMATION_VARIANTS: Variants = {
     rotateY: dir > 0 ? -12 : 12,
     scale: 0.98,
     filter: "blur(8px)",
-    transition: { duration: 0.4, ease: "easeInOut" }
+    transition: { duration: 0.4, ease: "easeInOut" },
   }),
 };
 
@@ -101,13 +92,13 @@ const generateSlug = (text: string): string => {
 
 // --- Sub-components (Content Only) ---
 
-const EditorContent = ({ 
-  value, 
-  onChange, 
-  placeholder 
-}: { 
-  value: string; 
-  onChange: (v: string) => void; 
+const EditorContent = ({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
   placeholder: string;
 }) => (
   <TextArea
@@ -129,7 +120,7 @@ const MetadataContent = ({
   isLoadingTags,
   isUploading,
   onFileUpload,
-  onDrop
+  onDrop,
 }: {
   metadata: MetadataState;
   onUpdateField: <K extends keyof MetadataState>(f: K, v: MetadataState[K]) => void;
@@ -143,25 +134,44 @@ const MetadataContent = ({
 }) => {
   const { contains } = useFilter({ sensitivity: "base" });
 
-  const onRemoveTags = useCallback((keys: Set<Key>) => {
-    onUpdateField("tagIds", metadata.tagIds.filter((id) => !keys.has(id)));
-  }, [metadata.tagIds, onUpdateField]);
+  const onRemoveTags = useCallback(
+    (keys: Set<Key>) => {
+      onUpdateField(
+        "tagIds",
+        metadata.tagIds.filter((id) => !keys.has(id))
+      );
+    },
+    [metadata.tagIds, onUpdateField]
+  );
 
-  const handleTagChange = useCallback((keys: Key[] | null) => {
-    const ids = (keys || []).map(k => parseInt(k.toString(), 10)).filter(id => !isNaN(id));
-    onUpdateField("tagIds", ids);
-  }, [onUpdateField]);
+  const handleTagChange = useCallback(
+    (keys: Key[] | null) => {
+      const ids = (keys || []).map((k) => parseInt(k.toString(), 10)).filter((id) => !isNaN(id));
+      onUpdateField("tagIds", ids);
+    },
+    [onUpdateField]
+  );
 
   return (
     <div className="flex flex-col gap-8 pb-8">
       {/* Cover Image Section */}
       <motion.section variants={ITEM_VARIANTS} className="flex flex-col gap-3">
-        <Label className="text-sm font-semibold text-foreground/80">Cover Image</Label>
+        <Label className="text-foreground/80 text-sm font-semibold">Cover Image</Label>
         {metadata.coverImage ? (
-          <div className="group relative h-56 w-full overflow-hidden rounded-2xl border-2 border-dashed border-divider bg-content2 transition-colors hover:border-primary/50">
-            <Image src={metadata.coverImage} alt="Cover" fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
+          <div className="group border-divider bg-content2 hover:border-primary/50 relative h-56 w-full overflow-hidden rounded-2xl border-2 border-dashed transition-colors">
+            <Image
+              src={metadata.coverImage}
+              alt="Cover"
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
             <div className="absolute inset-0 bg-black/20 opacity-0 transition-opacity group-hover:opacity-100" />
-            <Button size="sm" variant="danger" className="absolute right-4 top-4 shadow-lg" onPress={() => onUpdateField("coverImage", "")}>
+            <Button
+              size="sm"
+              variant="danger"
+              className="absolute top-4 right-4 shadow-lg"
+              onPress={() => onUpdateField("coverImage", "")}
+            >
               Remove Image
             </Button>
           </div>
@@ -180,9 +190,13 @@ const MetadataContent = ({
         )}
       </motion.section>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <motion.div variants={ITEM_VARIANTS} className="flex flex-col gap-6">
-          <TextField name="title" value={metadata.title} onChange={(v) => onUpdateField("title", v)}>
+          <TextField
+            name="title"
+            value={metadata.title}
+            onChange={(v) => onUpdateField("title", v)}
+          >
             <Label className="font-semibold">Post Title</Label>
             <Input placeholder="Enter an engaging title..." variant="secondary" />
           </TextField>
@@ -190,9 +204,17 @@ const MetadataContent = ({
             <Label className="font-semibold">URL Slug</Label>
             <Input placeholder="post-url-slug" variant="secondary" />
           </TextField>
-          <TextField name="summary" value={metadata.summary} onChange={(v) => onUpdateField("summary", v)}>
+          <TextField
+            name="summary"
+            value={metadata.summary}
+            onChange={(v) => onUpdateField("summary", v)}
+          >
             <Label className="font-semibold">Summary</Label>
-            <TextArea placeholder="Briefly describe what this post is about..." rows={4} variant="secondary" />
+            <TextArea
+              placeholder="Briefly describe what this post is about..."
+              rows={4}
+              variant="secondary"
+            />
           </TextField>
         </motion.div>
 
@@ -203,16 +225,22 @@ const MetadataContent = ({
               placeholder={isLoadingCategories ? "Loading..." : "Select a category"}
               selectionMode="single"
               value={metadata.categoryId?.toString()}
-              onChange={(key) => onUpdateField("categoryId", key ? parseInt(key.toString(), 10) : undefined)}
+              onChange={(key) =>
+                onUpdateField("categoryId", key ? parseInt(key.toString(), 10) : undefined)
+              }
               variant="secondary"
             >
               <Label className="font-semibold">Category</Label>
-              <Select.Trigger><Select.Value /><Select.Indicator /></Select.Trigger>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
               <Select.Popover>
                 <ListBox>
                   {categories.map((cat) => (
                     <ListBox.Item key={cat.id} id={cat.id.toString()} textValue={cat.name}>
-                      {cat.name}<ListBox.ItemIndicator />
+                      {cat.name}
+                      <ListBox.ItemIndicator />
                     </ListBox.Item>
                   ))}
                 </ListBox>
@@ -225,7 +253,7 @@ const MetadataContent = ({
               className="w-full"
               placeholder={isLoadingTags ? "Loading..." : "Select tags"}
               selectionMode="multiple"
-              value={metadata.tagIds.map(id => id.toString())}
+              value={metadata.tagIds.map((id) => id.toString())}
               onChange={(keys) => handleTagChange(keys as Key[] | null)}
               variant="secondary"
             >
@@ -240,24 +268,34 @@ const MetadataContent = ({
                         <TagGroup.List>
                           {keys.map((key) => {
                             const tag = allTags.find((t) => t.id.toString() === key.toString());
-                            return tag ? <Tag key={tag.id} id={tag.id}>{tag.name}</Tag> : null;
+                            return tag ? (
+                              <Tag key={tag.id} id={tag.id}>
+                                {tag.name}
+                              </Tag>
+                            ) : null;
                           })}
                         </TagGroup.List>
                       </TagGroup>
                     );
                   }}
                 </Autocomplete.Value>
-                <Autocomplete.ClearButton /><Autocomplete.Indicator />
+                <Autocomplete.ClearButton />
+                <Autocomplete.Indicator />
               </Autocomplete.Trigger>
               <Autocomplete.Popover>
                 <Autocomplete.Filter filter={contains}>
                   <SearchField autoFocus name="search" variant="secondary">
-                    <SearchField.Group><SearchField.SearchIcon /><SearchField.Input placeholder="Search tags..." /><SearchField.ClearButton /></SearchField.Group>
+                    <SearchField.Group>
+                      <SearchField.SearchIcon />
+                      <SearchField.Input placeholder="Search tags..." />
+                      <SearchField.ClearButton />
+                    </SearchField.Group>
                   </SearchField>
                   <ListBox renderEmptyState={() => <EmptyState>No tags found</EmptyState>}>
                     {allTags.map((tag) => (
                       <ListBox.Item key={tag.id} id={tag.id.toString()} textValue={tag.name}>
-                        {tag.name}<ListBox.ItemIndicator />
+                        {tag.name}
+                        <ListBox.ItemIndicator />
                       </ListBox.Item>
                     ))}
                   </ListBox>
@@ -273,18 +311,27 @@ const MetadataContent = ({
 
 // --- Main Component ---
 
-export function RichText({
-  value = "",
-  onChange,
-  label = "Edit Content",
-  placeholder = "Enter text...",
+export interface RichTextProps extends ModalVariants {
+  textValue?: string;
+  onTextValueChange?: (textValue: string) => void;
+  label?: string;
+  placeholder?: string;
+}
+
+export function RichText({ 
+  textValue = "", 
+  onTextValueChange, 
   size = "cover",
+  label = "Edit Content",
+  placeholder = "Enter text..."
 }: RichTextProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useAppDispatch();
+  const isOpen = useAppSelector(selectIsRichTextOpen);
+
   const [step, setStep] = useState<Step>("editor");
   const [direction, setDirection] = useState(0);
-  
-  const [internalValue, setInternalValue] = useState(value);
+
+  const [internalValue, setInternalValue] = useState(textValue);
   const [metadata, setMetadata] = useState<MetadataState>({
     title: "",
     slug: "",
@@ -293,7 +340,6 @@ export function RichText({
     tagIds: [],
   });
 
-  // API Hooks
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategoriesQuery();
   const { data: allTags = [], isLoading: isLoadingTags } = useGetAllTagsQuery();
   const [createPost, { isLoading: isCreating }] = useCreatePostMutation();
@@ -301,52 +347,65 @@ export function RichText({
 
   useEffect(() => {
     if (metadata.title && !metadata.slug) {
-      setMetadata(prev => ({ ...prev, slug: generateSlug(metadata.title) }));
+      setMetadata((prev) => ({ ...prev, slug: generateSlug(metadata.title) }));
     }
   }, [metadata.title, metadata.slug]);
 
   useEffect(() => {
     if (isOpen) {
-      setInternalValue(value);
+      setInternalValue(textValue);
       setStep("editor");
       setDirection(0);
     }
-  }, [isOpen, value]);
+  }, [isOpen, textValue]);
+
+  const handleOpenChange = useCallback(() => {
+    dispatch(toggleRichText());
+  }, [dispatch]);
 
   const goToStep = useCallback((newStep: Step) => {
     setDirection(newStep === "metadata" ? 1 : -1);
     setStep(newStep);
   }, []);
 
-  const updateMetadataField = useCallback(<K extends keyof MetadataState>(field: K, value: MetadataState[K]) => {
-    setMetadata(prev => ({ ...prev, [field]: value }));
-  }, []);
+  const updateMetadataField = useCallback(
+    <K extends keyof MetadataState>(field: K, value: MetadataState[K]) => {
+      setMetadata((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
 
-  const handleFileUpload = useCallback(async (fileList: FileList) => {
-    const file = fileList[0];
-    if (!file) return;
-    try {
-      const response = await uploadFile(file).unwrap();
-      updateMetadataField("coverImage", response.fileUrl);
-    } catch (error) {
-      console.error("Upload failed:", error);
-    }
-  }, [uploadFile, updateMetadataField]);
-
-  const handleDrop = useCallback(async (e: any) => {
-    const dropped: File[] = [];
-    for (const item of e.items) {
-      if (item.kind === "file" && item.getFile) dropped.push(await item.getFile());
-    }
-    if (dropped[0]) {
+  const handleFileUpload = useCallback(
+    async (fileList: FileList) => {
+      const file = fileList[0];
+      if (!file) return;
       try {
-        const response = await uploadFile(dropped[0]).unwrap();
+        const response = await uploadFile(file).unwrap();
         updateMetadataField("coverImage", response.fileUrl);
       } catch (error) {
         console.error("Upload failed:", error);
       }
-    }
-  }, [uploadFile, updateMetadataField]);
+    },
+    [uploadFile, updateMetadataField]
+  );
+
+  const handleDrop = useCallback(
+    async (e: any) => {
+      const dropped: File[] = [];
+      for (const item of e.items) {
+        if (item.kind === "file" && item.getFile) dropped.push(await item.getFile());
+      }
+      if (dropped[0]) {
+        try {
+          const response = await uploadFile(dropped[0]).unwrap();
+          updateMetadataField("coverImage", response.fileUrl);
+        } catch (error) {
+          console.error("Upload failed:", error);
+        }
+      }
+    },
+    [uploadFile, updateMetadataField]
+  );
 
   const handlePublish = useCallback(async () => {
     try {
@@ -356,19 +415,17 @@ export function RichText({
         content: internalValue,
         status: "PUBLISHED",
       }).unwrap();
-      onChange?.(internalValue);
-      setIsOpen(false);
+      onTextValueChange?.(internalValue);
+      dispatch(toggleRichText());
     } catch (error) {
       console.error("Failed to publish post:", error);
     }
-  }, [createPost, internalValue, metadata, onChange]);
+  }, [createPost, internalValue, metadata, onTextValueChange, dispatch]);
 
   return (
     <>
-      <Button onPress={() => setIsOpen(true)} variant="secondary">{label}</Button>
-
       <Modal>
-        <Modal.Backdrop isOpen={isOpen} onOpenChange={setIsOpen}>
+        <Modal.Backdrop isOpen={isOpen} onOpenChange={handleOpenChange}>
           <Modal.Container size={size}>
             <Modal.Dialog>
               <Modal.CloseTrigger />
@@ -376,7 +433,10 @@ export function RichText({
                 <Modal.Heading>{step === "editor" ? label : "Publish Settings"}</Modal.Heading>
               </Modal.Header>
               <Modal.Body className="p-0">
-                <div className="relative w-full h-[600px] overflow-hidden" style={{ perspective: "1200px" }}>
+                <div
+                  className="relative h-[600px] w-full overflow-hidden"
+                  style={{ perspective: "1200px" }}
+                >
                   <AnimatePresence initial={false} mode="popLayout" custom={direction}>
                     {step === "editor" ? (
                       <motion.div
@@ -388,10 +448,10 @@ export function RichText({
                         exit="exit"
                         className="absolute inset-0 flex flex-col p-6 pb-0"
                       >
-                        <EditorContent 
-                          value={internalValue} 
-                          onChange={setInternalValue} 
-                          placeholder={placeholder} 
+                        <EditorContent
+                          value={internalValue}
+                          onChange={setInternalValue}
+                          placeholder={placeholder}
                         />
                       </motion.div>
                     ) : (
@@ -402,9 +462,9 @@ export function RichText({
                         initial="initial"
                         animate="animate"
                         exit="exit"
-                        className="absolute inset-0 flex flex-col p-6 pb-0 overflow-y-auto"
+                        className="absolute inset-0 flex flex-col overflow-y-auto p-6 pb-0"
                       >
-                        <MetadataContent 
+                        <MetadataContent
                           metadata={metadata}
                           onUpdateField={updateMetadataField}
                           categories={categories}
@@ -423,13 +483,19 @@ export function RichText({
               <Modal.Footer>
                 {step === "editor" ? (
                   <>
-                    <Button variant="ghost" onPress={() => setIsOpen(false)}>Cancel</Button>
+                    <Button variant="ghost" onPress={() => dispatch(toggleRichText())}>
+                      Cancel
+                    </Button>
                     <Button onPress={() => goToStep("metadata")}>Next</Button>
                   </>
                 ) : (
                   <>
-                    <Button variant="ghost" onPress={() => goToStep("editor")}>Back</Button>
-                    <Button isPending={isCreating} onPress={handlePublish}>Publish Now</Button>
+                    <Button variant="ghost" onPress={() => goToStep("editor")}>
+                      Back
+                    </Button>
+                    <Button isPending={isCreating} onPress={handlePublish}>
+                      Publish Now
+                    </Button>
                   </>
                 )}
               </Modal.Footer>

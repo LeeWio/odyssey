@@ -13,6 +13,9 @@ interface UiState {
   dashboard: {
     isOpen: boolean;
   };
+  richText: {
+    isOpen: boolean;
+  };
 }
 
 const initialState: UiState = {
@@ -25,6 +28,9 @@ const initialState: UiState = {
   dashboard: {
     isOpen: false,
   },
+  richText: {
+    isOpen: false,
+  },
 };
 
 export const uiSlice = createSlice({
@@ -34,21 +40,23 @@ export const uiSlice = createSlice({
     toggleSheet: (state) => {
       state.sheet.isOpen = !state.sheet.isOpen;
     },
-    // Theme actions
     setThemeVariant: (state, action: PayloadAction<ThemeVariant>) => {
       state.theme.variant = action.payload;
     },
-    // Dashboard actions
     toggleDashboard: (state) => {
       state.dashboard.isOpen = !state.dashboard.isOpen;
+    },
+    toggleRichText: (state) => {
+      state.richText.isOpen = !state.richText.isOpen;
     },
   },
 });
 
-export const { toggleSheet, setThemeVariant, toggleDashboard } = uiSlice.actions;
+export const { toggleSheet, setThemeVariant, toggleDashboard, toggleRichText } = uiSlice.actions;
 
 export const selectIsSheetOpen = (state: RootState) => state.ui.sheet?.isOpen;
 export const selectThemeVariant = (state: RootState) => state.ui.theme?.variant;
 export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard?.isOpen;
+export const selectIsRichTextOpen = (state: RootState) => state.ui.richText?.isOpen;
 
 export default uiSlice.reducer;
