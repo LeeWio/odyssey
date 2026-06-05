@@ -97,7 +97,8 @@ export const baseApi = createApi({
     if (result.error && result.error.status === 401) {
       api.dispatch({ type: "auth/removeCredentials" });
       // Reset the entire API state to clear cache for security
-      api.dispatch(baseApi.util.resetApiState());
+      // Note: Calling resetApiState() here causes an infinite loop for mounted components.
+      // api.dispatch(baseApi.util.resetApiState());
     }
 
     return result;
