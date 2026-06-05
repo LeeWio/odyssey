@@ -69,6 +69,7 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
         theme: { variant: theme },
         sheet: { isOpen: false },
         dashboard: { isOpen: false },
+        richText: { isOpen: false },
       };
     if (locale) preloadedState.locale = { value: locale };
 

@@ -54,7 +54,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
 
   const themeCommands = useThemeCommands();
   const adminCommands = useAdminCommands();
-  const searchState = usePostSearchCommands(inputValue);
+  const searchState = usePostSearchCommands(inputValue, isOpen);
 
   const baseCommands = useMemo(
     () => [...STATIC_COMMANDS, ...themeCommands, ...adminCommands],

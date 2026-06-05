@@ -4,5 +4,8 @@
       "command": "npx -y @heroui/react-mcp@latest",
       "args": []
     }
+  },
+  "general": {
+    "enableNotifications": true
   }
 }

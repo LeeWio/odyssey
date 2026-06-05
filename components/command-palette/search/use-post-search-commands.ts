@@ -45,12 +45,13 @@ export interface PostSearchCommandState {
   isError: boolean;
 }
 
-export function usePostSearchCommands(query: string): PostSearchCommandState {
+export function usePostSearchCommands(query: string, isOpen: boolean): PostSearchCommandState {
   const deferredQuery = useDeferredValue(query.trim());
   const hasRemoteQuery = deferredQuery.length > 0;
 
   const { data, isFetching, isError } = useUnifiedSearchQuery(
-    hasRemoteQuery ? { keyword: deferredQuery } : {}
+    hasRemoteQuery ? { keyword: deferredQuery } : {},
+    { skip: !isOpen }
   );
 
   const { dynamicGroups, allCommands, total } = useMemo(() => {

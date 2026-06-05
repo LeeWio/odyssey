@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { ChartColumnIcon } from "@/components/icons";
+import { ChartColumnIcon, FileTextIcon } from "@/components/icons";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { selectIsAdmin } from "@/lib/features/auth";
-import { toggleDashboard } from "@/lib/features/ui";
+import { toggleDashboard, toggleRichText } from "@/lib/features/ui";
 import { createActionCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 
@@ -42,6 +42,35 @@ export const useAdminCommands = (): CommandItem[] => {
         payload: {
           action: () => {
             dispatch(toggleDashboard());
+          },
+          closeOnExecute: true,
+        },
+        defaultVisible: true,
+      }),
+      createActionCommand({
+        id: "admin-rich-text",
+        title: "Open Post Editor",
+        description: "Create or edit a blog post with rich text",
+        icon: FileTextIcon,
+        category: "Management",
+        source: "system",
+        order: 2,
+        keywords: [
+          "editor",
+          "rich text",
+          "post",
+          "create",
+          "write",
+          "blog",
+          "编辑",
+          "写文章",
+          "富文本",
+          "发布",
+        ],
+        intent: CommandIntent.EXECUTE,
+        payload: {
+          action: () => {
+            dispatch(toggleRichText());
           },
           closeOnExecute: true,
         },
