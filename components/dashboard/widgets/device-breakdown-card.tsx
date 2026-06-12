@@ -42,7 +42,16 @@ export function DeviceBreakdownCard() {
   const { data: trafficData, isLoading } = useGetTrafficAnalyticsQuery();
 
   const total = trafficData?.total ?? 0;
-  const devices = trafficData?.devices ?? [];
+  
+  // Ensure we always have the 3 main device categories to preserve the chart colors and structure
+  // even if the backend returns an empty array or missing categories when views are 0.
+  const rawDevices = trafficData?.devices ?? [];
+  const devices = [
+    rawDevices.find(d => d.name === "Mobile") ?? { name: "Mobile", views: 0, percentage: 0 },
+    rawDevices.find(d => d.name === "Desktop") ?? { name: "Desktop", views: 0, percentage: 0 },
+    rawDevices.find(d => d.name === "Tablet") ?? { name: "Tablet", views: 0, percentage: 0 }
+  ];
+
   const formattedTotal = formatCount(total);
 
   return (
