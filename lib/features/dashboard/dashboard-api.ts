@@ -41,22 +41,24 @@ export const TopPageSchema = z.object({
   trend: z.string().optional(),
 });
 
-export const TrafficDeviceSchema = z.object({
+export const TrafficMetricSchema = z.object({
   name: z.string(),
   views: z.number().default(0),
   percentage: z.number().default(0),
 });
 
-export const TrafficSourceSchema = z.object({
-  name: z.string(),
-  views: z.number().default(0),
-  percentage: z.number().default(0),
+export const TimeSeriesItemSchema = z.object({
+  date: z.string(),
+  sessions: z.number().default(0),
+  users: z.number().default(0),
 });
 
 export const TrafficResponseSchema = z.object({
   total: z.number().default(0),
-  devices: z.array(TrafficDeviceSchema).default([]),
-  sources: z.array(TrafficSourceSchema).default([]),
+  growthRate: z.number().default(0),
+  devices: z.array(TrafficMetricSchema).default([]),
+  sources: z.array(TrafficMetricSchema).default([]),
+  timeSeries: z.array(TimeSeriesItemSchema).default([]),
 });
 
 // --- Types ---
@@ -113,7 +115,7 @@ export const dashboardApi = baseApi.injectEndpoints({
     }),
 
     /**
-     * Admin: Get traffic analytics (devices, sources)
+     * Admin: Get traffic analytics (devices, sources, timeSeries)
      */
     getTrafficAnalytics: builder.query<TrafficResponse, void>({
       query: () => ({
