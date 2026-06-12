@@ -33,10 +33,19 @@ export const AnalyticsOverviewResponseSchema = z.object({
   topContent: z.array(TopContentSchema).default([]),
 });
 
+export const TopPageSchema = z.object({
+  path: z.string(),
+  views: z.number().default(0),
+  "avs.time": z.string().optional(),
+  bounce: z.number().default(0),
+  trend: z.string().optional(),
+});
+
 // --- Types ---
 
 export type DashboardStatsResponse = z.infer<typeof DashboardStatsResponseSchema>;
 export type AnalyticsOverviewResponse = z.infer<typeof AnalyticsOverviewResponseSchema>;
+export type TopPageResponse = z.infer<typeof TopPageSchema>;
 
 // --- API Injection ---
 
@@ -69,8 +78,23 @@ export const dashboardApi = baseApi.injectEndpoints({
       transformResponse: (response: { data: AnalyticsOverviewResponse }) => response.data,
       transformErrorResponse: transformError,
     }),
+
+    /**
+     * Admin: Get top pages analytics
+     */
+    getTopPages: builder.query<TopPageResponse[], void>({
+      query: () => ({
+        url: "/api/v1/admin/analytics/top-pages",
+        method: "GET",
+      }),
+      providesTags: ["Dashboard"],
+      rawResponseSchema: ApiResponseSchema(z.array(TopPageSchema)),
+      transformResponse: (response: { data: TopPageResponse[] }) => response.data,
+      transformErrorResponse: transformError,
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetDashboardStatsQuery, useGetAnalyticsOverviewQuery } = dashboardApi;
+export const { useGetDashboardStatsQuery, useGetAnalyticsOverviewQuery, useGetTopPagesQuery } =
+  dashboardApi;
