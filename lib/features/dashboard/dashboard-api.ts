@@ -53,9 +53,21 @@ export const TimeSeriesItemSchema = z.object({
   users: z.number().default(0),
 });
 
-export const TrafficResponseSchema = z.object({
-  total: z.number().default(0),
+export const MetricSchema = z.object({
+  value: z.string().default("0"),
+  numericValue: z.number().default(0),
   growthRate: z.number().default(0),
+});
+
+export const SummaryMetricsSchema = z.object({
+  sessions: MetricSchema.default({}),
+  users: MetricSchema.default({}),
+  bounceRate: MetricSchema.default({}),
+  avgSession: MetricSchema.default({}),
+});
+
+export const TrafficResponseSchema = z.object({
+  summary: SummaryMetricsSchema.default({}),
   devices: z.array(TrafficMetricSchema).default([]),
   sources: z.array(TrafficMetricSchema).default([]),
   timeSeries: z.array(TimeSeriesItemSchema).default([]),

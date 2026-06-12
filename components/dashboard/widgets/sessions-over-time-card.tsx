@@ -22,8 +22,6 @@ function formatDate(dateStr: string): string {
 export function SessionsOverTimeCard() {
   const { data, isLoading } = useGetTrafficAnalyticsQuery();
 
-  console.log(data);
-
   const chartData = useMemo(() => {
     if (!data?.timeSeries) return [];
 
@@ -34,8 +32,8 @@ export function SessionsOverTimeCard() {
     }));
   }, [data]);
 
-  const totalSessions = data?.total ?? 0;
-  const growthRate = data?.growthRate ?? 0;
+  const totalSessions = data?.summary.sessions.numericValue ?? 0;
+  const growthRate = data?.summary.sessions.growthRate ?? 0;
   const trend = growthRate >= 0 ? ("up" as const) : ("down" as const);
 
   return (

@@ -41,7 +41,7 @@ function DeviceTooltip({ active, payload }: DeviceTooltipProps) {
 export function DeviceBreakdownCard() {
   const { data: trafficData, isLoading } = useGetTrafficAnalyticsQuery();
 
-  const total = trafficData?.total ?? 0;
+  const total = trafficData?.summary.sessions.numericValue ?? 0;
 
   // Ensure we always have the 3 main device categories to preserve the chart colors and structure
   // even if the backend returns an empty array or missing categories when views are 0.
