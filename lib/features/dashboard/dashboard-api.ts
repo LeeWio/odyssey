@@ -41,11 +41,30 @@ export const TopPageSchema = z.object({
   trend: z.string().optional(),
 });
 
+export const TrafficDeviceSchema = z.object({
+  name: z.string(),
+  views: z.number().default(0),
+  percentage: z.number().default(0),
+});
+
+export const TrafficSourceSchema = z.object({
+  name: z.string(),
+  views: z.number().default(0),
+  percentage: z.number().default(0),
+});
+
+export const TrafficResponseSchema = z.object({
+  total: z.number().default(0),
+  devices: z.array(TrafficDeviceSchema).default([]),
+  sources: z.array(TrafficSourceSchema).default([]),
+});
+
 // --- Types ---
 
 export type DashboardStatsResponse = z.infer<typeof DashboardStatsResponseSchema>;
 export type AnalyticsOverviewResponse = z.infer<typeof AnalyticsOverviewResponseSchema>;
 export type TopPageResponse = z.infer<typeof TopPageSchema>;
+export type TrafficResponse = z.infer<typeof TrafficResponseSchema>;
 
 // --- API Injection ---
 
@@ -92,9 +111,23 @@ export const dashboardApi = baseApi.injectEndpoints({
       transformResponse: (response: { data: TopPageResponse[] }) => response.data,
       transformErrorResponse: transformError,
     }),
+
+    /**
+     * Admin: Get traffic analytics (devices, sources)
+     */
+    getTrafficAnalytics: builder.query<TrafficResponse, void>({
+      query: () => ({
+        url: "/api/v1/admin/analytics/traffic",
+        method: "GET",
+      }),
+      providesTags: ["Dashboard"],
+      rawResponseSchema: ApiResponseSchema(TrafficResponseSchema),
+      transformResponse: (response: { data: TrafficResponse }) => response.data,
+      transformErrorResponse: transformError,
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetDashboardStatsQuery, useGetAnalyticsOverviewQuery, useGetTopPagesQuery } =
+export const { useGetDashboardStatsQuery, useGetAnalyticsOverviewQuery, useGetTopPagesQuery, useGetTrafficAnalyticsQuery } =
   dashboardApi;

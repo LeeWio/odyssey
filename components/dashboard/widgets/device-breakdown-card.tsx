@@ -1,11 +1,11 @@
 "use client";
 
-import type {ReactNode} from "react";
+import type { ReactNode } from "react";
 
-import {Card} from "@heroui/react";
-import {ChartTooltip, PieChart} from "@heroui-pro/react";
+import { Card, Skeleton } from "@heroui/react";
+import { ChartTooltip, PieChart } from "@heroui-pro/react";
 
-import {DEVICE_BREAKDOWN} from "../data/analytics";
+import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
 
 const DEVICE_COLORS = ["var(--chart-3)", "var(--chart-2)", "var(--chart-4)"];
 
@@ -17,12 +17,12 @@ interface DeviceTooltipProps {
   active?: boolean;
   payload?: Array<{
     name?: string;
-    payload?: {fill?: string};
+    payload?: { fill?: string };
     value?: number | string;
   }>;
 }
 
-function DeviceTooltip({active, payload}: DeviceTooltipProps) {
+function DeviceTooltip({ active, payload }: DeviceTooltipProps) {
   const entry = payload?.[0];
 
   if (!active || !entry) return null;
@@ -39,7 +39,10 @@ function DeviceTooltip({active, payload}: DeviceTooltipProps) {
 }
 
 export function DeviceBreakdownCard() {
-  const total = DEVICE_BREAKDOWN.reduce((sum, d) => sum + d.value, 0);
+  const { data: trafficData, isLoading } = useGetTrafficAnalyticsQuery();
+
+  const total = trafficData?.total ?? 0;
+  const devices = trafficData?.devices ?? [];
   const formattedTotal = formatCount(total);
 
   return (
@@ -50,54 +53,73 @@ export function DeviceBreakdownCard() {
       </Card.Header>
       <Card.Content className="flex flex-1 flex-col items-center justify-center gap-6">
         <div className="relative">
-          <PieChart height={240} width={240}>
-            <PieChart.Pie
-              cornerRadius={8}
-              cx="50%"
-              cy="50%"
-              data={[...DEVICE_BREAKDOWN]}
-              dataKey="value"
-              innerRadius="68%"
-              nameKey="name"
-              paddingAngle={-12}
-              strokeWidth={0}
-            >
-              {DEVICE_BREAKDOWN.map((_, idx) => (
-                <PieChart.Cell key={idx} fill={DEVICE_COLORS[idx % DEVICE_COLORS.length]} />
-              ))}
-            </PieChart.Pie>
-            <PieChart.Tooltip content={<DeviceTooltip />} />
-          </PieChart>
+          {isLoading ? (
+            <Skeleton className="size-[240px] rounded-full" />
+          ) : (
+            <PieChart height={240} width={240}>
+              <PieChart.Pie
+                cornerRadius={8}
+                cx="50%"
+                cy="50%"
+                data={devices}
+                dataKey="views"
+                innerRadius="68%"
+                nameKey="name"
+                paddingAngle={-12}
+                strokeWidth={0}
+              >
+                {devices.map((_, idx) => (
+                  <PieChart.Cell key={idx} fill={DEVICE_COLORS[idx % DEVICE_COLORS.length]} />
+                ))}
+              </PieChart.Pie>
+              <PieChart.Tooltip content={<DeviceTooltip />} />
+            </PieChart>
+          )}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-foreground text-2xl font-semibold tabular-nums">
-              {formattedTotal}
-            </span>
-            <span className="text-muted text-xs">Sessions</span>
+            {isLoading ? (
+              <Skeleton className="h-8 w-16 rounded" />
+            ) : (
+              <>
+                <span className="text-foreground text-2xl font-semibold tabular-nums">
+                  {formattedTotal}
+                </span>
+                <span className="text-muted text-xs">Sessions</span>
+              </>
+            )}
           </div>
         </div>
-        <DeviceLegend total={total} />
+        
+        {isLoading ? (
+           <div className="flex w-full max-w-[240px] flex-col gap-3">
+             <Skeleton className="h-4 w-full rounded" />
+             <Skeleton className="h-4 w-full rounded" />
+             <Skeleton className="h-4 w-full rounded" />
+           </div>
+        ) : (
+          <DeviceLegend devices={devices} />
+        )}
       </Card.Content>
     </Card>
   );
 }
 
-function DeviceLegend({total}: {total: number}): ReactNode {
+function DeviceLegend({ devices }: { devices: Array<{ name: string; views: number; percentage: number }> }): ReactNode {
   return (
     <div className="flex w-full max-w-[240px] flex-col gap-2">
-      {DEVICE_BREAKDOWN.map((entry, idx) => {
-        const pct = ((entry.value / total) * 100).toFixed(0);
-
+      {devices.map((entry, idx) => {
         return (
           <div key={entry.name} className="flex items-center gap-3">
             <span
               className="size-3 shrink-0 rounded-full"
-              style={{backgroundColor: DEVICE_COLORS[idx % DEVICE_COLORS.length]}}
+              style={{ backgroundColor: DEVICE_COLORS[idx % DEVICE_COLORS.length] }}
             />
             <span className="text-foreground flex-1 text-sm">{entry.name}</span>
             <span className="text-foreground text-sm font-semibold tabular-nums">
-              {formatCount(entry.value)}
+              {formatCount(entry.views)}
             </span>
-            <span className="text-muted w-10 text-right text-xs tabular-nums">{pct}%</span>
+            <span className="text-muted w-12 text-right text-xs tabular-nums">
+              {entry.percentage.toFixed(1)}%
+            </span>
           </div>
         );
       })}
