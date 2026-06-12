@@ -57,6 +57,7 @@ export default async function RootLayout({
 
   return (
     <html
+      data-scrollbar="none"
       lang={lang}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
@@ -76,7 +77,7 @@ export default async function RootLayout({
                 <Navbar />
                 <SheetPanel />
                 <DashboardSheet />
-                <main className="mx-auto w-full grow px-4 sm:px-6 lg:px-8">{children}</main>
+                <main className="flex w-full grow flex-col">{children}</main>
                 <footer className="flex w-full items-center justify-center py-3">
                   <a
                     className="flex items-center gap-1 text-current no-underline"

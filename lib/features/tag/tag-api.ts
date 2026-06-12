@@ -40,6 +40,17 @@ export const tagApi = baseApi.injectEndpoints({
     }),
 
     /**
+     * Public: Retrieve all tags
+     */
+    getPublicTags: builder.query<TagResponse[], void>({
+      query: () => "/api/v1/public/tags",
+      rawResponseSchema: ApiResponseSchema(z.array(TagResponseSchema)),
+      transformResponse: (response: ApiResponse<TagResponse[]>) => response.data,
+      transformErrorResponse: transformError,
+      providesTags: [{ type: "Tag", id: "LIST" }],
+    }),
+
+    /**
      * Create a new tag
      */
     createTag: builder.mutation<TagResponse, TagRequest>({
@@ -118,6 +129,7 @@ export const tagApi = baseApi.injectEndpoints({
 
 export const {
   useGetAllTagsQuery,
+  useGetPublicTagsQuery,
   useCreateTagMutation,
   useUpdateTagMutation,
   useDeleteTagMutation,

@@ -117,7 +117,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                             }}
                           >
                             <Label>Username</Label>
-                            <Input placeholder="johndoe" />
+                            <Input placeholder="johndoe" variant="secondary" />
                             <FieldError />
                           </TextField>
 
@@ -133,7 +133,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                             }}
                           >
                             <Label>Email</Label>
-                            <Input placeholder="john@example.com" />
+                            <Input placeholder="john@example.com" variant="secondary" />
                             <FieldError />
                           </TextField>
 
@@ -155,7 +155,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                             }}
                           >
                             <Label>Password</Label>
-                            <InputGroup>
+                            <InputGroup variant="secondary">
                               <InputGroup.Input
                                 placeholder="Create a password"
                                 type={isVisible ? "text" : "password"}
@@ -194,7 +194,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                           </Button>
                         </Form>
                         {orDivider}
-                        <Button fullWidth variant="secondary" onPress={() => switchView(false)}>
+                        <Button fullWidth variant="tertiary" onPress={() => switchView(false)}>
                           <Icon icon="solar:arrow-left-linear" />
                           Other Sign Up options
                         </Button>
@@ -213,10 +213,10 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                           Continue with Email
                         </Button>
                         {orDivider}
-                        <Button fullWidth variant="secondary">
+                        <Button fullWidth variant="tertiary">
                           <Icon icon="devicon:google" /> Continue with Google
                         </Button>
-                        <Button fullWidth variant="secondary">
+                        <Button fullWidth variant="tertiary">
                           <Icon icon="devicon:github" /> Continue with Github
                         </Button>
                         <p className="text-small mt-3 text-center">

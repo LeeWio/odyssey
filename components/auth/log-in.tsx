@@ -11,7 +11,6 @@ import {
   Input,
   InputOTP,
   REGEXP_ONLY_DIGITS,
-  Alert,
   Spinner,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
@@ -32,6 +31,10 @@ const orDivider = (
     <Separator className="flex-1" />
   </div>
 );
+
+const maskEmail = (email: string) => {
+  return email.replace(/^(.)(.*)(@.*)$/, "$1****$3");
+};
 
 export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) => {
   const router = useRouter();
@@ -55,12 +58,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
   };
 
   const [sendOtp, { isLoading: isSendingOtp }] = useSendOtpMutation();
-  const [loginWithOtp, { isLoading: isLoggingIn, error: loginError }] = useLoginWithOtpMutation();
-
-  const getErrorMessage = (error: unknown) => {
-    const err = error as { data?: { message?: string }; error?: string };
-    return err?.data?.message || err?.error || "An unknown error occurred";
-  };
+  const [loginWithOtp, { isLoading: isLoggingIn }] = useLoginWithOtpMutation();
 
   const handleEmailSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -146,6 +144,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                           <TextField isRequired name="email" type="email" isInvalid={!!emailError}>
                             <Label>Email</Label>
                             <Input
+                              variant="secondary"
                               placeholder="john@example.com"
                               value={email}
                               onChange={(e) => {
@@ -174,11 +173,11 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                         </div>
                         {orDivider}
                         <div className="flex flex-col gap-2">
-                          <Button fullWidth variant="secondary">
+                          <Button fullWidth variant="tertiary">
                             <Icon icon="devicon:google" />
                             Continue with Google
                           </Button>
-                          <Button fullWidth variant="secondary">
+                          <Button fullWidth variant="tertiary">
                             <Icon icon="devicon:github" />
                             Continue with Github
                           </Button>
@@ -202,7 +201,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                         <div className="flex flex-col gap-1">
                           <Label>Verify account</Label>
                           <p className="text-muted text-sm">
-                            We&apos;ve sent a code to a****@gmail.com
+                            We&apos;ve sent a code to {maskEmail(email)}
                           </p>
                         </div>
 
@@ -211,6 +210,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                           pattern={REGEXP_ONLY_DIGITS}
                           onComplete={handleOTPComplete}
                           isDisabled={isLoggingIn}
+                          variant="secondary"
                         >
                           <InputOTP.Group>
                             <InputOTP.Slot index={0} />
@@ -225,6 +225,13 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                           </InputOTP.Group>
                         </InputOTP>
 
+                        <div className="flex items-center gap-1.25 px-1 pt-1">
+                          <p className="text-muted text-sm">Didn&apos;t receive a code?</p>
+                          <Link className="text-foreground underline" href="#">
+                            Resend
+                          </Link>
+                        </div>
+                        
                         <Button
                           fullWidth
                           variant="secondary"

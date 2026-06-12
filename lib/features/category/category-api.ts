@@ -11,6 +11,7 @@ export const CategoryResponseSchema = z.object({
   name: z.string(),
   slug: z.string(),
   description: z.string().nullable().default(""),
+  icon: z.string().nullable().default(""),
   createdAt: z.string(),
 });
 
@@ -42,6 +43,17 @@ export const categoryApi = baseApi.injectEndpoints({
               { type: "Category", id: "LIST" },
             ]
           : [{ type: "Category", id: "LIST" }],
+    }),
+
+    /**
+     * Public: Retrieve all categories
+     */
+    getPublicCategories: builder.query<CategoryResponse[], void>({
+      query: () => "/api/v1/public/categories",
+      rawResponseSchema: ApiResponseSchema(z.array(CategoryResponseSchema)),
+      transformResponse: (response: ApiResponse<CategoryResponse[]>) => response.data,
+      transformErrorResponse: transformError,
+      providesTags: [{ type: "Category", id: "LIST" }],
     }),
 
     /**
@@ -123,6 +135,7 @@ export const categoryApi = baseApi.injectEndpoints({
 
 export const {
   useGetCategoriesQuery,
+  useGetPublicCategoriesQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
