@@ -1,8 +1,8 @@
 "use client";
 
-import {KPI} from "@heroui-pro/react";
+import { KPI } from "@heroui-pro/react";
 
-import {STATS_CARDS} from "../data/sales";
+import { STATS_CARDS } from "../data/sales";
 
 export function KpiRow() {
   return (

@@ -4,16 +4,16 @@
 // source (e.g. your own API, a database query, etc.) and wire up the filter
 // dropdowns to filter the data.
 
-import type {Order} from "../data/orders";
-import type {DataGridColumn} from "@heroui-pro/react";
+import type { Order } from "../data/orders";
+import type { DataGridColumn } from "@heroui-pro/react";
 
-import {Calendar, Funnel} from "@gravity-ui/icons";
-import {Avatar, Button, Chip, Dropdown, Label, SearchField} from "@heroui/react";
-import {DataGrid, NumberValue} from "@heroui-pro/react";
-import {useMemo} from "react";
+import { Calendar, Funnel } from "@gravity-ui/icons";
+import { Avatar, Button, Chip, Dropdown, Label, SearchField } from "@heroui/react";
+import { DataGrid, NumberValue } from "@heroui-pro/react";
+import { useMemo } from "react";
 
-import {ORDERS, STATUS_COLORS} from "../data/orders";
-import {OrdersRowActions} from "../widgets/orders-row-actions";
+import { ORDERS, STATUS_COLORS } from "../data/orders";
+import { OrdersRowActions } from "../widgets/orders-row-actions";
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   day: "numeric",
@@ -104,11 +104,11 @@ export function OrdersPage() {
         minWidth: 140,
       },
     ],
-    [],
+    []
   );
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pb-10 pt-4">
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
       <p className="text-muted text-sm">Manage and track customer orders.</p>
 
       <div className="flex flex-wrap items-center gap-2">

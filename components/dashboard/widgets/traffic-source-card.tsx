@@ -1,11 +1,11 @@
 "use client";
 
-import {EllipsisVertical} from "@gravity-ui/icons";
-import {Card} from "@heroui/react";
-import {LineChart} from "@heroui-pro/react";
+import { EllipsisVertical } from "@gravity-ui/icons";
+import { Card } from "@heroui/react";
+import { LineChart } from "@heroui-pro/react";
 
-import {IconButton} from "../icon-button";
-import {TRAFFIC_DATA} from "../data/traffic";
+import { IconButton } from "../icon-button";
+import { TRAFFIC_DATA } from "../data/traffic";
 
 const Y_TICKS = [0, 5000, 10000, 20000];
 
@@ -60,10 +60,10 @@ export function TrafficSourceCard() {
   );
 }
 
-function LegendDot({color, label}: {color: string; label: string}) {
+function LegendDot({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="size-3 rounded-full" style={{backgroundColor: color}} />
+      <span className="size-3 rounded-full" style={{ backgroundColor: color }} />
       <span className="text-muted text-xs">{label}</span>
     </div>
   );

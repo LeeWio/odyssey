@@ -23,14 +23,17 @@ export const PostCard = ({ title, description, date, author, category, href }: P
           </Chip>
         </div>
         <ItemCard.Title className="text-xl font-bold">
-          <Link href={href} className="text-foreground no-underline hover:text-primary hover:underline">
+          <Link
+            href={href}
+            className="text-foreground hover:text-primary no-underline hover:underline"
+          >
             {title}
           </Link>
         </ItemCard.Title>
-        <ItemCard.Description className="mt-2 line-clamp-2 text-default-500">
+        <ItemCard.Description className="text-default-500 mt-2 line-clamp-2">
           {description}
         </ItemCard.Description>
-        <div className="mt-4 flex items-center gap-4 text-xs text-default-400">
+        <div className="text-default-400 mt-4 flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1">
             <Person className="size-3" />
             <span>{author}</span>

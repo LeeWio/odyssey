@@ -3,7 +3,7 @@
 // TODO: Wire these form controls to your account/workspace store. The controls
 // are currently uncontrolled and don't persist changes.
 
-import type {ReactNode} from "react";
+import type { ReactNode } from "react";
 
 import {
   Button,
@@ -18,23 +18,23 @@ import {
 } from "@heroui/react";
 
 const PROVINCES = [
-  {id: "on", label: "Ontario"},
-  {id: "qc", label: "Quebec"},
-  {id: "bc", label: "British Columbia"},
-  {id: "ab", label: "Alberta"},
+  { id: "on", label: "Ontario" },
+  { id: "qc", label: "Quebec" },
+  { id: "bc", label: "British Columbia" },
+  { id: "ab", label: "Alberta" },
 ] as const;
 
 const CURRENCIES = [
-  {id: "cad", label: "CAD - Canadian Dollar"},
-  {id: "usd", label: "USD - US Dollar"},
-  {id: "eur", label: "EUR - Euro"},
-  {id: "gbp", label: "GBP - British Pound"},
-  {id: "mxn", label: "MXN - Mexican Peso"},
+  { id: "cad", label: "CAD - Canadian Dollar" },
+  { id: "usd", label: "USD - US Dollar" },
+  { id: "eur", label: "EUR - Euro" },
+  { id: "gbp", label: "GBP - British Pound" },
+  { id: "mxn", label: "MXN - Mexican Peso" },
 ] as const;
 
 export function SettingsPage() {
   return (
-    <form className="mx-auto flex max-w-5xl flex-col gap-4 px-5 pb-10 pt-4">
+    <form className="mx-auto flex max-w-5xl flex-col gap-4 px-5 pt-4 pb-10">
       <p className="text-muted text-sm">Manage your organization profile and preferences.</p>
 
       <Separator />
@@ -165,7 +165,7 @@ interface SettingsRowProps {
   children: ReactNode;
 }
 
-function SettingsRow({children, description, label}: SettingsRowProps) {
+function SettingsRow({ children, description, label }: SettingsRowProps) {
   return (
     <div className="grid grid-cols-1 gap-4 py-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:gap-10">
       <div className="flex flex-col gap-1">

@@ -1,14 +1,14 @@
 "use client";
 
-import {Eye, Pencil, TrashBin} from "@gravity-ui/icons";
+import { Eye, Pencil, TrashBin } from "@gravity-ui/icons";
 
-import {IconButton} from "../icon-button";
+import { IconButton } from "../icon-button";
 
 export interface RowActionsProps {
   employeeId: string;
 }
 
-export function RowActions({employeeId}: RowActionsProps) {
+export function RowActions({ employeeId }: RowActionsProps) {
   return (
     <div className="flex items-center justify-end gap-0.5" data-employee-id={employeeId}>
       <IconButton label="View" size="sm" variant="tertiary">

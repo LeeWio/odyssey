@@ -1,9 +1,9 @@
 "use client";
 
-import {Card, ListBox, Select} from "@heroui/react";
-import {BarChart, NumberValue, TrendChip} from "@heroui-pro/react";
+import { Card, ListBox, Select } from "@heroui/react";
+import { BarChart, NumberValue, TrendChip } from "@heroui-pro/react";
 
-import {SALES_CHART_DATA, SALES_MINI_KPIS} from "../data/sales";
+import { SALES_CHART_DATA, SALES_MINI_KPIS } from "../data/sales";
 
 export function SalesPerformanceCard() {
   return (

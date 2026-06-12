@@ -89,17 +89,19 @@ const ITEM_VARIANTS: Variants = {
 // --- Utilities ---
 
 const generateSlug = (text: string): string => {
-  return text
-    .toLowerCase()
-    .trim()
-    // Replace spaces and underscores with hyphens
-    .replace(/[\s_]+/g, "-")
-    // Remove all non-alphanumeric characters except hyphens
-    .replace(/[^a-z0-9-]/g, "")
-    // Remove multiple consecutive hyphens
-    .replace(/-+/g, "-")
-    // Remove leading and trailing hyphens
-    .replace(/^-+|-+$/g, "");
+  return (
+    text
+      .toLowerCase()
+      .trim()
+      // Replace spaces and underscores with hyphens
+      .replace(/[\s_]+/g, "-")
+      // Remove all non-alphanumeric characters except hyphens
+      .replace(/[^a-z0-9-]/g, "")
+      // Remove multiple consecutive hyphens
+      .replace(/-+/g, "-")
+      // Remove leading and trailing hyphens
+      .replace(/^-+|-+$/g, "")
+  );
 };
 
 // --- Sub-components (Content Only) ---
@@ -179,7 +181,7 @@ const MetadataContent = ({
         <div className="relative flex h-48 w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-white/10 bg-white/5">
           <Image src={metadata.coverImage} alt="Cover" fill className="object-cover opacity-80" />
           <Button
-            className="absolute right-2 top-2 z-10"
+            className="absolute top-2 right-2 z-10"
             isIconOnly
             size="sm"
             variant="danger-soft"
@@ -187,12 +189,9 @@ const MetadataContent = ({
           >
             <Icon icon="gravity-ui:xmark" />
           </Button>
-          </div>
-          ) : (
-          <DropZone
-          className="h-48"
-          onDrop={onDrop}
-          >
+        </div>
+      ) : (
+        <DropZone className="h-48" onDrop={onDrop}>
           <DropZone.Area
             getDropOperation={(types) =>
               ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"].some((t) =>
@@ -207,9 +206,7 @@ const MetadataContent = ({
             </DropZone.Icon>
             <DropZone.Label>Drop your images here</DropZone.Label>
             <DropZone.Description>Accepts PNG, JPG, GIF, WebP, and SVG.</DropZone.Description>
-            <DropZone.Trigger isDisabled={isUploading}>
-              Select Images
-            </DropZone.Trigger>
+            <DropZone.Trigger isDisabled={isUploading}>Select Images</DropZone.Trigger>
           </DropZone.Area>
           <DropZone.Input
             accept="image/*"
@@ -500,7 +497,7 @@ export function RichText({
   const handlePublish = useCallback(async () => {
     try {
       const finalSlug = metadata.slug || generateSlug(metadata.title);
-      
+
       // Client-side validation before sending
       if (!finalSlug || !/^[a-z0-9-]+$/.test(finalSlug)) {
         toast.danger("Slug must only contain lowercase alphanumeric characters and hyphens.");
@@ -513,7 +510,7 @@ export function RichText({
         content: internalValue,
         status: metadata.status || "PUBLISHED",
       }).unwrap();
-      
+
       toast.success("Post published successfully.");
       onTextValueChange?.(internalValue);
       dispatch(toggleRichText());

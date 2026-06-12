@@ -1,16 +1,16 @@
 "use client";
 
-import type {Employee} from "../data/employees";
-import type {DataGridColumn, DataGridSortDescriptor} from "@heroui-pro/react";
+import type { Employee } from "../data/employees";
+import type { DataGridColumn, DataGridSortDescriptor } from "@heroui-pro/react";
 
-import {BarsDescendingAlignCenter, Copy, LayoutColumns3, Sliders} from "@gravity-ui/icons";
-import {Avatar, Button, Chip, SearchField} from "@heroui/react";
-import {DataGrid} from "@heroui-pro/react";
-import {useCallback, useMemo, useState} from "react";
+import { BarsDescendingAlignCenter, Copy, LayoutColumns3, Sliders } from "@gravity-ui/icons";
+import { Avatar, Button, Chip, SearchField } from "@heroui/react";
+import { DataGrid } from "@heroui-pro/react";
+import { useCallback, useMemo, useState } from "react";
 
-import {EMPLOYEES} from "../data/employees";
+import { EMPLOYEES } from "../data/employees";
 
-import {RowActions} from "./employees-table-row-actions";
+import { RowActions } from "./employees-table-row-actions";
 
 export function EmployeesTable() {
   const [search, setSearch] = useState("");
@@ -28,7 +28,7 @@ export function EmployeesTable() {
       (employee) =>
         employee.name.toLowerCase().includes(q) ||
         employee.email.toLowerCase().includes(q) ||
-        employee.workerId.toLowerCase().includes(q),
+        employee.workerId.toLowerCase().includes(q)
     );
   }, [search]);
 
@@ -113,7 +113,7 @@ export function EmployeesTable() {
         minWidth: 140,
       },
     ],
-    [],
+    []
   );
 
   return (

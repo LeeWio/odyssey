@@ -5,9 +5,9 @@
 // optimistic DnD locally — persist the reordered column in your
 // `onReorder`/`onInsert` handlers once you're wired up to a backend.
 
-import type {TrackerStatus, TrackerTask} from "../data/tracker";
-import type {UseKanbanReturn} from "@heroui-pro/react";
-import type {ComponentType} from "react";
+import type { TrackerStatus, TrackerTask } from "../data/tracker";
+import type { UseKanbanReturn } from "@heroui-pro/react";
+import type { ComponentType } from "react";
 
 import {
   ArrowRight,
@@ -20,33 +20,33 @@ import {
   Stopwatch,
   TrashBin,
 } from "@gravity-ui/icons";
-import {Avatar, Chip, Header, Label, ProgressBar} from "@heroui/react";
-import {ContextMenu, KPI, KPIGroup, Kanban, useKanban, useKanbanColumn} from "@heroui-pro/react";
-import {Fragment, useMemo} from "react";
+import { Avatar, Chip, Header, Label, ProgressBar } from "@heroui/react";
+import { ContextMenu, KPI, KPIGroup, Kanban, useKanban, useKanbanColumn } from "@heroui-pro/react";
+import { Fragment, useMemo } from "react";
 
-import {IconButton} from "../icon-button";
-import {TRACKER_COLUMNS, TRACKER_TASKS} from "../data/tracker";
+import { IconButton } from "../icon-button";
+import { TRACKER_COLUMNS, TRACKER_TASKS } from "../data/tracker";
 
 const COLUMN_META: Record<
   TrackerStatus,
-  {indicator: string; icon: ComponentType<{className?: string}>}
+  { indicator: string; icon: ComponentType<{ className?: string }> }
 > = {
-  Done: {icon: CircleCheck, indicator: "bg-success"},
-  "In Progress": {icon: CirclePlay, indicator: "bg-warning"},
-  "To Do": {icon: CircleDashed, indicator: "bg-accent"},
+  Done: { icon: CircleCheck, indicator: "bg-success" },
+  "In Progress": { icon: CirclePlay, indicator: "bg-warning" },
+  "To Do": { icon: CircleDashed, indicator: "bg-accent" },
 };
 
 const KPI_META: Record<
   TrackerStatus,
   {
-    icon: ComponentType<{className?: string}>;
+    icon: ComponentType<{ className?: string }>;
     label: string;
     status: "success" | "warning" | "danger";
   }
 > = {
-  Done: {icon: CircleCheck, label: "Completed", status: "success"},
-  "In Progress": {icon: CirclePlay, label: "In Progress", status: "warning"},
-  "To Do": {icon: CircleDashed, label: "To Do", status: "danger"},
+  Done: { icon: CircleCheck, label: "Completed", status: "success" },
+  "In Progress": { icon: CirclePlay, label: "In Progress", status: "warning" },
+  "To Do": { icon: CircleDashed, label: "To Do", status: "danger" },
 };
 
 function getTaskColumn(task: TrackerTask): string {
@@ -54,7 +54,7 @@ function getTaskColumn(task: TrackerTask): string {
 }
 
 function setTaskColumn(task: TrackerTask, column: string): TrackerTask {
-  return {...task, status: column as TrackerStatus};
+  return { ...task, status: column as TrackerStatus };
 }
 
 export function TrackerPage() {
@@ -67,7 +67,7 @@ export function TrackerPage() {
   // Counts derived from the live kanban list so KPIs update as cards are
   // dragged (`rerender-derived-state-no-effect`).
   const counts = useMemo(() => {
-    const base: Record<TrackerStatus, number> = {Done: 0, "In Progress": 0, "To Do": 0};
+    const base: Record<TrackerStatus, number> = { Done: 0, "In Progress": 0, "To Do": 0 };
 
     for (const item of kanban.list.items) {
       base[item.status] += 1;
@@ -77,7 +77,7 @@ export function TrackerPage() {
   }, [kanban.list.items]);
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pb-10 pt-4">
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
       <p className="text-muted text-sm">Track work across your team.</p>
 
       <KPIGroup>
@@ -118,8 +118,8 @@ interface TrackerColumnProps {
   kanban: UseKanbanReturn<TrackerTask>;
 }
 
-function TrackerColumn({column, kanban}: TrackerColumnProps) {
-  const {dragAndDropHooks, items} = useKanbanColumn(kanban, column);
+function TrackerColumn({ column, kanban }: TrackerColumnProps) {
+  const { dragAndDropHooks, items } = useKanbanColumn(kanban, column);
   const meta = COLUMN_META[column];
 
   return (
@@ -161,7 +161,7 @@ interface TrackerCardContextMenuProps {
   taskId: string;
 }
 
-function TrackerCardContextMenu({children, column, kanban, taskId}: TrackerCardContextMenuProps) {
+function TrackerCardContextMenu({ children, column, kanban, taskId }: TrackerCardContextMenuProps) {
   const otherColumns = TRACKER_COLUMNS.filter((c) => c !== column);
 
   return (
@@ -207,7 +207,7 @@ function TrackerCardContextMenu({children, column, kanban, taskId}: TrackerCardC
   );
 }
 
-function TrackerCardContent({task}: {task: TrackerTask}) {
+function TrackerCardContent({ task }: { task: TrackerTask }) {
   const isDone = task.status === "Done";
 
   return (
@@ -225,7 +225,7 @@ function TrackerCardContent({task}: {task: TrackerTask}) {
       </div>
 
       <span
-        className={`text-foreground text-sm font-medium leading-snug ${
+        className={`text-foreground text-sm leading-snug font-medium ${
           isDone ? "line-through opacity-60" : ""
         }`}
       >

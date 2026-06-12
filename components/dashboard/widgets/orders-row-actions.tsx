@@ -1,14 +1,14 @@
 "use client";
 
-import {Eye, Pencil, TrashBin} from "@gravity-ui/icons";
+import { Eye, Pencil, TrashBin } from "@gravity-ui/icons";
 
-import {IconButton} from "../icon-button";
+import { IconButton } from "../icon-button";
 
 export interface OrdersRowActionsProps {
   orderId: string;
 }
 
-export function OrdersRowActions({orderId}: OrdersRowActionsProps) {
+export function OrdersRowActions({ orderId }: OrdersRowActionsProps) {
   return (
     <div className="flex items-center justify-end gap-0.5" data-order-id={orderId}>
       <IconButton label="View order" size="sm" variant="tertiary">

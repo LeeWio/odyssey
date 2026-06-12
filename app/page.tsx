@@ -47,12 +47,7 @@ export default function Home() {
       <Typography type="h2">Trending in Animation</Typography>
       <Segment defaultSelectedKey="meetings" size="lg" variant="ghost" className="gap-1">
         {tabs.map((tab) => (
-          <Segment.Item
-            key={tab.id}
-            className="w-auto"
-            id={tab.id}
-            style={{ gap: 0 }}
-          >
+          <Segment.Item key={tab.id} className="w-auto" id={tab.id} style={{ gap: 0 }}>
             {({ isSelected }) => (
               <>
                 {tab.icon}

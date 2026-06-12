@@ -1,9 +1,9 @@
 "use client";
 
-import type {SparklinePoint} from "../data/analytics";
-import type {ComponentProps} from "react";
+import type { SparklinePoint } from "../data/analytics";
+import type { ComponentProps } from "react";
 
-import {KPI} from "@heroui-pro/react";
+import { KPI } from "@heroui-pro/react";
 
 import {
   BOUNCE_SPARKLINE,
@@ -40,7 +40,7 @@ const ANALYTICS_KPIS: readonly AnalyticsKpi[] = [
     chartColor: "var(--color-accent)",
     chartData: SESSIONS_SPARKLINE,
     label: "Sessions",
-    numberProps: {maximumFractionDigits: 0, value: 84_210},
+    numberProps: { maximumFractionDigits: 0, value: 84_210 },
     trend: "up",
     trendValue: "14%",
   },
@@ -48,7 +48,7 @@ const ANALYTICS_KPIS: readonly AnalyticsKpi[] = [
     chartColor: "var(--color-success)",
     chartData: USERS_SPARKLINE,
     label: "Unique users",
-    numberProps: {maximumFractionDigits: 0, value: 47_382},
+    numberProps: { maximumFractionDigits: 0, value: 47_382 },
     trend: "up",
     trendValue: "6%",
   },
@@ -56,7 +56,7 @@ const ANALYTICS_KPIS: readonly AnalyticsKpi[] = [
     chartColor: "var(--color-muted)",
     chartData: BOUNCE_SPARKLINE,
     label: "Bounce rate",
-    numberProps: {maximumFractionDigits: 1, style: "percent", value: 0.413},
+    numberProps: { maximumFractionDigits: 1, style: "percent", value: 0.413 },
     // Bounce rate going down is actually good — use "neutral" so we don't
     // mis-signal a red "down" arrow for an improving metric.
     trend: "neutral",

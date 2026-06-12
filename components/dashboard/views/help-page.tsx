@@ -4,15 +4,15 @@
 // support URLs. Replace the FAQ entries with real content or fetch them
 // from your CMS.
 
-import type {ComponentType} from "react";
+import type { ComponentType } from "react";
 
-import {ArrowRightFromSquare, Book, Comment, LifeRing} from "@gravity-ui/icons";
-import {Accordion, Card, Link} from "@heroui/react";
+import { ArrowRightFromSquare, Book, Comment, LifeRing } from "@gravity-ui/icons";
+import { Accordion, Card, Link } from "@heroui/react";
 
 type HelpLink = {
   description: string;
   href: string;
-  icon: ComponentType<{className?: string}>;
+  icon: ComponentType<{ className?: string }>;
   title: string;
 };
 
@@ -67,7 +67,7 @@ const FAQS: readonly FaqItem[] = [
 
 export function HelpPage() {
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 pb-10 pt-4">
+    <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 pt-4 pb-10">
       <p className="text-muted text-sm">Find answers, contact support, or dig into the docs.</p>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -105,7 +105,7 @@ export function HelpPage() {
   );
 }
 
-function HelpLinkCard({link}: {link: HelpLink}) {
+function HelpLinkCard({ link }: { link: HelpLink }) {
   const Icon = link.icon;
 
   return (

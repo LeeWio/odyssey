@@ -231,7 +231,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                             Resend
                           </Link>
                         </div>
-                        
+
                         <Button
                           fullWidth
                           variant="secondary"

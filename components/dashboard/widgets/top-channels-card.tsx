@@ -13,7 +13,7 @@ function formatThousands(value: number): string {
 export function TopChannelsCard() {
   const { data, isLoading } = useGetTrafficAnalyticsQuery();
 
-  console.log(data)
+  console.log(data);
 
   const chartData = useMemo(() => {
     if (!data?.sources) return [];

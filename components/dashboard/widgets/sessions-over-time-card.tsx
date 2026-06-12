@@ -22,6 +22,8 @@ function formatDate(dateStr: string): string {
 export function SessionsOverTimeCard() {
   const { data, isLoading } = useGetTrafficAnalyticsQuery();
 
+  console.log(data);
+
   const chartData = useMemo(() => {
     if (!data?.timeSeries) return [];
 

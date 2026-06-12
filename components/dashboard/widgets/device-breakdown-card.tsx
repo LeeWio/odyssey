@@ -42,14 +42,14 @@ export function DeviceBreakdownCard() {
   const { data: trafficData, isLoading } = useGetTrafficAnalyticsQuery();
 
   const total = trafficData?.total ?? 0;
-  
+
   // Ensure we always have the 3 main device categories to preserve the chart colors and structure
   // even if the backend returns an empty array or missing categories when views are 0.
   const rawDevices = trafficData?.devices ?? [];
   const devices = [
-    rawDevices.find(d => d.name === "Mobile") ?? { name: "Mobile", views: 0, percentage: 0 },
-    rawDevices.find(d => d.name === "Desktop") ?? { name: "Desktop", views: 0, percentage: 0 },
-    rawDevices.find(d => d.name === "Tablet") ?? { name: "Tablet", views: 0, percentage: 0 }
+    rawDevices.find((d) => d.name === "Mobile") ?? { name: "Mobile", views: 0, percentage: 0 },
+    rawDevices.find((d) => d.name === "Desktop") ?? { name: "Desktop", views: 0, percentage: 0 },
+    rawDevices.find((d) => d.name === "Tablet") ?? { name: "Tablet", views: 0, percentage: 0 },
   ];
 
   const formattedTotal = formatCount(total);
@@ -97,13 +97,13 @@ export function DeviceBreakdownCard() {
             )}
           </div>
         </div>
-        
+
         {isLoading ? (
-           <div className="flex w-full max-w-[240px] flex-col gap-3">
-             <Skeleton className="h-4 w-full rounded" />
-             <Skeleton className="h-4 w-full rounded" />
-             <Skeleton className="h-4 w-full rounded" />
-           </div>
+          <div className="flex w-full max-w-[240px] flex-col gap-3">
+            <Skeleton className="h-4 w-full rounded" />
+            <Skeleton className="h-4 w-full rounded" />
+            <Skeleton className="h-4 w-full rounded" />
+          </div>
         ) : (
           <DeviceLegend devices={devices} />
         )}
@@ -112,7 +112,11 @@ export function DeviceBreakdownCard() {
   );
 }
 
-function DeviceLegend({ devices }: { devices: Array<{ name: string; views: number; percentage: number }> }): ReactNode {
+function DeviceLegend({
+  devices,
+}: {
+  devices: Array<{ name: string; views: number; percentage: number }>;
+}): ReactNode {
   return (
     <div className="flex w-full max-w-[240px] flex-col gap-2">
       {devices.map((entry, idx) => {

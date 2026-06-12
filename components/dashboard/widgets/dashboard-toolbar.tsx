@@ -1,9 +1,9 @@
 "use client";
 
-import {ArrowsRotateLeft, Calendar, ChevronDown} from "@gravity-ui/icons";
-import {Button, ButtonGroup, Dropdown, Label, Tabs} from "@heroui/react";
+import { ArrowsRotateLeft, Calendar, ChevronDown } from "@gravity-ui/icons";
+import { Button, ButtonGroup, Dropdown, Label, Tabs } from "@heroui/react";
 
-import {IconButton} from "../icon-button";
+import { IconButton } from "../icon-button";
 
 export function DashboardToolbar() {
   return (
