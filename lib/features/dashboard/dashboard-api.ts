@@ -129,5 +129,9 @@ export const dashboardApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useGetDashboardStatsQuery, useGetAnalyticsOverviewQuery, useGetTopPagesQuery, useGetTrafficAnalyticsQuery } =
-  dashboardApi;
+export const {
+  useGetDashboardStatsQuery,
+  useGetAnalyticsOverviewQuery,
+  useGetTopPagesQuery,
+  useGetTrafficAnalyticsQuery,
+} = dashboardApi;
