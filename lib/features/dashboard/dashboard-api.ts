@@ -115,10 +115,11 @@ export const dashboardApi = baseApi.injectEndpoints({
     /**
      * Admin: Get top pages analytics
      */
-    getTopPages: builder.query<TopPageResponse[], void>({
-      query: () => ({
+    getTopPages: builder.query<TopPageResponse[], number | void>({
+      query: (days) => ({
         url: "/api/v1/admin/analytics/top-pages",
         method: "GET",
+        params: days ? { days } : undefined,
       }),
       providesTags: ["Dashboard"],
       rawResponseSchema: ApiResponseSchema(z.array(TopPageSchema)),
@@ -129,10 +130,11 @@ export const dashboardApi = baseApi.injectEndpoints({
     /**
      * Admin: Get traffic analytics (devices, sources, timeSeries)
      */
-    getTrafficAnalytics: builder.query<TrafficResponse, void>({
-      query: () => ({
+    getTrafficAnalytics: builder.query<TrafficResponse, number | void>({
+      query: (days) => ({
         url: "/api/v1/admin/analytics/traffic",
         method: "GET",
+        params: days ? { days } : undefined,
       }),
       providesTags: ["Dashboard"],
       rawResponseSchema: ApiResponseSchema(TrafficResponseSchema),

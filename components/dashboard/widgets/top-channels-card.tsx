@@ -10,10 +10,8 @@ function formatThousands(value: number): string {
   return value >= 1000 ? `${(value / 1000).toFixed(0)}k` : `${value}`;
 }
 
-export function TopChannelsCard() {
-  const { data, isLoading } = useGetTrafficAnalyticsQuery();
-
-  console.log(data);
+export function TopChannelsCard({ days }: { days?: number }) {
+  const { data, isLoading } = useGetTrafficAnalyticsQuery(days);
 
   const chartData = useMemo(() => {
     if (!data?.sources) return [];

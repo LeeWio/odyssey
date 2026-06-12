@@ -38,8 +38,8 @@ function DeviceTooltip({ active, payload }: DeviceTooltipProps) {
   );
 }
 
-export function DeviceBreakdownCard() {
-  const { data: trafficData, isLoading } = useGetTrafficAnalyticsQuery();
+export function DeviceBreakdownCard({ days }: { days?: number }) {
+  const { data: trafficData, isLoading } = useGetTrafficAnalyticsQuery(days);
 
   const total = trafficData?.summary.sessions.numericValue ?? 0;
 

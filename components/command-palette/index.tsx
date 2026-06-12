@@ -91,7 +91,6 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
       if (commands && commands.length > 0) {
         // Check if the current source filter allows this category
         const isAI = category === "AI";
-        const isAnalytics = category === "Analytics";
         const isTheme = commands.some((c) => c.source === "theme");
         const isSystem = commands.some((c) => c.source === "system");
 

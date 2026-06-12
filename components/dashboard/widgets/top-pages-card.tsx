@@ -9,8 +9,8 @@ import { Skeleton } from "@heroui/react";
 
 import { useGetTopPagesQuery } from "@/lib/features/dashboard";
 
-export function TopPagesCard() {
-  const { data: topPages, isLoading } = useGetTopPagesQuery();
+export function TopPagesCard({ days }: { days?: number }) {
+  const { data: topPages, isLoading } = useGetTopPagesQuery(days);
 
   const columns = useMemo<DataGridColumn<TopPageResponse>[]>(
     () => [

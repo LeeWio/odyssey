@@ -7,8 +7,8 @@ import { KPI } from "@heroui-pro/react";
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard/dashboard-api";
 import { BOUNCE_SPARKLINE, DURATION_SPARKLINE } from "../data/analytics";
 
-export function AnalyticsKpiRow() {
-  const { data, isLoading } = useGetTrafficAnalyticsQuery();
+export function AnalyticsKpiRow({ days }: { days?: number }) {
+  const { data, isLoading } = useGetTrafficAnalyticsQuery(days);
 
   const sessionsSparkline = useMemo(() => {
     return data?.timeSeries?.map((p) => ({ value: p.sessions })) ?? [];
@@ -36,7 +36,7 @@ export function AnalyticsKpiRow() {
           ) : (
             <>
               <KPI.Value maximumFractionDigits={0} value={summary?.sessions.numericValue ?? 0} />
-              <KPI.Trend trend={summary?.sessions.growthRate! >= 0 ? "up" : "down"}>
+              <KPI.Trend trend={(summary?.sessions.growthRate ?? 0) >= 0 ? "up" : "down"}>
                 {Math.abs(summary?.sessions.growthRate ?? 0).toFixed(1)}%
               </KPI.Trend>
             </>
@@ -68,7 +68,7 @@ export function AnalyticsKpiRow() {
           ) : (
             <>
               <KPI.Value maximumFractionDigits={0} value={summary?.users.numericValue ?? 0} />
-              <KPI.Trend trend={summary?.users.growthRate! >= 0 ? "up" : "down"}>
+              <KPI.Trend trend={(summary?.users.growthRate ?? 0) >= 0 ? "up" : "down"}>
                 {Math.abs(summary?.users.growthRate ?? 0).toFixed(1)}%
               </KPI.Trend>
             </>
@@ -105,7 +105,7 @@ export function AnalyticsKpiRow() {
                 value={(summary?.bounceRate.numericValue ?? 0) / 100}
               />
               <KPI.Trend trend="neutral">
-                {summary?.bounceRate.growthRate! >= 0 ? "+" : "−"}
+                {(summary?.bounceRate.growthRate ?? 0) >= 0 ? "+" : "−"}
                 {Math.abs(summary?.bounceRate.growthRate ?? 0).toFixed(1)}%
               </KPI.Trend>
             </>
@@ -139,7 +139,7 @@ export function AnalyticsKpiRow() {
               <span className="text-foreground text-2xl font-semibold tabular-nums">
                 {summary?.avgSession.value}
               </span>
-              <KPI.Trend trend={summary?.avgSession.growthRate! >= 0 ? "up" : "down"}>
+              <KPI.Trend trend={(summary?.avgSession.growthRate ?? 0) >= 0 ? "up" : "down"}>
                 {Math.abs(summary?.avgSession.growthRate ?? 0).toFixed(1)}%
               </KPI.Trend>
             </>

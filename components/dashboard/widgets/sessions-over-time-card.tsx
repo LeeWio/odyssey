@@ -14,13 +14,13 @@ function formatDate(dateStr: string): string {
   try {
     const date = new Date(dateStr);
     return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(date);
-  } catch (e) {
+  } catch (_e) {
     return dateStr;
   }
 }
 
-export function SessionsOverTimeCard() {
-  const { data, isLoading } = useGetTrafficAnalyticsQuery();
+export function SessionsOverTimeCard({ days }: { days?: number }) {
+  const { data, isLoading } = useGetTrafficAnalyticsQuery(days);
 
   const chartData = useMemo(() => {
     if (!data?.timeSeries) return [];

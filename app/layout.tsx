@@ -48,8 +48,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Get the user's preferred language from the Accept-Language header.
-  // You could also get this from a database, URL param, etc.
   const acceptLanguage = (await headers()).get("accept-language");
   const lang = acceptLanguage?.split(/[,;]/)[0] || "en-US";
 

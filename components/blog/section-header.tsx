@@ -1,6 +1,6 @@
 "use client";
 
-import { Typography, Separator } from "@heroui/react";
+import { Typography } from "@heroui/react";
 
 interface SectionHeaderProps {
   title: string;

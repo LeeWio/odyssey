@@ -2,8 +2,8 @@
 
 import type { NavItem } from "./nav-items";
 
-import { Avatar, Chip } from "@heroui/react";
-import { AppLayout, Sidebar, useSidebar } from "@heroui-pro/react";
+import { Chip } from "@heroui/react";
+import { Sidebar, useSidebar } from "@heroui-pro/react";
 import { Bars, LayoutSideContentLeft } from "@gravity-ui/icons";
 
 import { NAV_ITEMS } from "./nav-items";
