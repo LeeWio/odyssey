@@ -15,6 +15,7 @@ interface UiState {
   };
   richText: {
     isOpen: boolean;
+    draftIdentifier: string | null;
   };
 }
 
@@ -30,6 +31,7 @@ const initialState: UiState = {
   },
   richText: {
     isOpen: false,
+    draftIdentifier: null,
   },
 };
 
@@ -49,14 +51,19 @@ export const uiSlice = createSlice({
     toggleRichText: (state) => {
       state.richText.isOpen = !state.richText.isOpen;
     },
+    setDraftIdentifier: (state, action: PayloadAction<string | null>) => {
+      state.richText.draftIdentifier = action.payload;
+    },
   },
 });
 
-export const { toggleSheet, setThemeVariant, toggleDashboard, toggleRichText } = uiSlice.actions;
+export const { toggleSheet, setThemeVariant, toggleDashboard, toggleRichText, setDraftIdentifier } =
+  uiSlice.actions;
 
 export const selectIsSheetOpen = (state: RootState) => state.ui.sheet?.isOpen;
 export const selectThemeVariant = (state: RootState) => state.ui.theme?.variant;
 export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard?.isOpen;
 export const selectIsRichTextOpen = (state: RootState) => state.ui.richText?.isOpen;
+export const selectDraftIdentifier = (state: RootState) => state.ui.richText?.draftIdentifier;
 
 export default uiSlice.reducer;

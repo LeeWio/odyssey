@@ -128,7 +128,12 @@ export interface PostSearchQuery extends Pageable {
 export interface PostAutosaveRequest {
   /** Post ID (for existing) or client-generated UUID (for new) */
   identifier: string;
-  content: string;
+  content: Record<string, unknown>;
+}
+
+export interface PostAutosaveResponse {
+  identifier: string;
+  content: Record<string, unknown>;
 }
 
 export const postApi = baseApi.injectEndpoints({
@@ -369,10 +374,10 @@ export const postApi = baseApi.injectEndpoints({
     /**
      * Admin: Retrieve autosaved content
      */
-    getAutosave: builder.query<string, string>({
+    getAutosave: builder.query<PostAutosaveResponse, string>({
       query: (identifier) => `/api/v1/admin/posts/autosave/${identifier}`,
-      rawResponseSchema: ApiResponseSchema(z.string()),
-      transformResponse: (response: ApiResponse<string>) => response.data,
+      rawResponseSchema: ApiResponseSchema(z.any()),
+      transformResponse: (response: ApiResponse<PostAutosaveResponse>) => response.data,
       transformErrorResponse: transformError,
     }),
   }),

@@ -14,6 +14,7 @@ import { getMessages } from "next-intl/server";
 import { Toast } from "@heroui/react";
 import { SheetPanel } from "@/components/sheet-panel";
 import { DashboardSheet } from "@/components/dashboard";
+import { RichTextModal } from "@/components/rich-text";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -75,6 +76,7 @@ export default async function RootLayout({
                 <Navbar />
                 <SheetPanel />
                 <DashboardSheet />
+                <RichTextModal />
                 <main className="flex w-full grow flex-col">{children}</main>
                 <footer className="flex w-full items-center justify-center py-3">
                   <a

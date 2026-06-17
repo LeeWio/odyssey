@@ -2,7 +2,7 @@
 
 import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 import { setCredentials, setPermissions, removeCredentials } from "../features/auth/auth-slice";
-import { setThemeVariant } from "../features/ui";
+import { setThemeVariant, setDraftIdentifier } from "../features/ui";
 import { setLocale } from "../features/locale/locale-slice";
 import type { RootState } from "../store";
 
@@ -39,6 +39,20 @@ persistenceMiddleware.startListening({
   },
 });
 
+// Start listening for Draft Identifier changes
+persistenceMiddleware.startListening({
+  actionCreator: setDraftIdentifier,
+  effect: (action) => {
+    if (typeof window !== "undefined") {
+      if (action.payload) {
+        localStorage.setItem("odyssey_draft_id", action.payload);
+      } else {
+        localStorage.removeItem("odyssey_draft_id");
+      }
+    }
+  },
+});
+
 // Start listening for Locale changes
 persistenceMiddleware.startListening({
   actionCreator: setLocale,
@@ -60,17 +74,19 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
     const auth = localStorage.getItem("odyssey_auth");
     const theme = localStorage.getItem("odyssey_theme");
     const locale = localStorage.getItem("odyssey_locale");
+    const draftId = localStorage.getItem("odyssey_draft_id");
 
     const preloadedState: Record<string, unknown> = {};
 
     if (auth) preloadedState.auth = JSON.parse(auth);
-    if (theme)
+    if (theme || draftId) {
       preloadedState.ui = {
-        theme: { variant: theme },
+        theme: { variant: theme || "glass" },
         sheet: { isOpen: false },
         dashboard: { isOpen: false },
-        richText: { isOpen: false },
+        richText: { isOpen: false, draftIdentifier: draftId || null },
       };
+    }
     if (locale) preloadedState.locale = { value: locale };
 
     return preloadedState;

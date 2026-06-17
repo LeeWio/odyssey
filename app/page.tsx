@@ -35,19 +35,22 @@ const CRAZY_ONES = [
     name: "Steve Jobs",
     title: "Co-founder, Apple Inc.",
     image: "https://i.pravatar.cc/150?u=steve",
-    quote: "The people who are crazy enough to think they can change the world are the ones who do.",
+    quote:
+      "The people who are crazy enough to think they can change the world are the ones who do.",
   },
   {
     name: "Alan Turing",
     title: "Father of Computer Science",
     image: "https://i.pravatar.cc/150?u=alan",
-    quote: "Sometimes it is the people no one can imagine anything of who do the things no one can imagine.",
+    quote:
+      "Sometimes it is the people no one can imagine anything of who do the things no one can imagine.",
   },
   {
     name: "Albert Einstein",
     title: "Theoretical Physicist",
     image: "https://i.pravatar.cc/150?u=albert",
-    quote: "Imagination is more important than knowledge. For knowledge is limited, whereas imagination embraces the entire world.",
+    quote:
+      "Imagination is more important than knowledge. For knowledge is limited, whereas imagination embraces the entire world.",
   },
   {
     name: "Ada Lovelace",
@@ -96,43 +99,55 @@ function ThinkDifferentSection() {
     <Surface
       ref={containerRef}
       variant="transparent"
-      className="flex flex-col items-center py-24 px-6 relative w-full lg:py-32"
+      className="relative flex w-full flex-col items-center px-6 py-24 lg:py-32"
     >
-      <div className="flex flex-col gap-4 text-center max-w-3xl mb-24">
+      <div className="mb-24 flex max-w-3xl flex-col gap-4 text-center">
         <Typography type="h1" align="center" color="default" weight="semibold">
           Think Different
         </Typography>
 
-        <Typography type="h5" align="center" color="muted" weight="normal" className="italic leading-relaxed">
-          &quot;Here&apos;s to the crazy ones. The misfits. The rebels. The troublemakers... Because the people who are crazy enough to think they can change the world, are the ones who do.&quot;
+        <Typography
+          type="h5"
+          align="center"
+          color="muted"
+          weight="normal"
+          className="leading-relaxed italic"
+        >
+          &quot;Here&apos;s to the crazy ones. The misfits. The rebels. The troublemakers... Because
+          the people who are crazy enough to think they can change the world, are the ones who
+          do.&quot;
         </Typography>
       </div>
 
-      <div className="flex flex-col items-center gap-[50vh] w-full max-w-2xl pb-[30vh] relative">
+      <div className="relative flex w-full max-w-2xl flex-col items-center gap-[50vh] pb-[30vh]">
         {CRAZY_ONES.map((person, i) => (
           <div key={i} className="person-card w-full origin-top">
             <HoverCard>
-              <HoverCard.Trigger className="block cursor-pointer outline-none w-full">
-                <Card className="flex flex-col sm:flex-row items-center p-8 sm:p-12 gap-8 w-full shadow-2xl bg-surface border border-border transition-colors hover:bg-surface-secondary">
-                  <Avatar size="lg" className="w-28 h-28 text-3xl shrink-0 ring-4 ring-primary/10">
+              <HoverCard.Trigger className="block w-full cursor-pointer outline-none">
+                <Card className="bg-surface border-border hover:bg-surface-secondary flex w-full flex-col items-center gap-8 border p-8 shadow-2xl transition-colors sm:flex-row sm:p-12">
+                  <Avatar size="lg" className="ring-primary/10 h-28 w-28 shrink-0 text-3xl ring-4">
                     <Avatar.Image src={person.image} alt={person.name} />
                     <Avatar.Fallback>{person.name.charAt(0)}</Avatar.Fallback>
                   </Avatar>
-                  <div className="text-center sm:text-left flex flex-col gap-3">
-                    <Typography type="h3" className="font-bold text-2xl">{person.name}</Typography>
-                    <Typography type="body-sm" color="muted">{person.title}</Typography>
+                  <div className="flex flex-col gap-3 text-center sm:text-left">
+                    <Typography type="h3" className="text-2xl font-bold">
+                      {person.name}
+                    </Typography>
+                    <Typography type="body-sm" color="muted">
+                      {person.title}
+                    </Typography>
                   </div>
                 </Card>
               </HoverCard.Trigger>
               <HoverCard.Content className="max-w-md p-6" placement="top">
-                <Typography className="italic font-serif leading-relaxed text-lg">
+                <Typography className="font-serif text-lg leading-relaxed italic">
                   &quot;{person.quote}&quot;
                 </Typography>
               </HoverCard.Content>
             </HoverCard>
           </div>
         ))}
-        <div className="cards-end-marker w-full h-px" />
+        <div className="cards-end-marker h-px w-full" />
       </div>
     </Surface>
   );
