@@ -1,7 +1,7 @@
 "use client";
 
 import { useAutosavePostMutation } from "@/lib/features/post/post-api";
-import { RichTextEditor, RichTextEditorShell } from "@heroui-pro/react";
+import { FloatingToc, RichTextEditor, RichTextEditorShell } from "@heroui-pro/react";
 import { Button, Modal } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
 import { useDebouncedCallback } from "use-debounce";
@@ -10,6 +10,7 @@ import { ExtensionKit } from "./extensions/extension-kit";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
 import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
 import { LinkMenu } from "./menus/link-menu/link-menu";
+import { useState } from "react";
 
 interface RichTextProps {
   identifier: string;
@@ -20,7 +21,6 @@ interface RichTextProps {
 export function RichText({ identifier, initialValue, onChange }: RichTextProps) {
   // 1. 获取 RTK Query Mutation 状态以追踪自动保存进度
   const [autosavePost, { isLoading, isSuccess, isError }] = useAutosavePostMutation();
-
   const debouncedAutosave = useDebouncedCallback((contentJSON: JSONContent) => {
     autosavePost({ identifier, content: contentJSON });
   }, 1000);
@@ -44,7 +44,7 @@ export function RichText({ identifier, initialValue, onChange }: RichTextProps) 
           <TextMenu />
           <LinkMenu />
         </Modal.Header>
-        <Modal.Body className="flex-1 overflow-y-auto">
+        <Modal.Body className="relative flex-1 overflow-y-auto">
           <RichTextEditor.Content />
         </Modal.Body>
         <Modal.Footer>

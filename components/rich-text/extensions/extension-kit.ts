@@ -1,3 +1,25 @@
-import { Link, Document, Paragraph, Text, HorizontalRule, Typography } from ".";
+import {
+  Link,
+  Document,
+  Paragraph,
+  Text,
+  HorizontalRule,
+  Typography,
+  Heading,
+  Subscript,
+  Superscript,
+  TextAlign,
+} from ".";
 
-export const ExtensionKit = [Link, Document, Paragraph, Text, HorizontalRule, Typography];
+export const ExtensionKit = [
+  Link,
+  Document,
+  Paragraph,
+  Text,
+  HorizontalRule,
+  Typography,
+  Heading,
+  Subscript,
+  Superscript,
+  TextAlign,
+];

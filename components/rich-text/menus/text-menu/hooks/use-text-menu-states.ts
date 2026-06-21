@@ -1,5 +1,6 @@
 import { isCustomNodeSelected } from "@/components/rich-text/utils/is-custom-node-selected";
 import { isTextSelected } from "@/components/rich-text/utils/is-text-selected";
+import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
 import { EditorState } from "@tiptap/pm/state";
 import { EditorView } from "@tiptap/pm/view";
 import { Editor } from "@tiptap/react";
@@ -15,7 +16,31 @@ export interface ShouldShowProps {
   to: number;
 }
 
-export const useTextMenuStates = (editor: Editor | null) => {
+export const useTextMenuStates = () => {
+  const { editor } = useRichTextEditor();
+
+  const states = useRichTextEditorState((ctx) => {
+    if (!ctx.editor) {
+      return {
+        isSubscript: false,
+        isSuperscript: false,
+        isAlignLeft: false,
+        isAlignCenter: false,
+        isAlignRight: false,
+        isAlignJustify: false,
+      };
+    }
+
+    return {
+      isSubscript: ctx.editor.isActive("subscript"),
+      isSuperscript: ctx.editor.isActive("superscript"),
+      isAlignLeft: ctx.editor.isActive({ textAlign: "left" }),
+      isAlignCenter: ctx.editor.isActive({ textAlign: "center" }),
+      isAlignRight: ctx.editor.isActive({ textAlign: "right" }),
+      isAlignJustify: ctx.editor.isActive({ textAlign: "justify" }),
+    };
+  });
+
   const shouldShow = useCallback(
     ({ view, from }: ShouldShowProps) => {
       if (!editor || !view || editor.view.dragging) {
@@ -38,5 +63,6 @@ export const useTextMenuStates = (editor: Editor | null) => {
 
   return {
     shouldShow,
+    ...states,
   };
 };
