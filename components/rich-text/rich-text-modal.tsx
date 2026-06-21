@@ -36,7 +36,7 @@ export function RichTextModal() {
   return (
     <Modal>
       <Modal.Backdrop
-        isOpen={isOpen}
+        isOpen={true}
         onOpenChange={(open) => {
           if (!open) {
             dispatch(toggleRichText());

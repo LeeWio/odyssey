@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Carousel, HoverCard } from "@heroui-pro/react";
+import { Carousel, HoverCard, RichTextEditor } from "@heroui-pro/react";
 import {
   Button,
   Card,

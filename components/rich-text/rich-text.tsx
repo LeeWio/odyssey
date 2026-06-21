@@ -1,13 +1,15 @@
 "use client";
 
 import { useAutosavePostMutation } from "@/lib/features/post/post-api";
-import { RichTextEditor } from "@heroui-pro/react";
+import { RichTextEditor, RichTextEditorShell } from "@heroui-pro/react";
 import { Button, Modal } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
 import { useDebouncedCallback } from "use-debounce";
+import { TextMenu } from "./menus/text-menu/text-menu";
+import { ExtensionKit } from "./extensions/extension-kit";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
-import { BubbleToolbar } from "./toolbar/bubble-toolbar";
 import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
+import { LinkMenu } from "./menus/link-menu/link-menu";
 
 interface RichTextProps {
   identifier: string;
@@ -31,14 +33,16 @@ export function RichText({ identifier, initialValue, onChange }: RichTextProps) 
   return (
     <Modal.Dialog>
       <RichTextEditor
+        extensions={ExtensionKit}
         className="flex h-full flex-1 flex-col"
         defaultValue={initialValue}
         onValueChange={handleValueChange}
       >
         <Modal.Header>
           <FixedToolbar />
-          <BubbleToolbar />
           <SuggestionToolbar />
+          <TextMenu />
+          <LinkMenu />
         </Modal.Header>
         <Modal.Body className="flex-1 overflow-y-auto">
           <RichTextEditor.Content />
