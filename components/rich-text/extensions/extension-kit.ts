@@ -10,6 +10,7 @@ import {
   Superscript,
   TextAlign,
   TextStyleKit,
+  Indent,
 } from ".";
 
 export const ExtensionKit = [
@@ -24,4 +25,5 @@ export const ExtensionKit = [
   Superscript,
   TextAlign,
   TextStyleKit,
+  Indent,
 ];

@@ -33,8 +33,26 @@ export const useTextMenuStates = () => {
         lineHeight: "",
         textColor: "",
         backgroundColor: "",
+        canIndent: false,
+        canOutdent: false,
+        indent: 0,
       };
     }
+
+    const hasListContext = ctx.editor.isActive("bulletList") || ctx.editor.isActive("orderedList");
+
+    const canIndent = hasListContext
+      ? ctx.editor.can().sinkListItem("listItem")
+      : ctx.editor.can().indent();
+
+    const canOutdent = hasListContext
+      ? ctx.editor.can().liftListItem("listItem")
+      : ctx.editor.can().outdent();
+
+    const indent =
+      ctx.editor.getAttributes("paragraph").indent ||
+      ctx.editor.getAttributes("heading").indent ||
+      0;
 
     return {
       subscript: ctx.editor.isActive("subscript"),
@@ -48,6 +66,9 @@ export const useTextMenuStates = () => {
       lineHeight: ctx.editor.getAttributes("textStyle").lineHeight || "",
       textColor: ctx.editor.getAttributes("textStyle").color || "",
       backgroundColor: ctx.editor.getAttributes("textStyle").backgroundColor || "",
+      canIndent,
+      canOutdent,
+      indent,
     };
   });
 

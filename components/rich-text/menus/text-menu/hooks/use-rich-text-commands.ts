@@ -30,5 +30,19 @@ export function useRichTextCommands() {
     unsetTextColor: () => editor?.chain().focus().unsetColor().run(),
     setBackgroundColor: (color: string) => editor?.chain().focus().setBackgroundColor(color).run(),
     unsetBackgroundColor: () => editor?.chain().focus().unsetBackgroundColor().run(),
+    indent: () => {
+      if (!editor) return;
+      if (editor.isActive("bulletList") || editor.isActive("orderedList")) {
+        return editor.chain().focus().sinkListItem("listItem").run();
+      }
+      return editor.chain().focus().indent().run();
+    },
+    outdent: () => {
+      if (!editor) return;
+      if (editor.isActive("bulletList") || editor.isActive("orderedList")) {
+        return editor.chain().focus().liftListItem("listItem").run();
+      }
+      return editor.chain().focus().outdent().run();
+    },
   };
 }

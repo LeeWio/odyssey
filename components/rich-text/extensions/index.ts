@@ -6,6 +6,7 @@ export { Paragraph } from "./paragraph";
 export { Subscript } from "./subscript";
 export { Superscript } from "./superscript";
 export { TextAlign } from "./text-align";
+export { Indent } from "./indent";
 
 export { Document } from "@tiptap/extension-document";
 export { Text } from "@tiptap/extension-text";

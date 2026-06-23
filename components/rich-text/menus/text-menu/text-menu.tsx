@@ -122,10 +122,18 @@ export function TextMenu() {
 
                 <RichTextEditor.ToolbarSeparator />
 
-                <RichTextEditor.CommandButton onCommand={() => {}}>
+                <RichTextEditor.CommandButton
+                  onCommand={commands.outdent}
+                  isDisabled={!states.canOutdent}
+                  isActive={false}
+                >
                   <Icon icon="gravity-ui:text-outdent" />
                 </RichTextEditor.CommandButton>
-                <RichTextEditor.CommandButton onCommand={() => {}}>
+                <RichTextEditor.CommandButton
+                  onCommand={commands.indent}
+                  isDisabled={!states.canIndent}
+                  isActive={states.indent > 0}
+                >
                   <Icon icon="gravity-ui:text-indent" />
                 </RichTextEditor.CommandButton>
               </RichTextEditor.ToolbarGroup>
