@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { LinkMenuEdit } from "../link-menu/link-menu-edit";
 import {
   Button,
+  ButtonGroup,
   ComboBox,
   Dropdown,
   Input,
@@ -20,6 +21,7 @@ import { FontFamilyPicker } from "./components/font-family-picker";
 import { FontSizePicker } from "./components/font-size-picker";
 import { LineHeightPicker } from "./components/line-height-picker";
 import { TextColorPicker } from "./components/text-color-picker";
+import { BgColorPicker } from "./components/bg-color-picker";
 
 export function TextMenu() {
   const { editor } = useRichTextEditor();
@@ -67,6 +69,7 @@ export function TextMenu() {
       <RichTextEditor.ToolbarSeparator orientation="vertical" />
 
       <TextColorPicker value={states.textColor} onChange={commands.setTextColor} />
+      <BgColorPicker value={states.backgroundColor} onChange={commands.setBackgroundColor} />
 
       <RichTextEditor.LinkPopover isOpen={state.isOpen} onOpenChange={state.setOpen}>
         <RichTextEditor.LinkPopover.Trigger isIconOnly>
