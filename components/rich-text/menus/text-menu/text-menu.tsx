@@ -15,8 +15,13 @@ import {
 } from "@heroui/react";
 import { useTextMenuStates } from "./hooks/use-text-menu-states";
 import { useRichTextCommands } from "./hooks/use-rich-text-commands";
+import { ToggleButtonToolbar } from "../../toolbar/toggle-button-toolbar";
+import { FontFamilyPicker } from "./components/font-family-picker";
+import { FontSizePicker } from "./components/font-size-picker";
+import { LineHeightPicker } from "./components/line-height-picker";
 
 export function TextMenu() {
+  const { editor } = useRichTextEditor();
   const states = useTextMenuStates();
   const commands = useRichTextCommands();
 
@@ -24,34 +29,22 @@ export function TextMenu() {
 
   const moreOverlayState = useOverlayState();
 
-  const handleCloseAndRun = (fn: () => void) => () => {
-    moreOverlayState.close();
-    fn();
-  };
-
   return (
-    <RichTextEditor.BubbleMenu pluginKey="text-menu" shouldShow={states.shouldShow}>
-      <Dropdown>
-        <Button aria-label="" variant="secondary" isIconOnly>
-          A
-        </Button>
-        <Dropdown.Popover>
-          <Dropdown.Menu onAction={(key) => console.log(`Selected: ${key}`)}>
-            <Dropdown.Item id="new-file" textValue="New file">
-              <Label>New file</Label>
-            </Dropdown.Item>
-            <Dropdown.Item id="copy-link" textValue="Copy link">
-              <Label>Copy link</Label>
-            </Dropdown.Item>
-            <Dropdown.Item id="edit-file" textValue="Edit file">
-              <Label>Edit file</Label>
-            </Dropdown.Item>
-            <Dropdown.Item id="delete-file" textValue="Delete file" variant="danger">
-              <Label>Delete file</Label>
-            </Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown.Popover>
-      </Dropdown>
+    <RichTextEditor.BubbleMenu
+      pluginKey="text-menu"
+      shouldShow={states.shouldShow}
+      appendTo={() =>
+        (document.querySelector("[data-slot='modal-dialog']") as HTMLElement) || document.body
+      }
+    >
+      <RichTextEditor.ToolbarGroup aria-label="">
+        <FontSizePicker value={states.fontSize} onChange={commands.setFontSize} />
+        <FontFamilyPicker value={states.fontFamily} onChange={commands.setFontFamily} />
+        <LineHeightPicker value={states.lineHeight} onChange={commands.setLineHeight} />
+      </RichTextEditor.ToolbarGroup>
+
+      <RichTextEditor.ToolbarSeparator />
+
       <RichTextEditor.ToolbarGroup aria-label="Text Formatting">
         <RichTextEditor.ToggleButton command="bold" tooltip="Bold">
           <Icon icon="gravity-ui:bold" />
@@ -91,61 +84,31 @@ export function TextMenu() {
           <Popover.Dialog className="rounded-2xl p-1">
             <Popover.Arrow />
             <RichTextEditor.ToolbarGroup>
-              <ToggleButton
-                size="sm"
-                isIconOnly
-                variant="ghost"
-                onPress={handleCloseAndRun(commands.onSubscript)}
-                isSelected={states.isSubscript}
-              >
+              <ToggleButtonToolbar command="subscript" onPress={moreOverlayState.close}>
                 <Icon icon="gravity-ui:superscript" />
-              </ToggleButton>
-              <ToggleButton
-                size="sm"
-                isIconOnly
-                variant="ghost"
-                onPress={handleCloseAndRun(commands.onSuperscript)}
-                isSelected={states.isSuperscript}
-              >
+              </ToggleButtonToolbar>
+
+              <ToggleButtonToolbar command="superscript" onPress={moreOverlayState.close}>
                 <Icon icon="gravity-ui:superscript" />
-              </ToggleButton>
+              </ToggleButtonToolbar>
+
               <RichTextEditor.ToolbarSeparator />
-              <ToggleButton
-                size="sm"
-                isIconOnly
-                variant="ghost"
-                onPress={handleCloseAndRun(commands.onAlignLeft)}
-                isSelected={states.isAlignLeft}
-              >
+
+              <ToggleButtonToolbar command="alignLeft" onPress={moreOverlayState.close}>
                 <Icon icon="gravity-ui:text-align-left" />
-              </ToggleButton>
-              <ToggleButton
-                size="sm"
-                isIconOnly
-                variant="ghost"
-                onPress={handleCloseAndRun(handleCloseAndRun(commands.onAlignCenter))}
-                isSelected={states.isAlignCenter}
-              >
+              </ToggleButtonToolbar>
+
+              <ToggleButtonToolbar command="alignCenter" onPress={moreOverlayState.close}>
                 <Icon icon="gravity-ui:text-align-center" />
-              </ToggleButton>
-              <ToggleButton
-                size="sm"
-                isIconOnly
-                variant="ghost"
-                onPress={handleCloseAndRun(commands.onAlignRight)}
-                isSelected={states.isAlignRight}
-              >
+              </ToggleButtonToolbar>
+
+              <ToggleButtonToolbar command="alignRight" onPress={moreOverlayState.close}>
                 <Icon icon="gravity-ui:text-align-right" />
-              </ToggleButton>
-              <ToggleButton
-                size="sm"
-                isIconOnly
-                variant="ghost"
-                onPress={handleCloseAndRun(commands.onAlignJustify)}
-                isSelected={states.isAlignJustify}
-              >
+              </ToggleButtonToolbar>
+              <ToggleButtonToolbar command="alignJustify" onPress={moreOverlayState.close}>
                 <Icon icon="gravity-ui:text-align-justify" />
-              </ToggleButton>
+              </ToggleButtonToolbar>
+
               <RichTextEditor.ToolbarSeparator />
 
               <RichTextEditor.CommandButton onCommand={() => {}}>

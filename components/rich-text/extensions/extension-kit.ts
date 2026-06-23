@@ -9,6 +9,7 @@ import {
   Subscript,
   Superscript,
   TextAlign,
+  TextStyleKit,
 } from ".";
 
 export const ExtensionKit = [
@@ -22,4 +23,5 @@ export const ExtensionKit = [
   Subscript,
   Superscript,
   TextAlign,
+  TextStyleKit,
 ];

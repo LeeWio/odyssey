@@ -22,22 +22,28 @@ export const useTextMenuStates = () => {
   const states = useRichTextEditorState((ctx) => {
     if (!ctx.editor) {
       return {
-        isSubscript: false,
-        isSuperscript: false,
-        isAlignLeft: false,
-        isAlignCenter: false,
-        isAlignRight: false,
-        isAlignJustify: false,
+        subscript: false,
+        superscript: false,
+        alignLeft: false,
+        alignCenter: false,
+        alignRight: false,
+        alignJustify: false,
+        fontFamily: "",
+        fontSize: "",
+        lineHeight: "",
       };
     }
 
     return {
-      isSubscript: ctx.editor.isActive("subscript"),
-      isSuperscript: ctx.editor.isActive("superscript"),
-      isAlignLeft: ctx.editor.isActive({ textAlign: "left" }),
-      isAlignCenter: ctx.editor.isActive({ textAlign: "center" }),
-      isAlignRight: ctx.editor.isActive({ textAlign: "right" }),
-      isAlignJustify: ctx.editor.isActive({ textAlign: "justify" }),
+      subscript: ctx.editor.isActive("subscript"),
+      superscript: ctx.editor.isActive("superscript"),
+      alignLeft: ctx.editor.isActive({ textAlign: "left" }),
+      alignCenter: ctx.editor.isActive({ textAlign: "center" }),
+      alignRight: ctx.editor.isActive({ textAlign: "right" }),
+      alignJustify: ctx.editor.isActive({ textAlign: "justify" }),
+      fontFamily: ctx.editor.getAttributes("textStyle").fontFamily || "",
+      fontSize: ctx.editor.getAttributes("textStyle").fontSize || "",
+      lineHeight: ctx.editor.getAttributes("textStyle").lineHeight || "",
     };
   });
 

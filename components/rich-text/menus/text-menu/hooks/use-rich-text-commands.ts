@@ -10,13 +10,21 @@ export function useRichTextCommands() {
     // onUnderline: () => editor?.chain().focus().toggleUnderline().run(),
     // onStrike: () => editor?.chain().focus().toggleStrike().run(),
     // onCode: () => editor?.chain().focus().toggleCode().run(),
-    onSubscript: () => editor?.chain().focus().toggleSubscript().run(),
-    onSuperscript: () => editor?.chain().focus().toggleSuperscript().run(),
+    subscript: () => editor?.chain().focus().toggleSubscript().run(),
+    superscript: () => editor?.chain().focus().toggleSuperscript().run(),
 
     // Alignment
-    onAlignLeft: () => editor?.chain().focus().setTextAlign("left").run(),
-    onAlignCenter: () => editor?.chain().focus().setTextAlign("center").run(),
-    onAlignRight: () => editor?.chain().focus().setTextAlign("right").run(),
-    onAlignJustify: () => editor?.chain().focus().setTextAlign("justify").run(),
+    alignLeft: () => editor?.chain().focus().setTextAlign("left").run(),
+    alignCenter: () => editor?.chain().focus().setTextAlign("center").run(),
+    alignRight: () => editor?.chain().focus().setTextAlign("right").run(),
+    alignJustify: () => editor?.chain().focus().setTextAlign("justify").run(),
+
+    // Font family & Font size
+    setFontFamily: (fontFamily: string) => editor?.chain().focus().setFontFamily(fontFamily).run(),
+    unsetFontFamily: () => editor?.chain().focus().unsetFontFamily().run(),
+    setFontSize: (fontSize: string) => editor?.chain().focus().setFontSize(fontSize).run(),
+    unsetFontSize: () => editor?.chain().focus().unsetFontSize().run(),
+    setLineHeight: (lineHeight: string) => editor?.chain().focus().setLineHeight(lineHeight).run(),
+    unsetLineHeight: () => editor?.chain().focus().unsetLineHeight().run(),
   };
 }

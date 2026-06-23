@@ -9,3 +9,4 @@ export { TextAlign } from "./text-align";
 
 export { Document } from "@tiptap/extension-document";
 export { Text } from "@tiptap/extension-text";
+export { TextStyleKit } from "@tiptap/extension-text-style";
