@@ -48,10 +48,9 @@ export const TextColorPicker = memo(function TextColorPicker({
 
   return (
     <ColorPicker value={color} onChange={(newColor) => onChange(newColor.toString("hex"))}>
-      <ColorPicker.Trigger>
-        <ColorSwatch size="sm" />
-      </ColorPicker.Trigger>
-
+      <Button isIconOnly size="sm" variant="tertiary" aria-label="Text color">
+        <Icon icon="gravity-ui:bucket-paint" style={{ color: value || undefined }} />
+      </Button>
       <ColorPicker.Popover className="gap-2">
         <ColorSwatchPicker className="justify-center pt-2" size="xs">
           {colorPresets.map((preset) => (
