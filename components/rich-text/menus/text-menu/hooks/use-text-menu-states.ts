@@ -31,6 +31,8 @@ export const useTextMenuStates = () => {
         fontFamily: "",
         fontSize: "",
         lineHeight: "",
+        textColor: "",
+        backgroundColor: "",
       };
     }
 
@@ -44,6 +46,8 @@ export const useTextMenuStates = () => {
       fontFamily: ctx.editor.getAttributes("textStyle").fontFamily || "",
       fontSize: ctx.editor.getAttributes("textStyle").fontSize || "",
       lineHeight: ctx.editor.getAttributes("textStyle").lineHeight || "",
+      textColor: ctx.editor.getAttributes("textStyle").color || "",
+      backgroundColor: ctx.editor.getAttributes("textStyle").backgroundColor || "",
     };
   });
 

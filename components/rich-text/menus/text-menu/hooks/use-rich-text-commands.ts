@@ -26,5 +26,9 @@ export function useRichTextCommands() {
     unsetFontSize: () => editor?.chain().focus().unsetFontSize().run(),
     setLineHeight: (lineHeight: string) => editor?.chain().focus().setLineHeight(lineHeight).run(),
     unsetLineHeight: () => editor?.chain().focus().unsetLineHeight().run(),
+    setTextColor: (color: string) => editor?.chain().focus().setColor(color).run(),
+    unsetTextColor: () => editor?.chain().focus().unsetColor().run(),
+    setBackgroundColor: (color: string) => editor?.chain().focus().setBackgroundColor(color).run(),
+    unsetBackgroundColor: () => editor?.chain().focus().unsetBackgroundColor().run(),
   };
 }

@@ -19,6 +19,7 @@ import { ToggleButtonToolbar } from "../../toolbar/toggle-button-toolbar";
 import { FontFamilyPicker } from "./components/font-family-picker";
 import { FontSizePicker } from "./components/font-size-picker";
 import { LineHeightPicker } from "./components/line-height-picker";
+import { TextColorPicker } from "./components/text-color-picker";
 
 export function TextMenu() {
   const { editor } = useRichTextEditor();
@@ -64,6 +65,8 @@ export function TextMenu() {
       </RichTextEditor.ToolbarGroup>
 
       <RichTextEditor.ToolbarSeparator orientation="vertical" />
+
+      <TextColorPicker value={states.textColor} onChange={commands.setTextColor} />
 
       <RichTextEditor.LinkPopover isOpen={state.isOpen} onOpenChange={state.setOpen}>
         <RichTextEditor.LinkPopover.Trigger isIconOnly>
