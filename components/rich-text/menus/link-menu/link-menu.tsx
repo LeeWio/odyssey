@@ -11,7 +11,6 @@ export function LinkMenu() {
 
   const shouldShow = useCallback(() => {
     if (!editor) return false;
-    console.log(editor.isActive(LinkExtension.name));
     return editor.isActive(LinkExtension.name) && editor.isEditable;
   }, [editor]);
 
@@ -31,6 +30,9 @@ export function LinkMenu() {
       options={{
         onHide: () => setMode("preview"),
       }}
+      appendTo={() =>
+        (document.querySelector("[data-slot='modal-dialog']") as HTMLElement) || document.body
+      }
     >
       {mode === "preview" ? (
         <div className="popover__dialog rich-text-editor__link-popover-content p-0">

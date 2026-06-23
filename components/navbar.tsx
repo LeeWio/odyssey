@@ -87,13 +87,11 @@ export const Navbar = () => {
   );
 
   const handleSwitchToSignUp = () => {
-    console.log("Switching to Sign Up");
     setIsLoginOpen(false);
     setTimeout(() => setIsSignUpOpen(true), 300);
   };
 
   const handleSwitchToLogIn = () => {
-    console.log("Switching to Log In");
     setIsSignUpOpen(false);
     setTimeout(() => setIsLoginOpen(true), 300);
   };
