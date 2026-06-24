@@ -11,6 +11,7 @@ import { AppShell } from "./app-shell";
 import { DashboardPage } from "./views/dashboard-page";
 import { AnalyticsPage } from "./views/analytics-page";
 import { OrdersPage } from "./views/orders-page";
+import { UsersPage } from "./views/users-page";
 import { TrackerPage } from "./views/tracker-page";
 import { SettingsPage } from "./views/settings-page";
 import { HelpPage } from "./views/help-page";
@@ -40,6 +41,8 @@ export function DashboardSheet() {
         return <AnalyticsPage />;
       case "/orders":
         return <OrdersPage />;
+      case "/users":
+        return <UsersPage />;
       case "/tracker":
         return <TrackerPage />;
       case "/settings":
@@ -55,7 +58,7 @@ export function DashboardSheet() {
     <Sheet isOpen={isOpen} onOpenChange={handleOpenChange} isDetached>
       <Sheet.Backdrop variant="blur">
         <Sheet.Content>
-          <Sheet.Dialog>
+          <Sheet.Dialog id="dashboard-sheet-container">
             <Sheet.Handle />
             <AppShell pathname={currentPath} onNavigate={setCurrentPath}>
               {renderContent()}
