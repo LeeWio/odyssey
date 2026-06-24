@@ -24,6 +24,7 @@ import {
   toast,
   Spinner,
   Tooltip,
+  Form,
 } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
 import { useDebouncedCallback } from "use-debounce";
@@ -143,7 +144,7 @@ export function RichText({ identifier, initialValue, onChange }: RichTextProps) 
 
   // 3. Magical layout split animation using GSAP
   const containerRef = useRef<HTMLDivElement>(null);
-  const settingsRef = useRef<HTMLDivElement>(null);
+  const settingsRef = useRef<HTMLFormElement>(null);
 
   useGSAP(
     () => {
@@ -261,200 +262,152 @@ export function RichText({ identifier, initialValue, onChange }: RichTextProps) 
 
       <Modal.Body ref={containerRef} className="relative flex flex-1 flex-row overflow-hidden">
         <RichTextEditor.Content />
-        <div
+
+        <Form
           ref={settingsRef}
           className="flex h-full shrink-0 flex-col"
           style={{ width: 0, opacity: 0, overflow: "hidden" }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handlePublishSubmit();
+          }}
         >
-          <div className="flex shrink-0 items-center justify-between p-6">
-            <div className="flex flex-col gap-0.5">
-              <h3 className="flex items-center gap-2 text-base font-bold">
-                <Icon icon="gravity-ui:sliders" className="text-primary size-5" />
-                Publish Settings
-              </h3>
-              <p className="text-default-500 text-xs">Provide metadata before publishing</p>
-            </div>
-          </div>
-
           <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
-            <div className="publish-form-field flex flex-col gap-1.5">
-              <TextField name="title" isRequired value={title} onChange={handleTitleChange}>
-                <Label className="flex items-center gap-1.5 text-sm font-medium">
-                  <Icon icon="gravity-ui:heading-1" className="text-default-400 size-4" />
-                  Title
-                </Label>
-                <Input
-                  fullWidth
-                  placeholder="Enter post title..."
-                  variant="secondary"
-                  className="mt-1 h-10"
-                />
-              </TextField>
-            </div>
-
-            <div className="publish-form-field flex flex-col gap-1.5">
-              <TextField
-                name="slug"
-                isRequired
-                value={slug}
-                onChange={(val) => {
-                  setSlug(generateSlug(val));
-                  setIsSlugManuallyEdited(true);
-                }}
-              >
-                <Label className="flex items-center gap-1.5 text-sm font-medium">
-                  <Icon icon="gravity-ui:link" className="text-default-400 size-4" />
-                  Slug
-                </Label>
-                <Input
-                  fullWidth
-                  placeholder="e.g. my-first-post"
-                  variant="secondary"
-                  className="mt-1 h-10"
-                />
-              </TextField>
-            </div>
-
-            <div className="publish-form-field flex flex-col gap-1.5">
-              <Select
-                placeholder="Select a category"
+            {/* Title Field */}
+            <TextField
+              name="title"
+              isRequired
+              value={title}
+              onChange={handleTitleChange}
+              className="publish-form-field flex flex-col gap-1.5"
+            >
+              <Label className="text-sm font-medium">Title</Label>
+              <Input
+                fullWidth
+                placeholder="Enter post title..."
                 variant="secondary"
-                value={categoryId}
-                onChange={(key) => setCategoryId(key as string)}
-                className="w-full"
-              >
-                <Label className="flex items-center gap-1.5 text-sm font-medium">
-                  <Icon icon="gravity-ui:folder" className="text-default-400 size-4" />
-                  Category
-                </Label>
-                <Select.Trigger className="mt-1">
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    {categories.map((c) => (
-                      <ListBox.Item key={c.id} id={c.id.toString()} textValue={c.name}>
-                        {c.name}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-            </div>
+                className="mt-1 h-10"
+              />
+            </TextField>
 
-            <div className="publish-form-field flex flex-col gap-1.5">
-              <Select
-                placeholder="Select tags"
-                selectionMode="multiple"
+            {/* Slug Field */}
+            <TextField
+              name="slug"
+              isRequired
+              value={slug}
+              onChange={(val) => {
+                setSlug(generateSlug(val));
+                setIsSlugManuallyEdited(true);
+              }}
+              className="publish-form-field flex flex-col gap-1.5"
+            >
+              <Label className="text-sm font-medium">Slug</Label>
+              <Input
+                fullWidth
+                placeholder="e.g. my-first-post"
                 variant="secondary"
-                value={tagIds}
-                onChange={(keys) => setTagIds(keys as string[])}
-                className="w-full"
-              >
-                <Label className="flex items-center gap-1.5 text-sm font-medium">
-                  <Icon icon="gravity-ui:tag" className="text-default-400 size-4" />
-                  Tags
-                </Label>
-                <Select.Trigger className="mt-1">
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox selectionMode="multiple">
-                    {tags.map((t) => (
-                      <ListBox.Item key={t.id} id={t.id.toString()} textValue={t.name}>
-                        {t.name}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-            </div>
+                className="mt-1 h-10"
+              />
+            </TextField>
 
-            <div className="publish-form-field flex flex-col gap-1.5">
-              <TextField name="coverImage">
-                <Label className="flex items-center gap-1.5 text-sm font-medium">
-                  <Icon icon="gravity-ui:image" className="text-default-400 size-4" />
-                  Cover Image URL
-                </Label>
-                <Input
-                  fullWidth
-                  placeholder="https://example.com/cover.jpg"
-                  variant="secondary"
-                  value={coverImage}
-                  onChange={(e) => setCoverImage(e.target.value)}
-                  className="mt-1 h-10"
-                />
-              </TextField>
-              {coverImage.trim() && (
-                <div className="bg-content2 group relative mt-2 flex aspect-video items-center justify-center overflow-hidden rounded-xl shadow-inner">
-                  <img
-                    src={coverImage}
-                    alt="Cover Preview"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="publish-form-field flex flex-col gap-1.5">
-              <TextField name="summary">
-                <Label className="flex items-center gap-1.5 text-sm font-medium">
-                  <Icon icon="gravity-ui:text-align-left" className="text-default-400 size-4" />
-                  Summary
-                </Label>
-                <TextArea
-                  fullWidth
-                  className="mt-1 min-h-24 resize-y"
-                  maxLength={240}
-                  placeholder="Enter a brief summary..."
-                  variant="secondary"
-                  value={summary}
-                  onChange={(e) => setSummary(e.target.value)}
-                />
-              </TextField>
-            </div>
-
-            <div className="publish-form-field flex flex-col gap-1.5">
-              <Select
-                placeholder="Select status"
-                variant="secondary"
-                value={status}
-                onChange={(val) => setStatus(val as PostStatus)}
-                className="w-full"
-              >
-                <Label className="flex items-center gap-1.5 text-sm font-medium">
-                  <Icon icon="gravity-ui:eye" className="text-default-400 size-4" />
-                  Status
-                </Label>
-                <Select.Trigger className="mt-1">
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    <ListBox.Item id="PUBLISHED" textValue="Published">
-                      Published (Visible to everyone)
+            {/* Category Select */}
+            <Select
+              placeholder="Select a category"
+              variant="secondary"
+              value={categoryId}
+              onChange={(key) => setCategoryId(key as string)}
+              className="publish-form-field flex w-full flex-col gap-1.5"
+            >
+              <Label className="text-sm font-medium">Category</Label>
+              <Select.Trigger className="mt-1">
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  {categories.map((c) => (
+                    <ListBox.Item key={c.id} id={c.id.toString()} textValue={c.name}>
+                      {c.name}
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
-                    <ListBox.Item id="DRAFT" textValue="Draft">
-                      Draft (Only administrators)
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
+
+            {/* Tags Multiple Select */}
+            <Select
+              placeholder="Select tags"
+              selectionMode="multiple"
+              variant="secondary"
+              value={tagIds}
+              onChange={(keys) => setTagIds(keys as string[])}
+              className="publish-form-field flex w-full flex-col gap-1.5"
+            >
+              <Label className="text-sm font-medium">Tags</Label>
+              <Select.Trigger className="mt-1">
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox selectionMode="multiple">
+                  {tags.map((t) => (
+                    <ListBox.Item key={t.id} id={t.id.toString()} textValue={t.name}>
+                      {t.name}
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-            </div>
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
+
+            {/* Summary Text Area */}
+            <TextField name="summary" className="publish-form-field flex flex-col gap-1.5">
+              <Label className="text-sm font-medium">Summary</Label>
+              <TextArea
+                fullWidth
+                className="mt-1 min-h-24 resize-y"
+                maxLength={240}
+                placeholder="Enter a brief summary..."
+                variant="secondary"
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+              />
+            </TextField>
+
+            {/* Status Select */}
+            <Select
+              placeholder="Select status"
+              variant="secondary"
+              value={status}
+              onChange={(val) => setStatus(val as PostStatus)}
+              className="publish-form-field flex w-full flex-col gap-1.5"
+            >
+              <Label className="text-sm font-medium">Status</Label>
+              <Select.Trigger className="mt-1">
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="PUBLISHED" textValue="Published">
+                    Published (Visible to everyone)
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="DRAFT" textValue="Draft">
+                    Draft (Only administrators)
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                </ListBox>
+              </Select.Popover>
+            </Select>
           </div>
 
           <div className="publish-form-field bg-background/50 flex shrink-0 flex-col p-6 select-none">
             <Button
+              type="submit"
               variant="primary"
               className="flex h-11 w-full items-center justify-center gap-2 font-bold shadow-md"
-              onPress={handlePublishSubmit}
               isDisabled={isPublishing}
             >
               {isPublishing ? (
@@ -470,7 +423,7 @@ export function RichText({ identifier, initialValue, onChange }: RichTextProps) 
               )}
             </Button>
           </div>
-        </div>
+        </Form>
       </Modal.Body>
 
       <Modal.Footer className="flex items-center justify-between">
