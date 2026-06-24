@@ -38,12 +38,12 @@ function UsersRowActions({ user }: { user: UserResponse }) {
   const [updateStatus, { isLoading: isStatusUpdating }] = useUpdateUserStatusMutation();
   const [updateRoles, { isLoading: isRolesUpdating }] = useUpdateUserRolesMutation();
 
-  const isBanned = user.status === "BANNED";
+  const isActive = user.status === "ACTIVE";
   const isAdmin = user.roles.includes("ADMIN");
 
   const handleStatusToggle = async () => {
     try {
-      await updateStatus({ id: user.id, status: isBanned ? "ACTIVE" : "BANNED" }).unwrap();
+      await updateStatus({ id: user.id, status: isActive ? "INACTIVE" : "ACTIVE" }).unwrap();
     } catch {
       // Handled globally
     }
@@ -60,26 +60,26 @@ function UsersRowActions({ user }: { user: UserResponse }) {
 
   return (
     <div className="flex items-center justify-end gap-1.5" data-user-id={user.id}>
-      {/* Direct quick action for Ban/Unban */}
+      {/* Direct quick action for Deactivate/Activate */}
       <Tooltip delay={0}>
-        <Tooltip.Trigger aria-label={isBanned ? "Unban user" : "Ban user"}>
+        <Tooltip.Trigger aria-label={isActive ? "Deactivate user" : "Activate user"}>
           <Button
             isIconOnly
             size="sm"
-            variant={isBanned ? "tertiary" : "danger-soft"}
+            variant={isActive ? "danger-soft" : "tertiary"}
             onPress={handleStatusToggle}
             isDisabled={isStatusUpdating}
           >
             {isStatusUpdating ? (
               <Spinner size="sm" />
-            ) : isBanned ? (
-              <CirclePlay className="size-4 text-success" />
-            ) : (
+            ) : isActive ? (
               <TrashBin className="size-4 text-danger" />
+            ) : (
+              <CirclePlay className="size-4 text-success" />
             )}
           </Button>
         </Tooltip.Trigger>
-        <Tooltip.Content>{isBanned ? "Unban user" : "Ban user"}</Tooltip.Content>
+        <Tooltip.Content>{isActive ? "Deactivate user" : "Activate user"}</Tooltip.Content>
       </Tooltip>
 
       {/* Dropdown for other role actions */}

@@ -36,9 +36,8 @@ export const userApi = baseApi.injectEndpoints({
      */
     updateUserStatus: builder.mutation<UserResponse, { id: number; status: "ACTIVE" | "INACTIVE" | "PENDING" | "BANNED" | "DELETED" }>({
       query: ({ id, status }) => ({
-        url: `/api/v1/admin/users/${id}/status`,
-        method: "PUT",
-        body: { status },
+        url: `/api/v1/admin/users/${id}/status?status=${status}`,
+        method: "PATCH",
       }),
       rawResponseSchema: ApiResponseSchema(UserResponseSchema),
       transformResponse: (response: ApiResponse<UserResponse>) => response.data,
