@@ -56,12 +56,16 @@ function PermissionNode({ node, checkedIds, onCheckChange }: PermissionNodeProps
   );
 }
 
+const EMPTY_ROLES: RoleResponse[] = [];
+const EMPTY_MENUS: MenuResponse[] = [];
+const EMPTY_ROLE_MENUS: number[] = [];
+
 export function PermissionsPage() {
   const portalContainer = usePortalContainer();
 
   // Query roles and entire menu structure
-  const { data: roles = [], isLoading: isRolesLoading } = useGetAllRolesQuery();
-  const { data: menuTree = [], isLoading: isTreeLoading } = useGetAdminMenuTreeQuery();
+  const { data: roles = EMPTY_ROLES, isLoading: isRolesLoading } = useGetAllRolesQuery();
+  const { data: menuTree = EMPTY_MENUS, isLoading: isTreeLoading } = useGetAdminMenuTreeQuery();
 
   // Selected active role state
   const [selectedRole, setSelectedRole] = useState<RoleResponse | null>(null);
@@ -75,7 +79,7 @@ export function PermissionsPage() {
   }, [roles, selectedRole]);
 
   // Query assigned menu IDs for the active selected role
-  const { data: roleMenuIds = [], isFetching: isRoleMenusLoading } = useGetRoleMenuIdsQuery(
+  const { data: roleMenuIds = EMPTY_ROLE_MENUS, isFetching: isRoleMenusLoading } = useGetRoleMenuIdsQuery(
     selectedRole?.id as number,
     { skip: !selectedRole }
   );
