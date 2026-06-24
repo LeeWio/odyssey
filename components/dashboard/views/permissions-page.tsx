@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { Card, Button, Checkbox, Label, Spinner, toast } from "@heroui/react";
+import { Card, Button, Checkbox, Label, Spinner, toast, ListBox, Description } from "@heroui/react";
 import { useGetAllRolesQuery, useGetRoleMenuIdsQuery, useAssignRoleMenusMutation, type RoleResponse } from "@/lib/features/role/role-api";
 import { useGetAdminMenuTreeQuery, type MenuResponse } from "@/lib/features/permission/permission-api";
 import { Icon } from "@iconify/react";
@@ -167,30 +167,30 @@ export function PermissionsPage() {
             <Card.Description className="text-xs">Select a role to bind permissions</Card.Description>
           </Card.Header>
           
-          <Card.Content className="p-3 flex flex-col gap-1">
-            {roles.map((role) => {
-              const isActive = selectedRole?.id === role.id;
-              return (
-                <button
-                  key={role.id}
-                  onClick={() => setSelectedRole(role)}
-                  className={`w-full flex flex-col items-start gap-1 p-3 rounded-xl transition-all select-none text-left ${
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "hover:bg-default-100 text-foreground"
-                  }`}
-                >
-                  <span className="text-xs font-semibold">{role.name}</span>
-                  <span
-                    className={`text-[10px] font-mono leading-none ${
-                      isActive ? "text-primary-foreground/80" : "text-default-400"
-                    }`}
-                  >
-                    {role.code}
-                  </span>
-                </button>
-              );
-            })}
+          <Card.Content className="p-2">
+            <ListBox
+              aria-label="Security Roles"
+              selectionMode="single"
+              selectedKeys={selectedRole ? new Set([selectedRole.id.toString()]) : new Set()}
+              onSelectionChange={(keys) => {
+                const idStr = Array.from(keys)[0] as string | undefined;
+                if (idStr) {
+                  const role = roles.find((r) => r.id.toString() === idStr);
+                  if (role) setSelectedRole(role);
+                }
+              }}
+            >
+              {roles.map((role) => (
+                <ListBox.Item id={role.id.toString()} textValue={role.name} key={role.id}>
+                  <div className="flex flex-col items-start gap-1 select-none">
+                    <Label className="text-xs font-semibold">{role.name}</Label>
+                    <Description className="text-[10px] font-mono leading-none text-default-400">
+                      {role.code}
+                    </Description>
+                  </div>
+                </ListBox.Item>
+              ))}
+            </ListBox>
           </Card.Content>
         </Card>
 
