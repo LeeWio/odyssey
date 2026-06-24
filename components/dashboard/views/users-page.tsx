@@ -11,6 +11,7 @@ import {
   useUpdateUserRolesMutation,
   type UserResponse,
 } from "@/lib/features/user/user-api";
+import { useGetAllRolesQuery } from "@/lib/features/role/role-api";
 import { IconButton } from "../icon-button";
 import { usePortalContainer } from "../use-portal-container";
 
@@ -35,11 +36,13 @@ const STATUS_COLORS: Record<string, "success" | "warning" | "default" | "danger"
 
 function UsersRowActions({ user }: { user: UserResponse }) {
   const portalContainer = usePortalContainer();
+  const { data: rolesList = [] } = useGetAllRolesQuery();
   const [updateStatus, { isLoading: isStatusUpdating }] = useUpdateUserStatusMutation();
   const [updateRoles, { isLoading: isRolesUpdating }] = useUpdateUserRolesMutation();
 
   const isActive = user.status === "ACTIVE";
-  const isAdmin = user.roles.includes("ADMIN");
+  // Support both ADMIN and ROLE_ADMIN role checks
+  const isAdmin = user.roles.includes("ADMIN") || user.roles.includes("ROLE_ADMIN");
 
   const handleStatusToggle = async () => {
     try {
@@ -51,8 +54,20 @@ function UsersRowActions({ user }: { user: UserResponse }) {
 
   const handleRolesToggle = async () => {
     try {
-      const nextRoles = isAdmin ? ["USER"] : ["ADMIN", "USER"];
-      await updateRoles({ id: user.id, roles: nextRoles }).unwrap();
+      const adminRole = rolesList.find((r) => r.code === "ROLE_ADMIN" || r.code === "ADMIN");
+      const userRole = rolesList.find((r) => r.code === "ROLE_USER" || r.code === "USER");
+
+      if (!userRole || !adminRole) {
+        toast.danger("Roles configuration not loaded yet");
+        return;
+      }
+
+      // If they are currently Admin, demote them to just USER. If not, promote to both USER and ADMIN.
+      const roleIds = isAdmin
+        ? [userRole.id]
+        : [userRole.id, adminRole.id];
+
+      await updateRoles({ id: user.id, roleIds }).unwrap();
     } catch {
       // Handled globally
     }

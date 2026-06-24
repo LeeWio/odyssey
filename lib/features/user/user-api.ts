@@ -56,11 +56,11 @@ export const userApi = baseApi.injectEndpoints({
     /**
      * Update user roles
      */
-    updateUserRoles: builder.mutation<UserResponse, { id: number; roles: string[] }>({
-      query: ({ id, roles }) => ({
+    updateUserRoles: builder.mutation<UserResponse, { id: number; roleIds: number[] }>({
+      query: ({ id, roleIds }) => ({
         url: `/api/v1/admin/users/${id}/roles`,
         method: "PUT",
-        body: { roles },
+        body: { roleIds },
       }),
       rawResponseSchema: ApiResponseSchema(UserResponseSchema),
       transformResponse: (response: ApiResponse<UserResponse>) => response.data,
