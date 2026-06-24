@@ -12,6 +12,7 @@ import { DashboardPage } from "./views/dashboard-page";
 import { AnalyticsPage } from "./views/analytics-page";
 import { OrdersPage } from "./views/orders-page";
 import { UsersPage } from "./views/users-page";
+import { PermissionsPage } from "./views/permissions-page";
 import { TrackerPage } from "./views/tracker-page";
 import { SettingsPage } from "./views/settings-page";
 import { HelpPage } from "./views/help-page";
@@ -43,6 +44,8 @@ export function DashboardSheet() {
         return <OrdersPage />;
       case "/users":
         return <UsersPage />;
+      case "/permissions":
+        return <PermissionsPage />;
       case "/tracker":
         return <TrackerPage />;
       case "/settings":

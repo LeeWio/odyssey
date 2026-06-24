@@ -116,6 +116,43 @@ export const roleApi = baseApi.injectEndpoints({
         { type: "Role", id: "LIST" },
       ],
     }),
+
+    /**
+     * Get menu IDs assigned to a specific role
+     */
+    getRoleMenuIds: builder.query<number[], number>({
+      query: (id) => `/api/v1/admin/roles/${id}/menus`,
+      rawResponseSchema: ApiResponseSchema(z.array(z.number())),
+      transformResponse: (response: ApiResponse<number[]>) => response.data || [],
+      transformErrorResponse: transformError,
+      providesTags: (_result, _error, id) => [{ type: "Role" as const, id: `${id}-menus` }],
+    }),
+
+    /**
+     * Assign menus to a specific role
+     */
+    assignRoleMenus: builder.mutation<void, { id: number; menuIds: number[] }>({
+      query: ({ id, menuIds }) => ({
+        url: `/api/v1/admin/roles/${id}/menus`,
+        method: "POST",
+        body: { menuIds },
+      }),
+      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      transformResponse: (response: ApiResponse<void>) => response.data,
+      transformErrorResponse: transformError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          toast.success("Role permissions updated successfully!");
+        } catch (error) {
+          toast.danger(typeof error === "string" ? error : "Failed to update role permissions");
+        }
+      },
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "Role", id: `${id}-menus` },
+        { type: "Menu", id: "LIST" },
+      ],
+    }),
   }),
   overrideExisting: false,
 });
@@ -125,4 +162,6 @@ export const {
   useCreateRoleMutation,
   useUpdateRoleMutation,
   useDeleteRoleMutation,
+  useGetRoleMenuIdsQuery,
+  useAssignRoleMenusMutation,
 } = roleApi;
