@@ -60,14 +60,19 @@ export const MetricSchema = z.object({
 });
 
 export const SummaryMetricsSchema = z.object({
-  sessions: MetricSchema.default({}),
-  users: MetricSchema.default({}),
-  bounceRate: MetricSchema.default({}),
-  avgSession: MetricSchema.default({}),
+  sessions: MetricSchema.default({ value: "0", numericValue: 0, growthRate: 0 }),
+  users: MetricSchema.default({ value: "0", numericValue: 0, growthRate: 0 }),
+  bounceRate: MetricSchema.default({ value: "0", numericValue: 0, growthRate: 0 }),
+  avgSession: MetricSchema.default({ value: "0", numericValue: 0, growthRate: 0 }),
 });
 
 export const TrafficResponseSchema = z.object({
-  summary: SummaryMetricsSchema.default({}),
+  summary: SummaryMetricsSchema.default({
+    sessions: { value: "0", numericValue: 0, growthRate: 0 },
+    users: { value: "0", numericValue: 0, growthRate: 0 },
+    bounceRate: { value: "0", numericValue: 0, growthRate: 0 },
+    avgSession: { value: "0", numericValue: 0, growthRate: 0 },
+  }),
   devices: z.array(TrafficMetricSchema).default([]),
   sources: z.array(TrafficMetricSchema).default([]),
   timeSeries: z.array(TimeSeriesItemSchema).default([]),

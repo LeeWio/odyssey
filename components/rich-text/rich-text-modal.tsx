@@ -21,14 +21,14 @@ export function RichTextModal() {
   const draftId = useAppSelector(selectDraftIdentifier);
   const isMounted = useMounted();
 
-  // 1. 只有在弹窗打开且客户端已挂载、并且没有 Draft ID 时，才生成并分发 UUID，彻底避免 SSR 水合警告
+  // 1. Generate unique draft ID on client side when modal is opened
   useEffect(() => {
     if (isOpen && !draftId && isMounted) {
       dispatch(setDraftIdentifier(uuidv4()));
     }
   }, [isOpen, draftId, isMounted, dispatch]);
 
-  // 2. 只有在弹窗打开、Draft ID 就绪且挂载后才拉取草稿，避免无效/抢跑请求
+  // 2. Query autosaved content once draft ID is ready
   const { data: autosavedContent, isFetching } = useGetAutosaveQuery(draftId as string, {
     skip: !isOpen || !draftId || !isMounted,
   });
@@ -36,7 +36,7 @@ export function RichTextModal() {
   return (
     <Modal>
       <Modal.Backdrop
-        isOpen={true}
+        isOpen={isOpen}
         onOpenChange={(open) => {
           if (!open) {
             dispatch(toggleRichText());
@@ -44,38 +44,39 @@ export function RichTextModal() {
         }}
       >
         <Modal.Container size="cover">
-          {(isFetching || !draftId) && isOpen ? (
-            <Modal.Dialog>
-              <Modal.Header className="flex flex-col gap-1">Create New Post</Modal.Header>
-              <Modal.Body className="p-0">
-                <div className="flex h-125 flex-col gap-6 p-6">
-                  <Skeleton className="bg-default-100 h-10 w-2/3 rounded-lg" />
-                  <div className="flex gap-2.5">
-                    <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
-                    <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
-                    <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
-                    <Skeleton className="bg-default-100 h-9 w-16 rounded-lg" />
-                    <Skeleton className="bg-default-100 h-9 w-24 rounded-lg" />
-                  </div>
-                  <Skeleton className="bg-default-100 w-full flex-1 rounded-xl" />
-                </div>
-              </Modal.Body>
-              <Modal.Footer>
-                <div className="flex w-full items-center justify-between">
-                  <Skeleton className="bg-default-100 h-6 w-32 rounded-md" />
-                  <Skeleton className="bg-default-100 h-6 w-24 rounded-md" />
-                </div>
-              </Modal.Footer>
+          {isOpen && (
+            <Modal.Dialog className="flex h-[95vh] max-h-[95vh] w-[98vw] max-w-none flex-col overflow-hidden">
+              {isFetching || !draftId ? (
+                <>
+                  <Modal.Header className="flex flex-col gap-1">Create New Post</Modal.Header>
+                  <Modal.Body className="p-0">
+                    <div className="flex h-125 flex-col gap-6 p-6">
+                      <Skeleton className="bg-default-100 h-10 w-2/3 rounded-lg" />
+                      <div className="flex gap-2.5">
+                        <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
+                        <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
+                        <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
+                        <Skeleton className="bg-default-100 h-9 w-16 rounded-lg" />
+                        <Skeleton className="bg-default-100 h-9 w-24 rounded-lg" />
+                      </div>
+                      <Skeleton className="bg-default-100 w-full flex-1 rounded-xl" />
+                    </div>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <div className="flex w-full items-center justify-between">
+                      <Skeleton className="bg-default-100 h-6 w-32 rounded-md" />
+                      <Skeleton className="bg-default-100 h-6 w-24 rounded-md" />
+                    </div>
+                  </Modal.Footer>
+                </>
+              ) : (
+                <RichText
+                  key={draftId}
+                  identifier={draftId}
+                  initialValue={autosavedContent?.content as JSONContent | undefined}
+                />
+              )}
             </Modal.Dialog>
-          ) : (
-            isOpen &&
-            draftId && (
-              <RichText
-                key={draftId}
-                identifier={draftId}
-                initialValue={autosavedContent?.content as JSONContent | undefined}
-              />
-            )
           )}
         </Modal.Container>
       </Modal.Backdrop>
