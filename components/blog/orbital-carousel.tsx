@@ -177,17 +177,17 @@ export function OrbitalCarousel() {
                 <Card
                   variant={isCenter ? "default" : "transparent"}
                   className={`flex h-full flex-col justify-between overflow-hidden transition-all duration-500 ${
-                    isCenter && "shadow-accent-soft/20 shadow-2xl"
+                    isCenter && ""
                   }`}
                 >
                   <div className="relative h-45 w-full shrink-0 overflow-hidden sm:h-55">
                     <img
                       src={item.cover}
                       alt={item.title}
-                      className="h-full w-full object-cover transition-transform duration-700 select-none hover:scale-105"
+                      className="h-full w-full rounded-2xl object-cover transition-transform duration-700 select-none hover:scale-105"
                       draggable={false}
                     />
-                    <div className="from-background via-background/20 absolute inset-0 bg-linear-to-t to-transparent" />
+                    <div className="from-background via-background/20 absolute inset-0 rounded-2xl bg-linear-to-t to-transparent" />
                     <Chip
                       size="sm"
                       variant="secondary"

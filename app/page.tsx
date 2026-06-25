@@ -13,7 +13,7 @@ import {
   Separator,
   Surface,
 } from "@heroui/react";
-import { ChronicleDeck, OrbitalCarousel } from "@/components/blog";
+import { ChronicleDeck, OrbitalCarousel, StockLedger } from "@/components/blog";
 
 import ChevronRight from "@gravity-ui/icons/ChevronRight";
 import Globe from "@gravity-ui/icons/Globe";
@@ -190,6 +190,9 @@ export default function Home() {
 
       {/* 时光卡牌堆叠折叠文章展示区 */}
       <ChronicleDeck />
+
+      {/* 股票买入/卖出量化交易日志区 */}
+      <StockLedger />
 
       <Surface variant="transparent" className="px-6 py-24 text-center lg:px-10 lg:py-32">
         <Typography className="text-muted mb-8 text-sm font-semibold tracking-wider uppercase">
