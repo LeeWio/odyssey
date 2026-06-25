@@ -18,7 +18,7 @@ const getSlashItems = ({ query }: { query: string }): RichTextEditorSuggestionIt
       },
       {
         command: ({ editor, range }) => {
-          editor.chain().focus().deleteRange(range).toggleBulletList().run();
+          (editor.chain().focus().deleteRange(range) as any).toggleBulletList().run();
         },
         icon: <ListUl className={iconClassName} />,
         keywords: ["list", "bullet"],
@@ -26,7 +26,7 @@ const getSlashItems = ({ query }: { query: string }): RichTextEditorSuggestionIt
       },
       {
         command: ({ editor, range }) => {
-          editor.chain().focus().deleteRange(range).toggleBlockquote().run();
+          (editor.chain().focus().deleteRange(range) as any).toggleBlockquote().run();
         },
         icon: <QuoteOpen className={iconClassName} />,
         keywords: ["quote", "note"],

@@ -13,6 +13,7 @@ import {
   Separator,
   Surface,
 } from "@heroui/react";
+import { ChronicleDeck, OrbitalCarousel } from "@/components/blog";
 
 import ChevronRight from "@gravity-ui/icons/ChevronRight";
 import Globe from "@gravity-ui/icons/Globe";
@@ -183,6 +184,12 @@ export default function Home() {
           </Button>
         </div>
       </Surface>
+
+      {/* 3D 星轨环形文章展示区 */}
+      <OrbitalCarousel />
+
+      {/* 时光卡牌堆叠折叠文章展示区 */}
+      <ChronicleDeck />
 
       <Surface variant="transparent" className="px-6 py-24 text-center lg:px-10 lg:py-32">
         <Typography className="text-muted mb-8 text-sm font-semibold tracking-wider uppercase">

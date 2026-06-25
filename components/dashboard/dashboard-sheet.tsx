@@ -16,6 +16,8 @@ import { PermissionsPage } from "./views/permissions-page";
 import { TrackerPage } from "./views/tracker-page";
 import { SettingsPage } from "./views/settings-page";
 import { HelpPage } from "./views/help-page";
+import { CategoriesPage } from "./views/categories-page";
+import { TagsPage } from "./views/tags-page";
 
 export function DashboardSheet() {
   const isMounted = useMounted();
@@ -38,6 +40,10 @@ export function DashboardSheet() {
     switch (currentPath) {
       case "/":
         return <DashboardPage />;
+      case "/categories":
+        return <CategoriesPage />;
+      case "/tags":
+        return <TagsPage />;
       case "/analytics":
         return <AnalyticsPage />;
       case "/orders":
