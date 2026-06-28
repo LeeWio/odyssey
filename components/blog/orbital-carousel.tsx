@@ -2,93 +2,46 @@
 
 import { useState, useRef, MouseEvent, TouchEvent } from "react";
 import { Card, Chip, Button, Typography } from "@heroui/react";
-import { Tag, Gear, ArrowLeft, ArrowRight } from "@gravity-ui/icons";
+import { ArrowLeft, ArrowRight } from "@gravity-ui/icons";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import TrueFocus from "../text/true-focus";
 
-const CREATOR_ARSENAL = [
-  {
-    id: 1,
-    title: "Keychron Q1 Pro: The Symphony of Tactile Coding Resonance",
-    category: "Input Device",
-    summary:
-      "My primary weapon for writing and code generation. A fully custom-built 75% mechanical keyboard retrofitted with hand-lubed switches, custom brass plates, and thick PBT keycaps. Every keystroke is a tactile, deeply satisfying physical dialogue with the compiler.",
-    cover: "/IMG_4958.WEBP",
-    tier: "S-Class Gear",
-    usage: "Tactile Input Unit",
-    detailsLabel: "Inspect Mechanism",
-    techStack: ["Tactile Switches", "QMK/VIA Core", "Gasket Mounted", "Machined Aluminum"],
-  },
-  {
-    id: 2,
-    title: "Sony A7 IV: Freezing the Fleeing Shadows of Adventure",
-    category: "Optics Core",
-    summary:
-      "The photographic lens through which I capture the analog world. Armed with a 35mm f/1.4 prime lens, this mirrorless camera preserves travel expeditions, misty peaks, and studio light patterns, bringing rich, organic, film-like textures to my creative archives.",
-    cover: "/IMG_2232.JPG",
-    tier: "Legendary Optics",
-    usage: "Creative Capture",
-    detailsLabel: "Inspect Optics",
-    techStack: ["33MP Exmor R", "35mm f/1.4 Prime", "4K 10-Bit Cinematic", "Active IS"],
-  },
-  {
-    id: 3,
-    title: 'MacBook Pro 16": Taming Concurrent Architectural Storms',
-    category: "Compute Engine",
-    summary:
-      "My central computing neural network. Packed with an Apple M3 Max chip, 64GB of unified memory, and 2TB of high-speed solid-state storage. It effortlessly compiles heavy WebGL pipelines, coordinates local LLMs, and handles concurrent compilation storms.",
-    cover: "/zelda-landscape.jpg",
-    tier: "S-Class Compute",
-    usage: "Workspace Processing",
-    detailsLabel: "Inspect Processor",
-    techStack: ["M3 Max Chip", "64GB Unified RAM", "2TB SSD Matrix", "Liquid Retina XDR"],
-  },
-  {
-    id: 4,
-    title: "Herman Miller Aeron: Posture Post in Zero-Gravity Comfort",
-    category: "Postural Anchor",
-    summary:
-      "The ergonomic cockpit of my workspace. Engineered with breathable Pellicle mesh and PostureFit SL posture correctors, it distributes body weight flawlessly across long design sprints, keeping my focus undisturbed during intense 14-hour debugging runs.",
-    cover: "/IMG_4954.JPG",
-    tier: "S-Class Support",
-    usage: "Physical Care Matrix",
-    detailsLabel: "Inspect Ergonomics",
-    techStack: ["Pellicle Z-Mesh", "PostureFit SL Support", "Tilt Limiter Lock", "Cast Aluminum"],
-  },
-  {
-    id: 5,
-    title: "Peak Design Travel Pack: Packing my Entire Odyssey on the Move",
-    category: "Expedition Bag",
-    summary:
-      "My weather-resistant fortress on the move. An expandable 45L travel backpack designed to secure my MacBook, mirrorless cameras, lenses, solar generators, and off-grid equipment. Tailored to withstand the harshest rains of the Scottish Highlands.",
-    cover: "/IMG_2260.JPG",
-    tier: "Epic Expedition",
-    usage: "Armor & Protection",
-    detailsLabel: "Inspect Storage",
-    techStack: ["45L Expandable Shell", "Weatherproof 400D", "Modular Camera Cubes", "Ergo Straps"],
-  },
-];
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export function OrbitalCarousel() {
-  const [activeIndex, setActiveIndex] = useState(2); // Start on the middle card (MacBook)
+  const [activeIndex, setActiveIndex] = useState(2); // Start on the middle card (PS5)
   const dragStartRef = useRef<number | null>(null);
+  const isDraggingRef = useRef(false);
   const [dragOffset, setDragOffset] = useState(0);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev > 0 ? prev - 1 : prev));
   };
 
   const handleNext = () => {
-    setActiveIndex((prev) => (prev < CREATOR_ARSENAL.length - 1 ? prev + 1 : prev));
+    setActiveIndex((prev) => (prev < 4 ? prev + 1 : prev));
   };
 
   // Dragging interaction (Mouse & Touch)
   const handleDragStart = (clientX: number) => {
     dragStartRef.current = clientX;
+    isDraggingRef.current = false;
   };
 
   const handleDragMove = (clientX: number) => {
     if (dragStartRef.current === null) return;
     const offset = clientX - dragStartRef.current;
     setDragOffset(offset);
+    if (Math.abs(offset) > 10) {
+      isDraggingRef.current = true;
+    }
   };
 
   const handleDragEnd = () => {
@@ -97,12 +50,17 @@ export function OrbitalCarousel() {
 
     if (dragOffset > threshold && activeIndex > 0) {
       setActiveIndex((prev) => prev - 1);
-    } else if (dragOffset < -threshold && activeIndex < CREATOR_ARSENAL.length - 1) {
+    } else if (dragOffset < -threshold && activeIndex < 4) {
       setActiveIndex((prev) => prev + 1);
     }
 
     dragStartRef.current = null;
     setDragOffset(0);
+
+    // Keep dragging ref true briefly to block instant click events after dragging
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 50);
   };
 
   // Event binders
@@ -114,24 +72,110 @@ export function OrbitalCarousel() {
   const onTouchMove = (e: TouchEvent) => handleDragMove(e.touches[0].clientX);
   const onTouchEnd = () => handleDragEnd();
 
+  // Helper to compute and render 3D container wrapper styles for each card
+  const renderCardContainer = (idx: number, cardNode: React.ReactNode) => {
+    const offset = idx - activeIndex;
+    const isCenter = offset === 0;
+
+    const angle = -offset * 32 + dragOffset * 0.08;
+    const zTranslate =
+      -Math.abs(offset) * 200 - (dragStartRef.current ? Math.abs(dragOffset) * 0.25 : 0);
+    const xTranslate = offset * 390 + dragOffset * 0.95;
+    const scale = 1 - Math.abs(offset) * 0.1;
+    const opacity = 1 - Math.abs(offset) * 0.5;
+    const blurValue = Math.abs(offset) * 2.5;
+    const brightness = 1 - Math.abs(offset) * 0.3;
+
+    return (
+      <div
+        key={idx}
+        className={`absolute top-1/2 left-1/2 h-120 w-[320px] sm:h-132.5 sm:w-125 ${
+          !isCenter ? "cursor-pointer" : ""
+        }`}
+        style={{
+          transform: `translate(-50%, -50%) translateX(${xTranslate}px) translateZ(${zTranslate}px) rotateY(${angle}deg) scale(${scale})`,
+          opacity: Math.max(0.15, opacity),
+          filter: `blur(${blurValue}px) brightness(${brightness})`,
+          zIndex: 10 - Math.abs(offset),
+          transition: dragStartRef.current
+            ? "none"
+            : "transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s, filter 0.6s",
+          pointerEvents: "auto",
+        }}
+        onClick={() => {
+          if (!isCenter && !isDraggingRef.current) {
+            setActiveIndex(idx);
+          }
+        }}
+      >
+        {cardNode}
+      </div>
+    );
+  };
+
+  // Scroll Triggered Text Appear/Disappear Animation
+  useGSAP(
+    () => {
+      if (!headerRef.current) return;
+      const items = headerRef.current.querySelectorAll(".orbital-header-item");
+      if (items.length === 0) return;
+
+      gsap.fromTo(
+        items,
+        {
+          opacity: 0,
+          y: 40,
+          filter: "blur(12px)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          stagger: 0.15,
+          duration: 1.2,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: headerRef.current,
+            start: "top 90%",
+            end: "bottom 15%",
+            toggleActions: "play reverse play reverse",
+          },
+        }
+      );
+    },
+    { scope: containerRef }
+  );
+
   return (
-    <section className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden">
-      <div className="flex w-full flex-col items-center gap-3 text-center">
-        <Chip color="accent" size="lg" variant="secondary">
-          Curated Loot
+    <section
+      ref={containerRef}
+      className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden py-16 sm:py-24"
+    >
+      <div
+        ref={headerRef}
+        className="mb-8 flex w-full flex-col items-center gap-4 px-4 text-center sm:mb-12"
+      >
+        <Chip color="accent" size="lg" variant="secondary" className="orbital-header-item">
+          Everyday Essentials
         </Chip>
-        <Typography type="h1" truncate={true} weight="semibold">
-          The Explorer's Arsenal
+        <Typography
+          type="h1"
+          weight="semibold"
+          className="orbital-header-item text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
+        >
+          Tried it. Kept it.
         </Typography>
 
-        <Typography type="h5">
-          An interactive catalog of curated gear, hardware, and physical tools that empower my daily
-          creative and engineering odyssey.
+        <Typography
+          type="h5"
+          className="orbital-header-item text-muted max-w-2xl text-base leading-relaxed font-normal opacity-80 sm:text-lg md:text-xl"
+        >
+          Tried it once. Still using it every day.
         </Typography>
       </div>
 
       <div
-        className="relative flex h-140 w-full cursor-grab items-center justify-center select-none active:cursor-grabbing sm:h-150"
+        className="relative flex w-full cursor-grab items-center justify-center select-none active:cursor-grabbing"
         style={{ perspective: "1500px" }}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
@@ -145,101 +189,301 @@ export function OrbitalCarousel() {
           className="relative flex h-120 w-full items-center justify-center sm:h-132.5"
           style={{ transformStyle: "preserve-3d" }}
         >
-          {CREATOR_ARSENAL.map((item, idx) => {
-            const offset = idx - activeIndex;
-            const isCenter = offset === 0;
-
-            // Compute 3D variables based on offset relative to the absolute center
-            const angle = -offset * 32 + dragOffset * 0.08; // Rotate based on drag
-            const zTranslate =
-              -Math.abs(offset) * 200 - (dragStartRef.current ? Math.abs(dragOffset) * 0.25 : 0);
-            const xTranslate = offset * 390 + dragOffset * 0.95; // Horizontal orbital separation
-            const scale = 1 - Math.abs(offset) * 0.1;
-            const opacity = 1 - Math.abs(offset) * 0.5;
-            const blurValue = Math.abs(offset) * 2.5;
-            const brightness = 1 - Math.abs(offset) * 0.3;
-
-            return (
-              <div
-                key={item.id}
-                className="absolute top-1/2 left-1/2 h-120 w-[320px] sm:h-132.5 sm:w-125"
-                style={{
-                  transform: `translate(-50%, -50%) translateX(${xTranslate}px) translateZ(${zTranslate}px) rotateY(${angle}deg) scale(${scale})`,
-                  opacity: Math.max(0.15, opacity),
-                  filter: `blur(${blurValue}px) brightness(${brightness})`,
-                  zIndex: 10 - Math.abs(offset),
-                  transition: dragStartRef.current
-                    ? "none"
-                    : "transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s, filter 0.6s",
-                  pointerEvents: isCenter ? "auto" : "none",
-                }}
-              >
-                <Card
-                  variant={isCenter ? "default" : "transparent"}
-                  className={`flex h-full flex-col justify-between overflow-hidden transition-all duration-500 ${
-                    isCenter && ""
-                  }`}
-                >
-                  <div className="relative h-45 w-full shrink-0 overflow-hidden sm:h-55">
-                    <img
-                      src={item.cover}
-                      alt={item.title}
-                      className="h-full w-full rounded-2xl object-cover transition-transform duration-700 select-none hover:scale-105"
-                      draggable={false}
-                    />
-                    <div className="from-background via-background/20 absolute inset-0 rounded-2xl bg-linear-to-t to-transparent" />
-                    <Chip
-                      size="sm"
-                      variant="secondary"
-                      className="absolute top-4 left-4 z-10 tracking-wider uppercase"
-                    >
-                      {item.category}
-                    </Chip>
-                  </div>
-
-                  <Card.Header className="gap-2.5">
-                    <div className="text-muted flex items-center gap-3 text-xs font-semibold">
-                      <span className="flex items-center gap-1">
-                        <Tag className="size-3.5" />
-                        {item.tier}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center">
-                        <Gear className="size-3.5" />
-                        {item.usage}
-                      </span>
-                    </div>
-
-                    <Card.Title>{item.title}</Card.Title>
-
-                    <Card.Description>{item.summary}</Card.Description>
-                  </Card.Header>
-
-                  <Card.Content className="flex flex-row">
-                    {item.techStack.map((tech) => (
-                      <Chip key={tech}>{tech}</Chip>
-                    ))}
-                  </Card.Content>
-
-                  <Card.Footer>
-                    <Button variant="ghost" size="sm">
-                      {item.detailsLabel}
-                      <span className="ml-1 inline-block transition-transform duration-300 group-hover:translate-x-1">
-                        →
-                      </span>
-                    </Button>
-                    <span className="text-muted/30 font-mono text-base font-extrabold select-none">
-                      0{idx + 1}
-                    </span>
-                  </Card.Footer>
-                </Card>
+          {/* Card 0: MacBook Pro */}
+          {renderCardContainer(
+            0,
+            <Card
+              variant={activeIndex === 0 ? "default" : "transparent"}
+              className={`flex h-full flex-col overflow-hidden p-0 transition-all duration-500 ${
+                activeIndex === 0
+                  ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
+                  : "opacity-40"
+              }`}
+            >
+              <div className="relative aspect-video w-full shrink-0 overflow-hidden">
+                <img
+                  alt="MacBook Pro"
+                  loading="lazy"
+                  src="/IMG_4956.JPG"
+                  className="pointer-events-none h-full w-full object-cover select-none"
+                  draggable={false}
+                />
               </div>
-            );
-          })}
+              <Card.Header className="gap-2">
+                <Chip size="sm" variant="secondary">
+                  Workstation
+                </Chip>
+                <Card.Title className="text-foreground text-lg leading-snug font-bold tracking-tight sm:text-xl">
+                  MacBook Pro (M1 Max)
+                </Card.Title>
+                <Card.Description className="text-muted line-clamp-3 text-sm leading-relaxed font-normal opacity-90">
+                  My core development machine. With 32GB of RAM and 1TB of storage, it handles heavy
+                  workloads effortlessly. Bought it a while ago and it still feels as fast as day
+                  one.
+                </Card.Description>
+              </Card.Header>
+
+              <Card.Content className="mt-auto flex flex-row flex-wrap gap-1.5 px-6 py-2">
+                {["M1 Max Chip", "32GB RAM", "1TB SSD", "Liquid Retina"].map((tech) => (
+                  <span
+                    key={tech}
+                    className="bg-muted/30 text-muted-foreground border-border/5 inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </Card.Content>
+
+              <Card.Footer className="border-border/5 flex items-center justify-between border-t px-6 py-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-muted/30 h-8 px-3 text-xs font-semibold"
+                >
+                  View Details
+                  <span className="ml-1 inline-block transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
+                </Button>
+                <span className="text-muted/25 font-mono text-sm font-bold select-none">01</span>
+              </Card.Footer>
+            </Card>
+          )}
+
+          {renderCardContainer(
+            1,
+            <Card
+              variant={activeIndex === 1 ? "default" : "transparent"}
+              className={`relative flex h-full w-full overflow-hidden transition-all duration-500 ${
+                activeIndex === 1
+                  ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
+                  : "opacity-40"
+              }`}
+            >
+              <img
+                alt="iPhone 16 Pro"
+                loading="lazy"
+                src="/iPhone16Pro.png"
+                draggable={false}
+                className="pointer-events-none absolute object-contain select-none"
+              />
+
+              <div className="absolute inset-x-0 bottom-0 z-10 h-64 mask-[linear-gradient(to_top,black_45%,transparent)] backdrop-blur-3xl" />
+
+              <div className="from-background via-surface/80 absolute inset-x-0 bottom-0 z-20 h-72 bg-linear-to-t to-transparent" />
+
+              <Chip size="lg" color="default" variant="soft" className="w-fit">
+                Mobile
+              </Chip>
+
+              <Card.Header className="absolute inset-x-0 bottom-32 z-30 flex flex-col items-start gap-3 px-6">
+                <Card.Title>
+                  <TrueFocus
+                    sentence="iPhone 16 Pro"
+                    blurAmount={5}
+                    borderColor="var(--color-accent, #5227FF)"
+                    glowColor="var(--color-success, #5227FF)"
+                    animationDuration={0.5}
+                    pauseBetweenAnimations={1}
+                    initialIndex={2}
+                  />
+                </Card.Title>
+                <Card.Description className="text-muted max-w-[88%] text-sm leading-relaxed">
+                  sadf
+                </Card.Description>
+              </Card.Header>
+
+              <Card.Footer className="bg-surface absolute inset-x-5 bottom-5 z-40 flex items-center justify-between rounded-2xl backdrop-blur-xl">
+                <span className="text-sm font-semibold">View Details</span>
+                <span className="text-muted text-sm">02 / 04</span>
+              </Card.Footer>
+            </Card>
+          )}
+
+          {/* Card 2: PlayStation 5 */}
+          {renderCardContainer(
+            2,
+            <Card
+              variant={activeIndex === 2 ? "default" : "transparent"}
+              className={`flex flex-col overflow-hidden p-0 transition-all duration-500 ${
+                activeIndex === 2
+                  ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
+                  : "opacity-40"
+              }`}
+            >
+              <div className="relative aspect-video w-full shrink-0 overflow-hidden">
+                <img
+                  alt="PlayStation 5"
+                  loading="lazy"
+                  src="/er-hero.png"
+                  className="pointer-events-none w-full object-cover select-none"
+                  draggable={false}
+                />
+              </div>
+              <Card.Header className="gap-2">
+                <Chip size="sm" variant="secondary">
+                  Gaming Console
+                </Chip>
+                <Card.Title className="text-foreground text-lg leading-snug font-bold tracking-tight sm:text-xl">
+                  PlayStation 5
+                </Card.Title>
+                <Card.Description className="text-muted line-clamp-3 text-sm leading-relaxed font-normal opacity-90">
+                  Where I go to disconnect. Immersive single-player games run beautifully on it.
+                  It's the perfect way to unwind and shift my brain away from code after a long day.
+                </Card.Description>
+              </Card.Header>
+
+              <Card.Content className="mt-auto flex flex-row flex-wrap gap-1.5 px-6 py-2">
+                {["4K 120Hz Rendering", "Ultra-fast SSD", "DualSense Haptics", "3D Audio"].map(
+                  (tech) => (
+                    <span
+                      key={tech}
+                      className="bg-muted/30 text-muted-foreground border-border/5 inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium"
+                    >
+                      {tech}
+                    </span>
+                  )
+                )}
+              </Card.Content>
+
+              <Card.Footer className="border-border/5 flex items-center justify-between border-t px-6 py-4">
+                <Button variant="ghost" size="sm">
+                  View Details
+                  <span className="ml-1 inline-block transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
+                </Button>
+                <span className="text-muted/25 font-mono text-sm font-bold select-none">03</span>
+              </Card.Footer>
+            </Card>
+          )}
+
+          {/* Card 3: Nintendo Switch */}
+          {renderCardContainer(
+            3,
+            <Card
+              variant={activeIndex === 3 ? "default" : "transparent"}
+              className={`flex flex-col overflow-hidden p-0 transition-all duration-500 ${
+                activeIndex === 3
+                  ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
+                  : "opacity-40"
+              }`}
+            >
+              <div className="relative aspect-video w-full shrink-0 overflow-hidden">
+                <img
+                  alt="Nintendo Switch"
+                  loading="lazy"
+                  src="/zelda-hero.png"
+                  className="pointer-events-none w-full object-cover select-none"
+                  draggable={false}
+                />
+              </div>
+              <Card.Header className="gap-2">
+                <Chip size="sm" variant="secondary">
+                  Handheld Gaming
+                </Chip>
+                <Card.Title className="text-foreground text-lg leading-snug font-bold tracking-tight sm:text-xl">
+                  Nintendo Switch
+                </Card.Title>
+                <Card.Description className="text-muted line-clamp-3 text-sm leading-relaxed font-normal opacity-90">
+                  The best companion for travel and casual gaming. Whether I'm diving into Zelda on
+                  the couch or playing a quick round on a flight, it's always in my bag.
+                </Card.Description>
+              </Card.Header>
+
+              <Card.Content className="mt-auto flex flex-row flex-wrap gap-1.5 px-6 py-2">
+                {[
+                  "Hybrid Mode",
+                  "Joy-Con Controllers",
+                  "First-Party Titles",
+                  "Lightweight Design",
+                ].map((tech) => (
+                  <span
+                    key={tech}
+                    className="bg-muted/30 text-muted-foreground border-border/5 inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </Card.Content>
+
+              <Card.Footer className="border-border/5 flex items-center justify-between border-t px-6 py-4">
+                <Button variant="ghost" size="sm">
+                  View Details
+                  <span className="ml-1 inline-block transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
+                </Button>
+                <span className="text-muted/25 font-mono text-sm font-bold select-none">04</span>
+              </Card.Footer>
+            </Card>
+          )}
+
+          {/* Card 4: AirPods Pro */}
+          {renderCardContainer(
+            4,
+            <Card
+              variant={activeIndex === 4 ? "default" : "transparent"}
+              className={`flex flex-col overflow-hidden p-0 transition-all duration-500 ${
+                activeIndex === 4
+                  ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
+                  : "opacity-40"
+              }`}
+            >
+              <div className="relative aspect-video w-full shrink-0 overflow-hidden">
+                <img
+                  alt="AirPods Pro"
+                  loading="lazy"
+                  src="/IMG_4958.WEBP"
+                  className="pointer-events-none w-full object-cover select-none"
+                  draggable={false}
+                />
+              </div>
+              <Card.Header className="gap-2">
+                <Chip size="sm" variant="secondary">
+                  Audio
+                </Chip>
+                <Card.Title className="text-foreground text-lg leading-snug font-bold tracking-tight sm:text-xl">
+                  AirPods Pro
+                </Card.Title>
+                <Card.Description className="text-muted line-clamp-3 text-sm leading-relaxed font-normal opacity-90">
+                  Essential for deep work and daily commutes. The active noise cancellation creates
+                  instant focus wherever I am, and the seamless switching between my Apple devices
+                  feels like magic.
+                </Card.Description>
+              </Card.Header>
+
+              <Card.Content className="mt-auto flex flex-row flex-wrap gap-1.5 px-6 py-2">
+                {[
+                  "Active Noise Cancelling",
+                  "Adaptive Audio",
+                  "Spatial Audio",
+                  "MagSafe Charging",
+                ].map((tech) => (
+                  <span
+                    key={tech}
+                    className="bg-muted/30 text-muted-foreground border-border/5 inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </Card.Content>
+
+              <Card.Footer className="border-border/5 flex items-center justify-between border-t px-6 py-4">
+                <Button variant="ghost" size="sm">
+                  View Details
+                  <span className="ml-1 inline-block transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
+                </Button>
+                <span className="text-muted/25 font-mono text-sm font-bold select-none">05</span>
+              </Card.Footer>
+            </Card>
+          )}
         </div>
       </div>
 
-      <div className="flex w-full items-center justify-center gap-4">
+      <div className="mt-4 flex w-full items-center justify-center gap-4">
         <Button
           isIconOnly
           variant="tertiary"
@@ -250,7 +494,7 @@ export function OrbitalCarousel() {
           <ArrowLeft />
         </Button>
         <div className="flex items-center gap-1.5">
-          {CREATOR_ARSENAL.map((_, idx) => (
+          {[0, 1, 2, 3, 4].map((idx) => (
             <div
               key={idx}
               className="h-1.5 rounded-full transition-all duration-300"
@@ -269,7 +513,7 @@ export function OrbitalCarousel() {
           variant="tertiary"
           size="md"
           onPress={handleNext}
-          isDisabled={activeIndex === CREATOR_ARSENAL.length - 1}
+          isDisabled={activeIndex === 4}
         >
           <ArrowRight />
         </Button>

@@ -141,12 +141,6 @@ export function ChronicleDeck() {
       ref={containerRef}
       className="bg-background relative flex h-screen w-full flex-col justify-center overflow-hidden px-6 lg:px-12"
     >
-      {/* Decorative background grid and ambient blur */}
-      <div className="pointer-events-none absolute inset-0 opacity-20">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(128,128,128,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(128,128,128,0.08)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] bg-[size:4rem_4rem]" />
-        <div className="bg-accent-soft/15 pointer-events-none absolute top-1/4 left-1/4 size-96 rounded-full blur-[120px]" />
-      </div>
-
       <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-10 md:gap-12">
         {/* Section Header */}
         <div className="flex flex-col items-center gap-3 text-center">
