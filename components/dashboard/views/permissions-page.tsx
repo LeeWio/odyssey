@@ -2,8 +2,16 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { Card, Button, Checkbox, Label, Spinner, toast, ListBox, Description } from "@heroui/react";
-import { useGetAllRolesQuery, useGetRoleMenuIdsQuery, useAssignRoleMenusMutation, type RoleResponse } from "@/lib/features/role/role-api";
-import { useGetAdminMenuTreeQuery, type MenuResponse } from "@/lib/features/permission/permission-api";
+import {
+  useGetAllRolesQuery,
+  useGetRoleMenuIdsQuery,
+  useAssignRoleMenusMutation,
+  type RoleResponse,
+} from "@/lib/features/role/role-api";
+import {
+  useGetAdminMenuTreeQuery,
+  type MenuResponse,
+} from "@/lib/features/permission/permission-api";
 import { Icon } from "@iconify/react";
 import { usePortalContainer } from "../use-portal-container";
 
@@ -19,19 +27,16 @@ function PermissionNode({ node, checkedIds, onCheckChange }: PermissionNodeProps
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 py-0.5">
-        <Checkbox
-          isSelected={isChecked}
-          onChange={(checked) => onCheckChange(node.id, checked)}
-        >
+        <Checkbox isSelected={isChecked} onChange={(checked) => onCheckChange(node.id, checked)}>
           <Checkbox.Control>
             <Checkbox.Indicator />
           </Checkbox.Control>
           <Checkbox.Content>
-            <Label className="text-xs font-medium cursor-pointer flex items-center gap-1.5 select-none text-foreground">
-              {node.icon && <Icon icon={node.icon} className="size-4 text-default-400" />}
+            <Label className="text-foreground flex cursor-pointer items-center gap-1.5 text-xs font-medium select-none">
+              {node.icon && <Icon icon={node.icon} className="text-default-400 size-4" />}
               <span>{node.name}</span>
               {node.permission && (
-                <span className="text-[10px] font-mono bg-default-100 px-1.5 py-0.5 rounded text-default-500">
+                <span className="bg-default-100 text-default-500 rounded px-1.5 py-0.5 font-mono text-[10px]">
                   {node.permission}
                 </span>
               )}
@@ -41,7 +46,7 @@ function PermissionNode({ node, checkedIds, onCheckChange }: PermissionNodeProps
       </div>
 
       {node.children && node.children.length > 0 && (
-        <div className="flex flex-col gap-2 ml-3.5 pl-4 border-l border-default-200">
+        <div className="border-default-200 ml-3.5 flex flex-col gap-2 border-l pl-4">
           {node.children.map((child) => (
             <PermissionNode
               key={child.id}
@@ -79,10 +84,8 @@ export function PermissionsPage() {
   }, [roles, selectedRole]);
 
   // Query assigned menu IDs for the active selected role
-  const { data: roleMenuIds = EMPTY_ROLE_MENUS, isFetching: isRoleMenusLoading } = useGetRoleMenuIdsQuery(
-    selectedRole?.id as number,
-    { skip: !selectedRole }
-  );
+  const { data: roleMenuIds = EMPTY_ROLE_MENUS, isFetching: isRoleMenusLoading } =
+    useGetRoleMenuIdsQuery(selectedRole?.id as number, { skip: !selectedRole });
 
   // Sync checked IDs once fetched
   useEffect(() => {
@@ -152,21 +155,24 @@ export function PermissionsPage() {
     <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
       <div className="flex flex-col gap-1 select-none">
         <h2 className="text-foreground text-base font-semibold">Roles & Permissions</h2>
-        <p className="text-muted text-sm">Configure security roles and map hierarchical menu permissions.</p>
+        <p className="text-muted text-sm">
+          Configure security roles and map hierarchical menu permissions.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr] items-start mt-2">
-        
+      <div className="mt-2 grid grid-cols-1 items-start gap-6 md:grid-cols-[280px_1fr]">
         {/* Left Card: Roles List */}
-        <Card className="rounded-2xl shrink-0">
-          <Card.Header className="flex flex-col items-start gap-1 p-5 border-b border-default-100">
-            <Card.Title className="text-sm font-bold flex items-center gap-1.5 select-none">
+        <Card className="shrink-0 rounded-2xl">
+          <Card.Header className="border-default-100 flex flex-col items-start gap-1 border-b p-5">
+            <Card.Title className="flex items-center gap-1.5 text-sm font-bold select-none">
               <Icon icon="gravity-ui:person" className="text-primary size-4" />
               Security Roles
             </Card.Title>
-            <Card.Description className="text-xs">Select a role to bind permissions</Card.Description>
+            <Card.Description className="text-xs">
+              Select a role to bind permissions
+            </Card.Description>
           </Card.Header>
-          
+
           <Card.Content className="p-2">
             <ListBox
               aria-label="Security Roles"
@@ -184,7 +190,7 @@ export function PermissionsPage() {
                 <ListBox.Item id={role.id.toString()} textValue={role.name} key={role.id}>
                   <div className="flex flex-col items-start gap-1 select-none">
                     <Label className="text-xs font-semibold">{role.name}</Label>
-                    <Description className="text-[10px] font-mono leading-none text-default-400">
+                    <Description className="text-default-400 font-mono text-[10px] leading-none">
                       {role.code}
                     </Description>
                   </div>
@@ -196,15 +202,16 @@ export function PermissionsPage() {
 
         {/* Right Card: Permissions Tree */}
         <Card className="rounded-2xl">
-          <Card.Header className="flex items-center justify-between p-5 border-b border-default-100 select-none">
+          <Card.Header className="border-default-100 flex items-center justify-between border-b p-5 select-none">
             <div className="flex flex-col gap-1">
-              <Card.Title className="text-sm font-bold flex items-center gap-1.5">
+              <Card.Title className="flex items-center gap-1.5 text-sm font-bold">
                 <Icon icon="gravity-ui:sliders" className="text-primary size-4" />
                 Permissions Mapping
               </Card.Title>
               {selectedRole && (
                 <Card.Description className="text-xs">
-                  Configure active permissions for <span className="font-semibold text-foreground">{selectedRole.name}</span>
+                  Configure active permissions for{" "}
+                  <span className="text-foreground font-semibold">{selectedRole.name}</span>
                 </Card.Description>
               )}
             </div>
@@ -213,7 +220,7 @@ export function PermissionsPage() {
               <Button
                 variant="primary"
                 size="sm"
-                className="font-semibold shadow-sm flex items-center gap-1.5"
+                className="flex items-center gap-1.5 font-semibold shadow-sm"
                 onPress={handleSavePermissions}
                 isDisabled={isSaving || isRoleMenusLoading}
               >
@@ -232,15 +239,15 @@ export function PermissionsPage() {
             )}
           </Card.Header>
 
-          <Card.Content className="p-6 relative min-h-[300px]">
+          <Card.Content className="relative min-h-[300px] p-6">
             {isRoleMenusLoading && (
-              <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-2xl">
+              <div className="bg-background/50 absolute inset-0 z-10 flex items-center justify-center rounded-2xl backdrop-blur-[1px]">
                 <Spinner size="md" />
               </div>
             )}
 
             {menuTree.length === 0 ? (
-              <div className="flex h-48 flex-col items-center justify-center gap-2 text-default-400">
+              <div className="text-default-400 flex h-48 flex-col items-center justify-center gap-2">
                 <Icon icon="gravity-ui:circle-dashed" className="size-8 animate-spin" />
                 <span className="text-xs">No menus mapped in the system</span>
               </div>
@@ -258,7 +265,6 @@ export function PermissionsPage() {
             )}
           </Card.Content>
         </Card>
-
       </div>
     </div>
   );

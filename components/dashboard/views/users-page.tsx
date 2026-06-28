@@ -1,7 +1,17 @@
 "use client";
 
 import { useMemo, useState, useCallback } from "react";
-import { Avatar, Chip, SearchField, Button, Dropdown, Label, Tooltip, Spinner, toast } from "@heroui/react";
+import {
+  Avatar,
+  Chip,
+  SearchField,
+  Button,
+  Dropdown,
+  Label,
+  Tooltip,
+  Spinner,
+  toast,
+} from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { Eye, Pencil, TrashBin, Funnel, CirclePlay } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
@@ -63,9 +73,7 @@ function UsersRowActions({ user }: { user: UserResponse }) {
       }
 
       // If they are currently Admin, demote them to just USER. If not, promote to both USER and ADMIN.
-      const roleIds = isAdmin
-        ? [userRole.id]
-        : [userRole.id, adminRole.id];
+      const roleIds = isAdmin ? [userRole.id] : [userRole.id, adminRole.id];
 
       await updateRoles({ id: user.id, roleIds }).unwrap();
     } catch {
@@ -88,9 +96,9 @@ function UsersRowActions({ user }: { user: UserResponse }) {
             {isStatusUpdating ? (
               <Spinner size="sm" />
             ) : isActive ? (
-              <TrashBin className="size-4 text-danger" />
+              <TrashBin className="text-danger size-4" />
             ) : (
-              <CirclePlay className="size-4 text-success" />
+              <CirclePlay className="text-success size-4" />
             )}
           </Button>
         </Tooltip.Trigger>
@@ -107,7 +115,10 @@ function UsersRowActions({ user }: { user: UserResponse }) {
           </Tooltip.Trigger>
           <Tooltip.Content>More actions</Tooltip.Content>
         </Tooltip>
-        <Dropdown.Popover placement="bottom end" UNSTABLE_portalContainer={portalContainer || undefined}>
+        <Dropdown.Popover
+          placement="bottom end"
+          UNSTABLE_portalContainer={portalContainer || undefined}
+        >
           <Dropdown.Menu>
             <Dropdown.Item
               id="view-user"
@@ -209,9 +220,7 @@ export function UsersPage() {
           return (
             <div className="flex items-center gap-3">
               <Avatar className="size-8">
-                <Avatar.Fallback>
-                  {name.substring(0, 2).toUpperCase()}
-                </Avatar.Fallback>
+                <Avatar.Fallback>{name.substring(0, 2).toUpperCase()}</Avatar.Fallback>
               </Avatar>
               <div className="flex min-w-0 flex-col">
                 <span className="text-xs font-medium">{name}</span>
@@ -251,7 +260,9 @@ export function UsersPage() {
       {
         accessorKey: "createdAt",
         allowsSorting: true,
-        cell: (item) => <span className="text-muted tabular-nums">{formatDate(item.createdAt)}</span>,
+        cell: (item) => (
+          <span className="text-muted tabular-nums">{formatDate(item.createdAt)}</span>
+        ),
         header: "Joined Date",
         id: "createdAt",
         minWidth: 140,

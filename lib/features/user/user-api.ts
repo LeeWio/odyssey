@@ -34,7 +34,10 @@ export const userApi = baseApi.injectEndpoints({
     /**
      * Update user status (e.g. ban / activate)
      */
-    updateUserStatus: builder.mutation<UserResponse, { id: number; status: "ACTIVE" | "INACTIVE" | "PENDING" | "BANNED" | "DELETED" }>({
+    updateUserStatus: builder.mutation<
+      UserResponse,
+      { id: number; status: "ACTIVE" | "INACTIVE" | "PENDING" | "BANNED" | "DELETED" }
+    >({
       query: ({ id, status }) => ({
         url: `/api/v1/admin/users/${id}/status?status=${status}`,
         method: "PATCH",
@@ -79,8 +82,5 @@ export const userApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const {
-  useGetAllUsersQuery,
-  useUpdateUserStatusMutation,
-  useUpdateUserRolesMutation,
-} = userApi;
+export const { useGetAllUsersQuery, useUpdateUserStatusMutation, useUpdateUserRolesMutation } =
+  userApi;

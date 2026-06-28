@@ -1,19 +1,31 @@
 "use client";
 
 import { useState, useRef, MouseEvent, TouchEvent } from "react";
-import { Card, Chip, Button, Typography } from "@heroui/react";
-import { ArrowLeft, ArrowRight } from "@gravity-ui/icons";
+import {
+  Card,
+  Chip,
+  Button,
+  Typography,
+  Tooltip,
+  Link,
+  buttonVariants,
+  Tag,
+  Avatar,
+  TagGroup,
+} from "@heroui/react";
+import { ArrowLeft, ArrowRight, ArrowUpRight } from "@gravity-ui/icons";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import TrueFocus from "../text/true-focus";
+import { Icon } from "@iconify/react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
 export function OrbitalCarousel() {
-  const [activeIndex, setActiveIndex] = useState(2); // Start on the middle card (PS5)
+  const [activeIndex, setActiveIndex] = useState(1); // Start on the middle card (PS5)
   const dragStartRef = useRef<number | null>(null);
   const isDraggingRef = useRef(false);
   const [dragOffset, setDragOffset] = useState(0);
@@ -254,7 +266,7 @@ export function OrbitalCarousel() {
             1,
             <Card
               variant={activeIndex === 1 ? "default" : "transparent"}
-              className={`relative flex h-full w-full overflow-hidden transition-all duration-500 ${
+              className={`from-accent-200 via-success-400 relative flex h-full w-full overflow-hidden bg-radial-[at_50%_75%] to-red-900 to-90% transition-all duration-500 ${
                 activeIndex === 1
                   ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
                   : "opacity-40"
@@ -268,15 +280,13 @@ export function OrbitalCarousel() {
                 className="pointer-events-none absolute object-contain select-none"
               />
 
-              <div className="absolute inset-x-0 bottom-0 z-10 h-64 mask-[linear-gradient(to_top,black_45%,transparent)] backdrop-blur-3xl" />
-
-              <div className="from-background via-surface/80 absolute inset-x-0 bottom-0 z-20 h-72 bg-linear-to-t to-transparent" />
+              {/* <div className="from-background via-surface-secondary/80 to-transparent absolute inset-x-0 bottom-0 z-20 h-80 bg-linear-to-t " /> */}
 
               <Chip size="lg" color="default" variant="soft" className="w-fit">
                 Mobile
               </Chip>
 
-              <Card.Header className="absolute inset-x-0 bottom-32 z-30 flex flex-col items-start gap-3 px-6">
+              <Card.Header className="absolute inset-x-0 bottom-48 z-30 flex flex-col items-start gap-3 px-6">
                 <Card.Title>
                   <TrueFocus
                     sentence="iPhone 16 Pro"
@@ -288,14 +298,48 @@ export function OrbitalCarousel() {
                     initialIndex={2}
                   />
                 </Card.Title>
-                <Card.Description className="text-muted max-w-[88%] text-sm leading-relaxed">
-                  sadf
-                </Card.Description>
+                <TagGroup selectionMode="single" size="lg">
+                  <TagGroup.List>
+                    <Tag>
+                      <Icon icon="mdi:apple" className="size-4" />
+                      iOS 27.0
+                    </Tag>
+                    <Tag>
+                      <Icon icon="hugeicons:system-update-02" className="size-4" />
+                      macOS
+                    </Tag>
+                    <Tag>
+                      <Avatar className="size-4">
+                        <Avatar.Image src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg" />
+                        <Avatar.Fallback>J</Avatar.Fallback>
+                      </Avatar>
+                      Jane
+                    </Tag>
+                  </TagGroup.List>
+                </TagGroup>
               </Card.Header>
 
-              <Card.Footer className="bg-surface absolute inset-x-5 bottom-5 z-40 flex items-center justify-between rounded-2xl backdrop-blur-xl">
-                <span className="text-sm font-semibold">View Details</span>
-                <span className="text-muted text-sm">02 / 04</span>
+              <Card.Footer className="absolute inset-x-5 bottom-5 z-40 flex items-center justify-between">
+                <Chip variant="tertiary" size="lg" color="warning">
+                  A18 Pro silicon
+                </Chip>
+
+                <Tooltip delay={0}>
+                  <Link
+                    target="_blank"
+                    href="https://www.apple.com.cn/iphone/"
+                    className={buttonVariants({
+                      isIconOnly: true,
+                      variant: "danger-soft",
+                      size: "sm",
+                    })}
+                  >
+                    <ArrowUpRight />
+                  </Link>
+                  <Tooltip.Content>
+                    <p>Get it.</p>
+                  </Tooltip.Content>
+                </Tooltip>
               </Card.Footer>
             </Card>
           )}
