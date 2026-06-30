@@ -12,7 +12,7 @@ import { Modal, Skeleton } from "@heroui/react";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { RichText } from "./rich-text";
-import { useMounted } from "@mantine/hooks";
+import { useMounted, useFullscreenElement as useFullscreen } from "@mantine/hooks";
 import type { JSONContent } from "@tiptap/react";
 
 export function RichTextModal() {
@@ -20,6 +20,7 @@ export function RichTextModal() {
   const isOpen = useAppSelector(selectIsRichTextOpen);
   const draftId = useAppSelector(selectDraftIdentifier);
   const isMounted = useMounted();
+  const { ref, toggle, fullscreen } = useFullscreen();
 
   // 1. Generate unique draft ID on client side when modal is opened
   useEffect(() => {
@@ -45,7 +46,9 @@ export function RichTextModal() {
       >
         <Modal.Container size="cover">
           {isOpen && (
-            <Modal.Dialog className="flex h-[95vh] max-h-[95vh] w-[98vw] max-w-none flex-col overflow-hidden">
+            <Modal.Dialog
+              className="flex h-[95vh] max-h-[95vh] w-[98vw] max-w-none flex-col overflow-hidden"
+            >
               {isFetching || !draftId ? (
                 <>
                   <Modal.Header className="flex flex-col gap-1">Create New Post</Modal.Header>
@@ -70,11 +73,20 @@ export function RichTextModal() {
                   </Modal.Footer>
                 </>
               ) : (
-                <RichText
-                  key={draftId}
-                  identifier={draftId}
-                  initialValue={autosavedContent?.content as JSONContent | undefined}
-                />
+                <div
+                  ref={ref}
+                  className={`flex flex-col flex-1 h-full w-full overflow-hidden ${
+                    fullscreen ? "bg-background p-4" : ""
+                  }`}
+                >
+                  <RichText
+                    key={draftId}
+                    identifier={draftId}
+                    initialValue={autosavedContent?.content as JSONContent | undefined}
+                    isFullscreen={fullscreen}
+                    onToggleFullscreen={toggle}
+                  />
+                </div>
               )}
             </Modal.Dialog>
           )}

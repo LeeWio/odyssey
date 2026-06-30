@@ -44,6 +44,8 @@ interface RichTextProps {
   identifier: string;
   initialValue?: JSONContent;
   onChange?: (value: JSONContent) => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 /**
@@ -94,7 +96,13 @@ const extractText = (json: JSONContent): string => {
   return text.trim();
 };
 
-export function RichText({ identifier, initialValue, onChange }: RichTextProps) {
+export function RichText({
+  identifier,
+  initialValue,
+  onChange,
+  isFullscreen = false,
+  onToggleFullscreen,
+}: RichTextProps) {
   const dispatch = useAppDispatch();
 
   // 1. Editor state & Debounced Autosave
@@ -243,17 +251,37 @@ export function RichText({ identifier, initialValue, onChange }: RichTextProps) 
       <Modal.Header className="flex flex-row items-center justify-between">
         <FixedToolbar />
 
-        <Tooltip delay={0}>
-          <Button
-            aria-label={showSettings ? "Back to Edit" : "Publish"}
-            isIconOnly
-            variant={showSettings ? "secondary" : "tertiary"}
-            onPress={() => (showSettings ? setShowSettings(false) : handleOpenPublish())}
-          >
-            <Icon icon={showSettings ? "gravity-ui:arrow-left" : "gravity-ui:paper-plane"} />
-          </Button>
-          <Tooltip.Content>{showSettings ? "Back to Edit" : "Publish"}</Tooltip.Content>
-        </Tooltip>
+        <div className="flex items-center gap-2">
+          {onToggleFullscreen && (
+            <Tooltip delay={0}>
+              <Button
+                aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                isIconOnly
+                variant="tertiary"
+                onPress={onToggleFullscreen}
+              >
+                <Icon
+                  icon={isFullscreen ? "gravity-ui:fullscreen-exit" : "gravity-ui:fullscreen"}
+                />
+              </Button>
+              <Tooltip.Content>
+                {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              </Tooltip.Content>
+            </Tooltip>
+          )}
+
+          <Tooltip delay={0}>
+            <Button
+              aria-label={showSettings ? "Back to Edit" : "Publish"}
+              isIconOnly
+              variant={showSettings ? "secondary" : "tertiary"}
+              onPress={() => (showSettings ? setShowSettings(false) : handleOpenPublish())}
+            >
+              <Icon icon={showSettings ? "gravity-ui:arrow-left" : "gravity-ui:paper-plane"} />
+            </Button>
+            <Tooltip.Content>{showSettings ? "Back to Edit" : "Publish"}</Tooltip.Content>
+          </Tooltip>
+        </div>
 
         <SuggestionToolbar />
         <TextMenu />
