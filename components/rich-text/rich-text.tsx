@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   useAutosavePostMutation,
   useCreatePostMutation,
@@ -121,6 +121,18 @@ export function RichText({
     onChange?.(nextValue);
     debouncedAutosave(nextValue);
   };
+
+  // Intercept Escape to exit fullscreen before closing the modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFullscreen) {
+        e.stopPropagation();
+        onToggleFullscreen?.();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown, true); // Capture phase to preempt Modal close
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, [isFullscreen, onToggleFullscreen]);
 
   // 2. Publish Settings & Forms state
   const [showSettings, setShowSettings] = useState(false);
