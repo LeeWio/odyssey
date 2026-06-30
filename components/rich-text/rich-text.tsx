@@ -209,6 +209,18 @@ export function RichText({
             delay: 0.15,
           }
         );
+      } else {
+        // Quick, sleek fade-in-settle when docking back down
+        gsap.fromTo(
+          [".rich-text-header", ".rich-text-body"],
+          { opacity: 0.7, scale: 1.01 },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.5,
+            ease: "power2.out",
+          }
+        );
       }
     },
     { dependencies: [isFullscreen] }
