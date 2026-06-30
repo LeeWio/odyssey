@@ -3,7 +3,7 @@
 import { Segment } from "@heroui-pro/react";
 import { Skeleton } from "@heroui/react";
 import { useTheme } from "next-themes";
-import { useMounted } from "@/hooks/use-mounted";
+import { useMounted } from "@mantine/hooks";
 import { DisplayFillIcon, MoonFillIcon, SunMaxFillIcon } from "./icons";
 
 export const ModeSwitch = () => {

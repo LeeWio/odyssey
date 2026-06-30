@@ -1,7 +1,7 @@
 "use client";
 
 import { Sheet } from "@heroui-pro/react";
-import { useHotkeys } from "react-hotkeys-hook";
+import { useHotkeys } from "@mantine/hooks";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { selectIsSheetOpen, toggleSheet } from "@/lib/features/ui";
 import { Stocks } from "./widgets/stocks";
@@ -22,15 +22,16 @@ export function SheetPanel() {
   const [weather] = useState({ tempMin: 10, tempMax: 30 });
 
   useHotkeys(
-    "mod+j",
-    (e) => {
-      e.preventDefault();
-      dispatch(toggleSheet());
-    },
-    {
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    }
+    [
+      [
+        "mod+j",
+        () => {
+          dispatch(toggleSheet());
+        },
+      ],
+    ],
+    [],
+    true
   );
 
   return (

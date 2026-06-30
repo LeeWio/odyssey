@@ -5,7 +5,7 @@ import { Sheet } from "@heroui-pro/react";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { selectIsDashboardOpen, toggleDashboard } from "@/lib/features/ui";
 import { selectIsAdmin } from "@/lib/features/auth";
-import { useMounted } from "@/hooks/use-mounted";
+import { useMounted } from "@mantine/hooks";
 
 import { AppShell } from "./app-shell";
 import { DashboardPage } from "./views/dashboard-page";

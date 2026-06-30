@@ -12,7 +12,7 @@ import { Modal, Skeleton } from "@heroui/react";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { RichText } from "./rich-text";
-import { useMounted } from "@/hooks/use-mounted";
+import { useMounted } from "@mantine/hooks";
 import type { JSONContent } from "@tiptap/react";
 
 export function RichTextModal() {

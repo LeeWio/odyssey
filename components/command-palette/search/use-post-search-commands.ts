@@ -1,6 +1,7 @@
 "use client";
 
-import { useDeferredValue, useMemo } from "react";
+import { useMemo } from "react";
+import { useDebouncedValue } from "@mantine/hooks";
 
 import {
   FileTextIcon,
@@ -46,11 +47,11 @@ export interface PostSearchCommandState {
 }
 
 export function usePostSearchCommands(query: string, isOpen: boolean): PostSearchCommandState {
-  const deferredQuery = useDeferredValue(query.trim());
-  const hasRemoteQuery = deferredQuery.length > 0;
+  const [debouncedQuery] = useDebouncedValue(query.trim(), 250);
+  const hasRemoteQuery = debouncedQuery.length > 0;
 
   const { data, isFetching, isError } = useUnifiedSearchQuery(
-    hasRemoteQuery ? { keyword: deferredQuery } : {},
+    hasRemoteQuery ? { keyword: debouncedQuery } : {},
     { skip: !isOpen }
   );
 

@@ -6,7 +6,7 @@ import { Navbar as HerouiNavbar } from "@heroui-pro/react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { GearIcon, SearchIcon, PersonsIcon, ArrowRightFromSquareIcon } from "./icons";
-import { useMounted } from "@/hooks/use-mounted";
+import { useMounted } from "@mantine/hooks";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import {
   selectIsAuthenticated,

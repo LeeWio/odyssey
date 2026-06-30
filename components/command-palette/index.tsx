@@ -4,7 +4,7 @@ import { Key, Kbd, Chip } from "@heroui/react";
 import { Command, EmptyState } from "@heroui-pro/react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useHotkeys } from "react-hotkeys-hook";
+import { useHotkeys } from "@mantine/hooks";
 
 import { MagnifierIcon } from "@/components/icons";
 import { buildCommandSearchText, filterCommands } from "./command-model";
@@ -133,10 +133,17 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
     }
   };
 
-  useHotkeys("mod+k", (event) => {
-    event.preventDefault();
-    setIsOpen(!isOpen);
-  });
+  useHotkeys(
+    [
+      [
+        "mod+k",
+        () => {
+          setIsOpen(!isOpen);
+        },
+      ],
+    ],
+    []
+  );
 
   return (
     <Command>

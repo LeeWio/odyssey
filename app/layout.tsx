@@ -15,6 +15,7 @@ import { Toast } from "@heroui/react";
 import { SheetPanel } from "@/components/sheet-panel";
 import { DashboardSheet } from "@/components/dashboard";
 import { RichTextModal } from "@/components/rich-text";
+import { Footer } from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -78,17 +79,7 @@ export default async function RootLayout({
                 <DashboardSheet />
                 <RichTextModal />
                 <main className="flex w-full grow flex-col">{children}</main>
-                <footer className="flex w-full items-center justify-center py-3">
-                  <a
-                    className="flex items-center gap-1 text-current no-underline"
-                    href="https://heroui.com?utm_source=next-app-template"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    <span className="text-muted">Powered by</span>
-                    <p className="text-accent">HeroUI</p>
-                  </a>
-                </footer>
+                <Footer />
               </div>
             </ThemeProvider>
           </StoreProvider>

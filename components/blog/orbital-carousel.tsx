@@ -266,9 +266,9 @@ export function OrbitalCarousel() {
             1,
             <Card
               variant={activeIndex === 1 ? "default" : "transparent"}
-              className={`from-accent-200 via-success-400 relative flex h-full w-full overflow-hidden bg-radial-[at_50%_75%] to-red-900 to-90% transition-all duration-500 ${
+              className={`relative flex h-full w-full max-w-112.5 flex-col overflow-hidden bg-radial-[at_50%_35%] from-zinc-100/90 via-zinc-50/50 to-white transition-all duration-500 dark:border-white/5 dark:from-zinc-700/80 dark:via-zinc-950 dark:to-black ${
                 activeIndex === 1
-                  ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
+                  ? "group hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
                   : "opacity-40"
               }`}
             >
@@ -277,32 +277,32 @@ export function OrbitalCarousel() {
                 loading="lazy"
                 src="/iPhone16Pro.png"
                 draggable={false}
-                className="pointer-events-none absolute object-contain select-none"
+                className="pointer-events-none absolute top-0 left-1/2 z-10 h-[58%] w-auto -translate-x-1/2 object-contain transition-transform duration-700 ease-out select-none group-hover:-translate-y-2 group-hover:scale-[1.06]"
               />
 
-              {/* <div className="from-background via-surface-secondary/80 to-transparent absolute inset-x-0 bottom-0 z-20 h-80 bg-linear-to-t " /> */}
+              {/* <div className="absolute inset-x-0 bottom-0 z-20 h-72 bg-linear-to-t from-white via-white/85 to-transparent backdrop-blur-[5px] dark:from-black dark:via-black/85 dark:to-transparent" /> */}
 
-              <Chip size="lg" color="default" variant="soft" className="w-fit">
+              <Chip size="sm" variant="soft" className="w-fit">
                 Mobile
               </Chip>
 
-              <Card.Header className="absolute inset-x-0 bottom-48 z-30 flex flex-col items-start gap-3 px-6">
+              <Card.Header className="absolute inset-x-0 bottom-24 z-30 flex flex-col items-start gap-3 px-6">
                 <Card.Title>
                   <TrueFocus
                     sentence="iPhone 16 Pro"
                     blurAmount={5}
-                    borderColor="var(--color-accent, #5227FF)"
-                    glowColor="var(--color-success, #5227FF)"
+                    borderColor="var(--accent, #5227FF)"
+                    glowColor="var(--accent, #5227FF)"
                     animationDuration={0.5}
                     pauseBetweenAnimations={1}
                     initialIndex={2}
                   />
                 </Card.Title>
-                <TagGroup selectionMode="single" size="lg">
+                <TagGroup selectionMode="single" size="md" variant="surface">
                   <TagGroup.List>
                     <Tag>
                       <Icon icon="mdi:apple" className="size-4" />
-                      iOS 27.0
+                      iOS 20.0
                     </Tag>
                     <Tag>
                       <Icon icon="hugeicons:system-update-02" className="size-4" />
@@ -320,7 +320,7 @@ export function OrbitalCarousel() {
               </Card.Header>
 
               <Card.Footer className="absolute inset-x-5 bottom-5 z-40 flex items-center justify-between">
-                <Chip variant="tertiary" size="lg" color="warning">
+                <Chip variant="soft" size="md" color="warning">
                   A18 Pro silicon
                 </Chip>
 
@@ -334,7 +334,7 @@ export function OrbitalCarousel() {
                       size: "sm",
                     })}
                   >
-                    <ArrowUpRight />
+                    <ArrowUpRight className="size-4" />
                   </Link>
                   <Tooltip.Content>
                     <p>Get it.</p>
