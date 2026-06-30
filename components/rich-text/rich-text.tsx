@@ -180,6 +180,26 @@ export function RichText({
     { dependencies: [showSettings], scope: containerRef }
   );
 
+  // 4. Immersive Fullscreen Entry Animation
+  useGSAP(
+    () => {
+      if (isFullscreen) {
+        gsap.fromTo(
+          [".rich-text-header", ".rich-text-body"],
+          { opacity: 0, y: 15 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.08,
+            ease: "power3.out",
+          }
+        );
+      }
+    },
+    { dependencies: [isFullscreen] }
+  );
+
   // Extract metadata when opening Publish Settings
   const handleOpenPublish = () => {
     if (currentContent) {
@@ -248,7 +268,7 @@ export function RichText({
       defaultValue={initialValue}
       onValueChange={handleValueChange}
     >
-      <Modal.Header className="flex flex-row items-center justify-between">
+      <Modal.Header className="rich-text-header flex flex-row items-center justify-between">
         <FixedToolbar />
 
         <div className="flex items-center gap-2">
@@ -288,7 +308,7 @@ export function RichText({
         <LinkMenu />
       </Modal.Header>
 
-      <Modal.Body ref={containerRef} className="relative flex flex-1 flex-row overflow-hidden">
+      <Modal.Body ref={containerRef} className="rich-text-body relative flex flex-1 flex-row overflow-hidden">
         <RichTextEditor.Content />
 
         <Form

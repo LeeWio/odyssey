@@ -73,8 +73,8 @@ export function RichTextModal() {
               ) : (
                 <div
                   ref={ref}
-                  className={`flex h-full w-full flex-1 flex-col overflow-hidden ${
-                    fullscreen ? "bg-background p-4" : ""
+                  className={`flex h-full w-full flex-1 flex-col overflow-hidden transition-all duration-500 ease-in-out ${
+                    fullscreen ? "bg-background p-8 md:p-12 shadow-2xl" : "p-0"
                   }`}
                 >
                   <RichText
