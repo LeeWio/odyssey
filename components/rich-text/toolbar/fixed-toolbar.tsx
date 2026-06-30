@@ -1,9 +1,12 @@
 "use client";
 
-import { RichTextEditor } from "@heroui-pro/react";
+import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
+import { Dropdown, Button, Label, Tooltip } from "@heroui/react";
 
 export function FixedToolbar() {
+  const { editor } = useRichTextEditor();
+
   return (
     <RichTextEditor.Toolbar>
       <RichTextEditor.ToolbarGroup aria-label="Edit history actions">
@@ -46,6 +49,45 @@ export function FixedToolbar() {
         <RichTextEditor.ToggleButton command="codeBlock" tooltip="Code Block">
           <Icon icon="gravity-ui:curly-brackets" />
         </RichTextEditor.ToggleButton>
+
+        <Dropdown>
+          <Tooltip delay={0}>
+            <Button
+              aria-label="Multi-column Layout"
+              isIconOnly
+              size="sm"
+              variant="ghost"
+              className="rounded-medium h-9 w-9"
+            >
+              <Icon icon="lucide:columns" className="h-4 w-4" />
+            </Button>
+            <Tooltip.Content>Multi-column Layout</Tooltip.Content>
+          </Tooltip>
+          <Dropdown.Popover>
+            <Dropdown.Menu>
+              <Dropdown.Item
+                id="cols-2"
+                textValue="2 Columns"
+                onAction={() => editor?.chain().focus().setColumns(2).run()}
+              >
+                <div className="flex items-center gap-2">
+                  <Icon icon="lucide:columns-2" className="h-4 w-4" />
+                  <Label>2 Columns</Label>
+                </div>
+              </Dropdown.Item>
+              <Dropdown.Item
+                id="cols-3"
+                textValue="3 Columns"
+                onAction={() => editor?.chain().focus().setColumns(3).run()}
+              >
+                <div className="flex items-center gap-2">
+                  <Icon icon="lucide:columns-3" className="h-4 w-4" />
+                  <Label>3 Columns</Label>
+                </div>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown>
       </RichTextEditor.ToolbarGroup>
     </RichTextEditor.Toolbar>
   );

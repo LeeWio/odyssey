@@ -11,6 +11,8 @@ import {
   TextAlign,
   TextStyleKit,
   Indent,
+  Column,
+  Columns,
 } from ".";
 
 export const ExtensionKit = [
@@ -26,4 +28,6 @@ export const ExtensionKit = [
   TextAlign,
   TextStyleKit,
   Indent,
+  Column,
+  Columns,
 ];
