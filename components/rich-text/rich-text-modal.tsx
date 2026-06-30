@@ -46,9 +46,7 @@ export function RichTextModal() {
       >
         <Modal.Container size="cover">
           {isOpen && (
-            <Modal.Dialog
-              className="flex h-[95vh] max-h-[95vh] w-[98vw] max-w-none flex-col overflow-hidden"
-            >
+            <Modal.Dialog className="flex h-[95vh] max-h-[95vh] w-[98vw] max-w-none flex-col overflow-hidden">
               {isFetching || !draftId ? (
                 <>
                   <Modal.Header className="flex flex-col gap-1">Create New Post</Modal.Header>
@@ -75,7 +73,7 @@ export function RichTextModal() {
               ) : (
                 <div
                   ref={ref}
-                  className={`flex flex-col flex-1 h-full w-full overflow-hidden ${
+                  className={`flex h-full w-full flex-1 flex-col overflow-hidden ${
                     fullscreen ? "bg-background p-4" : ""
                   }`}
                 >

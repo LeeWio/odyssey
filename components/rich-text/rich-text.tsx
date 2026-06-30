@@ -261,7 +261,7 @@ export function RichText({
                 onPress={onToggleFullscreen}
               >
                 <Icon
-                  icon={isFullscreen ? "gravity-ui:fullscreen-exit" : "gravity-ui:fullscreen"}
+                  icon={isFullscreen ? "gravity-ui:chevrons-collapse-up-right" : "gravity-ui:chevrons-expand-up-right"}
                 />
               </Button>
               <Tooltip.Content>
