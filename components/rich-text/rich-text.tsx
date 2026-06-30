@@ -192,8 +192,6 @@ export function RichText({
     { dependencies: [showSettings], scope: containerRef }
   );
 
-
-
   // Extract metadata when opening Publish Settings
   const handleOpenPublish = () => {
     if (currentContent) {
@@ -271,11 +269,16 @@ export function RichText({
               <Button
                 aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
                 isIconOnly
+                size="sm"
                 variant="tertiary"
                 onPress={onToggleFullscreen}
               >
                 <Icon
-                  icon={isFullscreen ? "gravity-ui:chevrons-collapse-up-right" : "gravity-ui:chevrons-expand-up-right"}
+                  icon={
+                    isFullscreen
+                      ? "gravity-ui:chevrons-collapse-up-right"
+                      : "gravity-ui:chevrons-expand-up-right"
+                  }
                 />
               </Button>
               <Tooltip.Content>
@@ -286,6 +289,7 @@ export function RichText({
 
           <Tooltip delay={0}>
             <Button
+              size="sm"
               aria-label={showSettings ? "Back to Edit" : "Publish"}
               isIconOnly
               variant={showSettings ? "secondary" : "tertiary"}
@@ -302,7 +306,7 @@ export function RichText({
         <LinkMenu />
       </Modal.Header>
 
-      <Modal.Body ref={containerRef} className="rich-text-body relative flex flex-1 flex-row overflow-hidden">
+      <Modal.Body ref={containerRef} className="relative flex flex-1 flex-row overflow-hidden">
         <RichTextEditor.Content />
 
         <Form
@@ -314,7 +318,7 @@ export function RichText({
             handlePublishSubmit();
           }}
         >
-          <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
+          <div className="flex flex-1 flex-col gap-6 overflow-y-auto">
             {/* Title Field */}
             <TextField
               name="title"
@@ -324,12 +328,7 @@ export function RichText({
               className="publish-form-field flex flex-col gap-1.5"
             >
               <Label className="text-sm font-medium">Title</Label>
-              <Input
-                fullWidth
-                placeholder="Enter post title..."
-                variant="secondary"
-                className="mt-1 h-10"
-              />
+              <Input fullWidth placeholder="Enter post title..." variant="secondary" />
             </TextField>
 
             {/* Slug Field */}
@@ -341,15 +340,10 @@ export function RichText({
                 setSlug(generateSlug(val));
                 setIsSlugManuallyEdited(true);
               }}
-              className="publish-form-field flex flex-col gap-1.5"
+              className="publish-form-field"
             >
               <Label className="text-sm font-medium">Slug</Label>
-              <Input
-                fullWidth
-                placeholder="e.g. my-first-post"
-                variant="secondary"
-                className="mt-1 h-10"
-              />
+              <Input fullWidth placeholder="e.g. my-first-post" variant="secondary" />
             </TextField>
 
             {/* Category Select */}
@@ -358,7 +352,7 @@ export function RichText({
               variant="secondary"
               value={categoryId}
               onChange={(key) => setCategoryId(key as string)}
-              className="publish-form-field flex w-full flex-col gap-1.5"
+              className="publish-form-field flex w-full flex-col"
             >
               <Label className="text-sm font-medium">Category</Label>
               <Select.Trigger className="mt-1">

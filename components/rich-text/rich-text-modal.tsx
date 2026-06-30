@@ -50,17 +50,14 @@ export function RichTextModal() {
         <Modal.Container
           size="cover"
           className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            fullscreen ? "!p-0 !m-0 !max-w-none !max-h-none !h-screen !w-screen" : ""
+            fullscreen ? "m-0! h-screen! max-h-none! w-screen! max-w-none! rounded-none p-0!" : ""
           }`}
         >
           {isOpen && (
             <Modal.Dialog
               className={`flex flex-col overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                fullscreen
-                  ? "h-screen max-h-screen w-screen max-w-none rounded-none border-none p-0 m-0 bg-background"
-                  : "h-[95vh] max-h-[95vh] w-[98vw] max-w-none rounded-2xl"
+                fullscreen ? "rounded-none" : ""
               }`}
-              style={fullscreen ? { height: "100vh", width: "100vw", maxWidth: "none", maxHeight: "none", borderRadius: 0, border: "none", margin: 0, padding: 0 } : undefined}
             >
               {isFetching || !draftId ? (
                 <>
@@ -87,9 +84,7 @@ export function RichTextModal() {
                 </>
               ) : (
                 <div
-                  className={`flex h-full w-full flex-1 flex-col overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    fullscreen ? "bg-background p-8 md:p-16 shadow-[0_0_60px_rgba(0,0,0,0.08)] dark:shadow-[0_0_60px_rgba(0,0,0,0.4)] border-t border-divider" : "p-0"
-                  }`}
+                  className={`flex h-full w-full flex-1 flex-col overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]`}
                 >
                   <RichText
                     key={draftId}
