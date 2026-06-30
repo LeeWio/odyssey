@@ -47,7 +47,12 @@ export function RichTextModal() {
           }
         }}
       >
-        <Modal.Container size="cover">
+        <Modal.Container
+          size="cover"
+          className={`transition-all duration-500 ease-out ${
+            fullscreen ? "!p-0 !m-0 !max-w-none !max-h-none !h-screen !w-screen" : ""
+          }`}
+        >
           {isOpen && (
             <Modal.Dialog
               className={`flex flex-col overflow-hidden transition-all duration-500 ease-out ${
@@ -55,6 +60,7 @@ export function RichTextModal() {
                   ? "h-screen max-h-screen w-screen max-w-none rounded-none border-none p-0 m-0 bg-background"
                   : "h-[95vh] max-h-[95vh] w-[98vw] max-w-none rounded-2xl"
               }`}
+              style={fullscreen ? { height: "100vh", width: "100vw", maxWidth: "none", maxHeight: "none", borderRadius: 0, border: "none", margin: 0, padding: 0 } : undefined}
             >
               {isFetching || !draftId ? (
                 <>
