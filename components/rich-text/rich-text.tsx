@@ -198,13 +198,15 @@ export function RichText({
       if (isFullscreen) {
         gsap.fromTo(
           [".rich-text-header", ".rich-text-body"],
-          { opacity: 0, y: 15 },
+          { opacity: 0, y: 20, scale: 0.99 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.6,
-            stagger: 0.08,
+            scale: 1,
+            duration: 0.7,
+            stagger: 0.1,
             ease: "power3.out",
+            delay: 0.15,
           }
         );
       }

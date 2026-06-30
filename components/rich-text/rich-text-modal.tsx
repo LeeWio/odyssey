@@ -9,10 +9,10 @@ import {
 } from "@/lib/features/ui/ui-slice";
 import { useGetAutosaveQuery } from "@/lib/features/post/post-api";
 import { Modal, Skeleton } from "@heroui/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { RichText } from "./rich-text";
-import { useMounted } from "@mantine/hooks";
+import { useMounted, useFullscreenDocument as useFullscreen } from "@mantine/hooks";
 import type { JSONContent } from "@tiptap/react";
 
 export function RichTextModal() {
@@ -20,7 +20,7 @@ export function RichTextModal() {
   const isOpen = useAppSelector(selectIsRichTextOpen);
   const draftId = useAppSelector(selectDraftIdentifier);
   const isMounted = useMounted();
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { toggle, fullscreen } = useFullscreen();
 
   // 1. Generate unique draft ID on client side when modal is opened
   useEffect(() => {
@@ -40,7 +40,9 @@ export function RichTextModal() {
         isOpen={true}
         onOpenChange={(open) => {
           if (!open) {
-            setIsFullscreen(false);
+            if (fullscreen) {
+              toggle();
+            }
             dispatch(toggleRichText());
           }
         }}
@@ -49,7 +51,7 @@ export function RichTextModal() {
           {isOpen && (
             <Modal.Dialog
               className={`flex flex-col overflow-hidden transition-all duration-500 ease-out ${
-                isFullscreen
+                fullscreen
                   ? "h-screen max-h-screen w-screen max-w-none rounded-none border-none p-0 m-0 bg-background"
                   : "h-[95vh] max-h-[95vh] w-[98vw] max-w-none rounded-2xl"
               }`}
@@ -80,15 +82,15 @@ export function RichTextModal() {
               ) : (
                 <div
                   className={`flex h-full w-full flex-1 flex-col overflow-hidden transition-all duration-500 ease-out ${
-                    isFullscreen ? "bg-background p-8 md:p-12 shadow-2xl" : "p-0"
+                    fullscreen ? "bg-background p-8 md:p-16 shadow-2xl" : "p-0"
                   }`}
                 >
                   <RichText
                     key={draftId}
                     identifier={draftId}
                     initialValue={autosavedContent?.content as JSONContent | undefined}
-                    isFullscreen={isFullscreen}
-                    onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+                    isFullscreen={fullscreen}
+                    onToggleFullscreen={toggle}
                   />
                 </div>
               )}
