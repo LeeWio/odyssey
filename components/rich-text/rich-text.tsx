@@ -192,39 +192,7 @@ export function RichText({
     { dependencies: [showSettings], scope: containerRef }
   );
 
-  // 4. Immersive Fullscreen Entry Animation
-  useGSAP(
-    () => {
-      if (isFullscreen) {
-        gsap.fromTo(
-          [".rich-text-header", ".rich-text-body"],
-          { opacity: 0, y: 20, scale: 0.99 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.7,
-            stagger: 0.1,
-            ease: "power3.out",
-            delay: 0.15,
-          }
-        );
-      } else {
-        // Quick, sleek fade-in-settle when docking back down
-        gsap.fromTo(
-          [".rich-text-header", ".rich-text-body"],
-          { opacity: 0.7, scale: 1.01 },
-          {
-            opacity: 1,
-            scale: 1,
-            duration: 0.5,
-            ease: "power2.out",
-          }
-        );
-      }
-    },
-    { dependencies: [isFullscreen] }
-  );
+
 
   // Extract metadata when opening Publish Settings
   const handleOpenPublish = () => {
