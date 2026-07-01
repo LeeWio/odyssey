@@ -6,6 +6,7 @@ import {
   Modal,
   Label,
   TextField,
+  FieldError,
   Link,
   Separator,
   Input,
@@ -152,9 +153,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                                 if (emailError) setEmailError("");
                               }}
                             />
-                            {emailError && (
-                              <div className="text-tiny text-danger mt-1">{emailError}</div>
-                            )}
+                            {emailError && <FieldError>{emailError}</FieldError>}
                           </TextField>
 
                           <Button

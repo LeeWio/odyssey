@@ -45,7 +45,7 @@ export function TextMenu() {
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="flex items-center"
       >
-        <RichTextEditor.ToolbarGroup aria-label="">
+        <RichTextEditor.ToolbarGroup aria-label="Text formatting">
           <FontSizePicker value={states.fontSize} onChange={commands.setFontSize} />
           <FontFamilyPicker value={states.fontFamily} onChange={commands.setFontFamily} />
           <LineHeightPicker value={states.lineHeight} onChange={commands.setLineHeight} />

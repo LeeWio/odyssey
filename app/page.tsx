@@ -231,32 +231,32 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {[
             {
-              icon: <Globe className="size-6" aria-label="" role="img" />,
+              icon: <Globe className="size-6" aria-hidden="true" />,
               title: "Global CDN",
               desc: "Deploy seamlessly worldwide.",
             },
             {
-              icon: <Palette className="size-6" aria-label="" role="img" />,
+              icon: <Palette className="size-6" aria-hidden="true" />,
               title: "Themeable",
               desc: "Easily switch themes and styles.",
             },
             {
-              icon: <ShieldCheck className="size-6" aria-label="" role="img" />,
+              icon: <ShieldCheck className="size-6" aria-hidden="true" />,
               title: "Secure",
               desc: "Enterprise-grade security built-in.",
             },
             {
-              icon: <Persons className="size-6" aria-label="" role="img" />,
+              icon: <Persons className="size-6" aria-hidden="true" />,
               title: "Collaboration",
               desc: "Work together in real-time.",
             },
             {
-              icon: <Check className="size-6" aria-label="" role="img" />,
+              icon: <Check className="size-6" aria-hidden="true" />,
               title: "Accessible",
               desc: "Fully accessible out of the box.",
             },
             {
-              icon: <Globe className="size-6" aria-label="" role="img" />,
+              icon: <Globe className="size-6" aria-hidden="true" />,
               title: "SEO Ready",
               desc: "Optimized for search engines.",
             },
@@ -554,7 +554,12 @@ export default function Home() {
               to your inbox.
             </Typography>
             <div className="mt-2 flex items-center gap-2">
-              <Input placeholder="Enter your email" type="email" className="max-w-[240px]" />
+              <Input
+                aria-label="Email address"
+                placeholder="Enter your email"
+                type="email"
+                className="max-w-[240px]"
+              />
               <Button>Subscribe</Button>
             </div>
           </div>

@@ -87,13 +87,13 @@ export function SheetPanel() {
                   Music Player
                 </Card.Content>
                 <Card.Footer className="flex items-center justify-center gap-4">
-                  <Button isIconOnly size="lg" variant="secondary" aria-label="">
+                  <Button isIconOnly size="lg" variant="secondary" aria-label="Previous track">
                     <BackwardFillIcon />
                   </Button>
-                  <Button isIconOnly size="lg" variant="primary" aria-label="">
+                  <Button isIconOnly size="lg" variant="primary" aria-label="Play">
                     <PlayFillIcon />
                   </Button>
-                  <Button isIconOnly size="lg" variant="secondary" aria-label="">
+                  <Button isIconOnly size="lg" variant="secondary" aria-label="Next track">
                     <ForwardFillIcon />
                   </Button>
                 </Card.Footer>

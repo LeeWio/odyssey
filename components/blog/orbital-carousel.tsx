@@ -530,6 +530,7 @@ export function OrbitalCarousel() {
       <div className="mt-4 flex w-full items-center justify-center gap-4">
         <Button
           isIconOnly
+          aria-label="Previous slide"
           variant="tertiary"
           size="md"
           onPress={handlePrev}
@@ -537,10 +538,13 @@ export function OrbitalCarousel() {
         >
           <ArrowLeft />
         </Button>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5" role="tablist" aria-label="Slides">
           {[0, 1, 2, 3, 4].map((idx) => (
             <div
               key={idx}
+              role="tab"
+              aria-selected={idx === activeIndex}
+              aria-label={`Slide ${idx + 1}`}
               className="h-1.5 rounded-full transition-all duration-300"
               style={{
                 width: idx === activeIndex ? "24px" : "6px",
@@ -554,6 +558,7 @@ export function OrbitalCarousel() {
         </div>
         <Button
           isIconOnly
+          aria-label="Next slide"
           variant="tertiary"
           size="md"
           onPress={handleNext}

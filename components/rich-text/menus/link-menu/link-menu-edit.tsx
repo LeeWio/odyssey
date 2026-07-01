@@ -85,22 +85,22 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
       </TextField>
 
       <RichTextEditor.LinkPopover.Actions>
-        <CellSwitch
-          isSelected={openInNewTab}
-          onChange={setOpenInNewTab}
-          aria-label=""
-          className="w-full"
-        >
+        <CellSwitch isSelected={openInNewTab} onChange={setOpenInNewTab} className="w-full">
           <CellSwitch.Trigger>
             <CellSwitch.Label>Open in new tab</CellSwitch.Label>
             <CellSwitch.Control />
           </CellSwitch.Trigger>
         </CellSwitch>
         <ButtonGroup variant="secondary">
-          <Button isIconOnly onPress={onCancel}>
+          <Button isIconOnly onPress={onCancel} aria-label="Cancel">
             <Icon icon="gravity-ui:xmark" />
           </Button>
-          <Button isIconOnly onPress={handleSave} isDisabled={url.trim() === ""}>
+          <Button
+            isIconOnly
+            onPress={handleSave}
+            isDisabled={url.trim() === ""}
+            aria-label="Save link"
+          >
             <ButtonGroup.Separator />
             <Icon icon="gravity-ui:arrow-uturn-cw-left" />
           </Button>
