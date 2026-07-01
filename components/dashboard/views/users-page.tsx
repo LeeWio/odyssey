@@ -279,7 +279,7 @@ export function UsersPage() {
   );
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <h2 className="text-foreground text-base font-semibold">User Management</h2>

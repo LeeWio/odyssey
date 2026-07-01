@@ -152,7 +152,7 @@ export function PermissionsPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
       <div className="flex flex-col gap-1 select-none">
         <h2 className="text-foreground text-base font-semibold">Roles & Permissions</h2>
         <p className="text-muted text-sm">

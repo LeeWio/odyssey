@@ -67,7 +67,7 @@ const FAQS: readonly FaqItem[] = [
 
 export function HelpPage() {
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 pt-4 pb-10">
+    <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 pt-8 pb-10">
       <p className="text-muted text-sm">Find answers, contact support, or dig into the docs.</p>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">

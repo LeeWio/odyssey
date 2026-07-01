@@ -57,7 +57,7 @@ export function DashboardToolbar() {
             </Dropdown.Popover>
           </Dropdown>
         </ButtonGroup>
-        <Button size="sm">Download</Button>
+        <Button size="sm" variant="secondary">Download</Button>
       </div>
     </div>
   );

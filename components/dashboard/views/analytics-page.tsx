@@ -25,7 +25,7 @@ export function AnalyticsPage() {
   }, [selectedRange]);
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-muted text-sm">Explore how your product is performing.</p>
         <Segment
