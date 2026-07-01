@@ -261,7 +261,7 @@ export function StockLedger() {
                 {MARKET_INDICES.map((index, idx) => (
                   <Card
                     key={idx}
-                    className="flex flex-row items-center justify-between rounded-2xl border border-white/5 bg-white/5 p-4 shadow-[0_4px_12px_rgba(0,0,0,0.1)] backdrop-blur-md transition-all duration-300 hover:border-white/10 hover:bg-white/10"
+                    className="flex flex-row items-center justify-between rounded-2xl border border-white/5 bg-white/5 p-4 shadow-[0_4px_12px_rgba(0,0,0,0.1)] backdrop-blur-md transition-[transform,border-color,background-color] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-white/10 hover:bg-white/10 active:scale-[0.98]"
                   >
                     <div className="flex flex-col gap-0.5">
                       <span className="text-[9px] font-bold tracking-wider text-white/60 uppercase">
@@ -320,7 +320,7 @@ export function StockLedger() {
                         >
                           <div className="p-1">
                             {/* Square Premium Glass Card */}
-                            <Card className="relative aspect-square w-full overflow-hidden rounded-[28px] border border-white/15 bg-cover bg-center shadow-xl transition-all duration-400 ease-out select-none hover:-translate-y-1 hover:scale-[1.03]">
+                            <Card className="relative aspect-square w-full overflow-hidden rounded-[28px] border border-white/15 bg-cover bg-center shadow-xl transition-[transform,box-shadow,border-color,background-color] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] select-none hover:-translate-y-1 hover:scale-[1.03] active:scale-[0.98] active:translate-y-0">
                               {/* Fluid silk background gradient */}
                               <div
                                 className={`absolute inset-0 bg-gradient-to-tr ${item.gradient} opacity-95`}

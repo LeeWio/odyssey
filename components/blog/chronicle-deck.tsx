@@ -173,7 +173,7 @@ export function ChronicleDeck() {
                   <img
                     src={post.cover}
                     alt={post.title}
-                    className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-105"
                   />
                   <div className="from-background/90 absolute inset-0 bg-gradient-to-t via-transparent to-transparent md:bg-gradient-to-r md:from-transparent" />
                   <div className="absolute top-4 left-4">

@@ -206,7 +206,7 @@ export function OrbitalCarousel() {
             0,
             <Card
               variant={activeIndex === 0 ? "default" : "transparent"}
-              className={`flex h-full flex-col overflow-hidden p-0 transition-all duration-500 ${
+              className={`flex h-full flex-col overflow-hidden p-0 transition-[transform,opacity,shadow,background-color,border-color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
                 activeIndex === 0
                   ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
                   : "opacity-40"
@@ -266,7 +266,7 @@ export function OrbitalCarousel() {
             1,
             <Card
               variant={activeIndex === 1 ? "default" : "transparent"}
-              className={`relative flex h-full w-full max-w-112.5 flex-col overflow-hidden bg-radial-[at_50%_35%] from-zinc-100/90 via-zinc-50/50 to-white transition-all duration-500 dark:border-white/5 dark:from-zinc-700/80 dark:via-zinc-950 dark:to-black ${
+              className={`relative flex h-full w-full max-w-112.5 flex-col overflow-hidden bg-radial-[at_50%_35%] from-zinc-100/90 via-zinc-50/50 to-white transition-[transform,opacity,shadow,background-color,border-color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] dark:border-white/5 dark:from-zinc-700/80 dark:via-zinc-950 dark:to-black ${
                 activeIndex === 1
                   ? "group hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
                   : "opacity-40"
@@ -277,7 +277,7 @@ export function OrbitalCarousel() {
                 loading="lazy"
                 src="/iPhone16Pro.png"
                 draggable={false}
-                className="pointer-events-none absolute top-0 left-1/2 z-10 h-[58%] w-auto -translate-x-1/2 object-contain transition-transform duration-700 ease-out select-none group-hover:-translate-y-2 group-hover:scale-[1.06]"
+                className="pointer-events-none absolute top-0 left-1/2 z-10 h-[58%] w-auto -translate-x-1/2 object-contain transition-transform duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] select-none group-hover:-translate-y-2 group-hover:scale-[1.06]"
               />
 
               {/* <div className="absolute inset-x-0 bottom-0 z-20 h-72 bg-linear-to-t from-white via-white/85 to-transparent backdrop-blur-[5px] dark:from-black dark:via-black/85 dark:to-transparent" /> */}
@@ -349,7 +349,7 @@ export function OrbitalCarousel() {
             2,
             <Card
               variant={activeIndex === 2 ? "default" : "transparent"}
-              className={`flex flex-col overflow-hidden p-0 transition-all duration-500 ${
+              className={`flex flex-col overflow-hidden p-0 transition-[transform,opacity,shadow,background-color,border-color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
                 activeIndex === 2
                   ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
                   : "opacity-40"
@@ -407,7 +407,7 @@ export function OrbitalCarousel() {
             3,
             <Card
               variant={activeIndex === 3 ? "default" : "transparent"}
-              className={`flex flex-col overflow-hidden p-0 transition-all duration-500 ${
+              className={`flex flex-col overflow-hidden p-0 transition-[transform,opacity,shadow,background-color,border-color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
                 activeIndex === 3
                   ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
                   : "opacity-40"
@@ -468,7 +468,7 @@ export function OrbitalCarousel() {
             4,
             <Card
               variant={activeIndex === 4 ? "default" : "transparent"}
-              className={`flex flex-col overflow-hidden p-0 transition-all duration-500 ${
+              className={`flex flex-col overflow-hidden p-0 transition-[transform,opacity,shadow,background-color,border-color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
                 activeIndex === 4
                   ? "hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl"
                   : "opacity-40"
@@ -545,7 +545,7 @@ export function OrbitalCarousel() {
               role="tab"
               aria-selected={idx === activeIndex}
               aria-label={`Slide ${idx + 1}`}
-              className="h-1.5 rounded-full transition-all duration-300"
+              className="h-1.5 rounded-full transition-[width,background-color] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)]"
               style={{
                 width: idx === activeIndex ? "24px" : "6px",
                 backgroundColor:
