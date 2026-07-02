@@ -15,7 +15,7 @@ import {
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "motion/react";
 
-// --- 模块卡片组件 (一级菜单 Catalog，即 type === 0 或 type === 1 作为根) ---
+// --- 模块卡片组件 (一级菜单 Catalog) ---
 function PermissionModuleCard({
   rootNode,
   checkedIds,
@@ -27,6 +27,10 @@ function PermissionModuleCard({
 }) {
   const isChecked = checkedIds.has(rootNode.id);
   const [isOpen, setIsOpen] = useState(true);
+
+  // 1. 核心过滤：根节点下直属的二级 MENU 子菜单 (type !== 2) 与 直属的操作 BUTTON (type === 2)
+  const menuChildren = rootNode.children?.filter((c) => c.type !== 2) || [];
+  const actionChildren = rootNode.children?.filter((c) => c.type === 2) || [];
 
   // 辅助函数：计算当前模块已选中的子权限个数
   const getSelectionCount = (node: MenuResponse): { selected: number; total: number } => {
@@ -103,8 +107,45 @@ function PermissionModuleCard({
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           >
             <Card.Content className="p-5 flex flex-col gap-5">
-              {rootNode.children && rootNode.children.length > 0 ? (
-                rootNode.children.map((child) => (
+              {/* 直属操作按钮 (如果根分类直属挂载了 BUTTON 类型) */}
+              {actionChildren.length > 0 && (
+                <div className="flex flex-wrap gap-2.5 bg-surface-secondary/30 border border-border/20 rounded-2xl p-4 mb-2">
+                  {actionChildren.map((action) => {
+                    const isActionChecked = checkedIds.has(action.id);
+                    return (
+                      <label
+                        key={action.id}
+                        className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-xs cursor-pointer select-none transition-all duration-350 ${
+                          isActionChecked
+                            ? "bg-primary-soft/10 border-primary/30 text-primary font-semibold shadow-sm"
+                            : "bg-surface border-border/60 text-foreground/80 hover:bg-surface-secondary/40"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          className="hidden"
+                          checked={isActionChecked}
+                          onChange={(e) => onCheckChange(action.id, e.target.checked)}
+                        />
+                        <Icon
+                          icon={isActionChecked ? "gravity-ui:circle-check-fill" : "gravity-ui:circle"}
+                          className={`size-4 transition-transform duration-300 ${
+                            isActionChecked ? "text-primary scale-110" : "text-muted"
+                          }`}
+                        />
+                        <span>{action.name}</span>
+                        {action.permission && (
+                          <span className="opacity-60 text-[9px] font-mono">({action.permission})</span>
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* 直属子菜单分组 (二级 MENU 子分类) */}
+              {menuChildren.length > 0 ? (
+                menuChildren.map((child) => (
                   <PermissionSubGroup
                     key={child.id}
                     node={child}
@@ -113,7 +154,9 @@ function PermissionModuleCard({
                   />
                 ))
               ) : (
-                <p className="text-muted text-xs py-4 text-center">暂无分配任何子权限</p>
+                actionChildren.length === 0 && (
+                  <p className="text-muted text-xs py-4 text-center">暂无分配任何子权限</p>
+                )
               )}
             </Card.Content>
           </motion.div>
