@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Card, Button, Checkbox, Label, Spinner, ListBox, Description, Chip } from "@heroui/react";
+import { Card, Button, Checkbox, Label, Spinner, ListBox, Description, Chip, Tooltip } from "@heroui/react";
 import {
   useGetAllRolesQuery,
   useGetRoleMenuIdsQuery,
@@ -60,10 +60,10 @@ function PermissionModuleCard({
             isSelected={isChecked}
             onChange={(checked) => onCheckChange(rootNode.id, checked)}
           >
-            <Checkbox.Control>
-              <Checkbox.Indicator />
-            </Checkbox.Control>
             <Checkbox.Content>
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
               <span className="text-foreground text-sm font-bold flex items-center gap-2 select-none">
                 {rootNode.icon && <Icon icon={rootNode.icon} className="text-primary size-5" />}
                 {rootNode.name}
@@ -81,20 +81,24 @@ function PermissionModuleCard({
               已选 {selected} / {total} 项
             </span>
           )}
-          <Button
-            isIconOnly
-            size="sm"
-            variant="ghost"
-            onPress={() => setIsOpen(!isOpen)}
-            className="size-7"
-          >
-            <Icon
-              icon="gravity-ui:chevron-down"
-              className={`size-4 text-muted transition-transform duration-300 ${
-                isOpen ? "rotate-180" : ""
-              }`}
-            />
-          </Button>
+          <Tooltip delay={0}>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="ghost"
+              onPress={() => setIsOpen(!isOpen)}
+              className="size-7"
+              aria-label={isOpen ? "收起模块" : "展开模块"}
+            >
+              <Icon
+                icon="gravity-ui:chevron-down"
+                className={`size-4 text-muted transition-transform duration-300 ${
+                  isOpen ? "rotate-180" : ""
+                }`}
+              />
+            </Button>
+            <Tooltip.Content>{isOpen ? "收起模块" : "展开模块"}</Tooltip.Content>
+          </Tooltip>
         </div>
       </Card.Header>
 
@@ -109,35 +113,30 @@ function PermissionModuleCard({
             <Card.Content className="p-5 flex flex-col gap-5">
               {/* 直属操作按钮 (如果根分类直属挂载了 BUTTON 类型) */}
               {actionChildren.length > 0 && (
-                <div className="flex flex-wrap gap-2.5 bg-surface-secondary/30 border border-border/20 rounded-2xl p-4 mb-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-surface-secondary/30 border border-border/20 rounded-2xl p-4 mb-2">
                   {actionChildren.map((action) => {
                     const isActionChecked = checkedIds.has(action.id);
                     return (
-                      <label
-                        key={action.id}
-                        className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-xs cursor-pointer select-none transition-all duration-350 ${
-                          isActionChecked
-                            ? "bg-primary-soft/10 border-primary/30 text-primary font-semibold shadow-sm"
-                            : "bg-surface border-border/60 text-foreground/80 hover:bg-surface-secondary/40"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          className="hidden"
-                          checked={isActionChecked}
-                          onChange={(e) => onCheckChange(action.id, e.target.checked)}
-                        />
-                        <Icon
-                          icon={isActionChecked ? "gravity-ui:circle-check-fill" : "gravity-ui:circle"}
-                          className={`size-4 transition-transform duration-300 ${
-                            isActionChecked ? "text-primary scale-110" : "text-muted"
-                          }`}
-                        />
-                        <span>{action.name}</span>
-                        {action.permission && (
-                          <span className="opacity-60 text-[9px] font-mono">({action.permission})</span>
-                        )}
-                      </label>
+                      <Card key={action.id} className="bg-surface border border-border/50 hover:bg-surface-secondary/40 transition-colors duration-250 p-3.5 rounded-xl shadow-none">
+                        <Checkbox
+                          isSelected={isActionChecked}
+                          onChange={(checked) => onCheckChange(action.id, checked)}
+                          variant="secondary"
+                          className="w-full"
+                        >
+                          <Checkbox.Content>
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                            <div className="flex flex-col items-start gap-1 select-none">
+                              <span className="text-foreground text-xs font-bold leading-none">{action.name}</span>
+                              {action.permission && (
+                                <span className="text-[10px] text-default-400 font-mono leading-none mt-1">({action.permission})</span>
+                              )}
+                            </div>
+                          </Checkbox.Content>
+                        </Checkbox>
+                      </Card>
                     );
                   })}
                 </div>
@@ -190,10 +189,10 @@ function PermissionSubGroup({
           isSelected={isChecked}
           onChange={(checked) => onCheckChange(node.id, checked)}
         >
-          <Checkbox.Control>
-            <Checkbox.Indicator />
-          </Checkbox.Control>
           <Checkbox.Content>
+            <Checkbox.Control>
+              <Checkbox.Indicator />
+            </Checkbox.Control>
             <span className="text-foreground text-xs md:text-sm font-bold flex items-center gap-2 select-none">
               {node.icon && <Icon icon={node.icon} className="text-muted size-4" />}
               {node.name}
@@ -205,37 +204,32 @@ function PermissionSubGroup({
         </Chip>
       </div>
 
-      {/* 核心改版：操作型叶子节点权限，改用精美的气泡药丸标签(Tag pills)横向排列 */}
+      {/* 核心改版：操作型叶子节点权限，100% 采用官方 Checkbox + Card 网格排列 */}
       {actionChildren.length > 0 && (
-        <div className="flex flex-wrap gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {actionChildren.map((action) => {
             const isActionChecked = checkedIds.has(action.id);
             return (
-              <label
-                key={action.id}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-xs cursor-pointer select-none transition-all duration-350 ${
-                  isActionChecked
-                    ? "bg-primary-soft/10 border-primary/30 text-primary font-semibold shadow-sm"
-                    : "bg-surface border-border/60 text-foreground/80 hover:bg-surface-secondary/40"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  className="hidden"
-                  checked={isActionChecked}
-                  onChange={(e) => onCheckChange(action.id, e.target.checked)}
-                />
-                <Icon
-                  icon={isActionChecked ? "gravity-ui:circle-check-fill" : "gravity-ui:circle"}
-                  className={`size-4 transition-transform duration-300 ${
-                    isActionChecked ? "text-primary scale-110" : "text-muted"
-                  }`}
-                />
-                <span>{action.name}</span>
-                {action.permission && (
-                  <span className="opacity-60 text-[9px] font-mono">({action.permission})</span>
-                )}
-              </label>
+              <Card key={action.id} className="bg-surface border border-border/50 hover:bg-surface-secondary/40 transition-colors duration-250 p-3.5 rounded-xl shadow-none">
+                <Checkbox
+                  isSelected={isActionChecked}
+                  onChange={(checked) => onCheckChange(action.id, checked)}
+                  variant="secondary"
+                  className="w-full"
+                >
+                  <Checkbox.Content>
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                    <div className="flex flex-col items-start gap-1 select-none">
+                      <span className="text-foreground text-xs font-bold leading-none">{action.name}</span>
+                      {action.permission && (
+                        <span className="text-[10px] text-default-400 font-mono leading-none mt-1">({action.permission})</span>
+                      )}
+                    </div>
+                  </Checkbox.Content>
+                </Checkbox>
+              </Card>
             );
           })}
         </div>
