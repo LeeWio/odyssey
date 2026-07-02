@@ -29,7 +29,7 @@ import {
 } from "@/lib/features/moment/moment-api";
 import { usePortalContainer } from "../use-portal-container";
 
-// --- 单个时间线节点组件 ---
+// --- Single Timeline Node Component ---
 interface TimelineItemProps {
   moment: MomentResponse;
   onLike: (id: number) => void;
@@ -52,7 +52,7 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       className="relative flex gap-6 pl-1"
     >
-      {/* 轴线上的圆点标记 */}
+      {/* Axis Marker Circle */}
       <div className="relative flex flex-col items-center">
         <div className="bg-primary/10 border-primary/40 flex size-9 items-center justify-center rounded-full border-2 bg-surface shadow-sm ring-4 ring-background z-10">
           <Icon icon="gravity-ui:chat" className="text-primary size-4" aria-hidden="true" />
@@ -60,7 +60,7 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
         <div className="absolute top-9 bottom-0 w-0.5 bg-border -mb-10 last:hidden" />
       </div>
 
-      {/* 消息气泡卡片 */}
+      {/* Message Bubble Card */}
       <div className="bg-surface border-border flex flex-1 flex-col gap-4 rounded-3xl border p-5 md:p-6 shadow-sm hover:shadow-md transition-all duration-350">
         <div className="flex items-center justify-between border-b border-border/60 pb-3">
           <span className="text-muted text-xs font-semibold tracking-tight uppercase">
@@ -75,7 +75,7 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
           {moment.content}
         </div>
 
-        {/* 交互工具栏 */}
+        {/* Action Bar */}
         <div className="flex items-center gap-2 border-t border-border/40 pt-3">
           <Button
             size="sm"
@@ -103,9 +103,9 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
 
 export function MomentsPage() {
   const portalContainer = usePortalContainer();
-  const [activeTab, setActiveTab] = useState<string>("admin"); // Default to admin inside dashboard!
+  const [activeTab, setActiveTab] = useState<string>("admin"); // Default to admin inside dashboard
 
-  // --- 公共时间线数据 ---
+  // --- Public Timeline State ---
   const { data: publicData, isLoading: isPublicLoading } = useGetPublicMomentsQuery({
     page: 0,
     size: 50,
@@ -113,7 +113,7 @@ export function MomentsPage() {
   const publicMoments = publicData?.list || [];
   const [likeMoment, { isLoading: isLiking }] = useLikeMomentMutation();
 
-  // --- 管理控制台数据 ---
+  // --- Management Console State ---
   const { data: adminData, isLoading: isAdminLoading } = useGetAllMomentsQuery({
     page: 0,
     size: 50,
@@ -124,12 +124,12 @@ export function MomentsPage() {
   const [updateMoment, { isLoading: isUpdating }] = useUpdateMomentMutation();
   const [deleteMoment, { isLoading: isDeleting }] = useDeleteMomentMutation();
 
-  // --- 表单与对话框状态 ---
+  // --- Dialog & Modal States ---
   const [isFormOpen, setIsFormFormOpen] = useState(false);
   const [momentToEdit, setMomentToEdit] = useState<MomentResponse | null>(null);
   const [momentToDelete, setMomentToDelete] = useState<MomentResponse | null>(null);
 
-  // 表单字段
+  // Form Fields
   const [formContent, setFormContent] = useState("");
   const [formIsPublished, setFormIsPublished] = useState(true);
 
@@ -169,7 +169,7 @@ export function MomentsPage() {
       }
       setIsFormFormOpen(false);
     } catch {
-      // 报错提示在 RTK 拦截中已全局处理
+      // Handled globally
     }
   };
 
@@ -206,25 +206,25 @@ export function MomentsPage() {
       },
       {
         accessorKey: "content",
-        header: "内容",
+        header: "Content",
         id: "content",
         minWidth: 320,
         cell: (item) => <span className="text-sm line-clamp-2">{item.content}</span>,
       },
       {
         accessorKey: "isPublished",
-        header: "状态",
+        header: "Status",
         id: "isPublished",
         minWidth: 120,
         cell: (item) => (
           <Chip size="sm" variant="soft" color={item.isPublished ? "success" : "warning"}>
-            {item.isPublished ? "已发布" : "草稿"}
+            {item.isPublished ? "Published" : "Draft"}
           </Chip>
         ),
       },
       {
         accessorKey: "likesCount",
-        header: "获赞数",
+        header: "Likes",
         id: "likesCount",
         minWidth: 100,
         cell: (item) => <span className="font-medium tabular-nums">{item.likesCount}</span>,
@@ -232,7 +232,7 @@ export function MomentsPage() {
       {
         accessorKey: "createdAt",
         allowsSorting: true,
-        header: "发布时间",
+        header: "Created At",
         id: "createdAt",
         minWidth: 180,
         cell: (item) => (
@@ -243,7 +243,7 @@ export function MomentsPage() {
       },
       {
         align: "end",
-        header: "操作",
+        header: "Actions",
         id: "actions",
         minWidth: 160,
         cell: (item) => (
@@ -263,44 +263,44 @@ export function MomentsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8">
-      {/* 头部标题区 */}
+      {/* Header Title Section */}
       <div className="border-border flex flex-col gap-2 border-b pb-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-foreground text-2xl font-bold tracking-tight">微语 / 动态管理</h1>
+            <h1 className="text-foreground text-2xl font-bold tracking-tight">Moments & Microblogs</h1>
             {!isPublicLoading && (
               <Chip size="sm" variant="soft">
-                {publicMoments.length} 条已发布动态
+                {publicMoments.length} Published
               </Chip>
             )}
           </div>
           <p className="text-muted mt-1 text-sm">
-            发布并维护简短社交动态、微语或工作日志，支持对全站动态的点赞查看和逻辑下架。
+            Publish and manage short social updates, moments, or work logs. Supports likes tracking and logical deletion.
           </p>
         </div>
         <Button size="md" onPress={handleCreateOpen}>
           <Icon icon="gravity-ui:circle-plus" className="size-4" aria-hidden="true" />
-          新增微语
+          Add Moment
         </Button>
       </div>
 
-      {/* 标签栏选择 */}
+      {/* Tabs */}
       <Tabs selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(key as string)}>
         <Tabs.ListContainer>
           <Tabs.List aria-label="Moment views">
             <Tabs.Tab id="admin">
-              后台管理 Console
+              Management Console
               <Tabs.Indicator />
             </Tabs.Tab>
             <Tabs.Tab id="public">
-              时间轴预览 (Timeline)
+              Timeline Preview
               <Tabs.Indicator />
             </Tabs.Tab>
           </Tabs.List>
         </Tabs.ListContainer>
       </Tabs>
 
-      {/* 公共展示 Tab */}
+      {/* Public Tab */}
       {activeTab === "public" && (
         <div className="mx-auto w-full max-w-2xl">
           {isPublicLoading ? (
@@ -310,11 +310,11 @@ export function MomentsPage() {
           ) : publicMoments.length === 0 ? (
             <div className="bg-surface border-border flex flex-col items-center justify-center rounded-2xl border p-12 text-center shadow-sm">
               <Icon icon="gravity-ui:circle-exclamation" className="text-muted size-10 mb-3" aria-hidden="true" />
-              <p className="text-muted text-sm">当前时间轴上暂无微语，快去 Console 模块发布一条吧！</p>
+              <p className="text-muted text-sm">No moments published on the timeline yet. Go to the Management Console to create one!</p>
             </div>
           ) : (
             <div className="relative flex flex-col gap-8 pl-4">
-              {/* Timeline 左侧主轴线条 */}
+              {/* Timeline Vertical Axis Line */}
               <div className="absolute top-0 bottom-0 left-[21px] w-0.5 bg-border/60" />
               {publicMoments.map((moment) => (
                 <TimelineItem
@@ -329,7 +329,7 @@ export function MomentsPage() {
         </div>
       )}
 
-      {/* 后台管理 Tab */}
+      {/* Admin Tab */}
       {activeTab === "admin" && (
         <div className="bg-surface border-border overflow-hidden rounded-2xl border">
           <DataGrid
@@ -345,7 +345,7 @@ export function MomentsPage() {
         </div>
       )}
 
-      {/* 新增/编辑模态框 */}
+      {/* Create / Edit Modal */}
       <Modal>
         <Modal.Backdrop
           isOpen={isFormOpen}
@@ -358,48 +358,48 @@ export function MomentsPage() {
               <Form onSubmit={handleFormSubmit} className="flex flex-col gap-5">
                 <Modal.Header>
                   <div className="text-lg font-bold">
-                    {momentToEdit ? "编辑微语" : "发布新微语"}
+                    {momentToEdit ? "Edit Moment" : "Create Moment"}
                   </div>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4">
                   <TextField isRequired name="content" className="flex flex-col gap-1.5">
-                    <Label className="text-sm font-semibold">微语内容</Label>
+                    <Label className="text-sm font-semibold">Content</Label>
                     <TextArea
                       value={formContent}
                       onChange={(e) => setFormContent(e.target.value)}
-                      placeholder="今天有什么新鲜事想和大家分享吗..."
-                    className="min-h-32"
-                    variant="secondary"
-                    maxLength={500}
-                  />
-                </TextField>
+                      placeholder="Share what's on your mind today..."
+                      className="min-h-32"
+                      variant="secondary"
+                      maxLength={500}
+                    />
+                  </TextField>
 
-                <div className="pt-2">
-                  <Switch isSelected={formIsPublished} onChange={setFormIsPublished}>
-                    <Switch.Content>
-                      <Switch.Control>
-                        <Switch.Thumb />
-                      </Switch.Control>
-                      立即公开发布到主页时间线
-                    </Switch.Content>
-                  </Switch>
-                </div>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="ghost" onPress={() => setIsFormFormOpen(false)}>
-                  取消
-                </Button>
-                <Button type="submit" variant="primary" isDisabled={isCreating || isUpdating}>
-                  {isCreating || isUpdating ? <Spinner size="sm" /> : "确定提交"}
-                </Button>
-              </Modal.Footer>
-            </Form>
-          </Modal.Dialog>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
+                  <div className="pt-2">
+                    <Switch isSelected={formIsPublished} onChange={setFormIsPublished}>
+                      <Switch.Content>
+                        <Switch.Control>
+                          <Switch.Thumb />
+                        </Switch.Control>
+                        Publish immediately to the public timeline
+                      </Switch.Content>
+                    </Switch>
+                  </div>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="ghost" onPress={() => setIsFormFormOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" variant="primary" isDisabled={isCreating || isUpdating}>
+                    {isCreating || isUpdating ? <Spinner size="sm" /> : "Submit"}
+                  </Button>
+                </Modal.Footer>
+              </Form>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
 
-      {/* 删除确认 AlertDialog */}
+      {/* Delete Confirmation AlertDialog */}
       <AlertDialog>
         <AlertDialog.Backdrop
           isOpen={!!momentToDelete}
@@ -412,17 +412,17 @@ export function MomentsPage() {
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>删除微语确认</AlertDialog.Heading>
+                <AlertDialog.Heading>Delete Moment?</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                你确定要永久删除这条微语动态吗？此操作将无法撤销，时间线将同步下架。
+                Are you sure you want to permanently delete this moment? This action cannot be undone and will remove it from the timeline.
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button variant="ghost" onPress={() => setMomentToDelete(null)}>
-                  取消
+                  Cancel
                 </Button>
                 <Button variant="danger" onPress={handleDeleteConfirm} isDisabled={isDeleting}>
-                  {isDeleting ? <Spinner size="sm" className="text-white" /> : "永久删除"}
+                  {isDeleting ? <Spinner size="sm" className="text-white" /> : "Delete"}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

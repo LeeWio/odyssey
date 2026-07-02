@@ -72,7 +72,7 @@ function CommentTreeItem({
 }
 
 export function CommentsPage() {
-  const [activeTab, setActiveTab] = useState<string>("admin"); // Default to admin moderation inside admin panel!
+  const [activeTab, setActiveTab] = useState<string>("admin"); // Default to admin moderation inside admin panel
 
   // --- Public Tab State ---
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
@@ -159,7 +159,7 @@ export function CommentsPage() {
       },
       {
         accessorKey: "username",
-        header: "用户",
+        header: "User",
         id: "username",
         minWidth: 140,
         cell: (item) => (
@@ -173,7 +173,7 @@ export function CommentsPage() {
       },
       {
         accessorKey: "content",
-        header: "内容",
+        header: "Content",
         id: "content",
         minWidth: 280,
         cell: (item) => <span className="text-sm line-clamp-2">{item.content}</span>,
@@ -181,7 +181,7 @@ export function CommentsPage() {
       {
         accessorKey: "createdAt",
         allowsSorting: true,
-        header: "创建时间",
+        header: "Created At",
         id: "createdAt",
         minWidth: 160,
         cell: (item) => (
@@ -192,7 +192,7 @@ export function CommentsPage() {
       },
       {
         align: "end",
-        header: "操作",
+        header: "Actions",
         id: "actions",
         minWidth: 260,
         cell: (item) => (
@@ -204,7 +204,7 @@ export function CommentsPage() {
               onPress={() => handleModerate(item.id, "APPROVED")}
             >
               <Icon icon="gravity-ui:check" className="size-4" aria-hidden="true" />
-              通过
+              Approve
             </Button>
             <Button
               size="sm"
@@ -213,7 +213,7 @@ export function CommentsPage() {
               onPress={() => handleModerate(item.id, "REJECTED")}
             >
               <Icon icon="gravity-ui:xmark" className="size-4" aria-hidden="true" />
-              拒绝
+              Reject
             </Button>
             <Button
               isIconOnly
@@ -234,9 +234,9 @@ export function CommentsPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8">
       {/* Header */}
       <div className="border-border flex flex-col gap-2 border-b pb-4">
-        <h1 className="text-foreground text-2xl font-bold tracking-tight">评论审核与管理</h1>
+        <h1 className="text-foreground text-2xl font-bold tracking-tight">Comment Moderation</h1>
         <p className="text-muted mt-1 text-sm">
-          对全站文章下属评论进行审核、通过、拒绝以及删除等权限管控。
+          Approve, reject, or delete comments across all blog posts with administrative privileges.
         </p>
       </div>
 
@@ -244,11 +244,11 @@ export function CommentsPage() {
         <Tabs.ListContainer>
           <Tabs.List aria-label="Comment views">
             <Tabs.Tab id="admin">
-              审核大厅 (Moderation)
+              Moderation Console
               <Tabs.Indicator />
             </Tabs.Tab>
             <Tabs.Tab id="public">
-              前台效果预览 (Thread Preview)
+              Thread Preview
               <Tabs.Indicator />
             </Tabs.Tab>
           </Tabs.List>
@@ -260,7 +260,7 @@ export function CommentsPage() {
         <div className="flex flex-col gap-6">
           <Select
             className="w-full sm:w-[320px]"
-            placeholder={isPostsLoading ? "加载文章中..." : "选择一篇文章预览讨论线"}
+            placeholder={isPostsLoading ? "Loading posts..." : "Select a post to preview the comment thread"}
             isDisabled={isPostsLoading}
             value={selectedPostId?.toString() || null}
             onChange={(val) => {
@@ -272,7 +272,7 @@ export function CommentsPage() {
               }
             }}
           >
-            <Label>选择文章</Label>
+            <Label>Selected Post</Label>
             <Select.Trigger>
               <Select.Value />
               <Select.Indicator />
@@ -293,13 +293,13 @@ export function CommentsPage() {
             <div className="bg-surface border-border flex flex-col gap-8 rounded-3xl border p-6 md:p-8">
               {/* Comment Threading List */}
               <div className="flex flex-col gap-6">
-                <h3 className="text-lg font-bold">文章讨论线</h3>
+                <h3 className="text-lg font-bold">Comment Thread</h3>
                 {isCommentsLoading ? (
                   <div className="flex py-8 justify-center">
                     <Spinner size="md" />
                   </div>
                 ) : comments.length === 0 ? (
-                  <p className="text-muted text-sm py-4">当前文章暂无评论记录。</p>
+                  <p className="text-muted text-sm py-4">No comments found for this post.</p>
                 ) : (
                   <div className="flex flex-col gap-8">
                     {comments.map((comment) => (
@@ -316,27 +316,27 @@ export function CommentsPage() {
               {/* Publish Comment Form */}
               <Form onSubmit={handlePublishSubmit} className="bg-surface-secondary rounded-2xl p-4 md:p-6 flex flex-col gap-4">
                 <h4 className="text-base font-semibold">
-                  {replyToComment ? "回复选中的评论" : "发表新评论"}
+                  {replyToComment ? "Reply to Selected Comment" : "Leave a Comment"}
                 </h4>
                 
                 {replyToComment && (
                   <div className="bg-surface border-border flex items-center justify-between rounded-lg border px-4 py-2">
                     <span className="text-muted text-sm">
-                      正在回复 <span className="font-semibold text-foreground">@{replyToComment.username}</span>
+                      Replying to <span className="font-semibold text-foreground">@{replyToComment.username}</span>
                     </span>
                     <Button size="sm" variant="ghost" onPress={() => setReplyToComment(null)}>
                       <Icon icon="gravity-ui:xmark" className="size-4" aria-hidden="true" />
-                      取消
+                      Cancel
                     </Button>
                   </div>
                 )}
 
                 <TextField isRequired name="content" className="w-full">
-                  <Label className="sr-only">评论内容</Label>
+                  <Label className="sr-only">Comment Content</Label>
                   <TextArea
                     value={newCommentContent}
                     onChange={(e) => setNewCommentContent(e.target.value)}
-                    placeholder="写下您的精彩观点..."
+                    placeholder="Write your thoughts here..."
                     className="min-h-24"
                     variant="secondary"
                   />
@@ -344,7 +344,7 @@ export function CommentsPage() {
                 
                 <div className="flex justify-end">
                   <Button type="submit" variant="primary" isDisabled={isPublishing}>
-                    {isPublishing ? <Spinner size="sm" /> : "发布评论"}
+                    {isPublishing ? <Spinner size="sm" /> : "Post Comment"}
                   </Button>
                 </div>
               </Form>
@@ -380,17 +380,17 @@ export function CommentsPage() {
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>删除确认</AlertDialog.Heading>
+                <AlertDialog.Heading>Delete Comment?</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                确定永久删除该条评论记录吗？删除后前台将同步下架且不可撤销。
+                Are you sure you want to permanently delete this comment? This action cannot be undone and will remove the comment from the public timeline.
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button variant="ghost" onPress={() => setCommentToDelete(null)}>
-                  取消
+                  Cancel
                 </Button>
                 <Button variant="danger" onPress={handleDeleteConfirm} isDisabled={isDeleting}>
-                  {isDeleting ? <Spinner size="sm" className="text-white" /> : "确定删除"}
+                  {isDeleting ? <Spinner size="sm" className="text-white" /> : "Delete"}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>
