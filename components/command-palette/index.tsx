@@ -2,7 +2,7 @@
 
 import { Key, Kbd, Chip } from "@heroui/react";
 import { Command, EmptyState } from "@heroui-pro/react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useHotkeys } from "@mantine/hooks";
 
@@ -51,6 +51,14 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   const router = useRouter();
   const [inputValue, setInputValue] = useState("");
   const [activeSource, setActiveSource] = useState<CommandSource | null>(null);
+
+  // Clear input value and reset search scope when the command palette is closed (manually or programmatically)
+  useEffect(() => {
+    if (!isOpen) {
+      setInputValue("");
+      setActiveSource(null);
+    }
+  }, [isOpen]);
 
   const themeCommands = useThemeCommands();
   const adminCommands = useAdminCommands();
