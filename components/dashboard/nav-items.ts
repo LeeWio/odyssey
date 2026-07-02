@@ -12,6 +12,9 @@ import {
   Shield,
   Folder,
   Tag,
+  Comment,
+  Sparkles,
+  Picture,
 } from "@gravity-ui/icons";
 
 export type NavItem = {
@@ -25,6 +28,9 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/", icon: House, label: "Dashboard" },
   { href: "/categories", icon: Folder, label: "Categories" },
   { href: "/tags", icon: Tag, label: "Tags" },
+  { href: "/comments", icon: Comment, label: "Comments" },
+  { href: "/moments", icon: Sparkles, label: "Moments" },
+  { href: "/files", icon: Picture, label: "Materials" },
   { href: "/orders", icon: Receipt, label: "Orders" },
   { href: "/users", icon: Person, label: "Users" },
   { href: "/permissions", icon: Shield, label: "Permissions" },

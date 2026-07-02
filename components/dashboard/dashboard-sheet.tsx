@@ -18,6 +18,9 @@ import { SettingsPage } from "./views/settings-page";
 import { HelpPage } from "./views/help-page";
 import { CategoriesPage } from "./views/categories-page";
 import { TagsPage } from "./views/tags-page";
+import { CommentsPage } from "./views/comments-page";
+import { MomentsPage } from "./views/moments-page";
+import { FilesPage } from "./views/files-page";
 
 export function DashboardSheet() {
   const isMounted = useMounted();
@@ -44,6 +47,12 @@ export function DashboardSheet() {
         return <CategoriesPage />;
       case "/tags":
         return <TagsPage />;
+      case "/comments":
+        return <CommentsPage />;
+      case "/moments":
+        return <MomentsPage />;
+      case "/files":
+        return <FilesPage />;
       case "/analytics":
         return <AnalyticsPage />;
       case "/orders":
