@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Button, AlertDialog, Spinner, Tooltip } from "@heroui/react";
-import { DropZone } from "@heroui-pro/react";
+import { DropZone, useDropZonePickerContext } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 
 import { useUploadFileMutation, useDeleteFileMutation } from "@/lib/features/file/file-api";
@@ -52,6 +52,15 @@ function getFormatColor(ext: string): FileFormatColor {
     zip: "orange",
   };
   return map[ext.toLowerCase()] ?? "gray";
+}
+
+function UploadTrigger() {
+  const { openFilePicker } = useDropZonePickerContext();
+  return (
+    <Button variant="primary" onPress={openFilePicker} size="sm" className="mt-2">
+      添加素材文件
+    </Button>
+  );
 }
 
 export default function FileTestPage() {
@@ -232,7 +241,7 @@ export default function FileTestPage() {
           <DropZone.Icon />
           <DropZone.Label>将文件拖拽至此，或点击浏览</DropZone.Label>
           <DropZone.Description>支持 JPEG, PNG, PDF 格式，最大不超过 10 MB。</DropZone.Description>
-          <DropZone.Trigger>添加素材文件</DropZone.Trigger>
+          <UploadTrigger />
         </DropZone.Area>
         <DropZone.Input accept="image/*,application/pdf" onSelect={handleSelect} />
 

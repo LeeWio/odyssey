@@ -25,7 +25,7 @@ interface RichTextProps {
   onClose?: () => void;
 }
 
-const MotionButton = motion(Button);
+const MotionButton = motion.create(Button);
 
 export function RichText({
   identifier,

@@ -21,7 +21,7 @@ interface PublishSettingsSidebarProps {
   publish: RichTextPublishResult;
 }
 
-const MotionForm = motion(Form);
+const MotionForm = motion.create(Form);
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -55,7 +55,7 @@ const itemVariants = {
   },
 };
 
-const MotionButton = motion(Button);
+const MotionButton = motion.create(Button);
 
 export function PublishSettingsSidebar({ publish }: PublishSettingsSidebarProps) {
   const {
