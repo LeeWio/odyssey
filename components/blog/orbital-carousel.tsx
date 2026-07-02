@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, MouseEvent, TouchEvent } from "react";
+import Image from "next/image";
 import {
   Card,
   Chip,
@@ -90,8 +91,7 @@ export function OrbitalCarousel() {
     const isCenter = offset === 0;
 
     const angle = -offset * 32 + dragOffset * 0.08;
-    const zTranslate =
-      -Math.abs(offset) * 200 - (dragStartRef.current ? Math.abs(dragOffset) * 0.25 : 0);
+    const zTranslate = -Math.abs(offset) * 200 - Math.abs(dragOffset) * 0.25;
     const xTranslate = offset * 390 + dragOffset * 0.95;
     const scale = 1 - Math.abs(offset) * 0.1;
     const opacity = 1 - Math.abs(offset) * 0.5;
@@ -109,9 +109,10 @@ export function OrbitalCarousel() {
           opacity: Math.max(0.15, opacity),
           filter: `blur(${blurValue}px) brightness(${brightness})`,
           zIndex: 10 - Math.abs(offset),
-          transition: dragStartRef.current
-            ? "none"
-            : "transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s, filter 0.6s",
+          transition:
+            dragOffset !== 0
+              ? "none"
+              : "transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s, filter 0.6s",
           pointerEvents: "auto",
         }}
         onClick={() => {
@@ -213,11 +214,12 @@ export function OrbitalCarousel() {
               }`}
             >
               <div className="relative aspect-video w-full shrink-0 overflow-hidden">
-                <img
+                <Image
                   alt="MacBook Pro"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 30vw"
                   src="/IMG_4956.JPG"
-                  className="pointer-events-none h-full w-full object-cover select-none"
+                  className="pointer-events-none object-cover select-none"
                   draggable={false}
                 />
               </div>
@@ -272,12 +274,15 @@ export function OrbitalCarousel() {
                   : "opacity-40"
               }`}
             >
-              <img
+              <Image
                 alt="iPhone 16 Pro"
-                loading="lazy"
+                width={0}
+                height={0}
+                sizes="(max-width: 768px) 100vw, 30vw"
                 src="/iPhone16Pro.png"
                 draggable={false}
-                className="pointer-events-none absolute top-0 left-1/2 z-10 h-[58%] w-auto -translate-x-1/2 object-contain transition-transform duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] select-none group-hover:-translate-y-2 group-hover:scale-[1.06]"
+                style={{ height: "58%", width: "auto" }}
+                className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 object-contain transition-transform duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] select-none group-hover:-translate-y-2 group-hover:scale-[1.06]"
               />
 
               {/* <div className="absolute inset-x-0 bottom-0 z-20 h-72 bg-linear-to-t from-white via-white/85 to-transparent backdrop-blur-[5px] dark:from-black dark:via-black/85 dark:to-transparent" /> */}
@@ -356,11 +361,12 @@ export function OrbitalCarousel() {
               }`}
             >
               <div className="relative aspect-video w-full shrink-0 overflow-hidden">
-                <img
+                <Image
                   alt="PlayStation 5"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 30vw"
                   src="/er-hero.png"
-                  className="pointer-events-none w-full object-cover select-none"
+                  className="pointer-events-none object-cover select-none"
                   draggable={false}
                 />
               </div>
@@ -373,7 +379,8 @@ export function OrbitalCarousel() {
                 </Card.Title>
                 <Card.Description className="text-muted line-clamp-3 text-sm leading-relaxed font-normal opacity-90">
                   Where I go to disconnect. Immersive single-player games run beautifully on it.
-                  It's the perfect way to unwind and shift my brain away from code after a long day.
+                  It&apos;s the perfect way to unwind and shift my brain away from code after a long
+                  day.
                 </Card.Description>
               </Card.Header>
 
@@ -414,11 +421,12 @@ export function OrbitalCarousel() {
               }`}
             >
               <div className="relative aspect-video w-full shrink-0 overflow-hidden">
-                <img
+                <Image
                   alt="Nintendo Switch"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 30vw"
                   src="/zelda-hero.png"
-                  className="pointer-events-none w-full object-cover select-none"
+                  className="pointer-events-none object-cover select-none"
                   draggable={false}
                 />
               </div>
@@ -430,8 +438,9 @@ export function OrbitalCarousel() {
                   Nintendo Switch
                 </Card.Title>
                 <Card.Description className="text-muted line-clamp-3 text-sm leading-relaxed font-normal opacity-90">
-                  The best companion for travel and casual gaming. Whether I'm diving into Zelda on
-                  the couch or playing a quick round on a flight, it's always in my bag.
+                  The best companion for travel and casual gaming. Whether I&apos;m diving into
+                  Zelda on the couch or playing a quick round on a flight, it&apos;s always in my
+                  bag.
                 </Card.Description>
               </Card.Header>
 
@@ -475,11 +484,12 @@ export function OrbitalCarousel() {
               }`}
             >
               <div className="relative aspect-video w-full shrink-0 overflow-hidden">
-                <img
+                <Image
                   alt="AirPods Pro"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 30vw"
                   src="/IMG_4958.WEBP"
-                  className="pointer-events-none w-full object-cover select-none"
+                  className="pointer-events-none object-cover select-none"
                   draggable={false}
                 />
               </div>

@@ -1,20 +1,8 @@
-import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
+import { RichTextEditor } from "@heroui-pro/react";
 import { motion } from "motion/react";
 import { Icon } from "@iconify/react";
 import { LinkMenuEdit } from "../link-menu/link-menu-edit";
-import {
-  Button,
-  ButtonGroup,
-  ComboBox,
-  Dropdown,
-  Input,
-  Label,
-  ListBox,
-  Popover,
-  Separator,
-  ToggleButton,
-  useOverlayState,
-} from "@heroui/react";
+import { Button, Popover, useOverlayState } from "@heroui/react";
 import { useTextMenuStates } from "./hooks/use-text-menu-states";
 import { useRichTextCommands } from "./hooks/use-rich-text-commands";
 import { ToggleButtonToolbar } from "../../toolbar/toggle-button-toolbar";

@@ -1,20 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import {
-  Button,
-  AlertDialog,
-  Spinner,
-  Chip,
-  Tooltip,
-} from "@heroui/react";
+import { useState, useCallback, useEffect, useRef, ComponentProps } from "react";
+import { Button, AlertDialog, Spinner, Tooltip } from "@heroui/react";
 import { DropZone, useDropZonePickerContext } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 
-import {
-  useUploadFileMutation,
-  useDeleteFileMutation,
-} from "@/lib/features/file/file-api";
+import { useUploadFileMutation, useDeleteFileMutation } from "@/lib/features/file/file-api";
 
 interface UploadFile {
   id: string;
@@ -88,7 +79,11 @@ export function FilesPage() {
     const saved = localStorage.getItem("odyssey_dashboard_files");
     if (saved) {
       try {
-        setFiles(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Use setTimeout to avoid calling setState synchronously during mount/effect execution
+        setTimeout(() => {
+          setFiles(parsed);
+        }, 0);
       } catch {
         // Ignore parsing errors
       }
@@ -103,77 +98,80 @@ export function FilesPage() {
     };
   }, []);
 
-  const saveFilesToLocal = (updatedFiles: UploadFile[]) => {
+  const saveFilesToLocal = useCallback((updatedFiles: UploadFile[]) => {
     setFiles(updatedFiles);
     localStorage.setItem("odyssey_dashboard_files", JSON.stringify(updatedFiles));
-  };
+  }, []);
 
   // Execute file upload
-  const executeUpload = async (file: File) => {
-    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const newFile: UploadFile = {
-      id,
-      name: file.name,
-      size: file.size,
-      status: "uploading",
-      progress: 0,
-    };
+  const executeUpload = useCallback(
+    async (file: File) => {
+      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const newFile: UploadFile = {
+        id,
+        name: file.name,
+        size: file.size,
+        status: "uploading",
+        progress: 0,
+      };
 
-    setFiles((prev) => [newFile, ...prev]);
+      setFiles((prev) => [newFile, ...prev]);
 
-    // Simulate progress bar increments
-    const timer = setInterval(() => {
-      setFiles((prev) =>
-        prev.map((f) => {
-          if (f.id !== id || f.status !== "uploading") return f;
-          const next = Math.min(f.progress + Math.floor(Math.random() * 15) + 5, 90);
-          return { ...f, progress: next };
-        })
-      );
-    }, 200);
+      // Simulate progress bar increments
+      const timer = setInterval(() => {
+        setFiles((prev) =>
+          prev.map((f) => {
+            if (f.id !== id || f.status !== "uploading") return f;
+            const next = Math.min(f.progress + Math.floor(Math.random() * 15) + 5, 90);
+            return { ...f, progress: next };
+          })
+        );
+      }, 200);
 
-    timersRef.current.set(id, timer);
+      timersRef.current.set(id, timer);
 
-    try {
-      const res = await uploadFile(file).unwrap();
-      
-      const t = timersRef.current.get(id);
-      if (t) clearInterval(t);
-      timersRef.current.delete(id);
+      try {
+        const res = await uploadFile(file).unwrap();
 
-      setFiles((prev) => {
-        const updated = prev.map((f) => {
-          if (f.id === id) {
-            return {
-              ...f,
-              status: "complete" as const,
-              progress: 100,
-              url: res.fileUrl,
-              fileName: res.fileName,
-            };
-          }
-          return f;
+        const t = timersRef.current.get(id);
+        if (t) clearInterval(t);
+        timersRef.current.delete(id);
+
+        setFiles((prev) => {
+          const updated = prev.map((f) => {
+            if (f.id === id) {
+              return {
+                ...f,
+                status: "complete" as const,
+                progress: 100,
+                url: res.fileUrl,
+                fileName: res.fileName,
+              };
+            }
+            return f;
+          });
+          saveFilesToLocal(updated);
+          return updated;
         });
-        saveFilesToLocal(updated);
-        return updated;
-      });
-    } catch {
-      const t = timersRef.current.get(id);
-      if (t) clearInterval(t);
-      timersRef.current.delete(id);
+      } catch {
+        const t = timersRef.current.get(id);
+        if (t) clearInterval(t);
+        timersRef.current.delete(id);
 
-      setFiles((prev) => {
-        const updated = prev.map((f) => {
-          if (f.id === id) {
-            return { ...f, status: "failed" as const, progress: 0 };
-          }
-          return f;
+        setFiles((prev) => {
+          const updated = prev.map((f) => {
+            if (f.id === id) {
+              return { ...f, status: "failed" as const, progress: 0 };
+            }
+            return f;
+          });
+          saveFilesToLocal(updated);
+          return updated;
         });
-        saveFilesToLocal(updated);
-        return updated;
-      });
-    }
-  };
+      }
+    },
+    [uploadFile, saveFilesToLocal]
+  );
 
   // 1. Handle DropZone drop upload
   const handleDrop = useCallback(
@@ -188,7 +186,7 @@ export function FilesPage() {
         await executeUpload(dropped[0]);
       }
     },
-    [files]
+    [executeUpload]
   );
 
   // 2. Handle DropZone input selection upload
@@ -198,7 +196,7 @@ export function FilesPage() {
         await executeUpload(fileList[0]);
       }
     },
-    [files]
+    [executeUpload]
   );
 
   // Retry upload
@@ -236,21 +234,26 @@ export function FilesPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8 animate-fade-in">
+    <div className="animate-fade-in mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
       {/* Header */}
       <div className="border-border flex flex-col gap-2 border-b pb-4">
         <h1 className="text-foreground text-2xl font-bold tracking-tight">Static Assets Library</h1>
         <p className="text-muted mt-1 text-sm">
-          Upload, organize, and preview your media assets. Generated CDN/external links can be used as post covers and rich-text illustrations.
+          Upload, organize, and preview your media assets. Generated CDN/external links can be used
+          as post covers and rich-text illustrations.
         </p>
       </div>
 
       {/* Official DropZone UI */}
       <DropZone className="w-full">
-        <DropZone.Area onDrop={handleDrop as any}>
+        <DropZone.Area
+          onDrop={handleDrop as unknown as ComponentProps<typeof DropZone.Area>["onDrop"]}
+        >
           <DropZone.Icon />
           <DropZone.Label>Drag assets here or click to browse</DropZone.Label>
-          <DropZone.Description>Supports JPEG, PNG, or PDF formats up to 10 MB.</DropZone.Description>
+          <DropZone.Description>
+            Supports JPEG, PNG, or PDF formats up to 10 MB.
+          </DropZone.Description>
           <UploadTrigger />
         </DropZone.Area>
         <DropZone.Input accept="image/*,application/pdf" onSelect={handleSelect} />
@@ -273,19 +276,27 @@ export function FilesPage() {
                       {file.status === "complete" && (
                         <span className="text-success inline-flex items-center gap-1">
                           {" | "}
-                          <Icon icon="gravity-ui:circle-check-fill" className="size-3 text-success inline" aria-hidden="true" />
+                          <Icon
+                            icon="gravity-ui:circle-check-fill"
+                            className="text-success inline size-3"
+                            aria-hidden="true"
+                          />
                           {" Success"}
                         </span>
                       )}
                       {file.status === "failed" && (
                         <span className="text-danger inline-flex items-center gap-1">
                           {" | "}
-                          <Icon icon="gravity-ui:circle-xmark-fill" className="size-3 text-danger inline" aria-hidden="true" />
+                          <Icon
+                            icon="gravity-ui:circle-xmark-fill"
+                            className="text-danger inline size-3"
+                            aria-hidden="true"
+                          />
                           {" Failed"}
                         </span>
                       )}
                     </DropZone.FileMeta>
-                    
+
                     {/* Upload progress bar */}
                     {(file.status === "uploading" || file.status === "complete") && (
                       <DropZone.FileProgress value={file.progress}>
@@ -294,11 +305,11 @@ export function FilesPage() {
                         </DropZone.FileProgressTrack>
                       </DropZone.FileProgress>
                     )}
-                    
+
                     {/* Failed retry trigger */}
                     {file.status === "failed" && (
                       <Button
-                        className="-ml-1 mt-2 text-xs"
+                        className="mt-2 -ml-1 text-xs"
                         size="sm"
                         variant="danger-soft"
                         onPress={() => handleRetry(file)}
@@ -310,7 +321,7 @@ export function FilesPage() {
 
                   {/* Actions (Copy Link / New Tab Preview) */}
                   {file.status === "complete" && file.url && (
-                    <div className="flex items-center gap-1 mr-1">
+                    <div className="mr-1 flex items-center gap-1">
                       <Tooltip delay={0}>
                         <Button
                           isIconOnly
@@ -326,7 +337,9 @@ export function FilesPage() {
                             aria-hidden="true"
                           />
                         </Button>
-                        <Tooltip.Content>{isCopied ? "Link Copied!" : "Copy External Link"}</Tooltip.Content>
+                        <Tooltip.Content>
+                          {isCopied ? "Link Copied!" : "Copy External Link"}
+                        </Tooltip.Content>
                       </Tooltip>
                       <Tooltip delay={0}>
                         <Button
@@ -337,7 +350,11 @@ export function FilesPage() {
                           aria-label="Preview"
                           className="size-7"
                         >
-                          <Icon icon="gravity-ui:arrow-up-right-from-square" className="text-muted size-3.5" aria-hidden="true" />
+                          <Icon
+                            icon="gravity-ui:arrow-up-right-from-square"
+                            className="text-muted size-3.5"
+                            aria-hidden="true"
+                          />
                         </Button>
                         <Tooltip.Content>Open in New Tab</Tooltip.Content>
                       </Tooltip>
@@ -369,8 +386,12 @@ export function FilesPage() {
                 <AlertDialog.Heading>Delete Asset?</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                Are you sure you want to permanently delete the asset <span className="font-semibold text-foreground">"{fileToDelete?.name}"</span> from the server?
-                This action cannot be undone and all posts referenced by this URL will break.
+                Are you sure you want to permanently delete the asset{" "}
+                <span className="text-foreground font-semibold">
+                  &ldquo;{fileToDelete?.name}&rdquo;
+                </span>{" "}
+                from the server? This action cannot be undone and all posts referenced by this URL
+                will break.
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button variant="ghost" onPress={() => setFileToDelete(null)}>

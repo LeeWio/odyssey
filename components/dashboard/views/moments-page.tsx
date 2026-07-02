@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, FormEvent, useRef, useEffect } from "react";
+import { useMemo, useState, FormEvent, useCallback } from "react";
 import {
   Button,
   Form,
@@ -16,7 +16,7 @@ import {
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 
 import {
   useGetPublicMomentsQuery,
@@ -54,15 +54,15 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
     >
       {/* Axis Marker Circle */}
       <div className="relative flex flex-col items-center">
-        <div className="bg-primary/10 border-primary/40 flex size-9 items-center justify-center rounded-full border-2 bg-surface shadow-sm ring-4 ring-background z-10">
+        <div className="bg-primary/10 border-primary/40 bg-surface ring-background z-10 flex size-9 items-center justify-center rounded-full border-2 shadow-sm ring-4">
           <Icon icon="gravity-ui:chat" className="text-primary size-4" aria-hidden="true" />
         </div>
-        <div className="absolute top-9 bottom-0 w-0.5 bg-border -mb-10 last:hidden" />
+        <div className="bg-border absolute top-9 bottom-0 -mb-10 w-0.5 last:hidden" />
       </div>
 
       {/* Message Bubble Card */}
-      <div className="bg-surface border-border flex flex-1 flex-col gap-4 rounded-3xl border p-5 md:p-6 shadow-sm hover:shadow-md transition-all duration-350">
-        <div className="flex items-center justify-between border-b border-border/60 pb-3">
+      <div className="bg-surface border-border flex flex-1 flex-col gap-4 rounded-3xl border p-5 shadow-sm transition-all duration-350 hover:shadow-md md:p-6">
+        <div className="border-border/60 flex items-center justify-between border-b pb-3">
           <span className="text-muted text-xs font-semibold tracking-tight uppercase">
             MOMENT #{moment.id}
           </span>
@@ -71,29 +71,34 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
           </span>
         </div>
 
-        <div className="text-foreground/95 text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+        <div className="text-foreground/95 text-sm leading-relaxed whitespace-pre-wrap md:text-base">
           {moment.content}
         </div>
 
         {/* Action Bar */}
-        <div className="flex items-center gap-2 border-t border-border/40 pt-3">
+        <div className="border-border/40 flex items-center gap-2 border-t pt-3">
           <Button
             size="sm"
             variant="ghost"
-            className={`text-xs gap-1.5 rounded-full px-4 ${
+            className={`gap-1.5 rounded-full px-4 text-xs ${
               localLiked ? "text-danger bg-danger-soft/10" : "text-muted"
             }`}
             onPress={handleLikeClick}
             isDisabled={isLiking}
           >
-            <motion.div animate={{ scale: localLiked ? [1, 1.35, 1] : 1 }} transition={{ duration: 0.3 }}>
+            <motion.div
+              animate={{ scale: localLiked ? [1, 1.35, 1] : 1 }}
+              transition={{ duration: 0.3 }}
+            >
               <Icon
                 icon={localLiked ? "gravity-ui:heart-fill" : "gravity-ui:heart"}
                 className={`size-4 ${localLiked ? "text-danger" : ""}`}
                 aria-hidden="true"
               />
             </motion.div>
-            <span className="font-semibold tabular-nums">{moment.likesCount + (localLiked ? 1 : 0)}</span>
+            <span className="font-semibold tabular-nums">
+              {moment.likesCount + (localLiked ? 1 : 0)}
+            </span>
           </Button>
         </div>
       </div>
@@ -118,7 +123,6 @@ export function MomentsPage() {
     page: 0,
     size: 50,
   });
-  const adminMoments = adminData?.list || [];
 
   const [createMoment, { isLoading: isCreating }] = useCreateMomentMutation();
   const [updateMoment, { isLoading: isUpdating }] = useUpdateMomentMutation();
@@ -145,12 +149,12 @@ export function MomentsPage() {
     setIsFormFormOpen(true);
   };
 
-  const handleEditClick = (moment: MomentResponse) => {
+  const handleEditClick = useCallback((moment: MomentResponse) => {
     setMomentToEdit(moment);
     setFormContent(moment.content);
     setFormIsPublished(moment.isPublished);
     setIsFormFormOpen(true);
-  };
+  }, []);
 
   const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -181,8 +185,9 @@ export function MomentsPage() {
   };
 
   const sortedAdminMoments = useMemo(() => {
+    const list = adminData?.list || [];
     const col = adminSort.column as keyof MomentResponse;
-    return [...adminMoments].sort((a, b) => {
+    return [...list].sort((a, b) => {
       const first = a[col] ?? "";
       const second = b[col] ?? "";
       let cmp = 0;
@@ -193,7 +198,7 @@ export function MomentsPage() {
       }
       return adminSort.direction === "descending" ? -cmp : cmp;
     });
-  }, [adminMoments, adminSort]);
+  }, [adminData?.list, adminSort]);
 
   const adminColumns = useMemo<DataGridColumn<MomentResponse>[]>(
     () => [
@@ -209,7 +214,7 @@ export function MomentsPage() {
         header: "Content",
         id: "content",
         minWidth: 320,
-        cell: (item) => <span className="text-sm line-clamp-2">{item.content}</span>,
+        cell: (item) => <span className="line-clamp-2 text-sm">{item.content}</span>,
       },
       {
         accessorKey: "isPublished",
@@ -251,14 +256,19 @@ export function MomentsPage() {
             <Button isIconOnly size="sm" variant="tertiary" onPress={() => handleEditClick(item)}>
               <Icon icon="gravity-ui:pencil" className="size-4" aria-hidden="true" />
             </Button>
-            <Button isIconOnly size="sm" variant="danger-soft" onPress={() => setMomentToDelete(item)}>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="danger-soft"
+              onPress={() => setMomentToDelete(item)}
+            >
               <Icon icon="gravity-ui:trash-bin" className="size-4" aria-hidden="true" />
             </Button>
           </div>
         ),
       },
     ],
-    []
+    [handleEditClick]
   );
 
   return (
@@ -267,7 +277,9 @@ export function MomentsPage() {
       <div className="border-border flex flex-col gap-2 border-b pb-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-foreground text-2xl font-bold tracking-tight">Moments & Microblogs</h1>
+            <h1 className="text-foreground text-2xl font-bold tracking-tight">
+              Moments & Microblogs
+            </h1>
             {!isPublicLoading && (
               <Chip size="sm" variant="soft">
                 {publicMoments.length} Published
@@ -275,7 +287,8 @@ export function MomentsPage() {
             )}
           </div>
           <p className="text-muted mt-1 text-sm">
-            Publish and manage short social updates, moments, or work logs. Supports likes tracking and logical deletion.
+            Publish and manage short social updates, moments, or work logs. Supports likes tracking
+            and logical deletion.
           </p>
         </div>
         <Button size="md" onPress={handleCreateOpen}>
@@ -304,18 +317,25 @@ export function MomentsPage() {
       {activeTab === "public" && (
         <div className="mx-auto w-full max-w-2xl">
           {isPublicLoading ? (
-            <div className="flex py-12 justify-center">
+            <div className="flex justify-center py-12">
               <Spinner size="md" />
             </div>
           ) : publicMoments.length === 0 ? (
             <div className="bg-surface border-border flex flex-col items-center justify-center rounded-2xl border p-12 text-center shadow-sm">
-              <Icon icon="gravity-ui:circle-exclamation" className="text-muted size-10 mb-3" aria-hidden="true" />
-              <p className="text-muted text-sm">No moments published on the timeline yet. Go to the Management Console to create one!</p>
+              <Icon
+                icon="gravity-ui:circle-exclamation"
+                className="text-muted mb-3 size-10"
+                aria-hidden="true"
+              />
+              <p className="text-muted text-sm">
+                No moments published on the timeline yet. Go to the Management Console to create
+                one!
+              </p>
             </div>
           ) : (
             <div className="relative flex flex-col gap-8 pl-4">
               {/* Timeline Vertical Axis Line */}
-              <div className="absolute top-0 bottom-0 left-[21px] w-0.5 bg-border/60" />
+              <div className="bg-border/60 absolute top-0 bottom-0 left-[21px] w-0.5" />
               {publicMoments.map((moment) => (
                 <TimelineItem
                   key={moment.id}
@@ -415,7 +435,8 @@ export function MomentsPage() {
                 <AlertDialog.Heading>Delete Moment?</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                Are you sure you want to permanently delete this moment? This action cannot be undone and will remove it from the timeline.
+                Are you sure you want to permanently delete this moment? This action cannot be
+                undone and will remove it from the timeline.
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button variant="ghost" onPress={() => setMomentToDelete(null)}>

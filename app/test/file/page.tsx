@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, ComponentProps } from "react";
 import { Button, AlertDialog, Spinner, Tooltip } from "@heroui/react";
 import { DropZone, useDropZonePickerContext } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
@@ -79,7 +79,11 @@ export default function FileTestPage() {
     const saved = localStorage.getItem("odyssey_dropzone_files");
     if (saved) {
       try {
-        setFiles(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // 使用 setTimeout 异步设置状态以避免 react-hooks/set-state-in-effect 警告
+        setTimeout(() => {
+          setFiles(parsed);
+        }, 0);
       } catch {
         // 忽略解析失败
       }
@@ -94,77 +98,80 @@ export default function FileTestPage() {
     };
   }, []);
 
-  const saveFilesToLocal = (updatedFiles: UploadFile[]) => {
+  const saveFilesToLocal = useCallback((updatedFiles: UploadFile[]) => {
     setFiles(updatedFiles);
     localStorage.setItem("odyssey_dropzone_files", JSON.stringify(updatedFiles));
-  };
+  }, []);
 
   // 执行文件上传
-  const executeUpload = async (file: File) => {
-    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const newFile: UploadFile = {
-      id,
-      name: file.name,
-      size: file.size,
-      status: "uploading",
-      progress: 0,
-    };
+  const executeUpload = useCallback(
+    async (file: File) => {
+      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const newFile: UploadFile = {
+        id,
+        name: file.name,
+        size: file.size,
+        status: "uploading",
+        progress: 0,
+      };
 
-    setFiles((prev) => [newFile, ...prev]);
+      setFiles((prev) => [newFile, ...prev]);
 
-    // 模拟文件上传进度条递增
-    const timer = setInterval(() => {
-      setFiles((prev) =>
-        prev.map((f) => {
-          if (f.id !== id || f.status !== "uploading") return f;
-          const next = Math.min(f.progress + Math.floor(Math.random() * 15) + 5, 90);
-          return { ...f, progress: next };
-        })
-      );
-    }, 200);
+      // 模拟文件上传进度条递增
+      const timer = setInterval(() => {
+        setFiles((prev) =>
+          prev.map((f) => {
+            if (f.id !== id || f.status !== "uploading") return f;
+            const next = Math.min(f.progress + Math.floor(Math.random() * 15) + 5, 90);
+            return { ...f, progress: next };
+          })
+        );
+      }, 200);
 
-    timersRef.current.set(id, timer);
+      timersRef.current.set(id, timer);
 
-    try {
-      const res = await uploadFile(file).unwrap();
+      try {
+        const res = await uploadFile(file).unwrap();
 
-      const t = timersRef.current.get(id);
-      if (t) clearInterval(t);
-      timersRef.current.delete(id);
+        const t = timersRef.current.get(id);
+        if (t) clearInterval(t);
+        timersRef.current.delete(id);
 
-      setFiles((prev) => {
-        const updated = prev.map((f) => {
-          if (f.id === id) {
-            return {
-              ...f,
-              status: "complete" as const,
-              progress: 100,
-              url: res.fileUrl,
-              fileName: res.fileName,
-            };
-          }
-          return f;
+        setFiles((prev) => {
+          const updated = prev.map((f) => {
+            if (f.id === id) {
+              return {
+                ...f,
+                status: "complete" as const,
+                progress: 100,
+                url: res.fileUrl,
+                fileName: res.fileName,
+              };
+            }
+            return f;
+          });
+          saveFilesToLocal(updated);
+          return updated;
         });
-        saveFilesToLocal(updated);
-        return updated;
-      });
-    } catch {
-      const t = timersRef.current.get(id);
-      if (t) clearInterval(t);
-      timersRef.current.delete(id);
+      } catch {
+        const t = timersRef.current.get(id);
+        if (t) clearInterval(t);
+        timersRef.current.delete(id);
 
-      setFiles((prev) => {
-        const updated = prev.map((f) => {
-          if (f.id === id) {
-            return { ...f, status: "failed" as const, progress: 0 };
-          }
-          return f;
+        setFiles((prev) => {
+          const updated = prev.map((f) => {
+            if (f.id === id) {
+              return { ...f, status: "failed" as const, progress: 0 };
+            }
+            return f;
+          });
+          saveFilesToLocal(updated);
+          return updated;
         });
-        saveFilesToLocal(updated);
-        return updated;
-      });
-    }
-  };
+      }
+    },
+    [uploadFile, saveFilesToLocal]
+  );
 
   // 1. 处理 DropZone 拖放上传
   const handleDrop = useCallback(
@@ -179,7 +186,7 @@ export default function FileTestPage() {
         await executeUpload(dropped[0]);
       }
     },
-    [files]
+    [executeUpload]
   );
 
   // 2. 处理 DropZone 原生文件选择器文件
@@ -189,7 +196,7 @@ export default function FileTestPage() {
         await executeUpload(fileList[0]);
       }
     },
-    [files]
+    [executeUpload]
   );
 
   // 重试上传
@@ -240,7 +247,9 @@ export default function FileTestPage() {
 
       {/* 官方标准 DropZone UI */}
       <DropZone className="w-full">
-        <DropZone.Area onDrop={handleDrop as any}>
+        <DropZone.Area
+          onDrop={handleDrop as unknown as ComponentProps<typeof DropZone.Area>["onDrop"]}
+        >
           <DropZone.Icon />
           <DropZone.Label>将文件拖拽至此，或点击浏览</DropZone.Label>
           <DropZone.Description>支持 JPEG, PNG, PDF 格式，最大不超过 10 MB。</DropZone.Description>
@@ -377,8 +386,10 @@ export default function FileTestPage() {
               </AlertDialog.Header>
               <AlertDialog.Body>
                 你确定要从服务器上永久删除素材{" "}
-                <span className="text-foreground font-semibold">"{fileToDelete?.name}"</span> 吗？
-                此操作将无法撤销，所有引用此 URL 的文章和插图都将失效。
+                <span className="text-foreground font-semibold">
+                  &ldquo;{fileToDelete?.name}&rdquo;
+                </span>{" "}
+                吗？ 此操作将无法撤销，所有引用此 URL 的文章和插图都将失效。
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button variant="ghost" onPress={() => setFileToDelete(null)}>

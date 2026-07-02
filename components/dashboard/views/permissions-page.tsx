@@ -1,7 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Card, Button, Checkbox, Label, Spinner, ListBox, Description, Chip, Tooltip } from "@heroui/react";
+import { useState } from "react";
+import {
+  Card,
+  Button,
+  Checkbox,
+  Label,
+  Spinner,
+  ListBox,
+  Description,
+  Chip,
+  Tooltip,
+} from "@heroui/react";
 import {
   useGetAllRolesQuery,
   useGetRoleMenuIdsQuery,
@@ -52,9 +62,9 @@ function PermissionModuleCard({
   const { selected, total } = getSelectionCount(rootNode);
 
   return (
-    <Card className="border border-border/80 rounded-3xl overflow-hidden shadow-sm bg-surface mb-5 hover:shadow-md transition-all duration-300">
+    <Card className="border-border/80 bg-surface mb-5 overflow-hidden rounded-3xl border shadow-sm transition-all duration-300 hover:shadow-md">
       {/* 模块大头部与全局全选 */}
-      <Card.Header className="bg-surface-secondary/40 border-b border-border/40 py-4 px-5 flex items-center justify-between select-none">
+      <Card.Header className="bg-surface-secondary/40 border-border/40 flex items-center justify-between border-b px-5 py-4 select-none">
         <div className="flex items-center gap-3">
           <Checkbox
             isSelected={isChecked}
@@ -64,20 +74,20 @@ function PermissionModuleCard({
               <Checkbox.Control>
                 <Checkbox.Indicator />
               </Checkbox.Control>
-              <span className="text-foreground text-sm font-bold flex items-center gap-2 select-none">
+              <span className="text-foreground flex items-center gap-2 text-sm font-bold select-none">
                 {rootNode.icon && <Icon icon={rootNode.icon} className="text-primary size-5" />}
                 {rootNode.name}
               </span>
             </Checkbox.Content>
           </Checkbox>
-          <Chip size="sm" variant="soft" color="accent" className="font-mono text-[9px] scale-90">
+          <Chip size="sm" variant="soft" color="accent" className="scale-90 font-mono text-[9px]">
             {rootNode.type === 0 ? "目录" : rootNode.type === 1 ? "菜单" : "操作"}
           </Chip>
         </div>
 
         <div className="flex items-center gap-3">
           {total > 0 && (
-            <span className="text-muted text-xs tabular-nums font-semibold">
+            <span className="text-muted text-xs font-semibold tabular-nums">
               已选 {selected} / {total} 项
             </span>
           )}
@@ -92,7 +102,7 @@ function PermissionModuleCard({
             >
               <Icon
                 icon="gravity-ui:chevron-down"
-                className={`size-4 text-muted transition-transform duration-300 ${
+                className={`text-muted size-4 transition-transform duration-300 ${
                   isOpen ? "rotate-180" : ""
                 }`}
               />
@@ -110,14 +120,17 @@ function PermissionModuleCard({
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Card.Content className="p-5 flex flex-col gap-5">
+            <Card.Content className="flex flex-col gap-5 p-5">
               {/* 直属操作按钮 (如果根分类直属挂载了 BUTTON 类型) */}
               {actionChildren.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-surface-secondary/30 border border-border/20 rounded-2xl p-4 mb-2">
+                <div className="bg-surface-secondary/30 border-border/20 mb-2 grid grid-cols-1 gap-3 rounded-2xl border p-4 sm:grid-cols-2 lg:grid-cols-3">
                   {actionChildren.map((action) => {
                     const isActionChecked = checkedIds.has(action.id);
                     return (
-                      <Card key={action.id} className="bg-surface border border-border/50 hover:bg-surface-secondary/40 transition-colors duration-250 p-3.5 rounded-xl shadow-none">
+                      <Card
+                        key={action.id}
+                        className="bg-surface border-border/50 hover:bg-surface-secondary/40 rounded-xl border p-3.5 shadow-none transition-colors duration-250"
+                      >
                         <Checkbox
                           isSelected={isActionChecked}
                           onChange={(checked) => onCheckChange(action.id, checked)}
@@ -129,9 +142,13 @@ function PermissionModuleCard({
                               <Checkbox.Indicator />
                             </Checkbox.Control>
                             <div className="flex flex-col items-start gap-1 select-none">
-                              <span className="text-foreground text-xs font-bold leading-none">{action.name}</span>
+                              <span className="text-foreground text-xs leading-none font-bold">
+                                {action.name}
+                              </span>
                               {action.permission && (
-                                <span className="text-[10px] text-default-400 font-mono leading-none mt-1">({action.permission})</span>
+                                <span className="text-default-400 mt-1 font-mono text-[10px] leading-none">
+                                  ({action.permission})
+                                </span>
                               )}
                             </div>
                           </Checkbox.Content>
@@ -143,20 +160,18 @@ function PermissionModuleCard({
               )}
 
               {/* 直属子菜单分组 (二级 MENU 子分类) */}
-              {menuChildren.length > 0 ? (
-                menuChildren.map((child) => (
-                  <PermissionSubGroup
-                    key={child.id}
-                    node={child}
-                    checkedIds={checkedIds}
-                    onCheckChange={onCheckChange}
-                  />
-                ))
-              ) : (
-                actionChildren.length === 0 && (
-                  <p className="text-muted text-xs py-4 text-center">暂无分配任何子权限</p>
-                )
-              )}
+              {menuChildren.length > 0
+                ? menuChildren.map((child) => (
+                    <PermissionSubGroup
+                      key={child.id}
+                      node={child}
+                      checkedIds={checkedIds}
+                      onCheckChange={onCheckChange}
+                    />
+                  ))
+                : actionChildren.length === 0 && (
+                    <p className="text-muted py-4 text-center text-xs">暂无分配任何子权限</p>
+                  )}
             </Card.Content>
           </motion.div>
         )}
@@ -182,31 +197,28 @@ function PermissionSubGroup({
   const actionChildren = node.children?.filter((c) => c.type === 2) || [];
 
   return (
-    <div className="bg-surface-secondary/20 border border-border/30 rounded-2xl p-4 flex flex-col gap-4">
+    <div className="bg-surface-secondary/20 border-border/30 flex flex-col gap-4 rounded-2xl border p-4">
       {/* 子菜单栏头 */}
-      <div className="flex items-center justify-between border-b border-border/20 pb-2.5 select-none">
-        <Checkbox
-          isSelected={isChecked}
-          onChange={(checked) => onCheckChange(node.id, checked)}
-        >
+      <div className="border-border/20 flex items-center justify-between border-b pb-2.5 select-none">
+        <Checkbox isSelected={isChecked} onChange={(checked) => onCheckChange(node.id, checked)}>
           <Checkbox.Content>
             <Checkbox.Control>
               <Checkbox.Indicator />
             </Checkbox.Control>
-            <span className="text-foreground text-xs md:text-sm font-bold flex items-center gap-2 select-none">
+            <span className="text-foreground flex items-center gap-2 text-xs font-bold select-none md:text-sm">
               {node.icon && <Icon icon={node.icon} className="text-muted size-4" />}
               {node.name}
             </span>
           </Checkbox.Content>
         </Checkbox>
-        <Chip size="sm" variant="soft" className="font-mono text-[8px] scale-90">
+        <Chip size="sm" variant="soft" className="scale-90 font-mono text-[8px]">
           {node.type === 0 ? "目录" : node.type === 1 ? "菜单" : "操作"}
         </Chip>
       </div>
 
       {/* 核心改版：操作型叶子节点权限，100% 采用官方 Checkbox + Card 网格排列 */}
       {actionChildren.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {actionChildren.map((action) => {
             const isActionChecked = checkedIds.has(action.id);
             return (
@@ -222,9 +234,13 @@ function PermissionSubGroup({
                       <Checkbox.Indicator />
                     </Checkbox.Control>
                     <div className="flex flex-col items-start gap-1 select-none">
-                      <span className="text-foreground text-xs font-bold leading-none">{action.name}</span>
+                      <span className="text-foreground text-xs leading-none font-bold">
+                        {action.name}
+                      </span>
                       {action.permission && (
-                        <span className="text-[10px] text-default-400 font-mono leading-none mt-1">({action.permission})</span>
+                        <span className="text-default-400 mt-1 font-mono text-[10px] leading-none">
+                          ({action.permission})
+                        </span>
                       )}
                     </div>
                   </Checkbox.Content>
@@ -237,7 +253,7 @@ function PermissionSubGroup({
 
       {/* 如果仍然有多级层级菜单，递归渲染 */}
       {menuChildren.length > 0 && (
-        <div className="flex flex-col gap-4 pl-4 border-l border-border/40">
+        <div className="border-border/40 flex flex-col gap-4 border-l pl-4">
           {menuChildren.map((subChild) => (
             <PermissionSubGroup
               key={subChild.id}
@@ -348,15 +364,13 @@ export function PermissionsPage() {
 
       <div className="mt-2 grid grid-cols-1 items-start gap-6 md:grid-cols-[280px_1fr]">
         {/* Left Card: Roles List */}
-        <Card className="shrink-0 rounded-3xl border border-border/60 shadow-sm bg-surface">
+        <Card className="border-border/60 bg-surface shrink-0 rounded-3xl border shadow-sm">
           <Card.Header className="border-border/40 flex flex-col items-start gap-1 border-b p-5 select-none">
             <Card.Title className="flex items-center gap-1.5 text-sm font-bold">
               <Icon icon="gravity-ui:person" className="text-primary size-4" />
               安全角色 (Roles)
             </Card.Title>
-            <Card.Description className="text-xs">
-              选择角色绑定细粒度授权
-            </Card.Description>
+            <Card.Description className="text-xs">选择角色绑定细粒度授权</Card.Description>
           </Card.Header>
 
           <Card.Content className="p-2">
@@ -373,7 +387,12 @@ export function PermissionsPage() {
               }}
             >
               {roles.map((role) => (
-                <ListBox.Item id={role.id.toString()} textValue={role.name} key={role.id} className="rounded-2xl">
+                <ListBox.Item
+                  id={role.id.toString()}
+                  textValue={role.name}
+                  key={role.id}
+                  className="rounded-2xl"
+                >
                   <div className="flex flex-col items-start gap-1 select-none">
                     <Label className="text-xs font-bold">{role.name}</Label>
                     <Description className="text-default-400 font-mono text-[9px] leading-none">
@@ -389,15 +408,16 @@ export function PermissionsPage() {
         {/* Right Panel: Permissions Modules Grid */}
         <div className="flex flex-col gap-1">
           {/* 保存全局动作按钮区 */}
-          <div className="flex items-center justify-between mb-4 bg-surface border border-border/50 rounded-2xl px-5 py-3 shadow-sm select-none">
+          <div className="bg-surface border-border/50 mb-4 flex items-center justify-between rounded-2xl border px-5 py-3 shadow-sm select-none">
             <div className="flex flex-col gap-0.5">
-              <div className="text-sm font-bold flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 text-sm font-bold">
                 <Icon icon="gravity-ui:sliders" className="text-primary size-4" />
                 权限映射表 (Permissions)
               </div>
               {selectedRole && (
                 <span className="text-muted text-xs">
-                  正在配置角色：<span className="text-foreground font-semibold">{selectedRole.name}</span>
+                  正在配置角色：
+                  <span className="text-foreground font-semibold">{selectedRole.name}</span>
                 </span>
               )}
             </div>
@@ -433,7 +453,7 @@ export function PermissionsPage() {
             )}
 
             {menuTree.length === 0 ? (
-              <div className="text-default-400 bg-surface border border-border flex h-48 flex-col items-center justify-center gap-2 rounded-3xl">
+              <div className="text-default-400 bg-surface border-border flex h-48 flex-col items-center justify-center gap-2 rounded-3xl border">
                 <Icon icon="gravity-ui:circle-dashed" className="size-8 animate-spin" />
                 <span className="text-xs">系统当前未映射任何权限树节点</span>
               </div>

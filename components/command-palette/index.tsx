@@ -56,8 +56,10 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   // Clear input value and reset search scope when the command palette is closed (manually or programmatically)
   useEffect(() => {
     if (!isOpen) {
-      setInputValue("");
-      setActiveSource(null);
+      setTimeout(() => {
+        setInputValue("");
+        setActiveSource(null);
+      }, 0);
     }
   }, [isOpen]);
 
@@ -287,7 +289,10 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                             </div>
                             {showDescription ? (
                               <div className="text-muted mt-0.5 line-clamp-1 text-xs">
-                                <HighlightedText text={command.description || ""} query={inputValue} />
+                                <HighlightedText
+                                  text={command.description || ""}
+                                  query={inputValue}
+                                />
                               </div>
                             ) : null}
                           </div>

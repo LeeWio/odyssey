@@ -14,7 +14,7 @@ function formatDate(dateStr: string): string {
   try {
     const date = new Date(dateStr);
     return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(date);
-  } catch (_e) {
+  } catch {
     return dateStr;
   }
 }

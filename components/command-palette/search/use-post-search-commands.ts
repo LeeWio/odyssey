@@ -55,14 +55,16 @@ export function usePostSearchCommands(query: string, isOpen: boolean): PostSearc
     { skip: !isOpen }
   );
 
+  const groupsData = data?.groups;
+
   const { dynamicGroups, allCommands, total } = useMemo(() => {
-    if (!data?.groups) {
+    if (!groupsData) {
       return { dynamicGroups: [], allCommands: [], total: 0 };
     }
 
     let commandTotal = 0;
     const allCmds: CommandItem[] = [];
-    const groups = data.groups.map((group, groupIndex) => {
+    const groups = groupsData.map((group, groupIndex) => {
       const items = group.items || [];
       const commands = items.map((item, itemIndex) => {
         commandTotal++;
@@ -98,17 +100,17 @@ export function usePostSearchCommands(query: string, isOpen: boolean): PostSearc
 
     // Sort groups by priority if available
     groups.sort((a, b) => {
-      const gA = data.groups?.find(
-        (g) => `search-group-${g.type.toLowerCase()}-${data.groups?.indexOf(g)}` === a.id
+      const gA = groupsData.find(
+        (g) => `search-group-${g.type.toLowerCase()}-${groupsData.indexOf(g)}` === a.id
       );
-      const gB = data.groups?.find(
-        (g) => `search-group-${g.type.toLowerCase()}-${data.groups?.indexOf(g)}` === b.id
+      const gB = groupsData.find(
+        (g) => `search-group-${g.type.toLowerCase()}-${groupsData.indexOf(g)}` === b.id
       );
       return (gA?.priority ?? 0) - (gB?.priority ?? 0);
     });
 
     return { dynamicGroups: groups, allCommands: allCmds, total: commandTotal };
-  }, [data?.groups, hasRemoteQuery]);
+  }, [groupsData, hasRemoteQuery]);
 
   return {
     dynamicGroups,

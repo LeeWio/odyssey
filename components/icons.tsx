@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { IconSvgProps } from "@/types";
 
-export const Logo: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const Logo: React.FC<IconSvgProps> = (props) => (
   <svg fill="none" height={size || height} viewBox="0 0 32 32" width={size || width} {...props}>
     <path
       clipRule="evenodd"
@@ -13,7 +13,7 @@ export const Logo: React.FC<IconSvgProps> = ({ size = 36, width, height, ...prop
   </svg>
 );
 
-export const DiscordIcon: React.FC<IconSvgProps> = ({ size = 24, width, height, ...props }) => {
+export const DiscordIcon: React.FC<IconSvgProps> = (props) => {
   return (
     <svg height={size || height} viewBox="0 0 24 24" width={size || width} {...props}>
       <path
@@ -24,7 +24,7 @@ export const DiscordIcon: React.FC<IconSvgProps> = ({ size = 24, width, height, 
   );
 };
 
-export const TwitterIcon: React.FC<IconSvgProps> = ({ size = 24, width, height, ...props }) => {
+export const TwitterIcon: React.FC<IconSvgProps> = (props) => {
   return (
     <svg height={size || height} viewBox="0 0 24 24" width={size || width} {...props}>
       <path
@@ -35,7 +35,7 @@ export const TwitterIcon: React.FC<IconSvgProps> = ({ size = 24, width, height, 
   );
 };
 
-export const GithubIcon: React.FC<IconSvgProps> = ({ size = 24, width, height, ...props }) => {
+export const GithubIcon: React.FC<IconSvgProps> = (props) => {
   return (
     <svg height={size || height} viewBox="0 0 24 24" width={size || width} {...props}>
       <path
@@ -186,7 +186,7 @@ export const PersonsIcon = (props: IconSvgProps) => (
   </svg>
 );
 
-export const PlayFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const PlayFillIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -204,7 +204,7 @@ export const PlayFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height,
   </svg>
 );
 
-export const PauseFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const PauseFillIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -222,7 +222,7 @@ export const PauseFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height
   </svg>
 );
 
-export const ForwardFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const ForwardFillIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -240,12 +240,7 @@ export const ForwardFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, heig
   </svg>
 );
 
-export const BackwardFillIcon: React.FC<IconSvgProps> = ({
-  size = 36,
-  width,
-  height,
-  ...props
-}) => (
+export const BackwardFillIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -263,7 +258,7 @@ export const BackwardFillIcon: React.FC<IconSvgProps> = ({
   </svg>
 );
 
-export const SunMaxFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const SunMaxFillIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -286,7 +281,7 @@ export const SunMaxFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, heigh
   </svg>
 );
 
-export const MoonFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const MoonFillIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -304,7 +299,7 @@ export const MoonFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height,
   </svg>
 );
 
-export const DisplayFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => {
+export const DisplayFillIcon: React.FC<IconSvgProps> = (props) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -324,7 +319,7 @@ export const DisplayFillIcon: React.FC<IconSvgProps> = ({ size = 36, width, heig
   );
 };
 
-export const ClockIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const ClockIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -347,7 +342,7 @@ export const ClockIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ..
   </svg>
 );
 
-export const GearIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const GearIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -365,7 +360,7 @@ export const GearIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...
   </svg>
 );
 
-export const EnvelopeIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const EnvelopeIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -383,7 +378,7 @@ export const EnvelopeIcon: React.FC<IconSvgProps> = ({ size = 36, width, height,
   </svg>
 );
 
-export const EyeIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const EyeIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -401,7 +396,7 @@ export const EyeIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...p
   </svg>
 );
 
-export const EyeSlashIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const EyeSlashIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -424,7 +419,7 @@ export const EyeSlashIcon: React.FC<IconSvgProps> = ({ size = 36, width, height,
   </svg>
 );
 
-export const ArrowUpIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const ArrowUpIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -442,7 +437,7 @@ export const ArrowUpIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, 
   </svg>
 );
 
-export const ArrowDownIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const ArrowDownIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -459,7 +454,7 @@ export const ArrowDownIcon: React.FC<IconSvgProps> = ({ size = 36, width, height
     </g>
   </svg>
 );
-export const TargetIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const TargetIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -482,7 +477,7 @@ export const TargetIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, .
   </svg>
 );
 
-export const ShieldAlertIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const ShieldAlertIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -500,7 +495,7 @@ export const ShieldAlertIcon: React.FC<IconSvgProps> = ({ size = 36, width, heig
   </svg>
 );
 
-export const ChartColumnIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const ChartColumnIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -538,7 +533,7 @@ export const ChartColumnIcon: React.FC<IconSvgProps> = ({ size = 36, width, heig
   </svg>
 );
 
-export const ArchiveIcon: React.FC<IconSvgProps> = ({ size = 36, width, height, ...props }) => (
+export const ArchiveIcon: React.FC<IconSvgProps> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"

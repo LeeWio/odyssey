@@ -1,7 +1,7 @@
 import type { RichTextEditorSuggestionItem } from "@heroui-pro/react";
 
 import { RichTextEditor, filterRichTextEditorSuggestionItems } from "@heroui-pro/react";
-import { Calendar, CirclePlus, Heading1, ListUl, QuoteOpen, Sparkles } from "@gravity-ui/icons";
+import { Heading1, ListUl, QuoteOpen, Sparkles } from "@gravity-ui/icons";
 
 const iconClassName = "";
 
@@ -18,7 +18,13 @@ const getSlashItems = ({ query }: { query: string }): RichTextEditorSuggestionIt
       },
       {
         command: ({ editor, range }) => {
-          (editor.chain().focus().deleteRange(range) as any).toggleBulletList().run();
+          (
+            editor.chain().focus().deleteRange(range) as unknown as {
+              toggleBulletList: () => { run: () => void };
+            }
+          )
+            .toggleBulletList()
+            .run();
         },
         icon: <ListUl className={iconClassName} />,
         keywords: ["list", "bullet"],
@@ -26,7 +32,13 @@ const getSlashItems = ({ query }: { query: string }): RichTextEditorSuggestionIt
       },
       {
         command: ({ editor, range }) => {
-          (editor.chain().focus().deleteRange(range) as any).toggleBlockquote().run();
+          (
+            editor.chain().focus().deleteRange(range) as unknown as {
+              toggleBlockquote: () => { run: () => void };
+            }
+          )
+            .toggleBlockquote()
+            .run();
         },
         icon: <QuoteOpen className={iconClassName} />,
         keywords: ["quote", "note"],

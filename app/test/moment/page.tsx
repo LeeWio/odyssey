@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, FormEvent, Key } from "react";
+import { useMemo, useState, FormEvent, useCallback } from "react";
 import {
   Button,
   Form,
@@ -16,7 +16,7 @@ import {
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 
 import {
   useGetPublicMomentsQuery,
@@ -121,7 +121,6 @@ export default function MomentTestPage() {
     page: 0,
     size: 50,
   });
-  const adminMoments = adminData?.list || [];
 
   const [createMoment, { isLoading: isCreating }] = useCreateMomentMutation();
   const [updateMoment, { isLoading: isUpdating }] = useUpdateMomentMutation();
@@ -148,12 +147,12 @@ export default function MomentTestPage() {
     setIsFormFormOpen(true);
   };
 
-  const handleEditClick = (moment: MomentResponse) => {
+  const handleEditClick = useCallback((moment: MomentResponse) => {
     setMomentToEdit(moment);
     setFormContent(moment.content);
     setFormIsPublished(moment.isPublished);
     setIsFormFormOpen(true);
-  };
+  }, []);
 
   const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -184,8 +183,9 @@ export default function MomentTestPage() {
   };
 
   const sortedAdminMoments = useMemo(() => {
+    const list = adminData?.list || [];
     const col = adminSort.column as keyof MomentResponse;
-    return [...adminMoments].sort((a, b) => {
+    return [...list].sort((a, b) => {
       const first = a[col] ?? "";
       const second = b[col] ?? "";
       let cmp = 0;
@@ -196,7 +196,7 @@ export default function MomentTestPage() {
       }
       return adminSort.direction === "descending" ? -cmp : cmp;
     });
-  }, [adminMoments, adminSort]);
+  }, [adminData?.list, adminSort]);
 
   const adminColumns = useMemo<DataGridColumn<MomentResponse>[]>(
     () => [
@@ -266,7 +266,7 @@ export default function MomentTestPage() {
         ),
       },
     ],
-    []
+    [handleEditClick]
   );
 
   return (

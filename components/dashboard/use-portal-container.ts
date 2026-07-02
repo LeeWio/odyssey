@@ -10,7 +10,9 @@ export function usePortalContainer() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setContainer(document.getElementById("dashboard-sheet-container"));
+      setTimeout(() => {
+        setContainer(document.getElementById("dashboard-sheet-container"));
+      }, 0);
     }
   }, []);
 

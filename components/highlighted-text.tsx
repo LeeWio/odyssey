@@ -30,7 +30,7 @@ export function HighlightedText({ text, query, className = "" }: HighlightedText
         part.isHighlight ? (
           <mark
             key={i}
-            className="bg-accent/20 text-accent rounded px-1 py-0.5 font-semibold transition-colors duration-250 bg-transparent"
+            className="text-accent bg-transparent font-semibold transition-colors duration-250"
           >
             {part.text}
           </mark>

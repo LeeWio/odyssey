@@ -6,7 +6,6 @@ import {
   Button,
   ColorPicker,
   ColorSlider,
-  ColorSwatch,
   Label,
   ListBox,
   Select,

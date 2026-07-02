@@ -1,5 +1,4 @@
 import TiptapLink from "@tiptap/extension-link";
-import { mergeAttributes } from "@tiptap/react";
 
 export const Link = TiptapLink.extend({}).configure({
   openOnClick: false,

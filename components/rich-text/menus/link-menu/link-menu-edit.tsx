@@ -1,6 +1,6 @@
 import { Globe } from "@gravity-ui/icons";
 import { CellSwitch, RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
-import { Button, ButtonGroup, InputGroup, Label, TextField, useOverlayState } from "@heroui/react";
+import { Button, ButtonGroup, InputGroup, Label, TextField } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { getMarkRange } from "@tiptap/core";
 import { useCallback, useState } from "react";
@@ -47,7 +47,7 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
     }
 
     onCancel?.();
-  }, [editor, url]);
+  }, [editor, url, onCancel]);
 
   return (
     <>
@@ -59,7 +59,7 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
           </InputGroup.Prefix>
           <InputGroup.Input
             value={displayText}
-            onChange={(e: any) => setDisplayText(e.target.value)}
+            onChange={(e) => setDisplayText(e.target.value)}
             placeholder="Enter display text"
           />
         </InputGroup>

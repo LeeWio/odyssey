@@ -2,8 +2,6 @@
 
 import { memo } from "react";
 import { NumberStepper } from "@heroui-pro/react";
-import { Button } from "@heroui/react";
-import { Minus } from "@gravity-ui/icons";
 
 interface FontSizePickerProps {
   value: string;

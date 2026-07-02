@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, FormEvent } from "react";
+import { useMemo, useState, FormEvent, useCallback } from "react";
 import {
   Button,
   Form,
@@ -9,7 +9,6 @@ import {
   TextArea,
   AlertDialog,
   Spinner,
-  Chip,
   Tabs,
   Select,
   ListBox,
@@ -122,14 +121,16 @@ export function CommentsPage() {
     page: 0,
     size: 50,
   });
-  const adminComments = adminCommentsData?.list || [];
 
   const [moderateComment] = useModerateCommentMutation();
   const [deleteComment, { isLoading: isDeleting }] = useDeleteCommentMutation();
 
-  const handleModerate = async (id: number, status: CommentStatus) => {
-    await moderateComment({ id, status });
-  };
+  const handleModerate = useCallback(
+    async (id: number, status: CommentStatus) => {
+      await moderateComment({ id, status });
+    },
+    [moderateComment]
+  );
 
   const handleDeleteConfirm = async () => {
     if (commentToDelete) {
@@ -139,14 +140,15 @@ export function CommentsPage() {
   };
 
   const sortedAdminComments = useMemo(() => {
+    const list = adminCommentsData?.list || [];
     const col = adminSort.column as keyof CommentResponse;
-    return [...adminComments].sort((a, b) => {
+    return [...list].sort((a, b) => {
       const first = a[col] ?? "";
       const second = b[col] ?? "";
       const cmp = String(first).localeCompare(String(second));
       return adminSort.direction === "descending" ? -cmp : cmp;
     });
-  }, [adminComments, adminSort]);
+  }, [adminCommentsData?.list, adminSort]);
 
   const adminColumns = useMemo<DataGridColumn<CommentResponse>[]>(
     () => [
@@ -176,7 +178,7 @@ export function CommentsPage() {
         header: "Content",
         id: "content",
         minWidth: 280,
-        cell: (item) => <span className="text-sm line-clamp-2">{item.content}</span>,
+        cell: (item) => <span className="line-clamp-2 text-sm">{item.content}</span>,
       },
       {
         accessorKey: "createdAt",
@@ -227,7 +229,7 @@ export function CommentsPage() {
         ),
       },
     ],
-    []
+    [handleModerate]
   );
 
   return (
@@ -260,7 +262,9 @@ export function CommentsPage() {
         <div className="flex flex-col gap-6">
           <Select
             className="w-full sm:w-[320px]"
-            placeholder={isPostsLoading ? "Loading posts..." : "Select a post to preview the comment thread"}
+            placeholder={
+              isPostsLoading ? "Loading posts..." : "Select a post to preview the comment thread"
+            }
             isDisabled={isPostsLoading}
             value={selectedPostId?.toString() || null}
             onChange={(val) => {
@@ -295,11 +299,11 @@ export function CommentsPage() {
               <div className="flex flex-col gap-6">
                 <h3 className="text-lg font-bold">Comment Thread</h3>
                 {isCommentsLoading ? (
-                  <div className="flex py-8 justify-center">
+                  <div className="flex justify-center py-8">
                     <Spinner size="md" />
                   </div>
                 ) : comments.length === 0 ? (
-                  <p className="text-muted text-sm py-4">No comments found for this post.</p>
+                  <p className="text-muted py-4 text-sm">No comments found for this post.</p>
                 ) : (
                   <div className="flex flex-col gap-8">
                     {comments.map((comment) => (
@@ -314,15 +318,21 @@ export function CommentsPage() {
               </div>
 
               {/* Publish Comment Form */}
-              <Form onSubmit={handlePublishSubmit} className="bg-surface-secondary rounded-2xl p-4 md:p-6 flex flex-col gap-4">
+              <Form
+                onSubmit={handlePublishSubmit}
+                className="bg-surface-secondary flex flex-col gap-4 rounded-2xl p-4 md:p-6"
+              >
                 <h4 className="text-base font-semibold">
                   {replyToComment ? "Reply to Selected Comment" : "Leave a Comment"}
                 </h4>
-                
+
                 {replyToComment && (
                   <div className="bg-surface border-border flex items-center justify-between rounded-lg border px-4 py-2">
                     <span className="text-muted text-sm">
-                      Replying to <span className="font-semibold text-foreground">@{replyToComment.username}</span>
+                      Replying to{" "}
+                      <span className="text-foreground font-semibold">
+                        @{replyToComment.username}
+                      </span>
                     </span>
                     <Button size="sm" variant="ghost" onPress={() => setReplyToComment(null)}>
                       <Icon icon="gravity-ui:xmark" className="size-4" aria-hidden="true" />
@@ -341,7 +351,7 @@ export function CommentsPage() {
                     variant="secondary"
                   />
                 </TextField>
-                
+
                 <div className="flex justify-end">
                   <Button type="submit" variant="primary" isDisabled={isPublishing}>
                     {isPublishing ? <Spinner size="sm" /> : "Post Comment"}
@@ -383,7 +393,8 @@ export function CommentsPage() {
                 <AlertDialog.Heading>Delete Comment?</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                Are you sure you want to permanently delete this comment? This action cannot be undone and will remove the comment from the public timeline.
+                Are you sure you want to permanently delete this comment? This action cannot be
+                undone and will remove the comment from the public timeline.
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button variant="ghost" onPress={() => setCommentToDelete(null)}>

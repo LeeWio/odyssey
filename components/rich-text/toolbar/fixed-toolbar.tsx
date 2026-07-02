@@ -2,7 +2,7 @@
 
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { Dropdown, Button, Label, Tooltip } from "@heroui/react";
+import { Dropdown, Button, Tooltip } from "@heroui/react";
 
 export function FixedToolbar() {
   const { editor } = useRichTextEditor();

@@ -136,28 +136,28 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
         }
       >
         <span
-          className="absolute -top-2.5 -left-2.5 h-4 w-4 rounded-md border-[3px] border-r-0 border-b-0"
+          className="absolute -top-2.5 -left-2.5 h-4 w-4 border-[3px] border-r-0 border-b-0"
           style={{
             borderColor: "var(--border-color)",
             filter: "drop-shadow(0 0 4px var(--border-color))",
           }}
         ></span>
         <span
-          className="absolute -top-2.5 -right-2.5 h-4 w-4 rounded-md border-[3px] border-b-0 border-l-0"
+          className="absolute -top-2.5 -right-2.5 h-4 w-4 border-[3px] border-b-0 border-l-0"
           style={{
             borderColor: "var(--border-color)",
             filter: "drop-shadow(0 0 4px var(--border-color))",
           }}
         ></span>
         <span
-          className="absolute -bottom-2.5 -left-2.5 h-4 w-4 rounded-md border-[3px] border-t-0 border-r-0"
+          className="absolute -bottom-2.5 -left-2.5 h-4 w-4 border-[3px] border-t-0 border-r-0"
           style={{
             borderColor: "var(--border-color)",
             filter: "drop-shadow(0 0 4px var(--border-color))",
           }}
         ></span>
         <span
-          className="absolute -right-2.5 -bottom-2.5 h-4 w-4 rounded-md border-[3px] border-t-0 border-l-0"
+          className="absolute -right-2.5 -bottom-2.5 h-4 w-4 border-[3px] border-t-0 border-l-0"
           style={{
             borderColor: "var(--border-color)",
             filter: "drop-shadow(0 0 4px var(--border-color))",

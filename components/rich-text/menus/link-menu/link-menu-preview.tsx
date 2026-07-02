@@ -1,5 +1,5 @@
 import { RichTextEditor, useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
-import { Button, ButtonGroup, buttonVariants, cn, Link, Tooltip } from "@heroui/react";
+import { Button, ButtonGroup, Tooltip } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { Link as LinkExtension } from "@/components/rich-text/extensions";
 

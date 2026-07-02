@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { RichTextEditor } from "@heroui-pro/react";
-import { Button, Modal, Tooltip, Spinner } from "@heroui/react";
+import { Button, Modal, Tooltip } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
 import { motion } from "motion/react";
 import { Icon } from "@iconify/react";

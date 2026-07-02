@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -170,10 +171,12 @@ export function ChronicleDeck() {
               <Card className="border-border bg-surface/80 grid h-full grid-cols-1 overflow-hidden border shadow-2xl backdrop-blur-xl md:grid-cols-12">
                 {/* Left Side: Immersive Cover */}
                 <div className="bg-muted relative h-48 w-full overflow-hidden md:col-span-5 md:h-full">
-                  <img
+                  <Image
                     src={post.cover}
                     alt={post.title}
-                    className="h-full w-full object-cover transition-transform duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-105"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 40vw"
+                    className="object-cover transition-transform duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-105"
                   />
                   <div className="from-background/90 absolute inset-0 bg-gradient-to-t via-transparent to-transparent md:bg-gradient-to-r md:from-transparent" />
                   <div className="absolute top-4 left-4">

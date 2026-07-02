@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, FormEvent, Key } from "react";
+import { useMemo, useState, FormEvent, useCallback } from "react";
 import {
   Button,
   Form,
@@ -9,7 +9,6 @@ import {
   TextArea,
   AlertDialog,
   Spinner,
-  Chip,
   Tabs,
   Select,
   ListBox,
@@ -122,14 +121,16 @@ export default function CommentTestPage() {
     page: 0,
     size: 50,
   });
-  const adminComments = adminCommentsData?.list || [];
 
   const [moderateComment] = useModerateCommentMutation();
   const [deleteComment, { isLoading: isDeleting }] = useDeleteCommentMutation();
 
-  const handleModerate = async (id: number, status: CommentStatus) => {
-    await moderateComment({ id, status });
-  };
+  const handleModerate = useCallback(
+    async (id: number, status: CommentStatus) => {
+      await moderateComment({ id, status });
+    },
+    [moderateComment]
+  );
 
   const handleDeleteConfirm = async () => {
     if (commentToDelete) {
@@ -139,14 +140,15 @@ export default function CommentTestPage() {
   };
 
   const sortedAdminComments = useMemo(() => {
+    const list = adminCommentsData?.list || [];
     const col = adminSort.column as keyof CommentResponse;
-    return [...adminComments].sort((a, b) => {
+    return [...list].sort((a, b) => {
       const first = a[col] ?? "";
       const second = b[col] ?? "";
       const cmp = String(first).localeCompare(String(second));
       return adminSort.direction === "descending" ? -cmp : cmp;
     });
-  }, [adminComments, adminSort]);
+  }, [adminCommentsData?.list, adminSort]);
 
   const adminColumns = useMemo<DataGridColumn<CommentResponse>[]>(
     () => [
@@ -227,7 +229,7 @@ export default function CommentTestPage() {
         ),
       },
     ],
-    []
+    [handleModerate]
   );
 
   return (

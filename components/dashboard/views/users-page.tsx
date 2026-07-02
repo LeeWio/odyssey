@@ -22,7 +22,6 @@ import {
   type UserResponse,
 } from "@/lib/features/user/user-api";
 import { useGetAllRolesQuery } from "@/lib/features/role/role-api";
-import { IconButton } from "../icon-button";
 import { usePortalContainer } from "../use-portal-container";
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
