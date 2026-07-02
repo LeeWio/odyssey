@@ -55,7 +55,7 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
         <Label>Display Text</Label>
         <InputGroup variant="secondary">
           <InputGroup.Prefix>
-            <Icon icon="gravity-ui:text" />
+            <Icon icon="gravity-ui:text" aria-hidden="true" />
           </InputGroup.Prefix>
           <InputGroup.Input
             value={displayText}
@@ -69,7 +69,7 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
         <Label>Link URL</Label>
         <InputGroup variant="secondary">
           <InputGroup.Prefix>
-            <Globe className="text-muted size-4" />
+            <Globe className="text-muted size-4" aria-hidden="true" />
           </InputGroup.Prefix>
           <InputGroup.Input
             autoFocus
@@ -93,7 +93,7 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
         </CellSwitch>
         <ButtonGroup variant="secondary">
           <Button isIconOnly onPress={onCancel} aria-label="Cancel">
-            <Icon icon="gravity-ui:xmark" />
+            <Icon icon="gravity-ui:xmark" aria-hidden="true" />
           </Button>
           <Button
             isIconOnly
@@ -102,7 +102,7 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
             aria-label="Save link"
           >
             <ButtonGroup.Separator />
-            <Icon icon="gravity-ui:arrow-uturn-cw-left" />
+            <Icon icon="gravity-ui:arrow-uturn-cw-left" aria-hidden="true" />
           </Button>
         </ButtonGroup>
       </RichTextEditor.LinkPopover.Actions>

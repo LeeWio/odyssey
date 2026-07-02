@@ -88,8 +88,8 @@ export function TextMenu() {
         <RichTextEditor.ToolbarSeparator orientation="vertical" />
 
         <Popover isOpen={moreOverlayState.isOpen} onOpenChange={moreOverlayState.setOpen}>
-          <Button isIconOnly size="sm" variant="ghost">
-            <Icon icon="gravity-ui:ellipsis-vertical" />
+          <Button isIconOnly size="sm" variant="ghost" aria-label="More text formatting options">
+            <Icon icon="gravity-ui:ellipsis-vertical" aria-hidden="true" />
           </Button>
           <Popover.Content>
             <Popover.Dialog className="rounded-2xl p-1">

@@ -1,44 +1,20 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import {
-  useAutosavePostMutation,
-  useCreatePostMutation,
-  useUpdatePostMutation,
-  type PostStatus,
-} from "@/lib/features/post/post-api";
-import { useGetCategoriesQuery } from "@/lib/features/category/category-api";
-import { useGetAllTagsQuery } from "@/lib/features/tag/tag-api";
-import { useAppDispatch } from "@/lib/hooks";
-import { setDraftIdentifier, toggleRichText } from "@/lib/features/ui/ui-slice";
+import React, { useEffect } from "react";
 import { RichTextEditor } from "@heroui-pro/react";
-import {
-  Button,
-  Modal,
-  TextField,
-  Label,
-  Input,
-  TextArea,
-  Select,
-  ListBox,
-  toast,
-  Spinner,
-  Tooltip,
-  Form,
-} from "@heroui/react";
+import { Button, Modal, Tooltip, Spinner } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
-import { useDebouncedCallback } from "use-debounce";
+import { motion } from "motion/react";
+import { Icon } from "@iconify/react";
+
+import { useRichTextAutosave } from "./hooks/use-rich-text-autosave";
+import { useRichTextPublish } from "./hooks/use-rich-text-publish";
+import { PublishSettingsSidebar } from "./sidebar/publish-settings-sidebar";
 import { TextMenu } from "./menus/text-menu/text-menu";
 import { ExtensionKit } from "./extensions/extension-kit";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
 import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
 import { LinkMenu } from "./menus/link-menu/link-menu";
-import { Icon } from "@iconify/react";
-import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
-
-// Register useGSAP plugin for React animation
-gsap.registerPlugin(useGSAP);
 
 interface RichTextProps {
   identifier: string;
@@ -46,55 +22,10 @@ interface RichTextProps {
   onChange?: (value: JSONContent) => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
+  onClose?: () => void;
 }
 
-/**
- * Helper to extract the first heading or paragraph text from Tiptap JSON content as a default Title
- */
-const findFirstHeading = (json: JSONContent): string => {
-  if (!json.content) return "";
-  for (const node of json.content) {
-    if (node.type === "heading" && node.content && node.content[0]?.text) {
-      return node.content[0].text;
-    }
-  }
-  for (const node of json.content) {
-    if (node.type === "paragraph" && node.content && node.content[0]?.text) {
-      return node.content[0].text;
-    }
-  }
-  return "";
-};
-
-/**
- * Helper to generate URL slug from title string
- */
-const generateSlug = (title: string): string => {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "") // Remove special characters
-    .replace(/[\s_-]+/g, "-") // Replace spaces/underscores with hyphens
-    .replace(/^-+|-+$/g, ""); // Trim leading/trailing hyphens
-};
-
-/**
- * Helper to extract full text content from Tiptap JSON
- */
-const extractText = (json: JSONContent): string => {
-  if (!json.content) return "";
-  let text = "";
-  const traverse = (node: JSONContent) => {
-    if (node.text) {
-      text += node.text + " ";
-    }
-    if (node.content) {
-      node.content.forEach(traverse);
-    }
-  };
-  json.content.forEach(traverse);
-  return text.trim();
-};
+const MotionButton = motion(Button);
 
 export function RichText({
   identifier,
@@ -102,25 +33,16 @@ export function RichText({
   onChange,
   isFullscreen = false,
   onToggleFullscreen,
+  onClose,
 }: RichTextProps) {
-  const dispatch = useAppDispatch();
+  // 1. Decoupled Content Autosaving State Hook
+  const autosave = useRichTextAutosave(identifier, initialValue, onChange);
 
-  // 1. Editor state & Debounced Autosave
-  const [currentContent, setCurrentContent] = useState<JSONContent | undefined>(initialValue);
-  const [
-    autosavePost,
-    { isLoading: isAutosaving, isSuccess: isAutosaveSuccess, isError: isAutosaveError },
-  ] = useAutosavePostMutation();
+  // 2. Decoupled Document Publishing State Hook
+  const publish = useRichTextPublish(identifier, autosave.currentContent);
 
-  const debouncedAutosave = useDebouncedCallback((contentJSON: JSONContent) => {
-    autosavePost({ identifier, content: contentJSON });
-  }, 1000);
-
-  const handleValueChange = (nextValue: JSONContent) => {
-    setCurrentContent(nextValue);
-    onChange?.(nextValue);
-    debouncedAutosave(nextValue);
-  };
+  const { handleValueChange, isAutosaving, isAutosaveSuccess, isAutosaveError } = autosave;
+  const { showSettings, setShowSettings, handleOpenPublish } = publish;
 
   // Intercept Escape to exit fullscreen before closing the modal
   useEffect(() => {
@@ -133,125 +55,6 @@ export function RichText({
     window.addEventListener("keydown", handleKeyDown, true); // Capture phase to preempt Modal close
     return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, [isFullscreen, onToggleFullscreen]);
-
-  // 2. Publish Settings & Forms state
-  const [showSettings, setShowSettings] = useState(false);
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [categoryId, setCategoryId] = useState<string | null>("");
-  const [tagIds, setTagIds] = useState<string[]>([]);
-  const [coverImage, setCoverImage] = useState("");
-  const [summary, setSummary] = useState("");
-  const [status, setStatus] = useState<PostStatus>("PUBLISHED");
-
-  // Query categories & tags
-  const { data: categories = [] } = useGetCategoriesQuery();
-  const { data: tags = [] } = useGetAllTagsQuery();
-
-  // Mutation for post publishing
-  const [createPost, { isLoading: isCreating }] = useCreatePostMutation();
-  const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation();
-  const isPublishing = isCreating || isUpdating;
-
-  // Sync title changes to slug (only if slug was empty or automatically generated)
-  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
-  const handleTitleChange = (val: string) => {
-    setTitle(val);
-    if (!isSlugManuallyEdited) {
-      setSlug(generateSlug(val));
-    }
-  };
-
-  // 3. Magical layout split animation using GSAP
-  const containerRef = useRef<HTMLDivElement>(null);
-  const settingsRef = useRef<HTMLFormElement>(null);
-
-  useGSAP(
-    () => {
-      if (showSettings) {
-        const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 0.5 } });
-
-        tl.to(settingsRef.current, {
-          width: 440,
-          autoAlpha: 1,
-        }).fromTo(
-          ".publish-form-field",
-          { x: 20, opacity: 0 },
-          { x: 0, opacity: 1, stagger: 0.05, duration: 0.4 },
-          "-=0.3"
-        );
-      } else {
-        gsap.to(settingsRef.current, {
-          width: 0,
-          autoAlpha: 0,
-          duration: 0.4,
-          ease: "power3.inOut",
-        });
-      }
-    },
-    { dependencies: [showSettings], scope: containerRef }
-  );
-
-  // Extract metadata when opening Publish Settings
-  const handleOpenPublish = () => {
-    if (currentContent) {
-      if (!title) {
-        const extractedTitle = findFirstHeading(currentContent);
-        if (extractedTitle) {
-          setTitle(extractedTitle);
-          if (!slug) {
-            setSlug(generateSlug(extractedTitle));
-          }
-        }
-      }
-      if (!summary) {
-        const text = extractText(currentContent);
-        if (text) {
-          setSummary(text.substring(0, 150).trim() + (text.length > 150 ? "..." : ""));
-        }
-      }
-    }
-    setShowSettings(true);
-  };
-
-  // Handle confirm & publish submit
-  const handlePublishSubmit = async () => {
-    if (!title.trim()) {
-      toast.danger("Title is required");
-      return;
-    }
-    if (!slug.trim()) {
-      toast.danger("Slug is required");
-      return;
-    }
-
-    const postContentString = JSON.stringify(currentContent || {});
-    const isNewPost = isNaN(Number(identifier));
-
-    const body = {
-      title,
-      slug,
-      coverImage: coverImage.trim() || undefined,
-      summary: summary.trim() || undefined,
-      content: postContentString,
-      status,
-      categoryId: categoryId ? Number(categoryId) : undefined,
-      tagIds: tagIds.length > 0 ? tagIds.map(Number) : undefined,
-    };
-
-    try {
-      if (isNewPost) {
-        await createPost(body).unwrap();
-      } else {
-        await updatePost({ id: Number(identifier), body }).unwrap();
-      }
-
-      dispatch(setDraftIdentifier(null));
-      dispatch(toggleRichText());
-    } catch {
-      // Handled globally
-    }
-  };
 
   return (
     <RichTextEditor
@@ -266,12 +69,14 @@ export function RichText({
         <div className="flex items-center gap-2">
           {onToggleFullscreen && (
             <Tooltip delay={0}>
-              <Button
+              <MotionButton
                 aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
                 isIconOnly
                 size="sm"
                 variant="tertiary"
                 onPress={onToggleFullscreen}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
               >
                 <Icon
                   icon={
@@ -279,8 +84,9 @@ export function RichText({
                       ? "gravity-ui:chevrons-collapse-up-right"
                       : "gravity-ui:chevrons-expand-up-right"
                   }
+                  aria-hidden="true"
                 />
-              </Button>
+              </MotionButton>
               <Tooltip.Content>
                 {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
               </Tooltip.Content>
@@ -288,17 +94,39 @@ export function RichText({
           )}
 
           <Tooltip delay={0}>
-            <Button
+            <MotionButton
               size="sm"
               aria-label={showSettings ? "Back to Edit" : "Publish"}
               isIconOnly
               variant={showSettings ? "secondary" : "tertiary"}
               onPress={() => (showSettings ? setShowSettings(false) : handleOpenPublish())}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
             >
-              <Icon icon={showSettings ? "gravity-ui:arrow-left" : "gravity-ui:paper-plane"} />
-            </Button>
+              <Icon
+                icon={showSettings ? "gravity-ui:arrow-left" : "gravity-ui:paper-plane"}
+                aria-hidden="true"
+              />
+            </MotionButton>
             <Tooltip.Content>{showSettings ? "Back to Edit" : "Publish"}</Tooltip.Content>
           </Tooltip>
+
+          {onClose && (
+            <Tooltip delay={0}>
+              <MotionButton
+                size="sm"
+                aria-label="Close Editor"
+                isIconOnly
+                variant="tertiary"
+                onPress={onClose}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+              >
+                <Icon icon="gravity-ui:xmark" aria-hidden="true" />
+              </MotionButton>
+              <Tooltip.Content>Close Editor</Tooltip.Content>
+            </Tooltip>
+          )}
         </div>
 
         <SuggestionToolbar />
@@ -306,160 +134,11 @@ export function RichText({
         <LinkMenu />
       </Modal.Header>
 
-      <Modal.Body ref={containerRef} className="relative flex flex-1 flex-row overflow-hidden">
+      <Modal.Body className="relative flex flex-1 flex-row overflow-hidden">
         <RichTextEditor.Content />
 
-        <Form
-          ref={settingsRef}
-          className="flex h-full shrink-0 flex-col"
-          style={{ width: 0, opacity: 0, overflow: "hidden" }}
-          onSubmit={(e) => {
-            e.preventDefault();
-            handlePublishSubmit();
-          }}
-        >
-          <div className="flex flex-1 flex-col gap-6 overflow-y-auto">
-            {/* Title Field */}
-            <TextField
-              name="title"
-              isRequired
-              value={title}
-              onChange={handleTitleChange}
-              className="publish-form-field flex flex-col gap-1.5"
-            >
-              <Label className="text-sm font-medium">Title</Label>
-              <Input fullWidth placeholder="Enter post title..." variant="secondary" />
-            </TextField>
-
-            {/* Slug Field */}
-            <TextField
-              name="slug"
-              isRequired
-              value={slug}
-              onChange={(val) => {
-                setSlug(generateSlug(val));
-                setIsSlugManuallyEdited(true);
-              }}
-              className="publish-form-field"
-            >
-              <Label className="text-sm font-medium">Slug</Label>
-              <Input fullWidth placeholder="e.g. my-first-post" variant="secondary" />
-            </TextField>
-
-            {/* Category Select */}
-            <Select
-              placeholder="Select a category"
-              variant="secondary"
-              value={categoryId}
-              onChange={(key) => setCategoryId(key as string)}
-              className="publish-form-field flex w-full flex-col"
-            >
-              <Label className="text-sm font-medium">Category</Label>
-              <Select.Trigger className="mt-1">
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox>
-                  {categories.map((c) => (
-                    <ListBox.Item key={c.id} id={c.id.toString()} textValue={c.name}>
-                      {c.name}
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  ))}
-                </ListBox>
-              </Select.Popover>
-            </Select>
-
-            {/* Tags Multiple Select */}
-            <Select
-              placeholder="Select tags"
-              selectionMode="multiple"
-              variant="secondary"
-              value={tagIds}
-              onChange={(keys) => setTagIds(keys as string[])}
-              className="publish-form-field flex w-full flex-col gap-1.5"
-            >
-              <Label className="text-sm font-medium">Tags</Label>
-              <Select.Trigger className="mt-1">
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox selectionMode="multiple">
-                  {tags.map((t) => (
-                    <ListBox.Item key={t.id} id={t.id.toString()} textValue={t.name}>
-                      {t.name}
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  ))}
-                </ListBox>
-              </Select.Popover>
-            </Select>
-
-            {/* Summary Text Area */}
-            <TextField name="summary" className="publish-form-field flex flex-col gap-1.5">
-              <Label className="text-sm font-medium">Summary</Label>
-              <TextArea
-                fullWidth
-                className="mt-1 min-h-24 resize-y"
-                maxLength={240}
-                placeholder="Enter a brief summary..."
-                variant="secondary"
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-              />
-            </TextField>
-
-            {/* Status Select */}
-            <Select
-              placeholder="Select status"
-              variant="secondary"
-              value={status}
-              onChange={(val) => setStatus(val as PostStatus)}
-              className="publish-form-field flex w-full flex-col gap-1.5"
-            >
-              <Label className="text-sm font-medium">Status</Label>
-              <Select.Trigger className="mt-1">
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox>
-                  <ListBox.Item id="PUBLISHED" textValue="Published">
-                    Published (Visible to everyone)
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  <ListBox.Item id="DRAFT" textValue="Draft">
-                    Draft (Only administrators)
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                </ListBox>
-              </Select.Popover>
-            </Select>
-          </div>
-
-          <div className="publish-form-field bg-background/50 flex shrink-0 flex-col p-6 select-none">
-            <Button
-              type="submit"
-              variant="primary"
-              className="flex h-11 w-full items-center justify-center gap-2 font-bold shadow-md"
-              isDisabled={isPublishing}
-            >
-              {isPublishing ? (
-                <>
-                  <Spinner size="sm" />
-                  <span>Publishing...</span>
-                </>
-              ) : (
-                <>
-                  <span>Confirm & Publish</span>
-                  <Icon icon="gravity-ui:paper-plane" className="size-4" />
-                </>
-              )}
-            </Button>
-          </div>
-        </Form>
+        {/* Modular Sidebar Publish Settings form with Staggered animations */}
+        <PublishSettingsSidebar publish={publish} />
       </Modal.Body>
 
       <Modal.Footer className="flex items-center justify-between">
@@ -472,7 +151,7 @@ export function RichText({
           )}
           {isAutosaveSuccess && !isAutosaving && (
             <>
-              <span className="text-success h-2.5 w-2.5 font-bold">✓</span>
+              <Icon icon="gravity-ui:check" className="text-success size-3.5" aria-hidden="true" />
               <span className="text-success-600">Draft saved</span>
             </>
           )}

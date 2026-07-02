@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { Card, Button, Checkbox, Label, Spinner, toast, ListBox, Description } from "@heroui/react";
+import { useState } from "react";
+import { Card, Button, Checkbox, Label, Spinner, ListBox, Description } from "@heroui/react";
 import {
   useGetAllRolesQuery,
   useGetRoleMenuIdsQuery,
@@ -13,7 +13,6 @@ import {
   type MenuResponse,
 } from "@/lib/features/permission/permission-api";
 import { Icon } from "@iconify/react";
-import { usePortalContainer } from "../use-portal-container";
 
 interface PermissionNodeProps {
   node: MenuResponse;
@@ -66,33 +65,27 @@ const EMPTY_MENUS: MenuResponse[] = [];
 const EMPTY_ROLE_MENUS: number[] = [];
 
 export function PermissionsPage() {
-  const portalContainer = usePortalContainer();
-
   // Query roles and entire menu structure
   const { data: roles = EMPTY_ROLES, isLoading: isRolesLoading } = useGetAllRolesQuery();
   const { data: menuTree = EMPTY_MENUS, isLoading: isTreeLoading } = useGetAdminMenuTreeQuery();
 
-  // Selected active role state
-  const [selectedRole, setSelectedRole] = useState<RoleResponse | null>(null);
-  const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
-
-  // Auto-select first role on initial load
-  useEffect(() => {
-    if (roles.length > 0 && !selectedRole) {
-      setSelectedRole(roles[0]);
-    }
-  }, [roles, selectedRole]);
+  // Selected active role state (derived from selectedRoleState to avoid synchronous useEffect setStates)
+  const [selectedRoleState, setSelectedRoleState] = useState<RoleResponse | null>(null);
+  const selectedRole = selectedRoleState || (roles.length > 0 ? roles[0] : null);
+  const setSelectedRole = setSelectedRoleState;
 
   // Query assigned menu IDs for the active selected role
   const { data: roleMenuIds = EMPTY_ROLE_MENUS, isFetching: isRoleMenusLoading } =
     useGetRoleMenuIdsQuery(selectedRole?.id as number, { skip: !selectedRole });
 
-  // Sync checked IDs once fetched
-  useEffect(() => {
-    if (roleMenuIds) {
-      setCheckedIds(new Set(roleMenuIds));
-    }
-  }, [roleMenuIds]);
+  // Sync checked IDs once fetched during rendering (replaces cascading useEffect)
+  const [prevRoleMenuIds, setPrevRoleMenuIds] = useState<number[] | null>(null);
+  const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
+
+  if (roleMenuIds !== prevRoleMenuIds) {
+    setPrevRoleMenuIds(roleMenuIds);
+    setCheckedIds(new Set(roleMenuIds));
+  }
 
   // Mutation to save assignment
   const [assignRoleMenus, { isLoading: isSaving }] = useAssignRoleMenusMutation();

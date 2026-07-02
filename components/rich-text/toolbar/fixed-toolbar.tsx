@@ -52,13 +52,7 @@ export function FixedToolbar() {
 
         <Dropdown>
           <Tooltip delay={0}>
-            <Button
-              aria-label="Multi-column Layout"
-              isIconOnly
-              size="sm"
-              variant="ghost"
-              className="rounded-medium h-9 w-9"
-            >
+            <Button aria-label="Multi-column Layout" isIconOnly size="sm" variant="ghost">
               <Icon icon="lucide:columns" className="h-4 w-4" />
             </Button>
             <Tooltip.Content>Multi-column Layout</Tooltip.Content>
@@ -71,8 +65,8 @@ export function FixedToolbar() {
                 onAction={() => editor?.chain().focus().setColumns(2).run()}
               >
                 <div className="flex items-center gap-2">
-                  <Icon icon="lucide:columns-2" className="h-4 w-4" />
-                  <Label>2 Columns</Label>
+                  <Icon icon="lucide:columns-2" className="h-4 w-4" aria-hidden="true" />
+                  <span>2 Columns</span>
                 </div>
               </Dropdown.Item>
               <Dropdown.Item
@@ -81,8 +75,8 @@ export function FixedToolbar() {
                 onAction={() => editor?.chain().focus().setColumns(3).run()}
               >
                 <div className="flex items-center gap-2">
-                  <Icon icon="lucide:columns-3" className="h-4 w-4" />
-                  <Label>3 Columns</Label>
+                  <Icon icon="lucide:columns-3" className="h-4 w-4" aria-hidden="true" />
+                  <span>3 Columns</span>
                 </div>
               </Dropdown.Item>
             </Dropdown.Menu>

@@ -362,8 +362,8 @@ export function TagsPage() {
               <AlertDialog.Body>
                 <p className="text-sm">
                   Are you sure you want to delete the tag{" "}
-                  <strong className="text-foreground">"{selectedTag?.name}"</strong>? This action
-                  cannot be undone.
+                  <strong className="text-foreground">&quot;{selectedTag?.name}&quot;</strong>? This
+                  action cannot be undone.
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>

@@ -45,7 +45,7 @@ export const LinkMenuPreview: React.FC<LinkMenuPreviewProps> = ({ onEdit }) => {
           }}
           tooltip="Open in new tab"
         >
-          <Icon icon="gravity-ui:arrow-up-right-from-square" />
+          <Icon icon="gravity-ui:arrow-up-right-from-square" aria-hidden="true" />
         </RichTextEditor.CommandButton>
         <RichTextEditor.CommandButton
           size="sm"
@@ -56,7 +56,7 @@ export const LinkMenuPreview: React.FC<LinkMenuPreviewProps> = ({ onEdit }) => {
           }}
           tooltip="Remove link"
         >
-          <Icon icon="gravity-ui:trash-bin" className="text-danger" />
+          <Icon icon="gravity-ui:trash-bin" className="text-danger" aria-hidden="true" />
         </RichTextEditor.CommandButton>
       </ButtonGroup>
     </div>

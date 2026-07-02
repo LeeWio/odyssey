@@ -7,6 +7,18 @@
       "skillPath": "skills/12-principles-of-animation/SKILL.md",
       "computedHash": "fd8f83df6be0cebd89ac8c5e5345f7b5f4028a5e32f98f1699d52fa5008c7082"
     },
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "6d838b246d0e35d0b53f4f23f98ba7a1dd561937e64f7d0c7553b0928e376c3e"
+    },
+    "emil-design-eng": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "skillPath": "skills/emil-design-eng/SKILL.md",
+      "computedHash": "8bdf9e4e6de7a4969147bf4828a4ad2c5aacd9fba4b690b250a85e0467ca387d"
+    },
     "fixing-accessibility": {
       "source": "ibelick/ui-skills",
       "sourceType": "github",
@@ -60,6 +72,12 @@
       "sourceType": "github",
       "skillPath": "skills/gsap-utils/SKILL.md",
       "computedHash": "1ab2387f6e694718a4f1b5acf2a4ab16e1b884c3428adf5f6b26d830f00826cf"
+    },
+    "mastering-animate-presence": {
+      "source": "raphaelsalaja/skill",
+      "sourceType": "github",
+      "skillPath": "skills/mastering-animate-presence/SKILL.md",
+      "computedHash": "ec89348f9dd39e1447b40346e99193ca2ba276277152efbe03d6eb6104e28115"
     }
   }
 }

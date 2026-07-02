@@ -40,12 +40,12 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.3, ease: "easeOut" as const },
+      transition: { duration: 0.2, ease: "easeOut" as const },
     },
     hidden: {
       opacity: 0,
       y: 10,
-      transition: { duration: 0.2, ease: "easeIn" as const },
+      transition: { duration: 0.15, ease: "easeIn" as const },
     },
   };
 
@@ -67,6 +67,11 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
         if (onOpenChange) {
           onOpenChange(false);
         }
+
+        setTimeout(() => {
+          setIsFormVisible(false);
+          setIsVisible(false);
+        }, 500);
       } catch {}
     };
 
@@ -79,7 +84,18 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
 
   return (
     <Modal>
-      <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal.Backdrop
+        isOpen={isOpen}
+        onOpenChange={(open) => {
+          if (onOpenChange) onOpenChange(open);
+          if (!open) {
+            setTimeout(() => {
+              setIsFormVisible(false);
+              setIsVisible(false);
+            }, 300);
+          }
+        }}
+      >
         <Modal.Container>
           <Modal.Dialog className="sm:max-w-90">
             <Modal.CloseTrigger />
@@ -88,7 +104,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
             </Modal.Header>
             <Modal.Body data-scrollbar="none">
               <LazyMotion features={domAnimation}>
-                <m.div layout transition={{ duration: 0.3, ease: "easeInOut" }}>
+                <m.div layout transition={{ duration: 0.25, ease: "easeInOut" }}>
                   <AnimatePresence initial={false} mode="wait">
                     {isFormVisible ? (
                       <m.div
@@ -98,7 +114,6 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                         exit="hidden"
                         initial="hidden"
                         variants={variants}
-                        onSubmit={(e) => e.preventDefault()}
                       >
                         <Form
                           validationBehavior="native"
@@ -169,9 +184,17 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                                   onPress={() => setIsVisible(!isVisible)}
                                 >
                                   {isVisible ? (
-                                    <Icon icon="gravity-ui:eye" className="size-4" />
+                                    <Icon
+                                      icon="gravity-ui:eye"
+                                      className="size-4"
+                                      aria-hidden="true"
+                                    />
                                   ) : (
-                                    <Icon icon="gravity-ui:eye-slash" className="size-4" />
+                                    <Icon
+                                      icon="gravity-ui:eye-slash"
+                                      className="size-4"
+                                      aria-hidden="true"
+                                    />
                                   )}
                                 </Button>
                               </InputGroup.Suffix>
@@ -195,7 +218,7 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                         </Form>
                         {orDivider}
                         <Button fullWidth variant="tertiary" onPress={() => switchView(false)}>
-                          <Icon icon="solar:arrow-left-linear" />
+                          <Icon icon="solar:arrow-left-linear" aria-hidden="true" />
                           Other Sign Up options
                         </Button>
                       </m.div>
@@ -208,16 +231,16 @@ export const SignUp = ({ isOpen, onOpenChange, onSwitchToLogIn }: SignUpProps) =
                         exit="hidden"
                         variants={variants}
                       >
-                        <Button fullWidth variant="primary" onPress={() => switchView(true)}>
-                          <Icon icon="gravity-ui:envelope" />
+                        <Button fullWidth variant="secondary" onPress={() => switchView(true)}>
+                          <Icon icon="gravity-ui:envelope" aria-hidden="true" />
                           Continue with Email
                         </Button>
                         {orDivider}
                         <Button fullWidth variant="tertiary">
-                          <Icon icon="devicon:google" /> Continue with Google
+                          <Icon icon="devicon:google" aria-hidden="true" /> Continue with Google
                         </Button>
                         <Button fullWidth variant="tertiary">
-                          <Icon icon="devicon:github" /> Continue with Github
+                          <Icon icon="devicon:github" aria-hidden="true" /> Continue with Github
                         </Button>
                         <p className="text-small mt-3 text-center">
                           Already have an account?&nbsp;

@@ -18,6 +18,15 @@ interface ToggleButtonProps extends ToggleButtonVariants {
   onPress?: (e: PressEvent) => void;
 }
 
+const commandLabels: Record<ToggleButtonCommand, string> = {
+  subscript: "Subscript",
+  superscript: "Superscript",
+  alignLeft: "Align text left",
+  alignCenter: "Center text",
+  alignRight: "Align text right",
+  alignJustify: "Justify text",
+};
+
 export function ToggleButtonToolbar({
   command,
   onPress,
@@ -41,7 +50,7 @@ export function ToggleButtonToolbar({
       onChange={onChange}
       variant={variant}
       size={size}
-      aria-label={command}
+      aria-label={commandLabels[command]}
       {...props}
     >
       {children}

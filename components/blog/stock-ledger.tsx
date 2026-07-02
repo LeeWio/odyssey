@@ -320,7 +320,7 @@ export function StockLedger() {
                         >
                           <div className="p-1">
                             {/* Square Premium Glass Card */}
-                            <Card className="relative aspect-square w-full overflow-hidden rounded-[28px] border border-white/15 bg-cover bg-center shadow-xl transition-[transform,box-shadow,border-color,background-color] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] select-none hover:-translate-y-1 hover:scale-[1.03] active:scale-[0.98] active:translate-y-0">
+                            <Card className="relative aspect-square w-full overflow-hidden rounded-[28px] border border-white/15 bg-cover bg-center shadow-xl transition-[transform,box-shadow,border-color,background-color] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] select-none hover:-translate-y-1 hover:scale-[1.03] active:translate-y-0 active:scale-[0.98]">
                               {/* Fluid silk background gradient */}
                               <div
                                 className={`absolute inset-0 bg-gradient-to-tr ${item.gradient} opacity-95`}

@@ -364,8 +364,8 @@ export default function TagTestPage() {
               <AlertDialog.Body>
                 <p className="text-sm">
                   Are you sure you want to delete the tag{" "}
-                  <strong className="text-foreground">"{selectedTag?.name}"</strong>? This action
-                  cannot be undone and might affect posts assigned to this tag.
+                  <strong className="text-foreground">&quot;{selectedTag?.name}&quot;</strong>? This
+                  action cannot be undone and might affect posts assigned to this tag.
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>

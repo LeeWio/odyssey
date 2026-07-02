@@ -389,8 +389,8 @@ export function CategoriesPage() {
               <AlertDialog.Body>
                 <p className="text-sm">
                   Are you sure you want to delete the category{" "}
-                  <strong className="text-foreground">"{selectedCategory?.name}"</strong>? This
-                  action cannot be undone.
+                  <strong className="text-foreground">&quot;{selectedCategory?.name}&quot;</strong>?
+                  This action cannot be undone.
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>

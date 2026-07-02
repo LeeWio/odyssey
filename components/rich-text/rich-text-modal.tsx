@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 import { RichText } from "./rich-text";
 import { useMounted, useFullscreenDocument as useFullscreen } from "@mantine/hooks";
 import type { JSONContent } from "@tiptap/react";
+import { AnimatePresence, motion } from "motion/react";
 
 export function RichTextModal() {
   const dispatch = useAppDispatch();
@@ -37,7 +38,7 @@ export function RichTextModal() {
   return (
     <Modal>
       <Modal.Backdrop
-        isOpen={true}
+        isOpen={isOpen}
         onOpenChange={(open) => {
           if (!open) {
             if (fullscreen) {
@@ -59,42 +60,62 @@ export function RichTextModal() {
                 fullscreen ? "rounded-none" : ""
               }`}
             >
-              {isFetching || !draftId ? (
-                <>
-                  <Modal.Header className="flex flex-col gap-1">Create New Post</Modal.Header>
-                  <Modal.Body className="p-0">
-                    <div className="flex h-125 flex-col gap-6 p-6">
-                      <Skeleton className="bg-default-100 h-10 w-2/3 rounded-lg" />
-                      <div className="flex gap-2.5">
-                        <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
-                        <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
-                        <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
-                        <Skeleton className="bg-default-100 h-9 w-16 rounded-lg" />
-                        <Skeleton className="bg-default-100 h-9 w-24 rounded-lg" />
+              <AnimatePresence mode="wait">
+                {isFetching || !draftId ? (
+                  <motion.div
+                    key="skeleton"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-1 flex-col"
+                  >
+                    <Modal.Header className="flex flex-col gap-1">Create New Post</Modal.Header>
+                    <Modal.Body className="p-0">
+                      <div className="flex h-125 flex-col gap-6 p-6">
+                        <Skeleton className="bg-default-100 h-10 w-2/3 rounded-lg" />
+                        <div className="flex gap-2.5">
+                          <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
+                          <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
+                          <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
+                          <Skeleton className="bg-default-100 h-9 w-16 rounded-lg" />
+                          <Skeleton className="bg-default-100 h-9 w-24 rounded-lg" />
+                        </div>
+                        <Skeleton className="bg-default-100 w-full flex-1 rounded-xl" />
                       </div>
-                      <Skeleton className="bg-default-100 w-full flex-1 rounded-xl" />
-                    </div>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <div className="flex w-full items-center justify-between">
-                      <Skeleton className="bg-default-100 h-6 w-32 rounded-md" />
-                      <Skeleton className="bg-default-100 h-6 w-24 rounded-md" />
-                    </div>
-                  </Modal.Footer>
-                </>
-              ) : (
-                <div
-                  className={`flex h-full w-full flex-1 flex-col overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]`}
-                >
-                  <RichText
-                    key={draftId}
-                    identifier={draftId}
-                    initialValue={autosavedContent?.content as JSONContent | undefined}
-                    isFullscreen={fullscreen}
-                    onToggleFullscreen={toggle}
-                  />
-                </div>
-              )}
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <div className="flex w-full items-center justify-between">
+                        <Skeleton className="bg-default-100 h-6 w-32 rounded-md" />
+                        <Skeleton className="bg-default-100 h-6 w-24 rounded-md" />
+                      </div>
+                    </Modal.Footer>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="editor"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    className="flex h-full w-full flex-1 flex-col overflow-hidden"
+                  >
+                    <RichText
+                      key={draftId}
+                      identifier={draftId}
+                      initialValue={autosavedContent?.content as JSONContent | undefined}
+                      isFullscreen={fullscreen}
+                      onToggleFullscreen={toggle}
+                      onClose={() => {
+                        if (fullscreen) {
+                          toggle();
+                        }
+                        dispatch(toggleRichText());
+                      }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </Modal.Dialog>
           )}
         </Modal.Container>

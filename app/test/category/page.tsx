@@ -393,8 +393,8 @@ export default function CategoryTestPage() {
               <AlertDialog.Body>
                 <p className="text-sm">
                   Are you sure you want to delete the category{" "}
-                  <strong className="text-foreground">"{selectedCategory?.name}"</strong>? This
-                  action cannot be undone and might affect posts assigned to this category.
+                  <strong className="text-foreground">&quot;{selectedCategory?.name}&quot;</strong>?
+                  This action cannot be undone and might affect posts assigned to this category.
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>

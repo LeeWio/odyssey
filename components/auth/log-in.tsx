@@ -13,6 +13,7 @@ import {
   InputOTP,
   REGEXP_ONLY_DIGITS,
   Spinner,
+  Form,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, m, domAnimation, LazyMotion } from "motion/react";
@@ -43,36 +44,29 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
   // State: 1 = email + socials, 2 = otp input
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
 
   const variants = {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.3, ease: "easeOut" as const },
+      transition: { duration: 0.2, ease: "easeOut" as const },
     },
     hidden: {
       opacity: 0,
       y: 10,
-      transition: { duration: 0.2, ease: "easeIn" as const },
+      transition: { duration: 0.15, ease: "easeIn" as const },
     },
   };
 
   const [sendOtp, { isLoading: isSendingOtp }] = useSendOtpMutation();
   const [loginWithOtp, { isLoading: isLoggingIn }] = useLoginWithOtpMutation();
 
-  const handleEmailSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const submit = async () => {
-      if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
-        setEmailError("Please enter a valid email address");
-        return;
-      }
-
       try {
         await sendOtp({ email }).unwrap();
-        setEmailError("");
         switchStep(2); // Move to OTP step only after success
       } catch {
         // Error is handled by global transformError and toast
@@ -95,7 +89,6 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
       setTimeout(() => {
         setStep(1);
         setEmail("");
-        setEmailError("");
       }, 500);
     } catch {
       // Error handled by loginError state
@@ -116,7 +109,6 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
             setTimeout(() => {
               setStep(1);
               setEmail("");
-              setEmailError("");
             }, 300);
           }
         }}
@@ -129,20 +121,33 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
             </Modal.Header>
             <Modal.Body data-scrollbar="none">
               <LazyMotion features={domAnimation}>
-                <m.div layout transition={{ duration: 0.3, ease: "easeInOut" }}>
+                <m.div layout transition={{ duration: 0.25, ease: "easeInOut" }}>
                   <AnimatePresence initial={false} mode="wait">
                     {step === 1 ? (
-                      <m.form
+                      <m.div
                         key="email"
                         className="flex w-full flex-col gap-y-3"
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
                         variants={variants}
-                        onSubmit={handleEmailSubmit}
                       >
-                        <div className="flex flex-col gap-4">
-                          <TextField isRequired name="email" type="email" isInvalid={!!emailError}>
+                        <Form
+                          validationBehavior="native"
+                          className="flex flex-col gap-4"
+                          onSubmit={handleEmailSubmit}
+                        >
+                          <TextField
+                            isRequired
+                            name="email"
+                            type="email"
+                            validate={(value) => {
+                              if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
+                                return "Please enter a valid email address";
+                              }
+                              return null;
+                            }}
+                          >
                             <Label>Email</Label>
                             <Input
                               variant="secondary"
@@ -150,10 +155,9 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                               value={email}
                               onChange={(e) => {
                                 setEmail(e.target.value);
-                                if (emailError) setEmailError("");
                               }}
                             />
-                            {emailError && <FieldError>{emailError}</FieldError>}
+                            <FieldError />
                           </TextField>
 
                           <Button
@@ -169,15 +173,15 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                               </>
                             )}
                           </Button>
-                        </div>
+                        </Form>
                         {orDivider}
                         <div className="flex flex-col gap-2">
                           <Button fullWidth variant="tertiary">
-                            <Icon icon="devicon:google" />
+                            <Icon icon="devicon:google" aria-hidden="true" />
                             Continue with Google
                           </Button>
                           <Button fullWidth variant="tertiary">
-                            <Icon icon="devicon:github" />
+                            <Icon icon="devicon:github" aria-hidden="true" />
                             Continue with Github
                           </Button>
                         </div>
@@ -187,7 +191,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                             Sign Up
                           </Link>
                         </p>
-                      </m.form>
+                      </m.div>
                     ) : (
                       <m.div
                         key="otp"
@@ -205,6 +209,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                         </div>
 
                         <InputOTP
+                          aria-label="One-time password verification code"
                           maxLength={6}
                           pattern={REGEXP_ONLY_DIGITS}
                           onComplete={handleOTPComplete}
@@ -226,18 +231,24 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
 
                         <div className="flex items-center gap-1.25 px-1 pt-1">
                           <p className="text-muted text-sm">Didn&apos;t receive a code?</p>
-                          <Link className="text-foreground underline" href="#">
-                            Resend
+                          <Link
+                            className="text-foreground cursor-pointer underline"
+                            isDisabled={isSendingOtp}
+                            onPress={() => {
+                              void sendOtp({ email });
+                            }}
+                          >
+                            {isSendingOtp ? "Sending..." : "Resend"}
                           </Link>
                         </div>
 
                         <Button
                           fullWidth
-                          variant="secondary"
+                          variant="tertiary"
                           onPress={() => switchStep(1)}
                           isDisabled={isLoggingIn}
                         >
-                          <Icon icon="solar:arrow-left-linear" />
+                          <Icon icon="solar:arrow-left-linear" aria-hidden="true" />
                           Change Email
                         </Button>
                       </m.div>
