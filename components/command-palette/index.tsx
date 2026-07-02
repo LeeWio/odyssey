@@ -8,6 +8,7 @@ import { useHotkeys } from "@mantine/hooks";
 
 import { MagnifierIcon } from "@/components/icons";
 import { buildCommandSearchText, filterCommands } from "./command-model";
+import { HighlightedText } from "@/components/highlighted-text";
 import { usePostSearchCommands } from "./search/use-post-search-commands";
 import { STATIC_COMMANDS } from "./static-commands";
 import { useThemeCommands } from "./theme/use-theme-commands";
@@ -275,7 +276,9 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="truncate text-sm font-medium">{command.title}</span>
+                              <span className="truncate text-sm font-medium">
+                                <HighlightedText text={command.title} query={inputValue} />
+                              </span>
                               {command.isActive ? (
                                 <Chip color="success" size="sm" variant="soft">
                                   Current
@@ -284,7 +287,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                             </div>
                             {showDescription ? (
                               <div className="text-muted mt-0.5 line-clamp-1 text-xs">
-                                {command.description}
+                                <HighlightedText text={command.description || ""} query={inputValue} />
                               </div>
                             ) : null}
                           </div>
