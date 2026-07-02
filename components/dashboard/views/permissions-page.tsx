@@ -210,7 +210,7 @@ function PermissionSubGroup({
           {actionChildren.map((action) => {
             const isActionChecked = checkedIds.has(action.id);
             return (
-              <Card key={action.id} className="bg-surface border border-border/50 hover:bg-surface-secondary/40 transition-colors duration-250 p-3.5 rounded-xl shadow-none">
+              <Card key={action.id} className="transition-colors duration-250">
                 <Checkbox
                   isSelected={isActionChecked}
                   onChange={(checked) => onCheckChange(action.id, checked)}

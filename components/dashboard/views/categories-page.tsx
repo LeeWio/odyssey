@@ -14,6 +14,7 @@ import {
   SearchField,
   Spinner,
   Chip,
+  Tooltip,
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { Pencil, TrashBin, CirclePlus } from "@gravity-ui/icons";
@@ -219,17 +220,31 @@ export function CategoriesPage() {
         align: "end",
         cell: (item) => (
           <div className="flex items-center justify-end gap-2">
-            <Button isIconOnly size="sm" variant="tertiary" onPress={() => handleEditClick(item)}>
-              <Pencil className="size-4" />
-            </Button>
-            <Button
-              isIconOnly
-              size="sm"
-              variant="danger-soft"
-              onPress={() => handleDeleteClick(item)}
-            >
-              <TrashBin className="size-4" />
-            </Button>
+            <Tooltip delay={0}>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="tertiary"
+                onPress={() => handleEditClick(item)}
+                aria-label="Edit Category"
+              >
+                <Pencil className="size-4" />
+              </Button>
+              <Tooltip.Content>Edit Category</Tooltip.Content>
+            </Tooltip>
+
+            <Tooltip delay={0}>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="danger-soft"
+                onPress={() => handleDeleteClick(item)}
+                aria-label="Delete Category"
+              >
+                <TrashBin className="size-4" />
+              </Button>
+              <Tooltip.Content>Delete Category</Tooltip.Content>
+            </Tooltip>
           </div>
         ),
         header: "Actions",
@@ -317,6 +332,7 @@ export function CategoriesPage() {
                   <TextField isRequired name="name" type="text">
                     <Label className="text-sm font-medium">Name</Label>
                     <Input
+                      variant="secondary"
                       placeholder="e.g. Technology"
                       value={formName}
                       onChange={(e) => setFormName(e.target.value)}
@@ -338,6 +354,7 @@ export function CategoriesPage() {
                   >
                     <Label className="text-sm font-medium">Slug</Label>
                     <Input
+                      variant="secondary"
                       placeholder="e.g. technology"
                       value={formSlug}
                       onChange={(e) => setFormSlug(e.target.value)}
@@ -348,6 +365,7 @@ export function CategoriesPage() {
                   <TextField name="description">
                     <Label className="text-sm font-medium">Description</Label>
                     <TextArea
+                      variant="secondary"
                       placeholder="Describe this category..."
                       className="min-h-20"
                       value={formDescription}
