@@ -14,6 +14,7 @@ interface UploadFile {
   status: "uploading" | "complete" | "failed";
   progress: number;
   url?: string;
+  fileName?: string;
 }
 
 // 格式化文件大小辅助函数 (使用等宽数字)
@@ -139,6 +140,7 @@ export default function FileTestPage() {
               status: "complete" as const,
               progress: 100,
               url: res.fileUrl,
+              fileName: res.fileName,
             };
           }
           return f;
@@ -206,7 +208,8 @@ export default function FileTestPage() {
   const handleDeleteConfirm = async () => {
     if (fileToDelete) {
       try {
-        await deleteFile(fileToDelete.name).unwrap();
+        const nameToDelete = fileToDelete.fileName || fileToDelete.name;
+        await deleteFile(nameToDelete).unwrap();
         const updated = files.filter((f) => f.id !== fileToDelete.id);
         saveFilesToLocal(updated);
         setFileToDelete(null);
