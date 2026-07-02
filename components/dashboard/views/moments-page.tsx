@@ -27,6 +27,7 @@ import {
   useDeleteMomentMutation,
   type MomentResponse,
 } from "@/lib/features/moment/moment-api";
+import { usePortalContainer } from "../use-portal-container";
 
 // --- 单个时间线节点组件 ---
 interface TimelineItemProps {
@@ -101,6 +102,7 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
 }
 
 export function MomentsPage() {
+  const portalContainer = usePortalContainer();
   const [activeTab, setActiveTab] = useState<string>("admin"); // Default to admin inside dashboard!
 
   // --- 公共时间线数据 ---
@@ -344,23 +346,28 @@ export function MomentsPage() {
       )}
 
       {/* 新增/编辑模态框 */}
-      <Modal isOpen={isFormOpen} onOpenChange={setIsFormFormOpen}>
-        <Modal.Backdrop />
-        <Modal.Container>
-          <Modal.Dialog className="sm:max-w-lg">
-            <Form onSubmit={handleFormSubmit} className="flex flex-col gap-5">
-              <Modal.Header>
-                <div className="text-lg font-bold">
-                  {momentToEdit ? "编辑微语" : "发布新微语"}
-                </div>
-              </Modal.Header>
-              <Modal.Body className="flex flex-col gap-4">
-                <TextField isRequired name="content" className="flex flex-col gap-1.5">
-                  <Label className="text-sm font-semibold">微语内容</Label>
-                  <TextArea
-                    value={formContent}
-                    onChange={(e) => setFormContent(e.target.value)}
-                    placeholder="今天有什么新鲜事想和大家分享吗..."
+      <Modal>
+        <Modal.Backdrop
+          isOpen={isFormOpen}
+          onOpenChange={setIsFormFormOpen}
+          variant="blur"
+          UNSTABLE_portalContainer={portalContainer || undefined}
+        >
+          <Modal.Container>
+            <Modal.Dialog className="sm:max-w-lg">
+              <Form onSubmit={handleFormSubmit} className="flex flex-col gap-5">
+                <Modal.Header>
+                  <div className="text-lg font-bold">
+                    {momentToEdit ? "编辑微语" : "发布新微语"}
+                  </div>
+                </Modal.Header>
+                <Modal.Body className="flex flex-col gap-4">
+                  <TextField isRequired name="content" className="flex flex-col gap-1.5">
+                    <Label className="text-sm font-semibold">微语内容</Label>
+                    <TextArea
+                      value={formContent}
+                      onChange={(e) => setFormContent(e.target.value)}
+                      placeholder="今天有什么新鲜事想和大家分享吗..."
                     className="min-h-32"
                     variant="secondary"
                     maxLength={500}
@@ -389,13 +396,16 @@ export function MomentsPage() {
             </Form>
           </Modal.Dialog>
         </Modal.Container>
-      </Modal>
+      </Modal.Backdrop>
+    </Modal>
 
       {/* 删除确认 AlertDialog */}
       <AlertDialog>
         <AlertDialog.Backdrop
           isOpen={!!momentToDelete}
           onOpenChange={(open) => !open && setMomentToDelete(null)}
+          variant="blur"
+          UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <AlertDialog.Container>
             <AlertDialog.Dialog className="sm:max-w-md">
