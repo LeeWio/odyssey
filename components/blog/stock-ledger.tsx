@@ -116,27 +116,19 @@ const MASTER_QUOTES = [
     quote:
       "If you aren't willing to own a stock for ten years, don't even think about owning it for ten minutes.",
     author: "Warren Buffett",
-    title: "Chairman, Berkshire Hathaway",
-    initials: "WB",
   },
   {
     quote: "The big money is not in the buying and the selling, but in the waiting.",
     author: "Charlie Munger",
-    title: "Vice Chairman, Berkshire Hathaway",
-    initials: "CM",
   },
   {
     quote: "In the stock market, the most important organ is the stomach, not the brain.",
     author: "Peter Lynch",
-    title: "Manager, Magellan Fund",
-    initials: "PL",
   },
   {
     quote:
       "It's not whether you're right or wrong, but how much you make when you're right and how much you lose when you're wrong.",
     author: "George Soros",
-    title: "Founder, Soros Fund",
-    initials: "GS",
   },
 ];
 
@@ -282,8 +274,6 @@ export function StockLedger() {
       return {
         quote: thesis,
         author: "Personal Strategy",
-        title: "Active Market Notes",
-        initials: "ME",
       };
     }
     return activeQuote;
@@ -388,31 +378,18 @@ export function StockLedger() {
 
           {/* B. Investment Wisdom Card (Master Quotes & Insights - Extremely Clean & Elegant) */}
           <Card variant="default">
-            <Card.Content className="flex flex-col gap-4 p-6">
+            <Card.Content className="flex flex-col gap-3">
               <Typography
                 type="body"
                 weight="medium"
-                className="text-foreground/90 font-serif leading-relaxed font-medium italic"
+                className="text-foreground/90 font-serif leading-relaxed italic"
               >
                 &ldquo;{displayQuote.quote}&rdquo;
               </Typography>
-
-              <Separator />
-
-              <div className="flex items-center gap-3">
-                <Avatar size="sm" color="default">
-                  <Avatar.Fallback className="text-[10px] font-bold">
-                    {displayQuote.initials}
-                  </Avatar.Fallback>
-                </Avatar>
-                <div className="flex flex-col gap-0.5">
-                  <Typography type="body-xs" weight="bold" className="text-foreground leading-none">
-                    {displayQuote.author}
-                  </Typography>
-                  <Typography type="body-xs" color="muted" className="text-[10px]">
-                    {displayQuote.title}
-                  </Typography>
-                </div>
+              <div className="mt-1 flex justify-end">
+                <Typography type="body-xs" color="muted" className="font-semibold">
+                  — {displayQuote.author}
+                </Typography>
               </div>
             </Card.Content>
           </Card>
