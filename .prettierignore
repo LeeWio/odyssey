@@ -4,3 +4,4 @@ build
 out
 *.min.js
 *.min.css
+CHANGELOG.md
