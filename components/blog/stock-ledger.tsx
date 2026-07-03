@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, Fragment } from "react";
 import { Card, Chip, Separator, Surface, Typography, Avatar } from "@heroui/react";
 import { Carousel, KPI, KPIGroup, PieChart, ChartTooltip } from "@heroui-pro/react";
+
 const PORTFOLIO_KPIS = [
   {
     id: 1,
@@ -110,10 +111,10 @@ const QUANT_RULES = [
 ];
 
 const CHART_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
   "var(--chart-4)",
+  "var(--chart-3)",
+  "var(--chart-2)",
+  "var(--chart-1)",
   "var(--chart-5)",
 ];
 
@@ -287,9 +288,52 @@ export function StockLedger() {
 
       {/* 3. MAIN LAYOUT SPLIT GRID */}
       <Surface variant="transparent" className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-        {/* LEFT COLUMN: JOURNAL & NOTES (Spans 4/12) */}
+        {/* LEFT COLUMN: CHARTS, JOURNAL & NOTES (Spans 4/12) */}
         <Surface variant="transparent" className="flex flex-col gap-6 lg:col-span-4">
-          {/* Market Thesis */}
+          {/* A. Asset Allocation Pie Chart (Exactly matching HeroUI Pro's Custom Tooltip code & design) */}
+          <Card variant="default">
+            <Card.Header>
+              <Card.Title className="text-base font-bold">Asset Allocation</Card.Title>
+            </Card.Header>
+            <Card.Content className="flex flex-col items-center gap-4">
+              <PieChart height={220}>
+                <PieChart.Pie
+                  cx="50%"
+                  cy="50%"
+                  data={holdingData.list}
+                  dataKey="value"
+                  nameKey="name"
+                  outerRadius={90}
+                >
+                  {holdingData.list.map((_, idx) => (
+                    <PieChart.Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
+                  ))}
+                </PieChart.Pie>
+                <PieChart.Tooltip
+                  content={
+                    <PieTooltip
+                      valueFormatter={(v) =>
+                        `${((Number(v) / holdingData.total) * 100).toFixed(1)}%`
+                      }
+                    />
+                  }
+                />
+              </PieChart>
+              <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5">
+                {holdingData.list.map((entry, idx) => (
+                  <div key={entry.name} className="flex items-center gap-1.5">
+                    <span
+                      className="size-2.5 rounded-full"
+                      style={{ backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }}
+                    />
+                    <span className="text-muted text-xs">{entry.name}</span>
+                  </div>
+                ))}
+              </div>
+            </Card.Content>
+          </Card>
+
+          {/* B. Market Thesis */}
           <Card variant="default">
             <Card.Header className="pb-2">
               <div className="flex items-center gap-1.5">
@@ -323,7 +367,7 @@ export function StockLedger() {
             </Card.Content>
           </Card>
 
-          {/* Trading Rules */}
+          {/* C. Trading Rules */}
           <Card variant="default">
             <Card.Header className="pb-2">
               <Typography
@@ -468,241 +512,152 @@ export function StockLedger() {
             </Surface>
           </Surface>
 
-          {/* Asset Allocation & Current Positions Split */}
-          <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-12">
-            {/* Left part: Asset Allocation Donut Chart (Spans 5/12) */}
-            <div className="w-full md:col-span-5">
-              <Card variant="default">
-                <Card.Header className="border-border/20 flex flex-row items-center justify-between border-b pb-2">
-                  <div className="flex flex-col gap-0.5">
-                    <Typography
-                      type="body-xs"
-                      color="muted"
-                      weight="bold"
-                      className="tracking-wider uppercase"
+          {/* Current Positions */}
+          <Card variant="default">
+            <Card.Header className="border-border/20 border-b pb-3">
+              <Typography
+                type="body-xs"
+                color="muted"
+                weight="bold"
+                className="tracking-wider uppercase"
+              >
+                Active Strategic Positions
+              </Typography>
+              <Card.Title className="text-base font-bold">Current Positions</Card.Title>
+            </Card.Header>
+            <Card.Content className="p-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {transactions.map((stock, idx) => {
+                  const isPositive = !stock.roi.startsWith("-");
+                  return (
+                    <div
+                      key={stock.id || idx}
+                      className="transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
                     >
-                      Allocation
-                    </Typography>
-                    <Card.Title className="text-sm font-bold">Asset Ratio</Card.Title>
-                  </div>
-                  <Chip size="sm" variant="soft" className="text-[9px] font-bold">
-                    RATIO
-                  </Chip>
-                </Card.Header>
-                <Card.Content className="flex flex-col items-center gap-4 overflow-hidden p-5">
-                  <div className="relative">
-                    <PieChart height={180} width={180}>
-                      <PieChart.Pie
-                        cornerRadius={4}
-                        cx="50%"
-                        cy="50%"
-                        data={holdingData.list}
-                        dataKey="value"
-                        innerRadius="65%"
-                        nameKey="name"
-                        paddingAngle={-10}
-                        strokeWidth={0}
-                      >
-                        {holdingData.list.map((_, idx) => (
-                          <PieChart.Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
-                        ))}
-                      </PieChart.Pie>
-                      <PieChart.Tooltip
-                        content={
-                          <PieTooltip
-                            valueFormatter={(v) =>
-                              `$${Number(v).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-                            }
-                          />
-                        }
-                      />
-                    </PieChart>
-                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-foreground font-mono text-xl font-bold">
-                        {holdingData.total >= 1000
-                          ? `$${(holdingData.total / 1000).toFixed(0)}K`
-                          : `$${holdingData.total}`}
-                      </span>
-                      <span className="text-muted text-[9px] font-bold tracking-wider uppercase">
-                        Holding
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mt-2 flex w-full flex-col gap-2">
-                    {holdingData.list.map((entry, idx) => {
-                      const pct = ((entry.value / holdingData.total) * 100).toFixed(0);
-                      return (
-                        <div
-                          key={entry.name}
-                          className="flex w-full items-center justify-between text-xs"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="size-2.5 shrink-0 rounded-full"
-                              style={{ backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }}
-                            />
-                            <span className="text-foreground font-bold">{entry.name}</span>
-                          </div>
-                          <div className="text-muted flex items-center gap-1.5 font-mono text-[10px]">
-                            <span>{pct}%</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </Card.Content>
-              </Card>
-            </div>
-
-            {/* Right part: Current Positions Grid (Spans 7/12) */}
-            <div className="flex w-full flex-col md:col-span-7">
-              <Card variant="default" className="flex-1">
-                <Card.Header className="border-border/20 border-b pb-3">
-                  <Typography
-                    type="body-xs"
-                    color="muted"
-                    weight="bold"
-                    className="tracking-wider uppercase"
-                  >
-                    Active Strategic Positions
-                  </Typography>
-                  <Card.Title className="text-base font-bold">Current Positions</Card.Title>
-                </Card.Header>
-                <Card.Content className="p-5">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {transactions.map((stock, idx) => {
-                      const isPositive = !stock.roi.startsWith("-");
-                      return (
-                        <div
-                          key={stock.id || idx}
-                          className="transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98]"
-                        >
-                          <Card variant="secondary">
-                            <Card.Content className="flex h-[160px] flex-col justify-between p-4">
-                              {/* Top: Asset Ticker & Type */}
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <Avatar size="sm" color="default">
-                                    <Avatar.Fallback className="text-[10px] font-bold">
-                                      {stock.ticker.slice(0, 2)}
-                                    </Avatar.Fallback>
-                                  </Avatar>
-                                  <div className="flex flex-col">
-                                    <Typography
-                                      type="h5"
-                                      weight="bold"
-                                      className="text-foreground text-sm tracking-tight"
-                                    >
-                                      {stock.ticker}
-                                    </Typography>
-                                    <Typography
-                                      type="body-xs"
-                                      color="muted"
-                                      truncate
-                                      className="mt-0.5 block max-w-[80px] text-[9px] leading-none"
-                                      title={stock.companyName}
-                                    >
-                                      {stock.companyName}
-                                    </Typography>
-                                  </div>
-                                </div>
-
-                                <Chip size="sm" variant="soft" className="font-bold uppercase">
-                                  {stock.action}
-                                </Chip>
-                              </div>
-
-                              {/* Mid-Row: Price, Size, ROI with Separators */}
-                              <div className="my-1">
-                                <Separator />
-                                <div className="grid grid-cols-3 gap-1 py-1.5 text-center">
-                                  <div className="flex flex-col items-start gap-0.5">
-                                    <Typography
-                                      type="body-xs"
-                                      color="muted"
-                                      weight="bold"
-                                      className="text-[8px] uppercase"
-                                    >
-                                      Cost
-                                    </Typography>
-                                    <Typography
-                                      type="body-xs"
-                                      weight="bold"
-                                      className="text-foreground font-mono text-[10px]"
-                                    >
-                                      {stock.price}
-                                    </Typography>
-                                  </div>
-                                  <div className="flex flex-col items-center gap-0.5">
-                                    <Typography
-                                      type="body-xs"
-                                      color="muted"
-                                      weight="bold"
-                                      className="text-[8px] uppercase"
-                                    >
-                                      Shrs
-                                    </Typography>
-                                    <Typography
-                                      type="body-xs"
-                                      weight="semibold"
-                                      className="text-foreground/80 font-mono text-[10px]"
-                                    >
-                                      {stock.shares.split(" ")[0]}
-                                    </Typography>
-                                  </div>
-                                  <div className="flex flex-col items-end gap-0.5">
-                                    <Typography
-                                      type="body-xs"
-                                      color="muted"
-                                      weight="bold"
-                                      className="text-[8px] uppercase"
-                                    >
-                                      ROI
-                                    </Typography>
-                                    <Typography
-                                      type="body-xs"
-                                      weight="bold"
-                                      className={`font-mono text-[10px] ${isPositive ? "text-success" : "text-danger"}`}
-                                    >
-                                      {stock.roi}
-                                    </Typography>
-                                  </div>
-                                </div>
-                                <Separator />
-                              </div>
-
-                              {/* Bottom: Holding Status */}
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1.5">
-                                  <span
-                                    className={`size-1.5 rounded-full ${stock.isHolding ? "animate-pulse bg-emerald-400" : "bg-muted"}`}
-                                  />
-                                  <Typography
-                                    type="body-xs"
-                                    color="muted"
-                                    className="text-[9px] font-semibold"
-                                  >
-                                    {stock.statusText}
-                                  </Typography>
-                                </div>
-
+                      <Card variant="secondary">
+                        <Card.Content className="flex h-[160px] flex-col justify-between p-4">
+                          {/* Top: Asset Ticker & Type */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Avatar size="sm" color="default">
+                                <Avatar.Fallback className="text-[10px] font-bold">
+                                  {stock.ticker.slice(0, 2)}
+                                </Avatar.Fallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <Typography
+                                  type="h5"
+                                  weight="bold"
+                                  className="text-foreground text-sm tracking-tight"
+                                >
+                                  {stock.ticker}
+                                </Typography>
                                 <Typography
                                   type="body-xs"
-                                  className={`text-[9px] font-bold uppercase ${stock.isHolding ? "text-warning" : "text-muted"}`}
+                                  color="muted"
+                                  truncate
+                                  className="mt-0.5 block max-w-[80px] text-[9px] leading-none"
+                                  title={stock.companyName}
                                 >
-                                  {stock.isHolding ? "Holding" : "Closed"}
+                                  {stock.companyName}
                                 </Typography>
                               </div>
-                            </Card.Content>
-                          </Card>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </Card.Content>
-              </Card>
-            </div>
-          </div>
+                            </div>
+
+                            <Chip size="sm" variant="soft" className="font-bold uppercase">
+                              {stock.action}
+                            </Chip>
+                          </div>
+
+                          {/* Mid-Row: Price, Size, ROI with Separators */}
+                          <div className="my-1">
+                            <Separator />
+                            <div className="grid grid-cols-3 gap-1 py-1.5 text-center">
+                              <div className="flex flex-col items-start gap-0.5">
+                                <Typography
+                                  type="body-xs"
+                                  color="muted"
+                                  weight="bold"
+                                  className="text-[8px] uppercase"
+                                >
+                                  Cost
+                                </Typography>
+                                <Typography
+                                  type="body-xs"
+                                  weight="bold"
+                                  className="text-foreground font-mono text-[10px]"
+                                >
+                                  {stock.price}
+                                </Typography>
+                              </div>
+                              <div className="flex flex-col items-center gap-0.5">
+                                <Typography
+                                  type="body-xs"
+                                  color="muted"
+                                  weight="bold"
+                                  className="text-[8px] uppercase"
+                                >
+                                  Shrs
+                                </Typography>
+                                <Typography
+                                  type="body-xs"
+                                  weight="semibold"
+                                  className="text-foreground/80 font-mono text-[10px]"
+                                >
+                                  {stock.shares.split(" ")[0]}
+                                </Typography>
+                              </div>
+                              <div className="flex flex-col items-end gap-0.5">
+                                <Typography
+                                  type="body-xs"
+                                  color="muted"
+                                  weight="bold"
+                                  className="text-[8px] uppercase"
+                                >
+                                  ROI
+                                </Typography>
+                                <Typography
+                                  type="body-xs"
+                                  weight="bold"
+                                  className={`font-mono text-[10px] ${isPositive ? "text-success" : "text-danger"}`}
+                                >
+                                  {stock.roi}
+                                </Typography>
+                              </div>
+                            </div>
+                            <Separator />
+                          </div>
+
+                          {/* Bottom: Holding Status */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={`size-1.5 rounded-full ${stock.isHolding ? "animate-pulse bg-emerald-400" : "bg-muted"}`}
+                              />
+                              <Typography
+                                type="body-xs"
+                                color="muted"
+                                className="text-[9px] font-semibold"
+                              >
+                                {stock.statusText}
+                              </Typography>
+                            </div>
+
+                            <Typography
+                              type="body-xs"
+                              className={`text-[9px] font-bold uppercase ${stock.isHolding ? "text-warning" : "text-muted"}`}
+                            >
+                              {stock.isHolding ? "Holding" : "Closed"}
+                            </Typography>
+                          </div>
+                        </Card.Content>
+                      </Card>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card.Content>
+          </Card>
         </Surface>
       </Surface>
     </Surface>
