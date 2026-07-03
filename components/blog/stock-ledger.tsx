@@ -3,17 +3,6 @@
 import { useState, useEffect, useMemo, Fragment } from "react";
 import { Card, Chip, Separator, Surface, Typography, Avatar } from "@heroui/react";
 import { Carousel, KPI, KPIGroup } from "@heroui-pro/react";
-import { ArrowUpRight, ArrowDownRight } from "@gravity-ui/icons";
-
-import { useGetMarketIndicesQuery } from "@/lib/features/market/market-api";
-
-const MARKET_INDICES = [
-  { name: "S&P 500", ticker: "SPX", value: "5,117.10", change: "+0.45%", isPositive: true },
-  { name: "NASDAQ 100", ticker: "NDX", value: "16,110.50", change: "+0.81%", isPositive: true },
-  { name: "DOW JONES", ticker: "DJI", value: "39,131.50", change: "-0.12%", isPositive: false },
-  { name: "BITCOIN", ticker: "BTC", value: "$64,250.00", change: "+1.25%", isPositive: true },
-];
-
 const PORTFOLIO_KPIS = [
   {
     id: 1,
@@ -128,8 +117,6 @@ const parseNumericValue = (str: string): number => {
 };
 
 export function StockLedger() {
-  const { data: dbIndices = [] } = useGetMarketIndicesQuery();
-
   // Local sync states
   const [transactions, setTransactions] = useState(STOCK_TRANSACTIONS);
   const [kpis, setKpis] = useState(PORTFOLIO_KPIS);
@@ -155,17 +142,6 @@ export function StockLedger() {
       setTimeout(loadData, 0);
     }
   }, []);
-
-  const indices =
-    dbIndices.length > 0
-      ? dbIndices.map((item) => ({
-          name: item.name,
-          ticker: item.symbol,
-          value: item.current.toLocaleString(),
-          change: (item.changePct >= 0 ? "+" : "") + item.changePct.toFixed(2) + "%",
-          isPositive: item.changePct >= 0,
-        }))
-      : MARKET_INDICES;
 
   // Filter transactions to find recently bought stock positions (action === "BUY")
   const recentBuys = useMemo(() => {
@@ -210,57 +186,7 @@ export function StockLedger() {
         </Typography>
       </Surface>
 
-      {/* 2. MARKET INDEX BAR (Unified ticker panel) */}
-      <Surface
-        variant="transparent"
-        className="border-border/30 bg-default-50/5 divide-border/20 grid grid-cols-2 gap-4 divide-y rounded-xl border p-3 shadow-sm md:grid-cols-4 md:divide-x md:divide-y-0"
-      >
-        {indices.map((index, idx) => (
-          <Surface
-            key={idx}
-            variant="transparent"
-            className="flex items-center justify-between px-4 py-1.5 md:py-0"
-          >
-            <Surface variant="transparent" className="flex flex-col gap-0.5">
-              <Typography
-                type="body-xs"
-                color="muted"
-                weight="bold"
-                className="text-[10px] uppercase"
-              >
-                {index.name.split(" ")[0]}
-              </Typography>
-              <Typography type="h5" weight="bold" className="text-foreground text-xs leading-none">
-                {index.ticker}
-              </Typography>
-            </Surface>
-            <Surface variant="transparent" className="flex flex-col items-end gap-0.5">
-              <Typography
-                type="body-sm"
-                weight="bold"
-                className="text-foreground font-mono text-xs tabular-nums"
-              >
-                {index.value}
-              </Typography>
-              <Typography
-                type="body-xs"
-                className={`flex items-center gap-0.5 font-mono text-[10px] font-bold ${index.isPositive ? "text-success" : "text-danger"}`}
-              >
-                {index.isPositive ? (
-                  <ArrowUpRight className="size-2.5" />
-                ) : (
-                  <ArrowDownRight className="size-2.5" />
-                )}
-                {index.change}
-              </Typography>
-            </Surface>
-          </Surface>
-        ))}
-      </Surface>
-
-      <Separator />
-
-      {/* 3. PORTFOLIO KPIS (Premium, clean HeroUI Pro KPIGroup & KPI Components with absolute styling integrity) */}
+      {/* 2. PORTFOLIO KPIS (Premium, clean HeroUI Pro KPIGroup & KPI Components with absolute styling integrity) */}
       <Surface variant="transparent" className="w-full">
         <KPIGroup>
           {kpiData.map((stat, idx) => (
@@ -285,9 +211,7 @@ export function StockLedger() {
         </KPIGroup>
       </Surface>
 
-      <Separator />
-
-      {/* 4. MAIN LAYOUT SPLIT GRID */}
+      {/* 3. MAIN LAYOUT SPLIT GRID */}
       <Surface variant="transparent" className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
         {/* LEFT COLUMN: JOURNAL & NOTES (Spans 4/12) */}
         <Surface variant="transparent" className="flex flex-col gap-6 lg:col-span-4">
