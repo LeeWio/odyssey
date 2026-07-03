@@ -10,6 +10,8 @@ jobs:
   ci:
     name: Lint & Build Verification
     runs-on: ubuntu-latest
+    env:
+      HEROUI_AUTH_TOKEN: ${{ secrets.HEROUI_AUTH_TOKEN }}
 
     steps:
       - name: Checkout Repository
