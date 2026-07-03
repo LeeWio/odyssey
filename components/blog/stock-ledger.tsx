@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, Fragment } from "react";
-import { Card, Chip, Separator, Surface, Typography, Avatar } from "@heroui/react";
+import { Card, Chip, Separator, Surface, Typography, Avatar, ColorSwatch } from "@heroui/react";
 import { Carousel, KPI, KPIGroup, PieChart, ChartTooltip } from "@heroui-pro/react";
 
 const PORTFOLIO_KPIS = [
@@ -97,16 +97,19 @@ const QUANT_RULES = [
     id: 1,
     rule: "Trade with Trend",
     desc: "Only buy when major market indices show upward momentum on multiple timeframes.",
+    color: "#F59E0B",
   },
   {
     id: 2,
     rule: "Snappy -5% Stop-Loss",
     desc: "Cut losses immediately. Orders trigger automatically at -5% from cost.",
+    color: "#EF4444",
   },
   {
     id: 3,
     rule: "Position Limits",
     desc: "Keep exposure diversified. No single trade can exceed 15% of net value.",
+    color: "#0485F7",
   },
 ];
 
@@ -263,7 +266,6 @@ export function StockLedger() {
     };
   }, [transactions]);
 
-  // Decide what quote details to display: prefer custom local storage thesis if manually edited, otherwise show premium master quote
   const displayQuote = useMemo(() => {
     if (
       thesis &&
@@ -284,7 +286,6 @@ export function StockLedger() {
       variant="transparent"
       className="border-border/40 bg-background mx-auto flex w-full max-w-7xl flex-col gap-8 border-t px-6 py-16 lg:px-12"
     >
-      {/* 1. HEADER SECTION */}
       <Surface variant="transparent" className="flex flex-col gap-2">
         <Typography
           type="body-xs"
@@ -302,7 +303,6 @@ export function StockLedger() {
         </Typography>
       </Surface>
 
-      {/* 2. PORTFOLIO KPIS (Premium, clean HeroUI Pro KPIGroup & KPI Components with absolute styling integrity) */}
       <Surface variant="transparent" className="w-full">
         <KPIGroup>
           {kpiData.map((stat, idx) => (
@@ -327,13 +327,8 @@ export function StockLedger() {
         </KPIGroup>
       </Surface>
 
-      <Separator />
-
-      {/* 3. MAIN LAYOUT SPLIT GRID */}
       <Surface variant="transparent" className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-        {/* LEFT COLUMN: CHARTS, JOURNAL & NOTES (Spans 4/12) */}
         <Surface variant="transparent" className="flex flex-col gap-6 lg:col-span-4">
-          {/* A. Asset Allocation Pie Chart (Exactly matching HeroUI Pro's Custom Tooltip code & design) */}
           <Card variant="default">
             <Card.Header>
               <Card.Title className="text-base font-bold">Asset Allocation</Card.Title>
@@ -376,7 +371,6 @@ export function StockLedger() {
             </Card.Content>
           </Card>
 
-          {/* B. Investment Wisdom Card (Master Quotes & Insights - Extremely Clean & Elegant) */}
           <Card variant="default">
             <Card.Content className="flex flex-col gap-3">
               <Typography
@@ -394,24 +388,27 @@ export function StockLedger() {
             </Card.Content>
           </Card>
 
-          {/* C. Trading Rules */}
           <Card variant="default">
-            <Card.Header className="pb-2">
-              <Typography
-                type="body-xs"
-                color="muted"
-                weight="bold"
-                className="tracking-widest uppercase"
-              >
+            <Card.Header>
+              <Card.Title className="text-muted text-xs font-bold tracking-wide uppercase">
                 Risk Rules
-              </Typography>
-              <Card.Title className="mt-1 text-base font-bold">Trading Rules</Card.Title>
+              </Card.Title>
+              <Card.Description className="text-accent mt-1 text-xl font-bold">
+                Trading Rules
+              </Card.Description>
             </Card.Header>
             <Card.Content className="flex flex-col gap-4 pb-4">
               {rules.map((rule, idx) => (
                 <div key={rule.id || idx} className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-primary bg-primary/10 border-primary/20 flex size-5 shrink-0 items-center justify-center rounded-md border font-mono text-[9px] font-bold">{`0${idx + 1}`}</span>
+                    <ColorSwatch
+                      key={rule.color}
+                      color={rule.color}
+                      className="size-4"
+                      style={({ color: c }) => ({
+                        background: `linear-gradient(135deg, ${c.toString("css")}, white)`,
+                      })}
+                    />
                     <Typography
                       type="h5"
                       weight="bold"
@@ -429,9 +426,7 @@ export function StockLedger() {
           </Card>
         </Surface>
 
-        {/* RIGHT COLUMN: PORTFOLIO & RECENT (Spans 8/12) */}
         <Surface variant="transparent" className="flex flex-col gap-6 lg:col-span-8">
-          {/* Recently Bought (Un-nested, extremely clean Carousel with absolute styling integrity) */}
           <Surface variant="transparent" className="flex flex-col gap-4">
             <Surface variant="transparent" className="flex items-center justify-between">
               <Typography type="h3" className="text-foreground text-lg font-bold tracking-tight">
@@ -539,20 +534,16 @@ export function StockLedger() {
             </Surface>
           </Surface>
 
-          {/* Current Positions */}
           <Card variant="default">
-            <Card.Header className="border-border/20 border-b pb-3">
-              <Typography
-                type="body-xs"
-                color="muted"
-                weight="bold"
-                className="tracking-wider uppercase"
-              >
+            <Card.Header>
+              <Card.Title className="text-muted text-xs font-bold tracking-wide uppercase">
                 Active Strategic Positions
-              </Typography>
-              <Card.Title className="text-base font-bold">Current Positions</Card.Title>
+              </Card.Title>
+              <Card.Description className="text-danger mt-1 text-xl font-bold">
+                Current Positions
+              </Card.Description>
             </Card.Header>
-            <Card.Content className="p-5">
+            <Card.Content>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {transactions.map((stock, idx) => {
                   const isPositive = !stock.roi.startsWith("-");
@@ -562,7 +553,7 @@ export function StockLedger() {
                       className="transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
                     >
                       <Card variant="secondary">
-                        <Card.Content className="flex h-[160px] flex-col justify-between p-4">
+                        <Card.Content className="flex flex-col justify-between">
                           {/* Top: Asset Ticker & Type */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
