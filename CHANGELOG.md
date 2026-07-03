@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/LeeWio/odyssey/compare/v1.1.0...v1.2.0) (2026-07-03)
+
+
+### Features
+
+* **portfolio:** remove market index bar ticker, redundant separators, and unused icon imports ([a65b572](https://github.com/LeeWio/odyssey/commit/a65b5728b3c6fce261ae933543e5bc504b1858fa))
+
 # [1.1.0](https://github.com/LeeWio/odyssey/compare/v1.0.0...v1.1.0) (2026-07-03)
 
 
