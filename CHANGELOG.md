@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/LeeWio/odyssey/compare/v1.0.0...v1.1.0) (2026-07-03)
+
+
+### Features
+
+* **portfolio:** upgrade metrics row with HeroUI Pro KPIGroup and add tactile active card scale transitions ([ccd79e1](https://github.com/LeeWio/odyssey/commit/ccd79e1f147d96e207ba64c966a633508381b348))
+
 # 1.0.0 (2026-07-03)
 
 
