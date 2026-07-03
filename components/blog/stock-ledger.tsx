@@ -110,6 +110,36 @@ const QUANT_RULES = [
   },
 ];
 
+// Curated pool of elite investment philosophy quotes from world-class masters
+const MASTER_QUOTES = [
+  {
+    quote:
+      "If you aren't willing to own a stock for ten years, don't even think about owning it for ten minutes.",
+    author: "Warren Buffett",
+    title: "Chairman, Berkshire Hathaway",
+    initials: "WB",
+  },
+  {
+    quote: "The big money is not in the buying and the selling, but in the waiting.",
+    author: "Charlie Munger",
+    title: "Vice Chairman, Berkshire Hathaway",
+    initials: "CM",
+  },
+  {
+    quote: "In the stock market, the most important organ is the stomach, not the brain.",
+    author: "Peter Lynch",
+    title: "Manager, Magellan Fund",
+    initials: "PL",
+  },
+  {
+    quote:
+      "It's not whether you're right or wrong, but how much you make when you're right and how much you lose when you're wrong.",
+    author: "George Soros",
+    title: "Founder, Soros Fund",
+    initials: "GS",
+  },
+];
+
 const CHART_COLORS = [
   "var(--chart-4)",
   "var(--chart-3)",
@@ -158,9 +188,10 @@ export function StockLedger() {
   const [transactions, setTransactions] = useState(STOCK_TRANSACTIONS);
   const [kpis, setKpis] = useState(PORTFOLIO_KPIS);
   const [rules, setRules] = useState(QUANT_RULES);
-  const [thesis, setThesis] = useState(
-    "Holding a cash buffer and scaling down high-beta tech exposure. Waiting for better entry points in index ETFs during range-bound tech consolidation."
-  );
+  const [thesis, setThesis] = useState("");
+
+  // Select a random master quote on initial mount to keep the dashboard inspiring
+  const [activeQuote, setActiveQuote] = useState(MASTER_QUOTES[0]);
 
   // Fetch from localStorage if set (prevents SSR hydration error and synchronous cascading effect state update)
   useEffect(() => {
@@ -175,6 +206,10 @@ export function StockLedger() {
         if (storedKpis) setKpis(JSON.parse(storedKpis));
         if (storedRules) setRules(JSON.parse(storedRules));
         if (storedThesis) setThesis(storedThesis);
+
+        // Pick a random quote on mount for a delightful, refreshing touch
+        const randomIndex = Math.floor(Math.random() * MASTER_QUOTES.length);
+        setActiveQuote(MASTER_QUOTES[randomIndex]);
       };
       setTimeout(loadData, 0);
     }
@@ -235,6 +270,24 @@ export function StockLedger() {
       total: totalValue,
     };
   }, [transactions]);
+
+  // Decide what quote details to display: prefer custom local storage thesis if manually edited, otherwise show premium master quote
+  const displayQuote = useMemo(() => {
+    if (
+      thesis &&
+      thesis.trim() !== "" &&
+      thesis !==
+        "Holding a cash buffer and scaling down high-beta tech exposure. Waiting for better entry points in index ETFs during range-bound tech consolidation."
+    ) {
+      return {
+        quote: thesis,
+        author: "Personal Strategy",
+        title: "Active Market Notes",
+        initials: "ME",
+      };
+    }
+    return activeQuote;
+  }, [thesis, activeQuote]);
 
   return (
     <Surface
@@ -333,10 +386,10 @@ export function StockLedger() {
             </Card.Content>
           </Card>
 
-          {/* B. Market Thesis */}
+          {/* B. Investment Wisdom Card (Master Quotes & Insights - Extremely Premium) */}
           <Card variant="default">
             <Card.Header className="pb-2">
-              <div className="flex items-center gap-1.5">
+              <Surface variant="transparent" className="flex items-center gap-1.5">
                 <span className="relative flex size-1.5">
                   <span className="bg-success absolute inline-flex h-full w-full animate-ping rounded-full opacity-75">
                     {null}
@@ -351,19 +404,34 @@ export function StockLedger() {
                   weight="bold"
                   className="tracking-widest uppercase"
                 >
-                  Outlook
+                  Wisdom
                 </Typography>
-              </div>
-              <Card.Title className="mt-1 text-base font-bold">Market Thesis</Card.Title>
+              </Surface>
+              <Card.Title className="mt-1 text-base font-bold">Investing Philosophy</Card.Title>
             </Card.Header>
-            <Card.Content className="pb-4">
+            <Card.Content className="flex flex-col gap-4 pb-4">
               <Typography
                 type="body-sm"
                 weight="medium"
-                className="text-foreground/85 leading-relaxed font-medium italic"
+                className="text-foreground/95 leading-relaxed font-medium italic"
               >
-                &ldquo;{thesis}&rdquo;
+                &ldquo;{displayQuote.quote}&rdquo;
               </Typography>
+              <div className="border-border/20 mt-1 flex items-center gap-2.5 border-t pt-3.5">
+                <Avatar size="sm" color="default">
+                  <Avatar.Fallback className="text-[10px] font-bold">
+                    {displayQuote.initials}
+                  </Avatar.Fallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <Typography type="body-xs" weight="bold" className="text-foreground leading-none">
+                    {displayQuote.author}
+                  </Typography>
+                  <Typography type="body-xs" color="muted" className="mt-0.5 text-[9px]">
+                    {displayQuote.title}
+                  </Typography>
+                </div>
+              </div>
             </Card.Content>
           </Card>
 
