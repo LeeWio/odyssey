@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/LeeWio/odyssey/compare/v1.5.0...v1.6.0) (2026-07-03)
+
+
+### Features
+
+* **portfolio:** implement dynamic Investment Wisdom card with world-class master quotes ([b7e4e84](https://github.com/LeeWio/odyssey/commit/b7e4e84940fcb1ba599759577c4194ff44bbaf7e))
+
 # [1.5.0](https://github.com/LeeWio/odyssey/compare/v1.4.0...v1.5.0) (2026-07-03)
 
 
