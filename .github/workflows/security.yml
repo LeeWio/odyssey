@@ -1,0 +1,25 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [main, master]
+  schedule:
+    # Run every night at midnight UTC
+    - cron: "0 0 * * *"
+
+jobs:
+  audit:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Run Bun PM Audit
+        run: bun pm audit
