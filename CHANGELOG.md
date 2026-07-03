@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/LeeWio/odyssey/compare/v1.2.0...v1.3.0) (2026-07-03)
+
+
+### Features
+
+* **portfolio:** integrate HeroUI Pro PieChart for dynamic Asset Allocation and remove unused icon imports ([4c16983](https://github.com/LeeWio/odyssey/commit/4c169837006bfcca2b653943895986f9e5c19cea))
+
 # [1.2.0](https://github.com/LeeWio/odyssey/compare/v1.1.0...v1.2.0) (2026-07-03)
 
 
