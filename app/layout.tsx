@@ -4,12 +4,9 @@ import { headers } from "next/headers";
 import { fontSans } from "@/config/fonts";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
-import { ThemeProvider } from "./theme-provider";
+import { Providers } from "./providers";
 import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/navbar";
-import { StoreProvider } from "./store-provider";
-import { ThemeCSSLoader } from "@/components/theme-css-loader";
-import { IntlProvider } from "./intl-provider";
 import { getMessages } from "next-intl/server";
 import { Toast } from "@heroui/react";
 import { SheetPanel } from "@/components/sheet-panel";
@@ -59,8 +56,9 @@ export default async function RootLayout({
     <html
       data-scrollbar="none"
       lang={lang}
+      data-theme="mouve-dark"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={clsx(geistSans.variable, geistMono.variable, "dark h-full antialiased")}
     >
       <body
         className={clsx(
@@ -68,22 +66,17 @@ export default async function RootLayout({
           fontSans.variable
         )}
       >
-        <IntlProvider lang={lang} messages={messages}>
-          <StoreProvider>
-            <ThemeProvider>
-              <ThemeCSSLoader />
-              <Toast.Provider />
-              <div className="relative flex min-h-screen flex-col overflow-x-hidden">
-                <Navbar />
-                <SheetPanel />
-                <DashboardSheet />
-                <RichTextModal />
-                <main className="flex w-full grow flex-col">{children}</main>
-                <Footer />
-              </div>
-            </ThemeProvider>
-          </StoreProvider>
-        </IntlProvider>
+        <Providers lang={lang} messages={messages}>
+          <Toast.Provider />
+          <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+            <Navbar />
+            <SheetPanel />
+            <DashboardSheet />
+            <RichTextModal />
+            <main className="flex w-full grow flex-col">{children}</main>
+            <Footer />
+          </div>
+        </Providers>
       </body>
     </html>
   );

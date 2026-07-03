@@ -24,7 +24,7 @@ const initialState: UiState = {
     isOpen: false,
   },
   theme: {
-    variant: "glass",
+    variant: "mouve",
   },
   dashboard: {
     isOpen: false,

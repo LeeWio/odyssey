@@ -50,15 +50,13 @@ export function RichTextModal() {
       >
         <Modal.Container
           size="cover"
-          className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={
             fullscreen ? "m-0! h-screen! max-h-none! w-screen! max-w-none! rounded-none p-0!" : ""
-          }`}
+          }
         >
           {isOpen && (
             <Modal.Dialog
-              className={`flex flex-col overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                fullscreen ? "rounded-none" : ""
-              }`}
+              className={`flex flex-col overflow-hidden ${fullscreen ? "rounded-none" : ""}`}
             >
               <AnimatePresence mode="wait">
                 {isFetching || !draftId ? (
@@ -73,21 +71,21 @@ export function RichTextModal() {
                     <Modal.Header className="flex flex-col gap-1">Create New Post</Modal.Header>
                     <Modal.Body className="p-0">
                       <div className="flex h-125 flex-col gap-6 p-6">
-                        <Skeleton className="bg-default-100 h-10 w-2/3 rounded-lg" />
+                        <Skeleton className="h-10 w-2/3" />
                         <div className="flex gap-2.5">
-                          <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
-                          <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
-                          <Skeleton className="bg-default-100 h-9 w-9 rounded-lg" />
-                          <Skeleton className="bg-default-100 h-9 w-16 rounded-lg" />
-                          <Skeleton className="bg-default-100 h-9 w-24 rounded-lg" />
+                          <Skeleton className="h-9 w-9" />
+                          <Skeleton className="h-9 w-9" />
+                          <Skeleton className="h-9 w-9" />
+                          <Skeleton className="h-9 w-16" />
+                          <Skeleton className="h-9 w-24" />
                         </div>
-                        <Skeleton className="bg-default-100 w-full flex-1 rounded-xl" />
+                        <Skeleton className="w-full flex-1" />
                       </div>
                     </Modal.Body>
                     <Modal.Footer>
                       <div className="flex w-full items-center justify-between">
-                        <Skeleton className="bg-default-100 h-6 w-32 rounded-md" />
-                        <Skeleton className="bg-default-100 h-6 w-24 rounded-md" />
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-6 w-24" />
                       </div>
                     </Modal.Footer>
                   </motion.div>

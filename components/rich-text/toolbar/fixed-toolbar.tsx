@@ -2,7 +2,7 @@
 
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { Dropdown, Button, Tooltip } from "@heroui/react";
+import { Dropdown, Button, Tooltip, Label } from "@heroui/react";
 
 export function FixedToolbar() {
   const { editor } = useRichTextEditor();
@@ -64,20 +64,26 @@ export function FixedToolbar() {
                 textValue="2 Columns"
                 onAction={() => editor?.chain().focus().setColumns(2).run()}
               >
-                <div className="flex items-center gap-2">
-                  <Icon icon="lucide:columns-2" className="h-4 w-4" aria-hidden="true" />
-                  <span>2 Columns</span>
-                </div>
+                <Icon
+                  icon="lucide:columns-2"
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                  data-slot="icon"
+                />
+                <Label>2 Columns</Label>
               </Dropdown.Item>
               <Dropdown.Item
                 id="cols-3"
                 textValue="3 Columns"
                 onAction={() => editor?.chain().focus().setColumns(3).run()}
               >
-                <div className="flex items-center gap-2">
-                  <Icon icon="lucide:columns-3" className="h-4 w-4" aria-hidden="true" />
-                  <span>3 Columns</span>
-                </div>
+                <Icon
+                  icon="lucide:columns-3"
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                  data-slot="icon"
+                />
+                <Label>3 Columns</Label>
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown.Popover>

@@ -80,7 +80,7 @@ export function TextMenu() {
             <Icon icon="gravity-ui:ellipsis-vertical" aria-hidden="true" />
           </Button>
           <Popover.Content>
-            <Popover.Dialog className="rounded-2xl p-1">
+            <Popover.Dialog className="p-1">
               <Popover.Arrow />
               <RichTextEditor.ToolbarGroup>
                 <ToggleButtonToolbar command="subscript" onPress={moreOverlayState.close}>

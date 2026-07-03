@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { IconSvgProps } from "@/types";
 
-export const Logo: React.FC<IconSvgProps> = (props) => (
+export const Logo: React.FC<IconSvgProps> = ({ size, height, width, ...props }) => (
   <svg fill="none" height={size || height} viewBox="0 0 32 32" width={size || width} {...props}>
     <path
       clipRule="evenodd"
@@ -13,7 +13,7 @@ export const Logo: React.FC<IconSvgProps> = (props) => (
   </svg>
 );
 
-export const DiscordIcon: React.FC<IconSvgProps> = (props) => {
+export const DiscordIcon: React.FC<IconSvgProps> = ({ size, height, width, ...props }) => {
   return (
     <svg height={size || height} viewBox="0 0 24 24" width={size || width} {...props}>
       <path
@@ -24,7 +24,7 @@ export const DiscordIcon: React.FC<IconSvgProps> = (props) => {
   );
 };
 
-export const TwitterIcon: React.FC<IconSvgProps> = (props) => {
+export const TwitterIcon: React.FC<IconSvgProps> = ({ size, height, width, ...props }) => {
   return (
     <svg height={size || height} viewBox="0 0 24 24" width={size || width} {...props}>
       <path
@@ -35,7 +35,7 @@ export const TwitterIcon: React.FC<IconSvgProps> = (props) => {
   );
 };
 
-export const GithubIcon: React.FC<IconSvgProps> = (props) => {
+export const GithubIcon: React.FC<IconSvgProps> = ({ size, height, width, ...props }) => {
   return (
     <svg height={size || height} viewBox="0 0 24 24" width={size || width} {...props}>
       <path

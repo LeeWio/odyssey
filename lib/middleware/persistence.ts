@@ -2,7 +2,7 @@
 
 import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 import { setCredentials, setPermissions, removeCredentials } from "../features/auth/auth-slice";
-import { setThemeVariant, setDraftIdentifier } from "../features/ui";
+import { setThemeVariant, setDraftIdentifier, type ThemeVariant } from "../features/ui";
 import { setLocale } from "../features/locale/locale-slice";
 import type { RootState } from "../store";
 
@@ -35,6 +35,7 @@ persistenceMiddleware.startListening({
   effect: (action) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("odyssey_theme", action.payload);
+      document.cookie = `odyssey_theme=${action.payload}; path=/; max-age=31536000; SameSite=Lax`;
     }
   },
 });
@@ -81,11 +82,19 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
     if (auth) preloadedState.auth = JSON.parse(auth);
     if (theme || draftId) {
       preloadedState.ui = {
-        theme: { variant: theme || "glass" },
+        theme: { variant: (theme as ThemeVariant) || "mouve" },
         sheet: { isOpen: false },
         dashboard: { isOpen: false },
         richText: { isOpen: false, draftIdentifier: draftId || null },
       };
+
+      // Self-heal/sync localStorage configuration to Cookie on client load
+      if (theme) {
+        const match = document.cookie.match(/(?:^|; )odyssey_theme=([^;]*)/);
+        if (!match || match[1] !== theme) {
+          document.cookie = `odyssey_theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
+        }
+      }
     }
     if (locale) preloadedState.locale = { value: locale };
 
