@@ -21,5 +21,8 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Generate Temporary Lockfile for Auditing
+        run: bun install --yarn
+
       - name: Run Dependency Security Audit
         run: bun x audit-ci --high
