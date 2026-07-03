@@ -258,11 +258,11 @@ export function StockLedger() {
         ))}
       </Surface>
 
-      <Separator className="opacity-30" />
+      <Separator />
 
-      {/* 3. PORTFOLIO KPIS (Premium HeroUI Pro KPIGroup & KPI Components with absolute styling integrity) */}
+      {/* 3. PORTFOLIO KPIS (Premium, clean HeroUI Pro KPIGroup & KPI Components with absolute styling integrity) */}
       <Surface variant="transparent" className="w-full">
-        <KPIGroup className="border-border/30 bg-default-50/5 overflow-hidden rounded-xl border shadow-sm">
+        <KPIGroup>
           {kpiData.map((stat, idx) => (
             <Fragment key={stat.id || idx}>
               {idx > 0 && <KPIGroup.Separator />}
@@ -285,7 +285,7 @@ export function StockLedger() {
         </KPIGroup>
       </Surface>
 
-      <Separator className="opacity-30" />
+      <Separator />
 
       {/* 4. MAIN LAYOUT SPLIT GRID */}
       <Surface variant="transparent" className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
@@ -383,11 +383,8 @@ export function StockLedger() {
                 <Carousel.Content>
                   {recentBuys.map((item, idx) => (
                     <Carousel.Item key={item.id || idx} className="basis-full sm:basis-1/2">
-                      <div className="p-1">
-                        <Card
-                          variant="default"
-                          className="border-border/20 border shadow-sm transition-transform duration-150 active:scale-[0.98]"
-                        >
+                      <div className="p-1 transition-transform duration-150 active:scale-[0.98]">
+                        <Card variant="default">
                           <Card.Header className="flex flex-row items-center justify-between">
                             <div className="flex flex-col gap-0.5">
                               <Typography
@@ -491,128 +488,129 @@ export function StockLedger() {
                 {transactions.map((stock, idx) => {
                   const isPositive = !stock.roi.startsWith("-");
                   return (
-                    <Card
+                    <div
                       key={stock.id || idx}
-                      variant="secondary"
-                      className="transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98]"
+                      className="transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
                     >
-                      <Card.Content className="flex h-[160px] flex-col justify-between p-4">
-                        {/* Top: Asset Ticker & Type */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Avatar size="sm" color="default">
-                              <Avatar.Fallback className="text-[10px] font-bold">
-                                {stock.ticker.slice(0, 2)}
-                              </Avatar.Fallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                              <Typography
-                                type="h5"
-                                weight="bold"
-                                className="text-foreground text-sm tracking-tight"
-                              >
-                                {stock.ticker}
-                              </Typography>
-                              <Typography
-                                type="body-xs"
-                                color="muted"
-                                truncate
-                                className="mt-0.5 block max-w-[80px] text-[9px] leading-none"
-                                title={stock.companyName}
-                              >
-                                {stock.companyName}
-                              </Typography>
+                      <Card variant="secondary">
+                        <Card.Content className="flex h-[160px] flex-col justify-between p-4">
+                          {/* Top: Asset Ticker & Type */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Avatar size="sm" color="default">
+                                <Avatar.Fallback className="text-[10px] font-bold">
+                                  {stock.ticker.slice(0, 2)}
+                                </Avatar.Fallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <Typography
+                                  type="h5"
+                                  weight="bold"
+                                  className="text-foreground text-sm tracking-tight"
+                                >
+                                  {stock.ticker}
+                                </Typography>
+                                <Typography
+                                  type="body-xs"
+                                  color="muted"
+                                  truncate
+                                  className="mt-0.5 block max-w-[80px] text-[9px] leading-none"
+                                  title={stock.companyName}
+                                >
+                                  {stock.companyName}
+                                </Typography>
+                              </div>
                             </div>
+
+                            <Chip size="sm" variant="soft" className="font-bold uppercase">
+                              {stock.action}
+                            </Chip>
                           </div>
 
-                          <Chip size="sm" variant="soft" className="font-bold uppercase">
-                            {stock.action}
-                          </Chip>
-                        </div>
-
-                        {/* Mid-Row: Price, Size, ROI with Separators */}
-                        <div className="my-1">
-                          <Separator className="opacity-40" />
-                          <div className="grid grid-cols-3 gap-1 py-1.5 text-center">
-                            <div className="flex flex-col items-start gap-0.5">
-                              <Typography
-                                type="body-xs"
-                                color="muted"
-                                weight="bold"
-                                className="text-[8px] uppercase"
-                              >
-                                Cost
-                              </Typography>
-                              <Typography
-                                type="body-xs"
-                                weight="bold"
-                                className="text-foreground font-mono text-[10px]"
-                              >
-                                {stock.price}
-                              </Typography>
+                          {/* Mid-Row: Price, Size, ROI with Separators */}
+                          <div className="my-1">
+                            <Separator />
+                            <div className="grid grid-cols-3 gap-1 py-1.5 text-center">
+                              <div className="flex flex-col items-start gap-0.5">
+                                <Typography
+                                  type="body-xs"
+                                  color="muted"
+                                  weight="bold"
+                                  className="text-[8px] uppercase"
+                                >
+                                  Cost
+                                </Typography>
+                                <Typography
+                                  type="body-xs"
+                                  weight="bold"
+                                  className="text-foreground font-mono text-[10px]"
+                                >
+                                  {stock.price}
+                                </Typography>
+                              </div>
+                              <div className="flex flex-col items-center gap-0.5">
+                                <Typography
+                                  type="body-xs"
+                                  color="muted"
+                                  weight="bold"
+                                  className="text-[8px] uppercase"
+                                >
+                                  Shrs
+                                </Typography>
+                                <Typography
+                                  type="body-xs"
+                                  weight="semibold"
+                                  className="text-foreground/80 font-mono text-[10px]"
+                                >
+                                  {stock.shares.split(" ")[0]}
+                                </Typography>
+                              </div>
+                              <div className="flex flex-col items-end gap-0.5">
+                                <Typography
+                                  type="body-xs"
+                                  color="muted"
+                                  weight="bold"
+                                  className="text-[8px] uppercase"
+                                >
+                                  ROI
+                                </Typography>
+                                <Typography
+                                  type="body-xs"
+                                  weight="bold"
+                                  className={`font-mono text-[10px] ${isPositive ? "text-success" : "text-danger"}`}
+                                >
+                                  {stock.roi}
+                                </Typography>
+                              </div>
                             </div>
-                            <div className="flex flex-col items-center gap-0.5">
-                              <Typography
-                                type="body-xs"
-                                color="muted"
-                                weight="bold"
-                                className="text-[8px] uppercase"
-                              >
-                                Shrs
-                              </Typography>
-                              <Typography
-                                type="body-xs"
-                                weight="semibold"
-                                className="text-foreground/80 font-mono text-[10px]"
-                              >
-                                {stock.shares.split(" ")[0]}
-                              </Typography>
-                            </div>
-                            <div className="flex flex-col items-end gap-0.5">
-                              <Typography
-                                type="body-xs"
-                                color="muted"
-                                weight="bold"
-                                className="text-[8px] uppercase"
-                              >
-                                ROI
-                              </Typography>
-                              <Typography
-                                type="body-xs"
-                                weight="bold"
-                                className={`font-mono text-[10px] ${isPositive ? "text-success" : "text-danger"}`}
-                              >
-                                {stock.roi}
-                              </Typography>
-                            </div>
+                            <Separator />
                           </div>
-                          <Separator className="opacity-40" />
-                        </div>
 
-                        {/* Bottom: Holding Status */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <span
-                              className={`size-1.5 rounded-full ${stock.isHolding ? "animate-pulse bg-emerald-400" : "bg-muted"}`}
-                            />
+                          {/* Bottom: Holding Status */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={`size-1.5 rounded-full ${stock.isHolding ? "animate-pulse bg-emerald-400" : "bg-muted"}`}
+                              />
+                              <Typography
+                                type="body-xs"
+                                color="muted"
+                                className="text-[9px] font-semibold"
+                              >
+                                {stock.statusText}
+                              </Typography>
+                            </div>
+
                             <Typography
                               type="body-xs"
-                              color="muted"
-                              className="text-[9px] font-semibold"
+                              className={`text-[9px] font-bold uppercase ${stock.isHolding ? "text-warning" : "text-muted"}`}
                             >
-                              {stock.statusText}
+                              {stock.isHolding ? "Holding" : "Closed"}
                             </Typography>
                           </div>
-
-                          <Typography
-                            type="body-xs"
-                            className={`text-[9px] font-bold uppercase ${stock.isHolding ? "text-warning" : "text-muted"}`}
-                          >
-                            {stock.isHolding ? "Holding" : "Closed"}
-                          </Typography>
-                        </div>
-                      </Card.Content>
-                    </Card>
+                        </Card.Content>
+                      </Card>
+                    </div>
                   );
                 })}
               </div>
