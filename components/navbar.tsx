@@ -16,7 +16,6 @@ import {
   ListBox,
   Separator,
   Card,
-  Heading,
 } from "@heroui/react";
 import { Navbar as HerouiNavbar } from "@heroui-pro/react";
 import { useMounted, useOs } from "@mantine/hooks";
@@ -25,7 +24,6 @@ import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { v4 as uuidv4 } from "uuid";
 
 // 导入 Iconify
 import { Icon } from "@iconify/react";
@@ -55,7 +53,6 @@ export const Navbar = () => {
   const navbarRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
 
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
@@ -188,26 +185,27 @@ export const Navbar = () => {
                 <Popover.Dialog className="grid grid-cols-12 gap-4">
                   {/* Left Side: Featured Postcard */}
                   <Card
-                    className="col-span-5 flex flex-col justify-between border border-indigo-500/10 bg-gradient-to-br from-indigo-50/50 to-indigo-100/50 p-3 shadow-none select-none dark:border-indigo-400/5 dark:from-indigo-950/30 dark:to-indigo-900/10"
-                    variant="transparent"
+                    className="col-span-5 flex flex-col justify-between p-3 select-none"
+                    variant="secondary"
                   >
                     <Card.Header className="flex-col items-start gap-1 p-0">
                       <div className="flex items-center gap-1.5">
                         <Icon
                           icon="lucide:sparkles"
-                          className="size-4 animate-pulse text-indigo-500"
+                          className="text-primary size-4 animate-pulse"
                         />
-                        <span className="text-[9px] font-bold tracking-widest text-indigo-600/80 uppercase dark:text-indigo-400/80">
+                        <span className="text-primary/80 text-[9px] font-bold tracking-widest uppercase">
                           Featured
                         </span>
                       </div>
-                      <Card.Title className="mt-1 text-xs leading-tight font-bold text-zinc-950 dark:text-zinc-50">
+                      <Card.Title className="mt-1 text-xs leading-tight font-bold">
                         The Odyssey of Life
                       </Card.Title>
                     </Card.Header>
                     <Card.Content className="mt-auto p-0 pt-4">
-                      <Card.Description className="text-[10px] leading-relaxed text-zinc-500 italic">
-                        "A lifelong journey of mapping passions, creations & setups."
+                      <Card.Description className="text-[10px] leading-relaxed italic">
+                        &ldquo;A lifelong journey of mapping passions, creations &amp;
+                        setups.&rdquo;
                       </Card.Description>
                     </Card.Content>
                   </Card>
@@ -356,7 +354,7 @@ export const Navbar = () => {
                     aria-label="Creator Shipyard"
                     selectionMode="none"
                     className="grid grid-cols-2"
-                    onAction={(key) => {
+                    onAction={() => {
                       setIsBuildsOpen(false);
                       router.push("/");
                     }}
@@ -449,8 +447,8 @@ export const Navbar = () => {
                         <div className="flex flex-col">
                           <Label className="text-accent font-bold">Symbiosis Echo</Label>
                           <Description className="max-w-55 italic">
-                            "Your articles about stock trading and fitness changed my daily
-                            workflow. Thank you!" — Priya
+                            &ldquo;Your articles about stock trading and fitness changed my daily
+                            workflow. Thank you!&rdquo; — Priya
                           </Description>
                         </div>
                       </ListBox.Item>
@@ -701,7 +699,7 @@ export const Navbar = () => {
         </HerouiNavbar.Header>
 
         {/* Mobile Navigation Staggered Drawer Menu */}
-        <HerouiNavbar.Menu className="border-t border-black/5 backdrop-blur-xl dark:border-white/5 dark:bg-zinc-950/95">
+        <HerouiNavbar.Menu>
           <motion.div
             initial="hidden"
             animate="visible"
@@ -731,33 +729,21 @@ export const Navbar = () => {
               Explore
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/"
-                isCurrent={"/" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:book-open" className="size-4.5 text-indigo-400" />
-                <span className="text-sm font-medium">Blogs</span>
+              <HerouiNavbar.MenuItem href="/" isCurrent={"/" === currentItem}>
+                <Icon icon="lucide:book-open" className="text-indigo-400" data-slot="icon" />
+                Blogs
               </HerouiNavbar.MenuItem>
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/test/moment"
-                isCurrent={"/test/moment" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:map" className="size-4.5 text-emerald-500" />
-                <span className="text-sm font-medium">Travelogue</span>
+              <HerouiNavbar.MenuItem href="/test/moment" isCurrent={"/test/moment" === currentItem}>
+                <Icon icon="lucide:map" className="text-emerald-500" data-slot="icon" />
+                Travelogue
               </HerouiNavbar.MenuItem>
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/test/file"
-                isCurrent={"/test/file" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:camera" className="size-4.5 text-sky-400" />
-                <span className="text-sm font-medium">Exhibitions</span>
+              <HerouiNavbar.MenuItem href="/test/file" isCurrent={"/test/file" === currentItem}>
+                <Icon icon="lucide:camera" className="text-sky-400" data-slot="icon" />
+                Exhibitions
               </HerouiNavbar.MenuItem>
             </motion.div>
 
@@ -774,43 +760,27 @@ export const Navbar = () => {
               Passions
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/test/moment"
-                isCurrent={"/test/moment" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:trending-up" className="size-4.5 text-emerald-500" />
-                <span className="text-sm font-medium">Stock Ledger</span>
+              <HerouiNavbar.MenuItem href="/test/moment" isCurrent={"/test/moment" === currentItem}>
+                <Icon icon="lucide:trending-up" className="text-emerald-500" data-slot="icon" />
+                Stock Ledger
               </HerouiNavbar.MenuItem>
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/test/moment"
-                isCurrent={"/test/moment" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:music" className="size-4.5 text-rose-400" />
-                <span className="text-sm font-medium">Soundtrack</span>
+              <HerouiNavbar.MenuItem href="/test/moment" isCurrent={"/test/moment" === currentItem}>
+                <Icon icon="lucide:music" className="text-rose-400" data-slot="icon" />
+                Soundtrack
               </HerouiNavbar.MenuItem>
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/test/moment"
-                isCurrent={"/test/moment" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:dumbbell" className="size-4.5 text-amber-500" />
-                <span className="text-sm font-medium">Fitness Hub</span>
+              <HerouiNavbar.MenuItem href="/test/moment" isCurrent={"/test/moment" === currentItem}>
+                <Icon icon="lucide:dumbbell" className="text-amber-500" data-slot="icon" />
+                Fitness Hub
               </HerouiNavbar.MenuItem>
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/test/moment"
-                isCurrent={"/test/moment" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:terminal" className="size-4.5 text-sky-400" />
-                <span className="text-sm font-medium">Coding Sandbox</span>
+              <HerouiNavbar.MenuItem href="/test/moment" isCurrent={"/test/moment" === currentItem}>
+                <Icon icon="lucide:terminal" className="text-sky-400" data-slot="icon" />
+                Coding Sandbox
               </HerouiNavbar.MenuItem>
             </motion.div>
 
@@ -826,23 +796,15 @@ export const Navbar = () => {
               Builds
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/"
-                isCurrent={"/" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:rocket" className="size-4.5 text-teal-500" />
-                <span className="text-sm font-medium">Shipyard</span>
+              <HerouiNavbar.MenuItem href="/" isCurrent={"/" === currentItem}>
+                <Icon icon="lucide:rocket" className="text-teal-500" data-slot="icon" />
+                Shipyard
               </HerouiNavbar.MenuItem>
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/"
-                isCurrent={"/" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:github" className="size-4.5 text-zinc-400" />
-                <span className="text-sm font-medium">Open Source</span>
+              <HerouiNavbar.MenuItem href="/" isCurrent={"/" === currentItem}>
+                <Icon icon="lucide:github" className="text-zinc-400" data-slot="icon" />
+                Open Source
               </HerouiNavbar.MenuItem>
             </motion.div>
 
@@ -859,33 +821,24 @@ export const Navbar = () => {
               Curations
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/test/tag"
-                isCurrent={"/test/tag" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:sparkles" className="size-4.5 text-violet-400" />
-                <span className="text-sm font-medium">Selected Goods</span>
+              <HerouiNavbar.MenuItem href="/test/tag" isCurrent={"/test/tag" === currentItem}>
+                <Icon icon="lucide:sparkles" className="text-violet-400" data-slot="icon" />
+                Selected Goods
               </HerouiNavbar.MenuItem>
             </motion.div>
             <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/test/file"
-                isCurrent={"/test/file" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-              >
-                <Icon icon="lucide:archive" className="size-4.5 text-blue-500" />
-                <span className="text-sm font-medium">Media Vault</span>
+              <HerouiNavbar.MenuItem href="/test/file" isCurrent={"/test/file" === currentItem}>
+                <Icon icon="lucide:archive" className="text-blue-500" data-slot="icon" />
+                Media Vault
               </HerouiNavbar.MenuItem>
             </motion.div>
             <motion.div variants={itemMotionVariants}>
               <HerouiNavbar.MenuItem
                 href="/test/comment"
                 isCurrent={"/test/comment" === currentItem}
-                className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
               >
-                <Icon icon="lucide:message-square" className="size-4.5 text-purple-500" />
-                <span className="text-sm font-medium">Symbiosis Echo</span>
+                <Icon icon="lucide:message-square" className="text-purple-500" data-slot="icon" />
+                Symbiosis Echo
               </HerouiNavbar.MenuItem>
             </motion.div>
 
@@ -906,30 +859,28 @@ export const Navbar = () => {
                   <HerouiNavbar.MenuItem
                     href="/test/category"
                     isCurrent={"/test/category" === currentItem}
-                    className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
                   >
-                    <Icon icon="lucide:layout-dashboard" className="size-4.5 text-teal-500" />
-                    <span className="text-sm font-medium">Aviation Panel</span>
+                    <Icon
+                      icon="lucide:layout-dashboard"
+                      className="text-teal-500"
+                      data-slot="icon"
+                    />
+                    Aviation Panel
                   </HerouiNavbar.MenuItem>
                 </motion.div>
                 <motion.div variants={itemMotionVariants}>
                   <HerouiNavbar.MenuItem
                     href="/test/category"
                     isCurrent={"/test/category" === currentItem}
-                    className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
                   >
-                    <Icon icon="lucide:folder-tree" className="size-4.5 text-pink-400" />
-                    <span className="text-sm font-medium">Taxonomy Star</span>
+                    <Icon icon="lucide:folder-tree" className="text-pink-400" data-slot="icon" />
+                    Taxonomy Star
                   </HerouiNavbar.MenuItem>
                 </motion.div>
                 <motion.div variants={itemMotionVariants}>
-                  <HerouiNavbar.MenuItem
-                    href="/test/tag"
-                    isCurrent={"/test/tag" === currentItem}
-                    className="flex items-center gap-3 rounded-xl px-4 py-2 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:hover:bg-white/5"
-                  >
-                    <Icon icon="lucide:tags" className="size-4.5 text-amber-500" />
-                    <span className="text-sm font-medium">Keyword Index</span>
+                  <HerouiNavbar.MenuItem href="/test/tag" isCurrent={"/test/tag" === currentItem}>
+                    <Icon icon="lucide:tags" className="text-amber-500" data-slot="icon" />
+                    Keyword Index
                   </HerouiNavbar.MenuItem>
                 </motion.div>
               </>

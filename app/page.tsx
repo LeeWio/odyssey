@@ -188,11 +188,11 @@ export default function Home() {
       {/* 3D 星轨环形文章展示区 */}
       <OrbitalCarousel />
 
-      {/* 时光卡牌堆叠折叠文章展示区 */}
-      <ChronicleDeck />
-
       {/* 股票买入/卖出量化交易日志区 */}
       <StockLedger />
+
+      {/* 时光卡牌堆叠折叠文章展示区 */}
+      <ChronicleDeck />
 
       <Surface variant="transparent" className="px-6 py-24 text-center lg:px-10 lg:py-32">
         <Typography className="text-muted mb-8 text-sm font-semibold tracking-wider uppercase">

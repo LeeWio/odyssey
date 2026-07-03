@@ -87,7 +87,7 @@ export const useTextMenuStates = () => {
         if (node && isCustomNodeSelected(editor, node)) {
           return false;
         }
-      } catch (error) {
+      } catch {
         // Safe fallback when ProseMirror's docView is null during unmounting or state updates
         return false;
       }

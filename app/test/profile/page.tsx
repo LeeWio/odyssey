@@ -279,7 +279,7 @@ export default function ProfileTestPage() {
                     key={item.id}
                     size="sm"
                     variant={simulationState === item.id ? "primary" : "outline"}
-                    onClick={() => setSimulationState(item.id as any)}
+                    onClick={() => setSimulationState(item.id as "loaded" | "loading" | "empty")}
                     className="w-full justify-start gap-2.5 text-left font-medium"
                   >
                     <Icon

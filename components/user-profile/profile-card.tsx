@@ -1037,7 +1037,7 @@ export function ProfileCard({
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
                                 <h4 className="text-foreground text-sm leading-5 font-bold">
-                                  Unlocked "UI Virtuoso" Epic Badge
+                                  Unlocked &ldquo;UI Virtuoso&rdquo; Epic Badge
                                 </h4>
                                 <Chip color="accent" size="sm" variant="soft">
                                   Epic Achievement
