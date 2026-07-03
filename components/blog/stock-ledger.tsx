@@ -386,48 +386,30 @@ export function StockLedger() {
             </Card.Content>
           </Card>
 
-          {/* B. Investment Wisdom Card (Master Quotes & Insights - Extremely Premium) */}
+          {/* B. Investment Wisdom Card (Master Quotes & Insights - Extremely Clean & Elegant) */}
           <Card variant="default">
-            <Card.Header className="pb-2">
-              <Surface variant="transparent" className="flex items-center gap-1.5">
-                <span className="relative flex size-1.5">
-                  <span className="bg-success absolute inline-flex h-full w-full animate-ping rounded-full opacity-75">
-                    {null}
-                  </span>
-                  <span className="bg-success relative inline-flex size-1.5 rounded-full">
-                    {null}
-                  </span>
-                </span>
-                <Typography
-                  type="body-xs"
-                  color="muted"
-                  weight="bold"
-                  className="tracking-widest uppercase"
-                >
-                  Wisdom
-                </Typography>
-              </Surface>
-              <Card.Title className="mt-1 text-base font-bold">Investing Philosophy</Card.Title>
-            </Card.Header>
-            <Card.Content className="flex flex-col gap-4 pb-4">
+            <Card.Content className="flex flex-col gap-4 p-6">
               <Typography
-                type="body-sm"
+                type="body"
                 weight="medium"
-                className="text-foreground/95 leading-relaxed font-medium italic"
+                className="text-foreground/90 font-serif leading-relaxed font-medium italic"
               >
                 &ldquo;{displayQuote.quote}&rdquo;
               </Typography>
-              <div className="border-border/20 mt-1 flex items-center gap-2.5 border-t pt-3.5">
+
+              <Separator />
+
+              <div className="flex items-center gap-3">
                 <Avatar size="sm" color="default">
                   <Avatar.Fallback className="text-[10px] font-bold">
                     {displayQuote.initials}
                   </Avatar.Fallback>
                 </Avatar>
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-0.5">
                   <Typography type="body-xs" weight="bold" className="text-foreground leading-none">
                     {displayQuote.author}
                   </Typography>
-                  <Typography type="body-xs" color="muted" className="mt-0.5 text-[9px]">
+                  <Typography type="body-xs" color="muted" className="text-[10px]">
                     {displayQuote.title}
                   </Typography>
                 </div>
