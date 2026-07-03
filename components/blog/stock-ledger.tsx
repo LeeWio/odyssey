@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Fragment } from "react";
 import { Card, Chip, Separator, Surface, Typography, Avatar } from "@heroui/react";
-import { Carousel, KPI } from "@heroui-pro/react";
+import { Carousel, KPI, KPIGroup } from "@heroui-pro/react";
 import { ArrowUpRight, ArrowDownRight } from "@gravity-ui/icons";
 
 import { useGetMarketIndicesQuery } from "@/lib/features/market/market-api";
@@ -260,24 +260,29 @@ export function StockLedger() {
 
       <Separator className="opacity-30" />
 
-      {/* 3. PORTFOLIO KPIS (Premium, clean HeroUI Pro KPI Components with absolute styling integrity) */}
-      <Surface variant="transparent" className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {kpiData.map((stat, idx) => (
-          <KPI key={stat.id || idx}>
-            <KPI.Header>
-              <KPI.Title>{stat.title}</KPI.Title>
-            </KPI.Header>
-            <KPI.Content>
-              <KPI.Value
-                currency={stat.isCurrency ? "USD" : undefined}
-                maximumFractionDigits={stat.isCurrency ? 0 : 2}
-                style={stat.isCurrency ? "currency" : "decimal"}
-                value={stat.numericValue}
-              />
-              <KPI.Trend trend={stat.trend}>{stat.percentage}</KPI.Trend>
-            </KPI.Content>
-          </KPI>
-        ))}
+      {/* 3. PORTFOLIO KPIS (Premium HeroUI Pro KPIGroup & KPI Components with absolute styling integrity) */}
+      <Surface variant="transparent" className="w-full">
+        <KPIGroup className="border-border/30 bg-default-50/5 overflow-hidden rounded-xl border shadow-sm">
+          {kpiData.map((stat, idx) => (
+            <Fragment key={stat.id || idx}>
+              {idx > 0 && <KPIGroup.Separator />}
+              <KPI>
+                <KPI.Header>
+                  <KPI.Title>{stat.title}</KPI.Title>
+                </KPI.Header>
+                <KPI.Content>
+                  <KPI.Value
+                    currency={stat.isCurrency ? "USD" : undefined}
+                    maximumFractionDigits={stat.isCurrency ? 0 : 2}
+                    style={stat.isCurrency ? "currency" : "decimal"}
+                    value={stat.numericValue}
+                  />
+                  <KPI.Trend trend={stat.trend}>{stat.percentage}</KPI.Trend>
+                </KPI.Content>
+              </KPI>
+            </Fragment>
+          ))}
+        </KPIGroup>
       </Surface>
 
       <Separator className="opacity-30" />
@@ -379,7 +384,10 @@ export function StockLedger() {
                   {recentBuys.map((item, idx) => (
                     <Carousel.Item key={item.id || idx} className="basis-full sm:basis-1/2">
                       <div className="p-1">
-                        <Card variant="default">
+                        <Card
+                          variant="default"
+                          className="border-border/20 border shadow-sm transition-transform duration-150 active:scale-[0.98]"
+                        >
                           <Card.Header className="flex flex-row items-center justify-between">
                             <div className="flex flex-col gap-0.5">
                               <Typography
@@ -390,7 +398,12 @@ export function StockLedger() {
                               >
                                 {item.ticker}
                               </Typography>
-                              <Typography type="body-xs" color="muted" title={item.companyName}>
+                              <Typography
+                                type="body-xs"
+                                color="muted"
+                                truncate
+                                title={item.companyName}
+                              >
                                 {item.companyName}
                               </Typography>
                             </div>
@@ -432,7 +445,7 @@ export function StockLedger() {
                               </Typography>
                             </div>
                           </Card.Content>
-                          <Card.Footer className="flex flex-row justify-between">
+                          <Card.Footer className="border-border/20 mt-1 flex flex-row justify-between border-t pt-2.5">
                             <Typography type="body-xs" color="muted" weight="normal" align="start">
                               ROI
                             </Typography>
@@ -481,7 +494,7 @@ export function StockLedger() {
                     <Card
                       key={stock.id || idx}
                       variant="secondary"
-                      className="transition-transform duration-200 hover:-translate-y-0.5"
+                      className="transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98]"
                     >
                       <Card.Content className="flex h-[160px] flex-col justify-between p-4">
                         {/* Top: Asset Ticker & Type */}
