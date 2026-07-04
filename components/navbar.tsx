@@ -17,7 +17,7 @@ import {
   Separator,
   Card,
 } from "@heroui/react";
-import { Navbar as HerouiNavbar } from "@heroui-pro/react";
+import { Navbar as HerouiNavbar, ItemCardGroup, ItemCard } from "@heroui-pro/react";
 import { useMounted, useOs } from "@mantine/hooks";
 import { useTheme } from "next-themes";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
@@ -348,41 +348,47 @@ export const Navbar = () => {
                 </Button>
               </Popover.Trigger>
               <Popover.Content>
-                <Popover.Dialog>
-                  <Popover.Heading>Creator Shipyard</Popover.Heading>
-                  <ListBox
-                    aria-label="Creator Shipyard"
-                    selectionMode="none"
-                    className="grid grid-cols-2"
-                    onAction={() => {
-                      setIsBuildsOpen(false);
-                      router.push("/");
-                    }}
-                  >
-                    <ListBox.Item id="shipyard" textValue="Shipyard">
-                      <Icon
-                        icon="lucide:rocket"
-                        className="size-5 text-teal-500"
-                        data-slot="icon"
-                      />
-                      <div className="flex flex-col">
-                        <Label>Shipyard</Label>
-                        <Description>Active side products & SaaS web tools</Description>
-                      </div>
-                    </ListBox.Item>
+                <Popover.Dialog className="flex flex-col gap-3">
+                  <Popover.Heading className="font-bold tracking-widest uppercase">
+                    Creator Shipyard
+                  </Popover.Heading>
+                  <ItemCardGroup layout="grid" columns={3} variant="transparent">
+                    <ItemCard>
+                      <ItemCard.Icon>
+                        <Icon icon="lucide:rocket" className="text-teal-500" />
+                      </ItemCard.Icon>
+                      <ItemCard.Content>
+                        <ItemCard.Title className="font-semibold">Shipyard</ItemCard.Title>
+                        <ItemCard.Description className="text-muted">
+                          SaaS web products
+                        </ItemCard.Description>
+                      </ItemCard.Content>
+                    </ItemCard>
 
-                    <ListBox.Item id="opensource" textValue="Open Source">
-                      <Icon
-                        icon="lucide:github"
-                        className="size-5 text-zinc-400"
-                        data-slot="icon"
-                      />
-                      <div className="flex flex-col">
-                        <Label>Open Source</Label>
-                        <Description>Public libraries & open source tooling</Description>
-                      </div>
-                    </ListBox.Item>
-                  </ListBox>
+                    <ItemCard>
+                      <ItemCard.Icon>
+                        <Icon icon="lucide:github" className="size-5 text-zinc-400" />
+                      </ItemCard.Icon>
+                      <ItemCard.Content>
+                        <ItemCard.Title className="font-semibold">Open Source</ItemCard.Title>
+                        <ItemCard.Description className="text-muted">
+                          Public libraries
+                        </ItemCard.Description>
+                      </ItemCard.Content>
+                    </ItemCard>
+
+                    <ItemCard>
+                      <ItemCard.Icon>
+                        <Icon icon="lucide:flask-conical" className="size-5 text-amber-500" />
+                      </ItemCard.Icon>
+                      <ItemCard.Content>
+                        <ItemCard.Title className="font-semibold">Labs</ItemCard.Title>
+                        <ItemCard.Description className="text-muted">
+                          Beta experiments
+                        </ItemCard.Description>
+                      </ItemCard.Content>
+                    </ItemCard>
+                  </ItemCardGroup>
                 </Popover.Dialog>
               </Popover.Content>
             </Popover>
@@ -805,6 +811,12 @@ export const Navbar = () => {
               <HerouiNavbar.MenuItem href="/" isCurrent={"/" === currentItem}>
                 <Icon icon="lucide:github" className="text-zinc-400" data-slot="icon" />
                 Open Source
+              </HerouiNavbar.MenuItem>
+            </motion.div>
+            <motion.div variants={itemMotionVariants}>
+              <HerouiNavbar.MenuItem href="/" isCurrent={"/" === currentItem}>
+                <Icon icon="lucide:flask-conical" className="text-amber-500" data-slot="icon" />
+                Labs
               </HerouiNavbar.MenuItem>
             </motion.div>
 

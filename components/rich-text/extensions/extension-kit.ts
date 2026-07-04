@@ -13,6 +13,7 @@ import {
   Indent,
   Column,
   Columns,
+  TableOfContents,
 } from ".";
 
 export const ExtensionKit = [
@@ -30,4 +31,5 @@ export const ExtensionKit = [
   Indent,
   Column,
   Columns,
+  TableOfContents,
 ];

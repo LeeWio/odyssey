@@ -1,20 +1,20 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { RichTextEditor } from "@heroui-pro/react";
 import { Button, Modal, Tooltip } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
 import { motion } from "motion/react";
 import { Icon } from "@iconify/react";
 
-import { useRichTextAutosave } from "./hooks/use-rich-text-autosave";
-import { useRichTextPublish } from "./hooks/use-rich-text-publish";
+import { useRichTextSetup } from "./hooks/use-rich-text-setup";
 import { PublishSettingsSidebar } from "./sidebar/publish-settings-sidebar";
 import { TextMenu } from "./menus/text-menu/text-menu";
 import { ExtensionKit } from "./extensions/extension-kit";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
 import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
 import { LinkMenu } from "./menus/link-menu/link-menu";
+import { RichTextTableOfContents } from "./table-of-contents";
 
 interface RichTextProps {
   identifier: string;
@@ -35,26 +35,18 @@ export function RichText({
   onToggleFullscreen,
   onClose,
 }: RichTextProps) {
-  // 1. Decoupled Content Autosaving State Hook
-  const autosave = useRichTextAutosave(identifier, initialValue, onChange);
-
-  // 2. Decoupled Document Publishing State Hook
-  const publish = useRichTextPublish(identifier, autosave.currentContent);
+  // 1. Single unified source of truth setup hook
+  const { editorRef, autosave, publish } = useRichTextSetup({
+    identifier,
+    initialValue,
+    onChange,
+    isFullscreen,
+    onToggleFullscreen,
+    onClose,
+  });
 
   const { handleValueChange, isAutosaving, isAutosaveSuccess, isAutosaveError } = autosave;
   const { showSettings, setShowSettings, handleOpenPublish } = publish;
-
-  // Intercept Escape to exit fullscreen before closing the modal
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isFullscreen) {
-        e.stopPropagation();
-        onToggleFullscreen?.();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown, true); // Capture phase to preempt Modal close
-    return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, [isFullscreen, onToggleFullscreen]);
 
   return (
     <RichTextEditor
@@ -62,7 +54,14 @@ export function RichText({
       className="flex h-full flex-1 flex-col overflow-hidden"
       defaultValue={initialValue}
       onValueChange={handleValueChange}
+      editorOptions={{
+        // 2. Intercept and capture Tiptap Editor instance for maximum programmatical flexibility
+        onCreate: ({ editor }) => {
+          editorRef.current = editor;
+        },
+      }}
     >
+      {/* 🛠️ Editor Header bar containing toolbars & modal controls */}
       <Modal.Header className="rich-text-header flex flex-row items-center justify-between">
         <FixedToolbar />
 
@@ -134,13 +133,18 @@ export function RichText({
         <LinkMenu />
       </Modal.Header>
 
+      {/* 📄 Core Editor Content View & Floating TOC & Publish sidebar */}
       <Modal.Body className="relative flex flex-1 flex-row overflow-hidden">
         <RichTextEditor.Content />
+
+        {/* 🎯 Real-time floating TOC on writing canvas */}
+        <RichTextTableOfContents placement="right" />
 
         {/* Modular Sidebar Publish Settings form with Staggered animations */}
         <PublishSettingsSidebar publish={publish} />
       </Modal.Body>
 
+      {/* 🏷️ Status footer bar */}
       <Modal.Footer className="flex items-center justify-between">
         <div className="text-default-400 flex items-center gap-2 text-xs select-none">
           {isAutosaving && (

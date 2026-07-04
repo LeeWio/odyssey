@@ -1,15 +1,23 @@
 "use client";
 
 import { useState, useEffect, useMemo, Fragment } from "react";
-import { Card, Chip, Separator, Surface, Typography, Avatar, ColorSwatch } from "@heroui/react";
-import { Carousel, KPI, KPIGroup, PieChart, ChartTooltip } from "@heroui-pro/react";
+import { Card, Chip, Surface, Typography, Avatar, ColorSwatch, ScrollShadow } from "@heroui/react";
+import {
+  Carousel,
+  KPI,
+  KPIGroup,
+  PieChart,
+  ChartTooltip,
+  Widget,
+  TrendChip,
+} from "@heroui-pro/react";
 
 const PORTFOLIO_KPIS = [
   {
     id: 1,
     title: "Portfolio Value",
     value: "$142,850.40",
-    change: "+$3,240.20 Today",
+    change: "Today",
     percentage: "+2.32%",
     isPositive: true,
     description: "Net asset value of cash and active stock holdings.",
@@ -143,40 +151,42 @@ const CHART_COLORS = [
   "var(--chart-5)",
 ];
 
+const SPARKLINE_UP = [
+  { value: 30 },
+  { value: 35 },
+  { value: 28 },
+  { value: 42 },
+  { value: 38 },
+  { value: 45 },
+  { value: 50 },
+  { value: 48 },
+  { value: 55 },
+  { value: 60 },
+  { value: 58 },
+  { value: 65 },
+];
+
+const SPARKLINE_DOWN = [
+  { value: 65 },
+  { value: 60 },
+  { value: 62 },
+  { value: 55 },
+  { value: 58 },
+  { value: 52 },
+  { value: 50 },
+  { value: 48 },
+  { value: 45 },
+  { value: 42 },
+  { value: 44 },
+  { value: 40 },
+];
+
 // Helper to extract a clean float number from formatted KPI value strings
 const parseNumericValue = (str: string): number => {
   const cleaned = str.replace(/[$,%+]/g, "").trim();
   const num = parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
 };
-
-interface PieTooltipProps {
-  active?: boolean;
-  payload?: Array<{
-    name?: string;
-    payload?: { fill?: string };
-    value?: number | string;
-  }>;
-  valueFormatter?: (value: number | string) => React.ReactNode;
-}
-
-function PieTooltip({ active, payload, valueFormatter }: PieTooltipProps) {
-  const entry = payload?.[0];
-
-  if (!active || !entry) return null;
-
-  return (
-    <ChartTooltip>
-      <ChartTooltip.Item>
-        <ChartTooltip.Indicator color={entry.payload?.fill} />
-        <ChartTooltip.Label>{entry.name}</ChartTooltip.Label>
-        <ChartTooltip.Value>
-          {valueFormatter ? valueFormatter(entry.value ?? "") : entry.value}
-        </ChartTooltip.Value>
-      </ChartTooltip.Item>
-    </ChartTooltip>
-  );
-}
 
 export function StockLedger() {
   // Local sync states
@@ -303,37 +313,63 @@ export function StockLedger() {
         </Typography>
       </Surface>
 
-      <Surface variant="transparent" className="w-full">
-        <KPIGroup>
-          {kpiData.map((stat, idx) => (
-            <Fragment key={stat.id || idx}>
-              {idx > 0 && <KPIGroup.Separator />}
-              <KPI>
-                <KPI.Header>
-                  <KPI.Title>{stat.title}</KPI.Title>
-                </KPI.Header>
-                <KPI.Content>
-                  <KPI.Value
-                    currency={stat.isCurrency ? "USD" : undefined}
-                    maximumFractionDigits={stat.isCurrency ? 0 : 2}
-                    style={stat.isCurrency ? "currency" : "decimal"}
-                    value={stat.numericValue}
-                  />
-                  <KPI.Trend trend={stat.trend}>{stat.percentage}</KPI.Trend>
-                </KPI.Content>
-              </KPI>
-            </Fragment>
-          ))}
-        </KPIGroup>
-      </Surface>
+      <Widget className="w-full">
+        <Widget.Header>
+          <Widget.Title>Stock Portfolio Performance</Widget.Title>
+          <Widget.Description>
+            Real-time valuation, active equity returns, and quantitative trading factors
+          </Widget.Description>
+        </Widget.Header>
+        <Widget.Content className="p-4">
+          <KPIGroup className="bg-transparent shadow-none">
+            {kpiData.map((stat, idx) => {
+              const sparkline = idx % 2 === 0 ? SPARKLINE_UP : SPARKLINE_DOWN;
+              const sparklineColor = stat.isPositive
+                ? "var(--color-success)"
+                : "var(--color-danger)";
+              return (
+                <Fragment key={stat.id || idx}>
+                  {idx > 0 && <KPIGroup.Separator />}
+                  <KPI>
+                    <KPI.Header>
+                      <KPI.Title>{stat.title}</KPI.Title>
+                    </KPI.Header>
+                    <KPI.Content className="grid-cols-[1fr_1fr] items-end">
+                      <div className="flex flex-col gap-1">
+                        <KPI.Value
+                          className="text-3xl"
+                          currency={stat.isCurrency ? "USD" : undefined}
+                          maximumFractionDigits={stat.isCurrency ? 0 : 2}
+                          style={stat.isCurrency ? "currency" : "decimal"}
+                          value={stat.numericValue}
+                        />
+                        <TrendChip trend={stat.trend} variant="tertiary">
+                          {stat.percentage}
+                          <TrendChip.Suffix>{stat.change}</TrendChip.Suffix>
+                        </TrendChip>
+                      </div>
+                      <KPI.Chart
+                        color={sparklineColor}
+                        data={sparkline}
+                        height={60}
+                        strokeWidth={1.5}
+                      />
+                    </KPI.Content>
+                  </KPI>
+                </Fragment>
+              );
+            })}
+          </KPIGroup>
+        </Widget.Content>
+      </Widget>
 
       <Surface variant="transparent" className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
         <Surface variant="transparent" className="flex flex-col gap-6 lg:col-span-4">
-          <Card variant="default">
-            <Card.Header>
-              <Card.Title className="text-base font-bold">Asset Allocation</Card.Title>
-            </Card.Header>
-            <Card.Content className="flex flex-col items-center gap-4">
+          <Widget className="w-full">
+            <Widget.Header>
+              <Widget.Title>Asset Allocation</Widget.Title>
+            </Widget.Header>
+            <Widget.Content className="flex flex-col items-center gap-4">
               <PieChart height={220}>
                 <PieChart.Pie
                   cx="50%"
@@ -348,28 +384,39 @@ export function StockLedger() {
                   ))}
                 </PieChart.Pie>
                 <PieChart.Tooltip
-                  content={
-                    <PieTooltip
-                      valueFormatter={(v) =>
-                        `${((Number(v) / holdingData.total) * 100).toFixed(1)}%`
-                      }
-                    />
-                  }
+                  content={({ active, payload }) => {
+                    const entry = payload?.[0];
+
+                    if (!active || !entry) return null;
+
+                    return (
+                      <ChartTooltip>
+                        <ChartTooltip.Item>
+                          <ChartTooltip.Indicator color={entry.payload?.fill} />
+                          <ChartTooltip.Label>{entry.name}</ChartTooltip.Label>
+                          <ChartTooltip.Value>
+                            {`${((Number(entry.value) / holdingData.total) * 100).toFixed(1)}%`}
+                          </ChartTooltip.Value>
+                        </ChartTooltip.Item>
+                      </ChartTooltip>
+                    );
+                  }}
                 />
               </PieChart>
-              <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5">
-                {holdingData.list.map((entry, idx) => (
-                  <div key={entry.name} className="flex items-center gap-1.5">
-                    <span
-                      className="size-2.5 rounded-full"
-                      style={{ backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }}
-                    />
-                    <span className="text-muted text-xs">{entry.name}</span>
-                  </div>
-                ))}
-              </div>
-            </Card.Content>
-          </Card>
+              <ScrollShadow orientation="horizontal" hideScrollBar className="max-w-full">
+                <Widget.Legend className="flex-row flex-nowrap justify-start gap-x-4 py-1">
+                  {holdingData.list.map((entry, idx) => (
+                    <Widget.LegendItem
+                      key={entry.name}
+                      color={CHART_COLORS[idx % CHART_COLORS.length]!}
+                    >
+                      {entry.name}
+                    </Widget.LegendItem>
+                  ))}
+                </Widget.Legend>
+              </ScrollShadow>
+            </Widget.Content>
+          </Widget>
 
           <Card variant="default">
             <Card.Content className="flex flex-col gap-3">
@@ -447,81 +494,70 @@ export function StockLedger() {
                 <Carousel.Content>
                   {recentBuys.map((item, idx) => (
                     <Carousel.Item key={item.id || idx} className="basis-full sm:basis-1/2">
-                      <div className="p-1 transition-transform duration-150 active:scale-[0.98]">
-                        <Card variant="default">
-                          <Card.Header className="flex flex-row items-center justify-between">
-                            <div className="flex flex-col gap-0.5">
-                              <Typography
-                                type="h5"
-                                color="default"
-                                weight="bold"
-                                title={item.ticker}
-                              >
-                                {item.ticker}
-                              </Typography>
-                              <Typography
-                                type="body-xs"
-                                color="muted"
-                                truncate
-                                title={item.companyName}
-                              >
-                                {item.companyName}
-                              </Typography>
+                      <div className="p-1">
+                        <Card variant="secondary" className="border-border/40">
+                          <Card.Header className="flex flex-row items-center justify-between pb-2">
+                            <div className="flex items-center gap-3">
+                              <Avatar size="sm" color="default">
+                                <Avatar.Fallback className="text-[10px] font-bold">
+                                  {item.ticker.slice(0, 2)}
+                                </Avatar.Fallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <span className="text-foreground text-sm font-semibold tracking-tight">
+                                  {item.ticker}
+                                </span>
+                                <span className="text-muted max-w-[120px] truncate text-xs">
+                                  {item.companyName}
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="bg-success size-1.5 animate-pulse rounded-full" />
-                              <Chip size="sm" variant="soft" color="success" className="font-bold">
-                                BUY
-                              </Chip>
-                            </div>
+                            <Chip size="sm" variant="soft" color="success" className="font-bold">
+                              BUY
+                            </Chip>
                           </Card.Header>
-                          <Card.Content>
-                            <div className="flex items-center justify-between text-xs">
-                              <Typography type="body-xs" color="muted">
+                          <Card.Content className="border-border/10 grid grid-cols-3 gap-2 border-y py-3">
+                            <div className="flex flex-col">
+                              <span className="text-muted text-[10px] font-medium tracking-wider uppercase">
                                 Avg Cost
-                              </Typography>
-                              <Typography
-                                type="body-xs"
-                                weight="bold"
-                                className="text-foreground font-mono"
-                              >
+                              </span>
+                              <span className="mt-0.5 font-mono text-sm font-semibold">
                                 {item.price}
-                              </Typography>
+                              </span>
                             </div>
-                            <div className="mt-1.5 flex items-center justify-between text-xs">
-                              <Typography
-                                type="body-xs"
-                                color="muted"
-                                weight="normal"
-                                align="start"
-                              >
-                                Size
-                              </Typography>
-                              <Typography
-                                type="body-xs"
-                                weight="semibold"
-                                className="text-foreground/80"
-                              >
-                                {item.shares}
-                              </Typography>
+                            <div className="flex flex-col">
+                              <span className="text-muted text-[10px] font-medium tracking-wider uppercase">
+                                Shares
+                              </span>
+                              <span className="mt-0.5 font-mono text-sm font-semibold">
+                                {item.shares.split(" ")[0]}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <span className="text-muted text-[10px] font-medium tracking-wider uppercase">
+                                ROI
+                              </span>
+                              <div className="mt-0.5">
+                                <TrendChip
+                                  trend={!item.roi.startsWith("-") ? "up" : "down"}
+                                  variant="tertiary"
+                                  size="sm"
+                                >
+                                  {item.roi}
+                                </TrendChip>
+                              </div>
                             </div>
                           </Card.Content>
-                          <Card.Footer className="border-border/20 mt-1 flex flex-row justify-between border-t pt-2.5">
-                            <Typography type="body-xs" color="muted" weight="normal" align="start">
-                              ROI
-                            </Typography>
-                            <Typography
-                              type="body-xs"
-                              weight="bold"
-                              align="end"
-                              className={
-                                !item.roi.startsWith("-")
-                                  ? "text-success font-mono"
-                                  : "text-danger font-mono"
-                              }
-                            >
-                              {item.roi}
-                            </Typography>
+                          <Card.Footer className="flex flex-row items-center justify-between pt-2 pb-1 text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <span className="bg-success size-1.5 animate-pulse rounded-full" />
+                              <span className="text-muted text-[10px] font-medium">
+                                Position Active
+                              </span>
+                            </div>
+                            <span className="text-success text-[10px] font-bold uppercase">
+                              Holding
+                            </span>
                           </Card.Footer>
                         </Card>
                       </div>
@@ -533,149 +569,6 @@ export function StockLedger() {
               </Carousel>
             </Surface>
           </Surface>
-
-          <Card variant="default">
-            <Card.Header>
-              <Card.Title className="text-muted text-xs font-bold tracking-wide uppercase">
-                Active Strategic Positions
-              </Card.Title>
-              <Card.Description className="text-danger mt-1 text-xl font-bold">
-                Current Positions
-              </Card.Description>
-            </Card.Header>
-            <Card.Content>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                {transactions.map((stock, idx) => {
-                  const isPositive = !stock.roi.startsWith("-");
-                  return (
-                    <div
-                      key={stock.id || idx}
-                      className="transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
-                    >
-                      <Card variant="secondary">
-                        <Card.Content className="flex flex-col justify-between">
-                          {/* Top: Asset Ticker & Type */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Avatar size="sm" color="default">
-                                <Avatar.Fallback className="text-[10px] font-bold">
-                                  {stock.ticker.slice(0, 2)}
-                                </Avatar.Fallback>
-                              </Avatar>
-                              <div className="flex flex-col">
-                                <Typography
-                                  type="h5"
-                                  weight="bold"
-                                  className="text-foreground text-sm tracking-tight"
-                                >
-                                  {stock.ticker}
-                                </Typography>
-                                <Typography
-                                  type="body-xs"
-                                  color="muted"
-                                  truncate
-                                  className="mt-0.5 block max-w-[80px] text-[9px] leading-none"
-                                  title={stock.companyName}
-                                >
-                                  {stock.companyName}
-                                </Typography>
-                              </div>
-                            </div>
-
-                            <Chip size="sm" variant="soft" className="font-bold uppercase">
-                              {stock.action}
-                            </Chip>
-                          </div>
-
-                          {/* Mid-Row: Price, Size, ROI with Separators */}
-                          <div className="my-1">
-                            <Separator />
-                            <div className="grid grid-cols-3 gap-1 py-1.5 text-center">
-                              <div className="flex flex-col items-start gap-0.5">
-                                <Typography
-                                  type="body-xs"
-                                  color="muted"
-                                  weight="bold"
-                                  className="text-[8px] uppercase"
-                                >
-                                  Cost
-                                </Typography>
-                                <Typography
-                                  type="body-xs"
-                                  weight="bold"
-                                  className="text-foreground font-mono text-[10px]"
-                                >
-                                  {stock.price}
-                                </Typography>
-                              </div>
-                              <div className="flex flex-col items-center gap-0.5">
-                                <Typography
-                                  type="body-xs"
-                                  color="muted"
-                                  weight="bold"
-                                  className="text-[8px] uppercase"
-                                >
-                                  Shrs
-                                </Typography>
-                                <Typography
-                                  type="body-xs"
-                                  weight="semibold"
-                                  className="text-foreground/80 font-mono text-[10px]"
-                                >
-                                  {stock.shares.split(" ")[0]}
-                                </Typography>
-                              </div>
-                              <div className="flex flex-col items-end gap-0.5">
-                                <Typography
-                                  type="body-xs"
-                                  color="muted"
-                                  weight="bold"
-                                  className="text-[8px] uppercase"
-                                >
-                                  ROI
-                                </Typography>
-                                <Typography
-                                  type="body-xs"
-                                  weight="bold"
-                                  className={`font-mono text-[10px] ${isPositive ? "text-success" : "text-danger"}`}
-                                >
-                                  {stock.roi}
-                                </Typography>
-                              </div>
-                            </div>
-                            <Separator />
-                          </div>
-
-                          {/* Bottom: Holding Status */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5">
-                              <span
-                                className={`size-1.5 rounded-full ${stock.isHolding ? "animate-pulse bg-emerald-400" : "bg-muted"}`}
-                              />
-                              <Typography
-                                type="body-xs"
-                                color="muted"
-                                className="text-[9px] font-semibold"
-                              >
-                                {stock.statusText}
-                              </Typography>
-                            </div>
-
-                            <Typography
-                              type="body-xs"
-                              className={`text-[9px] font-bold uppercase ${stock.isHolding ? "text-warning" : "text-muted"}`}
-                            >
-                              {stock.isHolding ? "Holding" : "Closed"}
-                            </Typography>
-                          </div>
-                        </Card.Content>
-                      </Card>
-                    </div>
-                  );
-                })}
-              </div>
-            </Card.Content>
-          </Card>
         </Surface>
       </Surface>
     </Surface>
