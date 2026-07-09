@@ -21,7 +21,6 @@ import {
 import {
   DateFormatter,
   getLocalTimeZone,
-  parseDate,
   parseZonedDateTime,
   today,
   CalendarDate,
@@ -197,7 +196,7 @@ export default function DatePickerTestPage() {
         const start = range.start.toDate(tz);
         const end = range.end.toDate(tz);
         return dateFormatter.formatRange(start, end);
-      } catch (e) {
+      } catch {
         return `${range.start.toString()} - ${range.end.toString()}`;
       }
     },

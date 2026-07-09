@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import {
   Card,
   Avatar,
@@ -1191,10 +1192,12 @@ export function ProfileCard({
                                   : "opacity-60 hover:opacity-100"
                               }`}
                             >
-                              <img
+                              <Image
                                 src={item.url}
                                 alt={item.name}
-                                className="size-full object-cover"
+                                width={48}
+                                height={48}
+                                className="object-cover"
                               />
                               {isActive && (
                                 <div className="bg-primary/20 absolute inset-0 flex items-center justify-center">

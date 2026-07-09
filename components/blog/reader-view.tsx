@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button, Avatar, Chip, Typography, Card } from "@heroui/react";
 import { RichTextEditor, EmptyState } from "@heroui-pro/react";
@@ -260,10 +261,12 @@ export function ReaderView({ slug }: ReaderViewProps) {
         {/* 🖼️ Premium Full-Width Cover Image Header (As per Bento/Cinematic Standard) */}
         <div className="border-border/10 relative mb-12 aspect-[21/9] w-full overflow-hidden rounded-3xl border bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:from-black dark:via-zinc-950 dark:to-black">
           {article.coverImage ? (
-            <img
+            <Image
               src={article.coverImage}
               alt={article.title}
-              className="h-full w-full object-cover"
+              fill
+              priority
+              className="object-cover"
             />
           ) : (
             // Modern, cinematic abstract background when cover image is null

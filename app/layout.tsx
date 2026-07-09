@@ -21,7 +21,6 @@ import { RichTextModal } from "@/components/rich-text";
 import { Footer } from "@/components/footer";
 import { getInitialThemeState } from "@/lib/theme";
 import { getThemeInitScript } from "@/lib/theme-init-script";
-import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
   title: {

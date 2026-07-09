@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Typography } from "@heroui/react";
 import { ItemCard, ItemCardGroup } from "@heroui-pro/react";
 
@@ -57,10 +58,12 @@ export function RecentlyListened() {
 
       {songs.map((song) => (
         <ItemCard key={song.id} className="hover:bg-content2/30 transition-all duration-300">
-          <img
+          <Image
             src={song.cover}
             alt={`${song.title} - ${song.artist}`}
-            className="ring-foreground/10 size-12 rounded-xl object-cover shadow-sm ring-1"
+            width={48}
+            height={48}
+            className="ring-foreground/10 rounded-xl object-cover shadow-sm ring-1"
           />
 
           <ItemCard.Content>
