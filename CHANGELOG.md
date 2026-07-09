@@ -1,3 +1,11 @@
+# [1.7.0](https://github.com/LeeWio/odyssey/compare/v1.6.0...v1.7.0) (2026-07-09)
+
+
+### Features
+
+* **blog:** implement core blog reader, test playground, and active floating toc ([76865b7](https://github.com/LeeWio/odyssey/commit/76865b70f335a2fc71c9a5c906fd41ec03977f88))
+* **home:** redesign digital sanctuary home page, implement SSR-safe theme loader, and date-picker test page ([af2217e](https://github.com/LeeWio/odyssey/commit/af2217e1b1c776f4a599d2a93cb970d759c40995))
+
 # [1.6.0](https://github.com/LeeWio/odyssey/compare/v1.5.0...v1.6.0) (2026-07-03)
 
 
