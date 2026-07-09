@@ -11,6 +11,7 @@ import { setDraftIdentifier, toggleRichText } from "@/lib/features/ui/ui-slice";
 import { toast } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
 import { findFirstHeading, generateSlug, extractText } from "../utils/content-extractors";
+import { normalizeJSONContent } from "../utils/document-normalizer";
 
 export function useRichTextPublish(identifier: string, currentContent: JSONContent | undefined) {
   const dispatch = useAppDispatch();
@@ -76,7 +77,7 @@ export function useRichTextPublish(identifier: string, currentContent: JSONConte
       return;
     }
 
-    const postContentString = JSON.stringify(currentContent || {});
+    const postContentString = JSON.stringify(normalizeJSONContent(currentContent));
     const isNewPost = isNaN(Number(identifier));
 
     const body = {

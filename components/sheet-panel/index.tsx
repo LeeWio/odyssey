@@ -6,17 +6,18 @@ import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { selectIsSheetOpen, toggleSheet } from "@/lib/features/ui";
 import { Stocks } from "./widgets/stocks";
 import { useThemeSwitch } from "../theme-switch";
-import { Avatar, Button, Card, Chip, Toolbar, Typography } from "@heroui/react";
+import { Card, Chip, Toolbar, Typography } from "@heroui/react";
 import { useState } from "react";
 import { useRealTime } from "@/hooks/use-real-time";
 import { AnimatedNumber } from "../ui/animated-number";
-import { BackwardFillIcon, ForwardFillIcon, PlayFillIcon, SunMaxFillIcon } from "../icons";
+import { SunMaxFillIcon } from "../icons";
+import { MusicMiniWidget } from "../blog";
 
 export function SheetPanel() {
   const isOpen = useAppSelector(selectIsSheetOpen);
   const dispatch = useAppDispatch();
 
-  const { ModeSwitch } = useThemeSwitch();
+  const { ModeSwitch, VariantSwitch } = useThemeSwitch();
   const { formattedDate, day, weekdayName, hours, minutes } = useRealTime();
 
   const [weather] = useState({ tempMin: 10, tempMax: 30 });
@@ -73,34 +74,18 @@ export function SheetPanel() {
                   </Typography>
                 </Card.Footer>
               </Card>
-              <Card>
-                <Card.Header className="flex items-center justify-center">
-                  <Avatar className="h-16 w-16 rounded-full ring-8">
-                    <Avatar.Image
-                      alt="Small Avatar"
-                      src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
-                    />
-                    <Avatar.Fallback>SM</Avatar.Fallback>
-                  </Avatar>
-                </Card.Header>
-                <Card.Content className="flex items-center justify-center text-xl font-extrabold">
-                  Music Player
-                </Card.Content>
-                <Card.Footer className="flex items-center justify-center gap-4">
-                  <Button isIconOnly size="lg" variant="secondary" aria-label="Previous track">
-                    <BackwardFillIcon />
-                  </Button>
-                  <Button isIconOnly size="lg" variant="primary" aria-label="Play">
-                    <PlayFillIcon />
-                  </Button>
-                  <Button isIconOnly size="lg" variant="secondary" aria-label="Next track">
-                    <ForwardFillIcon />
-                  </Button>
-                </Card.Footer>
-              </Card>
+              <MusicMiniWidget
+                title="Realize"
+                artist="Yanzi Sun"
+                cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&auto=format&fit=crop&q=60"
+                onPlayChange={(playing) => console.log(playing)}
+              />
             </Sheet.Body>
-            <Sheet.Footer className="flex! flex-row! items-center justify-center gap-10">
-              <ModeSwitch />
+            <Sheet.Footer className="flex! flex-row! flex-wrap items-center justify-center gap-4">
+              <div className="flex items-center gap-2">
+                <VariantSwitch />
+                <ModeSwitch />
+              </div>
               <Toolbar
                 isAttached
                 className="bg-danger shadow-danger/20 flex aspect-square size-20 cursor-default flex-col items-center justify-center rounded-[2.2rem] border-none p-0 text-white shadow-2xl transition-transform select-none hover:scale-105 active:scale-95"

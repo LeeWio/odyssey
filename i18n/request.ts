@@ -7,7 +7,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   // Ensure that a valid locale is used
   if (!locale || !(routing.locales as readonly string[]).includes(locale)) {
-    locale = routing.defaultLocale;
+    const baseLocale = locale?.split("-")[0];
+    if (baseLocale && (routing.locales as readonly string[]).includes(baseLocale)) {
+      locale = baseLocale;
+    } else {
+      locale = routing.defaultLocale;
+    }
   }
 
   return {

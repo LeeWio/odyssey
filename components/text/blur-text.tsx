@@ -1,4 +1,4 @@
-import { m, Transition, Easing } from "motion/react";
+import { motion, Transition, Easing } from "motion/react";
 import { useEffect, useRef, useState, useMemo } from "react";
 
 type BlurTextProps = {
@@ -91,8 +91,28 @@ const BlurText: React.FC<BlurTextProps> = ({
     stepCount === 1 ? 0 : i / (stepCount - 1)
   );
 
+  const isGradient = className.includes("bg-clip-text");
+
+  // Separate parent and span classes if gradient classes are present to prevent GPU composite layer-isolation bugs
+  const parentClasses = isGradient
+    ? className
+        .replace(
+          /(bg-clip-text|text-transparent|bg-linear-[^\s]+|bg-gradient-[^\s]+|from-[^\s]+|to-[^\s]+|via-[^\s]+)/g,
+          ""
+        )
+        .trim()
+    : className;
+
+  const spanClasses = isGradient
+    ? className
+        .match(
+          /(bg-clip-text|text-transparent|bg-linear-[^\s]+|bg-gradient-[^\s]+|from-[^\s]+|to-[^\s]+|via-[^\s]+)/g
+        )
+        ?.join(" ") || ""
+    : "";
+
   return (
-    <p ref={ref} className={`blur-text ${className} flex flex-wrap`}>
+    <p ref={ref} className={`blur-text ${parentClasses} flex flex-wrap`}>
       {elements.map((segment, index) => {
         const animateKeyframes = buildKeyframes(fromSnapshot, toSnapshots);
 
@@ -104,8 +124,9 @@ const BlurText: React.FC<BlurTextProps> = ({
         };
 
         return (
-          <m.span
+          <motion.span
             key={index}
+            className={spanClasses}
             initial={fromSnapshot}
             animate={inView ? animateKeyframes : fromSnapshot}
             transition={spanTransition}
@@ -117,7 +138,7 @@ const BlurText: React.FC<BlurTextProps> = ({
           >
             {segment === " " ? "\u00A0" : segment}
             {animateBy === "words" && index < elements.length - 1 && "\u00A0"}
-          </m.span>
+          </motion.span>
         );
       })}
     </p>

@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
+import { DEFAULT_THEME_VARIANT, type ThemeVariant } from "../../theme";
 
-export type ThemeVariant = "default" | "glass" | "mouve" | "brutalism";
+export type { ThemeVariant } from "../../theme";
 
 interface UiState {
   sheet: {
@@ -24,7 +25,7 @@ const initialState: UiState = {
     isOpen: false,
   },
   theme: {
-    variant: "mouve",
+    variant: DEFAULT_THEME_VARIANT,
   },
   dashboard: {
     isOpen: false,

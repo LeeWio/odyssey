@@ -5,6 +5,13 @@ import { setCredentials, setPermissions, removeCredentials } from "../features/a
 import { setThemeVariant, setDraftIdentifier, type ThemeVariant } from "../features/ui";
 import { setLocale } from "../features/locale/locale-slice";
 import type { RootState } from "../store";
+import {
+  coerceThemeVariant,
+  DEFAULT_THEME_VARIANT,
+  LEGACY_THEME_STORAGE_KEY,
+  THEME_COOKIE_OPTIONS,
+  THEME_VARIANT_STORAGE_KEY,
+} from "../theme";
 
 /**
  * RTK Listener Middleware for Persistence
@@ -34,8 +41,16 @@ persistenceMiddleware.startListening({
   actionCreator: setThemeVariant,
   effect: (action) => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("odyssey_theme", action.payload);
-      document.cookie = `odyssey_theme=${action.payload}; path=/; max-age=31536000; SameSite=Lax`;
+      const variant = coerceThemeVariant(action.payload);
+
+      localStorage.setItem(THEME_VARIANT_STORAGE_KEY, variant);
+      localStorage.setItem(LEGACY_THEME_STORAGE_KEY, variant);
+      document.cookie = `${THEME_VARIANT_STORAGE_KEY}=${encodeURIComponent(
+        variant
+      )}; ${THEME_COOKIE_OPTIONS}`;
+      document.cookie = `${LEGACY_THEME_STORAGE_KEY}=${encodeURIComponent(
+        variant
+      )}; ${THEME_COOKIE_OPTIONS}`;
     }
   },
 });
@@ -73,7 +88,9 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
 
   try {
     const auth = localStorage.getItem("odyssey_auth");
-    const theme = localStorage.getItem("odyssey_theme");
+    const theme =
+      localStorage.getItem(THEME_VARIANT_STORAGE_KEY) ??
+      localStorage.getItem(LEGACY_THEME_STORAGE_KEY);
     const locale = localStorage.getItem("odyssey_locale");
     const draftId = localStorage.getItem("odyssey_draft_id");
 
@@ -81,8 +98,10 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
 
     if (auth) preloadedState.auth = JSON.parse(auth);
     if (theme || draftId) {
+      const variant = theme ? coerceThemeVariant(theme) : DEFAULT_THEME_VARIANT;
+
       preloadedState.ui = {
-        theme: { variant: (theme as ThemeVariant) || "mouve" },
+        theme: { variant: variant as ThemeVariant },
         sheet: { isOpen: false },
         dashboard: { isOpen: false },
         richText: { isOpen: false, draftIdentifier: draftId || null },
@@ -90,9 +109,16 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
 
       // Self-heal/sync localStorage configuration to Cookie on client load
       if (theme) {
-        const match = document.cookie.match(/(?:^|; )odyssey_theme=([^;]*)/);
-        if (!match || match[1] !== theme) {
-          document.cookie = `odyssey_theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
+        const match = document.cookie.match(
+          new RegExp(`(?:^|; )${THEME_VARIANT_STORAGE_KEY}=([^;]*)`)
+        );
+        if (!match || decodeURIComponent(match[1]) !== variant) {
+          document.cookie = `${THEME_VARIANT_STORAGE_KEY}=${encodeURIComponent(
+            variant
+          )}; ${THEME_COOKIE_OPTIONS}`;
+          document.cookie = `${LEGACY_THEME_STORAGE_KEY}=${encodeURIComponent(
+            variant
+          )}; ${THEME_COOKIE_OPTIONS}`;
         }
       }
     }

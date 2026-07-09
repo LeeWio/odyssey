@@ -29,7 +29,8 @@ import { useGSAP } from "@gsap/react";
 import { Icon } from "@iconify/react";
 
 // 导入图标
-import { Logo, SunMaxFillIcon, MoonFillIcon, SearchIcon } from "./icons";
+import { SunMaxFillIcon, MoonFillIcon, SearchIcon } from "./icons";
+import { SmileBallLogo } from "./ui/smile-ball";
 
 // 导入 Auth & Palette 关联组件
 import { SignUp } from "./auth/sign-up";
@@ -138,6 +139,8 @@ export const Navbar = () => {
         visible: { scaleX: 1, opacity: 1, transition: { duration: 0.3 } },
       } as const);
 
+  return <></>;
+
   return (
     <>
       <HerouiNavbar
@@ -157,15 +160,10 @@ export const Navbar = () => {
           <HerouiNavbar.Brand className="nav-stagger">
             <Link
               href="/"
-              className="group flex items-center gap-2.5 transition-all duration-150 active:scale-95"
+              className="focus-visible:ring-offset-background inline-flex size-9 items-center justify-center rounded-full transition-transform duration-150 outline-none focus-visible:ring-2 focus-visible:ring-lime-300 focus-visible:ring-offset-4 active:scale-95"
               aria-label="Odyssey Home"
             >
-              <div className="rounded-full bg-zinc-950 p-1 text-white shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:rotate-12 dark:bg-white dark:text-zinc-950">
-                <Logo size={14} />
-              </div>
-              <span className="hidden bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-600 bg-clip-text text-base font-bold tracking-tight text-transparent sm:block dark:from-white dark:via-white/90 dark:to-white/60">
-                Odyssey
-              </span>
+              <SmileBallLogo size={32} />
             </Link>
           </HerouiNavbar.Brand>
 
@@ -592,7 +590,7 @@ export const Navbar = () => {
                           className="size-8 transition-transform hover:scale-105"
                         >
                           <Avatar.Fallback delayMs={600}>
-                            {username ? username.charAt(0).toUpperCase() : "U"}
+                            {username?.charAt(0).toUpperCase() || "U"}
                           </Avatar.Fallback>
                         </Avatar>
                         <Badge color="success" placement="bottom-right" size="sm" />
@@ -606,7 +604,7 @@ export const Navbar = () => {
                           <Badge.Anchor>
                             <Avatar size="sm" color="default" className="size-8">
                               <Avatar.Fallback delayMs={600}>
-                                {username ? username.charAt(0).toUpperCase() : "U"}
+                                {username?.charAt(0).toUpperCase() || "U"}
                               </Avatar.Fallback>
                             </Avatar>
                             <Badge color="success" placement="bottom-right" size="sm" />

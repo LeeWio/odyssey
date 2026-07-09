@@ -3,8 +3,9 @@
   "version": "1.6.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "themes:build": "node scripts/scope-heroui-pro-themes.mjs",
+    "dev": "node scripts/scope-heroui-pro-themes.mjs && next dev",
+    "build": "node scripts/scope-heroui-pro-themes.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write ."
@@ -13,8 +14,8 @@
     "@gravity-ui/icons": "^2.18.0",
     "@gsap/react": "^2.1.2",
     "@heroui-pro/react": "^1.0.0-beta.6",
-    "@heroui/react": "^3.2.1",
-    "@heroui/styles": "^3.2.1",
+    "@heroui/react": "^3.2.2",
+    "@heroui/styles": "^3.2.2",
     "@iconify/react": "^6.0.2",
     "@mantine/hooks": "^9.4.1",
     "@number-flow/react": ">=0.5.0",

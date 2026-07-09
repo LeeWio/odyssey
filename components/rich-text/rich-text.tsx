@@ -4,6 +4,8 @@ import React from "react";
 import { RichTextEditor } from "@heroui-pro/react";
 import { Button, Modal, Tooltip } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
+import type { Extensions } from "@tiptap/core";
+import type { RichTextEditorValueChangeDetails } from "@heroui-pro/react";
 import { motion } from "motion/react";
 import { Icon } from "@iconify/react";
 
@@ -15,14 +17,23 @@ import { FixedToolbar } from "./toolbar/fixed-toolbar";
 import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
 import { LinkMenu } from "./menus/link-menu/link-menu";
 import { RichTextTableOfContents } from "./table-of-contents";
+import { normalizeJSONContent } from "./utils/document-normalizer";
 
 interface RichTextProps {
   identifier: string;
-  initialValue?: JSONContent;
-  onChange?: (value: JSONContent) => void;
+  initialValue?: JSONContent; // Uncontrolled defaultValue
+  value?: JSONContent; // Controlled value
+  onChange?: (value: JSONContent, details: RichTextEditorValueChangeDetails) => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
   onClose?: () => void;
+
+  // Custom official Tiptap/HeroUI Pro config options
+  placeholder?: string;
+  maxLength?: number;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
+  extensions?: Extensions;
 }
 
 const MotionButton = motion.create(Button);
@@ -30,15 +41,21 @@ const MotionButton = motion.create(Button);
 export function RichText({
   identifier,
   initialValue,
+  value,
   onChange,
   isFullscreen = false,
   onToggleFullscreen,
   onClose,
+  placeholder = "Start writing...",
+  maxLength,
+  isDisabled = false,
+  isReadOnly = false,
+  extensions = ExtensionKit,
 }: RichTextProps) {
   // 1. Single unified source of truth setup hook
   const { editorRef, autosave, publish } = useRichTextSetup({
     identifier,
-    initialValue,
+    initialValue: initialValue || value, // Fallback safely to any provided input
     onChange,
     isFullscreen,
     onToggleFullscreen,
@@ -48,12 +65,20 @@ export function RichText({
   const { handleValueChange, isAutosaving, isAutosaveSuccess, isAutosaveError } = autosave;
   const { showSettings, setShowSettings, handleOpenPublish } = publish;
 
+  const normalizedDefaultValue = initialValue ? normalizeJSONContent(initialValue) : undefined;
+  const normalizedValue = value ? normalizeJSONContent(value) : undefined;
+
   return (
     <RichTextEditor
-      extensions={ExtensionKit}
+      extensions={extensions}
       className="flex h-full flex-1 flex-col overflow-hidden"
-      defaultValue={initialValue}
+      defaultValue={normalizedDefaultValue}
+      value={normalizedValue}
       onValueChange={handleValueChange}
+      placeholder={placeholder}
+      maxLength={maxLength}
+      isDisabled={isDisabled}
+      isReadOnly={isReadOnly}
       editorOptions={{
         // 2. Intercept and capture Tiptap Editor instance for maximum programmatical flexibility
         onCreate: ({ editor }) => {

@@ -5,6 +5,21 @@ import { Skeleton } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useMounted } from "@mantine/hooks";
 import { DisplayFillIcon, MoonFillIcon, SunMaxFillIcon } from "./icons";
+import { setThemeVariant, selectThemeVariant } from "@/lib/features/ui";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  coerceThemeMode,
+  DEFAULT_THEME_MODE,
+  DEFAULT_THEME_VARIANT,
+  THEME_VARIANTS,
+  type ThemeVariant,
+} from "@/lib/theme";
+
+const THEME_VARIANT_LABELS: Record<ThemeVariant, string> = {
+  brutalism: "Brutal",
+  glass: "Glass",
+  mouve: "Mouve",
+};
 
 export const ModeSwitch = () => {
   const { theme, setTheme } = useTheme();
@@ -16,30 +31,53 @@ export const ModeSwitch = () => {
 
   return (
     <Segment
-      selectedKey={theme || "system"}
-      onSelectionChange={(key) => setTheme(String(key))}
+      aria-label="Color mode"
+      selectedKey={theme || DEFAULT_THEME_MODE}
+      onSelectionChange={(key) => setTheme(coerceThemeMode(String(key)))}
       size="sm"
     >
       <Segment.Item aria-label="Light" id="light">
         <Segment.Separator />
-        <SunMaxFillIcon />
+        <SunMaxFillIcon aria-hidden="true" />
       </Segment.Item>
       <Segment.Item aria-label="Dark" id="dark">
         <Segment.Separator />
-        <MoonFillIcon />
+        <MoonFillIcon aria-hidden="true" />
       </Segment.Item>
       <Segment.Item aria-label="System" id="system">
         <Segment.Separator />
-        <DisplayFillIcon />
+        <DisplayFillIcon aria-hidden="true" />
       </Segment.Item>
     </Segment>
   );
 };
 
-export const useThemeSwitch = () => {
-  const VariantSwitch = () => (
-    <div className="text-default-500 text-sm">Theme Variant Switcher Placeholder</div>
-  );
+export const VariantSwitch = () => {
+  const dispatch = useAppDispatch();
+  const selectedVariant = useAppSelector(selectThemeVariant) ?? DEFAULT_THEME_VARIANT;
+  const mounted = useMounted();
 
+  if (!mounted) {
+    return <Skeleton className="rounded-medium h-10 w-52" />;
+  }
+
+  return (
+    <Segment
+      aria-label="Theme variant"
+      selectedKey={selectedVariant}
+      onSelectionChange={(key) => dispatch(setThemeVariant(String(key) as ThemeVariant))}
+      size="sm"
+      variant="ghost"
+    >
+      {THEME_VARIANTS.map((variant) => (
+        <Segment.Item key={variant} id={variant}>
+          {THEME_VARIANT_LABELS[variant]}
+        </Segment.Item>
+      ))}
+    </Segment>
+  );
+};
+
+export const useThemeSwitch = () => {
   return { ModeSwitch, VariantSwitch };
 };

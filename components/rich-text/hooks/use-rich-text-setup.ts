@@ -3,13 +3,14 @@
 import { useRef, useEffect } from "react";
 import type { Editor } from "@tiptap/core";
 import type { JSONContent } from "@tiptap/react";
+import type { RichTextEditorValueChangeDetails } from "@heroui-pro/react";
 import { useRichTextAutosave } from "./use-rich-text-autosave";
 import { useRichTextPublish } from "./use-rich-text-publish";
 
 interface UseRichTextSetupProps {
   identifier: string;
   initialValue?: JSONContent;
-  onChange?: (value: JSONContent) => void;
+  onChange?: (value: JSONContent, details: RichTextEditorValueChangeDetails) => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
   onClose?: () => void;
@@ -26,7 +27,7 @@ export function useRichTextSetup({
   // 1. Ref to intercept and programmatically control Tiptap's Editor instance
   const editorRef = useRef<Editor | null>(null);
 
-  // 2. Decoupled Content Autosaving State Hook
+  // 2. Decoupled Content Autosaving State Hook with full details support
   const autosave = useRichTextAutosave(identifier, initialValue, onChange);
 
   // 3. Decoupled Document Publishing State Hook

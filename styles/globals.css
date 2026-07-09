@@ -1,4 +1,4 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 @import "@heroui-pro/react/css";
-@import "@heroui-pro/react/themes/mouve";
+@import "./themes/heroui-pro-themes.scoped.css";

@@ -7,12 +7,12 @@ import {
   DisplayFillIcon,
   GearIcon,
   MoonFillIcon,
-  // SparklesIcon,
+  SparklesIcon,
   SunMaxFillIcon,
-  // TargetIcon,
+  TargetIcon,
 } from "@/components/icons";
-// import { selectThemeVariant, setThemeVariant, type ThemeVariant } from "@/lib/features/ui";
-// import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { selectThemeVariant, setThemeVariant, type ThemeVariant } from "@/lib/features/ui";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { createActionCommand, createNavigationCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 
@@ -24,7 +24,6 @@ interface ThemeModeDefinition {
   keywords: readonly string[];
 }
 
-/*
 interface ThemeVariantDefinition {
   variant: ThemeVariant;
   title: string;
@@ -32,7 +31,6 @@ interface ThemeVariantDefinition {
   icon: React.ElementType;
   keywords: readonly string[];
 }
-*/
 
 const SHARED_THEME_KEYWORDS = ["theme", "appearance", "mode", "color", "palette", "style"] as const;
 
@@ -60,15 +58,7 @@ const THEME_MODES: readonly ThemeModeDefinition[] = [
   },
 ];
 
-/*
 const THEME_VARIANTS: readonly ThemeVariantDefinition[] = [
-  {
-    variant: "default",
-    title: "Default",
-    description: "Remove custom styling and use the base theme",
-    icon: GearIcon,
-    keywords: ["base", "standard", "reset", "default"],
-  },
   {
     variant: "glass",
     title: "Glass",
@@ -91,9 +81,10 @@ const THEME_VARIANTS: readonly ThemeVariantDefinition[] = [
     keywords: ["bold", "graphic", "sharp", "brutalist"],
   },
 ];
-*/
 
 export const useThemeCommands = (): CommandItem[] => {
+  const dispatch = useAppDispatch();
+  const themeVariant = useAppSelector(selectThemeVariant);
   const { theme, setTheme } = useTheme();
 
   return useMemo(() => {
@@ -122,6 +113,28 @@ export const useThemeCommands = (): CommandItem[] => {
       })
     );
 
+    const variantCommands = THEME_VARIANTS.map((variant, index) =>
+      createActionCommand({
+        id: `theme-variant-${variant.variant}`,
+        title: `Use ${variant.title} Theme`,
+        description: themeVariant === variant.variant ? "Current theme style" : variant.description,
+        icon: variant.icon,
+        category: "System",
+        source: "theme",
+        order: 1030 + index,
+        keywords: [...variant.keywords, ...SHARED_THEME_KEYWORDS],
+        intent: CommandIntent.EXECUTE,
+        isActive: themeVariant === variant.variant,
+        defaultVisible: true,
+        payload: {
+          action: () => {
+            dispatch(setThemeVariant(variant.variant));
+          },
+          closeOnExecute: true,
+        },
+      })
+    );
+
     const systemSettingsCommand = createNavigationCommand({
       id: "system-workspace-settings",
       title: "Open workspace settings",
@@ -136,6 +149,6 @@ export const useThemeCommands = (): CommandItem[] => {
       payload: { href: "/" },
     });
 
-    return [...modeCommands, systemSettingsCommand];
-  }, [setTheme, theme]);
+    return [...modeCommands, ...variantCommands, systemSettingsCommand];
+  }, [dispatch, setTheme, theme, themeVariant]);
 };

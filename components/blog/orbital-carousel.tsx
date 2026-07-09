@@ -15,15 +15,9 @@ import {
   TagGroup,
 } from "@heroui/react";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "@gravity-ui/icons";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { motion } from "motion/react";
 import TrueFocus from "../text/true-focus";
 import { Icon } from "@iconify/react";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 export function OrbitalCarousel() {
   const [activeIndex, setActiveIndex] = useState(1); // Start on the middle card (PS5)
@@ -126,66 +120,83 @@ export function OrbitalCarousel() {
     );
   };
 
-  // Scroll Triggered Text Appear/Disappear Animation
-  useGSAP(
-    () => {
-      if (!headerRef.current) return;
-      const items = headerRef.current.querySelectorAll(".orbital-header-item");
-      if (items.length === 0) return;
-
-      gsap.fromTo(
-        items,
-        {
-          opacity: 0,
-          y: 40,
-          filter: "blur(12px)",
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          stagger: 0.15,
-          duration: 1.2,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: headerRef.current,
-            start: "top 90%",
-            end: "bottom 15%",
-            toggleActions: "play reverse play reverse",
-          },
-        }
-      );
-    },
-    { scope: containerRef }
-  );
-
   return (
     <section
       ref={containerRef}
       className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden py-16 sm:py-24"
     >
-      <div
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-10%" }}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.12,
+            },
+          },
+        }}
         ref={headerRef}
         className="mb-8 flex w-full flex-col items-center gap-4 px-4 text-center sm:mb-12"
       >
-        <Chip color="accent" size="lg" variant="secondary" className="orbital-header-item">
-          Everyday Essentials
-        </Chip>
-        <Typography
-          type="h1"
-          weight="semibold"
-          className="orbital-header-item text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 30, filter: "blur(8px)" },
+            visible: {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              transition: { duration: 1.0, ease: "easeOut" },
+            },
+          }}
         >
-          Tried it. Kept it.
-        </Typography>
+          <Chip color="accent" size="lg" variant="secondary">
+            Everyday Essentials
+          </Chip>
+        </motion.div>
 
-        <Typography
-          type="h5"
-          className="orbital-header-item text-muted max-w-2xl text-base leading-relaxed font-normal opacity-80 sm:text-lg md:text-xl"
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 30, filter: "blur(8px)" },
+            visible: {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              transition: { duration: 1.0, ease: "easeOut" },
+            },
+          }}
+          className="w-full"
         >
-          Tried it once. Still using it every day.
-        </Typography>
-      </div>
+          <Typography
+            type="h1"
+            weight="semibold"
+            className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
+          >
+            Tried it. Kept it.
+          </Typography>
+        </motion.div>
+
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 30, filter: "blur(8px)" },
+            visible: {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              transition: { duration: 1.0, ease: "easeOut" },
+            },
+          }}
+          className="w-full"
+        >
+          <Typography
+            type="h5"
+            className="text-muted max-w-2xl text-base leading-relaxed font-normal opacity-80 sm:text-lg md:text-xl"
+          >
+            Tried it once. Still using it every day.
+          </Typography>
+        </motion.div>
+      </motion.div>
 
       <div
         className="relative flex w-full cursor-grab items-center justify-center select-none active:cursor-grabbing"

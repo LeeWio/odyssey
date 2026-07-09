@@ -3,6 +3,10 @@
     "heroui-react": {
       "command": "npx -y @heroui/react-mcp@latest",
       "args": []
+    },
+    "xcode-tools": {
+      "command": "xcrun",
+      "args": ["mcpbridge"]
     }
   },
   "general": {
