@@ -1,914 +1,971 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
-  Button,
   Avatar,
-  Dropdown,
-  Label,
-  Description,
-  Header,
-  Kbd,
   Badge,
-  Popover,
-  ListBox,
-  Separator,
+  Button,
   Card,
+  Chip,
+  Description,
+  Dropdown,
+  Kbd,
+  Label,
+  ListBox,
+  ProgressBar,
+  Tabs,
 } from "@heroui/react";
-import { Navbar as HerouiNavbar, ItemCardGroup, ItemCard } from "@heroui-pro/react";
+import { Icon } from "@iconify/react";
 import { useMounted, useOs } from "@mantine/hooks";
 import { useTheme } from "next-themes";
-import { useAppSelector, useAppDispatch } from "@/lib/hooks";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
 
-// 导入 Iconify
-import { Icon } from "@iconify/react";
-
-// 导入图标
-import { SunMaxFillIcon, MoonFillIcon, SearchIcon } from "./icons";
-import { SmileBallLogo } from "./ui/smile-ball";
-
-// 导入 Auth & Palette 关联组件
-import { SignUp } from "./auth/sign-up";
-import { LogIn } from "./auth/log-in";
-import { CommandPalette } from "./command-palette";
-
-// 导入 Auth Selector & Reducer
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
-  selectIsAuthenticated,
-  selectCurrentUser,
-  selectUserEmail,
   removeCredentials,
+  selectCurrentUser,
+  selectIsAuthenticated,
+  selectUserEmail,
 } from "@/lib/features/auth";
 import { baseApi } from "@/lib/features/api/base-api";
+import { CommandPalette } from "./command-palette";
+import { LogIn } from "./auth/log-in";
+import { SignUp } from "./auth/sign-up";
+import { MoonFillIcon, SearchIcon, SunMaxFillIcon } from "./icons";
+import { SmileBallLogo } from "./ui/smile-ball";
+
+const navigationItems = [
+  {
+    id: "chronicle",
+    label: "Chronicle",
+    eyebrow: "Writing & ideas",
+    title: "Words worth keeping.",
+    description:
+      "Essays on design systems, accessible engineering, and the decisions that survive a finished build.",
+    href: "/test/blog",
+    cta: "Explore Chronicle",
+    image:
+      "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1400&q=86",
+    feature: "Symbiosis: The Resilience of Outposts",
+    meta: "Design systems · 5 min read",
+    groups: [
+      { label: "Design systems", detail: "Interfaces that remain coherent" },
+      { label: "Engineering", detail: "Accessible, resilient software" },
+      { label: "Field notes", detail: "Small observations from the work" },
+    ],
+  },
+  {
+    id: "ledger",
+    label: "Ledger",
+    eyebrow: "Markets & decisions",
+    title: "A record for the long horizon.",
+    description:
+      "A private practice of writing before acting—tracking conviction, patience, and what each decision taught over time.",
+    href: "/test/moment",
+    cta: "Open the Ledger",
+    image:
+      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1400&q=86",
+    feature: "Process before prediction",
+    meta: "Years, not weeks",
+    groups: [
+      { label: "Market notes", detail: "Signals without the noise" },
+      { label: "Decision journal", detail: "Thesis, action, reflection" },
+      { label: "Reading room", detail: "Research worth returning to" },
+    ],
+  },
+  {
+    id: "sanctuary",
+    label: "Sanctuary",
+    eyebrow: "Sound & daily rituals",
+    title: "A room shaped by sound.",
+    description:
+      "Slow soundtracks, ambient rooms, movement, and the quiet rituals that change the atmosphere of a day.",
+    href: "/test/moment",
+    cta: "Enter Sanctuary",
+    image:
+      "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1400&q=86",
+    feature: "Music earns its place by changing the room",
+    meta: "Now collecting · Ambient works",
+    groups: [
+      { label: "Soundtrack", detail: "Albums and listening notes" },
+      { label: "Movement", detail: "Training, recovery, repetition" },
+      { label: "Daily practice", detail: "Systems for a quieter life" },
+    ],
+  },
+  {
+    id: "travelogue",
+    label: "Travelogue",
+    eyebrow: "Places & photographs",
+    title: "Places that changed the pace.",
+    description:
+      "Architecture, weather, and small moments collected from journeys across Iceland, Europe, and Asia.",
+    href: "/test/file",
+    cta: "View Travelogue",
+    image:
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=86",
+    feature: "North Atlantic studies",
+    meta: "Iceland · 64°08′N",
+    groups: [
+      { label: "Field journal", detail: "Routes, weather, observations" },
+      { label: "Exhibitions", detail: "Photographic stories" },
+      { label: "Atlas", detail: "Places worth returning to" },
+    ],
+  },
+  {
+    id: "more",
+    label: "More",
+    eyebrow: "Projects & collections",
+    title: "The rest of the archive.",
+    description:
+      "Products in progress, useful objects, public experiments, and conversations gathered along the way.",
+    href: "/test/portfolio",
+    cta: "View all projects",
+    image:
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=86",
+    feature: "Odyssey Shipyard",
+    meta: "Selected builds · 2026",
+    groups: [
+      { label: "Builds", detail: "Products and open-source work", href: "/test/portfolio" },
+      { label: "Curations", detail: "Tools, objects, and references", href: "/test/tag" },
+      { label: "Echo", detail: "Notes from visitors", href: "/test/comment" },
+    ],
+  },
+] as const;
+
+type NavigationId = (typeof navigationItems)[number]["id"];
+
+const enterEase = [0.16, 1, 0.3, 1] as const;
+
+type MegaPanelContentProps = {
+  id: NavigationId;
+  onNavigate: (href: string) => void;
+  reduceMotion: boolean;
+};
+
+const contentEntrance = {
+  hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+  visible: (index: number) => ({
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { delay: 0.06 + index * 0.035, duration: 0.22, ease: enterEase },
+  }),
+};
+
+function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProps) {
+  const reveal = (index: number) => ({
+    variants: reduceMotion ? undefined : contentEntrance,
+    initial: reduceMotion ? false : "hidden",
+    animate: "visible",
+    custom: index,
+  });
+
+  if (id === "chronicle") {
+    return (
+      <div className="grid gap-4 md:col-span-8 md:grid-cols-5">
+        <motion.div {...reveal(0)} className="md:col-span-3">
+          <Card className="h-full" variant="secondary">
+            <div className="relative min-h-52 flex-1 overflow-hidden rounded-2xl">
+              <Image
+                fill
+                alt="Notebook and pencil on a quiet writing desk"
+                className="object-cover"
+                sizes="(max-width: 767px) 90vw, 38vw"
+                src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=86"
+              />
+            </div>
+            <Card.Header>
+              <Card.Title>Symbiosis: The Resilience of Outposts</Card.Title>
+              <Card.Description>
+                A field note on systems that survive contact with reality.
+              </Card.Description>
+            </Card.Header>
+            <Card.Footer>
+              <Chip size="sm" color="accent" variant="soft">
+                Featured essay
+              </Chip>
+              <Button size="sm" variant="ghost" onPress={() => onNavigate("/test/blog")}>
+                Read story
+              </Button>
+            </Card.Footer>
+          </Card>
+        </motion.div>
+        <motion.div {...reveal(1)} className="md:col-span-2">
+          <Card className="h-full" variant="transparent">
+            <Card.Header>
+              <Card.Title>Latest notes</Card.Title>
+              <Card.Description>Recent additions to the writing archive.</Card.Description>
+            </Card.Header>
+            <Card.Content>
+              <ListBox
+                aria-label="Latest Chronicle notes"
+                selectionMode="none"
+                onAction={() => onNavigate("/test/blog")}
+              >
+                <ListBox.Item id="systems" textValue="Designing for the second draft">
+                  <Label>Designing for the second draft</Label>
+                  <Description>Design systems · 6 min</Description>
+                </ListBox.Item>
+                <ListBox.Item id="motion" textValue="Motion that explains itself">
+                  <Label>Motion that explains itself</Label>
+                  <Description>Interaction · 4 min</Description>
+                </ListBox.Item>
+                <ListBox.Item id="access" textValue="The quiet work of accessibility">
+                  <Label>The quiet work of accessibility</Label>
+                  <Description>Engineering · 8 min</Description>
+                </ListBox.Item>
+              </ListBox>
+            </Card.Content>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (id === "ledger") {
+    const metrics = [
+      { label: "Thesis confidence", value: 74, detail: "Evidence reviewed" },
+      { label: "Time horizon", value: 88, detail: "Long-term posture" },
+      { label: "Decision clarity", value: 62, detail: "Notes completed" },
+    ];
+    return (
+      <div className="grid gap-4 md:col-span-8 md:grid-cols-3">
+        {metrics.map((metric, index) => (
+          <motion.div key={metric.label} {...reveal(index)}>
+            <Card className="h-full" variant={index === 0 ? "secondary" : "default"}>
+              <Card.Header>
+                <Card.Description>{metric.detail}</Card.Description>
+                <Card.Title className="text-2xl tabular-nums">{metric.value}%</Card.Title>
+              </Card.Header>
+              <Card.Content className="mt-auto">
+                <ProgressBar aria-label={metric.label} value={metric.value} size="sm">
+                  <Label>{metric.label}</Label>
+                  <ProgressBar.Output />
+                  <ProgressBar.Track>
+                    <ProgressBar.Fill />
+                  </ProgressBar.Track>
+                </ProgressBar>
+              </Card.Content>
+            </Card>
+          </motion.div>
+        ))}
+        <motion.div {...reveal(3)} className="md:col-span-3">
+          <Card className="items-center justify-between gap-4 md:flex-row" variant="transparent">
+            <div>
+              <Card.Title>Process before prediction.</Card.Title>
+              <Card.Description>Write the thesis, define the risk, then decide.</Card.Description>
+            </div>
+            <Button onPress={() => onNavigate("/test/moment")}>Open decision journal</Button>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (id === "sanctuary") {
+    return (
+      <motion.div {...reveal(0)} className="md:col-span-8">
+        <Card className="h-full" variant="secondary">
+          <Tabs className="w-full" variant="secondary">
+            <Tabs.ListContainer>
+              <Tabs.List aria-label="Sanctuary collections">
+                <Tabs.Tab id="sound">
+                  Sound
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="movement">
+                  Movement
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="rituals">
+                  Rituals
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+              </Tabs.List>
+            </Tabs.ListContainer>
+            <Tabs.Panel className="pt-5" id="sound">
+              <div className="grid gap-5 sm:grid-cols-[180px_1fr]">
+                <div className="relative aspect-square overflow-hidden rounded-2xl">
+                  <Image
+                    fill
+                    alt="Vinyl record player"
+                    className="object-cover"
+                    sizes="180px"
+                    src="https://images.unsplash.com/photo-1461360228754-6e81c478b882?auto=format&fit=crop&w=600&q=86"
+                  />
+                </div>
+                <div className="flex flex-col items-start justify-center">
+                  <Chip color="accent" variant="soft">
+                    Now playing
+                  </Chip>
+                  <h3 className="mt-4 text-2xl font-semibold tracking-tight">
+                    A room shaped by sound
+                  </h3>
+                  <p className="text-muted mt-2 max-w-lg text-sm leading-6">
+                    Ambient works, late-night records, and playlists kept for the atmosphere they
+                    leave behind.
+                  </p>
+                  <Button className="mt-5" size="sm" onPress={() => onNavigate("/test/moment")}>
+                    Browse soundtrack
+                  </Button>
+                </div>
+              </div>
+            </Tabs.Panel>
+            <Tabs.Panel className="pt-5" id="movement">
+              <Card variant="transparent">
+                <Card.Title>Training as repetition</Card.Title>
+                <Card.Description>
+                  Sessions, recovery notes, and slow improvements recorded over time.
+                </Card.Description>
+              </Card>
+            </Tabs.Panel>
+            <Tabs.Panel className="pt-5" id="rituals">
+              <Card variant="transparent">
+                <Card.Title>Small systems for quieter days</Card.Title>
+                <Card.Description>
+                  Reading, walking, listening, and the daily practices that make space.
+                </Card.Description>
+              </Card>
+            </Tabs.Panel>
+          </Tabs>
+        </Card>
+      </motion.div>
+    );
+  }
+
+  if (id === "travelogue") {
+    const places = [
+      {
+        title: "North Atlantic",
+        place: "Iceland",
+        image:
+          "https://images.unsplash.com/photo-1504829857797-ddff29c27927?auto=format&fit=crop&w=800&q=86",
+      },
+      {
+        title: "Soft Geometry",
+        place: "Copenhagen",
+        image:
+          "https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?auto=format&fit=crop&w=800&q=86",
+      },
+      {
+        title: "After the Rain",
+        place: "Kyoto",
+        image:
+          "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=86",
+      },
+    ];
+    return (
+      <div className="grid gap-4 md:col-span-8 md:grid-cols-3">
+        {places.map((place, index) => (
+          <motion.div key={place.title} {...reveal(index)}>
+            <Card className="group h-full p-0" role="article">
+              <div className="relative min-h-48 flex-1 overflow-hidden rounded-2xl">
+                <motion.div
+                  className="absolute inset-0"
+                  whileHover={reduceMotion ? undefined : { scale: 1.035 }}
+                  transition={{ duration: 0.24, ease: enterEase }}
+                >
+                  <Image
+                    fill
+                    alt={`${place.place} travel study`}
+                    className="object-cover"
+                    sizes="(max-width: 767px) 90vw, 25vw"
+                    src={place.image}
+                  />
+                </motion.div>
+              </div>
+              <Card.Header className="p-4 pt-3">
+                <Card.Title>{place.title}</Card.Title>
+                <Card.Description>{place.place}</Card.Description>
+              </Card.Header>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    );
+  }
+
+  const projects = [
+    {
+      label: "Builds",
+      description: "Products and open-source work",
+      href: "/test/portfolio",
+      icon: "lucide:blocks",
+      status: "In progress",
+    },
+    {
+      label: "Curations",
+      description: "Tools, objects, and references",
+      href: "/test/tag",
+      icon: "lucide:bookmark",
+      status: "Updated",
+    },
+    {
+      label: "Echo",
+      description: "Notes and conversations from visitors",
+      href: "/test/comment",
+      icon: "lucide:message-circle",
+      status: "Open",
+    },
+  ];
+  return (
+    <div className="grid gap-4 md:col-span-8 md:grid-cols-3">
+      {projects.map((project, index) => (
+        <motion.div key={project.label} {...reveal(index)}>
+          <Card className="h-full" variant={index === 0 ? "tertiary" : "default"}>
+            <Card.Header>
+              <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl">
+                <Icon aria-hidden="true" icon={project.icon} className="size-5" />
+              </div>
+              <Card.Title>{project.label}</Card.Title>
+              <Card.Description>{project.description}</Card.Description>
+            </Card.Header>
+            <Card.Footer className="mt-auto justify-between">
+              <Chip size="sm" variant="soft">
+                {project.status}
+              </Chip>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="ghost"
+                aria-label={`Open ${project.label}`}
+                onPress={() => onNavigate(project.href)}
+              >
+                <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
+              </Button>
+            </Card.Footer>
+          </Card>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
 
 export const Navbar = () => {
   const router = useRouter();
-  const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
-
-  const navbarRef = useRef<HTMLElement>(null);
-  const reduceMotion = useReducedMotion();
-
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
-
-  // Controlled States for popovers to enable smooth animations and close actions
-  const [isExploreOpen, setIsExploreOpen] = useState(false);
-  const [isPassionsOpen, setIsPassionsOpen] = useState(false);
-  const [isBuildsOpen, setIsBuildsOpen] = useState(false);
-  const [isCurationsOpen, setIsCurationsOpen] = useState(false);
-
+  const { resolvedTheme, setTheme } = useTheme();
   const mounted = useMounted();
   const os = useOs();
+  const reduceMotion = useReducedMotion();
   const dispatch = useAppDispatch();
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const lastTriggerRef = useRef<HTMLElement | null>(null);
+
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
   const email = useAppSelector(selectUserEmail);
 
+  const [activeNavigation, setActiveNavigation] = useState<NavigationId | null>(null);
+  const [isLocked, setIsLocked] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+
+  const activeItem = navigationItems.find((item) => item.id === activeNavigation);
   const platformKey = mounted && (os === "macos" || os === "ios") ? "⌘" : "Ctrl";
 
-  // Derived current active item from actual pathname to keep routes perfectly synchronized
-  const currentItem = pathname || "/";
+  const cancelClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  };
 
-  const handleSwitchToSignUp = () => {
+  const closeNavigation = () => {
+    cancelClose();
+    setActiveNavigation(null);
+    setIsLocked(false);
+    setIsMobileMenuOpen(false);
+    window.requestAnimationFrame(() => lastTriggerRef.current?.focus());
+  };
+
+  const scheduleClose = () => {
+    cancelClose();
+    if (isLocked) return;
+    closeTimer.current = setTimeout(() => setActiveNavigation(null), 180);
+  };
+
+  const previewNavigation = (id: NavigationId) => {
+    cancelClose();
+    setActiveNavigation(id);
+  };
+
+  const toggleNavigation = (id: NavigationId) => {
+    cancelClose();
+    if (activeNavigation === id && isLocked) {
+      closeNavigation();
+      return;
+    }
+    setActiveNavigation(id);
+    setIsLocked(true);
+  };
+
+  useEffect(() => {
+    if (!activeNavigation && !isMobileMenuOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (closeTimer.current) clearTimeout(closeTimer.current);
+        setActiveNavigation(null);
+        setIsLocked(false);
+        setIsMobileMenuOpen(false);
+        window.requestAnimationFrame(() => lastTriggerRef.current?.focus());
+      }
+
+      if (event.key !== "Tab" || (!isLocked && !isMobileMenuOpen)) return;
+      const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeNavigation, isLocked, isMobileMenuOpen]);
+
+  useEffect(() => {
+    if (!isLocked && !isMobileMenuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() =>
+      panelRef.current?.querySelector<HTMLElement>("button")?.focus()
+    );
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isLocked, isMobileMenuOpen]);
+
+  useEffect(() => () => cancelClose(), []);
+
+  const handleLogout = () => {
+    dispatch(removeCredentials());
+    dispatch(baseApi.util.resetApiState());
+  };
+
+  const switchToSignUp = () => {
     setIsLoginOpen(false);
-    setTimeout(() => setIsSignUpOpen(true), 300);
+    window.setTimeout(() => setIsSignUpOpen(true), 220);
   };
 
-  const handleSwitchToLogIn = () => {
+  const switchToLogIn = () => {
     setIsSignUpOpen(false);
-    setTimeout(() => setIsLoginOpen(true), 300);
+    window.setTimeout(() => setIsLoginOpen(true), 220);
   };
 
-  // GSAP Entrance Choreography with Reduced Motion Support
-  useGSAP(
-    () => {
-      if (!mounted || reduceMotion) return;
-
-      gsap.fromTo(
-        navbarRef.current,
-        { y: -30, autoAlpha: 0 },
-        { y: 0, autoAlpha: 1, duration: 0.8, ease: "power3.out" }
-      );
-
-      gsap.fromTo(
-        ".nav-stagger",
-        { y: -8, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.5,
-          stagger: 0.04,
-          ease: "power2.out",
-          delay: 0.15,
-          clearProps: "all",
-        }
-      );
-    },
-    { scope: navbarRef, dependencies: [mounted, reduceMotion] }
-  );
-
-  // Inclusive Design: Motion Safeguards for Vestibular Disorders
-  const itemMotionVariants = reduceMotion
-    ? ({
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0.1 } },
-      } as const)
-    : ({
-        hidden: { y: 12, opacity: 0 },
-        visible: {
-          y: 0,
-          opacity: 1,
-          transition: { type: "spring" as const, stiffness: 350, damping: 25 },
-        },
-      } as const);
-
-  const dividerMotionVariants = reduceMotion
-    ? ({
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0.1 } },
-      } as const)
-    : ({
-        hidden: { scaleX: 0.9, opacity: 0 },
-        visible: { scaleX: 1, opacity: 1, transition: { duration: 0.3 } },
-      } as const);
-
-  return <></>;
+  const isNavigationOpen = Boolean(activeItem || isMobileMenuOpen);
 
   return (
     <>
-      <HerouiNavbar
-        ref={navbarRef as React.RefObject<HTMLDivElement>}
-        position="floating"
-        maxWidth="xl"
-        navigate={router.push}
-        className="mt-4 transition-shadow duration-300 md:mt-6"
-      >
-        <HerouiNavbar.Header>
-          <HerouiNavbar.MenuToggle
-            className="nav-stagger md:hidden"
-            srLabel="Toggle navigation menu"
+      <AnimatePresence>
+        {isNavigationOpen && (
+          <motion.button
+            key="navigation-backdrop"
+            type="button"
+            tabIndex={-1}
+            aria-label="Close navigation"
+            className="fixed inset-0 z-40 bg-black/20"
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{ opacity: 1, backdropFilter: "blur(14px)" }}
+            exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            transition={{ duration: reduceMotion ? 0 : 0.22, ease: enterEase }}
+            onClick={closeNavigation}
           />
+        )}
+      </AnimatePresence>
 
-          {/* Premium Brand Logo Section with Micro-interaction */}
-          <HerouiNavbar.Brand className="nav-stagger">
+      <motion.div
+        ref={panelRef}
+        layout={!reduceMotion}
+        role={isLocked || isMobileMenuOpen ? "dialog" : undefined}
+        aria-modal={isLocked || isMobileMenuOpen ? true : undefined}
+        aria-label={isLocked || isMobileMenuOpen ? "Odyssey navigation" : undefined}
+        className="bg-background/88 absolute top-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 overflow-hidden rounded-2xl shadow-[0_18px_56px_rgba(0,0,0,0.14)] backdrop-blur-2xl backdrop-saturate-150"
+        initial={reduceMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={
+          reduceMotion
+            ? { duration: 0 }
+            : {
+                layout: { type: "spring", stiffness: 260, damping: 32, mass: 0.85 },
+                duration: 0.3,
+                ease: enterEase,
+              }
+        }
+        onMouseEnter={cancelClose}
+        onMouseLeave={scheduleClose}
+      >
+        <nav
+          aria-label="Primary navigation"
+          className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-3 sm:px-4"
+        >
+          <motion.div
+            className="justify-self-start"
+            whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+          >
             <Link
               href="/"
-              className="focus-visible:ring-offset-background inline-flex size-9 items-center justify-center rounded-full transition-transform duration-150 outline-none focus-visible:ring-2 focus-visible:ring-lime-300 focus-visible:ring-offset-4 active:scale-95"
-              aria-label="Odyssey Home"
+              onClick={closeNavigation}
+              className="outline-focus-ring flex h-10 shrink-0 items-center gap-2.5 rounded-xl px-2 text-sm font-semibold tracking-[-0.02em]"
+              aria-label="Odyssey home"
             >
-              <SmileBallLogo size={32} />
+              <SmileBallLogo size={28} />
+              <span className="hidden sm:inline">Odyssey</span>
             </Link>
-          </HerouiNavbar.Brand>
-
-          <HerouiNavbar.Content className="absolute left-1/2 hidden -translate-x-1/2 gap-2 md:flex">
-            {/* 1. Explore Redesign: Split Panel Megamenu Popover */}
-            <Popover isOpen={isExploreOpen} onOpenChange={setIsExploreOpen}>
-              <Popover.Trigger>
-                <Button
-                  variant="ghost"
-                  className="nav-stagger"
-                  aria-label="Toggle Explore categories"
+          </motion.div>
+          <div className="hidden items-center gap-1 md:flex">
+            {navigationItems.map((item) => {
+              const isActive = activeNavigation === item.id;
+              const isCurrentLocked = isActive && isLocked;
+              return (
+                <motion.div
+                  key={item.id}
+                  className="relative"
+                  onHoverStart={() => previewNavigation(item.id)}
+                  whileTap={reduceMotion ? undefined : { scale: 0.98 }}
                 >
-                  Explore
-                </Button>
-              </Popover.Trigger>
-              <Popover.Content className="min-w-[460px] p-3">
-                <Popover.Dialog className="grid grid-cols-12 gap-4">
-                  {/* Left Side: Featured Postcard */}
-                  <Card
-                    className="col-span-5 flex flex-col justify-between p-3 select-none"
-                    variant="secondary"
-                  >
-                    <Card.Header className="flex-col items-start gap-1 p-0">
-                      <div className="flex items-center gap-1.5">
-                        <Icon
-                          icon="lucide:sparkles"
-                          className="text-primary size-4 animate-pulse"
-                        />
-                        <span className="text-primary/80 text-[9px] font-bold tracking-widest uppercase">
-                          Featured
-                        </span>
-                      </div>
-                      <Card.Title className="mt-1 text-xs leading-tight font-bold">
-                        The Odyssey of Life
-                      </Card.Title>
-                    </Card.Header>
-                    <Card.Content className="mt-auto p-0 pt-4">
-                      <Card.Description className="text-[10px] leading-relaxed italic">
-                        &ldquo;A lifelong journey of mapping passions, creations &amp;
-                        setups.&rdquo;
-                      </Card.Description>
-                    </Card.Content>
-                  </Card>
-
-                  {/* Right Side: Accessible ListBox */}
-                  <div className="col-span-7">
-                    <ListBox
-                      aria-label="Explore Archive Categories"
-                      selectionMode="none"
-                      onAction={(key) => {
-                        setIsExploreOpen(false);
-                        if (key === "blog") router.push("/");
-                        else if (key === "travel") router.push("/test/moment");
-                        else if (key === "exhibition") router.push("/test/file");
-                      }}
-                    >
-                      <ListBox.Item id="blog" textValue="Blogs">
-                        <Icon
-                          icon="lucide:book-open"
-                          className="size-4 text-indigo-400"
-                          data-slot="icon"
-                        />
-                        <div className="flex flex-col">
-                          <Label>Blogs</Label>
-                          <Description>Systematic columns & structured blogs</Description>
-                        </div>
-                      </ListBox.Item>
-
-                      <ListBox.Item id="travel" textValue="Travelogue">
-                        <Icon
-                          icon="lucide:map"
-                          className="size-4 text-emerald-500"
-                          data-slot="icon"
-                        />
-                        <div className="flex flex-col">
-                          <Label>Travelogue</Label>
-                          <Description>Photogenic travelogues & adventure logs</Description>
-                        </div>
-                      </ListBox.Item>
-
-                      <ListBox.Item id="exhibition" textValue="Exhibitions">
-                        <Icon
-                          icon="lucide:camera"
-                          className="size-4 text-sky-400"
-                          data-slot="icon"
-                        />
-                        <div className="flex flex-col">
-                          <Label>Exhibitions</Label>
-                          <Description>High-resolution photography & visual portfolio</Description>
-                        </div>
-                      </ListBox.Item>
-                    </ListBox>
-                  </div>
-                </Popover.Dialog>
-              </Popover.Content>
-            </Popover>
-
-            {/* 2. Passions Redesign: Standard Clean Dropdown List */}
-            <Dropdown isOpen={isPassionsOpen} onOpenChange={setIsPassionsOpen}>
-              <Button
-                variant="ghost"
-                className="nav-stagger"
-                aria-label="Toggle Passions categories"
-              >
-                Passions
-              </Button>
-              <Dropdown.Popover className="min-w-[240px]">
-                <Dropdown.Menu
-                  onAction={(key) => {
-                    setIsPassionsOpen(false);
-                    if (
-                      key === "stock" ||
-                      key === "soundtrack" ||
-                      key === "fitness" ||
-                      key === "coding"
-                    ) {
-                      router.push("/test/moment");
-                    }
-                  }}
-                >
-                  <Dropdown.Section>
-                    <Header>Daily & Passions</Header>
-                    <Dropdown.Item id="stock" textValue="Stock Ledger">
-                      <Icon
-                        icon="lucide:trending-up"
-                        className="size-4 text-emerald-500"
-                        data-slot="icon"
-                      />
-                      <div className="flex flex-col">
-                        <Label>Stock Ledger</Label>
-                        <Description>Real-time trading logs & portfolios</Description>
-                      </div>
-                    </Dropdown.Item>
-
-                    <Dropdown.Item id="soundtrack" textValue="Soundtrack">
-                      <Icon icon="lucide:music" className="size-4 text-rose-400" data-slot="icon" />
-                      <div className="flex flex-col">
-                        <Label>Soundtrack</Label>
-                        <Description>Ambient stream, playlists & notes</Description>
-                      </div>
-                    </Dropdown.Item>
-
-                    <Dropdown.Item id="fitness" textValue="Fitness Hub">
-                      <Icon
-                        icon="lucide:dumbbell"
-                        className="size-4 text-amber-500"
-                        data-slot="icon"
-                      />
-                      <div className="flex flex-col">
-                        <Label>Fitness Hub</Label>
-                        <Description>Active workout logging & performance</Description>
-                      </div>
-                    </Dropdown.Item>
-
-                    <Dropdown.Item id="coding" textValue="Coding Sandbox">
-                      <Icon
-                        icon="lucide:terminal"
-                        className="size-4 text-sky-400"
-                        data-slot="icon"
-                      />
-                      <div className="flex flex-col">
-                        <Label>Coding Sandbox</Label>
-                        <Description>Geek playgrounds & lab coding logs</Description>
-                      </div>
-                    </Dropdown.Item>
-                  </Dropdown.Section>
-                </Dropdown.Menu>
-              </Dropdown.Popover>
-            </Dropdown>
-
-            {/* 3. Builds Redesign: Horizontal Grid Popover Cards */}
-            <Popover isOpen={isBuildsOpen} onOpenChange={setIsBuildsOpen}>
-              <Popover.Trigger>
-                <Button
-                  variant="ghost"
-                  className="nav-stagger"
-                  aria-label="Toggle Builds categories"
-                >
-                  Builds
-                </Button>
-              </Popover.Trigger>
-              <Popover.Content>
-                <Popover.Dialog className="flex flex-col gap-3">
-                  <Popover.Heading className="font-bold tracking-widest uppercase">
-                    Creator Shipyard
-                  </Popover.Heading>
-                  <ItemCardGroup layout="grid" columns={3} variant="transparent">
-                    <ItemCard>
-                      <ItemCard.Icon>
-                        <Icon icon="lucide:rocket" className="text-teal-500" />
-                      </ItemCard.Icon>
-                      <ItemCard.Content>
-                        <ItemCard.Title className="font-semibold">Shipyard</ItemCard.Title>
-                        <ItemCard.Description className="text-muted">
-                          SaaS web products
-                        </ItemCard.Description>
-                      </ItemCard.Content>
-                    </ItemCard>
-
-                    <ItemCard>
-                      <ItemCard.Icon>
-                        <Icon icon="lucide:github" className="size-5 text-zinc-400" />
-                      </ItemCard.Icon>
-                      <ItemCard.Content>
-                        <ItemCard.Title className="font-semibold">Open Source</ItemCard.Title>
-                        <ItemCard.Description className="text-muted">
-                          Public libraries
-                        </ItemCard.Description>
-                      </ItemCard.Content>
-                    </ItemCard>
-
-                    <ItemCard>
-                      <ItemCard.Icon>
-                        <Icon icon="lucide:flask-conical" className="size-5 text-amber-500" />
-                      </ItemCard.Icon>
-                      <ItemCard.Content>
-                        <ItemCard.Title className="font-semibold">Labs</ItemCard.Title>
-                        <ItemCard.Description className="text-muted">
-                          Beta experiments
-                        </ItemCard.Description>
-                      </ItemCard.Content>
-                    </ItemCard>
-                  </ItemCardGroup>
-                </Popover.Dialog>
-              </Popover.Content>
-            </Popover>
-
-            <Popover isOpen={isCurationsOpen} onOpenChange={setIsCurationsOpen}>
-              <Popover.Trigger>
-                <Button
-                  variant="ghost"
-                  className="nav-stagger"
-                  aria-label="Toggle Curations categories"
-                >
-                  Curations
-                </Button>
-              </Popover.Trigger>
-              <Popover.Content>
-                <Popover.Dialog className="flex flex-col gap-2">
-                  <Popover.Heading>Selected & Shared</Popover.Heading>
-                  <ListBox
-                    aria-label="Selected Goods & Media"
-                    selectionMode="none"
-                    onAction={(key) => {
-                      setIsCurationsOpen(false);
-                      if (key === "goods") router.push("/test/tag");
-                      else if (key === "vault") router.push("/test/file");
-                    }}
-                  >
-                    <ListBox.Section>
-                      <ListBox.Item id="goods" textValue="Selected Goods">
-                        <Icon
-                          icon="lucide:sparkles"
-                          className="size-4 text-violet-400"
-                          data-slot="icon"
-                        />
-                        <div className="flex flex-col">
-                          <Label>Selected Goods</Label>
-                          <Description>Curated tech gear, setups & books</Description>
-                        </div>
-                      </ListBox.Item>
-
-                      <ListBox.Item id="vault" textValue="Media Vault">
-                        <Icon
-                          icon="lucide:archive"
-                          className="size-4 text-blue-500"
-                          data-slot="icon"
-                        />
-                        <div className="flex flex-col">
-                          <Label>Media Vault</Label>
-                          <Description>Public file templates & download bucket</Description>
-                        </div>
-                      </ListBox.Item>
-                      <Separator className="my-1 opacity-60" />
-
-                      <ListBox.Item key="comments" id="comments" textValue="Symbiosis Echo">
-                        <div className="flex h-8 items-start justify-center pt-px">
-                          <Icon
-                            icon="lucide:message-square"
-                            className="size-4 text-purple-500"
-                            data-slot="icon"
-                          />
-                        </div>
-
-                        <div className="flex flex-col">
-                          <Label className="text-accent font-bold">Symbiosis Echo</Label>
-                          <Description className="max-w-55 italic">
-                            &ldquo;Your articles about stock trading and fitness changed my daily
-                            workflow. Thank you!&rdquo; — Priya
-                          </Description>
-                        </div>
-                      </ListBox.Item>
-                    </ListBox.Section>
-                  </ListBox>
-                </Popover.Dialog>
-              </Popover.Content>
-            </Popover>
-
-            {/* 5. Aviation Redesign: Sharp Administrative Cockpit Dropdown */}
-            {mounted && isAuthenticated && (
-              <Dropdown>
-                <Button
-                  variant="ghost"
-                  className="nav-stagger font-bold text-teal-600 dark:text-teal-400"
-                  aria-label="Toggle Aviation admin cockpit"
-                >
-                  Aviation
-                </Button>
-                <Dropdown.Popover className="min-w-[240px]">
-                  <Dropdown.Menu
-                    onAction={(key) => {
-                      if (key === "dashboard" || key === "categories") {
-                        router.push("/test/category");
-                      } else if (key === "tags") {
-                        router.push("/test/tag");
+                  {isActive && (
+                    <motion.div
+                      layoutId="navigation-active"
+                      className="bg-default absolute inset-0 rounded-xl"
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : { type: "spring", stiffness: 500, damping: 38 }
                       }
-                    }}
-                  >
-                    <Dropdown.Section>
-                      <Header>Aviation Control</Header>
-                      <Dropdown.Item id="dashboard" textValue="Aviation Panel">
-                        <Icon
-                          icon="lucide:layout-dashboard"
-                          className="size-4 text-teal-500"
-                          data-slot="icon"
-                        />
-                        <div className="flex flex-col">
-                          <Label>Aviation Panel</Label>
-                          <Description>Full network metrics dashboard</Description>
-                        </div>
-                      </Dropdown.Item>
-
-                      <Dropdown.Item id="categories" textValue="Taxonomy Star">
-                        <Icon
-                          icon="lucide:folder-tree"
-                          className="size-4 text-pink-400"
-                          data-slot="icon"
-                        />
-                        <div className="flex flex-col">
-                          <Label>Taxonomy Star</Label>
-                          <Description>Map categories & knowledge trees</Description>
-                        </div>
-                      </Dropdown.Item>
-
-                      <Dropdown.Item id="tags" textValue="Keyword Index">
-                        <Icon
-                          icon="lucide:tags"
-                          className="size-4 text-amber-500"
-                          data-slot="icon"
-                        />
-                        <div className="flex flex-col">
-                          <Label>Keyword Index</Label>
-                          <Description>Micro-classification keyword tags</Description>
-                        </div>
-                      </Dropdown.Item>
-                    </Dropdown.Section>
-                  </Dropdown.Menu>
-                </Dropdown.Popover>
-              </Dropdown>
-            )}
-          </HerouiNavbar.Content>
-
-          <HerouiNavbar.Spacer />
-
-          {/* Right Accessories: Search, Theme toggles, and Account Panels */}
-          <HerouiNavbar.Content className="hidden items-center gap-2.5 md:flex">
-            {/* Global command search button */}
-            <Button
-              variant="secondary"
-              onPress={() => setIsSearchOpen(true)}
-              className="nav-stagger h-9 gap-2.5 rounded-full"
-              aria-label={`Search shortcuts: press ${platformKey} K to search`}
-            >
-              <SearchIcon size={13} className="opacity-80" />
-              <span className="text-xs font-semibold tracking-wide">Search...</span>
-              <Kbd variant="light" className="ml-1" aria-hidden="true">
-                <Kbd.Abbr
-                  keyValue={mounted && (os === "macos" || os === "ios") ? "command" : "ctrl"}
-                />
-                <Kbd.Content>K</Kbd.Content>
-              </Kbd>
-            </Button>
-
-            <CommandPalette isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} />
-
-            {/* Premium Theme Switcher */}
-            {mounted && (
-              <Button
-                isIconOnly
-                variant="ghost"
-                onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="nav-stagger relative size-9 overflow-hidden rounded-full"
-                aria-label="Toggle dark and light mode theme"
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={theme}
-                    initial={reduceMotion ? { opacity: 0 } : { y: -15, rotate: -90, opacity: 0 }}
-                    animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0, opacity: 1 }}
-                    exit={reduceMotion ? { opacity: 0 } : { y: 15, rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.22, ease: "easeOut" }}
-                    className="absolute inset-0 flex items-center justify-center"
-                  >
-                    {theme === "dark" ? <SunMaxFillIcon size={16} /> : <MoonFillIcon size={16} />}
-                  </motion.div>
-                </AnimatePresence>
-              </Button>
-            )}
-
-            {/* Account authentication state panel - Hydration safe layout */}
-            {mounted ? (
-              isAuthenticated ? (
-                <Dropdown>
-                  <Dropdown.Trigger
-                    className="nav-stagger relative rounded-full transition-all duration-150 active:scale-95"
-                    aria-label="User account dashboard menu"
-                  >
-                    <div className="group relative cursor-pointer">
-                      {/* Standard native status indicator using HeroUI Badge.Anchor */}
-                      <Badge.Anchor>
-                        <Avatar
-                          size="sm"
-                          color="default"
-                          className="size-8 transition-transform hover:scale-105"
-                        >
-                          <Avatar.Fallback delayMs={600}>
-                            {username?.charAt(0).toUpperCase() || "U"}
-                          </Avatar.Fallback>
-                        </Avatar>
-                        <Badge color="success" placement="bottom-right" size="sm" />
-                      </Badge.Anchor>
-                    </div>
-                  </Dropdown.Trigger>
-                  <Dropdown.Popover className="min-w-[240px]">
-                    <div className="px-3.5 pt-3.5 pb-2">
-                      <div className="flex items-center gap-2.5">
-                        <div className="relative">
-                          <Badge.Anchor>
-                            <Avatar size="sm" color="default" className="size-8">
-                              <Avatar.Fallback delayMs={600}>
-                                {username?.charAt(0).toUpperCase() || "U"}
-                              </Avatar.Fallback>
-                            </Avatar>
-                            <Badge color="success" placement="bottom-right" size="sm" />
-                          </Badge.Anchor>
-                        </div>
-                        <div className="flex min-w-0 flex-col gap-0">
-                          <p className="truncate text-sm leading-5 font-bold">
-                            {username || "User"}
-                          </p>
-                          <p className="truncate text-[10px] leading-none text-zinc-500 dark:text-zinc-400">
-                            {email || "Owner Account"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <Dropdown.Menu
-                      className="p-1"
-                      onAction={(key) => {
-                        if (key === "logout") {
-                          dispatch(removeCredentials());
-                          dispatch(baseApi.util.resetApiState());
-                        } else if (key === "dashboard") {
-                          router.push("/test/category");
-                        } else if (key === "profile") {
-                          router.push("/test/profile");
-                        }
-                      }}
-                    >
-                      <Dropdown.Item id="dashboard" textValue="Dashboard">
-                        <Label>Workspace Dashboard</Label>
-                      </Dropdown.Item>
-                      <Dropdown.Item id="profile" textValue="Profile">
-                        <Label>Profile</Label>
-                      </Dropdown.Item>
-                      <Dropdown.Item id="settings" textValue="Settings">
-                        <Label>Settings</Label>
-                        <Icon
-                          icon="lucide:settings"
-                          className="text-default-500 size-3.5"
-                          data-slot="icon"
-                        />
-                      </Dropdown.Item>
-                      <Dropdown.Item id="new-project" textValue="New project">
-                        <Label>Create Team</Label>
-                        <Icon
-                          icon="lucide:users"
-                          className="text-default-500 size-3.5"
-                          data-slot="icon"
-                        />
-                      </Dropdown.Item>
-                      <Dropdown.Item id="logout" textValue="Logout" variant="danger">
-                        <Label>Log Out</Label>
-                        <Icon
-                          icon="lucide:log-out"
-                          className="text-danger size-3.5"
-                          data-slot="icon"
-                        />
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown.Popover>
-                </Dropdown>
-              ) : (
-                <div className="nav-stagger ml-1 flex items-center gap-1.5">
+                    />
+                  )}
                   <Button
                     size="sm"
                     variant="ghost"
-                    onPress={() => setIsLoginOpen(!isLoginOpen)}
-                    className="rounded-full font-semibold"
+                    aria-expanded={isActive}
+                    aria-controls="odyssey-mega-navigation"
+                    className="text-muted data-[hovered=true]:text-foreground relative h-10 min-w-0 rounded-xl bg-transparent px-3.5 text-sm font-medium data-[hovered=true]:bg-transparent"
+                    onFocus={(event) => {
+                      lastTriggerRef.current = event.currentTarget as HTMLElement;
+                      previewNavigation(item.id);
+                    }}
+                    onPress={() => toggleNavigation(item.id)}
                   >
-                    Log in
+                    <span className="relative z-10 flex items-center gap-1.5">
+                      {item.label}
+                      {isCurrentLocked && (
+                        <span className="bg-accent size-1 rounded-full" aria-hidden="true" />
+                      )}
+                    </span>
                   </Button>
-                  <Button
-                    size="sm"
-                    onPress={() => setIsSignUpOpen(!isSignUpOpen)}
-                    className="rounded-full font-bold"
-                  >
-                    Sign up
-                  </Button>
-                </div>
-              )
-            ) : (
-              /* Safe Skeleton layout during hydration phase to avoid shift jitter */
-              <div
-                className="nav-stagger ml-1 flex items-center gap-1.5 opacity-0"
-                aria-hidden="true"
-              >
-                <Button size="sm" variant="ghost" className="h-9 min-w-0 rounded-full px-4 text-xs">
-                  Log in
-                </Button>
-                <Button size="sm" className="h-9 min-w-0 rounded-full px-4 text-xs">
-                  Sign up
-                </Button>
-              </div>
-            )}
-          </HerouiNavbar.Content>
-        </HerouiNavbar.Header>
-
-        {/* Mobile Navigation Staggered Drawer Menu */}
-        <HerouiNavbar.Menu>
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={
-              reduceMotion
-                ? {
-                    hidden: { opacity: 0 },
-                    visible: { opacity: 1, transition: { duration: 0.1 } },
-                  }
-                : {
-                    hidden: { opacity: 0 },
-                    visible: {
-                      opacity: 1,
-                      transition: {
-                        staggerChildren: 0.04,
-                      },
-                    },
-                  }
-            }
-            className="flex h-full w-full flex-col overflow-y-auto pb-8"
-          >
-            {/* 1. Explore Mobile Section */}
-            <motion.div
-              variants={itemMotionVariants}
-              className="px-2 pt-4 pb-1.5 text-[10px] font-bold tracking-widest text-zinc-500 uppercase"
-            >
-              Explore
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/" isCurrent={"/" === currentItem}>
-                <Icon icon="lucide:book-open" className="text-indigo-400" data-slot="icon" />
-                Blogs
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/test/moment" isCurrent={"/test/moment" === currentItem}>
-                <Icon icon="lucide:map" className="text-emerald-500" data-slot="icon" />
-                Travelogue
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/test/file" isCurrent={"/test/file" === currentItem}>
-                <Icon icon="lucide:camera" className="text-sky-400" data-slot="icon" />
-                Exhibitions
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-
-            <motion.div
-              variants={dividerMotionVariants}
-              className="my-2 border-t border-black/5 dark:border-white/5"
-            />
-
-            {/* 2. Passions Mobile Section */}
-            <motion.div
-              variants={itemMotionVariants}
-              className="px-2 pb-1.5 text-[10px] font-bold tracking-widest text-zinc-500 uppercase"
-            >
-              Passions
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/test/moment" isCurrent={"/test/moment" === currentItem}>
-                <Icon icon="lucide:trending-up" className="text-emerald-500" data-slot="icon" />
-                Stock Ledger
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/test/moment" isCurrent={"/test/moment" === currentItem}>
-                <Icon icon="lucide:music" className="text-rose-400" data-slot="icon" />
-                Soundtrack
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/test/moment" isCurrent={"/test/moment" === currentItem}>
-                <Icon icon="lucide:dumbbell" className="text-amber-500" data-slot="icon" />
-                Fitness Hub
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/test/moment" isCurrent={"/test/moment" === currentItem}>
-                <Icon icon="lucide:terminal" className="text-sky-400" data-slot="icon" />
-                Coding Sandbox
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-
-            <motion.div
-              variants={dividerMotionVariants}
-              className="my-2 border-t border-black/5 dark:border-white/5"
-            />
-
-            <motion.div
-              variants={itemMotionVariants}
-              className="px-2 pb-1.5 text-[10px] font-bold tracking-widest text-zinc-500 uppercase"
-            >
-              Builds
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/" isCurrent={"/" === currentItem}>
-                <Icon icon="lucide:rocket" className="text-teal-500" data-slot="icon" />
-                Shipyard
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/" isCurrent={"/" === currentItem}>
-                <Icon icon="lucide:github" className="text-zinc-400" data-slot="icon" />
-                Open Source
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/" isCurrent={"/" === currentItem}>
-                <Icon icon="lucide:flask-conical" className="text-amber-500" data-slot="icon" />
-                Labs
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-
-            <motion.div
-              variants={dividerMotionVariants}
-              className="my-2 border-t border-black/5 dark:border-white/5"
-            />
-
-            {/* 4. Curations Mobile Section */}
-            <motion.div
-              variants={itemMotionVariants}
-              className="px-2 pb-1.5 text-[10px] font-bold tracking-widest text-zinc-500 uppercase"
-            >
-              Curations
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/test/tag" isCurrent={"/test/tag" === currentItem}>
-                <Icon icon="lucide:sparkles" className="text-violet-400" data-slot="icon" />
-                Selected Goods
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem href="/test/file" isCurrent={"/test/file" === currentItem}>
-                <Icon icon="lucide:archive" className="text-blue-500" data-slot="icon" />
-                Media Vault
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-            <motion.div variants={itemMotionVariants}>
-              <HerouiNavbar.MenuItem
-                href="/test/comment"
-                isCurrent={"/test/comment" === currentItem}
-              >
-                <Icon icon="lucide:message-square" className="text-purple-500" data-slot="icon" />
-                Symbiosis Echo
-              </HerouiNavbar.MenuItem>
-            </motion.div>
-
-            {/* 5. Aviation Mobile Section (Only shown when logged in) */}
-            {mounted && isAuthenticated && (
-              <>
-                <motion.div
-                  variants={dividerMotionVariants}
-                  className="my-2 border-t border-black/5 dark:border-white/5"
-                />
-                <motion.div
-                  variants={itemMotionVariants}
-                  className="px-2 pb-1.5 text-[10px] font-bold tracking-widest text-teal-600 uppercase dark:text-teal-400"
-                >
-                  Aviation
                 </motion.div>
-                <motion.div variants={itemMotionVariants}>
-                  <HerouiNavbar.MenuItem
-                    href="/test/category"
-                    isCurrent={"/test/category" === currentItem}
+              );
+            })}
+          </div>
+          <div className="flex shrink-0 items-center gap-1.5 justify-self-end">
+            <motion.div whileTap={reduceMotion ? undefined : { scale: 0.96 }}>
+              <Button
+                isIconOnly
+                variant="ghost"
+                className="size-10 rounded-xl lg:hidden"
+                aria-label="Search"
+                onPress={() => setIsSearchOpen(true)}
+              >
+                <SearchIcon aria-hidden="true" size={16} />
+              </Button>
+            </motion.div>
+
+            <motion.div
+              className="hidden lg:block"
+              whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+            >
+              <Button
+                variant="secondary"
+                className="h-9 min-w-0 gap-2 rounded-xl px-3"
+                aria-label={`Search, keyboard shortcut ${platformKey} K`}
+                onPress={() => setIsSearchOpen(true)}
+              >
+                <SearchIcon aria-hidden="true" size={14} />
+                <span className="text-xs font-medium">Search</span>
+                <Kbd variant="light" aria-hidden="true">
+                  <Kbd.Abbr keyValue={platformKey === "⌘" ? "command" : "ctrl"} />
+                  <Kbd.Content>K</Kbd.Content>
+                </Kbd>
+              </Button>
+            </motion.div>
+
+            <motion.div
+              className="hidden md:block"
+              whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+            >
+              <Button
+                isIconOnly
+                variant="ghost"
+                className="size-10 rounded-xl"
+                aria-label="Toggle color theme"
+                onPress={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              >
+                <AnimatePresence mode="wait" initial={false} propagate>
+                  {mounted && (
+                    <motion.span
+                      key={resolvedTheme}
+                      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 5 }}
+                      transition={{ duration: 0.12, ease: enterEase }}
+                      className="flex"
+                    >
+                      {resolvedTheme === "dark" ? (
+                        <SunMaxFillIcon size={16} />
+                      ) : (
+                        <MoonFillIcon size={16} />
+                      )}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Button>
+            </motion.div>
+
+            {mounted && isAuthenticated ? (
+              <Dropdown>
+                <Dropdown.Trigger aria-label="Open account menu" className="rounded-xl p-1.5">
+                  <Badge.Anchor>
+                    <Avatar size="sm" className="size-8">
+                      <Avatar.Fallback>{username?.charAt(0).toUpperCase() || "U"}</Avatar.Fallback>
+                    </Avatar>
+                    <Badge color="success" placement="bottom-right" size="sm" />
+                  </Badge.Anchor>
+                </Dropdown.Trigger>
+                <Dropdown.Popover className="min-w-[250px]">
+                  <div className="px-3 pt-3 pb-2">
+                    <p className="truncate text-sm font-semibold">{username || "User"}</p>
+                    <p className="text-muted truncate text-xs">{email || "Owner account"}</p>
+                  </div>
+                  <Dropdown.Menu
+                    aria-label="Account actions"
+                    onAction={(key) => {
+                      if (key === "dashboard") router.push("/test/category");
+                      if (key === "profile") router.push("/test/profile");
+                      if (key === "logout") handleLogout();
+                    }}
+                  >
+                    <Dropdown.Item id="dashboard" textValue="Dashboard">
+                      <Label>Dashboard</Label>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="profile" textValue="Profile">
+                      <Label>Profile</Label>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="logout" textValue="Log out" variant="danger">
+                      <Label>Log out</Label>
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="hidden h-9 rounded-xl px-3.5 font-semibold sm:flex"
+                onPress={() => setIsLoginOpen(true)}
+              >
+                Sign in
+              </Button>
+            )}
+
+            <motion.div className="md:hidden" whileTap={reduceMotion ? undefined : { scale: 0.96 }}>
+              <Button
+                isIconOnly
+                variant="ghost"
+                className="size-10 rounded-xl"
+                aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="odyssey-mega-navigation"
+                onFocus={(event) => {
+                  lastTriggerRef.current = event.currentTarget as HTMLElement;
+                }}
+                onPress={() => {
+                  if (isMobileMenuOpen) closeNavigation();
+                  else {
+                    setActiveNavigation(null);
+                    setIsLocked(false);
+                    setIsMobileMenuOpen(true);
+                  }
+                }}
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={isMobileMenuOpen ? "close" : "menu"}
+                    initial={
+                      reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: -45, scale: 0.8 }
+                    }
+                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                    exit={reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: 45, scale: 0.8 }}
+                    transition={{ duration: 0.12, ease: enterEase }}
+                    className="flex"
                   >
                     <Icon
-                      icon="lucide:layout-dashboard"
-                      className="text-teal-500"
-                      data-slot="icon"
+                      aria-hidden="true"
+                      icon={isMobileMenuOpen ? "lucide:x" : "lucide:menu"}
+                      className="size-5"
                     />
-                    Aviation Panel
-                  </HerouiNavbar.MenuItem>
-                </motion.div>
-                <motion.div variants={itemMotionVariants}>
-                  <HerouiNavbar.MenuItem
-                    href="/test/category"
-                    isCurrent={"/test/category" === currentItem}
-                  >
-                    <Icon icon="lucide:folder-tree" className="text-pink-400" data-slot="icon" />
-                    Taxonomy Star
-                  </HerouiNavbar.MenuItem>
-                </motion.div>
-                <motion.div variants={itemMotionVariants}>
-                  <HerouiNavbar.MenuItem href="/test/tag" isCurrent={"/test/tag" === currentItem}>
-                    <Icon icon="lucide:tags" className="text-amber-500" data-slot="icon" />
-                    Keyword Index
-                  </HerouiNavbar.MenuItem>
-                </motion.div>
-              </>
-            )}
-          </motion.div>
-        </HerouiNavbar.Menu>
-      </HerouiNavbar>
+                  </motion.span>
+                </AnimatePresence>
+              </Button>
+            </motion.div>
+          </div>
+        </nav>
 
+        <AnimatePresence initial={false}>
+          {isNavigationOpen && (
+            <motion.section
+              key="mega-navigation-content"
+              id="odyssey-mega-navigation"
+              aria-label={activeItem ? `${activeItem.label} overview` : "Navigation sections"}
+              className="max-h-[calc(100dvh-5.5rem)] overflow-y-auto"
+              initial={
+                reduceMotion ? { opacity: 0 } : { opacity: 0, clipPath: "inset(0 0 100% 0)" }
+              }
+              animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, clipPath: "inset(0 0 100% 0)" }}
+              transition={{ duration: reduceMotion ? 0 : 0.42, ease: enterEase }}
+            >
+              <div className="px-5 py-7 sm:px-8 md:px-12 md:py-9 xl:px-16 2xl:px-20">
+                <div className="md:hidden">
+                  {!activeItem ? (
+                    <motion.div
+                      key="mobile-index"
+                      initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      className="pb-3"
+                    >
+                      <p className="text-muted mb-2 text-xs font-semibold tracking-[0.14em] uppercase">
+                        Explore Odyssey
+                      </p>
+                      <div className="grid gap-1">
+                        {navigationItems.map((item, index) => (
+                          <motion.div
+                            key={item.id}
+                            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: reduceMotion ? 0 : index * 0.045 }}
+                          >
+                            <Button
+                              fullWidth
+                              variant="ghost"
+                              className="h-auto justify-between px-2 py-3 text-left"
+                              onPress={() => setActiveNavigation(item.id)}
+                            >
+                              <span>
+                                <span className="block text-base font-semibold">{item.label}</span>
+                                <span className="text-muted mt-0.5 block text-xs font-normal">
+                                  {item.eyebrow}
+                                </span>
+                              </span>
+                              <Icon
+                                aria-hidden="true"
+                                icon="lucide:arrow-right"
+                                className="size-4"
+                              />
+                            </Button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="mb-5 -ml-2"
+                      onPress={() => setActiveNavigation(null)}
+                    >
+                      <Icon aria-hidden="true" icon="lucide:arrow-left" className="size-4" />
+                      All sections
+                    </Button>
+                  )}
+                </div>
+
+                {activeItem && (
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={activeItem.id}
+                      className="col-span-full grid gap-8 md:grid-cols-12 md:gap-10"
+                      initial={
+                        reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18, filter: "blur(8px)" }
+                      }
+                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                      exit={
+                        reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, filter: "blur(5px)" }
+                      }
+                      transition={{
+                        delay: reduceMotion ? 0 : 0.06,
+                        duration: reduceMotion ? 0 : 0.15,
+                        ease: enterEase,
+                      }}
+                    >
+                      <motion.div
+                        className="flex flex-col items-start md:col-span-4"
+                        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          delay: reduceMotion ? 0 : 0.04,
+                          duration: 0.22,
+                          ease: enterEase,
+                        }}
+                      >
+                        <p className="text-accent text-xs font-semibold tracking-[0.16em] uppercase">
+                          {activeItem.eyebrow}
+                        </p>
+                        <h2 className="mt-4 max-w-[10ch] text-[clamp(2.5rem,4.5vw,5rem)] leading-[0.94] font-semibold tracking-[-0.055em]">
+                          {activeItem.title}
+                        </h2>
+                        <p className="text-muted mt-5 max-w-md text-sm leading-6 sm:text-base sm:leading-7">
+                          {activeItem.description}
+                        </p>
+                        <Button
+                          className="mt-7"
+                          onPress={() => {
+                            closeNavigation();
+                            router.push(activeItem.href);
+                          }}
+                        >
+                          {activeItem.cta}
+                          <Icon
+                            aria-hidden="true"
+                            icon="lucide:arrow-up-right"
+                            className="size-4"
+                          />
+                        </Button>
+                      </motion.div>
+
+                      <MegaPanelContent
+                        id={activeItem.id}
+                        reduceMotion={Boolean(reduceMotion)}
+                        onNavigate={(href) => {
+                          closeNavigation();
+                          router.push(href);
+                        }}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                )}
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      <CommandPalette isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} />
       <SignUp
         isOpen={isSignUpOpen}
         onOpenChange={setIsSignUpOpen}
-        onSwitchToLogIn={handleSwitchToLogIn}
+        onSwitchToLogIn={switchToLogIn}
       />
-      <LogIn
-        isOpen={isLoginOpen}
-        onOpenChange={setIsLoginOpen}
-        onSwitchToSignUp={handleSwitchToSignUp}
-      />
+      <LogIn isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} onSwitchToSignUp={switchToSignUp} />
     </>
   );
 };

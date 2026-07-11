@@ -21,6 +21,7 @@ import { RichTextModal } from "@/components/rich-text";
 import { Footer } from "@/components/footer";
 import { getInitialThemeState } from "@/lib/theme";
 import { getThemeInitScript } from "@/lib/theme-init-script";
+import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
   title: {
@@ -86,7 +87,7 @@ export default async function RootLayout({
         <Providers lang={lang} messages={messages}>
           <Toast.Provider />
           <div className="relative flex min-h-screen flex-col overflow-x-clip">
-            {/* <Navbar /> */}
+            <Navbar />
             <SheetPanel />
             <DashboardSheet />
             <RichTextModal />
