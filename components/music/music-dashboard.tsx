@@ -55,28 +55,24 @@ export function MusicDashboard() {
       <div className="col-span-12 flex flex-col gap-5 md:col-span-8 lg:gap-6">
         
         {/* A. Hero Trending Song Banner */}
-        <Card className="relative overflow-hidden bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-6 md:p-8 border-none rounded-[28px] shadow-lg min-h-[180px] sm:min-h-[220px] flex flex-row items-center justify-between">
-          {/* Decorative Background Circles */}
-          <div className="absolute -top-10 -right-10 size-44 rounded-full bg-white/10 blur-xl" />
-          <div className="absolute -bottom-10 -left-10 size-44 rounded-full bg-black/10 blur-xl" />
-          
-          <div className="relative z-10 flex flex-col items-start max-w-[65%] gap-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">MUSKINAJA</span>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight">
+        <Card className="min-h-[180px] sm:min-h-[220px] flex flex-row items-center justify-between" variant="secondary">
+          <div className="flex flex-col items-start max-w-[65%] gap-3">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted">MUSKINAJA</span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
               Listen to trending songs all the time
             </h2>
-            <p className="text-xs text-white/80 leading-relaxed hidden sm:block max-w-sm">
+            <p className="text-xs text-muted leading-relaxed hidden sm:block max-w-sm">
               With Muskinaja, you can get premium music for free anywhere and at any time.
             </p>
-            <Button className="mt-2 bg-white text-violet-700 font-bold px-5 py-2 rounded-full shadow-sm hover:scale-105 transition-transform duration-200 text-xs" size="sm">
+            <Button className="mt-2 text-xs" size="sm" variant="primary">
               Explore Now
             </Button>
           </div>
 
           {/* Banner Hero Image Placeholder (representing the girl with headphones) */}
           <div className="relative size-32 sm:size-40 md:size-44 shrink-0 select-none mr-2 hidden sm:block">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/20 to-white/5 border border-white/20 flex items-center justify-center backdrop-blur-md">
-              <Icon icon="solar:headphones-round-bold-duotone" className="size-20 md:size-24 text-white/90 animate-pulse" />
+            <div className="absolute inset-0 rounded-full flex items-center justify-center">
+              <Icon icon="solar:headphones-round-bold-duotone" className="size-20 md:size-24 text-accent animate-pulse" />
             </div>
           </div>
         </Card>
@@ -97,20 +93,19 @@ export function MusicDashboard() {
               {/* Carousel Item 1: Musik Pagi */}
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
-                  <Card className="aspect-square relative overflow-hidden select-none transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                  <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     {/* Background Album Art with Hover Zoom */}
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
                         <Image fill alt="Musik Pagi album art" className="object-cover" src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80" sizes="220px" />
                       </motion.div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
                     {/* Absolute Glass Top-Right Action Button */}
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:music-note-bold" className="size-3.5" />
                     </Button>
                     {/* Floating Glass Capsule Footer */}
-                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Musik Pagi
@@ -119,7 +114,7 @@ export function MusicDashboard() {
                           12 Tracks
                         </Typography>
                       </div>
-                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-violet-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                      <Button variant="primary" isIconOnly size="sm">
                         <Icon icon="solar:play-bold" className="size-2.5" />
                       </Button>
                     </Card.Footer>
@@ -130,17 +125,16 @@ export function MusicDashboard() {
               {/* Carousel Item 2: Lofi Beats */}
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
-                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                  <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
                         <Image fill alt="Lofi Beats album art" className="object-cover" src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80" sizes="220px" />
                       </motion.div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:heart-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Lofi Beats
@@ -149,7 +143,7 @@ export function MusicDashboard() {
                           24 Tracks
                         </Typography>
                       </div>
-                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-purple-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                      <Button variant="primary" isIconOnly size="sm">
                         <Icon icon="solar:play-bold" className="size-2.5" />
                       </Button>
                     </Card.Footer>
@@ -160,17 +154,16 @@ export function MusicDashboard() {
               {/* Carousel Item 3: Late Night */}
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
-                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                  <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
                         <Image fill alt="Late Night album art" className="object-cover" src="https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=400&q=80" sizes="220px" />
                       </motion.div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:star-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Late Night
@@ -179,7 +172,7 @@ export function MusicDashboard() {
                           18 Tracks
                         </Typography>
                       </div>
-                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-blue-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                      <Button variant="primary" isIconOnly size="sm">
                         <Icon icon="solar:play-bold" className="size-2.5" />
                       </Button>
                     </Card.Footer>
@@ -190,17 +183,16 @@ export function MusicDashboard() {
               {/* Carousel Item 4: Deep Focus */}
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
-                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                  <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
                         <Image fill alt="Deep Focus album art" className="object-cover" src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&q=80" sizes="220px" />
                       </motion.div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:bookmark-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Deep Focus
@@ -209,7 +201,7 @@ export function MusicDashboard() {
                           32 Tracks
                         </Typography>
                       </div>
-                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-indigo-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                      <Button variant="primary" isIconOnly size="sm">
                         <Icon icon="solar:play-bold" className="size-2.5" />
                       </Button>
                     </Card.Footer>
@@ -220,17 +212,16 @@ export function MusicDashboard() {
               {/* Carousel Item 5: Active Sweat */}
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
-                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                  <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
                         <Image fill alt="Active Sweat album art" className="object-cover" src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&q=80" sizes="220px" />
                       </motion.div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:dumbbell-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Active Sweat
@@ -239,7 +230,7 @@ export function MusicDashboard() {
                           15 Tracks
                         </Typography>
                       </div>
-                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-rose-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                      <Button variant="primary" isIconOnly size="sm">
                         <Icon icon="solar:play-bold" className="size-2.5" />
                       </Button>
                     </Card.Footer>
@@ -250,17 +241,16 @@ export function MusicDashboard() {
               {/* Carousel Item 6: Compiling Loop */}
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
-                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                  <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
                         <Image fill alt="Compiling Loop album art" className="object-cover" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=80" sizes="220px" />
                       </motion.div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:terminal-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Compiling Loop
@@ -269,7 +259,7 @@ export function MusicDashboard() {
                           28 Tracks
                         </Typography>
                       </div>
-                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-amber-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                      <Button variant="primary" isIconOnly size="sm">
                         <Icon icon="solar:play-bold" className="size-2.5" />
                       </Button>
                     </Card.Footer>
@@ -280,17 +270,16 @@ export function MusicDashboard() {
               {/* Carousel Item 7: Silent Zen */}
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
-                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                  <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
                         <Image fill alt="Silent Zen album art" className="object-cover" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80" sizes="220px" />
                       </motion.div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:globus-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Silent Zen
@@ -299,7 +288,7 @@ export function MusicDashboard() {
                           20 Tracks
                         </Typography>
                       </div>
-                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-emerald-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                      <Button variant="primary" isIconOnly size="sm">
                         <Icon icon="solar:play-bold" className="size-2.5" />
                       </Button>
                     </Card.Footer>
@@ -310,17 +299,16 @@ export function MusicDashboard() {
               {/* Carousel Item 8: Acoustic Waves */}
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
-                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                  <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
                         <Image fill alt="Acoustic Waves album art" className="object-cover" src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&q=80" sizes="220px" />
                       </motion.div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:soundwave-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Acoustic Waves
@@ -329,7 +317,7 @@ export function MusicDashboard() {
                           22 Tracks
                         </Typography>
                       </div>
-                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-teal-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                      <Button variant="primary" isIconOnly size="sm">
                         <Icon icon="solar:play-bold" className="size-2.5" />
                       </Button>
                     </Card.Footer>
@@ -405,10 +393,7 @@ export function MusicDashboard() {
           </ItemCardGroup>
         </ItemCardGroup>
 
-        <Card
-          className="border-default/20 flex flex-col gap-4 rounded-[24px] border bg-indigo-950/80 p-5 text-white shadow-lg dark:bg-black/40"
-          variant="default"
-        >
+        <Card className="flex flex-col gap-4 text-white" variant="secondary">
           {/* Mock Track Cover Image with absolute overlay gradient */}
           <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-inner">
             <Icon
@@ -448,7 +433,7 @@ export function MusicDashboard() {
               value={36}
               size="sm"
               color="success"
-              className="w-full rounded-full bg-white/10"
+              className="w-full rounded-full"
             />
             <div className="mt-0.5 flex items-center justify-between font-mono text-[9px] text-white/60">
               <span>1:20</span>
