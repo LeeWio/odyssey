@@ -631,10 +631,10 @@ export default function Home() {
               weight="semibold"
               className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
             >
-              Sound Sanctuary Dashboard
+              Space Between the Notes
             </Typography>
             <p className="max-w-xl text-sm text-muted mt-2">
-              A visual spatial representation of your daily loop. Ambient acoustics, macro convictions, physical repetitions, and abstract compiled structures.
+              Clear the mind. Press play.
             </p>
           </div>
           
