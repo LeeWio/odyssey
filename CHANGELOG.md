@@ -1,3 +1,14 @@
+# [1.8.0](https://github.com/LeeWio/odyssey/compare/v1.7.0...v1.8.0) (2026-07-12)
+
+
+### Features
+
+* **ai:** create Odyssey Oracle AI Companion workspace page using HeroUI Pro AI components ([cd97146](https://github.com/LeeWio/odyssey/commit/cd97146aa56de6e0bfe47be74541adfc532158ac))
+* **auth:** implement Google & GitHub OAuth2 social login redirections ([ef8e377](https://github.com/LeeWio/odyssey/commit/ef8e377bf5889d9d32e1a742570b8654b63a0338))
+* **home:** implement premium mega-navigation header and polish cyber-sanctuary home page ([f2a45e8](https://github.com/LeeWio/odyssey/commit/f2a45e808dfe4a225e5aa2bdaec178a0d73f558d))
+* **home:** integrate unified Orbit panel and dynamic command cockpit into homepage ([64b3777](https://github.com/LeeWio/odyssey/commit/64b37770479addfcb6b93269769998984316e641))
+* **navigation:** deploy premium active "Orbit" daily lifestyle dashboard ([f339290](https://github.com/LeeWio/odyssey/commit/f33929048987ae6fa6f0d76b3af34fa36e23edb2))
+
 # [1.7.0](https://github.com/LeeWio/odyssey/compare/v1.6.0...v1.7.0) (2026-07-09)
 
 
