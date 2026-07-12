@@ -10,6 +10,10 @@ import { MusicDashboard } from "@/components/music/music-dashboard";
 
 const introHeroImage = "/odyssey-hero.png";
 
+// Premium ease-out easing curve and motion-enhanced Typography component
+const enterEase = [0.23, 1, 0.32, 1] as const;
+const MotionTypography = motion.create(Typography);
+
 const chapters = [
   { id: "odyssey", label: "Odyssey" },
   { id: "chronicle", label: "Chronicle" },
@@ -626,16 +630,30 @@ export default function Home() {
             <Chip size="sm" variant="soft" color="accent" className="font-semibold uppercase tracking-wider">
               Acoustic Jukebox
             </Chip>
-            <Typography
+            <MotionTypography
               type="h2"
               weight="semibold"
+              align="start"
               className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+              initial={reducedMotion ? false : { opacity: 0, y: 16, filter: "blur(4px)" }}
+              whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5, ease: enterEase }}
             >
               Space Between the Notes
-            </Typography>
-            <p className="max-w-xl text-sm text-muted mt-2">
+            </MotionTypography>
+            <MotionTypography
+              type="body"
+              color="muted"
+              align="start"
+              className="mt-2 max-w-xl text-sm"
+              initial={reducedMotion ? false : { opacity: 0, y: 12, filter: "blur(2px)" }}
+              whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5, delay: 0.1, ease: enterEase }}
+            >
               Clear the mind. Press play.
-            </p>
+            </MotionTypography>
           </div>
           
           {/* Mount our beautiful MusicDashboard layout! */}
