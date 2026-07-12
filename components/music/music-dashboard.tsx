@@ -97,7 +97,7 @@ export function MusicDashboard() {
               {/* Carousel Item 1: Musik Pagi */}
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
-                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                  <Card className="aspect-square relative overflow-hidden select-none transition-all duration-300 ease-out cursor-pointer group" variant="default">
                     {/* Background Album Art with Hover Zoom */}
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
