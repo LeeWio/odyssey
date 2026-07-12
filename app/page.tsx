@@ -256,208 +256,228 @@ function OrbitPanel() {
             How I spend the hours.
           </Typography>
           <Typography color="muted" type="body" className="mt-5 max-w-md leading-7">
-            A continuous loop of quiet listening, market calculations, physical repetitions, and abstract code construction that calibrate each day.
+            A continuous loop of quiet listening, market calculations, physical repetitions, and
+            abstract code construction that calibrate each day.
           </Typography>
 
           <Button
-            className="mt-8 whitespace-nowrap bg-accent text-accent-foreground rounded-xl"
+            className="bg-accent text-accent-foreground mt-8 rounded-xl whitespace-nowrap"
             size="lg"
             onPress={() => router.push("/test/oracle")}
           >
             Open Orbit Oracle
-            <Icon icon="lucide:sparkles" className="size-4 ml-1.5" />
+            <Icon icon="lucide:sparkles" className="ml-1.5 size-4" />
           </Button>
         </div>
 
         {/* 2x2 Interactive Command Cockpit Dashboard */}
-        <div className="grid gap-4 md:col-span-7 grid-cols-1 sm:grid-cols-2 lg:gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:col-span-7 lg:gap-6">
           {/* Pillar 1: Soul Soothe */}
-          <Card className="group relative flex flex-col justify-between overflow-hidden bg-background/50 dark:bg-zinc-950/20 p-5 border border-default/20 rounded-2xl shadow-sm hover:shadow-md hover:border-default/30 transition-all duration-300" variant="default">
+          <Card
+            className="group bg-background/50 border-default/20 hover:border-default/30 relative flex flex-col justify-between overflow-hidden rounded-2xl border p-5 shadow-sm transition-all duration-300 hover:shadow-md dark:bg-zinc-950/20"
+            variant="default"
+          >
             <div>
               <div className="flex flex-row items-center justify-between pb-2">
-                <div className="bg-default flex size-10 items-center justify-center rounded-xl group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-200 ease-out">
+                <div className="bg-default flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                   <Icon aria-hidden="true" icon="lucide:music" className="size-5" />
                 </div>
-                <div className="flex items-center gap-1.5 rounded-full bg-background/60 px-2.5 py-1 text-[10px] font-semibold backdrop-blur-md">
+                <div className="bg-background/60 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold backdrop-blur-md">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                   </span>
                   <span className="text-muted tracking-wide">Now playing</span>
                 </div>
               </div>
               <div className="pt-3">
-                <h3 className="text-sm font-semibold group-hover:text-accent transition-colors duration-200">
+                <h3 className="group-hover:text-accent text-sm font-semibold transition-colors duration-200">
                   Soul Soothe
                 </h3>
-                <p className="mt-1 text-xs text-muted leading-relaxed">
+                <p className="text-muted mt-1 text-xs leading-relaxed">
                   Ambient works & analog vinyl rooms compiled for focused flow.
                 </p>
               </div>
               <div className="mt-4 flex flex-col gap-1.5">
-                <div className="flex items-center justify-between text-[10px] font-medium text-muted">
+                <div className="text-muted flex items-center justify-between text-[10px] font-medium">
                   <span>Track: In Ambient Rooms</span>
                   <span>65% completed</span>
                 </div>
-                <ProgressBar aria-label="Soul Soothe track duration progress" value={65} size="sm" color="success" />
+                <ProgressBar
+                  aria-label="Soul Soothe track duration progress"
+                  value={65}
+                  size="sm"
+                  color="success"
+                />
               </div>
             </div>
-            <div className="mt-5 border-t border-default/30 pt-3 text-muted flex items-center gap-1.5 text-[11px] font-medium tracking-tight">
+            <div className="border-default/30 text-muted mt-5 flex items-center gap-1.5 border-t pt-3 text-[11px] font-medium tracking-tight">
               <Icon icon="lucide:arrow-right" className="size-3 opacity-60" />
               An Ending (Ascent)
             </div>
           </Card>
 
           {/* Pillar 2: Patience & Wait */}
-          <Card className="group relative flex flex-col justify-between overflow-hidden bg-background/50 dark:bg-zinc-950/20 p-5 border border-default/20 rounded-2xl shadow-sm hover:shadow-md hover:border-default/30 transition-all duration-300" variant="default">
+          <Card
+            className="group bg-background/50 border-default/20 hover:border-default/30 relative flex flex-col justify-between overflow-hidden rounded-2xl border p-5 shadow-sm transition-all duration-300 hover:shadow-md dark:bg-zinc-950/20"
+            variant="default"
+          >
             <div>
               <div className="flex flex-row items-center justify-between pb-2">
-                <div className="bg-default flex size-10 items-center justify-center rounded-xl group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-200 ease-out">
+                <div className="bg-default flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                   <Icon aria-hidden="true" icon="lucide:trending-up" className="size-5" />
                 </div>
-                <div className="flex items-center gap-1.5 rounded-full bg-background/60 px-2.5 py-1 text-[10px] font-semibold backdrop-blur-md">
+                <div className="bg-background/60 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold backdrop-blur-md">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-zinc-500"></span>
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-zinc-400 opacity-75"></span>
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-zinc-500"></span>
                   </span>
                   <span className="text-muted tracking-wide">Market closed</span>
                 </div>
               </div>
               <div className="pt-3">
-                <h3 className="text-sm font-semibold group-hover:text-accent transition-colors duration-200">
+                <h3 className="group-hover:text-accent text-sm font-semibold transition-colors duration-200">
                   Patience & Wait
                 </h3>
-                <p className="mt-1 text-xs text-muted leading-relaxed">
+                <p className="text-muted mt-1 text-xs leading-relaxed">
                   Macro-theses, asset allocations, and financial decision logs.
                 </p>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-[10px] font-mono mt-4">
-                <div className="flex flex-col bg-default/40 px-2 py-1.5 rounded-md border border-default/20">
+              <div className="mt-4 grid grid-cols-3 gap-2 font-mono text-[10px]">
+                <div className="bg-default/40 border-default/20 flex flex-col rounded-md border px-2 py-1.5">
                   <span className="text-muted text-[8px] font-semibold">NASDAQ</span>
-                  <span className="font-semibold text-emerald-500 mt-0.5">18,245.2</span>
+                  <span className="mt-0.5 font-semibold text-emerald-500">18,245.2</span>
                 </div>
-                <div className="flex flex-col bg-default/40 px-2 py-1.5 rounded-md border border-default/20">
+                <div className="bg-default/40 border-default/20 flex flex-col rounded-md border px-2 py-1.5">
                   <span className="text-muted text-[8px] font-semibold">AAPL</span>
-                  <span className="font-semibold text-emerald-500 mt-0.5">$184.22</span>
+                  <span className="mt-0.5 font-semibold text-emerald-500">$184.22</span>
                 </div>
-                <div className="flex flex-col bg-default/40 px-2 py-1.5 rounded-md border border-default/20">
+                <div className="bg-default/40 border-default/20 flex flex-col rounded-md border px-2 py-1.5">
                   <span className="text-muted text-[8px] font-semibold">NVDA</span>
-                  <span className="font-semibold text-emerald-500 mt-0.5">$128.50</span>
+                  <span className="mt-0.5 font-semibold text-emerald-500">$128.50</span>
                 </div>
               </div>
             </div>
-            <div className="mt-5 border-t border-default/30 pt-3 text-muted flex items-center gap-1.5 text-[11px] font-medium tracking-tight">
+            <div className="border-default/30 text-muted mt-5 flex items-center gap-1.5 border-t pt-3 text-[11px] font-medium tracking-tight">
               <Icon icon="lucide:arrow-right" className="size-3 opacity-60" />
               Long posture active
             </div>
           </Card>
 
           {/* Pillar 3: Sweat It Out */}
-          <Card className="group relative flex flex-col justify-between overflow-hidden bg-background/50 dark:bg-zinc-950/20 p-5 border border-default/20 rounded-2xl shadow-sm hover:shadow-md hover:border-default/30 transition-all duration-300" variant="default">
+          <Card
+            className="group bg-background/50 border-default/20 hover:border-default/30 relative flex flex-col justify-between overflow-hidden rounded-2xl border p-5 shadow-sm transition-all duration-300 hover:shadow-md dark:bg-zinc-950/20"
+            variant="default"
+          >
             <div>
               <div className="flex flex-row items-center justify-between pb-2">
-                <div className="bg-default flex size-10 items-center justify-center rounded-xl group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-200 ease-out">
+                <div className="bg-default flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                   <Icon aria-hidden="true" icon="lucide:dumbbell" className="size-5" />
                 </div>
-                <div className="flex items-center gap-1.5 rounded-full bg-background/60 px-2.5 py-1 text-[10px] font-semibold backdrop-blur-md">
+                <div className="bg-background/60 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold backdrop-blur-md">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-500"></span>
                   </span>
                   <span className="text-muted tracking-wide">Calibrating</span>
                 </div>
               </div>
               <div className="pt-3">
-                <h3 className="text-sm font-semibold group-hover:text-accent transition-colors duration-200">
+                <h3 className="group-hover:text-accent text-sm font-semibold transition-colors duration-200">
                   Sweat It Out
                 </h3>
-                <p className="mt-1 text-xs text-muted leading-relaxed">
+                <p className="text-muted mt-1 text-xs leading-relaxed">
                   Biomechanical sets, power tracking, and active recovery logs.
                 </p>
               </div>
-              <div className="flex justify-between items-center gap-1 bg-default/30 border border-default/20 rounded-xl px-3.5 py-1.5 mt-4">
+              <div className="bg-default/30 border-default/20 mt-4 flex items-center justify-between gap-1 rounded-xl border px-3.5 py-1.5">
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-[8px] text-muted font-bold uppercase">M</span>
+                  <span className="text-muted text-[8px] font-bold uppercase">M</span>
                   <div className="flex size-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-sm shadow-rose-500/25">
                     <Icon icon="lucide:check" className="size-2" />
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-[8px] text-muted font-bold uppercase">T</span>
-                  <div className="flex size-5 items-center justify-center rounded-full bg-default/50 text-muted">
+                  <span className="text-muted text-[8px] font-bold uppercase">T</span>
+                  <div className="bg-default/50 text-muted flex size-5 items-center justify-center rounded-full">
                     <span className="text-[10px] font-bold">·</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-[8px] text-muted font-bold uppercase">W</span>
+                  <span className="text-muted text-[8px] font-bold uppercase">W</span>
                   <div className="flex size-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-sm shadow-rose-500/25">
                     <Icon icon="lucide:check" className="size-2" />
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-[8px] text-muted font-bold uppercase">T</span>
-                  <div className="flex size-5 items-center justify-center rounded-full bg-default/50 text-muted">
+                  <span className="text-muted text-[8px] font-bold uppercase">T</span>
+                  <div className="bg-default/50 text-muted flex size-5 items-center justify-center rounded-full">
                     <span className="text-[10px] font-bold">·</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-[8px] text-muted font-bold uppercase">F</span>
+                  <span className="text-muted text-[8px] font-bold uppercase">F</span>
                   <div className="flex size-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-sm shadow-rose-500/25">
                     <Icon icon="lucide:check" className="size-2" />
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-[8px] text-muted font-bold uppercase">S</span>
-                  <div className="flex size-5 items-center justify-center rounded-full bg-default/50 text-muted">
+                  <span className="text-muted text-[8px] font-bold uppercase">S</span>
+                  <div className="bg-default/50 text-muted flex size-5 items-center justify-center rounded-full">
                     <span className="text-[10px] font-bold">·</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-[8px] text-muted font-bold uppercase">S</span>
-                  <div className="flex size-5 items-center justify-center rounded-full bg-default/50 text-muted">
+                  <span className="text-muted text-[8px] font-bold uppercase">S</span>
+                  <div className="bg-default/50 text-muted flex size-5 items-center justify-center rounded-full">
                     <span className="text-[10px] font-bold">·</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="mt-5 border-t border-default/30 pt-3 text-muted flex items-center gap-1.5 text-[11px] font-medium tracking-tight">
+            <div className="border-default/30 text-muted mt-5 flex items-center gap-1.5 border-t pt-3 text-[11px] font-medium tracking-tight">
               <Icon icon="lucide:arrow-right" className="size-3 opacity-60" />
               Cold plunge recovery
             </div>
           </Card>
 
           {/* Pillar 4: Code & Build */}
-          <Card className="group relative flex flex-col justify-between overflow-hidden bg-background/50 dark:bg-zinc-950/20 p-5 border border-default/20 rounded-2xl shadow-sm hover:shadow-md hover:border-default/30 transition-all duration-300" variant="default">
+          <Card
+            className="group bg-background/50 border-default/20 hover:border-default/30 relative flex flex-col justify-between overflow-hidden rounded-2xl border p-5 shadow-sm transition-all duration-300 hover:shadow-md dark:bg-zinc-950/20"
+            variant="default"
+          >
             <div>
               <div className="flex flex-row items-center justify-between pb-2">
-                <div className="bg-default flex size-10 items-center justify-center rounded-xl group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-200 ease-out">
+                <div className="bg-default flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                   <Icon aria-hidden="true" icon="lucide:terminal" className="size-5" />
                 </div>
-                <div className="flex items-center gap-1.5 rounded-full bg-background/60 px-2.5 py-1 text-[10px] font-semibold backdrop-blur-md">
+                <div className="bg-background/60 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold backdrop-blur-md">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                   </span>
                   <span className="text-muted tracking-wide">Compiling</span>
                 </div>
               </div>
               <div className="pt-3">
-                <h3 className="text-sm font-semibold group-hover:text-accent transition-colors duration-200">
+                <h3 className="group-hover:text-accent text-sm font-semibold transition-colors duration-200">
                   Code & Build
                 </h3>
-                <p className="mt-1 text-xs text-muted leading-relaxed">
+                <p className="text-muted mt-1 text-xs leading-relaxed">
                   Translating abstract logic into functional, accessible systems.
                 </p>
               </div>
-              <div className="mt-4 rounded-xl bg-zinc-950/90 dark:bg-black/40 p-2.5 text-[10px] font-mono leading-relaxed text-zinc-400 border border-default/20 shadow-inner">
+              <div className="border-default/20 mt-4 rounded-xl border bg-zinc-950/90 p-2.5 font-mono text-[10px] leading-relaxed text-zinc-400 shadow-inner dark:bg-black/40">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span className="font-bold text-emerald-500">✓</span>
                   <span className="font-semibold text-zinc-200">compile successful</span>
                 </div>
-                <div className="text-[9px] text-zinc-500 mt-0.5">Compiled in 42ms · 165 modules</div>
+                <div className="mt-0.5 text-[9px] text-zinc-500">
+                  Compiled in 42ms · 165 modules
+                </div>
               </div>
             </div>
-            <div className="mt-5 border-t border-default/30 pt-3 text-muted flex items-center gap-1.5 text-[11px] font-medium tracking-tight">
+            <div className="border-default/30 text-muted mt-5 flex items-center gap-1.5 border-t pt-3 text-[11px] font-medium tracking-tight">
               <Icon icon="lucide:arrow-right" className="size-3 opacity-60" />
               Next.js hydration audits
             </div>

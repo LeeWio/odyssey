@@ -184,16 +184,16 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                         </Form>
                         {orDivider}
                         <div className="flex flex-col gap-2">
-                          <Button 
-                            fullWidth 
+                          <Button
+                            fullWidth
                             variant="tertiary"
                             onPress={() => handleSocialLogin("google")}
                           >
                             <Icon icon="devicon:google" aria-hidden="true" />
                             Continue with Google
                           </Button>
-                          <Button 
-                            fullWidth 
+                          <Button
+                            fullWidth
                             variant="tertiary"
                             onPress={() => handleSocialLogin("github")}
                           >
