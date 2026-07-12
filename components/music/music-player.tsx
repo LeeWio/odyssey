@@ -204,7 +204,7 @@ export function MusicPlayer() {
             <ListBox.Item id="eno" textValue="An Ending (Ascent)">
               <div className="flex items-center gap-3 py-1">
                 <div className="relative size-10 overflow-hidden rounded-lg">
-                  <Image fill alt="Brian Eno cover" className="object-cover" src={PLAYLIST[0].cover} sizes="40px" />
+                  <Image fill unoptimized alt="Brian Eno cover" className="object-cover" src={PLAYLIST[0].cover} sizes="40px" />
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-xs font-semibold truncate">An Ending (Ascent)</span>
@@ -217,7 +217,7 @@ export function MusicPlayer() {
             <ListBox.Item id="part" textValue="Spiegel im Spiegel">
               <div className="flex items-center gap-3 py-1">
                 <div className="relative size-10 overflow-hidden rounded-lg">
-                  <Image fill alt="Arvo Pärt cover" className="object-cover" src={PLAYLIST[1].cover} sizes="40px" />
+                  <Image fill unoptimized alt="Arvo Pärt cover" className="object-cover" src={PLAYLIST[1].cover} sizes="40px" />
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-xs font-semibold truncate">Spiegel im Spiegel</span>
@@ -230,7 +230,7 @@ export function MusicPlayer() {
             <ListBox.Item id="satie" textValue="Gymnopédie No.1">
               <div className="flex items-center gap-3 py-1">
                 <div className="relative size-10 overflow-hidden rounded-lg">
-                  <Image fill alt="Erik Satie cover" className="object-cover" src={PLAYLIST[2].cover} sizes="40px" />
+                  <Image fill unoptimized alt="Erik Satie cover" className="object-cover" src={PLAYLIST[2].cover} sizes="40px" />
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-xs font-semibold truncate">Gymnopédie No.1</span>
@@ -243,7 +243,7 @@ export function MusicPlayer() {
             <ListBox.Item id="yiruma" textValue="River Flows in You">
               <div className="flex items-center gap-3 py-1">
                 <div className="relative size-10 overflow-hidden rounded-lg">
-                  <Image fill alt="Yiruma cover" className="object-cover" src={PLAYLIST[3].cover} sizes="40px" />
+                  <Image fill unoptimized alt="Yiruma cover" className="object-cover" src={PLAYLIST[3].cover} sizes="40px" />
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-xs font-semibold truncate">River Flows in You</span>
@@ -276,7 +276,7 @@ export function MusicPlayer() {
                 
                 {/* Center album cover art as Vinyl center label */}
                 <div className="relative size-12 overflow-hidden rounded-full border border-zinc-950">
-                  <Image fill alt="Center label" className="object-cover" src={currentTrack.cover} sizes="48px" />
+                  <Image fill unoptimized alt="Center label" className="object-cover" src={currentTrack.cover} sizes="48px" />
                 </div>
                 <div className="absolute size-2 rounded-full bg-background border border-zinc-950 shadow-inner" />
               </motion.div>

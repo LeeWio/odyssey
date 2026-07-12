@@ -223,6 +223,7 @@ function ChroniclePanel() {
         >
           <Image
             fill
+            unoptimized
             alt="A dark forest opening onto a sky filled with stars"
             className="object-cover"
             draggable={false}
@@ -516,6 +517,7 @@ function TraveloguePanel() {
     >
       <Image
         fill
+        unoptimized
         alt="A remote Icelandic landscape beneath a night sky"
         className="object-cover"
         draggable={false}

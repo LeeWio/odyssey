@@ -97,7 +97,7 @@ export function MusicDashboard() {
                     {/* Background Album Art with Hover Zoom */}
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill alt="Musik Pagi album art" className="object-cover" src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80" sizes="220px" />
+                        <Image fill unoptimized alt="Musik Pagi album art" className="object-cover" src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80" sizes="220px" />
                       </motion.div>
                     </div>
                     {/* Absolute Glass Top-Right Action Button */}
@@ -128,7 +128,7 @@ export function MusicDashboard() {
                   <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill alt="Lofi Beats album art" className="object-cover" src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80" sizes="220px" />
+                        <Image fill unoptimized alt="Lofi Beats album art" className="object-cover" src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80" sizes="220px" />
                       </motion.div>
                     </div>
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
@@ -157,7 +157,7 @@ export function MusicDashboard() {
                   <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill alt="Late Night album art" className="object-cover" src="https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=400&q=80" sizes="220px" />
+                        <Image fill unoptimized alt="Late Night album art" className="object-cover" src="https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=400&q=80" sizes="220px" />
                       </motion.div>
                     </div>
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
@@ -186,7 +186,7 @@ export function MusicDashboard() {
                   <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill alt="Deep Focus album art" className="object-cover" src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&q=80" sizes="220px" />
+                        <Image fill unoptimized alt="Deep Focus album art" className="object-cover" src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&q=80" sizes="220px" />
                       </motion.div>
                     </div>
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
@@ -215,7 +215,7 @@ export function MusicDashboard() {
                   <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill alt="Active Sweat album art" className="object-cover" src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&q=80" sizes="220px" />
+                        <Image fill unoptimized alt="Active Sweat album art" className="object-cover" src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&q=80" sizes="220px" />
                       </motion.div>
                     </div>
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
@@ -244,7 +244,7 @@ export function MusicDashboard() {
                   <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill alt="Compiling Loop album art" className="object-cover" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=80" sizes="220px" />
+                        <Image fill unoptimized alt="Compiling Loop album art" className="object-cover" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=80" sizes="220px" />
                       </motion.div>
                     </div>
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
@@ -273,7 +273,7 @@ export function MusicDashboard() {
                   <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill alt="Silent Zen album art" className="object-cover" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80" sizes="220px" />
+                        <Image fill unoptimized alt="Silent Zen album art" className="object-cover" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80" sizes="220px" />
                       </motion.div>
                     </div>
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
@@ -302,7 +302,7 @@ export function MusicDashboard() {
                   <Card className="aspect-square relative overflow-hidden select-none cursor-pointer group" variant="default">
                     <div className="absolute inset-0 overflow-hidden">
                       <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill alt="Acoustic Waves album art" className="object-cover" src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&q=80" sizes="220px" />
+                        <Image fill unoptimized alt="Acoustic Waves album art" className="object-cover" src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&q=80" sizes="220px" />
                       </motion.div>
                     </div>
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
