@@ -61,6 +61,11 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
   const [sendOtp, { isLoading: isSendingOtp }] = useSendOtpMutation();
   const [loginWithOtp, { isLoading: isLoggingIn }] = useLoginWithOtpMutation();
 
+  const handleSocialLogin = (provider: "google" | "github") => {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+    window.location.href = `${apiBaseUrl}/oauth2/authorization/${provider}`;
+  };
+
   const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -176,11 +181,19 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                         </Form>
                         {orDivider}
                         <div className="flex flex-col gap-2">
-                          <Button fullWidth variant="tertiary">
+                          <Button 
+                            fullWidth 
+                            variant="tertiary"
+                            onPress={() => handleSocialLogin("google")}
+                          >
                             <Icon icon="devicon:google" aria-hidden="true" />
                             Continue with Google
                           </Button>
-                          <Button fullWidth variant="tertiary">
+                          <Button 
+                            fullWidth 
+                            variant="tertiary"
+                            onPress={() => handleSocialLogin("github")}
+                          >
                             <Icon icon="devicon:github" aria-hidden="true" />
                             Continue with Github
                           </Button>
