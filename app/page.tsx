@@ -13,8 +13,7 @@ const introHeroImage = "/odyssey-hero.png";
 const chapters = [
   { id: "odyssey", label: "Odyssey" },
   { id: "chronicle", label: "Chronicle" },
-  { id: "daily", label: "Orbit" },
-  { id: "music", label: "Jukebox" }, // New dedicated horizontal Jukebox segment
+  { id: "daily", label: "Orbit" }, // Aligned with navbar state ID and Orbit label
   { id: "travelogue", label: "Travelogue" },
 ] as const;
 
@@ -502,40 +501,6 @@ function OrbitPanel() {
   );
 }
 
-// Dedicated horizontal Jukebox panel featuring our custom MusicDashboard layout!
-function JukeboxPanel() {
-  return (
-    <Surface
-      id="music"
-      aria-labelledby="jukebox-title"
-      role="region"
-      variant="transparent"
-      className="bg-background relative flex h-full w-screen shrink-0 items-center overflow-hidden pt-16"
-    >
-      <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col justify-center gap-6 px-5 py-6 sm:px-8 md:px-12 md:py-10">
-        <div className="flex flex-col items-start mb-2">
-          <Typography color="muted" type="body-sm" weight="medium">
-            Jukebox
-          </Typography>
-          <Typography
-            id="jukebox-title"
-            type="h2"
-            weight="semibold"
-            className="mt-2 text-3xl font-semibold tracking-tight text-foreground"
-          >
-            Sound Sanctuary
-          </Typography>
-        </div>
-        
-        {/* Dynamic Scrollable Music Dashboard Container */}
-        <div className="w-full overflow-y-auto max-h-[70dvh] pr-1" data-scrollbar="none">
-          <MusicDashboard />
-        </div>
-      </div>
-    </Surface>
-  );
-}
-
 function TraveloguePanel() {
   return (
     <Surface
@@ -596,7 +561,7 @@ export default function Home() {
     offset: ["start start", "end end"],
   });
 
-  const xTranslation = useTransform(scrollYProgress, [0, 1], ["0%", "-80%"]);
+  const xTranslation = useTransform(scrollYProgress, [0, 1], ["0%", "-75%"]);
   const x = useSpring(xTranslation, {
     stiffness: 80,
     damping: 26,
@@ -622,10 +587,11 @@ export default function Home() {
   };
 
   return (
-    <Surface variant="transparent" className="relative h-screen w-full">
+    <Surface variant="transparent" className="relative h-auto w-full">
+      {/* 1. Horizontal Scroll Section */}
       <div
         ref={targetRef}
-        className={cn("relative w-full", reducedMotion ? "h-auto" : "h-[500vh]")}
+        className={cn("relative w-full", reducedMotion ? "h-auto" : "h-[400vh]")}
       >
         <div
           className={cn(
@@ -642,15 +608,40 @@ export default function Home() {
           )}
 
           <motion.div
-            className={cn(reducedMotion ? "flex w-full flex-col" : "flex h-full w-[500vw]")}
+            className={cn(reducedMotion ? "flex w-full flex-col" : "flex h-full w-[400vw]")}
             style={{ x: reducedMotion ? 0 : x }}
           >
             <IntroPanel reducedMotion={reducedMotion} onEnter={() => scrollToPanel(1)} />
             <ChroniclePanel />
             <OrbitPanel />
-            <JukeboxPanel />
             <TraveloguePanel />
           </motion.div>
+        </div>
+      </div>
+
+      {/* 2. Post-Scroll Vertical Content Section (MusicDashboard) */}
+      <div className="bg-background relative w-full border-t border-default/15 px-5 py-20 sm:px-8 md:px-12 xl:px-16 2xl:px-24">
+        <div className="mx-auto w-full max-w-[1400px] flex flex-col gap-8">
+          <div className="flex flex-col items-start mb-4">
+            <Chip size="sm" variant="soft" color="accent" className="font-semibold uppercase tracking-wider">
+              Acoustic Jukebox
+            </Chip>
+            <Typography
+              type="h2"
+              weight="semibold"
+              className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+            >
+              Sound Sanctuary Dashboard
+            </Typography>
+            <p className="max-w-xl text-sm text-muted mt-2">
+              A visual spatial representation of your daily loop. Ambient acoustics, macro convictions, physical repetitions, and abstract compiled structures.
+            </p>
+          </div>
+          
+          {/* Mount our beautiful MusicDashboard layout! */}
+          <div className="w-full">
+            <MusicDashboard />
+          </div>
         </div>
       </div>
     </Surface>
