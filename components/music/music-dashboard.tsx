@@ -1,20 +1,58 @@
 "use client";
 
-import React from "react";
-import { Card, Button, Avatar, Chip, ProgressBar } from "@heroui/react";
+import React, { useState } from "react";
+import Image from "next/image";
+import {
+  Card,
+  Button,
+  Avatar,
+  Chip,
+  ProgressBar,
+  Dropdown,
+  Label,
+  Separator,
+  Surface,
+  Typography,
+  ListBox,
+  Tooltip,
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
+import {
+  Carousel,
+  InlineSelect,
+  ItemCard,
+  ItemCardGroup,
+  PressableFeedback,
+} from "@heroui-pro/react";
+import {
+  ArrowUpRightFromSquare,
+  ChevronDown,
+  ChevronRight,
+  Cloud,
+  Globe,
+  LogoGithub,
+  LogoGitlab,
+  LogoSlack,
+  Plus,
+  Receipt,
+} from "@gravity-ui/icons";
+import { motion } from "motion/react";
+
+// Premium ease-out curve
+const enterEase = [0.23, 1, 0.32, 1] as const;
 
 export function MusicDashboard() {
   const mounted = useMounted();
+  const [billing, setBilling] = useState("view");
 
   if (!mounted) return null;
 
   return (
-    <div className="grid w-full grid-cols-1 md:grid-cols-12 gap-5 lg:gap-6">
+    <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-12 lg:gap-6">
       
       {/* 1. Left Content Area (Column Span 8) */}
-      <div className="col-span-12 md:col-span-8 flex flex-col gap-5 lg:gap-6">
+      <div className="col-span-12 flex flex-col gap-5 md:col-span-8 lg:gap-6">
         
         {/* A. Hero Trending Song Banner */}
         <Card className="relative overflow-hidden bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-6 md:p-8 border-none rounded-[28px] shadow-lg min-h-[180px] sm:min-h-[220px] flex flex-row items-center justify-between">
@@ -43,284 +81,426 @@ export function MusicDashboard() {
           </div>
         </Card>
 
-        {/* B. Playlists Horizontal Row */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Playlists</h3>
-            <Button variant="ghost" size="sm" className="h-6 text-xs text-muted border-none min-w-0 px-2">
+        {/* B. Playlists Horizontal Carousel (Fully Unrolled & Loop-free!) */}
+        <Surface className="flex flex-col gap-3" variant="transparent">
+          <div className="flex items-center justify-between px-1.5">
+            <Typography type="h5" align="start" className="tracking-wider" weight="bold">
+              Playlists
+            </Typography>
+            <Button variant="ghost" size="sm">
               See More
             </Button>
           </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {/* Playlist 1 */}
-            <Card className="group relative aspect-square overflow-hidden rounded-2xl p-0 border border-default/20 hover:border-default/30 transition-all duration-300" variant="default">
-              {/* Cover Art Placeholder */}
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-indigo-500/10 flex items-center justify-center">
-                <Icon icon="solar:music-note-bold" className="size-10 text-violet-500/30 group-hover:scale-110 transition-transform duration-300" />
-              </div>
-              <div className="absolute right-3 top-3 bg-black/40 backdrop-blur-md p-1.5 rounded-full text-white size-7 flex items-center justify-center">
-                <Icon icon="solar:music-library-bold" className="size-3.5" />
-              </div>
-              {/* Glassmorphic bottom bar */}
-              <div className="absolute bottom-2 inset-x-2 bg-zinc-950/70 dark:bg-black/40 border border-white/10 dark:border-default/20 backdrop-blur-md rounded-xl p-2.5 flex items-center justify-between">
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[11px] font-bold text-white truncate leading-tight">Musik Pagi</span>
-                  <span className="text-[9px] text-white/70 truncate mt-0.5">12 Tracks</span>
+          <Carousel opts={{ align: "start" }}>
+            <Carousel.Content>
+              
+              {/* Carousel Item 1: Musik Pagi */}
+              <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                <div className="p-1">
+                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                    {/* Background Album Art with Hover Zoom */}
+                    <div className="absolute inset-0 overflow-hidden">
+                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
+                        <Image fill alt="Musik Pagi album art" className="object-cover" src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80" sizes="220px" />
+                      </motion.div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    </div>
+                    {/* Absolute Glass Top-Right Action Button */}
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                      <Icon icon="solar:music-note-bold" className="size-3.5" />
+                    </Button>
+                    {/* Floating Glass Capsule Footer */}
+                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                      <div className="flex flex-col min-w-0">
+                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                          Musik Pagi
+                        </Typography>
+                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                          12 Tracks
+                        </Typography>
+                      </div>
+                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-violet-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                        <Icon icon="solar:play-bold" className="size-2.5" />
+                      </Button>
+                    </Card.Footer>
+                  </Card>
                 </div>
-                <Button isIconOnly size="sm" className="size-6 bg-white text-violet-700 rounded-full shrink-0">
-                  <Icon icon="solar:play-bold" className="size-2.5" />
-                </Button>
-              </div>
-            </Card>
+              </Carousel.Item>
 
-            {/* Playlist 2 */}
-            <Card className="group relative aspect-square overflow-hidden rounded-2xl p-0 border border-default/20 hover:border-default/30 transition-all duration-300" variant="default">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-fuchsia-500/10 flex items-center justify-center">
-                <Icon icon="solar:music-notes-bold" className="size-10 text-purple-500/30 group-hover:scale-110 transition-transform duration-300" />
-              </div>
-              <div className="absolute right-3 top-3 bg-black/40 backdrop-blur-md p-1.5 rounded-full text-white size-7 flex items-center justify-center">
-                <Icon icon="solar:heart-bold" className="size-3.5" />
-              </div>
-              <div className="absolute bottom-2 inset-x-2 bg-zinc-950/70 dark:bg-black/40 border border-white/10 dark:border-default/20 backdrop-blur-md rounded-xl p-2.5 flex items-center justify-between">
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[11px] font-bold text-white truncate leading-tight">Musik Anu</span>
-                  <span className="text-[9px] text-white/70 truncate mt-0.5">22 Tracks</span>
+              {/* Carousel Item 2: Lofi Beats */}
+              <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                <div className="p-1">
+                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                    <div className="absolute inset-0 overflow-hidden">
+                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
+                        <Image fill alt="Lofi Beats album art" className="object-cover" src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80" sizes="220px" />
+                      </motion.div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    </div>
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                      <Icon icon="solar:heart-bold" className="size-3.5" />
+                    </Button>
+                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                      <div className="flex flex-col min-w-0">
+                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                          Lofi Beats
+                        </Typography>
+                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                          24 Tracks
+                        </Typography>
+                      </div>
+                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-purple-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                        <Icon icon="solar:play-bold" className="size-2.5" />
+                      </Button>
+                    </Card.Footer>
+                  </Card>
                 </div>
-                <Button isIconOnly size="sm" className="size-6 bg-white text-purple-700 rounded-full shrink-0">
-                  <Icon icon="solar:play-bold" className="size-2.5" />
-                </Button>
-              </div>
-            </Card>
+              </Carousel.Item>
 
-            {/* Playlist 3 */}
-            <Card className="group relative aspect-square overflow-hidden rounded-2xl p-0 border border-default/20 hover:border-default/30 transition-all duration-300" variant="default">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/10 flex items-center justify-center">
-                <Icon icon="solar:volume-loud-bold" className="size-10 text-blue-500/30 group-hover:scale-110 transition-transform duration-300" />
-              </div>
-              <div className="absolute right-3 top-3 bg-black/40 backdrop-blur-md p-1.5 rounded-full text-white size-7 flex items-center justify-center">
-                <Icon icon="solar:star-bold" className="size-3.5" />
-              </div>
-              <div className="absolute bottom-2 inset-x-2 bg-zinc-950/70 dark:bg-black/40 border border-white/10 dark:border-default/20 backdrop-blur-md rounded-xl p-2.5 flex items-center justify-between">
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[11px] font-bold text-white truncate leading-tight">Lofi Bass</span>
-                  <span className="text-[9px] text-white/70 truncate mt-0.5">18 Tracks</span>
+              {/* Carousel Item 3: Late Night */}
+              <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                <div className="p-1">
+                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                    <div className="absolute inset-0 overflow-hidden">
+                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
+                        <Image fill alt="Late Night album art" className="object-cover" src="https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=400&q=80" sizes="220px" />
+                      </motion.div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    </div>
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                      <Icon icon="solar:star-bold" className="size-3.5" />
+                    </Button>
+                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                      <div className="flex flex-col min-w-0">
+                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                          Late Night
+                        </Typography>
+                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                          18 Tracks
+                        </Typography>
+                      </div>
+                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-blue-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                        <Icon icon="solar:play-bold" className="size-2.5" />
+                      </Button>
+                    </Card.Footer>
+                  </Card>
                 </div>
-                <Button isIconOnly size="sm" className="size-6 bg-white text-blue-700 rounded-full shrink-0">
-                  <Icon icon="solar:play-bold" className="size-2.5" />
-                </Button>
-              </div>
-            </Card>
+              </Carousel.Item>
 
-            {/* Playlist 4 */}
-            <Card className="group relative aspect-square overflow-hidden rounded-2xl p-0 border border-default/20 hover:border-default/30 transition-all duration-300" variant="default">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-pink-500/10 flex items-center justify-center">
-                <Icon icon="solar:soundwave-bold" className="size-10 text-indigo-500/30 group-hover:scale-110 transition-transform duration-300" />
-              </div>
-              <div className="absolute right-3 top-3 bg-black/40 backdrop-blur-md p-1.5 rounded-full text-white size-7 flex items-center justify-center">
-                <Icon icon="solar:globus-bold" className="size-3.5" />
-              </div>
-              <div className="absolute bottom-2 inset-x-2 bg-zinc-950/70 dark:bg-black/40 border border-white/10 dark:border-default/20 backdrop-blur-md rounded-xl p-2.5 flex items-center justify-between">
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[11px] font-bold text-white truncate leading-tight">Anak Senja</span>
-                  <span className="text-[9px] text-white/70 truncate mt-0.5">25 Tracks</span>
+              {/* Carousel Item 4: Deep Focus */}
+              <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                <div className="p-1">
+                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                    <div className="absolute inset-0 overflow-hidden">
+                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
+                        <Image fill alt="Deep Focus album art" className="object-cover" src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&q=80" sizes="220px" />
+                      </motion.div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    </div>
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                      <Icon icon="solar:bookmark-bold" className="size-3.5" />
+                    </Button>
+                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                      <div className="flex flex-col min-w-0">
+                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                          Deep Focus
+                        </Typography>
+                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                          32 Tracks
+                        </Typography>
+                      </div>
+                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-indigo-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                        <Icon icon="solar:play-bold" className="size-2.5" />
+                      </Button>
+                    </Card.Footer>
+                  </Card>
                 </div>
-                <Button isIconOnly size="sm" className="size-6 bg-white text-indigo-700 rounded-full shrink-0">
-                  <Icon icon="solar:play-bold" className="size-2.5" />
-                </Button>
-              </div>
-            </Card>
-          </div>
-        </div>
+              </Carousel.Item>
 
-        {/* C. Trending Tracks Vertical List */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Trending</h3>
-            <Button variant="ghost" size="sm" className="h-6 text-xs text-muted border-none min-w-0 px-2">
+              {/* Carousel Item 5: Active Sweat */}
+              <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                <div className="p-1">
+                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                    <div className="absolute inset-0 overflow-hidden">
+                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
+                        <Image fill alt="Active Sweat album art" className="object-cover" src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&q=80" sizes="220px" />
+                      </motion.div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    </div>
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                      <Icon icon="solar:dumbbell-bold" className="size-3.5" />
+                    </Button>
+                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                      <div className="flex flex-col min-w-0">
+                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                          Active Sweat
+                        </Typography>
+                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                          15 Tracks
+                        </Typography>
+                      </div>
+                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-rose-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                        <Icon icon="solar:play-bold" className="size-2.5" />
+                      </Button>
+                    </Card.Footer>
+                  </Card>
+                </div>
+              </Carousel.Item>
+
+              {/* Carousel Item 6: Compiling Loop */}
+              <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                <div className="p-1">
+                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                    <div className="absolute inset-0 overflow-hidden">
+                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
+                        <Image fill alt="Compiling Loop album art" className="object-cover" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=80" sizes="220px" />
+                      </motion.div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    </div>
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                      <Icon icon="solar:terminal-bold" className="size-3.5" />
+                    </Button>
+                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                      <div className="flex flex-col min-w-0">
+                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                          Compiling Loop
+                        </Typography>
+                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                          28 Tracks
+                        </Typography>
+                      </div>
+                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-amber-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                        <Icon icon="solar:play-bold" className="size-2.5" />
+                      </Button>
+                    </Card.Footer>
+                  </Card>
+                </div>
+              </Carousel.Item>
+
+              {/* Carousel Item 7: Silent Zen */}
+              <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                <div className="p-1">
+                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                    <div className="absolute inset-0 overflow-hidden">
+                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
+                        <Image fill alt="Silent Zen album art" className="object-cover" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80" sizes="220px" />
+                      </motion.div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    </div>
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                      <Icon icon="solar:globus-bold" className="size-3.5" />
+                    </Button>
+                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                      <div className="flex flex-col min-w-0">
+                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                          Silent Zen
+                        </Typography>
+                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                          20 Tracks
+                        </Typography>
+                      </div>
+                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-emerald-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                        <Icon icon="solar:play-bold" className="size-2.5" />
+                      </Button>
+                    </Card.Footer>
+                  </Card>
+                </div>
+              </Carousel.Item>
+
+              {/* Carousel Item 8: Acoustic Waves */}
+              <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
+                <div className="p-1">
+                  <Card className="aspect-square relative overflow-hidden select-none rounded-[24px] p-0 border border-default/15 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer group" variant="default">
+                    <div className="absolute inset-0 overflow-hidden">
+                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
+                        <Image fill alt="Acoustic Waves album art" className="object-cover" src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&q=80" sizes="220px" />
+                      </motion.div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    </div>
+                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10 bg-black/30 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-default/20 text-white rounded-full size-7 min-w-0 p-0" aria-label="Playlist options">
+                      <Icon icon="solar:soundwave-bold" className="size-3.5" />
+                    </Button>
+                    <Card.Footer className="absolute bottom-2 inset-x-2 bg-background/60 dark:bg-zinc-950/60 border border-white/10 dark:border-default/10 backdrop-blur-xl rounded-xl p-2.5 flex flex-row items-center justify-between shadow-sm">
+                      <div className="flex flex-col min-w-0">
+                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                          Acoustic Waves
+                        </Typography>
+                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                          22 Tracks
+                        </Typography>
+                      </div>
+                      <Button variant="primary" isIconOnly size="sm" className="size-6 bg-white text-teal-700 hover:scale-105 transition-transform rounded-full shrink-0">
+                        <Icon icon="solar:play-bold" className="size-2.5" />
+                      </Button>
+                    </Card.Footer>
+                  </Card>
+                </div>
+              </Carousel.Item>
+
+            </Carousel.Content>
+            <Carousel.Previous />
+            <Carousel.Next />
+          </Carousel>
+        </Surface>
+
+        <ItemCardGroup variant="transparent">
+          <ItemCardGroup.Header className="mb-1 flex flex-row items-start justify-between px-1.5 pt-0">
+            <ItemCardGroup.Title>Trending</ItemCardGroup.Title>
+            <Button variant="ghost" size="sm">
               See More
             </Button>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {/* Track 1 */}
-            <Card className="group flex flex-row items-center justify-between p-3 border border-default/20 hover:border-default/30 bg-background/40 hover:bg-background/80 transition-all duration-200 rounded-2xl shadow-sm" variant="default">
-              <div className="flex items-center gap-4 min-w-0 flex-1">
-                <span className="text-xs font-bold text-muted w-5 text-center">01</span>
-                {/* Micro Cover */}
-                <div className="relative size-11 rounded-xl overflow-hidden bg-default shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-purple-500/10 flex items-center justify-center">
-                    <Icon icon="solar:music-note-2-bold" className="size-5 text-violet-500" />
-                  </div>
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-bold text-foreground truncate group-hover:text-accent transition-colors duration-200">
-                    Balonku Ada 5 Meter
-                  </span>
-                  <span className="text-[10px] text-muted truncate mt-0.5">
-                    Mamank · Dance Beat
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 shrink-0">
-                <span className="text-[10px] font-mono text-muted">3:20</span>
-                <Button isIconOnly size="sm" variant="ghost" className="size-8 rounded-xl border border-default/20 hover:bg-default/40">
-                  <Icon icon="solar:play-bold" className="size-3 text-foreground" />
-                </Button>
-              </div>
-            </Card>
-
-            {/* Track 2 */}
-            <Card className="group flex flex-row items-center justify-between p-3 border border-default/20 hover:border-default/30 bg-background/40 hover:bg-background/80 transition-all duration-200 rounded-2xl shadow-sm" variant="default">
-              <div className="flex items-center gap-4 min-w-0 flex-1">
-                <span className="text-xs font-bold text-muted w-5 text-center">02</span>
-                <div className="relative size-11 rounded-xl overflow-hidden bg-default shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-br from-rose-500/20 to-pink-500/10 flex items-center justify-center">
-                    <Icon icon="solar:music-note-4-bold" className="size-5 text-rose-500" />
-                  </div>
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-bold text-foreground truncate group-hover:text-accent transition-colors duration-200">
-                    Kucing Kesayangan
-                  </span>
-                  <span className="text-[10px] text-muted truncate mt-0.5">
-                    Maimunah · Electro Pop
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 shrink-0">
-                <span className="text-[10px] font-mono text-muted">3:20</span>
-                <Button isIconOnly size="sm" variant="ghost" className="size-8 rounded-xl border border-default/20 hover:bg-default/40">
-                  <Icon icon="solar:play-bold" className="size-3 text-foreground" />
-                </Button>
-              </div>
-            </Card>
-          </div>
-        </div>
-
+          </ItemCardGroup.Header>
+          <ItemCard>
+            <ItemCard.Icon>
+              <Receipt />
+            </ItemCard.Icon>
+            <ItemCard.Content>
+              <ItemCard.Title>Billing</ItemCard.Title>
+              <ItemCard.Description>Payment and invoices</ItemCard.Description>
+            </ItemCard.Content>
+            <ItemCard.Action>
+              <Tooltip delay={0}>
+                <Tooltip.Trigger>
+                  <Button isIconOnly aria-label={`Link`} size="sm" variant="secondary">
+                    <Icon icon="solar:play-bold" className="size-4" />
+                  </Button>
+                </Tooltip.Trigger>
+                <Tooltip.Content>111</Tooltip.Content>
+              </Tooltip>
+            </ItemCard.Action>
+          </ItemCard>
+        </ItemCardGroup>
       </div>
 
       {/* 2. Right Sidebar Area (Column Span 4) */}
-      <div className="col-span-12 md:col-span-4 flex flex-col gap-5 lg:gap-6">
-        
-        {/* A. Top Artist Card List */}
-        <Card className="p-4 border border-default/20 bg-background/30 dark:bg-zinc-950/20 rounded-[24px]" variant="default">
-          <div className="flex items-center justify-between px-1 mb-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Top Artist</h3>
-            <Button variant="ghost" size="sm" className="h-5 text-[10px] text-muted border-none min-w-0 px-1">
-              See More
-            </Button>
-          </div>
+      <div className="col-span-12 flex flex-col gap-5 md:col-span-4 lg:gap-6">
+        <ItemCardGroup className="overflow-hidden" variant="transparent">
+          <ItemCardGroup.Header className="mb-1 flex flex-row items-start justify-start px-1.5 pt-0">
+            <ItemCardGroup.Title>Top Artist</ItemCardGroup.Title>
+          </ItemCardGroup.Header>
+          <ItemCardGroup className="overflow-hidden">
+            <ItemCard>
+              <ItemCard.Icon>
+                <LogoGithub />
+              </ItemCard.Icon>
+              <ItemCard.Content>
+                <ItemCard.Title>GitHub</ItemCard.Title>
+                <ItemCard.Description className="max-w-xs">
+                  Connected as @jrgarciadev to repositori
+                </ItemCard.Description>
+              </ItemCard.Content>
+            </ItemCard>
+            <Separator />
+            <ItemCard>
+              <ItemCard.Icon>
+                <LogoGitlab />
+              </ItemCard.Icon>
+              <ItemCard.Content>
+                <ItemCard.Title>GitLab</ItemCard.Title>
+                <ItemCard.Description className="max-w-xs">
+                  Connect GitLab for Cloud Agents,
+                </ItemCard.Description>
+              </ItemCard.Content>
+            </ItemCard>
+          </ItemCardGroup>
+        </ItemCardGroup>
 
-          <div className="flex flex-col gap-3">
-            {/* Artist 1 */}
-            <div className="flex items-center justify-between p-1.5 rounded-xl hover:bg-default/30 transition-colors duration-150">
-              <div className="flex items-center gap-3">
-                <Avatar size="sm" className="size-8 font-semibold bg-violet-500 text-white">M</Avatar>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-foreground leading-tight">Mamank</span>
-                  <span className="text-[9px] text-muted mt-0.5">1.92B Followers · 1.22M Plays</span>
-                </div>
-              </div>
-              <Button isIconOnly size="sm" variant="ghost" className="size-7 rounded-lg border border-default/20">
-                <Icon icon="solar:add-folder-bold" className="size-3 text-muted-fg" />
-              </Button>
-            </div>
-
-            {/* Artist 2 */}
-            <div className="flex items-center justify-between p-1.5 rounded-xl hover:bg-default/30 transition-colors duration-150">
-              <div className="flex items-center gap-3">
-                <Avatar size="sm" className="size-8 font-semibold bg-fuchsia-500 text-white">MA</Avatar>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-foreground leading-tight">Maimunah</span>
-                  <span className="text-[9px] text-muted mt-0.5">1.92B Followers · 50M Plays</span>
-                </div>
-              </div>
-              <Button isIconOnly size="sm" variant="ghost" className="size-7 rounded-lg border border-default/20">
-                <Icon icon="solar:add-folder-bold" className="size-3 text-muted-fg" />
-              </Button>
-            </div>
-
-            {/* Artist 3 */}
-            <div className="flex items-center justify-between p-1.5 rounded-xl hover:bg-default/30 transition-colors duration-150">
-              <div className="flex items-center gap-3">
-                <Avatar size="sm" className="size-8 font-semibold bg-blue-500 text-white">P</Avatar>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-foreground leading-tight">Paijo</span>
-                  <span className="text-[9px] text-muted mt-0.5">1.92B Followers · 32M Plays</span>
-                </div>
-              </div>
-              <Button isIconOnly size="sm" variant="ghost" className="size-7 rounded-lg border border-default/20">
-                <Icon icon="solar:add-folder-bold" className="size-3 text-muted-fg" />
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        {/* B. Hanging Music Player Card (Mock console card matching bottom-right of the mockup) */}
-        <Card className="p-5 border border-default/20 bg-indigo-950/80 dark:bg-black/40 text-white rounded-[24px] shadow-lg flex flex-col gap-4" variant="default">
+        <Card
+          className="border-default/20 flex flex-col gap-4 rounded-[24px] border bg-indigo-950/80 p-5 text-white shadow-lg dark:bg-black/40"
+          variant="default"
+        >
           {/* Mock Track Cover Image with absolute overlay gradient */}
-          <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-inner">
-            <Icon icon="solar:music-note-bold-duotone" className="size-16 text-white/20 animate-pulse" />
+          <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-inner">
+            <Icon
+              icon="solar:music-note-bold-duotone"
+              className="size-16 animate-pulse text-white/20"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
           </div>
 
           {/* Title & Artist info */}
-          <div className="flex flex-col items-center text-center px-1">
-            <h4 className="text-sm font-bold text-white leading-tight">Balonku Ada 5 Meter</h4>
-            <span className="text-[10px] text-white/70 mt-1">Mamank</span>
+          <div className="flex flex-col items-center px-1 text-center">
+            <h4 className="text-sm leading-tight font-bold text-white">Balonku Ada 5 Meter</h4>
+            <span className="mt-1 text-[10px] text-white/70">Mamank</span>
           </div>
 
           {/* Active Soundwave Equalizer Placeholder */}
-          <div className="flex items-end justify-center gap-1 h-8 px-4 my-1 select-none pointer-events-none">
+          <div className="pointer-events-none my-1 flex h-8 items-end justify-center gap-1 px-4 select-none">
             {/* 12 small bounding bars that bounce */}
-            <div className="w-1 rounded-full bg-white/70 h-4 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/40 h-6 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/80 h-2 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/50 h-5 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/90 h-3 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/30 h-7 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/60 h-4 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/80 h-6 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/45 h-2 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/70 h-5 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/30 h-3 animate-pulse" />
-            <div className="w-1 rounded-full bg-white/50 h-4 animate-pulse" />
+            <div className="h-4 w-1 animate-pulse rounded-full bg-white/70" />
+            <div className="h-6 w-1 animate-pulse rounded-full bg-white/40" />
+            <div className="h-2 w-1 animate-pulse rounded-full bg-white/80" />
+            <div className="h-5 w-1 animate-pulse rounded-full bg-white/50" />
+            <div className="h-3 w-1 animate-pulse rounded-full bg-white/90" />
+            <div className="h-7 w-1 animate-pulse rounded-full bg-white/30" />
+            <div className="h-4 w-1 animate-pulse rounded-full bg-white/60" />
+            <div className="h-6 w-1 animate-pulse rounded-full bg-white/80" />
+            <div className="h-2 w-1 animate-pulse rounded-full bg-white/45" />
+            <div className="h-5 w-1 animate-pulse rounded-full bg-white/70" />
+            <div className="h-3 w-1 animate-pulse rounded-full bg-white/30" />
+            <div className="h-4 w-1 animate-pulse rounded-full bg-white/50" />
           </div>
 
           {/* Timeline slider and times */}
-          <div className="flex flex-col gap-1.5 w-full">
-            <ProgressBar aria-label="Mock player play progress" value={36} size="sm" color="success" className="w-full bg-white/10 rounded-full" />
-            <div className="flex justify-between items-center text-[9px] text-white/60 font-mono mt-0.5">
+          <div className="flex w-full flex-col gap-1.5">
+            <ProgressBar
+              aria-label="Mock player play progress"
+              value={36}
+              size="sm"
+              color="success"
+              className="w-full rounded-full bg-white/10"
+            />
+            <div className="mt-0.5 flex items-center justify-between font-mono text-[9px] text-white/60">
               <span>1:20</span>
               <span>3:30</span>
             </div>
           </div>
 
           {/* Audio Console Control buttons (Loop, Prev, Play, Next, Shuffle) */}
-          <div className="flex items-center justify-between px-2 mt-1">
-            <Button isIconOnly size="sm" variant="ghost" className="size-8 rounded-full border-none text-white/70 hover:text-white hover:bg-white/10">
+          <div className="mt-1 flex items-center justify-between px-2">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="ghost"
+              className="size-8 rounded-full border-none text-white/70 hover:bg-white/10 hover:text-white"
+            >
               <Icon icon="solar:repeat-bold" className="size-4" />
             </Button>
-            <Button isIconOnly size="sm" variant="ghost" className="size-8 rounded-full border-none text-white/70 hover:text-white hover:bg-white/10">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="ghost"
+              className="size-8 rounded-full border-none text-white/70 hover:bg-white/10 hover:text-white"
+            >
               <Icon icon="solar:skip-backward-bold" className="size-4" />
             </Button>
             {/* Play Button - White solid circle */}
-            <Button isIconOnly size="md" className="size-9 bg-white text-indigo-950 rounded-full hover:scale-105 transition-transform shadow-sm">
+            <Button
+              isIconOnly
+              size="md"
+              className="size-9 rounded-full bg-white text-indigo-950 shadow-sm transition-transform hover:scale-105"
+            >
               <Icon icon="solar:pause-bold" className="size-4 text-indigo-950" />
             </Button>
-            <Button isIconOnly size="sm" variant="ghost" className="size-8 rounded-full border-none text-white/70 hover:text-white hover:bg-white/10">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="ghost"
+              className="size-8 rounded-full border-none text-white/70 hover:bg-white/10 hover:text-white"
+            >
               <Icon icon="solar:skip-forward-bold" className="size-4" />
             </Button>
-            <Button isIconOnly size="sm" variant="ghost" className="size-8 rounded-full border-none text-white/70 hover:text-white hover:bg-white/10">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="ghost"
+              className="size-8 rounded-full border-none text-white/70 hover:bg-white/10 hover:text-white"
+            >
               <Icon icon="solar:shuffle-bold" className="size-4" />
             </Button>
           </div>
-
         </Card>
-
       </div>
-
     </div>
   );
 }
