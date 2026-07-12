@@ -6,13 +6,15 @@ import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "mo
 import { useRef } from "react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
+import { MusicDashboard } from "@/components/music/music-dashboard";
 
 const introHeroImage = "/odyssey-hero.png";
 
 const chapters = [
   { id: "odyssey", label: "Odyssey" },
   { id: "chronicle", label: "Chronicle" },
-  { id: "daily", label: "Orbit" }, // Aligned with navbar state ID and Orbit label
+  { id: "daily", label: "Orbit" },
+  { id: "music", label: "Jukebox" }, // New dedicated horizontal Jukebox segment
   { id: "travelogue", label: "Travelogue" },
 ] as const;
 
@@ -500,6 +502,40 @@ function OrbitPanel() {
   );
 }
 
+// Dedicated horizontal Jukebox panel featuring our custom MusicDashboard layout!
+function JukeboxPanel() {
+  return (
+    <Surface
+      id="music"
+      aria-labelledby="jukebox-title"
+      role="region"
+      variant="transparent"
+      className="bg-background relative flex h-full w-screen shrink-0 items-center overflow-hidden pt-16"
+    >
+      <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col justify-center gap-6 px-5 py-6 sm:px-8 md:px-12 md:py-10">
+        <div className="flex flex-col items-start mb-2">
+          <Typography color="muted" type="body-sm" weight="medium">
+            Jukebox
+          </Typography>
+          <Typography
+            id="jukebox-title"
+            type="h2"
+            weight="semibold"
+            className="mt-2 text-3xl font-semibold tracking-tight text-foreground"
+          >
+            Sound Sanctuary
+          </Typography>
+        </div>
+        
+        {/* Dynamic Scrollable Music Dashboard Container */}
+        <div className="w-full overflow-y-auto max-h-[70dvh] pr-1" data-scrollbar="none">
+          <MusicDashboard />
+        </div>
+      </div>
+    </Surface>
+  );
+}
+
 function TraveloguePanel() {
   return (
     <Surface
@@ -560,7 +596,7 @@ export default function Home() {
     offset: ["start start", "end end"],
   });
 
-  const xTranslation = useTransform(scrollYProgress, [0, 1], ["0%", "-75%"]);
+  const xTranslation = useTransform(scrollYProgress, [0, 1], ["0%", "-80%"]);
   const x = useSpring(xTranslation, {
     stiffness: 80,
     damping: 26,
@@ -589,7 +625,7 @@ export default function Home() {
     <Surface variant="transparent" className="relative h-screen w-full">
       <div
         ref={targetRef}
-        className={cn("relative w-full", reducedMotion ? "h-auto" : "h-[400vh]")}
+        className={cn("relative w-full", reducedMotion ? "h-auto" : "h-[500vh]")}
       >
         <div
           className={cn(
@@ -606,12 +642,13 @@ export default function Home() {
           )}
 
           <motion.div
-            className={cn(reducedMotion ? "flex w-full flex-col" : "flex h-full w-[400vw]")}
+            className={cn(reducedMotion ? "flex w-full flex-col" : "flex h-full w-[500vw]")}
             style={{ x: reducedMotion ? 0 : x }}
           >
             <IntroPanel reducedMotion={reducedMotion} onEnter={() => scrollToPanel(1)} />
             <ChroniclePanel />
             <OrbitPanel />
+            <JukeboxPanel />
             <TraveloguePanel />
           </motion.div>
         </div>
