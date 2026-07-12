@@ -277,7 +277,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label="Open Soul Soothe"
-                onPress={() => onNavigate("/test/moment")}
+                onPress={() => onNavigate("/test/music")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
               </Button>

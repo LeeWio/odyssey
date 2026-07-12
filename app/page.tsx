@@ -311,9 +311,21 @@ function OrbitPanel() {
                 />
               </div>
             </div>
-            <div className="border-default/30 text-muted mt-5 flex items-center gap-1.5 border-t pt-3 text-[11px] font-medium tracking-tight">
-              <Icon icon="lucide:arrow-right" className="size-3 opacity-60" />
-              An Ending (Ascent)
+            <div className="border-default/30 text-muted mt-5 flex items-center justify-between border-t pt-3 text-[11px] font-medium tracking-tight">
+              <span className="flex items-center gap-1.5">
+                <Icon icon="lucide:arrow-right" className="size-3 opacity-60" />
+                An Ending (Ascent)
+              </span>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="ghost"
+                className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
+                aria-label="Open Soul Soothe"
+                onPress={() => router.push("/test/music")}
+              >
+                <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
+              </Button>
             </div>
           </Card>
 
