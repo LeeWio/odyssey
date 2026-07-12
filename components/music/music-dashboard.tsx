@@ -105,7 +105,7 @@ export function MusicDashboard() {
                       <Icon icon="solar:music-note-bold" className="size-3.5" />
                     </Button>
                     {/* Floating Glass Capsule Footer */}
-                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between bg-background/50 backdrop-blur-md border border-default-100/50 rounded-xl p-2 shadow-sm">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Musik Pagi
@@ -134,7 +134,7 @@ export function MusicDashboard() {
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:heart-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between bg-background/50 backdrop-blur-md border border-default-100/50 rounded-xl p-2 shadow-sm">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Lofi Beats
@@ -163,7 +163,7 @@ export function MusicDashboard() {
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:star-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between bg-background/50 backdrop-blur-md border border-default-100/50 rounded-xl p-2 shadow-sm">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Late Night
@@ -192,7 +192,7 @@ export function MusicDashboard() {
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:bookmark-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between bg-background/50 backdrop-blur-md border border-default-100/50 rounded-xl p-2 shadow-sm">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Deep Focus
@@ -221,7 +221,7 @@ export function MusicDashboard() {
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:dumbbell-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between bg-background/50 backdrop-blur-md border border-default-100/50 rounded-xl p-2 shadow-sm">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Active Sweat
@@ -250,7 +250,7 @@ export function MusicDashboard() {
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:terminal-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between bg-background/50 backdrop-blur-md border border-default-100/50 rounded-xl p-2 shadow-sm">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Compiling Loop
@@ -279,7 +279,7 @@ export function MusicDashboard() {
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:globus-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between bg-background/50 backdrop-blur-md border border-default-100/50 rounded-xl p-2 shadow-sm">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Silent Zen
@@ -308,7 +308,7 @@ export function MusicDashboard() {
                     <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
                       <Icon icon="solar:soundwave-bold" className="size-3.5" />
                     </Button>
-                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between">
+                    <Card.Footer className="absolute bottom-2 inset-x-2 flex flex-row items-center justify-between bg-background/50 backdrop-blur-md border border-default-100/50 rounded-xl p-2 shadow-sm">
                       <div className="flex flex-col min-w-0">
                         <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
                           Acoustic Waves
