@@ -62,6 +62,9 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
   const [loginWithOtp, { isLoading: isLoggingIn }] = useLoginWithOtpMutation();
 
   const handleSocialLogin = (provider: "google" | "github") => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("oauth_redirect_referrer", window.location.pathname);
+    }
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
     window.location.href = `${apiBaseUrl}/oauth2/authorization/${provider}`;
   };

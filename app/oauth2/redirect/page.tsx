@@ -6,11 +6,13 @@ import { useAppDispatch } from "@/lib/hooks";
 import { setCredentials, setPermissions } from "@/lib/features/auth/auth-slice";
 import { permissionApi } from "@/lib/features/permission/permission-api";
 import type { MenuResponse } from "@/lib/features/permission/permission-api";
+import { baseApi } from "@/lib/features/api/base-api";
 import { Spinner, toast } from "@heroui/react";
 import { TextShimmer } from "@heroui-pro/react";
 
-// Safe helper to decode JWT payload on the client side
+// Safe helper to decode JWT payload on the client side with Node SSR guard
 const decodeJwt = (token: string) => {
+  if (typeof window === "undefined") return null;
   try {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -52,8 +54,18 @@ function RedirectHandler() {
 
   const handleAuth = useCallback(async (token: string) => {
     const payload = decodeJwt(token);
+    
+    // Fallback referrer path check
+    let referrer = "/";
+    if (typeof window !== "undefined") {
+      referrer = localStorage.getItem("oauth_redirect_referrer") || "/";
+    }
+
     if (!payload) {
       toast.danger("Invalid token received from server");
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("oauth_redirect_referrer");
+      }
       router.push("/");
       return;
     }
@@ -77,9 +89,20 @@ function RedirectHandler() {
       const permissions = extractPermissions(menuResult);
       dispatch(setPermissions(permissions));
 
+      // 4. Invalidate and Clean unauthenticated cache to force fresh data load
+      dispatch(baseApi.util.resetApiState());
+
+      // 5. Restore the user's active page and clear session tracker
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("oauth_redirect_referrer");
+      }
+
       toast.success("Successfully authenticated with Odyssey!");
-      router.push("/");
+      router.push(referrer);
     } catch {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("oauth_redirect_referrer");
+      }
       toast.danger("Authentication succeeded, but failed to sync user permissions.");
       router.push("/");
     }
@@ -91,6 +114,9 @@ function RedirectHandler() {
 
     if (error) {
       toast.danger(`OAuth authentication failed: ${error}`);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("oauth_redirect_referrer");
+      }
       router.push("/");
       return;
     }
