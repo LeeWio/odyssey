@@ -7,6 +7,7 @@ import { useRef } from "react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import { MusicDashboard } from "@/components/music/music-dashboard";
+import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 
 const introHeroImage = "/odyssey-hero.png";
 
@@ -76,22 +77,42 @@ function WorldTicker({ reducedMotion }: { reducedMotion: boolean }) {
 }
 
 function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => void }) {
+  const { scrollYProgress } = useScroll();
+  
+  // Parallax translation: as the panel slides left, translate the grid slightly right.
+  // This makes the grid drift slower, creating deep physical space separation (3D parallax).
+  const gridX = useTransform(scrollYProgress, [0, 0.33], ["0vw", "20vw"]);
+
+  // Ultra-clean micro coordinate dot matrix with a tight radial spotlight fade
+  const dotMatrixStyle = {
+    backgroundImage: "radial-gradient(currentColor 0.8px, transparent 0.8px)",
+    backgroundSize: "48px 44px",
+    backgroundPosition: "center center",
+    WebkitMaskImage: "radial-gradient(circle at center, rgba(0, 0, 0, 1) 10%, rgba(0, 0, 0, 0) 55%)",
+    maskImage: "radial-gradient(circle at center, rgba(0, 0, 0, 1) 10%, rgba(0, 0, 0, 0) 55%)",
+  } as const;
+
   return (
     <Surface
       id="odyssey"
       aria-labelledby="odyssey-title"
       role="region"
       variant="transparent"
-      className="bg-background relative flex h-full w-screen shrink-0 items-center overflow-hidden pt-16"
+      className="bg-transparent relative flex h-full w-screen shrink-0 items-center overflow-hidden pt-16"
     >
-      <div
+      {/* 1. Spotlight Coordinate Dot Matrix (Micro-dots with spatial 3D parallax) */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1], delay: 0.5 }}
+        style={{ ...dotMatrixStyle, x: reducedMotion ? "0vw" : gridX }}
+        className="absolute inset-0 text-default-400/18 dark:text-default-300/8 pointer-events-none"
         aria-hidden="true"
-        className="bg-accent/8 pointer-events-none absolute top-1/3 left-1/3 size-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px]"
       />
 
-      <div className="relative mx-auto grid w-full max-w-[1400px] grid-cols-1 items-center gap-10 px-5 pb-28 sm:px-8 md:grid-cols-12 md:gap-12 lg:px-12">
+      <div className="relative mx-auto flex w-full max-w-[1200px] flex-col items-center justify-center px-5 pb-24 sm:px-8 lg:px-12 text-center z-20">
         <motion.div
-          className="flex flex-col items-start md:col-span-5"
+          className="flex flex-col items-center text-center max-w-3xl"
           initial={reducedMotion ? false : { opacity: 0, y: 24 }}
           animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -100,79 +121,108 @@ function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => vo
             Odyssey · 31°14′N
           </Chip>
 
-          <Typography
+          {/* Main Hero Title - Refined for artistic, editorial impact */}
+          <div
             id="odyssey-title"
-            type="h1"
-            weight="semibold"
-            className="text-foreground mt-6 max-w-[9ch] text-[clamp(3.5rem,6.4vw,6.75rem)] leading-[0.9] tracking-[-0.07em]"
+            className="mt-6 flex flex-col items-center text-center"
           >
-            The world moves. <span className="text-accent">I stay.</span>
-          </Typography>
-
-          <Typography
-            color="muted"
-            type="body"
-            className="mt-6 max-w-md text-base leading-7 sm:text-lg"
-          >
-            A fixed point for the places, ideas, markets, music, and moments that keep passing by.
-          </Typography>
-
-          <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <Button className="whitespace-nowrap" size="lg" onPress={onEnter}>
-              Enter archive
-            </Button>
-            <Typography color="muted" type="body-xs">
-              Scroll to move through the archive
-            </Typography>
-          </div>
-        </motion.div>
-
-        <motion.div
-          className="hidden md:col-span-7 md:block"
-          initial={reducedMotion ? false : { opacity: 0, x: 30 }}
-          animate={reducedMotion ? undefined : { opacity: 1, x: 0 }}
-          transition={{ delay: 0.12, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <Card className="relative h-[68dvh] min-h-[34rem] overflow-hidden rounded-[32px] p-0">
-            <Image
-              fill
-              priority
-              alt="A quiet desk with a notebook, headphones, and a rain-lit night window"
-              className="object-cover object-center"
-              draggable={false}
-              sizes="(max-width: 767px) 0vw, 58vw"
-              src={introHeroImage}
-            />
-            <div
-              aria-hidden="true"
-              className="from-background/65 pointer-events-none absolute inset-0 bg-gradient-to-t via-transparent to-transparent"
-            />
-            <Card
-              className="bg-background/66 absolute right-5 bottom-5 left-5 shadow-none backdrop-blur-xl"
-              variant="transparent"
+            {/* Line 1: The world scrolls. (Thin, flowing Display Serif Italic - Drift Reveal) */}
+            <motion.span
+              style={{ fontFamily: "var(--font-display)" }}
+              className="text-muted-foreground/80 text-[clamp(2.75rem,5.5vw,5.5rem)] font-normal italic leading-[1.0] select-none tracking-normal"
+              initial={reducedMotion ? false : { opacity: 0, x: -32, filter: "blur(8px)" }}
+              animate={reducedMotion ? undefined : { opacity: 1, x: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1], delay: 0.05 }}
             >
-              <Card.Content className="flex-row items-center justify-between gap-6 p-0">
-                <div>
-                  <Typography color="muted" type="body-xs">
-                    Current coordinate
-                  </Typography>
-                  <Typography type="body-sm" weight="semibold" className="mt-1">
-                    Here, for a little while
-                  </Typography>
-                </div>
-                <Chip color="accent" variant="soft">
-                  Staying
-                </Chip>
-              </Card.Content>
-            </Card>
-          </Card>
+              The world scrolls.
+            </motion.span>
+
+            {/* Line 2: I stay. (Massive, anchored Sans-serif Ultra-bold - Gravity Drop & Lock) */}
+            <motion.span
+              className="text-accent text-[clamp(3.75rem,8vw,8.5rem)] font-black leading-[0.85] mt-2 sm:mt-4 select-none tracking-[-0.06em] flex items-center justify-center gap-[0.01em]"
+              initial={reducedMotion ? false : "hidden"}
+              animate={reducedMotion ? undefined : "visible"}
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.07, delayChildren: 0.45 }
+                }
+              }}
+            >
+              {/* Character-level staggered gravity spring animation for a solid physical presence */}
+              {Array.from("I stay.").map((char, index) => (
+                <motion.span
+                  key={index}
+                  className="inline-block origin-bottom animate-gpu"
+                  variants={{
+                    hidden: { opacity: 0, y: -24, filter: "blur(4px)" },
+                    visible: { 
+                      opacity: 1, 
+                      y: 0, 
+                      filter: "blur(0px)",
+                      transition: { 
+                        type: "spring", 
+                        stiffness: 140, 
+                        damping: 15, 
+                        mass: 1,
+                        restDelta: 0.001
+                      } 
+                    }
+                  }}
+                >
+                  {char === " " ? "\u00A0" : char}
+                </motion.span>
+              ))}
+            </motion.span>
+          </div>
+
+          {/* 1. Cinematic Voiceover Sub-title */}
+          <motion.p
+            className="mt-8 max-w-xl text-[clamp(0.75rem,1.5vw,0.875rem)] font-light tracking-[0.15em] text-muted-foreground/70 leading-relaxed uppercase select-none"
+            initial={reducedMotion ? false : { opacity: 0, filter: "blur(6px)", y: 12 }}
+            animate={reducedMotion ? undefined : { opacity: 1, filter: "blur(0px)", y: 0 }}
+            transition={{ duration: 1.0, ease: [0.23, 1, 0.32, 1], delay: 1.0 }}
+          >
+            A quiet coordinate in the infinite feed — anchoring what survives the drift.
+          </motion.p>
         </motion.div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-5 overflow-hidden px-5 sm:px-8 lg:px-12">
-        <div className="from-background pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r to-transparent sm:w-40" />
-        <div className="from-background pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l to-transparent sm:w-40" />
-        <WorldTicker reducedMotion={reducedMotion} />
+      {/* 2. Gravitational Scroll Tide Indicator */}
+      <div className="absolute inset-x-0 bottom-8 flex flex-col items-center justify-center gap-3">
+        <motion.button
+          onClick={onEnter}
+          className="group flex flex-col items-center gap-3 bg-transparent border-none outline-none cursor-pointer focus:outline-none"
+          initial={reducedMotion ? false : { opacity: 0 }}
+          animate={reducedMotion ? undefined : { opacity: 1 }}
+          transition={{ delay: 1.4, duration: 0.8 }}
+          aria-label="Scroll to enter the archive"
+        >
+          {/* Glowing guiding line & falling particle */}
+          <div className="w-px h-14 bg-default/20 relative overflow-hidden rounded-full">
+            {!reducedMotion && (
+              <motion.div
+                className="w-full h-3 bg-accent rounded-full absolute top-0 left-0"
+                animate={{ 
+                  y: [-12, 56],
+                  opacity: [0, 1, 1, 0] 
+                }}
+                transition={{
+                  duration: 2.2,
+                  ease: [0.25, 0, 0.35, 1], // cinematic gravity curve
+                  repeat: Infinity,
+                  repeatType: "loop"
+                }}
+              />
+            )}
+          </div>
+
+          {/* Label that lights up on hover */}
+          <span className="text-[9px] tracking-[0.25em] uppercase text-muted-foreground/50 transition-colors duration-300 group-hover:text-accent font-medium select-none">
+            Scroll or Click to Explore
+          </span>
+        </motion.button>
       </div>
     </Surface>
   );
@@ -185,7 +235,7 @@ function ChroniclePanel() {
       aria-labelledby="chronicle-title"
       role="region"
       variant="transparent"
-      className="bg-background relative flex h-full w-screen shrink-0 items-center overflow-hidden pt-16"
+      className="bg-transparent relative flex h-full w-screen shrink-0 items-center overflow-hidden pt-16"
     >
       <div className="mx-auto grid h-full w-full max-w-[1400px] grid-cols-1 content-center gap-6 px-5 py-6 sm:px-8 md:grid-cols-12 md:items-center md:gap-10 md:px-12 md:py-10">
         <div className="flex flex-col items-start md:col-span-5 md:pr-6">
@@ -245,8 +295,8 @@ function OrbitPanel() {
       id="daily"
       aria-labelledby="orbit-title"
       role="region"
-      variant="secondary"
-      className="relative flex h-full w-screen shrink-0 items-center overflow-hidden pt-16"
+      variant="transparent"
+      className="bg-transparent relative flex h-full w-screen shrink-0 items-center overflow-hidden pt-16"
     >
       <div className="mx-auto grid h-full w-full max-w-[1400px] grid-cols-1 content-center gap-8 px-5 py-6 sm:px-8 md:grid-cols-12 md:items-center md:gap-10 md:px-12 md:py-10">
         <div className="flex flex-col items-start md:col-span-5 md:pr-6">
@@ -513,13 +563,13 @@ function TraveloguePanel() {
       aria-labelledby="travelogue-title"
       role="region"
       variant="transparent"
-      className="bg-background relative flex h-full w-screen shrink-0 items-end overflow-hidden pt-16"
+      className="bg-transparent relative flex h-full w-screen shrink-0 items-end overflow-hidden pt-16"
     >
       <Image
         fill
         unoptimized
         alt="A remote Icelandic landscape beneath a night sky"
-        className="object-cover"
+        className="object-cover opacity-85 dark:opacity-80 transition-opacity duration-1000"
         draggable={false}
         sizes="100vw"
         src="https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=2000&q=88"
@@ -594,6 +644,9 @@ export default function Home() {
 
   return (
     <Surface variant="transparent" className="relative h-auto w-full">
+      {/* Global Dynamic Fluid Backdrop */}
+      <FluidBackdrop scrollYProgress={scrollYProgress} />
+
       {/* 1. Horizontal Scroll Section */}
       <div
         ref={targetRef}
