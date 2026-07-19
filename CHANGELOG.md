@@ -1,3 +1,17 @@
+# [1.9.0](https://github.com/LeeWio/odyssey/compare/v1.8.0...v1.9.0) (2026-07-19)
+
+
+### Features
+
+* **backdrop:** implement premium theme-aligned scroll-driven fluid aurora backdrop ([ea2a17c](https://github.com/LeeWio/odyssey/commit/ea2a17c94caaeabc12674ac8e8f5450fe764cf5e))
+* **blog:** implement premium blog feed, reader details with interactive comments ([d819bcc](https://github.com/LeeWio/odyssey/commit/d819bcc89de7140d78f5779986fca0b9047718a3))
+* **home:** relocate Music Dashboard to vertical post-scroll section ([7dc089e](https://github.com/LeeWio/odyssey/commit/7dc089eb4b10d26afaf5735fa40bc108b86d815c)), closes [hi#fidelity](https://github.com/hi/issues/fidelity)
+* **home:** update Jukebox section header copy to 'Space Between the Notes' ([4961e7b](https://github.com/LeeWio/odyssey/commit/4961e7b2f1d95e5dfb88ee2446ae99106a410b1c))
+* **home:** upgrade Jukebox headers to animated MotionTypography ([ba4d4b8](https://github.com/LeeWio/odyssey/commit/ba4d4b8495c36b112f5ee5c256a54105836d43aa))
+* **music:** implement high-fidelity custom Jukebox and Sound Sanctuary workspace ([c7855d8](https://github.com/LeeWio/odyssey/commit/c7855d8b49901a2b6bf9dca04061df56ca905fa1)), closes [hi#fidelity](https://github.com/hi/issues/fidelity)
+* **music:** implement Jukebox Music Dashboard layout mirroring public/music.png ([ac5ce67](https://github.com/LeeWio/odyssey/commit/ac5ce67f24d37118ea989c626d52184a842474aa))
+* **music:** redesign Playlist Card with background artwork and unroll Carousel loop ([59ced16](https://github.com/LeeWio/odyssey/commit/59ced16681a69272ecf05708e0d7920b4d6bc896)), closes [hi#res](https://github.com/hi/issues/res)
+
 # [1.8.0](https://github.com/LeeWio/odyssey/compare/v1.7.0...v1.8.0) (2026-07-12)
 
 
