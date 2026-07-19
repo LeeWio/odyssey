@@ -1,19 +1,50 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Button, Avatar, Chip, Typography, Card } from "@heroui/react";
-import { RichTextEditor, EmptyState } from "@heroui-pro/react";
+import { Button, Surface, Typography, Separator, Tooltip, cn, toast, Spinner } from "@heroui/react";
+import { RichTextEditor, EmptyState, ActionBar } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import type { JSONContent } from "@tiptap/react";
-import { useGetPublicPostBySlugQuery } from "@/lib/features/post/post-api";
+import {
+  useGetPublicPostBySlugQuery,
+  useLikePostMutation,
+  useUnlikePostMutation,
+} from "@/lib/features/post/post-api";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
+import { CommentSection } from "./comment-section";
+import { motion, useScroll } from "motion/react";
+import { MotionRichTextEditor, MotionSeparator } from "../ui";
 
 interface ReaderViewProps {
   slug: string;
 }
+
+interface LikeRipple {
+  id: number;
+  color: string;
+  delay: number;
+  maxScale: number;
+}
+
+const BACKGROUND_PRESETS = [
+  { name: "Sunset", colors: ["rgba(245, 158, 11, 0.08)", "rgba(244, 63, 94, 0.06)"] }, // Amber + Rose
+  { name: "Aurora", colors: ["rgba(16, 185, 129, 0.08)", "rgba(6, 182, 212, 0.08)"] }, // Emerald + Cyan
+  { name: "Cosmic", colors: ["rgba(139, 92, 246, 0.08)", "rgba(14, 165, 233, 0.08)"] }, // Violet + Sky Blue
+  { name: "Forest", colors: ["rgba(20, 184, 166, 0.08)", "rgba(245, 158, 11, 0.06)"] }, // Teal + Amber
+  { name: "Velvet", colors: ["rgba(217, 70, 239, 0.06)", "rgba(99, 102, 241, 0.08)"] }, // Fuchsia + Indigo
+  { name: "Abyss", colors: ["rgba(37, 99, 235, 0.08)", "rgba(20, 184, 166, 0.06)"] }, // Blue + Teal
+  { name: "Midas", colors: ["rgba(234, 179, 8, 0.08)", "rgba(115, 115, 115, 0.06)"] }, // Yellow + Neutral
+  { name: "Orchid", colors: ["rgba(236, 72, 153, 0.06)", "rgba(168, 85, 247, 0.08)"] }, // Pink + Purple
+];
+
+const getArticleBackgroundPreset = (id: number | string) => {
+  const numId =
+    typeof id === "number" ? id : id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const index = Math.abs(numId) % BACKGROUND_PRESETS.length;
+  return BACKGROUND_PRESETS[index]!;
+};
 
 const MOCK_POST_FALLBACK = {
   id: 9999,
@@ -116,9 +147,97 @@ export function ReaderView({ slug }: ReaderViewProps) {
   // RTK Query hook for fetching public blog details
   const { data: postData, isLoading } = useGetPublicPostBySlugQuery(slug);
 
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const { scrollYProgress } = useScroll();
 
   const article = postData || MOCK_POST_FALLBACK;
+
+  const articlePreset = useMemo(
+    () => getArticleBackgroundPreset(article.id || slug),
+    [article.id, slug]
+  );
+
+  const [likePost, { isLoading: isLiking }] = useLikePostMutation();
+  const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation();
+
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [showActionBar, setShowActionBar] = useState(false);
+  const [ripples, setRipples] = useState<LikeRipple[]>([]);
+
+  // Synchronize component state with fresh server-side article attributes
+  useEffect(() => {
+    if (article) {
+      setIsLiked(article.isLiked || false);
+      setLikesCount(article.likesCount || 0);
+    }
+  }, [article.id, article.isLiked, article.likesCount]);
+
+  // Handle scroll trigger for Action Bar display
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowActionBar(window.scrollY > 150);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleLike = async () => {
+    const nextLiked = !isLiked;
+
+    // Expand concentric water-like ripples of gold and rose light if liked
+    if (nextLiked) {
+      const newRipples = [
+        {
+          id: Date.now() + 1,
+          color: "var(--accent)", // Premium Gold/Amber
+          delay: 0,
+          maxScale: 3.5,
+        },
+        {
+          id: Date.now() + 2,
+          color: "#FB7185", // Elegant Rose Pink
+          delay: 0.12, // Delayed echo ripple for layered visual richness
+          maxScale: 2.8,
+        },
+      ];
+      setRipples(newRipples);
+
+      // Clear ripples state after animation completes
+      setTimeout(() => {
+        setRipples([]);
+      }, 800);
+    }
+
+    if (!article.id || article.id === 9999) {
+      // Offline/Mock mode support
+      setIsLiked(nextLiked);
+      setLikesCount((prev) => (nextLiked ? prev + 1 : Math.max(0, prev - 1)));
+      return;
+    }
+
+    const wasLiked = isLiked;
+
+    // 1. Optimistic UI update
+    setIsLiked(nextLiked);
+    setLikesCount((prev) => (nextLiked ? prev + 1 : Math.max(0, prev - 1)));
+
+    // 2. Dispatch the corresponding mutation to backend
+    try {
+      if (wasLiked) {
+        await unlikePost(article.id).unwrap();
+      } else {
+        await likePost(article.id).unwrap();
+      }
+    } catch (err) {
+      console.error("Like interaction failed:", err);
+
+      // Rollback to previous state on error
+      setIsLiked(wasLiked);
+      setLikesCount((prev) => (wasLiked ? prev + 1 : Math.max(0, prev - 1)));
+
+      toast.danger("Authentication required. Please log in to like this post!");
+    }
+  };
 
   const parsedContent = useMemo<JSONContent | undefined>(() => {
     if (!article?.content) return undefined;
@@ -171,25 +290,6 @@ export function ReaderView({ slug }: ReaderViewProps) {
   }, [article]);
 
   console.log("[READER-DEBUG] article loaded:", article ? "yes" : "no", "slug:", slug);
-  if (article) {
-    console.log("[READER-DEBUG] raw content length:", article.content ? article.content.length : 0);
-    console.log("[READER-DEBUG] raw content value (string):", article.content);
-    console.log("[READER-DEBUG] parsedContent value:", parsedContent);
-  }
-
-  // 1. Reading Progress Bar Logic
-  useEffect(() => {
-    const handleScroll = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight > 0) {
-        const progress = (window.scrollY / totalHeight) * 100;
-        setScrollProgress(progress);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   if (isLoading) {
     return (
@@ -230,22 +330,73 @@ export function ReaderView({ slug }: ReaderViewProps) {
   }
 
   return (
-    <div className="bg-background text-foreground relative min-h-screen pb-32">
-      {/* 🔴 Top reading progress bar */}
-      <div
-        className="fixed top-0 left-0 z-50 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 transition-all duration-75"
-        style={{ width: `${scrollProgress}%` }}
-        role="progressbar"
-        aria-valuenow={scrollProgress}
-        aria-valuemin={0}
-        aria-valuemax={100}
+    <Surface variant="transparent" className="relative min-h-screen w-full overflow-hidden">
+      {/* 🌌 Ambient Aesthetic Background Systems (Dynamic Preset-driven Morphing Auras) */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+        {/* Slow Morphing Floating Aura A */}
+        <motion.div
+          className="absolute rounded-full blur-[140px]"
+          style={{
+            backgroundColor: articlePreset.colors[0],
+            width: "55rem",
+            height: "55rem",
+            top: "-12rem",
+            left: "-12rem",
+          }}
+          animate={{
+            x: [0, 50, -40, 0],
+            y: [0, -30, 50, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+
+        {/* Slow Morphing Floating Aura B */}
+        <motion.div
+          className="absolute rounded-full blur-[150px]"
+          style={{
+            backgroundColor: articlePreset.colors[1],
+            width: "48rem",
+            height: "48rem",
+            top: "32rem",
+            right: "-12rem",
+          }}
+          animate={{
+            x: [0, -60, 45, 0],
+            y: [0, 40, -40, 0],
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+
+        {/* 🏁 Distraction-Free Refined Dot Grid Overlay */}
+        <div
+          className="absolute inset-0 opacity-40 dark:opacity-[0.22]"
+          style={{
+            backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+            color: "var(--default-200)",
+            maskImage:
+              "linear-gradient(to bottom, black 15%, rgba(0,0,0,0.4) 45%, transparent 80%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 15%, rgba(0,0,0,0.4) 45%, transparent 80%)",
+          }}
+        />
+      </div>
+
+      <MotionSeparator
+        className="bg-accent fixed top-0 right-0 left-0 z-50 h-0.5 origin-left"
+        style={{ scaleX: scrollYProgress }}
         aria-label="Reading progress"
       />
 
-      {/* Main Container */}
-      <div className="mx-auto max-w-7xl px-6 pt-24 lg:px-12">
-        {/* Back navigation and Mode Badges */}
-        <div className="mb-10 flex items-center justify-between">
+      {/* <div className="mb-10 flex items-center justify-between">
           <Button
             variant="ghost"
             size="sm"
@@ -256,166 +407,279 @@ export function ReaderView({ slug }: ReaderViewProps) {
             <Icon icon="lucide:arrow-left" className="size-4" />
             Back to Journal
           </Button>
-        </div>
+        </div> */}
 
-        {/* 🖼️ Premium Full-Width Cover Image Header (As per Bento/Cinematic Standard) */}
-        <div className="border-border/10 relative mb-12 aspect-[21/9] w-full overflow-hidden rounded-3xl border bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:from-black dark:via-zinc-950 dark:to-black">
-          {article.coverImage ? (
-            <Image
-              src={article.coverImage}
-              alt={article.title}
-              fill
-              priority
-              className="object-cover"
-            />
-          ) : (
-            // Modern, cinematic abstract background when cover image is null
-            <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-              <div className="absolute -top-12 -left-12 size-96 rounded-full bg-amber-500/10 blur-3xl" />
-              <div className="absolute -right-12 -bottom-12 size-96 rounded-full bg-teal-500/5 blur-3xl" />
-              <div className="z-10 flex flex-col items-center gap-2 opacity-30 select-none">
-                <Icon icon="lucide:book-open" className="size-12 text-zinc-400" />
-                <span className="text-xs font-bold tracking-widest text-zinc-500 uppercase">
-                  Odyssey Journal
+      <div className="relative z-10 mx-auto max-w-3xl pt-12 pb-24">
+        {/* 🧭 Back Navigation Header Link (Choreographed Entrance 1) */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          className="mb-10 flex items-center justify-between"
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hover:bg-default-100 gap-1.5 rounded-full"
+            onPress={() => router.push("/blog")}
+            aria-label="Back to blog"
+          >
+            <Icon icon="lucide:arrow-left" className="size-3.5" />
+            <span className="font-mono text-[10px] font-semibold tracking-widest uppercase">
+              CHRONICLE INDEX
+            </span>
+          </Button>
+        </motion.div>
+
+        {/* ✍️ Editorial Header Group (Asymmetric Split Magazine Layout) */}
+        <div className="mb-10 flex w-full flex-col items-start">
+          {article.category && (
+            <motion.span
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 0.9, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+              className="text-accent mb-4 block font-mono text-[9px] font-bold tracking-[0.18em] uppercase"
+            >
+              {article.category.name}
+            </motion.span>
+          )}
+
+          {/* Majestic Title Lens-Focus Blur Swell Reveal (Choreographed Entrance 2) */}
+          <motion.h1
+            initial={{ opacity: 0, y: 22, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.26 }}
+            className="text-foreground font-display mb-8 w-full text-4xl leading-[1.12] font-bold tracking-tight sm:text-5xl"
+          >
+            {article.title}
+          </motion.h1>
+
+          {/* Split Info Grid (Left: Stacked Meta, Right: Abstract Summary) (Choreographed Entrance 3) */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.42 }}
+            className="border-default-100/40 grid w-full grid-cols-1 gap-8 border-t pt-6 pb-4 md:grid-cols-12"
+          >
+            {/* Left Column: Stacked Monospace Metadata Block */}
+            <div className="flex flex-col gap-4 select-none md:col-span-4">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-default-400 text-[9px] font-bold tracking-widest uppercase">
+                  Written By
+                </span>
+                <span className="text-foreground text-sm font-semibold">
+                  {article.authorName || "Odysseus"}
+                </span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-default-400 text-[9px] font-bold tracking-widest uppercase">
+                  Published
+                </span>
+                <time className="text-default-500 font-mono text-xs">
+                  {new Date(article.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </time>
+              </div>
+              <div className="text-default-500 flex items-center gap-1.5 font-mono text-xs">
+                <Icon icon="lucide:book-open" className="text-accent size-3.5" />
+                <span>
+                  {article.content ? Math.max(1, Math.ceil(article.content.length / 800)) : 1} min
+                  read
                 </span>
               </div>
             </div>
-          )}
-          {/* Elegant overlay gradient to increase visual richness */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+            {/* Right Column: Abstract Summary with Gold Ribbon Accent */}
+            <div className="border-default-100/40 flex flex-col justify-start border-l pl-6 md:col-span-8 md:pl-8">
+              <span className="text-accent mb-3 text-[9px] font-bold tracking-widest uppercase">
+                Abstract
+              </span>
+              <p className="text-default-500 dark:text-default-400 text-sm leading-relaxed font-medium italic md:text-base">
+                {article.summary
+                  ? `“${article.summary}”`
+                  : "No abstract provided for this chronicle entry."}
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Elegant Base Divider Horizontal Expansion (Choreographed Entrance 4) */}
+          <motion.div
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.52 }}
+            className="from-default-100/10 via-default-100/50 to-default-100/10 mt-8 h-px w-full origin-center bg-gradient-to-r"
+          />
         </div>
 
-        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
-          {/* 👈 Left Column: Tactile Bento-Style Meta Card (lg:col-span-3) */}
-          <div className="flex flex-col gap-6 lg:sticky lg:top-24 lg:col-span-3">
-            <Card variant="secondary" className="border-border/30 border p-5 shadow-none">
-              <div className="flex flex-col gap-4">
-                <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase select-none">
-                  Classification
-                </span>
-                {article.category && (
-                  <Chip
-                    size="sm"
-                    variant="soft"
-                    color="accent"
-                    className="max-w-fit font-bold tracking-wider uppercase"
-                  >
-                    {article.category.name}
-                  </Chip>
-                )}
+        {/* Core Article Prose Text (Choreographed Entrance 5) */}
+        <MotionRichTextEditor
+          key={article.content}
+          isReadOnly
+          extensions={ExtensionKit}
+          defaultValue={parsedContent}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.62 }}
+          style={{ willChange: "opacity" }}
+        >
+          <RichTextEditor.Shell className="border-none bg-transparent">
+            <RichTextEditor.Content />
+            <RichTextTableOfContents placement="right" />
+          </RichTextEditor.Shell>
+        </MotionRichTextEditor>
 
-                <div className="bg-border/10 my-1 h-px" />
-
-                <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase select-none">
-                  Author & Date
-                </span>
-                <div className="flex items-center gap-3">
-                  <Avatar size="sm" color="default" className="border-border/40 size-8 border">
-                    <Avatar.Fallback className="font-bold">
-                      {article.authorName ? article.authorName.slice(0, 2).toUpperCase() : "OD"}
-                    </Avatar.Fallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <Typography type="body-xs" weight="semibold" className="text-foreground">
-                      {article.authorName}
-                    </Typography>
-                    <Typography type="body-xs" color="muted" className="mt-0.5 text-[10px]">
-                      {new Date(article.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </Typography>
-                  </div>
-                </div>
-
-                <div className="bg-border/10 my-1 h-px" />
-
-                <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase select-none">
-                  Engagement
-                </span>
-                <div className="text-muted flex flex-col gap-2.5 text-xs font-medium">
-                  <span className="flex items-center gap-2">
-                    <Icon icon="lucide:eye" className="text-default-400 size-4" />
-                    <span className="font-mono">{article.views} views</span>
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Icon icon="lucide:heart" className="size-4 fill-rose-500/10 text-rose-500" />
-                    <span className="font-mono">{article.likesCount} likes</span>
-                  </span>
-                </div>
-
-                {article.tags && article.tags.length > 0 && (
-                  <>
-                    <div className="bg-border/10 my-1 h-px" />
-                    <span className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase select-none">
-                      Keywords
-                    </span>
-                    <div className="mt-0.5 flex flex-wrap gap-1.5">
-                      {article.tags.map((t) => (
-                        <Chip
-                          key={t.name}
-                          size="sm"
-                          variant="secondary"
-                          className="h-6 px-2 text-[10px]"
-                        >
-                          #{t.name}
-                        </Chip>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            </Card>
-          </div>
-
-          {/* 📄 Middle Column: Core Prose Text (lg:col-span-9) */}
-          <main className="lg:col-span-9">
-            <article className="flex flex-col">
-              <Typography
-                type="h1"
-                className="text-foreground mb-6 text-3xl leading-tight font-extrabold tracking-tight lg:text-4xl"
-              >
-                {article.title}
-              </Typography>
-
-              {article.summary && (
-                <div className="text-foreground/80 border-border/10 mb-8 border-b pb-8 text-lg leading-relaxed font-medium italic">
-                  &ldquo;{article.summary}&rdquo;
-                </div>
-              )}
-
-              {/* The reading content wrapper */}
-              <div ref={proseRef} className="blog-prose text-foreground/90 max-w-none font-sans">
-                <style>{`
-                  .blog-prose .rich-text-editor,
-                  .blog-prose .rich-text-editor__shell,
-                  .blog-prose .rich-text-editor__content,
-                  .blog-prose .tiptap,
-                  .blog-prose .ProseMirror {
-                    height: auto !important;
-                    min-height: unset !important;
-                    overflow: visible !important;
-                  }
-                `}</style>
-                <RichTextEditor
-                  isReadOnly
-                  extensions={ExtensionKit}
-                  defaultValue={parsedContent}
-                  key={article.content}
-                >
-                  <RichTextEditor.Shell>
-                    <RichTextEditor.Content />
-
-                    {/* 🎯 Integrated reusable modular Floating TOC */}
-                    <RichTextTableOfContents placement="right" />
-                  </RichTextEditor.Shell>
-                </RichTextEditor>
-              </div>
-            </article>
-          </main>
-        </div>
+        {/* ☕ Minimalist Editorial Sign-off (Choreographed Entrance 6) */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, ease: "easeOut", delay: 1.2 }}
+          className="text-default-300/40 my-16 flex items-center justify-center font-mono text-xs tracking-[0.25em] select-none"
+        >
+          • &nbsp; • &nbsp; •
+        </motion.div>
       </div>
-    </div>
+
+      <ActionBar isOpen={showActionBar} aria-label="Reading Controls">
+        <ActionBar.Prefix>
+          <Tooltip delay={100}>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="ghost"
+              onPress={() => router.push("/blog")}
+              aria-label="Back to blog"
+            >
+              <Icon icon="lucide:arrow-left" className="size-4" />
+            </Button>
+            <Tooltip.Content>Back to Archive</Tooltip.Content>
+          </Tooltip>
+        </ActionBar.Prefix>
+
+        <Separator orientation="vertical" />
+
+        <ActionBar.Content>
+          <motion.div whileTap={{ scale: 0.95 }} className="inline-flex">
+            <Button
+              size="sm"
+              variant={isLiked ? "danger" : "ghost"}
+              onPress={handleLike}
+              isPending={isLiking || isUnliking}
+              aria-label="Like post"
+              className="relative overflow-visible rounded-full"
+            >
+              {({ isPending }) => (
+                <>
+                  {/* 🌊 Concentric Liquid Ripples */}
+                  {ripples.map((ripple) => (
+                    <motion.span
+                      key={ripple.id}
+                      className="pointer-events-none absolute z-10 rounded-full border border-current"
+                      style={{
+                        width: 24,
+                        height: 24,
+                        color: ripple.color,
+                        left: "50%",
+                        top: "50%",
+                        marginLeft: -12,
+                        marginTop: -12,
+                      }}
+                      initial={{ scale: 0.5, opacity: 0.8, borderWidth: 3 }}
+                      animate={{ scale: ripple.maxScale, opacity: 0, borderWidth: 0 }}
+                      transition={{
+                        duration: 0.6,
+                        ease: [0.1, 0.8, 0.3, 1], // Custom ultra-smooth cubic-bezier deceleration
+                        delay: ripple.delay,
+                      }}
+                    />
+                  ))}
+
+                  {/* ✨ Soft Radial Glow backdrop */}
+                  {isLiked && (
+                    <motion.span
+                      key={`glow-${likesCount}`}
+                      className="pointer-events-none absolute z-0 rounded-full bg-rose-500/10 blur-md"
+                      style={{
+                        width: 32,
+                        height: 32,
+                        left: "50%",
+                        top: "50%",
+                        marginLeft: -16,
+                        marginTop: -16,
+                      }}
+                      initial={{ scale: 0.4, opacity: 1 }}
+                      animate={{ scale: 2.8, opacity: 0 }}
+                      transition={{
+                        duration: 0.5,
+                        ease: "easeOut",
+                      }}
+                    />
+                  )}
+
+                  {isPending ? (
+                    <Spinner color="current" size="sm" className="mr-1.5" />
+                  ) : (
+                    <motion.span
+                      animate={{ scale: isLiked ? 1.25 : 1, rotate: isLiked ? -12 : 0 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 12,
+                      }}
+                      className="mr-1.5 flex items-center justify-center"
+                    >
+                      <Icon
+                        icon="lucide:heart"
+                        className={cn(
+                          "size-3.5 transition-transform",
+                          isLiked && "scale-110 fill-rose-500"
+                        )}
+                      />
+                    </motion.span>
+                  )}
+                  <span className="action-bar__label font-mono text-xs font-semibold">
+                    {likesCount}
+                  </span>
+                </>
+              )}
+            </Button>
+          </motion.div>
+
+          <motion.div whileTap={{ scale: 0.95 }} className="inline-flex">
+            <Button
+              size="sm"
+              variant="ghost"
+              onPress={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast.success("Article link copied successfully!");
+              }}
+              className="hover:bg-accent/10 hover:text-accent-600 rounded-full transition-all duration-300"
+            >
+              <Icon icon="lucide:share-2" className="mr-1.5 size-3.5" />
+              <span className="action-bar__label text-xs font-semibold">Share</span>
+            </Button>
+          </motion.div>
+        </ActionBar.Content>
+
+        <Separator orientation="vertical" />
+
+        <ActionBar.Suffix>
+          <Tooltip delay={100}>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="ghost"
+              onPress={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              aria-label="Scroll to top"
+            >
+              <Icon icon="lucide:arrow-up" className="size-4" />
+            </Button>
+            <Tooltip.Content>Scroll to top</Tooltip.Content>
+          </Tooltip>
+        </ActionBar.Suffix>
+      </ActionBar>
+    </Surface>
   );
 }

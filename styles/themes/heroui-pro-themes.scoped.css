@@ -3,7 +3,7 @@
 /* It scopes HeroUI Pro theme component overrides to their active data-theme. */
 
 /* mouve */
-/*! tailwindcss v4.3.1 | MIT License | https://tailwindcss.com */
+/*! tailwindcss v4.2.2 | MIT License | https://tailwindcss.com */
 @layer theme {
   .mouve-light,
   [data-theme="mouve-light"] {
@@ -465,7 +465,7 @@
 }
 
 /* brutalism */
-/*! tailwindcss v4.3.1 | MIT License | https://tailwindcss.com */
+/*! tailwindcss v4.2.2 | MIT License | https://tailwindcss.com */
 @layer properties {
   @supports (((-webkit-hyphens: none)) and (not (margin-trim: inline))) or
     ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
@@ -805,7 +805,7 @@
 }
 
 /* glass */
-/*! tailwindcss v4.3.1 | MIT License | https://tailwindcss.com */
+/*! tailwindcss v4.2.2 | MIT License | https://tailwindcss.com */
 @layer theme {
   html.glass-light,
   html[data-theme="glass-light"] {
@@ -1014,6 +1014,8 @@
     box-shadow: var(--overlay-shadow);
     border: none;
   }
+  :where([data-theme^="glass-"]) .map__popup-content,
+  :where([data-theme^="glass-"]) .map__tooltip,
   :where([data-theme^="glass-"]) .item-card--default {
     -webkit-backdrop-filter: blur(var(--glass-blur));
     backdrop-filter: blur(var(--glass-blur));

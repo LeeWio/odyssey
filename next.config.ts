@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     domains: [
       "images.unsplash.com",
       "heroui-assets.nyc3.cdn.digitaloceanspaces.com",
-      "img.heroui.chat"
+      "img.heroui.chat",
     ],
     remotePatterns: [
       {

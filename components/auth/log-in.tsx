@@ -225,6 +225,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
                         </div>
 
                         <InputOTP
+                          autoFocus
                           aria-label="One-time password verification code"
                           maxLength={6}
                           pattern={REGEXP_ONLY_DIGITS}

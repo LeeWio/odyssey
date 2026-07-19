@@ -85,7 +85,7 @@ export default async function RootLayout({
           strategy="beforeInteractive"
         />
         <Providers lang={lang} messages={messages}>
-          <Toast.Provider />
+          <Toast.Provider placement="top" />
           <div className="relative flex min-h-screen flex-col overflow-x-clip">
             <Navbar />
             <SheetPanel />

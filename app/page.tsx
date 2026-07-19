@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { Button, Card, Chip, Surface, Typography, cn, ProgressBar, Tooltip } from "@heroui/react";
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
-import { useRef } from "react";
+import { motion, useScroll, useSpring, useTransform } from "motion/react";
+import { useRef, useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import { MusicDashboard } from "@/components/music/music-dashboard";
@@ -13,19 +12,14 @@ import { MotionButton } from "@/components/ui";
 
 const introHeroImage = "/odyssey-hero.png";
 
-// Premium ease-out easing curve
 const enterEase = [0.23, 1, 0.32, 1] as const;
 
 const chapters = [
   { id: "odyssey", label: "Odyssey" },
   { id: "chronicle", label: "Chronicle" },
-  { id: "daily", label: "Orbit" }, // Aligned with navbar state ID and Orbit label
+  { id: "daily", label: "Orbit" },
   { id: "travelogue", label: "Travelogue" },
 ] as const;
-
-type PanelProps = {
-  reducedMotion: boolean;
-};
 
 const telemetrySignals = [
   { label: "Recently Listened", value: "Brian Eno — An Ending (Ascent)" },
@@ -38,13 +32,10 @@ const telemetrySignals = [
   { label: "System Latency", value: "120fps · Secure Connection" },
 ] as const;
 
-function WorldTicker({ reducedMotion }: { reducedMotion: boolean }) {
+function WorldTicker() {
   const items = telemetrySignals;
   return (
-    <div
-      className={reducedMotion ? "flex w-full flex-col gap-3" : "relative w-full overflow-hidden"}
-    >
-      {/* Self-contained CSS Marquee Animations (runs on compositor thread, supports pause on hover) */}
+    <div className="relative w-full overflow-hidden">
       <style>{`
         @keyframes marquee-scroll {
           0% { transform: translateX(0); }
@@ -62,11 +53,11 @@ function WorldTicker({ reducedMotion }: { reducedMotion: boolean }) {
         }
       `}</style>
 
-      <div className={reducedMotion ? "flex w-full flex-col gap-3" : "marquee-track"}>
+      <div className="marquee-track">
         {[...items, ...items].map((item, index) => (
           <motion.div
             key={`${item.label}-${index}`}
-            whileHover={reducedMotion ? undefined : { y: -4, scale: 1.025 }}
+            whileHover={{ y: -4, scale: 1.025 }}
             transition={{ type: "spring", stiffness: 300, damping: 18 }}
             className="shrink-0"
           >
@@ -90,14 +81,11 @@ function WorldTicker({ reducedMotion }: { reducedMotion: boolean }) {
   );
 }
 
-function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => void }) {
+function IntroPanel({ onEnter }: { onEnter: () => void }) {
   const { scrollYProgress } = useScroll();
 
-  // Parallax translation: as the panel slides left, translate the grid slightly right.
-  // This makes the grid drift slower, creating deep physical space separation (3D parallax).
   const gridX = useTransform(scrollYProgress, [0, 0.33], ["0vw", "20vw"]);
 
-  // Ultra-clean micro coordinate dot matrix with a tight radial spotlight fade
   const dotMatrixStyle = {
     backgroundImage: "radial-gradient(currentColor 0.8px, transparent 0.8px)",
     backgroundSize: "48px 44px",
@@ -113,8 +101,20 @@ function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => vo
       aria-labelledby="odyssey-title"
       role="region"
       variant="transparent"
-      className="relative flex h-full w-screen shrink-0 items-center overflow-hidden pt-16"
+      className="relative flex h-full w-screen shrink-0 items-center overflow-hidden bg-transparent pt-16"
     >
+      <style>{`
+        @keyframes text-scroll-gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .scrolling-text-gradient {
+          background-size: 200% auto;
+          animation: text-scroll-gradient 12s ease-in-out infinite;
+        }
+      `}</style>
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -133,7 +133,8 @@ function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => vo
             ease: [0.16, 1, 0.3, 1],
           }}
         >
-          <Chip size="sm" variant="soft">
+          <Chip size="sm" variant="soft" color="warning">
+            <Icon icon="gravity-ui:sparkles" className="mr-1 inline-block size-3.5 animate-pulse" />
             Odyssey · 31°14
           </Chip>
 
@@ -158,7 +159,7 @@ function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => vo
               }}
               weight="bold"
               align="center"
-              className="text-default-500 font-display text-[clamp(2.5rem,6vw,6rem)] leading-[0.95] tracking-[-0.045em] select-none"
+              className="from-accent via-success to-accent scrolling-text-gradient bg-linear-to-r bg-clip-text text-[clamp(2.5rem,6vw,6rem)] leading-[0.95] tracking-[-0.045em] text-transparent select-none"
             >
               The world scrolls.
             </MotionTypography>
@@ -188,7 +189,8 @@ function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => vo
                     key={index}
                     className={cn(
                       "inline-block origin-center will-change-transform",
-                      isAccentChar ? "text-accent" : "text-foreground"
+                      isAccentChar ? "text-accent" : "text-foreground",
+                      isDot && "cursor-pointer px-1.5"
                     )}
                     variants={{
                       hidden: {
@@ -210,21 +212,24 @@ function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => vo
                       },
                     }}
                     whileHover={
-                      reducedMotion
-                        ? undefined
-                        : isDot
-                          ? {
-                              scale: 1.25,
-                              rotate: 90,
-                            }
-                          : {
-                              y: -3,
-                              transition: {
-                                type: "spring",
-                                stiffness: 250,
-                                damping: 20,
-                              },
-                            }
+                      isDot
+                        ? {
+                            scale: 1.25,
+                            rotate: 90,
+                            transition: {
+                              type: "spring",
+                              stiffness: 200,
+                              damping: 25,
+                            },
+                          }
+                        : {
+                            y: -3,
+                            transition: {
+                              type: "spring",
+                              stiffness: 250,
+                              damping: 20,
+                            },
+                          }
                     }
                   >
                     {char === " " ? "\u00A0" : char}
@@ -272,7 +277,7 @@ function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => vo
           }}
           className="pointer-events-auto relative mt-14 w-screen overflow-hidden mask-[linear-gradient(to_right,transparent,white_15%,white_85%,transparent)] select-none md:mt-16"
         >
-          <WorldTicker reducedMotion={reducedMotion} />
+          <WorldTicker />
         </motion.div>
       </div>
 
@@ -316,6 +321,30 @@ function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => vo
 }
 
 function ChroniclePanel() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const { scrollYProgress } = useScroll();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.12;
+    }
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (latest) => {
+      const isActive = latest >= 0.15 && latest <= 0.45;
+      if (isActive) {
+        audioRef.current?.play().catch(() => {});
+        setIsPlaying(true);
+      } else {
+        audioRef.current?.pause();
+        setIsPlaying(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [scrollYProgress]);
+
   return (
     <Surface
       id="chronicle"
@@ -324,50 +353,226 @@ function ChroniclePanel() {
       variant="transparent"
       className="relative flex h-full w-screen shrink-0 items-center overflow-hidden bg-transparent pt-16"
     >
-      <div className="mx-auto grid h-full w-full max-w-[1400px] grid-cols-1 content-center gap-6 px-5 py-6 sm:px-8 md:grid-cols-12 md:items-center md:gap-10 md:px-12 md:py-10">
-        <div className="flex flex-col items-start md:col-span-5 md:pr-6">
-          <Typography color="muted" type="body-sm" weight="medium">
-            Chronicle
-          </Typography>
-          <Typography
-            id="chronicle-title"
-            type="h2"
-            weight="semibold"
-            className="mt-3 max-w-[9ch] text-[clamp(2.75rem,5.4vw,5.75rem)] leading-[0.95] tracking-[-0.055em]"
-          >
-            Words worth keeping.
-          </Typography>
-          <Typography color="muted" type="body" className="mt-5 max-w-md leading-7">
-            Notes on design systems, accessible engineering, and the decisions that survive a
-            finished build.
-          </Typography>
+      <audio
+        ref={audioRef}
+        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+        loop
+        preload="auto"
+      />
 
-          <article className="mt-8 max-w-md">
-            <Typography type="h5" weight="semibold">
-              Symbiosis: The Resilience of Outposts
-            </Typography>
-            <div className="text-muted mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-              <span>Design systems</span>
-              <span>5 min read</span>
-            </div>
-          </article>
+      <style>{`
+        @keyframes sound-ripple {
+          0% {
+            transform: scale(0.55);
+            opacity: 0;
+            filter: blur(4px);
+          }
+          20% {
+            opacity: 0.3;
+            filter: blur(0px);
+          }
+          60% {
+            opacity: 0.15;
+          }
+          100% {
+            transform: scale(1.35);
+            opacity: 0;
+            filter: blur(8px);
+          }
+        }
+        .ripple-wave {
+          position: absolute;
+          border-radius: 9999px;
+          border: 1.5px solid var(--accent);
+          background: radial-gradient(circle, color-mix(in oklab, var(--accent) 15%, transparent) 0%, transparent 70%);
+          width: 80%;
+          height: 80%;
+          transform-origin: center;
+          opacity: 0;
+        }
+        .ripple-active-1 { animation: sound-ripple 6s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
+        .ripple-active-2 { animation: sound-ripple 6s cubic-bezier(0.25, 1, 0.5, 1) infinite 2s; }
+        .ripple-active-3 { animation: sound-ripple 6s cubic-bezier(0.25, 1, 0.5, 1) infinite 4s; }
+      `}</style>
+
+      <div className="z-20 mx-auto grid h-full w-full max-w-350 grid-cols-1 content-center gap-6 px-5 py-6 sm:px-8 md:grid-cols-12 md:items-center md:gap-10 md:px-12 md:py-10">
+        <div className="flex flex-col items-start md:col-span-5 md:pr-6">
+          <Chip
+            size="sm"
+            variant="soft"
+            className="border-default-100/30 bg-default-100/5 mb-6 flex items-center gap-1.5 border py-0.5 uppercase select-none"
+          >
+            <span className="relative flex h-1.5 w-1.5 shrink-0">
+              <span
+                className={cn(
+                  "bg-accent absolute inline-flex h-full w-full rounded-full opacity-75",
+                  isPlaying && "animate-ping"
+                )}
+              ></span>
+              <span className="bg-accent relative inline-flex h-1.5 w-1.5 rounded-full"></span>
+            </span>
+            <Chip.Label className="text-muted-foreground font-mono text-[9px] tracking-[0.2em]">
+              Acoustic Outpost · Ambient Feed
+            </Chip.Label>
+          </Chip>
+
+          <div id="chronicle-title" className="flex flex-col items-start text-left">
+            <MotionTypography
+              initial={{
+                opacity: 0,
+                y: 18,
+                filter: "blur(12px)",
+                letterSpacing: "0.02em",
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)",
+                letterSpacing: "-0.04em",
+              }}
+              transition={{
+                duration: 1.4,
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.15,
+              }}
+              weight="bold"
+              align="start"
+              className="text-default-500 font-display text-left text-[clamp(2.5rem,6vw,6rem)] leading-[0.95] tracking-[-0.045em] select-none"
+            >
+              The music floats.
+            </MotionTypography>
+
+            <MotionTypography
+              initial="hidden"
+              animate="visible"
+              weight="semibold"
+              align="start"
+              variants={{
+                hidden: {},
+                visible: {
+                  transition: {
+                    staggerChildren: 0.045,
+                    delayChildren: 0.35,
+                  },
+                },
+              }}
+              className="text-foreground relative mt-1 text-left text-[clamp(4rem,9vw,9rem)] leading-[0.82] tracking-[-0.075em] italic select-none"
+            >
+              {Array.from("I listen.").map((char, index) => {
+                const isDot = char === ".";
+                const isAccentChar = index > 1;
+
+                return (
+                  <motion.span
+                    key={index}
+                    className={cn(
+                      "inline-block origin-center will-change-transform",
+                      isAccentChar ? "text-accent" : "text-foreground",
+                      isDot && "cursor-pointer px-1.5"
+                    )}
+                    variants={{
+                      hidden: {
+                        opacity: 0,
+                        y: 35,
+                        rotateX: 45,
+                        filter: "blur(10px)",
+                      },
+
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        rotateX: 0,
+                        filter: "blur(0px)",
+                        transition: {
+                          duration: 1.1,
+                          ease: [0.16, 1, 0.3, 1],
+                        },
+                      },
+                    }}
+                    whileHover={
+                      isDot
+                        ? {
+                            scale: 1.25,
+                            rotate: 90,
+                            transition: {
+                              type: "spring",
+                              stiffness: 200,
+                              damping: 25,
+                            },
+                          }
+                        : {
+                            y: -3,
+                            transition: {
+                              type: "spring",
+                              stiffness: 250,
+                              damping: 20,
+                            },
+                          }
+                    }
+                  >
+                    {char === " " ? "\u00A0" : char}
+                  </motion.span>
+                );
+              })}
+            </MotionTypography>
+          </div>
+
+          <Typography
+            color="muted"
+            type="body"
+            className="mt-8 max-w-md text-sm leading-relaxed font-light italic select-none"
+          >
+            "Close your eyes. Let the ambient loops settle the drift. You've been scrolling for a
+            long time — rest here a while."
+          </Typography>
         </div>
 
-        <Card
-          aria-label="Featured Chronicle essay image"
-          role="img"
-          className="relative h-[34dvh] min-h-52 overflow-hidden p-0 md:col-span-7 md:h-[66dvh] md:min-h-[32rem]"
-        >
-          <Image
-            fill
-            unoptimized
-            alt="A dark forest opening onto a sky filled with stars"
-            className="object-cover"
-            draggable={false}
-            sizes="(max-width: 767px) 90vw, 58vw"
-            src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1600&q=88"
-          />
-        </Card>
+        <div className="relative flex h-[40dvh] min-h-72 w-full items-center justify-center md:col-span-7 md:h-[66dvh] md:min-h-120">
+          <Card className="bg-background/10 hover:bg-background/20 border-default-100/10 relative flex h-full w-full items-center justify-center overflow-hidden rounded-3xl border p-0 shadow-xl backdrop-blur-xl transition-all duration-500 select-none">
+            <div
+              style={{
+                backgroundImage: "radial-gradient(currentColor 0.8px, transparent 0.8px)",
+                backgroundSize: "28px 28px",
+                WebkitMaskImage:
+                  "radial-gradient(circle at center, rgba(0,0,0,0.6) 10%, rgba(0,0,0,0) 75%)",
+                maskImage:
+                  "radial-gradient(circle at center, rgba(0,0,0,0.6) 10%, rgba(0,0,0,0) 75%)",
+              }}
+              className="pointer-events-none absolute inset-0"
+              aria-hidden="true"
+            />
+
+            <div className="bg-accent/10 pointer-events-none absolute z-0 size-60 animate-pulse rounded-full blur-[80px]" />
+
+            <div className="relative z-10 flex size-full items-center justify-center">
+              <div
+                className={cn(
+                  "ripple-wave",
+                  isPlaying ? "ripple-active-1" : "scale-[0.6] opacity-10"
+                )}
+              />
+              <div
+                className={cn(
+                  "ripple-wave",
+                  isPlaying ? "ripple-active-2" : "scale-[0.8] opacity-5"
+                )}
+              />
+              <div className={cn("ripple-wave", isPlaying ? "ripple-active-3" : "opacity-0")} />
+
+              <motion.div
+                className="bg-accent/15 border-accent/25 shadow-accent/5 pointer-events-none z-20 flex size-16 items-center justify-center rounded-full border shadow-inner backdrop-blur-md"
+                animate={
+                  isPlaying
+                    ? { scale: [1, 1.06, 0.98, 1], rotate: [0, 5, -5, 0] }
+                    : { scale: 1, rotate: 0 }
+                }
+                transition={{ duration: 4, ease: "easeInOut", repeat: Infinity }}
+              >
+                <Icon icon="solar:music-note-bold" className="text-accent size-6 animate-pulse" />
+              </motion.div>
+            </div>
+          </Card>
+        </div>
       </div>
     </Surface>
   );
@@ -650,27 +855,18 @@ function TraveloguePanel() {
       aria-labelledby="travelogue-title"
       role="region"
       variant="transparent"
-      className="relative flex h-full w-screen shrink-0 items-end overflow-hidden bg-transparent pt-16"
+      className="relative flex h-full w-screen shrink-0 items-end overflow-hidden pt-16"
     >
-      <Image
-        fill
-        unoptimized
-        alt="A remote Icelandic landscape beneath a night sky"
-        className="object-cover opacity-85 transition-opacity duration-1000 dark:opacity-80"
-        draggable={false}
-        sizes="100vw"
-        src="https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=2000&q=88"
+      <div
+        aria-hidden="true"
+        className="from-background via-background/55 pointer-events-none absolute inset-0 bg-linear-to-r to-transparent"
       />
       <div
         aria-hidden="true"
-        className="from-background via-background/55 pointer-events-none absolute inset-0 bg-gradient-to-r to-transparent"
-      />
-      <div
-        aria-hidden="true"
-        className="from-background via-background/15 to-background/20 pointer-events-none absolute inset-0 bg-gradient-to-t"
+        className="from-background via-background/15 to-background/20 pointer-events-none absolute inset-0 bg-linear-to-t"
       />
 
-      <div className="relative mx-auto flex w-full max-w-[1400px] px-5 py-10 sm:px-8 md:px-12 md:py-16">
+      <div className="relative mx-auto flex w-full max-w-350 px-5 py-10 sm:px-8 md:px-12 md:py-16">
         <div className="max-w-3xl">
           <Typography color="muted" type="body-sm" weight="medium">
             Travelogue
@@ -695,9 +891,6 @@ function TraveloguePanel() {
 
 export default function Home() {
   const targetRef = useRef<HTMLDivElement>(null);
-  const shouldReduceMotion = useReducedMotion();
-  const reducedMotion = Boolean(shouldReduceMotion);
-  const router = useRouter();
 
   const { scrollYProgress } = useScroll({
     target: targetRef,
@@ -712,11 +905,6 @@ export default function Home() {
   });
 
   const scrollToPanel = (index: number) => {
-    if (reducedMotion) {
-      document.getElementById(chapters[index].id)?.scrollIntoView({ block: "start" });
-      return;
-    }
-
     const target = targetRef.current;
     if (!target) return;
 
@@ -731,33 +919,18 @@ export default function Home() {
 
   return (
     <Surface variant="transparent" className="relative h-auto w-full">
-      {/* Global Dynamic Fluid Backdrop */}
       <FluidBackdrop scrollYProgress={scrollYProgress} />
 
-      {/* 1. Horizontal Scroll Section */}
-      <div
-        ref={targetRef}
-        className={cn("relative w-full", reducedMotion ? "h-auto" : "h-[400vh]")}
-      >
-        <div
-          className={cn(
-            "top-0 w-full overflow-hidden",
-            reducedMotion ? "relative h-auto" : "sticky h-dvh"
-          )}
-        >
-          {!reducedMotion && (
-            <motion.div
-              aria-hidden="true"
-              className="bg-accent fixed inset-x-0 top-0 z-50 h-px origin-left"
-              style={{ scaleX: scrollYProgress }}
-            />
-          )}
-
+      <div ref={targetRef} className="relative h-[400vh] w-full">
+        <div className="sticky top-0 h-dvh w-full overflow-hidden">
           <motion.div
-            className={cn(reducedMotion ? "flex w-full flex-col" : "flex h-full w-[400vw]")}
-            style={{ x: reducedMotion ? 0 : x }}
-          >
-            <IntroPanel reducedMotion={reducedMotion} onEnter={() => scrollToPanel(1)} />
+            aria-hidden="true"
+            className="bg-accent fixed inset-x-0 top-0 z-50 h-px origin-left"
+            style={{ scaleX: scrollYProgress }}
+          />
+
+          <motion.div className="flex h-full w-[400vw]" style={{ x }}>
+            <IntroPanel onEnter={() => scrollToPanel(1)} />
             <ChroniclePanel />
             <OrbitPanel />
             <TraveloguePanel />
@@ -765,9 +938,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 2. Post-Scroll Vertical Content Section (MusicDashboard) */}
       <div className="bg-background border-default/15 relative w-full border-t px-5 py-20 sm:px-8 md:px-12 xl:px-16 2xl:px-24">
-        <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-8">
+        <div className="mx-auto flex w-full max-w-350 flex-col gap-8">
           <div className="mb-4 flex flex-col items-start">
             <Chip
               size="sm"
@@ -782,8 +954,8 @@ export default function Home() {
               weight="semibold"
               align="start"
               className="text-foreground mt-4 text-3xl font-semibold tracking-tight sm:text-4xl"
-              initial={reducedMotion ? false : { opacity: 0, y: 16, filter: "blur(4px)" }}
-              whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.5, ease: enterEase }}
             >
@@ -794,8 +966,8 @@ export default function Home() {
               color="muted"
               align="start"
               className="mt-2 max-w-xl text-sm"
-              initial={reducedMotion ? false : { opacity: 0, y: 12, filter: "blur(2px)" }}
-              whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 12, filter: "blur(2px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.5, delay: 0.1, ease: enterEase }}
             >
@@ -803,7 +975,6 @@ export default function Home() {
             </MotionTypography>
           </div>
 
-          {/* Mount our beautiful MusicDashboard layout! */}
           <div className="w-full">
             <MusicDashboard />
           </div>

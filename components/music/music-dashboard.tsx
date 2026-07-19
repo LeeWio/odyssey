@@ -51,18 +51,21 @@ export function MusicDashboard() {
 
   return (
     <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-12 lg:gap-6">
-      
       {/* 1. Left Content Area (Column Span 8) */}
       <div className="col-span-12 flex flex-col gap-5 md:col-span-8 lg:gap-6">
-        
         {/* A. Hero Trending Song Banner */}
-        <Card className="min-h-[180px] sm:min-h-[220px] flex flex-row items-center justify-between" variant="secondary">
-          <div className="flex flex-col items-start max-w-[65%] gap-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted">MUSKINAJA</span>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
+        <Card
+          className="flex min-h-[180px] flex-row items-center justify-between sm:min-h-[220px]"
+          variant="secondary"
+        >
+          <div className="flex max-w-[65%] flex-col items-start gap-3">
+            <span className="text-muted text-[10px] font-bold tracking-wider uppercase">
+              MUSKINAJA
+            </span>
+            <h2 className="text-foreground text-2xl leading-tight font-extrabold tracking-tight sm:text-3xl lg:text-4xl">
               Listen to trending songs all the time
             </h2>
-            <p className="text-xs text-muted leading-relaxed hidden sm:block max-w-sm">
+            <p className="text-muted hidden max-w-sm text-xs leading-relaxed sm:block">
               With Muskinaja, you can get premium music for free anywhere and at any time.
             </p>
             <Button className="mt-2 text-xs" size="sm" variant="primary">
@@ -71,9 +74,12 @@ export function MusicDashboard() {
           </div>
 
           {/* Banner Hero Image Placeholder (representing the girl with headphones) */}
-          <div className="relative size-32 sm:size-40 md:size-44 shrink-0 select-none mr-2 hidden sm:block">
-            <div className="absolute inset-0 rounded-full flex items-center justify-center">
-              <Icon icon="solar:headphones-round-bold-duotone" className="size-20 md:size-24 text-accent animate-pulse" />
+          <div className="relative mr-2 hidden size-32 shrink-0 select-none sm:block sm:size-40 md:size-44">
+            <div className="absolute inset-0 flex items-center justify-center rounded-full">
+              <Icon
+                icon="solar:headphones-round-bold-duotone"
+                className="text-accent size-20 animate-pulse md:size-24"
+              />
             </div>
           </div>
         </Card>
@@ -90,37 +96,68 @@ export function MusicDashboard() {
           </div>
           <Carousel opts={{ align: "start" }}>
             <Carousel.Content>
-              
               {/* Carousel Item 1: Musik Pagi */}
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
                   <MotionCard
-                    className="group relative aspect-square overflow-hidden select-none cursor-pointer"
+                    className="group relative aspect-square cursor-pointer overflow-hidden select-none"
                     variant="default"
                     initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.5, delay: 0.0, ease: enterEase }}
-                    whileHover={{ y: -6, scale: 1.02, transition: { type: "spring", stiffness: 350, damping: 22 } }}
+                    whileHover={{
+                      y: -6,
+                      scale: 1.02,
+                      transition: { type: "spring", stiffness: 350, damping: 22 },
+                    }}
                     whileTap={{ scale: 0.98 }}
                   >
                     {/* Background Album Art with Hover Zoom */}
                     <div className="absolute inset-0 overflow-hidden">
-                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill unoptimized alt="Musik Pagi album art" className="object-cover" src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80" sizes="220px" />
+                      <motion.div
+                        className="absolute inset-0"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.24, ease: enterEase }}
+                      >
+                        <Image
+                          fill
+                          unoptimized
+                          alt="Musik Pagi album art"
+                          className="object-cover"
+                          src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80"
+                          sizes="220px"
+                        />
                       </motion.div>
                     </div>
                     {/* Absolute Glass Top-Right Action Button */}
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      className="absolute top-2.5 right-2.5 z-10"
+                      variant="secondary"
+                      aria-label="Playlist options"
+                    >
                       <Icon icon="solar:music-note-bold" className="size-3.5" />
                     </Button>
                     {/* Floating Glass Capsule Footer */}
                     <Card.Footer className="bg-background/40 absolute inset-x-2 bottom-1 flex flex-row items-center justify-between rounded-3xl p-2 backdrop-blur-md">
-                      <div className="flex flex-col min-w-0">
-                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                      <div className="flex min-w-0 flex-col">
+                        <Typography
+                          type="body-sm"
+                          align="start"
+                          className="text-foreground truncate leading-tight tracking-wide"
+                          weight="bold"
+                        >
                           Musik Pagi
                         </Typography>
-                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                        <Typography
+                          type="body-xs"
+                          align="start"
+                          weight="normal"
+                          color="muted"
+                          className="mt-0.5 truncate"
+                        >
                           12 Tracks
                         </Typography>
                       </div>
@@ -136,29 +173,61 @@ export function MusicDashboard() {
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
                   <MotionCard
-                    className="group relative aspect-square overflow-hidden select-none cursor-pointer"
+                    className="group relative aspect-square cursor-pointer overflow-hidden select-none"
                     variant="default"
                     initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.5, delay: 0.06, ease: enterEase }}
-                    whileHover={{ y: -6, scale: 1.02, transition: { type: "spring", stiffness: 350, damping: 22 } }}
+                    whileHover={{
+                      y: -6,
+                      scale: 1.02,
+                      transition: { type: "spring", stiffness: 350, damping: 22 },
+                    }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="absolute inset-0 overflow-hidden">
-                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill unoptimized alt="Lofi Beats album art" className="object-cover" src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80" sizes="220px" />
+                      <motion.div
+                        className="absolute inset-0"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.24, ease: enterEase }}
+                      >
+                        <Image
+                          fill
+                          unoptimized
+                          alt="Lofi Beats album art"
+                          className="object-cover"
+                          src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&q=80"
+                          sizes="220px"
+                        />
                       </motion.div>
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      className="absolute top-2.5 right-2.5 z-10"
+                      variant="secondary"
+                      aria-label="Playlist options"
+                    >
                       <Icon icon="solar:heart-bold" className="size-3.5" />
                     </Button>
                     <Card.Footer className="bg-background/40 absolute inset-x-2 bottom-1 flex flex-row items-center justify-between rounded-3xl p-2 backdrop-blur-md">
-                      <div className="flex flex-col min-w-0">
-                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                      <div className="flex min-w-0 flex-col">
+                        <Typography
+                          type="body-sm"
+                          align="start"
+                          className="text-foreground truncate leading-tight tracking-wide"
+                          weight="bold"
+                        >
                           Lofi Beats
                         </Typography>
-                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                        <Typography
+                          type="body-xs"
+                          align="start"
+                          weight="normal"
+                          color="muted"
+                          className="mt-0.5 truncate"
+                        >
                           24 Tracks
                         </Typography>
                       </div>
@@ -174,29 +243,61 @@ export function MusicDashboard() {
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
                   <MotionCard
-                    className="group relative aspect-square overflow-hidden select-none cursor-pointer"
+                    className="group relative aspect-square cursor-pointer overflow-hidden select-none"
                     variant="default"
                     initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.5, delay: 0.12, ease: enterEase }}
-                    whileHover={{ y: -6, scale: 1.02, transition: { type: "spring", stiffness: 350, damping: 22 } }}
+                    whileHover={{
+                      y: -6,
+                      scale: 1.02,
+                      transition: { type: "spring", stiffness: 350, damping: 22 },
+                    }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="absolute inset-0 overflow-hidden">
-                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill unoptimized alt="Late Night album art" className="object-cover" src="https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=400&q=80" sizes="220px" />
+                      <motion.div
+                        className="absolute inset-0"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.24, ease: enterEase }}
+                      >
+                        <Image
+                          fill
+                          unoptimized
+                          alt="Late Night album art"
+                          className="object-cover"
+                          src="https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=400&q=80"
+                          sizes="220px"
+                        />
                       </motion.div>
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      className="absolute top-2.5 right-2.5 z-10"
+                      variant="secondary"
+                      aria-label="Playlist options"
+                    >
                       <Icon icon="solar:star-bold" className="size-3.5" />
                     </Button>
                     <Card.Footer className="bg-background/40 absolute inset-x-2 bottom-1 flex flex-row items-center justify-between rounded-3xl p-2 backdrop-blur-md">
-                      <div className="flex flex-col min-w-0">
-                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                      <div className="flex min-w-0 flex-col">
+                        <Typography
+                          type="body-sm"
+                          align="start"
+                          className="text-foreground truncate leading-tight tracking-wide"
+                          weight="bold"
+                        >
                           Late Night
                         </Typography>
-                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                        <Typography
+                          type="body-xs"
+                          align="start"
+                          weight="normal"
+                          color="muted"
+                          className="mt-0.5 truncate"
+                        >
                           18 Tracks
                         </Typography>
                       </div>
@@ -212,29 +313,61 @@ export function MusicDashboard() {
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
                   <MotionCard
-                    className="group relative aspect-square overflow-hidden select-none cursor-pointer"
+                    className="group relative aspect-square cursor-pointer overflow-hidden select-none"
                     variant="default"
                     initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.5, delay: 0.18, ease: enterEase }}
-                    whileHover={{ y: -6, scale: 1.02, transition: { type: "spring", stiffness: 350, damping: 22 } }}
+                    whileHover={{
+                      y: -6,
+                      scale: 1.02,
+                      transition: { type: "spring", stiffness: 350, damping: 22 },
+                    }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="absolute inset-0 overflow-hidden">
-                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill unoptimized alt="Deep Focus album art" className="object-cover" src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&q=80" sizes="220px" />
+                      <motion.div
+                        className="absolute inset-0"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.24, ease: enterEase }}
+                      >
+                        <Image
+                          fill
+                          unoptimized
+                          alt="Deep Focus album art"
+                          className="object-cover"
+                          src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&q=80"
+                          sizes="220px"
+                        />
                       </motion.div>
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      className="absolute top-2.5 right-2.5 z-10"
+                      variant="secondary"
+                      aria-label="Playlist options"
+                    >
                       <Icon icon="solar:bookmark-bold" className="size-3.5" />
                     </Button>
                     <Card.Footer className="bg-background/40 absolute inset-x-2 bottom-1 flex flex-row items-center justify-between rounded-3xl p-2 backdrop-blur-md">
-                      <div className="flex flex-col min-w-0">
-                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                      <div className="flex min-w-0 flex-col">
+                        <Typography
+                          type="body-sm"
+                          align="start"
+                          className="text-foreground truncate leading-tight tracking-wide"
+                          weight="bold"
+                        >
                           Deep Focus
                         </Typography>
-                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                        <Typography
+                          type="body-xs"
+                          align="start"
+                          weight="normal"
+                          color="muted"
+                          className="mt-0.5 truncate"
+                        >
                           32 Tracks
                         </Typography>
                       </div>
@@ -250,29 +383,61 @@ export function MusicDashboard() {
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
                   <MotionCard
-                    className="group relative aspect-square overflow-hidden select-none cursor-pointer"
+                    className="group relative aspect-square cursor-pointer overflow-hidden select-none"
                     variant="default"
                     initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.5, delay: 0.24, ease: enterEase }}
-                    whileHover={{ y: -6, scale: 1.02, transition: { type: "spring", stiffness: 350, damping: 22 } }}
+                    whileHover={{
+                      y: -6,
+                      scale: 1.02,
+                      transition: { type: "spring", stiffness: 350, damping: 22 },
+                    }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="absolute inset-0 overflow-hidden">
-                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill unoptimized alt="Active Sweat album art" className="object-cover" src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&q=80" sizes="220px" />
+                      <motion.div
+                        className="absolute inset-0"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.24, ease: enterEase }}
+                      >
+                        <Image
+                          fill
+                          unoptimized
+                          alt="Active Sweat album art"
+                          className="object-cover"
+                          src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&q=80"
+                          sizes="220px"
+                        />
                       </motion.div>
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      className="absolute top-2.5 right-2.5 z-10"
+                      variant="secondary"
+                      aria-label="Playlist options"
+                    >
                       <Icon icon="solar:dumbbell-bold" className="size-3.5" />
                     </Button>
                     <Card.Footer className="bg-background/40 absolute inset-x-2 bottom-1 flex flex-row items-center justify-between rounded-3xl p-2 backdrop-blur-md">
-                      <div className="flex flex-col min-w-0">
-                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                      <div className="flex min-w-0 flex-col">
+                        <Typography
+                          type="body-sm"
+                          align="start"
+                          className="text-foreground truncate leading-tight tracking-wide"
+                          weight="bold"
+                        >
                           Active Sweat
                         </Typography>
-                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                        <Typography
+                          type="body-xs"
+                          align="start"
+                          weight="normal"
+                          color="muted"
+                          className="mt-0.5 truncate"
+                        >
                           15 Tracks
                         </Typography>
                       </div>
@@ -288,29 +453,61 @@ export function MusicDashboard() {
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
                   <MotionCard
-                    className="group relative aspect-square overflow-hidden select-none cursor-pointer"
+                    className="group relative aspect-square cursor-pointer overflow-hidden select-none"
                     variant="default"
                     initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-50px" }}
-                    transition={{ duration: 0.5, delay: 0.30, ease: enterEase }}
-                    whileHover={{ y: -6, scale: 1.02, transition: { type: "spring", stiffness: 350, damping: 22 } }}
+                    transition={{ duration: 0.5, delay: 0.3, ease: enterEase }}
+                    whileHover={{
+                      y: -6,
+                      scale: 1.02,
+                      transition: { type: "spring", stiffness: 350, damping: 22 },
+                    }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="absolute inset-0 overflow-hidden">
-                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill unoptimized alt="Compiling Loop album art" className="object-cover" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=80" sizes="220px" />
+                      <motion.div
+                        className="absolute inset-0"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.24, ease: enterEase }}
+                      >
+                        <Image
+                          fill
+                          unoptimized
+                          alt="Compiling Loop album art"
+                          className="object-cover"
+                          src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=80"
+                          sizes="220px"
+                        />
                       </motion.div>
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      className="absolute top-2.5 right-2.5 z-10"
+                      variant="secondary"
+                      aria-label="Playlist options"
+                    >
                       <Icon icon="solar:terminal-bold" className="size-3.5" />
                     </Button>
                     <Card.Footer className="bg-background/40 absolute inset-x-2 bottom-1 flex flex-row items-center justify-between rounded-3xl p-2 backdrop-blur-md">
-                      <div className="flex flex-col min-w-0">
-                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                      <div className="flex min-w-0 flex-col">
+                        <Typography
+                          type="body-sm"
+                          align="start"
+                          className="text-foreground truncate leading-tight tracking-wide"
+                          weight="bold"
+                        >
                           Compiling Loop
                         </Typography>
-                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                        <Typography
+                          type="body-xs"
+                          align="start"
+                          weight="normal"
+                          color="muted"
+                          className="mt-0.5 truncate"
+                        >
                           28 Tracks
                         </Typography>
                       </div>
@@ -326,29 +523,61 @@ export function MusicDashboard() {
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
                   <MotionCard
-                    className="group relative aspect-square overflow-hidden select-none cursor-pointer"
+                    className="group relative aspect-square cursor-pointer overflow-hidden select-none"
                     variant="default"
                     initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.5, delay: 0.36, ease: enterEase }}
-                    whileHover={{ y: -6, scale: 1.02, transition: { type: "spring", stiffness: 350, damping: 22 } }}
+                    whileHover={{
+                      y: -6,
+                      scale: 1.02,
+                      transition: { type: "spring", stiffness: 350, damping: 22 },
+                    }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="absolute inset-0 overflow-hidden">
-                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill unoptimized alt="Silent Zen album art" className="object-cover" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80" sizes="220px" />
+                      <motion.div
+                        className="absolute inset-0"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.24, ease: enterEase }}
+                      >
+                        <Image
+                          fill
+                          unoptimized
+                          alt="Silent Zen album art"
+                          className="object-cover"
+                          src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80"
+                          sizes="220px"
+                        />
                       </motion.div>
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      className="absolute top-2.5 right-2.5 z-10"
+                      variant="secondary"
+                      aria-label="Playlist options"
+                    >
                       <Icon icon="solar:globus-bold" className="size-3.5" />
                     </Button>
                     <Card.Footer className="bg-background/40 absolute inset-x-2 bottom-1 flex flex-row items-center justify-between rounded-3xl p-2 backdrop-blur-md">
-                      <div className="flex flex-col min-w-0">
-                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                      <div className="flex min-w-0 flex-col">
+                        <Typography
+                          type="body-sm"
+                          align="start"
+                          className="text-foreground truncate leading-tight tracking-wide"
+                          weight="bold"
+                        >
                           Silent Zen
                         </Typography>
-                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                        <Typography
+                          type="body-xs"
+                          align="start"
+                          weight="normal"
+                          color="muted"
+                          className="mt-0.5 truncate"
+                        >
                           20 Tracks
                         </Typography>
                       </div>
@@ -364,29 +593,61 @@ export function MusicDashboard() {
               <Carousel.Item className="basis-1/2 sm:basis-1/3 lg:basis-1/4">
                 <div className="p-1">
                   <MotionCard
-                    className="group relative aspect-square overflow-hidden select-none cursor-pointer"
+                    className="group relative aspect-square cursor-pointer overflow-hidden select-none"
                     variant="default"
                     initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.5, delay: 0.42, ease: enterEase }}
-                    whileHover={{ y: -6, scale: 1.02, transition: { type: "spring", stiffness: 350, damping: 22 } }}
+                    whileHover={{
+                      y: -6,
+                      scale: 1.02,
+                      transition: { type: "spring", stiffness: 350, damping: 22 },
+                    }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="absolute inset-0 overflow-hidden">
-                      <motion.div className="absolute inset-0" whileHover={{ scale: 1.05 }} transition={{ duration: 0.24, ease: enterEase }}>
-                        <Image fill unoptimized alt="Acoustic Waves album art" className="object-cover" src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&q=80" sizes="220px" />
+                      <motion.div
+                        className="absolute inset-0"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.24, ease: enterEase }}
+                      >
+                        <Image
+                          fill
+                          unoptimized
+                          alt="Acoustic Waves album art"
+                          className="object-cover"
+                          src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&q=80"
+                          sizes="220px"
+                        />
                       </motion.div>
                     </div>
-                    <Button isIconOnly size="sm" className="absolute top-2.5 right-2.5 z-10" variant="secondary" aria-label="Playlist options">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      className="absolute top-2.5 right-2.5 z-10"
+                      variant="secondary"
+                      aria-label="Playlist options"
+                    >
                       <Icon icon="solar:soundwave-bold" className="size-3.5" />
                     </Button>
                     <Card.Footer className="bg-background/40 absolute inset-x-2 bottom-1 flex flex-row items-center justify-between rounded-3xl p-2 backdrop-blur-md">
-                      <div className="flex flex-col min-w-0">
-                        <Typography type="body-sm" align="start" className="tracking-wide text-foreground leading-tight truncate" weight="bold">
+                      <div className="flex min-w-0 flex-col">
+                        <Typography
+                          type="body-sm"
+                          align="start"
+                          className="text-foreground truncate leading-tight tracking-wide"
+                          weight="bold"
+                        >
                           Acoustic Waves
                         </Typography>
-                        <Typography type="body-xs" align="start" weight="normal" color="muted" className="mt-0.5 truncate">
+                        <Typography
+                          type="body-xs"
+                          align="start"
+                          weight="normal"
+                          color="muted"
+                          className="mt-0.5 truncate"
+                        >
                           22 Tracks
                         </Typography>
                       </div>
@@ -397,7 +658,6 @@ export function MusicDashboard() {
                   </MotionCard>
                 </div>
               </Carousel.Item>
-
             </Carousel.Content>
             <Carousel.Previous />
             <Carousel.Next />

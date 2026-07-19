@@ -313,6 +313,18 @@ export const postApi = baseApi.injectEndpoints({
     }),
 
     /**
+     * User: Unlike post
+     */
+    unlikePost: builder.mutation<void, number>({
+      query: (postId) => ({
+        url: `/api/v1/public/interactions/posts/${postId}/unlike`,
+        method: "POST",
+      }),
+      transformErrorResponse: transformError,
+      invalidatesTags: (_result, _error, id) => [{ type: "Post", id }],
+    }),
+
+    /**
      * User: Favorite post
      */
     favoritePost: builder.mutation<void, number>({
@@ -395,6 +407,7 @@ export const {
   useSearchPublicPostsQuery,
   useUnifiedSearchQuery,
   useLikePostMutation,
+  useUnlikePostMutation,
   useFavoritePostMutation,
   useGetPostRevisionsQuery,
   useRevertPostRevisionMutation,
