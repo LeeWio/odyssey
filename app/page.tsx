@@ -113,114 +113,164 @@ function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => vo
       aria-labelledby="odyssey-title"
       role="region"
       variant="transparent"
-      className="relative flex h-full w-screen shrink-0 items-center overflow-hidden bg-transparent pt-16"
+      className="relative flex h-full w-screen shrink-0 items-center overflow-hidden pt-16"
     >
-      {/* 1. Spotlight Coordinate Dot Matrix (Micro-dots with spatial 3D parallax) */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1], delay: 0.5 }}
-        style={{ ...dotMatrixStyle, x: reducedMotion ? "0vw" : gridX }}
-        className="text-default-400/18 dark:text-default-300/8 pointer-events-none absolute inset-0"
+        style={{ ...dotMatrixStyle, x: gridX }}
+        className="pointer-events-none absolute inset-0"
         aria-hidden="true"
       />
-
-      <div className="relative z-20 mx-auto flex w-full flex-col items-center justify-center px-5 pt-14 pb-14 text-center sm:px-8 lg:px-12">
+      <div className="relative z-20 mx-auto flex w-full flex-col items-center justify-center px-5 text-center sm:px-8 lg:px-12">
         <motion.div
-          className="flex max-w-3xl flex-col items-center text-center"
-          initial={reducedMotion ? false : { opacity: 0, y: 24 }}
-          animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col items-center text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            duration: 1,
+            ease: [0.16, 1, 0.3, 1],
+          }}
         >
-          <Chip size="sm" variant="tertiary">
-            Odyssey · 31°14′N
+          <Chip size="sm" variant="soft">
+            Odyssey · 31°14
           </Chip>
 
-          {/* Main Hero Title - Refined for artistic, editorial impact */}
-          <div id="odyssey-title" className="mt-6 flex flex-col items-center text-center">
-            {/* Line 1: The world scrolls. (Thin, flowing Display Serif Italic - Drift Reveal) */}
-            <motion.span
-              style={{ fontFamily: "var(--font-display)" }}
-              className="text-muted-foreground/80 text-[clamp(2.75rem,5.5vw,5.5rem)] leading-[1.0] font-normal tracking-normal italic select-none"
-              initial={reducedMotion ? false : { opacity: 0, x: -32, filter: "blur(8px)" }}
-              animate={reducedMotion ? undefined : { opacity: 1, x: 0, filter: "blur(0px)" }}
-              transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1], delay: 0.05 }}
+          <div id="odyssey-title" className="mt-4 flex max-w-275 flex-col items-center text-center">
+            <MotionTypography
+              initial={{
+                opacity: 0,
+                y: 18,
+                filter: "blur(12px)",
+                letterSpacing: "0.02em",
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)",
+                letterSpacing: "-0.04em",
+              }}
+              transition={{
+                duration: 1.4,
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.15,
+              }}
+              weight="bold"
+              align="center"
+              className="text-default-500 font-display text-[clamp(2.5rem,6vw,6rem)] leading-[0.95] tracking-[-0.045em] select-none"
             >
               The world scrolls.
-            </motion.span>
+            </MotionTypography>
 
-            {/* Line 2: I stay. (Massive, anchored Sans-serif Ultra-bold - Gravity Drop & Lock) */}
-            <motion.span
-              className="text-accent mt-2 flex items-center justify-center gap-[0.01em] text-[clamp(3.75rem,8vw,8.5rem)] leading-[0.85] font-black tracking-[-0.06em] select-none sm:mt-4"
-              initial={reducedMotion ? false : "hidden"}
-              animate={reducedMotion ? undefined : "visible"}
+            <MotionTypography
+              initial="hidden"
+              animate="visible"
+              weight="semibold"
+              align="center"
               variants={{
-                hidden: { opacity: 0 },
+                hidden: {},
                 visible: {
-                  opacity: 1,
-                  transition: { staggerChildren: 0.07, delayChildren: 0.45 },
+                  transition: {
+                    staggerChildren: 0.045,
+                    delayChildren: 0.35,
+                  },
                 },
               }}
+              className="relative mt-1 text-[clamp(4rem,9vw,9rem)] leading-[0.82] tracking-[-0.075em] italic select-none"
             >
-              {/* Character-level staggered gravity spring animation for a solid physical presence */}
-              {Array.from("I stay.").map((char, index) => (
-                <motion.span
-                  key={index}
-                  className="animate-gpu inline-block origin-bottom cursor-default"
-                  whileHover={
-                    reducedMotion
-                      ? undefined
-                      : {
-                          y: -10,
-                          scale: 1.08,
-                          filter: "drop-shadow(0 0 8px rgba(99,102,241,0.5))",
-                        }
-                  }
-                  transition={{
-                    type: "spring",
-                    stiffness: 180,
-                    damping: 12,
-                    mass: 1,
-                  }}
-                  variants={{
-                    hidden: { opacity: 0, y: -24, filter: "blur(4px)" },
-                    visible: {
-                      opacity: 1,
-                      y: 0,
-                      filter: "blur(0px)",
-                      transition: {
-                        type: "spring",
-                        stiffness: 140,
-                        damping: 15,
-                        mass: 1,
-                        restDelta: 0.001,
+              {Array.from("I stay.").map((char, index) => {
+                const isDot = char === ".";
+                const isAccentChar = index > 1;
+
+                return (
+                  <motion.span
+                    key={index}
+                    className={cn(
+                      "inline-block origin-center will-change-transform",
+                      isAccentChar ? "text-accent" : "text-foreground"
+                    )}
+                    variants={{
+                      hidden: {
+                        opacity: 0,
+                        y: 35,
+                        rotateX: 45,
+                        filter: "blur(10px)",
                       },
-                    },
-                  }}
-                >
-                  {char === " " ? "\u00A0" : char}
-                </motion.span>
-              ))}
-            </motion.span>
+
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        rotateX: 0,
+                        filter: "blur(0px)",
+                        transition: {
+                          duration: 1.1,
+                          ease: [0.16, 1, 0.3, 1],
+                        },
+                      },
+                    }}
+                    whileHover={
+                      reducedMotion
+                        ? undefined
+                        : isDot
+                          ? {
+                              scale: 1.25,
+                              rotate: 90,
+                            }
+                          : {
+                              y: -3,
+                              transition: {
+                                type: "spring",
+                                stiffness: 250,
+                                damping: 20,
+                              },
+                            }
+                    }
+                  >
+                    {char === " " ? "\u00A0" : char}
+                  </motion.span>
+                );
+              })}
+            </MotionTypography>
           </div>
 
-          {/* 1. Cinematic Voiceover Sub-title */}
           <motion.p
-            className="text-muted-foreground/70 mt-8 max-w-xl text-[clamp(0.75rem,1.5vw,0.875rem)] leading-relaxed font-light tracking-[0.15em] uppercase select-none"
-            initial={reducedMotion ? false : { opacity: 0, filter: "blur(6px)", y: 12 }}
-            animate={reducedMotion ? undefined : { opacity: 1, filter: "blur(0px)", y: 0 }}
-            transition={{ duration: 1.0, ease: [0.23, 1, 0.32, 1], delay: 1.0 }}
+            className="text-muted-foreground/60 mt-10 max-w-md text-[11px] leading-loose font-light tracking-[0.22em] uppercase select-none md:text-xs"
+            initial={{
+              opacity: 0,
+              filter: "blur(6px)",
+              y: 12,
+            }}
+            animate={{
+              opacity: 1,
+              filter: "blur(0px)",
+              y: 0,
+            }}
+            transition={{
+              duration: 1,
+              ease: [0.23, 1, 0.32, 1],
+              delay: 1,
+            }}
           >
             A quiet coordinate in the infinite feed — anchoring what survives the drift.
           </motion.p>
         </motion.div>
 
-        {/* Integrated World Ticker (Fills the hollow space beneath sub-title with slow movement) */}
         <motion.div
-          initial={reducedMotion ? false : { opacity: 0, y: 16 }}
-          animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1], delay: 1.1 }}
-          className="pointer-events-auto relative mt-20 w-screen overflow-hidden mask-[linear-gradient(to_right,transparent,white_15%,white_85%,transparent)] select-none"
+          initial={{
+            opacity: 0,
+            y: 16,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: 1.2,
+            ease: [0.23, 1, 0.32, 1],
+            delay: 1.1,
+          }}
+          className="pointer-events-auto relative mt-14 w-screen overflow-hidden mask-[linear-gradient(to_right,transparent,white_15%,white_85%,transparent)] select-none md:mt-16"
         >
           <WorldTicker reducedMotion={reducedMotion} />
         </motion.div>
@@ -231,29 +281,31 @@ function IntroPanel({ onEnter, reducedMotion }: PanelProps & { onEnter: () => vo
           <MotionButton
             onPress={onEnter}
             variant="ghost"
-            initial={reducedMotion ? false : { opacity: 0 }}
-            animate={reducedMotion ? undefined : { opacity: 1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ delay: 1.4, duration: 0.8 }}
             aria-label="Scroll or Click to Explore"
-            className="before:bg-default-300/30 relative flex min-w-0 items-center justify-center overflow-hidden transition-colors before:absolute before:inset-y-0 before:w-px before:content-['']"
+            className="hover:bg-default-100/5 before:bg-default-300/30 relative flex h-14 w-6 min-w-0 items-center justify-center overflow-hidden rounded-full p-0 transition-colors before:absolute before:inset-y-0 before:w-px before:content-['']"
           >
-            {!reducedMotion && (
-              <motion.div
-                className="bg-accent absolute left-1/2 h-3 w-[1.5px] -translate-x-1/2 rounded-full"
-                animate={{
-                  y: [-12, 56],
-                  opacity: [0, 1, 1, 0],
-                }}
-                transition={{
-                  duration: 2.2,
-                  ease: [0.25, 0, 0.35, 1], // cinematic gravity curve
-                  repeat: Infinity,
-                  repeatType: "loop",
-                }}
-              />
-            )}
+            <motion.div
+              className="bg-accent absolute left-1/2 h-3 w-[1.5px] -translate-x-1/2 rounded-full"
+              animate={{
+                y: [-12, 56],
+                opacity: [0, 1, 1, 0],
+              }}
+              transition={{
+                duration: 2.2,
+                ease: [0.25, 0, 0.35, 1], // cinematic gravity curve
+                repeat: Infinity,
+                repeatType: "loop",
+              }}
+            />
           </MotionButton>
-          <Tooltip.Content showArrow placement="top">
+          <Tooltip.Content
+            showArrow
+            placement="top"
+            className="bg-background/80 border-default-100/55 text-foreground rounded-lg border px-3 py-1.5 font-mono text-[9px] tracking-[0.2em] uppercase shadow-lg backdrop-blur-md select-none"
+          >
             <Tooltip.Arrow />
             Scroll or Click
           </Tooltip.Content>
