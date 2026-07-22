@@ -816,7 +816,7 @@ export const Navbar = () => {
             type="button"
             tabIndex={-1}
             aria-label="Close navigation"
-            className="fixed inset-0 z-40 bg-black/15 backdrop-blur-[8px]"
+            className="fixed inset-0 z-40 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -849,7 +849,7 @@ export const Navbar = () => {
       >
         <nav
           aria-label="Primary navigation"
-          className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-3 sm:px-4"
+          className="grid w-full grid-cols-[1fr_auto_1fr] items-center px-3 py-0.5 sm:px-4"
         >
           <motion.div
             className="justify-self-start"
@@ -888,7 +888,6 @@ export const Navbar = () => {
                 variant="ghost"
                 aria-expanded={activeNavigation === "chronicle"}
                 aria-controls="odyssey-mega-navigation"
-                className="text-muted data-[hovered=true]:text-foreground relative h-10 min-w-0 rounded-xl bg-transparent px-3.5 text-sm font-medium data-[hovered=true]:bg-transparent"
                 onFocus={(event) => {
                   lastTriggerRef.current = event.currentTarget as HTMLElement;
                   previewNavigation("chronicle");
@@ -924,7 +923,6 @@ export const Navbar = () => {
                 variant="ghost"
                 aria-expanded={activeNavigation === "daily"}
                 aria-controls="odyssey-mega-navigation"
-                className="text-muted data-[hovered=true]:text-foreground relative h-10 min-w-0 rounded-xl bg-transparent px-3.5 text-sm font-medium data-[hovered=true]:bg-transparent"
                 onFocus={(event) => {
                   lastTriggerRef.current = event.currentTarget as HTMLElement;
                   previewNavigation("daily");
@@ -960,7 +958,6 @@ export const Navbar = () => {
                 variant="ghost"
                 aria-expanded={activeNavigation === "travelogue"}
                 aria-controls="odyssey-mega-navigation"
-                className="text-muted data-[hovered=true]:text-foreground relative h-10 min-w-0 rounded-xl bg-transparent px-3.5 text-sm font-medium data-[hovered=true]:bg-transparent"
                 onFocus={(event) => {
                   lastTriggerRef.current = event.currentTarget as HTMLElement;
                   previewNavigation("travelogue");
@@ -996,7 +993,6 @@ export const Navbar = () => {
                 variant="ghost"
                 aria-expanded={activeNavigation === "more"}
                 aria-controls="odyssey-mega-navigation"
-                className="text-muted data-[hovered=true]:text-foreground relative h-10 min-w-0 rounded-xl bg-transparent px-3.5 text-sm font-medium data-[hovered=true]:bg-transparent"
                 onFocus={(event) => {
                   lastTriggerRef.current = event.currentTarget as HTMLElement;
                   previewNavigation("more");
