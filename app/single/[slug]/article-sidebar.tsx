@@ -376,11 +376,8 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                     </EmptyState.Header>
                   </EmptyState>
                 ) : (
-                  <MotionListBox
+                  <ListBox
                     aria-label="Featured Articles"
-                    variants={listBoxContainerVariants}
-                    initial="hidden"
-                    animate="visible"
                     onAction={(key) => router.push(`/blog/${key}`)}
                   >
                     {featuredPosts.slice(0, 5).map((post, idx) => {
@@ -400,9 +397,26 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                           id={post.slug}
                           textValue={post.title}
                           variants={listBoxItemVariants}
-                          className="group flex w-full min-w-0 items-center gap-3 transition-all duration-300 hover:-translate-y-0.5"
+                          initial="hidden"
+                          animate="visible"
+                          transition={{
+                            type: "spring",
+                            stiffness: 120,
+                            damping: 20,
+                            mass: 0.6,
+                            delay: 0.15 + idx * 0.08,
+                          }}
+                          whileHover={{
+                            x: 4,
+                            transition: {
+                              type: "spring",
+                              stiffness: 300,
+                              damping: 25,
+                            }
+                          }}
+                          className="group flex w-full min-w-0 items-center gap-3 transition-colors duration-300"
                         >
-                          <div className="bg-default-100 text-default-500 group-hover:bg-accent/10 group-hover:text-accent flex size-8 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-semibold transition-all duration-300">
+                          <div className="bg-default-100 text-default-500 group-hover:bg-accent/10 group-hover:text-accent flex size-8 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-semibold transition-all duration-300 group-hover:scale-105">
                             {String(idx + 1).padStart(2, "0")}
                           </div>
 
@@ -416,13 +430,18 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
 
                             <Description className="text-default-400 group-hover:text-default-500 flex items-center gap-2 text-[11px] font-normal transition-colors duration-200">
                               <span>{formattedDate}</span>
-                              <span>•</span>
+
+                              <span className="opacity-50">•</span>
+
                               <span>{readingTime} min read</span>
                             </Description>
                           </div>
 
-                          <div className="text-default-400 group-hover:text-accent flex shrink-0 items-center gap-1 text-[11px] font-medium transition-all duration-200">
-                            <Eye className="size-3.5" />
+                          {/* Views */}
+
+                          <div className="text-default-400 group-hover:text-accent flex shrink-0 items-center gap-1 text-[11px] font-medium transition-all duration-300">
+                            <Eye className="size-3.5 transition-transform duration-300 group-hover:scale-110" />
+
                             <span>{post.views}</span>
                           </div>
 
@@ -430,7 +449,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                         </MotionListBoxItem>
                       );
                     })}
-                  </MotionListBox>
+                  </ListBox>
                 )}
               </ScrollShadow>
             </Carousel.Item>
