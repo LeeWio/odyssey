@@ -65,6 +65,44 @@ const timelineIcons = [Sparkles, Book, Code, Heart, Flame];
 
 const MotionTimeline = motion.create(Timeline);
 const MotionTimelineItem = motion.create(Timeline.Item);
+const MotionListBoxItem = motion.create(ListBox.Item);
+const MotionListBox = motion.create(ListBox);
+
+const listBoxContainerVariants = {
+  hidden: {
+    opacity: 0,
+  },
+
+  visible: {
+    opacity: 1,
+
+    transition: {
+      delayChildren: 0.15,
+      staggerChildren: 0.08,
+    },
+  },
+} as const;
+
+const listBoxItemVariants = {
+  hidden: {
+    opacity: 0,
+    y: 8,
+    filter: "blur(4px)",
+  },
+
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+
+    transition: {
+      type: "spring",
+      stiffness: 120,
+      damping: 20,
+      mass: 0.6,
+    },
+  },
+} as const;
 
 const containerVariants = {
   hidden: {
@@ -338,8 +376,11 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                     </EmptyState.Header>
                   </EmptyState>
                 ) : (
-                  <ListBox
+                  <MotionListBox
                     aria-label="Featured Articles"
+                    variants={listBoxContainerVariants}
+                    initial="hidden"
+                    animate="visible"
                     onAction={(key) => router.push(`/blog/${key}`)}
                   >
                     {featuredPosts.slice(0, 5).map((post, idx) => {
@@ -354,11 +395,12 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                       });
 
                       return (
-                        <ListBox.Item
+                        <MotionListBoxItem
                           key={post.id}
                           id={post.slug}
                           textValue={post.title}
-                          className="group flex w-full min-w-0 items-center gap-3 transition-all duration-200"
+                          variants={listBoxItemVariants}
+                          className="group flex w-full min-w-0 items-center gap-3 transition-all duration-300 hover:-translate-y-0.5"
                         >
                           <div className="bg-default-100 text-default-500 group-hover:bg-accent/10 group-hover:text-accent flex size-8 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-semibold transition-all duration-300">
                             {String(idx + 1).padStart(2, "0")}
@@ -385,10 +427,10 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                           </div>
 
                           <ListBox.ItemIndicator />
-                        </ListBox.Item>
+                        </MotionListBoxItem>
                       );
                     })}
-                  </ListBox>
+                  </MotionListBox>
                 )}
               </ScrollShadow>
             </Carousel.Item>
