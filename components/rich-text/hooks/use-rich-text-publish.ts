@@ -7,7 +7,7 @@ import {
 import { useGetCategoriesQuery } from "@/lib/features/category/category-api";
 import { useGetAllTagsQuery } from "@/lib/features/tag/tag-api";
 import { useAppDispatch } from "@/lib/hooks";
-import { setDraftIdentifier, toggleRichText } from "@/lib/features/ui/ui-slice";
+import { setActiveId, toggleRichText } from "@/lib/features/ui/ui-slice";
 import { toast } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
 import { findFirstHeading, generateSlug, extractText } from "../utils/content-extractors";
@@ -98,7 +98,7 @@ export function useRichTextPublish(identifier: string, currentContent: JSONConte
         await updatePost({ id: Number(identifier), body }).unwrap();
       }
 
-      dispatch(setDraftIdentifier(null));
+      dispatch(setActiveId(null));
       dispatch(toggleRichText());
     } catch {
       // Handled globally by transformError

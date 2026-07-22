@@ -376,8 +376,11 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                     </EmptyState.Header>
                   </EmptyState>
                 ) : (
-                  <ListBox
+                  <MotionListBox
                     aria-label="Featured Articles"
+                    variants={listBoxContainerVariants}
+                    initial="hidden"
+                    animate="visible"
                     onAction={(key) => router.push(`/blog/${key}`)}
                   >
                     {featuredPosts.slice(0, 5).map((post, idx) => {
@@ -412,7 +415,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                               type: "spring",
                               stiffness: 300,
                               damping: 25,
-                            }
+                            },
                           }}
                           className="group flex w-full min-w-0 items-center gap-3 transition-colors duration-300"
                         >
@@ -449,7 +452,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                         </MotionListBoxItem>
                       );
                     })}
-                  </ListBox>
+                  </MotionListBox>
                 )}
               </ScrollShadow>
             </Carousel.Item>

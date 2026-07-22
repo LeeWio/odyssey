@@ -2,7 +2,7 @@
 
 import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 import { setCredentials, setPermissions, removeCredentials } from "../features/auth/auth-slice";
-import { setThemeVariant, setDraftIdentifier, type ThemeVariant } from "../features/ui";
+import { setThemeVariant, setActiveId, type ThemeVariant } from "../features/ui";
 import { setLocale } from "../features/locale/locale-slice";
 import type { RootState } from "../store";
 import {
@@ -57,7 +57,7 @@ persistenceMiddleware.startListening({
 
 // Start listening for Draft Identifier changes
 persistenceMiddleware.startListening({
-  actionCreator: setDraftIdentifier,
+  actionCreator: setActiveId,
   effect: (action) => {
     if (typeof window !== "undefined") {
       if (action.payload) {
@@ -104,7 +104,7 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
         theme: { variant: variant as ThemeVariant },
         sheet: { isOpen: false },
         dashboard: { isOpen: false },
-        richText: { isOpen: false, draftIdentifier: draftId || null },
+        richText: { isOpen: false, activeId: draftId || null },
       };
 
       // Self-heal/sync localStorage configuration to Cookie on client load

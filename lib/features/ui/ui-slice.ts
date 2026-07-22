@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
 import { DEFAULT_THEME_VARIANT, type ThemeVariant } from "../../theme";
+import { JSONContent } from "@tiptap/react";
 
 export type { ThemeVariant } from "../../theme";
 
@@ -16,7 +17,9 @@ interface UiState {
   };
   richText: {
     isOpen: boolean;
-    draftIdentifier: string | null;
+    activeId: string | null;
+    initialValue: JSONContent | null;
+    isReadOnly: boolean;
   };
 }
 
@@ -32,7 +35,9 @@ const initialState: UiState = {
   },
   richText: {
     isOpen: false,
-    draftIdentifier: null,
+    activeId: null,
+    initialValue: null,
+    isReadOnly: false,
   },
 };
 
@@ -52,19 +57,43 @@ export const uiSlice = createSlice({
     toggleRichText: (state) => {
       state.richText.isOpen = !state.richText.isOpen;
     },
-    setDraftIdentifier: (state, action: PayloadAction<string | null>) => {
-      state.richText.draftIdentifier = action.payload;
+    setActiveId: (state, action: PayloadAction<string | null>) => {
+      state.richText.activeId = action.payload;
+    },
+    openRichText: (
+      state,
+      action: PayloadAction<{
+        activeId: string;
+        initialValue?: JSONContent | null;
+        isReadOnly?: boolean;
+      }>
+    ) => {
+      state.richText.isOpen = true;
+      state.richText.activeId = action.payload.activeId;
+      state.richText.initialValue = action.payload.initialValue ?? null;
+      state.richText.isReadOnly = action.payload.isReadOnly ?? false;
+    },
+    closeRichText: (state) => {
+      state.richText.isOpen = false;
     },
   },
 });
 
-export const { toggleSheet, setThemeVariant, toggleDashboard, toggleRichText, setDraftIdentifier } =
-  uiSlice.actions;
+export const {
+  toggleSheet,
+  setThemeVariant,
+  toggleDashboard,
+  toggleRichText,
+  setActiveId,
+  openRichText,
+  closeRichText,
+} = uiSlice.actions;
 
 export const selectIsSheetOpen = (state: RootState) => state.ui.sheet?.isOpen;
 export const selectThemeVariant = (state: RootState) => state.ui.theme?.variant;
 export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard?.isOpen;
 export const selectIsRichTextOpen = (state: RootState) => state.ui.richText?.isOpen;
-export const selectDraftIdentifier = (state: RootState) => state.ui.richText?.draftIdentifier;
+export const selectActiveId = (state: RootState) => state.ui.richText?.activeId;
+export const selectRichTextState = (state: RootState) => state.ui.richText;
 
 export default uiSlice.reducer;

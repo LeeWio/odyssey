@@ -6,10 +6,6 @@ import { MusicPlayer } from "@/components/music/music-player";
 import { useMounted } from "@mantine/hooks";
 
 export default function MusicPlaygroundPage() {
-  const mounted = useMounted();
-
-  if (!mounted) return null;
-
   return (
     <main className="bg-background relative min-h-[calc(100vh-4rem)] w-full overflow-hidden pt-8 pb-20">
       {/* Background blurring spot */}

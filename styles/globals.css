@@ -2,21 +2,3 @@
 @import "@heroui/styles";
 @import "@heroui-pro/react/css";
 @import "./themes/heroui-pro-themes.scoped.css";
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-.no-scrollbar::-webkit-scrollbar {
-  display: none !important;
-}
-
-html,
-body,
-.no-scrollbar {
-  scrollbar-width: none !important;
-}
-
-html,
-body,
-.no-scrollbar {
-  -ms-overflow-style: none !important;
-}

@@ -49,6 +49,23 @@ export const PostResponseSchema = z.object({
   updatedAt: z.string(),
 });
 
+// Compact Post Digest Response
+export const PostDigestResponseSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  slug: z.string(),
+  coverImage: z.string().nullable().default(""),
+  summary: z.string().nullable().default(""),
+  authorName: z.string().nullable().default("Anonymous"),
+  authorAvatar: z.string().nullable().default(""),
+  category: CategoryResponseSchema.nullable(),
+  views: z.number(),
+  likesCount: z.number(),
+  publishedAt: z.string().nullable().optional(),
+});
+
+export type PostDigestResponse = z.infer<typeof PostDigestResponseSchema>;
+
 // Post Search Document (Elasticsearch)
 export const PostDocumentSchema = z.object({
   id: z.string(),
@@ -301,6 +318,29 @@ export const postApi = baseApi.injectEndpoints({
     }),
 
     /**
+     * Public: Get featured posts
+     */
+    getFeaturedPosts: builder.query<PageResult<PostDigestResponse>, Pageable>({
+      query: ({ page = 0, size = 10 } = {}) => ({
+        url: "/api/v1/public/blog/posts/featured",
+        params: { page, size },
+      }),
+      rawResponseSchema: ApiResponseSchema(PageResultSchema(PostDigestResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<PostDigestResponse>>) => response.data,
+      transformErrorResponse: transformError,
+    }),
+
+    /**
+     * Public: Get related posts
+     */
+    getRelatedPosts: builder.query<PostDigestResponse[], string>({
+      query: (slug) => `/api/v1/public/blog/posts/${slug}/related`,
+      rawResponseSchema: ApiResponseSchema(z.array(PostDigestResponseSchema)),
+      transformResponse: (response: ApiResponse<PostDigestResponse[]>) => response.data,
+      transformErrorResponse: transformError,
+    }),
+
+    /**
      * User: Like post
      */
     likePost: builder.mutation<void, number>({
@@ -404,6 +444,8 @@ export const {
   useDeletePostMutation,
   useGetPublicPostsQuery,
   useGetPublicPostBySlugQuery,
+  useGetFeaturedPostsQuery,
+  useGetRelatedPostsQuery,
   useSearchPublicPostsQuery,
   useUnifiedSearchQuery,
   useLikePostMutation,

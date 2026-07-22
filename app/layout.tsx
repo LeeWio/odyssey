@@ -17,7 +17,7 @@ import { getMessages } from "next-intl/server";
 import { Toast, isRTL } from "@heroui/react";
 import { SheetPanel } from "@/components/sheet-panel";
 import { DashboardSheet } from "@/components/dashboard";
-import { RichTextModal } from "@/components/rich-text";
+// import { RichTextModal } from "@/components/rich-text";
 import { Footer } from "@/components/footer";
 import { getInitialThemeState } from "@/lib/theme";
 import { getThemeInitScript } from "@/lib/theme-init-script";
@@ -90,7 +90,7 @@ export default async function RootLayout({
             <Navbar />
             <SheetPanel />
             <DashboardSheet />
-            <RichTextModal />
+            {/* <RichTextModal /> */}
             <main className="flex w-full grow flex-col">{children}</main>
             <Footer />
           </div>

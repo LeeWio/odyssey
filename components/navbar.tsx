@@ -832,7 +832,7 @@ export const Navbar = () => {
         role={isLocked || isMobileMenuOpen ? "dialog" : undefined}
         aria-modal={isLocked || isMobileMenuOpen ? true : undefined}
         aria-label={isLocked || isMobileMenuOpen ? "Odyssey navigation" : undefined}
-        className="bg-background/88 absolute top-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 overflow-hidden rounded-2xl shadow-[0_18px_56px_rgba(0,0,0,0.14)] backdrop-blur-2xl backdrop-saturate-150"
+        className="absolute top-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 overflow-hidden rounded-2xl bg-transparent shadow-[0_18px_56px_rgba(0,0,0,0.14)] backdrop-blur-2xl backdrop-saturate-150"
         initial={reduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={
