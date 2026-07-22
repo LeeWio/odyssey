@@ -1,3 +1,16 @@
+# [1.10.0](https://github.com/LeeWio/odyssey/compare/v1.9.0...v1.10.0) (2026-07-22)
+
+
+### Bug Fixes
+
+* **blog:** resolve ListBoxItem render-visibility bug on initial mount ([e8e9002](https://github.com/LeeWio/odyssey/commit/e8e9002d935afbd07f80731dd492b745c1d719e0))
+
+
+### Features
+
+* **blog:** implement premium Personal Archive Timeline and unified ListBox on Article Sidebar ([886b3b1](https://github.com/LeeWio/odyssey/commit/886b3b14a3d499efbe39fe8ad7378a0a45680909)), closes [hi#fidelity](https://github.com/hi/issues/fidelity)
+* **blog:** integrate user-crafted blur-entrance spring animations on featured listbox ([162ee35](https://github.com/LeeWio/odyssey/commit/162ee35782fc61b916a3fc5161348468a7a123fa))
+
 # [1.9.0](https://github.com/LeeWio/odyssey/compare/v1.8.0...v1.9.0) (2026-07-19)
 
 
