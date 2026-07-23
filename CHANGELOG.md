@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/LeeWio/odyssey/compare/v1.10.0...v1.11.0) (2026-07-23)
+
+
+### Features
+
+* **comment:** redesign UI and integrate advanced backend APIs ([49c08cb](https://github.com/LeeWio/odyssey/commit/49c08cb4fe6fdee1793a7a53b7b7826286511283)), closes [hi#fidelity](https://github.com/hi/issues/fidelity)
+
 # [1.10.0](https://github.com/LeeWio/odyssey/compare/v1.9.0...v1.10.0) (2026-07-22)
 
 
