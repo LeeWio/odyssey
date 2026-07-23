@@ -74,7 +74,7 @@ export function CommentInput({
   const initialLetter = currentUser ? currentUser.slice(0, 2).toUpperCase() : "AN";
 
   return (
-    <form onSubmit={handleFormSubmit} className="flex w-full gap-4">
+    <form onSubmit={handleFormSubmit} className="flex w-full gap-4 ">
       {replyId === null && (
         <Avatar size="sm" className="border-border/30 shrink-0 border">
           <Avatar.Fallback className="text-xs font-bold uppercase select-none">

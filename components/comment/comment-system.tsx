@@ -57,12 +57,6 @@ function CommentSystemContainer() {
 
   return (
     <div className="flex w-full flex-col gap-6">
-      {/* 1. Root Comment Input */}
-      <div className="flex flex-col gap-3">
-        <CommentInput onSubmit={handleRootSubmit} />
-      </div>
-
-      {/* 2. Comment List (includes sorting header, cards, and paging load more) */}
       <CommentList
         comments={comments}
         isLoading={isLoading}

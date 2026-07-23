@@ -84,26 +84,15 @@ export function CommentItem({
         >
           <HoverCard openDelay={300} closeDelay={150}>
             <HoverCard.Trigger>
-              <div className="relative cursor-pointer transition-opacity hover:opacity-90">
-                <Avatar size="sm" className="border-border/30 h-8 w-8 border">
-                  {comment.avatar ? (
-                    <Avatar.Image src={comment.avatar} alt={comment.username} />
-                  ) : (
-                    <Avatar.Fallback className="text-xs font-bold uppercase select-none">
-                      {initialLetter}
-                    </Avatar.Fallback>
-                  )}
-                </Avatar>
-                {/* Author Green Dot Indicator (matching design) */}
-                {comment.isPostAuthor && (
-                  <span className="bg-success border-background absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2" />
+              <Avatar size="sm" className="border-border/30 h-8 w-8 border shrink-0 cursor-pointer transition-opacity hover:opacity-90">
+                {comment.avatar ? (
+                  <Avatar.Image src={comment.avatar} alt={comment.username} />
+                ) : (
+                  <Avatar.Fallback className="text-xs font-bold uppercase select-none">
+                    {initialLetter}
+                  </Avatar.Fallback>
                 )}
-                {comment.isPending && (
-                  <span className="bg-default-100 absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full">
-                    <Spinner size="sm" color="accent" />
-                  </span>
-                )}
-              </div>
+              </Avatar>
             </HoverCard.Trigger>
             <HoverCard.Content>
               <HoverCard.Arrow />
@@ -148,16 +137,6 @@ export function CommentItem({
               <Typography type="body-xs" color="muted">
                 {formattedDate()}
               </Typography>
-
-              {comment.isPostAuthor && (
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-default-100/80 text-default-600 h-5 px-1.5 text-[10px] font-bold tracking-wide"
-                >
-                  Author
-                </Chip>
-              )}
 
               {comment.isFailed && (
                 <Chip

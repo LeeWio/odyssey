@@ -20,7 +20,6 @@ interface CommentNode {
   postTitle?: string | null;
   createdAt: string;
   children?: CommentNode[] | null;
-  isPostAuthor?: boolean | null;
 }
 
 const PAGE_SIZE_STEP = 5; // How many root comments to load per page
@@ -123,7 +122,6 @@ export function useComments() {
         isEdited: localEdit !== undefined,
         isReported,
         children: processedChildren,
-        isPostAuthor: node.isPostAuthor || false,
       };
     }
 
