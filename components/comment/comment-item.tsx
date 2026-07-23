@@ -44,10 +44,7 @@ export function CommentItem({
   // Parent text starts at 44px (w-8 + gap-3 = 32 + 12).
   // ml-4 (16px) puts the left border exactly under the parent's avatar center.
   // pl-6 sm:pl-7 (24px to 28px) makes the child avatar start at 16 + 1 + 28 = 45px, which perfectly aligns with the parent text!
-  const indentClass =
-    depth === 1
-      ? ""
-      : "ml-4 border-l border-default-200/50 dark:border-default-100/30 pl-6 sm:pl-7 mt-3";
+  const indentClass = depth === 1 ? "" : "ml-4 pl-6 sm:pl-7 mt-3";
 
   const handleEditSave = (newContent: string) => {
     onEditSave(comment.id, newContent);
@@ -77,7 +74,6 @@ export function CommentItem({
   const renderCommentContentOnly = (isExpandedState?: boolean) => {
     return (
       <div className="group relative flex w-full gap-3">
-        {/* Left Column: Avatar */}
         <div
           className="flex shrink-0 flex-col items-center"
           onClick={(e) => e.stopPropagation()}
@@ -85,28 +81,23 @@ export function CommentItem({
         >
           <HoverCard openDelay={300} closeDelay={150}>
             <HoverCard.Trigger>
-              <div className="relative cursor-pointer transition-opacity hover:opacity-90">
-                <Avatar size="sm" className="border-border/30 h-8 w-8 border">
-                  {comment.avatar ? (
-                    <Avatar.Image src={comment.avatar} alt={comment.username} />
-                  ) : (
-                    <Avatar.Fallback className="text-xs font-bold uppercase select-none">
-                      {initialLetter}
-                    </Avatar.Fallback>
-                  )}
-                </Avatar>
-                {/* Author Green Dot Indicator (matching design) */}
-                {(comment.nickname === "wei.li" || comment.username === "wei.li") && (
+              <Avatar size="sm" className="border-border/30 h-8 w-8 border">
+                {comment.avatar ? (
+                  <Avatar.Image src={comment.avatar} alt={comment.username} />
+                ) : (
+                  <Avatar.Fallback className="text-xs font-bold uppercase select-none">
+                    {initialLetter}
+                  </Avatar.Fallback>
+                )}
+              </Avatar>
+              {/* {(comment.nickname === "wei.li" || comment.username === "wei.li") && (
                   <span className="bg-success border-background absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2" />
                 )}
-                {comment.isPending && (
-                  <span className="bg-default-100 absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full">
-                    <Spinner size="sm" color="accent" />
-                  </span>
-                )}
-              </div>
+                {true && (
+                  <Spinner size="sm" color="accent" className="absolute -right-1 -bottom-1" />
+                )} */}
             </HoverCard.Trigger>
-            <HoverCard.Content className="w-72 p-4">
+            <HoverCard.Content>
               <HoverCard.Arrow />
               <div className="flex items-center gap-3">
                 <Avatar size="sm" className="border-border/30 border">
@@ -139,28 +130,17 @@ export function CommentItem({
           </HoverCard>
         </div>
 
-        {/* Right Column: Header, Content, Actions */}
-        <div className="flex min-w-0 flex-1 flex-col pt-0.5">
-          {/* Header Row */}
+        <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex w-full items-center justify-between">
             <div className="flex flex-wrap items-center gap-2.5">
-              <Typography
-                type="body-xs"
-                weight="bold"
-                className="text-foreground text-[13px] leading-none tracking-tight"
-              >
+              <Typography type="h6" weight="bold">
                 {comment.nickname || comment.username || "Anonymous"}
               </Typography>
 
-              <Typography
-                type="body-xs"
-                color="muted"
-                className="text-[11px] leading-none font-medium"
-              >
+              <Typography type="body-xs" color="muted">
                 {formattedDate()}
               </Typography>
 
-              {/* Author Badge */}
               {(comment.nickname === "wei.li" || comment.username === "wei.li") && (
                 <Chip
                   size="sm"
