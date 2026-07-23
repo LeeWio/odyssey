@@ -20,6 +20,8 @@ const baseCommentFields = {
   username: z.string().nullable().default("Anonymous"),
   avatar: z.string().nullable().default(""),
   createdAt: z.string(),
+  likesCount: z.number().nullable().default(0),
+  likedByCurrentUser: z.boolean().nullable().default(false),
 };
 
 // Recursive Comment Response Schema
