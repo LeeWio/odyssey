@@ -17,7 +17,7 @@ interface CommentListProps {
   loadMore: () => void;
   refetch: () => Promise<unknown>;
   totalCount: number;
-  onLikeToggle: (id: number, currentLikes: number) => void;
+  onLikeToggle: (id: number, isLiked: boolean, currentLikes: number) => void;
   onReplySubmit: (content: string, parentId: number) => Promise<void>;
   onEditSave: (id: number, content: string) => void;
   onDelete: (id: number) => void;

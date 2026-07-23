@@ -66,7 +66,7 @@ export function CommentProvider({
   useEffect(() => {
     if (typeof window === "undefined") return;
     const timer = setTimeout(() => {
-      setLikes(simulationStore.getLikes());
+      setLikes({}); // Initialize as empty to respect backend-driven values
       setEdits(simulationStore.getEdits());
       setDeletions(simulationStore.getDeletions());
       setReports(simulationStore.getReports());

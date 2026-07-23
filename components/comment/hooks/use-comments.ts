@@ -20,6 +20,8 @@ interface CommentNode {
   postTitle?: string | null;
   createdAt: string;
   children?: CommentNode[] | null;
+  likesCount?: number | null;
+  likedByCurrentUser?: boolean | null;
 }
 
 const PAGE_SIZE_STEP = 5; // How many root comments to load per page
@@ -87,7 +89,9 @@ export function useComments() {
     function processNode(node: CommentNode): EnhancedComment | null {
       if (deletions.includes(node.id)) return null;
 
-      const localLike = likes[node.id] || { count: 0, isLiked: false };
+      const localLike = likes[node.id];
+      const isLiked = localLike !== undefined ? localLike.isLiked : (node.likedByCurrentUser || false);
+      const likesCount = localLike !== undefined ? localLike.count : (node.likesCount || 0);
       const localEdit = edits[node.id];
       const isReported = reports.includes(node.id);
 
@@ -117,8 +121,8 @@ export function useComments() {
         postId: node.postId || postId,
         postTitle: node.postTitle || "",
         createdAt: node.createdAt,
-        likesCount: localLike.isLiked ? Math.max(localLike.count, 1) : localLike.count,
-        isLiked: localLike.isLiked,
+        likesCount,
+        isLiked,
         isEdited: localEdit !== undefined,
         isReported,
         children: processedChildren,

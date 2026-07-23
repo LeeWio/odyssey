@@ -136,13 +136,16 @@ export function useCommentMutations({
     await publishComment(content, parentId, tempId);
   };
 
-  // 3. TOGGLE LIKE (Local Simulation + Real API Sync)
-  const toggleLike = async (id: number, initialLikes: number = 0) => {
-    const result = simulationStore.toggleLike(id, initialLikes);
-    setLikes((prev) => ({ ...prev, [id]: result }));
+  // 3. TOGGLE LIKE (Memory-only Optimistic state + Real API Sync)
+  const toggleLike = async (id: number, currentIsLiked: boolean, currentLikes: number) => {
+    const nextLiked = !currentIsLiked;
+    const nextCount = nextLiked ? currentLikes + 1 : Math.max(0, currentLikes - 1);
+    
+    // Set local optimistic state in memory
+    setLikes((prev) => ({ ...prev, [id]: { count: nextCount, isLiked: nextLiked } }));
 
     try {
-      if (result.isLiked) {
+      if (nextLiked) {
         await likeCommentApi(id).unwrap();
         toast.success("Echo liked!");
       } else {
@@ -151,11 +154,7 @@ export function useCommentMutations({
     } catch (err) {
       console.error("Failed to sync comment like state:", err);
       // Rollback optimistic state if backend fails
-      const rollbackResult = {
-        isLiked: !result.isLiked,
-        count: result.isLiked ? initialLikes : initialLikes + 1,
-      };
-      setLikes((prev) => ({ ...prev, [id]: rollbackResult }));
+      setLikes((prev) => ({ ...prev, [id]: { count: currentLikes, isLiked: currentIsLiked } }));
     }
   };
 

@@ -16,7 +16,7 @@ import { setLoginOpen } from "@/lib/features/auth";
 interface CommentItemProps {
   comment: EnhancedComment;
   depth?: number;
-  onLikeToggle: (id: number, currentLikes: number) => void;
+  onLikeToggle: (id: number, isLiked: boolean, currentLikes: number) => void;
   onReplySubmit: (content: string, parentId: number) => Promise<void>;
   onEditSave: (id: number, content: string) => void;
   onDelete: (id: number) => void;
@@ -204,7 +204,7 @@ export function CommentItem({
                   comment={comment}
                   depth={depth}
                   isReplying={isReplying}
-                  onLikeToggle={() => onLikeToggle(comment.id, comment.likesCount)}
+                  onLikeToggle={() => onLikeToggle(comment.id, comment.isLiked, comment.likesCount)}
                   onReplyToggle={() => {
                     if (!isAuthenticated) {
                       dispatch(setLoginOpen(true));
