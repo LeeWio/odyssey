@@ -6,6 +6,7 @@ import { Icon } from "@iconify/react";
 import {
   useGetPostCommentsQuery,
   usePublishCommentMutation,
+  type CommentResponse,
 } from "@/lib/features/comment/comment-api";
 import { CommentCard } from "./comment-card";
 
@@ -50,8 +51,8 @@ export function CommentSection({ postId }: CommentSectionProps) {
     }
   };
 
-  const comments = commentPage?.list || [];
-  const totalPages = commentPage?.totalPages || 1;
+  const comments = commentPage || [];
+  const totalPages = 1;
 
   return (
     <div className="border-default-100/50 mt-16 flex flex-col gap-8 border-t pt-12">
@@ -63,7 +64,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
             Symbiosis Echoes
           </Typography>
           <span className="bg-default-100 text-default-600 rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold">
-            {commentPage?.total || 0}
+            {commentPage?.length || 0}
           </span>
         </div>
 
@@ -144,7 +145,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
         </Card>
       ) : (
         <div className="flex flex-col gap-6">
-          {comments.map((comment) => (
+          {comments.map((comment: CommentResponse) => (
             <CommentCard
               key={comment.id}
               comment={comment}

@@ -33,6 +33,7 @@ export const CommentResponseSchema: z.ZodType<CommentResponse> = baseSchema.exte
   children: z
     .lazy(() => z.array(CommentResponseSchema))
     .nullable()
+    .optional()
     .transform((children) => children ?? []),
 });
 
@@ -45,6 +46,11 @@ export interface CommentRequest {
   parentId?: number;
 }
 
+export interface GuestbookRequest {
+  content: string;
+  parentId?: number;
+}
+
 export type CommentStatus = "PENDING" | "APPROVED" | "REJECTED" | "SPAM";
 
 export const commentApi = baseApi.injectEndpoints({
@@ -52,19 +58,19 @@ export const commentApi = baseApi.injectEndpoints({
     /**
      * Public: Retrieve hierarchical comments for a post
      */
-    getPostComments: builder.query<PageResult<CommentResponse>, { postId: number } & Pageable>({
+    getPostComments: builder.query<CommentResponse[], { postId: number } & Pageable>({
       query: ({ postId, page = 0, size = 10 }) => ({
         url: `/api/v1/public/comments/post/${postId}`,
         params: { page, size },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(CommentResponseSchema)),
-      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+      rawResponseSchema: ApiResponseSchema(z.array(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<CommentResponse[]>) => response.data || [],
       transformErrorResponse: transformError,
       providesTags: (result, _error, { postId }) =>
         result
           ? [
               "Comment",
-              ...result.list.map(({ id }) => ({ type: "Comment" as const, id })),
+              ...result.map(({ id }) => ({ type: "Comment" as const, id })),
               { type: "Comment", id: `POST_${postId}` },
             ]
           : ["Comment", { type: "Comment", id: `POST_${postId}` }],
@@ -118,6 +124,69 @@ export const commentApi = baseApi.injectEndpoints({
     }),
 
     /**
+     * Admin: Retrieve pending comments awaiting moderator approval
+     */
+    getPendingComments: builder.query<PageResult<CommentResponse>, Pageable>({
+      query: ({ page = 0, size = 10 }) => ({
+        url: "/api/v1/admin/comments/pending",
+        params: { page, size },
+      }),
+      rawResponseSchema: ApiResponseSchema(PageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+      transformErrorResponse: transformError,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.list.map(({ id }) => ({ type: "Comment" as const, id })),
+              { type: "Comment", id: "ADMIN_LIST" },
+            ]
+          : [{ type: "Comment", id: "ADMIN_LIST" }],
+    }),
+
+    /**
+     * Public: Retrieve complete guestbook message tree
+     */
+    getGuestbookEntries: builder.query<CommentResponse[], void>({
+      query: () => "/api/v1/public/guestbook",
+      rawResponseSchema: ApiResponseSchema(z.array(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<CommentResponse[]>) => response.data || [],
+      transformErrorResponse: transformError,
+      providesTags: (result) =>
+        result
+          ? [
+              "Comment",
+              ...result.map(({ id }) => ({ type: "Comment" as const, id })),
+              { type: "Comment", id: "GUESTBOOK" },
+            ]
+          : ["Comment", { type: "Comment", id: "GUESTBOOK" }],
+    }),
+
+    /**
+     * Public: Submit a new guestbook entry (requires login)
+     */
+    postGuestbookEntry: builder.mutation<void, GuestbookRequest>({
+      query: (body) => ({
+        url: "/api/v1/public/guestbook",
+        method: "POST",
+        body,
+      }),
+      transformErrorResponse: transformError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          toast.success("Guestbook entry posted successfully!");
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Failed to post entry"));
+        }
+      },
+      invalidatesTags: [
+        "Comment",
+        { type: "Comment", id: "GUESTBOOK" },
+        { type: "Comment", id: "ADMIN_LIST" },
+      ],
+    }),
+
+    /**
      * Admin: Moderate a comment status
      */
     moderateComment: builder.mutation<void, { id: number; status: CommentStatus }>({
@@ -165,6 +234,119 @@ export const commentApi = baseApi.injectEndpoints({
         { type: "Comment", id: "ADMIN_LIST" },
       ],
     }),
+
+    /**
+     * User: Edit my own comment
+     */
+    editMyComment: builder.mutation<void, { id: number; content: string }>({
+      query: ({ id, content }) => ({
+        url: `/api/v1/user/comments/${id}`,
+        method: "PUT",
+        body: { content },
+      }),
+      transformErrorResponse: transformError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          toast.success("Comment updated successfully!");
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Update failed"));
+        }
+      },
+      invalidatesTags: (_result, _error, { id }) => ["Comment", { type: "Comment", id }],
+    }),
+
+    /**
+     * User: Delete my own comment
+     */
+    deleteMyComment: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/api/v1/user/comments/${id}`,
+        method: "DELETE",
+      }),
+      transformErrorResponse: transformError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          toast.success("Comment retracted successfully!");
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Retraction failed"));
+        }
+      },
+      invalidatesTags: (_result, _error, id) => ["Comment", { type: "Comment", id }],
+    }),
+
+    /**
+     * Public: Like a comment
+     */
+    likeComment: builder.mutation<void, number>({
+      query: (commentId) => ({
+        url: `/api/v1/public/interactions/comments/${commentId}/like`,
+        method: "POST",
+      }),
+      transformErrorResponse: transformError,
+      invalidatesTags: (_result, _error, commentId) => [
+        "Comment",
+        { type: "Comment", id: commentId },
+      ],
+    }),
+
+    /**
+     * Public: Unlike a comment
+     */
+    unlikeComment: builder.mutation<void, number>({
+      query: (commentId) => ({
+        url: `/api/v1/public/interactions/comments/${commentId}/unlike`,
+        method: "POST",
+      }),
+      transformErrorResponse: transformError,
+      invalidatesTags: (_result, _error, commentId) => [
+        "Comment",
+        { type: "Comment", id: commentId },
+      ],
+    }),
+
+    /**
+     * Public: Report a comment
+     */
+    reportComment: builder.mutation<void, { id: number; reason: string; description?: string }>({
+      query: ({ id, reason, description }) => ({
+        url: `/api/v1/public/comments/${id}/report`,
+        method: "POST",
+        body: { reason, description },
+      }),
+      transformErrorResponse: transformError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          toast.success("Thank you. Comment has been flagged for moderation.");
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Report submission failed"));
+        }
+      },
+      invalidatesTags: (_result, _error, { id }) => ["Comment", { type: "Comment", id }],
+    }),
+
+    /**
+     * Admin: Batch moderate comments
+     */
+    batchModerateComments: builder.mutation<number, { ids: number[]; status: CommentStatus }>({
+      query: (body) => ({
+        url: "/api/v1/admin/comments/batch/status",
+        method: "POST",
+        body,
+      }),
+      transformErrorResponse: transformError,
+      async onQueryStarted({ status }, { queryFulfilled }) {
+        try {
+          const { data: count } = await queryFulfilled;
+          toast.success(`Batch moderated ${count} comments to ${status}`);
+        } catch (error: unknown) {
+          toast.danger(getRtkQueryErrorMessage(error, "Batch moderation failed"));
+        }
+      },
+      invalidatesTags: ["Comment", { type: "Comment", id: "ADMIN_LIST" }],
+    }),
   }),
   overrideExisting: false,
 });
@@ -173,6 +355,15 @@ export const {
   useGetPostCommentsQuery,
   usePublishCommentMutation,
   useGetAdminCommentsQuery,
+  useGetPendingCommentsQuery,
+  useGetGuestbookEntriesQuery,
+  usePostGuestbookEntryMutation,
   useModerateCommentMutation,
   useDeleteCommentMutation,
+  useEditMyCommentMutation,
+  useDeleteMyCommentMutation,
+  useLikeCommentMutation,
+  useUnlikeCommentMutation,
+  useReportCommentMutation,
+  useBatchModerateCommentsMutation,
 } = commentApi;

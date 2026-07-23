@@ -22,12 +22,14 @@ import {
   useGetPostCommentsQuery,
   usePublishCommentMutation,
   useGetAdminCommentsQuery,
+  useGetPendingCommentsQuery,
   useModerateCommentMutation,
   useDeleteCommentMutation,
   type CommentResponse,
   type CommentStatus,
 } from "@/lib/features/comment/comment-api";
 import { useGetPublicPostsQuery } from "@/lib/features/post/post-api";
+import { CommentSystem } from "@/components/comment";
 
 // --- Recursive Component for Public Comments ---
 function CommentTreeItem({
@@ -88,7 +90,7 @@ export default function CommentTestPage() {
     { postId: selectedPostId!, page: 0, size: 100 },
     { skip: !selectedPostId }
   );
-  const comments = commentsData?.list || [];
+  const comments = commentsData || [];
 
   const [publishComment, { isLoading: isPublishing }] = usePublishCommentMutation();
 
@@ -116,11 +118,21 @@ export default function CommentTestPage() {
     direction: "descending",
   });
   const [commentToDelete, setCommentToDelete] = useState<CommentResponse | null>(null);
+  const [adminFilter, setAdminFilter] = useState<"all" | "pending">("all");
 
-  const { data: adminCommentsData, isLoading: isAdminCommentsLoading } = useGetAdminCommentsQuery({
-    page: 0,
-    size: 50,
-  });
+  const allCommentsResult = useGetAdminCommentsQuery(
+    { page: 0, size: 50 },
+    { skip: adminFilter !== "all" }
+  );
+  const pendingCommentsResult = useGetPendingCommentsQuery(
+    { page: 0, size: 50 },
+    { skip: adminFilter !== "pending" }
+  );
+
+  const adminCommentsData =
+    adminFilter === "all" ? allCommentsResult.data : pendingCommentsResult.data;
+  const isAdminCommentsLoading =
+    adminFilter === "all" ? allCommentsResult.isLoading : pendingCommentsResult.isLoading;
 
   const [moderateComment] = useModerateCommentMutation();
   const [deleteComment, { isLoading: isDeleting }] = useDeleteCommentMutation();
@@ -157,6 +169,7 @@ export default function CommentTestPage() {
         header: "ID",
         id: "id",
         minWidth: 80,
+        isRowHeader: true,
         cell: (item) => <span className="font-medium tabular-nums">{item.id}</span>,
       },
       {
@@ -292,72 +305,8 @@ export default function CommentTestPage() {
           </Select>
 
           {selectedPostId && (
-            <div className="bg-surface border-border flex flex-col gap-8 rounded-3xl border p-6 md:p-8">
-              {/* Comment Threading List */}
-              <div className="flex flex-col gap-6">
-                <h3 className="text-lg font-bold">Comments</h3>
-                {isCommentsLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Spinner size="md" />
-                  </div>
-                ) : comments.length === 0 ? (
-                  <p className="text-muted py-4 text-sm">
-                    No comments yet. Be the first to start the discussion!
-                  </p>
-                ) : (
-                  <div className="flex flex-col gap-8">
-                    {comments.map((comment) => (
-                      <CommentTreeItem
-                        key={comment.id}
-                        comment={comment}
-                        onReply={setReplyToComment}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Publish Comment Form */}
-              <Form
-                onSubmit={handlePublishSubmit}
-                className="bg-surface-secondary flex flex-col gap-4 rounded-2xl p-4 md:p-6"
-              >
-                <h4 className="text-base font-semibold">
-                  {replyToComment ? "Reply to Comment" : "Leave a Comment"}
-                </h4>
-
-                {replyToComment && (
-                  <div className="bg-surface border-border flex items-center justify-between rounded-lg border px-4 py-2">
-                    <span className="text-muted text-sm">
-                      Replying to{" "}
-                      <span className="text-foreground font-semibold">
-                        @{replyToComment.username}
-                      </span>
-                    </span>
-                    <Button size="sm" variant="ghost" onPress={() => setReplyToComment(null)}>
-                      <Icon icon="gravity-ui:xmark" className="size-4" aria-hidden="true" />
-                      Cancel
-                    </Button>
-                  </div>
-                )}
-
-                <TextField isRequired name="content" className="w-full">
-                  <Label className="sr-only">Comment Content</Label>
-                  <TextArea
-                    value={newCommentContent}
-                    onChange={(e) => setNewCommentContent(e.target.value)}
-                    placeholder="What are your thoughts?"
-                    className="min-h-24"
-                    variant="secondary"
-                  />
-                </TextField>
-
-                <div className="flex justify-end">
-                  <Button type="submit" variant="primary" isDisabled={isPublishing}>
-                    {isPublishing ? <Spinner size="sm" /> : "Post Comment"}
-                  </Button>
-                </div>
-              </Form>
+            <div className="bg-surface border-border rounded-3xl border p-6 md:p-8">
+              <CommentSystem postId={selectedPostId} />
             </div>
           )}
         </div>
@@ -365,17 +314,46 @@ export default function CommentTestPage() {
 
       {/* Admin Tab */}
       {activeTab === "admin" && (
-        <div className="bg-surface border-border overflow-hidden rounded-2xl border">
-          <DataGrid
-            aria-label="Admin Comments"
-            columns={adminColumns}
-            contentClassName="min-w-[900px]"
-            data={sortedAdminComments}
-            getRowId={(item) => item.id}
-            isLoadingMore={isAdminCommentsLoading}
-            sortDescriptor={adminSort}
-            onSortChange={setAdminSort}
-          />
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              className={
+                adminFilter === "all"
+                  ? "bg-default-100 text-foreground font-semibold"
+                  : "text-default-400"
+              }
+              onPress={() => setAdminFilter("all")}
+            >
+              All Comments
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className={
+                adminFilter === "pending"
+                  ? "bg-default-100 text-foreground font-semibold"
+                  : "text-default-400"
+              }
+              onPress={() => setAdminFilter("pending")}
+            >
+              Pending Approval
+            </Button>
+          </div>
+
+          <div className="bg-surface border-border overflow-hidden rounded-2xl border">
+            <DataGrid
+              aria-label="Admin Comments"
+              columns={adminColumns}
+              contentClassName="min-w-[900px]"
+              data={sortedAdminComments}
+              getRowId={(item) => item.id}
+              isLoadingMore={isAdminCommentsLoading}
+              sortDescriptor={adminSort}
+              onSortChange={setAdminSort}
+            />
+          </div>
         </div>
       )}
 

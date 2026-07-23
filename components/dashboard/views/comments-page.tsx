@@ -88,7 +88,7 @@ export function CommentsPage() {
     { postId: selectedPostId!, page: 0, size: 100 },
     { skip: !selectedPostId }
   );
-  const comments = commentsData?.list || [];
+  const comments = commentsData || [];
 
   const [publishComment, { isLoading: isPublishing }] = usePublishCommentMutation();
 
@@ -157,6 +157,7 @@ export function CommentsPage() {
         header: "ID",
         id: "id",
         minWidth: 80,
+        isRowHeader: true,
         cell: (item) => <span className="font-medium tabular-nums">{item.id}</span>,
       },
       {
@@ -306,7 +307,7 @@ export function CommentsPage() {
                   <p className="text-muted py-4 text-sm">No comments found for this post.</p>
                 ) : (
                   <div className="flex flex-col gap-8">
-                    {comments.map((comment) => (
+                    {comments.map((comment: CommentResponse) => (
                       <CommentTreeItem
                         key={comment.id}
                         comment={comment}

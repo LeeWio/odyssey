@@ -13,7 +13,7 @@ import {
 } from "@/lib/features/post/post-api";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
-import { CommentSection } from "./comment-section";
+import { CommentSystem } from "@/components/comment";
 import { motion, useScroll } from "motion/react";
 import { MotionRichTextEditor, MotionSeparator } from "../ui";
 
@@ -540,6 +540,11 @@ export function ReaderView({ slug }: ReaderViewProps) {
         >
           • &nbsp; • &nbsp; •
         </motion.div>
+
+        {/* 💬 Integrated Comment and Dialogue System */}
+        <div className="border-default-100/50 mt-16 border-t pt-12">
+          <CommentSystem postId={article.id} />
+        </div>
       </div>
 
       <ActionBar isOpen={showActionBar} aria-label="Reading Controls">
