@@ -77,13 +77,8 @@ export const authSlice = createSlice({
   },
 });
 
-export const {
-  setLoginOpen,
-  setSignUpOpen,
-  setCredentials,
-  setPermissions,
-  removeCredentials,
-} = authSlice.actions;
+export const { setLoginOpen, setSignUpOpen, setCredentials, setPermissions, removeCredentials } =
+  authSlice.actions;
 
 export const {
   selectCurrentToken,

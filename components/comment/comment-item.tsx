@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Avatar, Button, Chip, Spinner, Typography, cn, Dropdown } from "@heroui/react";
+import { Avatar, Button, Chip, Spinner, Typography, cn, Dropdown, Card } from "@heroui/react";
 import { HoverCard } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useCommentContext } from "./context/comment-context";
@@ -34,7 +34,8 @@ export function CommentItem({
   onReport,
   onRetry,
 }: CommentItemProps) {
-  const { activeReplyId, setActiveReplyId, highlightedCommentId, isAuthenticated } = useCommentContext();
+  const { activeReplyId, setActiveReplyId, highlightedCommentId, isAuthenticated } =
+    useCommentContext();
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const dispatch = useAppDispatch();
@@ -84,23 +85,19 @@ export function CommentItem({
         >
           <HoverCard openDelay={300} closeDelay={150}>
             <HoverCard.Trigger>
-              <Avatar size="sm" className="border-border/30 h-8 w-8 border shrink-0 cursor-pointer transition-opacity hover:opacity-90">
+              <Avatar size="sm">
                 {comment.avatar ? (
                   <Avatar.Image src={comment.avatar} alt={comment.username} />
                 ) : (
-                  <Avatar.Fallback className="text-xs font-bold uppercase select-none">
-                    {initialLetter}
-                  </Avatar.Fallback>
+                  <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
                 )}
               </Avatar>
             </HoverCard.Trigger>
             <HoverCard.Content>
               <HoverCard.Arrow />
               <div className="flex items-center gap-3">
-                <Avatar size="sm" className="border-border/30 border">
-                  <Avatar.Fallback className="text-xs font-bold uppercase select-none">
-                    {initialLetter}
-                  </Avatar.Fallback>
+                <Avatar size="sm">
+                  <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
                 </Avatar>
                 <div className="flex flex-col items-start justify-center text-left">
                   <span className="text-sm leading-4 font-semibold">
@@ -245,7 +242,6 @@ export function CommentItem({
   const renderReplyFormAndChildren = () => {
     return (
       <>
-        {/* 2. Inline Reply Form */}
         <AnimatePresence initial={false}>
           {isReplying && (
             <motion.div
@@ -253,8 +249,8 @@ export function CommentItem({
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ type: "spring", duration: 0.4, bounce: 0.1 }}
-              className="mt-3 flex w-full flex-col gap-2 overflow-hidden pl-[44px]"
-              onClick={(e) => e.stopPropagation()} // Stop click bubbling
+              className="mt-1 flex w-full flex-col gap-2 overflow-hidden pt-1 pr-1 pl-11"
+              onClick={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
             >
               <CommentInput
@@ -268,7 +264,6 @@ export function CommentItem({
           )}
         </AnimatePresence>
 
-        {/* 3. Recursive Child Comments rendering (Expandable Body/Panel) */}
         {comment.children && comment.children.length > 0 && (
           <div className="flex flex-col">
             {comment.children.map((child) => (
@@ -295,7 +290,8 @@ export function CommentItem({
   const hasChildren = comment.children && comment.children.length > 0;
 
   return (
-    <div
+    <Card
+      variant="secondary"
       id={`comment-card-${comment.id}`}
       className={cn(
         "transition-[background-color,box-shadow] duration-200 ease-out",
@@ -306,9 +302,8 @@ export function CommentItem({
         depth > 1 && indentClass
       )}
     >
-      {/* Clickable Comment Row (unifying click to expand vs click to reply) */}
       <div
-        className="cursor-pointer hover:bg-default-100/5 dark:hover:bg-default-50/5 rounded-2xl p-2.5 -m-2.5 transition-colors"
+        className="cursor-pointer transition-colors"
         onClick={() => {
           if (hasChildren) {
             setIsExpanded(!isExpanded);
@@ -324,7 +319,6 @@ export function CommentItem({
         {renderCommentContentOnly(isExpanded)}
       </div>
 
-      {/* Slide-out Expansion Panel for Sub-comments and Inline Reply Input */}
       <AnimatePresence initial={false}>
         {(isExpanded || !hasChildren) && (
           <motion.div
@@ -338,6 +332,6 @@ export function CommentItem({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </Card>
   );
 }

@@ -74,60 +74,44 @@ export function CommentInput({
   const initialLetter = currentUser ? currentUser.slice(0, 2).toUpperCase() : "AN";
 
   return (
-    <form onSubmit={handleFormSubmit} className="flex w-full gap-4 ">
+    <form onSubmit={handleFormSubmit} className="flex flex-col gap-3">
       {replyId === null && (
-        <Avatar size="sm" className="border-border/30 shrink-0 border">
-          <Avatar.Fallback className="text-xs font-bold uppercase select-none">
-            {initialLetter}
-          </Avatar.Fallback>
+        <Avatar size="sm">
+          <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
         </Avatar>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
-        <TextField isRequired name="comment" className="w-full">
-          <TextArea
-            placeholder={placeholder}
-            value={content}
-            onChange={handleChange}
-            onFocus={() => {
-              if (!isAuthenticated) {
-                dispatch(setLoginOpen(true));
-              }
-            }}
-            variant="secondary"
-            className="w-full resize-none text-sm"
-            maxLength={1000}
-            rows={replyId ? 2 : 3}
-          />
-        </TextField>
+      <TextField isRequired name="comment">
+        <TextArea
+          placeholder={placeholder}
+          value={content}
+          onChange={handleChange}
+          onFocus={() => {
+            if (!isAuthenticated) {
+              dispatch(setLoginOpen(true));
+            }
+          }}
+          variant="secondary"
+          maxLength={1000}
+          rows={replyId ? 2 : 3}
+        />
+      </TextField>
 
-        <div className="flex justify-end gap-2">
-          {onCancel && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="rounded-full font-semibold transition-all duration-150 ease-out active:scale-[0.96]"
-              onPress={onCancel}
-              isDisabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="primary"
-            type="submit"
-            isDisabled={!content.trim() || isSubmitting}
-            className="rounded-full font-semibold transition-all duration-150 ease-out active:scale-[0.96]"
-          >
-            {isSubmitting ? (
-              <Spinner size="sm" color="accent" className="mr-1.5" />
-            ) : (
-              <Icon icon="lucide:send" className="mr-1.5 size-3.5" />
-            )}
-            {submitButtonText}
+      <div className="flex justify-end gap-2">
+        {onCancel && (
+          <Button size="sm" variant="ghost" onPress={onCancel} isDisabled={isSubmitting}>
+            Cancel
           </Button>
-        </div>
+        )}
+        <Button
+          size="sm"
+          variant="primary"
+          type="submit"
+          isDisabled={!content.trim() || isSubmitting}
+        >
+          {isSubmitting ? <Spinner size="sm" color="accent" /> : <Icon icon="lucide:send" />}
+          {submitButtonText}
+        </Button>
       </div>
     </form>
   );

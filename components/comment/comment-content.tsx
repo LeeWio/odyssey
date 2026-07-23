@@ -68,15 +68,13 @@ export function CommentContent({
   }
 
   return (
-    <div className="w-full pr-2">
+    <>
       {isReported ? (
-        <Alert status="danger" className="border-danger/20 mt-1 rounded-2xl p-3 shadow-none">
+        <Alert status="danger">
           <Alert.Indicator />
           <Alert.Content>
-            <Alert.Title className="text-xs leading-none font-bold">
-              Dialogue Under Review
-            </Alert.Title>
-            <Alert.Description className="mt-1 text-[11px] leading-relaxed opacity-90">
+            <Alert.Title>Dialogue Under Review</Alert.Title>
+            <Alert.Description>
               This resonance has been flagged and is currently awaiting moderation review.
             </Alert.Description>
           </Alert.Content>
@@ -84,7 +82,7 @@ export function CommentContent({
       ) : (
         <Typography
           type="body-sm"
-          className="text-foreground/90 text-sm leading-relaxed break-words whitespace-pre-wrap"
+          className="text-foreground/90 leading-relaxed wrap-break-word whitespace-pre-wrap"
         >
           {content}
         </Typography>
@@ -95,6 +93,6 @@ export function CommentContent({
           (edited)
         </span>
       )}
-    </div>
+    </>
   );
 }

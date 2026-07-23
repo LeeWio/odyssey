@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
-import { Button, Tooltip, Dropdown, cn } from "@heroui/react";
+import { Button, Tooltip, Dropdown, cn, Toolbar } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useCommentContext } from "./context/comment-context";
 import { EnhancedComment } from "./hooks/simulation-store";
+import { EmojiReactionButton } from "@heroui-pro/react";
 
 interface CommentActionsProps {
   comment: EnhancedComment;
@@ -39,45 +39,24 @@ export function CommentActions({
   const isUnapproved = comment.status === "PENDING" || comment.id < 0;
 
   return (
-    <div className="flex items-center gap-1.5">
-      {/* 1. Like Pill (Heart + Count) styled like the reference image */}
-      <Button
+    <Toolbar>
+      <EmojiReactionButton
         size="sm"
-        variant="ghost"
-        onPress={onLikeToggle}
+        isSelected={comment.isLiked}
+        onChange={onLikeToggle}
         isDisabled={isSimulatedOrPending}
-        className={cn(
-          "border-default-200/50 bg-default-50/50 h-7 min-w-0 rounded-full border px-2.5 transition-all active:scale-95",
-          comment.isLiked && "border-danger/20 bg-danger/10 text-danger",
-          "hover:border-danger/30 hover:bg-danger/10 hover:text-danger"
-        )}
       >
-        <Icon
-          icon={comment.isLiked ? "ph:heart-fill" : "ph:heart-bold"}
-          className={cn(
-            "size-3.5",
-            comment.isLiked ? "text-danger" : "text-default-400 group-hover:text-danger"
-          )}
-        />
-        {comment.likesCount > 0 && (
-          <span className="text-default-600 ml-1.5 text-xs font-semibold tabular-nums">
-            {comment.likesCount}
-          </span>
-        )}
-      </Button>
+        <EmojiReactionButton.Emoji>❤️</EmojiReactionButton.Emoji>
+        <EmojiReactionButton.Count>{comment.likesCount}</EmojiReactionButton.Count>
+      </EmojiReactionButton>
 
-      {/* 2. Clean Text Reply Button */}
       {depth < 5 && (
         <Tooltip delay={300}>
           <Button
             size="sm"
-            variant="ghost"
+            variant={isReplying ? "primary" : "ghost"}
             onPress={onReplyToggle}
             isDisabled={isSimulatedOrPending || isUnapproved}
-            className={cn(
-              "text-default-500 hover:text-foreground hover:bg-default-100 h-7 min-w-0 rounded-full border-none bg-transparent px-3 text-xs font-semibold transition-colors",
-              isReplying && "bg-default-100 text-foreground"
-            )}
           >
             Reply
           </Button>
@@ -87,17 +66,19 @@ export function CommentActions({
         </Tooltip>
       )}
 
-      {/* 3. Options Menu Dropdown (...) next to Reply */}
       <Dropdown>
-        <Dropdown.Trigger
+        <Button size="sm" isIconOnly>
+          <Icon icon="lucide:more-horizontal" />
+        </Button>
+        {/* <Dropdown.Trigger
           className={cn(
             "text-default-400 hover:bg-default-100 hover:text-foreground flex h-7 w-7 min-w-0 items-center justify-center rounded-full p-0 transition-colors active:scale-95",
             isSimulatedOrPending && "pointer-events-none opacity-50"
           )}
         >
           <Icon icon="lucide:more-horizontal" className="size-3.5" />
-        </Dropdown.Trigger>
-        <Dropdown.Popover className="min-w-[150px]">
+        </Dropdown.Trigger> */}
+        <Dropdown.Popover>
           <Dropdown.Menu
             onAction={(key) => {
               if (key === "edit") onEditStart();
@@ -131,6 +112,6 @@ export function CommentActions({
           </Dropdown.Menu>
         </Dropdown.Popover>
       </Dropdown>
-    </div>
+    </Toolbar>
   );
 }
