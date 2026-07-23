@@ -91,7 +91,6 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
       if (onOpenChange) {
         onOpenChange(false);
       }
-      router.push("/");
 
       // Reset state for next time modal opens
       setTimeout(() => {
