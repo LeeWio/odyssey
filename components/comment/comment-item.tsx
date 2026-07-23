@@ -10,6 +10,8 @@ import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
 import { CommentInput } from "./comment-input";
 import { EnhancedComment } from "./hooks/simulation-store";
+import { useAppDispatch } from "@/lib/hooks";
+import { setLoginOpen } from "@/lib/features/auth";
 
 interface CommentItemProps {
   comment: EnhancedComment;
@@ -32,9 +34,10 @@ export function CommentItem({
   onReport,
   onRetry,
 }: CommentItemProps) {
-  const { activeReplyId, setActiveReplyId, highlightedCommentId } = useCommentContext();
+  const { activeReplyId, setActiveReplyId, highlightedCommentId, isAuthenticated } = useCommentContext();
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const dispatch = useAppDispatch();
 
   const isReplying = activeReplyId === comment.id;
   const isHighlighted = highlightedCommentId === comment.id;
@@ -227,6 +230,10 @@ export function CommentItem({
                   isReplying={isReplying}
                   onLikeToggle={() => onLikeToggle(comment.id, comment.likesCount)}
                   onReplyToggle={() => {
+                    if (!isAuthenticated) {
+                      dispatch(setLoginOpen(true));
+                      return;
+                    }
                     const nextReplying = !isReplying;
                     setActiveReplyId(nextReplying ? comment.id : null);
                     if (nextReplying) {
@@ -322,12 +329,16 @@ export function CommentItem({
     >
       {/* Clickable Comment Row (unifying click to expand vs click to reply) */}
       <div
-        className="hover:bg-default-100/5 dark:hover:bg-default-50/5 -m-2.5 cursor-pointer rounded-2xl p-2.5 transition-colors"
+        className="cursor-pointer hover:bg-default-100/5 dark:hover:bg-default-50/5 rounded-2xl p-2.5 -m-2.5 transition-colors"
         onClick={() => {
           if (hasChildren) {
             setIsExpanded(!isExpanded);
           } else {
-            setActiveReplyId(isReplying ? null : comment.id);
+            if (!isAuthenticated) {
+              dispatch(setLoginOpen(true));
+            } else {
+              setActiveReplyId(isReplying ? null : comment.id);
+            }
           }
         }}
       >

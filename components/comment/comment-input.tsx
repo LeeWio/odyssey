@@ -5,6 +5,8 @@ import { Button, TextArea, TextField, Spinner, Avatar, toast } from "@heroui/rea
 import { Icon } from "@iconify/react";
 import { useCommentContext } from "./context/comment-context";
 import { useCommentDraft } from "./hooks/use-comment-draft";
+import { useAppDispatch } from "@/lib/hooks";
+import { setLoginOpen } from "@/lib/features/auth";
 
 interface CommentInputProps {
   replyId?: number | null;
@@ -25,6 +27,7 @@ export function CommentInput({
   const [draft, setDraft, clearDraft] = useCommentDraft(postId, replyId);
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const dispatch = useAppDispatch();
 
   // Initialize input content from draft
   useEffect(() => {
@@ -50,6 +53,10 @@ export function CommentInput({
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      dispatch(setLoginOpen(true));
+      return;
+    }
     if (!content.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
@@ -63,38 +70,6 @@ export function CommentInput({
       setIsSubmitting(false);
     }
   };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="border-default-100/50 bg-default-50/20 flex flex-col items-center justify-center rounded-2xl border border-dashed px-4 py-8 text-center">
-        <Icon icon="lucide:lock" className="text-default-400 mb-2 size-6" />
-        <p className="text-default-600 text-sm font-semibold">Join the Resonance</p>
-        <p className="text-default-400 mt-1 mb-4 text-xs">
-          Please log in to express a perspective and join the discussion feed.
-        </p>
-        <Button
-          size="sm"
-          variant="primary"
-          className="rounded-full font-semibold"
-          onPress={() => {
-            // Trigger login modal or navigation ( navbar controls login modal )
-            const loginTrigger = document.querySelector(
-              '[aria-label="User account menu"]'
-            ) as HTMLElement;
-            if (loginTrigger) {
-              loginTrigger.click();
-            } else {
-              // Fallback: reload/navigate to login
-              toast.warning("Please locate the Sign In button on the navigation bar.");
-            }
-          }}
-        >
-          <Icon icon="lucide:user" className="mr-1.5 size-3.5" />
-          Sign In to Comment
-        </Button>
-      </div>
-    );
-  }
 
   const initialLetter = currentUser ? currentUser.slice(0, 2).toUpperCase() : "AN";
 
@@ -114,6 +89,11 @@ export function CommentInput({
             placeholder={placeholder}
             value={content}
             onChange={handleChange}
+            onFocus={() => {
+              if (!isAuthenticated) {
+                dispatch(setLoginOpen(true));
+              }
+            }}
             variant="secondary"
             className="w-full resize-none text-sm"
             maxLength={1000}
