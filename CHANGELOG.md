@@ -1,3 +1,18 @@
+# [1.12.0](https://github.com/LeeWio/odyssey/compare/v1.11.0...v1.12.0) (2026-07-23)
+
+
+### Bug Fixes
+
+* **auth:** remove automatic homepage redirect on successful login ([9c669fb](https://github.com/LeeWio/odyssey/commit/9c669fb457630071f1e68fd24a0802eec08a1a68))
+* **comment:** add likesCount and likedByCurrentUser fields to Zod CommentResponseSchema to prevent data stripping ([430b883](https://github.com/LeeWio/odyssey/commit/430b883d24d606711e50b4520a59b87dabe3af7f))
+* **comment:** remove localStorage override of like count and status for flawless multi-user sync ([8124f97](https://github.com/LeeWio/odyssey/commit/8124f97235b8b733733945aa581749e4593446f2))
+
+
+### Features
+
+* **auth:** migrate SignUp and LogIn modal states to Redux global slice ([092c8af](https://github.com/LeeWio/odyssey/commit/092c8afda3ddbd1279f2d3559ea28f51284a6149))
+* **comment:** remove unauthenticated blocker and trigger login modal directly on action ([eb7bd93](https://github.com/LeeWio/odyssey/commit/eb7bd9394ec1ed7288ba8ebff67486a02fc03c31))
+
 # [1.11.0](https://github.com/LeeWio/odyssey/compare/v1.10.0...v1.11.0) (2026-07-23)
 
 
