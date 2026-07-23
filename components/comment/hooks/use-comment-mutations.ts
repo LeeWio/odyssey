@@ -31,6 +31,7 @@ export function useCommentMutations({
     postId,
     currentUser,
     isAuthenticated,
+    edits,
     setLikes,
     setEdits,
     setDeletions,
@@ -140,7 +141,7 @@ export function useCommentMutations({
   const toggleLike = async (id: number, currentIsLiked: boolean, currentLikes: number) => {
     const nextLiked = !currentIsLiked;
     const nextCount = nextLiked ? currentLikes + 1 : Math.max(0, currentLikes - 1);
-    
+
     // Set local optimistic state in memory
     setLikes((prev) => ({ ...prev, [id]: { count: nextCount, isLiked: nextLiked } }));
 
@@ -158,40 +159,59 @@ export function useCommentMutations({
     }
   };
 
-  // 4. EDIT COMMENT (Local Simulation + Real API Sync)
+  // 4. EDIT COMMENT (Optimistic UI + Real API Sync)
   const editComment = async (id: number, newContent: string) => {
-    simulationStore.editComment(id, newContent);
+    const hadPreviousEdit = Object.prototype.hasOwnProperty.call(edits, id);
+    const previousEdit = edits[id];
     setEdits((prev) => ({ ...prev, [id]: newContent }));
 
     try {
       await editMyCommentApi({ id, content: newContent }).unwrap();
     } catch (err) {
       console.error("Failed to sync comment edit:", err);
+      setEdits((prev) => {
+        const next = { ...prev };
+        if (hadPreviousEdit && previousEdit !== undefined) {
+          next[id] = previousEdit;
+        } else {
+          delete next[id];
+        }
+        return next;
+      });
     }
   };
 
-  // 5. DELETE COMMENT (Local Simulation + Real API Sync)
+  // 5. DELETE COMMENT (Optimistic UI + Real API Sync)
   const deleteComment = async (id: number) => {
-    simulationStore.deleteComment(id);
-    setDeletions((prev) => [...prev, id]);
-    setLocalComments((prev) => prev.filter((c) => c.id !== id));
+    let removedLocalComment: EnhancedComment | undefined;
+    setDeletions((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setLocalComments((prev) => {
+      removedLocalComment = prev.find((c) => c.id === id);
+      return prev.filter((c) => c.id !== id);
+    });
 
     try {
       await deleteMyCommentApi(id).unwrap();
     } catch (err) {
       console.error("Failed to sync comment deletion:", err);
+      setDeletions((prev) => prev.filter((deletedId) => deletedId !== id));
+      if (removedLocalComment) {
+        setLocalComments((prev) =>
+          prev.some((c) => c.id === id) ? prev : [...prev, removedLocalComment as EnhancedComment]
+        );
+      }
     }
   };
 
-  // 6. REPORT COMMENT (Local Simulation + Real API Sync)
+  // 6. REPORT COMMENT (Optimistic UI + Real API Sync)
   const reportComment = async (id: number) => {
-    simulationStore.reportComment(id);
-    setReports((prev) => [...prev, id]);
+    setReports((prev) => (prev.includes(id) ? prev : [...prev, id]));
 
     try {
       await reportCommentApi({ id, reason: "inappropriate" }).unwrap();
     } catch (err) {
       console.error("Failed to sync comment report:", err);
+      setReports((prev) => prev.filter((reportedId) => reportedId !== id));
     }
   };
 

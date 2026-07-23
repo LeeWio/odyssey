@@ -15,10 +15,11 @@ import {
   ListBox,
   ScrollShadow,
   Spinner,
-  Button,
   Chip,
+  Typography,
 } from "@heroui/react";
 import { useGetRelatedPostsQuery, useGetFeaturedPostsQuery } from "@/lib/features/post/post-api";
+import { cn } from "@/lib/utils";
 
 const tabs = [
   {
@@ -271,6 +272,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                   <MotionTimeline
                     density="compact"
                     size="sm"
+                    className="pr-1"
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
@@ -293,59 +295,56 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                         <MotionTimelineItem
                           key={post.id}
                           status={isCurrent ? "current" : "default"}
-                          align="start"
-                          className="group min-w-0 cursor-pointer"
-                          onClick={() => router.push(`/blog/${post.slug}`)}
+                          align="center"
                           variants={itemVariants}
                         >
                           <Timeline.Rail>
                             <Timeline.Marker aria-hidden="true">
-                              {isCurrent ? (
-                                <IconComponent className="transition-all duration-200" />
-                              ) : (
-                                <IconComponent className="group-hover:text-accent transition-all duration-200 group-hover:scale-125" />
-                              )}
+                              <IconComponent />
                             </Timeline.Marker>
-                            <Timeline.Connector
-                              className={`${isCurrent ? "bg-accent opacity-60" : "opacity-25"}`}
-                            />
+                            <Timeline.Connector />
                           </Timeline.Rail>
 
-                          <Timeline.Content className="w-full min-w-0 flex-1 pl-2">
-                            <div className="flex w-full min-w-0 flex-col transition-all duration-300 ease-out group-hover:-translate-y-0.5">
-                              <div className="w-full">
-                                <h4
-                                  title={post.title}
-                                  className={`line-clamp-2 block w-full text-xs leading-snug font-semibold transition-colors duration-200 ${
-                                    isCurrent
-                                      ? "text-accent"
-                                      : "text-default-800 group-hover:text-foreground"
-                                  }`}
-                                >
-                                  {post.title}
-                                </h4>
-                              </div>
-
-                              {post.summary && (
-                                <p className="text-default-400 mt-1 line-clamp-2 text-[11px] leading-relaxed font-normal">
-                                  {post.summary}
-                                </p>
+                          <Timeline.Content className="w-full min-w-0 flex-1">
+                            <button
+                              type="button"
+                              aria-current={isCurrent ? "page" : undefined}
+                              aria-label={`Read ${post.title}`}
+                              className={cn(
+                                "group/article block w-full min-w-0 overflow-hidden rounded-md px-2 py-1.5 text-left transition-colors duration-150",
+                                "focus-visible:ring-focus focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                                isCurrent ? "bg-default-100/45" : "hover:bg-default-100/25"
                               )}
-
-                              <div className="text-default-400 mt-1.5 flex items-center gap-1.5 text-[10px] font-medium">
-                                {post.category && (
-                                  <>
-                                    <span className="text-accent font-semibold">
-                                      {post.category.name}
-                                    </span>
-                                    <span>·</span>
-                                  </>
+                              onClick={() => router.push(`/single/${post.slug}`)}
+                            >
+                              <span className="flex w-full min-w-0 flex-col gap-1">
+                                <span className="text-foreground group-hover/article:text-accent line-clamp-2 text-xs leading-5 font-medium transition-colors">
+                                  {post.title}
+                                </span>
+                                {post.summary && (
+                                  <span className="text-muted line-clamp-1 text-[11px] leading-4">
+                                    {post.summary}
+                                  </span>
                                 )}
-                                <span>{formattedDate}</span>
-                                <span>·</span>
-                                <span>{readingTime} min read</span>
-                              </div>
-                            </div>
+
+                                <span className="flex min-w-0 items-center gap-1.5">
+                                  {post.category && (
+                                    <Chip size="sm" variant={isCurrent ? "soft" : "tertiary"}>
+                                      <Chip.Label>{post.category.name}</Chip.Label>
+                                    </Chip>
+                                  )}
+                                  <time
+                                    className="text-muted shrink-0 text-[11px] leading-4 tabular-nums"
+                                    dateTime={dateSource}
+                                  >
+                                    {formattedDate}
+                                  </time>
+                                  <span className="text-muted shrink-0 text-[11px] leading-4">
+                                    {readingTime} min
+                                  </span>
+                                </span>
+                              </span>
+                            </button>
                           </Timeline.Content>
                         </MotionTimelineItem>
                       );
@@ -378,10 +377,11 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                 ) : (
                   <MotionListBox
                     aria-label="Featured Articles"
+                    selectionMode="none"
                     variants={listBoxContainerVariants}
                     initial="hidden"
                     animate="visible"
-                    onAction={(key) => router.push(`/blog/${key}`)}
+                    onAction={(key) => router.push(`/single/${key}`)}
                   >
                     {featuredPosts.slice(0, 5).map((post, idx) => {
                       const readingTime = post.summary
@@ -417,38 +417,26 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                               damping: 25,
                             },
                           }}
-                          className="group flex w-full min-w-0 items-center gap-3 transition-colors duration-300"
+                          className="group flex w-full min-w-0 items-center transition-colors duration-300"
                         >
-                          <div className="bg-default-100 text-default-500 group-hover:bg-accent/10 group-hover:text-accent flex size-8 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-semibold transition-all duration-300 group-hover:scale-105">
+                          <div className="group-hover:bg-accent/10 group-hover:text-accent flex size-8 shrink-0 items-center justify-center rounded-3xl font-mono font-semibold transition-all duration-300 group-hover:scale-105">
                             {String(idx + 1).padStart(2, "0")}
                           </div>
 
-                          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                            <Label
-                              title={post.title}
-                              className="text-default-800 group-hover:text-foreground block w-full truncate text-sm font-medium transition-colors duration-200"
-                            >
+                          <div className="flex min-w-0 flex-1 flex-col">
+                            <Label className="w-full truncate transition-colors duration-200">
                               {post.title}
                             </Label>
-
-                            <Description className="text-default-400 group-hover:text-default-500 flex items-center gap-2 text-[11px] font-normal transition-colors duration-200">
+                            <Description>
                               <span>{formattedDate}</span>
-
-                              <span className="opacity-50">•</span>
-
                               <span>{readingTime} min read</span>
                             </Description>
                           </div>
 
-                          {/* Views */}
-
-                          <div className="text-default-400 group-hover:text-accent flex shrink-0 items-center gap-1 text-[11px] font-medium transition-all duration-300">
-                            <Eye className="size-3.5 transition-transform duration-300 group-hover:scale-110" />
-
-                            <span>{post.views}</span>
-                          </div>
-
-                          <ListBox.ItemIndicator />
+                          <Chip color="success" variant="soft">
+                            <Icon icon="gravity-ui:eye" />
+                            <Chip.Label>{post.views}</Chip.Label>
+                          </Chip>
                         </MotionListBoxItem>
                       );
                     })}
@@ -465,7 +453,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                     key={user.id}
                     id={user.id}
                     textValue={user.name}
-                    className="group hover:bg-default-50/80 flex w-full min-w-0 cursor-pointer items-center rounded-xl p-2 transition-all duration-200 active:scale-[0.98]"
+                    className="group hover:bg-default-50/80 flex w-full min-w-0 cursor-pointer items-center transition-all duration-200 active:scale-[0.98]"
                   >
                     <ItemCard variant="transparent" className="flex w-full items-center gap-3 p-0">
                       <ItemCard.Icon className="flex shrink-0">
@@ -517,6 +505,7 @@ function ArticleSegment({ selectedKey, onSelectionChange }: ArticleSegmentProps)
       onSelectionChange={(key) => {
         onSelectionChange(String(key) as TabId);
       }}
+      size="sm"
       variant="ghost"
       className="w-full"
     >

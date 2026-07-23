@@ -67,9 +67,9 @@ export function CommentProvider({
     if (typeof window === "undefined") return;
     const timer = setTimeout(() => {
       setLikes({}); // Initialize as empty to respect backend-driven values
-      setEdits(simulationStore.getEdits());
-      setDeletions(simulationStore.getDeletions());
-      setReports(simulationStore.getReports());
+      setEdits({});
+      setDeletions([]);
+      setReports([]);
       setLocalComments(simulationStore.getLocalComments(postId));
     }, 0);
     return () => clearTimeout(timer);

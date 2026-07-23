@@ -33,29 +33,23 @@ export function CommentContent({
   if (isEditing) {
     return (
       <div className="mt-1 flex w-full flex-col gap-2">
-        <TextField isRequired name="edit-comment">
+        <TextField isRequired fullWidth name="edit-comment">
           <TextArea
             value={editedText}
             onChange={(e) => setEditedText(e.target.value)}
             variant="secondary"
-            className="w-full resize-none text-sm"
+            fullWidth
             maxLength={1000}
             rows={3}
           />
         </TextField>
         <div className="flex justify-end gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="rounded-full font-semibold transition-all duration-150 ease-out active:scale-[0.96]"
-            onPress={onEditCancel}
-          >
+          <Button size="sm" variant="ghost" onPress={onEditCancel}>
             Cancel
           </Button>
           <Button
             size="sm"
             variant="primary"
-            className="rounded-full font-semibold transition-all duration-150 ease-out active:scale-[0.96]"
             isDisabled={!editedText.trim() || editedText.trim() === content}
             onPress={() => onEditSave(editedText.trim())}
           >
@@ -80,12 +74,9 @@ export function CommentContent({
           </Alert.Content>
         </Alert>
       ) : (
-        <Typography
-          type="body-sm"
-          className="text-foreground/90 leading-relaxed wrap-break-word whitespace-pre-wrap"
-        >
-          {content}
-        </Typography>
+        <div className="wrap-break-word whitespace-pre-wrap">
+          <Typography type="body-sm">{content}</Typography>
+        </div>
       )}
 
       {isEdited && !isReported && (

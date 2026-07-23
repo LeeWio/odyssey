@@ -90,8 +90,9 @@ export function useComments() {
       if (deletions.includes(node.id)) return null;
 
       const localLike = likes[node.id];
-      const isLiked = localLike !== undefined ? localLike.isLiked : (node.likedByCurrentUser || false);
-      const likesCount = localLike !== undefined ? localLike.count : (node.likesCount || 0);
+      const isLiked =
+        localLike !== undefined ? localLike.isLiked : node.likedByCurrentUser || false;
+      const likesCount = localLike !== undefined ? localLike.count : node.likesCount || 0;
       const localEdit = edits[node.id];
       const isReported = reports.includes(node.id);
 

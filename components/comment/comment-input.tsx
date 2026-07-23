@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, TextArea, TextField, Spinner, Avatar, toast } from "@heroui/react";
+import { Button, TextArea, TextField, Spinner, Avatar } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useCommentContext } from "./context/comment-context";
 import { useCommentDraft } from "./hooks/use-comment-draft";
@@ -26,6 +26,7 @@ export function CommentInput({
   const { postId, isAuthenticated, currentUser, setHasUnsavedDraft } = useCommentContext();
   const [draft, setDraft, clearDraft] = useCommentDraft(postId, replyId);
   const [content, setContent] = useState("");
+  const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useAppDispatch();
 
@@ -33,6 +34,7 @@ export function CommentInput({
   useEffect(() => {
     const timer = setTimeout(() => {
       setContent(draft);
+      setHasHydratedDraft(true);
     }, 0);
     return () => clearTimeout(timer);
   }, [draft]);
@@ -40,10 +42,10 @@ export function CommentInput({
   // Set context state for unsaved drafts
   useEffect(() => {
     const timer = setTimeout(() => {
-      setHasUnsavedDraft(content.trim().length > 0 && content !== draft);
+      setHasUnsavedDraft(hasHydratedDraft && content.trim().length > 0);
     }, 0);
     return () => clearTimeout(timer);
-  }, [content, draft, setHasUnsavedDraft]);
+  }, [content, hasHydratedDraft, setHasUnsavedDraft]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
@@ -64,6 +66,7 @@ export function CommentInput({
       await onSubmit(content.trim());
       setContent("");
       clearDraft();
+      setHasUnsavedDraft(false);
     } catch (err) {
       console.error("Form submit failed:", err);
     } finally {
@@ -81,7 +84,7 @@ export function CommentInput({
         </Avatar>
       )}
 
-      <TextField isRequired name="comment">
+      <TextField isRequired fullWidth name="comment">
         <TextArea
           placeholder={placeholder}
           value={content}
@@ -92,6 +95,7 @@ export function CommentInput({
             }
           }}
           variant="secondary"
+          fullWidth
           maxLength={1000}
           rows={replyId ? 2 : 3}
         />
@@ -99,7 +103,17 @@ export function CommentInput({
 
       <div className="flex justify-end gap-2">
         {onCancel && (
-          <Button size="sm" variant="ghost" onPress={onCancel} isDisabled={isSubmitting}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onPress={() => {
+              setContent("");
+              clearDraft();
+              setHasUnsavedDraft(false);
+              onCancel();
+            }}
+            isDisabled={isSubmitting}
+          >
             Cancel
           </Button>
         )}

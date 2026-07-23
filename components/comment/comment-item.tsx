@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Avatar, Button, Chip, Spinner, Typography, cn, Dropdown, Card } from "@heroui/react";
+import { Avatar, Button, Chip, Typography, cn, Dropdown, Card } from "@heroui/react";
 import { HoverCard } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useCommentContext } from "./context/comment-context";
@@ -75,7 +75,7 @@ export function CommentItem({
 
   // Renders the core comment details (User Row, Text Content, actions footer bar)
   // Shared across both root triggers, and nested Disclosure trigger rows
-  const renderCommentContentOnly = (isExpandedState?: boolean) => {
+  const renderCommentContentOnly = () => {
     return (
       <div className="group relative flex w-full gap-3">
         <div
@@ -136,21 +136,13 @@ export function CommentItem({
               </Typography>
 
               {comment.isFailed && (
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-danger-soft/10 text-danger border-danger/20 h-5 border px-1.5 text-[9px] font-bold"
-                >
+                <Chip size="sm" variant="soft" color="danger">
                   Failed to send
                 </Chip>
               )}
 
               {comment.status === "PENDING" && !comment.isPending && (
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-warning/10 text-warning border-warning/20 h-5 border px-1.5 text-[9px] font-bold"
-                >
+                <Chip size="sm" variant="soft" color="warning">
                   Awaiting Moderation
                 </Chip>
               )}
@@ -163,12 +155,12 @@ export function CommentItem({
               onMouseDown={(e) => e.stopPropagation()}
             >
               <Dropdown>
-                <Dropdown.Trigger className="text-default-300 hover:text-foreground hover:bg-default-100 flex h-6 w-6 items-center justify-center rounded-full p-0 transition-colors">
+                <Button size="sm" variant="ghost" isIconOnly aria-label="Copy comment link">
                   <Icon icon="lucide:more-horizontal" className="size-3.5" />
-                </Dropdown.Trigger>
-                <Dropdown.Popover className="min-w-[150px]">
+                </Button>
+                <Dropdown.Popover>
                   <Dropdown.Menu onAction={() => {}}>
-                    <Dropdown.Item key="copy" textValue="Copy Link">
+                    <Dropdown.Item id="copy" textValue="Copy Link">
                       <div className="flex items-center gap-2">
                         <Icon icon="lucide:link" className="size-3.5" />
                         <span className="text-xs">Copy Link</span>
@@ -290,8 +282,7 @@ export function CommentItem({
   const hasChildren = comment.children && comment.children.length > 0;
 
   return (
-    <Card
-      variant="secondary"
+    <div
       id={`comment-card-${comment.id}`}
       className={cn(
         "transition-[background-color,box-shadow] duration-200 ease-out",
@@ -302,36 +293,40 @@ export function CommentItem({
         depth > 1 && indentClass
       )}
     >
-      <div
-        className="cursor-pointer transition-colors"
-        onClick={() => {
-          if (hasChildren) {
-            setIsExpanded(!isExpanded);
-          } else {
-            if (!isAuthenticated) {
-              dispatch(setLoginOpen(true));
-            } else {
-              setActiveReplyId(isReplying ? null : comment.id);
+      <Card variant="secondary">
+        <div
+          className={cn(hasChildren && "cursor-pointer transition-colors")}
+          role={hasChildren ? "button" : undefined}
+          tabIndex={hasChildren ? 0 : undefined}
+          aria-expanded={hasChildren ? isExpanded : undefined}
+          onClick={() => {
+            if (hasChildren) {
+              setIsExpanded(!isExpanded);
             }
-          }
-        }}
-      >
-        {renderCommentContentOnly(isExpanded)}
-      </div>
+          }}
+          onKeyDown={(e) => {
+            if (!hasChildren || (e.key !== "Enter" && e.key !== " ")) return;
+            e.preventDefault();
+            setIsExpanded((expanded) => !expanded);
+          }}
+        >
+          {renderCommentContentOnly()}
+        </div>
 
-      <AnimatePresence initial={false}>
-        {(isExpanded || !hasChildren) && (
-          <motion.div
-            initial={hasChildren ? { height: 0, opacity: 0 } : undefined}
-            animate={hasChildren ? { height: "auto", opacity: 1 } : undefined}
-            exit={hasChildren ? { height: 0, opacity: 0 } : undefined}
-            transition={{ type: "spring", duration: 0.4, bounce: 0.1 }}
-            className="overflow-hidden"
-          >
-            {renderReplyFormAndChildren()}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Card>
+        <AnimatePresence initial={false}>
+          {(isExpanded || !hasChildren) && (
+            <motion.div
+              initial={hasChildren ? { height: 0, opacity: 0 } : undefined}
+              animate={hasChildren ? { height: "auto", opacity: 1 } : undefined}
+              exit={hasChildren ? { height: 0, opacity: 0 } : undefined}
+              transition={{ type: "spring", duration: 0.4, bounce: 0.1 }}
+              className="overflow-hidden"
+            >
+              {renderReplyFormAndChildren()}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Card>
+    </div>
   );
 }

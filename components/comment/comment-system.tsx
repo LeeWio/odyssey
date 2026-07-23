@@ -57,6 +57,7 @@ function CommentSystemContainer() {
 
   return (
     <div className="flex w-full flex-col gap-6">
+      <CommentInput onSubmit={handleRootSubmit} />
       <CommentList
         comments={comments}
         isLoading={isLoading}
