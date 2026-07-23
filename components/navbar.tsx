@@ -29,6 +29,10 @@ import {
   selectCurrentUser,
   selectIsAuthenticated,
   selectUserEmail,
+  setLoginOpen,
+  setSignUpOpen,
+  selectIsLoginOpen,
+  selectIsSignUpOpen,
 } from "@/lib/features/auth";
 import { baseApi } from "@/lib/features/api/base-api";
 import { CommandPalette } from "./command-palette";
@@ -687,13 +691,13 @@ export const Navbar = () => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
   const email = useAppSelector(selectUserEmail);
+  const isLoginOpen = useAppSelector(selectIsLoginOpen);
+  const isSignUpOpen = useAppSelector(selectIsSignUpOpen);
 
   const [activeNavigation, setActiveNavigation] = useState<NavigationId | null>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
   const activeItem = getNavigationItem(activeNavigation);
   const platformKey = mounted && (os === "macos" || os === "ios") ? "⌘" : "Ctrl";
@@ -781,13 +785,13 @@ export const Navbar = () => {
   };
 
   const switchToSignUp = () => {
-    setIsLoginOpen(false);
-    window.setTimeout(() => setIsSignUpOpen(true), 220);
+    dispatch(setLoginOpen(false));
+    window.setTimeout(() => dispatch(setSignUpOpen(true)), 220);
   };
 
   const switchToLogIn = () => {
-    setIsSignUpOpen(false);
-    window.setTimeout(() => setIsLoginOpen(true), 220);
+    dispatch(setSignUpOpen(false));
+    window.setTimeout(() => dispatch(setLoginOpen(true)), 220);
   };
 
   const isNavigationOpen = Boolean(activeItem || isMobileMenuOpen);
@@ -1117,7 +1121,7 @@ export const Navbar = () => {
                 size="sm"
                 variant="ghost"
                 className="hidden h-9 rounded-xl px-3.5 font-semibold sm:flex"
-                onPress={() => setIsLoginOpen(true)}
+                onPress={() => dispatch(setLoginOpen(true))}
               >
                 Sign in
               </Button>
@@ -1387,10 +1391,14 @@ export const Navbar = () => {
       <CommandPalette isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} />
       <SignUp
         isOpen={isSignUpOpen}
-        onOpenChange={setIsSignUpOpen}
+        onOpenChange={(open) => dispatch(setSignUpOpen(open))}
         onSwitchToLogIn={switchToLogIn}
       />
-      <LogIn isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} onSwitchToSignUp={switchToSignUp} />
+      <LogIn
+        isOpen={isLoginOpen}
+        onOpenChange={(open) => dispatch(setLoginOpen(open))}
+        onSwitchToSignUp={switchToSignUp}
+      />
     </>
   );
 };
