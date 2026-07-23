@@ -26,6 +26,7 @@ export interface EnhancedComment {
   isPending?: boolean;
   isFailed?: boolean;
   isReported?: boolean;
+  isPostAuthor?: boolean;
 }
 
 // Helper to get safe JSON parse
