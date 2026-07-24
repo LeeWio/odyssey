@@ -1,3 +1,10 @@
+## [1.14.8](https://github.com/LeeWio/odyssey/compare/v1.14.7...v1.14.8) (2026-07-24)
+
+
+### Bug Fixes
+
+* **docker:** remove .next from .dockerignore to allow copying precompiled standalone files ([bfa3e28](https://github.com/LeeWio/odyssey/commit/bfa3e28c2e0b13e7cf659db435b181392f7bb2b0))
+
 ## [1.14.7](https://github.com/LeeWio/odyssey/compare/v1.14.6...v1.14.7) (2026-07-24)
 
 
