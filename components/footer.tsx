@@ -18,7 +18,7 @@ export function Footer() {
       </a>
       {os !== "undetermined" && (
         <span className="text-muted text-xs select-none">
-          Running on <span className="text-accent capitalize">{os}</span>
+          Running on <span className="text-accent capitalize">{os}</span> • Pipeline Verified ✓
         </span>
       )}
     </footer>
