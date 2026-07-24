@@ -1,3 +1,10 @@
+## [1.16.1](https://github.com/LeeWio/odyssey/compare/v1.16.0...v1.16.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* **single-page:** safely guard JSON parsing of markdown content ([146f5cf](https://github.com/LeeWio/odyssey/commit/146f5cf0134175f7b082eb99e194eb39f0d2bfda))
+
 # [1.16.0](https://github.com/LeeWio/odyssey/compare/v1.15.1...v1.16.0) (2026-07-24)
 
 
