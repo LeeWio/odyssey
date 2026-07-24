@@ -41,8 +41,8 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ id.meta.outputs.tags }}
-          labels: ${{ id.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           # Securely mount the private HeroUI authentication token during build
           secrets: |
             "heroui_auth_token=${{ secrets.HEROUI_AUTH_TOKEN }}"

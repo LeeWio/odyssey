@@ -7,7 +7,7 @@
       "dependencies": {
         "@gravity-ui/icons": "^2.18.0",
         "@gsap/react": "^2.1.2",
-        "@heroui-pro/react": "^1.0.0-beta.6",
+        "@heroui-pro/react": "^1.0.0-beta.7",
         "@heroui/react": "^3.2.2",
         "@heroui/styles": "^3.2.2",
         "@iconify/react": "^6.0.2",
@@ -192,7 +192,7 @@
 
     "@gsap/react": ["@gsap/react@2.1.2", "", { "peerDependencies": { "gsap": "^3.12.5", "react": ">=17" } }, "sha512-JqliybO1837UcgH2hVOM4VO+38APk3ECNrsuSM4MuXp+rbf+/2IG2K1YJiqfTcXQHH7XlA0m3ykniFYstfq0Iw=="],
 
-    "@heroui-pro/react": ["@heroui-pro/react@1.0.0-beta.6", "", { "dependencies": { "chalk": "5.6.2", "heroui-pro": "^1.0.0-alpha.1" } }, "sha512-wejAgZdTvccsCLgIpRJNE9ovbkC5qo9rX97e5Leb7nlaHU6Bg+0b2Sx9dbhkUQQqLLhsppBjrWDAlnItauZkdQ=="],
+    "@heroui-pro/react": ["@heroui-pro/react@1.0.0-beta.7", "", { "dependencies": { "chalk": "5.6.2", "heroui-pro": "^1.0.0-alpha.1" } }, "sha512-8OPimF2ZwbX89wxpYlYRDFTCCVKQn1eRPtvymwLcjCTt2PWfYmYvqT/Yvn+VAgfr7QYCxmmxlAmLy29hwfyYcA=="],
 
     "@heroui/react": ["@heroui/react@3.2.2", "", { "dependencies": { "@heroui/styles": "3.2.2", "@radix-ui/react-avatar": "1.1.11", "@react-aria/i18n": "3.13.1", "@react-aria/ssr": "3.10.1", "@react-aria/utils": "3.34.1", "@react-stately/utils": "3.12.1", "@react-types/color": "3.2.0", "@react-types/shared": "3.36.0", "input-otp": "1.4.2", "react-aria": "^3.50.0", "react-aria-components": "^1.19.0", "tailwind-merge": "3.4.0", "tailwind-variants": "3.2.2" }, "peerDependencies": { "react": ">=19.0.0", "react-dom": ">=19.0.0", "tailwindcss": ">=4.0.0" } }, "sha512-TN8ccfHCRIxa9dGhWMaVSl5sGCKWH2E13z2NJ5QBZTFQCow8GogQzW3cn/dRz3YEdYt4B9zfH2N0oKEazVoKRA=="],
 
