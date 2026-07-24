@@ -1,0 +1,13 @@
+.git
+.github
+.next
+node_modules
+.idea
+.gemini
+.agents
+*.log
+.env
+.env.*
+Dockerfile
+README.md
+CHANGELOG.md
