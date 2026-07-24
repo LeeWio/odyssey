@@ -2,7 +2,7 @@ name: Odyssey Frontend Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   REGISTRY: ghcr.io

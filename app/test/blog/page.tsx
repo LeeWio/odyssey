@@ -189,9 +189,7 @@ export default function BlogTestPage() {
                       ease: [0.22, 1, 0.36, 1],
                     }}
                   >
-                    <Modal.Footer>
-                    111
-                    </Modal.Footer>
+                    <Modal.Footer>111</Modal.Footer>
                   </motion.div>
                 )}
               </AnimatePresence>
