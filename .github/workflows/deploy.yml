@@ -4,13 +4,13 @@ on:
   push:
     branches: ["main"]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'plans/**'
-      - '.github/workflows/ci.yml'
-      - '.github/workflows/security.yml'
-      - '.github/workflows/release.yml'
-      - '.gitignore'
+      - "**.md"
+      - "docs/**"
+      - "plans/**"
+      - ".github/workflows/ci.yml"
+      - ".github/workflows/security.yml"
+      - ".github/workflows/release.yml"
+      - ".gitignore"
 
 concurrency:
   group: odyssey-production-deploy

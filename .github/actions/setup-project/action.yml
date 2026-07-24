@@ -1,18 +1,18 @@
-name: 'Setup Project Environment'
-description: 'Standardized Node/Bun setup with aggressive caching of dependencies'
+name: "Setup Project Environment"
+description: "Standardized Node/Bun setup with aggressive caching of dependencies"
 
 inputs:
   bun-version:
-    description: 'Version of Bun to install'
+    description: "Version of Bun to install"
     required: false
-    default: '1.3.14'
+    default: "1.3.14"
   install-deps:
-    description: 'Whether to run bun install'
+    description: "Whether to run bun install"
     required: false
-    default: 'true'
+    default: "true"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Setup Bun
       uses: oven-sh/setup-bun@v2

@@ -4,9 +4,9 @@ on:
   push:
     branches: [main, master]
     paths:
-      - 'bun.lock'
-      - 'package.json'
-      - '.github/workflows/security.yml'
+      - "bun.lock"
+      - "package.json"
+      - ".github/workflows/security.yml"
   schedule:
     # Run every night at midnight UTC
     - cron: "0 0 * * *"
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Project Environment
         uses: ./.github/actions/setup-project
         with:
-          install-deps: 'false'
+          install-deps: "false"
 
       # Perform a blazing fast native Bun Scan
       - name: Run Fast Native Bun Scan

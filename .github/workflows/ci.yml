@@ -4,19 +4,19 @@ on:
   push:
     branches: [main, master]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'plans/**'
-      - '.gitignore'
-      - 'LICENSE'
+      - "**.md"
+      - "docs/**"
+      - "plans/**"
+      - ".gitignore"
+      - "LICENSE"
   pull_request:
     branches: [main, master]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'plans/**'
-      - '.gitignore'
-      - 'LICENSE'
+      - "**.md"
+      - "docs/**"
+      - "plans/**"
+      - ".gitignore"
+      - "LICENSE"
 
 permissions:
   contents: read
