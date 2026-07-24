@@ -65,10 +65,13 @@ export default function SinglePage({ params }: SinglePageProps) {
   const articleContent = article?.content;
   const parsedContent = useMemo<JSONContent | undefined>(() => {
     if (!articleContent) return undefined;
+    const trimmed = articleContent.trim();
+    if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+      return undefined; // It is plain text or Markdown, not JSON
+    }
     try {
-      return JSON.parse(articleContent) as JSONContent;
-    } catch (error) {
-      console.error("[SINGLE-PAGE] Parsing content failed:", error);
+      return JSON.parse(trimmed) as JSONContent;
+    } catch {
       return undefined;
     }
   }, [articleContent]);
