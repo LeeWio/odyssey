@@ -56,9 +56,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .next/cache
-          # Generate a new cache whenever packages or source files change.
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
-          # Fallback to last known cache
+          # Vercel-recommended high-performance GHA cache key strategy
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-
 
@@ -69,3 +68,11 @@ jobs:
         uses: treosh/lighthouse-ci-action@v12
         with:
           configPath: ./.lighthouserc.json
+
+      - name: Upload Lighthouse Reports Artifact
+        uses: actions/upload-artifact@v4
+        if: always() # Run even if assertions fail, allowing developers to download and inspect HTML reports
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 7
