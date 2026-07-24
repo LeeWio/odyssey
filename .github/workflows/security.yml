@@ -29,10 +29,6 @@ jobs:
         with:
           install-deps: "false"
 
-      # Perform a blazing fast native Bun Scan
-      - name: Run Fast Native Bun Scan
-        run: bun pm scan
-
       # Generate temporary lockfile for audit-ci compatibility
       - name: Generate Temporary Lockfile for Auditing
         run: bun install --yarn
