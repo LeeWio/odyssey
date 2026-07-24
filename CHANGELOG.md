@@ -1,3 +1,10 @@
+## [1.14.3](https://github.com/LeeWio/odyssey/compare/v1.14.2...v1.14.3) (2026-07-24)
+
+
+### Performance Improvements
+
+* **docker:** use official oven/bun base image to eliminate npm bun installation timeout ([f8499d4](https://github.com/LeeWio/odyssey/commit/f8499d4adecc4099eec14b082cfc813f144ca2e6))
+
 ## [1.14.2](https://github.com/LeeWio/odyssey/compare/v1.14.1...v1.14.2) (2026-07-24)
 
 
