@@ -69,3 +69,8 @@ jobs:
 
             # 5. Rebuild and recreate only the Web container with zero-downtime rolling restart (no dependency cascading)
             docker compose up -d --no-deps web
+
+            # 6. Post-deployment safe cleanup of dangling Docker images and old BuildKit caches (older than 24h) to preserve server disk space
+            echo "Performing post-deployment safe cleanup of unused Docker caches..."
+            docker image prune -f
+            docker builder prune -f --filter "until=24h"
