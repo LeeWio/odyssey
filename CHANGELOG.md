@@ -1,3 +1,16 @@
+# [1.13.0](https://github.com/LeeWio/odyssey/compare/v1.12.0...v1.13.0) (2026-07-24)
+
+
+### Bug Fixes
+
+* **ci:** fix deploy workflow syntax and update bun.lock to match package.json ([044e227](https://github.com/LeeWio/odyssey/commit/044e227cac57e3881b167919bea3ed14507a5346))
+
+
+### Features
+
+* **ci:** implement automated deploy workflow with HeroUI secret mounts ([430fe06](https://github.com/LeeWio/odyssey/commit/430fe06e847c816febbf8ffe878cca2a34e7ccac))
+* **web:** configure standalone build output, update API rewrite/endpoints, and upgrade @heroui-pro/react ([d711451](https://github.com/LeeWio/odyssey/commit/d711451093ab84b2ca285b55e4c35e880bbf00b4))
+
 # [1.12.0](https://github.com/LeeWio/odyssey/compare/v1.11.0...v1.12.0) (2026-07-23)
 
 
