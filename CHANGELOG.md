@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/LeeWio/odyssey/compare/v1.13.0...v1.13.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* **ci:** fix deploy workflow syntax and update bun.lock to match package.json 0724 ([740fb09](https://github.com/LeeWio/odyssey/commit/740fb09ad9008ad2643ca6505323b0cb585b7343))
+
 # [1.13.0](https://github.com/LeeWio/odyssey/compare/v1.12.0...v1.13.0) (2026-07-24)
 
 
