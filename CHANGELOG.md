@@ -1,3 +1,10 @@
+## [1.14.7](https://github.com/LeeWio/odyssey/compare/v1.14.6...v1.14.7) (2026-07-24)
+
+
+### Bug Fixes
+
+* **ci-cd:** remove strict tsc check to prevent blocking on existing codebase type errors ([2c0907d](https://github.com/LeeWio/odyssey/commit/2c0907d81786e47ecbfb05e6f55bdfb32f7ff4ff))
+
 ## [1.14.6](https://github.com/LeeWio/odyssey/compare/v1.14.5...v1.14.6) (2026-07-24)
 
 
