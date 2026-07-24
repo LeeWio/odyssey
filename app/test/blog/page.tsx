@@ -190,11 +190,7 @@ export default function BlogTestPage() {
                     }}
                   >
                     <Modal.Footer>
-                      <span className="text-default-400 text-xs">
-                        {editorRef.current?.storage.characterCount.characters() ?? 0} characters
-                        {", "}
-                        {editorRef.current?.storage.characterCount.words() ?? 0} words
-                      </span>
+                    111
                     </Modal.Footer>
                   </motion.div>
                 )}

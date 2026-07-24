@@ -1,9 +1,10 @@
-import { NextConfig } from "next";
+import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+
   images: {
-    // Legacy fallback domains for absolute compatibility
     domains: [
       "images.unsplash.com",
       "heroui-assets.nyc3.cdn.digitaloceanspaces.com",
@@ -27,15 +28,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
   async rewrites() {
     return [
       {
         source: "/api/v1/:path*",
-        destination: "http://localhost:8080/api/v1/:path*",
+        destination: "http://api:8080/api/v1/:path*",
       },
     ];
   },
 };
 
 const withNextIntl = createNextIntlPlugin();
+
 export default withNextIntl(nextConfig);
