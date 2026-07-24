@@ -1,8 +1,6 @@
-FROM public.ecr.aws/docker/library/node:24-alpine AS base
+FROM oven/bun:1.2-alpine AS base
 
 WORKDIR /app
-
-RUN npm install -g bun
 
 FROM base AS deps
 
