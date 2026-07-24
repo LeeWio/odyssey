@@ -1,0 +1,53 @@
+name: "CodeQL Static Analysis & Security Review"
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "plans/**"
+      - ".gitignore"
+  pull_request:
+    branches: ["main", "master"]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "plans/**"
+      - ".gitignore"
+  schedule:
+    # Scan every Saturday at 18:00 UTC
+    - cron: "0 18 * * 6"
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: CodeQL Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 1. Initialize CodeQL Tools for JavaScript/TypeScript
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: "javascript-typescript"
+          # Perform both security and quality analysis
+          queries: security-extended,quality
+
+      # 2. Perform Autofiles detection and autobuild (no compiling needed for JS/TS)
+      - name: Autobuild JS/TS
+        uses: github/codeql-action/autobuild@v3
+
+      # 3. Perform Deep Semantic Analysis
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
