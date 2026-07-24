@@ -2,9 +2,9 @@ FROM public.ecr.aws/docker/library/node:24-alpine AS base
 
 WORKDIR /app
 
-# Install Bun via kkgithub mirror to bypass docker.io blocking and ensure high-speed builds
+# Install Bun via ghproxy.net proxy to bypass docker.io blocking and ensure high-speed, stable builds
 RUN apk add --no-cache curl unzip \
-    && curl -fsSL -o bun.zip "https://kkgithub.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip" \
+    && curl -fsSL -o bun.zip "https://ghproxy.net/https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip" \
     && unzip bun.zip \
     && mv bun-linux-x64/bun /usr/local/bin/bun \
     && chmod +x /usr/local/bin/bun \
