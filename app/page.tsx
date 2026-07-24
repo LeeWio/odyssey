@@ -159,7 +159,7 @@ function IntroPanel({ onEnter }: { onEnter: () => void }) {
               align="center"
               className="from-accent via-success to-accent scrolling-text-gradient bg-linear-to-r bg-clip-text text-[clamp(2.5rem,6vw,6rem)] leading-[0.95] tracking-[-0.045em] text-transparent select-none"
             >
-              The world scrolls1.
+              The world scrolls111.
             </MotionTypography>
 
             <MotionTypography
