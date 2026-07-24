@@ -8,6 +8,10 @@ node_modules
 *.log
 .env
 .env.*
+.DS_Store
+coverage
+dist
+build_log
 Dockerfile
 README.md
 CHANGELOG.md
