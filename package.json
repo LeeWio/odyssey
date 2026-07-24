@@ -2,7 +2,7 @@
   "name": "odyssey",
   "version": "1.14.3",
   "private": true,
-  "packageManager": "bun@1.3.11",
+  "packageManager": "bun@1.3.14",
   "scripts": {
     "themes:build": "node scripts/scope-heroui-pro-themes.mjs",
     "dev": "node scripts/scope-heroui-pro-themes.mjs && next dev",

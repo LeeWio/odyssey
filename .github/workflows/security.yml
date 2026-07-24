@@ -19,8 +19,8 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.11
-          bun-download-url: "https://github.com/oven-sh/bun/releases/download/bun-v1.3.11/bun-${{ runner.os == 'macOS' && 'darwin' || (runner.os == 'Windows' && 'windows' || 'linux') }}-${{ runner.arch == 'X64' && 'x64' || 'aarch64' }}.zip"
+          bun-version: 1.3.14
+          bun-download-url: "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-${{ runner.os == 'macOS' && 'darwin' || (runner.os == 'Windows' && 'windows' || 'linux') }}-${{ runner.arch == 'X64' && 'x64' || 'aarch64' }}.zip"
 
       - name: Generate Temporary Lockfile for Auditing
         run: bun install --yarn
