@@ -335,7 +335,7 @@ export default function DatePickerTestPage() {
     // For "day" granularity, make the end date inclusive of the entire day (up to 23:59:59)
     let endMs = value.end.toDate(tz).getTime();
     if (granularity === "day") {
-      endMs += 24 * 60 * 60 * 1000 - 1; // plus 23h 59m 59s
+      endMs += 24 * 60 * 60 * 1000 - 1; // plus 23h 59m 59
     }
 
     return MOCK_AUDIT_LOGS.filter((log) => {
