@@ -16,14 +16,20 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
-            # Navigate to the Web repository directory on the server
+            # 1. Clear any leftover git lockfiles to unlock git operations on the server
+            rm -f ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}/apps/web/.git/index.lock
+            rm -f ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}/apps/web/.git/refs/remotes/origin/main.lock
+
+            # 2. Navigate to the Web directory and force-sync with remote origin/main
             cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}/apps/web
+            git fetch --all
+            git reset --hard origin/main
 
-            # Pull the latest frontend code
-            git pull
-
-            # Navigate to the root directory containing the compose.yaml file
+            # 3. Navigate to the root directory containing compose.yaml
             cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}
 
-            # Rebuild and restart only the Web service container
-            docker compose up -d --build web
+            # 4. Force-stop and remove any conflicting or orphaned web containers
+            docker compose rm -fs web || true
+
+            # 5. Rebuild and restart the Web container with force recreation
+            docker compose up -d --build --force-recreate web
