@@ -45,5 +45,23 @@ jobs:
             # 3. Navigate to the root directory containing compose.yaml
             cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}
 
-            # 4. Rebuild and recreate only the Web container with zero-downtime rolling restart (no dependency cascading)
-            docker compose up -d --build --no-deps web
+            # 4. Limit build concurrency and resource usage to prevent server lockups/freezes during Next.js compilation
+            export COMPOSE_PARALLEL_LIMIT=1
+            export BUILDKIT_STEP_LOG_MAX_SIZE=1048576
+
+            echo "Starting graceful, resource-limited Docker Compose build..."
+            # Check if systemd-run is available on the server for strict cgroup resource constraints
+            if command -v systemd-run >/dev/null 2>&1; then
+              echo "Using systemd-run for strict CPU/Memory resource fencing (CPU: 120%, RAM: 1400M)..."
+              if [ "$(id -u)" -eq 0 ]; then
+                systemd-run --scope -p CPUQuota=120% -p MemoryMax=1400M nice -n 10 docker compose build web
+              else
+                sudo systemd-run --scope -p CPUQuota=120% -p MemoryMax=1400M nice -n 10 docker compose build web
+              fi
+            else
+              echo "systemd-run not found. Falling back to nice -n 10 for CPU priority throttling..."
+              nice -n 10 docker compose build web
+            fi
+
+            # 5. Rebuild and recreate only the Web container with zero-downtime rolling restart (no dependency cascading)
+            docker compose up -d --no-deps web
