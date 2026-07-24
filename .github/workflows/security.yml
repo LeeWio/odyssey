@@ -20,6 +20,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+          bun-download-url: "https://github.com/oven-sh/bun/releases/latest/download/bun-${{ runner.os == 'macOS' && 'darwin' || (runner.os == 'Windows' && 'windows' || 'linux') }}-${{ runner.arch == 'X64' && 'x64' || 'aarch64' }}.zip"
 
       - name: Generate Temporary Lockfile for Auditing
         run: bun install --yarn
