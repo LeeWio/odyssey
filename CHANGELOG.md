@@ -1,3 +1,10 @@
+## [1.15.1](https://github.com/LeeWio/odyssey/compare/v1.15.0...v1.15.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* **codeql:** remove custom queries config to use default query pack ([97dad21](https://github.com/LeeWio/odyssey/commit/97dad21f3eaba49451787f7f5c930aa2cd6260d9))
+
 # [1.15.0](https://github.com/LeeWio/odyssey/compare/v1.14.9...v1.15.0) (2026-07-24)
 
 
