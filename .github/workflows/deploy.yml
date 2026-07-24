@@ -2,7 +2,7 @@ name: Odyssey Frontend Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   deploy:
@@ -18,12 +18,12 @@ jobs:
           script: |
             # Navigate to the Web repository directory on the server
             cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}/apps/web
-            
+
             # Pull the latest frontend code
             git pull
-            
+
             # Navigate to the root directory containing the compose.yaml file
             cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}
-            
+
             # Rebuild and restart only the Web service container
             docker compose up -d --build web
