@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Avatar,
   Button,
   Chip,
   Popover,
@@ -10,13 +11,17 @@ import {
   Tooltip,
   toast,
 } from "@heroui/react";
-import { ActionBar, KPI, NumberValue, Sheet } from "@heroui-pro/react";
+import { ActionBar, KPI, NumberValue, RichTextEditor, Sheet } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import { CommentSystem } from "@/components/comment";
+import { MotionRichTextEditor } from "@/components/ui";
+import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
+import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
+import type { JSONContent } from "@tiptap/react";
 import type { PostResponse } from "@/lib/features/post/post-api";
 import {
   useFavoritePostMutation,
@@ -55,7 +60,18 @@ export default function SinglePage({ params }: SinglePageProps) {
     null
   );
   const { scrollY, scrollYProgress } = useScroll();
-  const { data: article } = useGetPublicPostBySlugQuery(slug);
+  const { data: article, isLoading } = useGetPublicPostBySlugQuery(slug);
+
+  const articleContent = article?.content;
+  const parsedContent = useMemo<JSONContent | undefined>(() => {
+    if (!articleContent) return undefined;
+    try {
+      return JSON.parse(articleContent) as JSONContent;
+    } catch (error) {
+      console.error("[SINGLE-PAGE] Parsing content failed:", error);
+      return undefined;
+    }
+  }, [articleContent]);
   const [likePost, { isLoading: isLiking }] = useLikePostMutation();
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation();
   const [favoritePost, { isLoading: isFavoriting }] = useFavoritePostMutation();
@@ -155,58 +171,177 @@ export default function SinglePage({ params }: SinglePageProps) {
 
       <article className="min-w-0">
         <header className="border-b border-neutral-800 pb-5">
-          <div className="h-12 w-2/3 bg-neutral-900" />
+          {isLoading || !article ? (
+            <div className="h-12 w-2/3 animate-pulse rounded-lg bg-neutral-900" />
+          ) : (
+            <h1 className="text-foreground text-3xl leading-[1.15] font-bold tracking-tight md:text-4xl">
+              {article.title}
+            </h1>
+          )}
 
           <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="size-12 shrink-0 rounded-full bg-neutral-800" />
+            {isLoading || !article ? (
+              <div className="flex animate-pulse items-center gap-4">
+                <div className="size-12 shrink-0 rounded-full bg-neutral-800" />
 
-              <div className="space-y-2">
-                <div className="h-3 w-52 bg-neutral-800" />
-                <div className="h-3 w-40 bg-neutral-900" />
+                <div className="space-y-2">
+                  <div className="h-3 w-52 rounded bg-neutral-800" />
+                  <div className="h-3 w-40 rounded bg-neutral-900" />
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Avatar
+                  size="md"
+                  className="border border-neutral-700/50 bg-neutral-800 text-neutral-200"
+                >
+                  <Avatar.Fallback>
+                    {(article.authorName || "Anonymous").slice(0, 2).toUpperCase()}
+                  </Avatar.Fallback>
+                </Avatar>
 
-            <div className="flex gap-3">
-              <div className="h-5 w-14 bg-neutral-900" />
-              <div className="h-5 w-14 bg-neutral-900" />
-              <div className="h-5 w-14 bg-neutral-900" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-neutral-200">
+                    {article.authorName || "Anonymous"}
+                  </span>
+                  <span className="text-xs text-neutral-500">
+                    Published on{" "}
+                    {new Date(article.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2">
+              {isLoading || !article ? (
+                <>
+                  <div className="h-5 w-14 animate-pulse rounded bg-neutral-900" />
+                  <div className="h-5 w-14 animate-pulse rounded bg-neutral-900" />
+                </>
+              ) : (
+                article.tags?.map((tag) => (
+                  <Chip key={tag.id} size="sm" variant="soft" color="default">
+                    #{tag.name}
+                  </Chip>
+                ))
+              )}
             </div>
           </div>
         </header>
 
         <nav className="grid grid-cols-1 border-b border-neutral-800 sm:grid-cols-2">
-          <div className="flex h-14 items-center border-neutral-800 sm:border-r">
-            <div className="h-3 w-3/4 bg-neutral-900" />
-          </div>
+          {isLoading || !article ? (
+            <>
+              <div className="flex h-14 items-center border-neutral-800 sm:border-r">
+                <div className="h-3 w-3/4 animate-pulse rounded bg-neutral-900" />
+              </div>
 
-          <div className="flex h-14 items-center justify-end">
-            <div className="h-3 w-2/3 bg-neutral-900" />
-          </div>
+              <div className="flex h-14 items-center justify-end">
+                <div className="h-3 w-2/3 animate-pulse rounded bg-neutral-900" />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex h-14 items-center gap-1.5 border-neutral-800 font-mono text-xs text-neutral-400 select-none sm:border-r">
+                <Icon icon="lucide:folder-open" className="size-3.5 text-neutral-500" />
+                <span>CATEGORY:</span>
+                {article.category ? (
+                  <span className="font-bold text-neutral-200 uppercase">
+                    {article.category.name}
+                  </span>
+                ) : (
+                  <span className="italic opacity-50">None</span>
+                )}
+              </div>
+
+              <div className="flex h-14 items-center justify-end gap-1.5 font-mono text-xs text-neutral-400 select-none">
+                {article.series ? (
+                  <>
+                    <Icon icon="lucide:layers" className="size-3.5 text-neutral-500" />
+                    <span>SERIES:</span>
+                    <span className="font-bold text-neutral-200 uppercase">
+                      {article.series.name}
+                      {article.seriesOrder ? ` (PART ${article.seriesOrder})` : ""}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Icon icon="lucide:book-open" className="size-3.5 text-neutral-500" />
+                    <span>ESTIMATED READING:</span>
+                    <span className="font-bold text-neutral-200 uppercase">
+                      {getEstimatedReadingMinutes(article)} MIN
+                    </span>
+                  </>
+                )}
+              </div>
+            </>
+          )}
         </nav>
 
-        <section className="mt-8">
-          <div className="aspect-video w-full bg-neutral-900" />
-        </section>
+        {isLoading || !article ? (
+          <section className="mt-8">
+            <div className="aspect-video w-full animate-pulse rounded-2xl bg-neutral-900" />
+          </section>
+        ) : article.coverImage ? (
+          <section className="mt-8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={article.coverImage}
+              alt={article.title}
+              className="aspect-video w-full rounded-2xl border border-neutral-800 bg-neutral-900 object-cover"
+            />
+          </section>
+        ) : null}
 
         <section className="mx-auto max-w-190 py-12">
-          <div className="space-y-8">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="space-y-3">
-                <div className="h-4 w-full bg-neutral-900" />
-                <div className="h-4 w-full bg-neutral-900" />
-                <div className="h-4 w-5/6 bg-neutral-900" />
+          {isLoading || !article ? (
+            <>
+              <div className="space-y-8">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div key={index} className="animate-pulse space-y-3">
+                    <div className="h-4 w-full rounded bg-neutral-900" />
+                    <div className="h-4 w-full rounded bg-neutral-900" />
+                    <div className="h-4 w-5/6 rounded bg-neutral-900" />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          <div className="my-12 h-px bg-neutral-800" />
+              <div className="my-12 h-px bg-neutral-800" />
 
-          <div className="space-y-4">
-            <div className="h-8 w-1/2 bg-neutral-900" />
-            <div className="h-4 w-full bg-neutral-900" />
-            <div className="h-4 w-4/5 bg-neutral-900" />
-          </div>
+              <div className="animate-pulse space-y-4">
+                <div className="h-8 w-1/2 rounded bg-neutral-900" />
+                <div className="h-4 w-full rounded bg-neutral-900" />
+                <div className="h-4 w-4/5 rounded bg-neutral-900" />
+              </div>
+            </>
+          ) : (
+            <div className="prose prose-neutral dark:prose-invert max-w-none">
+              {parsedContent ? (
+                <MotionRichTextEditor
+                  key={article.content}
+                  isReadOnly
+                  extensions={ExtensionKit}
+                  defaultValue={parsedContent}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                >
+                  <RichTextEditor.Shell className="border-none bg-transparent p-0">
+                    <RichTextEditor.Content />
+                    <RichTextTableOfContents placement="right" />
+                  </RichTextEditor.Shell>
+                </MotionRichTextEditor>
+              ) : (
+                <p className="leading-relaxed whitespace-pre-wrap text-neutral-400">
+                  {article.content || "No content has been published for this chronicle entry."}
+                </p>
+              )}
+            </div>
+          )}
         </section>
 
         <span className="sr-only">Current article: {slug}</span>

@@ -254,15 +254,18 @@ export default function FriendLinkTestPage() {
         cell: (item) => (
           <div className="flex items-center gap-3">
             {item.avatar ? (
-              <img
-                src={item.avatar}
-                alt={item.name}
-                className="border-border/50 bg-default-50 size-8 rounded-full border object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80"; // fallback avatar
-                }}
-              />
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.avatar}
+                  alt={item.name}
+                  className="border-border/50 bg-default-50 size-8 rounded-full border object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80"; // fallback avatar
+                  }}
+                />
+              </>
             ) : (
               <div className="bg-default-100 text-default-600 flex size-8 items-center justify-center rounded-full text-xs font-bold uppercase">
                 {item.name.slice(0, 2)}
@@ -529,15 +532,18 @@ export default function FriendLinkTestPage() {
                 >
                   <div className="flex items-start justify-between">
                     {link.avatar ? (
-                      <img
-                        src={link.avatar}
-                        alt={link.name}
-                        className="border-border/50 bg-default-50 size-12 rounded-full border object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80";
-                        }}
-                      />
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={link.avatar}
+                          alt={link.name}
+                          className="border-border/50 bg-default-50 size-12 rounded-full border object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80";
+                          }}
+                        />
+                      </>
                     ) : (
                       <div className="bg-default-100 text-default-600 flex size-12 items-center justify-center rounded-full text-sm font-bold uppercase">
                         {link.name.slice(0, 2)}
