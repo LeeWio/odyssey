@@ -20,9 +20,22 @@ jobs:
             rm -f ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}/apps/web/.git/index.lock
             rm -f ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}/apps/web/.git/refs/remotes/origin/main.lock
 
-            # 2. Navigate to the Web directory and force-sync with remote origin/main
+            # 2. Navigate to the Web directory and force-sync with remote origin/main (with retry loop for network robustness)
             cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}/apps/web
-            git fetch --all
+            success=false
+            for i in {1..5}; do
+              echo "Fetching latest changes from GitHub (Attempt $i/5)..."
+              if git fetch --all; then
+                success=true
+                break
+              else
+                echo "Git fetch failed. Retrying in 10 seconds..."
+                sleep 10
+              fi
+            done
+            if [ "$success" = false ]; then
+              echo "WARNING: Git fetch failed after 5 attempts. Resetting to last available local origin/main."
+            fi
             git reset --hard origin/main
 
             # 3. Navigate to the root directory containing compose.yaml
