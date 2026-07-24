@@ -52,11 +52,15 @@ jobs:
             echo "Starting graceful, resource-limited Docker Compose build..."
             # Check if systemd-run is available on the server for strict cgroup resource constraints
             if command -v systemd-run >/dev/null 2>&1; then
-              echo "Using systemd-run for strict CPU/Memory resource fencing (CPU: 120%, RAM: 1400M)..."
               if [ "$(id -u)" -eq 0 ]; then
+                echo "Using systemd-run for strict CPU/Memory resource fencing (CPU: 120%, RAM: 1400M)..."
                 systemd-run --scope -p CPUQuota=120% -p MemoryMax=1400M nice -n 10 docker compose build web
+              elif sudo -n true >/dev/null 2>&1 && sudo -n systemd-run --help >/dev/null 2>&1; then
+                echo "Using systemd-run with sudo for strict CPU/Memory resource fencing (CPU: 120%, RAM: 1400M)..."
+                sudo -n systemd-run --scope -p CPUQuota=120% -p MemoryMax=1400M nice -n 10 docker compose build web
               else
-                sudo systemd-run --scope -p CPUQuota=120% -p MemoryMax=1400M nice -n 10 docker compose build web
+                echo "systemd-run is present but requires interactive sudo password. Falling back to nice -n 10 for CPU priority throttling..."
+                nice -n 10 docker compose build web
               fi
             else
               echo "systemd-run not found. Falling back to nice -n 10 for CPU priority throttling..."
