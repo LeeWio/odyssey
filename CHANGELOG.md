@@ -1,3 +1,10 @@
+## [1.14.5](https://github.com/LeeWio/odyssey/compare/v1.14.4...v1.14.5) (2026-07-24)
+
+
+### Bug Fixes
+
+* **security:** change unknown bun pm audit command to bun pm scan ([5d2d905](https://github.com/LeeWio/odyssey/commit/5d2d905aa4a24a905292354dead94cf2abc762c9))
+
 ## [1.14.4](https://github.com/LeeWio/odyssey/compare/v1.14.3...v1.14.4) (2026-07-24)
 
 
