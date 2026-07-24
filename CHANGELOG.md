@@ -1,3 +1,10 @@
+## [1.14.6](https://github.com/LeeWio/odyssey/compare/v1.14.5...v1.14.6) (2026-07-24)
+
+
+### Bug Fixes
+
+* **security:** remove redundant bun pm scan step to let audit-ci handle auditing ([3a884bb](https://github.com/LeeWio/odyssey/commit/3a884bb4555cf5488b71ce227d0ee54d5812e797))
+
 ## [1.14.5](https://github.com/LeeWio/odyssey/compare/v1.14.4...v1.14.5) (2026-07-24)
 
 
