@@ -4,12 +4,7 @@ import { useRichTextCommands } from "../menus/text-menu/hooks/use-rich-text-comm
 import { useTextMenuStates } from "../menus/text-menu/hooks/use-text-menu-states";
 
 export type ToggleButtonCommand =
-  | "subscript"
-  | "superscript"
-  | "alignLeft"
-  | "alignCenter"
-  | "alignRight"
-  | "alignJustify";
+  "subscript" | "superscript" | "alignLeft" | "alignCenter" | "alignRight" | "alignJustify";
 
 interface ToggleButtonProps extends ToggleButtonVariants {
   children?: ReactNode;
