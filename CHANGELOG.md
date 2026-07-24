@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/LeeWio/odyssey/compare/v1.15.1...v1.16.0) (2026-07-24)
+
+
+### Features
+
+* **api:** implement environment-aware proxying in next.config.ts and dynamic post details ([bb1aa8c](https://github.com/LeeWio/odyssey/commit/bb1aa8c87d562935fcb06257e153ba3c967a3fcc))
+
 ## [1.15.1](https://github.com/LeeWio/odyssey/compare/v1.15.0...v1.15.1) (2026-07-24)
 
 
