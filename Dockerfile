@@ -1,6 +1,14 @@
-FROM oven/bun:1.3.14-alpine AS base
+FROM public.ecr.aws/docker/library/node:24-alpine AS base
 
 WORKDIR /app
+
+# Install Bun via kkgithub mirror to bypass docker.io blocking and ensure high-speed builds
+RUN apk add --no-cache curl unzip \
+    && curl -fsSL -o bun.zip "https://kkgithub.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip" \
+    && unzip bun.zip \
+    && mv bun-linux-x64/bun /usr/local/bin/bun \
+    && chmod +x /usr/local/bin/bun \
+    && rm -rf bun.zip bun-linux-x64
 
 FROM base AS deps
 
