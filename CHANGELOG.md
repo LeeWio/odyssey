@@ -1,3 +1,10 @@
+## [1.14.9](https://github.com/LeeWio/odyssey/compare/v1.14.8...v1.14.9) (2026-07-24)
+
+
+### Performance Improvements
+
+* **ci-cd:** optimize Next.js build cache key, upload Lighthouse HTML reports, and add PR Conventional Commits linter ([8430a75](https://github.com/LeeWio/odyssey/commit/8430a75103ab4f822ef2b53177d93434755dca6e))
+
 ## [1.14.8](https://github.com/LeeWio/odyssey/compare/v1.14.7...v1.14.8) (2026-07-24)
 
 
