@@ -1,6 +1,6 @@
 {
   "name": "odyssey",
-  "version": "1.14.1",
+  "version": "1.14.2",
   "private": true,
   "scripts": {
     "themes:build": "node scripts/scope-heroui-pro-themes.mjs",

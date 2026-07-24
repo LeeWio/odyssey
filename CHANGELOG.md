@@ -1,3 +1,10 @@
+## [1.14.2](https://github.com/LeeWio/odyssey/compare/v1.14.1...v1.14.2) (2026-07-24)
+
+
+### Performance Improvements
+
+* **docker:** optimize .dockerignore to exclude build logs and temporary directories ([5bcb640](https://github.com/LeeWio/odyssey/commit/5bcb640ca2f32e531dc4e96fece7d4b988a80168))
+
 ## [1.14.1](https://github.com/LeeWio/odyssey/compare/v1.14.0...v1.14.1) (2026-07-24)
 
 
