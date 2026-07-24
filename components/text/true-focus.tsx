@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 
 interface TrueFocusProps {
   sentence?: string;
@@ -56,7 +56,7 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
     if (!wordRefs.current[currentIndex] || !containerRef.current) return;
 
     const parentRect = containerRef.current.getBoundingClientRect();
-    const activeRect = wordRefs.current[currentIndex]!.getBoundingClientRect();
+    const activeRect = wordRefs.current[currentIndex]?.getBoundingClientRect();
 
     setFocusRect({
       x: activeRect.left - parentRect.left,
@@ -64,7 +64,7 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
       width: activeRect.width,
       height: activeRect.height,
     });
-  }, [currentIndex, words.length]);
+  }, [currentIndex]);
 
   const handleMouseEnter = (index: number) => {
     if (manualMode) {

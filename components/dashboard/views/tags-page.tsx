@@ -1,30 +1,30 @@
 "use client";
 
-import { useMemo, useState, useCallback, FormEvent } from "react";
+import { CirclePlus, Pencil, TrashBin } from "@gravity-ui/icons";
 import {
-  Button,
-  Form,
-  TextField,
-  Label,
-  Input,
-  FieldError,
-  Modal,
   AlertDialog,
+  Button,
+  Chip,
+  FieldError,
+  Form,
+  Input,
+  Label,
+  Modal,
   SearchField,
   Spinner,
-  Chip,
+  TextField,
   Tooltip,
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
-import { Pencil, TrashBin, CirclePlus } from "@gravity-ui/icons";
+import { type FormEvent, useCallback, useMemo, useState } from "react";
 
 import {
-  useGetAllTagsQuery,
-  useCreateTagMutation,
-  useUpdateTagMutation,
-  useDeleteTagMutation,
-  type TagResponse,
   type TagRequest,
+  type TagResponse,
+  useCreateTagMutation,
+  useDeleteTagMutation,
+  useGetAllTagsQuery,
+  useUpdateTagMutation,
 } from "@/lib/features/tag/tag-api";
 import { usePortalContainer } from "../use-portal-container";
 
@@ -102,18 +102,18 @@ export function TagsPage() {
   };
 
   // Open Form Modal for Edit
-  const handleEditClick = (tag: TagResponse) => {
+  const handleEditClick = useCallback((tag: TagResponse) => {
     setSelectedTag(tag);
     setFormName(tag.name);
     setFormSlug(tag.slug);
     setIsFormModalOpen(true);
-  };
+  }, []);
 
   // Open Delete Confirmation
-  const handleDeleteClick = (tag: TagResponse) => {
+  const handleDeleteClick = useCallback((tag: TagResponse) => {
     setSelectedTag(tag);
     setIsDeleteAlertOpen(true);
-  };
+  }, []);
 
   // Auto-generate slug from name if empty
   const handleNameBlur = () => {
@@ -236,7 +236,7 @@ export function TagsPage() {
         minWidth: 120,
       },
     ],
-    []
+    [handleEditClick, handleDeleteClick]
   );
 
   return (

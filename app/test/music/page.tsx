@@ -1,9 +1,7 @@
 "use client";
 
-import React from "react";
-import { Chip, Surface, Typography } from "@heroui/react";
+import { Chip } from "@heroui/react";
 import { MusicPlayer } from "@/components/music/music-player";
-import { useMounted } from "@mantine/hooks";
 
 export default function MusicPlaygroundPage() {
   return (

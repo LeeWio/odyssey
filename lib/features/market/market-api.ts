@@ -1,6 +1,6 @@
-import { ApiResponse } from "@/types";
-import { baseApi, transformError, ApiResponseSchema } from "../api/base-api";
 import { z } from "zod";
+import type { ApiResponse } from "@/types";
+import { ApiResponseSchema, baseApi, transformError } from "../api/base-api";
 
 export const MarketIndexResponseSchema = z.object({
   name: z.string(),
@@ -16,7 +16,7 @@ export type MarketPeriod = "1D" | "1M" | "1Y" | "ALL";
 
 export const marketApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getMarketIndices: builder.query<MarketIndexResponse[], MarketPeriod | void>({
+    getMarketIndices: builder.query<MarketIndexResponse[], MarketPeriod | undefined>({
       query: (period) => ({
         url: "/api/v1/public/market/indices",
         params: { period: period || "1D" },

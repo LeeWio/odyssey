@@ -1,23 +1,23 @@
 "use client";
 
-import { useState, useRef, MouseEvent, TouchEvent } from "react";
-import Image from "next/image";
+import { ArrowLeft, ArrowRight, ArrowUpRight } from "@gravity-ui/icons";
 import {
+  Avatar,
+  Button,
+  buttonVariants,
   Card,
   Chip,
-  Button,
-  Typography,
-  Tooltip,
   Link,
-  buttonVariants,
   Tag,
-  Avatar,
   TagGroup,
+  Tooltip,
+  Typography,
 } from "@heroui/react";
-import { ArrowLeft, ArrowRight, ArrowUpRight } from "@gravity-ui/icons";
-import { motion } from "motion/react";
-import TrueFocus from "../text/true-focus";
 import { Icon } from "@iconify/react";
+import { motion } from "motion/react";
+import Image from "next/image";
+import { type MouseEvent, type TouchEvent, useRef, useState } from "react";
+import TrueFocus from "../text/true-focus";
 
 export function OrbitalCarousel() {
   const [activeIndex, setActiveIndex] = useState(1); // Start on the middle card (PS5)

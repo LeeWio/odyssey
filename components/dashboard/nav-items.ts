@@ -1,21 +1,20 @@
-import type { ComponentType } from "react";
-
 import {
   ArrowRightFromSquare,
   ChartColumn,
   CircleQuestion,
+  Comment,
+  Folder,
   Gear,
   House,
   ListCheck,
   Person,
+  Picture,
   Receipt,
   Shield,
-  Folder,
-  Tag,
-  Comment,
   Sparkles,
-  Picture,
+  Tag,
 } from "@gravity-ui/icons";
+import type { ComponentType } from "react";
 
 export type NavItem = {
   readonly href: string;

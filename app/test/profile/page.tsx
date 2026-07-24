@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Button, Card, Switch, Separator, toast } from "@heroui/react";
+import { Button, Card, Separator, Switch, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 import {
+  type Badge,
   ProfileCard,
   type UserProfileData,
-  type Badge,
 } from "@/components/user-profile/profile-card";
 
 // --- Mock Data ---

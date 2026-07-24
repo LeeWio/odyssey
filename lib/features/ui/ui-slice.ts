@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "../../store";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { JSONContent } from "@tiptap/react";
+import type { RootState } from "../../store";
 import { DEFAULT_THEME_VARIANT, type ThemeVariant } from "../../theme";
-import { JSONContent } from "@tiptap/react";
 
 export type { ThemeVariant } from "../../theme";
 

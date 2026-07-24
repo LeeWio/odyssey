@@ -1,8 +1,8 @@
 "use client";
 
-import { memo } from "react";
-import { Dropdown, Button, Label } from "@heroui/react";
+import { Button, Dropdown, Label } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { memo } from "react";
 
 interface FontFamilyPickerProps {
   value: string;

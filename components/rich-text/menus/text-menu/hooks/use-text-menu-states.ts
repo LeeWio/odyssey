@@ -1,10 +1,10 @@
+import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
+import type { EditorState } from "@tiptap/pm/state";
+import type { EditorView } from "@tiptap/pm/view";
+import type { Editor } from "@tiptap/react";
+import { useCallback } from "react";
 import { isCustomNodeSelected } from "@/components/rich-text/utils/is-custom-node-selected";
 import { isTextSelected } from "@/components/rich-text/utils/is-text-selected";
-import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
-import { EditorState } from "@tiptap/pm/state";
-import { EditorView } from "@tiptap/pm/view";
-import { Editor } from "@tiptap/react";
-import { useCallback } from "react";
 
 export interface ShouldShowProps {
   editor: Editor;

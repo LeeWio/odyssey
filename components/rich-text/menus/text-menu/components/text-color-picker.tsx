@@ -1,6 +1,5 @@
 "use client";
 
-import { memo } from "react";
 import {
   Button,
   ColorArea,
@@ -12,6 +11,7 @@ import {
   parseColor,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { memo } from "react";
 
 interface TextColorPickerProps {
   value: string;

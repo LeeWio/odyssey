@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
-import { CommentProvider } from "./context/comment-context";
 import { CommentInput } from "./comment-input";
 import { CommentList } from "./comment-list";
-import { useComments } from "./hooks/use-comments";
-import { useCommentMutations } from "./hooks/use-comment-mutations";
+import { CommentProvider } from "./context/comment-context";
 import { useCommentHighlight } from "./hooks/use-comment-highlight";
+import { useCommentMutations } from "./hooks/use-comment-mutations";
+import { useComments } from "./hooks/use-comments";
 
 interface CommentSystemProps {
   postId?: number;

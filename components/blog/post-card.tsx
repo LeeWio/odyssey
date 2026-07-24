@@ -1,8 +1,8 @@
 "use client";
 
-import { ItemCard } from "@heroui-pro/react";
-import { Chip, Link } from "@heroui/react";
 import { Calendar, Person } from "@gravity-ui/icons";
+import { Chip, Link } from "@heroui/react";
+import { ItemCard } from "@heroui-pro/react";
 
 interface PostCardProps {
   title: string;

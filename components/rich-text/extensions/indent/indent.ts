@@ -1,4 +1,4 @@
-import { Extension, type CommandProps } from "@tiptap/core";
+import { type CommandProps, Extension } from "@tiptap/core";
 
 export interface IndentOptions {
   types: string[];

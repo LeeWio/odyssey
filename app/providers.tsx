@@ -1,15 +1,15 @@
 "use client";
 
-import * as React from "react";
 import { I18nProvider } from "@heroui/react";
-import { AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import { Provider as ReduxProvider } from "react-redux";
-import { makeStore } from "@/lib/store";
-import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
+import { type AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
 import type { ThemeProviderProps } from "next-themes";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
+import * as React from "react";
+import { Provider as ReduxProvider } from "react-redux";
 import { selectThemeVariant, setThemeVariant } from "@/lib/features/ui";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { makeStore } from "@/lib/store";
 import {
   coerceResolvedThemeMode,
   coerceThemeMode,
@@ -19,13 +19,13 @@ import {
   getThemeName,
   LEGACY_THEME_STORAGE_KEY,
   parseThemeName,
+  type ResolvedThemeMode,
   resolveThemeMode,
   THEME_COOKIE_OPTIONS,
   THEME_MODE_STORAGE_KEY,
   THEME_NAME_STORAGE_KEY,
   THEME_RESOLVED_MODE_STORAGE_KEY,
   THEME_VARIANT_STORAGE_KEY,
-  type ResolvedThemeMode,
   type ThemeMode,
   type ThemeVariant,
 } from "@/lib/theme";

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef, memo } from "react";
-import { Editor as CoreEditor } from "@tiptap/core";
-import { TextSelection } from "@tiptap/pm/state";
 import { FloatingToc, useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
+import type { Editor as CoreEditor } from "@tiptap/core";
+import { TextSelection } from "@tiptap/pm/state";
+import type React from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 export interface TableOfContentsAnchor {
   id: string;
@@ -46,9 +47,6 @@ export const RichTextTableOfContents = memo(
       itemsRef.current = items;
     });
 
-    // Stable ID-mapped string dependency to guarantee reference identity safety
-    const itemIds = items.map((a) => a.id).join(",");
-
     // 3. Robust Intersection Observer to calculate scrollActiveId based on global window scroll viewport entry
     useEffect(() => {
       const currentItems = itemsRef.current;
@@ -75,7 +73,7 @@ export const RichTextTableOfContents = memo(
       return () => {
         observer.disconnect();
       };
-    }, [itemIds]);
+    }, []);
 
     if (!activeEditor || items.length === 0) {
       return null;

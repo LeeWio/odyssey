@@ -1,32 +1,32 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import type { DateValue, TimeValue } from "@heroui/react";
 import {
   Button,
+  Chip,
   DateField,
   DateRangePicker,
+  Description,
+  FieldError,
   Label,
+  ListBox,
   RangeCalendar,
   Select,
-  ListBox,
-  Switch,
   Separator,
-  Chip,
+  Switch,
   TimeField,
-  useLocale,
   Tooltip,
-  FieldError,
-  Description,
+  useLocale,
 } from "@heroui/react";
+import { Icon } from "@iconify/react";
 import {
+  CalendarDate,
   DateFormatter,
   getLocalTimeZone,
   parseZonedDateTime,
   today,
-  CalendarDate,
 } from "@internationalized/date";
-import type { DateValue, TimeValue } from "@heroui/react";
-import { Icon } from "@iconify/react";
+import { useCallback, useMemo, useState } from "react";
 
 // ==========================================
 // --- MOCK LOG AUDIT SPECIFICATIONS ---
@@ -565,7 +565,7 @@ export default function DatePickerTestPage() {
                           Active Choice
                         </span>
                         <span className="text-accent font-mono text-xs font-bold select-none">
-                          {state.value && state.value.start && state.value.end
+                          {state.value?.start && state.value.end
                             ? formatDateRange({ end: state.value.end, start: state.value.start })
                             : "No selection"}
                         </span>

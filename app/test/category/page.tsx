@@ -1,30 +1,30 @@
 "use client";
 
-import { useMemo, useState, useCallback, FormEvent } from "react";
+import { CirclePlus, Pencil, TrashBin } from "@gravity-ui/icons";
 import {
-  Button,
-  Form,
-  TextField,
-  Label,
-  Input,
-  TextArea,
-  FieldError,
-  Modal,
   AlertDialog,
+  Button,
+  Chip,
+  FieldError,
+  Form,
+  Input,
+  Label,
+  Modal,
   SearchField,
   Spinner,
-  Chip,
+  TextArea,
+  TextField,
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
-import { Pencil, TrashBin, CirclePlus } from "@gravity-ui/icons";
+import { type FormEvent, useCallback, useMemo, useState } from "react";
 
 import {
-  useGetCategoriesQuery,
-  useCreateCategoryMutation,
-  useUpdateCategoryMutation,
-  useDeleteCategoryMutation,
-  type CategoryResponse,
   type CategoryRequest,
+  type CategoryResponse,
+  useCreateCategoryMutation,
+  useDeleteCategoryMutation,
+  useGetCategoriesQuery,
+  useUpdateCategoryMutation,
 } from "@/lib/features/category/category-api";
 
 export default function CategoryTestPage() {
@@ -66,7 +66,7 @@ export default function CategoryTestPage() {
         (cat) =>
           cat.name.toLowerCase().includes(q) ||
           cat.slug.toLowerCase().includes(q) ||
-          (cat.description && cat.description.toLowerCase().includes(q))
+          cat.description?.toLowerCase().includes(q)
       );
     }
 
@@ -104,19 +104,19 @@ export default function CategoryTestPage() {
   };
 
   // Open Form Modal for Edit
-  const handleEditClick = (category: CategoryResponse) => {
+  const handleEditClick = useCallback((category: CategoryResponse) => {
     setSelectedCategory(category);
     setFormName(category.name);
     setFormSlug(category.slug);
     setFormDescription(category.description || "");
     setIsFormModalOpen(true);
-  };
+  }, []);
 
   // Open Delete Confirmation
-  const handleDeleteClick = (category: CategoryResponse) => {
+  const handleDeleteClick = useCallback((category: CategoryResponse) => {
     setSelectedCategory(category);
     setIsDeleteAlertOpen(true);
-  };
+  }, []);
 
   // Auto-generate slug from name if empty
   const handleNameBlur = () => {
@@ -234,7 +234,7 @@ export default function CategoryTestPage() {
         minWidth: 120,
       },
     ],
-    []
+    [handleEditClick, handleDeleteClick]
   );
 
   return (

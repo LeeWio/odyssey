@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 
 interface HighlightedTextProps {
   text: string;
@@ -15,7 +15,7 @@ export function HighlightedText({ text, query, className = "" }: HighlightedText
     }
 
     // Escape regex special characters to prevent errors and create case-insensitive regex
-    const safeQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+    const safeQuery = query.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
     const regex = new RegExp(`(${safeQuery})`, "gi");
 
     return text.split(regex).map((part) => ({

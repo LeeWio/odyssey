@@ -1,16 +1,16 @@
-import { RichTextEditor } from "@heroui-pro/react";
-import { motion } from "motion/react";
-import { Icon } from "@iconify/react";
-import { LinkMenuEdit } from "../link-menu/link-menu-edit";
 import { Button, Popover, useOverlayState } from "@heroui/react";
-import { useTextMenuStates } from "./hooks/use-text-menu-states";
-import { useRichTextCommands } from "./hooks/use-rich-text-commands";
+import { RichTextEditor } from "@heroui-pro/react";
+import { Icon } from "@iconify/react";
+import { motion } from "motion/react";
 import { ToggleButtonToolbar } from "../../toolbar/toggle-button-toolbar";
+import { LinkMenuEdit } from "../link-menu/link-menu-edit";
+import { BgColorPicker } from "./components/bg-color-picker";
 import { FontFamilyPicker } from "./components/font-family-picker";
 import { FontSizePicker } from "./components/font-size-picker";
 import { LineHeightPicker } from "./components/line-height-picker";
 import { TextColorPicker } from "./components/text-color-picker";
-import { BgColorPicker } from "./components/bg-color-picker";
+import { useRichTextCommands } from "./hooks/use-rich-text-commands";
+import { useTextMenuStates } from "./hooks/use-text-menu-states";
 
 export function TextMenu() {
   const states = useTextMenuStates();

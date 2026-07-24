@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
-import { Alert, Button, Card, Typography, ScrollShadow, Skeleton } from "@heroui/react";
+import { Alert, Button, Card, ScrollShadow, Skeleton, Typography } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { useCommentContext } from "./context/comment-context";
 import { CommentItem } from "./comment-item";
-import { EnhancedComment } from "./hooks/simulation-store";
+import { useCommentContext } from "./context/comment-context";
+import type { EnhancedComment } from "./hooks/simulation-store";
 
 interface CommentListProps {
   comments: EnhancedComment[];

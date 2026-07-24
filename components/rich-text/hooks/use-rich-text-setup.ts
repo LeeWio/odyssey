@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import type { RichTextEditorValueChangeDetails } from "@heroui-pro/react";
 import type { Editor } from "@tiptap/core";
 import type { JSONContent } from "@tiptap/react";
-import type { RichTextEditorValueChangeDetails } from "@heroui-pro/react";
+import { useEffect, useRef } from "react";
 import { useRichTextAutosave } from "./use-rich-text-autosave";
 import { useRichTextPublish } from "./use-rich-text-publish";
 

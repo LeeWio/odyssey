@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button, Card, TextArea, TextField, Spinner, Typography } from "@heroui/react";
+import { Button, Card, Spinner, TextArea, TextField, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import type React from "react";
+import { useState } from "react";
 import {
+  type CommentResponse,
   useGetPostCommentsQuery,
   usePublishCommentMutation,
-  type CommentResponse,
 } from "@/lib/features/comment/comment-api";
 import { CommentCard } from "./comment-card";
 

@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
-import { Card, Button, Chip, Slider, Label, Typography, ListBox, cn } from "@heroui/react";
-import { Icon } from "@iconify/react";
-import { AnimatePresence, motion } from "motion/react";
+import { Button, Card, Chip, ListBox, Slider } from "@heroui/react";
 import { TextShimmer } from "@heroui-pro/react";
+import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
+import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface Track {
   id: string;
@@ -125,6 +125,18 @@ export function MusicPlayer() {
     return active;
   };
 
+  const handlePlayPause = useCallback(() => {
+    setIsPlaying((prev) => !prev);
+  }, []);
+
+  const handleNext = useCallback(() => {
+    setCurrentTrackIndex((prev) => (prev + 1) % PLAYLIST.length);
+  }, []);
+
+  const handlePrev = useCallback(() => {
+    setCurrentTrackIndex((prev) => (prev - 1 + PLAYLIST.length) % PLAYLIST.length);
+  }, []);
+
   const startTimer = useCallback(() => {
     if (playTimerRef.current) clearInterval(playTimerRef.current);
     playTimerRef.current = setInterval(() => {
@@ -137,14 +149,14 @@ export function MusicPlayer() {
         return time + 1;
       });
     }, 1000);
-  }, [currentTrack.duration]);
+  }, [currentTrack.duration, handleNext]);
 
-  const stopTimer = () => {
+  const stopTimer = useCallback(() => {
     if (playTimerRef.current) {
       clearInterval(playTimerRef.current);
       playTimerRef.current = null;
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (isPlaying) {
@@ -153,27 +165,18 @@ export function MusicPlayer() {
       stopTimer();
     }
     return () => stopTimer();
-  }, [isPlaying, startTimer]);
+  }, [isPlaying, startTimer, stopTimer]);
 
   // Restart time when switching tracks
   useEffect(() => {
-    setCurrentTime(0);
-    if (isPlaying) {
-      startTimer();
-    }
-  }, [currentTrackIndex, isPlaying, startTimer]);
-
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleNext = () => {
-    setCurrentTrackIndex((prev) => (prev + 1) % PLAYLIST.length);
-  };
-
-  const handlePrev = () => {
-    setCurrentTrackIndex((prev) => (prev - 1 + PLAYLIST.length) % PLAYLIST.length);
-  };
+    const timer = setTimeout(() => {
+      setCurrentTime(0);
+      if (isPlaying) {
+        startTimer();
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [isPlaying, startTimer]);
 
   const toggleMute = () => {
     setIsMuted(!isMuted);

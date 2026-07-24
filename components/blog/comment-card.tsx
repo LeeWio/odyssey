@@ -1,20 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
 import {
   Avatar,
   Button,
   Card,
   Chip,
+  cn,
   Spinner,
   TextArea,
   TextField,
   Tooltip,
   Typography,
-  cn,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { CommentResponse, usePublishCommentMutation } from "@/lib/features/comment/comment-api";
+import type React from "react";
+import { useState } from "react";
+import {
+  type CommentResponse,
+  usePublishCommentMutation,
+} from "@/lib/features/comment/comment-api";
 
 interface CommentCardProps {
   comment: CommentResponse;

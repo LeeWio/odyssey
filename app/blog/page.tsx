@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { Chip, Surface, Typography } from "@heroui/react";
+import { Chip, Surface } from "@heroui/react";
 import { BlogFeed } from "@/components/blog/blog-feed";
 
 export default function BlogListingPage() {

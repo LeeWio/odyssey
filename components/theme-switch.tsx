@@ -1,11 +1,10 @@
 "use client";
 
-import { Segment } from "@heroui-pro/react";
 import { Skeleton } from "@heroui/react";
-import { useTheme } from "next-themes";
+import { Segment } from "@heroui-pro/react";
 import { useMounted } from "@mantine/hooks";
-import { DisplayFillIcon, MoonFillIcon, SunMaxFillIcon } from "./icons";
-import { setThemeVariant, selectThemeVariant } from "@/lib/features/ui";
+import { useTheme } from "next-themes";
+import { selectThemeVariant, setThemeVariant } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   coerceThemeMode,
@@ -14,6 +13,7 @@ import {
   THEME_VARIANTS,
   type ThemeVariant,
 } from "@/lib/theme";
+import { DisplayFillIcon, MoonFillIcon, SunMaxFillIcon } from "./icons";
 
 const THEME_VARIANT_LABELS: Record<ThemeVariant, string> = {
   brutalism: "Brutal",

@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Avatar, Button, Chip, Typography, cn, Dropdown, Card } from "@heroui/react";
+import { Avatar, Button, Card, Chip, cn, Dropdown, Typography } from "@heroui/react";
 import { HoverCard } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { useCommentContext } from "./context/comment-context";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
+import { setLoginOpen } from "@/lib/features/auth";
+import { useAppDispatch } from "@/lib/hooks";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
 import { CommentInput } from "./comment-input";
-import { EnhancedComment } from "./hooks/simulation-store";
-import { useAppDispatch } from "@/lib/hooks";
-import { setLoginOpen } from "@/lib/features/auth";
+import { useCommentContext } from "./context/comment-context";
+import type { EnhancedComment } from "./hooks/simulation-store";
 
 interface CommentItemProps {
   comment: EnhancedComment;

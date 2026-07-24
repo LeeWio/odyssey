@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "motion/react";
-import { Typography, Button, Separator } from "@heroui/react";
+import { Button, Separator, Typography } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react";
+import { motion } from "motion/react";
 
 export const MotionTypography = motion.create(Typography);
 export const MotionButton = motion.create(Button);

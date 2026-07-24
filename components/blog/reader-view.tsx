@@ -1,20 +1,20 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { Button, Surface, Typography, Separator, Tooltip, cn, toast, Spinner } from "@heroui/react";
-import { RichTextEditor, EmptyState, ActionBar } from "@heroui-pro/react";
+import { Button, cn, Separator, Spinner, Surface, Tooltip, Typography, toast } from "@heroui/react";
+import { ActionBar, EmptyState, RichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import type { JSONContent } from "@tiptap/react";
+import { motion, useScroll } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { CommentSystem } from "@/components/comment";
+import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
+import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import {
   useGetPublicPostBySlugQuery,
   useLikePostMutation,
   useUnlikePostMutation,
 } from "@/lib/features/post/post-api";
-import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
-import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
-import { CommentSystem } from "@/components/comment";
-import { motion, useScroll } from "motion/react";
 import { MotionRichTextEditor, MotionSeparator } from "../ui";
 
 interface ReaderViewProps {
@@ -142,7 +142,6 @@ const MOCK_POST_FALLBACK = {
 
 export function ReaderView({ slug }: ReaderViewProps) {
   const router = useRouter();
-  const proseRef = useRef<HTMLDivElement>(null);
 
   // RTK Query hook for fetching public blog details
   const { data: postData, isLoading } = useGetPublicPostBySlugQuery(slug);
@@ -167,10 +166,13 @@ export function ReaderView({ slug }: ReaderViewProps) {
   // Synchronize component state with fresh server-side article attributes
   useEffect(() => {
     if (article) {
-      setIsLiked(article.isLiked || false);
-      setLikesCount(article.likesCount || 0);
+      const timer = setTimeout(() => {
+        setIsLiked(article.isLiked || false);
+        setLikesCount(article.likesCount || 0);
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [article.id, article.isLiked, article.likesCount]);
+  }, [article]);
 
   // Handle scroll trigger for Action Bar display
   useEffect(() => {
@@ -256,7 +258,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
       const injectHeadingIds = (node: TiptapNode) => {
         if (node.type === "heading") {
           headingIndex++;
-          const text = (node.content && node.content[0]?.text) || "section";
+          const text = node.content?.[0]?.text || "section";
           let generatedId = text
             .toLowerCase()
             .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
@@ -269,8 +271,8 @@ export function ReaderView({ slug }: ReaderViewProps) {
           if (!node.attrs) {
             node.attrs = {};
           }
-          if (!node.attrs["id"]) {
-            node.attrs["id"] = generatedId;
+          if (!node.attrs.id) {
+            node.attrs.id = generatedId;
             node.attrs["data-toc-id"] = generatedId;
           }
         }

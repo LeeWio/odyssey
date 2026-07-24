@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import { Renderer, Program, Mesh, Triangle } from "ogl";
+import { Mesh, Program, Renderer, Triangle } from "ogl";
+import type React from "react";
+import { useEffect, useRef } from "react";
 
 export interface LightfallProps {
   className?: string;
@@ -53,7 +54,7 @@ const resolveCSSColorToRGB = (colorStr: string): RGB => {
 
 const prepColors = (input?: string[]) => {
   const base = (
-    input && input.length ? input : ["var(--accent)", "var(--default-300)", "var(--default-500)"]
+    input?.length ? input : ["var(--accent)", "var(--default-300)", "var(--default-500)"]
   ).slice(0, MAX_COLORS);
   const count = base.length;
   const arr: RGB[] = [];
@@ -243,7 +244,10 @@ const Lightfall: React.FC<LightfallProps> = ({
   const lastTimeRef = useRef(0);
 
   // Store uniforms ref so we can update them on theme changes
-  const uniformsRef = useRef<any>(null);
+  const uniformsRef = useRef<Record<
+    string,
+    { value: number | number[] | Float32Array | string | boolean }
+  > | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;

@@ -4,13 +4,12 @@
 // source (e.g. your own API, a database query, etc.) and wire up the filter
 // dropdowns to filter the data.
 
-import type { Order } from "../data/orders";
-import type { DataGridColumn } from "@heroui-pro/react";
-
 import { Calendar, Funnel } from "@gravity-ui/icons";
 import { Avatar, Button, Chip, Dropdown, Label, SearchField } from "@heroui/react";
+import type { DataGridColumn } from "@heroui-pro/react";
 import { DataGrid, NumberValue } from "@heroui-pro/react";
 import { useMemo } from "react";
+import type { Order } from "../data/orders";
 
 import { ORDERS, STATUS_COLORS } from "../data/orders";
 import { OrdersRowActions } from "../widgets/orders-row-actions";

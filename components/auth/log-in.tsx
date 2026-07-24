@@ -1,24 +1,24 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
 import {
   Button,
-  Modal,
-  Label,
-  TextField,
   FieldError,
-  Link,
-  Separator,
+  Form,
   Input,
   InputOTP,
+  Label,
+  Link,
+  Modal,
   REGEXP_ONLY_DIGITS,
+  Separator,
   Spinner,
-  Form,
+  TextField,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { AnimatePresence, m, domAnimation, LazyMotion } from "motion/react";
-import { useRouter } from "next/navigation";
-import { useSendOtpMutation, useLoginWithOtpMutation } from "@/lib/features/auth";
+import { AnimatePresence, domAnimation, LazyMotion, m } from "motion/react";
+import type React from "react";
+import { useCallback, useState } from "react";
+import { useLoginWithOtpMutation, useSendOtpMutation } from "@/lib/features/auth";
 
 export interface LogInProps {
   isOpen?: boolean;
@@ -39,8 +39,6 @@ const maskEmail = (email: string) => {
 };
 
 export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) => {
-  const router = useRouter();
-
   // State: 1 = email + socials, 2 = otp input
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");

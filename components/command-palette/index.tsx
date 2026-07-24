@@ -1,23 +1,22 @@
 "use client";
 
-import { Key, Kbd, Chip } from "@heroui/react";
+import { Chip, Kbd, type Key } from "@heroui/react";
 import { Command, EmptyState } from "@heroui-pro/react";
-import { useMemo, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useHotkeys } from "@mantine/hooks";
-
-import { MagnifierIcon } from "@/components/icons";
-import { buildCommandSearchText, filterCommands } from "./command-model";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { HighlightedText } from "@/components/highlighted-text";
+import { MagnifierIcon } from "@/components/icons";
+import { useAdminCommands } from "./admin/use-admin-commands";
+import { buildCommandSearchText, filterCommands } from "./command-model";
 import { usePostSearchCommands } from "./search/use-post-search-commands";
 import { STATIC_COMMANDS } from "./static-commands";
 import { useThemeCommands } from "./theme/use-theme-commands";
-import { useAdminCommands } from "./admin/use-admin-commands";
 import {
+  COMMAND_CATEGORY_ORDER,
   CommandIntent,
   type CommandItem,
   type CommandSource,
-  COMMAND_CATEGORY_ORDER,
 } from "./types";
 
 const COMMAND_SCOPES: readonly { label: string; source: CommandSource | null }[] = [

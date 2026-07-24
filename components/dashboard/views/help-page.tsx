@@ -4,10 +4,9 @@
 // support URLs. Replace the FAQ entries with real content or fetch them
 // from your CMS.
 
-import type { ComponentType } from "react";
-
 import { ArrowRightFromSquare, Book, Comment, LifeRing } from "@gravity-ui/icons";
 import { Accordion, Card, Link } from "@heroui/react";
+import type { ComponentType } from "react";
 
 type HelpLink = {
   description: string;

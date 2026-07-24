@@ -1,10 +1,9 @@
 "use client";
 
 import { Card } from "@heroui/react";
+import { Carousel } from "@heroui-pro/react";
 import Autoplay from "embla-carousel-autoplay";
 import { useMemo } from "react";
-
-import { Carousel } from "@heroui-pro/react";
 
 export function AutoplayCarousel() {
   const plugin = useMemo(() => Autoplay({ delay: 2000, stopOnInteraction: true }), []);

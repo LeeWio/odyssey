@@ -1,17 +1,17 @@
 "use client";
 
+import { toast } from "@heroui/react";
 import {
-  usePublishCommentMutation,
-  usePostGuestbookEntryMutation,
-  useEditMyCommentMutation,
   useDeleteMyCommentMutation,
+  useEditMyCommentMutation,
   useLikeCommentMutation,
-  useUnlikeCommentMutation,
+  usePostGuestbookEntryMutation,
+  usePublishCommentMutation,
   useReportCommentMutation,
+  useUnlikeCommentMutation,
 } from "@/lib/features/comment/comment-api";
 import { useCommentContext } from "../context/comment-context";
-import { simulationStore, EnhancedComment } from "./simulation-store";
-import { toast } from "@heroui/react";
+import { type EnhancedComment, simulationStore } from "./simulation-store";
 
 interface MutationHookProps {
   addPendingComment: (c: EnhancedComment) => void;
@@ -161,7 +161,7 @@ export function useCommentMutations({
 
   // 4. EDIT COMMENT (Optimistic UI + Real API Sync)
   const editComment = async (id: number, newContent: string) => {
-    const hadPreviousEdit = Object.prototype.hasOwnProperty.call(edits, id);
+    const hadPreviousEdit = Object.hasOwn(edits, id);
     const previousEdit = edits[id];
     setEdits((prev) => ({ ...prev, [id]: newContent }));
 

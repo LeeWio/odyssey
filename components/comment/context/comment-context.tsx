@@ -1,9 +1,10 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useAppSelector } from "@/lib/hooks";
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth/auth-slice";
-import { simulationStore, EnhancedComment } from "../hooks/simulation-store";
+import { useAppSelector } from "@/lib/hooks";
+import { type EnhancedComment, simulationStore } from "../hooks/simulation-store";
 
 export type SortOrder = "newest" | "oldest" | "likes";
 

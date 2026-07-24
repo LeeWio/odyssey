@@ -1,12 +1,11 @@
 "use client";
 
-import type { EmblaCarouselType } from "embla-carousel";
-
-import { useCallback, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { ArrowLeft, ArrowRight, Flame, PlayFill, Sparkles } from "@gravity-ui/icons";
 import { Button, Card, Chip, Surface, Tooltip, Typography } from "@heroui/react";
 import { Carousel } from "@heroui-pro/react";
+import type { EmblaCarouselType } from "embla-carousel";
+import Image from "next/image";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const heroSlides = [
   {
@@ -55,7 +54,7 @@ export function OdysseyHero() {
   const nextSlide = heroSlides[(selectedIndex + 1) % heroSlides.length];
 
   const slideMeta = useMemo(
-    () => `${selectedIndex + 1}`.padStart(2, "0") + " / " + `${heroSlides.length}`.padStart(2, "0"),
+    () => `${`${selectedIndex + 1}`.padStart(2, "0")} / ${`${heroSlides.length}`.padStart(2, "0")}`,
     [selectedIndex]
   );
 

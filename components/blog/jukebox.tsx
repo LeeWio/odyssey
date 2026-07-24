@@ -1,8 +1,8 @@
 "use client";
 
 import { Surface } from "@heroui/react";
-import { MusicMiniWidget } from "./music-mini-widget";
 import { RecentlyListened } from "../music/recently-listened";
+import { MusicMiniWidget } from "./music-mini-widget";
 
 export function Jukebox() {
   return (

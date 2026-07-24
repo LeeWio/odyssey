@@ -1,26 +1,26 @@
 "use client";
 
-import { useMemo, useState, FormEvent, useEffect } from "react";
+import { CirclePlus, Pencil, TrashBin } from "@gravity-ui/icons";
 import {
-  Button,
-  Form,
-  TextField,
-  Label,
-  Input,
-  TextArea,
-  FieldError,
-  Modal,
   AlertDialog,
-  SearchField,
+  Button,
   Chip,
-  Tabs,
-  Select,
+  FieldError,
+  Form,
+  Input,
+  Label,
   ListBox,
+  Modal,
+  SearchField,
+  Select,
   Switch,
+  Tabs,
+  TextArea,
+  TextField,
   toast,
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
-import { Pencil, TrashBin, CirclePlus } from "@gravity-ui/icons";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 // ==========================================
 // --- MOCK DATA SPECIFICATIONS ---
@@ -221,7 +221,7 @@ export default function PortfolioTestPage() {
     setIsTxModalOpen(true);
   };
 
-  const handleTxEditOpen = (tx: (typeof INITIAL_TRANSACTIONS)[0]) => {
+  const handleTxEditOpen = useCallback((tx: (typeof INITIAL_TRANSACTIONS)[0]) => {
     setSelectedTx(tx);
     setTxTicker(tx.ticker);
     setTxCompanyName(tx.companyName);
@@ -233,12 +233,12 @@ export default function PortfolioTestPage() {
     setTxIsHolding(tx.isHolding);
     setTxGradient(tx.gradient || "");
     setIsTxModalOpen(true);
-  };
+  }, []);
 
-  const handleTxDeleteOpen = (tx: (typeof INITIAL_TRANSACTIONS)[0]) => {
+  const handleTxDeleteOpen = useCallback((tx: (typeof INITIAL_TRANSACTIONS)[0]) => {
     setSelectedTx(tx);
     setIsTxDeleteAlertOpen(true);
-  };
+  }, []);
 
   const handleTxSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -409,7 +409,7 @@ export default function PortfolioTestPage() {
         ),
       },
     ],
-    []
+    [handleTxEditOpen, handleTxDeleteOpen]
   );
 
   // ==========================================

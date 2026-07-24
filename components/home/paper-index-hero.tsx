@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import { Icon } from "@iconify/react";
 import { Button, Card, Chip, ProgressBar, Separator, Surface, Typography } from "@heroui/react";
+import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
+import Image from "next/image";
 import { OffMapGlobe } from "@/components/home/off-map-globe";
 
 const easeOut = [0.23, 1, 0.32, 1] as const;

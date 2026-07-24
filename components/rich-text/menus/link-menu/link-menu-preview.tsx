@@ -1,5 +1,5 @@
-import { RichTextEditor, useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
 import { Button, ButtonGroup, Tooltip } from "@heroui/react";
+import { RichTextEditor, useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { Link as LinkExtension } from "@/components/rich-text/extensions";
 
@@ -16,7 +16,7 @@ export const LinkMenuPreview: React.FC<LinkMenuPreviewProps> = ({ onEdit }) => {
 
   const truncateStart = (str: string, maxLen: number = 24): string => {
     if (!str || str.length <= maxLen) return str;
-    return str.substring(0, maxLen - 3) + "...";
+    return `${str.substring(0, maxLen - 3)}...`;
   };
 
   if (!editor || !linkAttributes?.href) return null;

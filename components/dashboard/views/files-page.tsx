@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef, ComponentProps } from "react";
-import { Button, AlertDialog, Spinner, Tooltip } from "@heroui/react";
+import { AlertDialog, Button, Spinner, Tooltip } from "@heroui/react";
 import { DropZone, useDropZonePickerContext } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
+import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
 
-import { useUploadFileMutation, useDeleteFileMutation } from "@/lib/features/file/file-api";
+import { useDeleteFileMutation, useUploadFileMutation } from "@/lib/features/file/file-api";
 
 interface UploadFile {
   id: string;
@@ -23,7 +23,7 @@ const formatFileSize = (bytes: number) => {
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 };
 
 function getExtension(name: string): string {
@@ -192,7 +192,7 @@ export function FilesPage() {
   // 2. Handle DropZone input selection upload
   const handleSelect = useCallback(
     async (fileList: FileList) => {
-      if (fileList && fileList[0]) {
+      if (fileList?.[0]) {
         await executeUpload(fileList[0]);
       }
     },

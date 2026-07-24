@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useCommentContext } from "../context/comment-context";
 
 export function useCommentHighlight() {
@@ -9,10 +9,10 @@ export function useCommentHighlight() {
   const handleHashChange = useCallback(() => {
     if (typeof window === "undefined") return;
     const hash = window.location.hash;
-    if (hash && hash.startsWith("#comment-")) {
+    if (hash?.startsWith("#comment-")) {
       const idStr = hash.replace("#comment-", "");
       const id = parseInt(idStr, 10);
-      if (!isNaN(id)) {
+      if (!Number.isNaN(id)) {
         setHighlightedCommentId(id);
 
         // Find the element and scroll to it with delay to ensure DOM has rendered

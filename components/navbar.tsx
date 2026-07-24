@@ -1,10 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Avatar,
   Badge,
@@ -17,27 +12,30 @@ import {
   Label,
   ListBox,
   ProgressBar,
-  Tabs,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMounted, useOs } from "@mantine/hooks";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { baseApi } from "@/lib/features/api/base-api";
 import {
   removeCredentials,
   selectCurrentUser,
   selectIsAuthenticated,
+  selectIsLoginOpen,
+  selectIsSignUpOpen,
   selectUserEmail,
   setLoginOpen,
   setSignUpOpen,
-  selectIsLoginOpen,
-  selectIsSignUpOpen,
 } from "@/lib/features/auth";
-import { baseApi } from "@/lib/features/api/base-api";
-import { CommandPalette } from "./command-palette";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { LogIn } from "./auth/log-in";
 import { SignUp } from "./auth/sign-up";
+import { CommandPalette } from "./command-palette";
 import { MoonFillIcon, SearchIcon, SunMaxFillIcon } from "./icons";
 import { SmileBallLogo } from "./ui/smile-ball";
 
@@ -66,36 +64,6 @@ const contentEntrance = {
     },
   }),
 };
-
-// Animated Progress Bar that counts up when mounted (highly immersive!)
-function AnimatedProgressBar({
-  label,
-  value,
-  delay,
-}: {
-  label: string;
-  value: number;
-  delay: number;
-}) {
-  const [progress, setProgress] = useState(0);
-  const mounted = useMounted();
-
-  useEffect(() => {
-    if (!mounted) return;
-    const timer = setTimeout(() => setProgress(value), delay * 1000 + 80);
-    return () => clearTimeout(timer);
-  }, [mounted, value, delay]);
-
-  return (
-    <ProgressBar aria-label={label} value={progress} size="sm">
-      <Label>{label}</Label>
-      <ProgressBar.Output />
-      <ProgressBar.Track>
-        <ProgressBar.Fill className="transition-all duration-[700ms] ease-out" />
-      </ProgressBar.Track>
-    </ProgressBar>
-  );
-}
 
 // Statically mapping Navigation details for dynamic switch-case loop-free lookups
 const getNavigationItem = (id: NavigationId | null) => {
@@ -702,9 +670,9 @@ export const Navbar = () => {
   const activeItem = getNavigationItem(activeNavigation);
   const platformKey = mounted && (os === "macos" || os === "ios") ? "⌘" : "Ctrl";
 
-  const cancelClose = () => {
+  const cancelClose = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
-  };
+  }, []);
 
   const closeNavigation = () => {
     cancelClose();
@@ -777,7 +745,7 @@ export const Navbar = () => {
     };
   }, [isLocked, isMobileMenuOpen]);
 
-  useEffect(() => () => cancelClose(), []);
+  useEffect(() => () => cancelClose(), [cancelClose]);
 
   const handleLogout = () => {
     dispatch(removeCredentials());

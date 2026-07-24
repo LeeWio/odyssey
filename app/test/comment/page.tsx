@@ -1,38 +1,32 @@
 "use client";
 
-import { useMemo, useState, FormEvent, useCallback } from "react";
 import {
-  Button,
-  Form,
-  TextField,
-  Label,
-  TextArea,
   AlertDialog,
-  Spinner,
-  Tabs,
-  Select,
-  ListBox,
   Avatar,
   AvatarFallback,
+  Button,
+  Label,
+  ListBox,
+  Select,
+  Spinner,
+  Tabs,
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-
+import { useCallback, useMemo, useState } from "react";
+import { CommentSystem } from "@/components/comment";
 import {
-  useGetPostCommentsQuery,
-  usePublishCommentMutation,
+  type CommentResponse,
+  type CommentStatus,
+  useDeleteCommentMutation,
   useGetAdminCommentsQuery,
   useGetPendingCommentsQuery,
   useModerateCommentMutation,
-  useDeleteCommentMutation,
-  type CommentResponse,
-  type CommentStatus,
 } from "@/lib/features/comment/comment-api";
 import { useGetPublicPostsQuery } from "@/lib/features/post/post-api";
-import { CommentSystem } from "@/components/comment";
 
 // --- Recursive Component for Public Comments ---
-function CommentTreeItem({
+function _CommentTreeItem({
   comment,
   onReply,
 }: {
@@ -64,7 +58,7 @@ function CommentTreeItem({
       {comment.children && comment.children.length > 0 && (
         <div className="border-border ml-4 flex flex-col gap-6 border-l pl-6">
           {comment.children.map((child) => (
-            <CommentTreeItem key={child.id} comment={child} onReply={onReply} />
+            <_CommentTreeItem key={child.id} comment={child} onReply={onReply} />
           ))}
         </div>
       )}
@@ -77,40 +71,12 @@ export default function CommentTestPage() {
 
   // --- Public Tab State ---
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
-  const [replyToComment, setReplyToComment] = useState<CommentResponse | null>(null);
-  const [newCommentContent, setNewCommentContent] = useState("");
 
   const { data: postsData, isLoading: isPostsLoading } = useGetPublicPostsQuery({
     page: 0,
     size: 50,
   });
   const posts = postsData?.list || [];
-
-  const { data: commentsData, isLoading: isCommentsLoading } = useGetPostCommentsQuery(
-    { postId: selectedPostId!, page: 0, size: 100 },
-    { skip: !selectedPostId }
-  );
-  const comments = commentsData || [];
-
-  const [publishComment, { isLoading: isPublishing }] = usePublishCommentMutation();
-
-  const handlePublishSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!selectedPostId || !newCommentContent.trim()) return;
-
-    try {
-      await publishComment({
-        content: newCommentContent.trim(),
-        postId: selectedPostId,
-        parentId: replyToComment ? replyToComment.id : undefined,
-      }).unwrap();
-
-      setNewCommentContent("");
-      setReplyToComment(null);
-    } catch {
-      // Handled globally
-    }
-  };
 
   // --- Admin Tab State ---
   const [adminSort, setAdminSort] = useState<DataGridSortDescriptor>({
@@ -281,7 +247,6 @@ export default function CommentTestPage() {
             onChange={(val) => {
               if (val) {
                 setSelectedPostId(Number(val));
-                setReplyToComment(null); // reset reply state
               } else {
                 setSelectedPostId(null);
               }

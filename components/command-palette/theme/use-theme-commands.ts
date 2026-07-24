@@ -1,8 +1,8 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import type React from "react";
 import { useMemo } from "react";
-import { useTheme } from "next-themes";
 import {
   DisplayFillIcon,
   GearIcon,

@@ -38,7 +38,7 @@ export const extractText = (json: JSONContent): string => {
   let text = "";
   const traverse = (node: JSONContent) => {
     if (node.text) {
-      text += node.text + " ";
+      text += `${node.text} `;
     }
     if (node.content) {
       node.content.forEach(traverse);

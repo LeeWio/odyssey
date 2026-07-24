@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { Typography } from "@heroui/react";
 import { ItemCard, ItemCardGroup } from "@heroui-pro/react";
+import Image from "next/image";
 
 type Song = {
   id: string;

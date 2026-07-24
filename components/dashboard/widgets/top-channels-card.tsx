@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
 import { Card, Skeleton } from "@heroui/react";
 import { BarChart } from "@heroui-pro/react";
+import { useMemo } from "react";
 
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard/dashboard-api";
 

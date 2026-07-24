@@ -1,27 +1,27 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { CirclePlay, Eye, Funnel, Pencil, TrashBin } from "@gravity-ui/icons";
 import {
   Avatar,
-  Chip,
-  SearchField,
   Button,
+  Chip,
   Dropdown,
   Label,
-  Tooltip,
+  SearchField,
   Spinner,
+  Tooltip,
   toast,
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
-import { Eye, Pencil, TrashBin, Funnel, CirclePlay } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
-import {
-  useGetAllUsersQuery,
-  useUpdateUserStatusMutation,
-  useUpdateUserRolesMutation,
-  type UserResponse,
-} from "@/lib/features/user/user-api";
+import { useCallback, useMemo, useState } from "react";
 import { useGetAllRolesQuery } from "@/lib/features/role/role-api";
+import {
+  type UserResponse,
+  useGetAllUsersQuery,
+  useUpdateUserRolesMutation,
+  useUpdateUserStatusMutation,
+} from "@/lib/features/user/user-api";
 import { usePortalContainer } from "../use-portal-container";
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
@@ -168,7 +168,7 @@ export function UsersPage() {
         (user) =>
           user.username.toLowerCase().includes(q) ||
           user.email.toLowerCase().includes(q) ||
-          (user.nickname && user.nickname.toLowerCase().includes(q))
+          user.nickname?.toLowerCase().includes(q)
       );
     }
 

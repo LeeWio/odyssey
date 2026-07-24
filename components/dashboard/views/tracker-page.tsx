@@ -5,10 +5,6 @@
 // optimistic DnD locally — persist the reordered column in your
 // `onReorder`/`onInsert` handlers once you're wired up to a backend.
 
-import type { TrackerStatus, TrackerTask } from "../data/tracker";
-import type { UseKanbanReturn } from "@heroui-pro/react";
-import type { ComponentType } from "react";
-
 import {
   ArrowRight,
   CircleCheck,
@@ -21,11 +17,13 @@ import {
   TrashBin,
 } from "@gravity-ui/icons";
 import { Avatar, Chip, Header, Label, ProgressBar } from "@heroui/react";
-import { ContextMenu, KPI, KPIGroup, Kanban, useKanban, useKanbanColumn } from "@heroui-pro/react";
+import type { UseKanbanReturn } from "@heroui-pro/react";
+import { ContextMenu, Kanban, KPI, KPIGroup, useKanban, useKanbanColumn } from "@heroui-pro/react";
+import type { ComponentType } from "react";
 import { Fragment, useMemo } from "react";
-
-import { IconButton } from "../icon-button";
+import type { TrackerStatus, TrackerTask } from "../data/tracker";
 import { TRACKER_COLUMNS, TRACKER_TASKS } from "../data/tracker";
+import { IconButton } from "../icon-button";
 
 const COLUMN_META: Record<
   TrackerStatus,

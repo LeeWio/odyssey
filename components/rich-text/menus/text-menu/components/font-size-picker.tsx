@@ -1,7 +1,7 @@
 "use client";
 
-import { memo } from "react";
 import { NumberStepper } from "@heroui-pro/react";
+import { memo } from "react";
 
 interface FontSizePickerProps {
   value: string;

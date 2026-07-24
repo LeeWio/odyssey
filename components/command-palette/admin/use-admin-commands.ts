@@ -2,9 +2,9 @@
 
 import { useMemo } from "react";
 import { ChartColumnIcon, FileTextIcon } from "@/components/icons";
-import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { selectIsAdmin } from "@/lib/features/auth";
 import { toggleDashboard, toggleRichText } from "@/lib/features/ui";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { createActionCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 

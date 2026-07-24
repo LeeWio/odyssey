@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Button, Card, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { AnimatePresence, motion } from "motion/react";
 import type { Transition } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 
 const MotionCard = motion(Card);
 const MotionButton = motion(Button);
@@ -43,7 +43,6 @@ export function MusicMiniWidget({
   return (
     <MotionCard
       className="relative max-h-44 w-40 overflow-hidden select-none"
-      role=""
       aria-label={`Music player: ${title} by ${artist}`}
       initial={{ opacity: 0, y: 12, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}

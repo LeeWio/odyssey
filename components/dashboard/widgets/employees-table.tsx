@@ -1,12 +1,11 @@
 "use client";
 
-import type { Employee } from "../data/employees";
-import type { DataGridColumn, DataGridSortDescriptor } from "@heroui-pro/react";
-
 import { BarsDescendingAlignCenter, Copy, LayoutColumns3, Sliders } from "@gravity-ui/icons";
 import { Avatar, Button, Chip, SearchField } from "@heroui/react";
+import type { DataGridColumn, DataGridSortDescriptor } from "@heroui-pro/react";
 import { DataGrid } from "@heroui-pro/react";
 import { useCallback, useMemo, useState } from "react";
+import type { Employee } from "../data/employees";
 
 import { EMPLOYEES } from "../data/employees";
 

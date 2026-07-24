@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, Suspense, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useAppDispatch } from "@/lib/hooks";
-import { setCredentials, setPermissions } from "@/lib/features/auth/auth-slice";
-import { permissionApi } from "@/lib/features/permission/permission-api";
-import type { MenuResponse } from "@/lib/features/permission/permission-api";
-import { baseApi } from "@/lib/features/api/base-api";
 import { Spinner, toast } from "@heroui/react";
 import { TextShimmer } from "@heroui-pro/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect } from "react";
+import { baseApi } from "@/lib/features/api/base-api";
+import { setCredentials, setPermissions } from "@/lib/features/auth/auth-slice";
+import type { MenuResponse } from "@/lib/features/permission/permission-api";
+import { permissionApi } from "@/lib/features/permission/permission-api";
+import { useAppDispatch } from "@/lib/hooks";
 
 // Safe helper to decode JWT payload on the client side with Node SSR guard
 const decodeJwt = (token: string) => {
@@ -20,7 +20,7 @@ const decodeJwt = (token: string) => {
       window
         .atob(base64)
         .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .map((c) => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
         .join("")
     );
     return JSON.parse(jsonPayload);

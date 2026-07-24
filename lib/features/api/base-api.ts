@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery, FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
+import { createApi, type FetchBaseQueryError, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { z } from "zod";
 
 // Define a minimal state interface to break circular dependency with store.ts

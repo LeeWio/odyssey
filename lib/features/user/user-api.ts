@@ -1,7 +1,7 @@
-import { ApiResponse } from "@/types";
-import { baseApi, ApiResponseSchema, transformError } from "../api/base-api";
 import { toast } from "@heroui/react";
 import { z } from "zod";
+import type { ApiResponse } from "@/types";
+import { ApiResponseSchema, baseApi, transformError } from "../api/base-api";
 
 export const UserResponseSchema = z.object({
   id: z.number(),

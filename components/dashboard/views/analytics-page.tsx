@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { Segment } from "@heroui-pro/react";
+import { useMemo, useState } from "react";
 
 import { AnalyticsKpiRow } from "../widgets/analytics-kpi-row";
 import { DeviceBreakdownCard } from "../widgets/device-breakdown-card";

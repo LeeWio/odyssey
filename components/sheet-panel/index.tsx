@@ -1,17 +1,17 @@
 "use client";
 
+import { Card, Chip, Toolbar, Typography } from "@heroui/react";
 import { Sheet } from "@heroui-pro/react";
 import { useHotkeys } from "@mantine/hooks";
-import { useAppSelector, useAppDispatch } from "@/lib/hooks";
-import { selectIsSheetOpen, toggleSheet } from "@/lib/features/ui";
-import { Stocks } from "./widgets/stocks";
-import { useThemeSwitch } from "../theme-switch";
-import { Card, Chip, Toolbar, Typography } from "@heroui/react";
 import { useState } from "react";
 import { useRealTime } from "@/hooks/use-real-time";
-import { AnimatedNumber } from "../ui/animated-number";
-import { SunMaxFillIcon } from "../icons";
+import { selectIsSheetOpen, toggleSheet } from "@/lib/features/ui";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { MusicMiniWidget } from "../blog";
+import { SunMaxFillIcon } from "../icons";
+import { useThemeSwitch } from "../theme-switch";
+import { AnimatedNumber } from "../ui/animated-number";
+import { Stocks } from "./widgets/stocks";
 
 export function SheetPanel() {
   const isOpen = useAppSelector(selectIsSheetOpen);
@@ -53,7 +53,7 @@ export function SheetPanel() {
 
                 <Card.Content className="flex flex-row items-center justify-center">
                   <AnimatedNumber
-                    value={parseInt(hours)}
+                    value={parseInt(hours, 10)}
                     className="text-muted text-[6rem] leading-none font-bold tabular-nums"
                     format={{ minimumIntegerDigits: 2 }}
                   />
@@ -61,7 +61,7 @@ export function SheetPanel() {
                     :
                   </span>
                   <AnimatedNumber
-                    value={parseInt(minutes)}
+                    value={parseInt(minutes, 10)}
                     className="text-warning text-[6rem] leading-none font-bold tabular-nums"
                     format={{ minimumIntegerDigits: 2 }}
                   />

@@ -1,8 +1,8 @@
 "use client";
 
+import { Button, Dropdown, Label, Tooltip } from "@heroui/react";
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { Dropdown, Button, Tooltip, Label } from "@heroui/react";
 
 export function FixedToolbar() {
   const { editor } = useRichTextEditor();

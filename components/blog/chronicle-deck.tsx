@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef } from "react";
-import Image from "next/image";
+import { ArrowRight, Calendar, Person } from "@gravity-ui/icons";
 import { useGSAP } from "@gsap/react";
+import { Button, Card, Chip } from "@heroui/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Card, Chip, Button } from "@heroui/react";
-import { Calendar, Person, ArrowRight } from "@gravity-ui/icons";
+import Image from "next/image";
+import { useRef } from "react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);

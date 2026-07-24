@@ -3,8 +3,6 @@
 // TODO: Wire these form controls to your account/workspace store. The controls
 // are currently uncontrolled and don't persist changes.
 
-import type { ReactNode } from "react";
-
 import {
   Button,
   Checkbox,
@@ -16,6 +14,7 @@ import {
   TextArea,
   TextField,
 } from "@heroui/react";
+import type { ReactNode } from "react";
 
 const PROVINCES = [
   { id: "on", label: "Ontario" },

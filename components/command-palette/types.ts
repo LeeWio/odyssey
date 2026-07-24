@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 export const COMMAND_CATEGORIES = ["AI", "Management", "Analytics", "Developer", "System"] as const;
 

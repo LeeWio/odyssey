@@ -1,5 +1,5 @@
-import { Paragraph as TiptapParagraph } from "@tiptap/extension-paragraph";
 import { mergeAttributes } from "@tiptap/core";
+import { Paragraph as TiptapParagraph } from "@tiptap/extension-paragraph";
 
 export const Paragraph = TiptapParagraph.extend({
   // 只重写 renderHTML，其他行为（parseHTML、commands 等）全部继承

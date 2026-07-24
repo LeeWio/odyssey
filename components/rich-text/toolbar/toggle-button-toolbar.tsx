@@ -1,7 +1,7 @@
-import { PressEvent, ToggleButton, ToggleButtonVariants, Tooltip } from "@heroui/react";
-import { ReactNode } from "react";
-import { useTextMenuStates } from "../menus/text-menu/hooks/use-text-menu-states";
+import { type PressEvent, ToggleButton, type ToggleButtonVariants, Tooltip } from "@heroui/react";
+import type { ReactNode } from "react";
 import { useRichTextCommands } from "../menus/text-menu/hooks/use-rich-text-commands";
+import { useTextMenuStates } from "../menus/text-menu/hooks/use-text-menu-states";
 
 export type ToggleButtonCommand =
   | "subscript"

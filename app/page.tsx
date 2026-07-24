@@ -1,16 +1,14 @@
 "use client";
 
-import { Button, Card, Chip, Surface, Typography, cn, ProgressBar, Tooltip } from "@heroui/react";
-import { motion, useScroll, useSpring, useTransform } from "motion/react";
-import { useRef, useState, useEffect } from "react";
+import { Button, Card, Chip, cn, ProgressBar, Surface, Tooltip, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRouter } from "next/navigation";
-import { MusicDashboard } from "@/components/music/music-dashboard";
+import { useEffect, useRef, useState } from "react";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
-import { MotionTypography } from "@/components/ui/motion-typography";
+import { MusicDashboard } from "@/components/music/music-dashboard";
 import { MotionButton } from "@/components/ui";
-
-const introHeroImage = "/odyssey-hero.png";
+import { MotionTypography } from "@/components/ui/motion-typography";
 
 const enterEase = [0.23, 1, 0.32, 1] as const;
 
@@ -522,8 +520,8 @@ function ChroniclePanel() {
             type="body"
             className="mt-8 max-w-md text-sm leading-relaxed font-light italic select-none"
           >
-            "Close your eyes. Let the ambient loops settle the drift. You've been scrolling for a
-            long time — rest here a while."
+            &quot;Close your eyes. Let the ambient loops settle the drift. You&apos;ve been
+            scrolling for a long time — rest here a while.&quot;
           </Typography>
         </div>
 

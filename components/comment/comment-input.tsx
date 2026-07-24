@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Button, TextArea, TextField, Spinner, Avatar } from "@heroui/react";
+import { Avatar, Button, Spinner, TextArea, TextField } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { setLoginOpen } from "@/lib/features/auth";
+import { useAppDispatch } from "@/lib/hooks";
 import { useCommentContext } from "./context/comment-context";
 import { useCommentDraft } from "./hooks/use-comment-draft";
-import { useAppDispatch } from "@/lib/hooks";
-import { setLoginOpen } from "@/lib/features/auth";
 
 interface CommentInputProps {
   replyId?: number | null;

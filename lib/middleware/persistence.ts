@@ -1,9 +1,9 @@
 "use client";
 
 import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
-import { setCredentials, setPermissions, removeCredentials } from "../features/auth/auth-slice";
-import { setThemeVariant, setActiveId, type ThemeVariant } from "../features/ui";
+import { removeCredentials, setCredentials, setPermissions } from "../features/auth/auth-slice";
 import { setLocale } from "../features/locale/locale-slice";
+import { setActiveId, setThemeVariant, type ThemeVariant } from "../features/ui";
 import type { RootState } from "../store";
 import {
   coerceThemeVariant,

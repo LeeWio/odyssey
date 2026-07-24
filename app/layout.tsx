@@ -1,5 +1,5 @@
-import type { Metadata, Viewport } from "next";
 import clsx from "clsx";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import Script from "next/script";
 import {
@@ -10,18 +10,18 @@ import {
   fontSans,
 } from "@/config/fonts";
 import "@/styles/globals.css";
-import { Providers } from "./providers";
-import { siteConfig } from "@/config/site";
+import { isRTL, Toast } from "@heroui/react";
 // import { Navbar } from "@/components/navbar";
 import { getMessages } from "next-intl/server";
-import { Toast, isRTL } from "@heroui/react";
-import { SheetPanel } from "@/components/sheet-panel";
 import { DashboardSheet } from "@/components/dashboard";
 // import { RichTextModal } from "@/components/rich-text";
 import { Footer } from "@/components/footer";
+import { Navbar } from "@/components/navbar";
+import { SheetPanel } from "@/components/sheet-panel";
+import { siteConfig } from "@/config/site";
 import { getInitialThemeState } from "@/lib/theme";
 import { getThemeInitScript } from "@/lib/theme-init-script";
-import { Navbar } from "@/components/navbar";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: {

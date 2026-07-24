@@ -1,7 +1,6 @@
-import type { RichTextEditorSuggestionItem } from "@heroui-pro/react";
-
-import { RichTextEditor, filterRichTextEditorSuggestionItems } from "@heroui-pro/react";
 import { Heading1, ListUl, QuoteOpen, Sparkles } from "@gravity-ui/icons";
+import type { RichTextEditorSuggestionItem } from "@heroui-pro/react";
+import { filterRichTextEditorSuggestionItems, RichTextEditor } from "@heroui-pro/react";
 
 const iconClassName = "";
 

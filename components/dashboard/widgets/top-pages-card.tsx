@@ -1,11 +1,11 @@
 "use client";
 
-import type { TopPageResponse } from "@/lib/features/dashboard";
+import { Skeleton } from "@heroui/react";
 import type { DataGridColumn } from "@heroui-pro/react";
 
 import { DataGrid, NumberValue, TrendChip } from "@heroui-pro/react";
 import { useMemo } from "react";
-import { Skeleton } from "@heroui/react";
+import type { TopPageResponse } from "@/lib/features/dashboard";
 
 import { useGetTopPagesQuery } from "@/lib/features/dashboard";
 

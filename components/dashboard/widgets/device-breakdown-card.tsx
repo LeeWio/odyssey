@@ -1,9 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
-
 import { Card, Skeleton } from "@heroui/react";
 import { ChartTooltip, PieChart } from "@heroui-pro/react";
+import type { ReactNode } from "react";
 
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
 

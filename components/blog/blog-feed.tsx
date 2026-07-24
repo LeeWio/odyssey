@@ -1,21 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
-import { useDebounce } from "use-debounce";
 import {
   Button,
   Card,
   Chip,
+  cn,
   InputGroup,
-  Tabs,
   ScrollShadow,
   Spinner,
+  Tabs,
   Typography,
-  cn,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useGetPublicPostsQuery } from "@/lib/features/post/post-api";
+import { useState } from "react";
+import { useDebounce } from "use-debounce";
 import { useGetPublicCategoriesQuery } from "@/lib/features/category/category-api";
+import { useGetPublicPostsQuery } from "@/lib/features/post/post-api";
 import { useGetPublicTagsQuery } from "@/lib/features/tag/tag-api";
 import { PostCard } from "./post-card";
 
@@ -29,7 +29,7 @@ export function BlogFeed() {
 
   // Query categories & tags
   const { data: categories = [], isLoading: categoriesLoading } = useGetPublicCategoriesQuery();
-  const { data: tags = [], isLoading: tagsLoading } = useGetPublicTagsQuery();
+  const { data: tags = [] } = useGetPublicTagsQuery();
 
   // Selected category ID calculation
   const categoryId =
@@ -213,7 +213,7 @@ export function BlogFeed() {
             No articles found
           </Typography>
           <Typography type="body-xs" color="muted" className="mt-2 max-w-sm">
-            We couldn't find any narrative or log entry that matches your search filters. Try
+            We couldn&apos;t find any narrative or log entry that matches your search filters. Try
             resetting them.
           </Typography>
           <Button

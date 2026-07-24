@@ -1,8 +1,8 @@
 import type { Action, ThunkAction } from "@reduxjs/toolkit";
 import { combineSlices, configureStore } from "@reduxjs/toolkit";
+import { authSlice, localeSlice, uiSlice } from "./features";
 import { baseApi } from "./features/api/base-api";
-import { localeSlice, authSlice, uiSlice } from "./features";
-import { persistenceMiddleware, loadPersistedState } from "./middleware/persistence";
+import { loadPersistedState, persistenceMiddleware } from "./middleware/persistence";
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.

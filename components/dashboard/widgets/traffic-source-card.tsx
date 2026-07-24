@@ -3,9 +3,8 @@
 import { EllipsisVertical } from "@gravity-ui/icons";
 import { Card } from "@heroui/react";
 import { LineChart } from "@heroui-pro/react";
-
-import { IconButton } from "../icon-button";
 import { TRAFFIC_DATA } from "../data/traffic";
+import { IconButton } from "../icon-button";
 
 const Y_TICKS = [0, 5000, 10000, 20000];
 

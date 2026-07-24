@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
 import { Typography } from "@heroui/react";
+import { motion } from "motion/react";
 
 /**
  * A hardware-accelerated, motion-enhanced Typography component

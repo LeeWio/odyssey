@@ -1,5 +1,5 @@
-import { Editor } from "@tiptap/react";
-import { Link, HorizontalRule } from "../extensions";
+import type { Editor } from "@tiptap/react";
+import { HorizontalRule, Link } from "../extensions";
 
 export const isTableGripSelected = (node: HTMLElement | null) => {
   let container: HTMLElement | null = node;
@@ -8,8 +8,8 @@ export const isTableGripSelected = (node: HTMLElement | null) => {
     container = container.parentElement;
   }
 
-  const gripColumn = container?.querySelector && container.querySelector("a.grip-column.selected");
-  const gripRow = container?.querySelector && container.querySelector("a.grip-row.selected");
+  const gripColumn = container?.querySelector?.("a.grip-column.selected");
+  const gripRow = container?.querySelector?.("a.grip-row.selected");
 
   return !!(gripColumn || gripRow);
 };

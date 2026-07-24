@@ -1,18 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
+import { useMemo } from "react";
 
 import {
-  FileTextIcon,
-  MagnifierIcon,
-  TargetIcon,
-  ClockIcon,
-  SearchIcon,
   ArrowRightFromSquareIcon,
+  ClockIcon,
+  FileTextIcon,
   GearIcon,
+  MagnifierIcon,
   PersonsIcon,
+  SearchIcon,
   SparklesIcon,
+  TargetIcon,
 } from "@/components/icons";
 import { useUnifiedSearchQuery } from "@/lib/features/post/post-api";
 import { createNavigationCommand } from "../command-model";

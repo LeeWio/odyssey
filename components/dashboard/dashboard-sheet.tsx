@@ -1,26 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
 import { Sheet } from "@heroui-pro/react";
-import { useAppSelector, useAppDispatch } from "@/lib/hooks";
-import { selectIsDashboardOpen, toggleDashboard } from "@/lib/features/ui";
-import { selectIsAdmin } from "@/lib/features/auth";
 import { useMounted } from "@mantine/hooks";
+import { useState } from "react";
+import { selectIsAdmin } from "@/lib/features/auth";
+import { selectIsDashboardOpen, toggleDashboard } from "@/lib/features/ui";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 import { AppShell } from "./app-shell";
-import { DashboardPage } from "./views/dashboard-page";
 import { AnalyticsPage } from "./views/analytics-page";
-import { OrdersPage } from "./views/orders-page";
-import { UsersPage } from "./views/users-page";
-import { PermissionsPage } from "./views/permissions-page";
-import { TrackerPage } from "./views/tracker-page";
-import { SettingsPage } from "./views/settings-page";
-import { HelpPage } from "./views/help-page";
 import { CategoriesPage } from "./views/categories-page";
-import { TagsPage } from "./views/tags-page";
 import { CommentsPage } from "./views/comments-page";
-import { MomentsPage } from "./views/moments-page";
+import { DashboardPage } from "./views/dashboard-page";
 import { FilesPage } from "./views/files-page";
+import { HelpPage } from "./views/help-page";
+import { MomentsPage } from "./views/moments-page";
+import { OrdersPage } from "./views/orders-page";
+import { PermissionsPage } from "./views/permissions-page";
+import { SettingsPage } from "./views/settings-page";
+import { TagsPage } from "./views/tags-page";
+import { TrackerPage } from "./views/tracker-page";
+import { UsersPage } from "./views/users-page";
 
 export function DashboardSheet() {
   const isMounted = useMounted();

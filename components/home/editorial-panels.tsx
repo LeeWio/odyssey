@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
-import albumImage from "@/public/ChatGPT Image Jul 15, 2026, 11_56_34 PM.png";
-import mountainImage from "@/public/ChatGPT Image Jul 15, 2026, 11_55_41 PM.png";
+import Image from "next/image";
+import Link from "next/link";
 import { OffMapGlobe } from "@/components/home/off-map-globe";
+import mountainImage from "@/public/ChatGPT Image Jul 15, 2026, 11_55_41 PM.png";
+import albumImage from "@/public/ChatGPT Image Jul 15, 2026, 11_56_34 PM.png";
 
 type EditorialPanelProps = {
   reducedMotion: boolean;

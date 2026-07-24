@@ -1,10 +1,10 @@
 "use client";
 
-import type { NavItem } from "./nav-items";
+import { Bars, LayoutSideContentLeft } from "@gravity-ui/icons";
 
 import { Chip } from "@heroui/react";
 import { Sidebar, useSidebar } from "@heroui-pro/react";
-import { Bars, LayoutSideContentLeft } from "@gravity-ui/icons";
+import type { NavItem } from "./nav-items";
 
 import { NAV_ITEMS } from "./nav-items";
 

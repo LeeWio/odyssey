@@ -1,9 +1,9 @@
 import {
-  Anton as FontBrutalismDisplay,
-  Geist as FontSans,
-  Geist_Mono as FontMono,
-  Instrument_Serif as FontDisplay,
   Share_Tech_Mono as FontBrutalismBody,
+  Anton as FontBrutalismDisplay,
+  Instrument_Serif as FontDisplay,
+  Geist_Mono as FontMono,
+  Geist as FontSans,
 } from "next/font/google";
 
 export const fontSans = FontSans({

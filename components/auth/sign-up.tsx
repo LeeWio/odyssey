@@ -1,22 +1,23 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
 import {
   Button,
-  Modal,
-  Label,
-  TextField,
-  Link,
-  Separator,
+  FieldError,
   Form,
   Input,
   InputGroup,
-  FieldError,
+  Label,
+  Link,
+  Modal,
+  Separator,
   Spinner,
+  TextField,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { AnimatePresence, domAnimation, LazyMotion, m } from "motion/react";
+import type React from "react";
+import { useCallback, useState } from "react";
 import { useRegisterMutation } from "@/lib/features/auth";
-import { AnimatePresence, m, domAnimation, LazyMotion } from "motion/react";
 
 export interface SignUpProps {
   isOpen?: boolean;

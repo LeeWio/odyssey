@@ -1,11 +1,10 @@
 "use client";
 
-import React from "react";
 import { RichTextEditor } from "@heroui-pro/react";
-import { useAppSelector } from "@/lib/hooks";
+import type { Editor } from "@tiptap/react";
 import { selectRichTextState } from "@/lib/features";
+import { useAppSelector } from "@/lib/hooks";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
-import { Editor } from "@tiptap/react";
 
 export interface RichTextProps {
   onReady?: (editor: Editor) => void; // 👈 声明就绪回调 API

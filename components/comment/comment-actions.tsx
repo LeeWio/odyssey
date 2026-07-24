@@ -1,10 +1,10 @@
 "use client";
 
-import { Button, Tooltip, Dropdown } from "@heroui/react";
+import { Button, Dropdown, Tooltip } from "@heroui/react";
+import { EmojiReactionButton } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useCommentContext } from "./context/comment-context";
-import { EnhancedComment } from "./hooks/simulation-store";
-import { EmojiReactionButton } from "@heroui-pro/react";
+import type { EnhancedComment } from "./hooks/simulation-store";
 
 interface CommentActionsProps {
   comment: EnhancedComment;

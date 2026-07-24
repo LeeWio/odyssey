@@ -1,12 +1,12 @@
 "use client";
 
 import {
+  type MotionValue,
   motion,
+  useMotionValue,
   useReducedMotion,
   useSpring,
   useTransform,
-  useMotionValue,
-  MotionValue,
 } from "motion/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -25,10 +25,16 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Avoid hydration mismatch and set mouse tracking
+  // Avoid hydration mismatch and set mounted state
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
+  // Set mouse tracking
+  useEffect(() => {
     if (reducedMotion) return;
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -41,7 +47,7 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [reducedMotion]);
+  }, [reducedMotion, mouseX, mouseY]);
 
   // Use a highly refined physics spring to damp the scroll.
   // Lower stiffness and higher damping create a luscious, slow-motion liquid swell.
@@ -100,37 +106,37 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
   const scrollY3 = useTransform(smoothScroll, [0, 0.33, 0.66, 1], [40, 75, 10, 85]);
 
   // Combined scroll + mouse coordinates (disabled in reduced-motion)
-  const finalX1 = useTransform([scrollX1, mouseSpringX], (values: any[]) => {
-    const sX = values[0] as number;
-    const mX = values[1] as number;
+  const finalX1 = useTransform([scrollX1, mouseSpringX], (values: readonly number[]) => {
+    const sX = values[0];
+    const mX = values[1];
     return `${sX + (reducedMotion ? 0 : mX * 8)}vw`;
   });
-  const finalY1 = useTransform([scrollY1, mouseSpringY], (values: any[]) => {
-    const sY = values[0] as number;
-    const mY = values[1] as number;
+  const finalY1 = useTransform([scrollY1, mouseSpringY], (values: readonly number[]) => {
+    const sY = values[0];
+    const mY = values[1];
     return `${sY + (reducedMotion ? 0 : mY * 8)}vh`;
   });
 
   // Blob 2 uses OPPOSITE multiplier (* -10) to create physical sliding volume!
-  const finalX2 = useTransform([scrollX2, mouseSpringX], (values: any[]) => {
-    const sX = values[0] as number;
-    const mX = values[1] as number;
+  const finalX2 = useTransform([scrollX2, mouseSpringX], (values: readonly number[]) => {
+    const sX = values[0];
+    const mX = values[1];
     return `${sX + (reducedMotion ? 0 : mX * -10)}vw`;
   });
-  const finalY2 = useTransform([scrollY2, mouseSpringY], (values: any[]) => {
-    const sY = values[0] as number;
-    const mY = values[1] as number;
+  const finalY2 = useTransform([scrollY2, mouseSpringY], (values: readonly number[]) => {
+    const sY = values[0];
+    const mY = values[1];
     return `${sY + (reducedMotion ? 0 : mY * -10)}vh`;
   });
 
-  const finalX3 = useTransform([scrollX3, mouseSpringX], (values: any[]) => {
-    const sX = values[0] as number;
-    const mX = values[1] as number;
+  const finalX3 = useTransform([scrollX3, mouseSpringX], (values: readonly number[]) => {
+    const sX = values[0];
+    const mX = values[1];
     return `${sX + (reducedMotion ? 0 : mX * 6)}vw`;
   });
-  const finalY3 = useTransform([scrollY3, mouseSpringY], (values: any[]) => {
-    const sY = values[0] as number;
-    const mY = values[1] as number;
+  const finalY3 = useTransform([scrollY3, mouseSpringY], (values: readonly number[]) => {
+    const sY = values[0];
+    const mY = values[1];
     return `${sY + (reducedMotion ? 0 : mY * 6)}vh`;
   });
 

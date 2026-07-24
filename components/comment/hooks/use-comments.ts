@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  useGetPostCommentsQuery,
   useGetGuestbookEntriesQuery,
+  useGetPostCommentsQuery,
 } from "@/lib/features/comment/comment-api";
 import { useCommentContext } from "../context/comment-context";
-import { simulationStore, EnhancedComment } from "./simulation-store";
+import { type EnhancedComment, simulationStore } from "./simulation-store";
 
 interface CommentNode {
   id: number;

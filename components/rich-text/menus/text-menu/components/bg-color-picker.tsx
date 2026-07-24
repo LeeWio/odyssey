@@ -1,6 +1,5 @@
 "use client";
 
-import { memo, useState } from "react";
 import type { ColorChannel, ColorSpace } from "@heroui/react";
 import {
   Button,
@@ -8,10 +7,11 @@ import {
   ColorSlider,
   Label,
   ListBox,
-  Select,
   parseColor,
+  Select,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { memo, useState } from "react";
 
 interface BgColorPickerProps {
   value: string;

@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { AppLayout } from "@heroui-pro/react";
+import type { ReactNode } from "react";
 import { useCallback } from "react";
 
 import { DashboardSidebar } from "./dashboard-sidebar";

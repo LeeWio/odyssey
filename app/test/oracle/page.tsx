@@ -1,31 +1,26 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
-  ArrowUp,
-  Microphone,
-  CirclePlus,
-  Paperclip,
-  Copy,
-  ThumbsUp,
-  ThumbsDown,
-  ArrowsRotateLeft,
-  Sparkles,
-  LayoutHeaderCellsLargeThunderbolt,
   BookOpen,
+  CirclePlus,
+  Copy,
+  LayoutHeaderCellsLargeThunderbolt,
+  Microphone,
   MusicNote,
-  Terminal,
+  Sparkles,
+  ThumbsDown,
+  ThumbsUp,
 } from "@gravity-ui/icons";
-import { Button, Card, Chip, Avatar, cn } from "@heroui/react";
+import { Card, Chip } from "@heroui/react";
 import {
+  ChatLoader,
+  ChatMessage,
   PromptInput,
   PromptSuggestion,
-  ChatMessage,
   TextShimmer,
-  ChatLoader,
 } from "@heroui-pro/react";
-import { motion, AnimatePresence } from "motion/react";
 import { useMounted } from "@mantine/hooks";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface Message {
   id: string;
@@ -119,7 +114,7 @@ export default function OdysseyOraclePage() {
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, status]);
+  }, []);
 
   const handleStop = () => {
     clearTimers();

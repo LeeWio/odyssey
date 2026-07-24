@@ -1,43 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
-import {
-  Card,
-  Button,
-  Avatar,
-  Chip,
-  ProgressBar,
-  Dropdown,
-  Label,
-  Separator,
-  Surface,
-  Typography,
-  ListBox,
-  Tooltip,
-} from "@heroui/react";
+import { LogoGithub, LogoGitlab, Receipt } from "@gravity-ui/icons";
+import { Button, Card, ProgressBar, Separator, Surface, Tooltip, Typography } from "@heroui/react";
+import { Carousel, ItemCard, ItemCardGroup } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
-import {
-  Carousel,
-  InlineSelect,
-  ItemCard,
-  ItemCardGroup,
-  PressableFeedback,
-} from "@heroui-pro/react";
-import {
-  ArrowUpRightFromSquare,
-  ChevronDown,
-  ChevronRight,
-  Cloud,
-  Globe,
-  LogoGithub,
-  LogoGitlab,
-  LogoSlack,
-  Plus,
-  Receipt,
-} from "@gravity-ui/icons";
 import { motion } from "motion/react";
+import Image from "next/image";
 
 // Premium ease-out curve and custom MotionCard component
 const enterEase = [0.23, 1, 0.32, 1] as const;
@@ -45,7 +14,6 @@ const MotionCard = motion.create(Card);
 
 export function MusicDashboard() {
   const mounted = useMounted();
-  const [billing, setBilling] = useState("view");
 
   if (!mounted) return null;
 

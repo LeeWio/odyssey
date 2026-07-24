@@ -1,4 +1,4 @@
-import { isTextSelection, Editor } from "@tiptap/react";
+import { type Editor, isTextSelection } from "@tiptap/react";
 
 /**
  * Checks if there is a text selection in the editor.

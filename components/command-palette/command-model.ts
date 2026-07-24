@@ -3,12 +3,12 @@
 import fuzzysort from "fuzzysort";
 
 import {
-  COMMAND_CATEGORY_ORDER,
-  CommandIntent,
   type ActionCommand,
   type BaseCommand,
+  COMMAND_CATEGORY_ORDER,
   type CommandCategory,
   type CommandGroup,
+  type CommandIntent,
   type CommandItem,
   type ExecutionPayload,
   type NavigationCommand,

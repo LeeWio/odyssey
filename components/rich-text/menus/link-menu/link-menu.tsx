@@ -1,8 +1,8 @@
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
-import { LinkMenuPreview } from "./link-menu-preview";
 import { useCallback, useState } from "react";
 import { Link as LinkExtension } from "@/components/rich-text/extensions";
 import { LinkMenuEdit } from "./link-menu-edit";
+import { LinkMenuPreview } from "./link-menu-preview";
 
 export function LinkMenu() {
   const { editor } = useRichTextEditor();

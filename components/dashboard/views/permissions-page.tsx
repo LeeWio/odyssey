@@ -1,29 +1,29 @@
 "use client";
 
-import { useState } from "react";
 import {
-  Card,
   Button,
+  Card,
   Checkbox,
-  Label,
-  Spinner,
-  ListBox,
-  Description,
   Chip,
+  Description,
+  Label,
+  ListBox,
+  Spinner,
   Tooltip,
 } from "@heroui/react";
+import { Icon } from "@iconify/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 import {
+  type MenuResponse,
+  useGetAdminMenuTreeQuery,
+} from "@/lib/features/permission/permission-api";
+import {
+  type RoleResponse,
+  useAssignRoleMenusMutation,
   useGetAllRolesQuery,
   useGetRoleMenuIdsQuery,
-  useAssignRoleMenusMutation,
-  type RoleResponse,
 } from "@/lib/features/role/role-api";
-import {
-  useGetAdminMenuTreeQuery,
-  type MenuResponse,
-} from "@/lib/features/permission/permission-api";
-import { Icon } from "@iconify/react";
-import { motion, AnimatePresence } from "motion/react";
 
 // --- 模块卡片组件 (一级菜单 Catalog) ---
 function PermissionModuleCard({

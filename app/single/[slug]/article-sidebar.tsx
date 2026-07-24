@@ -1,24 +1,14 @@
 "use client";
 
-import type { EmblaCarouselType } from "embla-carousel";
-
-import { useCallback, useEffect, useState } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { Book, Code, Flame, Heart, Sparkles } from "@gravity-ui/icons";
+import { Avatar, Chip, Description, Label, ListBox, ScrollShadow, Spinner } from "@heroui/react";
+import { Carousel, EmptyState, ItemCard, Segment, Timeline } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { Sparkles, Flame, Eye, Book, Code, Heart } from "@gravity-ui/icons";
+import type { EmblaCarouselType } from "embla-carousel";
 import { motion } from "motion/react";
-import { Carousel, Segment, EmptyState, ItemCard, Timeline } from "@heroui-pro/react";
-import {
-  Avatar,
-  Description,
-  Label,
-  ListBox,
-  ScrollShadow,
-  Spinner,
-  Chip,
-  Typography,
-} from "@heroui/react";
-import { useGetRelatedPostsQuery, useGetFeaturedPostsQuery } from "@/lib/features/post/post-api";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useGetFeaturedPostsQuery, useGetRelatedPostsQuery } from "@/lib/features/post/post-api";
 import { cn } from "@/lib/utils";
 
 const tabs = [

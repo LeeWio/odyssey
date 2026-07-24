@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Button, TextArea, TextField, Typography, Alert } from "@heroui/react";
+import { Alert, Button, TextArea, TextField, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useEffect, useState } from "react";
 
 interface CommentContentProps {
   content: string;
@@ -28,7 +28,7 @@ export function CommentContent({
       setEditedText(content);
     }, 0);
     return () => clearTimeout(timer);
-  }, [content, isEditing]);
+  }, [content]);
 
   if (isEditing) {
     return (

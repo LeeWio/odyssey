@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect, useMemo, Fragment } from "react";
-import { Card, Chip, Surface, Typography, Avatar, ColorSwatch, ScrollShadow } from "@heroui/react";
+import { Avatar, Card, Chip, ColorSwatch, ScrollShadow, Surface, Typography } from "@heroui/react";
 import {
   Carousel,
+  ChartTooltip,
   KPI,
   KPIGroup,
   PieChart,
-  ChartTooltip,
-  Widget,
   TrendChip,
+  Widget,
 } from "@heroui-pro/react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 
 const PORTFOLIO_KPIS = [
   {
@@ -185,7 +185,7 @@ const SPARKLINE_DOWN = [
 const parseNumericValue = (str: string): number => {
   const cleaned = str.replace(/[$,%+]/g, "").trim();
   const num = parseFloat(cleaned);
-  return isNaN(num) ? 0 : num;
+  return Number.isNaN(num) ? 0 : num;
 };
 
 export function StockLedger() {
@@ -248,7 +248,7 @@ export function StockLedger() {
       .map((t) => {
         const sharesNum = parseFloat(t.shares.replace(/[^\d.]/g, ""));
         const priceNum = parseFloat(t.price.replace(/[^\d.]/g, ""));
-        const value = isNaN(sharesNum) || isNaN(priceNum) ? 0 : sharesNum * priceNum;
+        const value = Number.isNaN(sharesNum) || Number.isNaN(priceNum) ? 0 : sharesNum * priceNum;
         return {
           name: t.ticker,
           value: value,

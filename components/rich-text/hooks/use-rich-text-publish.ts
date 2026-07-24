@@ -1,16 +1,16 @@
-import { useState } from "react";
-import {
-  useCreatePostMutation,
-  useUpdatePostMutation,
-  type PostStatus,
-} from "@/lib/features/post/post-api";
-import { useGetCategoriesQuery } from "@/lib/features/category/category-api";
-import { useGetAllTagsQuery } from "@/lib/features/tag/tag-api";
-import { useAppDispatch } from "@/lib/hooks";
-import { setActiveId, toggleRichText } from "@/lib/features/ui/ui-slice";
 import { toast } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
-import { findFirstHeading, generateSlug, extractText } from "../utils/content-extractors";
+import { useState } from "react";
+import { useGetCategoriesQuery } from "@/lib/features/category/category-api";
+import {
+  type PostStatus,
+  useCreatePostMutation,
+  useUpdatePostMutation,
+} from "@/lib/features/post/post-api";
+import { useGetAllTagsQuery } from "@/lib/features/tag/tag-api";
+import { setActiveId, toggleRichText } from "@/lib/features/ui/ui-slice";
+import { useAppDispatch } from "@/lib/hooks";
+import { extractText, findFirstHeading, generateSlug } from "../utils/content-extractors";
 import { normalizeJSONContent } from "../utils/document-normalizer";
 
 export function useRichTextPublish(identifier: string, currentContent: JSONContent | undefined) {
@@ -78,7 +78,7 @@ export function useRichTextPublish(identifier: string, currentContent: JSONConte
     }
 
     const postContentString = JSON.stringify(normalizeJSONContent(currentContent));
-    const isNewPost = isNaN(Number(identifier));
+    const isNewPost = Number.isNaN(Number(identifier));
 
     const body = {
       title,

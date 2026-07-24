@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { Editor, useEditorState } from "@tiptap/react";
 import { Button, Modal } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import type { Editor } from "@tiptap/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useRef, useState } from "react";
 
 import { RichText } from "@/components/rich-text/rich-text";
 import { MotionButton } from "@/components/ui";

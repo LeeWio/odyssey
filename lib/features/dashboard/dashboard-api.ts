@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { baseApi, ApiResponseSchema, transformError } from "@/lib/features/api/base-api";
+import { ApiResponseSchema, baseApi, transformError } from "@/lib/features/api/base-api";
 
 // --- Zod Schemas ---
 
@@ -120,7 +120,7 @@ export const dashboardApi = baseApi.injectEndpoints({
     /**
      * Admin: Get top pages analytics
      */
-    getTopPages: builder.query<TopPageResponse[], number | void>({
+    getTopPages: builder.query<TopPageResponse[], number | undefined>({
       query: (days) => ({
         url: "/api/v1/admin/analytics/top-pages",
         method: "GET",
@@ -135,7 +135,7 @@ export const dashboardApi = baseApi.injectEndpoints({
     /**
      * Admin: Get traffic analytics (devices, sources, timeSeries)
      */
-    getTrafficAnalytics: builder.query<TrafficResponse, number | void>({
+    getTrafficAnalytics: builder.query<TrafficResponse, number | undefined>({
       query: (days) => ({
         url: "/api/v1/admin/analytics/traffic",
         method: "GET",
