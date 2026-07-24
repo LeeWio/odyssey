@@ -45,8 +45,5 @@ jobs:
             # 3. Navigate to the root directory containing compose.yaml
             cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}
 
-            # 4. Force-stop and remove any conflicting or orphaned web containers
-            docker compose rm -fs web || true
-
-            # 5. Rebuild and restart the Web container with force recreation
-            docker compose up -d --build --force-recreate web
+            # 4. Rebuild and recreate only the Web container with zero-downtime rolling restart (no dependency cascading)
+            docker compose up -d --build --no-deps web
