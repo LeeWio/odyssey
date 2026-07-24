@@ -1,6 +1,6 @@
 .git
 .github
-.next
+#.next
 node_modules
 .idea
 .gemini
