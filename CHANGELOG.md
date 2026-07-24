@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/LeeWio/odyssey/compare/v1.13.1...v1.14.0) (2026-07-24)
+
+
+### Features
+
+* **ci:** switch frontend deploy workflow to server-side pull and build ([6efa0e4](https://github.com/LeeWio/odyssey/commit/6efa0e4e290ab556ff475918ebc6a35618ecce2b))
+
 ## [1.13.1](https://github.com/LeeWio/odyssey/compare/v1.13.0...v1.13.1) (2026-07-24)
 
 
