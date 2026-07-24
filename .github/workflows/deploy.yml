@@ -2,118 +2,100 @@ name: Odyssey Frontend Deploy
 
 on:
   push:
-    branches:
-      - main
-
-permissions:
-  contents: read
+    branches: ["main"]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'plans/**'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/security.yml'
+      - '.github/workflows/release.yml'
+      - '.gitignore'
 
 concurrency:
   group: odyssey-production-deploy
   cancel-in-progress: true
 
-env:
-  PROJECT_PATH: /srv/blog
-  RELEASE_PATH: /srv/blog/releases
-  RELEASE_NAME: ${{ github.sha }}
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  deploy:
-    name: Deploy Odyssey Web
+  build-and-push-image:
+    name: Build & Push Docker Image to GHCR
     runs-on: ubuntu-latest
-    timeout-minutes: 40
-
+    env:
+      HEROUI_AUTH_TOKEN: ${{ secrets.HEROUI_AUTH_TOKEN }}
     steps:
-      - name: Checkout source
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
-      - name: Validate repository
-        shell: bash
+      # 1. Setup Node/Bun and install dependencies with native cache
+      - name: Setup Project Environment
+        uses: ./.github/actions/setup-project
+
+      # 2. Run static validation to ensure bad builds never go to production
+      - name: Verify Code Quality & Type Safety
         run: |
-          set -Eeuo pipefail
+          bun x prettier --check .
+          bun run lint
+          bun run typecheck
 
-          echo "Commit: $GITHUB_SHA"
+      # 3. Restore Next.js cache and compile standalone build on the host runner
+      - name: Cache Next.js Build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-
 
-          test -f compose.yaml || {
-            echo "compose.yaml was not found"
-            exit 1
-          }
+      - name: Compile Next.js Standalone Application
+        run: bun run build
 
-          test -f apps/web/Dockerfile || {
-            echo "apps/web/Dockerfile was not found"
-            exit 1
-          }
+      # 4. Set up Docker Buildx and login to GHCR
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Create deployment archive
-        shell: bash
-        run: |
-          set -Eeuo pipefail
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-          mkdir -p .deploy
+      # 5. Pack prebuilt standalone files into the ultra-lean runner-prebuilt target stage (takes ~5s)
+      - name: Package Prebuilt Output & Push Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: runner-prebuilt
+          push: true
+          tags: |
+            ghcr.io/leewio/odyssey-web:latest
+            ghcr.io/leewio/odyssey-web:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-          tar \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='node_modules' \
-            --exclude='.next' \
-            --exclude='dist' \
-            --exclude='coverage' \
-            --exclude='.deploy' \
-            -czf ".deploy/odyssey-${GITHUB_SHA}.tar.gz" \
-            .
-
-          ls -lh ".deploy/odyssey-${GITHUB_SHA}.tar.gz"
-
-      - name: Prepare release directory
+  deploy-to-server:
+    name: Pull & Recreate Container on Server
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://blog.wei.li
+    steps:
+      - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v1.2.2
-        env:
-          RELEASE_PATH: ${{ env.RELEASE_PATH }}
-          RELEASE_NAME: ${{ env.RELEASE_NAME }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
-          envs: RELEASE_PATH,RELEASE_NAME
-          command_timeout: 5m
-          script: |
-            set -Eeuo pipefail
-
-            mkdir -p "${RELEASE_PATH}/${RELEASE_NAME}"
-            mkdir -p "${RELEASE_PATH}/archives"
-
-            rm -rf "${RELEASE_PATH:?}/${RELEASE_NAME:?}"
-            mkdir -p "${RELEASE_PATH}/${RELEASE_NAME}"
-
-      - name: Upload deployment archive
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          source: ".deploy/odyssey-${{ github.sha }}.tar.gz"
-          target: "/srv/blog/releases/archives"
-          strip_components: 1
-          overwrite: true
-
-      - name: Deploy release
-        uses: appleboy/ssh-action@v1.2.2
-        env:
-          DEPLOY_SHA: ${{ github.sha }}
-          PROJECT_PATH: ${{ env.PROJECT_PATH }}
-          RELEASE_PATH: ${{ env.RELEASE_PATH }}
-          RELEASE_NAME: ${{ env.RELEASE_NAME }}
-          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          envs: DEPLOY_SHA,PROJECT_PATH,RELEASE_PATH,RELEASE_NAME,HEALTHCHECK_URL
-          command_timeout: 30m
+          # Pass temporary GHA secrets and custom health check urls to the SSH session
+          envs: GITHUB_TOKEN,GITHUB_ACTOR,HEALTHCHECK_URL
+          command_timeout: 15m
           script: |
             #!/usr/bin/env bash
             set -Eeuo pipefail
@@ -122,87 +104,27 @@ jobs:
               printf '\n[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
             }
 
-            on_error() {
-              local exit_code=$?
-              local line_number="${1:-unknown}"
+            # 1. Navigate to the root directory containing compose.yaml
+            log "Navigating to compose directory..."
+            cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}
 
-              echo
-              echo "================================================"
-              echo "Deployment failed"
-              echo "Exit code : ${exit_code}"
-              echo "Line      : ${line_number}"
-              echo "Commit    : ${DEPLOY_SHA}"
-              echo "================================================"
+            # 2. Login to ghcr.io with the ephemeral GITHUB_TOKEN passed from GHA
+            log "Logging in to GitHub Container Registry on production server..."
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
-              if [ -d "${RELEASE_PATH}/${RELEASE_NAME}" ]; then
-                cd "${RELEASE_PATH}/${RELEASE_NAME}" || true
-                docker compose logs --tail=150 web 2>/dev/null || true
-              fi
+            # 3. Pull the precompiled image from GHCR
+            log "Pulling the latest precompiled web image from registry..."
+            docker compose pull web
 
-              exit "${exit_code}"
-            }
+            # 4. Gracefully recreate the Web container with zero-downtime rolling restart (no compiling!)
+            log "Recreating Web container..."
+            docker compose up -d --no-deps web
 
-            trap 'on_error $LINENO' ERR
+            # 5. Logout of GHCR to protect server credentials
+            docker logout ghcr.io
 
-            ARCHIVE="${RELEASE_PATH}/archives/odyssey-${DEPLOY_SHA}.tar.gz"
-            RELEASE_DIR="${RELEASE_PATH}/${RELEASE_NAME}"
-            CURRENT_LINK="${PROJECT_PATH}/current"
-
-            log "Validating deployment package"
-
-            test -f "${ARCHIVE}" || {
-              echo "Deployment archive was not found:"
-              echo "${ARCHIVE}"
-              exit 1
-            }
-
-            command -v docker >/dev/null 2>&1 || {
-              echo "Docker is not installed"
-              exit 1
-            }
-
-            docker compose version >/dev/null 2>&1 || {
-              echo "Docker Compose v2 is unavailable"
-              exit 1
-            }
-
-            log "Extracting release"
-
-            rm -rf "${RELEASE_DIR:?}"/*
-            tar -xzf "${ARCHIVE}" -C "${RELEASE_DIR}"
-
-            test -f "${RELEASE_DIR}/compose.yaml" || {
-              echo "compose.yaml was not found after extraction"
-              exit 1
-            }
-
-            test -f "${RELEASE_DIR}/apps/web/Dockerfile" || {
-              echo "apps/web/Dockerfile was not found after extraction"
-              exit 1
-            }
-
-            cd "${RELEASE_DIR}"
-
-            log "Validating Docker Compose"
-
-            docker compose config --quiet
-
-            export COMPOSE_PARALLEL_LIMIT=1
-            export BUILDKIT_STEP_LOG_MAX_SIZE=1048576
-
-            log "Building web image"
-
-            nice -n 10 docker compose build --pull web
-
-            log "Starting web service"
-
-            docker compose up \
-              -d \
-              --no-deps \
-              web
-
-            log "Verifying container"
-
+            # 6. Advanced Post-Deployment Verification (imported from remote repository commits)
+            log "Verifying container status..."
             CONTAINER_ID="$(docker compose ps -q web)"
 
             if [ -z "${CONTAINER_ID}" ]; then
@@ -254,8 +176,9 @@ jobs:
               exit 1
             fi
 
+            # 7. HTTP Health Check (imported from remote repository commits)
             if [ -n "${HEALTHCHECK_URL:-}" ]; then
-              log "Running HTTP health check"
+              log "Running HTTP health check on url: ${HEALTHCHECK_URL}"
 
               HEALTHCHECK_OK=false
 
@@ -283,42 +206,13 @@ jobs:
               fi
             fi
 
-            log "Activating release"
-
-            ln -sfn "${RELEASE_DIR}" "${CURRENT_LINK}"
-
-            printf '%s\n' "${DEPLOY_SHA}" > "${RELEASE_DIR}/DEPLOYED_COMMIT"
-
-            log "Cleaning old releases"
-
-            find "${RELEASE_PATH}" \
-              -mindepth 1 \
-              -maxdepth 1 \
-              -type d \
-              -not -name archives \
-              -printf '%T@ %p\n' \
-              | sort -nr \
-              | awk 'NR > 3 { print $2 }' \
-              | xargs -r rm -rf
-
-            find "${RELEASE_PATH}/archives" \
-              -type f \
-              -name 'odyssey-*.tar.gz' \
-              -mtime +7 \
-              -delete
-
-            log "Cleaning Docker cache"
-
+            # 8. Post-deployment safe cleanup of old images to preserve disk space
+            log "Performing safe post-deployment cleanup of old images..."
             docker image prune --force
 
-            docker builder prune \
-              --force \
-              --filter "until=168h"
-
-            log "Deployment completed successfully"
-
-            echo "Commit    : ${DEPLOY_SHA}"
-            echo "Release   : ${RELEASE_DIR}"
-            echo "Container : ${CONTAINER_ID}"
-
+            log "Deployment completed successfully!"
             docker compose ps web
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}

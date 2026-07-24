@@ -52,3 +52,33 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
+
+
+# ========================================================
+# 🌟 Stage 5: runner-prebuilt (专为 GitHub Actions 宿主机编译打造的极速精简运行层)
+# ========================================================
+FROM public.ecr.aws/docker/library/node:24-alpine AS runner-prebuilt
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# 创建无特权生产运行账号
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 nextjs
+
+# 直接从 GitHub 宿主机上 COPY 编译完的打包产物
+COPY public ./public
+COPY --chown=nextjs:nodejs .next/standalone ./
+COPY --chown=nextjs:nodejs .next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
+

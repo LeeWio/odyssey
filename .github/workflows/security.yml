@@ -3,9 +3,16 @@ name: Security Audit
 on:
   push:
     branches: [main, master]
+    paths:
+      - 'bun.lock'
+      - 'package.json'
+      - '.github/workflows/security.yml'
   schedule:
     # Run every night at midnight UTC
     - cron: "0 0 * * *"
+
+permissions:
+  contents: read
 
 jobs:
   audit:
@@ -16,14 +23,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      # Setup environment (Skip dependency installation to save precious CI minutes)
+      - name: Setup Project Environment
+        uses: ./.github/actions/setup-project
         with:
-          bun-version: 1.3.14
-          bun-download-url: "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-${{ runner.os == 'macOS' && 'darwin' || (runner.os == 'Windows' && 'windows' || 'linux') }}-${{ runner.arch == 'X64' && 'x64' || 'aarch64' }}.zip"
+          install-deps: 'false'
 
+      # Perform a blazing fast native Bun Audit
+      - name: Run Fast Native Bun Audit
+        run: bun pm audit
+
+      # Generate temporary lockfile for audit-ci compatibility
       - name: Generate Temporary Lockfile for Auditing
         run: bun install --yarn
 
-      - name: Run Dependency Security Audit
+      # Perform deep, strict security threshold checking
+      - name: Run Deep Dependency Security Audit (audit-ci)
         run: bun x audit-ci --high
