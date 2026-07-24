@@ -2,56 +2,11 @@ name: Odyssey Frontend Deploy
 
 on:
   push:
-    branches: ["main"]
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+    branches: [ "main" ]
 
 jobs:
-  build-and-push-image:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest
-            type=sha,format=short
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          # Securely mount the private HeroUI authentication token during build
-          secrets: |
-            "heroui_auth_token=${{ secrets.HEROUI_AUTH_TOKEN }}"
-
   deploy:
     runs-on: ubuntu-latest
-    needs: build-and-push-image
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
     steps:
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -61,8 +16,14 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
-            cd ${{ secrets.SERVER_PROJECT_PATH || '/var/www/blog' }}
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose pull web
-            docker compose up -d --no-deps web
-            docker image prune -f
+            # Navigate to the Web repository directory on the server
+            cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}/apps/web
+            
+            # Pull the latest frontend code
+            git pull
+            
+            # Navigate to the root directory containing the compose.yaml file
+            cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}
+            
+            # Rebuild and restart only the Web service container
+            docker compose up -d --build web
