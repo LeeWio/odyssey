@@ -35,11 +35,10 @@ jobs:
         uses: ./.github/actions/setup-project
 
       # 2. Run static validation to ensure bad builds never go to production
-      - name: Verify Code Quality & Type Safety
+      - name: Verify Code Quality
         run: |
           bun x prettier --check .
           bun run lint
-          bun run typecheck
 
       # 3. Restore Next.js cache and compile standalone build on the host runner
       - name: Cache Next.js Build

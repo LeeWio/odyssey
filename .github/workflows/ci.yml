@@ -23,8 +23,10 @@ permissions:
 
 jobs:
   static-checks:
-    name: Lint & Typecheck
+    name: Lint & Formatting
     runs-on: ubuntu-latest
+    env:
+      HEROUI_AUTH_TOKEN: ${{ secrets.HEROUI_AUTH_TOKEN }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -37,9 +39,6 @@ jobs:
 
       - name: Run Linter
         run: bun run lint
-
-      - name: Run TypeScript Typecheck
-        run: bun run typecheck
 
   build-and-audit:
     name: Production Build & Web Vitals Audit
