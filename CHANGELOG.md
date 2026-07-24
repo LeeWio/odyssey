@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/LeeWio/odyssey/compare/v1.14.9...v1.15.0) (2026-07-24)
+
+
+### Features
+
+* **ci-cd:** add GitHub CodeQL security scan and ESLint Reviewdog automated PR reviewer workflows ([dbf4907](https://github.com/LeeWio/odyssey/commit/dbf4907e9d31ece90750c9221b3f4e06ddf9e5b1))
+
 ## [1.14.9](https://github.com/LeeWio/odyssey/compare/v1.14.8...v1.14.9) (2026-07-24)
 
 
