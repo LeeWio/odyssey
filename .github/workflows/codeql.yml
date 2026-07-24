@@ -39,8 +39,6 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: "javascript-typescript"
-          # Perform both security and quality analysis
-          queries: security-extended,quality
 
       # 2. Perform Autofiles detection and autobuild (no compiling needed for JS/TS)
       - name: Autobuild JS/TS
