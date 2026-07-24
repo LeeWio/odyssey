@@ -1,3 +1,11 @@
+## [1.14.4](https://github.com/LeeWio/odyssey/compare/v1.14.3...v1.14.4) (2026-07-24)
+
+
+### Performance Improvements
+
+* **docker:** fix release download proxy in Dockerfile using ghproxy ([6925a71](https://github.com/LeeWio/odyssey/commit/6925a716640a8554a8c93e195a6c1374d92a6c31))
+* **docker:** refactor Dockerfile to use AWS ECR and install bun via mirror ([65a157e](https://github.com/LeeWio/odyssey/commit/65a157ed75c14cfffe998f506a00e5218986b490))
+
 ## [1.14.3](https://github.com/LeeWio/odyssey/compare/v1.14.2...v1.14.3) (2026-07-24)
 
 
