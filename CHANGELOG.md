@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/LeeWio/odyssey/compare/v1.14.0...v1.14.1) (2026-07-24)
+
+
+### Performance Improvements
+
+* **docker:** upgrade to node 24 and cap v8 heap memory to 1200M during build ([9356eef](https://github.com/LeeWio/odyssey/commit/9356eefcaae4e844af49e18863e54f9925071261))
+
 # [1.14.0](https://github.com/LeeWio/odyssey/compare/v1.13.1...v1.14.0) (2026-07-24)
 
 
