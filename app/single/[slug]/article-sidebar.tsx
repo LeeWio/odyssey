@@ -301,293 +301,293 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
   }, [api, searchParams, pathname, router]);
 
   return (
-    <aside className="sticky top-24 hidden h-fit min-w-0 lg:block flex flex-col gap-6">
+    <aside className="sticky top-24 flex hidden h-fit min-w-0 flex-col gap-6 lg:block">
       {/* Editorial Epigraph Card as a Foreword */}
-      <Card className="w-full bg-default-50/5 border border-default-100/50 p-6 rounded-2xl flex flex-col gap-4 text-left shadow-none relative overflow-hidden group/quote hover:border-default-200/50 transition-all duration-300">
+      <Card className="bg-default-50/5 border-default-100/50 group/quote hover:border-default-200/50 relative flex w-full flex-col gap-4 overflow-hidden rounded-2xl border p-6 text-left shadow-none transition-all duration-300">
         {/* Watermark Quote Icon */}
-        <div className="absolute top-0 right-0 -mr-2 -mt-4 opacity-[0.03] select-none pointer-events-none group-hover/quote:opacity-[0.06] transition-opacity duration-500">
-          <Icon icon="lucide:quote" className="size-24 text-foreground" />
+        <div className="pointer-events-none absolute top-0 right-0 -mt-4 -mr-2 opacity-[0.03] transition-opacity duration-500 select-none group-hover/quote:opacity-[0.06]">
+          <Icon icon="lucide:quote" className="text-foreground size-24" />
         </div>
-        
+
         <div className="flex items-center gap-2 select-none">
           <Icon icon="solar:heart-angle-bold" className="text-accent size-4 animate-pulse" />
-          <span className="font-mono text-[9px] tracking-[0.18em] font-bold text-neutral-400 uppercase">
+          <span className="font-mono text-[9px] font-bold tracking-[0.18em] text-neutral-400 uppercase">
             EPIGRAPH // 侧栏题记
           </span>
         </div>
 
-        <p className="text-[12px] text-neutral-300 font-serif leading-relaxed italic pl-3 border-l border-accent/30 py-0.5">
+        <p className="border-accent/30 border-l py-0.5 pl-3 font-serif text-[12px] leading-relaxed text-neutral-300 italic">
           “在无限滑动的嘈杂洪流里，我们建造起小小的、由文字与极光围合的避难所。只为让两颗在光缆两端跳动的灵魂，能在此处，呼吸一秒静谧。”
         </p>
 
-        <div className="flex justify-end pr-1 mt-1">
-          <span className="font-mono text-[9px] text-neutral-500 uppercase tracking-wider select-none">
+        <div className="mt-1 flex justify-end pr-1">
+          <span className="font-mono text-[9px] tracking-wider text-neutral-500 uppercase select-none">
             — ODYSSEY DIRECTORS // 主创寄语
           </span>
         </div>
       </Card>
 
       {/* Symmetrical Two-Word Segment & Carousel */}
-      <div className="flex flex-col w-full">
+      <div className="flex w-full flex-col">
         <ArticleSegment selectedKey={selectedTab} onSelectionChange={handleSelectionChange} />
         <Carousel
-        setApi={setApi}
-        opts={{
-          align: "start",
-          containScroll: "trimSnaps",
-          dragFree: false,
-          loop: false,
-          skipSnaps: false,
-        }}
-        className="mt-5 w-full"
-      >
-        <Carousel.Content>
-          <Carousel.Item>
-            <ScrollShadow hideScrollBar>
-              {relatedLoading ? (
-                <div className="flex h-40 items-center justify-center gap-2">
-                  <Spinner size="sm" color="accent" />
-                </div>
-              ) : !slug || relatedPosts.length === 0 ? (
-                <div className="flex h-48 flex-col items-center justify-center p-4 text-center">
-                  <EmptyState size="sm">
+          setApi={setApi}
+          opts={{
+            align: "start",
+            containScroll: "trimSnaps",
+            dragFree: false,
+            loop: false,
+            skipSnaps: false,
+          }}
+          className="mt-5 w-full"
+        >
+          <Carousel.Content>
+            <Carousel.Item>
+              <ScrollShadow hideScrollBar>
+                {relatedLoading ? (
+                  <div className="flex h-40 items-center justify-center gap-2">
+                    <Spinner size="sm" color="accent" />
+                  </div>
+                ) : !slug || relatedPosts.length === 0 ? (
+                  <div className="flex h-48 flex-col items-center justify-center p-4 text-center">
+                    <EmptyState size="sm">
+                      <EmptyState.Header>
+                        <EmptyState.Media variant="icon">
+                          <Sparkles className="size-5" />
+                        </EmptyState.Media>
+                        <EmptyState.Title className="text-default-700 mt-1 text-sm font-semibold">
+                          No Recommendations Yet
+                        </EmptyState.Title>
+                        <EmptyState.Description className="text-default-400 mt-1 max-w-[220px] text-xs">
+                          We&apos;ll recommend related content as it becomes available.
+                        </EmptyState.Description>
+                      </EmptyState.Header>
+                    </EmptyState>
+                  </div>
+                ) : (
+                  <MotionTimeline
+                    density="compact"
+                    size="sm"
+                    className="pr-1"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    {relatedPosts.slice(0, 5).map((post, idx) => {
+                      const readingTime = post.summary
+                        ? Math.max(2, Math.ceil(post.summary.length / 40) + 1)
+                        : 5;
+                      const dateSource = post.publishedAt || new Date().toISOString();
+                      const formattedDate = new Date(dateSource).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      });
+
+                      const isCurrent = post.slug === slug;
+                      const IconComponent = timelineIcons[idx % timelineIcons.length];
+
+                      return (
+                        <MotionTimelineItem
+                          key={post.id}
+                          status={isCurrent ? "current" : "default"}
+                          align="center"
+                          variants={itemVariants}
+                        >
+                          <Timeline.Rail>
+                            <Timeline.Marker aria-hidden="true">
+                              <IconComponent />
+                            </Timeline.Marker>
+                            <Timeline.Connector />
+                          </Timeline.Rail>
+
+                          <Timeline.Content className="w-full min-w-0 flex-1">
+                            <button
+                              type="button"
+                              aria-current={isCurrent ? "page" : undefined}
+                              aria-label={`Read ${post.title}`}
+                              className={cn(
+                                "group/article block w-full min-w-0 overflow-hidden rounded-md px-2 py-1.5 text-left transition-colors duration-150",
+                                "focus-visible:ring-focus focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                                isCurrent ? "bg-default-100/45" : "hover:bg-default-100/25"
+                              )}
+                              onClick={() => router.push(`/single/${post.slug}`)}
+                            >
+                              <span className="flex w-full min-w-0 flex-col gap-1">
+                                <span className="text-foreground group-hover/article:text-accent line-clamp-2 text-xs leading-5 font-medium transition-colors">
+                                  {post.title}
+                                </span>
+                                {post.summary && (
+                                  <span className="text-muted line-clamp-1 text-[11px] leading-4">
+                                    {post.summary}
+                                  </span>
+                                )}
+
+                                <span className="flex min-w-0 items-center gap-1.5">
+                                  {post.category && (
+                                    <Chip size="sm" variant={isCurrent ? "soft" : "tertiary"}>
+                                      <Chip.Label>{post.category.name}</Chip.Label>
+                                    </Chip>
+                                  )}
+                                  <time
+                                    className="text-muted shrink-0 text-[11px] leading-4 tabular-nums"
+                                    dateTime={dateSource}
+                                  >
+                                    {formattedDate}
+                                  </time>
+                                  <span className="text-muted shrink-0 text-[11px] leading-4">
+                                    {readingTime} min
+                                  </span>
+                                </span>
+                              </span>
+                            </button>
+                          </Timeline.Content>
+                        </MotionTimelineItem>
+                      );
+                    })}
+                  </MotionTimeline>
+                )}
+              </ScrollShadow>
+            </Carousel.Item>
+
+            <Carousel.Item>
+              <ScrollShadow hideScrollBar className="max-h-80">
+                {featuredLoading ? (
+                  <div className="flex h-40 items-center justify-center gap-2">
+                    <Spinner size="sm" color="accent" />
+                  </div>
+                ) : featuredPosts.length === 0 ? (
+                  <EmptyState size="sm" className="p-4">
                     <EmptyState.Header>
                       <EmptyState.Media variant="icon">
-                        <Sparkles className="size-5" />
+                        <Flame className="size-5" />
                       </EmptyState.Media>
                       <EmptyState.Title className="text-default-700 mt-1 text-sm font-semibold">
-                        No Recommendations Yet
+                        No Top Picks Yet
                       </EmptyState.Title>
-                      <EmptyState.Description className="text-default-400 mt-1 max-w-[220px] text-xs">
-                        We&apos;ll recommend related content as it becomes available.
+                      <EmptyState.Description className="text-default-400 mt-1 max-w-55 text-xs">
+                        Featured posts will appear here once they are selected.
                       </EmptyState.Description>
                     </EmptyState.Header>
                   </EmptyState>
-                </div>
-              ) : (
-                <MotionTimeline
-                  density="compact"
-                  size="sm"
-                  className="pr-1"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  {relatedPosts.slice(0, 5).map((post, idx) => {
-                    const readingTime = post.summary
-                      ? Math.max(2, Math.ceil(post.summary.length / 40) + 1)
-                      : 5;
-                    const dateSource = post.publishedAt || new Date().toISOString();
-                    const formattedDate = new Date(dateSource).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    });
+                ) : (
+                  <MotionListBox
+                    aria-label="Featured Articles"
+                    selectionMode="none"
+                    variants={listBoxContainerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    onAction={(key) => router.push(`/single/${key}`)}
+                  >
+                    {featuredPosts.slice(0, 5).map((post, idx) => {
+                      const readingTime = post.summary
+                        ? Math.max(2, Math.ceil(post.summary.length / 40) + 1)
+                        : 5;
+                      const dateSource = post.publishedAt || new Date().toISOString();
+                      const formattedDate = new Date(dateSource).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      });
 
-                    const isCurrent = post.slug === slug;
-                    const IconComponent = timelineIcons[idx % timelineIcons.length];
-
-                    return (
-                      <MotionTimelineItem
-                        key={post.id}
-                        status={isCurrent ? "current" : "default"}
-                        align="center"
-                        variants={itemVariants}
-                      >
-                        <Timeline.Rail>
-                          <Timeline.Marker aria-hidden="true">
-                            <IconComponent />
-                          </Timeline.Marker>
-                          <Timeline.Connector />
-                        </Timeline.Rail>
-
-                        <Timeline.Content className="w-full min-w-0 flex-1">
-                          <button
-                            type="button"
-                            aria-current={isCurrent ? "page" : undefined}
-                            aria-label={`Read ${post.title}`}
-                            className={cn(
-                              "group/article block w-full min-w-0 overflow-hidden rounded-md px-2 py-1.5 text-left transition-colors duration-150",
-                              "focus-visible:ring-focus focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
-                              isCurrent ? "bg-default-100/45" : "hover:bg-default-100/25"
-                            )}
-                            onClick={() => router.push(`/single/${post.slug}`)}
-                          >
-                            <span className="flex w-full min-w-0 flex-col gap-1">
-                              <span className="text-foreground group-hover/article:text-accent line-clamp-2 text-xs leading-5 font-medium transition-colors">
-                                {post.title}
-                              </span>
-                              {post.summary && (
-                                <span className="text-muted line-clamp-1 text-[11px] leading-4">
-                                  {post.summary}
-                                </span>
-                              )}
-
-                              <span className="flex min-w-0 items-center gap-1.5">
-                                {post.category && (
-                                  <Chip size="sm" variant={isCurrent ? "soft" : "tertiary"}>
-                                    <Chip.Label>{post.category.name}</Chip.Label>
-                                  </Chip>
-                                )}
-                                <time
-                                  className="text-muted shrink-0 text-[11px] leading-4 tabular-nums"
-                                  dateTime={dateSource}
-                                >
-                                  {formattedDate}
-                                </time>
-                                <span className="text-muted shrink-0 text-[11px] leading-4">
-                                  {readingTime} min
-                                </span>
-                              </span>
-                            </span>
-                          </button>
-                        </Timeline.Content>
-                      </MotionTimelineItem>
-                    );
-                  })}
-                </MotionTimeline>
-              )}
-            </ScrollShadow>
-          </Carousel.Item>
-
-          <Carousel.Item>
-            <ScrollShadow hideScrollBar className="max-h-80">
-              {featuredLoading ? (
-                <div className="flex h-40 items-center justify-center gap-2">
-                  <Spinner size="sm" color="accent" />
-                </div>
-              ) : featuredPosts.length === 0 ? (
-                <EmptyState size="sm" className="p-4">
-                  <EmptyState.Header>
-                    <EmptyState.Media variant="icon">
-                      <Flame className="size-5" />
-                    </EmptyState.Media>
-                    <EmptyState.Title className="text-default-700 mt-1 text-sm font-semibold">
-                      No Top Picks Yet
-                    </EmptyState.Title>
-                    <EmptyState.Description className="text-default-400 mt-1 max-w-55 text-xs">
-                      Featured posts will appear here once they are selected.
-                    </EmptyState.Description>
-                  </EmptyState.Header>
-                </EmptyState>
-              ) : (
-                <MotionListBox
-                  aria-label="Featured Articles"
-                  selectionMode="none"
-                  variants={listBoxContainerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  onAction={(key) => router.push(`/single/${key}`)}
-                >
-                  {featuredPosts.slice(0, 5).map((post, idx) => {
-                    const readingTime = post.summary
-                      ? Math.max(2, Math.ceil(post.summary.length / 40) + 1)
-                      : 5;
-                    const dateSource = post.publishedAt || new Date().toISOString();
-                    const formattedDate = new Date(dateSource).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    });
-
-                    return (
-                      <MotionListBoxItem
-                        key={post.id}
-                        id={post.slug}
-                        textValue={post.title}
-                        variants={listBoxItemVariants}
-                        initial="hidden"
-                        animate="visible"
-                        transition={{
-                          type: "spring",
-                          stiffness: 120,
-                          damping: 20,
-                          mass: 0.6,
-                          delay: 0.15 + idx * 0.08,
-                        }}
-                        whileHover={{
-                          x: 4,
-                          transition: {
+                      return (
+                        <MotionListBoxItem
+                          key={post.id}
+                          id={post.slug}
+                          textValue={post.title}
+                          variants={listBoxItemVariants}
+                          initial="hidden"
+                          animate="visible"
+                          transition={{
                             type: "spring",
-                            stiffness: 300,
-                            damping: 25,
-                          },
-                        }}
-                        className="group flex w-full min-w-0 items-center transition-colors duration-300"
-                      >
-                        <div className="group-hover:bg-accent/10 group-hover:text-accent flex size-8 shrink-0 items-center justify-center rounded-3xl font-mono font-semibold transition-all duration-300 group-hover:scale-105">
-                          {String(idx + 1).padStart(2, "0")}
+                            stiffness: 120,
+                            damping: 20,
+                            mass: 0.6,
+                            delay: 0.15 + idx * 0.08,
+                          }}
+                          whileHover={{
+                            x: 4,
+                            transition: {
+                              type: "spring",
+                              stiffness: 300,
+                              damping: 25,
+                            },
+                          }}
+                          className="group flex w-full min-w-0 items-center transition-colors duration-300"
+                        >
+                          <div className="group-hover:bg-accent/10 group-hover:text-accent flex size-8 shrink-0 items-center justify-center rounded-3xl font-mono font-semibold transition-all duration-300 group-hover:scale-105">
+                            {String(idx + 1).padStart(2, "0")}
+                          </div>
+
+                          <div className="flex min-w-0 flex-1 flex-col">
+                            <Label className="w-full truncate transition-colors duration-200">
+                              {post.title}
+                            </Label>
+                            <Description>
+                              <span>{formattedDate}</span>
+                              <span>{readingTime} min read</span>
+                            </Description>
+                          </div>
+
+                          <Chip color="success" variant="soft">
+                            <Icon icon="gravity-ui:eye" />
+                            <Chip.Label>{post.views}</Chip.Label>
+                          </Chip>
+                        </MotionListBoxItem>
+                      );
+                    })}
+                  </MotionListBox>
+                )}
+              </ScrollShadow>
+            </Carousel.Item>
+
+            {/* Collections tab: Curated Series Index */}
+            <Carousel.Item>
+              <ScrollShadow hideScrollBar className="max-h-[380px]">
+                <ListBox
+                  aria-label="Collections"
+                  className="flex w-full flex-col gap-1"
+                  onAction={(key) => router.push(`/test/category?slug=${key}`)}
+                >
+                  {COLLECTIONS.map((col) => (
+                    <ListBox.Item
+                      key={col.id}
+                      id={col.id}
+                      textValue={col.name}
+                      className="group hover:bg-default-100/50 flex w-full min-w-0 cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 transition-all duration-200 outline-none select-none active:scale-[0.99]"
+                    >
+                      <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                        <div className="bg-default-100 border-default-200 group-hover:bg-accent/10 group-hover:border-accent/30 group-hover:text-accent flex size-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-200">
+                          <Icon
+                            icon={col.icon}
+                            className="group-hover:text-accent size-4 text-neutral-400 transition-colors"
+                          />
                         </div>
 
                         <div className="flex min-w-0 flex-1 flex-col">
-                          <Label className="w-full truncate transition-colors duration-200">
-                            {post.title}
-                          </Label>
-                          <Description>
-                            <span>{formattedDate}</span>
-                            <span>{readingTime} min read</span>
-                          </Description>
+                          <span className="group-hover:text-foreground truncate text-xs font-bold text-neutral-200 transition-colors">
+                            {col.name}
+                          </span>
+                          <span className="mt-0.5 truncate text-[10px] leading-none text-neutral-500">
+                            {col.description}
+                          </span>
                         </div>
-
-                        <Chip color="success" variant="soft">
-                          <Icon icon="gravity-ui:eye" />
-                          <Chip.Label>{post.views}</Chip.Label>
-                        </Chip>
-                      </MotionListBoxItem>
-                    );
-                  })}
-                </MotionListBox>
-              )}
-            </ScrollShadow>
-          </Carousel.Item>
-
-          {/* Collections tab: Curated Series Index */}
-          <Carousel.Item>
-            <ScrollShadow hideScrollBar className="max-h-[380px]">
-              <ListBox
-                aria-label="Collections"
-                className="flex w-full flex-col gap-1"
-                onAction={(key) => router.push(`/test/category?slug=${key}`)}
-              >
-                {COLLECTIONS.map((col) => (
-                  <ListBox.Item
-                    key={col.id}
-                    id={col.id}
-                    textValue={col.name}
-                    className="group hover:bg-default-100/50 flex w-full min-w-0 cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 transition-all duration-200 outline-none select-none active:scale-[0.99]"
-                  >
-                    <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
-                      <div className="bg-default-100 border-default-200 group-hover:bg-accent/10 group-hover:border-accent/30 group-hover:text-accent flex size-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-200">
-                        <Icon
-                          icon={col.icon}
-                          className="group-hover:text-accent size-4 text-neutral-400 transition-colors"
-                        />
                       </div>
 
-                      <div className="flex min-w-0 flex-1 flex-col">
-                        <span className="group-hover:text-foreground truncate text-xs font-bold text-neutral-200 transition-colors">
-                          {col.name}
-                        </span>
-                        <span className="mt-0.5 truncate text-[10px] leading-none text-neutral-500">
-                          {col.description}
-                        </span>
-                      </div>
-                    </div>
-
-                    <Chip
-                      size="sm"
-                      variant="soft"
-                      className="bg-default-100/80 group-hover:bg-accent/20 group-hover:text-accent h-5 px-2 py-0 font-mono text-[10px] font-bold transition-colors"
-                    >
-                      {col.count} Vol
-                    </Chip>
-                  </ListBox.Item>
-                ))}
-              </ListBox>
-            </ScrollShadow>
-          </Carousel.Item>
-        </Carousel.Content>
-      </Carousel>
+                      <Chip
+                        size="sm"
+                        variant="soft"
+                        className="bg-default-100/80 group-hover:bg-accent/20 group-hover:text-accent h-5 px-2 py-0 font-mono text-[10px] font-bold transition-colors"
+                      >
+                        {col.count} Vol
+                      </Chip>
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </ScrollShadow>
+            </Carousel.Item>
+          </Carousel.Content>
+        </Carousel>
       </div>
     </aside>
   );
