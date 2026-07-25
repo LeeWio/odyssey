@@ -9,8 +9,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    // 1. Query the unblocked Baidu Bodia Music API server-side
-    const queryUrl = `https://api.xcvts.cn/api/music/bdyy?msg=${encodeURIComponent("许嵩 " + title)}&n=1&type=json`;
+    // 1. Query the Bodia Music search API over HTTP to completely bypass Node.js SSL/TLS intermediate cert validation errors in production cloud environments
+    const queryUrl = `http://api.xcvts.cn/api/music/bdyy?msg=${encodeURIComponent("许嵩 " + title)}&n=1&type=json`;
     const res = await fetch(queryUrl, {
       headers: {
         "User-Agent":
@@ -36,45 +36,20 @@ export async function GET(request: Request) {
       );
     }
 
-    // 2. Read the client's Range header for browser seeking support (HTTP 206 Partial Content)
-    const clientRange = request.headers.get("range");
-    const fetchHeaders: HeadersInit = {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    };
+    // 2. Protocol Upgrade: Rewrite http:// to https:// for Kuwo CDN to prevent modern browsers blocking playback with Mixed Content Blocks in secured HTTPS site.
+    const securedPlayableUrl = playableUrl.replace(
+      /^http:\/\/car-lv\.kuwo\.cn/,
+      "https://car-lv.kuwo.cn"
+    );
 
-    if (clientRange) {
-      fetchHeaders["Range"] = clientRange;
-    }
+    console.log(
+      `[Vae Song Battle API] Successfully resolved stream for ${title}. Redirecting 302 to: ${securedPlayableUrl}`
+    );
 
-    // 3. Fetch from Bodia CDN with forwarded Range header
-    const audioResponse = await fetch(playableUrl, {
-      headers: fetchHeaders,
-    });
-
-    if (!audioResponse.ok && audioResponse.status !== 206) {
-      return NextResponse.json({ error: "Failed to pipe stream from Bodia CDN" }, { status: 500 });
-    }
-
-    // 4. Construct appropriate headers, supporting 200 OK or 206 Partial Content
-    const responseHeaders = new Headers();
-    responseHeaders.set("Content-Type", "audio/mpeg");
-    responseHeaders.set("Accept-Ranges", "bytes");
-    responseHeaders.set("Cache-Control", "public, max-age=86400"); // Cache for 1 day
-
-    if (audioResponse.headers.has("Content-Range")) {
-      responseHeaders.set("Content-Range", audioResponse.headers.get("Content-Range")!);
-    }
-    if (audioResponse.headers.has("Content-Length")) {
-      responseHeaders.set("Content-Length", audioResponse.headers.get("Content-Length")!);
-    }
-
-    // Return status 206 or 200 depending on client request
-    const status = clientRange ? 206 : 200;
-
-    return new NextResponse(audioResponse.body, {
-      status,
-      headers: responseHeaders,
+    // 3. High Performance 302 Redirect: Instantly return a 302 found redirection.
+    // This offloads 100% of the megabytes audio piping bandwidth from your server, utilizing Kuwo's high-speed enterprise CDN directly.
+    return NextResponse.redirect(securedPlayableUrl, {
+      status: 302,
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
