@@ -87,7 +87,7 @@ export default async function RootLayout({
         <Providers lang={lang} messages={messages}>
           <Toast.Provider placement="top" />
           <div className="relative flex min-h-screen flex-col overflow-x-clip">
-            <Navbar />
+            {/* <Navbar /> */}
             <SheetPanel />
             <DashboardSheet />
             {/* <RichTextModal /> */}
