@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/LeeWio/odyssey/compare/v1.18.1...v1.19.0) (2026-07-25)
+
+
+### Features
+
+* **audio-stream:** move audio resolver endpoint to public non-api namespace /vae-song-stream ([ae3347d](https://github.com/LeeWio/odyssey/commit/ae3347dfe652524d490b41b3651c54055a4d4af4))
+
 ## [1.18.1](https://github.com/LeeWio/odyssey/compare/v1.18.0...v1.18.1) (2026-07-25)
 
 
