@@ -481,8 +481,11 @@ export function BattleArena({
       synth.stop();
       setPlayingId(null);
     } else {
-      synth.play(song.id, song.title, `/api/vae-song?title=${encodeURIComponent(song.title)}`, () =>
-        setPlayingId(null)
+      synth.play(
+        song.id,
+        song.title,
+        `/vae-song-stream?title=${encodeURIComponent(song.title)}`,
+        () => setPlayingId(null)
       );
       setPlayingId(song.id);
     }

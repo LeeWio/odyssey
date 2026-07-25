@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    // 1. Query the Bodia Music search API over HTTP to completely bypass Node.js SSL/TLS intermediate cert validation errors in production cloud environments
+    // Query Bodia Music search API over HTTP to bypass production TLS handshake certificate validation errors
     const queryUrl = `http://api.xcvts.cn/api/music/bdyy?msg=${encodeURIComponent("许嵩 " + title)}&n=1&type=json`;
     const res = await fetch(queryUrl, {
       headers: {
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
       );
     }
 
-    // 2. Protocol Upgrade: Rewrite http:// to https:// for Kuwo CDN to prevent modern browsers blocking playback with Mixed Content Blocks in secured HTTPS site.
+    // Protocol Upgrade: Rewrite http:// to https:// for Kuwo CDN to prevent mixed content blocking on secured HTTPS sites
     const securedPlayableUrl = playableUrl.replace(
       /^http:\/\/car-lv\.kuwo\.cn/,
       "https://car-lv.kuwo.cn"
@@ -46,8 +46,7 @@ export async function GET(request: Request) {
       `[Vae Song Battle API] Successfully resolved stream for ${title}. Redirecting 302 to: ${securedPlayableUrl}`
     );
 
-    // 3. High Performance 302 Redirect: Instantly return a 302 found redirection.
-    // This offloads 100% of the megabytes audio piping bandwidth from your server, utilizing Kuwo's high-speed enterprise CDN directly.
+    // High Performance 302 Redirect directly to the Kuwo Enterprise CDN over secure HTTPS
     return NextResponse.redirect(securedPlayableUrl, {
       status: 302,
     });
