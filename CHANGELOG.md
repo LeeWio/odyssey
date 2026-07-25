@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/LeeWio/odyssey/compare/v1.16.1...v1.17.0) (2026-07-25)
+
+
+### Features
+
+* **single-page:** redesign layout with asymmetric sticky columns, cinematic hero, and editorial epigraph ([9360686](https://github.com/LeeWio/odyssey/commit/93606868a6985de906628d251383266c6772d53d))
+
 ## [1.16.1](https://github.com/LeeWio/odyssey/compare/v1.16.0...v1.16.1) (2026-07-24)
 
 
