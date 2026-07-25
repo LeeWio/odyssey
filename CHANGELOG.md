@@ -1,3 +1,10 @@
+## [1.18.1](https://github.com/LeeWio/odyssey/compare/v1.18.0...v1.18.1) (2026-07-25)
+
+
+### Performance Improvements
+
+* **audio-stream:** refactor to high-performance HTTP 302 redirection with HTTPS protocol upgrade ([0848917](https://github.com/LeeWio/odyssey/commit/0848917d1394211e0f4306b616e5ae0c63e66559)), closes [hi#performance](https://github.com/hi/issues/performance)
+
 # [1.18.0](https://github.com/LeeWio/odyssey/compare/v1.17.1...v1.18.0) (2026-07-25)
 
 
