@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/LeeWio/odyssey/compare/v1.17.1...v1.18.0) (2026-07-25)
+
+
+### Features
+
+* **vaesong-battle:** implement encyclopedic 128-song battle arena with smart ELO ladder ([05122d6](https://github.com/LeeWio/odyssey/commit/05122d654638c1422055cd7c648f3de47e7cd2ee))
+
 ## [1.17.1](https://github.com/LeeWio/odyssey/compare/v1.17.0...v1.17.1) (2026-07-25)
 
 
