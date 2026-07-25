@@ -140,6 +140,9 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
     return `${sY + (reducedMotion ? 0 : mY * 6)}vh`;
   });
 
+  const spotlightLeft = useTransform(mouseSpringX, (x: number) => `${(x + 0.5) * 100}%`);
+  const spotlightTop = useTransform(mouseSpringY, (y: number) => `${(y + 0.5) * 100}%`);
+
   const s1 = useTransform(smoothScroll, [0, 0.33, 0.66, 1], [1.0, 1.35, 1.6, 1.15]);
   const s2 = useTransform(smoothScroll, [0, 0.33, 0.66, 1], [1.1, 1.45, 1.15, 1.55]);
   const s3 = useTransform(smoothScroll, [0, 0.33, 0.66, 1], [0.8, 1.2, 1.5, 1.2]);
@@ -378,8 +381,8 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
       {!reducedMotion && (
         <motion.div
           style={{
-            left: useTransform(mouseSpringX, (x: number) => `${(x + 0.5) * 100}%`),
-            top: useTransform(mouseSpringY, (y: number) => `${(y + 0.5) * 100}%`),
+            left: spotlightLeft,
+            top: spotlightTop,
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
           }}
           className="pointer-events-none fixed size-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.08] blur-[60px] dark:opacity-[0.06]"

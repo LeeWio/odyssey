@@ -1,17 +1,8 @@
 "use client";
 
 import { Book, Code, Flame, Heart, Sparkles } from "@gravity-ui/icons";
-import {
-  Avatar,
-  Card,
-  Chip,
-  Description,
-  Label,
-  ListBox,
-  ScrollShadow,
-  Spinner,
-} from "@heroui/react";
-import { Carousel, EmptyState, ItemCard, Segment, Timeline } from "@heroui-pro/react";
+import { Card, Chip, Description, Label, ListBox, ScrollShadow, Spinner } from "@heroui/react";
+import { Carousel, EmptyState, Segment, Timeline } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import type { EmblaCarouselType } from "embla-carousel";
 import { motion } from "motion/react";
@@ -19,7 +10,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useGetFeaturedPostsQuery, useGetRelatedPostsQuery } from "@/lib/features/post/post-api";
 import { cn } from "@/lib/utils";
-import { MusicMiniWidget } from "@/components/blog/music-mini-widget";
 
 const tabs = [
   {
