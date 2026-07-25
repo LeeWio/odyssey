@@ -50,17 +50,17 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
   }, [reducedMotion, mouseX, mouseY]);
 
   // Use a highly refined physics spring to damp the scroll.
-  // Lower stiffness and higher damping create a luscious, slow-motion liquid swell.
+  // Fine-tuned to be ultra-sluggish and ethereal for deep reading focus (Suggestion 3).
   const smoothScroll = useSpring(scrollYProgress, {
-    stiffness: 24,
-    damping: 18,
-    mass: 1.2,
+    stiffness: 3,
+    damping: 35,
+    mass: 4.0,
     restDelta: 0.0001,
   });
 
-  // Very soft springs for mouse-following offset to create a heavy liquid latency
-  const mouseSpringX = useSpring(mouseX, { stiffness: 10, damping: 15, mass: 1.5 });
-  const mouseSpringY = useSpring(mouseY, { stiffness: 10, damping: 15, mass: 1.5 });
+  // Extremely sluggish springs for mouse-following offset to prevent snappy cursor movements from distracting
+  const mouseSpringX = useSpring(mouseX, { stiffness: 2.5, damping: 20, mass: 3.5 });
+  const mouseSpringY = useSpring(mouseY, { stiffness: 2.5, damping: 20, mass: 3.5 });
 
   const isDark = !mounted || resolvedTheme === "dark";
 
@@ -71,23 +71,23 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
   // This eliminates hardcoded colors from JS and ensures perfect theme reactivity.
   // =========================================================================
 
-  // --- Blob 1 Opacity Channels (Shifts earlier: nodes at 0.00, 0.28, 0.60, 0.90) ---
-  const b1_op0 = useTransform(smoothScroll, [-0.2, 0, 0.28, 0.6], [1, 1, 0, 0]);
-  const b1_op1 = useTransform(smoothScroll, [0, 0.28, 0.6, 0.9], [0, 1, 0, 0]);
-  const b1_op2 = useTransform(smoothScroll, [0.28, 0.6, 0.9, 1.2], [0, 1, 0, 0]);
-  const b1_op3 = useTransform(smoothScroll, [0.6, 0.9, 1.0, 1.2], [0, 0, 1, 1]);
+  // --- Blob 1 Opacity Channels (Aligned with reading flow: 0-15% Intro, 15-45% Reading, 45-75% Climax, 75-100% Outro/Comments) ---
+  const b1_op0 = useTransform(smoothScroll, [-0.2, 0, 0.15, 0.45], [1, 1, 0, 0]);
+  const b1_op1 = useTransform(smoothScroll, [0, 0.15, 0.45, 0.75], [0, 1, 0, 0]);
+  const b1_op2 = useTransform(smoothScroll, [0.15, 0.45, 0.75, 0.9], [0, 1, 0, 0]);
+  const b1_op3 = useTransform(smoothScroll, [0.45, 0.75, 0.9, 1.2], [0, 0, 1, 1]);
 
-  // --- Blob 2 Opacity Channels (Shifts later: nodes at 0.00, 0.38, 0.70, 1.00) ---
-  const b2_op0 = useTransform(smoothScroll, [-0.2, 0, 0.38, 0.7], [1, 1, 0, 0]);
-  const b2_op1 = useTransform(smoothScroll, [0, 0.38, 0.7, 1.0], [0, 1, 0, 0]);
-  const b2_op2 = useTransform(smoothScroll, [0.38, 0.7, 1.0, 1.2], [0, 1, 0, 0]);
-  const b2_op3 = useTransform(smoothScroll, [0.7, 1.0, 1.1, 1.3], [0, 0, 1, 1]);
+  // --- Blob 2 Opacity Channels ---
+  const b2_op0 = useTransform(smoothScroll, [-0.2, 0, 0.2, 0.5], [1, 1, 0, 0]);
+  const b2_op1 = useTransform(smoothScroll, [0, 0.2, 0.5, 0.8], [0, 1, 0, 0]);
+  const b2_op2 = useTransform(smoothScroll, [0.2, 0.5, 0.8, 0.92], [0, 1, 0, 0]);
+  const b2_op3 = useTransform(smoothScroll, [0.5, 0.8, 0.92, 1.2], [0, 0, 1, 1]);
 
-  // --- Blob 3 Opacity Channels (Standard spacing: nodes at 0.00, 0.33, 0.66, 1.00) ---
-  const b3_op0 = useTransform(smoothScroll, [-0.2, 0, 0.33, 0.66], [1, 1, 0, 0]);
-  const b3_op1 = useTransform(smoothScroll, [0, 0.33, 0.66, 1.0], [0, 1, 0, 0]);
-  const b3_op2 = useTransform(smoothScroll, [0.33, 0.66, 1.0, 1.2], [0, 1, 0, 0]);
-  const b3_op3 = useTransform(smoothScroll, [0.66, 1.0, 1.1, 1.3], [0, 0, 1, 1]);
+  // --- Blob 3 Opacity Channels ---
+  const b3_op0 = useTransform(smoothScroll, [-0.2, 0, 0.18, 0.48], [1, 1, 0, 0]);
+  const b3_op1 = useTransform(smoothScroll, [0, 0.18, 0.48, 0.78], [0, 1, 0, 0]);
+  const b3_op2 = useTransform(smoothScroll, [0.18, 0.48, 0.78, 0.91], [0, 1, 0, 0]);
+  const b3_op3 = useTransform(smoothScroll, [0.48, 0.78, 0.91, 1.2], [0, 0, 1, 1]);
 
   // =========================================================================
   // MULTI-DIMENSIONAL PARALLAX MOUSE-FOLLOW DRIFT
@@ -144,9 +144,10 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
   const s2 = useTransform(smoothScroll, [0, 0.33, 0.66, 1], [1.1, 1.45, 1.15, 1.55]);
   const s3 = useTransform(smoothScroll, [0, 0.33, 0.66, 1], [0.8, 1.2, 1.5, 1.2]);
 
-  const opacity1 = isDark ? 0.28 : 0.34;
-  const opacity2 = isDark ? 0.3 : 0.38;
-  const opacity3 = isDark ? 0.2 : 0.26;
+  // Ultra-low contrast opacities for a ghostly, non-distracting thin mist (Suggestion 1)
+  const opacity1 = isDark ? 0.08 : 0.1;
+  const opacity2 = isDark ? 0.09 : 0.11;
+  const opacity3 = isDark ? 0.05 : 0.06;
 
   return (
     <motion.div
@@ -203,7 +204,7 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
             scale: s1,
             opacity: opacity1,
           }}
-          className="animate-gpu absolute size-[38rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[110px] transition-opacity duration-1000 ease-out"
+          className="animate-gpu absolute size-[60rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[200px] transition-opacity duration-1000 ease-out"
         >
           <motion.div
             className="relative h-full w-full overflow-hidden rounded-full"
@@ -262,7 +263,7 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
             scale: s2,
             opacity: opacity2,
           }}
-          className="animate-gpu absolute size-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px] transition-opacity duration-1000 ease-out"
+          className="animate-gpu absolute size-[65rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[220px] transition-opacity duration-1000 ease-out"
         >
           <motion.div
             className="relative h-full w-full overflow-hidden rounded-full"
@@ -321,7 +322,7 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
             scale: s3,
             opacity: opacity3,
           }}
-          className="animate-gpu absolute size-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[130px] transition-opacity duration-1000 ease-out"
+          className="animate-gpu absolute size-[70rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[240px] transition-opacity duration-1000 ease-out"
         >
           <motion.div
             className="relative h-full w-full overflow-hidden rounded-full"
@@ -372,6 +373,26 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Dynamic Cursor Spotlight Overlay */}
+      {!reducedMotion && (
+        <motion.div
+          style={{
+            left: useTransform(mouseSpringX, (x: number) => `${(x + 0.5) * 100}%`),
+            top: useTransform(mouseSpringY, (y: number) => `${(y + 0.5) * 100}%`),
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+          }}
+          className="pointer-events-none fixed size-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.08] blur-[60px] dark:opacity-[0.06]"
+        />
+      )}
+
+      {/* SVG Paper Micro-Noise Overlay (Editorial Tactile Texture) */}
+      <div
+        className="pointer-events-none absolute inset-0 h-full w-full bg-repeat opacity-[0.015] mix-blend-overlay dark:opacity-[0.012]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
     </motion.div>
   );
 }
