@@ -199,8 +199,9 @@ export function BattleArena({
       result.push(...songsInRound);
     });
 
-    return result;
-  }, [gameState, activeSongs, eliminatedSongs]);
+    // CRITICAL: Filter out any song that was NOT originally selected by the user to remove bracket padding!
+    return result.filter((song) => selectedSongIds.includes(song.id));
+  }, [gameState, activeSongs, eliminatedSongs, selectedSongIds]);
 
   const presets = useMemo(
     () => [
