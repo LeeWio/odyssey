@@ -1,3 +1,10 @@
+## [1.24.8](https://github.com/LeeWio/odyssey/compare/v1.24.7...v1.24.8) (2026-07-26)
+
+
+### Bug Fixes
+
+* **vaesong-battle:** filter out tournament padding songs from final completed leaderboard ([1046ec1](https://github.com/LeeWio/odyssey/commit/1046ec179794e2f2a23d99071e8e91df91f16faa))
+
 ## [1.24.7](https://github.com/LeeWio/odyssey/compare/v1.24.6...v1.24.7) (2026-07-26)
 
 
