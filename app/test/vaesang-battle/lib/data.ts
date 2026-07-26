@@ -788,9 +788,9 @@ export const initialSongs: Song[] = [
   },
   {
     id: "87",
-    title: "三皮罐",
-    album: "《呼吸之野》",
-    year: 2021,
+    title: "七夕",
+    album: "单曲",
+    year: 2011,
     rank: null,
     comment: "",
     audioUrl: "/songs/87.mp3",
