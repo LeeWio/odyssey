@@ -1,3 +1,10 @@
+## [1.23.1](https://github.com/LeeWio/odyssey/compare/v1.23.0...v1.23.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* **audio:** refactor to single-instance persistent player with unbinding handlers ([d6b0c82](https://github.com/LeeWio/odyssey/commit/d6b0c8219dfa1379ddbca5fb23b0350ba20f2abc))
+
 # [1.23.0](https://github.com/LeeWio/odyssey/compare/v1.22.1...v1.23.0) (2026-07-26)
 
 
