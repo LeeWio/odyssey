@@ -1,3 +1,10 @@
+## [1.22.1](https://github.com/LeeWio/odyssey/compare/v1.22.0...v1.22.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* **audio:** implement robust physical stream-abort to prevent ghost audio bleeding ([9b50f4f](https://github.com/LeeWio/odyssey/commit/9b50f4f714c1006a0e804bb0d48b45dba8c45da0))
+
 # [1.22.0](https://github.com/LeeWio/odyssey/compare/v1.21.0...v1.22.0) (2026-07-26)
 
 
