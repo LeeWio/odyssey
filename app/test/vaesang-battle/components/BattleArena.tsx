@@ -204,8 +204,8 @@ export function BattleArena({
       const songsInRound = eliminatedSongs
         .filter((e) => e.roundId === rId)
         .map((e) => e.song)
-        // Secondary sort by Elo rating or year
-        .sort((a, b) => (b.elo ?? 1200) - (a.elo ?? 1200));
+        // Secondary sort by original database ID seed (smaller ID / higher seed is ranked higher in ties)
+        .sort((a, b) => parseInt(a.id) - parseInt(b.id));
       result.push(...songsInRound);
     });
 
