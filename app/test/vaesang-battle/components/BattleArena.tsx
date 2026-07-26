@@ -112,9 +112,6 @@ export function BattleArena({
   const [posterTheme, setPosterTheme] = useState<PosterTheme>("parchment");
 
   // ─── TIER 2: CHRONOLOGICAL DERIVED STATES (useMemos) ───
-  const sessionSongs = useMemo(() => {
-    return songs.filter((s) => selectedSongIds.includes(s.id));
-  }, [songs, selectedSongIds]);
 
   const isValidPoolSize = useMemo(() => {
     return [8, 16, 32, 64, 128].includes(selectedSongIds.length);
@@ -122,7 +119,7 @@ export function BattleArena({
 
   // Determine starting round and tournament configuration based on total count
   const tournamentConfig = useMemo(() => {
-    const totalCount = activeSongs.length > 0 ? activeSongs.length : sessionSongs.length;
+    const totalCount = selectedSongIds.length;
     let target = 128;
     if (totalCount > 64) target = 128;
     else if (totalCount > 32) target = 64;
@@ -157,7 +154,7 @@ export function BattleArena({
       bracketSize: target,
       rounds: allRounds.slice(startIndex),
     };
-  }, [activeSongs.length, sessionSongs.length]);
+  }, [selectedSongIds]);
 
   const currentRoundDef = useMemo(() => {
     return tournamentConfig.rounds[currentRoundIndex] || tournamentConfig.rounds[0];
