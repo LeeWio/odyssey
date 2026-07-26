@@ -1,3 +1,10 @@
+## [1.25.1](https://github.com/LeeWio/odyssey/compare/v1.25.0...v1.25.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* **vaesong-battle:** resolve tie-breaker ordering mismatch using seed-based ID sorting ([4d513f7](https://github.com/LeeWio/odyssey/commit/4d513f7fab1285917ce9eacda41b014509b50c5c))
+
 # [1.25.0](https://github.com/LeeWio/odyssey/compare/v1.24.8...v1.25.0) (2026-07-26)
 
 
