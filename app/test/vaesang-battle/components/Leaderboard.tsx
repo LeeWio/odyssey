@@ -45,10 +45,17 @@ export function Leaderboard({ songs }: LeaderboardProps) {
   const [sharedLoading, setSharedLoading] = useState(false);
   const [sharedError, setSharedError] = useState<string | null>(null);
 
+  // Sharing local state form
+  const [shareName, setShareName] = useState("");
+  const [isShared, setIsShared] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
+
   // Fetch cloud shared lists
   const fetchSharedLists = async () => {
-    setSharedLoading(true);
-    setSharedError(null);
+    Promise.resolve().then(() => {
+      setSharedLoading(true);
+      setSharedError(null);
+    });
     try {
       const res = await fetch("/vae-song-stream/shared");
       if (res.ok) {
@@ -66,7 +73,10 @@ export function Leaderboard({ songs }: LeaderboardProps) {
 
   useEffect(() => {
     if (activeTab === "shared") {
-      Promise.resolve().then(() => fetchSharedLists());
+      const timer = setTimeout(() => {
+        fetchSharedLists();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [activeTab]);
 
@@ -85,6 +95,45 @@ export function Leaderboard({ songs }: LeaderboardProps) {
     const albums = new Set(rankedSongs.map((s) => s.album));
     return Array.from(albums);
   }, [rankedSongs]);
+
+  // Handle sharing of currently persisted local browser leaderboard
+  const handleShareLocalList = async () => {
+    if (rankedSongs.length === 0 || isShared) return;
+    setShareLoading(true);
+    try {
+      const championSong = rankedSongs[0];
+      const championTitle = championSong ? championSong.title : "暂无";
+      const top5Titles = rankedSongs.slice(0, 5).map((s) => s.title);
+      const championComment = championSong ? championSong.comment || "" : "";
+
+      const response = await fetch("/vae-song-stream/shared", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: shareName || "匿名的嵩迷",
+          champion: championTitle,
+          topSongs: top5Titles,
+          comment: championComment,
+        }),
+      });
+
+      if (response.ok) {
+        setIsShared(true);
+        alert("🎉 恭喜！您积存的本地个人金榜已成功晒出！");
+        // Automatically switch tab and refresh shared square wall to let the user see their name instantly!
+        setActiveTab("shared");
+        fetchSharedLists();
+      } else {
+        alert("提交失败，请重试");
+      }
+    } catch {
+      alert("提交超时，请检查您的网络连接");
+    } finally {
+      setShareLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 font-sans">
@@ -119,13 +168,57 @@ export function Leaderboard({ songs }: LeaderboardProps) {
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <span className="mb-3 text-3xl">🗳️</span>
               <p className="mb-1 font-serif font-bold text-stone-500">本地暂无排单数据</p>
-              <p className="max-w-[36ch] font-serif text-xs leading-relaxed text-stone-400">
+              <p className="max-w-[36ch] font-sans font-serif text-sm leading-relaxed text-stone-400">
                 请前往「竞技场」开启一轮淘汰赛，或者点击右上角清空/一键重置缓存来载入天梯。
               </p>
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between">
+              {/* Cloud Shared Leaderboard Square Submission Form (Rendered directly at top of Local Leaderboard!) */}
+              <div className="flex flex-col gap-3.5 rounded-2xl border bg-white p-5 font-serif text-xs shadow-sm dark:border-stone-800 dark:bg-zinc-900">
+                <div>
+                  <h4 className="flex items-center gap-1 text-sm font-bold text-stone-900 dark:text-stone-200">
+                    🌍 晒出我的个人金榜到共享广场
+                  </h4>
+                  <p className="mt-0.5 font-sans text-[10px] leading-relaxed text-stone-400">
+                    一键将您当前保存在本机天梯的第一名《{rankedSongs[0]?.title}》、Top 5
+                    与专属评语上传分享，在全网共享墙上亮起您的大名！
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={shareName}
+                    onChange={(e) => setShareName(e.target.value)}
+                    disabled={isShared}
+                    placeholder="✍️ 留下你的大名（默认：匿名的嵩迷）"
+                    className="dark:border-stone-850 dark:bg-zinc-955 flex-1 rounded-xl border border-stone-200 bg-stone-50/50 p-3 text-xs font-bold outline-none focus:ring-1 focus:ring-stone-400 dark:text-stone-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleShareLocalList}
+                    disabled={isShared || shareLoading}
+                    className={`shrink-0 rounded-xl px-5 py-3 text-center font-extrabold transition-all ${
+                      isShared
+                        ? "border border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-400"
+                        : shareLoading
+                          ? "border border-stone-200 bg-stone-100 text-stone-400"
+                          : "cursor-pointer bg-blue-600 text-white shadow-md shadow-blue-600/10 hover:bg-blue-500 active:scale-98"
+                    }`}
+                  >
+                    {shareLoading ? (
+                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-stone-400 border-t-stone-800" />
+                    ) : isShared ? (
+                      "✓ 已成功晒出"
+                    ) : (
+                      "立即晒出"
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-1 flex items-center justify-between">
                 <h2 className="font-serif text-base font-bold tracking-tight text-stone-900 dark:text-stone-100">
                   Top {rankedSongs.length} 个人天梯金榜
                 </h2>
@@ -160,7 +253,7 @@ export function Leaderboard({ songs }: LeaderboardProps) {
                                 : song.rank === 2
                                   ? "bg-stone-500 text-white"
                                   : "bg-amber-800 text-white"
-                              : "bg-stone-100 text-stone-400 dark:bg-zinc-950"
+                              : "dark:bg-zinc-955 bg-stone-100 text-stone-400"
                           }`}
                         >
                           {song.rank}
@@ -229,7 +322,7 @@ export function Leaderboard({ songs }: LeaderboardProps) {
               <p className="text-xs">{sharedError}</p>
               <button
                 onClick={fetchSharedLists}
-                className="mt-3 rounded-lg border bg-white px-3 py-1.5 text-[10px] font-bold dark:bg-zinc-900"
+                className="mt-3 rounded-lg border bg-white px-3 py-1.5 font-serif text-[10px] font-bold dark:bg-zinc-900"
               >
                 重新加载
               </button>
@@ -246,7 +339,7 @@ export function Leaderboard({ songs }: LeaderboardProps) {
                     <span className="flex items-center gap-1 font-extrabold text-stone-900 dark:text-stone-100">
                       👤 {item.username}
                     </span>
-                    <span className="flex shrink-0 items-center gap-1 text-stone-400">
+                    <span className="flex shrink-0 items-center gap-1 font-sans text-stone-400">
                       <CalendarIcon className="h-3 w-3" />
                       {formatTimeAgo(item.timestamp)}
                     </span>
