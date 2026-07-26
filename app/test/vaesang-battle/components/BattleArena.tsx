@@ -1,17 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Song } from "../lib/data";
 import { synth } from "../lib/audio";
 import {
-  TrophyIcon,
-  Volume2Icon,
-  VolumeXIcon,
   RefreshCwIcon,
   CheckIcon,
   SparklesIcon,
-  CheckCircle2Icon,
   FlameIcon,
   ArrowRightIcon,
   DownloadIcon,
@@ -33,44 +29,12 @@ interface BattleArenaProps {
 type ArenaState = "config" | "playing" | "completed";
 type PosterTheme = "parchment" | "inkwash" | "film";
 
-interface InkParticle {
-  id: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  opacity: number;
-  color: string;
+// Round definitions matching the image structure
+interface RoundDef {
+  id: string;
+  name: string;
+  targetStrength: number;
 }
-interface TournamentStep {
-  sortedList: string[];
-  unrankedList: string[];
-  currentChallengerId: string | null;
-  binaryLeft: number;
-  binaryRight: number;
-  binaryMid: number;
-  battleCount: number;
-  playedTimeA: number;
-  playedTimeB: number;
-}
-
-const formatTime = (sec: number) => {
-  if (isNaN(sec) || sec <= 0) return "00:00";
-  return `${Math.floor(sec / 60)
-    .toString()
-    .padStart(2, "0")}:${Math.floor(sec % 60)
-    .toString()
-    .padStart(2, "0")}`;
-};
-
-const customLyrics: Record<string, string> = {
-  "1": "“ 俗的无畏，雅的轻狂。最喜欢在深夜里，雅俗共赏。 ”",
-  "2": "“ 庐州月光，洒在心头，月下的你暂不留。 ”",
-  "3": "“ 为你唱首歌，没有什么大不了，有何不可。 ”",
-  "4": "“ 又是清明雨上，折菊寄到你身旁，把你遗忘。 ”",
-  "5": "“ 你的头像闪动着，那停留的手指，再也不曾亮起。 ”",
-};
 
 const customChorus: Record<string, number> = {
   "1": 68,
@@ -80,20 +44,14 @@ const customChorus: Record<string, number> = {
   "5": 64,
 };
 
-const getSongLyrics = (s: Song): string => {
-  return customLyrics[s.id] || `“《${s.title}》：课桌底下的有线耳机与关于青春的旧夏天。 ”`;
-};
-
 const getSongChorus = (s: Song): number => {
   return customChorus[s.id] || 60;
 };
 
 export function BattleArena({
   songs,
-  recordBattle,
   resetElo,
   updateComment,
-  undoLastBattle,
   canUndo,
   setRankedOrder,
 }: BattleArenaProps) {
@@ -112,33 +70,28 @@ export function BattleArena({
     "43",
   ]);
 
-  const [sortedList, setSortedList] = useState<string[]>([]);
-  const [unrankedList, setUnrankedList] = useState<string[]>([]);
-  const [currentChallengerId, setCurrentChallengerId] = useState<string | null>(null);
+  // Tournament specific states
+  const [activeSongs, setActiveSongs] = useState<Song[]>([]);
+  const [eliminatedSongs, setEliminatedSongs] = useState<{ song: Song; roundId: string }[]>([]);
+  const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
+  const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
+  const [selectedInGroup, setSelectedInGroup] = useState<string[]>([]);
+  const [advancedSongs, setAdvancedSongs] = useState<string[]>([]);
 
-  const [binaryLeft, setBinaryLeft] = useState(0);
-  const [binaryRight, setBinaryRight] = useState(0);
-  const [binaryMid, setBinaryMid] = useState(0);
-  const [battleCount, setBattleCount] = useState(0);
-  const [maxRounds, setMaxRounds] = useState(30);
+  // Local storage for history to support Undo
+  const [tournamentHistory, setTournamentHistory] = useState<
+    {
+      activeSongs: Song[];
+      eliminatedSongs: { song: Song; roundId: string }[];
+      currentRoundIndex: number;
+      currentGroupIndex: number;
+      selectedInGroup: string[];
+      advancedSongs: string[];
+    }[]
+  >([]);
 
-  const [playedTimeA, setPlayedTimeA] = useState(0);
-  const [playedTimeB, setPlayedTimeB] = useState(0);
   const [playingId, setPlayingId] = useState<string | null>(null);
 
-  const [playbackProgress, setPlaybackProgress] = useState({ currentTime: 0, duration: 0 });
-  const [isScrubbing, setIsScrubbing] = useState(false);
-  const [scrubValue, setScrubValue] = useState(0);
-  const isScrubbingRef = useRef(false);
-  const prevSongAIdRef = useRef<string | null>(null);
-  const prevSongBIdRef = useRef<string | null>(null);
-
-  const [draggedCard, setDraggedCard] = useState<"A" | "B" | null>(null);
-  const [draggedOffset, setDraggedOffset] = useState({ x: 0, y: 0 });
-  const [tiltA, setTiltA] = useState({ x: 0, y: 0 });
-  const [tiltB, setTiltB] = useState({ x: 0, y: 0 });
-  const [particles, setParticles] = useState<InkParticle[]>([]);
-  const [tournamentHistory, setTournamentHistory] = useState<TournamentStep[]>([]);
   const [customComments, setCustomComments] = useState<Record<string, string>>({});
   const [editingCommentId, setEditingSongCommentId] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -146,77 +99,101 @@ export function BattleArena({
   const [posterTheme, setPosterTheme] = useState<PosterTheme>("parchment");
 
   // ─── TIER 2: CHRONOLOGICAL DERIVED STATES (useMemos) ───
-  const isAudited = playedTimeA >= 3 && playedTimeB >= 3;
-
   const sessionSongs = useMemo(() => {
     return songs.filter((s) => selectedSongIds.includes(s.id));
   }, [songs, selectedSongIds]);
 
-  const songA = useMemo(() => {
-    return songs.find((s) => s.id === currentChallengerId) || songs[0];
-  }, [songs, currentChallengerId]);
+  // Determine starting round and tournament configuration based on total count
+  const tournamentConfig = useMemo(() => {
+    const totalCount = activeSongs.length > 0 ? activeSongs.length : sessionSongs.length;
+    let target = 128;
+    if (totalCount > 64) target = 128;
+    else if (totalCount > 32) target = 64;
+    else if (totalCount > 16) target = 32;
+    else if (totalCount > 8) target = 16;
+    else if (totalCount > 4) target = 8;
+    else if (totalCount > 2) target = 4;
+    else target = 2;
 
-  const songB = useMemo(() => {
-    const defenderId = sortedList[binaryMid];
-    return songs.find((s) => s.id === defenderId) || songs[1];
-  }, [songs, sortedList, binaryMid]);
+    const allRounds: RoundDef[] = [
+      { id: "128_64", name: "128 进 64", targetStrength: 64 },
+      { id: "64_32", name: "64 进 32", targetStrength: 32 },
+      { id: "32_16", name: "32 进 16", targetStrength: 16 },
+      { id: "16_8", name: "16 进 8", targetStrength: 8 },
+      { id: "8_4", name: "8 进 4", targetStrength: 4 },
+      { id: "4_2", name: "4 进 2", targetStrength: 2 },
+      { id: "championship", name: "冠军战", targetStrength: 1 },
+    ];
 
+    // Filter rounds to start from the nearest bracket
+    const startIndex = allRounds.findIndex((r) => {
+      if (target === 128) return r.id === "128_64";
+      if (target === 64) return r.id === "64_32";
+      if (target === 32) return r.id === "32_16";
+      if (target === 16) return r.id === "16_8";
+      if (target === 8) return r.id === "8_4";
+      if (target === 4) return r.id === "4_2";
+      return r.id === "championship";
+    });
+
+    return {
+      bracketSize: target,
+      rounds: allRounds.slice(startIndex),
+    };
+  }, [activeSongs.length, sessionSongs.length]);
+
+  const currentRoundDef = useMemo(() => {
+    return tournamentConfig.rounds[currentRoundIndex] || tournamentConfig.rounds[0];
+  }, [tournamentConfig, currentRoundIndex]);
+
+  // Grouping configuration
+  const groupSize = useMemo(() => {
+    if (currentRoundDef.id === "championship") return 2;
+    if (currentRoundDef.id === "4_2") return 4;
+    return 8; // Default group of 8
+  }, [currentRoundDef]);
+
+  const targetSelectCount = useMemo(() => {
+    return groupSize / 2; // Always select exactly half to advance
+  }, [groupSize]);
+
+  const totalGroups = useMemo(() => {
+    return Math.max(1, Math.ceil(activeSongs.length / groupSize));
+  }, [activeSongs, groupSize]);
+
+  const groupSongs = useMemo(() => {
+    const start = currentGroupIndex * groupSize;
+    return activeSongs.slice(start, start + groupSize);
+  }, [activeSongs, currentGroupIndex, groupSize]);
+
+  // Final compile sorted ranking on completed
   const sortedSessionSongs = useMemo(() => {
-    if (gameState === "completed") {
-      return sortedList.map((id) => songs.find((s) => s.id === id)!).filter(Boolean);
-    }
-    return [...sessionSongs].sort((a, b) => (b.elo ?? 1200) - (a.elo ?? 1200));
-  }, [songs, sortedList, sessionSongs, gameState]);
+    if (gameState !== "completed") return [];
 
-  const battleAnalytics = useMemo(() => {
-    if (gameState !== "completed" || tournamentHistory.length === 0) return null;
-    const battleCounts: Record<string, number> = {};
-    tournamentHistory.forEach((step) => {
-      if (step.currentChallengerId) {
-        battleCounts[step.currentChallengerId] = (battleCounts[step.currentChallengerId] || 0) + 1;
-      }
-      const defenderId = step.sortedList[step.binaryMid];
-      if (defenderId) {
-        battleCounts[defenderId] = (battleCounts[defenderId] || 0) + 1;
-      }
+    // Ordered from Rank 1 (Champion) to Rank N
+    const result: Song[] = [];
+
+    // 1. Champion is the active advancedSongs (exactly 1 element left)
+    const champ = activeSongs[0];
+    if (champ) result.push(champ);
+
+    // 2. Add Runner-up (eliminated in championship)
+    const runnerUp = eliminatedSongs.find((e) => e.roundId === "championship")?.song;
+    if (runnerUp) result.push(runnerUp);
+
+    // 3. Add eliminated songs round by round in reverse order
+    const roundOrder = ["4_2", "8_4", "16_8", "32_16", "64_32", "128_64"];
+    roundOrder.forEach((rId) => {
+      const songsInRound = eliminatedSongs
+        .filter((e) => e.roundId === rId)
+        .map((e) => e.song)
+        // Secondary sort by Elo rating or year
+        .sort((a, b) => (b.elo ?? 1200) - (a.elo ?? 1200));
+      result.push(...songsInRound);
     });
 
-    let nemesisId = "";
-    let nemesisMaxCount = 0;
-    Object.entries(battleCounts).forEach(([id, count]) => {
-      if (count > nemesisMaxCount) {
-        nemesisMaxCount = count;
-        nemesisId = id;
-      }
-    });
-
-    const nemesisSong = songs.find((s) => s.id === nemesisId);
-    const absoluteKingId = sortedList[0];
-    const absoluteKing = songs.find((s) => s.id === absoluteKingId);
-
-    return {
-      nemesisTitle: nemesisSong ? nemesisSong.title : "暂无",
-      nemesisCount: nemesisMaxCount,
-      absoluteKingTitle: absoluteKing ? absoluteKing.title : "暂无",
-    };
-  }, [gameState, tournamentHistory, songs, sortedList]);
-
-  const metrics = useMemo(() => {
-    if (sortedList.length === 0)
-      return { confidence: "无数据", colorClass: "text-stone-400", progressPercentage: 0 };
-    const p = Math.round((sortedList.length / selectedSongIds.length) * 100);
-    return {
-      progressPercentage: p,
-      confidence:
-        p < 40 ? `对决打磨中 (${p}%)` : p < 80 ? `初具规模 (${p}%)` : `金榜大功告成 (100%)`,
-      colorClass:
-        p < 40
-          ? "text-red-500 bg-red-50"
-          : p < 80
-            ? "text-amber-600 bg-amber-50"
-            : "text-emerald-600 bg-emerald-50",
-    };
-  }, [sortedList, selectedSongIds]);
+    return result;
+  }, [gameState, activeSongs, eliminatedSongs]);
 
   const presets = useMemo(
     () => [
@@ -224,14 +201,12 @@ export function BattleArena({
         id: "hits",
         name: "🔥 至尊热门金曲 (10首)",
         description: "《有何不可》《素颜》《庐州月》《断桥残雪》《玫瑰花的葬礼》等",
-        matches: "对决约 22 轮",
         filter: () => ["1", "2", "3", "4", "5", "7", "16", "17", "18", "43"],
       },
       {
         id: "early",
-        name: "🎒 网络远古情怀 (2006-2008)",
+        name: "🎒 网络远古情怀 (32首)",
         description: "《你若成风》《南山忆》《浅唱》《雪花谣》《红尘沙画》等",
-        matches: "对决约 10 轮",
         filter: (all: Song[]) =>
           all
             .filter((s) => s.album === "早期单曲" || s.year <= 2008 || s.id === "18")
@@ -239,9 +214,8 @@ export function BattleArena({
       },
       {
         id: "golden",
-        name: "💿 巅峰双神专 (2009-2010)",
+        name: "💿 巅峰双神专 (18首)",
         description: "《自定义》与《寻雾启示》全收录，《如果当时》《多余的解释》等",
-        matches: "对决约 45 轮",
         filter: (all: Song[]) =>
           all
             .filter(
@@ -255,9 +229,8 @@ export function BattleArena({
       },
       {
         id: "philosophy",
-        name: "🍂 中期哲思 (2011-2018)",
+        name: "🍂 中期哲思 (47首)",
         description: "《苏格拉没有底》至《寻宝游戏》，收录先锋作《等到烟火清凉》等",
-        matches: "对决约 56 轮",
         filter: (all: Song[]) =>
           all
             .filter((s) =>
@@ -273,10 +246,9 @@ export function BattleArena({
       },
       {
         id: "indie",
-        name: "🌲 呼吸之野与近期 (13首)",
+        name: "🌲 呼吸之野与近期 (25首)",
         description:
           "《呼吸之野》的冷冽哲思、最新单曲《飞驰于沙场》《昨夜书》《留香》《雨幕》《羡慕》等",
-        matches: "对决约 33 轮",
         filter: (all: Song[]) =>
           all.filter((s) => s.album === "《呼吸之野》" || s.album === "近期单曲").map((s) => s.id),
       },
@@ -285,128 +257,6 @@ export function BattleArena({
   );
 
   // ─── TIER 3: TOPO INTERACTION HANDLERS ───
-  const spawnInkSplashes = (target: "A" | "B" | "draw") => {
-    const startX = target === "A" ? -180 : target === "B" ? 180 : 0;
-    const temp: InkParticle[] = [];
-    for (let i = 0; i < 12; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 2.5 + Math.random() * 5;
-      temp.push({
-        id: Date.now() + i + Math.random(),
-        x: startX,
-        y: -40,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 1,
-        size: 3 + Math.random() * 10,
-        opacity: 0.9,
-        color: "rgba(30,30,30,0.7)",
-      });
-    }
-    setParticles(temp);
-  };
-
-  const handleVote = (outcome: "A" | "B" | "draw") => {
-    if (!currentChallengerId || sortedList.length === 0 || !isAudited) return;
-    const defenderId = sortedList[binaryMid];
-    spawnInkSplashes(outcome);
-    recordBattle(currentChallengerId, defenderId, outcome);
-    setTournamentHistory((prev) => [
-      ...prev,
-      {
-        sortedList: [...sortedList],
-        unrankedList: [...unrankedList],
-        currentChallengerId,
-        binaryLeft,
-        binaryRight,
-        binaryMid,
-        battleCount,
-        playedTimeA,
-        playedTimeB,
-      },
-    ]);
-
-    synth.stop();
-    setPlayingId(null);
-    setBattleCount((v) => v + 1);
-    setPlayedTimeA(0);
-    setPlayedTimeB(0);
-    setDraggedCard(null);
-    setDraggedOffset({ x: 0, y: 0 });
-
-    let left = binaryLeft;
-    let right = binaryRight;
-    if (outcome === "A") right = binaryMid - 1;
-    else if (outcome === "B") left = binaryMid + 1;
-    else {
-      left = binaryMid + 1;
-      right = binaryMid;
-    }
-
-    if (left > right) {
-      const nextSorted = [...sortedList];
-      nextSorted.splice(left, 0, currentChallengerId);
-      if (unrankedList.length > 1) {
-        setSortedList(nextSorted);
-        setUnrankedList(unrankedList.slice(1));
-        setCurrentChallengerId(unrankedList[1]);
-        setBinaryLeft(0);
-        setBinaryRight(nextSorted.length - 1);
-        setBinaryMid(Math.floor((nextSorted.length - 1) / 2));
-      } else {
-        setSortedList(nextSorted);
-        setCurrentChallengerId(null);
-        setGameState("completed");
-      }
-    } else {
-      const mid = Math.floor((left + right) / 2);
-      setBinaryLeft(left);
-      setBinaryRight(right);
-      setBinaryMid(mid);
-    }
-  };
-
-  const handleUndo = () => {
-    if (tournamentHistory.length === 0) return;
-    synth.stop();
-    setPlayingId(null);
-    undoLastBattle();
-    const prev = tournamentHistory[tournamentHistory.length - 1];
-    setSortedList(prev.sortedList);
-    setUnrankedList(prev.unrankedList);
-    setCurrentChallengerId(prev.currentChallengerId);
-    setBinaryLeft(prev.binaryLeft);
-    setBinaryRight(prev.binaryRight);
-    setBinaryMid(prev.binaryMid);
-    setBattleCount(prev.battleCount);
-    setPlayedTimeA(3);
-    setPlayedTimeB(3);
-    setDraggedCard(null);
-    setDraggedOffset({ x: 0, y: 0 });
-    setTournamentHistory((v) => v.slice(0, -1));
-  };
-
-  const handleFinishBattle = () => {
-    synth.stop();
-    setPlayingId(null);
-    setGameState("completed");
-  };
-
-  const handleSaveLocalComment = (id: string, text: string) => {
-    setCustomComments((prev) => ({ ...prev, [id]: text }));
-    updateComment(id, text);
-    setEditingSongCommentId(null);
-  };
-
-  const handleSaveCeremonyResult = () => {
-    setRankedOrder(sortedList);
-    Object.entries(customComments).forEach(([id, text]) => updateComment(id, text));
-    setShowSyncedToast(true);
-    setTimeout(() => {
-      setShowSyncedToast(false);
-      setGameState("config");
-    }, 2000);
-  };
-
   const handleToggleSongSelect = (id: string) => {
     setSelectedSongIds((prev) =>
       prev.includes(id) ? (prev.length <= 2 ? prev : prev.filter((x) => x !== id)) : [...prev, id]
@@ -415,68 +265,70 @@ export function BattleArena({
 
   const handleStartBattle = () => {
     if (selectedSongIds.length < 2) return alert("请至少选择两首歌曲进行对决！");
+    synth.stop();
+    setPlayingId(null);
     resetElo();
+
+    // 1. Gather selected songs
     const pool = songs.filter((s) => selectedSongIds.includes(s.id));
-    setSortedList([pool[0].id]);
-    setUnrankedList(pool.slice(1).map((s) => s.id));
-    setCurrentChallengerId(pool.slice(1)[0]?.id || null);
-    setBinaryLeft(0);
-    setBinaryRight(0);
-    setBinaryMid(0);
-    setBattleCount(0);
-    setPlayedTimeA(0);
-    setPlayedTimeB(0);
+
+    // 2. Pad to nearest power of 2 bracket
+    let target = 2;
+    if (pool.length > 64) target = 128;
+    else if (pool.length > 32) target = 64;
+    else if (pool.length > 16) target = 32;
+    else if (pool.length > 8) target = 16;
+    else if (pool.length > 4) target = 8;
+    else if (pool.length > 2) target = 4;
+
+    const paddedPool = [...pool];
+    const unselected = songs.filter((s) => !selectedSongIds.includes(s.id));
+
+    while (paddedPool.length < target && unselected.length > 0) {
+      paddedPool.push(unselected.shift()!);
+    }
+
+    // 3. Shuffle pool to mix groups beautifully
+    const shuffledPool = paddedPool.sort(() => Math.random() - 0.5);
+
+    setActiveSongs(shuffledPool);
+    setEliminatedSongs([]);
+    setCurrentRoundIndex(0);
+    setCurrentGroupIndex(0);
+    setSelectedInGroup([]);
+    setAdvancedSongs([]);
     setTournamentHistory([]);
-    setParticles([]);
-
-    let sum = 0;
-    for (let i = 2; i <= pool.length; i++) sum += Math.ceil(Math.log2(i));
-    setMaxRounds(sum);
     setGameState("playing");
-  };
 
-  const handleDragAUpdate = (e: unknown, info: { offset: { x: number; y: number } }) => {
-    setDraggedCard("A");
-    setDraggedOffset({ x: info.offset.x, y: info.offset.y });
-  };
-  const handleDragAEnd = (e: unknown, info: { offset: { x: number; y: number } }) => {
-    setDraggedCard(null);
-    setDraggedOffset({ x: 0, y: 0 });
-    if (isAudited) {
-      if (info.offset.y < -110) handleVote("A");
-      else if (info.offset.y > 100) handleVote("draw");
-    }
-  };
-  const handleDragBUpdate = (e: unknown, info: { offset: { x: number; y: number } }) => {
-    setDraggedCard("B");
-    setDraggedOffset({ x: info.offset.x, y: info.offset.y });
-  };
-  const handleDragBEnd = (e: unknown, info: { offset: { x: number; y: number } }) => {
-    setDraggedCard(null);
-    setDraggedOffset({ x: 0, y: 0 });
-    if (isAudited) {
-      if (info.offset.y < -110) handleVote("B");
-      else if (info.offset.y > 100) handleVote("draw");
+    // Autoplay the first song of Group 1
+    const firstSong = shuffledPool[0];
+    if (firstSong) {
+      setTimeout(() => {
+        synth.play(
+          firstSong.id,
+          firstSong.title,
+          `/vae-song-stream?title=${encodeURIComponent(firstSong.title)}`,
+          () => setPlayingId(null)
+        );
+        synth.seek(getSongChorus(firstSong));
+        setPlayingId(firstSong.id);
+      }, 300);
     }
   };
 
-  const handleMouseMoveA = (e: React.MouseEvent) => {
-    const box = e.currentTarget.getBoundingClientRect();
-    setTiltA({
-      x: ((e.clientX - box.left - box.width / 2) / box.width) * 12,
-      y: -((e.clientY - box.top - box.height / 2) / box.height) * 12,
-    });
-  };
-  const handleMouseMoveB = (e: React.MouseEvent) => {
-    const box = e.currentTarget.getBoundingClientRect();
-    setTiltB({
-      x: ((e.clientX - box.left - box.width / 2) / box.width) * 12,
-      y: -((e.clientY - box.top - box.height / 2) / box.height) * 12,
-    });
-  };
+  // Click on a song card: Auto toggle check & AUTOPLAY CHORUS instantly!
+  const handleSongCardClick = (song: Song) => {
+    // 1. Toggle Selection
+    const isSelected = selectedInGroup.includes(song.id);
+    if (isSelected) {
+      setSelectedInGroup((prev) => prev.filter((id) => id !== song.id));
+    } else {
+      if (selectedInGroup.length < targetSelectCount) {
+        setSelectedInGroup((prev) => [...prev, song.id]);
+      }
+    }
 
-  const handleTogglePlay = (song: Song, e: React.MouseEvent) => {
-    e.stopPropagation();
+    // 2. ALWAYS Autoplay Chorus Climax instantly on clicking!
     if (playingId === song.id) {
       synth.stop();
       setPlayingId(null);
@@ -487,8 +339,131 @@ export function BattleArena({
         `/vae-song-stream?title=${encodeURIComponent(song.title)}`,
         () => setPlayingId(null)
       );
+      synth.seek(getSongChorus(song));
       setPlayingId(song.id);
     }
+  };
+
+  const handleClearGroupSelection = () => {
+    setSelectedInGroup([]);
+  };
+
+  const handleConfirmAdvancement = () => {
+    if (selectedInGroup.length !== targetSelectCount) return;
+
+    synth.stop();
+    setPlayingId(null);
+
+    // Save current step to history stack for Undo support
+    setTournamentHistory((prev) => [
+      ...prev,
+      {
+        activeSongs: [...activeSongs],
+        eliminatedSongs: [...eliminatedSongs],
+        currentRoundIndex,
+        currentGroupIndex,
+        selectedInGroup: [...selectedInGroup],
+        advancedSongs: [...advancedSongs],
+      },
+    ]);
+
+    // Group calculation
+    const roundEliminated = groupSongs
+      .filter((s) => !selectedInGroup.includes(s.id))
+      .map((s) => ({ song: s, roundId: currentRoundDef.id }));
+
+    const nextAdvanced = [...advancedSongs, ...selectedInGroup];
+    const nextEliminated = [...eliminatedSongs, ...roundEliminated];
+
+    // Check if there are more groups in this round
+    if (currentGroupIndex < totalGroups - 1) {
+      setAdvancedSongs(nextAdvanced);
+      setEliminatedSongs(nextEliminated);
+      setSelectedInGroup([]);
+      setCurrentGroupIndex((v) => v + 1);
+
+      // Autoplay the first song of the next group
+      const nextGroupFirstSong = activeSongs[(currentGroupIndex + 1) * groupSize];
+      if (nextGroupFirstSong) {
+        setTimeout(() => {
+          synth.play(
+            nextGroupFirstSong.id,
+            nextGroupFirstSong.title,
+            `/vae-song-stream?title=${encodeURIComponent(nextGroupFirstSong.title)}`,
+            () => setPlayingId(null)
+          );
+          synth.seek(getSongChorus(nextGroupFirstSong));
+          setPlayingId(nextGroupFirstSong.id);
+        }, 150);
+      }
+    } else {
+      // Current round completed! Transition to next round
+      const advancedPool = nextAdvanced
+        .map((id) => songs.find((s) => s.id === id)!)
+        .filter(Boolean);
+
+      if (currentRoundDef.id === "championship") {
+        // Championship completed! We have our winner!
+        setActiveSongs(advancedPool);
+        setEliminatedSongs(nextEliminated);
+        setGameState("completed");
+      } else {
+        // Move to next round
+        setActiveSongs(advancedPool);
+        setEliminatedSongs(nextEliminated);
+        setCurrentRoundIndex((v) => v + 1);
+        setCurrentGroupIndex(0);
+        setSelectedInGroup([]);
+        setAdvancedSongs([]);
+
+        // Autoplay the first song of the first group of the new round
+        const nextRoundFirstSong = advancedPool[0];
+        if (nextRoundFirstSong) {
+          setTimeout(() => {
+            synth.play(
+              nextRoundFirstSong.id,
+              nextRoundFirstSong.title,
+              `/vae-song-stream?title=${encodeURIComponent(nextRoundFirstSong.title)}`,
+              () => setPlayingId(null)
+            );
+            synth.seek(getSongChorus(nextRoundFirstSong));
+            setPlayingId(nextRoundFirstSong.id);
+          }, 150);
+        }
+      }
+    }
+  };
+
+  const handleUndo = () => {
+    if (tournamentHistory.length === 0) return;
+    synth.stop();
+    setPlayingId(null);
+    const lastState = tournamentHistory[tournamentHistory.length - 1];
+
+    setActiveSongs(lastState.activeSongs);
+    setEliminatedSongs(lastState.eliminatedSongs);
+    setCurrentRoundIndex(lastState.currentRoundIndex);
+    setCurrentGroupIndex(lastState.currentGroupIndex);
+    setSelectedInGroup(lastState.selectedInGroup);
+    setAdvancedSongs(lastState.advancedSongs);
+    setTournamentHistory((prev) => prev.slice(0, -1));
+  };
+
+  const handleSaveLocalComment = (id: string, text: string) => {
+    setCustomComments((prev) => ({ ...prev, [id]: text }));
+    updateComment(id, text);
+    setEditingSongCommentId(null);
+  };
+
+  const handleSaveCeremonyResult = () => {
+    const finalOrderedIds = sortedSessionSongs.map((s) => s.id);
+    setRankedOrder(finalOrderedIds);
+    Object.entries(customComments).forEach(([id, text]) => updateComment(id, text));
+    setShowSyncedToast(true);
+    setTimeout(() => {
+      setShowSyncedToast(false);
+      setGameState("config");
+    }, 2000);
   };
 
   const handleExportPoster = () => {
@@ -533,173 +508,9 @@ export function BattleArena({
   };
 
   // ─── TIER 4: COMPONENT INTERNAL EFFECTS & DEPS ───
-  useEffect(() => {
-    isScrubbingRef.current = isScrubbing;
-  }, [isScrubbing]);
-
-  // Smart Autoplay New Arrivals on Stage transition
-  useEffect(() => {
-    if (gameState !== "playing" || !currentChallengerId) {
-      prevSongAIdRef.current = null;
-      prevSongBIdRef.current = null;
-      return;
-    }
-
-    const defenderId = sortedList[binaryMid];
-    if (!defenderId) return;
-
-    const prevA = prevSongAIdRef.current;
-    const prevB = prevSongBIdRef.current;
-
-    // First round of the entire tournament
-    if (prevA === null && prevB === null) {
-      // Autoplay Song A (the first challenger!) at its chorus
-      const sA = songs.find((s) => s.id === currentChallengerId);
-      if (sA) {
-        setTimeout(() => {
-          synth.play(
-            sA.id,
-            sA.title,
-            `/vae-song-stream?title=${encodeURIComponent(sA.title)}`,
-            () => setPlayingId(null)
-          );
-          synth.seek(getSongChorus(sA));
-          setPlayingId(sA.id);
-        }, 400);
-      }
-    } else {
-      // Check which song is the "newly arrived" one compared to the previous round
-      const isNewA = currentChallengerId !== prevA;
-      const isNewB = defenderId !== prevB;
-
-      if (isNewA) {
-        // Autoplay the new challenger (Song A) at its chorus
-        const sA = songs.find((s) => s.id === currentChallengerId);
-        if (sA) {
-          setTimeout(() => {
-            synth.play(
-              sA.id,
-              sA.title,
-              `/vae-song-stream?title=${encodeURIComponent(sA.title)}`,
-              () => setPlayingId(null)
-            );
-            synth.seek(getSongChorus(sA));
-            setPlayingId(sA.id);
-          }, 100);
-        }
-      } else if (isNewB) {
-        // Autoplay the new defender (Song B) at its chorus
-        const sB = songs.find((s) => s.id === defenderId);
-        if (sB) {
-          setTimeout(() => {
-            synth.play(
-              sB.id,
-              sB.title,
-              `/vae-song-stream?title=${encodeURIComponent(sB.title)}`,
-              () => setPlayingId(null)
-            );
-            synth.seek(getSongChorus(sB));
-            setPlayingId(sB.id);
-          }, 100);
-        }
-      }
-    }
-
-    // Record the current IDs for the next transition check
-    prevSongAIdRef.current = currentChallengerId;
-    prevSongBIdRef.current = defenderId;
-  }, [gameState, currentChallengerId, binaryMid, sortedList, songs]);
-
-  // Audio timer
-  useEffect(() => {
-    if (!playingId || gameState !== "playing") return;
-    const t = setInterval(() => {
-      if (playingId === songA.id) setPlayedTimeA((v) => Math.min(3, v + 1));
-      if (playingId === songB.id) setPlayedTimeB((v) => Math.min(3, v + 1));
-    }, 1000);
-    return () => clearInterval(t);
-  }, [playingId, songA.id, songB.id, gameState]);
-
-  // Audio playhead polling
-  useEffect(() => {
-    if (!playingId) return;
-    let active = true;
-    const update = () => {
-      if (!active) return;
-      if (!isScrubbingRef.current) {
-        setPlaybackProgress({ currentTime: synth.getCurrentTime(), duration: synth.getDuration() });
-      }
-      requestAnimationFrame(update);
-    };
-    requestAnimationFrame(update);
-    return () => {
-      active = false;
-    };
-  }, [playingId]);
-
-  // Ink Splashes animation loop
-  useEffect(() => {
-    if (particles.length === 0) return;
-    const f = requestAnimationFrame(() => {
-      setParticles((prev) =>
-        prev
-          .map((p) => ({
-            ...p,
-            x: p.x + p.vx,
-            y: p.y + p.vy,
-            vy: p.vy + 0.12,
-            opacity: p.opacity - 0.025,
-          }))
-          .filter((p) => p.opacity > 0)
-      );
-    });
-    return () => cancelAnimationFrame(f);
-  }, [particles]);
-
-  // Disable Motion Drag on Mobile device width to prevent browser gesture collisions
-  const cardAStyle = useMemo(
-    () =>
-      gameState === "playing" && draggedCard === "B" && draggedOffset.y < -30
-        ? {
-            opacity: 1 - Math.min(0.65, -draggedOffset.y / 150),
-            filter: `blur(${Math.min(3, (-draggedOffset.y - 30) / 30)}px)`,
-          }
-        : {},
-    [draggedCard, draggedOffset, gameState]
-  );
-  const cardBStyle = useMemo(
-    () =>
-      gameState === "playing" && draggedCard === "A" && draggedOffset.y < -30
-        ? {
-            opacity: 1 - Math.min(0.65, -draggedOffset.y / 150),
-            filter: `blur(${Math.min(3, (-draggedOffset.y - 30) / 30)}px)`,
-          }
-        : {},
-    [draggedCard, draggedOffset, gameState]
-  );
 
   return (
     <div className="relative flex flex-col gap-6 overflow-hidden">
-      {/* Ink splasher particles */}
-      <div className="pointer-events-none absolute inset-0 z-30">
-        {particles.map((p) => (
-          <div
-            key={p.id}
-            style={{
-              position: "absolute",
-              left: `calc(50% + ${p.x}px)`,
-              top: `calc(50% + ${p.y}px)`,
-              width: p.size,
-              height: p.size,
-              borderRadius: "50%",
-              backgroundColor: p.color,
-              opacity: p.opacity,
-              transform: "translate(-50%, -50%) blur(0.5px)",
-            }}
-          />
-        ))}
-      </div>
-
       {/* CONFIG SCREEN */}
       {gameState === "config" && (
         <motion.div
@@ -712,11 +523,11 @@ export function BattleArena({
               V
             </span>
             <h2 className="font-serif text-2xl font-bold dark:text-stone-100">
-              许嵩单曲 ELO 争霸赛 · 智能天梯挑战
+              许嵩单曲分组晋级赛 · 智能天梯决选
             </h2>
             <p className="mt-2 max-w-[50ch] font-serif text-xs leading-relaxed text-stone-500 dark:text-stone-400">
-              基于 <b>二分插入锦标赛算法 (Binary Insertion Tournament)</b>，用最少对决次数产出 100%
-              完美的个人专属金榜。我们已为您扩充至 <b>{songs.length} 首生涯至尊大曲库</b>！
+              采用截图同款<b>「分组淘汰晋级锦标赛」制</b>，128
+              首曲目两两分组对决。点击歌曲自动高保真播放副歌，一键选定、层层筛选，直达冠军之巅！
             </p>
           </div>
 
@@ -747,7 +558,7 @@ export function BattleArena({
                         {p.description}
                       </span>
                       <span className="mt-1.5 rounded bg-stone-100/60 px-1.5 py-0.5 text-[9px] font-bold text-stone-500">
-                        {p.matches} ({pIds.length}首)
+                        {pIds.length}首曲池
                       </span>
                     </button>
                   );
@@ -769,14 +580,14 @@ export function BattleArena({
                   </button>
                   <span className="text-stone-300">·</span>
                   <button
-                    onClick={() => setSelectedSongIds(songs.slice(0, 2).map((s) => s.id))}
+                    onClick={() => setSelectedSongIds(songs.slice(0, 10).map((s) => s.id))}
                     className="text-stone-500 hover:text-stone-900"
                   >
-                    精简 2 首
+                    精选 10 首
                   </button>
                 </div>
               </div>
-              <div className="mt-3 flex max-h-52 flex-wrap gap-1.5 overflow-y-auto rounded-lg border border-stone-100 bg-stone-50/20 p-2.5 dark:border-stone-800 dark:bg-zinc-950/10">
+              <div className="dark:bg-zinc-955/10 mt-3 flex max-h-52 flex-wrap gap-1.5 overflow-y-auto rounded-lg border border-stone-100 bg-stone-50/20 p-2.5 dark:border-stone-800">
                 {songs.map((song) => {
                   const checked = selectedSongIds.includes(song.id);
                   return (
@@ -800,7 +611,7 @@ export function BattleArena({
                 className="group flex items-center gap-2 rounded-full bg-stone-900 px-6 py-2.5 text-xs font-bold text-white transition-all hover:scale-105 active:scale-95 dark:bg-stone-100 dark:text-stone-900"
               >
                 <FlameIcon className="h-3.5 w-3.5 animate-pulse text-amber-500" />
-                <span>开启对决之旅 (开始 PK)</span>
+                <span>开启分组淘汰赛 (开始 PK)</span>
                 <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
@@ -810,435 +621,183 @@ export function BattleArena({
 
       {/* PLAYING SCREEN */}
       {gameState === "playing" && (
-        <div className="flex flex-col gap-4">
-          {/* Desktop Top Drop Target Drag-Zone Indicator (Hidden on Mobile) */}
-          <AnimatePresence>
-            {draggedCard && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="hidden w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-amber-500 bg-amber-50 py-4 font-serif text-amber-900 transition-colors md:flex dark:bg-amber-950/20 dark:text-amber-200"
-              >
-                <TrophyIcon className="h-4 w-4 animate-pulse text-amber-500" />
-                <span className="text-xs font-bold">
-                  {draggedOffset.y < -110
-                    ? "松手立即确定：本轮投给此卡片 ✓"
-                    : `向上拖拽《${draggedCard === "A" ? songA.title : songB.title}》进行投票`}
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Cards Split View Grid (Mobile: 2 Columns Side-by-Side! No scrolling!) */}
-          <div className="relative grid grid-cols-2 items-stretch gap-2.5 select-none md:grid-cols-11 md:gap-4">
-            {/* Card A */}
-            <motion.div
-              drag={typeof window !== "undefined" && window.innerWidth >= 768 ? "y" : false}
-              dragSnapToOrigin
-              dragConstraints={{ top: -180, bottom: 100 }}
-              dragElastic={0.1}
-              onDrag={handleDragAUpdate}
-              onDragEnd={handleDragAEnd}
-              style={cardAStyle}
-              className="relative flex cursor-grab flex-col items-center justify-between rounded-2xl border border-stone-200 bg-white p-3 shadow-sm md:col-span-5 md:p-5 dark:border-stone-800 dark:bg-zinc-900"
-            >
-              <div
-                onMouseMove={handleMouseMoveA}
-                onMouseLeave={() => setTiltA({ x: 0, y: 0 })}
-                style={{
-                  transform: `perspective(600px) rotateX(${tiltA.y}deg) rotateY(${tiltA.x}deg)`,
-                  transition: "transform 0.1s",
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div className="flex min-h-[60px] w-full flex-col items-center justify-center text-center">
-                  <span className="inline-block rounded bg-stone-900 px-1 py-0.5 text-[7.5px] font-bold text-white dark:bg-stone-100 dark:text-stone-900">
-                    ⚡ 挑战者
-                  </span>
-                  <h3 className="mt-1 max-w-full truncate font-serif text-xs font-bold text-stone-900 md:text-lg dark:text-stone-100">
-                    {songA.title}
-                  </h3>
-                  <p className="max-w-full truncate font-serif text-[9px] leading-none text-stone-400 md:text-[10px]">
-                    {songA.album} · {songA.year}
-                  </p>
-                  <p className="mt-1.5 line-clamp-1 hidden font-serif text-[11px] text-stone-400 italic md:block">
-                    {getSongLyrics(songA)}
-                  </p>
-                </div>
-
-                <div className="relative my-3 flex h-16 w-16 shrink-0 items-center justify-center md:my-6 md:h-28 md:w-28">
-                  <div
-                    className={`absolute h-16 w-16 rounded-full bg-stone-900 shadow md:h-28 md:w-28 dark:bg-black ${playingId === songA.id ? "animate-spin" : ""}`}
-                    style={{ animationDuration: "8s" }}
-                  >
-                    <div className="absolute inset-1.5 rounded-full border border-stone-800/40 md:inset-2" />
-                    <div className="absolute inset-3 rounded-full border border-stone-800/20 md:inset-4" />
-                    <div className="absolute inset-[18px] flex items-center justify-center rounded-full border border-stone-300 bg-stone-100/90 md:inset-6 dark:bg-zinc-800">
-                      <div className="h-2 w-2 rounded-full bg-stone-900/15 md:h-4 md:w-4" />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => handleTogglePlay(songA, e)}
-                    className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-stone-50 shadow-md md:h-8 md:w-8 dark:bg-zinc-800"
-                  >
-                    {playingId === songA.id ? (
-                      <VolumeXIcon className="h-3 w-3 animate-pulse text-red-500 md:h-4 md:w-4" />
-                    ) : (
-                      <Volume2Icon className="h-3 w-3 text-stone-700 md:h-4 md:w-4 dark:text-stone-200" />
-                    )}
-                  </button>
-                </div>
-
-                {playingId === songA.id && playbackProgress.duration > 0 && (
-                  <div className="mb-1.5 w-full px-1 select-none md:mb-3">
-                    <div className="flex items-center gap-1 font-mono text-[8px] text-stone-400 md:text-[9px]">
-                      <span className="shrink-0">
-                        {formatTime(isScrubbing ? scrubValue : playbackProgress.currentTime)}
-                      </span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={playbackProgress.duration}
-                        step={0.1}
-                        value={isScrubbing ? scrubValue : playbackProgress.currentTime}
-                        onMouseDown={() => {
-                          setIsScrubbing(true);
-                          setScrubValue(playbackProgress.currentTime);
-                        }}
-                        onTouchStart={() => {
-                          setIsScrubbing(true);
-                          setScrubValue(playbackProgress.currentTime);
-                        }}
-                        onChange={(e) => setScrubValue(parseFloat(e.target.value))}
-                        onMouseUp={() => {
-                          synth.seek(scrubValue);
-                          setIsScrubbing(false);
-                        }}
-                        onTouchEnd={() => {
-                          synth.seek(scrubValue);
-                          setIsScrubbing(false);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="h-0.5 flex-1 cursor-pointer rounded-full bg-stone-100 focus:outline-none md:h-1 dark:bg-stone-800"
-                      />
-                      <span className="shrink-0">{formatTime(playbackProgress.duration)}</span>
-                    </div>
-                    <div className="mt-1 flex justify-center">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          synth.seek(getSongChorus(songA));
-                        }}
-                        className="py-0.2 dark:bg-amber-955/20 flex items-center gap-0.5 rounded-full bg-amber-50 px-1.5 font-serif text-[7.5px] font-bold text-amber-600 hover:scale-105 active:scale-95 md:text-[9px]"
-                      >
-                        <FlameIcon className="h-2 w-2" />{" "}
-                        <span>副歌 ⚡ {formatTime(getSongChorus(songA))}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex flex-col items-center gap-0.5 font-serif text-[9px] md:text-[10px]">
-                  {playedTimeA >= 3 ? (
-                    <span className="flex items-center gap-0.5 font-bold text-emerald-600">
-                      <CheckCircle2Icon className="h-2.5 w-2.5" />
-                      已解锁
-                    </span>
-                  ) : (
-                    <span className="truncate text-stone-400">
-                      {playingId === songA.id ? `试听 ${playedTimeA}/3s` : "未试听"}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* VS Divider (Hidden on Mobile) */}
-            <div className="hidden min-h-[40px] flex-col items-center justify-center py-1 font-serif font-bold text-stone-300 italic md:col-span-1 md:flex">
-              VS
-            </div>
-
-            {/* Card B */}
-            <motion.div
-              drag={typeof window !== "undefined" && window.innerWidth >= 768 ? "y" : false}
-              dragSnapToOrigin
-              dragConstraints={{ top: -180, bottom: 100 }}
-              dragElastic={0.1}
-              onDrag={handleDragBUpdate}
-              onDragEnd={handleDragBEnd}
-              style={cardBStyle}
-              className="relative flex cursor-grab flex-col items-center justify-between rounded-2xl border border-stone-200 bg-white p-3 shadow-sm md:col-span-5 md:p-5 dark:border-stone-800 dark:bg-zinc-900"
-            >
-              <div
-                onMouseMove={handleMouseMoveB}
-                onMouseLeave={() => setTiltB({ x: 0, y: 0 })}
-                style={{
-                  transform: `perspective(600px) rotateX(${tiltB.y}deg) rotateY(${tiltB.x}deg)`,
-                  transition: "transform 0.1s",
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div className="flex min-h-[60px] w-full flex-col items-center justify-center text-center">
-                  <span className="text-amber-850 dark:bg-amber-955/20 inline-block rounded bg-amber-100 px-1 py-0.5 text-[7.5px] font-bold dark:text-amber-300">
-                    🛡️ 擂主 第 {binaryMid + 1} 名
-                  </span>
-                  <h3 className="mt-1 max-w-full truncate font-serif text-xs font-bold text-stone-900 md:text-lg dark:text-stone-100">
-                    {songB.title}
-                  </h3>
-                  <p className="max-w-full truncate font-serif text-[9px] leading-none text-stone-400 md:text-[10px]">
-                    {songB.album} · {songB.year}
-                  </p>
-                  <p className="mt-1.5 line-clamp-1 hidden font-serif text-[11px] text-stone-400 italic md:block">
-                    {getSongLyrics(songB)}
-                  </p>
-                </div>
-
-                <div className="relative my-3 flex h-16 w-16 shrink-0 items-center justify-center md:my-6 md:h-28 md:w-28">
-                  <div
-                    className={`absolute h-16 w-16 rounded-full bg-stone-900 shadow md:h-28 md:w-28 dark:bg-black ${playingId === songB.id ? "animate-spin" : ""}`}
-                    style={{ animationDuration: "8s" }}
-                  >
-                    <div className="absolute inset-1.5 rounded-full border border-stone-800/40 md:inset-2" />
-                    <div className="absolute inset-3 rounded-full border border-stone-800/20 md:inset-4" />
-                    <div className="absolute inset-[18px] flex items-center justify-center rounded-full border border-stone-300 bg-stone-100/90 md:inset-6 dark:bg-zinc-800">
-                      <div className="h-2 w-2 rounded-full bg-stone-900/15 md:h-4 md:w-4" />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => handleTogglePlay(songB, e)}
-                    className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-stone-50 shadow-md md:h-8 md:w-8 dark:bg-zinc-800"
-                  >
-                    {playingId === songB.id ? (
-                      <VolumeXIcon className="h-3 w-3 animate-pulse text-red-500 md:h-4 md:w-4" />
-                    ) : (
-                      <Volume2Icon className="h-3 w-3 text-stone-700 md:h-4 md:w-4 dark:text-stone-200" />
-                    )}
-                  </button>
-                </div>
-
-                {playingId === songB.id && playbackProgress.duration > 0 && (
-                  <div className="mb-1.5 w-full px-1 select-none md:mb-3">
-                    <div className="flex items-center gap-1 font-mono text-[8px] text-stone-400 md:text-[9px]">
-                      <span className="shrink-0">
-                        {formatTime(isScrubbing ? scrubValue : playbackProgress.currentTime)}
-                      </span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={playbackProgress.duration}
-                        step={0.1}
-                        value={isScrubbing ? scrubValue : playbackProgress.currentTime}
-                        onMouseDown={() => {
-                          setIsScrubbing(true);
-                          setScrubValue(playbackProgress.currentTime);
-                        }}
-                        onTouchStart={() => {
-                          setIsScrubbing(true);
-                          setScrubValue(playbackProgress.currentTime);
-                        }}
-                        onChange={(e) => setScrubValue(parseFloat(e.target.value))}
-                        onMouseUp={() => {
-                          synth.seek(scrubValue);
-                          setIsScrubbing(false);
-                        }}
-                        onTouchEnd={() => {
-                          synth.seek(scrubValue);
-                          setIsScrubbing(false);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="h-0.5 flex-1 cursor-pointer rounded-full bg-stone-100 focus:outline-none md:h-1 dark:bg-stone-800"
-                      />
-                      <span className="shrink-0">{formatTime(playbackProgress.duration)}</span>
-                    </div>
-                    <div className="mt-1 flex justify-center">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          synth.seek(getSongChorus(songB));
-                        }}
-                        className="py-0.2 dark:bg-amber-955/20 flex items-center gap-0.5 rounded-full bg-amber-50 px-1.5 font-serif text-[7.5px] font-bold text-amber-600 hover:scale-105 active:scale-95 md:text-[9px]"
-                      >
-                        <FlameIcon className="h-2 w-2" />{" "}
-                        <span>副歌 ⚡ {formatTime(getSongChorus(songB))}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex flex-col items-center gap-0.5 font-serif text-[9px] md:text-[10px]">
-                  {playedTimeB >= 3 ? (
-                    <span className="flex items-center gap-0.5 font-bold text-emerald-600">
-                      <CheckCircle2Icon className="h-2.5 w-2.5" />
-                      已解锁
-                    </span>
-                  ) : (
-                    <span className="truncate text-stone-400">
-                      {playingId === songB.id ? `试听 ${playedTimeB}/3s` : "未试听"}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* ─── TIER 4: ERGONOMIC MOBILE THUMB-ZONE CONTROL PANEL (Mobile-Only pill button bar) ─── */}
-          <div className="mt-2 flex shrink-0 items-center justify-between gap-2 font-serif select-none md:hidden">
-            <button
-              type="button"
-              onClick={() => handleVote("A")}
-              disabled={!isAudited}
-              className={`flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl border px-1.5 py-3 font-serif text-[10.5px] font-bold transition-all active:scale-95 ${
-                !isAudited
-                  ? "dark:border-stone-850 border-stone-200 bg-stone-100 text-stone-300 dark:bg-zinc-950"
-                  : "border-stone-950 bg-stone-900 text-white shadow-md dark:border-stone-200 dark:bg-stone-100 dark:text-stone-950"
-              }`}
-            >
-              <TrophyIcon className="h-3 w-3 text-amber-500" />
-              <span className="max-w-[12ch] truncate">投票 A</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleVote("draw")}
-              disabled={!isAudited}
-              className={`flex flex-col items-center justify-center gap-0.5 rounded-xl border px-4 py-3 font-serif text-[10.5px] font-bold transition-all active:scale-95 ${
-                !isAudited
-                  ? "dark:border-stone-850 border-stone-200 bg-stone-100 text-stone-300 dark:bg-zinc-950"
-                  : "border-stone-200 bg-stone-100 text-stone-700 active:bg-stone-200 dark:border-stone-800 dark:bg-zinc-900 dark:text-stone-300"
-              }`}
-            >
-              <span className="text-xs">📥</span>
-              <span>平手</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleVote("B")}
-              disabled={!isAudited}
-              className={`flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl border px-1.5 py-3 font-serif text-[10.5px] font-bold transition-all active:scale-95 ${
-                !isAudited
-                  ? "dark:border-stone-850 border-stone-200 bg-stone-100 text-stone-300 dark:bg-zinc-950"
-                  : "border-amber-700 bg-amber-600 text-white shadow-md active:bg-amber-500"
-              }`}
-            >
-              <TrophyIcon className="h-3 w-3 text-amber-200" />
-              <span className="max-w-[12ch] truncate">投票 B</span>
-            </button>
-          </div>
-
-          {/* Desktop Gestures Area (Hidden on Mobile to prevent scroll conflicts) */}
-          <div className="hidden flex-col items-center gap-2 md:flex">
-            <AnimatePresence>
-              {draggedCard && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex w-full items-center justify-center rounded-xl border-2 border-dashed py-3 font-serif text-xs ${draggedOffset.y > 100 ? "border-stone-500 bg-stone-100 text-stone-900 dark:bg-zinc-950 dark:text-stone-200" : "border-stone-200 text-stone-400"}`}
-                >
-                  <span>
-                    {draggedOffset.y > 100
-                      ? "松手确定平手 / 难分轩轾 📥"
-                      : "向下拖拽判定本对决为 Draw (平手)"}
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {!draggedCard && (
-              <div className="flex items-center gap-2 font-serif text-[11px] text-stone-400">
-                {canUndo && (
-                  <button
-                    type="button"
-                    onClick={handleUndo}
-                    className="hover:text-stone-955 dark:bg-zinc-955 flex items-center gap-1 rounded-full border bg-white px-3 py-1.5 shadow-sm dark:border-stone-800"
-                  >
-                    <UndoIcon className="h-3.5 w-3.5" /> 撤销上一步
-                  </button>
-                )}
-                <span>( 向上 110px 投票选择，向下 100px 判为平手 )</span>
-              </div>
-            )}
-          </div>
-
-          {/* Stats Progress and天梯预览 */}
-          <div className="mt-1 flex flex-col gap-4 rounded-xl border bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-zinc-900">
-            <div className="flex items-center justify-between font-serif text-xs">
+        <div className="flex flex-col gap-4 font-sans text-stone-800 dark:text-stone-200">
+          {/* Header Progress matching IMG_5274 */}
+          <div className="flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-zinc-900">
+            <div className="flex items-start justify-between">
               <div>
-                <h4 className="font-bold">智能天梯金榜进度看板</h4>
-                <p className="text-[10px] text-stone-400">
-                  已对决: {battleCount} / 约 {maxRounds} 轮 · 锁定排名: {sortedList.length} /{" "}
-                  {selectedSongIds.length} 首
-                </p>
+                <h2 className="text-xl font-black tracking-tight md:text-2xl">
+                  {currentRoundDef.name}
+                </h2>
+                <div className="mt-0.5 flex items-center gap-1.5 text-xs font-medium text-stone-400">
+                  <span>
+                    第 {currentGroupIndex + 1} / {totalGroups} 组
+                  </span>
+                  <span>•</span>
+                  <span>本轮目标：选出 {currentRoundDef.targetStrength} 强</span>
+                </div>
               </div>
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${metrics.colorClass}`}
-              >
-                {metrics.confidence}
-              </span>
+              <div className="dark:bg-amber-955/20 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                双击可切换试听
+              </div>
             </div>
 
-            <div className="h-1.5 w-full rounded-full bg-stone-100 dark:bg-stone-800">
+            {/* Custom styled lavender/blue Progress Track */}
+            <div className="relative h-2 w-full overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
               <div
-                className="h-full rounded-full bg-stone-900 transition-all duration-300 dark:bg-stone-100"
-                style={{ width: `${metrics.progressPercentage}%` }}
+                className="h-full rounded-full bg-blue-600 transition-all duration-300"
+                style={{ width: `${((currentGroupIndex + 1) / totalGroups) * 100}%` }}
               />
             </div>
 
-            <div className="dark:border-stone-850 flex items-center justify-between border-t border-stone-100 pt-3">
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleFinishBattle}
-                  className="rounded-lg bg-amber-600 px-3 py-1.5 font-serif text-xs font-bold text-white hover:bg-amber-500"
-                >
-                  生成当前金榜
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (confirm("确定重置？")) {
-                      synth.stop();
-                      setGameState("config");
-                    }
-                  }}
-                  className="dark:border-stone-850 rounded-lg border px-3 py-1.5 font-serif text-xs font-semibold text-stone-600"
-                >
-                  重置
-                </button>
-
-                {/* Mobile-Only Undo Button */}
-                <div className="flex md:hidden">
-                  {canUndo && (
-                    <button
-                      type="button"
-                      onClick={handleUndo}
-                      className="hover:text-stone-955 flex items-center gap-1 rounded-lg border bg-white px-3 py-1.5 text-xs font-semibold dark:border-stone-800 dark:bg-zinc-950 dark:text-stone-300"
-                    >
-                      <UndoIcon className="h-3 w-3" />
-                      <span>撤销</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-              <span className="hidden font-serif text-[10px] text-stone-400 sm:inline">
-                高精度二分插入算法天梯 · 2026
-              </span>
+            {/* Round Pills Navigation match 100% */}
+            <div className="dark:border-stone-850 flex scrollbar-none items-center gap-1.5 overflow-x-auto border-t border-stone-100 py-1 pt-3">
+              {tournamentConfig.rounds.map((r, index) => {
+                const isActive = index === currentRoundIndex;
+                const isCompleted = index < currentRoundIndex;
+                return (
+                  <span
+                    key={r.id}
+                    className={`shrink-0 rounded-full px-3 py-1 text-[10.5px] font-bold transition-all ${
+                      isActive
+                        ? "dark:bg-blue-955/30 border border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800 dark:text-blue-400"
+                        : isCompleted
+                          ? "bg-stone-100 text-stone-400 line-through dark:bg-zinc-800 dark:text-stone-500"
+                          : "bg-stone-50/50 text-stone-300 dark:bg-zinc-950 dark:text-stone-600"
+                    }`}
+                  >
+                    {r.name}
+                  </span>
+                );
+              })}
             </div>
+          </div>
+
+          {/* Group Prompt Guidance */}
+          <div className="px-1 text-xs leading-relaxed font-medium text-stone-500 dark:text-stone-400">
+            当前组共 <b className="text-stone-900 dark:text-stone-100">{groupSongs.length} 首</b>
+            ，请选择 <b className="text-blue-600 dark:text-blue-400">{targetSelectCount} 首</b>{" "}
+            你更喜欢的歌曲。已选满后点击「确认晋级」。
+          </div>
+
+          {/* Song Grid (8 items - Double Column side-by-side) */}
+          <div className="grid grid-cols-2 gap-3">
+            {groupSongs.map((song) => {
+              const checked = selectedInGroup.includes(song.id);
+              const isPlaying = playingId === song.id;
+              return (
+                <button
+                  key={song.id}
+                  type="button"
+                  onClick={() => handleSongCardClick(song)}
+                  className={`relative flex min-h-[76px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 px-3 py-4 text-center transition-all duration-200 select-none active:scale-97 md:min-h-[88px] ${
+                    checked
+                      ? "dark:bg-blue-955/30 border-blue-500 bg-[#eff6ff] text-blue-900 shadow-sm dark:border-blue-400 dark:text-blue-100"
+                      : isPlaying
+                        ? "dark:bg-amber-955/10 border-amber-400 bg-amber-50/30 text-stone-900 dark:border-amber-500 dark:text-stone-100"
+                        : "dark:border-stone-850 border-stone-200 bg-white text-stone-700 hover:bg-stone-50/50 dark:bg-zinc-900 dark:text-stone-300"
+                  }`}
+                >
+                  <div className="flex w-full flex-col items-center gap-1.5">
+                    {/* Song Title (Fitted & Bold!) */}
+                    <span className="max-w-full truncate px-1 font-serif text-[12.5px] leading-tight font-extrabold md:text-[15px]">
+                      {song.title}
+                    </span>
+
+                    {/* Equalizer animation when playing or subtitle */}
+                    {isPlaying ? (
+                      <span className="flex h-2 items-center justify-center gap-0.5">
+                        <span
+                          className="h-full w-[1.5px] animate-bounce rounded-full bg-amber-500"
+                          style={{ animationDelay: "0s" }}
+                        />
+                        <span
+                          className="h-2/3 w-[1.5px] animate-bounce rounded-full bg-amber-500"
+                          style={{ animationDelay: "0.2s" }}
+                        />
+                        <span
+                          className="h-5/6 w-[1.5px] animate-bounce rounded-full bg-amber-500"
+                          style={{ animationDelay: "0.4s" }}
+                        />
+                      </span>
+                    ) : (
+                      <span className="max-w-full truncate font-serif text-[9.5px] leading-none opacity-40">
+                        {song.album} ({song.year})
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Absolute positioning of Blue Checked Circle badges */}
+                  {checked && (
+                    <span className="absolute top-2.5 right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm md:h-5 md:w-5 dark:bg-blue-500">
+                      <CheckIcon className="h-2.5 w-2.5 stroke-[3] md:h-3 md:w-3" />
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Selected Status Footer matching 100% */}
+          <div className="flex flex-col gap-1 rounded-xl border border-dashed border-stone-200 bg-stone-50/40 p-4 font-serif text-xs leading-relaxed text-stone-500 shadow-inner dark:border-stone-800 dark:bg-zinc-950/20">
+            <div className="flex justify-between">
+              <span className="font-semibold text-stone-700 dark:text-stone-300">
+                已选择{" "}
+                <b className="font-bold text-blue-600 dark:text-blue-400">
+                  {selectedInGroup.length} / {targetSelectCount}
+                </b>
+                ：
+              </span>
+              <span className="text-[10px] opacity-60">点击卡片可在选定与取消之间自如切换</span>
+            </div>
+            <div className="mt-0.5 truncate text-[12.5px] font-extrabold text-stone-800 dark:text-stone-200">
+              {selectedInGroup.length > 0
+                ? selectedInGroup.map((id) => songs.find((s) => s.id === id)?.title).join(" 、 ")
+                : "尚未在本组挑选任何晋级单曲"}
+            </div>
+          </div>
+
+          {/* Control Bar Actions Button Row */}
+          <div className="mt-1 flex items-center justify-between gap-3 font-serif text-xs select-none">
+            <button
+              type="button"
+              onClick={handleClearGroupSelection}
+              className="dark:border-stone-850 rounded-full border border-stone-200 bg-white px-5 py-3 font-bold text-stone-600 transition-all hover:bg-stone-50 active:scale-95 dark:bg-zinc-900 dark:text-stone-300"
+            >
+              清空本组
+            </button>
+
+            {canUndo && (
+              <button
+                type="button"
+                onClick={handleUndo}
+                className="dark:border-stone-850 flex items-center gap-1 rounded-full border border-stone-200 bg-white px-4 py-3 font-bold text-stone-600 transition-all hover:bg-stone-50 active:scale-95 dark:bg-zinc-900 dark:text-stone-300"
+              >
+                <UndoIcon className="h-3 w-3" />
+                <span>撤销</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleConfirmAdvancement}
+              disabled={selectedInGroup.length !== targetSelectCount}
+              className={`flex-1 rounded-full px-6 py-3 text-center font-serif text-xs font-extrabold transition-all duration-200 active:scale-98 ${
+                selectedInGroup.length !== targetSelectCount
+                  ? "dark:border-stone-850 cursor-not-allowed border border-stone-200 bg-stone-100 text-stone-300 dark:bg-zinc-950 dark:text-stone-700"
+                  : "cursor-pointer bg-blue-600 text-white shadow-md shadow-blue-600/10 hover:bg-blue-500"
+              }`}
+            >
+              确认晋级
+            </button>
+          </div>
+
+          {/* Helper details */}
+          <div className="dark:border-stone-850 mt-1 flex items-center justify-between border-t border-stone-100 px-1 pt-3 font-serif text-[10px] text-stone-400">
+            <span>双核对决淘汰制锦标赛 · Vae Song Arena</span>
+            <span>
+              按 <b>确认晋级</b> 可演进到下一组
+            </span>
           </div>
         </div>
       )}
@@ -1255,31 +814,30 @@ export function BattleArena({
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-900 font-serif text-base text-white italic">
                 V
               </span>
-              <h2 className="mt-2 text-xl font-bold">许嵩单曲 ELO 争霸赛 · 个人金榜</h2>
+              <h2 className="mt-2 text-xl font-bold">许嵩单曲分组晋级赛 · 个人金榜</h2>
               <p className="mt-0.5 text-[10px] text-stone-500 italic">
                 - 课桌底下的有线耳机与滚烫夏天 -
               </p>
             </div>
 
-            {battleAnalytics && (
-              <div className="dark:bg-zinc-955/20 my-4 rounded-xl border border-dashed border-stone-300 bg-stone-100/30 p-3.5 text-xs leading-relaxed text-stone-600 dark:border-stone-800 dark:text-stone-400">
-                <h4 className="flex items-center gap-1 font-bold text-stone-900 dark:text-stone-200">
-                  <SparklesIcon className="h-3.5 w-3.5 text-amber-500" />
-                  水墨战况诊断报告
-                </h4>
-                <p className="mt-1">
-                  <b>【第一挚爱】</b> 经过多轮攻防，您无懈可击的挚爱至尊为{" "}
-                  <b>《{battleAnalytics.absoluteKingTitle}》</b>。
-                </p>
-                <p className="mt-1">
-                  <b>【终极宿敌】</b> 您的最大决策纠结线为 <b>《{battleAnalytics.nemesisTitle}》</b>
-                  （在对决中拉锯了 {battleAnalytics.nemesisCount} 次）。
-                </p>
-              </div>
-            )}
+            <div className="dark:bg-zinc-955/20 my-4 rounded-xl border border-dashed border-stone-300 bg-stone-100/30 p-3.5 text-xs leading-relaxed text-stone-600 dark:border-stone-800 dark:text-stone-400">
+              <h4 className="flex items-center gap-1 font-bold text-stone-900 dark:text-stone-200">
+                <SparklesIcon className="h-3.5 w-3.5 text-amber-500" />
+                水墨金榜册封报告
+              </h4>
+              <p className="mt-1">
+                <b>【第一挚爱】</b> 经过多轮残酷的小组突围、半决赛及终极巅峰对决，您册封的无尚至尊为{" "}
+                <b>《{sortedSessionSongs[0]?.title}》</b>。
+              </p>
+              <p className="mt-1">
+                <b>【天梯封赏】</b>{" "}
+                我们已根据各首曲目在各轮淘汰赛中坚持的深度，为您自动精密编译出了完整的 ELO
+                梯级金榜，点击下方卡片可留下您专属的回忆评语。
+              </p>
+            </div>
 
             <div className="divide-stone-150 mt-4 flex flex-col gap-4 divide-y dark:divide-stone-800">
-              {sortedSessionSongs.map((song, idx) => {
+              {sortedSessionSongs.slice(0, 8).map((song, idx) => {
                 const isTop = idx < 3;
                 const val = customComments[song.id] ?? song.comment;
                 return (
@@ -1300,9 +858,7 @@ export function BattleArena({
                             {song.album}
                           </b>
                         </span>
-                        <span className="font-mono text-[10px] text-stone-400">
-                          ELO {song.elo ?? 1200}
-                        </span>
+                        <span className="font-mono text-[10px] text-stone-400">R{song.year}</span>
                       </div>
                       <div className="group relative">
                         {editingCommentId === song.id ? (
