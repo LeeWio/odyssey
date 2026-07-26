@@ -1,3 +1,10 @@
+## [1.25.2](https://github.com/LeeWio/odyssey/compare/v1.25.1...v1.25.2) (2026-07-26)
+
+
+### Bug Fixes
+
+* **vaesong-battle:** resolve round-shrinking race condition that scrambled rankings 3 onwards ([f40b9a5](https://github.com/LeeWio/odyssey/commit/f40b9a57e2ba8a35f93733a43a8b68a2cb0b0f43))
+
 ## [1.25.1](https://github.com/LeeWio/odyssey/compare/v1.25.0...v1.25.1) (2026-07-26)
 
 
