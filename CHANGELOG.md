@@ -1,3 +1,10 @@
+## [1.24.2](https://github.com/LeeWio/odyssey/compare/v1.24.1...v1.24.2) (2026-07-26)
+
+
+### Bug Fixes
+
+* **catalog:** replace unplayable '三皮罐' with high-nostalgia '七夕' ([f46494e](https://github.com/LeeWio/odyssey/commit/f46494e823464b7a5521d664491a0a5f4ec617e7)), closes [hi#nostalgia](https://github.com/hi/issues/nostalgia)
+
 ## [1.24.1](https://github.com/LeeWio/odyssey/compare/v1.24.0...v1.24.1) (2026-07-26)
 
 
