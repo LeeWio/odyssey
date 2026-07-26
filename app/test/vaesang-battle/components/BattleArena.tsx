@@ -44,6 +44,7 @@ const customChorus: Record<string, number> = {
   "3": 50,
   "4": 66,
   "5": 64,
+  "64": 48,
   "87": 71,
 };
 

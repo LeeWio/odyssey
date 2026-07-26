@@ -581,9 +581,9 @@ export const initialSongs: Song[] = [
   },
   {
     id: "64",
-    title: "乱乱套",
-    album: "早期单曲",
-    year: 2008,
+    title: "河山大好",
+    album: "《苏格拉没有底》",
+    year: 2011,
     rank: null,
     comment: "",
     audioUrl: "/songs/64.mp3",
@@ -1122,8 +1122,8 @@ export const initialSongs: Song[] = [
   {
     id: "124",
     title: "九月清晨",
-    album: "早期单曲",
-    year: 2006,
+    album: "《寻宝游戏》",
+    year: 2018,
     rank: null,
     comment: "",
     audioUrl: "/songs/124.mp3",
