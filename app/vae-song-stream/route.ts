@@ -9,8 +9,13 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Query Bodia Music search API over HTTP to bypass production TLS handshake certificate validation errors
-    const queryUrl = `http://api.xcvts.cn/api/music/bdyy?msg=${encodeURIComponent("许嵩 " + title)}&n=1&type=json`;
+    // 1. Smart Resolver Override: Remap '浅唱' to '浅唱 寒星' to bypass wrong Kuwo database mappings for Vae's classic song
+    let queryTitle = title;
+    if (title === "浅唱") {
+      queryTitle = "浅唱 寒星";
+    }
+
+    const queryUrl = `http://api.xcvts.cn/api/music/bdyy?msg=${encodeURIComponent("许嵩 " + queryTitle)}&n=1&type=json`;
     const res = await fetch(queryUrl, {
       headers: {
         "User-Agent":
