@@ -1,3 +1,10 @@
+## [1.24.7](https://github.com/LeeWio/odyssey/compare/v1.24.6...v1.24.7) (2026-07-26)
+
+
+### Bug Fixes
+
+* **audio:** handle browser NotAllowedError autoplay blocks with warnings and shorten delays to 10ms ([2f3e4f3](https://github.com/LeeWio/odyssey/commit/2f3e4f32ff885e60c0362855b035bd294c0a7cc8))
+
 ## [1.24.6](https://github.com/LeeWio/odyssey/compare/v1.24.5...v1.24.6) (2026-07-26)
 
 
