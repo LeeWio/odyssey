@@ -1,3 +1,10 @@
+## [1.24.4](https://github.com/LeeWio/odyssey/compare/v1.24.3...v1.24.4) (2026-07-26)
+
+
+### Bug Fixes
+
+* **catalog:** correct album year of 九月清晨 and replace duplicate 乱乱套 with 河山大好 ([4466174](https://github.com/LeeWio/odyssey/commit/4466174cb58b7421fdd841a4a077b95c268f9a39))
+
 ## [1.24.3](https://github.com/LeeWio/odyssey/compare/v1.24.2...v1.24.3) (2026-07-26)
 
 
