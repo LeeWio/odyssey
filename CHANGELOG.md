@@ -1,3 +1,10 @@
+# [1.24.0](https://github.com/LeeWio/odyssey/compare/v1.23.1...v1.24.0) (2026-07-26)
+
+
+### Features
+
+* **vaesong-battle:** implement seamless active tournament auto-save and hot-resume ([7c32a79](https://github.com/LeeWio/odyssey/commit/7c32a79a0a38a8a800d77559d240d3653f28a6ee))
+
 ## [1.23.1](https://github.com/LeeWio/odyssey/compare/v1.23.0...v1.23.1) (2026-07-26)
 
 
