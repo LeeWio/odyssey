@@ -319,7 +319,7 @@ export function BattleArena({
           getSongChorus(firstSong)
         );
         setPlayingId(firstSong.id);
-      }, 300);
+      }, 10);
     }
   };
 
@@ -403,7 +403,7 @@ export function BattleArena({
             getSongChorus(nextGroupFirstSong)
           );
           setPlayingId(nextGroupFirstSong.id);
-        }, 150);
+        }, 10);
       }
     } else {
       // Current round completed! Transition to next round
@@ -438,7 +438,7 @@ export function BattleArena({
               getSongChorus(nextRoundFirstSong)
             );
             setPlayingId(nextRoundFirstSong.id);
-          }, 150);
+          }, 10);
         }
       }
     }

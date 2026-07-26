@@ -72,7 +72,13 @@ class VaeAudioSynth {
         }
 
         audio.play().catch((err) => {
-          console.error(`[Vae Player] Failed to play real audio: ${err.message}. Staying quiet.`);
+          if (err.name === "NotAllowedError") {
+            console.warn(
+              `[Vae Player] Autoplay was blocked by browser gesture policy. Staying quiet until user interacts.`
+            );
+          } else {
+            console.error(`[Vae Player] Failed to play real audio: ${err.message}. Staying quiet.`);
+          }
           this.stop(); // Stop and stay perfectly quiet on playback error
         });
       } catch (e) {
