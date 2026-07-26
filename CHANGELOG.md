@@ -1,3 +1,10 @@
+## [1.24.3](https://github.com/LeeWio/odyssey/compare/v1.24.2...v1.24.3) (2026-07-26)
+
+
+### Bug Fixes
+
+* **catalog:** correct misspelled song title '九月雨' to '九月清晨' on ID 124 ([7859e08](https://github.com/LeeWio/odyssey/commit/7859e08906a7beb92e30a97986f37951bfefe000))
+
 ## [1.24.2](https://github.com/LeeWio/odyssey/compare/v1.24.1...v1.24.2) (2026-07-26)
 
 
