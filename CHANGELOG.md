@@ -1,3 +1,10 @@
+# [1.25.0](https://github.com/LeeWio/odyssey/compare/v1.24.8...v1.25.0) (2026-07-26)
+
+
+### Features
+
+* **vaesong-battle:** enforce strict power of 2 bracket sizes to guarantee 100% ranking accuracy ([b8dfdfe](https://github.com/LeeWio/odyssey/commit/b8dfdfe1d2a5846e3e4f400f5ce5a6be3b0d3a8a))
+
 ## [1.24.8](https://github.com/LeeWio/odyssey/compare/v1.24.7...v1.24.8) (2026-07-26)
 
 
