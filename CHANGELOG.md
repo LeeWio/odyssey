@@ -1,3 +1,10 @@
+## [1.24.6](https://github.com/LeeWio/odyssey/compare/v1.24.5...v1.24.6) (2026-07-26)
+
+
+### Performance Improvements
+
+* **audio:** remove procedural synthesizer fallback to ensure pure silence on load errors ([451e9d9](https://github.com/LeeWio/odyssey/commit/451e9d90dc8a4697807b845760e263f93e0213bc))
+
 ## [1.24.5](https://github.com/LeeWio/odyssey/compare/v1.24.4...v1.24.5) (2026-07-26)
 
 
