@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/LeeWio/odyssey/compare/v1.19.0...v1.20.0) (2026-07-26)
+
+
+### Features
+
+* **vaesong-battle:** implement continuous smart climax autoplay for new arrivals ([b40d743](https://github.com/LeeWio/odyssey/commit/b40d7436df3b80595d6496abacde4bd30544c9f5))
+
 # [1.19.0](https://github.com/LeeWio/odyssey/compare/v1.18.1...v1.19.0) (2026-07-25)
 
 
