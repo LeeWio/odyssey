@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/LeeWio/odyssey/compare/v1.20.0...v1.21.0) (2026-07-26)
+
+
+### Features
+
+* **vaesong-battle:** implement group-based elimination tournament with instant chorus autoplay on tap ([8d3e6d0](https://github.com/LeeWio/odyssey/commit/8d3e6d094cee8db611126132f2771a7c76536d4f)), closes [#eff6ff](https://github.com/LeeWio/odyssey/issues/eff6ff)
+
 # [1.20.0](https://github.com/LeeWio/odyssey/compare/v1.19.0...v1.20.0) (2026-07-26)
 
 
