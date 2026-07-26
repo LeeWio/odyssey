@@ -256,6 +256,9 @@ class VaeAudioSynth {
     if (this.audioEl) {
       try {
         this.audioEl.pause();
+        // Bulletproof physical stream-abort: force browser to immediately kill pending network download buffer and free audio hardware cache!
+        this.audioEl.src = "";
+        this.audioEl.load();
         this.audioEl = null;
       } catch (e) {
         console.error("Failed to pause audio element", e);
