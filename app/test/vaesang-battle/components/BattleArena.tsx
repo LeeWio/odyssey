@@ -413,6 +413,7 @@ export function BattleArena({
         // Championship completed! We have our winner!
         setActiveSongs(advancedPool);
         setEliminatedSongs(nextEliminated);
+        localStorage.removeItem("vaesong_tournament_active_state"); // Clear active tournament save on championship complete!
         setGameState("completed");
       } else {
         // Move to next round
@@ -467,6 +468,7 @@ export function BattleArena({
     setRankedOrder(finalOrderedIds);
     Object.entries(customComments).forEach(([id, text]) => updateComment(id, text));
     setShowSyncedToast(true);
+    localStorage.removeItem("vaesong_tournament_active_state"); // Clear active tournament save on complete sync!
     setTimeout(() => {
       setShowSyncedToast(false);
       setGameState("config");
@@ -570,8 +572,6 @@ export function BattleArena({
         selectedSongIds,
       };
       localStorage.setItem("vaesong_tournament_active_state", JSON.stringify(stateToSave));
-    } else {
-      localStorage.removeItem("vaesong_tournament_active_state");
     }
   }, [
     gameState,
@@ -897,8 +897,22 @@ export function BattleArena({
           <div className="mt-1 flex items-center justify-between gap-3 font-serif text-xs select-none">
             <button
               type="button"
+              onClick={() => {
+                if (confirm("确定重置对决并返回首页？这将清除当前所有对决进度。")) {
+                  synth.stop();
+                  localStorage.removeItem("vaesong_tournament_active_state");
+                  setGameState("config");
+                }
+              }}
+              className="dark:border-stone-850 rounded-full border border-stone-200 bg-white px-4 py-3 font-bold text-red-500 transition-all hover:bg-red-50/10 active:scale-95 dark:bg-zinc-900 dark:text-red-400 dark:hover:bg-red-950/20"
+            >
+              重置
+            </button>
+
+            <button
+              type="button"
               onClick={handleClearGroupSelection}
-              className="dark:border-stone-850 rounded-full border border-stone-200 bg-white px-5 py-3 font-bold text-stone-600 transition-all hover:bg-stone-50 active:scale-95 dark:bg-zinc-900 dark:text-stone-300"
+              className="dark:border-stone-850 rounded-full border border-stone-200 bg-white px-4 py-3 font-bold text-stone-600 transition-all hover:bg-stone-50 active:scale-95 dark:bg-zinc-900 dark:text-stone-300"
             >
               清空本组
             </button>
@@ -1136,6 +1150,7 @@ export function BattleArena({
               type="button"
               onClick={() => {
                 resetElo();
+                localStorage.removeItem("vaesong_tournament_active_state"); // Clear active tournament save on play again!
                 setGameState("config");
               }}
               className="dark:bg-zinc-955 flex flex-1 items-center justify-center gap-1.5 rounded-full border bg-white py-3 text-xs font-semibold text-stone-700 dark:border-stone-800 dark:text-stone-300"
