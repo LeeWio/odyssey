@@ -98,6 +98,9 @@ export function BattleArena({
   const [editingCommentId, setEditingSongCommentId] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [showSyncedToast, setShowSyncedToast] = useState(false);
+  const [shareName, setShareName] = useState("");
+  const [isShared, setIsShared] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
   const [posterTheme, setPosterTheme] = useState<PosterTheme>("parchment");
 
   // ─── TIER 2: CHRONOLOGICAL DERIVED STATES (useMemos) ───
@@ -511,6 +514,45 @@ export function BattleArena({
     }
   };
 
+  const handleShareGoldenList = async () => {
+    if (isShared) return;
+    setShareLoading(true);
+    try {
+      const championSong = sortedSessionSongs[0];
+      const championTitle = championSong ? championSong.title : "暂无";
+      const top5Titles = sortedSessionSongs.slice(0, 5).map((s) => s.title);
+      const championComment = championSong
+        ? (customComments[championSong.id] ?? championSong.comment)
+        : "";
+
+      const response = await fetch("/vae-song-stream/shared", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: shareName || "匿名的嵩迷",
+          champion: championTitle,
+          topSongs: top5Titles,
+          comment: championComment,
+        }),
+      });
+
+      if (response.ok) {
+        setIsShared(true);
+        alert(
+          "🎉 恭喜！您的金榜已成功晒出到共享广场！大家现在都能在「大千世界共享广场」看到您的册封报告啦！"
+        );
+      } else {
+        alert("提交失败，请重试");
+      }
+    } catch {
+      alert("提交超时，请检查您的网络连接");
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
   // ─── TIER 4: COMPONENT INTERNAL EFFECTS & DEPS ───
 
   return (
@@ -907,6 +949,49 @@ export function BattleArena({
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Cloud Shared Leaderboard Square Submission Form */}
+          <div className="flex flex-col gap-3.5 rounded-2xl border bg-white p-5 font-serif text-xs shadow-sm dark:border-stone-800 dark:bg-zinc-900">
+            <div>
+              <h4 className="flex items-center gap-1 text-sm font-bold text-stone-900 dark:text-stone-200">
+                🌍 晒出我的金榜到共享广场
+              </h4>
+              <p className="mt-0.5 text-[10px] text-stone-400">
+                将您的金榜殿堂和冠军评语一键上传，在全网歌迷的「大千世界共享广场」亮起您的署名！
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={shareName}
+                onChange={(e) => setShareName(e.target.value)}
+                disabled={isShared}
+                placeholder="✍️ 留下你的大名（默认：匿名的嵩迷）"
+                className="dark:bg-zinc-955 flex-1 rounded-xl border border-stone-200 bg-stone-50/50 p-3 text-xs font-bold outline-none focus:ring-1 focus:ring-stone-400 dark:border-stone-800 dark:text-stone-200"
+              />
+              <button
+                type="button"
+                onClick={handleShareGoldenList}
+                disabled={isShared || shareLoading}
+                className={`shrink-0 rounded-xl px-5 py-3 text-center font-extrabold transition-all ${
+                  isShared
+                    ? "border border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-400"
+                    : shareLoading
+                      ? "border border-stone-200 bg-stone-100 text-stone-400"
+                      : "bg-blue-600 text-white shadow-md shadow-blue-600/10 hover:bg-blue-500 active:scale-98"
+                }`}
+              >
+                {shareLoading ? (
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-stone-400 border-t-stone-800" />
+                ) : isShared ? (
+                  "✓ 已成功晒出"
+                ) : (
+                  "立即晒出"
+                )}
+              </button>
             </div>
           </div>
 
