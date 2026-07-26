@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Song } from "../lib/data";
 import { synth } from "../lib/audio";
@@ -554,6 +554,92 @@ export function BattleArena({
   };
 
   // ─── TIER 4: COMPONENT INTERNAL EFFECTS & DEPS ───
+
+  // 1. Auto-save active tournament state to LocalStorage
+  useEffect(() => {
+    if (gameState === "playing") {
+      const stateToSave = {
+        gameState,
+        activeSongs,
+        eliminatedSongs,
+        currentRoundIndex,
+        currentGroupIndex,
+        selectedInGroup,
+        advancedSongs,
+        tournamentHistory,
+        selectedSongIds,
+      };
+      localStorage.setItem("vaesong_tournament_active_state", JSON.stringify(stateToSave));
+    } else {
+      localStorage.removeItem("vaesong_tournament_active_state");
+    }
+  }, [
+    gameState,
+    activeSongs,
+    eliminatedSongs,
+    currentRoundIndex,
+    currentGroupIndex,
+    selectedInGroup,
+    advancedSongs,
+    tournamentHistory,
+    selectedSongIds,
+  ]);
+
+  // 2. Hot-resume active tournament state on Mount (with self-healing metadata merging)
+  useEffect(() => {
+    const savedStateStr = localStorage.getItem("vaesong_tournament_active_state");
+    if (savedStateStr) {
+      try {
+        const saved = JSON.parse(savedStateStr);
+        if (saved && saved.gameState === "playing") {
+          // Self-heal and restore latest metadata from static songs list (handles album/title typo updates)
+          const restoredActive = saved.activeSongs.map((s: Song) => {
+            const staticSong = songs.find((x) => x.id === s.id);
+            return staticSong ? { ...staticSong, elo: s.elo } : s;
+          });
+
+          const restoredEliminated = saved.eliminatedSongs.map(
+            (e: { song: Song; roundId: string }) => {
+              const staticSong = songs.find((x) => x.id === e.song.id);
+              return {
+                song: staticSong ? { ...staticSong, elo: e.song.elo } : e.song,
+                roundId: e.roundId,
+              };
+            }
+          );
+
+          // Wrap inside setTimeout macro-task to completely decouple from React Mount and satisfy ESLint setstate rule
+          setTimeout(() => {
+            setActiveSongs(restoredActive);
+            setEliminatedSongs(restoredEliminated);
+            setCurrentRoundIndex(saved.currentRoundIndex);
+            setCurrentGroupIndex(saved.currentGroupIndex);
+            setSelectedInGroup(saved.selectedInGroup);
+            setAdvancedSongs(saved.advancedSongs);
+            setTournamentHistory(saved.tournamentHistory);
+            setSelectedSongIds(saved.selectedSongIds || []);
+            setGameState("playing");
+
+            // Seamlessly autoplay the first song of the currently resumed group at its chorus
+            const K = saved.currentRoundIndex === 5 ? 4 : saved.currentRoundIndex === 6 ? 2 : 8;
+            const firstSong = restoredActive[saved.currentGroupIndex * K];
+            if (firstSong) {
+              synth.play(
+                firstSong.id,
+                firstSong.title,
+                `/vae-song-stream?title=${encodeURIComponent(firstSong.title)}`,
+                () => setPlayingId(null),
+                getSongChorus(firstSong)
+              );
+              setPlayingId(firstSong.id);
+            }
+          }, 0);
+        }
+      } catch (err) {
+        console.warn("[Vae Tournament Restore] Failed to parse active tournament state", err);
+      }
+    }
+  }, [songs]);
 
   return (
     <div className="relative flex flex-col gap-6 overflow-hidden">
