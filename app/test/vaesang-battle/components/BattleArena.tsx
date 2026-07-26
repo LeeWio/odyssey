@@ -130,6 +130,8 @@ export function BattleArena({
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubValue, setScrubValue] = useState(0);
   const isScrubbingRef = useRef(false);
+  const prevSongAIdRef = useRef<string | null>(null);
+  const prevSongBIdRef = useRef<string | null>(null);
 
   const [draggedCard, setDraggedCard] = useState<"A" | "B" | null>(null);
   const [draggedOffset, setDraggedOffset] = useState({ x: 0, y: 0 });
@@ -534,6 +536,79 @@ export function BattleArena({
   useEffect(() => {
     isScrubbingRef.current = isScrubbing;
   }, [isScrubbing]);
+
+  // Smart Autoplay New Arrivals on Stage transition
+  useEffect(() => {
+    if (gameState !== "playing" || !currentChallengerId) {
+      prevSongAIdRef.current = null;
+      prevSongBIdRef.current = null;
+      return;
+    }
+
+    const defenderId = sortedList[binaryMid];
+    if (!defenderId) return;
+
+    const prevA = prevSongAIdRef.current;
+    const prevB = prevSongBIdRef.current;
+
+    // First round of the entire tournament
+    if (prevA === null && prevB === null) {
+      // Autoplay Song A (the first challenger!) at its chorus
+      const sA = songs.find((s) => s.id === currentChallengerId);
+      if (sA) {
+        setTimeout(() => {
+          synth.play(
+            sA.id,
+            sA.title,
+            `/vae-song-stream?title=${encodeURIComponent(sA.title)}`,
+            () => setPlayingId(null)
+          );
+          synth.seek(getSongChorus(sA));
+          setPlayingId(sA.id);
+        }, 400);
+      }
+    } else {
+      // Check which song is the "newly arrived" one compared to the previous round
+      const isNewA = currentChallengerId !== prevA;
+      const isNewB = defenderId !== prevB;
+
+      if (isNewA) {
+        // Autoplay the new challenger (Song A) at its chorus
+        const sA = songs.find((s) => s.id === currentChallengerId);
+        if (sA) {
+          setTimeout(() => {
+            synth.play(
+              sA.id,
+              sA.title,
+              `/vae-song-stream?title=${encodeURIComponent(sA.title)}`,
+              () => setPlayingId(null)
+            );
+            synth.seek(getSongChorus(sA));
+            setPlayingId(sA.id);
+          }, 100);
+        }
+      } else if (isNewB) {
+        // Autoplay the new defender (Song B) at its chorus
+        const sB = songs.find((s) => s.id === defenderId);
+        if (sB) {
+          setTimeout(() => {
+            synth.play(
+              sB.id,
+              sB.title,
+              `/vae-song-stream?title=${encodeURIComponent(sB.title)}`,
+              () => setPlayingId(null)
+            );
+            synth.seek(getSongChorus(sB));
+            setPlayingId(sB.id);
+          }, 100);
+        }
+      }
+    }
+
+    // Record the current IDs for the next transition check
+    prevSongAIdRef.current = currentChallengerId;
+    prevSongBIdRef.current = defenderId;
+  }, [gameState, currentChallengerId, binaryMid, sortedList, songs]);
 
   // Audio timer
   useEffect(() => {
