@@ -1,3 +1,10 @@
+# [1.23.0](https://github.com/LeeWio/odyssey/compare/v1.22.1...v1.23.0) (2026-07-26)
+
+
+### Features
+
+* **vaesong-battle:** implement public cloud-shared leaderboard wall and submission form ([a8ddfe0](https://github.com/LeeWio/odyssey/commit/a8ddfe04f0ff0af3ae8d707cd50419a324878ac2)), closes [hi#friction](https://github.com/hi/issues/friction)
+
 ## [1.22.1](https://github.com/LeeWio/odyssey/compare/v1.22.0...v1.22.1) (2026-07-26)
 
 
