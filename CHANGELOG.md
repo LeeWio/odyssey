@@ -1,3 +1,10 @@
+## [1.24.5](https://github.com/LeeWio/odyssey/compare/v1.24.4...v1.24.5) (2026-07-26)
+
+
+### Bug Fixes
+
+* **audio:** remap '浅唱' query to '浅唱 寒星' to resolve wrong cloud catalog mapping ([ecdc593](https://github.com/LeeWio/odyssey/commit/ecdc59346cb7985defd2151e633303459cd3247c))
+
 ## [1.24.4](https://github.com/LeeWio/odyssey/compare/v1.24.3...v1.24.4) (2026-07-26)
 
 
