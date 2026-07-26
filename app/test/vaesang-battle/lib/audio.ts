@@ -52,7 +52,13 @@ class VaeAudioSynth {
     return buffer;
   }
 
-  public play(songId: string, songTitle: string, audioUrl?: string, onStop?: () => void) {
+  public play(
+    songId: string,
+    songTitle: string,
+    audioUrl?: string,
+    onStop?: () => void,
+    startTime?: number
+  ) {
     // If already playing this song, do nothing
     if (this.isPlayingId === songId) return;
 
@@ -69,6 +75,20 @@ class VaeAudioSynth {
         this.audioEl = audio;
         audio.loop = true; // Loop the real music
         audio.volume = 0.8;
+
+        if (startTime && startTime > 0) {
+          audio.addEventListener(
+            "loadedmetadata",
+            () => {
+              try {
+                audio.currentTime = startTime;
+              } catch (err) {
+                console.warn("Failed to seek to startTime inside loadedmetadata event", err);
+              }
+            },
+            { once: true }
+          );
+        }
 
         audio.onended = () => {
           this.stop();

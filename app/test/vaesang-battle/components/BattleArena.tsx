@@ -13,6 +13,8 @@ import {
   DownloadIcon,
   PenLineIcon,
   UndoIcon,
+  PlayIcon,
+  VolumeXIcon,
 } from "lucide-react";
 
 interface BattleArenaProps {
@@ -308,17 +310,16 @@ export function BattleArena({
           firstSong.id,
           firstSong.title,
           `/vae-song-stream?title=${encodeURIComponent(firstSong.title)}`,
-          () => setPlayingId(null)
+          () => setPlayingId(null),
+          getSongChorus(firstSong)
         );
-        synth.seek(getSongChorus(firstSong));
         setPlayingId(firstSong.id);
       }, 300);
     }
   };
 
-  // Click on a song card: Auto toggle check & AUTOPLAY CHORUS instantly!
-  const handleSongCardClick = (song: Song) => {
-    // 1. Toggle Selection
+  // Toggle selection (checks/unchecks) - Separated from play
+  const handleToggleSelect = (song: Song) => {
     const isSelected = selectedInGroup.includes(song.id);
     if (isSelected) {
       setSelectedInGroup((prev) => prev.filter((id) => id !== song.id));
@@ -327,19 +328,22 @@ export function BattleArena({
         setSelectedInGroup((prev) => [...prev, song.id]);
       }
     }
+  };
 
-    // 2. ALWAYS Autoplay Chorus Climax instantly on clicking!
+  // Toggle play (auditions chorus directly!) - Separated from selection
+  const handleTogglePlay = (song: Song) => {
     if (playingId === song.id) {
       synth.stop();
       setPlayingId(null);
     } else {
+      // Pass getSongChorus(song) directly as 5th argument so it starts natively from chorus climax!
       synth.play(
         song.id,
         song.title,
         `/vae-song-stream?title=${encodeURIComponent(song.title)}`,
-        () => setPlayingId(null)
+        () => setPlayingId(null),
+        getSongChorus(song)
       );
-      synth.seek(getSongChorus(song));
       setPlayingId(song.id);
     }
   };
@@ -390,9 +394,9 @@ export function BattleArena({
             nextGroupFirstSong.id,
             nextGroupFirstSong.title,
             `/vae-song-stream?title=${encodeURIComponent(nextGroupFirstSong.title)}`,
-            () => setPlayingId(null)
+            () => setPlayingId(null),
+            getSongChorus(nextGroupFirstSong)
           );
-          synth.seek(getSongChorus(nextGroupFirstSong));
           setPlayingId(nextGroupFirstSong.id);
         }, 150);
       }
@@ -424,9 +428,9 @@ export function BattleArena({
               nextRoundFirstSong.id,
               nextRoundFirstSong.title,
               `/vae-song-stream?title=${encodeURIComponent(nextRoundFirstSong.title)}`,
-              () => setPlayingId(null)
+              () => setPlayingId(null),
+              getSongChorus(nextRoundFirstSong)
             );
-            synth.seek(getSongChorus(nextRoundFirstSong));
             setPlayingId(nextRoundFirstSong.id);
           }, 150);
         }
@@ -686,54 +690,58 @@ export function BattleArena({
               const checked = selectedInGroup.includes(song.id);
               const isPlaying = playingId === song.id;
               return (
-                <button
+                <div
                   key={song.id}
-                  type="button"
-                  onClick={() => handleSongCardClick(song)}
-                  className={`relative flex min-h-[76px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 px-3 py-4 text-center transition-all duration-200 select-none active:scale-97 md:min-h-[88px] ${
+                  onClick={() => handleToggleSelect(song)}
+                  className={`relative flex min-h-[76px] cursor-pointer flex-row items-center justify-between rounded-2xl border-2 px-3 py-3 text-left transition-all duration-200 select-none active:scale-97 md:min-h-[88px] ${
                     checked
                       ? "dark:bg-blue-955/30 border-blue-500 bg-[#eff6ff] text-blue-900 shadow-sm dark:border-blue-400 dark:text-blue-100"
                       : isPlaying
-                        ? "dark:bg-amber-955/10 border-amber-400 bg-amber-50/30 text-stone-900 dark:border-amber-500 dark:text-stone-100"
+                        ? "dark:bg-amber-955/10 border-amber-400 bg-amber-50/10 text-stone-900 dark:border-amber-500 dark:text-stone-100"
                         : "dark:border-stone-850 border-stone-200 bg-white text-stone-700 hover:bg-stone-50/50 dark:bg-zinc-900 dark:text-stone-300"
                   }`}
                 >
-                  <div className="flex w-full flex-col items-center gap-1.5">
-                    {/* Song Title (Fitted & Bold!) */}
-                    <span className="max-w-full truncate px-1 font-serif text-[12.5px] leading-tight font-extrabold md:text-[15px]">
+                  {/* Left: Dedicated play button */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTogglePlay(song);
+                    }}
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all md:h-8 md:w-8 ${
+                      isPlaying
+                        ? "animate-pulse border-amber-600 bg-amber-500 text-white"
+                        : "border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100 dark:border-stone-700 dark:bg-zinc-800 dark:text-stone-300"
+                    }`}
+                  >
+                    {isPlaying ? (
+                      <VolumeXIcon className="h-3.5 w-3.5" />
+                    ) : (
+                      <PlayIcon className="h-3.5 w-3.5 fill-current" />
+                    )}
+                  </button>
+
+                  {/* Center: Song info */}
+                  <div className="flex min-w-0 flex-1 flex-col items-start pl-2">
+                    <span className="max-w-full truncate font-serif text-[12.5px] leading-tight font-extrabold text-stone-900 md:text-[14.5px] dark:text-stone-100">
                       {song.title}
                     </span>
-
-                    {/* Equalizer animation when playing or subtitle */}
-                    {isPlaying ? (
-                      <span className="flex h-2 items-center justify-center gap-0.5">
-                        <span
-                          className="h-full w-[1.5px] animate-bounce rounded-full bg-amber-500"
-                          style={{ animationDelay: "0s" }}
-                        />
-                        <span
-                          className="h-2/3 w-[1.5px] animate-bounce rounded-full bg-amber-500"
-                          style={{ animationDelay: "0.2s" }}
-                        />
-                        <span
-                          className="h-5/6 w-[1.5px] animate-bounce rounded-full bg-amber-500"
-                          style={{ animationDelay: "0.4s" }}
-                        />
-                      </span>
-                    ) : (
-                      <span className="max-w-full truncate font-serif text-[9.5px] leading-none opacity-40">
-                        {song.album} ({song.year})
-                      </span>
-                    )}
+                    <span className="mt-1 max-w-full truncate font-serif text-[9.5px] leading-none opacity-40">
+                      {song.album} ({song.year})
+                    </span>
                   </div>
 
-                  {/* Absolute positioning of Blue Checked Circle badges */}
-                  {checked && (
-                    <span className="absolute top-2.5 right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm md:h-5 md:w-5 dark:bg-blue-500">
-                      <CheckIcon className="h-2.5 w-2.5 stroke-[3] md:h-3 md:w-3" />
-                    </span>
-                  )}
-                </button>
+                  {/* Right: Checkbox indicator */}
+                  <div className="flex shrink-0 items-center justify-center pl-1">
+                    {checked ? (
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm md:h-5 md:w-5 dark:bg-blue-500">
+                        <CheckIcon className="h-2.5 w-2.5 stroke-[3] md:h-3 md:w-3" />
+                      </span>
+                    ) : (
+                      <span className="dark:bg-zinc-955 h-4 w-4 rounded-full border border-stone-200 bg-white md:h-5 md:w-5 dark:border-stone-700" />
+                    )}
+                  </div>
+                </div>
               );
             })}
           </div>
