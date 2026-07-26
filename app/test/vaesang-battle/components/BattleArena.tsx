@@ -67,7 +67,13 @@ export function BattleArena({
     "3",
     "4",
     "5",
+    "6",
     "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
     "16",
     "17",
     "18",
@@ -109,6 +115,10 @@ export function BattleArena({
   const sessionSongs = useMemo(() => {
     return songs.filter((s) => selectedSongIds.includes(s.id));
   }, [songs, selectedSongIds]);
+
+  const isValidPoolSize = useMemo(() => {
+    return [8, 16, 32, 64, 128].includes(selectedSongIds.length);
+  }, [selectedSongIds]);
 
   // Determine starting round and tournament configuration based on total count
   const tournamentConfig = useMemo(() => {
@@ -207,9 +217,26 @@ export function BattleArena({
     () => [
       {
         id: "hits",
-        name: "🔥 至尊热门金曲 (10首)",
-        description: "《有何不可》《素颜》《庐州月》《断桥残雪》《玫瑰花的葬礼》等",
-        filter: () => ["1", "2", "3", "4", "5", "7", "16", "17", "18", "43"],
+        name: "🔥 至尊热门金曲 (16首)",
+        description: "《有何不可》《素颜》《庐州月》《断桥残雪》《玫瑰花的葬礼》《七夕》等",
+        filter: () => [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "16",
+          "17",
+          "18",
+          "43",
+        ],
       },
       {
         id: "early",
@@ -218,12 +245,13 @@ export function BattleArena({
         filter: (all: Song[]) =>
           all
             .filter((s) => s.album === "早期单曲" || s.year <= 2008 || s.id === "18")
+            .slice(0, 32)
             .map((s) => s.id),
       },
       {
         id: "golden",
-        name: "💿 巅峰双神专 (18首)",
-        description: "《自定义》与《寻雾启示》全收录，《如果当时》《多余的解释》等",
+        name: "💿 巅峰双神专 (16首)",
+        description: "《自定义》与《寻雾启示》精品选录，《如果当时》《多余的解释》等",
         filter: (all: Song[]) =>
           all
             .filter(
@@ -233,12 +261,13 @@ export function BattleArena({
                 s.id === "16" ||
                 s.id === "17"
             )
+            .slice(0, 16)
             .map((s) => s.id),
       },
       {
         id: "philosophy",
-        name: "🍂 中期哲思 (47首)",
-        description: "《苏格拉没有底》至《寻宝游戏》，收录先锋作《等到烟火清凉》等",
+        name: "🍂 中期哲思 (32首)",
+        description: "《苏格拉没有底》至《寻宝游戏》，收录先锋作《河山大好》等",
         filter: (all: Song[]) =>
           all
             .filter((s) =>
@@ -250,15 +279,19 @@ export function BattleArena({
                 "《寻宝游戏》",
               ].includes(s.album)
             )
+            .slice(0, 32)
             .map((s) => s.id),
       },
       {
         id: "indie",
-        name: "🌲 呼吸之野与近期 (25首)",
+        name: "🌲 近期大作 (16首)",
         description:
           "《呼吸之野》的冷冽哲思、最新单曲《飞驰于沙场》《昨夜书》《留香》《雨幕》《羡慕》等",
         filter: (all: Song[]) =>
-          all.filter((s) => s.album === "《呼吸之野》" || s.album === "近期单曲").map((s) => s.id),
+          all
+            .filter((s) => s.album === "《呼吸之野》" || s.album === "近期单曲")
+            .slice(0, 16)
+            .map((s) => s.id),
       },
     ],
     []
@@ -280,24 +313,8 @@ export function BattleArena({
     // 1. Gather selected songs
     const pool = songs.filter((s) => selectedSongIds.includes(s.id));
 
-    // 2. Pad to nearest power of 2 bracket
-    let target = 2;
-    if (pool.length > 64) target = 128;
-    else if (pool.length > 32) target = 64;
-    else if (pool.length > 16) target = 32;
-    else if (pool.length > 8) target = 16;
-    else if (pool.length > 4) target = 8;
-    else if (pool.length > 2) target = 4;
-
-    const paddedPool = [...pool];
-    const unselected = songs.filter((s) => !selectedSongIds.includes(s.id));
-
-    while (paddedPool.length < target && unselected.length > 0) {
-      paddedPool.push(unselected.shift()!);
-    }
-
-    // 3. Shuffle pool to mix groups beautifully
-    const shuffledPool = paddedPool.sort(() => Math.random() - 0.5);
+    // 2. Shuffle pool directly (since size is guaranteed to be a perfect power of 2: 8, 16, 32, 64, or 128)
+    const shuffledPool = [...pool].sort(() => Math.random() - 0.5);
 
     setActiveSongs(shuffledPool);
     setEliminatedSongs([]);
@@ -715,10 +732,10 @@ export function BattleArena({
                   </button>
                   <span className="text-stone-300">·</span>
                   <button
-                    onClick={() => setSelectedSongIds(songs.slice(0, 10).map((s) => s.id))}
+                    onClick={() => setSelectedSongIds(songs.slice(0, 16).map((s) => s.id))}
                     className="text-stone-500 hover:text-stone-900"
                   >
-                    精选 10 首
+                    精选 16 首
                   </button>
                 </div>
               </div>
@@ -738,16 +755,57 @@ export function BattleArena({
                   );
                 })}
               </div>
+
+              {/* Dynamic Bracket Size Validation Board */}
+              {isValidPoolSize ? (
+                <div className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2.5 font-serif text-[11px] font-bold text-emerald-600 dark:border-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-400">
+                  <span className="flex h-1.5 w-1.5 shrink-0 animate-ping rounded-full bg-emerald-500" />
+                  <span>
+                    当前已选 {selectedSongIds.length} 首，完美符合晋级淘汰比例，可以开启！
+                  </span>
+                </div>
+              ) : (
+                <div className="dark:bg-red-955/20 mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 font-serif text-[11px] leading-relaxed font-bold text-red-500 dark:border-red-900 dark:text-red-400">
+                  <span className="flex h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-red-500" />
+                  <span>
+                    当前已选 {selectedSongIds.length} 首。赛制实行二分淘汰，请调整至 8、16、32、64
+                    或 128 首（当前还差{" "}
+                    {selectedSongIds.length < 8
+                      ? 8 - selectedSongIds.length
+                      : selectedSongIds.length < 16
+                        ? 16 - selectedSongIds.length
+                        : selectedSongIds.length < 32
+                          ? 32 - selectedSongIds.length
+                          : selectedSongIds.length < 64
+                            ? 64 - selectedSongIds.length
+                            : 128 - selectedSongIds.length}{" "}
+                    首，或手动砍掉多余曲目）。
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="mt-1 flex justify-center border-t border-stone-100 pt-5 dark:border-stone-800">
               <button
                 onClick={handleStartBattle}
-                className="group flex items-center gap-2 rounded-full bg-stone-900 px-6 py-2.5 text-xs font-bold text-white transition-all hover:scale-105 active:scale-95 dark:bg-stone-100 dark:text-stone-900"
+                disabled={!isValidPoolSize}
+                className={`group flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-bold transition-all ${
+                  isValidPoolSize
+                    ? "cursor-pointer bg-stone-900 text-white hover:scale-105 active:scale-95 dark:bg-stone-100 dark:text-stone-900"
+                    : "dark:border-stone-850 cursor-not-allowed border border-stone-200 bg-stone-100 text-stone-400 dark:bg-zinc-950 dark:text-stone-700"
+                }`}
               >
-                <FlameIcon className="h-3.5 w-3.5 animate-pulse text-amber-500" />
-                <span>开启分组淘汰赛 (开始 PK)</span>
-                <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                <FlameIcon
+                  className={`h-3.5 w-3.5 text-amber-500 ${isValidPoolSize ? "animate-pulse" : ""}`}
+                />
+                <span>
+                  {isValidPoolSize
+                    ? "开启分组淘汰赛 (开始 PK)"
+                    : `已选 ${selectedSongIds.length} 首 (请凑满 8/16/32/64/128 首)`}
+                </span>
+                {isValidPoolSize && (
+                  <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                )}
               </button>
             </div>
           </div>
