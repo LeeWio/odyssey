@@ -1,3 +1,10 @@
+## [1.24.1](https://github.com/LeeWio/odyssey/compare/v1.24.0...v1.24.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* **vaesong-battle:** resolve auto-save lifecycle race condition on Mount ([063ef2c](https://github.com/LeeWio/odyssey/commit/063ef2cb30853f0395efb01d3f89c4ba351434ac))
+
 # [1.24.0](https://github.com/LeeWio/odyssey/compare/v1.23.1...v1.24.0) (2026-07-26)
 
 
