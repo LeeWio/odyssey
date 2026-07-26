@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/LeeWio/odyssey/compare/v1.21.0...v1.22.0) (2026-07-26)
+
+
+### Features
+
+* **vaesong-battle:** decouple audition and selection with instant loadedmetadata-seek chorus autoplay ([bec6c40](https://github.com/LeeWio/odyssey/commit/bec6c401bc3afaa930627838cef589ac0d616ce4))
+
 # [1.21.0](https://github.com/LeeWio/odyssey/compare/v1.20.0...v1.21.0) (2026-07-26)
 
 
