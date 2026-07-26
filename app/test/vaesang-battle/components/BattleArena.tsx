@@ -64,7 +64,6 @@ const formatTime = (sec: number) => {
     .padStart(2, "0")}`;
 };
 
-// Nostalgic lyrics mapping for major classics, with a dynamic fallback
 const customLyrics: Record<string, string> = {
   "1": "“ 俗的无畏，雅的轻狂。最喜欢在深夜里，雅俗共赏。 ”",
   "2": "“ 庐州月光，洒在心头，月下的你暂不留。 ”",
@@ -145,7 +144,6 @@ export function BattleArena({
   const [posterTheme, setPosterTheme] = useState<PosterTheme>("parchment");
 
   // ─── TIER 2: CHRONOLOGICAL DERIVED STATES (useMemos) ───
-  // Declared BEFORE any handlers or useEffects so they are TDZ-safe
   const isAudited = playedTimeA >= 3 && playedTimeB >= 3;
 
   const sessionSongs = useMemo(() => {
@@ -583,6 +581,7 @@ export function BattleArena({
     return () => cancelAnimationFrame(f);
   }, [particles]);
 
+  // Disable Motion Drag on Mobile device width to prevent browser gesture collisions
   const cardAStyle = useMemo(
     () =>
       gameState === "playing" && draggedCard === "B" && draggedOffset.y < -30
@@ -736,42 +735,38 @@ export function BattleArena({
 
       {/* PLAYING SCREEN */}
       {gameState === "playing" && (
-        <div className="flex flex-col gap-5">
-          {/* Top Drop Target */}
+        <div className="flex flex-col gap-4">
+          {/* Desktop Top Drop Target Drag-Zone Indicator (Hidden on Mobile) */}
           <AnimatePresence>
             {draggedCard && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className={`flex w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed py-4 font-serif transition-colors ${!isAudited ? "animate-pulse border-stone-200 bg-stone-100/40 text-stone-400 dark:border-stone-800" : draggedOffset.y < -110 ? "dark:bg-amber-955/20 border-amber-500 bg-amber-50 text-amber-900 dark:text-amber-200" : "border-stone-300 bg-white text-stone-500"}`}
+                className="hidden w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-amber-500 bg-amber-50 py-4 font-serif text-amber-900 transition-colors md:flex dark:bg-amber-950/20 dark:text-amber-200"
               >
-                <TrophyIcon
-                  className={`h-4 w-4 ${!isAudited ? "text-stone-300" : "animate-pulse text-amber-500"}`}
-                />
+                <TrophyIcon className="h-4 w-4 animate-pulse text-amber-500" />
                 <span className="text-xs font-bold">
-                  {!isAudited
-                    ? "🎧 试听未满 3s：请先点击下方唱片分别试听"
-                    : draggedOffset.y < -110
-                      ? "松手立即确定：本轮投给此卡片 ✓"
-                      : `向上拖拽《${draggedCard === "A" ? songA.title : songB.title}》投票`}
+                  {draggedOffset.y < -110
+                    ? "松手立即确定：本轮投给此卡片 ✓"
+                    : `向上拖拽《${draggedCard === "A" ? songA.title : songB.title}》进行投票`}
                 </span>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Cards 1v1 Grid */}
-          <div className="relative grid grid-cols-1 items-stretch gap-4 select-none md:grid-cols-11">
+          {/* Cards Split View Grid (Mobile: 2 Columns Side-by-Side! No scrolling!) */}
+          <div className="relative grid grid-cols-2 items-stretch gap-2.5 select-none md:grid-cols-11 md:gap-4">
             {/* Card A */}
             <motion.div
-              drag
+              drag={typeof window !== "undefined" && window.innerWidth >= 768 ? "y" : false}
               dragSnapToOrigin
-              dragConstraints={{ left: -30, right: 100, top: -180, bottom: 100 }}
+              dragConstraints={{ top: -180, bottom: 100 }}
               dragElastic={0.1}
               onDrag={handleDragAUpdate}
               onDragEnd={handleDragAEnd}
               style={cardAStyle}
-              className="relative flex cursor-grab flex-col items-center justify-between rounded-2xl border border-stone-200 bg-white p-5 shadow-sm md:col-span-5 dark:border-stone-800 dark:bg-zinc-900"
+              className="relative flex cursor-grab flex-col items-center justify-between rounded-2xl border border-stone-200 bg-white p-3 shadow-sm md:col-span-5 md:p-5 dark:border-stone-800 dark:bg-zinc-900"
             >
               <div
                 onMouseMove={handleMouseMoveA}
@@ -787,49 +782,49 @@ export function BattleArena({
                   justifyContent: "space-between",
                 }}
               >
-                <div className="w-full text-center">
-                  <span className="inline-block rounded-md bg-stone-900 px-1.5 py-0.5 text-[8px] font-bold text-white dark:bg-stone-100 dark:text-stone-900">
+                <div className="flex min-h-[60px] w-full flex-col items-center justify-center text-center">
+                  <span className="inline-block rounded bg-stone-900 px-1 py-0.5 text-[7.5px] font-bold text-white dark:bg-stone-100 dark:text-stone-900">
                     ⚡ 挑战者
                   </span>
-                  <h3 className="mt-2 truncate font-serif text-lg font-bold text-stone-900 dark:text-stone-100">
+                  <h3 className="mt-1 max-w-full truncate font-serif text-xs font-bold text-stone-900 md:text-lg dark:text-stone-100">
                     {songA.title}
                   </h3>
-                  <p className="font-serif text-[10px] text-stone-400">
+                  <p className="max-w-full truncate font-serif text-[9px] leading-none text-stone-400 md:text-[10px]">
                     {songA.album} · {songA.year}
                   </p>
-                  <p className="mt-2 line-clamp-1 min-h-6 font-serif text-[11px] text-stone-400 italic">
+                  <p className="mt-1.5 line-clamp-1 hidden font-serif text-[11px] text-stone-400 italic md:block">
                     {getSongLyrics(songA)}
                   </p>
                 </div>
 
-                <div className="relative my-6 flex h-28 w-28 items-center justify-center">
+                <div className="relative my-3 flex h-16 w-16 shrink-0 items-center justify-center md:my-6 md:h-28 md:w-28">
                   <div
-                    className={`absolute h-28 w-28 rounded-full bg-stone-900 shadow dark:bg-black ${playingId === songA.id ? "animate-spin" : ""}`}
+                    className={`absolute h-16 w-16 rounded-full bg-stone-900 shadow md:h-28 md:w-28 dark:bg-black ${playingId === songA.id ? "animate-spin" : ""}`}
                     style={{ animationDuration: "8s" }}
                   >
-                    <div className="absolute inset-2 rounded-full border border-stone-800/40" />
-                    <div className="absolute inset-4 rounded-full border border-stone-800/20" />
-                    <div className="absolute inset-6 flex items-center justify-center rounded-full border border-stone-300 bg-stone-100/90 dark:bg-zinc-800">
-                      <div className="h-4 w-4 rounded-full bg-stone-900/15" />
+                    <div className="absolute inset-1.5 rounded-full border border-stone-800/40 md:inset-2" />
+                    <div className="absolute inset-3 rounded-full border border-stone-800/20 md:inset-4" />
+                    <div className="absolute inset-[18px] flex items-center justify-center rounded-full border border-stone-300 bg-stone-100/90 md:inset-6 dark:bg-zinc-800">
+                      <div className="h-2 w-2 rounded-full bg-stone-900/15 md:h-4 md:w-4" />
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={(e) => handleTogglePlay(songA, e)}
-                    className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-stone-50 shadow-md dark:bg-zinc-800"
+                    className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-stone-50 shadow-md md:h-8 md:w-8 dark:bg-zinc-800"
                   >
                     {playingId === songA.id ? (
-                      <VolumeXIcon className="h-4 w-4 animate-pulse text-red-500" />
+                      <VolumeXIcon className="h-3 w-3 animate-pulse text-red-500 md:h-4 md:w-4" />
                     ) : (
-                      <Volume2Icon className="h-4 w-4 text-stone-700 dark:text-stone-200" />
+                      <Volume2Icon className="h-3 w-3 text-stone-700 md:h-4 md:w-4 dark:text-stone-200" />
                     )}
                   </button>
                 </div>
 
                 {playingId === songA.id && playbackProgress.duration > 0 && (
-                  <div className="mb-3 w-full px-2 select-none">
-                    <div className="flex items-center gap-1.5 font-mono text-[9px] text-stone-400">
-                      <span>
+                  <div className="mb-1.5 w-full px-1 select-none md:mb-3">
+                    <div className="flex items-center gap-1 font-mono text-[8px] text-stone-400 md:text-[9px]">
+                      <span className="shrink-0">
                         {formatTime(isScrubbing ? scrubValue : playbackProgress.currentTime)}
                       </span>
                       <input
@@ -856,56 +851,56 @@ export function BattleArena({
                           setIsScrubbing(false);
                         }}
                         onClick={(e) => e.stopPropagation()}
-                        className="h-1 flex-1 cursor-pointer rounded-full bg-stone-100 focus:outline-none dark:bg-stone-800"
+                        className="h-0.5 flex-1 cursor-pointer rounded-full bg-stone-100 focus:outline-none md:h-1 dark:bg-stone-800"
                       />
-                      <span>{formatTime(playbackProgress.duration)}</span>
+                      <span className="shrink-0">{formatTime(playbackProgress.duration)}</span>
                     </div>
-                    <div className="mt-1.5 flex justify-center">
+                    <div className="mt-1 flex justify-center">
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           synth.seek(getSongChorus(songA));
                         }}
-                        className="dark:bg-amber-955/20 flex items-center gap-0.5 rounded-full bg-amber-50 px-2 py-0.5 font-serif text-[9px] font-bold text-amber-600 hover:scale-105 active:scale-95"
+                        className="py-0.2 dark:bg-amber-955/20 flex items-center gap-0.5 rounded-full bg-amber-50 px-1.5 font-serif text-[7.5px] font-bold text-amber-600 hover:scale-105 active:scale-95 md:text-[9px]"
                       >
-                        <FlameIcon className="h-2 w-2" /> 直达副歌 ⚡{" "}
-                        {formatTime(getSongChorus(songA))}
+                        <FlameIcon className="h-2 w-2" />{" "}
+                        <span>副歌 ⚡ {formatTime(getSongChorus(songA))}</span>
                       </button>
                     </div>
                   </div>
                 )}
 
-                <div className="flex flex-col items-center gap-1 font-serif text-[10px]">
+                <div className="flex flex-col items-center gap-0.5 font-serif text-[9px] md:text-[10px]">
                   {playedTimeA >= 3 ? (
                     <span className="flex items-center gap-0.5 font-bold text-emerald-600">
-                      <CheckCircle2Icon className="h-3 w-3" />
+                      <CheckCircle2Icon className="h-2.5 w-2.5" />
                       已解锁
                     </span>
                   ) : (
-                    <span className="text-stone-400">
-                      {playingId === songA.id ? `试听中 ${playedTimeA}/3s` : "未试听 (需3秒)"}
+                    <span className="truncate text-stone-400">
+                      {playingId === songA.id ? `试听 ${playedTimeA}/3s` : "未试听"}
                     </span>
                   )}
                 </div>
               </div>
             </motion.div>
 
-            {/* VS Divider */}
-            <div className="flex min-h-[40px] flex-col items-center justify-center py-1 font-serif font-bold text-stone-300 italic md:col-span-1">
+            {/* VS Divider (Hidden on Mobile) */}
+            <div className="hidden min-h-[40px] flex-col items-center justify-center py-1 font-serif font-bold text-stone-300 italic md:col-span-1 md:flex">
               VS
             </div>
 
             {/* Card B */}
             <motion.div
-              drag
+              drag={typeof window !== "undefined" && window.innerWidth >= 768 ? "y" : false}
               dragSnapToOrigin
-              dragConstraints={{ left: -100, right: 30, top: -180, bottom: 100 }}
+              dragConstraints={{ top: -180, bottom: 100 }}
               dragElastic={0.1}
               onDrag={handleDragBUpdate}
               onDragEnd={handleDragBEnd}
               style={cardBStyle}
-              className="relative flex cursor-grab flex-col items-center justify-between rounded-2xl border border-stone-200 bg-white p-5 shadow-sm md:col-span-5 dark:border-stone-800 dark:bg-zinc-900"
+              className="relative flex cursor-grab flex-col items-center justify-between rounded-2xl border border-stone-200 bg-white p-3 shadow-sm md:col-span-5 md:p-5 dark:border-stone-800 dark:bg-zinc-900"
             >
               <div
                 onMouseMove={handleMouseMoveB}
@@ -921,49 +916,49 @@ export function BattleArena({
                   justifyContent: "space-between",
                 }}
               >
-                <div className="w-full text-center">
-                  <span className="inline-block rounded-md bg-amber-100 px-1.5 py-0.5 text-[8px] font-bold text-amber-800">
-                    🛡️ 守门员 第 {binaryMid + 1} 名
+                <div className="flex min-h-[60px] w-full flex-col items-center justify-center text-center">
+                  <span className="text-amber-850 dark:bg-amber-955/20 inline-block rounded bg-amber-100 px-1 py-0.5 text-[7.5px] font-bold dark:text-amber-300">
+                    🛡️ 擂主 第 {binaryMid + 1} 名
                   </span>
-                  <h3 className="mt-2 truncate font-serif text-lg font-bold text-stone-900 dark:text-stone-100">
+                  <h3 className="mt-1 max-w-full truncate font-serif text-xs font-bold text-stone-900 md:text-lg dark:text-stone-100">
                     {songB.title}
                   </h3>
-                  <p className="font-serif text-[10px] text-stone-400">
+                  <p className="max-w-full truncate font-serif text-[9px] leading-none text-stone-400 md:text-[10px]">
                     {songB.album} · {songB.year}
                   </p>
-                  <p className="mt-2 line-clamp-1 min-h-6 font-serif text-[11px] text-stone-400 italic">
+                  <p className="mt-1.5 line-clamp-1 hidden font-serif text-[11px] text-stone-400 italic md:block">
                     {getSongLyrics(songB)}
                   </p>
                 </div>
 
-                <div className="relative my-6 flex h-28 w-28 items-center justify-center">
+                <div className="relative my-3 flex h-16 w-16 shrink-0 items-center justify-center md:my-6 md:h-28 md:w-28">
                   <div
-                    className={`absolute h-28 w-28 rounded-full bg-stone-900 shadow dark:bg-black ${playingId === songB.id ? "animate-spin" : ""}`}
+                    className={`absolute h-16 w-16 rounded-full bg-stone-900 shadow md:h-28 md:w-28 dark:bg-black ${playingId === songB.id ? "animate-spin" : ""}`}
                     style={{ animationDuration: "8s" }}
                   >
-                    <div className="absolute inset-2 rounded-full border border-stone-800/40" />
-                    <div className="absolute inset-4 rounded-full border border-stone-800/20" />
-                    <div className="absolute inset-6 flex items-center justify-center rounded-full border border-stone-300 bg-stone-100/90 dark:bg-zinc-800">
-                      <div className="h-6 w-6 rounded-full border border-stone-400/40 bg-stone-900/10 dark:bg-stone-50/10" />
+                    <div className="absolute inset-1.5 rounded-full border border-stone-800/40 md:inset-2" />
+                    <div className="absolute inset-3 rounded-full border border-stone-800/20 md:inset-4" />
+                    <div className="absolute inset-[18px] flex items-center justify-center rounded-full border border-stone-300 bg-stone-100/90 md:inset-6 dark:bg-zinc-800">
+                      <div className="h-2 w-2 rounded-full bg-stone-900/15 md:h-4 md:w-4" />
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={(e) => handleTogglePlay(songB, e)}
-                    className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-stone-50 shadow-md dark:bg-zinc-800"
+                    className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-stone-50 shadow-md md:h-8 md:w-8 dark:bg-zinc-800"
                   >
                     {playingId === songB.id ? (
-                      <VolumeXIcon className="h-4 w-4 animate-pulse text-red-500" />
+                      <VolumeXIcon className="h-3 w-3 animate-pulse text-red-500 md:h-4 md:w-4" />
                     ) : (
-                      <Volume2Icon className="h-4 w-4 text-stone-700 dark:text-stone-200" />
+                      <Volume2Icon className="h-3 w-3 text-stone-700 md:h-4 md:w-4 dark:text-stone-200" />
                     )}
                   </button>
                 </div>
 
                 {playingId === songB.id && playbackProgress.duration > 0 && (
-                  <div className="mb-3 w-full px-2 select-none">
-                    <div className="flex items-center gap-1.5 font-mono text-[9px] text-stone-400">
-                      <span>
+                  <div className="mb-1.5 w-full px-1 select-none md:mb-3">
+                    <div className="flex items-center gap-1 font-mono text-[8px] text-stone-400 md:text-[9px]">
+                      <span className="shrink-0">
                         {formatTime(isScrubbing ? scrubValue : playbackProgress.currentTime)}
                       </span>
                       <input
@@ -990,35 +985,35 @@ export function BattleArena({
                           setIsScrubbing(false);
                         }}
                         onClick={(e) => e.stopPropagation()}
-                        className="h-1 flex-1 cursor-pointer rounded-full bg-stone-100 focus:outline-none dark:bg-stone-800"
+                        className="h-0.5 flex-1 cursor-pointer rounded-full bg-stone-100 focus:outline-none md:h-1 dark:bg-stone-800"
                       />
-                      <span>{formatTime(playbackProgress.duration)}</span>
+                      <span className="shrink-0">{formatTime(playbackProgress.duration)}</span>
                     </div>
-                    <div className="mt-1.5 flex justify-center">
+                    <div className="mt-1 flex justify-center">
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           synth.seek(getSongChorus(songB));
                         }}
-                        className="dark:bg-amber-955/20 flex items-center gap-0.5 rounded-full bg-amber-50 px-2.5 py-0.5 font-serif text-[9px] font-bold text-amber-600 hover:scale-105 active:scale-95"
+                        className="py-0.2 dark:bg-amber-955/20 flex items-center gap-0.5 rounded-full bg-amber-50 px-1.5 font-serif text-[7.5px] font-bold text-amber-600 hover:scale-105 active:scale-95 md:text-[9px]"
                       >
-                        <FlameIcon className="h-2 w-2" /> 直达副歌 ⚡{" "}
-                        {formatTime(getSongChorus(songB))}
+                        <FlameIcon className="h-2 w-2" />{" "}
+                        <span>副歌 ⚡ {formatTime(getSongChorus(songB))}</span>
                       </button>
                     </div>
                   </div>
                 )}
 
-                <div className="flex flex-col items-center gap-1 font-serif text-[10px]">
+                <div className="flex flex-col items-center gap-0.5 font-serif text-[9px] md:text-[10px]">
                   {playedTimeB >= 3 ? (
                     <span className="flex items-center gap-0.5 font-bold text-emerald-600">
-                      <CheckCircle2Icon className="h-3 w-3" />
+                      <CheckCircle2Icon className="h-2.5 w-2.5" />
                       已解锁
                     </span>
                   ) : (
-                    <span className="text-stone-400">
-                      {playingId === songB.id ? `试听中 ${playedTimeB}/3s` : "未试听 (需3秒)"}
+                    <span className="truncate text-stone-400">
+                      {playingId === songB.id ? `试听 ${playedTimeB}/3s` : "未试听"}
                     </span>
                   )}
                 </div>
@@ -1026,8 +1021,53 @@ export function BattleArena({
             </motion.div>
           </div>
 
-          {/* Bottom Gestures Draw */}
-          <div className="flex flex-col items-center gap-2">
+          {/* ─── TIER 4: ERGONOMIC MOBILE THUMB-ZONE CONTROL PANEL (Mobile-Only pill button bar) ─── */}
+          <div className="mt-2 flex shrink-0 items-center justify-between gap-2 font-serif select-none md:hidden">
+            <button
+              type="button"
+              onClick={() => handleVote("A")}
+              disabled={!isAudited}
+              className={`flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl border px-1.5 py-3 font-serif text-[10.5px] font-bold transition-all active:scale-95 ${
+                !isAudited
+                  ? "dark:border-stone-850 border-stone-200 bg-stone-100 text-stone-300 dark:bg-zinc-950"
+                  : "border-stone-950 bg-stone-900 text-white shadow-md dark:border-stone-200 dark:bg-stone-100 dark:text-stone-950"
+              }`}
+            >
+              <TrophyIcon className="h-3 w-3 text-amber-500" />
+              <span className="max-w-[12ch] truncate">投票 A</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleVote("draw")}
+              disabled={!isAudited}
+              className={`flex flex-col items-center justify-center gap-0.5 rounded-xl border px-4 py-3 font-serif text-[10.5px] font-bold transition-all active:scale-95 ${
+                !isAudited
+                  ? "dark:border-stone-850 border-stone-200 bg-stone-100 text-stone-300 dark:bg-zinc-950"
+                  : "border-stone-200 bg-stone-100 text-stone-700 active:bg-stone-200 dark:border-stone-800 dark:bg-zinc-900 dark:text-stone-300"
+              }`}
+            >
+              <span className="text-xs">📥</span>
+              <span>平手</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleVote("B")}
+              disabled={!isAudited}
+              className={`flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl border px-1.5 py-3 font-serif text-[10.5px] font-bold transition-all active:scale-95 ${
+                !isAudited
+                  ? "dark:border-stone-850 border-stone-200 bg-stone-100 text-stone-300 dark:bg-zinc-950"
+                  : "border-amber-700 bg-amber-600 text-white shadow-md active:bg-amber-500"
+              }`}
+            >
+              <TrophyIcon className="h-3 w-3 text-amber-200" />
+              <span className="max-w-[12ch] truncate">投票 B</span>
+            </button>
+          </div>
+
+          {/* Desktop Gestures Area (Hidden on Mobile to prevent scroll conflicts) */}
+          <div className="hidden flex-col items-center gap-2 md:flex">
             <AnimatePresence>
               {draggedCard && (
                 <motion.div
@@ -1061,7 +1101,7 @@ export function BattleArena({
           </div>
 
           {/* Stats Progress and天梯预览 */}
-          <div className="flex flex-col gap-4 rounded-xl border bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-zinc-900">
+          <div className="mt-1 flex flex-col gap-4 rounded-xl border bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-zinc-900">
             <div className="flex items-center justify-between font-serif text-xs">
               <div>
                 <h4 className="font-bold">智能天梯金榜进度看板</h4>
@@ -1105,8 +1145,22 @@ export function BattleArena({
                 >
                   重置
                 </button>
+
+                {/* Mobile-Only Undo Button */}
+                <div className="flex md:hidden">
+                  {canUndo && (
+                    <button
+                      type="button"
+                      onClick={handleUndo}
+                      className="hover:text-stone-955 flex items-center gap-1 rounded-lg border bg-white px-3 py-1.5 text-xs font-semibold dark:border-stone-800 dark:bg-zinc-950 dark:text-stone-300"
+                    >
+                      <UndoIcon className="h-3 w-3" />
+                      <span>撤销</span>
+                    </button>
+                  )}
+                </div>
               </div>
-              <span className="font-serif text-[10px] text-stone-400">
+              <span className="hidden font-serif text-[10px] text-stone-400 sm:inline">
                 高精度二分插入算法天梯 · 2026
               </span>
             </div>
