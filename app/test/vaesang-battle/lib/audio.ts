@@ -12,8 +12,18 @@ class VaeAudioSynth {
   private feedbackNode: GainNode | null = null;
   private masterGain: GainNode | null = null;
   private audioEl: HTMLAudioElement | null = null;
+  private activeMetadataListener: (() => void) | null = null;
   private noiseNode: AudioBufferSourceNode | null = null;
   private biquadFilter: BiquadFilterNode | null = null;
+
+  private getAudioEl(): HTMLAudioElement {
+    if (!this.audioEl) {
+      this.audioEl = new Audio();
+      this.audioEl.volume = 0.8;
+      this.audioEl.loop = true;
+    }
+    return this.audioEl;
+  }
 
   // A warm, beautiful G major pentatonic scale (frequencies in Hz)
   // G3, A3, B3, D4, E4, G4, A4, B4, D5, E5
@@ -71,24 +81,7 @@ class VaeAudioSynth {
     // If audioUrl is provided, try to play the real track
     if (audioUrl) {
       try {
-        const audio = new Audio(audioUrl);
-        this.audioEl = audio;
-        audio.loop = true; // Loop the real music
-        audio.volume = 0.8;
-
-        if (startTime && startTime > 0) {
-          audio.addEventListener(
-            "loadedmetadata",
-            () => {
-              try {
-                audio.currentTime = startTime;
-              } catch (err) {
-                console.warn("Failed to seek to startTime inside loadedmetadata event", err);
-              }
-            },
-            { once: true }
-          );
-        }
+        const audio = this.getAudioEl();
 
         audio.onended = () => {
           this.stop();
@@ -98,15 +91,33 @@ class VaeAudioSynth {
           console.warn(
             `Failed to load real audio from ${audioUrl}, falling back to procedural synthesizer.`
           );
-          this.audioEl = null;
           this.playSynth(songId, songTitle);
         };
+
+        // Reset and assign source
+        audio.src = audioUrl;
+
+        if (startTime && startTime > 0) {
+          // Remove old listener if any to avoid stacking multiple seeks on same element!
+          if (this.activeMetadataListener) {
+            audio.removeEventListener("loadedmetadata", this.activeMetadataListener);
+          }
+
+          // Register new listener
+          this.activeMetadataListener = () => {
+            try {
+              audio.currentTime = startTime;
+            } catch (err) {
+              console.warn("Failed to seek to startTime inside loadedmetadata event", err);
+            }
+          };
+          audio.addEventListener("loadedmetadata", this.activeMetadataListener, { once: true });
+        }
 
         audio.play().catch((err) => {
           console.warn(
             `Failed to play real audio: ${err.message}, falling back to procedural synthesizer.`
           );
-          this.audioEl = null;
           this.playSynth(songId, songTitle);
         });
       } catch (e) {
@@ -256,10 +267,20 @@ class VaeAudioSynth {
     if (this.audioEl) {
       try {
         this.audioEl.pause();
+
+        // Wipe metadata seek listeners before resetting source to avoid ghost events
+        if (this.activeMetadataListener) {
+          this.audioEl.removeEventListener("loadedmetadata", this.activeMetadataListener);
+          this.activeMetadataListener = null;
+        }
+
         // Bulletproof physical stream-abort: force browser to immediately kill pending network download buffer and free audio hardware cache!
         this.audioEl.src = "";
         this.audioEl.load();
-        this.audioEl = null;
+
+        // Clear references to prevent memory leaks and ghost ended callbacks
+        this.audioEl.onended = null;
+        this.audioEl.onerror = null;
       } catch (e) {
         console.error("Failed to pause audio element", e);
       }
@@ -300,7 +321,11 @@ class VaeAudioSynth {
     this.biquadFilter = null;
 
     if (currentStopCallback) {
-      currentStopCallback();
+      try {
+        currentStopCallback();
+      } catch (e) {
+        console.error("Failed to execute stop callback", e);
+      }
     }
   }
 
