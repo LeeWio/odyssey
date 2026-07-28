@@ -1,3 +1,10 @@
+# [1.29.0](https://github.com/LeeWio/odyssey/compare/v1.28.1...v1.29.0) (2026-07-28)
+
+
+### Features
+
+* **dashboard:** finalize Phase 1 data realization and fix type errors ([5a2f0b6](https://github.com/LeeWio/odyssey/commit/5a2f0b6b77f0b615d185f3ea86fd8a01bb0b3dd0))
+
 ## [1.28.1](https://github.com/LeeWio/odyssey/compare/v1.28.0...v1.28.1) (2026-07-28)
 
 
