@@ -1,3 +1,10 @@
+## [1.28.1](https://github.com/LeeWio/odyssey/compare/v1.28.0...v1.28.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* **links:** correct HeroUI component usage and resolve TypeScript errors for CI stability ([ce14af8](https://github.com/LeeWio/odyssey/commit/ce14af85a916589d627457eccf79ae4cd1630eae))
+
 # [1.28.0](https://github.com/LeeWio/odyssey/compare/v1.27.0...v1.28.0) (2026-07-28)
 
 
