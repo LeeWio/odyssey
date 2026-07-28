@@ -19,7 +19,7 @@ export function PostsPage() {
   const dispatch = useAppDispatch();
 
   // Pagination & Sorting State
-  const [page, setPage] = useState(0);
+  const [page] = useState(0);
   const [size] = useState(10);
   const [sortDescriptor, setSortDescriptor] = useState<DataGridSortDescriptor>({
     column: "createdAt",

@@ -37,7 +37,7 @@ export function FriendLinksPage() {
   const portalContainer = usePortalContainer();
 
   // Pagination & Sorting State
-  const [page, setPage] = useState(0);
+  const [page] = useState(0);
   const [size] = useState(10);
   const [sortDescriptor, setSortDescriptor] = useState<DataGridSortDescriptor>({
     column: "createdAt",
@@ -241,7 +241,7 @@ export function FriendLinksPage() {
             isSelected={item.isPublished}
             size="sm"
             onChange={(val) => {
-              const { id, createdAt, updatedAt, ...rest } = item;
+              const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = item;
               updateLink({
                 id: item.id,
                 body: {
