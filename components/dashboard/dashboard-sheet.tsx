@@ -13,10 +13,12 @@ import { CategoriesPage } from "./views/categories-page";
 import { CommentsPage } from "./views/comments-page";
 import { DashboardPage } from "./views/dashboard-page";
 import { FilesPage } from "./views/files-page";
+import { FriendLinksPage } from "./views/friend-links-page";
 import { HelpPage } from "./views/help-page";
 import { MomentsPage } from "./views/moments-page";
 import { OrdersPage } from "./views/orders-page";
 import { PermissionsPage } from "./views/permissions-page";
+import { PostsPage } from "./views/posts-page";
 import { SettingsPage } from "./views/settings-page";
 import { TagsPage } from "./views/tags-page";
 import { TrackerPage } from "./views/tracker-page";
@@ -43,6 +45,10 @@ export function DashboardSheet() {
     switch (currentPath) {
       case "/":
         return <DashboardPage />;
+      case "/posts":
+        return <PostsPage />;
+      case "/links":
+        return <FriendLinksPage />;
       case "/categories":
         return <CategoriesPage />;
       case "/tags":

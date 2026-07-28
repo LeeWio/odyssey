@@ -38,12 +38,7 @@ interface RichTextFormProps {
 function DropZoneTrigger() {
   const { openFilePicker } = useDropZonePickerContext();
   return (
-    <Button
-      className="mt-4"
-      variant="secondary"
-      size="sm"
-      onPress={openFilePicker}
-    >
+    <Button className="mt-4" variant="secondary" size="sm" onPress={openFilePicker}>
       <Icon icon="gravity-ui:picture" className="mr-2" />
       Choose Image
     </Button>
@@ -81,7 +76,8 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
   );
 
   const handleTagChange = (keys: Key | Key[] | null) => {
-    handleFieldChange("tagIds", keys as number[]);
+    const numericKeys = Array.isArray(keys) ? keys.map(Number) : keys ? [Number(keys)] : [];
+    handleFieldChange("tagIds", numericKeys);
   };
 
   const onRemoveTags = (keys: Set<Key>) => {
@@ -93,17 +89,17 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
   };
 
   return (
-    <div className="flex h-full w-full flex-col gap-10 overflow-y-auto p-6 md:p-10 lg:p-16 scrollbar-none">
+    <div className="flex h-full w-full scrollbar-none flex-col gap-10 overflow-y-auto p-6 md:p-10 lg:p-16">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-12">
         {/* Cover Image Section */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2 px-1">
             <Icon icon="gravity-ui:picture" className="text-accent" />
-            <Typography className="text-sm font-semibold uppercase tracking-wider text-muted">
+            <Typography className="text-muted text-sm font-semibold tracking-wider uppercase">
               Cover Media
             </Typography>
           </div>
-          <DropZone className="group relative aspect-video w-full overflow-hidden rounded-3xl border-2 border-dashed border-border/50 bg-surface-secondary/50 transition-all hover:border-accent/50 hover:bg-surface-secondary">
+          <DropZone className="group border-border/50 bg-surface-secondary/50 hover:border-accent/50 hover:bg-surface-secondary relative aspect-video w-full overflow-hidden rounded-3xl border-2 border-dashed transition-all">
             <DropZone.Area
               onDrop={handleDrop}
               className="flex h-full w-full flex-col items-center justify-center p-0"
@@ -130,14 +126,14 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-4 text-center">
-                  <div className="flex size-20 items-center justify-center rounded-full bg-surface-tertiary text-muted transition-colors group-hover:bg-accent/10 group-hover:text-accent">
+                  <div className="bg-surface-tertiary text-muted group-hover:bg-accent/10 group-hover:text-accent flex size-20 items-center justify-center rounded-full transition-colors">
                     <Icon icon="gravity-ui:picture" className="size-10" />
                   </div>
                   <div>
                     <Typography className="text-lg font-semibold">
                       Add a compelling cover
                     </Typography>
-                    <Typography className="text-sm text-muted">
+                    <Typography className="text-muted text-sm">
                       PNG, JPG, WebP up to 10MB
                     </Typography>
                   </div>
@@ -148,7 +144,7 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
             <DropZone.Input accept="image/*" />
           </DropZone>
           {isUploading && (
-            <div className="flex items-center gap-2 px-2 text-xs text-accent">
+            <div className="text-accent flex items-center gap-2 px-2 text-xs">
               <Spinner size="sm" />
               <span>Uploading cover image...</span>
             </div>
@@ -159,7 +155,7 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-2 px-1">
             <Icon icon="gravity-ui:file-text" className="text-accent" />
-            <Typography className="text-sm font-semibold uppercase tracking-wider text-muted">
+            <Typography className="text-muted text-sm font-semibold tracking-wider uppercase">
               Article Content
             </Typography>
           </div>
@@ -203,11 +199,14 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-2 px-1">
             <Icon icon="gravity-ui:tag" className="text-accent" />
-            <Typography className="text-sm font-semibold uppercase tracking-wider text-muted">
+            <Typography className="text-muted text-sm font-semibold tracking-wider uppercase">
               Categorization
             </Typography>
           </div>
-          <Surface variant="secondary" className="grid grid-cols-1 gap-8 rounded-3xl p-8 shadow-sm md:grid-cols-2">
+          <Surface
+            variant="secondary"
+            className="grid grid-cols-1 gap-8 rounded-3xl p-8 shadow-sm md:grid-cols-2"
+          >
             <Select
               className="w-full"
               variant="secondary"
@@ -297,11 +296,14 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-2 px-1">
             <Icon icon="gravity-ui:circle-check" className="text-accent" />
-            <Typography className="text-sm font-semibold uppercase tracking-wider text-muted">
+            <Typography className="text-muted text-sm font-semibold tracking-wider uppercase">
               Publishing Settings
             </Typography>
           </div>
-          <Surface variant="secondary" className="flex flex-wrap items-center justify-between gap-8 rounded-3xl p-8 shadow-sm">
+          <Surface
+            variant="secondary"
+            className="flex flex-wrap items-center justify-between gap-8 rounded-3xl p-8 shadow-sm"
+          >
             <div className="flex items-center gap-6">
               <Select
                 className="w-48"
@@ -334,10 +336,10 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
               </Select>
             </div>
 
-            <div className="flex items-center gap-4 rounded-2xl bg-surface p-4 ring-1 ring-border/50">
+            <div className="bg-surface ring-border/50 flex items-center gap-4 rounded-2xl p-4 ring-1">
               <div className="flex flex-col gap-0.5">
                 <Typography className="font-semibold">Featured Article</Typography>
-                <Typography className="text-xs text-muted">Pin this post to the top</Typography>
+                <Typography className="text-muted text-xs">Pin this post to the top</Typography>
               </div>
               <Switch
                 isSelected={data.isFeatured || false}

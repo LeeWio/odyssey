@@ -25,6 +25,14 @@ export function RichTextModal() {
   const [showForm, setShowForm] = useState(false);
   const editorRef = useRef<Editor | null>(null);
 
+  // Reset showForm when modal opens or activeId changes
+  useEffect(() => {
+    if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShowForm(false);
+    }
+  }, [isOpen, activeId]);
+
   // Form State
   const [postData, setPostData] = useState<Partial<PostRequest>>({
     status: "DRAFT",
@@ -39,10 +47,9 @@ export function RichTextModal() {
 
   // Fetch existing post data if activeId is a numeric string (existing ID)
   const isExistingPost = activeId && !isNaN(Number(activeId));
-  const { data: existingPost, isLoading: isFetching } = useGetAdminPostByIdQuery(
-    Number(activeId),
-    { skip: !isExistingPost || !isOpen }
-  );
+  const { data: existingPost, isLoading: isFetching } = useGetAdminPostByIdQuery(Number(activeId), {
+    skip: !isExistingPost || !isOpen,
+  });
 
   // Initialize form with existing post data
   useEffect(() => {
@@ -246,9 +253,9 @@ export function RichTextModal() {
             </Modal.Body>
 
             {/* Modal Footer with Actions */}
-            <Modal.Footer className="border-t border-border/50 bg-surface/50 backdrop-blur-md">
+            <Modal.Footer className="border-border/50 bg-surface/50 border-t backdrop-blur-md">
               <div className="flex w-full items-center justify-between">
-                <div className="flex items-center gap-2 text-muted text-sm">
+                <div className="text-muted flex items-center gap-2 text-sm">
                   {isExistingPost ? "Editing existing post" : "Creating new post"}
                 </div>
                 <div className="flex items-center gap-3">

@@ -6,6 +6,8 @@ import {
   Folder,
   Gear,
   House,
+  FileText,
+  Link,
   ListCheck,
   Person,
   Picture,
@@ -25,6 +27,8 @@ export type NavItem = {
 
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/", icon: House, label: "Dashboard" },
+  { href: "/posts", icon: FileText, label: "Posts" },
+  { href: "/links", icon: Link, label: "Friend Links" },
   { href: "/categories", icon: Folder, label: "Categories" },
   { href: "/tags", icon: Tag, label: "Tags" },
   { href: "/comments", icon: Comment, label: "Comments" },
