@@ -1,8 +1,10 @@
 {
   "mcpServers": {
-    "heroui-react": {
-      "command": "npx -y @heroui/react-mcp@latest",
-      "args": []
+    "heroui-pro": {
+      "url": "https://mcp.heroui.pro/mcp",
+      "headers": {
+        "x-heroui-personal-token": "7f578537-7f32-4eba-80a3-a6cd7faf8771"
+      }
     },
     "xcode-tools": {
       "command": "xcrun",

@@ -2,16 +2,20 @@
 
 import { RichTextEditor } from "@heroui-pro/react";
 import type { Editor } from "@tiptap/react";
+import type { JSONContent } from "@tiptap/react";
 import { selectRichTextState } from "@/lib/features";
 import { useAppSelector } from "@/lib/hooks";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
 
 export interface RichTextProps {
-  onReady?: (editor: Editor) => void; // 👈 声明就绪回调 API
+  onReady?: (editor: Editor) => void;
+  content?: JSONContent;
 }
 
-export function RichText({ onReady }: RichTextProps) {
+export function RichText({ onReady, content }: RichTextProps) {
   const { initialValue, isReadOnly } = useAppSelector(selectRichTextState);
+
+  const defaultValue = content || initialValue || undefined;
 
   return (
     <RichTextEditor
@@ -22,7 +26,7 @@ export function RichText({ onReady }: RichTextProps) {
         },
       }}
       isReadOnly={isReadOnly}
-      defaultValue={initialValue || undefined}
+      defaultValue={defaultValue}
       className="flex h-full w-full flex-col overflow-hidden"
     >
       <RichTextEditor.Shell className="flex h-full flex-1 flex-col overflow-hidden border-none bg-transparent">
@@ -37,6 +41,3 @@ export function RichText({ onReady }: RichTextProps) {
     </RichTextEditor>
   );
 }
-
-// Map RichTextModal to RichText for layout.tsx compatibility
-export { RichText as RichTextModal };

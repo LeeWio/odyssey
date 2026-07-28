@@ -13,11 +13,9 @@ import "@/styles/globals.css";
 import { isRTL, Toast } from "@heroui/react";
 // import { Navbar } from "@/components/navbar";
 import { getMessages } from "next-intl/server";
-import { DashboardSheet } from "@/components/dashboard";
-// import { RichTextModal } from "@/components/rich-text";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
-import { SheetPanel } from "@/components/sheet-panel";
+import { GlobalControl } from "@/components/global-control";
 import { siteConfig } from "@/config/site";
 import { getInitialThemeState } from "@/lib/theme";
 import { getThemeInitScript } from "@/lib/theme-init-script";
@@ -88,9 +86,7 @@ export default async function RootLayout({
           <Toast.Provider placement="top" />
           <div className="relative flex min-h-screen flex-col overflow-x-clip">
             <Navbar />
-            <SheetPanel />
-            <DashboardSheet />
-            {/* <RichTextModal /> */}
+            <GlobalControl />
             <main className="flex w-full grow flex-col">{children}</main>
             <Footer />
           </div>
