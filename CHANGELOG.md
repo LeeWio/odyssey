@@ -1,3 +1,10 @@
+# [1.30.0](https://github.com/LeeWio/odyssey/compare/v1.29.0...v1.30.0) (2026-07-28)
+
+
+### Features
+
+* **blog:** finalize premium reader features and AI command suggestions ([73fff31](https://github.com/LeeWio/odyssey/commit/73fff3130785b930fa336aa5b3816e98fb5d53e5))
+
 # [1.29.0](https://github.com/LeeWio/odyssey/compare/v1.28.1...v1.29.0) (2026-07-28)
 
 
