@@ -21,6 +21,14 @@ export function Footer() {
           Running on <span className="text-accent capitalize">{os}</span> • Pipeline Verified ✓
         </span>
       )}
+      <a
+        href="https://beian.miit.gov.cn/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-muted text-xs hover:underline"
+      >
+        鄂ICP备2026038770号-1
+      </a>
     </footer>
   );
 }
