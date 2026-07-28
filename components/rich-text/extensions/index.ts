@@ -5,6 +5,7 @@ export { Heading } from "./heading";
 export { HorizontalRule } from "./horizontal-rule";
 export { Indent } from "./indent";
 export { Link } from "./link";
+export { Image } from "./image";
 export { Column, Columns } from "./multi-column";
 export { Paragraph } from "./paragraph";
 export { Subscript } from "./subscript";

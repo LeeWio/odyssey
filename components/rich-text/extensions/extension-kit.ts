@@ -6,6 +6,7 @@ import {
   HorizontalRule,
   Indent,
   Link,
+  Image,
   Paragraph,
   Subscript,
   Superscript,
@@ -18,6 +19,7 @@ import {
 
 export const ExtensionKit = [
   Link,
+  Image,
   Document,
   Paragraph,
   Text,

@@ -4,18 +4,19 @@ import { Button, cn, Separator, Spinner, Surface, Tooltip, Typography, toast } f
 import { ActionBar, EmptyState, RichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import type { JSONContent } from "@tiptap/react";
-import { motion, useScroll } from "motion/react";
+import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CommentSystem } from "@/components/comment";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
+import { ReadingProgressBar } from "./reading-progress-bar";
 import {
   useGetPublicPostBySlugQuery,
   useLikePostMutation,
   useUnlikePostMutation,
 } from "@/lib/features/post/post-api";
-import { MotionRichTextEditor, MotionSeparator } from "../ui";
+import { MotionRichTextEditor } from "../ui";
 
 interface ReaderViewProps {
   slug: string;
@@ -145,8 +146,6 @@ export function ReaderView({ slug }: ReaderViewProps) {
 
   // RTK Query hook for fetching public blog details
   const { data: postData, isLoading } = useGetPublicPostBySlugQuery(slug);
-
-  const { scrollYProgress } = useScroll();
 
   const article = postData || MOCK_POST_FALLBACK;
 
@@ -333,6 +332,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
 
   return (
     <Surface variant="transparent" className="relative min-h-screen w-full overflow-hidden">
+      <ReadingProgressBar />
       {/* 🌌 Ambient Aesthetic Background Systems (Dynamic Preset-driven Morphing Auras) */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
         {/* Slow Morphing Floating Aura A */}
@@ -391,12 +391,6 @@ export function ReaderView({ slug }: ReaderViewProps) {
           }}
         />
       </div>
-
-      <MotionSeparator
-        className="bg-accent fixed top-0 right-0 left-0 z-50 h-0.5 origin-left"
-        style={{ scaleX: scrollYProgress }}
-        aria-label="Reading progress"
-      />
 
       {/* <div className="mb-10 flex items-center justify-between">
           <Button

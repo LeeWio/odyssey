@@ -25,7 +25,7 @@ import {
   Typography,
 } from "@heroui/react";
 import { AnimatePresence, motion, useScroll } from "motion/react";
-import { type FormEvent, useState, useMemo } from "react";
+import { type FormEvent, useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 
 import {
@@ -78,6 +78,13 @@ export default function PremiumFriendLinksPage() {
   const [applyLink, { isLoading: isApplying }] = useApplyFriendLinkMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSparksLoading, setIsSparksLoading] = useState(true);
+
+  // Simulate RSS Fetching delay
+  useEffect(() => {
+    const timer = setTimeout(() => setIsSparksLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Form State
   const [formData, setFormData] = useState<FriendLinkRequest>({
@@ -178,39 +185,54 @@ export default function PremiumFriendLinksPage() {
 
           <div className="relative -mx-6 overflow-hidden px-6">
             <div className="flex scrollbar-none gap-6 overflow-x-auto pb-8">
-              {MOCK_SPARKS.map((spark, idx) => (
-                <motion.div
-                  key={spark.id}
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1, duration: 0.6 }}
-                  className="w-[300px] shrink-0"
-                >
-                  <Surface
-                    variant="secondary"
-                    className="ring-border/50 hover:ring-accent/30 flex h-full flex-col justify-between rounded-[2rem] p-6 ring-1 transition-all hover:shadow-xl"
-                  >
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-accent size-1.5 rounded-full" />
-                        <Typography className="text-accent text-xs font-bold">
-                          {spark.friendName}
-                        </Typography>
-                      </div>
-                      <Typography className="line-clamp-2 text-base leading-tight font-bold tracking-tight">
-                        {spark.title}
-                      </Typography>
+              {isSparksLoading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="w-[300px] shrink-0">
+                      <Surface
+                        variant="secondary"
+                        className="bg-default-100 flex h-[140px] animate-pulse flex-col justify-between rounded-[2rem] p-6"
+                      >
+                        <div />
+                      </Surface>
                     </div>
-                    <div className="mt-6 flex items-center justify-between">
-                      <Typography className="text-muted/60 text-xs">{spark.date}</Typography>
-                      <Button isIconOnly size="sm" variant="ghost" className="rounded-full">
-                        <ArrowRight className="size-4" />
-                      </Button>
-                    </div>
-                  </Surface>
-                </motion.div>
-              ))}
+                  ))
+                : MOCK_SPARKS.map((spark, idx) => (
+                    <motion.div
+                      key={spark.id}
+                      initial={{ opacity: 0, x: 50 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.1, duration: 0.6 }}
+                      className="w-[300px] shrink-0"
+                    >
+                      <Surface
+                        variant="secondary"
+                        className="ring-border/50 hover:ring-accent/30 flex h-full flex-col justify-between rounded-[2rem] p-6 ring-1 transition-all hover:shadow-xl"
+                      >
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-center gap-2">
+                            <motion.div
+                              animate={{ scale: [1, 1.5, 1], opacity: [0.6, 1, 0.6] }}
+                              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                              className="bg-accent size-1.5 rounded-full shadow-[0_0_8px_rgba(var(--accent-rgb),0.8)]"
+                            />
+                            <Typography className="text-accent text-xs font-bold">
+                              {spark.friendName}
+                            </Typography>
+                          </div>
+                          <Typography className="line-clamp-2 text-base leading-tight font-bold tracking-tight">
+                            {spark.title}
+                          </Typography>
+                        </div>
+                        <div className="mt-6 flex items-center justify-between">
+                          <Typography className="text-muted/60 text-xs">{spark.date}</Typography>
+                          <Button isIconOnly size="sm" variant="ghost" className="rounded-full">
+                            <ArrowRight className="size-4" />
+                          </Button>
+                        </div>
+                      </Surface>
+                    </motion.div>
+                  ))}
             </div>
           </div>
         </section>

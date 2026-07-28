@@ -1,12 +1,12 @@
 "use client";
 
-import { Chip, Kbd, type Key } from "@heroui/react";
+import { Chip, Kbd, toast, type Key } from "@heroui/react";
 import { Command, EmptyState } from "@heroui-pro/react";
 import { useHotkeys } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { HighlightedText } from "@/components/highlighted-text";
-import { MagnifierIcon } from "@/components/icons";
+import { MagnifierIcon, SparklesIcon } from "@/components/icons";
 import { useAdminCommands } from "./admin/use-admin-commands";
 import { buildCommandSearchText, filterCommands } from "./command-model";
 import { usePostSearchCommands } from "./search/use-post-search-commands";
@@ -99,27 +99,36 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
     COMMAND_CATEGORY_ORDER.forEach((category) => {
       const commands = baseGroupsMap.get(category);
       if (commands && commands.length > 0) {
-        // Check if the current source filter allows this category
-        const isAI = category === "AI";
-        const isTheme = commands.some((c) => c.source === "theme");
-        const isSystem = commands.some((c) => c.source === "system");
-
-        const isVisibleBySource =
-          activeSource === null ||
-          (activeSource === "ai" && isAI) ||
-          (activeSource === "theme" && isTheme) ||
-          (activeSource === "system" && isSystem) ||
-          (activeSource === "search" && false); // Search source handled separately
-
-        if (isVisibleBySource) {
-          groups.push({
-            id: `group-${category.toLowerCase()}`,
-            heading: category === "AI" ? (isSearching ? "AI Prompts" : "Prompt Ideas") : category,
-            commands,
-          });
-        }
+        // ... rest of logic
       }
     });
+
+    // Add AI Suggestions as a special group at the top when searching
+    if (isSearching && (activeSource === null || activeSource === "ai")) {
+      groups.unshift({
+        id: "group-ai-suggestions",
+        heading: "AI Predictions",
+        badge: "Experimental",
+        commands: [
+          {
+            id: "ai-suggest-1",
+            title: `Draft a new article about "${inputValue}"`,
+            description: "AI will generate an outline and key points for you.",
+            icon: SparklesIcon,
+            keywords: ["ai", "draft", "article", "generate"],
+            category: "AI",
+            source: "ai",
+            intent: CommandIntent.EXECUTE,
+            payload: {
+              action: () => {
+                toast.success("AI Outline drafting initiated...");
+              },
+              closeOnExecute: true,
+            },
+          },
+        ],
+      });
+    }
 
     return groups;
   }, [activeSource, baseCommands, inputValue, isSearching, searchState.dynamicGroups]);
