@@ -320,7 +320,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
               </EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
-              <Button size="sm" variant="secondary" onPress={() => router.push("/test/blog")}>
+              <Button size="sm" variant="secondary" onPress={() => router.push("/blog")}>
                 Back to Journal
               </Button>
             </EmptyState.Content>

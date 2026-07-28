@@ -609,7 +609,7 @@ function OrbitPanel() {
           <Button
             className="bg-accent text-accent-foreground mt-8 rounded-xl whitespace-nowrap"
             size="lg"
-            onPress={() => router.push("/test/oracle")}
+            onPress={() => router.push("/blog")}
           >
             Open Orbit Oracle
             <Icon icon="lucide:sparkles" className="ml-1.5 size-4" />
@@ -668,7 +668,7 @@ function OrbitPanel() {
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label="Open Soul Soothe"
-                onPress={() => router.push("/test/music")}
+                onPress={() => router.push("/blog")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
               </Button>

@@ -537,7 +537,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                 <ListBox
                   aria-label="Collections"
                   className="flex w-full flex-col gap-1"
-                  onAction={(key) => router.push(`/test/category?slug=${key}`)}
+                  onAction={(key) => router.push(`/blog?slug=${key}`)}
                 >
                   {COLLECTIONS.map((col) => (
                     <ListBox.Item

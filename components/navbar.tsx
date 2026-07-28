@@ -77,7 +77,7 @@ const getNavigationItem = (id: NavigationId | null) => {
         title: "Words that survive the build.",
         description:
           "Field notes on design systems, accessible engineering, and structural decisions that resist contact with the real world.",
-        href: "/test/blog",
+        href: "/blog",
         cta: "Explore the archive",
       };
     case "daily":
@@ -88,7 +88,7 @@ const getNavigationItem = (id: NavigationId | null) => {
         title: "How I spend the hours.",
         description:
           "Four pillars of focus, patience, biomechanics, and compiled logic that shape the rhythm of each day.",
-        href: "/test/moment",
+        href: "/blog",
         cta: "Open day logs",
       };
     case "travelogue":
@@ -99,7 +99,7 @@ const getNavigationItem = (id: NavigationId | null) => {
         title: "Moments framed in flow.",
         description:
           "Brutalist structures, wild coastlines, and silent weather studies collected across slow journeys in Iceland, Europe, and Asia.",
-        href: "/test/file",
+        href: "/links",
         cta: "View Travelogue",
       };
     case "more":
@@ -110,7 +110,7 @@ const getNavigationItem = (id: NavigationId | null) => {
         title: "The rest of the yard.",
         description:
           "A repository of shipping products, open-source utilities, and useful objects curated or built along the journey.",
-        href: "/test/portfolio",
+        href: "/blog",
         cta: "Explore the archive",
       };
     default:
@@ -158,7 +158,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
               <Chip size="sm" color="accent" variant="soft">
                 Featured essay
               </Chip>
-              <Button size="sm" variant="ghost" onPress={() => onNavigate("/test/blog")}>
+              <Button size="sm" variant="ghost" onPress={() => onNavigate("/blog")}>
                 Read story
               </Button>
             </Card.Footer>
@@ -174,7 +174,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
               <ListBox
                 aria-label="Latest Chronicle notes"
                 selectionMode="none"
-                onAction={() => onNavigate("/test/blog")}
+                onAction={() => onNavigate("/blog")}
               >
                 <ListBox.Item id="systems" textValue="Designing for the second draft">
                   <Label>Designing for the second draft</Label>
@@ -249,7 +249,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label="Open Soul Soothe"
-                onPress={() => onNavigate("/test/music")}
+                onPress={() => onNavigate("/blog")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
               </Button>
@@ -308,7 +308,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label="Open Patience & Wait"
-                onPress={() => onNavigate("/test/moment")}
+                onPress={() => onNavigate("/blog")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
               </Button>
@@ -397,7 +397,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label="Open Sweat It Out"
-                onPress={() => onNavigate("/test/moment")}
+                onPress={() => onNavigate("/blog")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
               </Button>
@@ -451,7 +451,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label="Open Code & Build"
-                onPress={() => onNavigate("/test/moment")}
+                onPress={() => onNavigate("/blog")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
               </Button>
@@ -573,7 +573,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 size="sm"
                 variant="ghost"
                 aria-label="Open Odyssey Shipyard"
-                onPress={() => onNavigate("/test/portfolio")}
+                onPress={() => onNavigate("/blog")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>
@@ -602,7 +602,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 size="sm"
                 variant="ghost"
                 aria-label="Open Selected Goods"
-                onPress={() => onNavigate("/test/tag")}
+                onPress={() => onNavigate("/blog")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>
@@ -1067,8 +1067,8 @@ export const Navbar = () => {
                   <Dropdown.Menu
                     aria-label="Account actions"
                     onAction={(key) => {
-                      if (key === "dashboard") router.push("/test/category");
-                      if (key === "profile") router.push("/test/profile");
+                      if (key === "dashboard") router.push("/blog");
+                      if (key === "profile") router.push("/blog");
                       if (key === "logout") handleLogout();
                     }}
                   >
