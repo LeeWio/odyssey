@@ -1,3 +1,10 @@
+# [1.26.0](https://github.com/LeeWio/odyssey/compare/v1.25.2...v1.26.0) (2026-07-28)
+
+
+### Features
+
+* **footer:** add ICP filing number and link to MIIT ([7c6eb2e](https://github.com/LeeWio/odyssey/commit/7c6eb2e849e40bf34f4793e2a17db9c33b990bf2))
+
 ## [1.25.2](https://github.com/LeeWio/odyssey/compare/v1.25.1...v1.25.2) (2026-07-26)
 
 
