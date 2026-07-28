@@ -1,11 +1,32 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { DashboardToolbar } from "../widgets/dashboard-toolbar";
 import { KpiRow } from "../widgets/kpi-row";
-import { MarketPulseCard } from "../widgets/market-pulse-card";
-import { SalesPerformanceCard } from "../widgets/sales-performance-card";
-import { TrafficSourceCard } from "../widgets/traffic-source-card";
-import { UsersTable } from "../widgets/users-table";
+import { Skeleton } from "@heroui/react";
+
+// Dynamically import heavy chart/table widgets with skeletons
+const SalesPerformanceCard = dynamic(
+  () => import("../widgets/sales-performance-card").then((m) => m.SalesPerformanceCard),
+  {
+    loading: () => <Skeleton className="h-[300px] w-full rounded-2xl" />,
+  }
+);
+const TrafficSourceCard = dynamic(
+  () => import("../widgets/traffic-source-card").then((m) => m.TrafficSourceCard),
+  {
+    loading: () => <Skeleton className="h-[300px] w-full rounded-2xl" />,
+  }
+);
+const MarketPulseCard = dynamic(
+  () => import("../widgets/market-pulse-card").then((m) => m.MarketPulseCard),
+  {
+    loading: () => <Skeleton className="h-[200px] w-full rounded-2xl" />,
+  }
+);
+const UsersTable = dynamic(() => import("../widgets/users-table").then((m) => m.UsersTable), {
+  loading: () => <Skeleton className="h-[400px] w-full rounded-2xl" />,
+});
 
 export function DashboardPage() {
   return (

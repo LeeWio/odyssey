@@ -1,0 +1,20 @@
+name: Link Health Monitor
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Run every day at midnight
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Run Health Check
+        run: bun scripts/check-links.mjs
+        env:
+          NEXT_PUBLIC_API_BASE: ${{ secrets.PROD_API_BASE || 'https://odyssey.com' }}

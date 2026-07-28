@@ -1,11 +1,49 @@
 {
   "Navigation": {
-    "search": "搜索文档...",
+    "search": "搜索...",
     "docs": "文档",
     "pro": "专业版",
-    "blog": "博客"
+    "blog": "博客",
+    "links": "友链",
+    "dashboard": "控制台"
   },
   "Index": {
-    "title": "欢迎来到 Odyssey"
+    "title": "不止于行",
+    "subtitle": "精于其道",
+    "philosophy": {
+      "intent": {
+        "title": "沉默的“为什么”",
+        "desc": "无目的的行动即是噪音。每一行代码、每一个像素都必须有存在的理由。",
+        "metric": "意图指数"
+      },
+      "precision": {
+        "title": "1% 的执念",
+        "desc": "卓越存在于细微之处。最后 1% 的打磨是灵魂注入机器的时刻。",
+        "metric": "精炼周期"
+      },
+      "integrity": {
+        "title": "标准高于速度",
+        "desc": "绝不以自豪感换取进度。当无人注视时，你的工作就是你人格的镜子。",
+        "metric": "一致性记录"
+      },
+      "legacy": {
+        "title": "跨越时空的回响",
+        "desc": "创造超越你存在的价值。唯有品质能经受住时间的考验。",
+        "metric": "终身影响力"
+      }
+    },
+    "quote": "优秀不是一种行为，而是一种习惯。它是高尚意图和明智执行的结果。"
+  },
+  "Blog": {
+    "readMore": "阅读更多",
+    "backToArchive": "返回归档",
+    "abstract": "摘要",
+    "publishedOn": "发布于",
+    "minRead": "分钟阅读"
+  },
+  "Links": {
+    "apply": "申请交换",
+    "recentSparks": "朋友圈动态",
+    "identity": "本站信息"
   }
 }

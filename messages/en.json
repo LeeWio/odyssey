@@ -1,9 +1,11 @@
 {
   "Navigation": {
-    "search": "Search docs...",
+    "search": "Search...",
     "docs": "Docs",
     "pro": "Pro",
-    "blog": "Blog"
+    "blog": "Blog",
+    "links": "Links",
+    "dashboard": "Dashboard"
   },
   "Index": {
     "title": "don't just do it",
@@ -31,5 +33,17 @@
       }
     },
     "quote": "Excellence is not an act, but a habit. It is the result of high intention and intelligent execution."
+  },
+  "Blog": {
+    "readMore": "Read More",
+    "backToArchive": "Back to Archive",
+    "abstract": "Abstract",
+    "publishedOn": "Published on",
+    "minRead": "min read"
+  },
+  "Links": {
+    "apply": "Apply for Exchange",
+    "recentSparks": "Recent Sparks",
+    "identity": "Our Identity"
   }
 }

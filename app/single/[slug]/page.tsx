@@ -29,6 +29,7 @@ import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { CommentSystem } from "@/components/comment";
 import { MotionRichTextEditor } from "@/components/ui";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
@@ -269,8 +270,9 @@ export default function SinglePage({ params }: SinglePageProps) {
         {/* Cover image blurred background bleed */}
         {article?.coverImage && (
           <div className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-hidden select-none">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
+              fill
+              priority
               src={article.coverImage}
               alt=""
               className="absolute inset-0 h-full w-full scale-110 object-cover opacity-15 blur-[80px] dark:opacity-10"
