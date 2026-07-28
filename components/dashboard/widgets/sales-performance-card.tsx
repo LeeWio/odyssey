@@ -1,74 +1,82 @@
 "use client";
 
-import { Card, ListBox, Select } from "@heroui/react";
-import { BarChart, NumberValue, TrendChip } from "@heroui-pro/react";
-
-import { SALES_CHART_DATA, SALES_MINI_KPIS } from "../data/sales";
+import { Card, Skeleton } from "@heroui/react";
+import { AreaChart, NumberValue, TrendChip } from "@heroui-pro/react";
+import { useGetAnalyticsOverviewQuery } from "@/lib/features/dashboard/dashboard-api";
+import { useMemo } from "react";
 
 export function SalesPerformanceCard() {
+  const { data, isLoading } = useGetAnalyticsOverviewQuery();
+
+  const chartData = useMemo(() => {
+    return (
+      data?.dailyTrends?.map((d) => ({
+        date: d.date,
+        pv: d.pv,
+        uv: d.uv,
+      })) ?? []
+    );
+  }, [data]);
+
   return (
     <Card className="rounded-2xl">
       <Card.Header className="flex-row items-center justify-between">
-        <Card.Title className="text-base">Sales Performance</Card.Title>
-        <Select className="w-[140px]" defaultValue="last-2-weeks" variant="secondary">
-          <Select.Trigger className="h-auto min-h-0 px-3 py-1.5 text-xs font-medium">
-            <Select.Value />
-            <Select.Indicator className="size-3.5" />
-          </Select.Trigger>
-          <Select.Popover>
-            <ListBox>
-              <ListBox.Item id="last-week" textValue="Last week">
-                Last week
-                <ListBox.ItemIndicator />
-              </ListBox.Item>
-              <ListBox.Item id="last-2-weeks" textValue="Last 2 weeks">
-                Last 2 weeks
-                <ListBox.ItemIndicator />
-              </ListBox.Item>
-              <ListBox.Item id="last-month" textValue="Last month">
-                Last month
-                <ListBox.ItemIndicator />
-              </ListBox.Item>
-              <ListBox.Item id="last-3-months" textValue="Last 3 months">
-                Last 3 months
-                <ListBox.ItemIndicator />
-              </ListBox.Item>
-            </ListBox>
-          </Select.Popover>
-        </Select>
+        <Card.Title className="text-base">Traffic Trends (PV/UV)</Card.Title>
+        <TrendChip
+          className="bg-transparent"
+          trend={(data?.pvGrowthRate ?? 0) >= 0 ? "up" : "down"}
+        >
+          {Math.abs(data?.pvGrowthRate ?? 0).toFixed(1)}%
+        </TrendChip>
       </Card.Header>
-      <Card.Content className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          {SALES_MINI_KPIS.map((kpi) => (
-            <div key={kpi.label} className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <NumberValue
-                  className="text-foreground text-lg font-semibold tabular-nums"
-                  currency={kpi.currency}
-                  maximumFractionDigits={0}
-                  style={kpi.currency ? "currency" : "decimal"}
-                  value={kpi.value}
-                />
-                <TrendChip className="bg-transparent" trend="up">
-                  3.3%
-                </TrendChip>
-              </div>
-              <span className="text-muted text-xs">{kpi.label}</span>
-            </div>
-          ))}
+      <Card.Content className="flex flex-col gap-6">
+        <div className="flex flex-wrap items-center gap-x-10 gap-y-3">
+          <div className="flex flex-col">
+            {isLoading ? (
+              <Skeleton className="h-7 w-20 rounded-md" />
+            ) : (
+              <NumberValue
+                className="text-foreground text-xl font-bold tabular-nums"
+                value={data?.todayPv ?? 0}
+              />
+            )}
+            <span className="text-muted text-xs font-medium">Today PV</span>
+          </div>
+          <div className="flex flex-col">
+            {isLoading ? (
+              <Skeleton className="h-7 w-20 rounded-md" />
+            ) : (
+              <NumberValue
+                className="text-foreground text-xl font-bold tabular-nums"
+                value={data?.todayUv ?? 0}
+              />
+            )}
+            <span className="text-muted text-xs font-medium">Today UV</span>
+          </div>
         </div>
-        <BarChart data={[...SALES_CHART_DATA]} height={180}>
-          <BarChart.Grid vertical={false} />
-          <BarChart.XAxis dataKey="month" tickMargin={8} />
-          <BarChart.YAxis domain={[0, 60]} ticks={[0, 20, 40, 60]} width={30} />
-          <BarChart.Bar
-            barSize={16}
-            dataKey="sales"
-            fill="var(--chart-3)"
-            radius={[24, 24, 24, 24]}
-          />
-          <BarChart.Tooltip content={<BarChart.TooltipContent />} />
-        </BarChart>
+
+        {isLoading ? (
+          <Skeleton className="h-[180px] w-full rounded-2xl" />
+        ) : (
+          <AreaChart data={chartData} height={180}>
+            <AreaChart.Grid vertical={false} />
+            <AreaChart.XAxis dataKey="date" tickMargin={8} />
+            <AreaChart.YAxis width={30} />
+            <AreaChart.Area
+              dataKey="pv"
+              name="Page Views"
+              stroke="var(--color-accent)"
+              fill="var(--color-accent-soft)"
+            />
+            <AreaChart.Area
+              dataKey="uv"
+              name="Unique Visitors"
+              stroke="var(--color-success)"
+              fill="var(--color-success-soft)"
+            />
+            <AreaChart.Tooltip content={<AreaChart.TooltipContent />} />
+          </AreaChart>
+        )}
       </Card.Content>
     </Card>
   );
