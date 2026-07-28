@@ -58,7 +58,7 @@ export function FriendLinksPage() {
   const [createLink, { isLoading: isCreating }] = useCreateFriendLinkMutation();
   const [updateLink, { isLoading: isUpdating }] = useUpdateFriendLinkMutation();
   const [deleteLink, { isLoading: isDeleting }] = useDeleteFriendLinkMutation();
-  const [moderateLink, { isLoading: isModerating }] = useModerateFriendLinkMutation();
+  const [moderateLink] = useModerateFriendLinkMutation();
 
   // Modal States
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -242,6 +242,9 @@ export function FriendLinksPage() {
             size="sm"
             onChange={(val) => {
               const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = item;
+              void _id;
+              void _c;
+              void _u;
               updateLink({
                 id: item.id,
                 body: {
