@@ -1,3 +1,10 @@
+# [1.27.0](https://github.com/LeeWio/odyssey/compare/v1.26.0...v1.27.0) (2026-07-28)
+
+
+### Features
+
+* **blog:** move rich-text modal to global control and implement metadata form ([6792ee1](https://github.com/LeeWio/odyssey/commit/6792ee14f930f30c1570beeaa241fcaa2ff80fff))
+
 # [1.26.0](https://github.com/LeeWio/odyssey/compare/v1.25.2...v1.26.0) (2026-07-28)
 
 
