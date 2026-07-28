@@ -240,7 +240,19 @@ export function FriendLinksPage() {
           <Switch
             isSelected={item.isPublished}
             size="sm"
-            onChange={(val) => updateLink({ id: item.id, body: { ...item, isPublished: val } })}
+            onChange={(val) => {
+              const { id, createdAt, updatedAt, ...rest } = item;
+              updateLink({
+                id: item.id,
+                body: {
+                  ...rest,
+                  avatar: rest.avatar || undefined,
+                  description: rest.description || undefined,
+                  email: rest.email || undefined,
+                  isPublished: val,
+                },
+              });
+            }}
           />
         ),
         header: "Visible",
@@ -333,7 +345,7 @@ export function FriendLinksPage() {
           <h2 className="text-foreground text-base font-semibold">Friend Link Management</h2>
           {data && (
             <Chip size="sm" variant="soft">
-              {data.totalElements}
+              {data.total}
             </Chip>
           )}
         </div>

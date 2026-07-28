@@ -610,28 +610,28 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
           </Card>
         </motion.div>
 
-        {/* Project 3: Symbiosis Echo */}
+        {/* Project 3: Friend Links */}
         <motion.div {...reveal(2)}>
           <Card className="group h-full" variant="default">
             <Card.Header>
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
-                <Icon aria-hidden="true" icon="lucide:message-circle" className="size-5" />
+                <Icon aria-hidden="true" icon="lucide:link" className="size-5" />
               </div>
-              <Card.Title>Symbiosis Echo</Card.Title>
+              <Card.Title>Friend Links</Card.Title>
               <Card.Description>
-                Notes, digital postcards, and feedback gathered from visitors.
+                A curated constellation of creative minds and digital outposts.
               </Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
-              <Chip size="sm" variant="soft">
-                Active
+              <Chip size="sm" variant="soft" color="accent">
+                Community
               </Chip>
               <Button
                 isIconOnly
                 size="sm"
                 variant="ghost"
-                aria-label="Open Symbiosis Echo"
-                onPress={() => onNavigate("/test/comment")}
+                aria-label="Open Friend Links"
+                onPress={() => onNavigate("/links")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>

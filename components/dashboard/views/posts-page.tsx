@@ -113,10 +113,10 @@ export function PostsPage() {
         accessorKey: "status",
         allowsSorting: true,
         cell: (item) => {
-          const variants: Record<string, "soft" | "solid" | "outline"> = {
+          const variants: Record<string, "soft" | "primary" | "secondary" | "tertiary"> = {
             PUBLISHED: "soft",
-            DRAFT: "outline",
-            ARCHIVED: "soft",
+            DRAFT: "secondary",
+            ARCHIVED: "tertiary",
           };
           const colors: Record<string, "success" | "warning" | "default"> = {
             PUBLISHED: "success",
@@ -137,7 +137,7 @@ export function PostsPage() {
         accessorKey: "category",
         allowsSorting: false,
         cell: (item) => (
-          <Chip size="sm" variant="flat">
+          <Chip size="sm" variant="secondary">
             {item.category?.name || "Uncategorized"}
           </Chip>
         ),
@@ -211,7 +211,7 @@ export function PostsPage() {
           <h2 className="text-foreground text-base font-semibold">Post Management</h2>
           {data && (
             <Chip size="sm" variant="soft">
-              {data.totalElements}
+              {data.total}
             </Chip>
           )}
         </div>
