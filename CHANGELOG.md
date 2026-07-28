@@ -1,3 +1,10 @@
+# [1.28.0](https://github.com/LeeWio/odyssey/compare/v1.27.0...v1.28.0) (2026-07-28)
+
+
+### Features
+
+* **friend-link:** implement public links page and admin moderation dashboard ([46dbd2d](https://github.com/LeeWio/odyssey/commit/46dbd2d900f80bb538328954f9902b518fb3fd16))
+
 # [1.27.0](https://github.com/LeeWio/odyssey/compare/v1.26.0...v1.27.0) (2026-07-28)
 
 
