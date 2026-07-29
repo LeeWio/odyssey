@@ -13,6 +13,7 @@ import { usePostSearchCommands } from "./search/use-post-search-commands";
 import { STATIC_COMMANDS } from "./static-commands";
 import { useThemeCommands } from "./theme/use-theme-commands";
 import {
+  COMMAND_CATEGORY_METADATA,
   COMMAND_CATEGORY_ORDER,
   CommandIntent,
   type CommandItem,
@@ -45,6 +46,10 @@ function filterBySource(commands: readonly CommandItem[], source: CommandSource 
 
 function shouldShowDescription(command: CommandItem) {
   return command.id.startsWith("search-");
+}
+
+function isSafeInternalHref(href: string) {
+  return href.startsWith("/") && !href.startsWith("//");
 }
 
 export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
@@ -99,7 +104,11 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
     COMMAND_CATEGORY_ORDER.forEach((category) => {
       const commands = baseGroupsMap.get(category);
       if (commands && commands.length > 0) {
-        // ... rest of logic
+        groups.push({
+          id: `group-${category.toLowerCase()}`,
+          heading: COMMAND_CATEGORY_METADATA[category].label,
+          commands,
+        });
       }
     });
 
@@ -133,6 +142,12 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
     return groups;
   }, [activeSource, baseCommands, inputValue, isSearching, searchState.dynamicGroups]);
 
+  const closePalette = () => {
+    setIsOpen(false);
+    setInputValue("");
+    setActiveSource(null);
+  };
+
   const handleAction = (key: Key) => {
     const allCommands = [...baseCommands, ...searchState.allCommands];
     const command = allCommands.find((item) => item.id === String(key));
@@ -140,29 +155,41 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
     if (!command) return;
 
     if (command.intent === CommandIntent.NAVIGATE) {
-      router.push(command.payload.href);
-      setIsOpen(false);
+      if (command.payload.external) {
+        const url = new URL(command.payload.href, window.location.origin);
+        if (url.protocol === "http:" || url.protocol === "https:") {
+          window.open(url, "_blank", "noopener,noreferrer");
+          closePalette();
+        }
+        return;
+      }
+
+      if (isSafeInternalHref(command.payload.href)) {
+        router.push(command.payload.href);
+        closePalette();
+      }
       return;
     }
 
-    command.payload.action();
+    const actionResult = command.payload.action();
 
     if (command.payload.closeOnExecute) {
-      setIsOpen(false);
+      closePalette();
+    }
+
+    if (actionResult instanceof Promise) {
+      void actionResult.catch(() => undefined);
     }
   };
 
-  useHotkeys(
+  useHotkeys([
     [
-      [
-        "mod+k",
-        () => {
-          setIsOpen(!isOpen);
-        },
-      ],
+      "mod+k",
+      () => {
+        setIsOpen(!isOpen);
+      },
     ],
-    []
-  );
+  ]);
 
   return (
     <Command>

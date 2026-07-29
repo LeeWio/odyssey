@@ -116,7 +116,7 @@ export function RichTextModal() {
 
   return (
     <Modal key={activeId}>
-      <Modal.Backdrop isOpen={isOpen} onOpenChange={handleClose}>
+      <Modal.Backdrop isOpen={true} onOpenChange={handleClose}>
         <Modal.Container size="cover">
           <Modal.Dialog className="relative flex h-full w-full flex-col overflow-hidden">
             {/* Toggle Button */}
@@ -179,119 +179,81 @@ export function RichTextModal() {
                   <Spinner size="lg" />
                 </div>
               ) : (
-                <AnimatePresence mode="wait">
-                  {!showForm ? (
-                    <motion.div
-                      key="editor"
-                      layout
-                      className="h-full w-full"
-                      initial={{
-                        opacity: 0,
-                        x: -40,
-                        scale: 0.98,
-                        filter: "blur(12px)",
+                <div className="flex h-full w-full overflow-hidden">
+                  <motion.div
+                    layout
+                    initial={false}
+                    animate={{ width: showForm ? "70%" : "100%" }}
+                    transition={{ type: "spring", bounce: 0, duration: 0.5 }}
+                    className="h-full min-w-0 flex-shrink-0"
+                  >
+                    <RichText
+                      content={existingPost?.content ? JSON.parse(existingPost.content) : undefined}
+                      onReady={(editor) => {
+                        editorRef.current = editor;
                       }}
-                      animate={{
-                        opacity: 1,
-                        x: 0,
-                        scale: 1,
-                        filter: "blur(0px)",
-                      }}
-                      exit={{
-                        opacity: 0,
-                        x: 40,
-                        scale: 0.98,
-                        filter: "blur(12px)",
-                      }}
-                      transition={{
-                        duration: 0.45,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                    >
-                      <RichText
-                        content={
-                          existingPost?.content ? JSON.parse(existingPost.content) : undefined
-                        }
-                        onReady={(editor) => {
-                          editorRef.current = editor;
-                        }}
-                      />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="settings"
-                      layout
-                      className="h-full w-full"
-                      initial={{
-                        opacity: 0,
-                        x: 40,
-                        scale: 0.98,
-                        filter: "blur(12px)",
-                      }}
-                      animate={{
-                        opacity: 1,
-                        x: 0,
-                        scale: 1,
-                        filter: "blur(0px)",
-                      }}
-                      exit={{
-                        opacity: 0,
-                        x: -40,
-                        scale: 0.98,
-                        filter: "blur(12px)",
-                      }}
-                      transition={{
-                        duration: 0.45,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                    >
-                      <RichTextForm data={postData} onChange={setPostData} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    />
+                  </motion.div>
+
+                  <AnimatePresence initial={false}>
+                    {showForm && (
+                      <motion.div
+                        key="settings"
+                        initial={{ width: 0, opacity: 0, x: 20 }}
+                        animate={{ width: "30%", opacity: 1, x: 0 }}
+                        exit={{ width: 0, opacity: 0, x: 20 }}
+                        transition={{ type: "spring", bounce: 0, duration: 0.5 }}
+                        className="bg-surface/30 flex h-full flex-shrink-0 flex-col overflow-hidden backdrop-blur-sm"
+                      >
+                        <div className="w-full min-w-[320px] flex-1 overflow-y-auto">
+                          <RichTextForm data={postData} onChange={setPostData} />
+                        </div>
+
+                        {/* Form Footer with Actions */}
+                        <div className="min-w-[320px] p-6 pb-8 md:px-10 lg:px-16">
+                          <div className="flex w-full flex-col gap-4">
+                            <div className="text-muted text-sm font-medium">
+                              {isExistingPost ? "Editing existing post" : "Creating new post"}
+                            </div>
+                            <div className="flex w-full items-center gap-3">
+                              <Button variant="secondary" className="flex-1" onPress={handleClose}>
+                                Cancel
+                              </Button>
+                              <Button
+                                variant="secondary"
+                                className="flex-1"
+                                onPress={() => handleSave("DRAFT")}
+                                isPending={isPending}
+                              >
+                                {({ isPending }) => (
+                                  <>
+                                    {isPending && <Spinner color="current" size="sm" />}
+                                    Save Draft
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                variant="primary"
+                                className="bg-accent text-accent-foreground flex-1"
+                                onPress={() => handleSave("PUBLISHED")}
+                                isPending={isPending}
+                              >
+                                {({ isPending }) => (
+                                  <>
+                                    {isPending && <Spinner color="current" size="sm" />}
+                                    {postData.status === "PUBLISHED" ? "Update" : "Publish"}
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               )}
             </Modal.Body>
-
-            {/* Modal Footer with Actions */}
-            <Modal.Footer className="border-border/50 bg-surface/50 border-t backdrop-blur-md">
-              <div className="flex w-full items-center justify-between">
-                <div className="text-muted flex items-center gap-2 text-sm">
-                  {isExistingPost ? "Editing existing post" : "Creating new post"}
-                </div>
-                <div className="flex items-center gap-3">
-                  <Button variant="secondary" size="sm" onPress={handleClose}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onPress={() => handleSave("DRAFT")}
-                    isPending={isPending}
-                  >
-                    {({ isPending }) => (
-                      <>
-                        {isPending && <Spinner color="current" size="sm" />}
-                        Save Draft
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onPress={() => handleSave("PUBLISHED")}
-                    isPending={isPending}
-                    className="bg-accent text-accent-foreground"
-                  >
-                    {({ isPending }) => (
-                      <>
-                        {isPending && <Spinner color="current" size="sm" />}
-                        {postData.status === "PUBLISHED" ? "Update" : "Publish"}
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </Modal.Footer>
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>

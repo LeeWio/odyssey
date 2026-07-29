@@ -3,7 +3,6 @@
 import {
   Autocomplete,
   Button,
-  Description,
   EmptyState,
   Input,
   Label,
@@ -11,7 +10,6 @@ import {
   SearchField,
   Select,
   Spinner,
-  Surface,
   Switch,
   Tag,
   TagGroup,
@@ -152,69 +150,60 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
         </div>
 
         {/* Content Section */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
           <div className="flex items-center gap-2 px-1">
-            <Icon icon="gravity-ui:file-text" className="text-accent" />
-            <Typography className="text-muted text-sm font-semibold tracking-wider uppercase">
+            <Icon icon="gravity-ui:file-text" className="text-muted-foreground" />
+            <Typography className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
               Article Content
             </Typography>
           </div>
-          <Surface variant="secondary" className="flex flex-col gap-8 rounded-3xl p-8 shadow-sm">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              <TextField isRequired className="w-full" variant="secondary">
-                <Label>Title</Label>
-                <Input
-                  placeholder="The art of design..."
-                  value={data.title || ""}
-                  onChange={(e) => handleFieldChange("title", e.target.value)}
-                />
-                <Description>A catchy title for your post</Description>
-              </TextField>
+          <div className="flex flex-col gap-6">
+            <TextField isRequired className="w-full">
+              <Label>Title</Label>
+              <Input
+                placeholder="The art of design..."
+                value={data.title || ""}
+                onChange={(e) => handleFieldChange("title", e.target.value)}
+              />
+            </TextField>
 
-              <TextField isRequired className="w-full" variant="secondary">
-                <Label>Slug</Label>
-                <Input
-                  placeholder="art-of-design"
-                  value={data.slug || ""}
-                  onChange={(e) => handleFieldChange("slug", e.target.value)}
-                />
-                <Description>URL friendly identifier</Description>
-              </TextField>
-            </div>
+            <TextField isRequired className="w-full">
+              <Label>Slug</Label>
+              <Input
+                placeholder="art-of-design"
+                value={data.slug || ""}
+                onChange={(e) => handleFieldChange("slug", e.target.value)}
+              />
+            </TextField>
 
-            <TextField className="w-full" variant="secondary">
+            <TextField className="w-full">
               <Label>Summary</Label>
               <TextArea
                 placeholder="In this article, we explore..."
-                rows={4}
+                rows={3}
                 value={data.summary || ""}
                 onChange={(e) => handleFieldChange("summary", e.target.value)}
               />
-              <Description>A brief overview (max 200 chars)</Description>
             </TextField>
-          </Surface>
+          </div>
         </div>
 
         {/* Categorization Section */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
           <div className="flex items-center gap-2 px-1">
-            <Icon icon="gravity-ui:tag" className="text-accent" />
-            <Typography className="text-muted text-sm font-semibold tracking-wider uppercase">
+            <Icon icon="gravity-ui:tag" className="text-muted-foreground" />
+            <Typography className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
               Categorization
             </Typography>
           </div>
-          <Surface
-            variant="secondary"
-            className="grid grid-cols-1 gap-8 rounded-3xl p-8 shadow-sm md:grid-cols-2"
-          >
+          <div className="flex flex-col gap-6">
             <Select
               className="w-full"
-              variant="secondary"
               placeholder="Select category"
               value={data.categoryId}
               onChange={(key) => handleFieldChange("categoryId", key ? Number(key) : undefined)}
             >
-              <Label>Category</Label>
+              <Label className="text-sm font-medium">Category</Label>
               <Select.Trigger>
                 <Select.Value />
                 <Select.Indicator />
@@ -233,13 +222,12 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
 
             <Autocomplete
               className="w-full"
-              variant="secondary"
               placeholder="Add tags..."
               selectionMode="multiple"
               value={data.tagIds || []}
               onChange={handleTagChange}
             >
-              <Label>Tags</Label>
+              <Label className="text-sm font-medium">Tags</Label>
               <Autocomplete.Trigger>
                 <Autocomplete.Value>
                   {({ defaultChildren, isPlaceholder, state }) => {
@@ -271,7 +259,7 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
               </Autocomplete.Trigger>
               <Autocomplete.Popover>
                 <Autocomplete.Filter filter={contains}>
-                  <SearchField autoFocus name="search" variant="secondary">
+                  <SearchField autoFocus name="search">
                     <SearchField.Group>
                       <SearchField.SearchIcon />
                       <SearchField.Input placeholder="Search tags..." />
@@ -289,57 +277,53 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
                 </Autocomplete.Filter>
               </Autocomplete.Popover>
             </Autocomplete>
-          </Surface>
+          </div>
         </div>
 
         {/* Publishing Settings */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
           <div className="flex items-center gap-2 px-1">
-            <Icon icon="gravity-ui:circle-check" className="text-accent" />
-            <Typography className="text-muted text-sm font-semibold tracking-wider uppercase">
+            <Icon icon="gravity-ui:circle-check" className="text-muted-foreground" />
+            <Typography className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
               Publishing Settings
             </Typography>
           </div>
-          <Surface
-            variant="secondary"
-            className="flex flex-wrap items-center justify-between gap-8 rounded-3xl p-8 shadow-sm"
-          >
-            <div className="flex items-center gap-6">
-              <Select
-                className="w-48"
-                variant="secondary"
-                placeholder="Select status"
-                value={data.status || "DRAFT"}
-                onChange={(key) => handleFieldChange("status", key as PostStatus)}
-              >
-                <Label>Visibility</Label>
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    <ListBox.Item id="DRAFT" textValue="Draft">
-                      Draft
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    <ListBox.Item id="PUBLISHED" textValue="Published">
-                      Published
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    <ListBox.Item id="ARCHIVED" textValue="Archived">
-                      Archived
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-            </div>
+          <div className="flex flex-col gap-6">
+            <Select
+              className="w-full"
+              placeholder="Select status"
+              value={data.status || "DRAFT"}
+              onChange={(key) => handleFieldChange("status", key as PostStatus)}
+            >
+              <Label className="text-sm font-medium">Visibility</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="DRAFT" textValue="Draft">
+                    Draft
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="PUBLISHED" textValue="Published">
+                    Published
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="ARCHIVED" textValue="Archived">
+                    Archived
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                </ListBox>
+              </Select.Popover>
+            </Select>
 
-            <div className="bg-surface ring-border/50 flex items-center gap-4 rounded-2xl p-4 ring-1">
-              <div className="flex flex-col gap-0.5">
-                <Typography className="font-semibold">Featured Article</Typography>
-                <Typography className="text-muted text-xs">Pin this post to the top</Typography>
+            <div className="flex items-center justify-between gap-4 py-2">
+              <div className="flex flex-col gap-1">
+                <Typography className="text-sm font-medium">Featured Article</Typography>
+                <Typography className="text-muted-foreground text-xs">
+                  Pin this post to the top
+                </Typography>
               </div>
               <Switch
                 isSelected={data.isFeatured || false}
@@ -352,7 +336,7 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
                 </Switch.Content>
               </Switch>
             </div>
-          </Surface>
+          </div>
         </div>
       </div>
     </div>

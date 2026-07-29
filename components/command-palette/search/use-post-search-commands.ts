@@ -52,7 +52,7 @@ export function usePostSearchCommands(query: string, isOpen: boolean): PostSearc
 
   const { data, isFetching, isError } = useUnifiedSearchQuery(
     hasRemoteQuery ? { keyword: debouncedQuery } : {},
-    { skip: !isOpen }
+    { skip: !isOpen || !hasRemoteQuery }
   );
 
   const groupsData = data?.groups;
@@ -83,8 +83,11 @@ export function usePostSearchCommands(query: string, isOpen: boolean): PostSearc
           order: group.priority ? group.priority * 1000 + itemIndex : itemIndex,
           keywords: item.shortcut ? [...item.shortcut, group.type] : [group.type, group.label],
           intent: CommandIntent.NAVIGATE,
-          payload: { href: item.url },
-          defaultVisible: !hasRemoteQuery, // Ensure empty state items are visible without search
+          payload: {
+            href: item.url,
+            external: /^https?:\/\//.test(item.url),
+          },
+          defaultVisible: false,
         });
       });
 
@@ -110,7 +113,7 @@ export function usePostSearchCommands(query: string, isOpen: boolean): PostSearc
     });
 
     return { dynamicGroups: groups, allCommands: allCmds, total: commandTotal };
-  }, [groupsData, hasRemoteQuery]);
+  }, [groupsData]);
 
   return {
     dynamicGroups,
