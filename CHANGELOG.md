@@ -1,3 +1,10 @@
+# [1.31.0](https://github.com/LeeWio/odyssey/compare/v1.30.0...v1.31.0) (2026-07-29)
+
+
+### Features
+
+* enhance UI components and expand file API schema ([cb46213](https://github.com/LeeWio/odyssey/commit/cb46213a8b6cf50ee11f82a07ab19d11d751bcfa))
+
 # [1.30.0](https://github.com/LeeWio/odyssey/compare/v1.29.0...v1.30.0) (2026-07-28)
 
 
