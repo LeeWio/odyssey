@@ -437,7 +437,7 @@ function ChroniclePanel() {
               align="start"
               className="text-default-500 font-display text-left text-[clamp(2.5rem,6vw,6rem)] leading-[0.95] tracking-[-0.045em] select-none"
             >
-              The music floats.
+              The music floats.1
             </MotionTypography>
 
             <MotionTypography
