@@ -1,5 +1,12 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { Chip, Surface } from "@heroui/react";
+import { BlogFeed } from "@/components/blog/blog-feed";
 
 export default function SingleIndexPage() {
-  redirect("/blog");
+  return (
+    <main className="bg-background relative min-h-[calc(100vh-4rem)] w-full overflow-hidden pt-12 pb-24">
+      <BlogFeed />
+    </main>
+  );
 }

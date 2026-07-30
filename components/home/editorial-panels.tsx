@@ -76,7 +76,7 @@ export function ChroniclePanel({ reducedMotion }: EditorialPanelProps) {
             Essays, field notes, and decisions connected by the questions that kept returning.
           </p>
           <Link
-            href="/blog"
+            href="/single"
             className="mt-8 inline-flex items-center gap-2 border-b border-[#20211e]/55 pb-1 text-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#a2431b]"
           >
             Read the chronicle
@@ -91,7 +91,7 @@ export function ChroniclePanel({ reducedMotion }: EditorialPanelProps) {
           {chronicleEntries.map((entry, index) => (
             <Link
               key={entry.title}
-              href="/blog"
+              href="/single"
               className="group relative block py-6 first:pt-1 last:pb-1 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#a2431b]"
             >
               <span
@@ -173,7 +173,7 @@ export function NotebookPanel({ reducedMotion }: EditorialPanelProps) {
             outcomes.
           </p>
           <Link
-            href="/blog"
+            href="/single"
             className="mt-8 inline-flex items-center gap-2 border-b border-[#20211e]/55 pb-1 text-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#315d88]"
           >
             Open the daily oracle
@@ -214,7 +214,7 @@ export function NotebookPanel({ reducedMotion }: EditorialPanelProps) {
                   </h3>
                   <p className="mt-2 text-xs leading-5 text-[#66645d]">Ólafur Arnalds · 46 min</p>
                   <Link
-                    href="/blog"
+                    href="/single"
                     className="mt-4 inline-flex items-center gap-1 text-xs text-[#315d88] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#315d88]"
                   >
                     Enter listening room
@@ -395,7 +395,7 @@ export function TraveloguePanel({ reducedMotion }: EditorialPanelProps) {
             </div>
           ))}
           <Link
-            href="/blog"
+            href="/single"
             className="mt-6 inline-flex items-center gap-2 border-b border-[#20211e]/55 pb-1 text-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#67516e] [@media(min-width:1024px)_and_(max-height:800px)]:mt-4"
           >
             Open the field archive

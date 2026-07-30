@@ -12,6 +12,7 @@ import {
   Label,
   ListBox,
   ProgressBar,
+  Tooltip,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMounted, useOs } from "@mantine/hooks";
@@ -43,6 +44,25 @@ type NavigationId = "chronicle" | "daily" | "travelogue" | "more";
 
 // Premium ease-out: starts extremely fast, settles gracefully and intentionally
 const enterEase = [0.23, 1, 0.32, 1] as const;
+const exitEase = [0.4, 0, 1, 1] as const;
+const navigationSpring = {
+  type: "spring" as const,
+  stiffness: 360,
+  damping: 40,
+  mass: 0.8,
+};
+const activeIndicatorSpring = {
+  type: "spring" as const,
+  stiffness: 520,
+  damping: 42,
+  mass: 0.7,
+};
+const focusableSelector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+const getVisibleFocusableElements = (container: HTMLElement | null) =>
+  Array.from(container?.querySelectorAll<HTMLElement>(focusableSelector) ?? []).filter(
+    (element) => element.getClientRects().length > 0
+  );
 
 type MegaPanelContentProps = {
   id: NavigationId;
@@ -58,8 +78,8 @@ const contentEntrance = {
     y: 0,
     filter: "blur(0px)",
     transition: {
-      delay: 0.04 + index * 0.025,
-      duration: 0.18,
+      delay: 0.02 + index * 0.02,
+      duration: 0.16,
       ease: enterEase,
     },
   }),
@@ -653,8 +673,15 @@ export const Navbar = () => {
   const reduceMotion = useReducedMotion();
   const dispatch = useAppDispatch();
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const navigationRef = useRef<HTMLElement>(null);
+  const navigationContentRef = useRef<HTMLElement>(null);
   const lastTriggerRef = useRef<HTMLElement | null>(null);
+  const compactStateRef = useRef(false);
+  const brandRef = useRef<HTMLDivElement>(null);
+  const navigationItemsRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
@@ -666,16 +693,31 @@ export const Navbar = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
+  const [navigationWidths, setNavigationWidths] = useState({
+    compact: 0,
+    expanded: 0,
+    panel: 0,
+  });
 
   const activeItem = getNavigationItem(activeNavigation);
   const platformKey = mounted && (os === "macos" || os === "ios") ? "⌘" : "Ctrl";
 
   const cancelClose = useCallback(() => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
+    if (!closeTimer.current) return;
+    clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+  }, []);
+
+  const cancelPreview = useCallback(() => {
+    if (!previewTimer.current) return;
+    clearTimeout(previewTimer.current);
+    previewTimer.current = null;
   }, []);
 
   const closeNavigation = () => {
     cancelClose();
+    cancelPreview();
     setActiveNavigation(null);
     setIsLocked(false);
     setIsMobileMenuOpen(false);
@@ -684,17 +726,25 @@ export const Navbar = () => {
 
   const scheduleClose = () => {
     cancelClose();
+    cancelPreview();
     if (isLocked) return;
     closeTimer.current = setTimeout(() => setActiveNavigation(null), 180);
   };
 
   const previewNavigation = (id: NavigationId) => {
     cancelClose();
-    setActiveNavigation(id);
+    cancelPreview();
+    if (activeNavigation === id) return;
+
+    previewTimer.current = setTimeout(() => {
+      previewTimer.current = null;
+      setActiveNavigation(id);
+    }, 100);
   };
 
   const toggleNavigation = (id: NavigationId) => {
     cancelClose();
+    cancelPreview();
     if (activeNavigation === id && isLocked) {
       closeNavigation();
       return;
@@ -703,11 +753,20 @@ export const Navbar = () => {
     setIsLocked(true);
   };
 
+  const openNavigationFromKeyboard = (id: NavigationId, trigger: HTMLElement) => {
+    cancelClose();
+    cancelPreview();
+    lastTriggerRef.current = trigger;
+    setActiveNavigation(id);
+    setIsLocked(true);
+  };
+
   useEffect(() => {
     if (!activeNavigation && !isMobileMenuOpen) return;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        if (closeTimer.current) clearTimeout(closeTimer.current);
+        cancelClose();
+        cancelPreview();
         setActiveNavigation(null);
         setIsLocked(false);
         setIsMobileMenuOpen(false);
@@ -715,10 +774,8 @@ export const Navbar = () => {
       }
 
       if (event.key !== "Tab" || (!isLocked && !isMobileMenuOpen)) return;
-      const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      if (!focusable?.length) return;
+      const focusable = getVisibleFocusableElements(panelRef.current);
+      if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (event.shiftKey && document.activeElement === first) {
@@ -729,23 +786,110 @@ export const Navbar = () => {
         first.focus();
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeNavigation, isLocked, isMobileMenuOpen]);
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, [activeNavigation, cancelClose, cancelPreview, isLocked, isMobileMenuOpen]);
 
   useEffect(() => {
     if (!isLocked && !isMobileMenuOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    window.requestAnimationFrame(() =>
-      panelRef.current?.querySelector<HTMLElement>("button")?.focus()
-    );
+    let focusFrame = window.requestAnimationFrame(() => {
+      focusFrame = window.requestAnimationFrame(() =>
+        getVisibleFocusableElements(navigationContentRef.current)[0]?.focus()
+      );
+    });
+
     return () => {
+      window.cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
     };
   }, [isLocked, isMobileMenuOpen]);
 
-  useEffect(() => () => cancelClose(), [cancelClose]);
+  useEffect(
+    () => () => {
+      cancelClose();
+      cancelPreview();
+    },
+    [cancelClose, cancelPreview]
+  );
+
+  useEffect(() => {
+    const updateCompactState = () => {
+      const scrollTop = window.scrollY;
+      const nextCompact = compactStateRef.current ? scrollTop > 24 : scrollTop > 64;
+
+      if (nextCompact === compactStateRef.current) return;
+      compactStateRef.current = nextCompact;
+      setIsCompact(nextCompact);
+    };
+
+    updateCompactState();
+    window.addEventListener("scroll", updateCompactState, { passive: true });
+
+    return () => window.removeEventListener("scroll", updateCompactState);
+  }, []);
+
+  useEffect(() => {
+    const measureNavigation = () => {
+      const brandWidth = brandRef.current?.offsetWidth ?? 0;
+      const navigationItemsWidth = navigationItemsRef.current?.offsetWidth ?? 0;
+      const actionsWidth = actionsRef.current?.offsetWidth ?? 0;
+      const navigationStyle = navigationRef.current
+        ? window.getComputedStyle(navigationRef.current)
+        : null;
+      const horizontalPadding =
+        Number.parseFloat(navigationStyle?.paddingLeft ?? "0") +
+        Number.parseFloat(navigationStyle?.paddingRight ?? "0");
+      const columnGap = Number.parseFloat(navigationStyle?.columnGap ?? "0");
+      const viewportWidth = document.documentElement.clientWidth;
+      const panelWidth = Math.min(Math.max(viewportWidth - 32, 0), 1280);
+      const compactWidth = Math.min(
+        Math.ceil(
+          brandWidth + navigationItemsWidth + actionsWidth + horizontalPadding + columnGap * 2
+        ),
+        panelWidth
+      );
+      const expandedWidth = Math.min(viewportWidth, 1280);
+
+      setNavigationWidths((current) => {
+        if (
+          current.compact === compactWidth &&
+          current.expanded === expandedWidth &&
+          current.panel === panelWidth
+        ) {
+          return current;
+        }
+
+        return {
+          compact: compactWidth,
+          expanded: expandedWidth,
+          panel: panelWidth,
+        };
+      });
+    };
+
+    const resizeObserver = new ResizeObserver(measureNavigation);
+    const observedElements = [
+      navigationRef.current,
+      brandRef.current,
+      navigationItemsRef.current,
+      actionsRef.current,
+    ];
+
+    observedElements.forEach((element) => {
+      if (element) resizeObserver.observe(element);
+    });
+
+    const animationFrame = window.requestAnimationFrame(measureNavigation);
+    window.addEventListener("resize", measureNavigation);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener("resize", measureNavigation);
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const handleLogout = () => {
     dispatch(removeCredentials());
@@ -763,17 +907,27 @@ export const Navbar = () => {
   };
 
   const isNavigationOpen = Boolean(activeItem || isMobileMenuOpen);
+  const hasGlassSurface = isCompact || isNavigationOpen;
+  const glassBackground =
+    resolvedTheme === "light" ? "rgba(255, 255, 255, 0.34)" : "rgba(12, 10, 18, 0.22)";
+  const glassBorder =
+    resolvedTheme === "light" ? "rgba(17, 17, 20, 0.08)" : "rgba(255, 255, 255, 0.1)";
+  const targetNavigationWidth = isNavigationOpen
+    ? navigationWidths.panel
+    : isCompact
+      ? navigationWidths.compact
+      : navigationWidths.expanded;
 
   // Micro-stagger orchestrator for left-hand header elements
   const textEntrance = {
-    hidden: { opacity: 0, y: 8, filter: "blur(4px)" },
+    hidden: { opacity: 0, y: 6, filter: "blur(2px)" },
     visible: (i: number) => ({
       opacity: 1,
       y: 0,
       filter: "blur(0px)",
       transition: {
-        delay: 0.02 + i * 0.03,
-        duration: 0.18,
+        delay: 0.01 + i * 0.018,
+        duration: 0.15,
         ease: enterEase,
       },
     }),
@@ -791,7 +945,10 @@ export const Navbar = () => {
             className="fixed inset-0 z-40 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{
+              opacity: 0,
+              transition: { duration: reduceMotion ? 0 : 0.12, ease: exitEase },
+            }}
             transition={{ duration: reduceMotion ? 0 : 0.18, ease: enterEase }}
             onClick={closeNavigation}
           />
@@ -800,32 +957,46 @@ export const Navbar = () => {
 
       <motion.div
         ref={panelRef}
-        layout={!reduceMotion}
+        data-compact={isCompact}
         role={isLocked || isMobileMenuOpen ? "dialog" : undefined}
         aria-modal={isLocked || isMobileMenuOpen ? true : undefined}
         aria-label={isLocked || isMobileMenuOpen ? "Odyssey navigation" : undefined}
-        className="absolute top-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 overflow-hidden rounded-2xl bg-transparent shadow-[0_18px_56px_rgba(0,0,0,0.14)] backdrop-blur-2xl backdrop-saturate-150"
+        className="fixed inset-x-0 top-0 z-50 mx-auto w-full max-w-7xl overflow-hidden rounded-2xl border"
         initial={reduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
+        animate={{
+          opacity: 1,
+          width: targetNavigationWidth || "100%",
+          y: isNavigationOpen ? 16 : isCompact ? 12 : 0,
+          backgroundColor: hasGlassSurface ? glassBackground : "rgba(0, 0, 0, 0)",
+          borderColor: hasGlassSurface ? glassBorder : "rgba(0, 0, 0, 0)",
+          boxShadow: hasGlassSurface ? "0 14px 40px rgba(0, 0, 0, 0.08)" : "0 0 0 rgba(0, 0, 0, 0)",
+          backdropFilter: hasGlassSurface ? "blur(16px) saturate(1.2)" : "blur(0px) saturate(1)",
+        }}
         transition={
           reduceMotion
             ? { duration: 0 }
             : {
-                layout: { type: "spring", stiffness: 350, damping: 35, mass: 0.8 },
-                duration: 0.25,
-                ease: enterEase,
+                opacity: { duration: 0.2, ease: enterEase },
+                width: navigationSpring,
+                y: navigationSpring,
+                backgroundColor: { duration: 0.18, ease: enterEase },
+                borderColor: { duration: 0.18, ease: enterEase },
+                boxShadow: { duration: 0.18, ease: enterEase },
+                backdropFilter: { duration: 0.18, ease: enterEase },
               }
         }
         onMouseEnter={cancelClose}
         onMouseLeave={scheduleClose}
       >
-        <nav
+        <motion.nav
+          ref={navigationRef}
           aria-label="Primary navigation"
-          className="grid w-full grid-cols-[1fr_auto_1fr] items-center px-3 py-0.5 sm:px-4"
+          className="mx-auto grid w-full max-w-7xl grid-cols-[auto_auto_auto] items-center justify-between gap-3 px-2.5 py-0.5"
         >
           <motion.div
+            ref={brandRef}
             className="justify-self-start"
-            whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.97 }}
           >
             <Link
               href="/"
@@ -839,30 +1010,33 @@ export const Navbar = () => {
           </motion.div>
 
           {/* Static unrolled main navigation items */}
-          <div className="hidden items-center gap-1 md:flex">
+          <motion.div ref={navigationItemsRef} className="hidden items-center gap-1 md:flex">
             {/* Item 1: Chronicle */}
-            <motion.div
+            <div
               className="relative"
-              onHoverStart={() => previewNavigation("chronicle")}
-              whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+              onMouseEnter={() => previewNavigation("chronicle")}
+              onMouseLeave={cancelPreview}
             >
               {activeNavigation === "chronicle" && (
                 <motion.div
                   layoutId="navigation-active"
                   className="bg-default absolute inset-0 rounded-xl"
-                  transition={
-                    reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }
-                  }
+                  transition={reduceMotion ? { duration: 0 } : activeIndicatorSpring}
                 />
               )}
               <Button
                 size="sm"
                 variant="ghost"
+                aria-haspopup="dialog"
                 aria-expanded={activeNavigation === "chronicle"}
                 aria-controls="odyssey-mega-navigation"
                 onFocus={(event) => {
                   lastTriggerRef.current = event.currentTarget as HTMLElement;
-                  previewNavigation("chronicle");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== "ArrowDown") return;
+                  event.preventDefault();
+                  openNavigationFromKeyboard("chronicle", event.currentTarget);
                 }}
                 onPress={() => toggleNavigation("chronicle")}
               >
@@ -873,31 +1047,34 @@ export const Navbar = () => {
                   )}
                 </span>
               </Button>
-            </motion.div>
+            </div>
 
             {/* Item 2: Orbit */}
-            <motion.div
+            <div
               className="relative"
-              onHoverStart={() => previewNavigation("daily")}
-              whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+              onMouseEnter={() => previewNavigation("daily")}
+              onMouseLeave={cancelPreview}
             >
               {activeNavigation === "daily" && (
                 <motion.div
                   layoutId="navigation-active"
                   className="bg-default absolute inset-0 rounded-xl"
-                  transition={
-                    reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }
-                  }
+                  transition={reduceMotion ? { duration: 0 } : activeIndicatorSpring}
                 />
               )}
               <Button
                 size="sm"
                 variant="ghost"
+                aria-haspopup="dialog"
                 aria-expanded={activeNavigation === "daily"}
                 aria-controls="odyssey-mega-navigation"
                 onFocus={(event) => {
                   lastTriggerRef.current = event.currentTarget as HTMLElement;
-                  previewNavigation("daily");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== "ArrowDown") return;
+                  event.preventDefault();
+                  openNavigationFromKeyboard("daily", event.currentTarget);
                 }}
                 onPress={() => toggleNavigation("daily")}
               >
@@ -908,31 +1085,34 @@ export const Navbar = () => {
                   )}
                 </span>
               </Button>
-            </motion.div>
+            </div>
 
             {/* Item 3: Travelogue */}
-            <motion.div
+            <div
               className="relative"
-              onHoverStart={() => previewNavigation("travelogue")}
-              whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+              onMouseEnter={() => previewNavigation("travelogue")}
+              onMouseLeave={cancelPreview}
             >
               {activeNavigation === "travelogue" && (
                 <motion.div
                   layoutId="navigation-active"
                   className="bg-default absolute inset-0 rounded-xl"
-                  transition={
-                    reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }
-                  }
+                  transition={reduceMotion ? { duration: 0 } : activeIndicatorSpring}
                 />
               )}
               <Button
                 size="sm"
                 variant="ghost"
+                aria-haspopup="dialog"
                 aria-expanded={activeNavigation === "travelogue"}
                 aria-controls="odyssey-mega-navigation"
                 onFocus={(event) => {
                   lastTriggerRef.current = event.currentTarget as HTMLElement;
-                  previewNavigation("travelogue");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== "ArrowDown") return;
+                  event.preventDefault();
+                  openNavigationFromKeyboard("travelogue", event.currentTarget);
                 }}
                 onPress={() => toggleNavigation("travelogue")}
               >
@@ -943,31 +1123,34 @@ export const Navbar = () => {
                   )}
                 </span>
               </Button>
-            </motion.div>
+            </div>
 
             {/* Item 4: Archive */}
-            <motion.div
+            <div
               className="relative"
-              onHoverStart={() => previewNavigation("more")}
-              whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+              onMouseEnter={() => previewNavigation("more")}
+              onMouseLeave={cancelPreview}
             >
               {activeNavigation === "more" && (
                 <motion.div
                   layoutId="navigation-active"
                   className="bg-default absolute inset-0 rounded-xl"
-                  transition={
-                    reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }
-                  }
+                  transition={reduceMotion ? { duration: 0 } : activeIndicatorSpring}
                 />
               )}
               <Button
                 size="sm"
                 variant="ghost"
+                aria-haspopup="dialog"
                 aria-expanded={activeNavigation === "more"}
                 aria-controls="odyssey-mega-navigation"
                 onFocus={(event) => {
                   lastTriggerRef.current = event.currentTarget as HTMLElement;
-                  previewNavigation("more");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== "ArrowDown") return;
+                  event.preventDefault();
+                  openNavigationFromKeyboard("more", event.currentTarget);
                 }}
                 onPress={() => toggleNavigation("more")}
               >
@@ -978,11 +1161,14 @@ export const Navbar = () => {
                   )}
                 </span>
               </Button>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
 
-          <div className="flex shrink-0 items-center gap-1.5 justify-self-end">
-            <motion.div whileTap={reduceMotion ? undefined : { scale: 0.95 }}>
+          <motion.div
+            ref={actionsRef}
+            className="flex shrink-0 items-center gap-1.5 justify-self-end"
+          >
+            <Tooltip delay={500} closeDelay={100}>
               <Button
                 isIconOnly
                 variant="ghost"
@@ -992,14 +1178,14 @@ export const Navbar = () => {
               >
                 <SearchIcon aria-hidden="true" size={16} />
               </Button>
-            </motion.div>
+              <Tooltip.Content placement="bottom" offset={8}>
+                Search
+              </Tooltip.Content>
+            </Tooltip>
 
-            <motion.div
-              className="hidden lg:block"
-              whileTap={reduceMotion ? undefined : { scale: 0.95 }}
-            >
+            <div className="hidden lg:block">
               <Button
-                variant="secondary"
+                variant="ghost"
                 className="h-9 min-w-0 gap-2 rounded-xl px-3"
                 aria-label={`Search, keyboard shortcut ${platformKey} K`}
                 onPress={() => setIsSearchOpen(true)}
@@ -1011,43 +1197,53 @@ export const Navbar = () => {
                   <Kbd.Content>K</Kbd.Content>
                 </Kbd>
               </Button>
-            </motion.div>
+            </div>
 
-            <motion.div
-              className="hidden md:block"
-              whileTap={reduceMotion ? undefined : { scale: 0.95 }}
-            >
-              <Button
-                isIconOnly
-                variant="ghost"
-                className="size-10 rounded-xl"
-                aria-label="Toggle color theme"
-                onPress={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              >
-                <AnimatePresence mode="wait" initial={false} propagate>
-                  {mounted && (
-                    <motion.span
-                      key={resolvedTheme}
-                      initial={
-                        reduceMotion ? { opacity: 0 } : { opacity: 0, y: -4, filter: "blur(2px)" }
-                      }
-                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      exit={
-                        reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4, filter: "blur(2px)" }
-                      }
-                      transition={{ duration: 0.14, ease: enterEase }}
-                      className="flex"
-                    >
-                      {resolvedTheme === "dark" ? (
-                        <SunMaxFillIcon size={16} />
-                      ) : (
-                        <MoonFillIcon size={16} />
-                      )}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </Button>
-            </motion.div>
+            <div className="hidden md:block">
+              <Tooltip delay={500} closeDelay={100}>
+                <Button
+                  isIconOnly
+                  variant="ghost"
+                  className="size-10 rounded-xl"
+                  aria-label={
+                    mounted
+                      ? resolvedTheme === "dark"
+                        ? "Switch to light theme"
+                        : "Switch to dark theme"
+                      : "Toggle theme"
+                  }
+                  onPress={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                >
+                  <AnimatePresence mode="wait" initial={false} propagate>
+                    {mounted && (
+                      <motion.span
+                        key={resolvedTheme}
+                        initial={
+                          reduceMotion ? { opacity: 0 } : { opacity: 0, y: -4, filter: "blur(2px)" }
+                        }
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        exit={{
+                          opacity: 0,
+                          ...(reduceMotion ? {} : { y: 4, filter: "blur(2px)" }),
+                          transition: { duration: reduceMotion ? 0 : 0.1, ease: exitEase },
+                        }}
+                        transition={{ duration: 0.14, ease: enterEase }}
+                        className="flex"
+                      >
+                        {resolvedTheme === "dark" ? (
+                          <SunMaxFillIcon size={16} />
+                        ) : (
+                          <MoonFillIcon size={16} />
+                        )}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Button>
+                <Tooltip.Content placement="bottom" offset={8}>
+                  {mounted ? (resolvedTheme === "dark" ? "Light theme" : "Dark theme") : "Theme"}
+                </Tooltip.Content>
+              </Tooltip>
+            </div>
 
             {mounted && isAuthenticated ? (
               <Dropdown>
@@ -1095,52 +1291,63 @@ export const Navbar = () => {
               </Button>
             )}
 
-            <motion.div className="md:hidden" whileTap={reduceMotion ? undefined : { scale: 0.95 }}>
-              <Button
-                isIconOnly
-                variant="ghost"
-                className="size-10 rounded-xl"
-                aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-                aria-expanded={isMobileMenuOpen}
-                aria-controls="odyssey-mega-navigation"
-                onFocus={(event) => {
-                  lastTriggerRef.current = event.currentTarget as HTMLElement;
-                }}
-                onPress={() => {
-                  if (isMobileMenuOpen) closeNavigation();
-                  else {
-                    setActiveNavigation(null);
-                    setIsLocked(false);
-                    setIsMobileMenuOpen(true);
-                  }
-                }}
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.span
-                    key={isMobileMenuOpen ? "close" : "menu"}
-                    initial={
-                      reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: -45, scale: 0.9 }
+            <div className="md:hidden">
+              <Tooltip delay={500} closeDelay={100}>
+                <Button
+                  isIconOnly
+                  variant="ghost"
+                  className="size-10 rounded-xl"
+                  aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                  aria-haspopup="dialog"
+                  aria-expanded={isMobileMenuOpen}
+                  aria-controls="odyssey-mega-navigation"
+                  onFocus={(event) => {
+                    lastTriggerRef.current = event.currentTarget as HTMLElement;
+                  }}
+                  onPress={() => {
+                    if (isMobileMenuOpen) closeNavigation();
+                    else {
+                      setActiveNavigation(null);
+                      setIsLocked(false);
+                      setIsMobileMenuOpen(true);
                     }
-                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                    exit={reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: 45, scale: 0.9 }}
-                    transition={{ duration: 0.15, ease: enterEase }}
-                    className="flex"
-                  >
-                    <Icon
-                      aria-hidden="true"
-                      icon={isMobileMenuOpen ? "lucide:x" : "lucide:menu"}
-                      className="size-5"
-                    />
-                  </motion.span>
-                </AnimatePresence>
-              </Button>
-            </motion.div>
-          </div>
-        </nav>
+                  }}
+                >
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={isMobileMenuOpen ? "close" : "menu"}
+                      initial={
+                        reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: -45, scale: 0.9 }
+                      }
+                      animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                      exit={{
+                        opacity: 0,
+                        ...(reduceMotion ? {} : { rotate: 45, scale: 0.9 }),
+                        transition: { duration: reduceMotion ? 0 : 0.1, ease: exitEase },
+                      }}
+                      transition={{ duration: 0.15, ease: enterEase }}
+                      className="flex"
+                    >
+                      <Icon
+                        aria-hidden="true"
+                        icon={isMobileMenuOpen ? "lucide:x" : "lucide:menu"}
+                        className="size-5"
+                      />
+                    </motion.span>
+                  </AnimatePresence>
+                </Button>
+                <Tooltip.Content placement="bottom" offset={8}>
+                  {isMobileMenuOpen ? "Close menu" : "Open menu"}
+                </Tooltip.Content>
+              </Tooltip>
+            </div>
+          </motion.div>
+        </motion.nav>
 
-        <AnimatePresence initial={false}>
+        <AnimatePresence initial={false} propagate>
           {isNavigationOpen && (
             <motion.section
+              ref={navigationContentRef}
               key="mega-navigation-content"
               id="odyssey-mega-navigation"
               aria-label={activeItem ? `${activeItem.label} overview` : "Navigation sections"}
@@ -1148,8 +1355,13 @@ export const Navbar = () => {
               style={{ overflow: "hidden" }}
               initial={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto", transitionEnd: { overflow: "auto" } }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0, overflow: "hidden" }}
-              transition={{ duration: reduceMotion ? 0 : 0.25, ease: enterEase }}
+              exit={{
+                opacity: 0,
+                height: 0,
+                overflow: "hidden",
+                transition: { duration: reduceMotion ? 0 : 0.16, ease: exitEase },
+              }}
+              transition={{ duration: reduceMotion ? 0 : 0.22, ease: enterEase }}
             >
               <div className="px-5 py-7 sm:px-8 md:px-12 md:py-9 xl:px-16 2xl:px-20">
                 <div className="md:hidden">
@@ -1171,7 +1383,7 @@ export const Navbar = () => {
                         <motion.div
                           initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0 }}
+                          transition={{ delay: 0, duration: 0.16, ease: enterEase }}
                         >
                           <Button
                             fullWidth
@@ -1193,7 +1405,7 @@ export const Navbar = () => {
                         <motion.div
                           initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.045 }}
+                          transition={{ delay: 0.04, duration: 0.16, ease: enterEase }}
                         >
                           <Button
                             fullWidth
@@ -1215,7 +1427,7 @@ export const Navbar = () => {
                         <motion.div
                           initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.09 }}
+                          transition={{ delay: 0.08, duration: 0.16, ease: enterEase }}
                         >
                           <Button
                             fullWidth
@@ -1237,7 +1449,7 @@ export const Navbar = () => {
                         <motion.div
                           initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.135 }}
+                          transition={{ delay: 0.12, duration: 0.16, ease: enterEase }}
                         >
                           <Button
                             fullWidth
@@ -1270,20 +1482,19 @@ export const Navbar = () => {
                 </div>
 
                 {activeItem && (
-                  <AnimatePresence mode="wait" initial={false}>
+                  <AnimatePresence mode="popLayout" initial={false} propagate>
                     <motion.div
                       key={activeItem.id}
                       className="col-span-full grid gap-8 md:grid-cols-12 md:gap-10"
-                      initial={
-                        reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, filter: "blur(4px)" }
-                      }
-                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      exit={
-                        reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, filter: "blur(3px)" }
-                      }
+                      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, filter: "blur(2px)" }}
+                      animate={{ opacity: 1, filter: "blur(0px)" }}
+                      exit={{
+                        opacity: 0,
+                        ...(reduceMotion ? {} : { filter: "blur(2px)" }),
+                        transition: { duration: reduceMotion ? 0 : 0.1, ease: exitEase },
+                      }}
                       transition={{
-                        delay: reduceMotion ? 0 : 0.02,
-                        duration: reduceMotion ? 0 : 0.12,
+                        duration: reduceMotion ? 0 : 0.16,
                         ease: enterEase,
                       }}
                     >

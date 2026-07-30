@@ -291,9 +291,9 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
   }, [api, searchParams, pathname, router]);
 
   return (
-    <aside className="sticky top-24 flex hidden h-fit min-w-0 flex-col gap-6 lg:block">
+    <aside className="sticky top-24 flex hidden h-fit min-w-0 flex-col gap-5 lg:block">
       {/* Editorial Epigraph Card as a Foreword */}
-      <Card className="bg-default-50/5 border-default-100/50 group/quote hover:border-default-200/50 relative flex w-full flex-col gap-4 overflow-hidden rounded-2xl border p-6 text-left shadow-none transition-all duration-300">
+      <Card className="bg-default-50/5 border-default-100/40 group/quote hover:border-default-200/50 relative flex w-full flex-col gap-3 overflow-hidden rounded-2xl border p-5 text-left shadow-none transition-all duration-300">
         {/* Watermark Quote Icon */}
         <div className="pointer-events-none absolute top-0 right-0 -mt-4 -mr-2 opacity-[0.03] transition-opacity duration-500 select-none group-hover/quote:opacity-[0.06]">
           <Icon icon="lucide:quote" className="text-foreground size-24" />
@@ -301,19 +301,15 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
 
         <div className="flex items-center gap-2 select-none">
           <Icon icon="solar:heart-angle-bold" className="text-accent size-4 animate-pulse" />
-          <span className="font-mono text-[9px] font-bold tracking-[0.18em] text-neutral-400 uppercase">
-            EPIGRAPH // 侧栏题记
-          </span>
+          <span className="text-muted text-[11px] font-medium">Epigraph · 侧栏题记</span>
         </div>
 
-        <p className="border-accent/30 border-l py-0.5 pl-3 font-serif text-[12px] leading-relaxed text-neutral-300 italic">
+        <p className="border-accent/30 border-l py-0.5 pl-3 font-serif text-xs leading-5 text-neutral-400 italic">
           “在无限滑动的嘈杂洪流里，我们建造起小小的、由文字与极光围合的避难所。只为让两颗在光缆两端跳动的灵魂，能在此处，呼吸一秒静谧。”
         </p>
 
         <div className="mt-1 flex justify-end pr-1">
-          <span className="font-mono text-[9px] tracking-wider text-neutral-500 uppercase select-none">
-            — ODYSSEY DIRECTORS // 主创寄语
-          </span>
+          <span className="text-muted text-[10px] select-none">— Odyssey · 主创寄语</span>
         </div>
       </Card>
 
@@ -537,7 +533,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
                 <ListBox
                   aria-label="Collections"
                   className="flex w-full flex-col gap-1"
-                  onAction={(key) => router.push(`/blog?slug=${key}`)}
+                  onAction={(key) => router.push(`/single?slug=${key}`)}
                 >
                   {COLLECTIONS.map((col) => (
                     <ListBox.Item

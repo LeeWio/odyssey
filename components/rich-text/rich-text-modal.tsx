@@ -203,25 +203,16 @@ export function RichTextModal() {
                         animate={{ width: "30%", opacity: 1, x: 0 }}
                         exit={{ width: 0, opacity: 0, x: 20 }}
                         transition={{ type: "spring", bounce: 0, duration: 0.5 }}
-                        className="bg-surface/30 flex h-full flex-shrink-0 flex-col overflow-hidden backdrop-blur-sm"
+                        className="flex h-full shrink-0 flex-col overflow-hidden backdrop-blur-sm"
                       >
-                        <div className="w-full min-w-[320px] flex-1 overflow-y-auto">
-                          <RichTextForm data={postData} onChange={setPostData} />
-                        </div>
+                        <RichTextForm data={postData} onChange={setPostData} />
 
-                        {/* Form Footer with Actions */}
                         <div className="min-w-[320px] p-6 pb-8 md:px-10 lg:px-16">
                           <div className="flex w-full flex-col gap-4">
-                            <div className="text-muted text-sm font-medium">
-                              {isExistingPost ? "Editing existing post" : "Creating new post"}
-                            </div>
                             <div className="flex w-full items-center gap-3">
-                              <Button variant="secondary" className="flex-1" onPress={handleClose}>
-                                Cancel
-                              </Button>
                               <Button
+                                fullWidth
                                 variant="secondary"
-                                className="flex-1"
                                 onPress={() => handleSave("DRAFT")}
                                 isPending={isPending}
                               >
@@ -233,8 +224,8 @@ export function RichTextModal() {
                                 )}
                               </Button>
                               <Button
+                                fullWidth
                                 variant="primary"
-                                className="bg-accent text-accent-foreground flex-1"
                                 onPress={() => handleSave("PUBLISHED")}
                                 isPending={isPending}
                               >

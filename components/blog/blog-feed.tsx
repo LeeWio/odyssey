@@ -241,7 +241,7 @@ export function BlogFeed() {
                 })}
                 author={post.authorName || "Anonymous"}
                 category={post.category?.name || "Unclassified"}
-                href={`/blog/${post.slug}`}
+                href={`/single/${post.slug}`}
               />
             ))}
           </div>
