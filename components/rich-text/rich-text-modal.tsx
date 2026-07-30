@@ -116,7 +116,7 @@ export function RichTextModal() {
 
   return (
     <Modal key={activeId}>
-      <Modal.Backdrop isOpen={true} onOpenChange={handleClose}>
+      <Modal.Backdrop isOpen={isOpen} onOpenChange={handleClose}>
         <Modal.Container size="cover">
           <Modal.Dialog className="relative flex h-full w-full flex-col overflow-hidden">
             {/* Toggle Button */}
