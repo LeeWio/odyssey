@@ -1,3 +1,20 @@
+# [1.32.0](https://github.com/LeeWio/odyssey/compare/v1.31.0...v1.32.0) (2026-07-31)
+
+
+### Bug Fixes
+
+* **ui:** remove entry blur and synchronize path drawing sequence with original design ([7818cd1](https://github.com/LeeWio/odyssey/commit/7818cd16546c2bea43a009d8043c03d4eb119cc9))
+* **ui:** restore absolute animation fidelity using native SVG animate tags for the first stroke extension ([c49542e](https://github.com/LeeWio/odyssey/commit/c49542e20b9e0ce822d86d78d3693f70fe3530f6))
+* **ui:** use correct heroui pro semantic color variables for hello apple gradient ([6f8018d](https://github.com/LeeWio/odyssey/commit/6f8018d71d908f51d1b75be5bf63151bfaed24f1))
+
+
+### Features
+
+* **ui:** overlay apple-inspired hello animation on existing hero section ([9aa4b4a](https://github.com/LeeWio/odyssey/commit/9aa4b4a92a4637fceb45cc6140dd1dd02de50996))
+* **ui:** refactor HelloApple animation to use Framer Motion with symmetric path retraction ([4033e7b](https://github.com/LeeWio/odyssey/commit/4033e7be697454e22597b4a764eb6f2f974c82e9))
+* **ui:** remove temporary toggle logic and restore clean home page state ([5ee1b49](https://github.com/LeeWio/odyssey/commit/5ee1b4955103661a48bcef73a52e9bede3cb7adc))
+* **ui:** simplify home page to exclusive hello apple animation ([2f32743](https://github.com/LeeWio/odyssey/commit/2f32743db497ffe4730cb087704a8031afe78b3a))
+
 # [1.31.0](https://github.com/LeeWio/odyssey/compare/v1.30.0...v1.31.0) (2026-07-29)
 
 
