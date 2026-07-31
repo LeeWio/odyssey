@@ -9,6 +9,7 @@ import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 import { MusicDashboard } from "@/components/music/music-dashboard";
 import { MotionButton } from "@/components/ui";
 import { MotionTypography } from "@/components/ui/motion-typography";
+import { HelloApple } from "@/components/home/hello-apple";
 
 const enterEase = [0.23, 1, 0.32, 1] as const;
 
@@ -80,213 +81,47 @@ function WorldTicker() {
 }
 
 function IntroPanel({ onEnter }: { onEnter: () => void }) {
-  const { scrollYProgress } = useScroll();
-
-  const gridX = useTransform(scrollYProgress, [0, 0.33], ["0vw", "20vw"]);
-
-  const dotMatrixStyle = {
-    backgroundImage: "radial-gradient(currentColor 0.8px, transparent 0.8px)",
-    backgroundSize: "48px 44px",
-    backgroundPosition: "center center",
-    WebkitMaskImage:
-      "radial-gradient(circle at center, rgba(0, 0, 0, 1) 10%, rgba(0, 0, 0, 0) 55%)",
-    maskImage: "radial-gradient(circle at center, rgba(0, 0, 0, 1) 10%, rgba(0, 0, 0, 0) 55%)",
-  } as const;
-
   return (
     <Surface
       id="odyssey"
       aria-labelledby="odyssey-title"
       role="region"
       variant="transparent"
-      className="relative flex h-full w-screen shrink-0 items-center overflow-hidden bg-transparent pt-16"
+      className="relative flex h-full w-screen shrink-0 flex-col items-center justify-center overflow-hidden bg-transparent"
     >
-      <style>{`
-        @keyframes text-scroll-gradient {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .scrolling-text-gradient {
-          background-size: 200% auto;
-          animation: text-scroll-gradient 12s ease-in-out infinite;
-        }
-      `}</style>
+      <div className="relative z-20 flex flex-col items-center justify-center px-5 text-center sm:px-8 lg:px-12">
+        <HelloApple />
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1], delay: 0.5 }}
-        style={{ ...dotMatrixStyle, x: gridX }}
-        className="pointer-events-none absolute inset-0"
-        aria-hidden="true"
-      />
-      <div className="relative z-20 mx-auto flex w-full flex-col items-center justify-center px-5 text-center sm:px-8 lg:px-12">
         <motion.div
-          className="flex flex-col items-center text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{
-            duration: 1,
-            ease: [0.16, 1, 0.3, 1],
-          }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2, duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
+          className="mt-8 flex flex-col items-center"
         >
-          <Chip size="sm" variant="soft" color="warning">
-            <Icon icon="gravity-ui:sparkles" className="mr-1 inline-block size-3.5 animate-pulse" />
-            Odyssey · 31°14
-          </Chip>
-
-          <div id="odyssey-title" className="mt-4 flex max-w-275 flex-col items-center text-center">
-            <MotionTypography
-              initial={{
-                opacity: 0,
-                y: 18,
-                filter: "blur(12px)",
-                letterSpacing: "0.02em",
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                filter: "blur(0px)",
-                letterSpacing: "-0.04em",
-              }}
-              transition={{
-                duration: 1.4,
-                ease: [0.16, 1, 0.3, 1],
-                delay: 0.15,
-              }}
-              weight="bold"
-              align="center"
-              className="from-accent via-success to-accent scrolling-text-gradient bg-linear-to-r bg-clip-text text-[clamp(2.5rem,6vw,6rem)] leading-[0.95] tracking-[-0.045em] text-transparent select-none"
-            >
-              The world scrolls.
-            </MotionTypography>
-
-            <MotionTypography
-              initial="hidden"
-              animate="visible"
-              weight="semibold"
-              align="center"
-              variants={{
-                hidden: {},
-                visible: {
-                  transition: {
-                    staggerChildren: 0.045,
-                    delayChildren: 0.35,
-                  },
-                },
-              }}
-              className="relative mt-1 text-[clamp(4rem,9vw,9rem)] leading-[0.82] tracking-[-0.075em] italic select-none"
-            >
-              {Array.from("I stay.").map((char, index) => {
-                const isDot = char === ".";
-                const isAccentChar = index > 1;
-
-                return (
-                  <motion.span
-                    key={index}
-                    className={cn(
-                      "inline-block origin-center will-change-transform",
-                      isAccentChar ? "text-accent" : "text-foreground",
-                      isDot && "cursor-pointer px-1.5"
-                    )}
-                    variants={{
-                      hidden: {
-                        opacity: 0,
-                        y: 35,
-                        rotateX: 45,
-                        filter: "blur(10px)",
-                      },
-
-                      visible: {
-                        opacity: 1,
-                        y: 0,
-                        rotateX: 0,
-                        filter: "blur(0px)",
-                        transition: {
-                          duration: 1.1,
-                          ease: [0.16, 1, 0.3, 1],
-                        },
-                      },
-                    }}
-                    whileHover={
-                      isDot
-                        ? {
-                            scale: 1.25,
-                            rotate: 90,
-                            transition: {
-                              type: "spring",
-                              stiffness: 200,
-                              damping: 25,
-                            },
-                          }
-                        : {
-                            y: -3,
-                            transition: {
-                              type: "spring",
-                              stiffness: 250,
-                              damping: 20,
-                            },
-                          }
-                    }
-                  >
-                    {char === " " ? "\u00A0" : char}
-                  </motion.span>
-                );
-              })}
-            </MotionTypography>
-          </div>
-
-          <motion.p
-            className="text-muted-foreground/60 mt-10 max-w-md text-[11px] leading-loose font-light tracking-[0.22em] uppercase select-none md:text-xs"
-            initial={{
-              opacity: 0,
-              filter: "blur(6px)",
-              y: 12,
-            }}
-            animate={{
-              opacity: 1,
-              filter: "blur(0px)",
-              y: 0,
-            }}
-            transition={{
-              duration: 1,
-              ease: [0.23, 1, 0.32, 1],
-              delay: 1,
-            }}
+          <Typography
+            id="odyssey-title"
+            weight="semibold"
+            className="text-foreground/80 text-[clamp(1.5rem,3vw,2.5rem)] tracking-tight"
           >
-            A quiet coordinate in the infinite feed — anchoring what survives the drift.
-          </motion.p>
-        </motion.div>
-
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 16,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          transition={{
-            duration: 1.2,
-            ease: [0.23, 1, 0.32, 1],
-            delay: 1.1,
-          }}
-          className="pointer-events-auto relative mt-14 w-screen overflow-hidden mask-[linear-gradient(to_right,transparent,white_15%,white_85%,transparent)] select-none md:mt-16"
-        >
-          <WorldTicker />
+            Welcome to Odyssey.
+          </Typography>
+          <Typography
+            color="muted"
+            className="mt-4 max-w-md text-sm leading-relaxed font-light tracking-[0.1em] uppercase"
+          >
+            A personal coordinate in the infinite feed.
+          </Typography>
         </motion.div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-4 z-30 flex items-center justify-center">
+      <div className="absolute inset-x-0 bottom-12 z-30 flex items-center justify-center">
         <Tooltip delay={200}>
           <MotionButton
             onPress={onEnter}
             variant="ghost"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.4, duration: 0.8 }}
+            transition={{ delay: 3, duration: 0.8 }}
             aria-label="Scroll or Click to Explore"
             className="hover:bg-default-100/5 before:bg-default-300/30 relative flex h-14 w-6 min-w-0 items-center justify-center overflow-hidden rounded-full p-0 transition-colors before:absolute before:inset-y-0 before:w-px before:content-['']"
           >
@@ -298,7 +133,7 @@ function IntroPanel({ onEnter }: { onEnter: () => void }) {
               }}
               transition={{
                 duration: 2.2,
-                ease: [0.25, 0, 0.35, 1], // cinematic gravity curve
+                ease: [0.25, 0, 0.35, 1],
                 repeat: Infinity,
                 repeatType: "loop",
               }}
