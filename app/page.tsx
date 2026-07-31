@@ -9,6 +9,7 @@ import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 import { MusicDashboard } from "@/components/music/music-dashboard";
 import { MotionButton } from "@/components/ui";
 import { MotionTypography } from "@/components/ui/motion-typography";
+import { HelloApple } from "@/components/home/hello-apple";
 
 const enterEase = [0.23, 1, 0.32, 1] as const;
 
@@ -122,13 +123,19 @@ function IntroPanel({ onEnter }: { onEnter: () => void }) {
         aria-hidden="true"
       />
       <div className="relative z-20 mx-auto flex w-full flex-col items-center justify-center px-5 text-center sm:px-8 lg:px-12">
+        {/* Hello Apple Animation Overlay */}
+        <div className="pointer-events-none absolute inset-0 -top-24 z-0 flex items-center justify-center opacity-40">
+          <HelloApple />
+        </div>
+
         <motion.div
-          className="flex flex-col items-center text-center"
+          className="relative z-10 flex flex-col items-center text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{
             duration: 1,
             ease: [0.16, 1, 0.3, 1],
+            delay: 1.5,
           }}
         >
           <Chip size="sm" variant="soft" color="warning">
@@ -153,7 +160,7 @@ function IntroPanel({ onEnter }: { onEnter: () => void }) {
               transition={{
                 duration: 1.4,
                 ease: [0.16, 1, 0.3, 1],
-                delay: 0.15,
+                delay: 1.8,
               }}
               weight="bold"
               align="center"
@@ -172,7 +179,7 @@ function IntroPanel({ onEnter }: { onEnter: () => void }) {
                 visible: {
                   transition: {
                     staggerChildren: 0.045,
-                    delayChildren: 0.35,
+                    delayChildren: 2.2,
                   },
                 },
               }}
@@ -252,7 +259,7 @@ function IntroPanel({ onEnter }: { onEnter: () => void }) {
             transition={{
               duration: 1,
               ease: [0.23, 1, 0.32, 1],
-              delay: 1,
+              delay: 2.8,
             }}
           >
             A quiet coordinate in the infinite feed — anchoring what survives the drift.
@@ -271,7 +278,7 @@ function IntroPanel({ onEnter }: { onEnter: () => void }) {
           transition={{
             duration: 1.2,
             ease: [0.23, 1, 0.32, 1],
-            delay: 1.1,
+            delay: 3.2,
           }}
           className="pointer-events-auto relative mt-14 w-screen overflow-hidden mask-[linear-gradient(to_right,transparent,white_15%,white_85%,transparent)] select-none md:mt-16"
         >
