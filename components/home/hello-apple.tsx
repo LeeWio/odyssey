@@ -10,7 +10,7 @@ export function HelloApple() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+      initial={{ opacity: 0, scale: 0.9, filter: "blur(0px)" }}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
       exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
       transition={{
@@ -55,12 +55,18 @@ export function HelloApple() {
                 strokeLinecap="round"
                 strokeWidth="9"
                 stroke="url(#hello-gradient)"
-                initial={{ pathLength: 0, d: dValue }}
-                animate={{ pathLength: 1, d: dValue2 }}
-                exit={{ pathLength: 0, d: dValue }}
+                initial={{ pathLength: 0, d: dValue, strokeWidth: 9 }}
+                animate={{
+                  pathLength: 1,
+                  d: [dValue, dValue, dValue2],
+                  strokeWidth: [9, 10, 9],
+                }}
+                exit={{ pathLength: 0, d: dValue, strokeWidth: 9 }}
                 transition={{
                   duration: 2.5,
                   ease: "easeInOut",
+                  d: { times: [0, 0.8, 1] },
+                  strokeWidth: { times: [0, 0.5, 1] },
                 }}
               />
             </g>
