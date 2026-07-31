@@ -36,23 +36,11 @@ export function HelloApple() {
               x1="-135"
               y1="19"
             >
-              <stop offset="0%" stopColor="currentColor" />
-              <stop offset="5.5%" stopColor="currentColor" />
-              <stop offset="11%" stopColor="currentColor" />
-              <stop offset="17.1%" stopColor="currentColor" />
-              <stop offset="23.3%" stopColor="currentColor" />
-              <stop offset="29.9%" stopColor="currentColor" />
-              <stop offset="36.5%" stopColor="currentColor" />
-              <stop offset="42.2%" stopColor="currentColor" />
-              <stop offset="48%" stopColor="currentColor" />
-              <stop offset="54.3%" stopColor="currentColor" />
-              <stop offset="60.5%" stopColor="currentColor" />
-              <stop offset="67.1%" stopColor="currentColor" />
-              <stop offset="73.8%" stopColor="currentColor" />
-              <stop offset="80.6%" stopColor="currentColor" />
-              <stop offset="87.5%" stopColor="currentColor" />
-              <stop offset="93.8%" stopColor="currentColor" />
-              <stop offset="100%" stopColor="currentColor" />
+              <stop offset="0%" stopColor="var(--heroui-primary)" />
+              <stop offset="25%" stopColor="var(--heroui-secondary)" />
+              <stop offset="50%" stopColor="var(--heroui-success)" />
+              <stop offset="75%" stopColor="var(--heroui-warning)" />
+              <stop offset="100%" stopColor="var(--heroui-primary)" />
             </linearGradient>
           </defs>
           <g transform="matrix(1.087,0,0,1.087,-21.135,-19.235)">
