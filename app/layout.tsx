@@ -83,13 +83,7 @@ export default async function RootLayout({
           strategy="beforeInteractive"
         />
         <Providers lang={lang} messages={messages}>
-          <Toast.Provider placement="top" />
-          <div className="relative flex min-h-screen flex-col overflow-x-clip">
-            <Navbar />
-            <GlobalControl />
-            <main className="flex w-full grow flex-col">{children}</main>
-            <Footer />
-          </div>
+          {children}
         </Providers>
       </body>
     </html>

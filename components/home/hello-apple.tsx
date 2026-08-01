@@ -23,9 +23,40 @@ export function HelloApple() {
           viewBox="0 0 500 500"
           xmlnsXlink="http://www.w3.org/1999/xlink"
           xmlns="http://www.w3.org/2000/svg"
-          className="text-foreground"
         >
           <defs>
+            <style>
+              {`
+                @keyframes color-cycle-0 {
+                  0%, 100% { stop-color: var(--accent); }
+                  25% { stop-color: var(--success); }
+                  50% { stop-color: var(--warning); }
+                  75% { stop-color: var(--danger); }
+                }
+                @keyframes color-cycle-1 {
+                  0%, 100% { stop-color: var(--success); }
+                  25% { stop-color: var(--warning); }
+                  50% { stop-color: var(--danger); }
+                  75% { stop-color: var(--accent); }
+                }
+                @keyframes color-cycle-2 {
+                  0%, 100% { stop-color: var(--warning); }
+                  25% { stop-color: var(--danger); }
+                  50% { stop-color: var(--accent); }
+                  75% { stop-color: var(--success); }
+                }
+                @keyframes color-cycle-3 {
+                  0%, 100% { stop-color: var(--danger); }
+                  25% { stop-color: var(--accent); }
+                  50% { stop-color: var(--success); }
+                  75% { stop-color: var(--warning); }
+                }
+                .stop-0 { animation: color-cycle-0 20s infinite ease-in-out; }
+                .stop-1 { animation: color-cycle-1 20s infinite ease-in-out; }
+                .stop-2 { animation: color-cycle-2 20s infinite ease-in-out; }
+                .stop-3 { animation: color-cycle-3 20s infinite ease-in-out; }
+              `}
+            </style>
             <linearGradient
               id="hello-gradient"
               gradientUnits="userSpaceOnUse"
@@ -35,10 +66,10 @@ export function HelloApple() {
               x1="-135"
               y1="19"
             >
-              <stop offset="0%" stopColor="var(--accent)" />
-              <stop offset="33%" stopColor="var(--success)" />
-              <stop offset="66%" stopColor="var(--warning)" />
-              <stop offset="100%" stopColor="var(--danger)" />
+              <stop className="stop-0" offset="0%" stopColor="var(--accent)" />
+              <stop className="stop-1" offset="33%" stopColor="var(--success)" />
+              <stop className="stop-2" offset="66%" stopColor="var(--warning)" />
+              <stop className="stop-3" offset="100%" stopColor="var(--danger)" />
             </linearGradient>
           </defs>
           <g transform="matrix(1.087,0,0,1.087,-21.135,-19.235)">
@@ -53,7 +84,7 @@ export function HelloApple() {
                 stroke="url(#hello-gradient)"
               >
                 <animate
-                  repeatCount="indefinite"
+                  repeatCount="1"
                   attributeName="stroke-width"
                   dur="6s"
                   begin="0s"
@@ -64,7 +95,7 @@ export function HelloApple() {
                   calcMode="spline"
                 />
                 <animate
-                  repeatCount="indefinite"
+                  repeatCount="1"
                   attributeName="d"
                   dur="6s"
                   begin="0s"
@@ -75,25 +106,25 @@ export function HelloApple() {
                   fill="freeze"
                 />
                 <animate
-                  repeatCount="indefinite"
+                  repeatCount="1"
                   fill="freeze"
                   begin="0s"
                   dur="6s"
                   calcMode="spline"
                   keySplines="0 0 1 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0 0 1 1"
                   keyTimes="0; 0.034722; 0.041667; 0.0625; 0.081944; 0.416667; 0.693056; 0.958333; 1"
-                  values="0 100; 0 100; 0.877 99.123; 4.288 95.712; 8.593 91.407; 99 1; 99 1; 0 100; 0 100"
+                  values="0 100; 0 100; 0.877 99.123; 4.288 95.712; 8.593 91.407; 99 1; 99 1; 99 1; 99 1"
                   attributeName="stroke-dasharray"
                 />
                 <animate
-                  repeatCount="indefinite"
+                  repeatCount="1"
                   fill="freeze"
                   begin="0s"
                   dur="6s"
                   calcMode="spline"
                   keySplines="0 0 1 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0 0 1 1"
                   keyTimes="0; 0.034722; 0.041667; 0.0625; 0.081944; 0.416667; 0.693056; 0.958333; 1"
-                  values="0; 0; -0.048; -0.305; -0.452; -1; -1; 0; 0"
+                  values="0; 0; -0.048; -0.305; -0.452; -1; -1; -1; -1"
                   attributeName="stroke-dashoffset"
                 />
               </path>
