@@ -1,7 +1,7 @@
 "use client";
 
 import { Chip, Surface } from "@heroui/react";
-import { BlogFeed } from "@/components/blog/blog-feed";
+import { BlogFeed } from "@/features/blog";
 
 export default function SingleIndexPage() {
   return (

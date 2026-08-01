@@ -9,7 +9,7 @@ import {
   type PostResponse,
   useDeletePostMutation,
   useSearchAdminPostsQuery,
-} from "@/lib/features/post/post-api";
+} from "@/features/blog";
 import { openRichText } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
 import { usePortalContainer } from "../use-portal-container";

@@ -13,7 +13,7 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "motion/react";
-import type { PostStatus } from "@/lib/features/post/post-api";
+import type { PostStatus } from "@/features/blog";
 import type { RichTextPublishResult } from "../hooks/use-rich-text-publish";
 import { generateSlug } from "../utils/content-extractors";
 

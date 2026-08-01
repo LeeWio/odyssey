@@ -2,7 +2,7 @@ import type { RichTextEditorValueChangeDetails } from "@heroui-pro/react";
 import type { JSONContent } from "@tiptap/react";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { useAutosavePostMutation } from "@/lib/features/post/post-api";
+import { useAutosavePostMutation } from "@/features/blog";
 import { normalizeJSONContent } from "../utils/document-normalizer";
 
 export function useRichTextAutosave(

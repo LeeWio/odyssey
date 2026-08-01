@@ -2,11 +2,7 @@ import { toast } from "@heroui/react";
 import type { JSONContent } from "@tiptap/react";
 import { useState } from "react";
 import { useGetCategoriesQuery } from "@/lib/features/category/category-api";
-import {
-  type PostStatus,
-  useCreatePostMutation,
-  useUpdatePostMutation,
-} from "@/lib/features/post/post-api";
+import { type PostStatus, useCreatePostMutation, useUpdatePostMutation } from "@/features/blog";
 import { useGetAllTagsQuery } from "@/lib/features/tag/tag-api";
 import { setActiveId, toggleRichText } from "@/lib/features/ui/ui-slice";
 import { useAppDispatch } from "@/lib/hooks";

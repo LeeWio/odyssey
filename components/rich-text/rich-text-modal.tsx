@@ -16,7 +16,7 @@ import {
   useGetAdminPostByIdQuery,
   useUpdatePostMutation,
   type PostRequest,
-} from "@/lib/features/post/post-api";
+} from "@/features/blog";
 
 export function RichTextModal() {
   const { isOpen, activeId } = useAppSelector(selectRichTextState);

@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useRealTime } from "@/hooks/use-real-time";
 import { selectIsSheetOpen, toggleSheet } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { MusicMiniWidget } from "../blog";
+import { MusicMiniWidget } from "@/features/blog";
 import { SunMaxFillIcon } from "../icons";
 import { useThemeSwitch } from "../theme-switch";
 import { AnimatedNumber } from "../ui/animated-number";
@@ -78,7 +78,7 @@ export function SheetPanel() {
                 title="Realize"
                 artist="Yanzi Sun"
                 cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&auto=format&fit=crop&q=60"
-                onPlayChange={(playing) => console.log(playing)}
+                onPlayChange={(playing: boolean) => console.log(playing)}
               />
             </Sheet.Body>
             <Sheet.Footer className="flex! flex-row! flex-wrap items-center justify-center gap-4">

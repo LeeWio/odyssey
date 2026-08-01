@@ -27,7 +27,7 @@ import {
   useModerateCommentMutation,
   usePublishCommentMutation,
 } from "@/lib/features/comment/comment-api";
-import { useGetPublicPostsQuery } from "@/lib/features/post/post-api";
+import { useGetPublicPostsQuery } from "@/features/blog";
 
 // --- Recursive Component for Public Comments ---
 function CommentTreeItem({

@@ -1,5 +1,5 @@
 import { Node, mergeAttributes, ReactNodeViewRenderer } from "@tiptap/react";
-import { MediumImageZoom } from "@/components/blog/medium-image-zoom";
+import { MediumImageZoom } from "@/features/blog";
 
 export const Image = Node.create({
   name: "image",

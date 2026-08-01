@@ -37,7 +37,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { LogIn } from "./auth/log-in";
 import { SignUp } from "./auth/sign-up";
 import { CommandPalette } from "./command-palette";
-import { MoonFillIcon, SearchIcon, SunMaxFillIcon } from "./icons";
+import { Logo, MoonFillIcon, SearchIcon, SunMaxFillIcon } from "./icons";
 import { SmileBallLogo } from "./ui/smile-ball";
 
 type NavigationId = "chronicle" | "daily" | "travelogue" | "more";
@@ -998,14 +998,8 @@ export const Navbar = () => {
             className="justify-self-start"
             whileTap={reduceMotion ? undefined : { scale: 0.97 }}
           >
-            <Link
-              href="/"
-              onClick={closeNavigation}
-              className="outline-focus-ring flex h-10 shrink-0 items-center gap-2.5 rounded-xl px-2 text-sm font-semibold tracking-[-0.02em]"
-              aria-label="Odyssey home"
-            >
-              <SmileBallLogo size={28} />
-              <span className="hidden sm:inline">Odyssey</span>
+            <Link href="/" onClick={closeNavigation} aria-label="Odyssey home">
+              <Logo size={30} />
             </Link>
           </motion.div>
 

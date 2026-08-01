@@ -28,13 +28,14 @@ import { MotionRichTextEditor } from "@/components/ui";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import type { JSONContent } from "@tiptap/react";
-import type { PostResponse } from "@/lib/features/post/post-api";
+import type { PostResponse } from "@/features/blog";
 import {
+  ArticleTypography,
   useFavoritePostMutation,
   useGetPublicPostBySlugQuery,
   useLikePostMutation,
   useUnlikePostMutation,
-} from "@/lib/features/post/post-api";
+} from "@/features/blog";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 import { ArticleSidebar } from "./article-sidebar";
 
@@ -293,7 +294,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                 </div>
               </>
             ) : (
-              <div className="prose prose-neutral dark:prose-invert max-w-none">
+              <ArticleTypography>
                 {parsedContent ? (
                   <MotionRichTextEditor
                     key={article.content}
@@ -314,7 +315,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                     {article.content || "No content has been published for this chronicle entry."}
                   </p>
                 )}
-              </div>
+              </ArticleTypography>
             )}
           </section>
         </article>

@@ -26,7 +26,7 @@ import { type Key, useCallback, useEffect, useRef, useState } from "react";
 import { useGetCategoriesQuery } from "@/lib/features/category/category-api";
 import { useUploadFileMutation } from "@/lib/features/file/file-api";
 import { useGetAllTagsQuery } from "@/lib/features/tag/tag-api";
-import type { PostRequest, PostStatus } from "@/lib/features/post/post-api";
+import type { PostRequest, PostStatus } from "@/features/blog";
 
 interface RichTextFormProps {
   data: Partial<PostRequest>;

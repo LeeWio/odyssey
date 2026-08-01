@@ -8,7 +8,7 @@ import type { EmblaCarouselType } from "embla-carousel";
 import { motion } from "motion/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { useGetFeaturedPostsQuery, useGetRelatedPostsQuery } from "@/lib/features/post/post-api";
+import { useGetFeaturedPostsQuery, useGetRelatedPostsQuery } from "@/features/blog";
 import { cn } from "@/lib/utils";
 
 const tabs = [

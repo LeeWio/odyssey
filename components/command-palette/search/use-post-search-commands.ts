@@ -14,7 +14,7 @@ import {
   SparklesIcon,
   TargetIcon,
 } from "@/components/icons";
-import { useUnifiedSearchQuery } from "@/lib/features/post/post-api";
+import { useUnifiedSearchQuery } from "@/features/blog";
 import { createNavigationCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 

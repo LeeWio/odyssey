@@ -1,36 +1,53 @@
-import {
-  Share_Tech_Mono as FontBrutalismBody,
-  Anton as FontBrutalismDisplay,
-  Instrument_Serif as FontDisplay,
-  Geist_Mono as FontMono,
-  Geist as FontSans,
-} from "next/font/google";
+import localFont from "next/font/local";
 
-export const fontSans = FontSans({
-  subsets: ["latin"],
+export const fontSans = localFont({
+  src: [
+    {
+      path: "../fonts/Geist/Geist-VariableFont_wght.ttf",
+      style: "normal",
+    },
+    {
+      path: "../fonts/Geist/Geist-Italic-VariableFont_wght.ttf",
+      style: "italic",
+    },
+  ],
   variable: "--font-sans",
 });
 
-export const fontMono = FontMono({
-  subsets: ["latin"],
+export const fontMono = localFont({
+  src: [
+    {
+      path: "../fonts/Geist_Mono/GeistMono-VariableFont_wght.ttf",
+      style: "normal",
+    },
+    {
+      path: "../fonts/Geist_Mono/GeistMono-Italic-VariableFont_wght.ttf",
+      style: "italic",
+    },
+  ],
   variable: "--font-mono",
 });
 
-export const fontDisplay = FontDisplay({
-  subsets: ["latin"],
+export const fontDisplay = localFont({
+  src: [
+    {
+      path: "../fonts/Instrument_Serif/InstrumentSerif-Regular.ttf",
+      style: "normal",
+    },
+    {
+      path: "../fonts/Instrument_Serif/InstrumentSerif-Italic.ttf",
+      style: "italic",
+    },
+  ],
   variable: "--font-display",
-  weight: "400",
-  style: ["normal", "italic"],
 });
 
-export const fontBrutalismBody = FontBrutalismBody({
-  subsets: ["latin"],
+export const fontBrutalismBody = localFont({
+  src: "../fonts/Share_Tech_Mono/ShareTechMono-Regular.ttf",
   variable: "--font-brutalism-body",
-  weight: "400",
 });
 
-export const fontBrutalismDisplay = FontBrutalismDisplay({
-  subsets: ["latin"],
+export const fontBrutalismDisplay = localFont({
+  src: "../fonts/Anton/Anton-Regular.ttf",
   variable: "--font-brutalism-display",
-  weight: "400",
 });
