@@ -1,3 +1,10 @@
+# [1.33.0](https://github.com/LeeWio/odyssey/compare/v1.32.0...v1.33.0) (2026-08-01)
+
+
+### Features
+
+* **blog:** implement high-fidelity blog feed layout and restructure to feature-based architecture ([52ee6d9](https://github.com/LeeWio/odyssey/commit/52ee6d960dc2cde2e2bb3eb233ade1f9a850ff6b)), closes [hi#fidelity](https://github.com/hi/issues/fidelity)
+
 # [1.32.0](https://github.com/LeeWio/odyssey/compare/v1.31.0...v1.32.0) (2026-07-31)
 
 
