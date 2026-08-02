@@ -6,23 +6,22 @@ import { ChatAttachmentInput, ItemCard, KPI, PromptInput, TrendChip } from "@her
 import Image from "next/image";
 import { MediaPlayButton } from "@/features/media/components/media-play-button";
 import { MediaItem } from "@/features/media/types";
-import { ArrowUp, Paperclip, Target } from "@gravity-ui/icons";
+import { ArrowUp, Paperclip } from "@gravity-ui/icons";
 import { useState } from "react";
+import { useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
+import { ArrowDownIcon, ArrowUpIcon } from "@/components/icons";
+import { Icon } from "@iconify/react";
 
-const sparklineUp = [
-  { value: 30 },
-  { value: 35 },
-  { value: 28 },
-  { value: 42 },
-  { value: 38 },
-  { value: 45 },
-  { value: 50 },
-  { value: 48 },
-  { value: 55 },
-  { value: 60 },
-  { value: 58 },
-  { value: 65 },
-];
+const mapSparkline = (data?: number[]) => {
+  if (!data || data.length === 0) return [];
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min;
+
+  return data.map((value) => ({
+    value: range === 0 ? 50 : ((value - min) / range) * 100,
+  }));
+};
 
 const mockSong: MediaItem = {
   id: "1",
@@ -54,6 +53,13 @@ const mockSong: MediaItem = {
 
 export default function Home() {
   const [value] = useState("");
+
+  const { data: nasdaqData } = useGetMarketIndexBySymbolQuery(
+    { symbol: ".ixic", period: "1D" },
+    { pollingInterval: 300000, refetchOnFocus: true }
+  );
+
+  const isPositive = (nasdaqData?.changePct || 0) >= 0;
 
   return (
     <main className="bg-background relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-6">
@@ -92,7 +98,7 @@ export default function Home() {
           type="h1"
           weight="bold"
           color="default"
-          className="text-[clamp(2.25rem,5vw,4rem)] leading-[1.1] tracking-[-0.03em]"
+          className="from-foreground via-foreground to-accent bg-linear-to-r bg-clip-text text-[clamp(2.25rem,5vw,4rem)] leading-[1.1] tracking-[-0.03em] text-transparent"
           initial={{
             opacity: 0,
             y: 18,
@@ -205,22 +211,29 @@ export default function Home() {
           className="absolute top-[28%] right-[12%] rotate-[8deg]"
         >
           <KPI.Header>
-            <Target className="text-muted size-4" />
+            <Icon icon="gravity-ui:target-dart" className="text-muted size-4" />
             <KPI.Title>NASDAQ</KPI.Title>
           </KPI.Header>
           <KPI.Content className="w-92 grid-cols-[1fr_1fr] items-end">
             <div className="flex flex-col gap-1">
-              <KPI.Value className="text-3xl" maximumFractionDigits={2} value={25373.85} />
+              <KPI.Value
+                className="text-3xl"
+                maximumFractionDigits={2}
+                value={nasdaqData?.current || 0}
+              />
               <div className="flex items-center gap-1.5">
-                <TrendChip trend="up" variant="tertiary">
-                  3.5%
-                  <TrendChip.Suffix>last 30d</TrendChip.Suffix>
+                <TrendChip trend={isPositive ? "up" : "down"} variant="tertiary">
+                  <TrendChip.Indicator>
+                    {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                  </TrendChip.Indicator>
+                  {Math.abs(nasdaqData?.changePct || 0).toFixed(2)}%
+                  <TrendChip.Suffix>today</TrendChip.Suffix>
                 </TrendChip>
               </div>
             </div>
             <KPI.Chart
               color="var(--color-accent)"
-              data={sparklineUp}
+              data={mapSparkline(nasdaqData?.sparkline)}
               height={60}
               strokeWidth={1.5}
             />
