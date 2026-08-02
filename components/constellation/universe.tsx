@@ -63,10 +63,9 @@ function UniverseContent() {
         <group key={constellation.id} position={constellation.position}>
           {constellation.stars.map((star) => (
             <StarMesh
-              key={star.id}
+              key={star.name}
               name={star.name}
               position={star.position}
-              weight={star.weight}
               activity={star.activity}
               modelPath={star.modelPath}
             />

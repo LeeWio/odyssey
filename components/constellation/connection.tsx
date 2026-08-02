@@ -1,6 +1,6 @@
 "use client";
 
-import { QuadraticBezierLine, Sparkles } from "@react-three/drei";
+import { QuadraticBezierLine, Sparkles, type QuadraticBezierLineRef } from "@react-three/drei";
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -13,7 +13,8 @@ interface ConnectionProps {
 }
 
 export function Connection({ start, end, color = "#44aaff", opacity = 0.3 }: ConnectionProps) {
-  const lineRef = useRef<THREE.Mesh & { dashOffset: number }>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const lineRef = useRef<any>(null);
 
   // 3. Gravity Link: Bezier curve mid-point
   const mid = useMemo(() => {

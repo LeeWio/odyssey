@@ -3,9 +3,10 @@
 import { Skeleton } from "@heroui/react";
 import { KPI, Segment, TrendChip } from "@heroui-pro/react";
 import { useState } from "react";
-import type { Key } from "react-aria-components";
+import { type Key } from "react-aria-components";
 import { ArrowDownIcon, ArrowUpIcon, FileTextIcon, TargetIcon } from "@/components/icons";
 import { type MarketPeriod, useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
+import { type IconSvgProps } from "@/types";
 
 const mapSparkline = (data?: number[]) => {
   if (!data || data.length === 0) return [];
@@ -38,7 +39,7 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
     }
   );
 
-  const Icon = config.icon;
+  const Icon = config.icon as React.ElementType<IconSvgProps>;
 
   if (isLoading && !indexData) {
     return (

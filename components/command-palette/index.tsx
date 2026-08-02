@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { HighlightedText } from "@/components/highlighted-text";
 import { MagnifierIcon, SparklesIcon } from "@/components/icons";
+import { type IconSvgProps } from "@/types";
 import { useAdminCommands } from "./admin/use-admin-commands";
 import { buildCommandSearchText, filterCommands } from "./command-model";
 import { usePostSearchCommands } from "./search/use-post-search-commands";
@@ -289,7 +290,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                   {group.commands
                     .filter((command) => isSearching || command.defaultVisible)
                     .map((command) => {
-                      const Icon = command.icon;
+                      const Icon = command.icon as React.ElementType<IconSvgProps>;
                       const showDescription =
                         shouldShowDescription(command) && Boolean(command.description);
 

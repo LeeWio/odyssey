@@ -72,8 +72,7 @@ export const MiniPlayer: React.FC = () => {
                 <Button
                   isIconOnly
                   size="sm"
-                  variant="tertiary"
-                  color={shuffle ? "primary" : "default"}
+                  variant={shuffle ? "primary" : "tertiary"}
                   onClick={toggleShuffle}
                 >
                   <Shuffle size={16} />
