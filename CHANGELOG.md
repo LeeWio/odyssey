@@ -1,3 +1,10 @@
+## [1.34.1](https://github.com/LeeWio/odyssey/compare/v1.34.0...v1.34.1) (2026-08-02)
+
+
+### Bug Fixes
+
+* resolve typescript and lint errors for production build ([7ab70e1](https://github.com/LeeWio/odyssey/commit/7ab70e171a1b068a75e8d7b370b48c93f996a237))
+
 # [1.34.0](https://github.com/LeeWio/odyssey/compare/v1.33.0...v1.34.0) (2026-08-02)
 
 
