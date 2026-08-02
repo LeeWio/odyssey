@@ -1,3 +1,11 @@
+# [1.34.0](https://github.com/LeeWio/odyssey/compare/v1.33.0...v1.34.0) (2026-08-02)
+
+
+### Features
+
+* **home:** use real NASDAQ data for MotionKPI ([2c01a98](https://github.com/LeeWio/odyssey/commit/2c01a98b3e74d138d4913d3e6b184e9c0e61a519))
+* implement media player and constellations modules ([e31484f](https://github.com/LeeWio/odyssey/commit/e31484fb573abf222e68d11472af1607c3fc5b29))
+
 # [1.33.0](https://github.com/LeeWio/odyssey/compare/v1.32.0...v1.33.0) (2026-08-01)
 
 
