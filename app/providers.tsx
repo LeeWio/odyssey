@@ -10,6 +10,7 @@ import { Provider as ReduxProvider } from "react-redux";
 import { selectThemeVariant, setThemeVariant } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { makeStore } from "@/lib/store";
+import { MediaProvider } from "@/features/media/context/media-provider";
 import {
   coerceResolvedThemeMode,
   coerceThemeMode,
@@ -137,7 +138,7 @@ export function Providers({ children, lang, messages, themeProps }: ProvidersPro
             {...themeProps}
           >
             <ThemeRootSync />
-            {children}
+            <MediaProvider>{children}</MediaProvider>
           </NextThemesProvider>
         </ReduxProvider>
       </NextIntlClientProvider>
