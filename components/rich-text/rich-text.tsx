@@ -6,6 +6,8 @@ import type { JSONContent } from "@tiptap/react";
 import { selectRichTextState } from "@/lib/features";
 import { useAppSelector } from "@/lib/hooks";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
+import { ExtensionKit } from "./extensions/extension-kit";
+import { TextMenu } from "./menus/text-menu/text-menu";
 
 export interface RichTextProps {
   onReady?: (editor: Editor) => void;
@@ -19,7 +21,9 @@ export function RichText({ onReady, content }: RichTextProps) {
 
   return (
     <RichTextEditor
+      extensions={ExtensionKit}
       editorOptions={{
+        extensions: ExtensionKit,
         autofocus: true,
         onCreate: ({ editor }) => {
           onReady?.(editor);
@@ -31,7 +35,8 @@ export function RichText({ onReady, content }: RichTextProps) {
     >
       <RichTextEditor.Shell className="flex h-full flex-1 flex-col overflow-hidden border-none bg-transparent">
         <FixedToolbar />
-        <RichTextEditor.Content className="min-h-0 flex-1 scrollbar-none overflow-y-auto outline-none focus:outline-none" />
+        <TextMenu />
+        <RichTextEditor.Content className="min-h-0 flex-1 scrollbar-none overflow-y-auto outline-none focus:outline-none [&.resize-cursor]:cursor-col-resize" />
 
         {/* <RichTextEditor.Footer className="flex shrink-0 items-center justify-between select-none">
           <span>JSON-first editor state</span>

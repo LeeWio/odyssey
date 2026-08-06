@@ -3,6 +3,7 @@
 import { Button, Dropdown, Label, Tooltip } from "@heroui/react";
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
+import { TableSelector } from "./table-selector";
 
 export function FixedToolbar() {
   const { editor } = useRichTextEditor();
@@ -19,6 +20,9 @@ export function FixedToolbar() {
       </RichTextEditor.ToolbarGroup>
       <RichTextEditor.ToolbarSeparator />
       <RichTextEditor.ToolbarGroup aria-label="Text Formatting">
+        <RichTextEditor.ToggleButton command="heading-1" tooltip="Heading 1">
+          <Icon icon="gravity-ui:heading-1" />
+        </RichTextEditor.ToggleButton>
         <RichTextEditor.ToggleButton command="bold" tooltip="Bold">
           <Icon icon="gravity-ui:bold" />
         </RichTextEditor.ToggleButton>
@@ -49,6 +53,12 @@ export function FixedToolbar() {
         <RichTextEditor.ToggleButton command="codeBlock" tooltip="Code Block">
           <Icon icon="gravity-ui:curly-brackets" />
         </RichTextEditor.ToggleButton>
+
+        <TableSelector
+          onSelect={(rows, cols) => {
+            editor?.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
+          }}
+        />
 
         <Dropdown>
           <Tooltip delay={0}>

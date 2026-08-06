@@ -1,4 +1,5 @@
 import {
+  BlockFormatTransition,
   Column,
   Columns,
   Document,
@@ -10,7 +11,11 @@ import {
   Paragraph,
   Subscript,
   Superscript,
+  Table,
+  TableCell,
+  TableHeader,
   TableOfContents,
+  TableRow,
   Text,
   TextAlign,
   TextStyleKit,
@@ -18,6 +23,7 @@ import {
 } from ".";
 
 export const ExtensionKit = [
+  BlockFormatTransition,
   Link,
   Image,
   Document,
@@ -33,5 +39,11 @@ export const ExtensionKit = [
   Indent,
   Column,
   Columns,
+  Table.configure({
+    resizable: true,
+  }),
+  TableRow,
+  TableHeader,
+  TableCell,
   TableOfContents,
 ];
