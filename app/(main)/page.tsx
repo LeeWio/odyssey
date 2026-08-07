@@ -38,7 +38,7 @@ const mockSong: MediaItem = {
     },
     {
       id: "track-2",
-      title: "Example Song 2",
+      title: "Example1 Song 2",
       artist: "Artist 2",
       src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
     },
