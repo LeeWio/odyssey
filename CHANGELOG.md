@@ -1,3 +1,10 @@
+# [1.35.0](https://github.com/LeeWio/odyssey/compare/v1.34.1...v1.35.0) (2026-08-07)
+
+
+### Features
+
+* **rich-text:** add block transitions and tables ([ebe9f94](https://github.com/LeeWio/odyssey/commit/ebe9f942664ce100b796747bc34fa245796eb583))
+
 ## [1.34.1](https://github.com/LeeWio/odyssey/compare/v1.34.0...v1.34.1) (2026-08-02)
 
 
