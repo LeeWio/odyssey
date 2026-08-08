@@ -1,3 +1,10 @@
+## [1.37.1](https://github.com/LeeWio/odyssey/compare/v1.37.0...v1.37.1) (2026-08-08)
+
+
+### Bug Fixes
+
+* **navbar:** restore mobile auth actions ([411e7b4](https://github.com/LeeWio/odyssey/commit/411e7b410e81f4d5ce759448b7f8fa9666af9caf))
+
 # [1.37.0](https://github.com/LeeWio/odyssey/compare/v1.36.0...v1.37.0) (2026-08-08)
 
 
