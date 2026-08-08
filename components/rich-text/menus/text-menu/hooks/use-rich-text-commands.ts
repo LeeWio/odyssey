@@ -30,6 +30,16 @@ export function useRichTextCommands() {
     unsetTextColor: () => editor?.chain().focus().unsetColor().run(),
     setBackgroundColor: (color: string) => editor?.chain().focus().setBackgroundColor(color).run(),
     unsetBackgroundColor: () => editor?.chain().focus().unsetBackgroundColor().run(),
+    convertSelectionToInlineMath: () => {
+      if (!editor || editor.state.selection.empty) return false;
+
+      const { from, to } = editor.state.selection;
+      const latex = editor.state.doc.textBetween(from, to, " ").trim();
+
+      if (!latex) return false;
+
+      return editor.chain().focus().deleteSelection().insertInlineMath({ latex }).run();
+    },
     indent: () => {
       if (!editor) return;
       if (editor.isActive("bulletList") || editor.isActive("orderedList")) {

@@ -2,6 +2,7 @@
 
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
+import { MathInsertPopover } from "./math-insert-popover";
 import { MultiColumnMenu } from "./multi-column-menu";
 import { TableSelector } from "./table-selector";
 
@@ -53,6 +54,8 @@ export function FixedToolbar() {
         <RichTextEditor.ToggleButton command="codeBlock" tooltip="Code Block">
           <Icon icon="gravity-ui:curly-brackets" />
         </RichTextEditor.ToggleButton>
+
+        <MathInsertPopover />
 
         <RichTextEditor.CommandButton
           aria-label="Toggle details block"

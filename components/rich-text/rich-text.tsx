@@ -12,6 +12,7 @@ import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
 import { ExtensionKit, createExtensionKit } from "./extensions/extension-kit";
 import { ColumnsMenu } from "./menus/columns-menu/columns-menu";
 import { ImageMenu } from "./menus/image-menu/image-menu";
+import { MathMenu } from "./menus/math-menu";
 import { TextMenu } from "./menus/text-menu/text-menu";
 import { RichTextTableOfContents } from "./table-of-contents";
 
@@ -57,6 +58,7 @@ export function RichText({ content, onReady, showTableOfContents = false }: Rich
         <FixedToolbar />
         <TextMenu />
         <ImageMenu />
+        <MathMenu />
         <ColumnsMenu />
         <RichTextEditor.Content
           id={scrollContainerId}

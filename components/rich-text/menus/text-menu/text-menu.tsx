@@ -57,6 +57,13 @@ export function TextMenu() {
           <RichTextEditor.ToggleButton command="code" tooltip="Code">
             <Icon icon="gravity-ui:code" />
           </RichTextEditor.ToggleButton>
+          <RichTextEditor.CommandButton
+            aria-label="Convert selection to formula"
+            tooltip="Convert to formula"
+            onCommand={commands.convertSelectionToInlineMath}
+          >
+            <Icon aria-hidden="true" icon="gravity-ui:function" />
+          </RichTextEditor.CommandButton>
         </RichTextEditor.ToolbarGroup>
 
         <RichTextEditor.ToolbarSeparator orientation="vertical" />

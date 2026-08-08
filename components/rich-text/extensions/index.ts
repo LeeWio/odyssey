@@ -3,6 +3,7 @@ export { BlockFormatTransition } from "./block-format-transition";
 export { Details, DetailsContent, DetailsKit, DetailsSummary } from "./details";
 export { Indent } from "./indent";
 export { Image } from "./image";
+export { Mathematics } from "./mathematics";
 export { Column, Columns } from "./multi-column";
 export { TableKit } from "./table";
 export { Subscript } from "./subscript";
