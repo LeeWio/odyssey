@@ -1,3 +1,16 @@
+# [1.36.0](https://github.com/LeeWio/odyssey/compare/v1.35.1...v1.36.0) (2026-08-08)
+
+
+### Bug Fixes
+
+* **rich-text:** render columns horizontally ([7f42d4f](https://github.com/LeeWio/odyssey/commit/7f42d4fe50117c789f744a7a6e243fed5ac4b5c9))
+
+
+### Features
+
+* **editor:** enhance rich text extensions ([15af550](https://github.com/LeeWio/odyssey/commit/15af5505f45d184e66ac8ce0fe6342329cc2ae01))
+* **rich-text:** harden editor extensions ([6b4dba8](https://github.com/LeeWio/odyssey/commit/6b4dba840fddb3324d2ac0af08f7ee532764f372))
+
 ## [1.35.1](https://github.com/LeeWio/odyssey/compare/v1.35.0...v1.35.1) (2026-08-08)
 
 
