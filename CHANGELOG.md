@@ -1,3 +1,10 @@
+## [1.35.1](https://github.com/LeeWio/odyssey/compare/v1.35.0...v1.35.1) (2026-08-08)
+
+
+### Bug Fixes
+
+* **web:** use canonical API paths ([42cfb1a](https://github.com/LeeWio/odyssey/commit/42cfb1ab4675f68290e5881994938839f7704013))
+
 # [1.35.0](https://github.com/LeeWio/odyssey/compare/v1.34.1...v1.35.0) (2026-08-07)
 
 
