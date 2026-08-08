@@ -906,6 +906,19 @@ export const Navbar = () => {
     window.setTimeout(() => dispatch(setLoginOpen(true)), 220);
   };
 
+  const openAuthFromMobileMenu = (mode: "login" | "signup") => {
+    cancelClose();
+    cancelPreview();
+    setActiveNavigation(null);
+    setIsLocked(false);
+    setIsMobileMenuOpen(false);
+
+    window.setTimeout(
+      () => dispatch(mode === "login" ? setLoginOpen(true) : setSignUpOpen(true)),
+      reduceMotion ? 0 : 220
+    );
+  };
+
   const isNavigationOpen = Boolean(activeItem || isMobileMenuOpen);
   const hasGlassSurface = isCompact || isNavigationOpen;
   const glassBackground =
@@ -1461,6 +1474,21 @@ export const Navbar = () => {
                           </Button>
                         </motion.div>
                       </div>
+
+                      {mounted && !isAuthenticated && (
+                        <div className="mt-5 grid grid-cols-2 gap-2">
+                          <Button
+                            fullWidth
+                            variant="secondary"
+                            onPress={() => openAuthFromMobileMenu("login")}
+                          >
+                            Sign in
+                          </Button>
+                          <Button fullWidth onPress={() => openAuthFromMobileMenu("signup")}>
+                            Create account
+                          </Button>
+                        </div>
+                      )}
                     </motion.div>
                   ) : (
                     <Button
