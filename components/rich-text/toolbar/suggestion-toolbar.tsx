@@ -2,7 +2,7 @@ import { Heading1, ListUl, QuoteOpen, Sparkles } from "@gravity-ui/icons";
 import type { RichTextEditorSuggestionItem } from "@heroui-pro/react";
 import { filterRichTextEditorSuggestionItems, RichTextEditor } from "@heroui-pro/react";
 
-const iconClassName = "";
+const iconClassName = "size-4";
 
 const getSlashItems = ({ query }: { query: string }): RichTextEditorSuggestionItem[] =>
   filterRichTextEditorSuggestionItems(
@@ -17,13 +17,7 @@ const getSlashItems = ({ query }: { query: string }): RichTextEditorSuggestionIt
       },
       {
         command: ({ editor, range }) => {
-          (
-            editor.chain().focus().deleteRange(range) as unknown as {
-              toggleBulletList: () => { run: () => void };
-            }
-          )
-            .toggleBulletList()
-            .run();
+          editor.chain().focus().deleteRange(range).toggleBulletList().run();
         },
         icon: <ListUl className={iconClassName} />,
         keywords: ["list", "bullet"],
@@ -31,13 +25,7 @@ const getSlashItems = ({ query }: { query: string }): RichTextEditorSuggestionIt
       },
       {
         command: ({ editor, range }) => {
-          (
-            editor.chain().focus().deleteRange(range) as unknown as {
-              toggleBlockquote: () => { run: () => void };
-            }
-          )
-            .toggleBlockquote()
-            .run();
+          editor.chain().focus().deleteRange(range).toggleBlockquote().run();
         },
         icon: <QuoteOpen className={iconClassName} />,
         keywords: ["quote", "note"],
@@ -69,5 +57,7 @@ const getSlashItems = ({ query }: { query: string }): RichTextEditorSuggestionIt
   );
 
 export function SuggestionToolbar() {
-  return <RichTextEditor.SuggestionMenu char="/" items={getSlashItems} />;
+  return (
+    <RichTextEditor.SuggestionMenu char="/" items={getSlashItems} pluginKey="slash-command-menu" />
+  );
 }

@@ -1,56 +1,39 @@
 "use client";
 
 import { FloatingToc, useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
-import type { Editor as CoreEditor } from "@tiptap/core";
+import type { TableOfContentDataItem } from "@tiptap/extension-table-of-contents";
 import { TextSelection } from "@tiptap/pm/state";
 import type React from "react";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 
-export interface TableOfContentsAnchor {
-  id: string;
-  textContent: string;
-  originalLevel: number;
-  level: number;
-  isActive: boolean;
-  pos: number;
-  itemIndex?: number;
-}
+export type TableOfContentsAnchor = TableOfContentDataItem;
+
+const EMPTY_TABLE_OF_CONTENTS: TableOfContentsAnchor[] = [];
 
 export type TableOfContentsProps = {
-  editor?: CoreEditor; // Explicit editor prop to support rendering anywhere outside editor context
   placement?: "left" | "right";
   onItemClick?: () => void;
 };
 
 export const RichTextTableOfContents = memo(
-  ({
-    editor: propEditor,
-    placement = "right",
-    onItemClick: propOnItemClick,
-  }: TableOfContentsProps) => {
-    // 1. Dual-mode fallback: Read editor from react context if no explicit editor prop is passed
-    const contextEditor = useRichTextEditor().editor;
-    const activeEditor = propEditor || contextEditor;
+  ({ placement = "right", onItemClick: propOnItemClick }: TableOfContentsProps) => {
+    const { editor } = useRichTextEditor();
 
-    // 2. Reactively subscribe to ToC anchor state on editor transactions using official HeroUI Pro state hook
+    // Subscribe through HeroUI Pro so the table of contents follows editor transactions.
     const items =
       useRichTextEditorState((state) => {
-        const rawAnchors = state.editor.storage.tableOfContents?.anchors || [];
-        return rawAnchors as unknown as TableOfContentsAnchor[];
-      }) || [];
+        return state.editor.storage.tableOfContents?.content;
+      }) || EMPTY_TABLE_OF_CONTENTS;
 
     const [scrollActiveId, setScrollActiveId] = useState<string>("");
+    const observedIds = useMemo(() => items.map((item) => item.id), [items]);
 
-    // Sync the latest items to a stable Ref to bypass re-observe triggers on every render cycle
-    const itemsRef = useRef<TableOfContentsAnchor[]>(items);
+    // Keep the active item synchronized with headings visible in the viewport.
     useEffect(() => {
-      itemsRef.current = items;
-    });
-
-    // 3. Robust Intersection Observer to calculate scrollActiveId based on global window scroll viewport entry
-    useEffect(() => {
-      const currentItems = itemsRef.current;
-      if (!currentItems || currentItems.length === 0) return;
+      if (observedIds.length === 0) {
+        setScrollActiveId("");
+        return;
+      }
 
       const observer = new IntersectionObserver(
         (entries) => {
@@ -65,38 +48,37 @@ export const RichTextTableOfContents = memo(
         }
       );
 
-      currentItems.forEach((item) => {
-        const el = document.getElementById(item.id);
+      observedIds.forEach((id) => {
+        const el = document.getElementById(id);
         if (el) observer.observe(el);
       });
 
       return () => {
         observer.disconnect();
       };
-    }, []);
+    }, [observedIds]);
 
-    if (!activeEditor || items.length === 0) {
+    if (!editor || items.length === 0) {
       return null;
     }
 
-    // 4. 100% faithful port of the provided onItemClick logic
     const onItemClick = (e: React.MouseEvent, id: string) => {
       e.preventDefault();
 
-      if (activeEditor) {
-        const element = activeEditor.view.dom.querySelector(`[data-toc-id="${id}"]`);
+      if (editor) {
+        const element = editor.view.dom.querySelector(`[data-toc-id="${id}"]`);
 
         if (element) {
-          const pos = activeEditor.view.posAtDOM(element, 0);
+          const pos = editor.view.posAtDOM(element, 0);
 
           // set focus
-          const tr = activeEditor.view.state.tr;
+          const tr = editor.view.state.tr;
 
           tr.setSelection(new TextSelection(tr.doc.resolve(pos)));
 
-          activeEditor.view.dispatch(tr);
+          editor.view.dispatch(tr);
 
-          activeEditor.view.focus();
+          editor.view.focus();
 
           if (history.pushState) {
             history.pushState(null, "", `#${id}`);

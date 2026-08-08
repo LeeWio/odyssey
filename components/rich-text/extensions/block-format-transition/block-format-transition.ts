@@ -2,8 +2,15 @@ import { Extension } from "@tiptap/core";
 import type { Node as ProseMirrorNode, ResolvedPos } from "@tiptap/pm/model";
 import type { Selection, Transaction } from "@tiptap/pm/state";
 
-const ANIMATION_DURATION_MS = 200;
-const ANIMATION_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
+export interface BlockFormatTransitionOptions {
+  duration: number;
+  easing: string;
+}
+
+interface BlockFormatTransitionStorage {
+  activeAnimations: Set<Animation>;
+  animationsByElement: WeakMap<HTMLElement, Animation>;
+}
 
 interface TypographySnapshot {
   fontSize: string;
@@ -60,8 +67,12 @@ function normalizeLetterSpacing(value: string): string {
   return value === "normal" ? "0px" : value;
 }
 
-function readTypography(element: HTMLElement): TypographySnapshot {
-  const style = getComputedStyle(element);
+function isHTMLElement(node: Node | null): node is HTMLElement {
+  return node !== null && node.nodeType === 1;
+}
+
+function readTypography(element: HTMLElement, editorWindow: Window): TypographySnapshot {
+  const style = editorWindow.getComputedStyle(element);
 
   return {
     fontSize: style.fontSize,
@@ -71,8 +82,8 @@ function readTypography(element: HTMLElement): TypographySnapshot {
   };
 }
 
-function shouldReduceMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function shouldReduceMotion(editorWindow: Window): boolean {
+  return editorWindow.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 function toKeyframe(snapshot: TypographySnapshot): Keyframe {
@@ -87,7 +98,8 @@ function toKeyframe(snapshot: TypographySnapshot): Keyframe {
 function collectBlockTransitions(
   transaction: Transaction,
   previousSelection: Selection,
-  editorElementAt: (position: number) => Node | null
+  editorElementAt: (position: number) => Node | null,
+  editorWindow: Window
 ): BlockTransition[] {
   return getSelectedTextblockPositions(transaction.before, previousSelection)
     .map((position): BlockTransition | null => {
@@ -103,28 +115,49 @@ function collectBlockTransitions(
 
       const element = editorElementAt(position);
 
-      if (!(element instanceof HTMLElement)) {
+      if (!isHTMLElement(element)) {
         return null;
       }
 
       return {
         expectedFormat: nextFormat,
-        from: readTypography(element),
+        from: readTypography(element, editorWindow),
         nextPosition,
       };
     })
     .filter((transition): transition is BlockTransition => transition !== null);
 }
 
-export const BlockFormatTransition = Extension.create({
+export const BlockFormatTransition = Extension.create<
+  BlockFormatTransitionOptions,
+  BlockFormatTransitionStorage
+>({
   name: "blockFormatTransition",
   priority: 1000,
 
+  addOptions() {
+    return {
+      duration: 200,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+    };
+  },
+
+  addStorage() {
+    return {
+      activeAnimations: new Set<Animation>(),
+      animationsByElement: new WeakMap<HTMLElement, Animation>(),
+    };
+  },
+
   dispatchTransaction({ transaction, next }) {
+    const editorDocument = this.editor.view.dom.ownerDocument;
+    const editorWindow = editorDocument.defaultView;
+
     if (
-      typeof window === "undefined" ||
-      shouldReduceMotion() ||
-      document.visibilityState === "hidden"
+      !transaction.docChanged ||
+      !editorWindow ||
+      shouldReduceMotion(editorWindow) ||
+      editorDocument.visibilityState === "hidden"
     ) {
       next(transaction);
       return;
@@ -133,7 +166,8 @@ export const BlockFormatTransition = Extension.create({
     const transitions = collectBlockTransitions(
       transaction,
       this.editor.state.selection,
-      (position) => this.editor.view.nodeDOM(position)
+      (position) => this.editor.view.nodeDOM(position),
+      editorWindow
     );
 
     next(transaction);
@@ -142,21 +176,39 @@ export const BlockFormatTransition = Extension.create({
       const nextElement = this.editor.view.nodeDOM(nextPosition);
       const nextNode = this.editor.state.doc.nodeAt(nextPosition);
 
-      if (
-        !(nextElement instanceof HTMLElement) ||
-        getFormatSignature(nextNode) !== expectedFormat
-      ) {
+      if (!isHTMLElement(nextElement) || getFormatSignature(nextNode) !== expectedFormat) {
         return;
       }
 
-      const to = readTypography(nextElement);
+      const to = readTypography(nextElement, editorWindow);
+      const previousAnimation = this.storage.animationsByElement.get(nextElement);
 
-      nextElement.getAnimations().forEach((animation) => animation.cancel());
-      nextElement.animate([toKeyframe(from), toKeyframe(to)], {
-        duration: ANIMATION_DURATION_MS,
-        easing: ANIMATION_EASING,
+      previousAnimation?.cancel();
+
+      const animation = nextElement.animate([toKeyframe(from), toKeyframe(to)], {
+        duration: this.options.duration,
+        easing: this.options.easing,
       });
+
+      this.storage.activeAnimations.add(animation);
+      this.storage.animationsByElement.set(nextElement, animation);
+
+      const cleanup = () => {
+        this.storage.activeAnimations.delete(animation);
+
+        if (this.storage.animationsByElement.get(nextElement) === animation) {
+          this.storage.animationsByElement.delete(nextElement);
+        }
+      };
+
+      animation.addEventListener("finish", cleanup, { once: true });
+      animation.addEventListener("cancel", cleanup, { once: true });
     });
+  },
+
+  onDestroy() {
+    this.storage.activeAnimations.forEach((animation) => animation.cancel());
+    this.storage.activeAnimations.clear();
   },
 });
 

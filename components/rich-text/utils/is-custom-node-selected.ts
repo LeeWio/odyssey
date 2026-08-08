@@ -1,5 +1,4 @@
 import type { Editor } from "@tiptap/react";
-import { HorizontalRule, Link } from "../extensions";
 
 export const isTableGripSelected = (node: HTMLElement | null) => {
   let container: HTMLElement | null = node;
@@ -15,7 +14,7 @@ export const isTableGripSelected = (node: HTMLElement | null) => {
 };
 
 export const isCustomNodeSelected = (editor: Editor, node: HTMLElement | null) => {
-  const customNodes = [Link.name, HorizontalRule.name];
+  const customNodes = ["link", "horizontalRule"];
 
   const isActive = customNodes.some((type) => editor.isActive(type));
 

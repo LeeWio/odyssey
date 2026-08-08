@@ -10,9 +10,10 @@ interface MediumImageZoomProps {
   src: string;
   alt: string;
   className?: string;
+  unoptimized?: boolean;
 }
 
-export function MediumImageZoom({ src, alt, className }: MediumImageZoomProps) {
+export function MediumImageZoom({ src, alt, className, unoptimized }: MediumImageZoomProps) {
   const [isZoomed, setIsZoomed] = useState(false);
 
   const toggleZoom = useCallback(() => {
@@ -44,6 +45,7 @@ export function MediumImageZoom({ src, alt, className }: MediumImageZoomProps) {
           alt={alt}
           width={800}
           height={450}
+          unoptimized={unoptimized}
           className="h-auto w-full transition-opacity duration-300 hover:opacity-90"
         />
       </div>
@@ -67,7 +69,14 @@ export function MediumImageZoom({ src, alt, className }: MediumImageZoomProps) {
                 className="relative h-[90vh] w-[90vw]"
                 onClick={(e) => e.stopPropagation()}
               >
-                <Image src={src} alt={alt} fill className="object-contain" priority />
+                <Image
+                  src={src}
+                  alt={alt}
+                  fill
+                  className="object-contain"
+                  priority
+                  unoptimized={unoptimized}
+                />
               </motion.div>
             </motion.div>
           </AnimatePresence>,

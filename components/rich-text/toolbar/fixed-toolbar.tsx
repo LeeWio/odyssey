@@ -1,8 +1,9 @@
 "use client";
 
-import { Button, Dropdown, Label, Tooltip } from "@heroui/react";
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
+import { ImageInsertPopover } from "./image-insert-popover";
+import { MultiColumnMenu } from "./multi-column-menu";
 import { TableSelector } from "./table-selector";
 
 export function FixedToolbar() {
@@ -54,50 +55,15 @@ export function FixedToolbar() {
           <Icon icon="gravity-ui:curly-brackets" />
         </RichTextEditor.ToggleButton>
 
+        <ImageInsertPopover />
+
         <TableSelector
           onSelect={(rows, cols) => {
             editor?.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
           }}
         />
 
-        <Dropdown>
-          <Tooltip delay={0}>
-            <Button aria-label="Multi-column Layout" isIconOnly size="sm" variant="ghost">
-              <Icon icon="lucide:columns" className="h-4 w-4" />
-            </Button>
-            <Tooltip.Content>Multi-column Layout</Tooltip.Content>
-          </Tooltip>
-          <Dropdown.Popover>
-            <Dropdown.Menu>
-              <Dropdown.Item
-                id="cols-2"
-                textValue="2 Columns"
-                onAction={() => editor?.chain().focus().setColumns(2).run()}
-              >
-                <Icon
-                  icon="lucide:columns-2"
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                  data-slot="icon"
-                />
-                <Label>2 Columns</Label>
-              </Dropdown.Item>
-              <Dropdown.Item
-                id="cols-3"
-                textValue="3 Columns"
-                onAction={() => editor?.chain().focus().setColumns(3).run()}
-              >
-                <Icon
-                  icon="lucide:columns-3"
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                  data-slot="icon"
-                />
-                <Label>3 Columns</Label>
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown.Popover>
-        </Dropdown>
+        <MultiColumnMenu />
       </RichTextEditor.ToolbarGroup>
     </RichTextEditor.Toolbar>
   );

@@ -1,6 +1,5 @@
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { useCallback, useState } from "react";
-import { Link as LinkExtension } from "@/components/rich-text/extensions";
 import { LinkMenuEdit } from "./link-menu-edit";
 import { LinkMenuPreview } from "./link-menu-preview";
 
@@ -11,7 +10,7 @@ export function LinkMenu() {
 
   const shouldShow = useCallback(() => {
     if (!editor) return false;
-    return editor.isActive(LinkExtension.name) && editor.isEditable;
+    return editor.isActive("link") && editor.isEditable;
   }, [editor]);
 
   const handleEdit = () => setMode("edit");

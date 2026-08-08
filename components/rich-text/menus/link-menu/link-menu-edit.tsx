@@ -41,13 +41,18 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
     }
 
     if (url) {
-      editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href: url, target: openInNewTab ? "_blank" : null })
+        .run();
     } else {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
     }
 
     onCancel?.();
-  }, [editor, url, onCancel]);
+  }, [editor, onCancel, openInNewTab, url]);
 
   return (
     <>

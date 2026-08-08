@@ -8,7 +8,6 @@ import {
   ListBox,
   SearchField,
   Select,
-  Spinner,
   Switch,
   Tag,
   TagGroup,
@@ -86,7 +85,7 @@ function getFormatColor(ext: string): FileFormatColor {
 export function RichTextForm({ data, onChange }: RichTextFormProps) {
   const { data: categories = [] } = useGetCategoriesQuery();
   const { data: tags = [] } = useGetAllTagsQuery();
-  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
+  const [uploadFile] = useUploadFileMutation();
 
   const { contains } = useFilter({ sensitivity: "base" });
 

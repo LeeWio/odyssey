@@ -6,6 +6,38 @@ export const EMPTY_DOC: JSONContent = {
   content: [{ type: "paragraph" }],
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isJSONContentTree(value: unknown): value is JSONContent {
+  const pending: unknown[] = [value];
+
+  while (pending.length > 0) {
+    const node = pending.pop();
+
+    if (!isRecord(node) || typeof node.type !== "string") return false;
+    if (node.text !== undefined && typeof node.text !== "string") return false;
+    if (node.attrs !== undefined && !isRecord(node.attrs)) return false;
+
+    if (node.marks !== undefined) {
+      if (!Array.isArray(node.marks)) return false;
+
+      for (const mark of node.marks) {
+        if (!isRecord(mark) || typeof mark.type !== "string") return false;
+        if (mark.attrs !== undefined && !isRecord(mark.attrs)) return false;
+      }
+    }
+
+    if (node.content !== undefined) {
+      if (!Array.isArray(node.content)) return false;
+      pending.push(...node.content);
+    }
+  }
+
+  return true;
+}
+
 /**
  * Normalizes any potential Tiptap document input, converting invalid or empty
  * structures (like empty '{}' objects, undefined values, or raw JSON strings)
@@ -16,13 +48,16 @@ export const normalizeJSONContent = (value: unknown): JSONContent => {
 
   if (typeof value === "string") {
     try {
-      const parsed = JSON.parse(value);
-      return parsed && parsed.type === "doc" ? parsed : EMPTY_DOC;
+      return normalizeJSONContent(JSON.parse(value));
     } catch {
       return EMPTY_DOC;
     }
   }
 
-  const obj = value as Record<string, unknown>;
-  return obj && obj.type === "doc" ? (obj as JSONContent) : EMPTY_DOC;
+  return isJSONContentTree(value) &&
+    value.type === "doc" &&
+    Array.isArray(value.content) &&
+    value.content.length > 0
+    ? value
+    : EMPTY_DOC;
 };

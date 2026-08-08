@@ -4,13 +4,14 @@ import { Button, Modal, Spinner } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import type { Editor } from "@tiptap/react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { RichText } from "@/components/rich-text/rich-text";
 import { RichTextForm } from "@/components/rich-text/rich-text-form";
 import { MotionButton } from "@/components/ui";
 import { closeRichText, selectRichTextState } from "@/lib/features";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { normalizeJSONContent } from "./utils/document-normalizer";
 import {
   useCreatePostMutation,
   useGetAdminPostByIdQuery,
@@ -50,6 +51,10 @@ export function RichTextModal() {
   const { data: existingPost, isLoading: isFetching } = useGetAdminPostByIdQuery(Number(activeId), {
     skip: !isExistingPost || !isOpen,
   });
+  const editorContent = useMemo(
+    () => normalizeJSONContent(existingPost?.content),
+    [existingPost?.content]
+  );
 
   // Initialize form with existing post data
   useEffect(() => {
@@ -116,7 +121,7 @@ export function RichTextModal() {
 
   return (
     <Modal key={activeId}>
-      <Modal.Backdrop isOpen={isOpen} onOpenChange={handleClose}>
+      <Modal.Backdrop isOpen={true} onOpenChange={handleClose}>
         <Modal.Container size="cover">
           <Modal.Dialog className="relative flex h-full w-full flex-col overflow-hidden">
             {/* Toggle Button */}
@@ -188,7 +193,7 @@ export function RichTextModal() {
                     className="h-full min-w-0 flex-shrink-0"
                   >
                     <RichText
-                      content={existingPost?.content ? JSON.parse(existingPost.content) : undefined}
+                      content={editorContent}
                       onReady={(editor) => {
                         editorRef.current = editor;
                       }}

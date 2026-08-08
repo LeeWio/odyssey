@@ -1,7 +1,6 @@
 import { Button, ButtonGroup, Tooltip } from "@heroui/react";
 import { RichTextEditor, useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { Link as LinkExtension } from "@/components/rich-text/extensions";
 
 interface LinkMenuPreviewProps {
   onEdit: () => void;
@@ -10,9 +9,7 @@ interface LinkMenuPreviewProps {
 export const LinkMenuPreview: React.FC<LinkMenuPreviewProps> = ({ onEdit }) => {
   const { editor } = useRichTextEditor();
 
-  const linkAttributes = useRichTextEditorState((state) =>
-    state.editor.getAttributes(LinkExtension.name)
-  );
+  const linkAttributes = useRichTextEditorState((state) => state.editor.getAttributes("link"));
 
   const truncateStart = (str: string, maxLen: number = 24): string => {
     if (!str || str.length <= maxLen) return str;
@@ -52,7 +49,7 @@ export const LinkMenuPreview: React.FC<LinkMenuPreviewProps> = ({ onEdit }) => {
           isIconOnly
           variant="ghost"
           onCommand={(editor) => {
-            editor.chain().focus().extendMarkRange(LinkExtension.name).unsetLink().run();
+            editor.chain().focus().extendMarkRange("link").unsetLink().run();
           }}
           tooltip="Remove link"
         >

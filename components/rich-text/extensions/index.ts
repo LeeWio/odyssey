@@ -1,15 +1,9 @@
-export { Document } from "@tiptap/extension-document";
-export { Text } from "@tiptap/extension-text";
 export { TextStyleKit } from "@tiptap/extension-text-style";
 export { BlockFormatTransition } from "./block-format-transition";
-export { Heading } from "./heading";
-export { HorizontalRule } from "./horizontal-rule";
 export { Indent } from "./indent";
-export { Link } from "./link";
 export { Image } from "./image";
 export { Column, Columns } from "./multi-column";
-export { Table, TableRow, TableHeader, TableCell } from "./table";
-export { Paragraph } from "./paragraph";
+export { TableKit } from "./table";
 export { Subscript } from "./subscript";
 export { Superscript } from "./superscript";
 export { TableOfContents } from "./table-of-contents";
