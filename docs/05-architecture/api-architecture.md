@@ -9,7 +9,7 @@ API 架构负责隔离前端应用与后端服务、外部服务、本地数据�
 项目当前存在三类 API 接入方式：
 
 - RTK Query：主要业务后端接口。
-- Next.js rewrites：将 `/api/v1/*` 转发到后端服务。
+- 生产入口：Caddy 将 `/api/v1/*` 转发到后端服务；Next.js rewrites 用于不经过 Caddy 的开发和服务端场景。
 - Next.js route handlers：处理轻量代理、外部服务适配或局部演示数据。
 
 ## 统一业务 API 层
@@ -39,6 +39,11 @@ API 架构负责隔离前端应用与后端服务、外部服务、本地数据�
 - 可通过 `API_URL` 覆盖
 
 该设计让浏览器侧代码保持稳定路径，同时允许部署层切换后端地址。
+
+生产环境使用同源 API：`NEXT_PUBLIC_API_BASE_URL` 为空，浏览器直接请求
+`/api/v1/*`。Caddy 还会将 OAuth 授权和回调路径 `/oauth2/*`、
+`/login/oauth2/*` 转发给后端服务；Next.js 也为这两个路径提供相同的
+rewrite 作为不经过 Caddy 时的回退。
 
 ## 响应结构
 

@@ -63,7 +63,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
     if (typeof window !== "undefined") {
       localStorage.setItem("oauth_redirect_referrer", window.location.pathname);
     }
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
     window.location.href = `${apiBaseUrl}/oauth2/authorization/${provider}`;
   };
 

@@ -38,6 +38,14 @@ const nextConfig: NextConfig = {
         source: "/api/v1/:path*",
         destination: `${apiHost}/api/v1/:path*`,
       },
+      {
+        source: "/oauth2/:path*",
+        destination: `${apiHost}/oauth2/:path*`,
+      },
+      {
+        source: "/login/oauth2/:path*",
+        destination: `${apiHost}/login/oauth2/:path*`,
+      },
     ];
   },
 };

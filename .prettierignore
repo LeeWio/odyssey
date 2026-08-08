@@ -5,3 +5,4 @@ out
 *.min.js
 *.min.css
 CHANGELOG.md
+.env.production

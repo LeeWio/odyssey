@@ -77,7 +77,7 @@ export const getRtkQueryErrorMessage = (error: unknown, fallback: string): strin
 };
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as AuthState).auth.accessToken;
     if (token) {
