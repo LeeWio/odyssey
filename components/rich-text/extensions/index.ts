@@ -1,11 +1,12 @@
 export { TextStyleKit } from "@tiptap/extension-text-style";
 export { BlockFormatTransition } from "./block-format-transition";
+export { Details, DetailsContent, DetailsKit, DetailsSummary } from "./details";
 export { Indent } from "./indent";
 export { Image } from "./image";
 export { Column, Columns } from "./multi-column";
 export { TableKit } from "./table";
 export { Subscript } from "./subscript";
 export { Superscript } from "./superscript";
-export { TableOfContents } from "./table-of-contents";
+export { TableOfContents, createTableOfContents } from "./table-of-contents";
 export { TextAlign } from "./text-align";
 export { Typography } from "./typography";

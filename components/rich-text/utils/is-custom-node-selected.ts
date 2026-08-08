@@ -14,7 +14,7 @@ export const isTableGripSelected = (node: HTMLElement | null) => {
 };
 
 export const isCustomNodeSelected = (editor: Editor, node: HTMLElement | null) => {
-  const customNodes = ["link", "horizontalRule"];
+  const customNodes = ["image", "link", "horizontalRule"];
 
   const isActive = customNodes.some((type) => editor.isActive(type));
 

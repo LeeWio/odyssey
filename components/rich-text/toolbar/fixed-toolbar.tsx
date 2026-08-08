@@ -2,7 +2,6 @@
 
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { ImageInsertPopover } from "./image-insert-popover";
 import { MultiColumnMenu } from "./multi-column-menu";
 import { TableSelector } from "./table-selector";
 
@@ -55,7 +54,43 @@ export function FixedToolbar() {
           <Icon icon="gravity-ui:curly-brackets" />
         </RichTextEditor.ToggleButton>
 
-        <ImageInsertPopover />
+        <RichTextEditor.CommandButton
+          aria-label="Toggle details block"
+          tooltip="Details"
+          isActive={(currentEditor) => currentEditor.isActive("details")}
+          isDisabled={(currentEditor) => {
+            const chain = currentEditor.can().chain().focus();
+
+            return currentEditor.isActive("details")
+              ? !chain.unsetDetails().run()
+              : !chain.setDetails().run();
+          }}
+          onCommand={(currentEditor) =>
+            currentEditor.isActive("details")
+              ? currentEditor.chain().focus().unsetDetails().run()
+              : currentEditor
+                  .chain()
+                  .focus()
+                  .setDetails()
+                  .updateAttributes("details", { open: true })
+                  .run()
+          }
+        >
+          <Icon icon="gravity-ui:circle-chevron-down" />
+        </RichTextEditor.CommandButton>
+
+        <RichTextEditor.CommandButton
+          aria-label="Insert image"
+          tooltip="Insert image"
+          isDisabled={(currentEditor) =>
+            !currentEditor.can().chain().insertContent({ type: "image" }).run()
+          }
+          onCommand={(currentEditor) =>
+            currentEditor.chain().focus().insertContent({ type: "image" }).run()
+          }
+        >
+          <Icon icon="gravity-ui:picture" />
+        </RichTextEditor.CommandButton>
 
         <TableSelector
           onSelect={(rows, cols) => {

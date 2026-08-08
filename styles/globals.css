@@ -2,3 +2,61 @@
 @import "@heroui/styles";
 @import "@heroui-pro/react/css";
 @import "./themes/heroui-pro-themes.scoped.css";
+
+@layer components {
+  .odyssey-details summary {
+    list-style: none;
+  }
+
+  .odyssey-details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ProseMirror div.odyssey-details[data-type="details"] > div {
+    position: relative;
+  }
+
+  details.odyssey-details > summary::before {
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 1rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-inline-end: 1.5px solid currentColor;
+    border-block-end: 1.5px solid currentColor;
+    content: "";
+    pointer-events: none;
+    transform: translateY(-65%) rotate(45deg);
+    transition: transform 250ms var(--ease-out);
+  }
+
+  details.odyssey-details[open] > summary::before {
+    transform: translateY(-35%) rotate(225deg);
+  }
+
+  .ProseMirror div.odyssey-details[data-type="details"] summary:empty::after,
+  .ProseMirror div.odyssey-details[data-type="details"] summary:has(> br:only-child)::after {
+    color: var(--muted);
+    content: "Details title";
+    pointer-events: none;
+  }
+
+  .ProseMirror
+    div.odyssey-details[data-type="details"]
+    [data-type="detailsContent"]
+    > p:first-child:last-child:empty::before,
+  .ProseMirror
+    div.odyssey-details[data-type="details"]
+    [data-type="detailsContent"]
+    > p:first-child:last-child:has(> br:only-child)::before {
+    color: var(--muted);
+    content: "Add supporting details…";
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    details.odyssey-details > summary::before {
+      transition: none;
+    }
+  }
+}

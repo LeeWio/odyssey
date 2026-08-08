@@ -1,20 +1,8 @@
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
-import type { EditorState } from "@tiptap/pm/state";
-import type { EditorView } from "@tiptap/pm/view";
-import type { Editor } from "@tiptap/react";
 import { useCallback } from "react";
 import { isCustomNodeSelected } from "@/components/rich-text/utils/is-custom-node-selected";
 import { isTextSelected } from "@/components/rich-text/utils/is-text-selected";
-
-export interface ShouldShowProps {
-  editor: Editor;
-  element: HTMLElement;
-  view: EditorView;
-  state: EditorState;
-  oldState?: EditorState;
-  from: number;
-  to: number;
-}
+import type { ShouldShowProps } from "../../types";
 
 export const useTextMenuStates = () => {
   const { editor } = useRichTextEditor();

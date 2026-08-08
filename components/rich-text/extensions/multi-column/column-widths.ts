@@ -1,7 +1,10 @@
-export const COLUMN_GAP_PX = 16;
 export const MIN_COLUMN_WIDTH_PERCENT = 15;
 
 const WIDTH_PRECISION = 2;
+
+export const COLUMN_LAYOUT_PRESETS = ["equal", "left", "center", "right"] as const;
+
+export type ColumnLayoutPreset = (typeof COLUMN_LAYOUT_PRESETS)[number];
 
 export function createEqualColumnWidths(count: number): number[] {
   if (count < 1) {
@@ -66,26 +69,44 @@ export function getColumnGridTemplate(widths: number[]): string {
   return widths.map((width) => `${width}fr`).join(" ");
 }
 
-export function resizeAdjacentColumns(
-  widths: number[],
-  dividerIndex: number,
-  deltaPercent: number
-): number[] {
-  const next = [...widths];
-  const combinedWidth = next[dividerIndex] + next[dividerIndex + 1];
-  const leftWidth = Math.min(
-    combinedWidth - MIN_COLUMN_WIDTH_PERCENT,
-    Math.max(MIN_COLUMN_WIDTH_PERCENT, next[dividerIndex] + deltaPercent)
-  );
-
-  next[dividerIndex] = Number(leftWidth.toFixed(WIDTH_PRECISION));
-  next[dividerIndex + 1] = Number((combinedWidth - leftWidth).toFixed(WIDTH_PRECISION));
-
-  return next;
-}
-
 export function areEqualColumnWidths(widths: number[]): boolean {
   const equalWidths = createEqualColumnWidths(widths.length);
 
   return widths.every((width, index) => Math.abs(width - equalWidths[index]) < 0.01);
+}
+
+export function getColumnLayoutPresetWidths(
+  count: 2 | 3,
+  preset: ColumnLayoutPreset
+): number[] | null {
+  if (preset === "equal") {
+    return createEqualColumnWidths(count);
+  }
+
+  if (count === 2) {
+    if (preset === "left") return [65, 35];
+    if (preset === "right") return [35, 65];
+
+    return null;
+  }
+
+  if (preset === "left") return [50, 25, 25];
+  if (preset === "center") return [25, 50, 25];
+  if (preset === "right") return [25, 25, 50];
+
+  return null;
+}
+
+export function getActiveColumnLayoutPreset(widths: number[]): ColumnLayoutPreset | null {
+  const count = widths.length;
+
+  if (count !== 2 && count !== 3) return null;
+
+  return (
+    COLUMN_LAYOUT_PRESETS.find((preset) => {
+      const presetWidths = getColumnLayoutPresetWidths(count, preset);
+
+      return presetWidths?.every((width, index) => Math.abs(width - widths[index]) < 0.01) ?? false;
+    }) ?? null
+  );
 }

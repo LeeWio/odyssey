@@ -1,8 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { Button, Tooltip } from "@heroui/react";
-import { Icon } from "@iconify/react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import { Resizable, type Layout } from "@heroui-pro/react/resizable";
 import {
   NodeViewContent,
   NodeViewWrapper,
@@ -10,32 +17,34 @@ import {
   type NodeViewProps,
 } from "@tiptap/react";
 import {
-  COLUMN_GAP_PX,
   getColumnGridTemplate,
   normalizeColumnWidths,
-  resizeAdjacentColumns,
   serializeColumnWidths,
 } from "./column-widths";
 
 type ColumnsStyle = CSSProperties & { "--column-widths": string };
 
-function getDividerPosition(widths: number[], dividerIndex: number, containerWidth: number) {
-  const usableWidth = containerWidth - COLUMN_GAP_PX * (widths.length - 1);
-  const cumulativeWidth = widths.slice(0, dividerIndex + 1).reduce((sum, width) => sum + width, 0);
-
-  return (usableWidth * cumulativeWidth) / 100 + COLUMN_GAP_PX * dividerIndex + COLUMN_GAP_PX / 2;
+function haveSameWidths(first: number[], second: number[]) {
+  return (
+    first.length === second.length &&
+    first.every((width, index) => Math.abs(width - second[index]) < 0.01)
+  );
 }
 
 export function ColumnsNodeView({ editor, getPos, node, updateAttributes }: NodeViewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const groupId = useId();
   const cleanupResizeRef = useRef<() => void>(() => undefined);
-  const [containerWidth, setContainerWidth] = useState(0);
+  const pendingWidthsRef = useRef<number[] | null>(null);
   const persistedWidths = useMemo(
     () => normalizeColumnWidths(node.attrs.widths, node.childCount),
     [node.attrs.widths, node.childCount]
   );
-  const [dragWidths, setDragWidths] = useState<number[] | null>(null);
-  const displayedWidths = dragWidths ?? persistedWidths;
+  const [previewWidths, setPreviewWidths] = useState<number[] | null>(null);
+  const displayedWidths = previewWidths ?? persistedWidths;
+  const panelIds = useMemo(
+    () => Array.from({ length: node.childCount }, (_, index) => `${groupId}-column-${index}`),
+    [groupId, node.childCount]
+  );
   const isColumnsActive = useEditorState({
     editor,
     selector: ({ editor: currentEditor }) => {
@@ -49,76 +58,43 @@ export function ColumnsNodeView({ editor, getPos, node, updateAttributes }: Node
     },
   });
 
-  useEffect(() => {
-    const element = containerRef.current;
+  const commitPendingWidths = useCallback(() => {
+    const widths = pendingWidthsRef.current;
+    pendingWidthsRef.current = null;
+    setPreviewWidths(null);
 
-    if (!element) return;
+    if (!widths || haveSameWidths(widths, persistedWidths)) return;
 
-    const updateWidth = () => setContainerWidth(element.getBoundingClientRect().width);
-    const observer = new ResizeObserver(updateWidth);
+    updateAttributes({ widths });
+  }, [persistedWidths, updateAttributes]);
 
-    updateWidth();
-    observer.observe(element);
+  const beginPointerResize = useCallback(() => {
+    cleanupResizeRef.current();
 
-    return () => observer.disconnect();
-  }, []);
+    const finishResize = () => {
+      cleanupResizeRef.current();
+      commitPendingWidths();
+    };
+
+    cleanupResizeRef.current = () => {
+      window.removeEventListener("pointerup", finishResize);
+      window.removeEventListener("pointercancel", finishResize);
+      cleanupResizeRef.current = () => undefined;
+    };
+
+    window.addEventListener("pointerup", finishResize, { once: true });
+    window.addEventListener("pointercancel", finishResize, { once: true });
+  }, [commitPendingWidths]);
 
   useEffect(() => () => cleanupResizeRef.current(), []);
-
-  const commitWidths = useCallback(
-    (widths: number[]) => {
-      const normalizedWidths = normalizeColumnWidths(widths, node.childCount);
-      updateAttributes({ widths: normalizedWidths });
-      setDragWidths(null);
-    },
-    [node.childCount, updateAttributes]
-  );
-
-  const startResize = useCallback(
-    (event: React.PointerEvent, dividerIndex: number) => {
-      if (!editor.isEditable || !containerWidth) return;
-
-      event.preventDefault();
-      cleanupResizeRef.current();
-      const startX = event.clientX;
-      const startWidths = [...displayedWidths];
-      const usableWidth = containerWidth - COLUMN_GAP_PX * (startWidths.length - 1);
-      let nextWidths = startWidths;
-
-      const handlePointerMove = (pointerEvent: PointerEvent) => {
-        nextWidths = resizeAdjacentColumns(
-          startWidths,
-          dividerIndex,
-          ((pointerEvent.clientX - startX) / usableWidth) * 100
-        );
-        setDragWidths(nextWidths);
-      };
-      const handlePointerUp = () => {
-        cleanupResizeRef.current();
-        commitWidths(nextWidths);
-      };
-
-      cleanupResizeRef.current = () => {
-        window.removeEventListener("pointermove", handlePointerMove);
-        window.removeEventListener("pointerup", handlePointerUp);
-        window.removeEventListener("pointercancel", handlePointerUp);
-        cleanupResizeRef.current = () => undefined;
-      };
-
-      window.addEventListener("pointermove", handlePointerMove);
-      window.addEventListener("pointerup", handlePointerUp, { once: true });
-      window.addEventListener("pointercancel", handlePointerUp, { once: true });
-    },
-    [commitWidths, containerWidth, displayedWidths, editor.isEditable]
-  );
 
   const style: ColumnsStyle = {
     "--column-widths": getColumnGridTemplate(displayedWidths),
   };
+  const layoutKey = `${node.childCount}:${serializeColumnWidths(persistedWidths)}`;
 
   return (
     <NodeViewWrapper
-      ref={containerRef}
       className="relative my-4 w-full"
       data-column-widths={serializeColumnWidths(displayedWidths)}
       data-type="columns"
@@ -126,38 +102,56 @@ export function ColumnsNodeView({ editor, getPos, node, updateAttributes }: Node
     >
       <NodeViewContent className="contents *:grid *:[grid-template-columns:var(--column-widths)] *:gap-4" />
 
-      {isColumnsActive &&
-        editor.isEditable &&
-        containerWidth > 0 &&
-        displayedWidths.slice(0, -1).map((_, dividerIndex) => (
-          <Tooltip key={dividerIndex} delay={0}>
-            <Button
-              aria-label={`Resize columns ${dividerIndex + 1} and ${dividerIndex + 2}`}
-              className="absolute top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 cursor-col-resize touch-none"
-              isIconOnly
-              onKeyDown={(event) => {
-                if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      {isColumnsActive && editor.isEditable && (
+        <div className="pointer-events-none absolute inset-0 z-10" contentEditable={false}>
+          <Resizable
+            key={layoutKey}
+            className="pointer-events-none [--resizable-handle-hit-area:1rem] [--resizable-handle-size:1rem]"
+            id={groupId}
+            onKeyUpCapture={commitPendingWidths}
+            onLayoutChange={(layout: Layout) => {
+              const layoutWidths = panelIds.map((panelId) => layout[panelId]);
 
-                event.preventDefault();
-                const step = event.shiftKey ? 10 : 5;
-                commitWidths(
-                  resizeAdjacentColumns(
-                    displayedWidths,
-                    dividerIndex,
-                    event.key === "ArrowLeft" ? -step : step
-                  )
-                );
-              }}
-              onPointerDown={(event) => startResize(event, dividerIndex)}
-              size="sm"
-              style={{ left: getDividerPosition(displayedWidths, dividerIndex, containerWidth) }}
-              variant="secondary"
-            >
-              <Icon aria-hidden="true" className="size-4" icon="lucide:grip-vertical" />
-            </Button>
-            <Tooltip.Content>Drag or use arrow keys to resize</Tooltip.Content>
-          </Tooltip>
-        ))}
+              if (layoutWidths.some((width) => !Number.isFinite(width))) return;
+
+              const widths = normalizeColumnWidths(layoutWidths, node.childCount);
+              pendingWidthsRef.current = widths;
+
+              if (!haveSameWidths(widths, persistedWidths)) {
+                setPreviewWidths(widths);
+              }
+            }}
+            onPointerDownCapture={beginPointerResize}
+            orientation="horizontal"
+          >
+            {persistedWidths.flatMap((width, index) => {
+              const panel = (
+                <Resizable.Panel
+                  key={panelIds[index]}
+                  className="pointer-events-none"
+                  defaultSize={width}
+                  id={panelIds[index]}
+                  minSize={15}
+                />
+              );
+
+              if (index === persistedWidths.length - 1) return [panel];
+
+              return [
+                panel,
+                <Resizable.Handle
+                  key={`${panelIds[index]}-handle`}
+                  aria-label={`Resize columns ${index + 1} and ${index + 2}`}
+                  className="pointer-events-auto"
+                  id={`${panelIds[index]}-handle`}
+                  type="handle"
+                  variant="tertiary"
+                />,
+              ];
+            })}
+          </Resizable>
+        </div>
+      )}
     </NodeViewWrapper>
   );
 }
