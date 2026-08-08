@@ -124,7 +124,7 @@ export function ColumnsNodeView({ editor, getPos, node, updateAttributes }: Node
       data-type="columns"
       style={style}
     >
-      <NodeViewContent className="grid [grid-template-columns:var(--column-widths)] gap-4" />
+      <NodeViewContent className="contents *:grid *:[grid-template-columns:var(--column-widths)] *:gap-4" />
 
       {isColumnsActive &&
         editor.isEditable &&
