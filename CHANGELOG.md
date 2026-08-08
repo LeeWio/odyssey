@@ -1,3 +1,10 @@
+# [1.37.0](https://github.com/LeeWio/odyssey/compare/v1.36.0...v1.37.0) (2026-08-08)
+
+
+### Features
+
+* **rich-text:** add math tools and enhanced slash menu ([341ee8a](https://github.com/LeeWio/odyssey/commit/341ee8ae3d4b3702779a6e4e6c6670b972052fc9))
+
 # [1.36.0](https://github.com/LeeWio/odyssey/compare/v1.35.1...v1.36.0) (2026-08-08)
 
 
