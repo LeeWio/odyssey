@@ -1,9 +1,8 @@
 "use client";
 
-import { Avatar, Button, Spinner, TextArea, TextField } from "@heroui/react";
-import { Icon } from "@iconify/react";
+import { Avatar, Button, Modal, TextArea, TextField } from "@heroui/react";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { setLoginOpen } from "@/lib/features/auth";
 import { useAppDispatch } from "@/lib/hooks";
 import { useCommentContext } from "./context/comment-context";
@@ -11,7 +10,10 @@ import { useCommentDraft } from "./hooks/use-comment-draft";
 
 interface CommentInputProps {
   replyId?: number | null;
-  onCancel?: () => void;
+  replyTo?: string;
+  isOpen?: boolean;
+  hideTrigger?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
   onSubmit: (content: string) => Promise<void>;
   placeholder?: string;
   submitButtonText?: string;
@@ -19,47 +21,66 @@ interface CommentInputProps {
 
 export function CommentInput({
   replyId = null,
-  onCancel,
+  replyTo,
+  isOpen,
+  hideTrigger = false,
+  onOpenChange,
   onSubmit,
-  placeholder = "Share your resonance. Join the dialogue with constructive insights...",
-  submitButtonText = "Publish Narrative",
+  placeholder = "Share your thoughts...",
+  submitButtonText = "Post comment",
 }: CommentInputProps) {
   const { postId, isAuthenticated, currentUser, setHasUnsavedDraft } = useCommentContext();
   const [draft, setDraft, clearDraft] = useCommentDraft(postId, replyId);
   const [content, setContent] = useState("");
   const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useAppDispatch();
+  const formId = useId();
+  const modalIsOpen = isOpen ?? internalOpen;
+  const isReply = replyId !== null;
+  const initialLetter = currentUser ? currentUser.slice(0, 2).toUpperCase() : "AN";
 
-  // Initialize input content from draft
   useEffect(() => {
     const timer = setTimeout(() => {
       setContent(draft);
       setHasHydratedDraft(true);
     }, 0);
+
     return () => clearTimeout(timer);
   }, [draft]);
 
-  // Set context state for unsaved drafts
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasUnsavedDraft(hasHydratedDraft && content.trim().length > 0);
     }, 0);
+
     return () => clearTimeout(timer);
   }, [content, hasHydratedDraft, setHasUnsavedDraft]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setContent(val);
-    setDraft(val);
+  const setModalOpen = (nextIsOpen: boolean) => {
+    if (isOpen === undefined) setInternalOpen(nextIsOpen);
+    onOpenChange?.(nextIsOpen);
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const openComposer = () => {
+    setModalOpen(true);
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(event.target.value);
+    setDraft(event.target.value);
+  };
+
+  const handleFormSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
     if (!isAuthenticated) {
+      setModalOpen(false);
       dispatch(setLoginOpen(true));
       return;
     }
+
     if (!content.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
@@ -68,66 +89,86 @@ export function CommentInput({
       setContent("");
       clearDraft();
       setHasUnsavedDraft(false);
-    } catch (err) {
-      console.error("Form submit failed:", err);
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Comment submission failed:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const initialLetter = currentUser ? currentUser.slice(0, 2).toUpperCase() : "AN";
+  const heading = isReply && replyTo ? `Reply to ${replyTo}` : "Write a comment";
+  const description = isReply
+    ? "Continue the conversation with a clear and respectful reply."
+    : "Add a thoughtful response to the discussion.";
 
   return (
-    <form onSubmit={handleFormSubmit} className="flex flex-col gap-3">
-      {replyId === null && (
-        <Avatar size="sm">
-          <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
-        </Avatar>
+    <>
+      {!hideTrigger && (
+        <Button
+          fullWidth
+          variant="secondary"
+          className="h-auto justify-start gap-3 px-3 py-3"
+          onPress={openComposer}
+        >
+          <Avatar size="sm" variant="soft" className="shrink-0">
+            <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
+          </Avatar>
+          <span className="text-muted text-left text-sm">Write a comment...</span>
+        </Button>
       )}
 
-      <TextField isRequired fullWidth name="comment">
-        <TextArea
-          placeholder={placeholder}
-          value={content}
-          onChange={handleChange}
-          onFocus={() => {
-            if (!isAuthenticated) {
-              dispatch(setLoginOpen(true));
-            }
-          }}
-          variant="secondary"
-          fullWidth
-          maxLength={1000}
-          rows={replyId ? 2 : 3}
-        />
-      </TextField>
+      <Modal.Backdrop isOpen={modalIsOpen} onOpenChange={setModalOpen}>
+        <Modal.Container placement="auto" size="md">
+          <Modal.Dialog className="sm:max-w-lg">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>{heading}</Modal.Heading>
+              <p className="text-muted mt-1.5 max-w-sm text-sm leading-5">{description}</p>
+            </Modal.Header>
 
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onPress={() => {
-              setContent("");
-              clearDraft();
-              setHasUnsavedDraft(false);
-              onCancel();
-            }}
-            isDisabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-        )}
-        <Button
-          size="sm"
-          variant="primary"
-          type="submit"
-          isDisabled={!content.trim() || isSubmitting}
-        >
-          {isSubmitting ? <Spinner size="sm" color="accent" /> : <Icon icon="lucide:send" />}
-          {submitButtonText}
-        </Button>
-      </div>
-    </form>
+            <Modal.Body>
+              <form id={formId} className="flex flex-col gap-2" onSubmit={handleFormSubmit}>
+                <TextField isRequired fullWidth name={isReply ? "reply" : "comment"}>
+                  <TextArea
+                    autoFocus
+                    aria-label={heading}
+                    fullWidth
+                    maxLength={1000}
+                    placeholder={placeholder}
+                    rows={7}
+                    value={content}
+                    variant="secondary"
+                    onChange={handleChange}
+                  />
+                </TextField>
+                <p className="text-muted text-right text-xs tabular-nums" aria-hidden="true">
+                  {content.length}/1000
+                </p>
+              </form>
+            </Modal.Body>
+
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                isDisabled={isSubmitting}
+                onPress={() => setModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                form={formId}
+                type="submit"
+                variant="primary"
+                isDisabled={!content.trim() || isSubmitting}
+                isPending={isSubmitting}
+              >
+                {submitButtonText}
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </>
   );
 }

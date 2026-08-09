@@ -76,7 +76,7 @@ export function useCommentMutations({
     existingTempId?: number
   ) => {
     if (!isAuthenticated) {
-      toast.warning("Please sign in to publish your narrative.");
+      toast.warning("Please sign in to post a comment.");
       return;
     }
 
@@ -125,7 +125,7 @@ export function useCommentMutations({
       // On Success, remove from pending list and fetch actual comments
       removePendingComment(tempId);
       await refetch();
-      toast.success("Dialogue published! Awaiting community moderation.");
+      toast.success("Comment posted and sent for review.");
     } catch (err) {
       console.error("Comment submission failed, keeping in local failed list:", err);
       markPendingCommentFailed(tempId);
@@ -148,7 +148,7 @@ export function useCommentMutations({
     try {
       if (nextLiked) {
         await likeCommentApi(id).unwrap();
-        toast.success("Echo liked!");
+        toast.success("Comment liked.");
       } else {
         await unlikeCommentApi(id).unwrap();
       }

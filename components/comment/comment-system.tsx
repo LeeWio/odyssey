@@ -12,8 +12,7 @@ interface CommentSystemProps {
   isGuestbook?: boolean;
 }
 
-// Inner container that can safely utilize comment context
-function CommentSystemContainer() {
+function CommentSystemContent() {
   const {
     comments,
     allCommentsCount,
@@ -28,7 +27,6 @@ function CommentSystemContainer() {
     removePendingComment,
     markPendingCommentFailed,
   } = useComments();
-
   const {
     publishComment,
     retryPublishComment,
@@ -43,45 +41,35 @@ function CommentSystemContainer() {
     refetch,
   });
 
-  // Activate highlight and anchoring listener
   useCommentHighlight();
 
-  const handleRootSubmit = async (content: string) => {
-    await publishComment(content, null);
-  };
-
-  const handleReplySubmit = async (content: string, parentId: number) => {
-    await publishComment(content, parentId);
-  };
-
   return (
-    <div className="flex w-full flex-col gap-6">
-      <CommentInput onSubmit={handleRootSubmit} />
+    <section aria-label="Comments" className="flex w-full flex-col gap-5">
+      <CommentInput onSubmit={(content) => publishComment(content, null)} />
       <CommentList
         comments={comments}
-        isLoading={isLoading}
-        isFetching={isFetching}
         error={error}
         hasMore={hasMore}
+        isFetching={isFetching}
+        isLoading={isLoading}
         loadMore={loadMore}
         refetch={refetch}
         totalCount={backendTotal || allCommentsCount}
-        onLikeToggle={toggleLike}
-        onReplySubmit={handleReplySubmit}
-        onEditSave={editComment}
         onDelete={deleteComment}
+        onEditSave={editComment}
+        onLikeToggle={toggleLike}
+        onReplySubmit={(content, parentId) => publishComment(content, parentId)}
         onReport={reportComment}
         onRetry={retryPublishComment}
       />
-    </div>
+    </section>
   );
 }
 
-// Main exported orchestrator with provider boundary
 export function CommentSystem({ postId = 0, isGuestbook = false }: CommentSystemProps) {
   return (
     <CommentProvider postId={postId} isGuestbook={isGuestbook}>
-      <CommentSystemContainer />
+      <CommentSystemContent />
     </CommentProvider>
   );
 }

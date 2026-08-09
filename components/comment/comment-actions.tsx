@@ -1,8 +1,7 @@
 "use client";
 
-import { Button, Dropdown, Tooltip } from "@heroui/react";
-import { EmojiReactionButton } from "@heroui-pro/react";
-import { Icon } from "@iconify/react";
+import { Ellipsis, Flag, Heart, HeartFill, Link, Pencil, TrashBin } from "@gravity-ui/icons";
+import { Button, Dropdown } from "@heroui/react";
 import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./hooks/simulation-store";
 
@@ -13,6 +12,7 @@ interface CommentActionsProps {
   onEditStart: () => void;
   onDelete: () => void;
   onReport: () => void;
+  onCopyLink: () => void;
   isReplying: boolean;
   depth: number;
 }
@@ -24,86 +24,75 @@ export function CommentActions({
   onEditStart,
   onDelete,
   onReport,
+  onCopyLink,
   isReplying,
   depth,
 }: CommentActionsProps) {
   const { currentUser, isAuthenticated } = useCommentContext();
-
+  const normalizedUser = currentUser?.toLowerCase();
   const isAuthor =
-    isAuthenticated &&
-    currentUser &&
-    (currentUser.toLowerCase() === comment.username.toLowerCase() ||
-      currentUser.toLowerCase() === comment.nickname?.toLowerCase());
-
-  const isSimulatedOrPending = comment.isPending || comment.isFailed;
+    Boolean(isAuthenticated && normalizedUser) &&
+    (normalizedUser === comment.username.toLowerCase() ||
+      normalizedUser === comment.nickname?.toLowerCase());
+  const isUnavailable = Boolean(comment.isPending || comment.isFailed);
   const isUnapproved = comment.status === "PENDING" || comment.id < 0;
 
   return (
     <div role="group" aria-label="Comment actions" className="flex items-center gap-1">
-      <EmojiReactionButton
+      <Button
         size="sm"
-        isSelected={comment.isLiked}
-        onChange={onLikeToggle}
-        isDisabled={isSimulatedOrPending}
+        variant="ghost"
+        aria-label={comment.isLiked ? "Unlike comment" : "Like comment"}
+        isDisabled={isUnavailable}
+        onPress={onLikeToggle}
       >
-        <EmojiReactionButton.Emoji>❤️</EmojiReactionButton.Emoji>
-        <EmojiReactionButton.Count>{comment.likesCount}</EmojiReactionButton.Count>
-      </EmojiReactionButton>
+        {comment.isLiked ? <HeartFill className="text-danger" /> : <Heart />}
+        <span>{comment.likesCount}</span>
+      </Button>
 
       {depth < 5 && (
-        <Tooltip delay={300}>
-          <Button
-            size="sm"
-            variant={isReplying ? "primary" : "ghost"}
-            onPress={onReplyToggle}
-            isDisabled={isSimulatedOrPending || isUnapproved}
-          >
-            Reply
-          </Button>
-          <Tooltip.Content>
-            {isUnapproved ? "Replies disabled" : isReplying ? "Cancel" : "Reply"}
-          </Tooltip.Content>
-        </Tooltip>
+        <Button
+          size="sm"
+          variant="ghost"
+          isDisabled={isUnavailable || isUnapproved}
+          onPress={onReplyToggle}
+        >
+          {isReplying ? "Cancel" : "Reply"}
+        </Button>
       )}
 
       <Dropdown>
-        <Button
-          size="sm"
-          isIconOnly
-          aria-label="Comment options"
-          isDisabled={Boolean(isSimulatedOrPending)}
-        >
-          <Icon icon="lucide:more-horizontal" />
+        <Button size="sm" variant="ghost" isDisabled={isUnavailable}>
+          <Ellipsis />
         </Button>
         <Dropdown.Popover>
           <Dropdown.Menu
             onAction={(key) => {
+              if (key === "copy") onCopyLink();
               if (key === "edit") onEditStart();
-              else if (key === "delete") onDelete();
-              else if (key === "report") onReport();
+              if (key === "delete") onDelete();
+              if (key === "report") onReport();
             }}
           >
+            <Dropdown.Item id="copy" textValue="Copy link">
+              <Link />
+              Copy link
+            </Dropdown.Item>
             {isAuthor ? (
-              [
-                <Dropdown.Item key="edit" id="edit" textValue="Edit Comment">
-                  <div className="flex items-center gap-2">
-                    <Icon icon="lucide:pencil" className="size-3.5" />
-                    <span className="text-xs">Edit</span>
-                  </div>
-                </Dropdown.Item>,
-                <Dropdown.Item key="delete" id="delete" textValue="Delete Comment" variant="danger">
-                  <div className="text-danger flex items-center gap-2">
-                    <Icon icon="lucide:trash-2" className="size-3.5" />
-                    <span className="text-xs font-semibold">Delete</span>
-                  </div>
-                </Dropdown.Item>,
-              ]
+              <>
+                <Dropdown.Item id="edit" textValue="Edit comment">
+                  <Pencil />
+                  Edit
+                </Dropdown.Item>
+                <Dropdown.Item id="delete" textValue="Delete comment" variant="danger">
+                  <TrashBin />
+                  Delete
+                </Dropdown.Item>
+              </>
             ) : (
-              <Dropdown.Item id="report" textValue="Report Comment" variant="danger">
-                <div className="text-danger flex items-center gap-2">
-                  <Icon icon="lucide:flag" className="size-3.5" />
-                  <span className="text-xs">Report</span>
-                </div>
+              <Dropdown.Item id="report" textValue="Report comment" variant="danger">
+                <Flag />
+                Report
               </Dropdown.Item>
             )}
           </Dropdown.Menu>
