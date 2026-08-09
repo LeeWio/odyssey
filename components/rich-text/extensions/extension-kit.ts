@@ -3,6 +3,7 @@ import {
   Column,
   Columns,
   DetailsKit,
+  Emoji,
   Indent,
   Image,
   Mathematics,
@@ -25,6 +26,7 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
   return [
     BlockFormatTransition,
     ...DetailsKit,
+    Emoji,
     Image,
     Mathematics,
     Typography,

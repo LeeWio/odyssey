@@ -1,6 +1,7 @@
 export { TextStyleKit } from "@tiptap/extension-text-style";
 export { BlockFormatTransition } from "./block-format-transition";
 export { Details, DetailsContent, DetailsKit, DetailsSummary } from "./details";
+export { Emoji } from "./emoji";
 export { Indent } from "./indent";
 export { Image } from "./image";
 export { Mathematics } from "./mathematics";

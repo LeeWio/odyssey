@@ -1,7 +1,7 @@
 "use client";
 
-import { Alert, Button, TextArea, TextField, Typography } from "@heroui/react";
-import { Icon } from "@iconify/react";
+import { Check } from "@gravity-ui/icons";
+import { Alert, Button, TextArea, TextField } from "@heroui/react";
 import { useEffect, useState } from "react";
 
 interface CommentContentProps {
@@ -24,23 +24,23 @@ export function CommentContent({
   const [editedText, setEditedText] = useState(content);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setEditedText(content);
-    }, 0);
+    const timer = setTimeout(() => setEditedText(content), 0);
+
     return () => clearTimeout(timer);
   }, [content]);
 
   if (isEditing) {
     return (
-      <div className="mt-1 flex w-full flex-col gap-2">
-        <TextField isRequired fullWidth name="edit-comment">
+      <div className="flex w-full flex-col gap-2 pt-1">
+        <TextField isRequired fullWidth name="edit-comment" aria-label="Edit comment">
           <TextArea
-            value={editedText}
-            onChange={(e) => setEditedText(e.target.value)}
-            variant="secondary"
+            autoFocus
             fullWidth
             maxLength={1000}
             rows={3}
+            value={editedText}
+            variant="secondary"
+            onChange={(event) => setEditedText(event.target.value)}
           />
         </TextField>
         <div className="flex justify-end gap-2">
@@ -53,37 +53,32 @@ export function CommentContent({
             isDisabled={!editedText.trim() || editedText.trim() === content}
             onPress={() => onEditSave(editedText.trim())}
           >
-            <Icon icon="lucide:check" className="mr-1.5 size-3.5" />
-            Save Changes
+            <Check />
+            Save
           </Button>
         </div>
       </div>
     );
   }
 
-  return (
-    <>
-      {isReported ? (
-        <Alert status="danger">
-          <Alert.Indicator />
-          <Alert.Content>
-            <Alert.Title>Dialogue Under Review</Alert.Title>
-            <Alert.Description>
-              This resonance has been flagged and is currently awaiting moderation review.
-            </Alert.Description>
-          </Alert.Content>
-        </Alert>
-      ) : (
-        <div className="wrap-break-word whitespace-pre-wrap">
-          <Typography type="body-sm">{content}</Typography>
-        </div>
-      )}
+  if (isReported) {
+    return (
+      <Alert status="warning">
+        <Alert.Indicator />
+        <Alert.Content>
+          <Alert.Title>Comment under review</Alert.Title>
+          <Alert.Description>
+            This comment has been reported to the moderation team.
+          </Alert.Description>
+        </Alert.Content>
+      </Alert>
+    );
+  }
 
-      {isEdited && !isReported && (
-        <span className="text-default-400 mt-1 inline-block font-mono text-[10px] font-semibold tracking-wider select-none">
-          (edited)
-        </span>
-      )}
-    </>
+  return (
+    <p className="text-foreground/90 text-sm leading-6 wrap-break-word whitespace-pre-wrap">
+      {content}
+      {isEdited && <span className="text-muted ml-2 text-xs">Edited</span>}
+    </p>
   );
 }
