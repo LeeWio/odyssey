@@ -1,3 +1,10 @@
+# [1.38.0](https://github.com/LeeWio/odyssey/compare/v1.37.1...v1.38.0) (2026-08-09)
+
+
+### Features
+
+* **editor:** add emoji tools and refine comments ([fb1faf2](https://github.com/LeeWio/odyssey/commit/fb1faf2f54d7434cb39b8558086aefa96fa97e8a))
+
 ## [1.37.1](https://github.com/LeeWio/odyssey/compare/v1.37.0...v1.37.1) (2026-08-08)
 
 
