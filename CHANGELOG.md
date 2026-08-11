@@ -1,3 +1,10 @@
+## [1.39.1](https://github.com/LeeWio/odyssey/compare/v1.39.0...v1.39.1) (2026-08-11)
+
+
+### Bug Fixes
+
+* **editor:** label rich text modal ([a192014](https://github.com/LeeWio/odyssey/commit/a19201477e4e3b088a14c483656f0db1a017099d))
+
 # [1.39.0](https://github.com/LeeWio/odyssey/compare/v1.38.0...v1.39.0) (2026-08-11)
 
 
