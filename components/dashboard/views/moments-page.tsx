@@ -26,7 +26,7 @@ import {
   useGetPublicMomentsQuery,
   useLikeMomentMutation,
   useUpdateMomentMutation,
-} from "@/lib/features/moment/moment-api";
+} from "@/lib/features/moment";
 import { usePortalContainer } from "../use-portal-container";
 
 // --- Single Timeline Node Component ---

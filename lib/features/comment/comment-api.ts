@@ -1,59 +1,23 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse, Pageable, PageResult } from "@/types";
+import type { ApiResponse, CursorPageResult, Pageable, PageResult } from "@/lib/api";
 import {
-  ApiResponseSchema,
+  apiResponseSchema,
   baseApi,
-  getRtkQueryErrorMessage,
-  PageResultSchema,
-  transformError,
-} from "../api/base-api";
-
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
-
-// Define basic fields first to avoid circular dependency issues during lazy evaluation
-const baseCommentFields = {
-  id: z.number(),
-  content: z.string(),
-  username: z.string().nullable().default("Anonymous"),
-  avatar: z.string().nullable().default(""),
-  createdAt: z.string(),
-  likesCount: z.number().nullable().default(0),
-  likedByCurrentUser: z.boolean().nullable().default(false),
-};
-
-// Recursive Comment Response Schema
-export type CommentResponse = z.infer<typeof baseSchema> & {
-  children?: CommentResponse[];
-};
-
-const baseSchema = z.object(baseCommentFields);
-
-export const CommentResponseSchema: z.ZodType<CommentResponse> = baseSchema.extend({
-  children: z
-    .lazy(() => z.array(CommentResponseSchema))
-    .nullable()
-    .optional()
-    .transform((children) => children ?? []),
-});
-
-/**
- * --- TypeScript Interfaces ---
- */
-export interface CommentRequest {
-  content: string;
-  postId?: number;
-  parentId?: number;
-}
-
-export interface GuestbookRequest {
-  content: string;
-  parentId?: number;
-}
-
-export type CommentStatus = "PENDING" | "APPROVED" | "REJECTED" | "SPAM";
+  cursorPageResultSchema,
+  getApiErrorMessage,
+  pageResultSchema,
+  transformApiError,
+} from "@/lib/api";
+import {
+  CommentAnchorContextResponseSchema,
+  CommentResponseSchema,
+  type CommentAnchorContextResponse,
+  type CommentRequest,
+  type CommentResponse,
+  type CommentStatus,
+  type GuestbookRequest,
+} from "./comment-contracts";
 
 export const commentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -65,9 +29,9 @@ export const commentApi = baseApi.injectEndpoints({
         url: `/api/v1/public/comments/post/${postId}`,
         params: { page, size },
       }),
-      rawResponseSchema: ApiResponseSchema(z.array(CommentResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(CommentResponseSchema)),
       transformResponse: (response: ApiResponse<CommentResponse[]>) => response.data || [],
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result, _error, { postId }) =>
         result
           ? [
@@ -76,6 +40,126 @@ export const commentApi = baseApi.injectEndpoints({
               { type: "Comment", id: `POST_${postId}` },
             ]
           : ["Comment", { type: "Comment", id: `POST_${postId}` }],
+    }),
+
+    getPostCommentRoots: builder.query<PageResult<CommentResponse>, { postId: number } & Pageable>({
+      query: ({ postId, page = 0, size = 20, sort }) => ({
+        url: `/api/v1/public/comments/post/${postId}/roots`,
+        params: { page, size, sort },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, { postId }) => [
+        { type: "Comment", id: `POST_${postId}_ROOTS` },
+      ],
+    }),
+
+    getHotPostCommentRoots: builder.query<
+      PageResult<CommentResponse>,
+      { postId: number } & Pageable
+    >({
+      query: ({ postId, page = 0, size = 20, sort }) => ({
+        url: `/api/v1/public/comments/post/${postId}/roots/hot`,
+        params: { page, size, sort },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, { postId }) => [
+        { type: "Comment", id: `POST_${postId}_HOT_ROOTS` },
+      ],
+    }),
+
+    getPostCommentRootsCursor: builder.query<
+      CursorPageResult<CommentResponse>,
+      { postId: number; cursor?: number; size?: number }
+    >({
+      query: ({ postId, cursor, size = 20 }) => ({
+        url: `/api/v1/public/comments/post/${postId}/roots/cursor`,
+        params: { cursor, size },
+      }),
+      rawResponseSchema: apiResponseSchema(cursorPageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<CursorPageResult<CommentResponse>>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, { postId }) => [
+        { type: "Comment", id: `POST_${postId}_ROOTS` },
+      ],
+    }),
+
+    getNewPostCommentRoots: builder.query<
+      CursorPageResult<CommentResponse>,
+      { postId: number; afterId?: number; size?: number }
+    >({
+      query: ({ postId, afterId, size = 20 }) => ({
+        url: `/api/v1/public/comments/post/${postId}/new`,
+        params: { afterId, size },
+      }),
+      rawResponseSchema: apiResponseSchema(cursorPageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<CursorPageResult<CommentResponse>>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, { postId }) => [
+        { type: "Comment", id: `POST_${postId}_ROOTS` },
+      ],
+    }),
+
+    getNewPostCommentRootsCount: builder.query<number, { postId: number; afterId?: number }>({
+      query: ({ postId, afterId }) => ({
+        url: `/api/v1/public/comments/post/${postId}/new-count`,
+        params: { afterId },
+      }),
+      rawResponseSchema: apiResponseSchema(z.number()),
+      transformResponse: (response: ApiResponse<number>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, { postId }) => [
+        { type: "Comment", id: `POST_${postId}_ROOTS` },
+      ],
+    }),
+
+    getCommentReplies: builder.query<PageResult<CommentResponse>, { parentId: number } & Pageable>({
+      query: ({ parentId, page = 0, size = 20, sort }) => ({
+        url: `/api/v1/public/comments/${parentId}/replies`,
+        params: { page, size, sort },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, { parentId }) => [
+        { type: "Comment", id: `REPLIES_${parentId}` },
+      ],
+    }),
+
+    getCommentRepliesCursor: builder.query<
+      CursorPageResult<CommentResponse>,
+      { parentId: number; cursor?: number; size?: number }
+    >({
+      query: ({ parentId, cursor, size = 20 }) => ({
+        url: `/api/v1/public/comments/${parentId}/replies/cursor`,
+        params: { cursor, size },
+      }),
+      rawResponseSchema: apiResponseSchema(cursorPageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<CursorPageResult<CommentResponse>>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, { parentId }) => [
+        { type: "Comment", id: `REPLIES_${parentId}` },
+      ],
+    }),
+
+    getCommentAnchorContext: builder.query<
+      CommentAnchorContextResponse,
+      { commentId: number; size?: number }
+    >({
+      query: ({ commentId, size = 20 }) => ({
+        url: `/api/v1/public/comments/${commentId}/context`,
+        params: { size },
+      }),
+      rawResponseSchema: apiResponseSchema(CommentAnchorContextResponseSchema),
+      transformResponse: (response: ApiResponse<CommentAnchorContextResponse>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, { commentId }) => [{ type: "Comment", id: commentId }],
     }),
 
     /**
@@ -87,13 +171,13 @@ export const commentApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Comment published successfully!");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Failed to publish comment"));
+          toast.danger(getApiErrorMessage(error, "Failed to publish comment"));
         }
       },
       invalidatesTags: (_result, _error, { postId }) =>
@@ -113,9 +197,9 @@ export const commentApi = baseApi.injectEndpoints({
         url: "/api/v1/admin/comments",
         params: { page, size },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(CommentResponseSchema)),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -133,9 +217,9 @@ export const commentApi = baseApi.injectEndpoints({
         url: "/api/v1/admin/comments/pending",
         params: { page, size },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(CommentResponseSchema)),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -150,9 +234,9 @@ export const commentApi = baseApi.injectEndpoints({
      */
     getGuestbookEntries: builder.query<CommentResponse[], void>({
       query: () => "/api/v1/public/guestbook",
-      rawResponseSchema: ApiResponseSchema(z.array(CommentResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(CommentResponseSchema)),
       transformResponse: (response: ApiResponse<CommentResponse[]>) => response.data || [],
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -161,6 +245,69 @@ export const commentApi = baseApi.injectEndpoints({
               { type: "Comment", id: "GUESTBOOK" },
             ]
           : ["Comment", { type: "Comment", id: "GUESTBOOK" }],
+    }),
+
+    getGuestbookRoots: builder.query<PageResult<CommentResponse>, Pageable>({
+      query: ({ page = 0, size = 20, sort }) => ({
+        url: "/api/v1/public/guestbook/roots",
+        params: { page, size, sort },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "Comment", id: "GUESTBOOK" }],
+    }),
+
+    getHotGuestbookRoots: builder.query<PageResult<CommentResponse>, Pageable>({
+      query: ({ page = 0, size = 20, sort }) => ({
+        url: "/api/v1/public/guestbook/roots/hot",
+        params: { page, size, sort },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "Comment", id: "GUESTBOOK" }],
+    }),
+
+    getGuestbookRootsCursor: builder.query<
+      CursorPageResult<CommentResponse>,
+      { cursor?: number; size?: number }
+    >({
+      query: ({ cursor, size = 20 }) => ({
+        url: "/api/v1/public/guestbook/roots/cursor",
+        params: { cursor, size },
+      }),
+      rawResponseSchema: apiResponseSchema(cursorPageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<CursorPageResult<CommentResponse>>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "Comment", id: "GUESTBOOK" }],
+    }),
+
+    getNewGuestbookRoots: builder.query<
+      CursorPageResult<CommentResponse>,
+      { afterId?: number; size?: number }
+    >({
+      query: ({ afterId, size = 20 }) => ({
+        url: "/api/v1/public/guestbook/new",
+        params: { afterId, size },
+      }),
+      rawResponseSchema: apiResponseSchema(cursorPageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<CursorPageResult<CommentResponse>>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "Comment", id: "GUESTBOOK" }],
+    }),
+
+    getNewGuestbookRootsCount: builder.query<number, { afterId?: number }>({
+      query: ({ afterId }) => ({
+        url: "/api/v1/public/guestbook/new-count",
+        params: { afterId },
+      }),
+      rawResponseSchema: apiResponseSchema(z.number()),
+      transformResponse: (response: ApiResponse<number>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "Comment", id: "GUESTBOOK" }],
     }),
 
     /**
@@ -172,13 +319,13 @@ export const commentApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Guestbook entry posted successfully!");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Failed to post entry"));
+          toast.danger(getApiErrorMessage(error, "Failed to post entry"));
         }
       },
       invalidatesTags: [
@@ -197,13 +344,13 @@ export const commentApi = baseApi.injectEndpoints({
         method: "PATCH",
         params: { status },
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted({ status }, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success(`Comment status updated to ${status}`);
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Moderation failed"));
+          toast.danger(getApiErrorMessage(error, "Moderation failed"));
         }
       },
       invalidatesTags: (_result, _error, { id }) => [
@@ -221,13 +368,13 @@ export const commentApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/comments/${id}`,
         method: "DELETE",
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Comment deleted permanently");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Deletion failed"));
+          toast.danger(getApiErrorMessage(error, "Deletion failed"));
         }
       },
       invalidatesTags: (_result, _error, id) => [
@@ -235,6 +382,20 @@ export const commentApi = baseApi.injectEndpoints({
         { type: "Comment", id },
         { type: "Comment", id: "ADMIN_LIST" },
       ],
+    }),
+
+    getMyComments: builder.query<
+      PageResult<CommentResponse>,
+      Pageable & { status?: CommentStatus }
+    >({
+      query: ({ status, page = 0, size = 20, sort }) => ({
+        url: "/api/v1/user/comments",
+        params: { status, page, size, sort },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "Comment", id: "MY_COMMENTS" }],
     }),
 
     /**
@@ -246,13 +407,13 @@ export const commentApi = baseApi.injectEndpoints({
         method: "PUT",
         body: { content },
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Comment updated successfully!");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Update failed"));
+          toast.danger(getApiErrorMessage(error, "Update failed"));
         }
       },
       invalidatesTags: (_result, _error, { id }) => ["Comment", { type: "Comment", id }],
@@ -266,13 +427,13 @@ export const commentApi = baseApi.injectEndpoints({
         url: `/api/v1/user/comments/${id}`,
         method: "DELETE",
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Comment retracted successfully!");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Retraction failed"));
+          toast.danger(getApiErrorMessage(error, "Retraction failed"));
         }
       },
       invalidatesTags: (_result, _error, id) => ["Comment", { type: "Comment", id }],
@@ -286,7 +447,7 @@ export const commentApi = baseApi.injectEndpoints({
         url: `/api/v1/public/interactions/comments/${commentId}/like`,
         method: "POST",
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       invalidatesTags: (_result, _error, commentId) => [
         "Comment",
         { type: "Comment", id: commentId },
@@ -301,7 +462,7 @@ export const commentApi = baseApi.injectEndpoints({
         url: `/api/v1/public/interactions/comments/${commentId}/unlike`,
         method: "POST",
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       invalidatesTags: (_result, _error, commentId) => [
         "Comment",
         { type: "Comment", id: commentId },
@@ -317,13 +478,13 @@ export const commentApi = baseApi.injectEndpoints({
         method: "POST",
         body: { reason, description },
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Thank you. Comment has been flagged for moderation.");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Report submission failed"));
+          toast.danger(getApiErrorMessage(error, "Report submission failed"));
         }
       },
       invalidatesTags: (_result, _error, { id }) => ["Comment", { type: "Comment", id }],
@@ -338,13 +499,13 @@ export const commentApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted({ status }, { queryFulfilled }) {
         try {
           const { data: count } = await queryFulfilled;
           toast.success(`Batch moderated ${count} comments to ${status}`);
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Batch moderation failed"));
+          toast.danger(getApiErrorMessage(error, "Batch moderation failed"));
         }
       },
       invalidatesTags: ["Comment", { type: "Comment", id: "ADMIN_LIST" }],
@@ -355,13 +516,27 @@ export const commentApi = baseApi.injectEndpoints({
 
 export const {
   useGetPostCommentsQuery,
+  useGetPostCommentRootsQuery,
+  useGetHotPostCommentRootsQuery,
+  useGetPostCommentRootsCursorQuery,
+  useGetNewPostCommentRootsQuery,
+  useGetNewPostCommentRootsCountQuery,
+  useGetCommentRepliesQuery,
+  useGetCommentRepliesCursorQuery,
+  useGetCommentAnchorContextQuery,
   usePublishCommentMutation,
   useGetAdminCommentsQuery,
   useGetPendingCommentsQuery,
   useGetGuestbookEntriesQuery,
+  useGetGuestbookRootsQuery,
+  useGetHotGuestbookRootsQuery,
+  useGetGuestbookRootsCursorQuery,
+  useGetNewGuestbookRootsQuery,
+  useGetNewGuestbookRootsCountQuery,
   usePostGuestbookEntryMutation,
   useModerateCommentMutation,
   useDeleteCommentMutation,
+  useGetMyCommentsQuery,
   useEditMyCommentMutation,
   useDeleteMyCommentMutation,
   useLikeCommentMutation,

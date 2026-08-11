@@ -15,10 +15,7 @@ import {
 import { Icon } from "@iconify/react";
 import type React from "react";
 import { useState } from "react";
-import {
-  type CommentResponse,
-  usePublishCommentMutation,
-} from "@/lib/features/comment/comment-api";
+import { type CommentResponse, usePublishCommentMutation } from "@/lib/features/comment";
 
 interface CommentCardProps {
   comment: CommentResponse;

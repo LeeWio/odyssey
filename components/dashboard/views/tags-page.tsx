@@ -25,7 +25,7 @@ import {
   useDeleteTagMutation,
   useGetAllTagsQuery,
   useUpdateTagMutation,
-} from "@/lib/features/tag/tag-api";
+} from "@/lib/features/tag";
 import { usePortalContainer } from "../use-portal-container";
 
 export function TagsPage() {

@@ -8,7 +8,7 @@ import NextImage from "next/image";
 import type { DropZoneProps } from "react-aria-components";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useUploadFileMutation } from "@/lib/features/file/file-api";
+import { useUploadFileMutation } from "@/lib/features/file";
 import {
   normalizeImageAlignment,
   normalizeImageWidthPercent,

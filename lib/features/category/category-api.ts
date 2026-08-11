@@ -1,30 +1,12 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse } from "@/types";
-import { ApiResponseSchema, baseApi, transformError } from "../api/base-api";
-
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
-export const CategoryResponseSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  slug: z.string(),
-  description: z.string().nullable().default(""),
-  icon: z.string().nullable().default(""),
-  createdAt: z.string(),
-});
-
-/**
- * --- TypeScript Interfaces (Inferred from Schemas) ---
- */
-export type CategoryResponse = z.infer<typeof CategoryResponseSchema>;
-
-export interface CategoryRequest {
-  name: string;
-  slug: string;
-  description?: string;
-}
+import type { ApiResponse } from "@/lib/api";
+import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import {
+  CategoryResponseSchema,
+  type CategoryRequest,
+  type CategoryResponse,
+} from "./category-contracts";
 
 export const categoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -33,9 +15,9 @@ export const categoryApi = baseApi.injectEndpoints({
      */
     getCategories: builder.query<CategoryResponse[], void>({
       query: () => "/api/v1/admin/categories",
-      rawResponseSchema: ApiResponseSchema(z.array(CategoryResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(CategoryResponseSchema)),
       transformResponse: (response: ApiResponse<CategoryResponse[]>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -50,9 +32,9 @@ export const categoryApi = baseApi.injectEndpoints({
      */
     getPublicCategories: builder.query<CategoryResponse[], void>({
       query: () => "/api/v1/public/categories",
-      rawResponseSchema: ApiResponseSchema(z.array(CategoryResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(CategoryResponseSchema)),
       transformResponse: (response: ApiResponse<CategoryResponse[]>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: [{ type: "Category", id: "LIST" }],
     }),
 
@@ -65,9 +47,9 @@ export const categoryApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(CategoryResponseSchema),
+      rawResponseSchema: apiResponseSchema(CategoryResponseSchema),
       transformResponse: (response: ApiResponse<CategoryResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -88,9 +70,9 @@ export const categoryApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(CategoryResponseSchema),
+      rawResponseSchema: apiResponseSchema(CategoryResponseSchema),
       transformResponse: (response: ApiResponse<CategoryResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -113,9 +95,9 @@ export const categoryApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/categories/${id}`,
         method: "DELETE",
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;

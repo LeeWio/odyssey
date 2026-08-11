@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
-import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth/auth-slice";
+import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
 import { type EnhancedComment, simulationStore } from "../hooks/simulation-store";
 

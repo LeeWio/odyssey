@@ -5,7 +5,7 @@ import { Avatar, Button, Chip, SearchField } from "@heroui/react";
 import type { DataGridColumn, DataGridSortDescriptor } from "@heroui-pro/react";
 import { DataGrid } from "@heroui-pro/react";
 import { useCallback, useMemo, useState } from "react";
-import { useGetAllUsersQuery, type UserResponse } from "@/lib/features/user/user-api";
+import { useGetAllUsersQuery, type UserResponse } from "@/lib/features/user";
 
 export function UsersTable() {
   const { data: users = [], isLoading, isFetching } = useGetAllUsersQuery();

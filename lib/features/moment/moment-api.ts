@@ -1,29 +1,8 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse, Pageable, PageResult } from "@/types";
-import { ApiResponseSchema, baseApi, PageResultSchema, transformError } from "../api/base-api";
-
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
-export const MomentResponseSchema = z.object({
-  id: z.number(),
-  content: z.string(),
-  likesCount: z.number(),
-  isPublished: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
-
-/**
- * --- TypeScript Interfaces ---
- */
-export type MomentResponse = z.infer<typeof MomentResponseSchema>;
-
-export interface MomentRequest {
-  content: string;
-  isPublished: boolean;
-}
+import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
+import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
+import { MomentResponseSchema, type MomentRequest, type MomentResponse } from "./moment-contracts";
 
 export const momentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -35,9 +14,9 @@ export const momentApi = baseApi.injectEndpoints({
         url: "/api/v1/public/moments",
         params: { page, size },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(MomentResponseSchema)),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(MomentResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<MomentResponse>>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -55,7 +34,7 @@ export const momentApi = baseApi.injectEndpoints({
         url: `/api/v1/public/moments/${id}/like`,
         method: "POST",
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       invalidatesTags: (_result, _error, id) => [{ type: "Moment", id }],
     }),
 
@@ -67,9 +46,9 @@ export const momentApi = baseApi.injectEndpoints({
         url: "/api/v1/admin/moments",
         params: { page, size },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(MomentResponseSchema)),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(MomentResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<MomentResponse>>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -77,6 +56,14 @@ export const momentApi = baseApi.injectEndpoints({
               { type: "Moment", id: "LIST" },
             ]
           : [{ type: "Moment", id: "LIST" }],
+    }),
+
+    getMomentById: builder.query<MomentResponse, number>({
+      query: (id) => `/api/v1/admin/moments/${id}`,
+      rawResponseSchema: apiResponseSchema(MomentResponseSchema),
+      transformResponse: (response: ApiResponse<MomentResponse>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, id) => [{ type: "Moment", id }],
     }),
 
     /**
@@ -88,9 +75,9 @@ export const momentApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(MomentResponseSchema),
+      rawResponseSchema: apiResponseSchema(MomentResponseSchema),
       transformResponse: (response: ApiResponse<MomentResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -111,9 +98,9 @@ export const momentApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(MomentResponseSchema),
+      rawResponseSchema: apiResponseSchema(MomentResponseSchema),
       transformResponse: (response: ApiResponse<MomentResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -136,9 +123,9 @@ export const momentApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/moments/${id}`,
         method: "DELETE",
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -160,6 +147,7 @@ export const {
   useGetPublicMomentsQuery,
   useLikeMomentMutation,
   useGetAllMomentsQuery,
+  useGetMomentByIdQuery,
   useCreateMomentMutation,
   useUpdateMomentMutation,
   useDeleteMomentMutation,

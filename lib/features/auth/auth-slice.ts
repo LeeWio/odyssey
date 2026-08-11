@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export interface AuthState {
   accessToken: string | null;
+  refreshToken: string | null;
   username: string | null;
   email: string | null;
   roles: string[];
@@ -13,6 +14,7 @@ export interface AuthState {
 
 const initialState: AuthState = {
   accessToken: null,
+  refreshToken: null,
   username: null,
   email: null,
   roles: [],
@@ -36,14 +38,16 @@ export const authSlice = createSlice({
       state,
       action: PayloadAction<{
         accessToken: string;
+        refreshToken?: string;
         username: string;
         email?: string;
         roles: string[];
         permissions?: string[];
       }>
     ) => {
-      const { accessToken, username, email, roles, permissions } = action.payload;
+      const { accessToken, refreshToken, username, email, roles, permissions } = action.payload;
       state.accessToken = accessToken;
+      if (refreshToken !== undefined) state.refreshToken = refreshToken;
       state.username = username;
       if (email !== undefined) state.email = email;
       state.roles = roles;
@@ -57,6 +61,7 @@ export const authSlice = createSlice({
     },
     removeCredentials: (state) => {
       state.accessToken = null;
+      state.refreshToken = null;
       state.username = null;
       state.email = null;
       state.roles = [];
@@ -66,6 +71,7 @@ export const authSlice = createSlice({
   },
   selectors: {
     selectCurrentToken: (state) => state.accessToken,
+    selectRefreshToken: (state) => state.refreshToken,
     selectCurrentUser: (state) => state.username,
     selectUserEmail: (state) => state.email,
     selectIsAuthenticated: (state) => state.isAuthenticated,
@@ -82,6 +88,7 @@ export const { setLoginOpen, setSignUpOpen, setCredentials, setPermissions, remo
 
 export const {
   selectCurrentToken,
+  selectRefreshToken,
   selectCurrentUser,
   selectUserEmail,
   selectIsAuthenticated,

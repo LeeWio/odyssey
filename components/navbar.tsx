@@ -22,9 +22,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { baseApi } from "@/lib/features/api/base-api";
 import {
-  removeCredentials,
   selectCurrentUser,
   selectIsAuthenticated,
   selectIsLoginOpen,
@@ -32,6 +30,7 @@ import {
   selectUserEmail,
   setLoginOpen,
   setSignUpOpen,
+  useLogoutMutation,
 } from "@/lib/features/auth";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { LogIn } from "./auth/log-in";
@@ -672,6 +671,7 @@ export const Navbar = () => {
   const os = useOs();
   const reduceMotion = useReducedMotion();
   const dispatch = useAppDispatch();
+  const [logout] = useLogoutMutation();
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -892,8 +892,7 @@ export const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    dispatch(removeCredentials());
-    dispatch(baseApi.util.resetApiState());
+    void logout();
   };
 
   const switchToSignUp = () => {

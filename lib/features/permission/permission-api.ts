@@ -1,60 +1,8 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse } from "@/types";
-import {
-  ApiResponseSchema,
-  baseApi,
-  getRtkQueryErrorMessage,
-  transformError,
-} from "../api/base-api";
-
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
-
-// Define basic fields first to avoid circular dependency
-const baseMenuFields = {
-  id: z.number(),
-  parentId: z.number().nullable().default(0),
-  name: z.string(),
-  path: z.string().nullable().default(""),
-  permission: z.string().nullable().default(""),
-  type: z.number(), // 0-Dir, 1-Menu, 2-Button
-  icon: z.string().nullable().default(""),
-  sortOrder: z.number().nullable().default(0),
-  isVisible: z.boolean(),
-  isPublic: z.boolean(),
-  createdAt: z.string(),
-};
-
-// Recursive Menu Response Schema
-export type MenuResponse = z.infer<typeof baseSchema> & {
-  children?: MenuResponse[];
-};
-
-const baseSchema = z.object(baseMenuFields);
-
-export const MenuResponseSchema: z.ZodType<MenuResponse> = baseSchema.extend({
-  children: z
-    .lazy(() => z.array(MenuResponseSchema))
-    .nullable()
-    .transform((children) => children ?? []),
-});
-
-/**
- * --- TypeScript Interfaces ---
- */
-export interface MenuRequest {
-  name: string;
-  parentId?: number;
-  path?: string;
-  permission?: string;
-  type: number; // 0-Dir, 1-Menu, 2-Button
-  icon?: string;
-  sortOrder?: number;
-  isVisible?: boolean;
-  isPublic?: boolean;
-}
+import type { ApiResponse } from "@/lib/api";
+import { apiResponseSchema, baseApi, getApiErrorMessage, transformApiError } from "@/lib/api";
+import { MenuResponseSchema, type MenuRequest, type MenuResponse } from "./permission-contracts";
 
 export const permissionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -63,9 +11,9 @@ export const permissionApi = baseApi.injectEndpoints({
      */
     getCurrentUserMenus: builder.query<MenuResponse[], void>({
       query: () => "/api/v1/admin/menus/current",
-      rawResponseSchema: ApiResponseSchema(z.array(MenuResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(MenuResponseSchema)),
       transformResponse: (response: ApiResponse<MenuResponse[]>) => response.data || [],
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: ["Menu"],
     }),
 
@@ -74,9 +22,9 @@ export const permissionApi = baseApi.injectEndpoints({
      */
     getAdminMenuTree: builder.query<MenuResponse[], void>({
       query: () => "/api/v1/admin/menus/tree",
-      rawResponseSchema: ApiResponseSchema(z.array(MenuResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(MenuResponseSchema)),
       transformResponse: (response: ApiResponse<MenuResponse[]>) => response.data || [],
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: ["Menu"],
     }),
 
@@ -85,9 +33,9 @@ export const permissionApi = baseApi.injectEndpoints({
      */
     getPublicNavigation: builder.query<MenuResponse[], void>({
       query: () => "/api/v1/public/menus/navigation",
-      rawResponseSchema: ApiResponseSchema(z.array(MenuResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(MenuResponseSchema)),
       transformResponse: (response: ApiResponse<MenuResponse[]>) => response.data || [],
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: ["Menu"],
     }),
 
@@ -100,15 +48,15 @@ export const permissionApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(MenuResponseSchema),
+      rawResponseSchema: apiResponseSchema(MenuResponseSchema),
       transformResponse: (response: ApiResponse<MenuResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Menu item created successfully!");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Failed to create menu item"));
+          toast.danger(getApiErrorMessage(error, "Failed to create menu item"));
         }
       },
       invalidatesTags: ["Menu"],
@@ -123,15 +71,15 @@ export const permissionApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(MenuResponseSchema),
+      rawResponseSchema: apiResponseSchema(MenuResponseSchema),
       transformResponse: (response: ApiResponse<MenuResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Menu item updated successfully!");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Failed to update menu item"));
+          toast.danger(getApiErrorMessage(error, "Failed to update menu item"));
         }
       },
       invalidatesTags: ["Menu"],
@@ -145,15 +93,15 @@ export const permissionApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/menus/${id}`,
         method: "DELETE",
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Menu item deleted successfully!");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Failed to delete menu item"));
+          toast.danger(getApiErrorMessage(error, "Failed to delete menu item"));
         }
       },
       invalidatesTags: ["Menu"],

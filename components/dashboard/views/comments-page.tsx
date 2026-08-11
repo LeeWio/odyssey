@@ -26,7 +26,7 @@ import {
   useGetPostCommentsQuery,
   useModerateCommentMutation,
   usePublishCommentMutation,
-} from "@/lib/features/comment/comment-api";
+} from "@/lib/features/comment";
 import { useGetPublicPostsQuery } from "@/features/blog";
 
 // --- Recursive Component for Public Comments ---

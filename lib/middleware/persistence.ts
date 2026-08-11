@@ -96,7 +96,14 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
 
     const preloadedState: Record<string, unknown> = {};
 
-    if (auth) preloadedState.auth = JSON.parse(auth);
+    if (auth) {
+      const persistedAuth = JSON.parse(auth) as Record<string, unknown>;
+      preloadedState.auth = {
+        ...persistedAuth,
+        refreshToken:
+          typeof persistedAuth.refreshToken === "string" ? persistedAuth.refreshToken : null,
+      };
+    }
     if (theme || draftId) {
       const variant = theme ? coerceThemeVariant(theme) : DEFAULT_THEME_VARIANT;
 

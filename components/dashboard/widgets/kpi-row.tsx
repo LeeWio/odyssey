@@ -2,7 +2,7 @@
 
 import { Skeleton } from "@heroui/react";
 import { KPI } from "@heroui-pro/react";
-import { useGetDashboardStatsQuery } from "@/lib/features/dashboard/dashboard-api";
+import { useGetDashboardStatsQuery } from "@/lib/features/dashboard";
 import { Icon } from "@iconify/react";
 
 export function KpiRow() {

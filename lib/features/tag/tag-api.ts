@@ -1,27 +1,8 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse } from "@/types";
-import { ApiResponseSchema, baseApi, transformError } from "../api/base-api";
-
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
-export const TagResponseSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  slug: z.string(),
-  createdAt: z.string(),
-});
-
-/**
- * --- TypeScript Interfaces (Inferred from Schemas) ---
- */
-export type TagResponse = z.infer<typeof TagResponseSchema>;
-
-export interface TagRequest {
-  name: string;
-  slug: string;
-}
+import type { ApiResponse } from "@/lib/api";
+import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import { TagResponseSchema, type TagRequest, type TagResponse } from "./tag-contracts";
 
 export const tagApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -30,9 +11,9 @@ export const tagApi = baseApi.injectEndpoints({
      */
     getAllTags: builder.query<TagResponse[], void>({
       query: () => "/api/v1/admin/tags",
-      rawResponseSchema: ApiResponseSchema(z.array(TagResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(TagResponseSchema)),
       transformResponse: (response: ApiResponse<TagResponse[]>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [...result.map(({ id }) => ({ type: "Tag" as const, id })), { type: "Tag", id: "LIST" }]
@@ -44,9 +25,9 @@ export const tagApi = baseApi.injectEndpoints({
      */
     getPublicTags: builder.query<TagResponse[], void>({
       query: () => "/api/v1/public/tags",
-      rawResponseSchema: ApiResponseSchema(z.array(TagResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(TagResponseSchema)),
       transformResponse: (response: ApiResponse<TagResponse[]>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: [{ type: "Tag", id: "LIST" }],
     }),
 
@@ -59,9 +40,9 @@ export const tagApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(TagResponseSchema),
+      rawResponseSchema: apiResponseSchema(TagResponseSchema),
       transformResponse: (response: ApiResponse<TagResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -82,9 +63,9 @@ export const tagApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(TagResponseSchema),
+      rawResponseSchema: apiResponseSchema(TagResponseSchema),
       transformResponse: (response: ApiResponse<TagResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -107,9 +88,9 @@ export const tagApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/tags/${id}`,
         method: "DELETE",
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;

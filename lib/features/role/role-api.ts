@@ -1,28 +1,8 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse } from "@/types";
-import { ApiResponseSchema, baseApi, transformError } from "../api/base-api";
-
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
-export const RoleResponseSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  code: z.string(),
-  description: z.string().nullable().default(""),
-});
-
-/**
- * --- TypeScript Interfaces (Inferred from Schemas) ---
- */
-export type RoleResponse = z.infer<typeof RoleResponseSchema>;
-
-export interface RoleRequest {
-  name: string;
-  code: string;
-  description?: string;
-}
+import type { ApiResponse } from "@/lib/api";
+import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import { RoleResponseSchema, type RoleRequest, type RoleResponse } from "./role-contracts";
 
 export const roleApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -31,9 +11,9 @@ export const roleApi = baseApi.injectEndpoints({
      */
     getAllRoles: builder.query<RoleResponse[], void>({
       query: () => "/api/v1/admin/roles",
-      rawResponseSchema: ApiResponseSchema(z.array(RoleResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(RoleResponseSchema)),
       transformResponse: (response: ApiResponse<RoleResponse[]>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -52,9 +32,9 @@ export const roleApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(RoleResponseSchema),
+      rawResponseSchema: apiResponseSchema(RoleResponseSchema),
       transformResponse: (response: ApiResponse<RoleResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -75,9 +55,9 @@ export const roleApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(RoleResponseSchema),
+      rawResponseSchema: apiResponseSchema(RoleResponseSchema),
       transformResponse: (response: ApiResponse<RoleResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -100,9 +80,9 @@ export const roleApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/roles/${id}`,
         method: "DELETE",
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -122,9 +102,9 @@ export const roleApi = baseApi.injectEndpoints({
      */
     getRoleMenuIds: builder.query<number[], number>({
       query: (id) => `/api/v1/admin/roles/${id}/menus`,
-      rawResponseSchema: ApiResponseSchema(z.array(z.number())),
+      rawResponseSchema: apiResponseSchema(z.array(z.number())),
       transformResponse: (response: ApiResponse<number[]>) => response.data || [],
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (_result, _error, id) => [{ type: "Role" as const, id: `${id}-menus` }],
     }),
 
@@ -137,9 +117,9 @@ export const roleApi = baseApi.injectEndpoints({
         method: "POST",
         body: { menuIds },
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;

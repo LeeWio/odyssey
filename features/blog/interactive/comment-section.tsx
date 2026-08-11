@@ -8,7 +8,7 @@ import {
   type CommentResponse,
   useGetPostCommentsQuery,
   usePublishCommentMutation,
-} from "@/lib/features/comment/comment-api";
+} from "@/lib/features/comment";
 import { CommentCard } from "./comment-card";
 
 interface CommentSectionProps {

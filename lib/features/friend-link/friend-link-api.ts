@@ -1,43 +1,13 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse, Pageable, PageResult } from "@/types";
-import { ApiResponseSchema, baseApi, PageResultSchema, transformError } from "../api/base-api";
-
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
-export const FriendLinkStatusSchema = z.enum(["APPLYING", "APPROVED", "REJECTED"]);
-
-export const FriendLinkResponseSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  url: z.string(),
-  avatar: z.string().nullable().default(""),
-  description: z.string().nullable().default(""),
-  email: z.string().nullable().default(""),
-  status: FriendLinkStatusSchema,
-  sortOrder: z.number(),
-  isPublished: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
-
-/**
- * --- TypeScript Interfaces (Inferred from Schemas) ---
- */
-export type FriendLinkStatus = z.infer<typeof FriendLinkStatusSchema>;
-export type FriendLinkResponse = z.infer<typeof FriendLinkResponseSchema>;
-
-export interface FriendLinkRequest {
-  name: string;
-  url: string;
-  avatar?: string;
-  description?: string;
-  email?: string;
-  sortOrder?: number;
-  isPublished?: boolean;
-  status?: FriendLinkStatus;
-}
+import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
+import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
+import {
+  FriendLinkResponseSchema,
+  type FriendLinkRequest,
+  type FriendLinkResponse,
+  type FriendLinkStatus,
+} from "./friend-link-contracts";
 
 export const friendLinkApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -46,9 +16,9 @@ export const friendLinkApi = baseApi.injectEndpoints({
      */
     getPublicFriendLinks: builder.query<FriendLinkResponse[], void>({
       query: () => "/api/v1/public/friend-links",
-      rawResponseSchema: ApiResponseSchema(z.array(FriendLinkResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(FriendLinkResponseSchema)),
       transformResponse: (response: ApiResponse<FriendLinkResponse[]>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: ["FriendLink"],
     }),
 
@@ -61,9 +31,9 @@ export const friendLinkApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -88,12 +58,12 @@ export const friendLinkApi = baseApi.injectEndpoints({
         params: {
           page,
           size,
-          ...(sort && { sort: sort.join(",") }),
+          sort,
         },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(FriendLinkResponseSchema)),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(FriendLinkResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<FriendLinkResponse>>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: ["FriendLink"],
     }),
 
@@ -102,9 +72,9 @@ export const friendLinkApi = baseApi.injectEndpoints({
      */
     getAdminFriendLinkById: builder.query<FriendLinkResponse, number>({
       query: (id) => `/api/v1/admin/friend-links/${id}`,
-      rawResponseSchema: ApiResponseSchema(FriendLinkResponseSchema),
+      rawResponseSchema: apiResponseSchema(FriendLinkResponseSchema),
       transformResponse: (response: ApiResponse<FriendLinkResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (_result, _error, id) => [{ type: "FriendLink", id }],
     }),
 
@@ -117,9 +87,9 @@ export const friendLinkApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(FriendLinkResponseSchema),
+      rawResponseSchema: apiResponseSchema(FriendLinkResponseSchema),
       transformResponse: (response: ApiResponse<FriendLinkResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       invalidatesTags: ["FriendLink"],
     }),
 
@@ -133,9 +103,9 @@ export const friendLinkApi = baseApi.injectEndpoints({
           method: "PUT",
           body,
         }),
-        rawResponseSchema: ApiResponseSchema(FriendLinkResponseSchema),
+        rawResponseSchema: apiResponseSchema(FriendLinkResponseSchema),
         transformResponse: (response: ApiResponse<FriendLinkResponse>) => response.data,
-        transformErrorResponse: transformError,
+        transformErrorResponse: transformApiError,
         invalidatesTags: (_result, _error, { id }) => ["FriendLink", { type: "FriendLink", id }],
       }
     ),
@@ -149,9 +119,9 @@ export const friendLinkApi = baseApi.injectEndpoints({
         method: "PATCH",
         params: { status },
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted({ status }, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -175,9 +145,9 @@ export const friendLinkApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/friend-links/${id}`,
         method: "DELETE",
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       invalidatesTags: (_result, _error, id) => ["FriendLink", { type: "FriendLink", id }],
     }),
   }),

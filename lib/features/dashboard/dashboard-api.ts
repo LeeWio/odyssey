@@ -1,91 +1,14 @@
-import { z } from "zod";
-
-import { ApiResponseSchema, baseApi, transformError } from "@/lib/features/api/base-api";
-
-// --- Zod Schemas ---
-
-export const DashboardStatsResponseSchema = z.object({
-  totalUsers: z.number().default(0),
-  totalPosts: z.number().default(0),
-  totalComments: z.number().default(0),
-  pendingComments: z.number().default(0),
-  totalViews: z.number().default(0),
-});
-
-export const DailyTrendSchema = z.object({
-  date: z.string(),
-  pv: z.number().default(0),
-  uv: z.number().default(0),
-});
-
-export const TopContentSchema = z.object({
-  url: z.string(),
-  count: z.number().default(0),
-});
-
-export const AnalyticsOverviewResponseSchema = z.object({
-  todayPv: z.number().default(0),
-  todayUv: z.number().default(0),
-  yesterdayPv: z.number().default(0),
-  yesterdayUv: z.number().default(0),
-  pvGrowthRate: z.number().default(0),
-  dailyTrends: z.array(DailyTrendSchema).default([]),
-  topContent: z.array(TopContentSchema).default([]),
-});
-
-export const TopPageSchema = z.object({
-  path: z.string(),
-  views: z.number().default(0),
-  "avs.time": z.string().optional(),
-  bounce: z.number().default(0),
-  trend: z.string().optional(),
-});
-
-export const TrafficMetricSchema = z.object({
-  name: z.string(),
-  views: z.number().default(0),
-  percentage: z.number().default(0),
-});
-
-export const TimeSeriesItemSchema = z.object({
-  date: z.string(),
-  sessions: z.number().default(0),
-  users: z.number().default(0),
-});
-
-export const MetricSchema = z.object({
-  value: z.string().default("0"),
-  numericValue: z.number().default(0),
-  growthRate: z.number().default(0),
-});
-
-export const SummaryMetricsSchema = z.object({
-  sessions: MetricSchema.default({ value: "0", numericValue: 0, growthRate: 0 }),
-  users: MetricSchema.default({ value: "0", numericValue: 0, growthRate: 0 }),
-  bounceRate: MetricSchema.default({ value: "0", numericValue: 0, growthRate: 0 }),
-  avgSession: MetricSchema.default({ value: "0", numericValue: 0, growthRate: 0 }),
-});
-
-export const TrafficResponseSchema = z.object({
-  summary: SummaryMetricsSchema.default({
-    sessions: { value: "0", numericValue: 0, growthRate: 0 },
-    users: { value: "0", numericValue: 0, growthRate: 0 },
-    bounceRate: { value: "0", numericValue: 0, growthRate: 0 },
-    avgSession: { value: "0", numericValue: 0, growthRate: 0 },
-  }),
-  devices: z.array(TrafficMetricSchema).default([]),
-  sources: z.array(TrafficMetricSchema).default([]),
-  timeSeries: z.array(TimeSeriesItemSchema).default([]),
-});
-
-// --- Types ---
-
-export type DashboardStatsResponse = z.infer<typeof DashboardStatsResponseSchema>;
-export type AnalyticsOverviewResponse = z.infer<typeof AnalyticsOverviewResponseSchema>;
-export type TopPageResponse = z.infer<typeof TopPageSchema>;
-export type TrafficResponse = z.infer<typeof TrafficResponseSchema>;
-
-// --- API Injection ---
+import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import {
+  AnalyticsOverviewResponseSchema,
+  DashboardStatsResponseSchema,
+  TopPagesResponseSchema,
+  TrafficResponseSchema,
+  type AnalyticsOverviewResponse,
+  type DashboardStatsResponse,
+  type TopPageResponse,
+  type TrafficResponse,
+} from "./dashboard-contracts";
 
 export const dashboardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -98,9 +21,9 @@ export const dashboardApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["Dashboard"],
-      rawResponseSchema: ApiResponseSchema(DashboardStatsResponseSchema),
+      rawResponseSchema: apiResponseSchema(DashboardStatsResponseSchema),
       transformResponse: (response: { data: DashboardStatsResponse }) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
 
     /**
@@ -112,24 +35,23 @@ export const dashboardApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["Dashboard"],
-      rawResponseSchema: ApiResponseSchema(AnalyticsOverviewResponseSchema),
+      rawResponseSchema: apiResponseSchema(AnalyticsOverviewResponseSchema),
       transformResponse: (response: { data: AnalyticsOverviewResponse }) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
 
     /**
      * Admin: Get top pages analytics
      */
-    getTopPages: builder.query<TopPageResponse[], number | undefined>({
-      query: (days) => ({
+    getTopPages: builder.query<TopPageResponse[], void>({
+      query: () => ({
         url: "/api/v1/admin/analytics/top-pages",
         method: "GET",
-        params: days ? { days } : undefined,
       }),
       providesTags: ["Dashboard"],
-      rawResponseSchema: ApiResponseSchema(z.array(TopPageSchema)),
+      rawResponseSchema: apiResponseSchema(TopPagesResponseSchema),
       transformResponse: (response: { data: TopPageResponse[] }) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
 
     /**
@@ -142,9 +64,9 @@ export const dashboardApi = baseApi.injectEndpoints({
         params: days ? { days } : undefined,
       }),
       providesTags: ["Dashboard"],
-      rawResponseSchema: ApiResponseSchema(TrafficResponseSchema),
+      rawResponseSchema: apiResponseSchema(TrafficResponseSchema),
       transformResponse: (response: { data: TrafficResponse }) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
   }),
   overrideExisting: false,

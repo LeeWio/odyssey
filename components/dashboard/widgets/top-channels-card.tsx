@@ -4,7 +4,7 @@ import { Card, Skeleton } from "@heroui/react";
 import { BarChart } from "@heroui-pro/react";
 import { useMemo } from "react";
 
-import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard/dashboard-api";
+import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
 
 function formatThousands(value: number): string {
   return value >= 1000 ? `${(value / 1000).toFixed(0)}k` : `${value}`;
