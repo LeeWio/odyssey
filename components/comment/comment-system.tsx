@@ -1,5 +1,6 @@
 "use client";
 
+import { Surface } from "@heroui/react";
 import { CommentInput } from "./comment-input";
 import { CommentList } from "./comment-list";
 import { CommentProvider } from "./context/comment-context";
@@ -10,9 +11,10 @@ import { useComments } from "./hooks/use-comments";
 interface CommentSystemProps {
   postId?: number;
   isGuestbook?: boolean;
+  onRequestClose?: () => void;
 }
 
-function CommentSystemContent() {
+function CommentSystemContent({ onRequestClose }: { onRequestClose?: () => void }) {
   const {
     comments,
     allCommentsCount,
@@ -44,32 +46,43 @@ function CommentSystemContent() {
   useCommentHighlight();
 
   return (
-    <section aria-label="Comments" className="flex w-full flex-col gap-5">
-      <CommentInput onSubmit={(content) => publishComment(content, null)} />
-      <CommentList
-        comments={comments}
-        error={error}
-        hasMore={hasMore}
-        isFetching={isFetching}
-        isLoading={isLoading}
-        loadMore={loadMore}
-        refetch={refetch}
-        totalCount={backendTotal || allCommentsCount}
-        onDelete={deleteComment}
-        onEditSave={editComment}
-        onLikeToggle={toggleLike}
-        onReplySubmit={(content, parentId) => publishComment(content, parentId)}
-        onReport={reportComment}
-        onRetry={retryPublishComment}
-      />
+    <section aria-label="Comments" className="w-full">
+      <Surface className="flex flex-col gap-5" variant="transparent">
+        <CommentInput
+          onAuthenticationRequired={onRequestClose}
+          onSubmit={(content) => publishComment(content, null)}
+        />
+
+        <CommentList
+          comments={comments}
+          error={error}
+          hasMore={hasMore}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          loadMore={loadMore}
+          refetch={refetch}
+          totalCount={backendTotal || allCommentsCount}
+          onDelete={deleteComment}
+          onEditSave={editComment}
+          onLikeToggle={toggleLike}
+          onAuthenticationRequired={onRequestClose}
+          onReplySubmit={(content, parentId) => publishComment(content, parentId)}
+          onReport={reportComment}
+          onRetry={retryPublishComment}
+        />
+      </Surface>
     </section>
   );
 }
 
-export function CommentSystem({ postId = 0, isGuestbook = false }: CommentSystemProps) {
+export function CommentSystem({
+  postId = 0,
+  isGuestbook = false,
+  onRequestClose,
+}: CommentSystemProps) {
   return (
     <CommentProvider postId={postId} isGuestbook={isGuestbook}>
-      <CommentSystemContent />
+      <CommentSystemContent onRequestClose={onRequestClose} />
     </CommentProvider>
   );
 }

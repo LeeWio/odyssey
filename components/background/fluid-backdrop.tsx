@@ -158,7 +158,7 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1.8, ease: [0.23, 1, 0.32, 1], delay: 0.1 }}
-      className="bg-background pointer-events-none fixed inset-0 z-0 h-screen w-screen overflow-hidden transition-colors duration-1000"
+      className="bg-background pointer-events-none fixed inset-0 z-0 h-[100dvh] w-screen overflow-hidden transition-colors duration-1000"
     >
       {/* Dynamic CSS Keyframe Injection for Organic wobble animations (GPU accelerated) */}
       <style>{`

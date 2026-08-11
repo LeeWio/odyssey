@@ -1,9 +1,8 @@
 "use client";
 
-import { ArrowUp, ArrowUpArrowDown, ChevronDown, Comments } from "@gravity-ui/icons";
-import { Alert, Button, Dropdown, Separator, Skeleton } from "@heroui/react";
+import { ArrowUp, Comments } from "@gravity-ui/icons";
+import { Alert, Button, Skeleton, ToggleButton, ToggleButtonGroup, type Key } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
-import { Fragment } from "react";
 import { CommentItem } from "./comment-item";
 import { type SortOrder, useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./hooks/simulation-store";
@@ -18,6 +17,7 @@ interface CommentListProps {
   refetch: () => Promise<unknown>;
   totalCount: number;
   onLikeToggle: (id: number, isLiked: boolean, currentLikes: number) => void;
+  onAuthenticationRequired?: () => void;
   onReplySubmit: (content: string, parentId: number) => Promise<void>;
   onEditSave: (id: number, content: string) => void;
   onDelete: (id: number) => void;
@@ -26,10 +26,14 @@ interface CommentListProps {
 }
 
 const SORT_LABELS: Record<SortOrder, string> = {
-  newest: "Newest",
+  newest: "Recent",
   oldest: "Oldest",
-  likes: "Most liked",
+  likes: "Top",
 };
+
+function isSortOrder(value: Key | undefined): value is SortOrder {
+  return value === "newest" || value === "oldest" || value === "likes";
+}
 
 export function CommentList({
   comments,
@@ -41,6 +45,7 @@ export function CommentList({
   refetch,
   totalCount,
   onLikeToggle,
+  onAuthenticationRequired,
   onReplySubmit,
   onEditSave,
   onDelete,
@@ -56,37 +61,33 @@ export function CommentList({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex min-h-8 items-center justify-between gap-3">
-        <p className="text-muted text-sm">
-          {totalCount} {totalCount === 1 ? "comment" : "comments"}
-          {isFetching && !isLoading && <span className="sr-only">, updating</span>}
-        </p>
+      <p className="sr-only" aria-live="polite">
+        {totalCount} {totalCount === 1 ? "comment" : "comments"}
+        {isFetching && !isLoading ? ", updating" : ""}
+      </p>
 
-        <Dropdown>
-          <Button
+      {totalCount > 1 && (
+        <div className="flex justify-end">
+          <ToggleButtonGroup
+            disallowEmptySelection
+            aria-label="Sort comments"
+            selectedKeys={new Set<Key>([sortOrder])}
+            selectionMode="single"
             size="sm"
-            variant="ghost"
-            aria-label={`Sort comments by ${SORT_LABELS[sortOrder]}`}
+            onSelectionChange={(keys) => {
+              const nextSortOrder = keys.values().next().value;
+              if (isSortOrder(nextSortOrder)) setSortOrder(nextSortOrder);
+            }}
           >
-            <ArrowUpArrowDown />
-            {SORT_LABELS[sortOrder]}
-            <ChevronDown />
-          </Button>
-          <Dropdown.Popover>
-            <Dropdown.Menu onAction={(key) => setSortOrder(key as SortOrder)}>
-              <Dropdown.Item id="newest" textValue="Newest">
-                Newest
-              </Dropdown.Item>
-              <Dropdown.Item id="oldest" textValue="Oldest">
-                Oldest
-              </Dropdown.Item>
-              <Dropdown.Item id="likes" textValue="Most liked">
-                Most liked
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown.Popover>
-        </Dropdown>
-      </div>
+            {(Object.entries(SORT_LABELS) as [SortOrder, string][]).map(([key, label], index) => (
+              <ToggleButton key={key} id={key} variant="ghost">
+                {index > 0 && <ToggleButtonGroup.Separator />}
+                {label}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        </div>
+      )}
 
       {newCommentCount > 0 && (
         <Button size="sm" variant="outline" className="self-center" onPress={handleRefresh}>
@@ -132,20 +133,19 @@ export function CommentList({
           </EmptyState.Header>
         </EmptyState>
       ) : (
-        <div className="flex flex-col">
-          {comments.map((comment, index) => (
-            <Fragment key={comment.id}>
-              {index > 0 && <Separator variant="tertiary" className="my-5" />}
-              <CommentItem
-                comment={comment}
-                onDelete={onDelete}
-                onEditSave={onEditSave}
-                onLikeToggle={onLikeToggle}
-                onReplySubmit={onReplySubmit}
-                onReport={onReport}
-                onRetry={onRetry}
-              />
-            </Fragment>
+        <div className="flex flex-col gap-3">
+          {comments.map((comment) => (
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              onDelete={onDelete}
+              onEditSave={onEditSave}
+              onLikeToggle={onLikeToggle}
+              onAuthenticationRequired={onAuthenticationRequired}
+              onReplySubmit={onReplySubmit}
+              onReport={onReport}
+              onRetry={onRetry}
+            />
           ))}
 
           {hasMore && (

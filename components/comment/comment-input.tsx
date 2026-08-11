@@ -1,9 +1,20 @@
 "use client";
 
-import { Avatar, Button, Modal, TextArea, TextField } from "@heroui/react";
+import { ArrowUp } from "@gravity-ui/icons";
+import {
+  Avatar,
+  Button,
+  Description,
+  Form,
+  Label,
+  Modal,
+  TextArea,
+  TextField,
+} from "@heroui/react";
+import { PromptInput, PromptSuggestion } from "@heroui-pro/react";
 import type React from "react";
-import { useEffect, useId, useState } from "react";
-import { setLoginOpen } from "@/lib/features/auth";
+import { useEffect, useId, useRef, useState } from "react";
+import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
 import { useCommentContext } from "./context/comment-context";
 import { useCommentDraft } from "./hooks/use-comment-draft";
@@ -14,10 +25,18 @@ interface CommentInputProps {
   isOpen?: boolean;
   hideTrigger?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
+  onAuthenticationRequired?: () => void;
   onSubmit: (content: string) => Promise<void>;
   placeholder?: string;
   submitButtonText?: string;
 }
+
+const COMMENT_SUGGESTIONS = [
+  "Share a highlight ✦",
+  "Ask a question 👋",
+  "Add another angle ↗",
+  "Leave a practical note ✓",
+] as const;
 
 export function CommentInput({
   replyId = null,
@@ -25,6 +44,7 @@ export function CommentInput({
   isOpen,
   hideTrigger = false,
   onOpenChange,
+  onAuthenticationRequired,
   onSubmit,
   placeholder = "Share your thoughts...",
   submitButtonText = "Post comment",
@@ -35,6 +55,7 @@ export function CommentInput({
   const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dispatch = useAppDispatch();
   const formId = useId();
   const modalIsOpen = isOpen ?? internalOpen;
@@ -72,11 +93,10 @@ export function CommentInput({
     setDraft(event.target.value);
   };
 
-  const handleFormSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
+  const submitComment = async () => {
     if (!isAuthenticated) {
       setModalOpen(false);
+      onAuthenticationRequired?.();
       dispatch(setLoginOpen(true));
       return;
     }
@@ -97,20 +117,88 @@ export function CommentInput({
     }
   };
 
+  const handleFormSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    await submitComment();
+  };
+
+  const handleValueChange = (value: string) => {
+    setContent(value);
+    setDraft(value);
+  };
+
+  const applySuggestion = (suggestion: string) => {
+    handleValueChange(suggestion);
+    requestAnimationFrame(() => textareaRef.current?.focus());
+  };
+
   const heading = isReply && replyTo ? `Reply to ${replyTo}` : "Write a comment";
   const description = isReply
     ? "Continue the conversation with a clear and respectful reply."
     : "Add a thoughtful response to the discussion.";
 
+  if (!isReply && !hideTrigger) {
+    return (
+      <div className="flex flex-col gap-4">
+        <PromptInput
+          layout="inline"
+          maxHeight={160}
+          size="lg"
+          status={isSubmitting ? "submitted" : "ready"}
+          value={content}
+          variant="secondary"
+          onSubmit={() => void submitComment()}
+          onValueChange={handleValueChange}
+        >
+          <PromptInput.Shell>
+            <PromptInput.Content>
+              <PromptInput.TextArea
+                ref={textareaRef}
+                aria-label="Add a comment"
+                maxLength={1000}
+                placeholder="Add a comment"
+              />
+            </PromptInput.Content>
+            <PromptInput.Toolbar>
+              <PromptInput.ToolbarStart>
+                <Avatar size="sm" variant="soft" className="shrink-0">
+                  <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
+                </Avatar>
+              </PromptInput.ToolbarStart>
+              <PromptInput.ToolbarEnd>
+                <PromptInput.Send aria-label="Send comment">
+                  <ArrowUp aria-hidden="true" className="size-4" />
+                </PromptInput.Send>
+              </PromptInput.ToolbarEnd>
+            </PromptInput.Toolbar>
+          </PromptInput.Shell>
+          <PromptInput.Footer className="sr-only" aria-live="polite">
+            {content.length > 0
+              ? `${content.length} of 1000 characters`
+              : "Press Enter to send. Press Shift and Enter for a new line."}
+          </PromptInput.Footer>
+        </PromptInput>
+
+        <PromptSuggestion className="gap-3">
+          <PromptSuggestion.Header>
+            <PromptSuggestion.Description>Suggestions</PromptSuggestion.Description>
+          </PromptSuggestion.Header>
+          <PromptSuggestion.Items className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {COMMENT_SUGGESTIONS.map((suggestion) => (
+              <PromptSuggestion.Item key={suggestion} onPress={() => applySuggestion(suggestion)}>
+                {suggestion}
+              </PromptSuggestion.Item>
+            ))}
+          </PromptSuggestion.Items>
+        </PromptSuggestion>
+      </div>
+    );
+  }
+
   return (
     <>
       {!hideTrigger && (
-        <Button
-          fullWidth
-          variant="secondary"
-          className="h-auto justify-start gap-3 px-3 py-3"
-          onPress={openComposer}
-        >
+        <Button fullWidth variant="secondary" onPress={openComposer}>
           <Avatar size="sm" variant="soft" className="shrink-0">
             <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
           </Avatar>
@@ -124,12 +212,12 @@ export function CommentInput({
             <Modal.CloseTrigger />
             <Modal.Header>
               <Modal.Heading>{heading}</Modal.Heading>
-              <p className="text-muted mt-1.5 max-w-sm text-sm leading-5">{description}</p>
             </Modal.Header>
 
             <Modal.Body>
-              <form id={formId} className="flex flex-col gap-2" onSubmit={handleFormSubmit}>
+              <Form id={formId} className="flex flex-col gap-4" onSubmit={handleFormSubmit}>
                 <TextField isRequired fullWidth name={isReply ? "reply" : "comment"}>
+                  <Label> {description}</Label>
                   <TextArea
                     autoFocus
                     aria-label={heading}
@@ -141,13 +229,10 @@ export function CommentInput({
                     variant="secondary"
                     onChange={handleChange}
                   />
+                  <Description>{content.length}/1000</Description>
                 </TextField>
-                <p className="text-muted text-right text-xs tabular-nums" aria-hidden="true">
-                  {content.length}/1000
-                </p>
-              </form>
+              </Form>
             </Modal.Body>
-
             <Modal.Footer>
               <Button
                 variant="secondary"

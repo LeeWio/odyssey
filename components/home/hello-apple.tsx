@@ -1,26 +1,29 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 export function HelloApple() {
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const dValue =
     "M-145.66,43.747C-145.66,43.747,-86.107,10.264,-81.851,-26.162C-79.424,-46.943,-98.573,-44.137,-101.426,-23.013C-103.757,-5.755,-109.596,40.561,-109.596,40.561C-109.596,40.561,-103.979,-0.034,-85.851,1.753C-65.936,4.083,-91.979,40.05,-69,40.305C-48.573,40.532,-27.639,22.688,-26.873,10.943C-25.99,-2.599,-44.362,-4.886,-50.022,11.966C-55.226,27.461,-43.584,44.902,-23.54,40.581C7.341,33.922,22.483,-10.827,23.936,-26.077C25.467,-42.162,13.723,-43.694,6.574,-29.397C-0.104,-16.04,-11.245,37.085,12.958,41.583C41.809,46.944,64.277,-5.906,67.086,-23.779C69.802,-41.066,58.656,-45.952,50.234,-30.673C41.166,-14.223,27.843,44.077,59.937,41.326C86.746,39.028,76.916,2.264,102.898,-0.05C114.562,-1.088,119.386,9.92,118.532,21.029C117.638,32.646,106.66,42.475,95.809,40.943C85.898,39.544,80.838,25.973,83.425,17.072C86.617,6.094,96.662,0.12,102.898,-0.05C111.766,-0.29,116.234,5.327,124.149,5.199C131.179,5.086,138.27,-2.922,138.27,-2.922";
   const dValue2 =
     "M-145.66,43.747C-145.66,43.747,-86.107,10.264,-81.851,-26.162C-79.424,-46.943,-98.573,-44.137,-101.426,-23.013C-103.757,-5.755,-109.596,40.561,-109.596,40.561C-109.596,40.561,-103.979,-0.034,-85.851,1.753C-65.936,4.083,-91.978,40.05,-68.999,40.305C-48.572,40.532,-27.639,22.688,-26.873,10.943C-25.99,-2.599,-44.362,-4.886,-50.022,11.966C-55.226,27.461,-43.584,44.902,-23.54,40.581C7.341,33.922,22.483,-10.827,23.936,-26.077C25.467,-42.162,13.723,-43.694,6.574,-29.397C-0.104,-16.04,-11.245,37.085,12.958,41.583C41.809,46.944,64.277,-5.906,67.086,-23.779C69.802,-41.066,58.656,-45.952,50.234,-30.673C41.166,-14.223,27.843,44.077,59.937,41.326C86.746,39.028,76.916,2.264,102.898,-0.05C114.562,-1.088,119.386,9.92,118.532,21.029C117.638,32.646,106.66,42.475,95.809,40.943C85.898,39.544,80.838,25.973,83.425,17.072C86.617,6.094,96.662,0.12,102.898,-0.05C111.766,-0.29,116.234,5.327,124.149,5.199C131.179,5.086,136.66,-1.311,136.66,-1.311";
 
   return (
-    <div className="relative flex aspect-square w-full max-w-2xl items-center justify-center">
+    <div className="relative flex aspect-[5/2] w-full items-center justify-center">
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+        initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.94, filter: "blur(10px)" }}
         animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-        transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
+        transition={{ duration: shouldReduceMotion ? 0 : 1.2, ease: [0.23, 1, 0.32, 1] }}
         className="h-full w-full"
       >
         <svg
           fill="none"
           height="100%"
           width="100%"
-          viewBox="0 0 500 500"
+          aria-label="Hello"
+          role="img"
+          viewBox="0 145 500 210"
           xmlnsXlink="http://www.w3.org/1999/xlink"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -55,6 +58,9 @@ export function HelloApple() {
                 .stop-1 { animation: color-cycle-1 20s infinite ease-in-out; }
                 .stop-2 { animation: color-cycle-2 20s infinite ease-in-out; }
                 .stop-3 { animation: color-cycle-3 20s infinite ease-in-out; }
+                @media (prefers-reduced-motion: reduce) {
+                  .stop-0, .stop-1, .stop-2, .stop-3 { animation: none; }
+                }
               `}
             </style>
             <linearGradient
@@ -75,58 +81,62 @@ export function HelloApple() {
           <g transform="matrix(1.087,0,0,1.087,-21.135,-19.235)">
             <g transform="matrix(1,0,0,1,252,245.918)">
               <path
-                strokeDasharray="0 100"
+                strokeDasharray={shouldReduceMotion ? "99 1" : "0 100"}
                 pathLength="100"
-                d={dValue}
+                d={shouldReduceMotion ? dValue2 : dValue}
                 strokeLinejoin="round"
                 strokeLinecap="round"
                 strokeWidth="9"
                 stroke="url(#hello-gradient)"
               >
-                <animate
-                  repeatCount="1"
-                  attributeName="stroke-width"
-                  dur="6s"
-                  begin="0s"
-                  fill="freeze"
-                  values="9; 9; 10; 9; 9"
-                  keyTimes="0; 0.034722; 0.101389; 0.416667; 1"
-                  keySplines="0 0 1 1; 0.681 0 0.788 1; 0.059 0 0.118 1; 0 0 1 1"
-                  calcMode="spline"
-                />
-                <animate
-                  repeatCount="1"
-                  attributeName="d"
-                  dur="6s"
-                  begin="0s"
-                  calcMode="spline"
-                  values={`${dValue}; ${dValue}; ${dValue2}; ${dValue2}`}
-                  keyTimes="0; 0.416667; 0.518056; 1"
-                  keySplines="0 0 1 1; 0.281 0.613 0.596 1; 0 0 1 1"
-                  fill="freeze"
-                />
-                <animate
-                  repeatCount="1"
-                  fill="freeze"
-                  begin="0s"
-                  dur="6s"
-                  calcMode="spline"
-                  keySplines="0 0 1 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0 0 1 1"
-                  keyTimes="0; 0.034722; 0.041667; 0.0625; 0.081944; 0.416667; 0.693056; 0.958333; 1"
-                  values="0 100; 0 100; 0.877 99.123; 4.288 95.712; 8.593 91.407; 99 1; 99 1; 99 1; 99 1"
-                  attributeName="stroke-dasharray"
-                />
-                <animate
-                  repeatCount="1"
-                  fill="freeze"
-                  begin="0s"
-                  dur="6s"
-                  calcMode="spline"
-                  keySplines="0 0 1 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0 0 1 1"
-                  keyTimes="0; 0.034722; 0.041667; 0.0625; 0.081944; 0.416667; 0.693056; 0.958333; 1"
-                  values="0; 0; -0.048; -0.305; -0.452; -1; -1; -1; -1"
-                  attributeName="stroke-dashoffset"
-                />
+                {!shouldReduceMotion && (
+                  <>
+                    <animate
+                      repeatCount="1"
+                      attributeName="stroke-width"
+                      dur="2.8s"
+                      begin="0s"
+                      fill="freeze"
+                      values="9; 9; 10; 9; 9"
+                      keyTimes="0; 0.034722; 0.101389; 0.416667; 1"
+                      keySplines="0 0 1 1; 0.681 0 0.788 1; 0.059 0 0.118 1; 0 0 1 1"
+                      calcMode="spline"
+                    />
+                    <animate
+                      repeatCount="1"
+                      attributeName="d"
+                      dur="2.8s"
+                      begin="0s"
+                      calcMode="spline"
+                      values={`${dValue}; ${dValue}; ${dValue2}; ${dValue2}`}
+                      keyTimes="0; 0.416667; 0.518056; 1"
+                      keySplines="0 0 1 1; 0.281 0.613 0.596 1; 0 0 1 1"
+                      fill="freeze"
+                    />
+                    <animate
+                      repeatCount="1"
+                      fill="freeze"
+                      begin="0s"
+                      dur="2.8s"
+                      calcMode="spline"
+                      keySplines="0 0 1 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0 0 1 1"
+                      keyTimes="0; 0.034722; 0.041667; 0.0625; 0.081944; 0.416667; 0.693056; 0.958333; 1"
+                      values="0 100; 0 100; 0.877 99.123; 4.288 95.712; 8.593 91.407; 99 1; 99 1; 99 1; 99 1"
+                      attributeName="stroke-dasharray"
+                    />
+                    <animate
+                      repeatCount="1"
+                      fill="freeze"
+                      begin="0s"
+                      dur="2.8s"
+                      calcMode="spline"
+                      keySplines="0 0 1 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0.302 0.14 0.665 1; 0 0 1 1"
+                      keyTimes="0; 0.034722; 0.041667; 0.0625; 0.081944; 0.416667; 0.693056; 0.958333; 1"
+                      values="0; 0; -0.048; -0.305; -0.452; -1; -1; -1; -1"
+                      attributeName="stroke-dashoffset"
+                    />
+                  </>
+                )}
               </path>
             </g>
           </g>

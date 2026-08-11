@@ -8,8 +8,6 @@ export interface AuthState {
   roles: string[];
   permissions: string[];
   isAuthenticated: boolean;
-  isLoginOpen: boolean;
-  isSignUpOpen: boolean;
 }
 
 const initialState: AuthState = {
@@ -20,20 +18,12 @@ const initialState: AuthState = {
   roles: [],
   permissions: [],
   isAuthenticated: false,
-  isLoginOpen: false,
-  isSignUpOpen: false,
 };
 
 export const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setLoginOpen: (state, action: PayloadAction<boolean>) => {
-      state.isLoginOpen = action.payload;
-    },
-    setSignUpOpen: (state, action: PayloadAction<boolean>) => {
-      state.isSignUpOpen = action.payload;
-    },
     setCredentials: (
       state,
       action: PayloadAction<{
@@ -78,13 +68,10 @@ export const authSlice = createSlice({
     selectUserRoles: (state) => state.roles,
     selectUserPermissions: (state) => state.permissions,
     selectIsAdmin: (state) => state.roles.includes("ROLE_ADMIN"),
-    selectIsLoginOpen: (state) => state.isLoginOpen,
-    selectIsSignUpOpen: (state) => state.isSignUpOpen,
   },
 });
 
-export const { setLoginOpen, setSignUpOpen, setCredentials, setPermissions, removeCredentials } =
-  authSlice.actions;
+export const { setCredentials, setPermissions, removeCredentials } = authSlice.actions;
 
 export const {
   selectCurrentToken,
@@ -95,6 +82,4 @@ export const {
   selectUserRoles,
   selectUserPermissions,
   selectIsAdmin,
-  selectIsLoginOpen,
-  selectIsSignUpOpen,
 } = authSlice.selectors;

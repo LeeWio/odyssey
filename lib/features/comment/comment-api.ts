@@ -29,7 +29,12 @@ export const commentApi = baseApi.injectEndpoints({
         url: `/api/v1/public/comments/post/${postId}`,
         params: { page, size },
       }),
-      rawResponseSchema: apiResponseSchema(z.array(CommentResponseSchema)),
+      rawResponseSchema: apiResponseSchema(
+        z
+          .array(CommentResponseSchema)
+          .nullable()
+          .transform((comments) => comments ?? [])
+      ),
       transformResponse: (response: ApiResponse<CommentResponse[]>) => response.data || [],
       transformErrorResponse: transformApiError,
       providesTags: (result, _error, { postId }) =>
@@ -234,7 +239,12 @@ export const commentApi = baseApi.injectEndpoints({
      */
     getGuestbookEntries: builder.query<CommentResponse[], void>({
       query: () => "/api/v1/public/guestbook",
-      rawResponseSchema: apiResponseSchema(z.array(CommentResponseSchema)),
+      rawResponseSchema: apiResponseSchema(
+        z
+          .array(CommentResponseSchema)
+          .nullable()
+          .transform((comments) => comments ?? [])
+      ),
       transformResponse: (response: ApiResponse<CommentResponse[]>) => response.data || [],
       transformErrorResponse: transformApiError,
       providesTags: (result) =>

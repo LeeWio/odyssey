@@ -25,19 +25,20 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   selectCurrentUser,
   selectIsAuthenticated,
-  selectIsLoginOpen,
-  selectIsSignUpOpen,
   selectUserEmail,
-  setLoginOpen,
-  setSignUpOpen,
   useLogoutMutation,
 } from "@/lib/features/auth";
+import {
+  selectIsLoginOpen,
+  selectIsSignUpOpen,
+  setLoginOpen,
+  setSignUpOpen,
+} from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { LogIn } from "./auth/log-in";
 import { SignUp } from "./auth/sign-up";
 import { CommandPalette } from "./command-palette";
 import { Logo, MoonFillIcon, SearchIcon, SunMaxFillIcon } from "./icons";
-import { SmileBallLogo } from "./ui/smile-ball";
 
 type NavigationId = "chronicle" | "daily" | "travelogue" | "more";
 

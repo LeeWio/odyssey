@@ -1,9 +1,9 @@
 "use client";
 
 import { ArrowRotateRight, ChevronDown } from "@gravity-ui/icons";
-import { Avatar, Button, Chip, cn, toast } from "@heroui/react";
+import { Avatar, Button, Chip, Surface, Typography, cn, toast } from "@heroui/react";
 import { useState } from "react";
-import { setLoginOpen } from "@/lib/features/auth";
+import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
@@ -15,6 +15,7 @@ interface CommentItemProps {
   comment: EnhancedComment;
   depth?: number;
   onLikeToggle: (id: number, isLiked: boolean, currentLikes: number) => void;
+  onAuthenticationRequired?: () => void;
   onReplySubmit: (content: string, parentId: number) => Promise<void>;
   onEditSave: (id: number, content: string) => void;
   onDelete: (id: number) => void;
@@ -38,6 +39,7 @@ export function CommentItem({
   comment,
   depth = 1,
   onLikeToggle,
+  onAuthenticationRequired,
   onReplySubmit,
   onEditSave,
   onDelete,
@@ -70,139 +72,156 @@ export function CommentItem({
   };
 
   return (
-    <article
-      id={`comment-card-${comment.id}`}
+    <Surface
       className={cn(
-        "scroll-mt-24",
-        isHighlighted && "bg-accent-soft/10 ring-accent/20 rounded-xl ring-1",
-        isHighlighted && (depth === 1 ? "-m-3 p-3" : "p-3")
+        depth === 1 && "rounded-3xl p-4 sm:p-5",
+        depth > 1 && "p-0",
+        isHighlighted && "ring-accent/30 ring-1"
       )}
+      variant={depth === 1 ? "tertiary" : "transparent"}
     >
-      <div className="flex gap-3">
-        <Avatar size="sm" variant="soft" className="shrink-0">
-          {comment.avatar && <Avatar.Image src={comment.avatar} alt={displayName} />}
-          <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
-        </Avatar>
+      <article id={`comment-card-${comment.id}`} className="scroll-mt-24">
+        <div className="flex gap-3 sm:gap-4">
+          <Avatar size={depth === 1 ? "md" : "sm"} variant="soft" className="shrink-0">
+            {comment.avatar && <Avatar.Image src={comment.avatar} alt={displayName} />}
+            <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
+          </Avatar>
 
-        <div className="min-w-0 flex-1">
-          <header className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-sm font-semibold">{displayName}</span>
-            <time className="text-muted text-xs" dateTime={comment.createdAt}>
-              {formatCommentDate(comment.createdAt)}
-            </time>
-            {comment.isFailed && (
-              <Chip size="sm" color="danger" variant="soft">
-                Not sent
-              </Chip>
-            )}
-            {comment.status === "PENDING" && !comment.isPending && (
-              <Chip size="sm" color="warning" variant="soft">
-                In review
-              </Chip>
-            )}
-          </header>
+          <div className="min-w-0 flex-1">
+            <header className="flex flex-col items-start gap-1">
+              <Typography className="max-w-full truncate" type="body-sm" weight="semibold">
+                {displayName}
+              </Typography>
+              <div className="flex flex-wrap items-center gap-2">
+                <time className="text-muted text-xs" dateTime={comment.createdAt}>
+                  {formatCommentDate(comment.createdAt)}
+                </time>
+                {comment.isFailed ? (
+                  <Chip size="sm" color="danger" variant="soft">
+                    Not sent
+                  </Chip>
+                ) : comment.isPending ? (
+                  <Chip size="sm" variant="soft">
+                    Sending
+                  </Chip>
+                ) : comment.status === "PENDING" ? (
+                  <Chip size="sm" color="warning" variant="soft">
+                    In review
+                  </Chip>
+                ) : null}
+              </div>
+            </header>
 
-          <div className="mt-1">
-            <CommentContent
-              content={comment.content}
-              isEdited={comment.isEdited}
-              isEditing={isEditing}
-              isReported={comment.isReported}
-              onEditCancel={() => setIsEditing(false)}
-              onEditSave={(content) => {
-                onEditSave(comment.id, content);
-                setIsEditing(false);
-              }}
-            />
-          </div>
-
-          {!isEditing && (
-            <div className="mt-1.5 flex flex-wrap items-center gap-1">
-              <CommentActions
-                comment={comment}
-                depth={depth}
-                isReplying={isReplying}
-                onCopyLink={copyCommentLink}
-                onDelete={() => onDelete(comment.id)}
-                onEditStart={() => setIsEditing(true)}
-                onLikeToggle={() => onLikeToggle(comment.id, comment.isLiked, comment.likesCount)}
-                onReplyToggle={() => {
-                  if (!isAuthenticated) {
-                    dispatch(setLoginOpen(true));
-                    return;
-                  }
-
-                  setActiveReplyId(isReplying ? null : comment.id);
+            <div className="mt-3">
+              <CommentContent
+                content={comment.content}
+                isEdited={comment.isEdited}
+                isEditing={isEditing}
+                isReported={comment.isReported}
+                onEditCancel={() => setIsEditing(false)}
+                onEditSave={(content) => {
+                  onEditSave(comment.id, content);
+                  setIsEditing(false);
                 }}
-                onReport={() => onReport(comment.id)}
               />
-
-              {comment.isFailed && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onPress={() => onRetry(comment.id, comment.content, comment.parentId)}
-                >
-                  <ArrowRotateRight />
-                  Retry
-                </Button>
-              )}
             </div>
-          )}
 
-          {isReplying && (
-            <CommentInput
-              hideTrigger
-              isOpen
-              replyId={comment.id}
-              replyTo={displayName}
-              placeholder={`Reply to ${displayName}...`}
-              submitButtonText="Post reply"
-              onOpenChange={(open) => {
-                if (!open) setActiveReplyId(null);
-              }}
-              onSubmit={(content) => onReplySubmit(content, comment.id)}
-            />
-          )}
+            {!isEditing && comment.isFailed && (
+              <Button
+                className="mt-3"
+                size="sm"
+                variant="secondary"
+                onPress={() => onRetry(comment.id, comment.content, comment.parentId)}
+              >
+                <ArrowRotateRight aria-hidden="true" />
+                Retry
+              </Button>
+            )}
 
-          {hasReplies && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="mt-1"
-              aria-controls={repliesId}
-              aria-expanded={isExpanded}
-              onPress={() => setIsExpanded((value) => !value)}
-            >
-              <ChevronDown className={cn("transition-transform", isExpanded && "rotate-180")} />
-              {isExpanded
-                ? "Hide replies"
-                : `View ${replies.length} ${replies.length === 1 ? "reply" : "replies"}`}
-            </Button>
-          )}
+            {!isEditing &&
+              !comment.isFailed &&
+              !comment.isPending &&
+              comment.status !== "PENDING" && (
+                <CommentActions
+                  comment={comment}
+                  depth={depth}
+                  isReplying={isReplying}
+                  onCopyLink={copyCommentLink}
+                  onDelete={() => onDelete(comment.id)}
+                  onEditStart={() => setIsEditing(true)}
+                  onLikeToggle={() => onLikeToggle(comment.id, comment.isLiked, comment.likesCount)}
+                  onReplyToggle={() => {
+                    if (!isAuthenticated) {
+                      onAuthenticationRequired?.();
+                      dispatch(setLoginOpen(true));
+                      return;
+                    }
+
+                    setActiveReplyId(isReplying ? null : comment.id);
+                  }}
+                  onReport={() => onReport(comment.id)}
+                />
+              )}
+
+            {isReplying && (
+              <CommentInput
+                hideTrigger
+                isOpen
+                replyId={comment.id}
+                replyTo={displayName}
+                onAuthenticationRequired={onAuthenticationRequired}
+                placeholder={`Reply to ${displayName}...`}
+                submitButtonText="Post reply"
+                onOpenChange={(open) => {
+                  if (!open) setActiveReplyId(null);
+                }}
+                onSubmit={(content) => onReplySubmit(content, comment.id)}
+              />
+            )}
+
+            {hasReplies && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="mt-2"
+                aria-controls={repliesId}
+                aria-expanded={isExpanded}
+                onPress={() => setIsExpanded((value) => !value)}
+              >
+                <ChevronDown
+                  aria-hidden="true"
+                  className={cn("transition-transform", isExpanded && "rotate-180")}
+                />
+                {isExpanded
+                  ? "Hide replies"
+                  : `View ${replies.length} ${replies.length === 1 ? "reply" : "replies"}`}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
 
-      {hasReplies && isExpanded && (
-        <div
-          id={repliesId}
-          className="border-separator-tertiary mt-4 ml-4 flex flex-col gap-4 border-l pl-5"
-        >
-          {replies.map((child) => (
-            <CommentItem
-              key={child.id}
-              comment={child}
-              depth={depth + 1}
-              onDelete={onDelete}
-              onEditSave={onEditSave}
-              onLikeToggle={onLikeToggle}
-              onReplySubmit={onReplySubmit}
-              onReport={onReport}
-              onRetry={onRetry}
-            />
-          ))}
-        </div>
-      )}
-    </article>
+        {hasReplies && isExpanded && (
+          <div
+            id={repliesId}
+            className="border-separator-tertiary mt-5 ml-5 flex flex-col gap-4 border-l pl-5"
+          >
+            {replies.map((child) => (
+              <CommentItem
+                key={child.id}
+                comment={child}
+                depth={depth + 1}
+                onDelete={onDelete}
+                onEditSave={onEditSave}
+                onLikeToggle={onLikeToggle}
+                onAuthenticationRequired={onAuthenticationRequired}
+                onReplySubmit={onReplySubmit}
+                onReport={onReport}
+                onRetry={onRetry}
+              />
+            ))}
+          </div>
+        )}
+      </article>
+    </Surface>
   );
 }

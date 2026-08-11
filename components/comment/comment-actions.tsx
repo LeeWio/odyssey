@@ -62,8 +62,13 @@ export function CommentActions({
       )}
 
       <Dropdown>
-        <Button size="sm" variant="ghost" isDisabled={isUnavailable}>
-          <Ellipsis />
+        <Button
+          size="sm"
+          variant="ghost"
+          aria-label="More comment actions"
+          isDisabled={isUnavailable}
+        >
+          <Ellipsis aria-hidden="true" />
         </Button>
         <Dropdown.Popover>
           <Dropdown.Menu

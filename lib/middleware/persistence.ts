@@ -28,7 +28,19 @@ persistenceMiddleware.startListening({
 
     if (typeof window !== "undefined") {
       if (auth.isAuthenticated) {
-        localStorage.setItem("odyssey_auth", JSON.stringify(auth));
+        // Persist session data only. Dialog visibility belongs to the UI slice and must reset on load.
+        localStorage.setItem(
+          "odyssey_auth",
+          JSON.stringify({
+            accessToken: auth.accessToken,
+            refreshToken: auth.refreshToken,
+            username: auth.username,
+            email: auth.email,
+            roles: auth.roles,
+            permissions: auth.permissions,
+            isAuthenticated: auth.isAuthenticated,
+          })
+        );
       } else {
         localStorage.removeItem("odyssey_auth");
       }
@@ -98,16 +110,33 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
 
     if (auth) {
       const persistedAuth = JSON.parse(auth) as Record<string, unknown>;
+      // Reconstruct the durable shape explicitly so legacy UI fields are ignored.
       preloadedState.auth = {
-        ...persistedAuth,
+        accessToken:
+          typeof persistedAuth.accessToken === "string" ? persistedAuth.accessToken : null,
         refreshToken:
           typeof persistedAuth.refreshToken === "string" ? persistedAuth.refreshToken : null,
+        username: typeof persistedAuth.username === "string" ? persistedAuth.username : null,
+        email: typeof persistedAuth.email === "string" ? persistedAuth.email : null,
+        roles: Array.isArray(persistedAuth.roles)
+          ? persistedAuth.roles.filter((role): role is string => typeof role === "string")
+          : [],
+        permissions: Array.isArray(persistedAuth.permissions)
+          ? persistedAuth.permissions.filter(
+              (permission): permission is string => typeof permission === "string"
+            )
+          : [],
+        isAuthenticated:
+          persistedAuth.isAuthenticated === true &&
+          typeof persistedAuth.accessToken === "string" &&
+          persistedAuth.accessToken.length > 0,
       };
     }
     if (theme || draftId) {
       const variant = theme ? coerceThemeVariant(theme) : DEFAULT_THEME_VARIANT;
 
       preloadedState.ui = {
+        authDialogs: { isLoginOpen: false, isSignUpOpen: false },
         theme: { variant: variant as ThemeVariant },
         sheet: { isOpen: false },
         dashboard: { isOpen: false },
