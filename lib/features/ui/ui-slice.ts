@@ -6,6 +6,10 @@ import { DEFAULT_THEME_VARIANT, type ThemeVariant } from "../../theme";
 export type { ThemeVariant } from "../../theme";
 
 interface UiState {
+  authDialogs: {
+    isLoginOpen: boolean;
+    isSignUpOpen: boolean;
+  };
   sheet: {
     isOpen: boolean;
   };
@@ -24,6 +28,10 @@ interface UiState {
 }
 
 const initialState: UiState = {
+  authDialogs: {
+    isLoginOpen: false,
+    isSignUpOpen: false,
+  },
   sheet: {
     isOpen: false,
   },
@@ -45,6 +53,14 @@ export const uiSlice = createSlice({
   name: "ui",
   initialState,
   reducers: {
+    setLoginOpen: (state, action: PayloadAction<boolean>) => {
+      state.authDialogs ??= { isLoginOpen: false, isSignUpOpen: false };
+      state.authDialogs.isLoginOpen = action.payload;
+    },
+    setSignUpOpen: (state, action: PayloadAction<boolean>) => {
+      state.authDialogs ??= { isLoginOpen: false, isSignUpOpen: false };
+      state.authDialogs.isSignUpOpen = action.payload;
+    },
     toggleSheet: (state) => {
       state.sheet.isOpen = !state.sheet.isOpen;
     },
@@ -80,6 +96,8 @@ export const uiSlice = createSlice({
 });
 
 export const {
+  setLoginOpen,
+  setSignUpOpen,
   toggleSheet,
   setThemeVariant,
   toggleDashboard,
@@ -89,6 +107,8 @@ export const {
   closeRichText,
 } = uiSlice.actions;
 
+export const selectIsLoginOpen = (state: RootState) => state.ui.authDialogs?.isLoginOpen ?? false;
+export const selectIsSignUpOpen = (state: RootState) => state.ui.authDialogs?.isSignUpOpen ?? false;
 export const selectIsSheetOpen = (state: RootState) => state.ui.sheet?.isOpen;
 export const selectThemeVariant = (state: RootState) => state.ui.theme?.variant;
 export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard?.isOpen;

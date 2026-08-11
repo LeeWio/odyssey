@@ -1,16 +1,25 @@
 "use client";
 
-import { HelloApple } from "@/components/home/hello-apple";
-import { MotionChip, MotionItemCard, MotionKPI, MotionTypography } from "@/components/ui";
-import { ChatAttachmentInput, ItemCard, KPI, PromptInput, TrendChip } from "@heroui-pro/react";
-import Image from "next/image";
-import { MediaPlayButton } from "@/features/media/components/media-play-button";
-import { MediaItem } from "@/features/media/types";
-import { ArrowUp, Paperclip } from "@gravity-ui/icons";
-import { useState } from "react";
-import { useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
 import { ArrowDownIcon, ArrowUpIcon } from "@/components/icons";
+import { HelloApple } from "@/components/home/hello-apple";
+import {
+  MotionCard,
+  MotionChip,
+  MotionItemCard,
+  MotionKPI,
+  MotionSurface,
+  MotionTypography,
+} from "@/components/ui";
+import { MediaPlayButton } from "@/features/media/components/media-play-button";
+import type { MediaItem } from "@/features/media/types";
+import { useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
+import { ItemCard, KPI, TrendChip } from "@heroui-pro/react";
+import { buttonVariants, Card, Chip, Link, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
+import { useReducedMotion } from "motion/react";
+
+const easeOut = [0.22, 1, 0.36, 1] as const;
 
 const mapSparkline = (data?: number[]) => {
   if (!data || data.length === 0) return [];
@@ -36,244 +45,195 @@ const mockSong: MediaItem = {
       artist: "安泊猜想",
       src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
     },
-    {
-      id: "track-2",
-      title: "Example1 Song 2",
-      artist: "Artist 2",
-      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    },
-    {
-      id: "track-3",
-      title: "Example Song 3",
-      artist: "Artist 3",
-      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-    },
   ],
 };
 
 export default function Home() {
-  const [value] = useState("");
-
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const { data: nasdaqData } = useGetMarketIndexBySymbolQuery(
     { symbol: ".ixic", period: "1D" },
     { pollingInterval: 300000, refetchOnFocus: true }
   );
-
   const isPositive = (nasdaqData?.changePct || 0) >= 0;
 
-  return (
-    <main className="bg-background relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-6">
-      <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl">
-        <HelloApple />
-      </div>
+  const reveal = (delay = 0, distance = 18) => ({
+    initial: shouldReduceMotion ? false : { opacity: 0, y: distance, filter: "blur(8px)" },
+    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    transition: { duration: shouldReduceMotion ? 0 : 0.7, delay, ease: easeOut },
+  });
 
-      <section className="relative mt-[clamp(5rem,10vw,10rem)] flex min-h-[700px] w-full flex-col items-center gap-2 px-[clamp(1rem,4vw,4rem)] pb-[clamp(5rem,12vw,12rem)]">
-        <MotionChip
-          size="md"
-          color="default"
-          variant="primary"
-          initial={{
-            opacity: 0,
-            y: 12,
-            filter: "blur(8px)",
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-          }}
-          viewport={{
-            once: true,
-            amount: 0.4,
-          }}
-          transition={{
-            duration: 0.6,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
-          RECENTLY
+  const revealInView = (delay = 0, distance = 20) => ({
+    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.3 },
+    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
+  });
+
+  return (
+    <div className="bg-background w-full overflow-hidden">
+      <section
+        aria-labelledby="home-hero-title"
+        className="mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col items-center justify-center px-6 pt-24 pb-16 text-center sm:px-10"
+      >
+        <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
+          A personal field journal
         </MotionChip>
+
+        <div className="mt-1 w-full max-w-3xl" aria-hidden="true">
+          <HelloApple />
+        </div>
+
         <MotionTypography
-          align="center"
+          id="home-hero-title"
           type="h1"
           weight="bold"
-          color="default"
-          className="from-foreground via-foreground to-accent bg-linear-to-r bg-clip-text text-[clamp(2.25rem,5vw,4rem)] leading-[1.1] tracking-[-0.03em] text-transparent"
-          initial={{
-            opacity: 0,
-            y: 18,
-            filter: "blur(10px)",
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-          }}
-          viewport={{
-            once: true,
-            amount: 0.4,
-          }}
-          transition={{
-            duration: 0.8,
-            delay: 0.08,
-            ease: [0.22, 1, 0.36, 1],
-          }}
+          className="max-w-3xl text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.055em]"
+          {...reveal(0.18)}
         >
-          What I&apos;ve been up to
+          A living notebook, kept in motion.
         </MotionTypography>
 
-        <MotionTypography
-          align="center"
-          type="body"
-          color="muted"
-          weight="normal"
-          className="text-[clamp(0.875rem,1.5vw,1.125rem)] leading-relaxed tracking-[-0.01em]"
-          initial={{
-            opacity: 0,
-            y: 12,
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
-          viewport={{
-            once: true,
-            amount: 0.4,
-          }}
-          transition={{
-            duration: 0.7,
-            delay: 0.18,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
-          Things I enjoy lately.
+        <MotionTypography color="muted" type="body" className="mt-4 max-w-xl" {...reveal(0.26, 14)}>
+          Software, markets, music, and the habits that shape the work.
         </MotionTypography>
 
-        <MotionItemCard
-          initial={{
-            opacity: 0,
-            y: 30,
-            scale: 0.96,
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-            scale: 1,
-          }}
-          transition={{
-            duration: 0.6,
-          }}
-          className="absolute top-[35%] left-[15%] w-75 rotate-[-8deg]"
+        <MotionSurface
+          variant="transparent"
+          className="mt-6 flex flex-col items-center gap-4 sm:flex-row"
+          {...reveal(0.34, 12)}
         >
-          <ItemCard.Icon role="img">
-            <div className="relative size-9 overflow-hidden rounded-lg">
-              <Image
-                src="/IMG_5332.JPG"
-                alt="Album cover"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            </div>
-          </ItemCard.Icon>
-          <ItemCard.Content>
-            <ItemCard.Title>老歌</ItemCard.Title>
-            <ItemCard.Description>安泊猜想</ItemCard.Description>
-          </ItemCard.Content>
-          <ItemCard.Action>
-            <MediaPlayButton media={mockSong} shuffle={true} size="sm" variant="tertiary" />
-          </ItemCard.Action>
-        </MotionItemCard>
-
-        <MotionKPI
-          initial={{
-            opacity: 0,
-            x: 30,
-            y: 10,
-            scale: 0.96,
-            filter: "blur(8px)",
-          }}
-          whileInView={{
-            opacity: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-            filter: "blur(0px)",
-          }}
-          viewport={{
-            once: true,
-            amount: 0.3,
-          }}
-          transition={{
-            duration: 0.8,
-            delay: 0.12,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="absolute top-[28%] right-[12%] rotate-[8deg]"
-        >
-          <KPI.Header>
-            <Icon icon="gravity-ui:target-dart" className="text-muted size-4" />
-            <KPI.Title>NASDAQ</KPI.Title>
-          </KPI.Header>
-          <KPI.Content className="w-92 grid-cols-[1fr_1fr] items-end">
-            <div className="flex flex-col gap-1">
-              <KPI.Value
-                className="text-3xl"
-                maximumFractionDigits={2}
-                value={nasdaqData?.current || 0}
-              />
-              <div className="flex items-center gap-1.5">
-                <TrendChip trend={isPositive ? "up" : "down"} variant="tertiary">
-                  <TrendChip.Indicator>
-                    {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
-                  </TrendChip.Indicator>
-                  {Math.abs(nasdaqData?.changePct || 0).toFixed(2)}%
-                  <TrendChip.Suffix>today</TrendChip.Suffix>
-                </TrendChip>
-              </div>
-            </div>
-            <KPI.Chart
-              color="var(--color-accent)"
-              data={mapSparkline(nasdaqData?.sparkline)}
-              height={60}
-              strokeWidth={1.5}
-            />
-          </KPI.Content>
-        </MotionKPI>
-
-        <PromptInput value={value} className="absolute top-[50%] max-w-110">
-          <ChatAttachmentInput disabled onFilesSelected={() => {}}>
-            <ChatAttachmentInput.Dropzone
-              render={(dropzoneProps) => (
-                <PromptInput.Shell {...dropzoneProps}>
-                  <PromptInput.Content>
-                    <PromptInput.TextArea placeholder="What do you want to know?" />
-                  </PromptInput.Content>
-                  <PromptInput.Toolbar>
-                    <PromptInput.ToolbarStart>
-                      <ChatAttachmentInput.Trigger
-                        render={(triggerProps) => (
-                          <PromptInput.Action
-                            {...triggerProps}
-                            aria-label="Attach file"
-                            tooltip="Attach file"
-                          >
-                            <Paperclip className="size-4" />
-                          </PromptInput.Action>
-                        )}
-                      />
-                    </PromptInput.ToolbarStart>
-                    <PromptInput.ToolbarEnd>
-                      <PromptInput.Send>
-                        <ArrowUp className="size-4" />
-                      </PromptInput.Send>
-                    </PromptInput.ToolbarEnd>
-                  </PromptInput.Toolbar>
-                </PromptInput.Shell>
-              )}
-            />
-          </ChatAttachmentInput>
-        </PromptInput>
+          <Link className={buttonVariants({ size: "lg", variant: "primary" })} href="/blog">
+            Read the journal
+            <Icon aria-hidden="true" icon="gravity-ui:arrow-up-right-from-square" />
+          </Link>
+          <Link href="#lately">
+            See what&apos;s lately
+            <Link.Icon />
+          </Link>
+        </MotionSurface>
       </section>
-    </main>
+
+      <section
+        id="lately"
+        aria-labelledby="lately-title"
+        className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-24 sm:px-10 sm:py-32"
+      >
+        <header className="flex flex-col items-center text-center">
+          <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
+            Lately
+          </MotionChip>
+          <MotionTypography
+            id="lately-title"
+            align="center"
+            type="h2"
+            weight="bold"
+            className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
+            {...revealInView(0.06)}
+          >
+            What I&apos;ve been up to
+          </MotionTypography>
+          <MotionTypography
+            align="center"
+            type="body"
+            color="muted"
+            className="mt-3"
+            {...revealInView(0.12, 14)}
+          >
+            Listening, investing, building, and training.
+          </MotionTypography>
+        </header>
+
+        <div className="mt-12 grid gap-5 lg:grid-cols-2">
+          <MotionCard variant="secondary" className="min-h-60" {...revealInView(0.08, 24)}>
+            <Card.Header>
+              <Chip size="sm" variant="soft">
+                Listening
+              </Chip>
+              <Card.Title>One song, kept close.</Card.Title>
+              <Card.Description>
+                Music that stayed after the rest of the queue moved on.
+              </Card.Description>
+            </Card.Header>
+            <Card.Content className="mt-auto">
+              <MotionItemCard variant="secondary">
+                <ItemCard.Icon role="img" aria-label="Album cover for 老歌 by 安泊猜想">
+                  <div className="relative size-10 overflow-hidden rounded-lg">
+                    <Image alt="" className="object-cover" fill sizes="40px" src="/IMG_5332.JPG" />
+                  </div>
+                </ItemCard.Icon>
+                <ItemCard.Content>
+                  <ItemCard.Title>老歌</ItemCard.Title>
+                  <ItemCard.Description>安泊猜想</ItemCard.Description>
+                </ItemCard.Content>
+                <ItemCard.Action>
+                  <MediaPlayButton media={mockSong} shuffle size="sm" variant="tertiary" />
+                </ItemCard.Action>
+              </MotionItemCard>
+            </Card.Content>
+          </MotionCard>
+
+          <MotionCard variant="secondary" className="min-h-60" {...revealInView(0.14, 24)}>
+            <Card.Header>
+              <Chip size="sm" variant="soft">
+                Investing
+              </Chip>
+              <Card.Title>Watching without rushing.</Card.Title>
+              <Card.Description>
+                A small market signal, observed in context rather than isolation.
+              </Card.Description>
+            </Card.Header>
+            <Card.Content className="mt-auto">
+              <MotionKPI variant="secondary">
+                <KPI.Header>
+                  <Icon aria-hidden="true" icon="gravity-ui:target-dart" />
+                  <KPI.Title>NASDAQ</KPI.Title>
+                </KPI.Header>
+                <KPI.Content className="grid-cols-[1fr_1fr] items-end">
+                  <div className="flex flex-col gap-2">
+                    <KPI.Value maximumFractionDigits={2} value={nasdaqData?.current || 0} />
+                    <TrendChip trend={isPositive ? "up" : "down"} variant="tertiary">
+                      <TrendChip.Indicator>
+                        {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                      </TrendChip.Indicator>
+                      {Math.abs(nasdaqData?.changePct || 0).toFixed(2)}%
+                      <TrendChip.Suffix>today</TrendChip.Suffix>
+                    </TrendChip>
+                  </div>
+                  <KPI.Chart
+                    color="var(--color-accent)"
+                    data={mapSparkline(nasdaqData?.sparkline)}
+                    height={60}
+                    strokeWidth={1.5}
+                  />
+                </KPI.Content>
+              </MotionKPI>
+            </Card.Content>
+          </MotionCard>
+        </div>
+
+        <MotionCard
+          variant="tertiary"
+          className="mt-5 flex-col items-start gap-5 sm:flex-row sm:items-center"
+          {...revealInView(0.18, 20)}
+        >
+          <Card.Header className="flex-1">
+            <Typography type="body-xs" color="muted">
+              Building & training
+            </Typography>
+            <Card.Title>Practice is part of the archive.</Card.Title>
+            <Card.Description>
+              The unfinished work matters: systems shipped, miles logged, and questions carried
+              forward.
+            </Card.Description>
+          </Card.Header>
+          <Card.Footer>
+            <Link href="/blog">
+              Open the archive
+              <Link.Icon />
+            </Link>
+          </Card.Footer>
+        </MotionCard>
+      </section>
+    </div>
   );
 }

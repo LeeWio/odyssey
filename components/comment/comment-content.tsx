@@ -76,7 +76,7 @@ export function CommentContent({
   }
 
   return (
-    <p className="text-foreground/90 text-sm leading-6 wrap-break-word whitespace-pre-wrap">
+    <p className="text-foreground/90 text-sm leading-6 [overflow-wrap:anywhere] whitespace-pre-wrap">
       {content}
       {isEdited && <span className="text-muted ml-2 text-xs">Edited</span>}
     </p>

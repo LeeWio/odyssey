@@ -4,9 +4,7 @@ import {
   Breadcrumbs,
   BreadcrumbsItem,
   Button,
-  Card,
   Chip,
-  Input,
   Popover,
   ProgressCircle,
   Tooltip,
@@ -16,13 +14,13 @@ import {
   Separator,
   Avatar,
 } from "@heroui/react";
-import { ActionBar, Rating, RichTextEditor, Sheet, Timeline } from "@heroui-pro/react";
+import { Comments } from "@gravity-ui/icons";
+import { ActionBar, RichTextEditor, Sheet } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { CommentSystem } from "@/components/comment";
 import { MotionRichTextEditor } from "@/components/ui";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
@@ -37,6 +35,7 @@ import {
   useUnlikePostMutation,
 } from "@/features/blog";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
+import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import { ArticleSidebar } from "./article-sidebar";
 
 interface SinglePageProps {
@@ -182,10 +181,10 @@ export default function SinglePage({ params }: SinglePageProps) {
     <>
       <FluidBackdrop scrollYProgress={scrollYProgress} />
 
-      <header className="relative w-full px-6 pt-32 pb-16 md:px-12 lg:px-24">
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+      <header className="relative w-full px-6 pt-28 pb-10 md:px-12 lg:px-24">
+        <div className="mx-auto w-full max-w-5xl">
           {isLoading || !article ? (
-            <div className="space-y-5 rounded-lg bg-transparent p-4">
+            <div className="space-y-5 rounded-3xl bg-transparent p-8">
               <Skeleton className="h-4 w-32 rounded-lg" />
               <div className="space-y-3">
                 <Skeleton className="h-12 w-3/5 rounded-lg" />
@@ -194,75 +193,85 @@ export default function SinglePage({ params }: SinglePageProps) {
               </div>
             </div>
           ) : (
-            <>
-              <Breadcrumbs className="font-mono text-[11px] font-semibold tracking-wider uppercase">
-                <BreadcrumbsItem>Chronicle</BreadcrumbsItem>
-                <BreadcrumbsItem>
-                  {article.category ? article.category.name : "Uncategorized"}
-                </BreadcrumbsItem>
-                <BreadcrumbsItem className="text-muted">
-                  <span className="flex items-center gap-1.5">
-                    <Icon icon="lucide:clock" className="size-3.5" />
-                    {getEstimatedReadingMinutes(article)} MIN READ
-                  </span>
-                </BreadcrumbsItem>
-              </Breadcrumbs>
+            <SmartColorSurface
+              className="rounded-4xl"
+              seed={article.slug}
+              tone={getSmartColorTone({
+                categoryName: article.category?.name,
+                title: article.title,
+              })}
+            >
+              <div className="flex min-h-[430px] flex-col justify-end gap-6 p-7 sm:p-10 lg:p-14">
+                <Breadcrumbs className="text-xs font-medium text-white/72">
+                  <BreadcrumbsItem className="text-white/72" href="/blog">
+                    <span className="text-white/72">Chronicle</span>
+                  </BreadcrumbsItem>
+                  <BreadcrumbsItem className="text-white/72">
+                    <span className="text-white/72">
+                      {article.category ? article.category.name : "Uncategorized"}
+                    </span>
+                  </BreadcrumbsItem>
+                  <BreadcrumbsItem className="text-white/72">
+                    <span className="flex items-center gap-1.5 text-white/72">
+                      <Icon aria-hidden="true" icon="lucide:clock" className="size-3.5" />
+                      {getEstimatedReadingMinutes(article)} min read
+                    </span>
+                  </BreadcrumbsItem>
+                </Breadcrumbs>
 
-              <Typography type="h1" className="leading-tight font-bold text-balance">
-                {article.title}
-              </Typography>
-
-              {article.summary && (
                 <Typography
-                  type="body"
-                  color="muted"
-                  className="text-lg leading-relaxed font-normal text-balance"
+                  type="h1"
+                  className="max-w-4xl leading-[1.02] font-bold text-balance text-white"
                 >
-                  {article.summary}
+                  {article.title}
                 </Typography>
-              )}
 
-              <Separator className="my-2 opacity-50" />
-
-              <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-3 select-none">
-                  <Avatar
-                    size="sm"
-                    className="border border-neutral-700/30 bg-neutral-800 text-neutral-200"
+                {article.summary && (
+                  <Typography
+                    type="body"
+                    className="max-w-2xl text-lg leading-relaxed font-normal text-balance text-white/76"
                   >
-                    <Avatar.Fallback>
-                      {(article.authorName || "Anonymous").slice(0, 2).toUpperCase()}
-                    </Avatar.Fallback>
-                  </Avatar>
+                    {article.summary}
+                  </Typography>
+                )}
 
-                  <div className="flex flex-col text-left">
-                    <span className="text-sm font-semibold text-neutral-200">
-                      {article.authorName || "Anonymous"}
-                    </span>
-                    <span className="text-[11px] text-neutral-500">
-                      {new Date(article.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </span>
+                <div className="flex flex-col items-start justify-between gap-6 border-t border-white/16 pt-6 sm:flex-row sm:items-center">
+                  <div className="flex items-center gap-3 select-none">
+                    <Avatar size="sm" className="bg-white/14 text-white">
+                      <Avatar.Fallback>
+                        {(article.authorName || "Anonymous").slice(0, 2).toUpperCase()}
+                      </Avatar.Fallback>
+                    </Avatar>
+
+                    <div className="flex flex-col text-left">
+                      <Typography type="body-sm" weight="semibold" className="text-white">
+                        {article.authorName || "Anonymous"}
+                      </Typography>
+                      <Typography type="body-xs" className="text-white/62">
+                        {new Date(article.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </Typography>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {article.tags?.map((tag) => (
+                      <Chip
+                        key={tag.id}
+                        size="sm"
+                        variant="soft"
+                        className="bg-white/12 text-white"
+                      >
+                        {tag.name}
+                      </Chip>
+                    ))}
                   </div>
                 </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {article.tags?.map((tag) => (
-                    <Chip
-                      key={tag.id}
-                      size="sm"
-                      variant="soft"
-                      className="font-mono text-[10px] uppercase"
-                    >
-                      #{tag.name}
-                    </Chip>
-                  ))}
-                </div>
               </div>
-            </>
+            </SmartColorSurface>
           )}
         </div>
       </header>
@@ -441,17 +450,23 @@ export default function SinglePage({ params }: SinglePageProps) {
           onOpenChange={setIsCommentSheetOpen}
         >
           <Sheet.Backdrop variant="blur">
-            <Sheet.Content className="w-[420px] max-w-[calc(100vw-2rem)]">
+            <Sheet.Content className="mx-auto w-[min(760px,calc(100vw-2rem))] max-w-none">
               <Sheet.Dialog>
                 <Sheet.CloseTrigger />
 
                 <Sheet.Header>
-                  <Sheet.Heading>Comments</Sheet.Heading>
+                  <Sheet.Heading className="flex flex-row items-center gap-2">
+                    <Comments aria-hidden="true" className="text-muted size-5" />
+                    Comments
+                  </Sheet.Heading>
                 </Sheet.Header>
 
                 <Sheet.Body className="min-h-0 overflow-y-auto">
                   {postId ? (
-                    <CommentSystem postId={postId} />
+                    <CommentSystem
+                      postId={postId}
+                      onRequestClose={() => setIsCommentSheetOpen(false)}
+                    />
                   ) : (
                     <p className="text-muted text-sm">
                       Comments will be available once the article loads.

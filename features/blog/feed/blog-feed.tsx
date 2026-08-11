@@ -1,600 +1,448 @@
 "use client";
 
+import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
+import { MotionCard, MotionChip, MotionTypography } from "@/components/ui";
+import type { PostDigestResponse, PostResponse } from "@/features/blog/api/blog-api";
+import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/features/blog/api/blog-api";
+import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
+import { EmptyState } from "@heroui-pro/react";
 import {
-  ArrowRight,
-  Bell,
-  Bookmark,
-  Calendar,
-  ChevronRight,
-  CircleChevronLeft,
-  CircleChevronRight,
-  Magnifier,
-  Moon,
-  Person,
-  Key as KeyIcon,
-  Cloud,
-} from "@gravity-ui/icons";
-import {
-  Avatar,
   Button,
   Card,
   Chip,
-  Description,
-  Input,
   Label,
-  ListBox,
+  Link,
+  Pagination,
   ScrollShadow,
-  Separator,
-  Surface,
-  Tabs,
+  SearchField,
+  Skeleton,
+  Tag,
+  TagGroup,
   Typography,
-  cn,
 } from "@heroui/react";
+import { ArrowRotateLeft, BookOpen, Eye } from "@gravity-ui/icons";
+import { useDeferredValue, useState } from "react";
+import { useReducedMotion } from "motion/react";
 
-import { ChartTooltip, ItemCardGroup, PieChart, PressableFeedback } from "@heroui-pro/react";
-const CHART_COLORS = ["var(--chart-4)", "var(--chart-3)", "var(--chart-2)", "var(--chart-1)"];
-const browserData = [
-  { name: "Chrome", value: 62 },
-  { name: "Safari", value: 19 },
-  { name: "Firefox", value: 10 },
-  { name: "Edge", value: 9 },
-];
-const MotionWidget = motion.create(Widget);
-const MotionTypography = motion.create(Typography);
-const MotionCard = motion.create(Card);
-import { Carousel, ItemCard, Segment, Widget } from "@heroui-pro/react";
-import { Icon } from "@iconify/react";
-import { motion } from "motion/react";
-import Image from "next/image";
-import Link from "next/link";
-const CATEGORIES = [
-  { id: "all", name: "All", icon: "lucide:layers" },
-  { id: "design", name: "设计", icon: "lucide:palette" },
-  { id: "dev", name: "编程", icon: "lucide:code" },
-  { id: "travel", name: "旅行", icon: "lucide:map" },
-  { id: "life", name: "生活", icon: "lucide:coffee" },
-  { id: "photo", name: "摄影", icon: "lucide:camera" },
-];
-const SERIES = [
-  {
-    title: "Front1end",
-    count: "12 stories",
-    gradient: "from-violet-500/20 via-purple-500/10 to-transparent",
-  },
-  {
-    title: "Syst2ems",
-    count: "8 stories",
-    gradient: "from-blue-500/20 via-cyan-500/10 to-transparent",
-  },
-  {
-    title: "A34I",
-    count: "15 stories",
-    gradient: "from-emerald-500/20 via-teal-500/10 to-transparent",
-  },
-  {
-    title: "Des5ign",
-    count: "10 stories",
-    gradient: "from-orange-500/20 via-yellow-500/10 to-transparent",
-  },
-  {
-    title: "Fron6tend",
-    count: "12 stories",
-    gradient: "from-violet-500/20 via-purple-500/10 to-transparent",
-  },
-  {
-    title: "Sys7tems",
-    count: "8 stories",
-    gradient: "from-blue-500/20 via-cyan-500/10 to-transparent",
-  },
-  {
-    title: "AI",
-    count: "15 stories",
-    gradient: "from-emerald-500/20 via-teal-500/10 to-transparent",
-  },
-  {
-    title: "Design",
-    count: "10 stories",
-    gradient: "from-orange-500/20 via-yellow-500/10 to-transparent",
-  },
-];
-const LATEST_ARTICLES = [
-  {
-    title: "深入理解 JavaScript 中的闭包",
-    summary: "闭包是 JavaScript 中一个强大而又容易被误解的概念。本文通过实例带你彻底搞定它。",
-    category: "编程",
-    author: "某小北",
-    date: "May 12, 2024",
-    readTime: "15 min read",
-    image: "/111.jpeg",
-  },
-  {
-    title: "我日常使用的 10 个效率工具",
-    summary: "工具是其于战胜之器。分享我在学习、工作和生活中常用的工具，希望能给你有所帮助。",
-    category: "效率",
-    author: "某小北",
-    date: "May 18, 2024",
-    readTime: "8 min read",
-    image: "/222.png",
-  },
-  {
-    title: "在瑞士徒步的那些难忘瞬间",
-    summary: "徒步是最接近自然的方式之一。记录在瑞士徒步中的所见所感，风景真的太美了！",
-    category: "旅行",
-    author: "某小北",
-    date: "May 16, 2024",
-    readTime: "10 min read",
-    image: "/333.png",
-  },
-  {
-    title: "极简生活：少即是多",
-    summary: "断舍离之后，我发现生活变得更加轻松和自由。分享我的极简生活实践与思考。",
-    category: "生活",
-    author: "某小北",
-    date: "May 10, 2024",
-    readTime: "6 min read",
-    image: "/111.jpeg",
-  },
-];
+const PAGE_SIZE = 8;
+const easeOut = [0.22, 1, 0.36, 1] as const;
+function formatDate(value?: string | null) {
+  if (!value) return "Recently published";
 
-const POPULAR_THIS_WEEK = [
-  { id: "01", title: "深入理解 JavaScript 中的闭包", date: "May 12", image: "/111.jpeg" },
-  { id: "02", title: "我日常使用的 10 个效率工具", date: "May 18", image: "/222.png" },
-  { id: "03", title: "使用 TypeScript 优化 React 项目", date: "May 8", image: "/333.png" },
-  { id: "04", title: "极简生活：少即是多", date: "May 10", image: "/111.jpeg" },
-];
+  return new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
 
-const POPULAR_TAGS = [
-  "JavaScript",
-  "TypeScript",
-  "React",
-  "Node.js",
-  "前端",
-  "编辑技巧",
-  "工具推荐",
-  "效率提升",
-  "随笔",
-  "旅行",
-  "生活方式",
-  "摄影",
-  "设计",
-  "阅读",
-  "建筑",
-];
+function getDisplayAuthor(value?: string | null) {
+  const author = value?.trim();
 
-const TRENDING_NOW = [
-  { title: "如何优雅地编写可维护的前端代码", views: "342 views", image: "/111.jpeg" },
-  { title: "深度解析 Promise 原理", views: "431 views", image: "/222.png" },
-  { title: "从 0 到 1 搭建个人博客", views: "389 views", image: "/333.png" },
-  { title: "我的 2024 年度书单", views: "275 views", image: "/111.jpeg" },
-];
+  if (!author || /^(anonymous|john doe|jane doe)$/i.test(author)) return "Odyssey";
+  return author;
+}
+
+function PostVisual({ post }: { post: PostResponse }) {
+  return (
+    <SmartColorSurface
+      seed={post.slug}
+      tone={getSmartColorTone({ categoryName: post.category?.name, title: post.title })}
+    >
+      <div aria-hidden="true" className="aspect-[16/9] w-full" />
+    </SmartColorSurface>
+  );
+}
+
+function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
+  const shouldReduceMotion = useReducedMotion() ?? false;
+
+  return (
+    <Link className="block h-full no-underline" href={`/single/${post.slug}`}>
+      <MotionCard
+        variant="secondary"
+        className="h-full overflow-hidden p-0"
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{
+          delay: shouldReduceMotion ? 0 : Math.min(index, 3) * 0.04,
+          duration: shouldReduceMotion ? 0 : 0.55,
+          ease: easeOut,
+        }}
+      >
+        <PostVisual post={post} />
+        <Card.Header>
+          {post.category?.name ? (
+            <Chip size="sm" variant="soft">
+              {post.category.name}
+            </Chip>
+          ) : null}
+          <Card.Title>{post.title}</Card.Title>
+          {post.summary ? <Card.Description>{post.summary}</Card.Description> : null}
+        </Card.Header>
+        <Card.Footer className="mt-auto justify-between">
+          <Typography color="muted" type="body-xs">
+            {formatDate(post.createdAt)}
+          </Typography>
+          <Typography
+            color="muted"
+            type="body-xs"
+            className="flex items-center gap-1.5 tabular-nums"
+          >
+            <Eye aria-hidden="true" className="size-3.5" />
+            {post.views.toLocaleString("en-US")}
+          </Typography>
+        </Card.Footer>
+      </MotionCard>
+    </Link>
+  );
+}
+
+function FeaturedPost({ post }: { post: PostDigestResponse }) {
+  return (
+    <Link className="block no-underline" href={`/single/${post.slug}`}>
+      <Card variant="tertiary" className="overflow-hidden p-0 md:flex-row md:items-stretch">
+        <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden md:aspect-auto md:w-[46%]">
+          <SmartColorSurface
+            className="h-full"
+            seed={`featured-${post.slug}`}
+            tone={getSmartColorTone({ categoryName: post.category?.name, title: post.title })}
+          >
+            <div aria-hidden="true" className="aspect-[16/10] w-full md:aspect-auto md:h-full" />
+          </SmartColorSurface>
+        </div>
+        <div className="flex flex-1 flex-col justify-center gap-5 p-6 sm:p-8 lg:p-10">
+          <Chip color="accent" size="sm" variant="soft">
+            Featured
+          </Chip>
+          <Card.Header className="p-0">
+            <Card.Title className="text-[clamp(1.75rem,3vw,3rem)] leading-[1.02] tracking-[-0.035em]">
+              {post.title}
+            </Card.Title>
+            {post.summary ? <Card.Description>{post.summary}</Card.Description> : null}
+          </Card.Header>
+          <Card.Footer className="gap-3 p-0">
+            <Typography color="muted" type="body-xs">
+              {getDisplayAuthor(post.authorName)}
+            </Typography>
+            <Typography color="muted" type="body-xs">
+              {formatDate(post.publishedAt)}
+            </Typography>
+          </Card.Footer>
+        </div>
+      </Card>
+    </Link>
+  );
+}
+
+function FeedSkeleton() {
+  return (
+    <div
+      aria-busy="true"
+      aria-label="Loading articles"
+      aria-live="polite"
+      role="status"
+      className="grid gap-5 md:grid-cols-2"
+    >
+      {Array.from({ length: 4 }, (_, index) => (
+        <Card key={index} variant="secondary" className="overflow-hidden p-0">
+          <Skeleton className="aspect-[16/10] w-full rounded-none" />
+          <Card.Header>
+            <Skeleton className="h-5 w-24 rounded-lg" />
+            <Skeleton className="h-7 w-4/5 rounded-lg" />
+            <Skeleton className="h-4 w-full rounded-lg" />
+            <Skeleton className="h-4 w-3/4 rounded-lg" />
+          </Card.Header>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function getPageNumbers(page: number, totalPages: number) {
+  if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
+
+  const current = page + 1;
+  const values: Array<number | "ellipsis-start" | "ellipsis-end"> = [1];
+
+  if (current > 3) values.push("ellipsis-start");
+  for (
+    let value = Math.max(2, current - 1);
+    value <= Math.min(totalPages - 1, current + 1);
+    value++
+  ) {
+    values.push(value);
+  }
+  if (current < totalPages - 2) values.push("ellipsis-end");
+  values.push(totalPages);
+
+  return values;
+}
 
 export default function BlogFeed() {
+  const shouldReduceMotion = useReducedMotion() ?? false;
+  const [page, setPage] = useState(0);
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number>();
+  const keyword = useDeferredValue(searchValue.trim());
+  const { data, isLoading, isFetching, isError, refetch } = useGetPublicPostsQuery({
+    categoryId: selectedCategoryId,
+    keyword: keyword || undefined,
+    page,
+    size: PAGE_SIZE,
+  });
+  const { data: featuredData } = useGetFeaturedPostsQuery({ page: 0, size: 1 });
+  const { data: facets, isLoading: isFacetsLoading } = useRetrieveFacetsQuery();
+  const posts = data?.list ?? [];
+  const featuredPost = featuredData?.list[0];
+  const categories = (facets?.categories ?? []).filter(
+    (category) => category.id != null && category.name && (category.count ?? 0) > 0
+  );
+  const selectedCategory = categories.find((category) => category.id === selectedCategoryId);
+  const totalPages = data?.totalPages ?? 0;
+  const startItem = data && data.total > 0 ? page * data.size + 1 : 0;
+  const endItem = data ? Math.min((page + 1) * data.size, data.total) : 0;
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+    setPage(0);
+  };
+
+  const handleCategoryChange = (keys: "all" | Set<React.Key>) => {
+    if (keys === "all") return;
+
+    const [key] = Array.from(keys);
+    const nextCategoryId = key === "all" || key == null ? undefined : Number(key);
+
+    setSelectedCategoryId(Number.isFinite(nextCategoryId) ? nextCategoryId : undefined);
+    setPage(0);
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    setPage(nextPage);
+    document.getElementById("all-writing")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
-    <main className="min-h-screen">
-      <ScrollShadow
-        orientation="horizontal"
-        className="mx-auto flex w-full overflow-x-auto px-6 lg:px-12"
-        hideScrollBar
-      >
-        <Segment defaultSelectedKey="all" size="md" variant="ghost">
-          {CATEGORIES.map((category) => (
-            <Segment.Item key={category.id} id={category.id}>
-              <Icon icon={category.icon} className="size-4" />
-              {category.name}
-            </Segment.Item>
-          ))}
-        </Segment>
-      </ScrollShadow>
-
-      <div className="mx-auto mt-12 grid w-full grid-cols-1 items-start gap-12 px-6 lg:grid-cols-12 lg:px-12 xl:gap-16">
-        <div className="flex flex-col gap-8 lg:col-span-7 xl:col-span-6">
-          <ItemCardGroup className="overflow-hidden">
-            <ItemCardGroup.Header>
-              <ItemCardGroup.Title>Lastesst articles</ItemCardGroup.Title>
-              <ItemCardGroup.Description>
-                Manage your account settings and preferences
-              </ItemCardGroup.Description>
-            </ItemCardGroup.Header>
-            <ItemCard<"button">
-              className="hover:bg-default/20 active:bg-default-hover/50 relative w-full cursor-pointer overflow-hidden transition-colors"
-              render={(props) => <button type="button" {...props} />}
-            >
-              <PressableFeedback.Ripple />
-              <ItemCard.Icon>
-                <Person />
-              </ItemCard.Icon>
-              <ItemCard.Content>
-                <ItemCard.Title>Profile</ItemCard.Title>
-                <ItemCard.Description>Update your personal information</ItemCard.Description>
-              </ItemCard.Content>
-              <ItemCard.Action>
-                <ChevronRight className="text-muted size-4" />
-              </ItemCard.Action>
-            </ItemCard>
-            <ItemCard<"button">
-              className="hover:bg-default/20 active:bg-default-hover/50 relative w-full cursor-pointer overflow-hidden transition-colors"
-              render={(props) => <button type="button" {...props} />}
-            >
-              <PressableFeedback.Ripple />
-              <ItemCard.Icon>
-                <KeyIcon />
-              </ItemCard.Icon>
-              <ItemCard.Content>
-                <ItemCard.Title>Security</ItemCard.Title>
-                <ItemCard.Description>Manage passwords and 2FA</ItemCard.Description>
-              </ItemCard.Content>
-              <ItemCard.Action>
-                <ChevronRight className="text-muted size-4" />
-              </ItemCard.Action>
-            </ItemCard>
-            <ItemCard<"button">
-              className="hover:bg-default/20 active:bg-default-hover/50 relative w-full cursor-pointer overflow-hidden transition-colors"
-              render={(props) => <button type="button" {...props} />}
-            >
-              <PressableFeedback.Ripple />
-              <ItemCard.Icon>
-                <Cloud />
-              </ItemCard.Icon>
-              <ItemCard.Content>
-                <ItemCard.Title>Cloud sync</ItemCard.Title>
-                <ItemCard.Description>Sync data across your devices</ItemCard.Description>
-              </ItemCard.Content>
-              <ItemCard.Action>
-                <ChevronRight className="text-muted size-4" />
-              </ItemCard.Action>
-            </ItemCard>
-          </ItemCardGroup>
-
-          <Button fullWidth variant="tertiary">
-            Load more <Icon icon="lucide:chevron-down" className="ml-1" />
-          </Button>
-        </div>
-
-        <div className="flex flex-col gap-12 lg:col-span-5 xl:col-span-3">
-          <Carousel opts={{ loop: true }}>
-            <Carousel.Content>
-              {Array.from({ length: 5 }, (_, i) => (
-                <Carousel.Item key={i}>
-                  <div className="p-1">
-                    <Card className="select-none">
-                      <Card.Content className="flex aspect-square items-center justify-center">
-                        <span className="text-4xl font-semibold tabular-nums">{i + 1}</span>
-                      </Card.Content>
-                    </Card>
-                  </div>
-                </Carousel.Item>
-              ))}
-            </Carousel.Content>
-            <Carousel.Previous />
-            <Carousel.Next />
-          </Carousel>
-
-          <div className="flex flex-col gap-8">
-            <ItemCardGroup className="overflow-hidden" variant="transparent">
-              <ItemCardGroup.Header>
-                <ItemCardGroup.Title>Popular This Week</ItemCardGroup.Title>
-              </ItemCardGroup.Header>
-              <ItemCard>
-                <ItemCard.Icon>
-                  <Person />
-                </ItemCard.Icon>
-                <ItemCard.Content>
-                  <ItemCard.Title>Profile</ItemCard.Title>
-                  <ItemCard.Description>Update your personal information</ItemCard.Description>
-                </ItemCard.Content>
-                <ItemCard.Action>
-                  <ChevronRight className="text-muted size-4" />
-                </ItemCard.Action>
-              </ItemCard>
-              <ItemCard>
-                <ItemCard.Icon>
-                  <KeyIcon />
-                </ItemCard.Icon>
-                <ItemCard.Content>
-                  <ItemCard.Title>Security</ItemCard.Title>
-                  <ItemCard.Description>Manage passwords and 2FA</ItemCard.Description>
-                </ItemCard.Content>
-                <ItemCard.Action>
-                  <ChevronRight className="text-muted size-4" />
-                </ItemCard.Action>
-              </ItemCard>
-              <ItemCard>
-                <ItemCard.Icon>
-                  <KeyIcon />
-                </ItemCard.Icon>
-                <ItemCard.Content>
-                  <ItemCard.Title>Security</ItemCard.Title>
-                  <ItemCard.Description>Manage passwords and 2FA</ItemCard.Description>
-                </ItemCard.Content>
-                <ItemCard.Action>
-                  <ChevronRight className="text-muted size-4" />
-                </ItemCard.Action>
-              </ItemCard>
-              <ItemCard>
-                <ItemCard.Icon>
-                  <KeyIcon />
-                </ItemCard.Icon>
-                <ItemCard.Content>
-                  <ItemCard.Title>Security</ItemCard.Title>
-                  <ItemCard.Description>Manage passwords and 2FA</ItemCard.Description>
-                </ItemCard.Content>
-                <ItemCard.Action>
-                  <ChevronRight className="text-muted size-4" />
-                </ItemCard.Action>
-              </ItemCard>
-              <ItemCard>
-                <ItemCard.Icon>
-                  <KeyIcon />
-                </ItemCard.Icon>
-                <ItemCard.Content>
-                  <ItemCard.Title>Security</ItemCard.Title>
-                  <ItemCard.Description>Manage passwords and 2FA</ItemCard.Description>
-                </ItemCard.Content>
-                <ItemCard.Action>
-                  <ChevronRight className="text-muted size-4" />
-                </ItemCard.Action>
-              </ItemCard>
-            </ItemCardGroup>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:col-span-12 xl:col-span-3 xl:grid-cols-1">
-          <Widget className="w-full">
-            <Widget.Header>
-              <Widget.Title>Browser Usage</Widget.Title>
-            </Widget.Header>
-            <Widget.Content className="flex flex-col items-center gap-4">
-              <PieChart height={200}>
-                <PieChart.Pie
-                  cx="50%"
-                  cy="50%"
-                  data={browserData}
-                  dataKey="value"
-                  nameKey="name"
-                  outerRadius={80}
-                >
-                  {browserData.map((_, idx) => (
-                    <PieChart.Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
-                  ))}
-                </PieChart.Pie>
-                <PieChart.Tooltip
-                  content={({ active, payload }) => {
-                    const entry = payload?.[0];
-                    if (!active || !entry) return null;
-                    return (
-                      <ChartTooltip>
-                        <ChartTooltip.Item>
-                          <ChartTooltip.Indicator color={entry.payload?.fill} />
-                          <ChartTooltip.Label>{entry.name}</ChartTooltip.Label>
-                          <ChartTooltip.Value>{entry.value}%</ChartTooltip.Value>
-                        </ChartTooltip.Item>
-                      </ChartTooltip>
-                    );
-                  }}
-                />
-              </PieChart>
-              <Widget.Legend className="flex-wrap justify-center">
-                {browserData.map((entry, idx) => (
-                  <Widget.LegendItem
-                    key={entry.name}
-                    color={CHART_COLORS[idx % CHART_COLORS.length]!}
-                  >
-                    {entry.name}
-                  </Widget.LegendItem>
-                ))}
-              </Widget.Legend>
-            </Widget.Content>
-          </Widget>
-
-          <Surface className="shadow-surface flex h-full flex-col rounded-3xl">
-            <ListBox aria-label="Users" selectionMode="multiple">
-              <ListBox.Item id="1" textValue="Bob">
-                <Avatar size="sm">
-                  <Avatar.Image
-                    alt="Bob"
-                    src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
-                  />
-                  <Avatar.Fallback>B</Avatar.Fallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <Label>Bob</Label>
-                  <Description>bob@heroui.com</Description>
-                </div>
-                <ListBox.ItemIndicator />
-              </ListBox.Item>
-              <ListBox.Item id="2" textValue="Fred">
-                <Avatar size="sm">
-                  <Avatar.Image
-                    alt="Fred"
-                    src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg"
-                  />
-                  <Avatar.Fallback>F</Avatar.Fallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <Label>Fred</Label>
-                  <Description>fred@heroui.com</Description>
-                </div>
-                <ListBox.ItemIndicator />
-              </ListBox.Item>
-              <ListBox.Item id="3" textValue="Martha">
-                <Avatar size="sm">
-                  <Avatar.Image
-                    alt="Martha"
-                    src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg"
-                  />
-                  <Avatar.Fallback>M</Avatar.Fallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <Label>Martha</Label>
-                  <Description>martha@heroui.com</Description>
-                </div>
-                <ListBox.ItemIndicator />
-              </ListBox.Item>
-            </ListBox>
-          </Surface>
-        </div>
-      </div>
-
-      <MotionWidget
-        initial={{
-          opacity: 0,
-          y: 24,
-        }}
-        whileInView={{
-          opacity: 1,
-          y: 0,
-        }}
-        viewport={{
-          once: true,
-          amount: 0.2,
-        }}
-        transition={{
-          duration: 0.7,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        className="bg-transparent px-[clamp(1rem,3vw,3rem)]"
-      >
-        {/* Header */}
-
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <motion.div
-              initial={{
-                opacity: 0,
-                scale: 0.5,
-                rotate: -45,
-              }}
-              whileInView={{
-                opacity: 1,
-                scale: 1,
-                rotate: 0,
-              }}
-              viewport={{
-                once: true,
-              }}
-              transition={{
-                duration: 0.6,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-            >
-              <Icon icon="gravity-ui:sparkles-fill" className="text-primary size-5" />
-            </motion.div>
-
-            <MotionTypography
-              type="h3"
-              initial={{
-                opacity: 0,
-                x: -10,
-              }}
-              whileInView={{
-                opacity: 1,
-                x: 0,
-              }}
-              viewport={{
-                once: true,
-              }}
-              transition={{
-                delay: 0.1,
-                duration: 0.5,
-              }}
-            >
-              Constellations
-            </MotionTypography>
-          </div>
-
+    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+      <div className="mx-auto w-full max-w-6xl">
+        <header className="flex max-w-3xl flex-col items-start">
+          <MotionChip
+            color="accent"
+            size="sm"
+            variant="soft"
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.5, ease: easeOut }}
+          >
+            Chronicle
+          </MotionChip>
           <MotionTypography
-            type="body-sm"
-            color="muted"
-            className="max-w-md"
-            initial={{
-              opacity: 0,
-              y: 10,
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0,
-            }}
-            viewport={{
-              once: true,
-            }}
-            transition={{
-              delay: 0.2,
-              duration: 0.5,
-            }}
+            type="h1"
+            weight="bold"
+            className="mt-5 text-[clamp(2.75rem,6vw,5.75rem)] leading-[0.95] tracking-[-0.06em]"
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.65, delay: 0.06, ease: easeOut }}
           >
-            Small pieces that become a bigger picture.
+            Writing worth returning to.
           </MotionTypography>
+          <MotionTypography
+            color="muted"
+            type="body"
+            className="mt-5 max-w-xl"
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: 0.12, ease: easeOut }}
+          >
+            Essays on software, design, markets, and the questions that remain useful over time.
+          </MotionTypography>
+        </header>
+
+        <SearchField
+          fullWidth
+          name="article-search"
+          value={searchValue}
+          onChange={handleSearchChange}
+          className="mt-10 max-w-xl"
+        >
+          <Label className="sr-only">Search articles</Label>
+          <SearchField.Group>
+            <SearchField.SearchIcon />
+            <SearchField.Input placeholder="Search the chronicle" />
+            <SearchField.ClearButton aria-label="Clear search" />
+          </SearchField.Group>
+        </SearchField>
+
+        <div className="mt-6 min-w-0">
+          {isFacetsLoading ? (
+            <div aria-label="Loading topics" className="flex gap-2" role="status">
+              {["w-20", "w-28", "w-24", "w-36"].map((width) => (
+                <Skeleton key={width} className={`h-8 ${width} rounded-full`} />
+              ))}
+            </div>
+          ) : categories.length > 0 ? (
+            <ScrollShadow hideScrollBar orientation="horizontal">
+              <TagGroup
+                aria-label="Filter articles by topic"
+                selectedKeys={new Set([selectedCategoryId ? String(selectedCategoryId) : "all"])}
+                selectionMode="single"
+                size="sm"
+                variant="surface"
+                className="w-max min-w-full"
+                onSelectionChange={handleCategoryChange}
+              >
+                <TagGroup.List className="flex-nowrap pr-8">
+                  <Tag id="all" textValue="All topics">
+                    All topics
+                    <span className="text-muted text-xs tabular-nums">
+                      {facets?.totalPublishedCount ?? 0}
+                    </span>
+                  </Tag>
+                  {categories.map((category) => (
+                    <Tag key={category.id} id={String(category.id)} textValue={category.name}>
+                      {category.name}
+                      <span className="text-muted text-xs tabular-nums">{category.count ?? 0}</span>
+                    </Tag>
+                  ))}
+                </TagGroup.List>
+              </TagGroup>
+            </ScrollShadow>
+          ) : null}
         </div>
 
-        {/* Carousel */}
+        {!keyword && !selectedCategoryId && featuredPost ? (
+          <section aria-labelledby="featured-writing-title" className="mt-16">
+            <Typography id="featured-writing-title" type="h2" weight="semibold" className="mb-6">
+              Featured writing
+            </Typography>
+            <FeaturedPost post={featuredPost} />
+          </section>
+        ) : null}
 
-        <Widget.Content className="mt-6 bg-transparent p-0">
-          <Carousel
-            opts={{
-              align: "start",
-              dragFree: true,
-            }}
-          >
-            <Carousel.Content>
-              {SERIES.map((item, i) => (
-                <Carousel.Item
-                  key={item.title}
-                  className="basis-[85%] pr-3 sm:basis-[45%] md:basis-[32%] lg:basis-[24%] xl:basis-[19%] 2xl:basis-[16%]"
-                >
-                  <MotionCard
-                    initial={{
-                      opacity: 0,
-                      y: 24,
-                    }}
-                    whileInView={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    viewport={{
-                      once: true,
-                      amount: 0.3,
-                    }}
-                    transition={{
-                      delay: i * 0.08,
-                      duration: 0.5,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                    className="group bg-muted/20 relative overflow-hidden border-none"
-                  >
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-80`}
-                    />
+        <section
+          id="all-writing"
+          aria-busy={isFetching}
+          aria-labelledby="all-writing-title"
+          className="scroll-mt-28 pt-20"
+        >
+          <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <Typography id="all-writing-title" type="h2" weight="semibold">
+                {keyword ? "Search results" : selectedCategory?.name || "All writing"}
+              </Typography>
+              <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
+                {data ? `${data.total.toLocaleString("en-US")} articles` : "Browse the archive"}
+              </Typography>
+            </div>
+            {isFetching && !isLoading ? (
+              <Typography aria-live="polite" color="muted" type="body-xs">
+                Updating results
+              </Typography>
+            ) : null}
+          </div>
 
-                    {/* star */}
+          {isLoading ? <FeedSkeleton /> : null}
 
-                    <div className="bg-foreground/40 absolute top-5 right-5 size-1.5 rounded-full" />
+          {!isLoading && isError ? (
+            <EmptyState size="lg">
+              <EmptyState.Header>
+                <EmptyState.Media variant="icon">
+                  <BookOpen aria-hidden="true" />
+                </EmptyState.Media>
+                <EmptyState.Title>The chronicle is unavailable</EmptyState.Title>
+                <EmptyState.Description>
+                  The archive could not be loaded. Please try again in a moment.
+                </EmptyState.Description>
+              </EmptyState.Header>
+              <EmptyState.Content>
+                <Button variant="outline" onPress={() => refetch()}>
+                  <ArrowRotateLeft aria-hidden="true" />
+                  Try again
+                </Button>
+              </EmptyState.Content>
+            </EmptyState>
+          ) : null}
 
-                    <Card.Content className="relative flex aspect-[4/3] flex-col justify-between p-5">
-                      <div>
-                        <Typography className="text-muted-foreground text-xs">
-                          {String(i + 1).padStart(2, "0")}
-                        </Typography>
+          {!isLoading && !isError && posts.length === 0 ? (
+            <EmptyState size="lg">
+              <EmptyState.Header>
+                <EmptyState.Media variant="icon">
+                  <BookOpen aria-hidden="true" />
+                </EmptyState.Media>
+                <EmptyState.Title>
+                  {keyword ? "No matching articles" : "No articles yet"}
+                </EmptyState.Title>
+                <EmptyState.Description>
+                  {keyword
+                    ? "Try a different title, topic, or phrase."
+                    : "Published writing will appear here when it is ready."}
+                </EmptyState.Description>
+              </EmptyState.Header>
+              {keyword ? (
+                <EmptyState.Content>
+                  <Button variant="outline" onPress={() => handleSearchChange("")}>
+                    Clear search
+                  </Button>
+                </EmptyState.Content>
+              ) : null}
+            </EmptyState>
+          ) : null}
 
-                        <Typography className="mt-8 text-xl font-semibold tracking-tight">
-                          {item.title}
-                        </Typography>
-                      </div>
-
-                      <Typography type="body-sm" color="muted">
-                        {item.count}
-                      </Typography>
-                    </Card.Content>
-                  </MotionCard>
-                </Carousel.Item>
+          {!isLoading && !isError && posts.length > 0 ? (
+            <div className="grid gap-5 md:grid-cols-2">
+              {posts.map((post, index) => (
+                <BlogPostCard key={post.id} index={index} post={post} />
               ))}
-            </Carousel.Content>
+            </div>
+          ) : null}
 
-            <Carousel.Previous className="hidden sm:flex" />
-
-            <Carousel.Next className="hidden sm:flex" />
-          </Carousel>
-        </Widget.Content>
-      </MotionWidget>
-    </main>
+          {!isLoading && !isError && totalPages > 1 ? (
+            <Pagination className="mt-12 w-full" size="sm">
+              <Pagination.Summary>
+                Showing {startItem}-{endItem} of {data?.total ?? 0}
+              </Pagination.Summary>
+              <Pagination.Content>
+                <Pagination.Item>
+                  <Pagination.Previous
+                    isDisabled={page === 0}
+                    onPress={() => handlePageChange(page - 1)}
+                  >
+                    <Pagination.PreviousIcon />
+                    <span>Previous</span>
+                  </Pagination.Previous>
+                </Pagination.Item>
+                {getPageNumbers(page, totalPages).map((value) =>
+                  typeof value === "number" ? (
+                    <Pagination.Item key={value}>
+                      <Pagination.Link
+                        isActive={value === page + 1}
+                        onPress={() => handlePageChange(value - 1)}
+                      >
+                        {value}
+                      </Pagination.Link>
+                    </Pagination.Item>
+                  ) : (
+                    <Pagination.Item key={value}>
+                      <Pagination.Ellipsis />
+                    </Pagination.Item>
+                  )
+                )}
+                <Pagination.Item>
+                  <Pagination.Next
+                    isDisabled={page >= totalPages - 1}
+                    onPress={() => handlePageChange(page + 1)}
+                  >
+                    <span>Next</span>
+                    <Pagination.NextIcon />
+                  </Pagination.Next>
+                </Pagination.Item>
+              </Pagination.Content>
+            </Pagination>
+          ) : null}
+        </section>
+      </div>
+    </div>
   );
 }

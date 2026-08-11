@@ -1,5 +1,5 @@
 import { BlogFeed } from "@/features/blog";
 
-export default function SingleIndexPage() {
+export default function BlogPage() {
   return <BlogFeed />;
 }

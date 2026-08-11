@@ -1,5 +1,5 @@
-import { LoadingSvg } from "@/components/icons";
+import { RouteLoading } from "@/components/system/route-state";
 
 export default function Loading() {
-  return <LoadingSvg />;
+  return <RouteLoading />;
 }
