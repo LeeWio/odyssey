@@ -123,7 +123,10 @@ export function RichTextModal() {
     <Modal key={activeId}>
       <Modal.Backdrop isOpen={isOpen} onOpenChange={handleClose}>
         <Modal.Container size="cover">
-          <Modal.Dialog className="relative flex h-full w-full flex-col overflow-hidden">
+          <Modal.Dialog
+            aria-label={isExistingPost ? "Edit article" : "Create article"}
+            className="relative flex h-full w-full flex-col overflow-hidden"
+          >
             {/* Toggle Button */}
             <MotionButton
               isIconOnly
