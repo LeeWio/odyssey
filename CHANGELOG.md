@@ -1,3 +1,10 @@
+# [1.39.0](https://github.com/LeeWio/odyssey/compare/v1.38.0...v1.39.0) (2026-08-11)
+
+
+### Features
+
+* refine editorial experience and auth state ([4f8e97d](https://github.com/LeeWio/odyssey/commit/4f8e97dc7b56c0c870873c1400b69e65051f10de))
+
 # [1.38.0](https://github.com/LeeWio/odyssey/compare/v1.37.1...v1.38.0) (2026-08-09)
 
 
