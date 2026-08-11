@@ -4,7 +4,7 @@ import { Skeleton } from "@heroui/react";
 import { KPI } from "@heroui-pro/react";
 import { useMemo } from "react";
 
-import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard/dashboard-api";
+import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
 import { BOUNCE_SPARKLINE, DURATION_SPARKLINE } from "../data/analytics";
 
 export function AnalyticsKpiRow({ days }: { days?: number }) {

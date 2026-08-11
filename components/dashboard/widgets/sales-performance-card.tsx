@@ -2,7 +2,7 @@
 
 import { Card, Skeleton } from "@heroui/react";
 import { AreaChart, NumberValue, TrendChip } from "@heroui-pro/react";
-import { useGetAnalyticsOverviewQuery } from "@/lib/features/dashboard/dashboard-api";
+import { useGetAnalyticsOverviewQuery } from "@/lib/features/dashboard";
 import { useMemo } from "react";
 
 export function SalesPerformanceCard() {

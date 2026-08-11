@@ -51,7 +51,7 @@ export function AnalyticsPage() {
         <TopChannelsCard days={days} />
       </div>
 
-      <TopPagesCard days={days} />
+      <TopPagesCard />
     </div>
   );
 }

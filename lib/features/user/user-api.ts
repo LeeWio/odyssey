@@ -1,22 +1,41 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse } from "@/types";
-import { ApiResponseSchema, baseApi, transformError } from "../api/base-api";
-
-export const UserResponseSchema = z.object({
-  id: z.number(),
-  username: z.string(),
-  email: z.string(),
-  nickname: z.string().nullable(),
-  status: z.enum(["ACTIVE", "INACTIVE", "PENDING", "BANNED", "DELETED"]),
-  createdAt: z.string(),
-  roles: z.array(z.string()),
-});
-
-export type UserResponse = z.infer<typeof UserResponseSchema>;
+import type { ApiResponse } from "@/lib/api";
+import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import {
+  UserInfoResponseSchema,
+  UserResponseSchema,
+  type PasswordChangeRequest,
+  type UserInfoResponse,
+  type UserProfileRequest,
+  type UserResponse,
+} from "./user-contracts";
 
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    getCurrentUser: builder.query<UserInfoResponse, void>({
+      query: () => "/api/v1/user/me",
+      rawResponseSchema: apiResponseSchema(UserInfoResponseSchema),
+      transformResponse: (response: ApiResponse<UserInfoResponse>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "User", id: "CURRENT" }],
+    }),
+
+    updateProfile: builder.mutation<void, UserProfileRequest>({
+      query: (body) => ({ url: "/api/v1/user/profile", method: "PUT", body }),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
+      transformResponse: (response: ApiResponse<void>) => response.data,
+      transformErrorResponse: transformApiError,
+      invalidatesTags: [{ type: "User", id: "CURRENT" }],
+    }),
+
+    changePassword: builder.mutation<void, PasswordChangeRequest>({
+      query: (body) => ({ url: "/api/v1/user/password", method: "PUT", body }),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
+      transformResponse: (response: ApiResponse<void>) => response.data,
+      transformErrorResponse: transformApiError,
+    }),
+
     /**
      * Get all users
      */
@@ -25,9 +44,9 @@ export const userApi = baseApi.injectEndpoints({
         url: "/api/v1/admin/users",
         method: "GET",
       }),
-      rawResponseSchema: ApiResponseSchema(z.array(UserResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(UserResponseSchema)),
       transformResponse: (response: ApiResponse<UserResponse[]>) => response.data || [],
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: ["User"],
     }),
 
@@ -42,9 +61,9 @@ export const userApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/users/${id}/status?status=${status}`,
         method: "PATCH",
       }),
-      rawResponseSchema: ApiResponseSchema(UserResponseSchema),
+      rawResponseSchema: apiResponseSchema(UserResponseSchema),
       transformResponse: (response: ApiResponse<UserResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -65,9 +84,9 @@ export const userApi = baseApi.injectEndpoints({
         method: "PUT",
         body: { roleIds },
       }),
-      rawResponseSchema: ApiResponseSchema(UserResponseSchema),
+      rawResponseSchema: apiResponseSchema(UserResponseSchema),
       transformResponse: (response: ApiResponse<UserResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -82,5 +101,11 @@ export const userApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useGetAllUsersQuery, useUpdateUserStatusMutation, useUpdateUserRolesMutation } =
-  userApi;
+export const {
+  useGetCurrentUserQuery,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
+  useGetAllUsersQuery,
+  useUpdateUserStatusMutation,
+  useUpdateUserRolesMutation,
+} = userApi;

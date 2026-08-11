@@ -9,8 +9,8 @@ import type { TopPageResponse } from "@/lib/features/dashboard";
 
 import { useGetTopPagesQuery } from "@/lib/features/dashboard";
 
-export function TopPagesCard({ days }: { days?: number }) {
-  const { data: topPages, isLoading } = useGetTopPagesQuery(days);
+export function TopPagesCard() {
+  const { data: topPages, isLoading } = useGetTopPagesQuery();
 
   const columns = useMemo<DataGridColumn<TopPageResponse>[]>(
     () => [
@@ -95,7 +95,7 @@ export function TopPagesCard({ days }: { days?: number }) {
     <section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <h2 className="text-foreground text-base font-semibold">Top pages</h2>
-        <p className="text-muted text-xs">Most-viewed pages over the selected period.</p>
+        <p className="text-muted text-xs">Most-viewed pages overall.</p>
       </div>
       <DataGrid
         aria-label="Top pages"

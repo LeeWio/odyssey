@@ -14,16 +14,13 @@ import {
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import {
-  type MenuResponse,
-  useGetAdminMenuTreeQuery,
-} from "@/lib/features/permission/permission-api";
+import { type MenuResponse, useGetAdminMenuTreeQuery } from "@/lib/features/permission";
 import {
   type RoleResponse,
   useAssignRoleMenusMutation,
   useGetAllRolesQuery,
   useGetRoleMenuIdsQuery,
-} from "@/lib/features/role/role-api";
+} from "@/lib/features/role";
 
 // --- 模块卡片组件 (一级菜单 Catalog) ---
 function PermissionModuleCard({

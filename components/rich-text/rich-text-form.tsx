@@ -22,9 +22,9 @@ import { Icon } from "@iconify/react";
 import type { DropZoneProps } from "react-aria-components";
 import { type Key, useCallback, useEffect, useRef, useState } from "react";
 
-import { useGetCategoriesQuery } from "@/lib/features/category/category-api";
-import { useUploadFileMutation } from "@/lib/features/file/file-api";
-import { useGetAllTagsQuery } from "@/lib/features/tag/tag-api";
+import { useGetCategoriesQuery } from "@/lib/features/category";
+import { useUploadFileMutation } from "@/lib/features/file";
+import { useGetAllTagsQuery } from "@/lib/features/tag";
 import type { PostRequest, PostStatus } from "@/features/blog";
 
 interface RichTextFormProps {

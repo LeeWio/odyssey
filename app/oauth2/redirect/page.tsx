@@ -4,10 +4,9 @@ import { Spinner, toast } from "@heroui/react";
 import { TextShimmer } from "@heroui-pro/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect } from "react";
-import { baseApi } from "@/lib/features/api/base-api";
-import { setCredentials, setPermissions } from "@/lib/features/auth/auth-slice";
-import type { MenuResponse } from "@/lib/features/permission/permission-api";
-import { permissionApi } from "@/lib/features/permission/permission-api";
+import { baseApi } from "@/lib/api";
+import { setCredentials, setPermissions } from "@/lib/features/auth";
+import { permissionApi, type MenuResponse } from "@/lib/features/permission";
 import { useAppDispatch } from "@/lib/hooks";
 
 // Safe helper to decode JWT payload on the client side with Node SSR guard

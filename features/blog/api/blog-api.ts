@@ -1,21 +1,23 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse, Pageable, PageResult } from "@/types";
-import {
-  ApiResponseSchema,
-  baseApi,
-  PageResultSchema,
-  transformError,
-} from "@/lib/features/api/base-api";
-import { CategoryResponseSchema } from "@/lib/features/category/category-api";
-import { TagResponseSchema } from "@/lib/features/tag/tag-api";
+import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
+import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
+import { CategoryResponseSchema } from "@/lib/features/category";
+import { TagResponseSchema } from "@/lib/features/tag";
 
 /**
  * --- Zod Schemas for Runtime Validation ---
  */
 
 // Post Status Enum
-export const PostStatusSchema = z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]);
+export const PostStatusSchema = z.enum([
+  "DRAFT",
+  "PENDING_REVIEW",
+  "SCHEDULED",
+  "PUBLISHED",
+  "REJECTED",
+  "ARCHIVED",
+]);
 export type PostStatus = z.infer<typeof PostStatusSchema>;
 
 // Series Schema
@@ -166,11 +168,11 @@ export const postApi = baseApi.injectEndpoints({
     searchAdminPosts: builder.query<PageResult<PostResponse>, Pageable>({
       query: ({ page = 0, size = 10, sort }) => ({
         url: "/api/v1/admin/posts",
-        params: { page, size, ...(sort && { sort: sort.join(",") }) },
+        params: { page, size, sort },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(PostResponseSchema)),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(PostResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<PostResponse>>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -185,9 +187,9 @@ export const postApi = baseApi.injectEndpoints({
      */
     getAdminPostById: builder.query<PostResponse, number>({
       query: (id) => `/api/v1/admin/posts/${id}`,
-      rawResponseSchema: ApiResponseSchema(PostResponseSchema),
+      rawResponseSchema: apiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (_result, _error, id) => [{ type: "Post", id }],
     }),
 
@@ -200,9 +202,9 @@ export const postApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(PostResponseSchema),
+      rawResponseSchema: apiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -223,9 +225,9 @@ export const postApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(PostResponseSchema),
+      rawResponseSchema: apiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -248,9 +250,9 @@ export const postApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/posts/${id}`,
         method: "DELETE",
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -273,9 +275,9 @@ export const postApi = baseApi.injectEndpoints({
         url: "/api/v1/public/blog/posts",
         params: { page, size, categoryId, tagId, keyword },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(PostResponseSchema)),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(PostResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<PostResponse>>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -290,9 +292,9 @@ export const postApi = baseApi.injectEndpoints({
      */
     getPublicPostBySlug: builder.query<PostResponse, string>({
       query: (slug) => `/api/v1/public/blog/posts/${slug}`,
-      rawResponseSchema: ApiResponseSchema(PostResponseSchema),
+      rawResponseSchema: apiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) => (result ? [{ type: "Post", id: result.id }] : ["Post"]),
     }),
 
@@ -304,9 +306,9 @@ export const postApi = baseApi.injectEndpoints({
         url: "/api/v1/public/search/posts",
         params: { keyword, page, size },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(PostDocumentSchema)),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(PostDocumentSchema)),
       transformResponse: (response: ApiResponse<PageResult<PostDocument>>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
 
     /**
@@ -317,9 +319,9 @@ export const postApi = baseApi.injectEndpoints({
         url: "/api/v1/public/search/unified",
         params: params.keyword ? { keyword: params.keyword } : undefined,
       }),
-      rawResponseSchema: ApiResponseSchema(UnifiedSearchResponseSchema),
+      rawResponseSchema: apiResponseSchema(UnifiedSearchResponseSchema),
       transformResponse: (response: ApiResponse<UnifiedSearchResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
 
     /**
@@ -330,9 +332,9 @@ export const postApi = baseApi.injectEndpoints({
         url: "/api/v1/public/blog/posts/featured",
         params: { page, size },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(PostDigestResponseSchema)),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(PostDigestResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<PostDigestResponse>>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
 
     /**
@@ -340,9 +342,9 @@ export const postApi = baseApi.injectEndpoints({
      */
     getRelatedPosts: builder.query<PostDigestResponse[], string>({
       query: (slug) => `/api/v1/public/blog/posts/${slug}/related`,
-      rawResponseSchema: ApiResponseSchema(z.array(PostDigestResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(PostDigestResponseSchema)),
       transformResponse: (response: ApiResponse<PostDigestResponse[]>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
 
     /**
@@ -353,7 +355,7 @@ export const postApi = baseApi.injectEndpoints({
         url: `/api/v1/public/interactions/posts/${postId}/like`,
         method: "POST",
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       invalidatesTags: (_result, _error, id) => [{ type: "Post", id }],
     }),
 
@@ -365,7 +367,7 @@ export const postApi = baseApi.injectEndpoints({
         url: `/api/v1/public/interactions/posts/${postId}/unlike`,
         method: "POST",
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       invalidatesTags: (_result, _error, id) => [{ type: "Post", id }],
     }),
 
@@ -377,7 +379,7 @@ export const postApi = baseApi.injectEndpoints({
         url: `/api/v1/public/interactions/posts/${postId}/favorite`,
         method: "POST",
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       invalidatesTags: (_result, _error, id) => [{ type: "Post", id }],
     }),
 
@@ -386,9 +388,9 @@ export const postApi = baseApi.injectEndpoints({
      */
     getPostRevisions: builder.query<PostRevision[], number>({
       query: (id) => `/api/v1/admin/posts/${id}/revisions`,
-      rawResponseSchema: ApiResponseSchema(z.array(PostRevisionSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(PostRevisionSchema)),
       transformResponse: (response: ApiResponse<PostRevision[]>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
 
     /**
@@ -399,9 +401,9 @@ export const postApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/posts/${id}/revisions/${revisionId}/revert`,
         method: "POST",
       }),
-      rawResponseSchema: ApiResponseSchema(PostResponseSchema),
+      rawResponseSchema: apiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -425,7 +427,7 @@ export const postApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
 
     /**
@@ -433,9 +435,9 @@ export const postApi = baseApi.injectEndpoints({
      */
     getAutosave: builder.query<PostAutosaveResponse, string>({
       query: (identifier) => `/api/v1/admin/posts/autosave/${identifier}`,
-      rawResponseSchema: ApiResponseSchema(z.any()),
+      rawResponseSchema: apiResponseSchema(z.any()),
       transformResponse: (response: ApiResponse<PostAutosaveResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
   }),
   overrideExisting: false,

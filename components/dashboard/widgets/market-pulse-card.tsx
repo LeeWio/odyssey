@@ -2,7 +2,7 @@
 
 import { Card, Spinner } from "@heroui/react";
 import { AreaChart, NumberValue, TrendChip } from "@heroui-pro/react";
-import { useGetMarketIndicesQuery } from "@/lib/features/market/market-api";
+import { useGetMarketIndicesQuery } from "@/lib/features/market";
 import { Icon } from "@iconify/react";
 
 export function MarketPulseCard() {

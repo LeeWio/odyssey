@@ -26,7 +26,7 @@ import {
   useDeleteCategoryMutation,
   useGetCategoriesQuery,
   useUpdateCategoryMutation,
-} from "@/lib/features/category/category-api";
+} from "@/lib/features/category";
 import { usePortalContainer } from "../use-portal-container";
 
 export function CategoriesPage() {

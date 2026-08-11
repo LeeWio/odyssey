@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  useGetGuestbookEntriesQuery,
-  useGetPostCommentsQuery,
-} from "@/lib/features/comment/comment-api";
+import { useGetGuestbookEntriesQuery, useGetPostCommentsQuery } from "@/lib/features/comment";
 import { useCommentContext } from "../context/comment-context";
 import { type EnhancedComment, simulationStore } from "./simulation-store";
 

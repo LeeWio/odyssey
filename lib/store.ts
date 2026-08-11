@@ -1,7 +1,7 @@
 import type { Action, ThunkAction } from "@reduxjs/toolkit";
 import { combineSlices, configureStore } from "@reduxjs/toolkit";
 import { authSlice, localeSlice, uiSlice } from "./features";
-import { baseApi } from "./features/api/base-api";
+import { baseApi } from "./api";
 import { loadPersistedState, persistenceMiddleware } from "./middleware/persistence";
 
 // `combineSlices` automatically combines the reducers using

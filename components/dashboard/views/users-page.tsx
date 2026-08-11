@@ -15,13 +15,13 @@ import {
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useCallback, useMemo, useState } from "react";
-import { useGetAllRolesQuery } from "@/lib/features/role/role-api";
+import { useGetAllRolesQuery } from "@/lib/features/role";
 import {
   type UserResponse,
   useGetAllUsersQuery,
   useUpdateUserRolesMutation,
   useUpdateUserStatusMutation,
-} from "@/lib/features/user/user-api";
+} from "@/lib/features/user";
 import { usePortalContainer } from "../use-portal-container";
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {

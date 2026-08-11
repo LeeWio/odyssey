@@ -1,53 +1,18 @@
 import { toast } from "@heroui/react";
-import { z } from "zod";
-import type { ApiResponse } from "@/types";
+import type { ApiResponse } from "@/lib/api";
+import { apiResponseSchema, baseApi, getApiErrorMessage, transformApiError } from "@/lib/api";
+import { type MenuResponse, permissionApi } from "../permission";
 import {
-  ApiResponseSchema,
-  baseApi,
-  getRtkQueryErrorMessage,
-  transformError,
-} from "../api/base-api";
-import type { MenuResponse } from "../permission/permission-api";
-import { permissionApi } from "../permission/permission-api";
-import { setCredentials, setPermissions } from "./auth-slice";
-
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
-const AuthResponseSchema = z.object({
-  accessToken: z.string(),
-  tokenType: z.string(),
-  username: z.string(),
-  email: z.string().optional(),
-  roles: z.array(z.string()),
-});
-
-export const OtpSendRequestSchema = z.object({
-  email: z.string().email(),
-});
-
-export const OtpLoginRequestSchema = z.object({
-  email: z.string().email(),
-  code: z.string().min(1),
-});
-
-/**
- * --- TypeScript Interfaces (Inferred from Schemas) ---
- */
-export type AuthResponse = z.infer<typeof AuthResponseSchema>;
-export type OtpSendRequest = z.infer<typeof OtpSendRequestSchema>;
-export type OtpLoginRequest = z.infer<typeof OtpLoginRequestSchema>;
-
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
-}
+  AuthResponseSchema,
+  EmptyAuthResponseSchema,
+  type AuthResponse,
+  type LoginRequest,
+  type OtpLoginRequest,
+  type OtpSendRequest,
+  type RefreshTokenRequest,
+  type RegisterRequest,
+} from "./auth-contracts";
+import { removeCredentials, setCredentials, setPermissions } from "./auth-slice";
 
 const extractPermissions = (menus: MenuResponse[]): string[] => {
   const permissions = new Set<string>();
@@ -78,9 +43,9 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
-      rawResponseSchema: ApiResponseSchema(AuthResponseSchema),
+      rawResponseSchema: apiResponseSchema(AuthResponseSchema),
       transformResponse: (response: ApiResponse<AuthResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
 
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
@@ -88,7 +53,7 @@ export const authApi = baseApi.injectEndpoints({
           dispatch(setCredentials(data));
           toast.success(`Welcome back!`);
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Login failed"));
+          toast.danger(getApiErrorMessage(error, "Login failed"));
         }
       },
       invalidatesTags: ["User", "Post", "Moment", "Project", "Menu", "Dashboard"],
@@ -103,15 +68,15 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(EmptyAuthResponseSchema),
       transformResponse: (response: ApiResponse<void>) => response,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Verification code sent successfully");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Failed to send verification code"));
+          toast.danger(getApiErrorMessage(error, "Failed to send verification code"));
         }
       },
     }),
@@ -125,9 +90,9 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(AuthResponseSchema),
+      rawResponseSchema: apiResponseSchema(AuthResponseSchema),
       transformResponse: (response: ApiResponse<AuthResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
         try {
           const { data } = await queryFulfilled;
@@ -143,7 +108,7 @@ export const authApi = baseApi.injectEndpoints({
 
           toast.success(`Welcome back!`);
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Login failed"));
+          toast.danger(getApiErrorMessage(error, "Login failed"));
         }
       },
       invalidatesTags: ["User", "Post", "Moment", "Project", "Menu", "Dashboard"],
@@ -158,15 +123,47 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: userData,
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(EmptyAuthResponseSchema),
       transformResponse: (response: ApiResponse<void>) => response,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           toast.success(data.message || "Account created successfully!");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Registration failed"));
+          toast.danger(getApiErrorMessage(error, "Registration failed"));
+        }
+      },
+    }),
+
+    refreshSession: builder.mutation<AuthResponse, RefreshTokenRequest>({
+      query: (body) => ({
+        url: "/api/v1/auth/refresh",
+        method: "POST",
+        body,
+      }),
+      rawResponseSchema: apiResponseSchema(AuthResponseSchema),
+      transformResponse: (response: ApiResponse<AuthResponse>) => response.data!,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        dispatch(setCredentials(data));
+      },
+    }),
+
+    logout: builder.mutation<void, void>({
+      query: () => ({
+        url: "/api/v1/auth/logout",
+        method: "POST",
+      }),
+      transformResponse: () => undefined,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } finally {
+          dispatch(removeCredentials());
+          dispatch(baseApi.util.resetApiState());
         }
       },
     }),
@@ -179,4 +176,6 @@ export const {
   useRegisterMutation,
   useSendOtpMutation,
   useLoginWithOtpMutation,
+  useRefreshSessionMutation,
+  useLogoutMutation,
 } = authApi;

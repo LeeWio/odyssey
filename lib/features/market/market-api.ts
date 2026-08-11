@@ -1,18 +1,11 @@
 import { z } from "zod";
-import type { ApiResponse } from "@/types";
-import { ApiResponseSchema, baseApi, transformError } from "../api/base-api";
-
-export const MarketIndexResponseSchema = z.object({
-  name: z.string(),
-  symbol: z.string(),
-  current: z.number(),
-  changePct: z.number(),
-  sparkline: z.array(z.number()),
-});
-
-export type MarketIndexResponse = z.infer<typeof MarketIndexResponseSchema>;
-
-export type MarketPeriod = "1D" | "1M" | "1Y" | "ALL";
+import type { ApiResponse } from "@/lib/api";
+import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import {
+  MarketIndexResponseSchema,
+  type MarketIndexResponse,
+  type MarketPeriod,
+} from "./market-contracts";
 
 export const marketApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -22,9 +15,9 @@ export const marketApi = baseApi.injectEndpoints({
         params: { period: period || "1D" },
       }),
       keepUnusedDataFor: 60,
-      rawResponseSchema: ApiResponseSchema(z.array(MarketIndexResponseSchema)),
+      rawResponseSchema: apiResponseSchema(z.array(MarketIndexResponseSchema)),
       transformResponse: (response: ApiResponse<MarketIndexResponse[]>) => response.data || [],
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
     getMarketIndexBySymbol: builder.query<
       MarketIndexResponse,
@@ -35,9 +28,9 @@ export const marketApi = baseApi.injectEndpoints({
         params: { period: period || "1D" },
       }),
       keepUnusedDataFor: 60,
-      rawResponseSchema: ApiResponseSchema(MarketIndexResponseSchema),
+      rawResponseSchema: apiResponseSchema(MarketIndexResponseSchema),
       transformResponse: (response: ApiResponse<MarketIndexResponse>) => response.data!,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
     }),
   }),
   overrideExisting: false,

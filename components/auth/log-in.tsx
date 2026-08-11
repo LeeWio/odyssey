@@ -75,7 +75,7 @@ export const LogIn = ({ isOpen, onOpenChange, onSwitchToSignUp }: LogInProps) =>
         await sendOtp({ email }).unwrap();
         switchStep(2); // Move to OTP step only after success
       } catch {
-        // Error is handled by global transformError and toast
+        // Error is handled by global transformApiError and toast
       }
     };
 

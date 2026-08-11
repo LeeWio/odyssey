@@ -5,7 +5,7 @@ import { DropZone, useDropZonePickerContext } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
 
-import { useDeleteFileMutation, useUploadFileMutation } from "@/lib/features/file/file-api";
+import { useDeleteFileMutation, useUploadFileMutation } from "@/lib/features/file";
 
 interface UploadFile {
   id: string;

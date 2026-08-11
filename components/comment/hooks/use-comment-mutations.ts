@@ -9,7 +9,7 @@ import {
   usePublishCommentMutation,
   useReportCommentMutation,
   useUnlikeCommentMutation,
-} from "@/lib/features/comment/comment-api";
+} from "@/lib/features/comment";
 import { useCommentContext } from "../context/comment-context";
 import { type EnhancedComment, simulationStore } from "./simulation-store";
 

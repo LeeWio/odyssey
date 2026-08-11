@@ -1,30 +1,22 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse } from "@/types";
-import { ApiResponseSchema, baseApi, transformError } from "../api/base-api";
-
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
-export const FileResponseSchema = z.object({
-  fileName: z.string(),
-  originalName: z.string(),
-  fileUrl: z.string(),
-  thumbnailUrl: z.string().nullable(),
-  width: z.number().nullable(),
-  height: z.number().nullable(),
-  fileSize: z.number(),
-  fileType: z.string(),
-  createdAt: z.string(),
-});
-
-/**
- * --- TypeScript Interfaces ---
- */
-export type FileResponse = z.infer<typeof FileResponseSchema>;
+import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
+import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
+import { FileResponseSchema, type FileResponse } from "./file-contracts";
 
 export const fileApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    searchFiles: builder.query<PageResult<FileResponse>, Pageable & { keyword?: string }>({
+      query: ({ keyword, page = 0, size = 20, sort }) => ({
+        url: "/api/v1/admin/files",
+        params: { keyword, page, size, sort },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(FileResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<FileResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: ["File"],
+    }),
+
     /**
      * Upload a single file
      */
@@ -40,9 +32,9 @@ export const fileApi = baseApi.injectEndpoints({
           // and generate the boundary if the body is a FormData object.
         };
       },
-      rawResponseSchema: ApiResponseSchema(FileResponseSchema),
+      rawResponseSchema: apiResponseSchema(FileResponseSchema),
       transformResponse: (response: ApiResponse<FileResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -51,6 +43,7 @@ export const fileApi = baseApi.injectEndpoints({
           toast.danger(typeof error === "string" ? error : "Upload failed");
         }
       },
+      invalidatesTags: ["File"],
     }),
 
     /**
@@ -61,9 +54,9 @@ export const fileApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/files/${fileName}`,
         method: "DELETE",
       }),
-      rawResponseSchema: ApiResponseSchema(z.unknown()),
+      rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -72,9 +65,10 @@ export const fileApi = baseApi.injectEndpoints({
           toast.danger(typeof error === "string" ? error : "Deletion failed");
         }
       },
+      invalidatesTags: ["File"],
     }),
   }),
   overrideExisting: false,
 });
 
-export const { useUploadFileMutation, useDeleteFileMutation } = fileApi;
+export const { useSearchFilesQuery, useUploadFileMutation, useDeleteFileMutation } = fileApi;

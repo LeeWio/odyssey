@@ -1,49 +1,18 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
-import type { ApiResponse, Pageable, PageResult } from "@/types";
+import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
 import {
-  ApiResponseSchema,
+  apiResponseSchema,
   baseApi,
-  getRtkQueryErrorMessage,
-  PageResultSchema,
-  transformError,
-} from "../api/base-api";
-
-/**
- * --- Zod Schemas for Runtime Validation ---
- */
-
-export const ProjectResponseSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string().nullable().default(""),
-  coverImage: z.string().nullable().default(""),
-  githubUrl: z.string().nullable().default(""),
-  previewUrl: z.string().nullable().default(""),
-  techStack: z.string().nullable().default(""),
-  starsCount: z.number().nullable().default(0),
-  forksCount: z.number().nullable().default(0),
-  language: z.string().nullable().default(""),
-  sortOrder: z.number(),
-  isPublished: z.boolean(),
-  createdAt: z.string(),
-});
-
-/**
- * --- TypeScript Interfaces ---
- */
-export type ProjectResponse = z.infer<typeof ProjectResponseSchema>;
-
-export interface ProjectRequest {
-  name: string;
-  description?: string;
-  coverImage?: string;
-  githubUrl?: string;
-  previewUrl?: string;
-  techStack?: string;
-  sortOrder?: number;
-  isPublished: boolean;
-}
+  getApiErrorMessage,
+  pageResultSchema,
+  transformApiError,
+} from "@/lib/api";
+import {
+  ProjectResponseSchema,
+  type ProjectRequest,
+  type ProjectResponse,
+} from "./project-contracts";
 
 export const projectApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -52,9 +21,9 @@ export const projectApi = baseApi.injectEndpoints({
      */
     getPublicProjects: builder.query<ProjectResponse[], void>({
       query: () => "/api/v1/public/projects",
-      rawResponseSchema: ApiResponseSchema(z.array(ProjectResponseSchema).nullable().default([])),
+      rawResponseSchema: apiResponseSchema(z.array(ProjectResponseSchema).nullable().default([])),
       transformResponse: (response: ApiResponse<ProjectResponse[]>) => response.data || [],
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -72,9 +41,9 @@ export const projectApi = baseApi.injectEndpoints({
         url: "/api/v1/admin/projects",
         params: { page, size },
       }),
-      rawResponseSchema: ApiResponseSchema(PageResultSchema(ProjectResponseSchema)),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(ProjectResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<ProjectResponse>>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (result) =>
         result
           ? [
@@ -89,9 +58,9 @@ export const projectApi = baseApi.injectEndpoints({
      */
     getProjectById: builder.query<ProjectResponse, number>({
       query: (id) => `/api/v1/admin/projects/${id}`,
-      rawResponseSchema: ApiResponseSchema(ProjectResponseSchema),
+      rawResponseSchema: apiResponseSchema(ProjectResponseSchema),
       transformResponse: (response: ApiResponse<ProjectResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       providesTags: (_result, _error, id) => [{ type: "Project", id }],
     }),
 
@@ -104,15 +73,15 @@ export const projectApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(ProjectResponseSchema),
+      rawResponseSchema: apiResponseSchema(ProjectResponseSchema),
       transformResponse: (response: ApiResponse<ProjectResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Project created successfully!");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Failed to create project"));
+          toast.danger(getApiErrorMessage(error, "Failed to create project"));
         }
       },
       invalidatesTags: [
@@ -130,15 +99,15 @@ export const projectApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      rawResponseSchema: ApiResponseSchema(ProjectResponseSchema),
+      rawResponseSchema: apiResponseSchema(ProjectResponseSchema),
       transformResponse: (response: ApiResponse<ProjectResponse>) => response.data,
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Project updated successfully!");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Failed to update project"));
+          toast.danger(getApiErrorMessage(error, "Failed to update project"));
         }
       },
       invalidatesTags: (_result, _error, { id }) => [
@@ -156,13 +125,13 @@ export const projectApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/projects/${id}`,
         method: "DELETE",
       }),
-      transformErrorResponse: transformError,
+      transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           await queryFulfilled;
           toast.success("Project deleted successfully");
         } catch (error: unknown) {
-          toast.danger(getRtkQueryErrorMessage(error, "Failed to delete project"));
+          toast.danger(getApiErrorMessage(error, "Failed to delete project"));
         }
       },
       invalidatesTags: [
