@@ -102,7 +102,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           # Pass temporary GHA secrets and custom health check urls to the SSH session
-          envs: GITHUB_TOKEN,GITHUB_ACTOR,HEALTHCHECK_URL
+          envs: HEALTHCHECK_URL,ALIYUN_REGISTRY,ALIYUN_REGISTRY_USER,ALIYUN_REGISTRY_PASSWORD,ALIYUN_IMAGE,WEB_LATEST_IMAGE
           command_timeout: 15m
           script: |
             #!/usr/bin/env bash
@@ -112,24 +112,32 @@ jobs:
               printf '\n[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
             }
 
+            cleanup() {
+              log "Logging out of Aliyun Registry..."
+              docker logout "${ALIYUN_REGISTRY}" >/dev/null 2>&1 || true
+            }
+            trap cleanup EXIT
+
             # 1. Navigate to the root directory containing compose.yaml
             log "Navigating to compose directory..."
             cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}
 
-            # 2. Login to ghcr.io with the ephemeral GITHUB_TOKEN passed from GHA
-            log "Logging in to GitHub Container Registry on production server..."
-            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+            # 2. Login to Aliyun Container Registry
+            log "Logging in to Aliyun Container Registry on production server..."
+            echo "${ALIYUN_REGISTRY_PASSWORD}" | docker login "${ALIYUN_REGISTRY}" -u "${ALIYUN_REGISTRY_USER}" --password-stdin
 
-            # 3. Pull the precompiled image from GHCR
-            log "Pulling the latest precompiled web image from registry..."
-            docker compose pull web
+            # 3. Pull the precompiled immutable image from Aliyun
+            log "Pulling the latest precompiled web image from Aliyun Registry..."
+            docker pull "${ALIYUN_IMAGE}"
 
-            # 4. Gracefully recreate the Web container with zero-downtime rolling restart (no compiling!)
+            # 4. Retag the pulled Aliyun image to local ghcr.io tag (referenced by compose.yaml)
+            log "Retagging Aliyun image to local compose target image..."
+            PULLED_IMAGE_ID="$(docker image inspect --format '{{.Id}}' "${ALIYUN_IMAGE}")"
+            docker tag "${PULLED_IMAGE_ID}" "${WEB_LATEST_IMAGE}"
+
+            # 5. Gracefully recreate the Web container using the locally tagged image
             log "Recreating Web container..."
-            docker compose up -d --no-deps web
-
-            # 5. Logout of GHCR to protect server credentials
-            docker logout ghcr.io
+            docker compose up -d --no-deps --force-recreate --pull never web
 
             # 6. Advanced Post-Deployment Verification (imported from remote repository commits)
             log "Verifying container status..."
@@ -221,6 +229,9 @@ jobs:
             log "Deployment completed successfully!"
             docker compose ps web
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
           HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+          ALIYUN_REGISTRY: crpi-jljp0dhu73tl5aot.cn-shenzhen.personal.cr.aliyuncs.com
+          ALIYUN_REGISTRY_USER: ${{ secrets.ALIYUN_REGISTRY_USER }}
+          ALIYUN_REGISTRY_PASSWORD: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+          ALIYUN_IMAGE: crpi-jljp0dhu73tl5aot.cn-shenzhen.personal.cr.aliyuncs.com/wei_li/odyssey_web:${{ github.sha }}
+          WEB_LATEST_IMAGE: ghcr.io/leewio/odyssey-web:latest
