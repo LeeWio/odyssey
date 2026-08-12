@@ -22,10 +22,6 @@ export const Image = TiptapImage.extend({
           "data-width-percent": normalizeImageWidthPercent(attributes.widthPercent),
         }),
       },
-      uploadId: {
-        default: null,
-        rendered: false,
-      },
     };
   },
 

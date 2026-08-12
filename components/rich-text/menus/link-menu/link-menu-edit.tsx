@@ -1,14 +1,17 @@
 import { Globe } from "@gravity-ui/icons";
-import { Button, ButtonGroup, InputGroup, Label, TextField, toast } from "@heroui/react";
+import { Button, ButtonGroup, InputGroup, Label, TextField } from "@heroui/react";
 import { CellSwitch, RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { getMarkRange } from "@tiptap/core";
 import { useCallback, useState } from "react";
 
-import { normalizeLinkUrl } from "@/components/rich-text/utils/link-utils";
-
 interface LinkMenuEditProps {
   onCancel: () => void;
+}
+
+function normalizeLinkUrl(value: string): string {
+  const url = value.trim();
+  return url && !/^(https?:|mailto:|tel:|#|\/)/i.test(url) ? `https://${url}` : url;
 }
 
 export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
@@ -43,11 +46,6 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
     }
 
     const normalizedUrl = normalizeLinkUrl(url);
-    if (url.trim() && !normalizedUrl) {
-      toast.warning("Use a valid web, mail, telephone, page anchor, or site-relative link.");
-      return;
-    }
-
     if (normalizedUrl) {
       const { selection } = editor.state;
       const markRange = getMarkRange(selection.$from, editor.state.schema.marks.link);

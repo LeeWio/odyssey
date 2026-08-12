@@ -284,11 +284,6 @@ export function RichTextModal() {
       return;
     }
 
-    if (hasPendingImageUploads(content)) {
-      toast.warning("Finish or remove image uploads before saving.");
-      return;
-    }
-
     const title = postData.title?.trim();
     const slug = postData.slug?.trim();
     if (!title || !slug) {
@@ -300,7 +295,7 @@ export function RichTextModal() {
       ...(postData as PostRequest),
       title,
       slug,
-      content: JSON.stringify(normalizeRichTextDocument(removeTemporaryImageAttributes(content))),
+      content: JSON.stringify(content),
       contentType: "JSON",
       status: statusOverride || postData.status || "DRAFT",
     };

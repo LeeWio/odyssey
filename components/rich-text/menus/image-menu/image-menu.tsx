@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Label, Modal, Popover, Slider, TextField, toast } from "@heroui/react";
+import { Button, Label, Modal, Popover, Slider, toast } from "@heroui/react";
 import {
   RichTextEditor,
   Segment,
@@ -10,7 +10,7 @@ import {
 import { Icon } from "@iconify/react";
 import { isNodeSelection } from "@tiptap/core";
 import NextImage from "next/image";
-import { useCallback, useRef, useState, type ChangeEvent } from "react";
+import { useCallback, useState } from "react";
 
 import {
   IMAGE_MAX_WIDTH_PERCENT,
@@ -20,7 +20,6 @@ import {
   normalizeImageWidthPercent,
   type ImageAlignment,
 } from "../../extensions/image/image-attributes";
-import { queueImageUpload, validateImageFile } from "../../extensions/image/image-upload";
 import type { ShouldShowProps } from "../types";
 
 interface ImagePreview {
@@ -30,7 +29,6 @@ interface ImagePreview {
 
 export function ImageMenu() {
   const [preview, setPreview] = useState<ImagePreview | null>(null);
-  const replacementInputRef = useRef<HTMLInputElement>(null);
   const { editor } = useRichTextEditor();
   const imageAttributes = useRichTextEditorState((state) => state.editor.getAttributes("image"));
   const src = typeof imageAttributes?.src === "string" ? imageAttributes.src : "";
@@ -61,29 +59,8 @@ export function ImageMenu() {
   }, [src]);
 
   const updateImageAttributes = useCallback(
-    (attributes: { alignment?: ImageAlignment; alt?: string; widthPercent?: number }) => {
+    (attributes: { alignment?: ImageAlignment; widthPercent?: number }) => {
       editor?.chain().updateAttributes("image", attributes).run();
-    },
-    [editor]
-  );
-
-  const replaceImage = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.item(0);
-      event.target.value = "";
-      if (!file || !editor) return;
-
-      const validationError = validateImageFile(file);
-      if (validationError) {
-        toast.warning(validationError);
-        return;
-      }
-
-      editor
-        .chain()
-        .focus()
-        .updateAttributes("image", { uploadId: queueImageUpload(editor, file) })
-        .run();
     },
     [editor]
   );
@@ -157,34 +134,6 @@ export function ImageMenu() {
 
           <RichTextEditor.ToolbarSeparator orientation="vertical" />
 
-          <Popover>
-            <Button isIconOnly aria-label="Edit image description" size="sm" variant="ghost">
-              <Icon aria-hidden="true" icon="gravity-ui:text" />
-            </Button>
-            <Popover.Content className="w-72" placement="top">
-              <Popover.Dialog className="p-3">
-                <Popover.Arrow />
-                <TextField name="image-alt-text">
-                  <Label>Alternative text</Label>
-                  <Input
-                    autoFocus
-                    value={alt}
-                    variant="secondary"
-                    onChange={(event) => updateImageAttributes({ alt: event.target.value })}
-                  />
-                </TextField>
-              </Popover.Dialog>
-            </Popover.Content>
-          </Popover>
-
-          <RichTextEditor.CommandButton
-            aria-label="Replace image"
-            tooltip="Replace image"
-            onCommand={() => replacementInputRef.current?.click()}
-          >
-            <Icon aria-hidden="true" icon="gravity-ui:arrow-rotate-right" />
-          </RichTextEditor.CommandButton>
-
           <RichTextEditor.CommandButton
             aria-label="View image full screen"
             isDisabled={!src}
@@ -224,14 +173,6 @@ export function ImageMenu() {
             <Icon aria-hidden="true" className="text-danger" icon="gravity-ui:trash-bin" />
           </RichTextEditor.CommandButton>
         </RichTextEditor.ToolbarGroup>
-        <input
-          ref={replacementInputRef}
-          accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
-          className="sr-only"
-          tabIndex={-1}
-          type="file"
-          onChange={replaceImage}
-        />
       </RichTextEditor.BubbleMenu>
 
       <Modal.Backdrop
