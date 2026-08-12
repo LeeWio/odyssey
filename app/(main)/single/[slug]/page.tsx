@@ -5,8 +5,14 @@ import {
   BreadcrumbsItem,
   Button,
   Chip,
+  FieldError,
+  Form,
+  Input,
+  Label,
+  Modal,
   Popover,
   ProgressCircle,
+  TextField,
   Tooltip,
   Skeleton,
   toast,
@@ -21,7 +27,7 @@ import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, use, useEffect, useMemo, useRef, useState } from "react";
 import { CommentSystem } from "@/components/comment";
 import { MotionRichTextEditor } from "@/components/ui";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
@@ -40,6 +46,7 @@ import { getSmartColorTone, SmartColorSurface } from "@/components/background/sm
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useAddPostToCollectionMutation,
+  useCreatePostCollectionMutation,
   useGetPostCollectionsQuery,
   useRecordReadingProgressMutation,
 } from "@/lib/features/library";
@@ -87,6 +94,9 @@ export default function SinglePage({ params }: SinglePageProps) {
   const [readingProgress, setReadingProgress] = useState(0);
   const [readingProgressPostId, setReadingProgressPostId] = useState<number | null>(null);
   const [collectionPendingId, setCollectionPendingId] = useState<number | null>(null);
+  const [isCreateCollectionOpen, setIsCreateCollectionOpen] = useState(false);
+  const [collectionName, setCollectionName] = useState("");
+  const [collectionDescription, setCollectionDescription] = useState("");
   const [optimisticLike, setOptimisticLike] = useState<OptimisticLikeState | null>(null);
   const [optimisticFavorite, setOptimisticFavorite] = useState<OptimisticFavoriteState | null>(
     null
@@ -122,6 +132,8 @@ export default function SinglePage({ params }: SinglePageProps) {
     { skip: !isAuthenticated }
   );
   const [addPostToCollection] = useAddPostToCollectionMutation();
+  const [createPostCollection, { isLoading: isCreatingCollection }] =
+    useCreatePostCollectionMutation();
   const postId = article?.id;
   const serverIsLiked = article?.isLiked || false;
   const serverLikesCount = article?.likesCount || 0;
@@ -245,6 +257,40 @@ export default function SinglePage({ params }: SinglePageProps) {
       // The mutation displays its own failure toast.
     } finally {
       setCollectionPendingId(null);
+    }
+  };
+
+  const openCreateCollection = () => {
+    setCollectionName("");
+    setCollectionDescription("");
+    setIsCreateCollectionOpen(true);
+  };
+
+  const handleCreateCollection = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!postId) return;
+
+    const name = collectionName.trim();
+    if (!name) {
+      toast.danger("Enter a collection name.");
+      return;
+    }
+
+    try {
+      const collection = await createPostCollection({
+        name,
+        description: collectionDescription.trim() || undefined,
+      }).unwrap();
+      setIsCreateCollectionOpen(false);
+      setCollectionPendingId(collection.id);
+
+      try {
+        await addPostToCollection({ collectionId: collection.id, postId }).unwrap();
+      } finally {
+        setCollectionPendingId(null);
+      }
+    } catch {
+      // The mutations display their own failure toast.
     }
   };
 
@@ -553,6 +599,10 @@ export default function SinglePage({ params }: SinglePageProps) {
                           <p className="text-muted px-2 py-2 text-sm">Loading collections...</p>
                         ) : collections.length > 0 ? (
                           <>
+                            <Button fullWidth variant="ghost" onPress={openCreateCollection}>
+                              <Icon icon="lucide:folder-plus" className="size-4" />
+                              New collection
+                            </Button>
                             {collections.slice(0, 5).map((collection) => (
                               <Button
                                 key={collection.id}
@@ -580,7 +630,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                             </Button>
                           </>
                         ) : (
-                          <Button fullWidth variant="ghost" onPress={() => router.push("/library")}>
+                          <Button fullWidth variant="ghost" onPress={openCreateCollection}>
                             <Icon icon="lucide:folder-plus" className="size-4" />
                             Create collection
                           </Button>
@@ -625,6 +675,56 @@ export default function SinglePage({ params }: SinglePageProps) {
             </Tooltip>
           </ActionBar.Suffix>
         </ActionBar>
+
+        <Modal>
+          <Modal.Backdrop
+            isOpen={isCreateCollectionOpen}
+            onOpenChange={setIsCreateCollectionOpen}
+            variant="blur"
+          >
+            <Modal.Container size="sm">
+              <Modal.Dialog className="sm:max-w-md">
+                <Modal.CloseTrigger />
+                <Form onSubmit={handleCreateCollection}>
+                  <Modal.Header>
+                    <Modal.Heading>Create collection</Modal.Heading>
+                  </Modal.Header>
+                  <Modal.Body className="flex flex-col gap-4 py-4">
+                    <p className="text-muted text-sm">Save this article to a new collection.</p>
+                    <TextField isRequired name="collection-name">
+                      <Label>Name</Label>
+                      <Input
+                        autoFocus
+                        maxLength={80}
+                        placeholder="e.g. Design references"
+                        value={collectionName}
+                        onChange={(event) => setCollectionName(event.target.value)}
+                      />
+                      <FieldError />
+                    </TextField>
+                    <TextField name="collection-description">
+                      <Label>Description</Label>
+                      <Input
+                        maxLength={300}
+                        placeholder="What belongs in this collection?"
+                        value={collectionDescription}
+                        onChange={(event) => setCollectionDescription(event.target.value)}
+                      />
+                    </TextField>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button slot="close" size="sm" variant="tertiary">
+                      Cancel
+                    </Button>
+                    <Button isPending={isCreatingCollection} size="sm" type="submit">
+                      Create and save
+                    </Button>
+                  </Modal.Footer>
+                </Form>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
 
         <Sheet
           isDetached
