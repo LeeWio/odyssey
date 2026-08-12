@@ -1,3 +1,10 @@
+# [1.59.0](https://github.com/LeeWio/odyssey/compare/v1.58.0...v1.59.0) (2026-08-12)
+
+
+### Features
+
+* **rich-text:** complete editing workflows ([59eaf73](https://github.com/LeeWio/odyssey/commit/59eaf73e03a666d76557fd2da2964f3219d3ebb5))
+
 # [1.58.0](https://github.com/LeeWio/odyssey/compare/v1.57.0...v1.58.0) (2026-08-12)
 
 
