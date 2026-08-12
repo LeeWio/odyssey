@@ -98,8 +98,8 @@ const getNavigationItem = (id: NavigationId | null) => {
         title: "Words that survive the build.",
         description:
           "Field notes on design systems, accessible engineering, and structural decisions that resist contact with the real world.",
-        href: "/blog",
-        cta: "Explore the archive",
+        href: "/explore",
+        cta: "Explore writing",
       };
     case "daily":
       return {
@@ -195,7 +195,15 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
               <ListBox
                 aria-label="Latest Chronicle notes"
                 selectionMode="none"
-                onAction={(key) => onNavigate(key === "columns" ? "/columns" : "/blog")}
+                onAction={(key) => {
+                  if (key === "columns") {
+                    onNavigate("/columns");
+                  } else if (key === "explore") {
+                    onNavigate("/explore");
+                  } else {
+                    onNavigate("/blog");
+                  }
+                }}
               >
                 <ListBox.Item id="systems" textValue="Designing for the second draft">
                   <Label>Designing for the second draft</Label>
@@ -212,6 +220,10 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 <ListBox.Item id="columns" textValue="Browse columns">
                   <Label>Browse columns</Label>
                   <Description>Focused reading paths</Description>
+                </ListBox.Item>
+                <ListBox.Item id="explore" textValue="Explore by topic">
+                  <Label>Explore by topic</Label>
+                  <Description>Tags and subjects across the archive</Description>
                 </ListBox.Item>
               </ListBox>
             </Card.Content>
@@ -606,28 +618,28 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
           </Card>
         </motion.div>
 
-        {/* Project 2: Selected Goods */}
+        {/* Project 2: Explore writing */}
         <motion.div {...reveal(1)}>
           <Card className="group h-full" variant="default">
             <Card.Header>
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:bookmark" className="size-5" />
               </div>
-              <Card.Title>Selected Goods</Card.Title>
+              <Card.Title>Explore Writing</Card.Title>
               <Card.Description>
-                Useful objects, software toolkits, and tactile physical gears.
+                Follow recurring topics and tags across the entire writing archive.
               </Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
               <Chip size="sm" variant="soft">
-                Curated
+                Discover
               </Chip>
               <Button
                 isIconOnly
                 size="sm"
                 variant="ghost"
-                aria-label="Open Selected Goods"
-                onPress={() => onNavigate("/blog")}
+                aria-label="Explore writing"
+                onPress={() => onNavigate("/explore")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>

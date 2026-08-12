@@ -7,6 +7,7 @@ import { SmartColorSurface } from "@/components/background/smart-color-surface";
 
 const FOOTER_LINKS = [
   { href: "/blog", label: "Chronicle" },
+  { href: "/explore", label: "Explore" },
   { href: "/columns", label: "Columns" },
   { href: "/blog", label: "Orbit" },
   { href: "/links", label: "Travelogue" },

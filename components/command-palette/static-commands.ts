@@ -1,8 +1,29 @@
-import { ClockIcon, FileTextIcon, GearIcon, PersonsIcon, SparklesIcon } from "@/components/icons";
+import {
+  ArchiveIcon,
+  ClockIcon,
+  FileTextIcon,
+  GearIcon,
+  PersonsIcon,
+  SparklesIcon,
+} from "@/components/icons";
 import { createActionCommand, createNavigationCommand } from "./command-model";
 import { CommandIntent, type CommandItem } from "./types";
 
 export const STATIC_COMMANDS: readonly CommandItem[] = [
+  createNavigationCommand({
+    id: "navigate-explore-writing",
+    title: "Explore writing",
+    description: "Browse articles by topic and tag",
+    icon: ArchiveIcon,
+    category: "System",
+    source: "navigation",
+    order: 0,
+    keywords: ["explore", "archive", "topics", "tags", "writing", "discover"],
+    intent: CommandIntent.NAVIGATE,
+    payload: { href: "/explore" },
+    defaultVisible: true,
+  }),
+
   // AI category
   createActionCommand({
     id: "smart-summarize-week",
