@@ -21,7 +21,7 @@ import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import { CommentSystem } from "@/components/comment";
 import { MotionRichTextEditor } from "@/components/ui";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
@@ -37,6 +37,9 @@ import {
 } from "@/features/blog";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
+import { selectIsAuthenticated } from "@/lib/features/auth";
+import { useRecordReadingProgressMutation } from "@/lib/features/library";
+import { useAppSelector } from "@/lib/hooks";
 import { ArticleSidebar } from "./article-sidebar";
 
 interface SinglePageProps {
@@ -57,16 +60,33 @@ interface OptimisticFavoriteState {
   favoritesCount: number;
 }
 
+function getReadingPositionAnchor(postId: number) {
+  const headings = document.querySelectorAll<HTMLElement>(
+    "[data-reading-content] h2[id], [data-reading-content] h3[id], [data-reading-content] h4[id]"
+  );
+  let anchor = "";
+
+  for (const heading of headings) {
+    if (heading.getBoundingClientRect().top > 160) break;
+    anchor = heading.id;
+  }
+
+  return anchor ? `#${anchor}` : `article-${postId}`;
+}
+
 export default function SinglePage({ params }: SinglePageProps) {
   const router = useRouter();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const { slug } = use(params);
   const [isActionBarOpen, setIsActionBarOpen] = useState(false);
   const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
   const [readingProgress, setReadingProgress] = useState(0);
+  const [readingProgressPostId, setReadingProgressPostId] = useState<number | null>(null);
   const [optimisticLike, setOptimisticLike] = useState<OptimisticLikeState | null>(null);
   const [optimisticFavorite, setOptimisticFavorite] = useState<OptimisticFavoriteState | null>(
     null
   );
+  const readingProgressRef = useRef({ postId: null as number | null, progress: 0 });
 
   const { scrollY, scrollYProgress } = useScroll();
   const { data: serverArticle, isLoading: queryIsLoading } = useGetPublicPostBySlugQuery(slug);
@@ -91,6 +111,7 @@ export default function SinglePage({ params }: SinglePageProps) {
   const [likePost, { isLoading: isLiking }] = useLikePostMutation();
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation();
   const [favoritePost, { isLoading: isFavoriting }] = useFavoritePostMutation();
+  const [recordReadingProgress] = useRecordReadingProgressMutation();
   const postId = article?.id;
   const serverIsLiked = article?.isLiked || false;
   const serverLikesCount = article?.likesCount || 0;
@@ -122,6 +143,32 @@ export default function SinglePage({ params }: SinglePageProps) {
   });
 
   useEffect(() => () => revealWhenScrollSettles.cancel(), [revealWhenScrollSettles]);
+
+  useEffect(() => {
+    if (readingProgressRef.current.postId === postId) return;
+    readingProgressRef.current = { postId: postId ?? null, progress: 0 };
+    setReadingProgress(0);
+    setReadingProgressPostId(postId ?? null);
+  }, [postId]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !postId || readingProgressPostId !== postId || readingProgress < 10)
+      return;
+
+    const progress = readingProgress === 100 ? 100 : Math.floor(readingProgress / 10) * 10;
+    if (progress <= readingProgressRef.current.progress) return;
+
+    readingProgressRef.current.progress = progress;
+    void recordReadingProgress({
+      postId,
+      body: {
+        positionAnchor: getReadingPositionAnchor(postId),
+        progressPercent: progress,
+      },
+    })
+      .unwrap()
+      .catch(() => undefined);
+  }, [isAuthenticated, postId, readingProgress, readingProgressPostId, recordReadingProgress]);
 
   const handleShare = async () => {
     try {
@@ -289,7 +336,7 @@ export default function SinglePage({ params }: SinglePageProps) {
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1400px] grid-cols-1 justify-center gap-8 px-4 py-12 md:px-6 lg:grid-cols-[260px_minmax(0,760px)] lg:px-8 xl:grid-cols-[280px_minmax(0,760px)] xl:gap-12 2xl:gap-16 2xl:px-12">
         <ArticleSidebar slug={slug} />
 
-        <article className="mx-auto w-full max-w-[760px] min-w-0">
+        <article data-reading-content className="mx-auto w-full max-w-[760px] min-w-0">
           <section className="mx-auto max-w-190 py-0">
             {isLoading || !article ? (
               <>
