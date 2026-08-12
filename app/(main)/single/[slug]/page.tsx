@@ -206,6 +206,14 @@ export default function SinglePage({ params }: SinglePageProps) {
                   <BreadcrumbsItem className="text-white/72" href="/blog">
                     <span className="text-white/72">Chronicle</span>
                   </BreadcrumbsItem>
+                  {article.series ? (
+                    <BreadcrumbsItem
+                      className="text-white/72"
+                      href={`/columns/${article.series.slug}`}
+                    >
+                      <span className="text-white/72">{article.series.name}</span>
+                    </BreadcrumbsItem>
+                  ) : null}
                   <BreadcrumbsItem className="text-white/72">
                     <span className="text-white/72">
                       {article.category ? article.category.name : "Uncategorized"}

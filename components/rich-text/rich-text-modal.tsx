@@ -75,6 +75,8 @@ export function RichTextModal() {
           coverImage: existingPost.coverImage || "",
           isFeatured: existingPost.isFeatured,
           categoryId: existingPost.category?.id,
+          seriesId: existingPost.series?.id,
+          seriesOrder: existingPost.seriesOrder ?? 0,
           tagIds: existingPost.tags?.map((t) => t.id) || [],
         };
       });

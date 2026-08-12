@@ -136,6 +136,7 @@ export const baseApi = createApi({
     "Notification",
     "Library",
     "OpenApi",
+    "Column",
   ],
   endpoints: () => ({}),
 });

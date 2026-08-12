@@ -11,6 +11,7 @@ import { AppShell } from "./app-shell";
 import { AnalyticsPage } from "./views/analytics-page";
 import { CategoriesPage } from "./views/categories-page";
 import { CommentsPage } from "./views/comments-page";
+import { ColumnsPage } from "./views/columns-page";
 import { DashboardPage } from "./views/dashboard-page";
 import { FilesPage } from "./views/files-page";
 import { FriendLinksPage } from "./views/friend-links-page";
@@ -47,6 +48,8 @@ export function DashboardSheet() {
         return <DashboardPage />;
       case "/posts":
         return <PostsPage />;
+      case "/columns":
+        return <ColumnsPage />;
       case "/links":
         return <FriendLinksPage />;
       case "/categories":

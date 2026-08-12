@@ -3,6 +3,7 @@ import {
   ChartColumn,
   CircleQuestion,
   Comment,
+  Book,
   Folder,
   Gear,
   House,
@@ -28,6 +29,7 @@ export type NavItem = {
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/", icon: House, label: "Dashboard" },
   { href: "/posts", icon: FileText, label: "Posts" },
+  { href: "/columns", icon: Book, label: "Columns" },
   { href: "/links", icon: Link, label: "Friend Links" },
   { href: "/categories", icon: Folder, label: "Categories" },
   { href: "/tags", icon: Tag, label: "Tags" },

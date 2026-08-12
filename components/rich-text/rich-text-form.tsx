@@ -23,6 +23,7 @@ import type { DropZoneProps } from "react-aria-components";
 import { type Key, useCallback, useEffect, useRef, useState } from "react";
 
 import { useGetCategoriesQuery } from "@/lib/features/category";
+import { useGetColumnsQuery } from "@/lib/features/column";
 import { useUploadFileMutation } from "@/lib/features/file";
 import { useGetAllTagsQuery } from "@/lib/features/tag";
 import type { PostRequest, PostStatus } from "@/features/blog";
@@ -84,6 +85,7 @@ function getFormatColor(ext: string): FileFormatColor {
 
 export function RichTextForm({ data, onChange }: RichTextFormProps) {
   const { data: categories = [] } = useGetCategoriesQuery();
+  const { data: columns = [] } = useGetColumnsQuery();
   const { data: tags = [] } = useGetAllTagsQuery();
   const [uploadFile] = useUploadFileMutation();
 
@@ -366,6 +368,41 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
               </ListBox>
             </Select.Popover>
           </Select>
+
+          <Select
+            className="w-full"
+            placeholder="No column"
+            value={data.seriesId}
+            onChange={(key) => handleFieldChange("seriesId", key ? Number(key) : undefined)}
+          >
+            <Label className="text-sm font-medium">Column</Label>
+            <Select.Trigger>
+              <Select.Value />
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                {columns.map((column) => (
+                  <ListBox.Item key={column.id} id={column.id} textValue={column.name}>
+                    {column.name}
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                ))}
+              </ListBox>
+            </Select.Popover>
+          </Select>
+
+          {data.seriesId ? (
+            <TextField className="w-full">
+              <Label>Column order</Label>
+              <Input
+                min={0}
+                type="number"
+                value={String(data.seriesOrder ?? 0)}
+                onChange={(event) => handleFieldChange("seriesOrder", Number(event.target.value))}
+              />
+            </TextField>
+          ) : null}
 
           <Autocomplete
             className="w-full"
