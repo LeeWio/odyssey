@@ -28,6 +28,7 @@ import {
   selectUserEmail,
   useLogoutMutation,
 } from "@/lib/features/auth";
+import { NotificationPopover } from "@/features/notification/notification-popover";
 import { useGetUnreadNotificationCountQuery } from "@/lib/features/notification";
 import {
   selectIsLoginOpen,
@@ -720,7 +721,6 @@ export const Navbar = () => {
   const { data: unreadNotificationCount = 0 } = useGetUnreadNotificationCountQuery(undefined, {
     skip: !isAuthenticated,
   });
-
   const activeItem = getNavigationItem(activeNavigation);
   const platformKey = mounted && (os === "macos" || os === "ios") ? "⌘" : "Ctrl";
 
@@ -1272,35 +1272,7 @@ export const Navbar = () => {
               </Tooltip>
             </div>
 
-            {mounted && isAuthenticated ? (
-              <Tooltip delay={500} closeDelay={100}>
-                <Badge.Anchor>
-                  <Button
-                    isIconOnly
-                    variant="ghost"
-                    className="size-10 rounded-xl"
-                    aria-label={
-                      unreadNotificationCount > 0
-                        ? `${unreadNotificationCount} unread notifications`
-                        : "Notifications"
-                    }
-                    onPress={() => router.push("/notifications")}
-                  >
-                    <Icon aria-hidden="true" className="size-4" icon="lucide:bell" />
-                  </Button>
-                  {unreadNotificationCount > 0 ? (
-                    <Badge color="danger" placement="top-right" size="sm">
-                      <Badge.Label className="min-w-4 px-1 text-[9px] leading-4">
-                        {unreadNotificationCount > 99 ? "99+" : unreadNotificationCount}
-                      </Badge.Label>
-                    </Badge>
-                  ) : null}
-                </Badge.Anchor>
-                <Tooltip.Content placement="bottom" offset={8}>
-                  Notifications
-                </Tooltip.Content>
-              </Tooltip>
-            ) : null}
+            {mounted && isAuthenticated ? <NotificationPopover /> : null}
 
             {mounted && isAuthenticated ? (
               <Dropdown>
