@@ -18,11 +18,9 @@ import {
   saveRichTextDraft,
 } from "./utils/editor-draft";
 import {
-  hasPendingImageUploads,
   normalizeJSONContent,
   normalizeRichTextDocument,
   parseJSONContent,
-  removeTemporaryImageAttributes,
 } from "./utils/document-normalizer";
 import {
   useCreatePostMutation,
