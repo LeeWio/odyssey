@@ -1,3 +1,10 @@
+# [1.43.0](https://github.com/LeeWio/odyssey/compare/v1.42.0...v1.43.0) (2026-08-12)
+
+
+### Features
+
+* **columns:** add sequential reading ([2e2578f](https://github.com/LeeWio/odyssey/commit/2e2578f9effb86e0f73ea8790aa1c5aa0c63d088))
+
 # [1.42.0](https://github.com/LeeWio/odyssey/compare/v1.41.0...v1.42.0) (2026-08-12)
 
 
