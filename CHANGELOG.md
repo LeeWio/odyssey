@@ -1,3 +1,10 @@
+## [1.59.1](https://github.com/LeeWio/odyssey/compare/v1.59.0...v1.59.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **deploy:** disable unsupported registry attestations ([5b7435f](https://github.com/LeeWio/odyssey/commit/5b7435ff03a3f41325988104308aae04f2e5c5cb))
+
 # [1.59.0](https://github.com/LeeWio/odyssey/compare/v1.58.0...v1.59.0) (2026-08-12)
 
 
