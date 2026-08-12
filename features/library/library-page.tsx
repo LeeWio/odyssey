@@ -1,33 +1,47 @@
 "use client";
 
-import { BookOpen, Heart, Play, TrashBin } from "@gravity-ui/icons";
+import { CirclePlus, Pencil, BookOpen, Heart, Play, TrashBin } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
 import {
   AlertDialog,
   Button,
   Card,
   Chip,
+  FieldError,
+  Form,
+  Input,
+  Label,
   Link,
+  Modal,
   ProgressBar,
   Skeleton,
+  TextArea,
+  TextField,
   Tooltip,
   Typography,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   type FavoritePostResponse,
+  type PostCollectionResponse,
   type RecommendedPostResponse,
   type ReadingHistoryResponse,
+  useCreatePostCollectionMutation,
   useClearReadingHistoryMutation,
+  useDeletePostCollectionMutation,
   useDeleteReadingHistoryMutation,
+  useGetCollectionPostsQuery,
   useGetFavoritePostsQuery,
   useGetLibraryOverviewQuery,
+  useGetPostCollectionsQuery,
   useGetReadingHistoryQuery,
   useHideRecommendationMutation,
+  useRemovePostFromCollectionMutation,
+  useUpdatePostCollectionMutation,
 } from "@/lib/features/library";
 import type { PostDigestResponse } from "@/lib/features/post";
 import { setLoginOpen } from "@/lib/features/ui";
@@ -229,6 +243,74 @@ function EmptyLibrarySection({ description, title }: { description: string; titl
   );
 }
 
+function CollectionCard({
+  collection,
+  isSelected,
+  onDelete,
+  onEdit,
+  onSelect,
+}: {
+  collection: PostCollectionResponse;
+  isSelected: boolean;
+  onDelete: (collection: PostCollectionResponse) => void;
+  onEdit: (collection: PostCollectionResponse) => void;
+  onSelect: (collectionId: number) => void;
+}) {
+  return (
+    <Card
+      variant={isSelected ? "tertiary" : "secondary"}
+      className="h-full gap-4 p-5 transition-colors"
+    >
+      <Card.Header className="gap-2 p-0">
+        <div className="flex items-start justify-between gap-3">
+          <Chip size="sm" variant="soft">
+            {collection.itemCount} {collection.itemCount === 1 ? "article" : "articles"}
+          </Chip>
+          <div className="flex shrink-0 gap-1">
+            <Tooltip>
+              <Button
+                isIconOnly
+                aria-label={`Edit ${collection.name}`}
+                size="sm"
+                variant="ghost"
+                onPress={() => onEdit(collection)}
+              >
+                <Pencil aria-hidden="true" className="size-3.5" />
+              </Button>
+              <Tooltip.Content>Edit collection</Tooltip.Content>
+            </Tooltip>
+            <Tooltip>
+              <Button
+                isIconOnly
+                aria-label={`Delete ${collection.name}`}
+                size="sm"
+                variant="ghost"
+                onPress={() => onDelete(collection)}
+              >
+                <TrashBin aria-hidden="true" className="size-3.5" />
+              </Button>
+              <Tooltip.Content>Delete collection</Tooltip.Content>
+            </Tooltip>
+          </div>
+        </div>
+        <Card.Title className="line-clamp-2 text-lg">{collection.name}</Card.Title>
+        {collection.description ? (
+          <Card.Description className="line-clamp-2">{collection.description}</Card.Description>
+        ) : null}
+      </Card.Header>
+      <Card.Footer className="mt-auto justify-end p-0">
+        <Button
+          size="sm"
+          variant={isSelected ? "secondary" : "ghost"}
+          onPress={() => onSelect(collection.id)}
+        >
+          {isSelected ? "Viewing" : "View collection"}
+        </Button>
+      </Card.Footer>
+    </Card>
+  );
+}
+
 export function LibraryPage() {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -238,6 +320,19 @@ export function LibraryPage() {
     null
   );
   const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
+  const [isCollectionFormOpen, setIsCollectionFormOpen] = useState(false);
+  const [isCollectionDeleteOpen, setIsCollectionDeleteOpen] = useState(false);
+  const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null);
+  const [collectionPendingDeletion, setCollectionPendingDeletion] =
+    useState<PostCollectionResponse | null>(null);
+  const [collectionBeingEdited, setCollectionBeingEdited] = useState<PostCollectionResponse | null>(
+    null
+  );
+  const [collectionName, setCollectionName] = useState("");
+  const [collectionDescription, setCollectionDescription] = useState("");
+  const [collectionPostPendingRemoval, setCollectionPostPendingRemoval] = useState<number | null>(
+    null
+  );
 
   const overview = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
   const favorites = useGetFavoritePostsQuery(
@@ -248,6 +343,21 @@ export function LibraryPage() {
     { page: historyPage, size: HISTORY_PAGE_SIZE, sort: ["lastReadAt,desc"] },
     { skip: !isAuthenticated }
   );
+  const collections = useGetPostCollectionsQuery(undefined, { skip: !isAuthenticated });
+  const selectedCollection = collections.data?.find(
+    (collection) => collection.id === selectedCollectionId
+  );
+  const collectionPosts = useGetCollectionPostsQuery(
+    { collectionId: selectedCollection?.id ?? 0, page: 0, size: 20, sort: ["addedAt,desc"] },
+    { skip: !isAuthenticated || !selectedCollection }
+  );
+  const [createPostCollection, { isLoading: isCreatingCollection }] =
+    useCreatePostCollectionMutation();
+  const [updatePostCollection, { isLoading: isUpdatingCollection }] =
+    useUpdatePostCollectionMutation();
+  const [deletePostCollection, { isLoading: isDeletingCollection }] =
+    useDeletePostCollectionMutation();
+  const [removePostFromCollection] = useRemovePostFromCollectionMutation();
   const [deleteReadingHistory] = useDeleteReadingHistoryMutation();
   const [hideRecommendation] = useHideRecommendationMutation();
   const [clearReadingHistory, { isLoading: isClearingHistory }] = useClearReadingHistoryMutation();
@@ -257,6 +367,7 @@ export function LibraryPage() {
   );
   const historyEntries = history.data?.list ?? [];
   const recommendations = overview.data?.recommendations ?? [];
+  const selectedCollectionPosts = collectionPosts.data?.list ?? [];
 
   const handleRemoveHistoryEntry = async (postId: number) => {
     setEntryPendingRemoval(postId);
@@ -287,6 +398,65 @@ export function LibraryPage() {
       // The mutation displays its own failure toast.
     } finally {
       setRecommendationPendingRemoval(null);
+    }
+  };
+
+  const openCreateCollection = () => {
+    setCollectionBeingEdited(null);
+    setCollectionName("");
+    setCollectionDescription("");
+    setIsCollectionFormOpen(true);
+  };
+
+  const openEditCollection = (collection: PostCollectionResponse) => {
+    setCollectionBeingEdited(collection);
+    setCollectionName(collection.name);
+    setCollectionDescription(collection.description || "");
+    setIsCollectionFormOpen(true);
+  };
+
+  const handleCollectionSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const body = {
+      name: collectionName.trim(),
+      description: collectionDescription.trim() || undefined,
+    };
+
+    try {
+      const collection = collectionBeingEdited
+        ? await updatePostCollection({ collectionId: collectionBeingEdited.id, body }).unwrap()
+        : await createPostCollection(body).unwrap();
+
+      setSelectedCollectionId(collection.id);
+      setIsCollectionFormOpen(false);
+    } catch {
+      // The mutations display their own failure toast.
+    }
+  };
+
+  const handleDeleteCollection = async () => {
+    if (!collectionPendingDeletion) return;
+
+    try {
+      await deletePostCollection(collectionPendingDeletion.id).unwrap();
+      if (selectedCollectionId === collectionPendingDeletion.id) setSelectedCollectionId(null);
+      setIsCollectionDeleteOpen(false);
+      setCollectionPendingDeletion(null);
+    } catch {
+      // The mutation displays its own failure toast.
+    }
+  };
+
+  const handleRemoveCollectionPost = async (postId: number) => {
+    if (!selectedCollectionId) return;
+
+    setCollectionPostPendingRemoval(postId);
+    try {
+      await removePostFromCollection({ collectionId: selectedCollectionId, postId }).unwrap();
+    } catch {
+      // The mutation displays its own failure toast.
+    } finally {
+      setCollectionPostPendingRemoval(null);
     }
   };
 
@@ -395,6 +565,120 @@ export function LibraryPage() {
               description="Use the favorite action on an article to keep it close."
             />
           )}
+        </section>
+
+        <section aria-labelledby="collections-title" className="mt-20">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <Typography id="collections-title" type="h2" weight="semibold">
+                Collections
+              </Typography>
+              <Typography color="muted" type="body-sm" className="mt-1">
+                Group the writing you want to keep together.
+              </Typography>
+            </div>
+            <Button size="sm" onPress={openCreateCollection}>
+              <CirclePlus aria-hidden="true" className="size-4" />
+              New collection
+            </Button>
+          </div>
+
+          {collections.isLoading ? (
+            <LibrarySkeleton />
+          ) : collections.isError ? (
+            <EmptyLibrarySection
+              title="Collections are unavailable"
+              description="Try loading this page again in a moment."
+            />
+          ) : (collections.data?.length ?? 0) > 0 ? (
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {collections.data?.map((collection) => (
+                <CollectionCard
+                  key={collection.id}
+                  collection={collection}
+                  isSelected={collection.id === selectedCollectionId}
+                  onDelete={(nextCollection) => {
+                    setCollectionPendingDeletion(nextCollection);
+                    setIsCollectionDeleteOpen(true);
+                  }}
+                  onEdit={openEditCollection}
+                  onSelect={setSelectedCollectionId}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyLibrarySection
+              title="Start your first collection"
+              description="Create a collection from an article to gather related reading in one place."
+            />
+          )}
+
+          {selectedCollection ? (
+            <div className="border-default-200 mt-8 border-t pt-8">
+              <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <Typography type="h3" weight="semibold">
+                    {selectedCollection.name}
+                  </Typography>
+                  {selectedCollection.description ? (
+                    <Typography color="muted" type="body-sm" className="mt-1">
+                      {selectedCollection.description}
+                    </Typography>
+                  ) : null}
+                </div>
+                <Button size="sm" variant="ghost" onPress={() => setSelectedCollectionId(null)}>
+                  Close
+                </Button>
+              </div>
+
+              {collectionPosts.isLoading ? (
+                <LibrarySkeleton count={2} />
+              ) : collectionPosts.isError ? (
+                <EmptyLibrarySection
+                  title="Collection articles are unavailable"
+                  description="Try opening this collection again in a moment."
+                />
+              ) : selectedCollectionPosts.length === 0 ? (
+                <EmptyLibrarySection
+                  title="This collection is empty"
+                  description="Open an article and use the collection action to add it here."
+                />
+              ) : (
+                <div className="divide-default-200 border-default-200 divide-y border-y">
+                  {selectedCollectionPosts.map(({ addedAt, post }) => (
+                    <article key={post.id} className="flex gap-4 py-5 sm:items-center">
+                      <div className="hidden w-28 shrink-0 overflow-hidden sm:block">
+                        <LibraryPostVisual post={post} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <Link className="no-underline" href={`/single/${post.slug}`}>
+                          <Typography className="line-clamp-2 text-base font-semibold" type="h4">
+                            {post.title}
+                          </Typography>
+                        </Link>
+                        <Typography color="muted" type="body-xs" className="mt-2">
+                          Added {formatDate(addedAt)}
+                        </Typography>
+                      </div>
+                      <Tooltip>
+                        <Button
+                          isIconOnly
+                          aria-label={`Remove ${post.title} from ${selectedCollection.name}`}
+                          isPending={collectionPostPendingRemoval === post.id}
+                          size="sm"
+                          variant="ghost"
+                          onPress={() => handleRemoveCollectionPost(post.id)}
+                        >
+                          <TrashBin aria-hidden="true" className="size-4" />
+                        </Button>
+                        <Tooltip.Content>Remove from collection</Tooltip.Content>
+                      </Tooltip>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : null}
         </section>
 
         {!overview.isLoading && !overview.isError && recommendations.length > 0 ? (
@@ -548,6 +832,100 @@ export function LibraryPage() {
                   onPress={handleClearHistory}
                 >
                   Clear history
+                </Button>
+              </AlertDialog.Footer>
+            </AlertDialog.Dialog>
+          </AlertDialog.Container>
+        </AlertDialog.Backdrop>
+      </AlertDialog>
+
+      <Modal>
+        <Modal.Backdrop
+          isOpen={isCollectionFormOpen}
+          onOpenChange={setIsCollectionFormOpen}
+          variant="blur"
+        >
+          <Modal.Container size="sm">
+            <Modal.Dialog className="sm:max-w-md">
+              <Modal.CloseTrigger />
+              <Form onSubmit={handleCollectionSubmit}>
+                <Modal.Header>
+                  <Modal.Heading>
+                    {collectionBeingEdited ? "Edit collection" : "Create collection"}
+                  </Modal.Heading>
+                </Modal.Header>
+                <Modal.Body className="flex flex-col gap-4 py-4">
+                  <TextField isRequired name="collection-name">
+                    <Label>Name</Label>
+                    <Input
+                      maxLength={80}
+                      placeholder="e.g. Design references"
+                      value={collectionName}
+                      onChange={(event) => setCollectionName(event.target.value)}
+                    />
+                    <FieldError />
+                  </TextField>
+                  <TextField name="collection-description">
+                    <Label>Description</Label>
+                    <TextArea
+                      maxLength={300}
+                      placeholder="What belongs in this collection?"
+                      rows={3}
+                      value={collectionDescription}
+                      onChange={(event) => setCollectionDescription(event.target.value)}
+                    />
+                  </TextField>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button slot="close" size="sm" variant="tertiary">
+                    Cancel
+                  </Button>
+                  <Button
+                    isPending={isCreatingCollection || isUpdatingCollection}
+                    size="sm"
+                    type="submit"
+                  >
+                    {collectionBeingEdited ? "Save changes" : "Create collection"}
+                  </Button>
+                </Modal.Footer>
+              </Form>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+
+      <AlertDialog>
+        <AlertDialog.Backdrop
+          isOpen={isCollectionDeleteOpen}
+          onOpenChange={setIsCollectionDeleteOpen}
+          variant="blur"
+        >
+          <AlertDialog.Container>
+            <AlertDialog.Dialog className="sm:max-w-md">
+              <AlertDialog.CloseTrigger />
+              <AlertDialog.Header>
+                <AlertDialog.Icon status="danger" />
+                <AlertDialog.Heading>Delete collection?</AlertDialog.Heading>
+              </AlertDialog.Header>
+              <AlertDialog.Body>
+                <p className="text-sm">
+                  Delete{" "}
+                  <strong className="text-foreground">{collectionPendingDeletion?.name}</strong>?
+                  The articles will remain in your library, but this collection cannot be restored.
+                </p>
+              </AlertDialog.Body>
+              <AlertDialog.Footer>
+                <Button slot="close" size="sm" variant="tertiary">
+                  Cancel
+                </Button>
+                <Button
+                  isDisabled={!collectionPendingDeletion}
+                  isPending={isDeletingCollection}
+                  size="sm"
+                  variant="danger"
+                  onPress={handleDeleteCollection}
+                >
+                  Delete collection
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

@@ -38,7 +38,11 @@ import {
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import { selectIsAuthenticated } from "@/lib/features/auth";
-import { useRecordReadingProgressMutation } from "@/lib/features/library";
+import {
+  useAddPostToCollectionMutation,
+  useGetPostCollectionsQuery,
+  useRecordReadingProgressMutation,
+} from "@/lib/features/library";
 import { useAppSelector } from "@/lib/hooks";
 import { ArticleSidebar } from "./article-sidebar";
 
@@ -82,6 +86,7 @@ export default function SinglePage({ params }: SinglePageProps) {
   const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
   const [readingProgress, setReadingProgress] = useState(0);
   const [readingProgressPostId, setReadingProgressPostId] = useState<number | null>(null);
+  const [collectionPendingId, setCollectionPendingId] = useState<number | null>(null);
   const [optimisticLike, setOptimisticLike] = useState<OptimisticLikeState | null>(null);
   const [optimisticFavorite, setOptimisticFavorite] = useState<OptimisticFavoriteState | null>(
     null
@@ -112,6 +117,11 @@ export default function SinglePage({ params }: SinglePageProps) {
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation();
   const [favoritePost, { isLoading: isFavoriting }] = useFavoritePostMutation();
   const [recordReadingProgress] = useRecordReadingProgressMutation();
+  const { data: collections = [], isLoading: isLoadingCollections } = useGetPostCollectionsQuery(
+    undefined,
+    { skip: !isAuthenticated }
+  );
+  const [addPostToCollection] = useAddPostToCollectionMutation();
   const postId = article?.id;
   const serverIsLiked = article?.isLiked || false;
   const serverLikesCount = article?.likesCount || 0;
@@ -222,6 +232,19 @@ export default function SinglePage({ params }: SinglePageProps) {
         favoritesCount: previousFavoritesCount,
       });
       toast.danger("Please log in to save this article.");
+    }
+  };
+
+  const handleAddToCollection = async (collectionId: number) => {
+    if (!postId) return;
+
+    setCollectionPendingId(collectionId);
+    try {
+      await addPostToCollection({ collectionId, postId }).unwrap();
+    } catch {
+      // The mutation displays its own failure toast.
+    } finally {
+      setCollectionPendingId(null);
     }
   };
 
@@ -520,6 +543,50 @@ export default function SinglePage({ params }: SinglePageProps) {
                       <Icon icon="lucide:message-square" className="size-4" />
                       Comments
                     </Button>
+                    {isAuthenticated ? (
+                      <>
+                        <div className="border-separator my-1 border-t" />
+                        <p className="text-muted px-2 pt-1 text-xs font-medium">
+                          Save to collection
+                        </p>
+                        {isLoadingCollections ? (
+                          <p className="text-muted px-2 py-2 text-sm">Loading collections...</p>
+                        ) : collections.length > 0 ? (
+                          <>
+                            {collections.slice(0, 5).map((collection) => (
+                              <Button
+                                key={collection.id}
+                                fullWidth
+                                isPending={collectionPendingId === collection.id}
+                                variant="ghost"
+                                onPress={() => handleAddToCollection(collection.id)}
+                              >
+                                <Icon icon="lucide:folder-plus" className="size-4" />
+                                <span className="min-w-0 flex-1 truncate text-left">
+                                  {collection.name}
+                                </span>
+                                <span className="text-muted text-xs tabular-nums">
+                                  {collection.itemCount}
+                                </span>
+                              </Button>
+                            ))}
+                            <Button
+                              fullWidth
+                              variant="ghost"
+                              onPress={() => router.push("/library")}
+                            >
+                              <Icon icon="lucide:folders" className="size-4" />
+                              Manage collections
+                            </Button>
+                          </>
+                        ) : (
+                          <Button fullWidth variant="ghost" onPress={() => router.push("/library")}>
+                            <Icon icon="lucide:folder-plus" className="size-4" />
+                            Create collection
+                          </Button>
+                        )}
+                      </>
+                    ) : null}
                     <Button
                       fullWidth
                       variant="ghost"
