@@ -1,3 +1,10 @@
+# [1.53.0](https://github.com/LeeWio/odyssey/compare/v1.52.0...v1.53.0) (2026-08-12)
+
+
+### Features
+
+* **explore:** add archive discovery filters ([6a31531](https://github.com/LeeWio/odyssey/commit/6a3153187003222bd50b611a1b1a8eba704e8180))
+
 # [1.52.0](https://github.com/LeeWio/odyssey/compare/v1.51.0...v1.52.0) (2026-08-12)
 
 
