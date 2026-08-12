@@ -78,6 +78,9 @@ jobs:
           file: ./Dockerfile
           target: runner-prebuilt
           push: true
+          # Aliyun's personal registry rejects Buildx attestation manifests.
+          provenance: false
+          sbom: false
           tags: |
             ghcr.io/leewio/odyssey-web:latest
             ghcr.io/leewio/odyssey-web:${{ github.sha }}
