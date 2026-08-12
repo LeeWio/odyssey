@@ -16,6 +16,8 @@ import { getSmartColorTone, SmartColorSurface } from "@/components/background/sm
 import { useGetPublicColumnBySlugQuery } from "@/lib/features/column";
 
 function formatDate(value: string) {
+  if (!value) return "Recently published";
+
   return new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     month: "short",
@@ -118,43 +120,54 @@ export function ColumnDetail({ slug }: { slug: string }) {
           <Typography id="column-essays" type="h2" weight="semibold">
             In this column
           </Typography>
-          <div className="divide-default-200 border-default-200 mt-6 divide-y border-y">
-            {column.posts.map((post, index) => (
-              <Link
-                key={post.id}
-                className="group flex gap-5 py-6 no-underline sm:items-start"
-                href={`/single/${post.slug}`}
-              >
-                <span className="text-muted mt-1 font-mono text-sm tabular-nums">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <Typography
-                    className="group-hover:text-accent text-lg font-semibold transition-colors"
-                    type="h3"
-                  >
-                    {post.title}
-                  </Typography>
-                  {post.summary ? (
-                    <Typography className="text-muted mt-2 line-clamp-2" type="body-sm">
-                      {post.summary}
+          {column.posts.length === 0 ? (
+            <Card variant="secondary" className="mt-6 items-start gap-2 p-6">
+              <Card.Header>
+                <Card.Title>No essays published yet</Card.Title>
+                <Card.Description>
+                  This column is ready for its first published essay.
+                </Card.Description>
+              </Card.Header>
+            </Card>
+          ) : (
+            <div className="divide-default-200 border-default-200 mt-6 divide-y border-y">
+              {column.posts.map((post, index) => (
+                <Link
+                  key={post.id}
+                  className="group flex gap-5 py-6 no-underline sm:items-start"
+                  href={`/single/${post.slug}`}
+                >
+                  <span className="text-muted mt-1 font-mono text-sm tabular-nums">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <Typography
+                      className="group-hover:text-accent text-lg font-semibold transition-colors"
+                      type="h3"
+                    >
+                      {post.title}
                     </Typography>
-                  ) : null}
-                  <div className="text-muted mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-                    <span>{formatDate(post.publishedAt || "")}</span>
-                    <span className="flex items-center gap-1">
-                      <Eye aria-hidden="true" className="size-3.5" />
-                      {post.views.toLocaleString("en-US")}
-                    </span>
+                    {post.summary ? (
+                      <Typography className="text-muted mt-2 line-clamp-2" type="body-sm">
+                        {post.summary}
+                      </Typography>
+                    ) : null}
+                    <div className="text-muted mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                      <span>{formatDate(post.publishedAt || "")}</span>
+                      <span className="flex items-center gap-1">
+                        <Eye aria-hidden="true" className="size-3.5" />
+                        {post.views.toLocaleString("en-US")}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <ArrowRight
-                  aria-hidden="true"
-                  className="text-muted mt-1 size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
-                />
-              </Link>
-            ))}
-          </div>
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="text-muted mt-1 size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                  />
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </div>

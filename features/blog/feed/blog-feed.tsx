@@ -20,7 +20,7 @@ import {
   TagGroup,
   Typography,
 } from "@heroui/react";
-import { ArrowRotateLeft, BookOpen, Eye } from "@gravity-ui/icons";
+import { ArrowRight, ArrowRotateLeft, BookOpen, Eye } from "@gravity-ui/icons";
 import { useDeferredValue, useState } from "react";
 import { useReducedMotion } from "motion/react";
 
@@ -73,10 +73,20 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
       >
         <PostVisual post={post} />
         <Card.Header>
-          {post.category?.name ? (
-            <Chip size="sm" variant="soft">
-              {post.category.name}
-            </Chip>
+          {post.category?.name || post.series ? (
+            <div className="flex flex-wrap gap-2">
+              {post.category?.name ? (
+                <Chip size="sm" variant="soft">
+                  {post.category.name}
+                </Chip>
+              ) : null}
+              {post.series ? (
+                <Chip size="sm" variant="secondary">
+                  <BookOpen aria-hidden="true" className="size-3.5" />
+                  {post.series.name}
+                </Chip>
+              ) : null}
+            </div>
           ) : null}
           <Card.Title>{post.title}</Card.Title>
           {post.summary ? <Card.Description>{post.summary}</Card.Description> : null}
@@ -258,6 +268,13 @@ export default function BlogFeed() {
           >
             Essays on software, design, markets, and the questions that remain useful over time.
           </MotionTypography>
+          <Link
+            className="text-accent mt-5 inline-flex items-center gap-2 text-sm font-medium no-underline"
+            href="/columns"
+          >
+            Browse columns
+            <ArrowRight aria-hidden="true" className="size-4" />
+          </Link>
         </header>
 
         <SearchField

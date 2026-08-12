@@ -1,6 +1,6 @@
 "use client";
 
-import { CirclePlus, Pencil, TrashBin } from "@gravity-ui/icons";
+import { CirclePlus, Eye, Pencil, TrashBin } from "@gravity-ui/icons";
 import {
   AlertDialog,
   Button,
@@ -105,6 +105,10 @@ export function ColumnsPage() {
     setIsDeleteOpen(true);
   }, []);
 
+  const previewColumn = useCallback((column: ColumnResponse) => {
+    window.open(`/columns/${column.slug}`, "_blank", "noopener,noreferrer");
+  }, []);
+
   const fillSlug = () => {
     if (form.slug || !form.name) return;
     setForm((current) => ({
@@ -202,6 +206,21 @@ export function ColumnsPage() {
           <div className="flex items-center justify-end gap-2">
             <Tooltip delay={0}>
               <Button
+                isDisabled={!column.isPublished}
+                isIconOnly
+                aria-label="Preview public column"
+                onPress={() => previewColumn(column)}
+                size="sm"
+                variant="tertiary"
+              >
+                <Eye className="size-4" />
+              </Button>
+              <Tooltip.Content>
+                {column.isPublished ? "Preview public column" : "Publish the column to preview it"}
+              </Tooltip.Content>
+            </Tooltip>
+            <Tooltip delay={0}>
+              <Button
                 isIconOnly
                 aria-label="Edit column"
                 onPress={() => openEdit(column)}
@@ -228,10 +247,10 @@ export function ColumnsPage() {
         ),
         header: "Actions",
         id: "actions",
-        minWidth: 120,
+        minWidth: 168,
       },
     ],
-    [openDelete, openEdit]
+    [openDelete, openEdit, previewColumn]
   );
 
   return (
@@ -275,7 +294,7 @@ export function ColumnsPage() {
         <DataGrid
           aria-label="Columns"
           columns={columnsDefinition}
-          contentClassName="min-w-[760px]"
+          contentClassName="min-w-[808px]"
           data={sortedColumns}
           getRowId={(column) => column.id}
           isLoadingMore={isLoading}

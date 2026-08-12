@@ -194,7 +194,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
               <ListBox
                 aria-label="Latest Chronicle notes"
                 selectionMode="none"
-                onAction={() => onNavigate("/blog")}
+                onAction={(key) => onNavigate(key === "columns" ? "/columns" : "/blog")}
               >
                 <ListBox.Item id="systems" textValue="Designing for the second draft">
                   <Label>Designing for the second draft</Label>
@@ -207,6 +207,10 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 <ListBox.Item id="access" textValue="The quiet work of accessibility">
                   <Label>The quiet work of accessibility</Label>
                   <Description>Engineering · 8 min read</Description>
+                </ListBox.Item>
+                <ListBox.Item id="columns" textValue="Browse columns">
+                  <Label>Browse columns</Label>
+                  <Description>Focused reading paths</Description>
                 </ListBox.Item>
               </ListBox>
             </Card.Content>

@@ -146,6 +146,21 @@ export function PostsPage() {
         minWidth: 140,
       },
       {
+        accessorKey: "series",
+        allowsSorting: false,
+        cell: (item) =>
+          item.series ? (
+            <Chip size="sm" variant="secondary">
+              {item.series.name}
+            </Chip>
+          ) : (
+            <span className="text-muted text-sm">No column</span>
+          ),
+        header: "Column",
+        id: "series",
+        minWidth: 160,
+      },
+      {
         accessorKey: "views",
         allowsSorting: true,
         cell: (item) => <span className="text-muted text-sm tabular-nums">{item.views}</span>,
@@ -241,7 +256,7 @@ export function PostsPage() {
       <DataGrid
         aria-label="Posts"
         columns={columns}
-        contentClassName="min-w-[900px]"
+        contentClassName="min-w-[1060px]"
         data={data?.list || []}
         getRowId={(item) => item.id}
         isLoadingMore={isLoading || isFetching}
