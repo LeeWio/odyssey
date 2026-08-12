@@ -1,3 +1,10 @@
+# [1.57.0](https://github.com/LeeWio/odyssey/compare/v1.56.0...v1.57.0) (2026-08-12)
+
+
+### Features
+
+* **guestbook:** publish visitor message board ([4dc9f8f](https://github.com/LeeWio/odyssey/commit/4dc9f8fad226dc666b3b498c22c6704e14cc60f8))
+
 # [1.56.0](https://github.com/LeeWio/odyssey/compare/v1.55.0...v1.56.0) (2026-08-12)
 
 
