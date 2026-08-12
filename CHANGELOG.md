@@ -1,3 +1,10 @@
+# [1.49.0](https://github.com/LeeWio/odyssey/compare/v1.48.0...v1.49.0) (2026-08-12)
+
+
+### Features
+
+* **library:** save articles to new collections ([0aebb0b](https://github.com/LeeWio/odyssey/commit/0aebb0b997c79c41b4b4c9fcda7e99cccc24f6d9))
+
 # [1.48.0](https://github.com/LeeWio/odyssey/compare/v1.47.0...v1.48.0) (2026-08-12)
 
 
