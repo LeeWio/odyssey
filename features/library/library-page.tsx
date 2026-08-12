@@ -1,6 +1,6 @@
 "use client";
 
-import { CirclePlus, Pencil, BookOpen, Heart, Play, TrashBin } from "@gravity-ui/icons";
+import { CirclePlus, Pencil, BookOpen, Eye, Heart, Play, TrashBin } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
 import {
   AlertDialog,
@@ -41,6 +41,7 @@ import {
   useGetCollectionPostsQuery,
   useGetContentPreferencesQuery,
   useGetFavoritePostsQuery,
+  useGetFollowingFeedQuery,
   useGetLibraryOverviewQuery,
   useGetPostCollectionsQuery,
   useGetReadingHistoryQuery,
@@ -55,6 +56,7 @@ import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 const HISTORY_PAGE_SIZE = 10;
+const FOLLOWING_PAGE_SIZE = 6;
 
 function formatDate(value?: string | null) {
   if (!value) return "Recently";
@@ -217,6 +219,40 @@ function FavoriteCard({ entry }: { entry: FavoritePostResponse }) {
   );
 }
 
+function FollowingCard({ post }: { post: PostDigestResponse }) {
+  return (
+    <Link className="block h-full no-underline" href={`/single/${post.slug}`}>
+      <Card variant="secondary" className="h-full overflow-hidden p-0">
+        <LibraryPostVisual post={post} />
+        <Card.Header className="gap-3">
+          {post.category?.name ? (
+            <Chip size="sm" variant="soft">
+              {post.category.name}
+            </Chip>
+          ) : null}
+          <Card.Title className="line-clamp-2 text-lg">{post.title}</Card.Title>
+          {post.summary ? (
+            <Card.Description className="line-clamp-2">{post.summary}</Card.Description>
+          ) : null}
+        </Card.Header>
+        <Card.Footer className="mt-auto justify-between gap-3">
+          <Typography color="muted" type="body-xs">
+            {formatDate(post.publishedAt)}
+          </Typography>
+          <Typography
+            color="muted"
+            type="body-xs"
+            className="flex shrink-0 items-center gap-1.5 tabular-nums"
+          >
+            <Eye aria-hidden="true" className="size-3.5" />
+            {post.views.toLocaleString("en-US")}
+          </Typography>
+        </Card.Footer>
+      </Card>
+    </Link>
+  );
+}
+
 function LibrarySkeleton({ count = 3 }: { count?: number }) {
   return (
     <div
@@ -322,6 +358,7 @@ export function LibraryPage() {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [historyPage, setHistoryPage] = useState(0);
+  const [followingPage, setFollowingPage] = useState(0);
   const [entryPendingRemoval, setEntryPendingRemoval] = useState<number | null>(null);
   const [recommendationPendingRemoval, setRecommendationPendingRemoval] = useState<number | null>(
     null
@@ -348,6 +385,11 @@ export function LibraryPage() {
   const favorites = useGetFavoritePostsQuery(
     { page: 0, size: 6, sort: ["favoritedAt,desc"] },
     { skip: !isAuthenticated }
+  );
+  const followedCategories = preferences.data?.followedCategories ?? [];
+  const following = useGetFollowingFeedQuery(
+    { page: followingPage, size: FOLLOWING_PAGE_SIZE, sort: ["publishedAt,desc"] },
+    { skip: !isAuthenticated || preferences.isLoading || followedCategories.length === 0 }
   );
   const history = useGetReadingHistoryQuery(
     { page: historyPage, size: HISTORY_PAGE_SIZE, sort: ["lastReadAt,desc"] },
@@ -381,10 +423,9 @@ export function LibraryPage() {
   );
   const historyEntries = history.data?.list ?? [];
   const recommendations = overview.data?.recommendations ?? [];
+  const followingPosts = following.data?.list ?? [];
   const selectedCollectionPosts = collectionPosts.data?.list ?? [];
-  const followedCategoryIds = new Set(
-    (preferences.data?.followedCategories ?? []).map((category) => category.id)
-  );
+  const followedCategoryIds = new Set(followedCategories.map((category) => category.id));
   const preferenceCategories = (facets?.categories ?? [])
     .flatMap((category) =>
       category.id != null && category.name && (category.count ?? 0) > 0
@@ -433,6 +474,7 @@ export function LibraryPage() {
       } else {
         await followCategory(categoryId).unwrap();
       }
+      setFollowingPage(0);
     } catch {
       // The mutations display their own failure toast.
     } finally {
@@ -580,6 +622,86 @@ export function LibraryPage() {
             <EmptyLibrarySection
               title="Nothing in progress"
               description="Start an article and your place will be saved here."
+            />
+          )}
+        </section>
+
+        <section aria-labelledby="following-title" className="mt-20">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <Typography id="following-title" type="h2" weight="semibold">
+                From topics you follow
+              </Typography>
+              <Typography color="muted" type="body-sm" className="mt-1">
+                New writing from the subjects you asked to see more often.
+              </Typography>
+            </div>
+            {followedCategories.length > 0 ? (
+              <Link
+                className="text-accent text-sm font-medium no-underline"
+                href="#reading-preferences-title"
+              >
+                Tune topics
+              </Link>
+            ) : null}
+          </div>
+
+          {preferences.isLoading ? (
+            <LibrarySkeleton />
+          ) : preferences.isError ? (
+            <EmptyLibrarySection
+              title="Followed topics are unavailable"
+              description="Try loading this page again in a moment."
+            />
+          ) : followedCategories.length === 0 ? (
+            <EmptyLibrarySection
+              title="Follow a topic to build your feed"
+              description="Choose topics below and their latest articles will appear here."
+            />
+          ) : following.isLoading ? (
+            <LibrarySkeleton />
+          ) : following.isError ? (
+            <EmptyLibrarySection
+              title="Your followed feed is unavailable"
+              description="Try loading this page again in a moment."
+            />
+          ) : followingPosts.length > 0 ? (
+            <>
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {followingPosts.map((post) => (
+                  <FollowingCard key={post.id} post={post} />
+                ))}
+              </div>
+              {following.data && following.data.totalPages > 1 ? (
+                <div className="mt-6 flex items-center justify-between gap-4">
+                  <Typography color="muted" type="body-xs">
+                    {following.data.total.toLocaleString("en-US")} articles from followed topics
+                  </Typography>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      isDisabled={followingPage === 0}
+                      onPress={() => setFollowingPage((page) => Math.max(0, page - 1))}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      isDisabled={followingPage >= following.data.totalPages - 1}
+                      onPress={() => setFollowingPage((page) => page + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <EmptyLibrarySection
+              title="Nothing new from followed topics"
+              description="When new articles are published in your selected topics, they will show up here."
             />
           )}
         </section>
