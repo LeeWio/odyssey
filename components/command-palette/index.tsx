@@ -2,7 +2,7 @@
 
 import { Chip, Kbd, toast, type Key } from "@heroui/react";
 import { Command, EmptyState } from "@heroui-pro/react";
-import { useHotkeys } from "@mantine/hooks";
+import { useHotkeys, useOs } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { HighlightedText } from "@/components/highlighted-text";
@@ -13,6 +13,7 @@ import { buildCommandSearchText, filterCommands } from "./command-model";
 import { usePostSearchCommands } from "./search/use-post-search-commands";
 import { STATIC_COMMANDS } from "./static-commands";
 import { useThemeCommands } from "./theme/use-theme-commands";
+import { useSystemCommands } from "./system/use-system-commands";
 import {
   COMMAND_CATEGORY_METADATA,
   COMMAND_CATEGORY_ORDER,
@@ -55,6 +56,7 @@ function isSafeInternalHref(href: string) {
 
 export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   const router = useRouter();
+  const os = useOs();
   const [inputValue, setInputValue] = useState("");
   const [activeSource, setActiveSource] = useState<CommandSource | null>(null);
 
@@ -69,12 +71,13 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   }, [isOpen]);
 
   const themeCommands = useThemeCommands();
+  const systemCommands = useSystemCommands();
   const adminCommands = useAdminCommands();
   const searchState = usePostSearchCommands(inputValue, isOpen);
 
   const baseCommands = useMemo(
-    () => [...STATIC_COMMANDS, ...themeCommands, ...adminCommands],
-    [themeCommands, adminCommands]
+    () => [...STATIC_COMMANDS, ...themeCommands, ...systemCommands, ...adminCommands],
+    [themeCommands, systemCommands, adminCommands]
   );
   const isSearching = inputValue.trim().length > 0;
 
@@ -333,7 +336,24 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                             ) : null}
                           </div>
                           <div className="ml-auto flex items-center gap-2 pl-3">
-                            {command.intent === CommandIntent.NAVIGATE ? (
+                            {command.shortcut ? (
+                              <Kbd
+                                className="text-muted-foreground border-none bg-transparent text-xs shadow-none"
+                                slot="keyboard"
+                                variant="light"
+                              >
+                                {command.shortcut.map((key) =>
+                                  key === "mod" ? (
+                                    <Kbd.Abbr
+                                      key={key}
+                                      keyValue={os === "macos" ? "command" : "ctrl"}
+                                    />
+                                  ) : (
+                                    <Kbd.Content key={key}>{key}</Kbd.Content>
+                                  )
+                                )}
+                              </Kbd>
+                            ) : command.intent === CommandIntent.NAVIGATE ? (
                               <Kbd
                                 className="text-muted-foreground border-none bg-transparent text-xs shadow-none"
                                 slot="keyboard"

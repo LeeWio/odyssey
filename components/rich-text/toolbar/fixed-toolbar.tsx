@@ -6,6 +6,7 @@ import { EmojiToolbarPicker } from "./emoji-picker";
 import { MathInsertPopover } from "./math-insert-popover";
 import { MultiColumnMenu } from "./multi-column-menu";
 import { TableSelector } from "./table-selector";
+import { BlockTypeSelector } from "./block-type-selector";
 
 export function FixedToolbar() {
   const { editor } = useRichTextEditor();
@@ -21,10 +22,11 @@ export function FixedToolbar() {
         </RichTextEditor.ActionButton>
       </RichTextEditor.ToolbarGroup>
       <RichTextEditor.ToolbarSeparator />
+      <RichTextEditor.ToolbarGroup aria-label="Block type">
+        <BlockTypeSelector />
+      </RichTextEditor.ToolbarGroup>
+      <RichTextEditor.ToolbarSeparator />
       <RichTextEditor.ToolbarGroup aria-label="Text Formatting">
-        <RichTextEditor.ToggleButton command="heading-1" tooltip="Heading 1">
-          <Icon icon="gravity-ui:heading-1" />
-        </RichTextEditor.ToggleButton>
         <RichTextEditor.ToggleButton command="bold" tooltip="Bold">
           <Icon icon="gravity-ui:bold" />
         </RichTextEditor.ToggleButton>

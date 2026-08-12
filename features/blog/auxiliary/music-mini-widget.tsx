@@ -1,13 +1,13 @@
 "use client";
 
-import { Button, Card, Typography } from "@heroui/react";
+import { Button, Card, Typography, cn } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import type { Transition } from "motion/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
-const MotionCard = motion(Card);
-const MotionButton = motion(Button);
+const MotionCard = motion.create(Card);
+const MotionButton = motion.create(Button);
 
 const spring: Transition = {
   type: "spring",
@@ -19,6 +19,7 @@ type MusicMiniWidgetProps = {
   title: string;
   artist: string;
   cover: string;
+  className?: string;
   defaultPlaying?: boolean;
   onPlayChange?: (isPlaying: boolean) => void;
 };
@@ -27,6 +28,7 @@ export function MusicMiniWidget({
   title,
   artist,
   cover,
+  className,
   defaultPlaying = false,
   onPlayChange,
 }: MusicMiniWidgetProps) {
@@ -42,7 +44,7 @@ export function MusicMiniWidget({
 
   return (
     <MotionCard
-      className="relative max-h-44 w-40 overflow-hidden select-none"
+      className={cn("relative max-h-44 w-40 overflow-hidden select-none", className)}
       aria-label={`Music player: ${title} by ${artist}`}
       initial={{ opacity: 0, y: 12, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
