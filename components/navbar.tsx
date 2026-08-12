@@ -28,6 +28,7 @@ import {
   selectUserEmail,
   useLogoutMutation,
 } from "@/lib/features/auth";
+import { useGetUnreadNotificationCountQuery } from "@/lib/features/notification";
 import {
   selectIsLoginOpen,
   selectIsSignUpOpen,
@@ -704,6 +705,9 @@ export const Navbar = () => {
     expanded: 0,
     panel: 0,
   });
+  const { data: unreadNotificationCount = 0 } = useGetUnreadNotificationCountQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
   const activeItem = getNavigationItem(activeNavigation);
   const platformKey = mounted && (os === "macos" || os === "ios") ? "⌘" : "Ctrl";
@@ -1257,6 +1261,36 @@ export const Navbar = () => {
             </div>
 
             {mounted && isAuthenticated ? (
+              <Tooltip delay={500} closeDelay={100}>
+                <Badge.Anchor>
+                  <Button
+                    isIconOnly
+                    variant="ghost"
+                    className="size-10 rounded-xl"
+                    aria-label={
+                      unreadNotificationCount > 0
+                        ? `${unreadNotificationCount} unread notifications`
+                        : "Notifications"
+                    }
+                    onPress={() => router.push("/notifications")}
+                  >
+                    <Icon aria-hidden="true" className="size-4" icon="lucide:bell" />
+                  </Button>
+                  {unreadNotificationCount > 0 ? (
+                    <Badge color="danger" placement="top-right" size="sm">
+                      <Badge.Label className="min-w-4 px-1 text-[9px] leading-4">
+                        {unreadNotificationCount > 99 ? "99+" : unreadNotificationCount}
+                      </Badge.Label>
+                    </Badge>
+                  ) : null}
+                </Badge.Anchor>
+                <Tooltip.Content placement="bottom" offset={8}>
+                  Notifications
+                </Tooltip.Content>
+              </Tooltip>
+            ) : null}
+
+            {mounted && isAuthenticated ? (
               <Dropdown>
                 <Dropdown.Trigger aria-label="Open account menu" className="rounded-xl p-1.5">
                   <Badge.Anchor>
@@ -1276,6 +1310,7 @@ export const Navbar = () => {
                     onAction={(key) => {
                       if (key === "dashboard") router.push("/blog");
                       if (key === "library") router.push("/library");
+                      if (key === "notifications") router.push("/notifications");
                       if (key === "logout") handleLogout();
                     }}
                   >
@@ -1284,6 +1319,12 @@ export const Navbar = () => {
                     </Dropdown.Item>
                     <Dropdown.Item id="library" textValue="Reading library">
                       <Label>Reading library</Label>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="notifications" textValue="Notifications">
+                      <Label>
+                        Notifications
+                        {unreadNotificationCount > 0 ? ` (${unreadNotificationCount})` : ""}
+                      </Label>
                     </Dropdown.Item>
                     <Dropdown.Item id="logout" textValue="Log out" variant="danger">
                       <Label>Log out</Label>
