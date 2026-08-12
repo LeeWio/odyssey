@@ -63,5 +63,6 @@ export type PostCollectionRequest = z.infer<typeof PostCollectionRequestSchema>;
 export type PostCollectionResponse = z.infer<typeof PostCollectionResponseSchema>;
 export type FavoritePostResponse = z.infer<typeof FavoritePostResponseSchema>;
 export type CollectionPostResponse = z.infer<typeof CollectionPostResponseSchema>;
+export type RecommendedPostResponse = z.infer<typeof RecommendedPostResponseSchema>;
 export type ContentPreferenceResponse = z.infer<typeof ContentPreferenceResponseSchema>;
 export type PersonalLibraryOverviewResponse = z.infer<typeof PersonalLibraryOverviewResponseSchema>;

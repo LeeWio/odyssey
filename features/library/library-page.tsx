@@ -13,19 +13,23 @@ import {
   Tooltip,
   Typography,
 } from "@heroui/react";
+import { Icon } from "@iconify/react";
 import { useState } from "react";
 
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   type FavoritePostResponse,
+  type RecommendedPostResponse,
   type ReadingHistoryResponse,
   useClearReadingHistoryMutation,
   useDeleteReadingHistoryMutation,
   useGetFavoritePostsQuery,
   useGetLibraryOverviewQuery,
   useGetReadingHistoryQuery,
+  useHideRecommendationMutation,
 } from "@/lib/features/library";
+import type { PostDigestResponse } from "@/lib/features/post";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
@@ -41,7 +45,7 @@ function formatDate(value?: string | null) {
   }).format(new Date(value));
 }
 
-function LibraryPostVisual({ post }: { post: ReadingHistoryResponse["post"] }) {
+function LibraryPostVisual({ post }: { post: PostDigestResponse }) {
   return (
     <SmartColorSurface
       className="h-full"
@@ -50,6 +54,65 @@ function LibraryPostVisual({ post }: { post: ReadingHistoryResponse["post"] }) {
     >
       <div aria-hidden="true" className="aspect-[16/10] w-full" />
     </SmartColorSurface>
+  );
+}
+
+function RecommendedCard({
+  entry,
+  isHiding,
+  onHide,
+}: {
+  entry: RecommendedPostResponse;
+  isHiding: boolean;
+  onHide: (postId: number) => void;
+}) {
+  const { post } = entry;
+
+  return (
+    <Card variant="secondary" className="h-full overflow-hidden p-0">
+      <LibraryPostVisual post={post} />
+      <Card.Header className="gap-3">
+        <div className="flex items-center justify-between gap-3">
+          {post.category?.name ? (
+            <Chip size="sm" variant="soft">
+              {post.category.name}
+            </Chip>
+          ) : (
+            <span />
+          )}
+          <Tooltip>
+            <Button
+              isIconOnly
+              aria-label={`Hide recommendation for ${post.title}`}
+              isPending={isHiding}
+              size="sm"
+              variant="ghost"
+              onPress={() => onHide(post.id)}
+            >
+              <Icon aria-hidden="true" className="size-4" icon="lucide:x" />
+            </Button>
+            <Tooltip.Content>Not interested</Tooltip.Content>
+          </Tooltip>
+        </div>
+        <Link className="no-underline" href={`/single/${post.slug}`}>
+          <Card.Title className="line-clamp-2 text-lg">{post.title}</Card.Title>
+        </Link>
+        {post.summary ? (
+          <Card.Description className="line-clamp-2">{post.summary}</Card.Description>
+        ) : null}
+      </Card.Header>
+      <Card.Footer className="mt-auto justify-between gap-3">
+        <Typography color="muted" type="body-xs" className="line-clamp-1">
+          {entry.reason}
+        </Typography>
+        <Link
+          className="text-accent shrink-0 text-sm font-medium no-underline"
+          href={`/single/${post.slug}`}
+        >
+          Read
+        </Link>
+      </Card.Footer>
+    </Card>
   );
 }
 
@@ -171,6 +234,9 @@ export function LibraryPage() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [historyPage, setHistoryPage] = useState(0);
   const [entryPendingRemoval, setEntryPendingRemoval] = useState<number | null>(null);
+  const [recommendationPendingRemoval, setRecommendationPendingRemoval] = useState<number | null>(
+    null
+  );
   const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
 
   const overview = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
@@ -183,12 +249,14 @@ export function LibraryPage() {
     { skip: !isAuthenticated }
   );
   const [deleteReadingHistory] = useDeleteReadingHistoryMutation();
+  const [hideRecommendation] = useHideRecommendationMutation();
   const [clearReadingHistory, { isLoading: isClearingHistory }] = useClearReadingHistoryMutation();
 
   const continueReading = (overview.data?.continueReading ?? []).filter(
     (entry) => entry.progressPercent < 100
   );
   const historyEntries = history.data?.list ?? [];
+  const recommendations = overview.data?.recommendations ?? [];
 
   const handleRemoveHistoryEntry = async (postId: number) => {
     setEntryPendingRemoval(postId);
@@ -208,6 +276,17 @@ export function LibraryPage() {
       setIsClearHistoryOpen(false);
     } catch {
       // The mutation displays its own failure toast.
+    }
+  };
+
+  const handleHideRecommendation = async (postId: number) => {
+    setRecommendationPendingRemoval(postId);
+    try {
+      await hideRecommendation(postId).unwrap();
+    } catch {
+      // The mutation displays its own failure toast.
+    } finally {
+      setRecommendationPendingRemoval(null);
     }
   };
 
@@ -317,6 +396,29 @@ export function LibraryPage() {
             />
           )}
         </section>
+
+        {!overview.isLoading && !overview.isError && recommendations.length > 0 ? (
+          <section aria-labelledby="recommendations-title" className="mt-20">
+            <div className="mb-6">
+              <Typography id="recommendations-title" type="h2" weight="semibold">
+                Recommended for you
+              </Typography>
+              <Typography color="muted" type="body-sm" className="mt-1">
+                Suggestions shaped by the writing you have saved and read.
+              </Typography>
+            </div>
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {recommendations.slice(0, 6).map((entry) => (
+                <RecommendedCard
+                  key={entry.post.id}
+                  entry={entry}
+                  isHiding={recommendationPendingRemoval === entry.post.id}
+                  onHide={handleHideRecommendation}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section aria-labelledby="reading-history-title" className="mt-20">
           <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
