@@ -1,3 +1,12 @@
+# [1.55.0](https://github.com/LeeWio/odyssey/compare/v1.54.0...v1.55.0) (2026-08-12)
+
+
+### Features
+
+* **archive:** add chronological article browsing ([801c034](https://github.com/LeeWio/odyssey/commit/801c0347f6544af1859cb14395175e754c0e6c9d))
+* **newsletter:** add footer subscription form ([3cb79d2](https://github.com/LeeWio/odyssey/commit/3cb79d2d24d73d4493c039d3106eb3612a582cd6))
+* **projects:** publish project showcase ([f17ef7b](https://github.com/LeeWio/odyssey/commit/f17ef7bc04adb374160a30da46c8b77759bd2621))
+
 # [1.54.0](https://github.com/LeeWio/odyssey/compare/v1.53.0...v1.54.0) (2026-08-12)
 
 
