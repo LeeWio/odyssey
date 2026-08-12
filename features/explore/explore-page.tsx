@@ -4,6 +4,7 @@ import {
   ArrowRight,
   ArrowRotateLeft,
   BookOpen,
+  Calendar,
   Eye,
   Hashtag,
   Layers,
@@ -391,6 +392,20 @@ export function ExplorePage() {
                   </TagGroup.List>
                 </TagGroup>
               ) : null}
+            </div>
+
+            <div className="border-default-200 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-muted flex items-center gap-2 text-sm">
+                <Calendar aria-hidden="true" className="size-4" />
+                Prefer to browse the notebook by when it was published?
+              </div>
+              <Link
+                className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
+                href="/archive"
+              >
+                Browse by date
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </Link>
             </div>
           </div>
         </section>
