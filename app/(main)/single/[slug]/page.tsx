@@ -19,6 +19,7 @@ import { ActionBar, RichTextEditor, Sheet } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useMemo, useState } from "react";
 import { CommentSystem } from "@/components/comment";
@@ -335,6 +336,66 @@ export default function SinglePage({ params }: SinglePageProps) {
               </ArticleTypography>
             )}
           </section>
+
+          {article?.series ? (
+            <nav
+              aria-label={`${article.series.name} column navigation`}
+              className="border-default-200 mt-14 border-t pt-8"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-muted text-xs font-medium">Continue this column</p>
+                  <Link
+                    className="text-foreground mt-1 inline-flex items-center gap-2 text-lg font-semibold no-underline"
+                    href={`/columns/${article.series.slug}`}
+                  >
+                    {article.series.name}
+                    <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
+                  </Link>
+                </div>
+                {article.seriesOrder != null ? (
+                  <span className="text-muted font-mono text-xs tabular-nums">
+                    Essay {article.seriesOrder + 1}
+                  </span>
+                ) : null}
+              </div>
+
+              {article.navigation?.prev || article.navigation?.next ? (
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {article.navigation.prev ? (
+                    <Link
+                      className="border-default-200 hover:border-accent/50 hover:bg-default group flex min-h-24 flex-col gap-2 border p-4 no-underline transition-colors"
+                      href={`/single/${article.navigation.prev.slug}`}
+                    >
+                      <span className="text-muted flex items-center gap-1.5 text-xs font-medium">
+                        <Icon aria-hidden="true" icon="lucide:arrow-left" className="size-3.5" />
+                        Previous essay
+                      </span>
+                      <span className="text-foreground line-clamp-2 text-sm font-semibold">
+                        {article.navigation.prev.title}
+                      </span>
+                    </Link>
+                  ) : (
+                    <div aria-hidden="true" className="hidden sm:block" />
+                  )}
+                  {article.navigation.next ? (
+                    <Link
+                      className="border-default-200 hover:border-accent/50 hover:bg-default group flex min-h-24 flex-col items-start gap-2 border p-4 no-underline transition-colors sm:items-end sm:text-right"
+                      href={`/single/${article.navigation.next.slug}`}
+                    >
+                      <span className="text-muted flex items-center gap-1.5 text-xs font-medium">
+                        Next essay
+                        <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-3.5" />
+                      </span>
+                      <span className="text-foreground line-clamp-2 text-sm font-semibold">
+                        {article.navigation.next.title}
+                      </span>
+                    </Link>
+                  ) : null}
+                </div>
+              ) : null}
+            </nav>
+          ) : null}
         </article>
 
         <ActionBar isOpen={isActionBarOpen} aria-label="Article controls">

@@ -32,6 +32,16 @@ export const SeriesResponseSchema = z.object({
   createdAt: z.string(),
 });
 
+export const PostNavigationNeighborSchema = z.object({
+  title: z.string(),
+  slug: z.string(),
+});
+
+export const PostNavigationSchema = z.object({
+  prev: PostNavigationNeighborSchema.nullable().default(null),
+  next: PostNavigationNeighborSchema.nullable().default(null),
+});
+
 // Detailed Post Response
 export const PostResponseSchema = z.object({
   id: z.number(),
@@ -54,6 +64,7 @@ export const PostResponseSchema = z.object({
   tags: z.array(TagResponseSchema).nullable().default([]),
   createdAt: z.string(),
   updatedAt: z.string(),
+  navigation: PostNavigationSchema.nullable().optional().default(null),
 });
 
 // Compact Post Digest Response
