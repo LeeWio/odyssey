@@ -23,6 +23,19 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     payload: { href: "/explore" },
     defaultVisible: true,
   }),
+  createNavigationCommand({
+    id: "navigate-projects",
+    title: "Browse projects",
+    description: "Explore tools, experiments, and open-source work",
+    icon: FileTextIcon,
+    category: "System",
+    source: "navigation",
+    order: 1,
+    keywords: ["projects", "portfolio", "tools", "experiments", "open source", "builds"],
+    intent: CommandIntent.NAVIGATE,
+    payload: { href: "/projects" },
+    defaultVisible: true,
+  }),
 
   // AI category
   createActionCommand({

@@ -132,8 +132,8 @@ const getNavigationItem = (id: NavigationId | null) => {
         title: "The rest of the notebook.",
         description:
           "A repository of field notes, shipping products, open-source utilities, and useful objects collected along the journey.",
-        href: "/moments",
-        cta: "Open field notes",
+        href: "/projects",
+        cta: "Browse projects",
       };
     default:
       return null;
@@ -619,28 +619,28 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
           </Card>
         </motion.div>
 
-        {/* Project 2: Explore writing */}
+        {/* Project 2: Built projects */}
         <motion.div {...reveal(1)}>
           <Card className="group h-full" variant="default">
             <Card.Header>
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
-                <Icon aria-hidden="true" icon="lucide:bookmark" className="size-5" />
+                <Icon aria-hidden="true" icon="lucide:blocks" className="size-5" />
               </div>
-              <Card.Title>Explore Writing</Card.Title>
+              <Card.Title>Built Projects</Card.Title>
               <Card.Description>
-                Follow recurring topics and tags across the entire writing archive.
+                Tools, experiments, and open-source work shaped through practical use.
               </Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
               <Chip size="sm" variant="soft">
-                Discover
+                In progress
               </Chip>
               <Button
                 isIconOnly
                 size="sm"
                 variant="ghost"
-                aria-label="Explore writing"
-                onPress={() => onNavigate("/explore")}
+                aria-label="Browse projects"
+                onPress={() => onNavigate("/projects")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>
@@ -648,28 +648,28 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
           </Card>
         </motion.div>
 
-        {/* Project 3: Friend Links */}
+        {/* Project 3: Date archive */}
         <motion.div {...reveal(2)}>
           <Card className="group h-full" variant="default">
             <Card.Header>
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
-                <Icon aria-hidden="true" icon="lucide:link" className="size-5" />
+                <Icon aria-hidden="true" icon="lucide:calendar-range" className="size-5" />
               </div>
-              <Card.Title>Friend Links</Card.Title>
+              <Card.Title>Read by Date</Card.Title>
               <Card.Description>
-                A curated constellation of creative minds and digital outposts.
+                Return to the work published in a particular month or year.
               </Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
               <Chip size="sm" variant="soft" color="accent">
-                Community
+                Timeline
               </Chip>
               <Button
                 isIconOnly
                 size="sm"
                 variant="ghost"
-                aria-label="Open Friend Links"
-                onPress={() => onNavigate("/links")}
+                aria-label="Browse writing by date"
+                onPress={() => onNavigate("/archive")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>
