@@ -12,6 +12,7 @@ import {
 } from "@/features/blog";
 import { openRichText } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
+import { NEW_RICH_TEXT_DRAFT_ID } from "@/components/rich-text/utils/editor-draft";
 import { usePortalContainer } from "../use-portal-container";
 
 export function PostsPage() {
@@ -50,7 +51,7 @@ export function PostsPage() {
   const handleCreateOpen = () => {
     dispatch(
       openRichText({
-        activeId: `new-${Date.now()}`,
+        activeId: NEW_RICH_TEXT_DRAFT_ID,
         initialValue: null,
         isReadOnly: false,
       })

@@ -21,6 +21,8 @@ import { RichTextTableOfContents } from "./table-of-contents";
 
 export interface RichTextProps {
   content?: JSONContent;
+  isDisabled?: boolean;
+  onContentError?: (error: Error) => void;
   onReady?: (editor: Editor) => void;
   onUpdate?: (editor: Editor) => void;
   showTableOfContents?: boolean;
@@ -28,6 +30,8 @@ export interface RichTextProps {
 
 export function RichText({
   content,
+  isDisabled = false,
+  onContentError,
   onReady,
   onUpdate,
   showTableOfContents = false,
@@ -55,13 +59,18 @@ export function RichText({
       extensions={extensions}
       editorOptions={{
         autofocus: true,
+        enableContentCheck: true,
         onCreate: ({ editor }) => {
           onReady?.(editor);
+        },
+        onContentError: ({ error }) => {
+          onContentError?.(error);
         },
         onUpdate: ({ editor }) => {
           onUpdate?.(editor);
         },
       }}
+      isDisabled={isDisabled}
       isReadOnly={isReadOnly}
       defaultValue={defaultValue}
       className="flex h-full w-full flex-col overflow-hidden"

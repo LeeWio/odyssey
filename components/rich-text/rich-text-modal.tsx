@@ -12,6 +12,12 @@ import { MotionButton } from "@/components/ui";
 import { closeRichText, selectRichTextState } from "@/lib/features";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
+  clearRichTextDraft,
+  type RichTextDraft,
+  readRichTextDraft,
+  saveRichTextDraft,
+} from "./utils/editor-draft";
+import {
   hasPendingImageUploads,
   normalizeJSONContent,
   normalizeRichTextDocument,
@@ -72,6 +78,15 @@ export function RichTextModal() {
   const [isContentDirty, setIsContentDirty] = useState(false);
   const [isMetadataDirty, setIsMetadataDirty] = useState(false);
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
+  const [isDraftRecoveryDialogOpen, setIsDraftRecoveryDialogOpen] = useState(false);
+  const [recoveryDraft, setRecoveryDraft] = useState<RichTextDraft | null>(null);
+  const [isEditorReady, setIsEditorReady] = useState(false);
+  const [isPostDataReady, setIsPostDataReady] = useState(false);
+  const [draftRevision, setDraftRevision] = useState(0);
+  const [contentSchemaError, setContentSchemaError] = useState<{
+    activeId: string;
+    message: string;
+  } | null>(null);
 
   // Reset showForm when modal opens or activeId changes
   useEffect(() => {
@@ -89,6 +104,7 @@ export function RichTextModal() {
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation();
 
   const isPending = isCreating || isUpdating;
+  const hasContentSchemaError = contentSchemaError?.activeId === activeId;
 
   // Fetch existing post data if activeId is a numeric string (existing ID)
   const isExistingPost = activeId && !isNaN(Number(activeId));
@@ -107,7 +123,27 @@ export function RichTextModal() {
   useEffect(() => {
     editorRef.current = null;
     initialEditorContentRef.current = null;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsEditorReady(false);
+    setIsPostDataReady(false);
+    setIsContentDirty(false);
+    setIsMetadataDirty(false);
+    setIsDraftRecoveryDialogOpen(false);
+    setRecoveryDraft(null);
+    setContentSchemaError(null);
   }, [activeId, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !activeId || !isPostDataReady || !existingContentIsEditable) return;
+
+    const draft = readRichTextDraft(activeId);
+    const timer = window.setTimeout(() => {
+      setRecoveryDraft(draft);
+      setIsDraftRecoveryDialogOpen(Boolean(draft));
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [activeId, existingContentIsEditable, isOpen, isPostDataReady]);
 
   // Initialize form with existing post data
   useEffect(() => {
@@ -124,6 +160,7 @@ export function RichTextModal() {
     const timer = window.setTimeout(() => {
       setPostData(nextPostData);
       setIsMetadataDirty(false);
+      setIsPostDataReady(true);
     }, 0);
 
     return () => window.clearTimeout(timer);
@@ -134,7 +171,28 @@ export function RichTextModal() {
   const handlePostDataChange = (nextPostData: Partial<PostRequest>) => {
     setPostData(nextPostData);
     setIsMetadataDirty(serializePostData(nextPostData) !== initialPostDataRef.current);
+    setDraftRevision((revision) => revision + 1);
   };
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      !activeId ||
+      !isDirty ||
+      hasContentSchemaError ||
+      !isPostDataReady ||
+      !editorRef.current
+    ) {
+      return;
+    }
+
+    const content = editorRef.current.getJSON();
+    const timer = window.setTimeout(() => {
+      saveRichTextDraft(activeId, content, postData);
+    }, 750);
+
+    return () => window.clearTimeout(timer);
+  }, [activeId, draftRevision, hasContentSchemaError, isDirty, isOpen, isPostDataReady, postData]);
 
   useEffect(() => {
     if (!isOpen || !isDirty) return;
@@ -152,6 +210,9 @@ export function RichTextModal() {
     dispatch(closeRichText());
     setShowForm(false);
     setIsDiscardDialogOpen(false);
+    setIsDraftRecoveryDialogOpen(false);
+    setRecoveryDraft(null);
+    setContentSchemaError(null);
   };
 
   const requestClose = () => {
@@ -165,7 +226,51 @@ export function RichTextModal() {
     closeEditor();
   };
 
+  const discardLocalDraft = () => {
+    clearRichTextDraft(activeId);
+    setRecoveryDraft(null);
+    setIsDraftRecoveryDialogOpen(false);
+  };
+
+  const discardChanges = () => {
+    clearRichTextDraft(activeId);
+    closeEditor();
+  };
+
+  const restoreDraft = () => {
+    if (!recoveryDraft || !editorRef.current || hasContentSchemaError) return;
+
+    try {
+      editorRef.current.commands.setContent(recoveryDraft.content, {
+        emitUpdate: false,
+        errorOnInvalidContent: true,
+      });
+    } catch (error) {
+      setContentSchemaError({
+        activeId: activeId || "unknown",
+        message: error instanceof Error ? error.message : "The recovered draft is incompatible.",
+      });
+      return;
+    }
+
+    const restoredContent = editorRef.current.getJSON();
+    const restoredPostData = recoveryDraft.postData;
+    setPostData(restoredPostData);
+    setIsContentDirty(JSON.stringify(restoredContent) !== initialEditorContentRef.current);
+    setIsMetadataDirty(serializePostData(restoredPostData) !== initialPostDataRef.current);
+    setDraftRevision((revision) => revision + 1);
+    setRecoveryDraft(null);
+    setIsDraftRecoveryDialogOpen(false);
+  };
+
   const handleSave = async (statusOverride?: PostRequest["status"]) => {
+    if (hasContentSchemaError) {
+      toast.danger(
+        "This document is incompatible with the current editor schema and cannot be saved."
+      );
+      return;
+    }
+
     if (!existingContentIsEditable) {
       toast.danger(
         "This article is not stored as a valid Tiptap JSON document and cannot be saved here."
@@ -206,6 +311,7 @@ export function RichTextModal() {
       } else {
         await createPost(payload).unwrap();
       }
+      clearRichTextDraft(activeId);
       closeEditor();
     } catch (error) {
       console.error("Save failed", error);
@@ -302,19 +408,45 @@ export function RichTextModal() {
                       <RichText
                         key={`${activeId}-${existingPost?.updatedAt || "new"}`}
                         content={editorContent}
+                        isDisabled={hasContentSchemaError}
                         showTableOfContents
                         onReady={(editor) => {
                           editorRef.current = editor;
                           const content = JSON.stringify(editor.getJSON());
                           initialEditorContentRef.current = content;
                           setIsContentDirty(false);
+                          setIsEditorReady(true);
+                        }}
+                        onContentError={(error) => {
+                          setContentSchemaError({
+                            activeId: activeId || "unknown",
+                            message: error.message,
+                          });
                         }}
                         onUpdate={(editor) => {
                           setIsContentDirty(
                             JSON.stringify(editor.getJSON()) !== initialEditorContentRef.current
                           );
+                          setDraftRevision((revision) => revision + 1);
                         }}
                       />
+                      {hasContentSchemaError && (
+                        <div className="bg-background/95 absolute inset-0 z-20 flex items-center justify-center p-8 text-center backdrop-blur-sm">
+                          <div className="max-w-lg space-y-3">
+                            <Icon
+                              icon="solar:danger-triangle-linear"
+                              className="text-danger mx-auto size-8"
+                            />
+                            <h2 className="text-foreground text-base font-semibold">
+                              This document cannot be safely edited
+                            </h2>
+                            <p className="text-muted text-sm">
+                              Its JSON content is incompatible with the active editor schema. No
+                              changes can be saved, so unsupported content is not overwritten.
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
 
                     <AnimatePresence initial={false}>
@@ -336,6 +468,7 @@ export function RichTextModal() {
                                   fullWidth
                                   variant="secondary"
                                   onPress={() => handleSave("DRAFT")}
+                                  isDisabled={hasContentSchemaError}
                                   isPending={isPending}
                                 >
                                   {({ isPending }) => (
@@ -349,6 +482,7 @@ export function RichTextModal() {
                                   fullWidth
                                   variant="primary"
                                   onPress={() => handleSave("PUBLISHED")}
+                                  isDisabled={hasContentSchemaError}
                                   isPending={isPending}
                                 >
                                   {({ isPending }) => (
@@ -390,8 +524,46 @@ export function RichTextModal() {
                 <Button slot="close" size="sm" variant="tertiary">
                   Keep editing
                 </Button>
-                <Button size="sm" variant="danger" onPress={closeEditor}>
+                <Button size="sm" variant="danger" onPress={discardChanges}>
                   Discard changes
+                </Button>
+              </AlertDialog.Footer>
+            </AlertDialog.Dialog>
+          </AlertDialog.Container>
+        </AlertDialog.Backdrop>
+      </AlertDialog>
+      <AlertDialog>
+        <AlertDialog.Backdrop
+          isOpen={isDraftRecoveryDialogOpen}
+          onOpenChange={setIsDraftRecoveryDialogOpen}
+          variant="blur"
+        >
+          <AlertDialog.Container>
+            <AlertDialog.Dialog className="sm:max-w-md">
+              <AlertDialog.Header>
+                <AlertDialog.Icon status="warning" />
+                <AlertDialog.Heading>Recover unsaved draft?</AlertDialog.Heading>
+              </AlertDialog.Header>
+              <AlertDialog.Body>
+                <p className="text-sm">
+                  A locally saved draft is available from{" "}
+                  {recoveryDraft
+                    ? new Date(recoveryDraft.savedAt).toLocaleString()
+                    : "this browser"}
+                  .
+                </p>
+              </AlertDialog.Body>
+              <AlertDialog.Footer>
+                <Button size="sm" variant="tertiary" onPress={discardLocalDraft}>
+                  Discard draft
+                </Button>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onPress={restoreDraft}
+                  isDisabled={!isEditorReady || hasContentSchemaError}
+                >
+                  Restore draft
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>
