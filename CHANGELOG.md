@@ -1,3 +1,10 @@
+## [1.60.2](https://github.com/LeeWio/odyssey/compare/v1.60.1...v1.60.2) (2026-08-12)
+
+
+### Bug Fixes
+
+* **rich-text:** remove unused imports in rich-text-modal to fix production build ([328a0e7](https://github.com/LeeWio/odyssey/commit/328a0e7a0ec637d16c57aabfd1e6788a8a050e1a))
+
 ## [1.60.1](https://github.com/LeeWio/odyssey/compare/v1.60.0...v1.60.1) (2026-08-12)
 
 
