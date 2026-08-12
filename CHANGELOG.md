@@ -1,3 +1,10 @@
+# [1.60.0](https://github.com/LeeWio/odyssey/compare/v1.59.1...v1.60.0) (2026-08-12)
+
+
+### Features
+
+* **rich-text:** recover local editor drafts ([d6a85a2](https://github.com/LeeWio/odyssey/commit/d6a85a28e7ad7fa0ecab764a8f0044b025100eec))
+
 ## [1.59.1](https://github.com/LeeWio/odyssey/compare/v1.59.0...v1.59.1) (2026-08-12)
 
 
