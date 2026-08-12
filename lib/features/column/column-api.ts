@@ -27,7 +27,7 @@ export const columnApi = baseApi.injectEndpoints({
       transformErrorResponse: transformApiError,
       providesTags: [{ type: "Column", id: "ADMIN_LIST" }],
     }),
-    createColumn: builder.mutation<ColumnResponse, ColumnRequest>({
+    createEditorialColumn: builder.mutation<ColumnResponse, ColumnRequest>({
       query: (body) => ({ url: "/api/v1/admin/columns", method: "POST", body }),
       rawResponseSchema: apiResponseSchema(ColumnResponseSchema),
       transformResponse: (response: ApiResponse<ColumnResponse>) => response.data,
@@ -45,7 +45,7 @@ export const columnApi = baseApi.injectEndpoints({
         { type: "Column", id: "ADMIN_LIST" },
       ],
     }),
-    updateColumn: builder.mutation<ColumnResponse, { id: number; body: ColumnRequest }>({
+    updateEditorialColumn: builder.mutation<ColumnResponse, { id: number; body: ColumnRequest }>({
       query: ({ id, body }) => ({ url: `/api/v1/admin/columns/${id}`, method: "PUT", body }),
       rawResponseSchema: apiResponseSchema(ColumnResponseSchema),
       transformResponse: (response: ApiResponse<ColumnResponse>) => response.data,
@@ -64,7 +64,7 @@ export const columnApi = baseApi.injectEndpoints({
         { type: "Column", id: "ADMIN_LIST" },
       ],
     }),
-    deleteColumn: builder.mutation<void, number>({
+    deleteEditorialColumn: builder.mutation<void, number>({
       query: (id) => ({ url: `/api/v1/admin/columns/${id}`, method: "DELETE" }),
       rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
@@ -90,7 +90,7 @@ export const {
   useGetPublicColumnsQuery,
   useGetPublicColumnBySlugQuery,
   useGetColumnsQuery,
-  useCreateColumnMutation,
-  useUpdateColumnMutation,
-  useDeleteColumnMutation,
+  useCreateEditorialColumnMutation,
+  useUpdateEditorialColumnMutation,
+  useDeleteEditorialColumnMutation,
 } = columnApi;

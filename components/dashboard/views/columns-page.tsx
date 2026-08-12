@@ -22,10 +22,10 @@ import { type FormEvent, useCallback, useMemo, useState } from "react";
 import {
   type ColumnRequest,
   type ColumnResponse,
-  useCreateColumnMutation,
-  useDeleteColumnMutation,
+  useCreateEditorialColumnMutation,
+  useDeleteEditorialColumnMutation,
   useGetColumnsQuery,
-  useUpdateColumnMutation,
+  useUpdateEditorialColumnMutation,
 } from "@/lib/features/column";
 import { usePortalContainer } from "../use-portal-container";
 
@@ -50,9 +50,9 @@ function columnRequest(column: ColumnResponse): ColumnRequest {
 export function ColumnsPage() {
   const portalContainer = usePortalContainer();
   const { data: columns = [], error, isLoading } = useGetColumnsQuery();
-  const [createColumn, { isLoading: isCreating }] = useCreateColumnMutation();
-  const [updateColumn, { isLoading: isUpdating }] = useUpdateColumnMutation();
-  const [deleteColumn, { isLoading: isDeleting }] = useDeleteColumnMutation();
+  const [createColumn, { isLoading: isCreating }] = useCreateEditorialColumnMutation();
+  const [updateColumn, { isLoading: isUpdating }] = useUpdateEditorialColumnMutation();
+  const [deleteColumn, { isLoading: isDeleting }] = useDeleteEditorialColumnMutation();
   const [search, setSearch] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState<DataGridSortDescriptor>({
     column: "createdAt",
