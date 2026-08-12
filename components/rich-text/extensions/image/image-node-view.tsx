@@ -1,6 +1,6 @@
 "use client";
 
-import { Surface, toast } from "@heroui/react";
+import { Button, Surface, toast } from "@heroui/react";
 import { DropZone } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
@@ -10,31 +10,27 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useUploadFileMutation } from "@/lib/features/file";
 import {
+  claimImageUpload,
+  clearImageUpload,
+  createImageAltText,
+  getImageUpload,
+  markImageUploadFailed,
+  queueImageUpload,
+  releaseImageUpload,
+  retryImageUpload,
+  validateImageFile,
+} from "./image-upload";
+import {
   normalizeImageAlignment,
   normalizeImageWidthPercent,
   type ImageAlignment,
 } from "./image-attributes";
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = new Set([
-  "image/gif",
-  "image/jpeg",
-  "image/png",
-  "image/svg+xml",
-  "image/webp",
-]);
-
 type DropEvent = Parameters<NonNullable<DropZoneProps["onDrop"]>>[0];
-
-interface PendingImage {
-  error?: string;
-  file: File;
-  status: "failed" | "uploading";
-}
 
 interface ActiveUpload {
   abort: () => void;
-  id: symbol;
+  id: string;
 }
 
 const IMAGE_ALIGNMENT_CLASS_NAMES: Record<ImageAlignment, string> = {
@@ -55,112 +51,163 @@ function getFileExtension(fileName: string): string {
   return extension.toLowerCase() === "jpeg" ? "JPG" : extension.toUpperCase();
 }
 
-function validateImage(file: File): string | null {
-  if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
-    return "Choose a PNG, JPG, GIF, WebP, or SVG image.";
-  }
-
-  if (file.size > MAX_IMAGE_SIZE) {
-    return "The image must be 10 MB or smaller.";
-  }
-
-  return null;
-}
-
-export function ImageNodeView({ editor, node, updateAttributes }: NodeViewProps) {
+export function ImageNodeView({ deleteNode, editor, node, updateAttributes }: NodeViewProps) {
   const src = typeof node.attrs.src === "string" ? node.attrs.src : "";
   const alt = typeof node.attrs.alt === "string" ? node.attrs.alt : "";
+  const uploadId = typeof node.attrs.uploadId === "string" ? node.attrs.uploadId : null;
   const alignment = normalizeImageAlignment(node.attrs.alignment);
   const widthPercent = normalizeImageWidthPercent(node.attrs.widthPercent);
-  const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
+  const [, setUploadVersion] = useState(0);
   const [uploadFile] = useUploadFileMutation();
   const activeUploadRef = useRef<ActiveUpload | null>(null);
 
-  useEffect(() => {
-    return () => {
-      activeUploadRef.current?.abort();
-      activeUploadRef.current = null;
-    };
+  const refreshUpload = useCallback(() => {
+    setUploadVersion((version) => version + 1);
   }, []);
 
-  const uploadImage = useCallback(
-    async (file: File) => {
-      const validationError = validateImage(file);
-
-      if (validationError) {
-        setPendingImage({ error: validationError, file, status: "failed" });
-        toast.warning(validationError);
-        return;
+  const cancelUpload = useCallback(
+    (id: string, removeEmptyNode = false) => {
+      if (activeUploadRef.current?.id === id) {
+        activeUploadRef.current.abort();
+        activeUploadRef.current = null;
       }
 
-      activeUploadRef.current?.abort();
+      clearImageUpload(editor, id);
+      if (removeEmptyNode) {
+        deleteNode();
+      } else {
+        updateAttributes({ uploadId: null });
+      }
+    },
+    [deleteNode, editor, updateAttributes]
+  );
 
-      const id = Symbol(file.name);
-      const request = uploadFile(file);
+  const beginUpload = useCallback(
+    async (id: string, retry = false) => {
+      const queuedUpload = retry ? retryImageUpload(editor, id) : claimImageUpload(editor, id);
+
+      if (!queuedUpload) return;
+
+      const request = uploadFile(queuedUpload.file);
       activeUploadRef.current = { abort: request.abort, id };
-      setPendingImage({ file, status: "uploading" });
+      refreshUpload();
 
       try {
         const response = await request.unwrap();
 
         if (activeUploadRef.current?.id !== id) return;
 
+        clearImageUpload(editor, id);
+        activeUploadRef.current = null;
         updateAttributes({
-          alt: file.name,
+          alt: alt || createImageAltText(queuedUpload.file.name),
           src: response.fileUrl,
+          uploadId: null,
         });
       } catch {
         if (activeUploadRef.current?.id !== id) return;
 
-        setPendingImage({
-          error: "Upload failed. Try again.",
-          file,
-          status: "failed",
-        });
+        markImageUploadFailed(editor, id, "Upload failed. Try again.");
+        refreshUpload();
       } finally {
         if (activeUploadRef.current?.id === id) {
           activeUploadRef.current = null;
         }
       }
     },
-    [updateAttributes, uploadFile]
+    [alt, editor, refreshUpload, updateAttributes, uploadFile]
+  );
+
+  useEffect(() => {
+    if (!uploadId) return;
+
+    const timer = window.setTimeout(() => {
+      void beginUpload(uploadId);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+
+      if (activeUploadRef.current?.id === uploadId) {
+        activeUploadRef.current.abort();
+        activeUploadRef.current = null;
+        releaseImageUpload(editor, uploadId);
+      }
+
+      if (getImageUpload(editor, uploadId)?.status === "pending") {
+        clearImageUpload(editor, uploadId);
+      }
+    };
+  }, [beginUpload, editor, uploadId]);
+
+  useEffect(() => {
+    return () => {
+      const activeUpload = activeUploadRef.current;
+
+      if (activeUpload) {
+        activeUpload.abort();
+        releaseImageUpload(editor, activeUpload.id);
+        activeUploadRef.current = null;
+      }
+    };
+  }, [editor]);
+
+  const queueUpload = useCallback(
+    (file: File) => {
+      const id = queueImageUpload(editor, file);
+      const validationError = validateImageFile(file);
+
+      if (validationError) {
+        markImageUploadFailed(editor, id, validationError);
+        toast.warning(validationError);
+      }
+
+      updateAttributes({
+        alt: src ? alt : createImageAltText(file.name),
+        uploadId: id,
+      });
+      refreshUpload();
+    },
+    [alt, editor, refreshUpload, src, updateAttributes]
   );
 
   const handleSelect = useCallback(
     (files: FileList) => {
       const file = files.item(0);
-      if (file) void uploadImage(file);
+      if (file) queueUpload(file);
     },
-    [uploadImage]
+    [queueUpload]
   );
 
   const handleDrop = useCallback(
     async (event: DropEvent) => {
       const fileItem = event.items.find((item) => item.kind === "file");
       if (fileItem?.kind === "file") {
-        await uploadImage(await fileItem.getFile());
+        queueUpload(await fileItem.getFile());
       }
     },
-    [uploadImage]
+    [queueUpload]
   );
 
-  const clearPendingImage = useCallback(() => {
-    activeUploadRef.current?.abort();
-    activeUploadRef.current = null;
-    setPendingImage(null);
-  }, []);
+  const pendingUpload = uploadId ? getImageUpload(editor, uploadId) : null;
+  const isUploading = pendingUpload?.status === "uploading";
+  const isFailed = pendingUpload?.status === "failed";
 
   if (!src) {
-    const isDisabled = !editor.isEditable || pendingImage?.status === "uploading";
+    const isDisabled = !editor.isEditable || isUploading;
 
     return (
       <NodeViewWrapper className="my-8" contentEditable={false}>
         <DropZone className="w-full">
-          {!pendingImage && (
+          {!pendingUpload && (
             <DropZone.Area
               isDisabled={isDisabled}
               getDropOperation={(types) =>
-                [...ACCEPTED_IMAGE_TYPES].some((type) => types.has(type)) ? "copy" : "cancel"
+                ["image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/webp"].some(
+                  (type) => types.has(type)
+                )
+                  ? "copy"
+                  : "cancel"
               }
               onDrop={handleDrop}
             >
@@ -179,18 +226,21 @@ export function ImageNodeView({ editor, node, updateAttributes }: NodeViewProps)
             onSelect={handleSelect}
           />
 
-          {pendingImage && (
+          {pendingUpload && (
             <DropZone.FileList>
-              <DropZone.FileItem status={pendingImage.status}>
-                <DropZone.FileFormatIcon format={getFileExtension(pendingImage.file.name)} />
+              <DropZone.FileItem
+                status={pendingUpload.status === "pending" ? "uploading" : pendingUpload.status}
+              >
+                <DropZone.FileFormatIcon format={getFileExtension(pendingUpload.file.name)} />
                 <DropZone.FileInfo>
-                  <DropZone.FileName>{pendingImage.file.name}</DropZone.FileName>
+                  <DropZone.FileName>{pendingUpload.file.name}</DropZone.FileName>
                   <DropZone.FileMeta>
-                    {formatFileSize(pendingImage.file.size)} · {pendingImage.error ?? "Uploading…"}
+                    {formatFileSize(pendingUpload.file.size)} ·{" "}
+                    {pendingUpload.error ?? "Uploading…"}
                   </DropZone.FileMeta>
-                  {pendingImage.status === "uploading" && (
+                  {isUploading && (
                     <DropZone.FileProgress
-                      aria-label={`Uploading ${pendingImage.file.name}`}
+                      aria-label={`Uploading ${pendingUpload.file.name}`}
                       isIndeterminate
                     >
                       <DropZone.FileProgressTrack>
@@ -199,15 +249,15 @@ export function ImageNodeView({ editor, node, updateAttributes }: NodeViewProps)
                     </DropZone.FileProgress>
                   )}
                 </DropZone.FileInfo>
-                {pendingImage.status === "failed" && (
+                {isFailed && (
                   <DropZone.FileRetryTrigger
-                    aria-label={`Retry uploading ${pendingImage.file.name}`}
-                    onPress={() => void uploadImage(pendingImage.file)}
+                    aria-label={`Retry uploading ${pendingUpload.file.name}`}
+                    onPress={() => void beginUpload(uploadId!, true)}
                   />
                 )}
                 <DropZone.FileRemoveTrigger
-                  aria-label={`Remove ${pendingImage.file.name}`}
-                  onPress={clearPendingImage}
+                  aria-label={`Remove ${pendingUpload.file.name}`}
+                  onPress={() => cancelUpload(uploadId!, true)}
                 />
               </DropZone.FileItem>
             </DropZone.FileList>
@@ -225,7 +275,7 @@ export function ImageNodeView({ editor, node, updateAttributes }: NodeViewProps)
     >
       <Surface
         variant="transparent"
-        className="max-w-full flex-none overflow-hidden rounded-2xl"
+        className="relative max-w-full flex-none overflow-hidden rounded-2xl"
         style={{ width: `${widthPercent}%` }}
       >
         <NextImage
@@ -237,6 +287,35 @@ export function ImageNodeView({ editor, node, updateAttributes }: NodeViewProps)
           unoptimized
           width={1600}
         />
+        {pendingUpload && (
+          <div className="bg-overlay/80 absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-3 text-sm backdrop-blur-sm">
+            <span className="min-w-0 truncate">
+              {isFailed ? pendingUpload.error : `Uploading ${pendingUpload.file.name}…`}
+            </span>
+            <div className="flex shrink-0 items-center gap-1">
+              {isFailed && (
+                <Button
+                  isIconOnly
+                  aria-label="Retry image upload"
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => void beginUpload(uploadId!, true)}
+                >
+                  <Icon aria-hidden="true" icon="gravity-ui:arrow-rotate-right" />
+                </Button>
+              )}
+              <Button
+                isIconOnly
+                aria-label="Cancel image replacement"
+                size="sm"
+                variant="secondary"
+                onPress={() => cancelUpload(uploadId!)}
+              >
+                <Icon aria-hidden="true" icon="gravity-ui:xmark" />
+              </Button>
+            </div>
+          </div>
+        )}
       </Surface>
     </NodeViewWrapper>
   );

@@ -2,8 +2,9 @@ import { Button, Popover, useOverlayState } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
+import { BlockTypeSelector } from "../../toolbar/block-type-selector";
+import { LinkPopover } from "../../toolbar/link-popover";
 import { ToggleButtonToolbar } from "../../toolbar/toggle-button-toolbar";
-import { LinkMenuEdit } from "../link-menu/link-menu-edit";
 import { BgColorPicker } from "./components/bg-color-picker";
 import { FontFamilyPicker } from "./components/font-family-picker";
 import { FontSizePicker } from "./components/font-size-picker";
@@ -15,8 +16,6 @@ import { useTextMenuStates } from "./hooks/use-text-menu-states";
 export function TextMenu() {
   const states = useTextMenuStates();
   const commands = useRichTextCommands();
-
-  const state = useOverlayState();
 
   const moreOverlayState = useOverlayState();
 
@@ -31,10 +30,11 @@ export function TextMenu() {
       <motion.div
         layout
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="flex items-center"
+        className="flex max-w-[calc(100vw-1rem)] scrollbar-none items-center overflow-x-auto"
       >
-        <RichTextEditor.ToolbarGroup aria-label="Text formatting">
+        <RichTextEditor.ToolbarGroup aria-label="Text formatting" className="shrink-0">
           <FontSizePicker value={states.fontSize} onChange={commands.setFontSize} />
+          <BlockTypeSelector />
           <FontFamilyPicker value={states.fontFamily} onChange={commands.setFontFamily} />
           <LineHeightPicker value={states.lineHeight} onChange={commands.setLineHeight} />
         </RichTextEditor.ToolbarGroup>
@@ -71,14 +71,7 @@ export function TextMenu() {
         <TextColorPicker value={states.textColor} onChange={commands.setTextColor} />
         <BgColorPicker value={states.backgroundColor} onChange={commands.setBackgroundColor} />
 
-        <RichTextEditor.LinkPopover isOpen={state.isOpen} onOpenChange={state.setOpen}>
-          <RichTextEditor.LinkPopover.Trigger isIconOnly>
-            <Icon icon="gravity-ui:link" />
-          </RichTextEditor.LinkPopover.Trigger>
-          <RichTextEditor.LinkPopover.Content>
-            <LinkMenuEdit onCancel={state.close} />
-          </RichTextEditor.LinkPopover.Content>
-        </RichTextEditor.LinkPopover>
+        <LinkPopover />
 
         <RichTextEditor.ToolbarSeparator orientation="vertical" />
 

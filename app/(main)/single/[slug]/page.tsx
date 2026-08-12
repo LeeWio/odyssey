@@ -32,7 +32,10 @@ import { CommentSystem } from "@/components/comment";
 import { MotionRichTextEditor } from "@/components/ui";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
-import type { JSONContent } from "@tiptap/react";
+import {
+  normalizeRichTextDocument,
+  parseJSONContent,
+} from "@/components/rich-text/utils/document-normalizer";
 import type { PostResponse } from "@/features/blog";
 import {
   ArticleTypography,
@@ -110,19 +113,10 @@ export default function SinglePage({ params }: SinglePageProps) {
 
   const isLoading = queryIsLoading && !article;
 
-  const articleContent = article?.content;
-  const parsedContent = useMemo<JSONContent | undefined>(() => {
-    if (!articleContent) return undefined;
-    const trimmed = articleContent.trim();
-    if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
-      return undefined; // It is plain text or Markdown, not JSON
-    }
-    try {
-      return JSON.parse(trimmed) as JSONContent;
-    } catch {
-      return undefined;
-    }
-  }, [articleContent]);
+  const parsedContent = useMemo(() => {
+    const content = article?.contentType === "JSON" ? parseJSONContent(article.content) : null;
+    return content ? normalizeRichTextDocument(content) : null;
+  }, [article]);
   const [likePost, { isLoading: isLiking }] = useLikePostMutation();
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation();
   const [favoritePost, { isLoading: isFavoriting }] = useFavoritePostMutation();
@@ -445,8 +439,9 @@ export default function SinglePage({ params }: SinglePageProps) {
                     </RichTextEditor.Shell>
                   </MotionRichTextEditor>
                 ) : (
-                  <p className="text-default-500 text-base leading-8 whitespace-pre-wrap">
-                    {article.content || "No content has been published for this chronicle entry."}
+                  <p className="text-default-500 text-base leading-8">
+                    This article is unavailable because its content is not a supported Tiptap
+                    document.
                   </p>
                 )}
               </ArticleTypography>

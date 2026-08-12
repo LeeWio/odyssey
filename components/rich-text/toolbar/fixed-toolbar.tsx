@@ -3,6 +3,7 @@
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { EmojiToolbarPicker } from "./emoji-picker";
+import { LinkPopover } from "./link-popover";
 import { MathInsertPopover } from "./math-insert-popover";
 import { MultiColumnMenu } from "./multi-column-menu";
 import { TableSelector } from "./table-selector";
@@ -12,7 +13,7 @@ export function FixedToolbar() {
   const { editor } = useRichTextEditor();
 
   return (
-    <RichTextEditor.Toolbar>
+    <RichTextEditor.Toolbar className="max-w-full scrollbar-none overflow-x-auto">
       <RichTextEditor.ToolbarGroup aria-label="Edit history actions">
         <RichTextEditor.ActionButton aria-label="Undo action" tooltip="Undo" action="undo">
           <Icon icon="gravity-ui:arrow-uturn-ccw-left" />
@@ -42,6 +43,7 @@ export function FixedToolbar() {
         <RichTextEditor.ToggleButton command="code" tooltip="Code">
           <Icon icon="gravity-ui:code" />
         </RichTextEditor.ToggleButton>
+        <LinkPopover />
       </RichTextEditor.ToolbarGroup>
 
       <RichTextEditor.ToolbarGroup aria-label="Lists and Layout">

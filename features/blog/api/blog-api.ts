@@ -20,6 +20,9 @@ export const PostStatusSchema = z.enum([
 ]);
 export type PostStatus = z.infer<typeof PostStatusSchema>;
 
+const PostContentTypeSchema = z.enum(["JSON", "MDX"]);
+export type PostContentType = z.infer<typeof PostContentTypeSchema>;
+
 // Series Schema
 export const SeriesResponseSchema = z.object({
   id: z.number(),
@@ -50,6 +53,7 @@ export const PostResponseSchema = z.object({
   coverImage: z.string().nullable().default(""),
   summary: z.string().nullable().default(""),
   content: z.string().nullable().default(""),
+  contentType: PostContentTypeSchema.nullish().transform((value) => value ?? "JSON"),
   status: PostStatusSchema,
   isFeatured: z.boolean(),
   views: z.number(),
@@ -146,6 +150,7 @@ export interface PostRequest {
   coverImage?: string;
   summary?: string;
   content: string;
+  contentType: "JSON";
   status: PostStatus;
   isFeatured?: boolean;
   categoryId?: number;

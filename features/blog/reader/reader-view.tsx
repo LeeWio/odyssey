@@ -3,13 +3,16 @@
 import { Button, cn, Separator, Spinner, Surface, Tooltip, Typography, toast } from "@heroui/react";
 import { ActionBar, EmptyState, RichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import type { JSONContent } from "@tiptap/react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CommentSystem } from "@/components/comment";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
+import {
+  normalizeRichTextDocument,
+  parseJSONContent,
+} from "@/components/rich-text/utils/document-normalizer";
 import { ReadingProgressBar } from "../auxiliary/reading-progress-bar";
 import {
   useGetPublicPostBySlugQuery,
@@ -78,6 +81,7 @@ const MOCK_POST_FALLBACK = {
   ],
   createdAt: "2026-07-04T12:00:00.000Z",
   updatedAt: "2026-07-04T12:00:00.000Z",
+  contentType: "JSON",
   content: JSON.stringify({
     type: "doc",
     content: [
@@ -240,54 +244,9 @@ export function ReaderView({ slug }: ReaderViewProps) {
     }
   };
 
-  const parsedContent = useMemo<JSONContent | undefined>(() => {
-    if (!article?.content) return undefined;
-    try {
-      const doc = JSON.parse(article.content);
-
-      interface TiptapNode {
-        type: string;
-        text?: string;
-        attrs?: Record<string, unknown>;
-        content?: TiptapNode[];
-      }
-
-      let headingIndex = 0;
-      // Recursive pre-processor to inject missing IDs to headings in isReadOnly mode
-      const injectHeadingIds = (node: TiptapNode) => {
-        if (node.type === "heading") {
-          headingIndex++;
-          const text = node.content?.[0]?.text || "section";
-          let generatedId = text
-            .toLowerCase()
-            .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
-            .replace(/(^-|-$)/g, "");
-
-          if (!generatedId || generatedId === "-") {
-            generatedId = `section-${headingIndex}`;
-          }
-
-          if (!node.attrs) {
-            node.attrs = {};
-          }
-          if (!node.attrs.id) {
-            node.attrs.id = generatedId;
-            node.attrs["data-toc-id"] = generatedId;
-          }
-        }
-        if (node.content && Array.isArray(node.content)) {
-          node.content.forEach((n: unknown) => injectHeadingIds(n as TiptapNode));
-        }
-      };
-
-      if (doc && doc.type === "doc" && Array.isArray(doc.content)) {
-        doc.content.forEach((n: unknown) => injectHeadingIds(n as TiptapNode));
-      }
-      return doc as JSONContent;
-    } catch (error) {
-      console.error("[READER-DEBUG] Parsing content failed:", error);
-      return undefined;
-    }
+  const parsedContent = useMemo(() => {
+    const doc = article?.contentType === "JSON" ? parseJSONContent(article.content) : null;
+    return doc ? normalizeRichTextDocument(doc) : null;
   }, [article]);
 
   console.log("[READER-DEBUG] article loaded:", article ? "yes" : "no", "slug:", slug);
@@ -511,21 +470,27 @@ export function ReaderView({ slug }: ReaderViewProps) {
         </div>
 
         {/* Core Article Prose Text (Choreographed Entrance 5) */}
-        <MotionRichTextEditor
-          key={article.content}
-          isReadOnly
-          extensions={ExtensionKit}
-          defaultValue={parsedContent}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.62 }}
-          style={{ willChange: "opacity" }}
-        >
-          <RichTextEditor.Shell className="border-none bg-transparent">
-            <RichTextEditor.Content />
-            <RichTextTableOfContents placement="right" />
-          </RichTextEditor.Shell>
-        </MotionRichTextEditor>
+        {parsedContent ? (
+          <MotionRichTextEditor
+            key={article.content}
+            isReadOnly
+            extensions={ExtensionKit}
+            defaultValue={parsedContent}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.62 }}
+            style={{ willChange: "opacity" }}
+          >
+            <RichTextEditor.Shell className="border-none bg-transparent">
+              <RichTextEditor.Content />
+              <RichTextTableOfContents placement="right" />
+            </RichTextEditor.Shell>
+          </MotionRichTextEditor>
+        ) : (
+          <p className="text-default-500 text-base leading-8">
+            This article is unavailable because its content is not a supported Tiptap document.
+          </p>
+        )}
 
         {/* ☕ Minimalist Editorial Sign-off (Choreographed Entrance 6) */}
         <motion.div

@@ -1,9 +1,11 @@
 import { Globe } from "@gravity-ui/icons";
-import { Button, ButtonGroup, InputGroup, Label, TextField } from "@heroui/react";
+import { Button, ButtonGroup, InputGroup, Label, TextField, toast } from "@heroui/react";
 import { CellSwitch, RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { getMarkRange } from "@tiptap/core";
 import { useCallback, useState } from "react";
+
+import { normalizeLinkUrl } from "@/components/rich-text/utils/link-utils";
 
 interface LinkMenuEditProps {
   onCancel: () => void;
@@ -40,23 +42,40 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
       return;
     }
 
-    if (url) {
-      editor
-        .chain()
-        .focus()
-        .extendMarkRange("link")
-        .setLink({ href: url, target: openInNewTab ? "_blank" : null })
-        .run();
+    const normalizedUrl = normalizeLinkUrl(url);
+    if (url.trim() && !normalizedUrl) {
+      toast.warning("Use a valid web, mail, telephone, page anchor, or site-relative link.");
+      return;
+    }
+
+    if (normalizedUrl) {
+      const { selection } = editor.state;
+      const markRange = getMarkRange(selection.$from, editor.state.schema.marks.link);
+      const from = markRange?.from ?? selection.from;
+      const to = markRange?.to ?? selection.to;
+      const selectedText = editor.state.doc.textBetween(from, to, " ");
+      const linkText = displayText.trim();
+      const chain = editor.chain().focus();
+
+      if (linkText && linkText !== selectedText) {
+        chain
+          .insertContentAt({ from, to }, linkText)
+          .setTextSelection({ from, to: from + linkText.length });
+      } else if (from !== to) {
+        chain.setTextSelection({ from, to });
+      }
+
+      chain.setLink({ href: normalizedUrl, target: openInNewTab ? "_blank" : null }).run();
     } else {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
     }
 
     onCancel?.();
-  }, [editor, onCancel, openInNewTab, url]);
+  }, [displayText, editor, onCancel, openInNewTab, url]);
 
   return (
     <>
-      <TextField className="w-full" name="text" isDisabled>
+      <TextField className="w-full" name="text">
         <Label>Display Text</Label>
         <InputGroup variant="secondary">
           <InputGroup.Prefix>
