@@ -1,3 +1,10 @@
+## [1.40.1](https://github.com/LeeWio/odyssey/compare/v1.40.0...v1.40.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **columns:** avoid kanban endpoint collision ([4a53875](https://github.com/LeeWio/odyssey/commit/4a53875f86ea7a90cc8c0f022a4879b84735cb0d))
+
 # [1.40.0](https://github.com/LeeWio/odyssey/compare/v1.39.1...v1.40.0) (2026-08-12)
 
 
