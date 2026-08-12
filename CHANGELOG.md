@@ -1,3 +1,15 @@
+# [1.58.0](https://github.com/LeeWio/odyssey/compare/v1.57.0...v1.58.0) (2026-08-12)
+
+
+### Bug Fixes
+
+* **editor:** label rich text modal ([23b85c6](https://github.com/LeeWio/odyssey/commit/23b85c616add20588017364ba1aa3cff34d37d67))
+
+
+### Features
+
+* **ui:** refine home layout, rich-text editor, and control center ([cf4f216](https://github.com/LeeWio/odyssey/commit/cf4f216f4de03cd09e45f865e5f5a20591258d07))
+
 # [1.57.0](https://github.com/LeeWio/odyssey/compare/v1.56.0...v1.57.0) (2026-08-12)
 
 
