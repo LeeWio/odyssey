@@ -1,3 +1,10 @@
+# [1.56.0](https://github.com/LeeWio/odyssey/compare/v1.55.0...v1.56.0) (2026-08-12)
+
+
+### Features
+
+* **links:** add public friend link exchange ([8e3f35c](https://github.com/LeeWio/odyssey/commit/8e3f35cd2c7dcad8cab329c194631fdd75b19df5))
+
 # [1.55.0](https://github.com/LeeWio/odyssey/compare/v1.54.0...v1.55.0) (2026-08-12)
 
 
