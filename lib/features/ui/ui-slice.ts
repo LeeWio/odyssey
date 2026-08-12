@@ -64,6 +64,9 @@ export const uiSlice = createSlice({
     toggleSheet: (state) => {
       state.sheet.isOpen = !state.sheet.isOpen;
     },
+    setSheetOpen: (state, action: PayloadAction<boolean>) => {
+      state.sheet.isOpen = action.payload;
+    },
     setThemeVariant: (state, action: PayloadAction<ThemeVariant>) => {
       state.theme.variant = action.payload;
     },
@@ -99,6 +102,7 @@ export const {
   setLoginOpen,
   setSignUpOpen,
   toggleSheet,
+  setSheetOpen,
   setThemeVariant,
   toggleDashboard,
   toggleRichText,

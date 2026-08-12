@@ -1,6 +1,6 @@
 "use client";
 
-import { Skeleton } from "@heroui/react";
+import { Button, Skeleton } from "@heroui/react";
 import { KPI, Segment, TrendChip } from "@heroui-pro/react";
 import { useState } from "react";
 import { type Key } from "react-aria-components";
@@ -28,7 +28,11 @@ interface StockConfig {
 
 const StockWidget = ({ config }: { config: StockConfig }) => {
   const [range, setRange] = useState<Key>("1D");
-  const { data: indexData, isLoading } = useGetMarketIndexBySymbolQuery(
+  const {
+    data: indexData,
+    isLoading,
+    refetch,
+  } = useGetMarketIndexBySymbolQuery(
     {
       symbol: config.symbol,
       period: range as MarketPeriod,
@@ -64,7 +68,24 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
     );
   }
 
-  const isPositive = (indexData?.changePct || 0) >= 0;
+  if (!indexData) {
+    return (
+      <KPI>
+        <KPI.Header className="flex items-center gap-1">
+          <Icon className="text-muted size-4" />
+          <KPI.Title>{config.title}</KPI.Title>
+        </KPI.Header>
+        <KPI.Content className="flex min-h-24 flex-col items-start justify-end gap-2">
+          <p className="text-muted text-sm">Market data unavailable</p>
+          <Button size="sm" variant="ghost" onPress={() => void refetch()}>
+            Try again
+          </Button>
+        </KPI.Content>
+      </KPI>
+    );
+  }
+
+  const isPositive = indexData.changePct >= 0;
 
   return (
     <KPI>
@@ -73,7 +94,12 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
           <Icon className="text-muted size-4" />
           <KPI.Title>{config.title}</KPI.Title>
         </div>
-        <Segment defaultSelectedKey="1D" size="sm" onSelectionChange={setRange}>
+        <Segment
+          aria-label={`${config.title} market period`}
+          defaultSelectedKey="1D"
+          size="sm"
+          onSelectionChange={setRange}
+        >
           <Segment.Item id="1D">1D</Segment.Item>
           <Segment.Item id="1M">1M</Segment.Item>
           <Segment.Item id="1Y">1Y</Segment.Item>
@@ -81,17 +107,13 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
       </KPI.Header>
       <KPI.Content className="grid-cols-[1fr_1fr] items-end">
         <div className="flex flex-col gap-1">
-          <KPI.Value
-            className="text-3xl"
-            maximumFractionDigits={2}
-            value={indexData?.current || 0}
-          />
+          <KPI.Value className="text-3xl" maximumFractionDigits={2} value={indexData.current} />
           <div className="flex items-center gap-1.5">
             <TrendChip trend={isPositive ? "up" : "down"} variant="tertiary">
               <TrendChip.Indicator>
                 {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
               </TrendChip.Indicator>
-              {Math.abs(indexData?.changePct || 0).toFixed(2)}%
+              {Math.abs(indexData.changePct).toFixed(2)}%
               <TrendChip.Suffix>
                 {{
                   "1D": "today",
@@ -104,7 +126,7 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
         </div>
         <KPI.Chart
           color={config.color}
-          data={mapSparkline(indexData?.sparkline)}
+          data={mapSparkline(indexData.sparkline)}
           height={70}
           strokeWidth={1.5}
         />
@@ -122,9 +144,16 @@ export const Stocks = () => {
   ];
 
   return (
-    <div className="col-span-full grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div
+      aria-label="Market indices"
+      role="region"
+      tabIndex={0}
+      className="focus-visible:outline-focus col-span-full -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-1 pb-2 focus-visible:outline-2 focus-visible:outline-offset-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-4"
+    >
       {configs.map((config) => (
-        <StockWidget key={config.symbol} config={config} />
+        <div key={config.symbol} className="min-w-[calc(100%-1.5rem)] snap-center md:min-w-0">
+          <StockWidget config={config} />
+        </div>
       ))}
     </div>
   );
