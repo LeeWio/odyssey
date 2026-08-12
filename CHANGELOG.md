@@ -1,3 +1,11 @@
+# [1.44.0](https://github.com/LeeWio/odyssey/compare/v1.43.0...v1.44.0) (2026-08-12)
+
+
+### Features
+
+* **library:** surface continue reading ([8001c86](https://github.com/LeeWio/odyssey/commit/8001c86e87c5da8a8a30245240db1bd6feebafb8))
+* **reader:** sync reading progress ([7d3998e](https://github.com/LeeWio/odyssey/commit/7d3998e77032cccc3527d179ff1a0591dc0fbb55))
+
 # [1.43.0](https://github.com/LeeWio/odyssey/compare/v1.42.0...v1.43.0) (2026-08-12)
 
 
