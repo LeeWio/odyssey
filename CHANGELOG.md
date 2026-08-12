@@ -1,3 +1,10 @@
+# [1.41.0](https://github.com/LeeWio/odyssey/compare/v1.40.1...v1.41.0) (2026-08-12)
+
+
+### Features
+
+* **toast:** unify user feedback ([97dd0aa](https://github.com/LeeWio/odyssey/commit/97dd0aaeb6430cfcf2ca85ef8e342adf7b83154c))
+
 ## [1.40.1](https://github.com/LeeWio/odyssey/compare/v1.40.0...v1.40.1) (2026-08-12)
 
 
