@@ -1,3 +1,10 @@
+# [1.40.0](https://github.com/LeeWio/odyssey/compare/v1.39.1...v1.40.0) (2026-08-12)
+
+
+### Features
+
+* **columns:** add column browsing and management ([f83069d](https://github.com/LeeWio/odyssey/commit/f83069d62d74b994aa0b630d2492c076d3e81999))
+
 ## [1.39.1](https://github.com/LeeWio/odyssey/compare/v1.39.0...v1.39.1) (2026-08-11)
 
 
