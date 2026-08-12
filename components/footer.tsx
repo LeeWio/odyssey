@@ -1,9 +1,11 @@
 "use client";
 
 import { useOs } from "@mantine/hooks";
-import { Chip, Link, Typography } from "@heroui/react";
+import { Button, Chip, Input, Label, Link, TextField, Typography, toast } from "@heroui/react";
+import { useState, type FormEvent } from "react";
 
 import { SmartColorSurface } from "@/components/background/smart-color-surface";
+import { useSubscribeMutation } from "@/lib/features/openapi";
 
 const FOOTER_LINKS = [
   { href: "/blog", label: "Chronicle" },
@@ -17,6 +19,31 @@ const FOOTER_LINKS = [
 export function Footer() {
   const os = useOs();
   const osLabel = os === "macos" ? "macOS" : os;
+  const [email, setEmail] = useState("");
+  const [subscribe, { isLoading: isSubscribing }] = useSubscribeMutation();
+
+  const handleSubscribe = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail) {
+      toast.warning("Enter an email address to subscribe.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      toast.warning("Enter a valid email address.");
+      return;
+    }
+
+    try {
+      await subscribe({ email: normalizedEmail }).unwrap();
+      setEmail("");
+      toast.success("Check your inbox to confirm your subscription.");
+    } catch {
+      // The generated mutation reports API failures through the shared toast helper.
+    }
+  };
 
   return (
     <footer className="w-full px-4 pt-10 pb-4 sm:px-6 sm:pt-12 sm:pb-6">
@@ -26,7 +53,7 @@ export function Footer() {
         tone="neutral"
       >
         <div className="flex min-h-64 flex-col justify-between gap-12 p-6 sm:min-h-72 sm:p-9 lg:p-12">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)_auto] lg:items-start">
             <div className="max-w-xl">
               <Typography
                 className="font-mono tracking-[0.16em] text-white/60 uppercase"
@@ -41,6 +68,29 @@ export function Footer() {
                 A personal record of what I build, study, hear, and notice along the way.
               </Typography>
             </div>
+
+            <form noValidate className="max-w-md" onSubmit={handleSubscribe}>
+              <TextField
+                fullWidth
+                isDisabled={isSubscribing}
+                name="newsletter-email"
+                type="email"
+                value={email}
+                onChange={setEmail}
+              >
+                <Label className="text-sm font-medium text-white">Notes, occasionally</Label>
+                <div className="mt-3 flex gap-2">
+                  <Input
+                    className="min-w-0 bg-white/10 text-white shadow-none placeholder:text-white/45"
+                    placeholder="you@example.com"
+                    variant="secondary"
+                  />
+                  <Button isPending={isSubscribing} size="sm" type="submit" variant="secondary">
+                    Join
+                  </Button>
+                </div>
+              </TextField>
+            </form>
 
             <nav
               aria-label="Footer navigation"
