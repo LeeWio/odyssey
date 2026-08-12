@@ -1,3 +1,10 @@
+# [1.46.0](https://github.com/LeeWio/odyssey/compare/v1.45.0...v1.46.0) (2026-08-12)
+
+
+### Features
+
+* **library:** surface personalized recommendations ([e535a2e](https://github.com/LeeWio/odyssey/commit/e535a2e314b3bd28e9ed430264f44f733b2a1115))
+
 # [1.45.0](https://github.com/LeeWio/odyssey/compare/v1.44.0...v1.45.0) (2026-08-12)
 
 
