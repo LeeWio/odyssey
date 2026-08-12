@@ -1,3 +1,10 @@
+# [1.54.0](https://github.com/LeeWio/odyssey/compare/v1.53.0...v1.54.0) (2026-08-12)
+
+
+### Features
+
+* **notifications:** add inbox popover ([a6005e1](https://github.com/LeeWio/odyssey/commit/a6005e1e127bfdc78c2820d15677a46ab97cd0ea))
+
 # [1.53.0](https://github.com/LeeWio/odyssey/compare/v1.52.0...v1.53.0) (2026-08-12)
 
 
