@@ -1,3 +1,10 @@
+# [1.52.0](https://github.com/LeeWio/odyssey/compare/v1.51.0...v1.52.0) (2026-08-12)
+
+
+### Features
+
+* **moments:** publish field notes timeline ([0589feb](https://github.com/LeeWio/odyssey/commit/0589febf429f1045e7f2cb6c7811f87d17fe1a9b))
+
 # [1.51.0](https://github.com/LeeWio/odyssey/compare/v1.50.0...v1.51.0) (2026-08-12)
 
 
