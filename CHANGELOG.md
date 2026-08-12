@@ -1,3 +1,10 @@
+# [1.42.0](https://github.com/LeeWio/odyssey/compare/v1.41.0...v1.42.0) (2026-08-12)
+
+
+### Features
+
+* **columns:** improve discovery and management ([b862719](https://github.com/LeeWio/odyssey/commit/b86271993780ee290a12da129bef498580494582))
+
 # [1.41.0](https://github.com/LeeWio/odyssey/compare/v1.40.1...v1.41.0) (2026-08-12)
 
 
