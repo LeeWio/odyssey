@@ -1,3 +1,10 @@
+# [1.51.0](https://github.com/LeeWio/odyssey/compare/v1.50.0...v1.51.0) (2026-08-12)
+
+
+### Features
+
+* **notifications:** add activity inbox ([9a6e8ca](https://github.com/LeeWio/odyssey/commit/9a6e8ca8a24f8a9fc6e01750c064cf50ce8820e6))
+
 # [1.50.0](https://github.com/LeeWio/odyssey/compare/v1.49.0...v1.50.0) (2026-08-12)
 
 
