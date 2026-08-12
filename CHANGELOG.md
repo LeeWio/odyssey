@@ -1,3 +1,10 @@
+# [1.45.0](https://github.com/LeeWio/odyssey/compare/v1.44.0...v1.45.0) (2026-08-12)
+
+
+### Features
+
+* **library:** add personal reading library\n\nExpose saved reading progress, favorites, and history through a dedicated authenticated library page. Add history removal controls and link the account menu to the new destination. ([d82dcb1](https://github.com/LeeWio/odyssey/commit/d82dcb1d39dc04e9f92e2917c8634de732701851))
+
 # [1.44.0](https://github.com/LeeWio/odyssey/compare/v1.43.0...v1.44.0) (2026-08-12)
 
 
