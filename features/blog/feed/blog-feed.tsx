@@ -13,6 +13,7 @@ import {
   Label,
   Link,
   Pagination,
+  ProgressBar,
   ScrollShadow,
   SearchField,
   Skeleton,
@@ -20,9 +21,12 @@ import {
   TagGroup,
   Typography,
 } from "@heroui/react";
-import { ArrowRight, ArrowRotateLeft, BookOpen, Eye } from "@gravity-ui/icons";
+import { ArrowRight, ArrowRotateLeft, BookOpen, Eye, Play } from "@gravity-ui/icons";
 import { useDeferredValue, useState } from "react";
 import { useReducedMotion } from "motion/react";
+import { selectIsAuthenticated } from "@/lib/features/auth";
+import { useGetLibraryOverviewQuery } from "@/lib/features/library";
+import { useAppSelector } from "@/lib/hooks";
 
 const PAGE_SIZE = 8;
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -170,6 +174,67 @@ function FeedSkeleton() {
   );
 }
 
+function ContinueReading({
+  entries,
+}: {
+  entries: Array<{ post: PostDigestResponse; progressPercent: number }>;
+}) {
+  return (
+    <section aria-labelledby="continue-reading-title" className="mt-12">
+      <div className="mb-5 flex items-end justify-between gap-4">
+        <div>
+          <Typography id="continue-reading-title" type="h2" weight="semibold">
+            Continue reading
+          </Typography>
+          <Typography color="muted" type="body-sm" className="mt-1">
+            Pick up where you left off.
+          </Typography>
+        </div>
+      </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        {entries.map(({ post, progressPercent }) => (
+          <Card key={post.id} variant="secondary" className="gap-4 p-5">
+            <Card.Header className="gap-2 p-0">
+              <div className="flex items-start justify-between gap-3">
+                {post.category?.name ? (
+                  <Chip size="sm" variant="soft">
+                    {post.category.name}
+                  </Chip>
+                ) : (
+                  <span />
+                )}
+                <span className="text-muted shrink-0 font-mono text-xs tabular-nums">
+                  {progressPercent}%
+                </span>
+              </div>
+              <Card.Title className="line-clamp-2 text-base">{post.title}</Card.Title>
+            </Card.Header>
+            <ProgressBar
+              aria-label={`${post.title} reading progress`}
+              color="accent"
+              size="sm"
+              value={progressPercent}
+            >
+              <ProgressBar.Track>
+                <ProgressBar.Fill />
+              </ProgressBar.Track>
+            </ProgressBar>
+            <Card.Footer className="justify-end p-0">
+              <Link
+                className="text-accent inline-flex items-center gap-1.5 text-sm font-medium no-underline"
+                href={`/single/${post.slug}`}
+              >
+                Continue
+                <Play aria-hidden="true" className="size-3.5" />
+              </Link>
+            </Card.Footer>
+          </Card>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function getPageNumbers(page: number, totalPages: number) {
   if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
 
@@ -192,6 +257,7 @@ function getPageNumbers(page: number, totalPages: number) {
 
 export default function BlogFeed() {
   const shouldReduceMotion = useReducedMotion() ?? false;
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [page, setPage] = useState(0);
   const [searchValue, setSearchValue] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<number>();
@@ -203,9 +269,13 @@ export default function BlogFeed() {
     size: PAGE_SIZE,
   });
   const { data: featuredData } = useGetFeaturedPostsQuery({ page: 0, size: 1 });
+  const { data: libraryOverview } = useGetLibraryOverviewQuery(undefined, {
+    skip: !isAuthenticated,
+  });
   const { data: facets, isLoading: isFacetsLoading } = useRetrieveFacetsQuery();
   const posts = data?.list ?? [];
   const featuredPost = featuredData?.list[0];
+  const continueReading = (libraryOverview?.continueReading ?? []).slice(0, 3);
   const categories = (facets?.categories ?? []).filter(
     (category) => category.id != null && category.name && (category.count ?? 0) > 0
   );
@@ -336,6 +406,10 @@ export default function BlogFeed() {
             </Typography>
             <FeaturedPost post={featuredPost} />
           </section>
+        ) : null}
+
+        {!keyword && !selectedCategoryId && continueReading.length > 0 ? (
+          <ContinueReading entries={continueReading} />
         ) : null}
 
         <section
