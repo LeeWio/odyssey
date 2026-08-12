@@ -1,3 +1,10 @@
+# [1.47.0](https://github.com/LeeWio/odyssey/compare/v1.46.0...v1.47.0) (2026-08-12)
+
+
+### Features
+
+* **library:** manage article collections\n\nLet readers create, edit, browse, and remove personal article collections. Add a reading-page action to save the current article into an existing collection. ([90a880c](https://github.com/LeeWio/odyssey/commit/90a880c1c2342e4aea43a914c7bb644c3dbc6305))
+
 # [1.46.0](https://github.com/LeeWio/odyssey/compare/v1.45.0...v1.46.0) (2026-08-12)
 
 
