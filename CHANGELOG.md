@@ -1,3 +1,10 @@
+# [1.50.0](https://github.com/LeeWio/odyssey/compare/v1.49.0...v1.50.0) (2026-08-12)
+
+
+### Features
+
+* **library:** show followed topic feed ([0089404](https://github.com/LeeWio/odyssey/commit/00894043ddc9f1e2c9f3b56277695c2308302d1d))
+
 # [1.49.0](https://github.com/LeeWio/odyssey/compare/v1.48.0...v1.49.0) (2026-08-12)
 
 
