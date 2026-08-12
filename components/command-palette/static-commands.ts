@@ -50,6 +50,19 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     payload: { href: "/links" },
     defaultVisible: true,
   }),
+  createNavigationCommand({
+    id: "navigate-guestbook",
+    title: "Sign the guestbook",
+    description: "Read notes from visitors and leave your own",
+    icon: FileTextIcon,
+    category: "System",
+    source: "navigation",
+    order: 3,
+    keywords: ["guestbook", "comments", "notes", "message", "sign", "visitor log"],
+    intent: CommandIntent.NAVIGATE,
+    payload: { href: "/guestbook" },
+    defaultVisible: true,
+  }),
 
   // AI category
   createActionCommand({

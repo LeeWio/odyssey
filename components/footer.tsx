@@ -13,6 +13,7 @@ const FOOTER_LINKS = [
   { href: "/columns", label: "Columns" },
   { href: "/blog", label: "Orbit" },
   { href: "/links", label: "Travelogue" },
+  { href: "/guestbook", label: "Guestbook" },
   { href: "/moments", label: "Archive" },
 ] as const;
 
