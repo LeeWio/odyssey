@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Modal, Spinner } from "@heroui/react";
+import { Button, Modal, Spinner, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import type { Editor } from "@tiptap/react";
 import { AnimatePresence, motion } from "motion/react";
@@ -101,7 +101,10 @@ export function RichTextModal() {
 
   const handleSave = async (statusOverride?: PostRequest["status"]) => {
     const content = editorRef.current?.getJSON();
-    if (!content) return;
+    if (!content) {
+      toast.warning("Add content before saving this article.");
+      return;
+    }
 
     const payload: PostRequest = {
       ...(postData as PostRequest),

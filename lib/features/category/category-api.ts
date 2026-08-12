@@ -1,7 +1,7 @@
-import { toast } from "@heroui/react";
 import { z } from "zod";
 import type { ApiResponse } from "@/lib/api";
 import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import { notifyMutation } from "@/lib/toast";
 import {
   CategoryResponseSchema,
   type CategoryRequest,
@@ -51,12 +51,10 @@ export const categoryApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<CategoryResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Category created successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to create category");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to create category.",
+          success: "Category created successfully.",
+        });
       },
       invalidatesTags: [{ type: "Category", id: "LIST" }],
     }),
@@ -74,12 +72,10 @@ export const categoryApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<CategoryResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Category updated successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to update category");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update category.",
+          success: "Category updated successfully.",
+        });
       },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Category", id },
@@ -99,12 +95,10 @@ export const categoryApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Category deleted successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to delete category");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to delete category.",
+          success: "Category deleted successfully.",
+        });
       },
       invalidatesTags: (_result, _error, id) => [
         { type: "Category", id },

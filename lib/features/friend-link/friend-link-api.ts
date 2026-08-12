@@ -1,7 +1,7 @@
-import { toast } from "@heroui/react";
 import { z } from "zod";
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
 import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
+import { notifyMutation } from "@/lib/toast";
 import {
   FriendLinkResponseSchema,
   type FriendLinkRequest,
@@ -35,16 +35,10 @@ export const friendLinkApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Application submitted successfully!");
-        } catch (error) {
-          if (typeof error === "string") {
-            toast.danger(error);
-          } else {
-            toast.danger("Application failed");
-          }
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Application failed.",
+          success: "Application submitted successfully.",
+        });
       },
       invalidatesTags: ["FriendLink"],
     }),
@@ -90,6 +84,12 @@ export const friendLinkApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(FriendLinkResponseSchema),
       transformResponse: (response: ApiResponse<FriendLinkResponse>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to create friend link.",
+          success: "Friend link created.",
+        });
+      },
       invalidatesTags: ["FriendLink"],
     }),
 
@@ -106,6 +106,12 @@ export const friendLinkApi = baseApi.injectEndpoints({
         rawResponseSchema: apiResponseSchema(FriendLinkResponseSchema),
         transformResponse: (response: ApiResponse<FriendLinkResponse>) => response.data,
         transformErrorResponse: transformApiError,
+        async onQueryStarted(_arg, { queryFulfilled }) {
+          await notifyMutation(queryFulfilled, {
+            error: "Failed to update friend link.",
+            success: "Friend link updated.",
+          });
+        },
         invalidatesTags: (_result, _error, { id }) => ["FriendLink", { type: "FriendLink", id }],
       }
     ),
@@ -123,16 +129,10 @@ export const friendLinkApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted({ status }, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success(`Friend link status updated to ${status}.`);
-        } catch (error) {
-          if (typeof error === "string") {
-            toast.danger(error);
-          } else {
-            toast.danger("Moderation failed");
-          }
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update friend link status.",
+          success: `Friend link status updated to ${status}.`,
+        });
       },
       invalidatesTags: (_result, _error, { id }) => ["FriendLink", { type: "FriendLink", id }],
     }),
@@ -148,6 +148,12 @@ export const friendLinkApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to delete friend link.",
+          success: "Friend link deleted.",
+        });
+      },
       invalidatesTags: (_result, _error, id) => ["FriendLink", { type: "FriendLink", id }],
     }),
   }),

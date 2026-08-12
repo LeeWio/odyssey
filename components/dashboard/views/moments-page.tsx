@@ -32,16 +32,22 @@ import { usePortalContainer } from "../use-portal-container";
 // --- Single Timeline Node Component ---
 interface TimelineItemProps {
   moment: MomentResponse;
-  onLike: (id: number) => void;
+  onLike: (id: number) => Promise<unknown>;
   isLiking: boolean;
 }
 
 function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
   const [localLiked, setLocalLiked] = useState(false);
 
-  const handleLikeClick = () => {
-    setLocalLiked((prev) => !prev);
-    onLike(moment.id);
+  const handleLikeClick = async () => {
+    const wasLiked = localLiked;
+    setLocalLiked(!wasLiked);
+
+    try {
+      await onLike(moment.id);
+    } catch {
+      setLocalLiked(wasLiked);
+    }
   };
 
   return (
@@ -117,6 +123,13 @@ export function MomentsPage() {
   });
   const publicMoments = publicData?.list || [];
   const [likeMoment, { isLoading: isLiking }] = useLikeMomentMutation();
+
+  const handleLikeMoment = useCallback(
+    async (id: number) => {
+      await likeMoment(id).unwrap();
+    },
+    [likeMoment]
+  );
 
   // --- Management Console State ---
   const { data: adminData, isLoading: isAdminLoading } = useGetAllMomentsQuery({
@@ -340,7 +353,7 @@ export function MomentsPage() {
                 <TimelineItem
                   key={moment.id}
                   moment={moment}
-                  onLike={likeMoment}
+                  onLike={handleLikeMoment}
                   isLiking={isLiking}
                 />
               ))}

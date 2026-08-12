@@ -10,7 +10,7 @@ import {
   fontSans,
 } from "@/config/fonts";
 import "@/styles/globals.css";
-import { isRTL, Toast } from "@heroui/react";
+import { isRTL } from "@heroui/react";
 // import { Navbar } from "@/components/navbar";
 import { getMessages } from "next-intl/server";
 import { Footer } from "@/components/footer";

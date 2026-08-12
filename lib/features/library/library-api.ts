@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
 import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
 import { PostDigestResponseSchema, type PostDigestResponse } from "@/lib/features/post";
+import { notifyMutation } from "@/lib/toast";
 import {
   CollectionPostResponseSchema,
   ContentPreferenceResponseSchema,
@@ -118,6 +119,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(PostCollectionResponseSchema),
       transformResponse: (response: ApiResponse<PostCollectionResponse>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to create collection.",
+          success: "Collection created.",
+        });
+      },
       invalidatesTags: [overviewTag, { type: "Library", id: "COLLECTIONS" }],
     }),
     updatePostCollection: builder.mutation<
@@ -132,6 +139,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(PostCollectionResponseSchema),
       transformResponse: (response: ApiResponse<PostCollectionResponse>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update collection.",
+          success: "Collection updated.",
+        });
+      },
       invalidatesTags: (_result, _error, { collectionId }) => [
         overviewTag,
         { type: "Library", id: "COLLECTIONS" },
@@ -146,6 +159,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: emptySchema,
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to delete collection.",
+          success: "Collection deleted.",
+        });
+      },
       invalidatesTags: (_result, _error, collectionId) => [
         overviewTag,
         { type: "Library", id: "COLLECTIONS" },
@@ -160,6 +179,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: emptySchema,
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to save post to collection.",
+          success: "Saved to collection.",
+        });
+      },
       invalidatesTags: (_result, _error, { collectionId }) => [
         overviewTag,
         { type: "Library", id: "COLLECTIONS" },
@@ -174,6 +199,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: emptySchema,
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to remove post from collection.",
+          success: "Removed from collection.",
+        });
+      },
       invalidatesTags: (_result, _error, { collectionId }) => [
         overviewTag,
         { type: "Library", id: "COLLECTIONS" },
@@ -188,6 +219,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: emptySchema,
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to follow category.",
+          success: "Category followed.",
+        });
+      },
       invalidatesTags: [overviewTag, { type: "Library", id: "PREFERENCES" }],
     }),
     unfollowCategory: builder.mutation<void, number>({
@@ -198,6 +235,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: emptySchema,
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to unfollow category.",
+          success: "Category unfollowed.",
+        });
+      },
       invalidatesTags: [overviewTag, { type: "Library", id: "PREFERENCES" }],
     }),
     hideRecommendation: builder.mutation<void, number>({
@@ -208,6 +251,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: emptySchema,
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to hide recommendation.",
+          success: "Recommendation hidden.",
+        });
+      },
       invalidatesTags: [overviewTag, { type: "Library", id: "PREFERENCES" }],
     }),
     restoreRecommendation: builder.mutation<void, number>({
@@ -218,6 +267,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: emptySchema,
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to restore recommendation.",
+          success: "Recommendation restored.",
+        });
+      },
       invalidatesTags: [overviewTag, { type: "Library", id: "PREFERENCES" }],
     }),
     clearHiddenRecommendations: builder.mutation<void, void>({
@@ -228,6 +283,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: emptySchema,
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to clear hidden recommendations.",
+          success: "Hidden recommendations cleared.",
+        });
+      },
       invalidatesTags: [overviewTag, { type: "Library", id: "PREFERENCES" }],
     }),
     deleteReadingHistory: builder.mutation<void, number>({
@@ -238,6 +299,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: emptySchema,
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to remove reading history entry.",
+          success: "Reading history entry removed.",
+        });
+      },
       invalidatesTags: [overviewTag, { type: "Library", id: "HISTORY" }],
     }),
     clearReadingHistory: builder.mutation<void, void>({
@@ -245,6 +312,12 @@ export const libraryApi = baseApi.injectEndpoints({
       rawResponseSchema: emptySchema,
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to clear reading history.",
+          success: "Reading history cleared.",
+        });
+      },
       invalidatesTags: [overviewTag, { type: "Library", id: "HISTORY" }],
     }),
   }),

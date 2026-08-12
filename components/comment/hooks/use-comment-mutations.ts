@@ -125,7 +125,6 @@ export function useCommentMutations({
       // On Success, remove from pending list and fetch actual comments
       removePendingComment(tempId);
       await refetch();
-      toast.success("Comment posted and sent for review.");
     } catch (err) {
       console.error("Comment submission failed, keeping in local failed list:", err);
       markPendingCommentFailed(tempId);
@@ -148,7 +147,6 @@ export function useCommentMutations({
     try {
       if (nextLiked) {
         await likeCommentApi(id).unwrap();
-        toast.success("Comment liked.");
       } else {
         await unlikeCommentApi(id).unwrap();
       }
@@ -156,6 +154,7 @@ export function useCommentMutations({
       console.error("Failed to sync comment like state:", err);
       // Rollback optimistic state if backend fails
       setLikes((prev) => ({ ...prev, [id]: { count: currentLikes, isLiked: currentIsLiked } }));
+      toast.danger("Couldn't update comment reaction.");
     }
   };
 

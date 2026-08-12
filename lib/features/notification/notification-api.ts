@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
 import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
+import { notifyMutation } from "@/lib/toast";
 import { NotificationResponseSchema, type NotificationResponse } from "./notification-contracts";
 
 export const notificationApi = baseApi.injectEndpoints({
@@ -39,6 +40,9 @@ export const notificationApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Failed to mark notification as read." });
+      },
       invalidatesTags: (_result, _error, id) => [
         { type: "Notification", id },
         { type: "Notification", id: "LIST" },
@@ -51,6 +55,12 @@ export const notificationApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to mark all notifications as read.",
+          success: "All notifications marked as read.",
+        });
+      },
       invalidatesTags: ["Notification"],
     }),
 
@@ -59,6 +69,12 @@ export const notificationApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to delete notification.",
+          success: "Notification deleted.",
+        });
+      },
       invalidatesTags: (_result, _error, id) => [
         { type: "Notification", id },
         { type: "Notification", id: "LIST" },
@@ -71,6 +87,12 @@ export const notificationApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to clear notifications.",
+          success: "Read notifications cleared.",
+        });
+      },
       invalidatesTags: ["Notification"],
     }),
   }),

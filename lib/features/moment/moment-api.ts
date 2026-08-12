@@ -1,7 +1,7 @@
-import { toast } from "@heroui/react";
 import { z } from "zod";
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
 import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
+import { notifyMutation } from "@/lib/toast";
 import { MomentResponseSchema, type MomentRequest, type MomentResponse } from "./moment-contracts";
 
 export const momentApi = baseApi.injectEndpoints({
@@ -35,6 +35,9 @@ export const momentApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Couldn't update moment reaction." });
+      },
       invalidatesTags: (_result, _error, id) => [{ type: "Moment", id }],
     }),
 
@@ -79,12 +82,10 @@ export const momentApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<MomentResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Moment created successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to create moment");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to create moment.",
+          success: "Moment created successfully.",
+        });
       },
       invalidatesTags: [{ type: "Moment", id: "LIST" }],
     }),
@@ -102,12 +103,10 @@ export const momentApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<MomentResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Moment updated successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to update moment");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update moment.",
+          success: "Moment updated successfully.",
+        });
       },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Moment", id },
@@ -127,12 +126,10 @@ export const momentApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Moment deleted successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to delete moment");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to delete moment.",
+          success: "Moment deleted successfully.",
+        });
       },
       invalidatesTags: (_result, _error, id) => [
         { type: "Moment", id },

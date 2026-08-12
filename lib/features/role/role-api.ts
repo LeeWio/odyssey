@@ -1,7 +1,7 @@
-import { toast } from "@heroui/react";
 import { z } from "zod";
 import type { ApiResponse } from "@/lib/api";
 import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import { notifyMutation } from "@/lib/toast";
 import { RoleResponseSchema, type RoleRequest, type RoleResponse } from "./role-contracts";
 
 export const roleApi = baseApi.injectEndpoints({
@@ -36,12 +36,10 @@ export const roleApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<RoleResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Role created successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to create role");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to create role.",
+          success: "Role created successfully.",
+        });
       },
       invalidatesTags: [{ type: "Role", id: "LIST" }],
     }),
@@ -59,12 +57,10 @@ export const roleApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<RoleResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Role updated successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to update role");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update role.",
+          success: "Role updated successfully.",
+        });
       },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Role", id },
@@ -84,12 +80,10 @@ export const roleApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Role deleted successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to delete role");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to delete role.",
+          success: "Role deleted successfully.",
+        });
       },
       invalidatesTags: (_result, _error, id) => [
         { type: "Role", id },
@@ -121,12 +115,10 @@ export const roleApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Role permissions updated successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to update role permissions");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update role permissions.",
+          success: "Role permissions updated successfully.",
+        });
       },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Role", id: `${id}-menus` },

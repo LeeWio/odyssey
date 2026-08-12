@@ -1,6 +1,6 @@
 "use client";
 
-import { I18nProvider } from "@heroui/react";
+import { I18nProvider, Toast } from "@heroui/react";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { type AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
 import type { ThemeProviderProps } from "next-themes";
@@ -139,6 +139,7 @@ export function Providers({ children, lang, messages, themeProps }: ProvidersPro
           >
             <ThemeRootSync />
             <MediaProvider>{children}</MediaProvider>
+            <Toast.Provider maxVisibleToasts={4} placement="bottom end" />
           </NextThemesProvider>
         </ReduxProvider>
       </NextIntlClientProvider>

@@ -57,5 +57,11 @@ export const transformApiError = (error: FetchBaseQueryError): string => {
 
 export const getApiErrorMessage = (error: unknown, fallback: string): string => {
   if (typeof error === "string") return error;
+  if (!error || typeof error !== "object") return fallback;
+
+  const value = error as { error?: unknown };
+  if (typeof value.error === "string") return value.error;
+  if (value.error && value.error !== error) return getApiErrorMessage(value.error, fallback);
+
   return getApiErrorPayload(error)?.message ?? fallback;
 };

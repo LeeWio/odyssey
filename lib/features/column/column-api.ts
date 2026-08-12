@@ -1,7 +1,7 @@
-import { toast } from "@heroui/react";
 import { z } from "zod";
 import type { ApiResponse } from "@/lib/api";
 import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import { notifyMutation } from "@/lib/toast";
 import { ColumnResponseSchema, type ColumnRequest, type ColumnResponse } from "./column-contracts";
 
 export const columnApi = baseApi.injectEndpoints({
@@ -33,12 +33,10 @@ export const columnApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<ColumnResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Column created successfully.");
-        } catch {
-          toast.danger("Failed to create column.");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to create column.",
+          success: "Column created successfully.",
+        });
       },
       invalidatesTags: [
         { type: "Column", id: "LIST" },
@@ -51,12 +49,10 @@ export const columnApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<ColumnResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Column updated successfully.");
-        } catch {
-          toast.danger("Failed to update column.");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update column.",
+          success: "Column updated successfully.",
+        });
       },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Column", id },
@@ -70,12 +66,10 @@ export const columnApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Column deleted successfully.");
-        } catch {
-          toast.danger("Failed to delete column.");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to delete column.",
+          success: "Column deleted successfully.",
+        });
       },
       invalidatesTags: [
         { type: "Column", id: "LIST" },

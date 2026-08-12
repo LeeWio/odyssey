@@ -1,7 +1,14 @@
 import { toast } from "@heroui/react";
 import { z } from "zod";
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
-import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
+import {
+  apiResponseSchema,
+  baseApi,
+  getApiErrorMessage,
+  pageResultSchema,
+  transformApiError,
+} from "@/lib/api";
+import { notifyMutation } from "@/lib/toast";
 import { FileResponseSchema, type FileResponse } from "./file-contracts";
 
 export const fileApi = baseApi.injectEndpoints({
@@ -35,13 +42,12 @@ export const fileApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(FileResponseSchema),
       transformResponse: (response: ApiResponse<FileResponse>) => response.data,
       transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("File uploaded successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Upload failed");
-        }
+      onQueryStarted(file, { queryFulfilled }) {
+        void toast.promise(queryFulfilled, {
+          loading: `Uploading ${file.name}...`,
+          success: `Uploaded ${file.name}.`,
+          error: (error) => getApiErrorMessage(error, `Couldn't upload ${file.name}.`),
+        });
       },
       invalidatesTags: ["File"],
     }),
@@ -58,12 +64,10 @@ export const fileApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("File deleted successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Deletion failed");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to delete file.",
+          success: "File deleted successfully.",
+        });
       },
       invalidatesTags: ["File"],
     }),

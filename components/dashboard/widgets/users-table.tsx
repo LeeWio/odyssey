@@ -1,7 +1,7 @@
 "use client";
 
 import { Copy, Sliders } from "@gravity-ui/icons";
-import { Avatar, Button, Chip, SearchField } from "@heroui/react";
+import { Avatar, Button, Chip, SearchField, toast } from "@heroui/react";
 import type { DataGridColumn, DataGridSortDescriptor } from "@heroui-pro/react";
 import { DataGrid } from "@heroui-pro/react";
 import { useCallback, useMemo, useState } from "react";
@@ -42,6 +42,15 @@ export function UsersTable() {
     setSearch(value);
   }, []);
 
+  const handleCopyId = useCallback(async (id: number) => {
+    try {
+      await navigator.clipboard.writeText(id.toString());
+      toast.success("User ID copied.");
+    } catch {
+      toast.danger("Couldn't copy the user ID.");
+    }
+  }, []);
+
   const columns = useMemo<DataGridColumn<UserResponse>[]>(
     () => [
       {
@@ -55,7 +64,7 @@ export function UsersTable() {
               aria-label="Copy ID"
               size="sm"
               variant="ghost"
-              onPress={() => navigator.clipboard.writeText(item.id.toString())}
+              onPress={() => void handleCopyId(item.id)}
             >
               <Copy className="text-muted size-3.5" />
             </Button>
@@ -136,7 +145,7 @@ export function UsersTable() {
         minWidth: 120,
       },
     ],
-    []
+    [handleCopyId]
   );
 
   return (

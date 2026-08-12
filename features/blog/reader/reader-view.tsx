@@ -652,9 +652,13 @@ export function ReaderView({ slug }: ReaderViewProps) {
             <Button
               size="sm"
               variant="ghost"
-              onPress={() => {
-                navigator.clipboard.writeText(window.location.href);
-                toast.success("Article link copied successfully!");
+              onPress={async () => {
+                try {
+                  await navigator.clipboard.writeText(window.location.href);
+                  toast.success("Article link copied successfully!");
+                } catch {
+                  toast.danger("Unable to copy article link.");
+                }
               }}
               className="hover:bg-accent/10 hover:text-accent-600 rounded-full transition-all duration-300"
             >

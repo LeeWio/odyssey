@@ -1,6 +1,6 @@
 "use client";
 
-import { Surface } from "@heroui/react";
+import { Surface, toast } from "@heroui/react";
 import { DropZone } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
@@ -89,6 +89,7 @@ export function ImageNodeView({ editor, node, updateAttributes }: NodeViewProps)
 
       if (validationError) {
         setPendingImage({ error: validationError, file, status: "failed" });
+        toast.warning(validationError);
         return;
       }
 

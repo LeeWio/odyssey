@@ -1,7 +1,7 @@
-import { toast } from "@heroui/react";
 import { z } from "zod";
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
 import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
+import { notifyMutation } from "@/lib/toast";
 import { CategoryResponseSchema } from "@/lib/features/category";
 import { TagResponseSchema } from "@/lib/features/tag";
 
@@ -206,12 +206,10 @@ export const postApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Post created successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to create post");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to create post.",
+          success: "Post created successfully.",
+        });
       },
       invalidatesTags: [{ type: "Post", id: "LIST" }],
     }),
@@ -229,12 +227,10 @@ export const postApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Post updated successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to update post");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update post.",
+          success: "Post updated successfully.",
+        });
       },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Post", id },
@@ -254,12 +250,10 @@ export const postApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Post deleted successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to delete post");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to delete post.",
+          success: "Post deleted successfully.",
+        });
       },
       invalidatesTags: (_result, _error, id) => [
         { type: "Post", id },
@@ -405,12 +399,10 @@ export const postApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Post reverted to selected revision!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to revert post");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to revert post.",
+          success: "Post reverted to the selected revision.",
+        });
       },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Post", id },

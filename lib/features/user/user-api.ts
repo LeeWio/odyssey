@@ -1,7 +1,7 @@
-import { toast } from "@heroui/react";
 import { z } from "zod";
 import type { ApiResponse } from "@/lib/api";
 import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import { notifyMutation } from "@/lib/toast";
 import {
   UserInfoResponseSchema,
   UserResponseSchema,
@@ -26,6 +26,12 @@ export const userApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update profile.",
+          success: "Profile updated.",
+        });
+      },
       invalidatesTags: [{ type: "User", id: "CURRENT" }],
     }),
 
@@ -34,6 +40,12 @@ export const userApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(z.unknown()),
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to change password.",
+          success: "Password changed.",
+        });
+      },
     }),
 
     /**
@@ -65,12 +77,10 @@ export const userApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<UserResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("User status updated successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to update status");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update user status.",
+          success: "User status updated successfully.",
+        });
       },
       invalidatesTags: ["User"],
     }),
@@ -88,12 +98,10 @@ export const userApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<UserResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("User roles updated successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to update roles");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update user roles.",
+          success: "User roles updated successfully.",
+        });
       },
       invalidatesTags: ["User"],
     }),

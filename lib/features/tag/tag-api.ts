@@ -1,7 +1,7 @@
-import { toast } from "@heroui/react";
 import { z } from "zod";
 import type { ApiResponse } from "@/lib/api";
 import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
+import { notifyMutation } from "@/lib/toast";
 import { TagResponseSchema, type TagRequest, type TagResponse } from "./tag-contracts";
 
 export const tagApi = baseApi.injectEndpoints({
@@ -44,12 +44,10 @@ export const tagApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<TagResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Tag created successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to create tag");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to create tag.",
+          success: "Tag created successfully.",
+        });
       },
       invalidatesTags: [{ type: "Tag", id: "LIST" }],
     }),
@@ -67,12 +65,10 @@ export const tagApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<TagResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Tag updated successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to update tag");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to update tag.",
+          success: "Tag updated successfully.",
+        });
       },
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Tag", id },
@@ -92,12 +88,10 @@ export const tagApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          toast.success("Tag deleted successfully!");
-        } catch (error) {
-          toast.danger(typeof error === "string" ? error : "Failed to delete tag");
-        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to delete tag.",
+          success: "Tag deleted successfully.",
+        });
       },
       invalidatesTags: (_result, _error, id) => [
         { type: "Tag", id },

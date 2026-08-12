@@ -247,10 +247,14 @@ export function ProfileCard({
   };
 
   // Share profile callback
-  const handleShareProfile = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
+  const handleShareProfile = async () => {
+    if (typeof window === "undefined") return;
+
+    try {
+      await navigator.clipboard.writeText(window.location.href);
       toast.success("Profile link copied to clipboard!");
+    } catch {
+      toast.danger("Unable to copy profile link.");
     }
   };
 

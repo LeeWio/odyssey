@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertDialog, Button, Spinner, Tooltip } from "@heroui/react";
+import { AlertDialog, Button, Spinner, Tooltip, toast } from "@heroui/react";
 import { DropZone, useDropZonePickerContext } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
@@ -225,11 +225,16 @@ export function FilesPage() {
   };
 
   // Copy URL link
-  const handleCopyLink = (file: UploadFile) => {
-    if (file.url) {
-      navigator.clipboard.writeText(file.url);
+  const handleCopyLink = async (file: UploadFile) => {
+    if (!file.url) return;
+
+    try {
+      await navigator.clipboard.writeText(file.url);
       setCopiedFileName(file.name);
       setTimeout(() => setCopiedFileName(null), 2000);
+      toast.success("File link copied.");
+    } catch {
+      toast.danger("Couldn't copy the file link.");
     }
   };
 
@@ -327,7 +332,7 @@ export function FilesPage() {
                           isIconOnly
                           size="sm"
                           variant="ghost"
-                          onPress={() => handleCopyLink(file)}
+                          onPress={() => void handleCopyLink(file)}
                           aria-label="Copy Link"
                           className="size-7"
                         >

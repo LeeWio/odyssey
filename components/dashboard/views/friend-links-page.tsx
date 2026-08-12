@@ -140,7 +140,8 @@ export function FriendLinksPage() {
     if (!selectedLink) return;
     try {
       await deleteLink(selectedLink.id).unwrap();
-      setIsDeleteAlertOpen(true);
+      setIsDeleteAlertOpen(false);
+      setSelectedLink(null);
     } catch {
       // Toast handled in API
     }
