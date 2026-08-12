@@ -1,3 +1,10 @@
+# [1.48.0](https://github.com/LeeWio/odyssey/compare/v1.47.0...v1.48.0) (2026-08-12)
+
+
+### Features
+
+* **library:** add reading preferences ([4ee2c26](https://github.com/LeeWio/odyssey/commit/4ee2c2655745e785ae95737d2c138c19a5d872dc))
+
 # [1.47.0](https://github.com/LeeWio/odyssey/compare/v1.46.0...v1.47.0) (2026-08-12)
 
 
