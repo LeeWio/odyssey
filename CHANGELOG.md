@@ -1,3 +1,10 @@
+## [1.60.1](https://github.com/LeeWio/odyssey/compare/v1.60.0...v1.60.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **rich-text:** resolve document normalizer export error & update editor configurations ([39ddd3e](https://github.com/LeeWio/odyssey/commit/39ddd3ea2979a871e37ad39e94557adeb1170834))
+
 # [1.60.0](https://github.com/LeeWio/odyssey/compare/v1.59.1...v1.60.0) (2026-08-12)
 
 
