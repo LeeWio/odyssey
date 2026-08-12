@@ -1,5 +1,6 @@
 import {
   ArchiveIcon,
+  ArrowRightFromSquareIcon,
   ClockIcon,
   FileTextIcon,
   GearIcon,
@@ -34,6 +35,19 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     keywords: ["projects", "portfolio", "tools", "experiments", "open source", "builds"],
     intent: CommandIntent.NAVIGATE,
     payload: { href: "/projects" },
+    defaultVisible: true,
+  }),
+  createNavigationCommand({
+    id: "navigate-links",
+    title: "Visit the blogroll",
+    description: "Browse friends and places worth reading",
+    icon: ArrowRightFromSquareIcon,
+    category: "System",
+    source: "navigation",
+    order: 2,
+    keywords: ["links", "blogroll", "friends", "web", "exchange", "travelogue"],
+    intent: CommandIntent.NAVIGATE,
+    payload: { href: "/links" },
     defaultVisible: true,
   }),
 
