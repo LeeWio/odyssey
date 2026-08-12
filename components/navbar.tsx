@@ -1275,15 +1275,15 @@ export const Navbar = () => {
                     aria-label="Account actions"
                     onAction={(key) => {
                       if (key === "dashboard") router.push("/blog");
-                      if (key === "profile") router.push("/blog");
+                      if (key === "library") router.push("/library");
                       if (key === "logout") handleLogout();
                     }}
                   >
                     <Dropdown.Item id="dashboard" textValue="Dashboard">
                       <Label>Dashboard</Label>
                     </Dropdown.Item>
-                    <Dropdown.Item id="profile" textValue="Profile">
-                      <Label>Profile</Label>
+                    <Dropdown.Item id="library" textValue="Reading library">
+                      <Label>Reading library</Label>
                     </Dropdown.Item>
                     <Dropdown.Item id="logout" textValue="Log out" variant="danger">
                       <Label>Log out</Label>
