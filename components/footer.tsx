@@ -10,7 +10,7 @@ const FOOTER_LINKS = [
   { href: "/columns", label: "Columns" },
   { href: "/blog", label: "Orbit" },
   { href: "/links", label: "Travelogue" },
-  { href: "/blog", label: "Archive" },
+  { href: "/moments", label: "Archive" },
 ] as const;
 
 export function Footer() {

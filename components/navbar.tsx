@@ -127,12 +127,12 @@ const getNavigationItem = (id: NavigationId | null) => {
       return {
         id: "more" as const,
         label: "Archive",
-        eyebrow: "Projects & objects",
-        title: "The rest of the yard.",
+        eyebrow: "Projects & field notes",
+        title: "The rest of the notebook.",
         description:
-          "A repository of shipping products, open-source utilities, and useful objects curated or built along the journey.",
-        href: "/blog",
-        cta: "Explore the archive",
+          "A repository of field notes, shipping products, open-source utilities, and useful objects collected along the journey.",
+        href: "/moments",
+        cta: "Open field notes",
       };
     default:
       return null;
@@ -577,28 +577,28 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
   if (id === "more") {
     return (
       <div className="grid gap-4 md:col-span-8 md:grid-cols-3">
-        {/* Project 1: Odyssey Shipyard */}
+        {/* Field notes */}
         <motion.div {...reveal(0)}>
           <Card className="group h-full" variant="tertiary">
             <Card.Header>
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
-                <Icon aria-hidden="true" icon="lucide:blocks" className="size-5" />
+                <Icon aria-hidden="true" icon="lucide:notebook-pen" className="size-5" />
               </div>
-              <Card.Title>Odyssey Shipyard</Card.Title>
+              <Card.Title>Field Notes</Card.Title>
               <Card.Description>
-                Products, layouts, and Next.js widgets in active development.
+                Short observations, work-in-progress notes, and things worth keeping close.
               </Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
-              <Chip size="sm" variant="soft">
-                In progress
+              <Chip size="sm" variant="soft" color="accent">
+                Notebook
               </Chip>
               <Button
                 isIconOnly
                 size="sm"
                 variant="ghost"
-                aria-label="Open Odyssey Shipyard"
-                onPress={() => onNavigate("/blog")}
+                aria-label="Open Field Notes"
+                onPress={() => onNavigate("/moments")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>
