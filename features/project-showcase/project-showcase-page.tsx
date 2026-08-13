@@ -10,18 +10,36 @@ import {
   Star,
 } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
-import { Button, Card, Chip, Skeleton, Typography, buttonVariants, cn } from "@heroui/react";
+import {
+  Button,
+  Card,
+  Chip,
+  Label,
+  ListBox,
+  SearchField,
+  Select,
+  Skeleton,
+  Tag,
+  TagGroup,
+  Typography,
+  buttonVariants,
+  cn,
+} from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useDeferredValue, useMemo, useState } from "react";
 
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import { type ProjectResponse, useGetPublicProjectsQuery } from "@/lib/features/project";
+
+type ProjectAvailability = "all" | "preview" | "source";
+type ProjectSort = "featured" | "most-starred" | "alphabetical";
 
 function toSafeExternalUrl(value?: string | null) {
   if (!value?.trim()) return undefined;
 
   try {
-    const url = new URL(value);
+    const url = new URL(value.trim());
     return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : undefined;
   } catch {
     return undefined;
@@ -34,6 +52,18 @@ function getTechnologyLabels(value?: string | null) {
     .map((technology) => technology.trim())
     .filter(Boolean)
     .slice(0, 4);
+}
+
+function matchesProject(project: ProjectResponse, query: string) {
+  if (!query) return true;
+
+  return [
+    project.name,
+    project.slug,
+    project.description,
+    project.language,
+    project.techStack,
+  ].some((value) => value?.toLocaleLowerCase().includes(query));
 }
 
 function ProjectSkeleton() {
@@ -174,6 +204,56 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
 
 export function ProjectShowcasePage() {
   const { data: projects = [], error, isLoading, refetch } = useGetPublicProjectsQuery();
+  const [search, setSearch] = useState("");
+  const [availability, setAvailability] = useState<ProjectAvailability>("all");
+  const [sort, setSort] = useState<ProjectSort>("featured");
+  const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase());
+
+  const visibleProjects = useMemo(() => {
+    const filtered = projects.filter((project) => {
+      const matchesAvailability =
+        availability === "all" ||
+        (availability === "preview"
+          ? Boolean(toSafeExternalUrl(project.previewUrl))
+          : Boolean(toSafeExternalUrl(project.githubUrl)));
+
+      return matchesAvailability && matchesProject(project, deferredSearch);
+    });
+
+    return [...filtered].sort((first, second) => {
+      if (sort === "most-starred") {
+        return (
+          (second.starsCount ?? 0) - (first.starsCount ?? 0) ||
+          (second.forksCount ?? 0) - (first.forksCount ?? 0) ||
+          first.name.localeCompare(second.name)
+        );
+      }
+      if (sort === "alphabetical") return first.name.localeCompare(second.name);
+
+      return first.sortOrder - second.sortOrder || first.name.localeCompare(second.name);
+    });
+  }, [availability, deferredSearch, projects, sort]);
+
+  const previewCount = projects.filter((project) =>
+    Boolean(toSafeExternalUrl(project.previewUrl))
+  ).length;
+  const sourceCount = projects.filter((project) =>
+    Boolean(toSafeExternalUrl(project.githubUrl))
+  ).length;
+
+  const clearFilters = () => {
+    setSearch("");
+    setAvailability("all");
+  };
+
+  const handleAvailabilityChange = (keys: "all" | Set<React.Key>) => {
+    if (keys === "all") return;
+
+    const [key] = Array.from(keys);
+    if (key === "all" || key === "preview" || key === "source") {
+      setAvailability(key);
+    }
+  };
 
   return (
     <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
@@ -242,11 +322,115 @@ export function ProjectShowcasePage() {
           ) : null}
 
           {!isLoading && !error && projects.length > 0 ? (
-            <div className="grid gap-5 lg:grid-cols-2">
-              {projects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </div>
+            <>
+              <div className="border-default-200 grid gap-5 border-y py-6 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-end">
+                <div className="min-w-0">
+                  <SearchField fullWidth name="project-search" value={search} onChange={setSearch}>
+                    <Label className="sr-only">Search projects</Label>
+                    <SearchField.Group>
+                      <SearchField.SearchIcon />
+                      <SearchField.Input placeholder="Search projects, tools, or technology" />
+                      <SearchField.ClearButton aria-label="Clear project search" />
+                    </SearchField.Group>
+                  </SearchField>
+                  <TagGroup
+                    aria-label="Filter projects by availability"
+                    selectedKeys={new Set([availability])}
+                    selectionMode="single"
+                    size="sm"
+                    variant="surface"
+                    className="mt-4"
+                    onSelectionChange={handleAvailabilityChange}
+                  >
+                    <TagGroup.List className="flex-wrap">
+                      <Tag id="all" textValue="All projects">
+                        All projects
+                        <span className="text-muted text-xs tabular-nums">{projects.length}</span>
+                      </Tag>
+                      <Tag id="preview" textValue="Live preview available">
+                        Live preview
+                        <span className="text-muted text-xs tabular-nums">{previewCount}</span>
+                      </Tag>
+                      <Tag id="source" textValue="Source available">
+                        Source available
+                        <span className="text-muted text-xs tabular-nums">{sourceCount}</span>
+                      </Tag>
+                    </TagGroup.List>
+                  </TagGroup>
+                </div>
+                <Select
+                  fullWidth
+                  value={sort}
+                  variant="secondary"
+                  onChange={(value) => {
+                    if (
+                      value === "featured" ||
+                      value === "most-starred" ||
+                      value === "alphabetical"
+                    ) {
+                      setSort(value);
+                    }
+                  }}
+                >
+                  <Label>Sort projects</Label>
+                  <Select.Trigger>
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      <ListBox.Item id="featured" textValue="Featured first">
+                        Featured first
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                      <ListBox.Item id="most-starred" textValue="Most starred">
+                        Most starred
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                      <ListBox.Item id="alphabetical" textValue="Alphabetical">
+                        Alphabetical
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
+              </div>
+
+              <div className="mt-7 flex items-center justify-between gap-4">
+                <Typography color="muted" type="body-sm">
+                  {visibleProjects.length} {visibleProjects.length === 1 ? "project" : "projects"}{" "}
+                  to explore
+                </Typography>
+                {search || availability !== "all" ? (
+                  <Button size="sm" variant="tertiary" onPress={clearFilters}>
+                    Clear filters
+                  </Button>
+                ) : null}
+              </div>
+
+              {visibleProjects.length > 0 ? (
+                <div className="mt-6 grid gap-5 lg:grid-cols-2">
+                  {visibleProjects.map((project) => (
+                    <ProjectCard key={project.id} project={project} />
+                  ))}
+                </div>
+              ) : (
+                <Card variant="secondary" className="mt-6 items-start gap-4 p-7">
+                  <Card.Header>
+                    <Chip size="sm" variant="soft">
+                      No matches
+                    </Chip>
+                    <Card.Title>No projects match these filters</Card.Title>
+                    <Card.Description>
+                      Try a project name, technology, or a different availability filter.
+                    </Card.Description>
+                  </Card.Header>
+                  <Button size="sm" variant="secondary" onPress={clearFilters}>
+                    Show all projects
+                  </Button>
+                </Card>
+              )}
+            </>
           ) : null}
         </section>
 
