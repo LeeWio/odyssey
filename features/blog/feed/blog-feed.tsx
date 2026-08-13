@@ -25,8 +25,9 @@ import { ArrowRight, ArrowRotateLeft, BookOpen, Eye, Play } from "@gravity-ui/ic
 import { useDeferredValue, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
-import { useGetLibraryOverviewQuery } from "@/lib/features/library";
+import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { useAppSelector } from "@/lib/hooks";
+import { getReadingPositionHref } from "@/lib/reading-position";
 
 const PAGE_SIZE = 8;
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -174,11 +175,7 @@ function FeedSkeleton() {
   );
 }
 
-function ContinueReading({
-  entries,
-}: {
-  entries: Array<{ post: PostDigestResponse; progressPercent: number }>;
-}) {
+function ContinueReading({ entries }: { entries: ReadingHistoryResponse[] }) {
   return (
     <section aria-labelledby="continue-reading-title" className="mt-12">
       <div className="mb-5 flex items-end justify-between gap-4">
@@ -192,7 +189,7 @@ function ContinueReading({
         </div>
       </div>
       <div className="grid gap-3 md:grid-cols-3">
-        {entries.map(({ post, progressPercent }) => (
+        {entries.map(({ post, positionAnchor, progressPercent }) => (
           <Card key={post.id} variant="secondary" className="gap-4 p-5">
             <Card.Header className="gap-2 p-0">
               <div className="flex items-start justify-between gap-3">
@@ -222,7 +219,7 @@ function ContinueReading({
             <Card.Footer className="justify-end p-0">
               <Link
                 className="text-accent inline-flex items-center gap-1.5 text-sm font-medium no-underline"
-                href={`/single/${post.slug}`}
+                href={getReadingPositionHref(post.slug, positionAnchor)}
               >
                 Continue
                 <Play aria-hidden="true" className="size-3.5" />
