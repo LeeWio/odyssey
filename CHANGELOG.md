@@ -1,3 +1,10 @@
+# [1.65.0](https://github.com/LeeWio/odyssey/compare/v1.64.0...v1.65.0) (2026-08-13)
+
+
+### Features
+
+* **library:** restore positions from reading history ([98a735c](https://github.com/LeeWio/odyssey/commit/98a735c8c57d6b22346e08c45b8e72e757d6fa40))
+
 # [1.64.0](https://github.com/LeeWio/odyssey/compare/v1.63.0...v1.64.0) (2026-08-13)
 
 
