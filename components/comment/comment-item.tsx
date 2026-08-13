@@ -5,6 +5,7 @@ import { Avatar, Button, Chip, Surface, Typography, cn, toast } from "@heroui/re
 import { useState } from "react";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
+import { formatRelativeTime } from "@/lib/relative-time";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
 import { CommentInput } from "./comment-input";
@@ -23,16 +24,14 @@ interface CommentItemProps {
   onRetry: (tempId: number, content: string, parentId: number | null) => Promise<void>;
 }
 
-function formatCommentDate(value: string) {
-  const date = new Date(value);
+const commentDateFormatter = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
 
-  if (Number.isNaN(date.getTime())) return "Just now";
-
-  return new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-    year: date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
-  }).format(date);
+function formatCommentTimestamp(value: string) {
+  const timestamp = new Date(value).getTime();
+  return Number.isFinite(timestamp) ? commentDateFormatter.format(new Date(timestamp)) : undefined;
 }
 
 export function CommentItem({
@@ -93,8 +92,12 @@ export function CommentItem({
                 {displayName}
               </Typography>
               <div className="flex flex-wrap items-center gap-2">
-                <time className="text-muted text-xs" dateTime={comment.createdAt}>
-                  {formatCommentDate(comment.createdAt)}
+                <time
+                  className="text-muted text-xs"
+                  dateTime={comment.createdAt}
+                  title={formatCommentTimestamp(comment.createdAt)}
+                >
+                  {formatRelativeTime(comment.createdAt, { fallback: "Just now" })}
                 </time>
                 {comment.isFailed ? (
                   <Chip size="sm" color="danger" variant="soft">
