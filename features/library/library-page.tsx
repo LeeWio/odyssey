@@ -52,6 +52,7 @@ import {
   useUpdatePostCollectionMutation,
 } from "@/lib/features/library";
 import type { PostDigestResponse } from "@/lib/features/post";
+import { getReadingPositionHref } from "@/lib/reading-position";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
@@ -140,10 +141,11 @@ function RecommendedCard({
 }
 
 function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
-  const { post, progressPercent } = entry;
+  const { post, positionAnchor, progressPercent } = entry;
+  const href = getReadingPositionHref(post.slug, positionAnchor);
 
   return (
-    <Link className="block h-full no-underline" href={`/single/${post.slug}`}>
+    <Link className="block h-full no-underline" href={href}>
       <Card variant="secondary" className="h-full overflow-hidden p-0">
         <LibraryPostVisual post={post} />
         <Card.Header className="gap-3">

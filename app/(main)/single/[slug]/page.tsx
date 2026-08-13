@@ -54,6 +54,7 @@ import {
   useGetPostCollectionsQuery,
   useRecordReadingProgressMutation,
 } from "@/lib/features/library";
+import { getReadingPositionId } from "@/lib/reading-position";
 import { useAppSelector } from "@/lib/hooks";
 import { ArticleSidebar } from "./article-sidebar";
 
@@ -106,6 +107,7 @@ export default function SinglePage({ params }: SinglePageProps) {
     null
   );
   const readingProgressRef = useRef({ postId: null as number | null, progress: 0 });
+  const restoredPositionRef = useRef<string | null>(null);
 
   const { scrollY, scrollYProgress } = useScroll();
   const { data: serverArticle, isLoading: queryIsLoading } = useGetPublicPostBySlugQuery(slug);
@@ -137,6 +139,40 @@ export default function SinglePage({ params }: SinglePageProps) {
   const currentOptimisticLike = optimisticLike?.postId === postId ? optimisticLike : null;
   const currentOptimisticFavorite =
     optimisticFavorite?.postId === postId ? optimisticFavorite : null;
+
+  useEffect(() => {
+    if (!parsedContent || !postId) return;
+
+    const targetId = getReadingPositionId(window.location.hash);
+    if (!targetId) return;
+
+    const restoreKey = `${postId}:${targetId}`;
+    if (restoredPositionRef.current === restoreKey) return;
+
+    let contentFrame: number | null = null;
+    const frame = window.requestAnimationFrame(() => {
+      contentFrame = window.requestAnimationFrame(() => {
+        const target = document.getElementById(targetId);
+
+        if (!target || !target.closest("[data-reading-content]")) return;
+
+        restoredPositionRef.current = restoreKey;
+        target.setAttribute("tabindex", "-1");
+        target.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth",
+          block: "start",
+        });
+        target.focus({ preventScroll: true });
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (contentFrame !== null) window.cancelAnimationFrame(contentFrame);
+    };
+  }, [parsedContent, postId]);
   const isLiked = currentOptimisticLike?.isLiked ?? serverIsLiked;
   const likesCount = currentOptimisticLike?.likesCount ?? serverLikesCount;
   const isFavorited = currentOptimisticFavorite?.isFavorited ?? serverIsFavorited;
@@ -400,7 +436,11 @@ export default function SinglePage({ params }: SinglePageProps) {
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1400px] grid-cols-1 justify-center gap-8 px-4 py-12 md:px-6 lg:grid-cols-[260px_minmax(0,760px)] lg:px-8 xl:grid-cols-[280px_minmax(0,760px)] xl:gap-12 2xl:gap-16 2xl:px-12">
         <ArticleSidebar slug={slug} />
 
-        <article data-reading-content className="mx-auto w-full max-w-[760px] min-w-0">
+        <article
+          id={postId ? `article-${postId}` : undefined}
+          data-reading-content
+          className="mx-auto w-full max-w-[760px] min-w-0"
+        >
           <section className="mx-auto max-w-190 py-0">
             {isLoading || !article ? (
               <>
