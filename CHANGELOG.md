@@ -1,3 +1,10 @@
+# [1.68.0](https://github.com/LeeWio/odyssey/compare/v1.67.0...v1.68.0) (2026-08-13)
+
+
+### Features
+
+* **comments:** show relative comment timestamps ([a8113e3](https://github.com/LeeWio/odyssey/commit/a8113e3822559cb3807fa4a9d3f5a795d0bbe604))
+
 # [1.67.0](https://github.com/LeeWio/odyssey/compare/v1.66.0...v1.67.0) (2026-08-13)
 
 
