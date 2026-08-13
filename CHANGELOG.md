@@ -1,3 +1,10 @@
+# [1.61.0](https://github.com/LeeWio/odyssey/compare/v1.60.2...v1.61.0) (2026-08-13)
+
+
+### Features
+
+* **reading:** add persistent article reading sessions ([5782ee3](https://github.com/LeeWio/odyssey/commit/5782ee3917fd3d35ee91803da554be1af3095b2d))
+
 ## [1.60.2](https://github.com/LeeWio/odyssey/compare/v1.60.1...v1.60.2) (2026-08-12)
 
 
