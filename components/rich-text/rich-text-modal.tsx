@@ -18,9 +18,11 @@ import {
   saveRichTextDraft,
 } from "./utils/editor-draft";
 import {
+  hasPendingImageUploads,
   normalizeJSONContent,
   normalizeRichTextDocument,
   parseJSONContent,
+  removeTemporaryImageAttributes,
 } from "./utils/document-normalizer";
 import {
   useCreatePostMutation,
@@ -185,6 +187,8 @@ export function RichTextModal() {
     }
 
     const content = editorRef.current.getJSON();
+    if (hasPendingImageUploads(content)) return;
+
     const timer = window.setTimeout(() => {
       saveRichTextDraft(activeId, content, postData);
     }, 750);
@@ -282,6 +286,11 @@ export function RichTextModal() {
       return;
     }
 
+    if (hasPendingImageUploads(content)) {
+      toast.warning("Finish or remove image uploads before saving.");
+      return;
+    }
+
     const title = postData.title?.trim();
     const slug = postData.slug?.trim();
     if (!title || !slug) {
@@ -293,7 +302,7 @@ export function RichTextModal() {
       ...(postData as PostRequest),
       title,
       slug,
-      content: JSON.stringify(content),
+      content: JSON.stringify(normalizeRichTextDocument(removeTemporaryImageAttributes(content))),
       contentType: "JSON",
       status: statusOverride || postData.status || "DRAFT",
     };

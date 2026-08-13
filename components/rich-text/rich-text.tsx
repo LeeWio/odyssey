@@ -10,10 +10,12 @@ import { useAppSelector } from "@/lib/hooks";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
 import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
 import { ExtensionKit, createExtensionKit } from "./extensions/extension-kit";
+import { ImageUploadHandler } from "./extensions/image";
 import { ColumnsMenu } from "./menus/columns-menu/columns-menu";
 import { ImageMenu } from "./menus/image-menu/image-menu";
 import { LinkMenu } from "./menus/link-menu/link-menu";
 import { MathMenu } from "./menus/math-menu";
+import { TableMenu } from "./menus/table-menu/table-menu";
 import { TextMenu } from "./menus/text-menu/text-menu";
 import { RichTextTableOfContents } from "./table-of-contents";
 
@@ -74,10 +76,12 @@ export function RichText({
       className="flex h-full w-full flex-col overflow-hidden"
     >
       <RichTextEditor.Shell className="relative flex h-full flex-1 flex-col overflow-hidden border-none bg-transparent">
+        <ImageUploadHandler />
         <FixedToolbar />
         <TextMenu />
         <LinkMenu />
         <ImageMenu />
+        <TableMenu />
         <MathMenu />
         <ColumnsMenu />
         <RichTextEditor.Content
