@@ -46,6 +46,7 @@ import {
 } from "@/features/blog";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
+import { ReadingSession } from "@/components/reading/reading-session";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useAddPostToCollectionMutation,
@@ -422,29 +423,37 @@ export default function SinglePage({ params }: SinglePageProps) {
                 </div>
               </>
             ) : (
-              <ArticleTypography>
-                {parsedContent ? (
-                  <MotionRichTextEditor
-                    key={article.content}
-                    isReadOnly
-                    extensions={ExtensionKit}
-                    defaultValue={parsedContent}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                  >
-                    <RichTextEditor.Shell className="border-none bg-transparent p-0">
-                      <RichTextEditor.Content />
-                      <RichTextTableOfContents placement="right" />
-                    </RichTextEditor.Shell>
-                  </MotionRichTextEditor>
-                ) : (
-                  <p className="text-default-500 text-base leading-8">
-                    This article is unavailable because its content is not a supported Tiptap
-                    document.
-                  </p>
-                )}
-              </ArticleTypography>
+              <>
+                <ReadingSession
+                  key={article.id}
+                  articleId={article.id}
+                  articleTitle={article.title}
+                  estimatedMinutes={getEstimatedReadingMinutes(article)}
+                />
+                <ArticleTypography>
+                  {parsedContent ? (
+                    <MotionRichTextEditor
+                      key={article.content}
+                      isReadOnly
+                      extensions={ExtensionKit}
+                      defaultValue={parsedContent}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                    >
+                      <RichTextEditor.Shell className="border-none bg-transparent p-0">
+                        <RichTextEditor.Content />
+                        <RichTextTableOfContents placement="right" />
+                      </RichTextEditor.Shell>
+                    </MotionRichTextEditor>
+                  ) : (
+                    <p className="text-default-500 text-base leading-8">
+                      This article is unavailable because its content is not a supported Tiptap
+                      document.
+                    </p>
+                  )}
+                </ArticleTypography>
+              </>
             )}
           </section>
 
