@@ -1,3 +1,10 @@
+## [1.68.1](https://github.com/LeeWio/odyssey/compare/v1.68.0...v1.68.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* **comments:** reveal replies for comment permalinks ([f2daeb4](https://github.com/LeeWio/odyssey/commit/f2daeb44df85436f62713c9d888b9c38bb4a54f3))
+
 # [1.68.0](https://github.com/LeeWio/odyssey/compare/v1.67.0...v1.68.0) (2026-08-13)
 
 
