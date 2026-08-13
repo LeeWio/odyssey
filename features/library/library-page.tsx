@@ -53,6 +53,7 @@ import {
 } from "@/lib/features/library";
 import type { PostDigestResponse } from "@/lib/features/post";
 import { getReadingPositionHref } from "@/lib/reading-position";
+import { formatRelativeTime } from "@/lib/relative-time";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
@@ -141,7 +142,7 @@ function RecommendedCard({
 }
 
 function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
-  const { post, positionAnchor, progressPercent } = entry;
+  const { lastReadAt, post, positionAnchor, progressPercent } = entry;
   const href = getReadingPositionHref(post.slug, positionAnchor);
 
   return (
@@ -177,10 +178,15 @@ function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
               <ProgressBar.Fill />
             </ProgressBar.Track>
           </ProgressBar>
-          <span className="text-accent inline-flex items-center justify-end gap-1.5 text-sm font-medium">
-            Continue
-            <Play aria-hidden="true" className="size-3.5" />
-          </span>
+          <div className="flex items-center justify-between gap-3">
+            <Typography color="muted" type="body-xs" className="line-clamp-1">
+              Read {formatRelativeTime(lastReadAt)}
+            </Typography>
+            <span className="text-accent inline-flex shrink-0 items-center gap-1.5 text-sm font-medium">
+              Continue
+              <Play aria-hidden="true" className="size-3.5" />
+            </span>
+          </div>
         </Card.Footer>
       </Card>
     </Link>

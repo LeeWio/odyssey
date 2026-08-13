@@ -28,6 +28,7 @@ import { selectIsAuthenticated } from "@/lib/features/auth";
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
+import { formatRelativeTime } from "@/lib/relative-time";
 
 const PAGE_SIZE = 8;
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -189,7 +190,7 @@ function ContinueReading({ entries }: { entries: ReadingHistoryResponse[] }) {
         </div>
       </div>
       <div className="grid gap-3 md:grid-cols-3">
-        {entries.map(({ post, positionAnchor, progressPercent }) => (
+        {entries.map(({ lastReadAt, post, positionAnchor, progressPercent }) => (
           <Card key={post.id} variant="secondary" className="gap-4 p-5">
             <Card.Header className="gap-2 p-0">
               <div className="flex items-start justify-between gap-3">
@@ -216,7 +217,10 @@ function ContinueReading({ entries }: { entries: ReadingHistoryResponse[] }) {
                 <ProgressBar.Fill />
               </ProgressBar.Track>
             </ProgressBar>
-            <Card.Footer className="justify-end p-0">
+            <Card.Footer className="justify-between gap-3 p-0">
+              <Typography color="muted" type="body-xs" className="line-clamp-1">
+                Read {formatRelativeTime(lastReadAt)}
+              </Typography>
               <Link
                 className="text-accent inline-flex items-center gap-1.5 text-sm font-medium no-underline"
                 href={getReadingPositionHref(post.slug, positionAnchor)}
