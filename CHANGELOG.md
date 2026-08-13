@@ -1,3 +1,11 @@
+# [1.63.0](https://github.com/LeeWio/odyssey/compare/v1.62.0...v1.63.0) (2026-08-13)
+
+
+### Features
+
+* **feed:** resume articles from the home feed ([5fcccfc](https://github.com/LeeWio/odyssey/commit/5fcccfc38bf7968eee01863edfe3bf9c18bf9423))
+* **library:** resume articles at saved positions ([0747f2a](https://github.com/LeeWio/odyssey/commit/0747f2a0da3f3eb3c6f315824dffe7c6c339638f))
+
 # [1.62.0](https://github.com/LeeWio/odyssey/compare/v1.61.0...v1.62.0) (2026-08-13)
 
 
