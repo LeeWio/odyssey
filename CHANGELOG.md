@@ -1,3 +1,10 @@
+# [1.64.0](https://github.com/LeeWio/odyssey/compare/v1.63.0...v1.64.0) (2026-08-13)
+
+
+### Features
+
+* **reading:** show when progress was saved ([9edd070](https://github.com/LeeWio/odyssey/commit/9edd07053a0cb55352ee63b18fb5f997f58001ce))
+
 # [1.63.0](https://github.com/LeeWio/odyssey/compare/v1.62.0...v1.63.0) (2026-08-13)
 
 
