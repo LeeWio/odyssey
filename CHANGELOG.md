@@ -1,3 +1,10 @@
+# [1.67.0](https://github.com/LeeWio/odyssey/compare/v1.66.0...v1.67.0) (2026-08-13)
+
+
+### Features
+
+* **links:** make the blogroll searchable ([c239601](https://github.com/LeeWio/odyssey/commit/c2396011f8dce989e4d950d1ff38b1289d182541))
+
 # [1.66.0](https://github.com/LeeWio/odyssey/compare/v1.65.0...v1.66.0) (2026-08-13)
 
 
