@@ -8,22 +8,14 @@ export function useCommentHighlight() {
 
   const handleHashChange = useCallback(() => {
     if (typeof window === "undefined") return;
-    const hash = window.location.hash;
-    if (hash?.startsWith("#comment-")) {
-      const idStr = hash.replace("#comment-", "");
-      const id = parseInt(idStr, 10);
-      if (!Number.isNaN(id)) {
-        setHighlightedCommentId(id);
-
-        // Find the element and scroll to it with delay to ensure DOM has rendered
-        setTimeout(() => {
-          const el = document.getElementById(`comment-card-${id}`);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-        }, 300);
-      }
+    const match = window.location.hash.match(/^#comment-(\d+)$/);
+    if (!match) {
+      setHighlightedCommentId(null);
+      return;
     }
+
+    const id = Number(match[1]);
+    setHighlightedCommentId(id);
   }, [setHighlightedCommentId]);
 
   // Monitor initial mount and hash changes

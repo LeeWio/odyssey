@@ -2,7 +2,7 @@
 
 import { ArrowRotateRight, ChevronDown } from "@gravity-ui/icons";
 import { Avatar, Button, Chip, Surface, Typography, cn, toast } from "@heroui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
 import { formatRelativeTime } from "@/lib/relative-time";
@@ -45,8 +45,13 @@ export function CommentItem({
   onReport,
   onRetry,
 }: CommentItemProps) {
-  const { activeReplyId, setActiveReplyId, highlightedCommentId, isAuthenticated } =
-    useCommentContext();
+  const {
+    activeReplyId,
+    setActiveReplyId,
+    highlightedCommentId,
+    setHighlightedCommentId,
+    isAuthenticated,
+  } = useCommentContext();
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const dispatch = useAppDispatch();
@@ -54,9 +59,25 @@ export function CommentItem({
   const isHighlighted = highlightedCommentId === comment.id;
   const replies = comment.children ?? [];
   const hasReplies = replies.length > 0;
+  const hasHighlightedReply =
+    highlightedCommentId !== null && containsComment(replies, highlightedCommentId);
+  const areRepliesExpanded = isExpanded || hasHighlightedReply;
   const displayName = comment.nickname || comment.username || "Anonymous";
   const initialLetter = comment.username ? comment.username.slice(0, 2).toUpperCase() : "AN";
   const repliesId = `comment-replies-${comment.id}`;
+
+  useEffect(() => {
+    if (isHighlighted) {
+      const timer = window.setTimeout(() => {
+        document.getElementById(`comment-card-${comment.id}`)?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 0);
+
+      return () => window.clearTimeout(timer);
+    }
+  }, [comment.id, isHighlighted]);
 
   const copyCommentLink = async () => {
     try {
@@ -188,14 +209,17 @@ export function CommentItem({
                 variant="ghost"
                 className="mt-2"
                 aria-controls={repliesId}
-                aria-expanded={isExpanded}
-                onPress={() => setIsExpanded((value) => !value)}
+                aria-expanded={areRepliesExpanded}
+                onPress={() => {
+                  if (hasHighlightedReply) setHighlightedCommentId(null);
+                  setIsExpanded(!areRepliesExpanded);
+                }}
               >
                 <ChevronDown
                   aria-hidden="true"
-                  className={cn("transition-transform", isExpanded && "rotate-180")}
+                  className={cn("transition-transform", areRepliesExpanded && "rotate-180")}
                 />
-                {isExpanded
+                {areRepliesExpanded
                   ? "Hide replies"
                   : `View ${replies.length} ${replies.length === 1 ? "reply" : "replies"}`}
               </Button>
@@ -203,7 +227,7 @@ export function CommentItem({
           </div>
         </div>
 
-        {hasReplies && isExpanded && (
+        {hasReplies && areRepliesExpanded && (
           <div
             id={repliesId}
             className="border-separator-tertiary mt-5 ml-5 flex flex-col gap-4 border-l pl-5"
@@ -226,5 +250,11 @@ export function CommentItem({
         )}
       </article>
     </Surface>
+  );
+}
+
+function containsComment(comments: EnhancedComment[], id: number): boolean {
+  return comments.some(
+    (comment) => comment.id === id || containsComment(comment.children ?? [], id)
   );
 }
