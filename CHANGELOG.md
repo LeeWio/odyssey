@@ -1,3 +1,16 @@
+# [1.62.0](https://github.com/LeeWio/odyssey/compare/v1.61.0...v1.62.0) (2026-08-13)
+
+
+### Bug Fixes
+
+* **home:** use tracked editorial assets ([9973ffd](https://github.com/LeeWio/odyssey/commit/9973ffd7338bceed628754d6d40d169fdc5bfd57))
+
+
+### Features
+
+* **columns:** add searchable reading directory ([6e92845](https://github.com/LeeWio/odyssey/commit/6e928454d17187ee199fdb33e1bc15c755b078a6))
+* **rich-text:** streamline image editing workflows ([8d880ae](https://github.com/LeeWio/odyssey/commit/8d880ae51651f7acb89bb0d0c26aa93fcab934fb))
+
 # [1.61.0](https://github.com/LeeWio/odyssey/compare/v1.60.2...v1.61.0) (2026-08-13)
 
 
