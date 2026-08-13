@@ -11,13 +11,14 @@ import {
   Form,
   Input,
   Label,
+  SearchField,
   Skeleton,
   TextArea,
   TextField,
   Typography,
   toast,
 } from "@heroui/react";
-import { useState, type FormEvent } from "react";
+import { useDeferredValue, useState, type FormEvent } from "react";
 
 import {
   type FriendLinkRequest,
@@ -125,11 +126,26 @@ function FriendLinkCard({ link }: { link: FriendLinkResponse }) {
   );
 }
 
+function matchesFriendLink(link: FriendLinkResponse, query: string) {
+  if (!query) return true;
+
+  const url = toSafeExternalUrl(link.url);
+  const searchable = [link.name, link.description, url ? new URL(url).hostname : ""]
+    .filter(Boolean)
+    .join(" ")
+    .toLocaleLowerCase();
+
+  return searchable.includes(query);
+}
+
 export function FriendLinksPage() {
   const { data: friendLinks = [], error, isLoading, refetch } = useGetPublicFriendLinksQuery();
   const [applyFriendLink, { isLoading: isApplying }] = useApplyFriendLinkMutation();
   const [application, setApplication] = useState<FriendLinkApplication>(EMPTY_APPLICATION);
+  const [searchValue, setSearchValue] = useState("");
+  const searchQuery = useDeferredValue(searchValue.trim().toLocaleLowerCase());
   const validLinks = friendLinks.filter((link) => Boolean(toSafeExternalUrl(link.url)));
+  const visibleLinks = validLinks.filter((link) => matchesFriendLink(link, searchQuery));
 
   const updateApplication = <Key extends keyof FriendLinkApplication>(
     key: Key,
@@ -203,6 +219,29 @@ export function FriendLinksPage() {
         </header>
 
         <section aria-label="Friend links" className="mt-14">
+          {!isLoading && !error && validLinks.length > 0 ? (
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <SearchField
+                className="w-full sm:max-w-sm"
+                name="friend-link-search"
+                value={searchValue}
+                onChange={setSearchValue}
+              >
+                <Label className="sr-only">Search places to visit</Label>
+                <SearchField.Group>
+                  <SearchField.SearchIcon />
+                  <SearchField.Input placeholder="Search the blogroll" />
+                  <SearchField.ClearButton aria-label="Clear link search" />
+                </SearchField.Group>
+              </SearchField>
+              <Typography aria-live="polite" color="muted" type="body-xs">
+                {searchQuery
+                  ? `${visibleLinks.length.toLocaleString("en-US")} matches`
+                  : "Browse the blogroll"}
+              </Typography>
+            </div>
+          ) : null}
+
           {isLoading ? <FriendLinkSkeleton /> : null}
 
           {!isLoading && error ? (
@@ -242,9 +281,30 @@ export function FriendLinksPage() {
             </Card>
           ) : null}
 
-          {!isLoading && !error && validLinks.length > 0 ? (
+          {!isLoading && !error && validLinks.length > 0 && visibleLinks.length === 0 ? (
+            <Card variant="secondary" className="p-0">
+              <EmptyState size="md">
+                <EmptyState.Header>
+                  <EmptyState.Media variant="icon">
+                    <CircleLink aria-hidden="true" />
+                  </EmptyState.Media>
+                  <EmptyState.Title>No places match your search</EmptyState.Title>
+                  <EmptyState.Description>
+                    Try a site name, a topic from its introduction, or a domain.
+                  </EmptyState.Description>
+                </EmptyState.Header>
+                <EmptyState.Content>
+                  <Button variant="secondary" onPress={() => setSearchValue("")}>
+                    Clear search
+                  </Button>
+                </EmptyState.Content>
+              </EmptyState>
+            </Card>
+          ) : null}
+
+          {!isLoading && !error && visibleLinks.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-2">
-              {validLinks.map((link) => (
+              {visibleLinks.map((link) => (
                 <FriendLinkCard key={link.id} link={link} />
               ))}
             </div>
