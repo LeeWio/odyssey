@@ -1,3 +1,10 @@
+# [1.69.0](https://github.com/LeeWio/odyssey/compare/v1.68.1...v1.69.0) (2026-08-13)
+
+
+### Features
+
+* **projects:** add showcase filters ([52159a2](https://github.com/LeeWio/odyssey/commit/52159a23df7a7b3058f35f6a4324546bab19c102))
+
 ## [1.68.1](https://github.com/LeeWio/odyssey/compare/v1.68.0...v1.68.1) (2026-08-13)
 
 
