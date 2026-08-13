@@ -5,13 +5,13 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { OffMapGlobe } from "@/components/home/off-map-globe";
-import mountainImage from "@/public/ChatGPT Image Jul 15, 2026, 11_55_41 PM.png";
-import albumImage from "@/public/ChatGPT Image Jul 15, 2026, 11_56_34 PM.png";
 
 type EditorialPanelProps = {
   reducedMotion: boolean;
 };
 
+const mountainImage = "/zelda-landscape.jpg";
+const albumImage = "/music.png";
 const displayFont = { fontFamily: "var(--font-display)" } as const;
 const monoFont = { fontFamily: "var(--font-mono)" } as const;
 const easeOut = [0.23, 1, 0.32, 1] as const;

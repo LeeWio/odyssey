@@ -155,7 +155,7 @@ export function PaperIndexHero({ onNavigate, reducedMotion }: PaperIndexHeroProp
                     alt="Clouds drifting through a dark mountain range beside still water"
                     className="object-cover"
                     sizes="(max-width: 767px) 90vw, 43vw"
-                    src="/ChatGPT Image Jul 15, 2026, 11_55_41 PM.png"
+                    src="/zelda-landscape.jpg"
                   />
                   <Card.Content className="absolute inset-x-0 bottom-0 z-10 gap-4 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
                     <Chip color="default" size="sm" variant="soft">
