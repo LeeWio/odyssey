@@ -17,25 +17,16 @@ import {
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
 } from "@/lib/features/notification";
+import {
+  formatNotificationDate,
+  getNotificationIcon,
+  getNotificationTypeLabel,
+} from "@/lib/notification-presentation";
+import { formatRelativeTime } from "@/lib/relative-time";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 const NOTIFICATIONS_PAGE_SIZE = 20;
-
-function formatNotificationDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
-
-function getNotificationTypeLabel(type: string) {
-  const label = type.replace(/[_-]+/g, " ").trim();
-  return label ? label.charAt(0).toUpperCase() + label.slice(1).toLowerCase() : "Update";
-}
 
 function NotificationSkeleton() {
   return (
@@ -281,7 +272,11 @@ export function NotificationCenterPage() {
                   }`}
                 >
                   <div className="bg-default-100 text-muted mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-lg">
-                    <Icon aria-hidden="true" className="size-4" icon="lucide:bell-ring" />
+                    <Icon
+                      aria-hidden="true"
+                      className="size-4"
+                      icon={getNotificationIcon(notification.type)}
+                    />
                   </div>
                   <Button
                     fullWidth
@@ -308,9 +303,13 @@ export function NotificationCenterPage() {
                       <span className="text-muted mt-1.5 block text-sm leading-6 whitespace-pre-wrap">
                         {notification.content}
                       </span>
-                      <span className="text-muted mt-2 block text-xs">
-                        {formatNotificationDate(notification.createdAt)}
-                      </span>
+                      <time
+                        className="text-muted mt-2 block text-xs"
+                        dateTime={notification.createdAt}
+                        title={formatNotificationDate(notification.createdAt)}
+                      >
+                        {formatRelativeTime(notification.createdAt)}
+                      </time>
                     </span>
                   </Button>
                   <Tooltip>

@@ -14,31 +14,12 @@ import {
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
 } from "@/lib/features/notification";
+import { getNotificationIcon, getNotificationTypeLabel } from "@/lib/notification-presentation";
 import { formatRelativeTime } from "@/lib/relative-time";
 
 const POPOVER_PAGE_SIZE = 8;
 
 type NotificationView = "all" | "unread";
-
-function getNotificationTypeLabel(type: string) {
-  const label = type.replace(/[_-]+/g, " ").trim();
-  return label ? label.charAt(0).toUpperCase() + label.slice(1).toLowerCase() : "Update";
-}
-
-function getNotificationIcon(type: string) {
-  const normalizedType = type.toLowerCase();
-
-  if (normalizedType.includes("comment") || normalizedType.includes("reply")) {
-    return "lucide:message-square";
-  }
-  if (normalizedType.includes("like") || normalizedType.includes("favorite")) {
-    return "lucide:heart";
-  }
-  if (normalizedType.includes("follow")) return "lucide:user-plus";
-  if (normalizedType.includes("publish")) return "lucide:file-text";
-
-  return "lucide:bell-ring";
-}
 
 function NotificationPopoverSkeleton() {
   return (
