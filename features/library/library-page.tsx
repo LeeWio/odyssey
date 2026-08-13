@@ -1009,40 +1009,48 @@ export function LibraryPage() {
             />
           ) : (
             <div className="divide-default-200 border-default-200 divide-y border-y">
-              {historyEntries.map((entry) => (
-                <article key={entry.post.id} className="flex gap-4 py-5 sm:items-center">
-                  <div className="hidden w-28 shrink-0 overflow-hidden sm:block">
-                    <LibraryPostVisual post={entry.post} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <Link className="min-w-0 no-underline" href={`/single/${entry.post.slug}`}>
-                        <Typography className="line-clamp-2 text-base font-semibold" type="h3">
-                          {entry.post.title}
-                        </Typography>
-                      </Link>
-                      <Tooltip>
-                        <Button
-                          isIconOnly
-                          aria-label={`Remove ${entry.post.title} from reading history`}
-                          isDisabled={entryPendingRemoval === entry.post.id}
-                          size="sm"
-                          variant="ghost"
-                          onPress={() => handleRemoveHistoryEntry(entry.post.id)}
-                        >
-                          <TrashBin aria-hidden="true" className="size-4" />
-                        </Button>
-                        <Tooltip.Content>Remove from history</Tooltip.Content>
-                      </Tooltip>
+              {historyEntries.map((entry) => {
+                const href = getReadingPositionHref(entry.post.slug, entry.positionAnchor);
+                const status =
+                  entry.progressPercent >= 100 ? "Finished" : `${entry.progressPercent}% read`;
+
+                return (
+                  <article key={entry.post.id} className="flex gap-4 py-5 sm:items-center">
+                    <div className="hidden w-28 shrink-0 overflow-hidden sm:block">
+                      <LibraryPostVisual post={entry.post} />
                     </div>
-                    <div className="text-muted mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-                      <span>{formatDate(entry.lastReadAt)}</span>
-                      <span>{entry.progressPercent}% read</span>
-                      {entry.post.category?.name ? <span>{entry.post.category.name}</span> : null}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <Link className="min-w-0 no-underline" href={href}>
+                          <Typography className="line-clamp-2 text-base font-semibold" type="h3">
+                            {entry.post.title}
+                          </Typography>
+                        </Link>
+                        <Tooltip>
+                          <Button
+                            isIconOnly
+                            aria-label={`Remove ${entry.post.title} from reading history`}
+                            isDisabled={entryPendingRemoval === entry.post.id}
+                            size="sm"
+                            variant="ghost"
+                            onPress={() => handleRemoveHistoryEntry(entry.post.id)}
+                          >
+                            <TrashBin aria-hidden="true" className="size-4" />
+                          </Button>
+                          <Tooltip.Content>Remove from history</Tooltip.Content>
+                        </Tooltip>
+                      </div>
+                      <div className="text-muted mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                        <time dateTime={entry.lastReadAt}>
+                          Read {formatRelativeTime(entry.lastReadAt)}
+                        </time>
+                        <span>{status}</span>
+                        {entry.post.category?.name ? <span>{entry.post.category.name}</span> : null}
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           )}
 
