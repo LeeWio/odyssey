@@ -1,3 +1,10 @@
+# [1.66.0](https://github.com/LeeWio/odyssey/compare/v1.65.0...v1.66.0) (2026-08-13)
+
+
+### Features
+
+* **notifications:** unify activity presentation ([cb906cd](https://github.com/LeeWio/odyssey/commit/cb906cdcf94ef156a8246a8d06746f734ded9018))
+
 # [1.65.0](https://github.com/LeeWio/odyssey/compare/v1.64.0...v1.65.0) (2026-08-13)
 
 
