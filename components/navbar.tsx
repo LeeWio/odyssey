@@ -589,7 +589,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
 
   if (id === "more") {
     return (
-      <div className="grid gap-4 md:col-span-8 md:grid-cols-3">
+      <div className="grid gap-4 md:col-span-8 md:grid-cols-4">
         {/* Field notes */}
         <motion.div {...reveal(0)}>
           <Card className="group h-full" variant="tertiary">
@@ -670,6 +670,35 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 variant="ghost"
                 aria-label="Browse writing by date"
                 onPress={() => onNavigate("/archive")}
+              >
+                <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
+              </Button>
+            </Card.Footer>
+          </Card>
+        </motion.div>
+
+        {/* Project 4: Equipment & Setup */}
+        <motion.div {...reveal(3)}>
+          <Card className="group h-full" variant="default">
+            <Card.Header>
+              <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
+                <Icon aria-hidden="true" icon="lucide:briefcase" className="size-5" />
+              </div>
+              <Card.Title>Equipment</Card.Title>
+              <Card.Description>
+                The physical hardware, tools, and visual setup behind my daily workflows.
+              </Card.Description>
+            </Card.Header>
+            <Card.Footer className="mt-auto justify-between">
+              <Chip size="sm" variant="soft">
+                Staples
+              </Chip>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="ghost"
+                aria-label="Browse equipment"
+                onPress={() => onNavigate("/uses")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>

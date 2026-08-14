@@ -8,13 +8,16 @@ import { SmartColorSurface } from "@/components/background/smart-color-surface";
 import { useSubscribeMutation } from "@/lib/features/openapi";
 
 const FOOTER_LINKS = [
+  { href: "/about", label: "About" },
+  { href: "/uses", label: "Setup" },
+  { href: "/roadmap", label: "Roadmap" },
+  { href: "/schedule", label: "Schedule" },
+  { href: "/explorer", label: "Explorer" },
   { href: "/blog", label: "Chronicle" },
   { href: "/explore", label: "Explore" },
   { href: "/columns", label: "Columns" },
-  { href: "/blog", label: "Orbit" },
   { href: "/links", label: "Travelogue" },
   { href: "/guestbook", label: "Guestbook" },
-  { href: "/moments", label: "Archive" },
 ] as const;
 
 export function Footer() {
