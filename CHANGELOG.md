@@ -1,3 +1,10 @@
+# [1.70.0](https://github.com/LeeWio/odyssey/compare/v1.69.0...v1.70.0) (2026-08-14)
+
+
+### Features
+
+* **navigation:** integrate premium portfolio modules and interactive explorer ([1f3dac0](https://github.com/LeeWio/odyssey/commit/1f3dac0de048c5e69f43da2d5917b87cf9c6d455)), closes [hi#fidelity](https://github.com/hi/issues/fidelity)
+
 # [1.69.0](https://github.com/LeeWio/odyssey/compare/v1.68.1...v1.69.0) (2026-08-13)
 
 
