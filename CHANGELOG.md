@@ -1,3 +1,10 @@
+# [1.73.0](https://github.com/LeeWio/odyssey/compare/v1.72.0...v1.73.0) (2026-08-15)
+
+
+### Features
+
+* **guestbook:** restore original beautiful centered typography guestbook header ([70c9f78](https://github.com/LeeWio/odyssey/commit/70c9f789ea7f06bff64b9c3d146e66c5f53a0883))
+
 # [1.72.0](https://github.com/LeeWio/odyssey/compare/v1.71.0...v1.72.0) (2026-08-15)
 
 
