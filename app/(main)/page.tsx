@@ -448,6 +448,33 @@ export default function Home() {
           </MotionCard>
         </div>
       </section>
+
+      <section
+        aria-labelledby="guestbook-intro-title"
+        className="border-separator w-full border-t"
+      >
+        <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-24 sm:px-10 sm:py-32 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.65fr)] lg:items-end lg:gap-20">
+          <MotionTypography
+            id="guestbook-intro-title"
+            type="h2"
+            weight="bold"
+            className="max-w-3xl text-4xl leading-[1.02] text-balance sm:text-5xl lg:text-6xl"
+            {...revealInView(0, 18)}
+          >
+            Since you’re here, leave a few words behind.
+          </MotionTypography>
+
+          <motion.div
+            className="border-separator border-l pl-6 sm:pl-8 lg:pb-2"
+            {...revealInView(0.1, 16)}
+          >
+            <Typography color="muted" type="body" className="max-w-md leading-7 text-pretty">
+              Maybe we’ve never met. But for a moment, our paths crossed here. Leave something
+              behind.
+            </Typography>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 }
