@@ -4,6 +4,31 @@
 @import "katex/dist/katex.min.css";
 @import "./themes/heroui-pro-themes.scoped.css";
 
+@theme {
+  --font-display: var(--font-display), "Instrument Serif", serif;
+  --animate-scrolling-banner: scrolling-banner var(--duration, 20s) linear infinite;
+  --animate-scrolling-banner-vertical: scrolling-banner-vertical var(--duration, 20s) linear
+    infinite;
+
+  @keyframes scrolling-banner {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-50% - var(--gap, 0px) / 2));
+    }
+  }
+
+  @keyframes scrolling-banner-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-50% - var(--gap, 0px) / 2));
+    }
+  }
+}
+
 @layer components {
   .tiptap-mathematics-render {
     @apply max-w-full align-middle;

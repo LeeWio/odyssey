@@ -13,12 +13,29 @@ import {
 import { MediaPlayButton } from "@/features/media/components/media-play-button";
 import type { MediaItem } from "@/features/media/types";
 import { useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
-import { ItemCard, KPI, TrendChip } from "@heroui-pro/react";
-import { Card, Chip, Skeleton, Typography } from "@heroui/react";
+import { useState, useEffect } from "react";
+import { ItemCard, KPI, TrendChip, EmojiReactionButton, Rating } from "@heroui-pro/react";
+import {
+  Card,
+  Chip,
+  Skeleton,
+  Typography,
+  Button,
+  Popover,
+  TextArea,
+  Description,
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
+
+import GuestbookBoard from "@/components/corners/guestbook-board";
+import { selectIsAuthenticated } from "@/lib/features/auth";
+import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
+import { setLoginOpen } from "@/lib/features/ui";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { PencilToSquare } from "@gravity-ui/icons";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -88,6 +105,87 @@ export default function Home() {
     { pollingInterval: 300000, refetchOnFocus: true }
   );
   const isPositive = nasdaqData ? nasdaqData.changePct >= 0 : false;
+
+  const [isMessageInputOpen, setIsMessageInputOpen] = useState(false);
+  const [isGuestbookPopoverOpen, setIsGuestbookPopoverOpen] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+
+  // local states for rating and reactions
+  const [rating, setRating] = useState<number>(0);
+  const [reactions, setReactions] = useState<Record<string, { count: number; selected: boolean }>>({
+    "❤️": { count: 42, selected: false },
+    "🎉": { count: 18, selected: false },
+    "👍": { count: 24, selected: false },
+    "🤯": { count: 15, selected: false },
+    "🔥": { count: 31, selected: false },
+  });
+
+  // Hydrate states from localStorage safely
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const savedRating = localStorage.getItem("odyssey-rating");
+    const savedReactions = localStorage.getItem("odyssey-reactions");
+
+    if (savedRating || savedReactions) {
+      setTimeout(() => {
+        if (savedRating) {
+          setRating(Number(savedRating));
+        }
+
+        if (savedReactions) {
+          try {
+            const parsed = JSON.parse(savedReactions) as Record<string, boolean>;
+            setReactions((current) => {
+              const updated = { ...current };
+              Object.keys(parsed).forEach((emoji) => {
+                if (updated[emoji]) {
+                  updated[emoji] = {
+                    count: parsed[emoji] ? updated[emoji].count + 1 : updated[emoji].count,
+                    selected: parsed[emoji],
+                  };
+                }
+              });
+              return updated;
+            });
+          } catch (err) {
+            console.error("Failed to parse reactions from localStorage", err);
+          }
+        }
+      }, 0);
+    }
+  }, []);
+
+  const handleRatingChange = (newValue: number) => {
+    setRating(newValue);
+    localStorage.setItem("odyssey-rating", String(newValue));
+  };
+
+  const toggleReaction = (emoji: string) => {
+    setReactions((current) => {
+      const entry = current[emoji];
+      if (!entry) return current;
+
+      const selected = !entry.selected;
+      const count = selected ? entry.count + 1 : entry.count - 1;
+
+      const updated = {
+        ...current,
+        [emoji]: { count, selected },
+      };
+
+      // persist selected keys to localStorage
+      const selectionMap: Record<string, boolean> = {};
+      Object.entries(updated).forEach(([key, value]) => {
+        if (value.selected) selectionMap[key] = true;
+      });
+      localStorage.setItem("odyssey-reactions", JSON.stringify(selectionMap));
+
+      return updated;
+    });
+  };
 
   const reveal = (delay = 0, distance = 18) => ({
     initial: shouldReduceMotion ? false : { opacity: 0, y: distance, filter: "blur(8px)" },
@@ -416,41 +514,143 @@ export default function Home() {
 
           <MotionCard
             variant="tertiary"
-            className="relative min-h-72 overflow-hidden lg:col-span-12 lg:grid lg:grid-cols-[0.72fr_1.28fr] lg:items-end lg:gap-16 lg:p-12"
+            className="relative min-h-[30rem] overflow-hidden lg:col-span-12 lg:grid lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12 lg:p-12"
             {...revealInView(0.18, 24)}
           >
             <span
               aria-hidden="true"
               className="bg-accent/8 absolute -top-20 -right-16 size-72 rounded-full blur-3xl"
             />
-            <Card.Header className="relative">
+
+            {/* Left side: Editorial introduction */}
+            <div className="relative flex flex-col gap-5 p-6 lg:p-0">
+              <div>
+                <Typography
+                  type="body-xs"
+                  color="muted"
+                  className="font-mono tracking-[0.14em] uppercase"
+                >
+                  Building & training
+                </Typography>
+                <Card.Title className="mt-4 text-3xl font-bold tracking-[-0.03em]">
+                  Practice is part of the archive.
+                </Card.Title>
+                <Card.Description className="mt-2 max-w-sm text-sm leading-relaxed">
+                  Real-time indicators documenting personal progress, deep focus blocks, and active
+                  code commitments.
+                </Card.Description>
+              </div>
+              <span className="bg-default-100/50 my-1 h-px w-24" />
               <Typography
-                type="body-xs"
+                type="body-sm"
                 color="muted"
-                className="font-mono tracking-[0.14em] uppercase"
-              >
-                Building & training
-              </Typography>
-              <Card.Title className="mt-4 text-2xl tracking-[-0.03em]">
-                Practice is part of the archive.
-              </Card.Title>
-            </Card.Header>
-            <Card.Content className="relative lg:p-0">
-              <Typography
-                type="h3"
-                weight="normal"
-                className="max-w-2xl text-[clamp(1.45rem,2.8vw,2.35rem)] leading-[1.2] tracking-[-0.035em]"
+                className="max-w-md text-sm leading-relaxed italic"
               >
                 “The unfinished work matters: systems shipped, miles logged, and questions carried
                 forward.”
               </Typography>
-            </Card.Content>
+            </div>
+
+            {/* Right side: Live Telemetry KPIs */}
+            <div className="relative grid gap-4 p-6 sm:grid-cols-3 lg:p-0">
+              {/* KPI 1: Deep Work focus */}
+              <KPI className="bg-background/40 border-default-100/50 rounded-2xl border p-5 shadow-sm">
+                <KPI.Header>
+                  <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
+                    Today&apos;s Focus
+                  </KPI.Title>
+                </KPI.Header>
+                <KPI.Content className="mt-2.5 items-end gap-1">
+                  <KPI.Value
+                    className="text-foreground font-mono text-2xl leading-none font-black tabular-nums"
+                    value={4.8}
+                    style="decimal"
+                    maximumFractionDigits={1}
+                  />
+                  <div className="text-muted/60 mt-1 font-mono text-[10px] font-medium">hours</div>
+                </KPI.Content>
+                <KPI.Progress className="mt-4" value={90} status="success" />
+              </KPI>
+
+              {/* KPI 2: Written Chronicles size */}
+              <KPI className="bg-background/40 border-default-100/50 rounded-2xl border p-5 shadow-sm">
+                <KPI.Header>
+                  <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
+                    Written Essays
+                  </KPI.Title>
+                </KPI.Header>
+                <KPI.Content className="mt-2.5 items-end gap-1">
+                  <KPI.Value
+                    className="text-foreground font-mono text-2xl leading-none font-black tabular-nums"
+                    value={18.4}
+                    style="decimal"
+                    maximumFractionDigits={1}
+                  />
+                  <div className="text-muted/60 mt-1 font-mono text-[10px] font-medium">
+                    k words
+                  </div>
+                </KPI.Content>
+                <KPI.Progress className="mt-4" value={85} status="success" />
+              </KPI>
+
+              {/* KPI 3: Repository Commits */}
+              <KPI className="bg-background/40 border-default-100/50 rounded-2xl border p-5 shadow-sm">
+                <KPI.Header>
+                  <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
+                    Active Commits
+                  </KPI.Title>
+                </KPI.Header>
+                <KPI.Content className="mt-2.5 items-end">
+                  <div className="flex w-full flex-col gap-1">
+                    <KPI.Value
+                      className="text-foreground font-mono text-2xl leading-none font-black tabular-nums"
+                      value={452}
+                      style="decimal"
+                      maximumFractionDigits={0}
+                    />
+                    <div className="mt-1 flex items-center gap-1">
+                      <TrendChip trend="up" variant="tertiary" className="px-1 py-0.5 text-[10px]">
+                        12%
+                        <TrendChip.Suffix className="ml-0.5 text-[8px]">MoM</TrendChip.Suffix>
+                      </TrendChip>
+                    </div>
+                  </div>
+                </KPI.Content>
+                <KPI.Progress className="mt-4.5" value={95} status="success" />
+              </KPI>
+            </div>
           </MotionCard>
         </div>
       </section>
 
-      <section aria-labelledby="guestbook-intro-title" className="border-separator w-full border-t">
-        <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-24 sm:px-10 sm:py-32 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.65fr)] lg:items-end lg:gap-20">
+      <section
+        id="guestbook"
+        aria-labelledby="guestbook-intro-title"
+        className="border-separator relative mx-auto w-full max-w-6xl border-t px-6 py-24 sm:px-10 sm:py-32"
+      >
+        <Popover isOpen={isGuestbookPopoverOpen} onOpenChange={setIsGuestbookPopoverOpen}>
+          <Popover.Trigger className="absolute top-12 right-6 sm:right-10">
+            <Image
+              alt="Guestbook decorative animation"
+              aria-hidden="true"
+              height={112}
+              src="/Animation.svg"
+              unoptimized
+              width={112}
+            />
+          </Popover.Trigger>
+          <Popover.Content
+            className="border-default-200/50 bg-surface/90 w-80 border shadow-xl backdrop-blur-md"
+            placement="bottom end"
+          >
+            <Popover.Dialog className="p-4 outline-none">
+              <Popover.Arrow />
+              <GuestbookQuickForm onClose={() => setIsGuestbookPopoverOpen(false)} />
+            </Popover.Dialog>
+          </Popover.Content>
+        </Popover>
+
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.65fr)] lg:items-end lg:gap-20">
           <MotionTypography
             id="guestbook-intro-title"
             type="h2"
@@ -471,7 +671,221 @@ export default function Home() {
             </Typography>
           </motion.div>
         </div>
+
+        {/* Beautiful Guestbook Testimonials Board */}
+        <motion.div className="mt-16 w-full overflow-hidden" {...revealInView(0.12, 20)}>
+          <GuestbookBoard />
+        </motion.div>
+
+        {/* Constrained Comments & Feedback Content */}
+        <div className="mx-auto mt-16 flex w-full max-w-3xl flex-col gap-10">
+          {/* Playful Emotional Feedback Panel: Rating & Reactions */}
+          <motion.div className="w-full" {...revealInView(0.16, 16)}>
+            <Card
+              variant="secondary"
+              className="border-default-100/50 bg-surface-secondary/15 rounded-3xl border p-6 shadow-sm sm:p-8"
+            >
+              <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
+                {/* Star Rating section */}
+                <div className="flex flex-col items-center gap-2 sm:items-start">
+                  <Typography
+                    type="body-xs"
+                    weight="bold"
+                    className="text-muted/60 font-mono text-[10px] tracking-wider uppercase"
+                  >
+                    Rate your Odyssey experience
+                  </Typography>
+                  <div className="flex items-center gap-3">
+                    <Rating
+                      aria-label="Platform Rating"
+                      value={rating}
+                      onValueChange={handleRatingChange}
+                      size="md"
+                      style={
+                        { "--rating-active-color": "var(--color-accent)" } as React.CSSProperties
+                      }
+                    >
+                      <Rating.Item value={1} />
+                      <Rating.Item value={2} />
+                      <Rating.Item value={3} />
+                      <Rating.Item value={4} />
+                      <Rating.Item value={5} />
+                    </Rating>
+                    {rating > 0 && (
+                      <span className="text-accent font-mono text-xs font-semibold">
+                        {rating} / 5
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Emoji Reaction button group */}
+                <div className="flex flex-col items-center gap-2 sm:items-end">
+                  <Typography
+                    type="body-xs"
+                    weight="bold"
+                    className="text-muted/60 font-mono text-[10px] tracking-wider uppercase"
+                  >
+                    React to the workspace
+                  </Typography>
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
+                    {Object.entries(reactions).map(([emoji, { count, selected }]) => (
+                      <EmojiReactionButton
+                        key={emoji}
+                        isSelected={selected}
+                        onChange={() => toggleReaction(emoji)}
+                        size="sm"
+                      >
+                        <EmojiReactionButton.Emoji>{emoji}</EmojiReactionButton.Emoji>
+                        {count > 0 && (
+                          <EmojiReactionButton.Count>{count}</EmojiReactionButton.Count>
+                        )}
+                      </EmojiReactionButton>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
+          {mounted && !isAuthenticated ? (
+            <motion.div className="w-full" {...revealInView(0.2, 16)}>
+              <div className="border-default-100 bg-surface-secondary/20 flex flex-col gap-4 rounded-2xl border p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div>
+                  <Typography type="body-sm" weight="semibold">
+                    Sign in to add an entry
+                  </Typography>
+                  <Typography color="muted" type="body-xs" className="mt-1">
+                    Reading is open to everyone. Sign in to leave a note or reply.
+                  </Typography>
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="shrink-0 font-medium"
+                  onPress={() => dispatch(setLoginOpen(true))}
+                >
+                  <PencilToSquare aria-hidden="true" className="size-4" />
+                  Sign in to write
+                </Button>
+              </div>
+            </motion.div>
+          ) : null}
+        </div>
       </section>
     </div>
+  );
+}
+
+interface GuestbookQuickFormProps {
+  onClose: () => void;
+}
+
+function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const [content, setContent] = useState("");
+  const [postEntry, { isLoading }] = usePostGuestbookEntryMutation();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content.trim() || isLoading) return;
+    try {
+      await postEntry({ content: content.trim() }).unwrap();
+      setContent("");
+      onClose();
+    } catch (err) {
+      console.error("Failed to post entry:", err);
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col gap-3 text-start">
+        <div className="flex items-center gap-2">
+          <span className="text-accent text-base">✨</span>
+          <Popover.Heading className="text-foreground text-sm font-semibold tracking-tight">
+            Sign the Guestbook
+          </Popover.Heading>
+        </div>
+        <p className="text-muted/80 text-[11px] leading-relaxed">
+          Leave a message on our wall to mark your visit. Reading is open to everyone, but writing
+          requires a quick sign-in.
+        </p>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <Button
+            size="sm"
+            variant="primary"
+            className="bg-accent h-8 px-4 text-xs font-semibold text-white hover:brightness-105"
+            onPress={() => {
+              onClose();
+              dispatch(setLoginOpen(true));
+            }}
+          >
+            <Icon icon="lucide:pencil-line" className="size-3.5" />
+            Sign in to write
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-muted/80 h-8 px-3 text-xs font-medium"
+            onPress={onClose}
+          >
+            Close
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3 text-start">
+      <div className="flex items-center gap-2">
+        <span className="text-accent text-base">✨</span>
+        <Popover.Heading className="text-foreground text-sm font-semibold tracking-tight">
+          Before You Go
+        </Popover.Heading>
+      </div>
+
+      <div className="flex w-full flex-col gap-2">
+        <TextArea
+          aria-label="Guestbook message"
+          placeholder="Write something for the next explorer..."
+          rows={3}
+          maxLength={280}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          disabled={isLoading}
+        />
+        <Description id="textarea-controlled-description">
+          Characters: {content.length} / 280
+        </Description>
+      </div>
+
+      <div className="flex items-center justify-between gap-4">
+        <Button size="sm" fullWidth variant="ghost" onPress={onClose} isDisabled={isLoading}>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          fullWidth
+          size="sm"
+          variant="primary"
+          isDisabled={!content.trim() || isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Icon icon="lucide:loader-2" className="size-3.5 animate-spin" />
+              Posting...
+            </>
+          ) : (
+            <>
+              <Icon icon="lucide:send" className="size-3.5" />
+              Submit
+            </>
+          )}
+        </Button>
+      </div>
+    </form>
   );
 }
