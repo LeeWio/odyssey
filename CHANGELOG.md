@@ -1,3 +1,11 @@
+# [1.72.0](https://github.com/LeeWio/odyssey/compare/v1.71.0...v1.72.0) (2026-08-15)
+
+
+### Features
+
+* **guestbook:** connect interactive animation popover to live guestbook API ([a6bec6c](https://github.com/LeeWio/odyssey/commit/a6bec6cb230cbd459992d7097388158ea499650f))
+* **navigation:** deploy interactive sandboxes, portfolios, and evaluator ([eda5edc](https://github.com/LeeWio/odyssey/commit/eda5edcd608352ece9fffb582f37c1cdd2d4426a))
+
 # [1.71.0](https://github.com/LeeWio/odyssey/compare/v1.70.0...v1.71.0) (2026-08-15)
 
 
