@@ -1,3 +1,10 @@
+# [1.71.0](https://github.com/LeeWio/odyssey/compare/v1.70.0...v1.71.0) (2026-08-15)
+
+
+### Features
+
+* **home:** add guestbook invitation ([19e9619](https://github.com/LeeWio/odyssey/commit/19e961919b366880f8dfad82b06ebf4ecd97454e))
+
 # [1.70.0](https://github.com/LeeWio/odyssey/compare/v1.69.0...v1.70.0) (2026-08-14)
 
 
