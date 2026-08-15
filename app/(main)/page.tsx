@@ -449,10 +449,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section
-        aria-labelledby="guestbook-intro-title"
-        className="border-separator w-full border-t"
-      >
+      <section aria-labelledby="guestbook-intro-title" className="border-separator w-full border-t">
         <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-24 sm:px-10 sm:py-32 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.65fr)] lg:items-end lg:gap-20">
           <MotionTypography
             id="guestbook-intro-title"
