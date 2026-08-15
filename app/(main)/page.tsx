@@ -625,55 +625,59 @@ export default function Home() {
 
       <section
         id="guestbook"
-        aria-labelledby="guestbook-intro-title"
-        className="border-separator relative mx-auto w-full max-w-6xl border-t px-6 py-24 sm:px-10 sm:py-32"
+        aria-labelledby="guestbook-title"
+        className="mx-auto w-full scroll-mt-24 py-24 sm:py-32"
       >
-        <Popover isOpen={isGuestbookPopoverOpen} onOpenChange={setIsGuestbookPopoverOpen}>
-          <Popover.Trigger className="absolute top-12 right-6 sm:right-10">
-            <Image
-              alt="Guestbook decorative animation"
-              aria-hidden="true"
-              height={112}
-              src="/Animation.svg"
-              unoptimized
-              width={112}
-            />
-          </Popover.Trigger>
-          <Popover.Content
-            className="border-default-200/50 bg-surface/90 w-80 border shadow-xl backdrop-blur-md"
-            placement="bottom end"
-          >
-            <Popover.Dialog className="p-4 outline-none">
-              <Popover.Arrow />
-              <GuestbookQuickForm onClose={() => setIsGuestbookPopoverOpen(false)} />
-            </Popover.Dialog>
-          </Popover.Content>
-        </Popover>
+        <header className="relative mx-auto flex max-w-4xl flex-col items-center px-6 text-center sm:px-10">
+          <Popover isOpen={isGuestbookPopoverOpen} onOpenChange={setIsGuestbookPopoverOpen}>
+            <Popover.Trigger className="absolute -top-8 -right-20">
+              <Image
+                alt="Guestbook decorative animation"
+                aria-hidden="true"
+                height={112}
+                src="/Animation.svg"
+                unoptimized
+                width={112}
+              />
+            </Popover.Trigger>
+            <Popover.Content
+              className="border-default-200/50 bg-surface/90 w-80 border shadow-xl backdrop-blur-md"
+              placement="bottom end"
+            >
+              <Popover.Dialog className="p-4 outline-none">
+                <Popover.Arrow />
+                <GuestbookQuickForm onClose={() => setIsGuestbookPopoverOpen(false)} />
+              </Popover.Dialog>
+            </Popover.Content>
+          </Popover>
 
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.65fr)] lg:items-end lg:gap-20">
+          <MotionChip size="sm" color="accent" variant="soft" {...revealInView(0, 10)}>
+            Guestbook
+          </MotionChip>
+
           <MotionTypography
-            id="guestbook-intro-title"
+            id="guestbook-title"
+            align="center"
             type="h2"
             weight="bold"
-            className="max-w-3xl text-4xl leading-[1.02] text-balance sm:text-5xl lg:text-6xl"
-            {...revealInView(0, 18)}
+            className="mt-4 text-center text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-[-0.04em] text-balance"
+            {...revealInView(0.06)}
           >
-            Since you’re here, leave a few words behind.
+            Since you’re here,
           </MotionTypography>
 
-          <motion.div
-            className="border-separator border-l pl-6 sm:pl-8 lg:pb-2"
-            {...revealInView(0.1, 16)}
+          <MotionTypography
+            align="center"
+            type="h3"
+            className="text-center text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-[-0.04em] text-balance"
+            {...revealInView(0.06)}
           >
-            <Typography color="muted" type="body" className="max-w-md leading-7 text-pretty">
-              Maybe we’ve never met. But for a moment, our paths crossed here. Leave something
-              behind.
-            </Typography>
-          </motion.div>
-        </div>
+            leave a few words behind.
+          </MotionTypography>
+        </header>
 
         {/* Beautiful Guestbook Testimonials Board */}
-        <motion.div className="mt-16 w-full overflow-hidden" {...revealInView(0.12, 20)}>
+        <motion.div className="mt-6 w-full overflow-hidden" {...revealInView(0.12, 20)}>
           <GuestbookBoard />
         </motion.div>
 
