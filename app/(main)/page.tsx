@@ -2,6 +2,7 @@
 
 import { ArrowDownIcon, ArrowUpIcon } from "@/components/icons";
 import { HelloApple } from "@/components/home/hello-apple";
+import { RepositoryActivity } from "@/components/home/repository-activity";
 import {
   MotionCard,
   MotionChip,
@@ -13,6 +14,7 @@ import {
 import { MediaPlayButton } from "@/features/media/components/media-play-button";
 import type { MediaItem } from "@/features/media/types";
 import { useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
+import { useGetGitHubActivityQuery } from "@/lib/features/github";
 import { useState } from "react";
 import { ItemCard, KPI, TrendChip } from "@heroui-pro/react";
 import {
@@ -38,6 +40,8 @@ import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { PencilToSquare, ChevronDown } from "@gravity-ui/icons";
 import GradientText from "@/components/ui/gradient-text";
+
+const MotionAccordion = motion.create(Accordion);
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -120,6 +124,10 @@ export default function Home() {
     { pollingInterval: 300000, refetchOnFocus: true }
   );
   const isPositive = nasdaqData ? nasdaqData.changePct >= 0 : false;
+  const { data: githubActivity, isLoading: isGitHubActivityLoading } = useGetGitHubActivityQuery(
+    undefined,
+    { pollingInterval: 3600000, refetchOnFocus: true }
+  );
 
   const [isMessageInputOpen, setIsMessageInputOpen] = useState(false);
   const [isGuestbookPopoverOpen, setIsGuestbookPopoverOpen] = useState(false);
@@ -479,6 +487,60 @@ export default function Home() {
             </div>
           </MotionCard>
         </div>
+
+        <motion.section
+          aria-labelledby="github-activity-title"
+          className="mt-20 grid w-full items-start gap-12 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-16"
+          {...revealInView(0.2, 20)}
+        >
+          <div className="max-w-md lg:sticky lg:top-28 lg:pt-1">
+            <Typography
+              color="muted"
+              type="body-xs"
+              className="font-mono tracking-[0.14em] uppercase"
+            >
+              Development log
+            </Typography>
+            <Typography
+              id="github-activity-title"
+              type="h2"
+              weight="bold"
+              className="mt-4 text-[clamp(2rem,4vw,3.5rem)] leading-[1.02] tracking-[-0.045em]"
+            >
+              What&apos;s Being Built
+            </Typography>
+            <Typography color="muted" type="body" className="mt-5 max-w-sm leading-relaxed italic">
+              A closer look at the work behind the site: new features, fixes, experiments, and
+              everything slowly taking shape.
+            </Typography>
+          </div>
+
+          <div className="flex w-full min-w-0 lg:justify-end">
+            {!mounted || (isGitHubActivityLoading && !githubActivity) ? (
+              <div
+                aria-label="Loading GitHub repository activity"
+                aria-live="polite"
+                className="w-full max-w-[620px] min-w-0"
+              >
+                <Skeleton className="mb-6 h-5 w-32 rounded-md" />
+                <div className="grid gap-5 pl-9">
+                  <Skeleton className="h-20 w-full rounded-xl" />
+                  <Skeleton className="h-32 w-full rounded-xl" />
+                  <Skeleton className="h-24 w-full rounded-xl" />
+                </div>
+              </div>
+            ) : githubActivity?.available ? (
+              <RepositoryActivity activity={githubActivity} />
+            ) : (
+              <Card className="w-full max-w-[620px] min-w-0 p-5" variant="secondary">
+                <Card.Title className="text-sm">GitHub activity is unavailable</Card.Title>
+                <Card.Description className="mt-1 text-xs">
+                  The public activity feed could not be loaded right now.
+                </Card.Description>
+              </Card>
+            )}
+          </div>
+        </motion.section>
       </section>
 
       <section
@@ -601,42 +663,42 @@ export default function Home() {
           </MotionTypography>
         </header>
 
-        <motion.div className="mt-12 flex w-full justify-center" {...revealInView(0.18, 20)}>
-          <Accordion className="bg-surface-1/10 w-full rounded-2xl" variant="surface">
-            {faqItems.map((item, index) => (
-              <Accordion.Item
-                key={index}
-                className="group/item first:**:data-[slot=accordion-trigger]:rounded-t-2xl last:[&:not(:has([data-slot=accordion-trigger][aria-expanded='true']))_[data-slot=accordion-trigger]]:rounded-b-2xl"
-              >
-                <Accordion.Heading>
-                  <Accordion.Trigger className="group hover:bg-surface flex items-center gap-2 transition-none">
-                    {item.iconUrl ? (
-                      <Image
-                        alt={item.title}
-                        className="h-11 w-11 transition-[scale,rotate] duration-300 ease-out group-hover/item:scale-120 group-hover/item:-rotate-10 group-hover/item:drop-shadow-lg"
-                        src={item.iconUrl}
-                        width={44}
-                        height={44}
-                      />
-                    ) : null}
-                    <div className="flex flex-col gap-0 text-start">
-                      <span className="leading-5 font-medium">{item.title}</span>
-                      <span className="text-muted/80 leading-6 font-normal">{item.subtitle}</span>
-                    </div>
-                    <Accordion.Indicator className="text-muted/50 [&>svg]:size-4">
-                      <ChevronDown />
-                    </Accordion.Indicator>
-                  </Accordion.Trigger>
-                </Accordion.Heading>
-                <Accordion.Panel>
-                  <Accordion.Body className="text-muted/80 text-start">
-                    {item.content}
-                  </Accordion.Body>
-                </Accordion.Panel>
-              </Accordion.Item>
-            ))}
-          </Accordion>
-        </motion.div>
+        <MotionAccordion
+          className="bg-surface-1/10 mt-12 w-full rounded-2xl"
+          variant="surface"
+          {...revealInView(0.18, 20)}
+        >
+          {faqItems.map((item, index) => (
+            <Accordion.Item
+              key={index}
+              className="group/item first:**:data-[slot=accordion-trigger]:rounded-t-2xl last:[&:not(:has([data-slot=accordion-trigger][aria-expanded='true']))_[data-slot=accordion-trigger]]:rounded-b-2xl"
+            >
+              <Accordion.Heading>
+                <Accordion.Trigger className="group hover:bg-surface flex items-center gap-2 transition-none">
+                  {item.iconUrl ? (
+                    <Image
+                      alt={item.title}
+                      className="h-11 w-11 transition-[scale,rotate] duration-300 ease-out group-hover/item:scale-120 group-hover/item:-rotate-10 group-hover/item:drop-shadow-lg"
+                      src={item.iconUrl}
+                      width={44}
+                      height={44}
+                    />
+                  ) : null}
+                  <div className="flex flex-col gap-0 text-start">
+                    <span className="leading-5 font-medium">{item.title}</span>
+                    <span className="text-muted/80 leading-6 font-normal">{item.subtitle}</span>
+                  </div>
+                  <Accordion.Indicator className="text-muted/50 [&>svg]:size-4">
+                    <ChevronDown />
+                  </Accordion.Indicator>
+                </Accordion.Trigger>
+              </Accordion.Heading>
+              <Accordion.Panel>
+                <Accordion.Body className="text-muted/80 text-start">{item.content}</Accordion.Body>
+              </Accordion.Panel>
+            </Accordion.Item>
+          ))}
+        </MotionAccordion>
       </section>
     </div>
   );

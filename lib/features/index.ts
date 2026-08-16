@@ -4,6 +4,7 @@ export * from "./comment";
 export * from "./dashboard";
 export * from "./file";
 export * from "./friend-link";
+export * from "./github";
 export * from "./library";
 export * from "./locale";
 export * from "./market";
