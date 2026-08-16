@@ -1,3 +1,21 @@
+# [1.76.0](https://github.com/LeeWio/odyssey/compare/v1.75.0...v1.76.0) (2026-08-16)
+
+
+### Bug Fixes
+
+* **config/faq:** authorize Supabase host and optimize FAQ accordion images ([bc21a72](https://github.com/LeeWio/odyssey/commit/bc21a7215bf8bdddf00b2dbcb500722797d0aa2b))
+* **config:** authorize 3D icons CDN hostname in Next.js configurations ([cf68a41](https://github.com/LeeWio/odyssey/commit/cf68a41bafc0403f5f80556d7c4e6b4ef41365fa))
+* **config:** authorize Icons8 CDN hostname in Next.js configurations ([11417d0](https://github.com/LeeWio/odyssey/commit/11417d08e44407cc2662d279739a1c66ae988ab3))
+
+
+### Features
+
+* **faq/building:** add FAQ section header and refine building templates ([540594b](https://github.com/LeeWio/odyssey/commit/540594b54c95e4055ff69369057c69def17c68c6))
+* **faq:** populate FAQ section with interactive Accordion component and items ([cb0c485](https://github.com/LeeWio/odyssey/commit/cb0c485112dbbc8d0e62766c86f129afc72f6c9b))
+* **github:** implement live GitHub repository activity feed and optimize motion accordion ([f704304](https://github.com/LeeWio/odyssey/commit/f704304d09752def7007c653f82a6545d3518e6f)), closes [hi#fidelity](https://github.com/hi/issues/fidelity)
+* **home:** remove the entire Field Notes timeline section ([6eeceaf](https://github.com/LeeWio/odyssey/commit/6eeceafe583deb1a86d668046b73d48aa8a56d44))
+* **home:** remove the rating and reactions feedback module ([4e253ee](https://github.com/LeeWio/odyssey/commit/4e253ee8a5d4136f15c757d9305ee5e92d26cff6))
+
 # [1.75.0](https://github.com/LeeWio/odyssey/compare/v1.74.0...v1.75.0) (2026-08-16)
 
 
