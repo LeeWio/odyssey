@@ -13,8 +13,8 @@ import {
 import { MediaPlayButton } from "@/features/media/components/media-play-button";
 import type { MediaItem } from "@/features/media/types";
 import { useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
-import { useState, useEffect } from "react";
-import { ItemCard, KPI, TrendChip, EmojiReactionButton, Rating } from "@heroui-pro/react";
+import { useState } from "react";
+import { ItemCard, KPI, TrendChip } from "@heroui-pro/react";
 import {
   Card,
   Chip,
@@ -126,81 +126,6 @@ export default function Home() {
 
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-
-  // local states for rating and reactions
-  const [rating, setRating] = useState<number>(0);
-  const [reactions, setReactions] = useState<Record<string, { count: number; selected: boolean }>>({
-    "❤️": { count: 42, selected: false },
-    "🎉": { count: 18, selected: false },
-    "👍": { count: 24, selected: false },
-    "🤯": { count: 15, selected: false },
-    "🔥": { count: 31, selected: false },
-  });
-
-  // Hydrate states from localStorage safely
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const savedRating = localStorage.getItem("odyssey-rating");
-    const savedReactions = localStorage.getItem("odyssey-reactions");
-
-    if (savedRating || savedReactions) {
-      setTimeout(() => {
-        if (savedRating) {
-          setRating(Number(savedRating));
-        }
-
-        if (savedReactions) {
-          try {
-            const parsed = JSON.parse(savedReactions) as Record<string, boolean>;
-            setReactions((current) => {
-              const updated = { ...current };
-              Object.keys(parsed).forEach((emoji) => {
-                if (updated[emoji]) {
-                  updated[emoji] = {
-                    count: parsed[emoji] ? updated[emoji].count + 1 : updated[emoji].count,
-                    selected: parsed[emoji],
-                  };
-                }
-              });
-              return updated;
-            });
-          } catch (err) {
-            console.error("Failed to parse reactions from localStorage", err);
-          }
-        }
-      }, 0);
-    }
-  }, []);
-
-  const handleRatingChange = (newValue: number) => {
-    setRating(newValue);
-    localStorage.setItem("odyssey-rating", String(newValue));
-  };
-
-  const toggleReaction = (emoji: string) => {
-    setReactions((current) => {
-      const entry = current[emoji];
-      if (!entry) return current;
-
-      const selected = !entry.selected;
-      const count = selected ? entry.count + 1 : entry.count - 1;
-
-      const updated = {
-        ...current,
-        [emoji]: { count, selected },
-      };
-
-      // persist selected keys to localStorage
-      const selectionMap: Record<string, boolean> = {};
-      Object.entries(updated).forEach(([key, value]) => {
-        if (value.selected) selectionMap[key] = true;
-      });
-      localStorage.setItem("odyssey-reactions", JSON.stringify(selectionMap));
-
-      return updated;
-    });
-  };
 
   const reveal = (delay = 0, distance = 18) => ({
     initial: shouldReduceMotion ? false : { opacity: 0, y: distance, filter: "blur(8px)" },
@@ -620,75 +545,6 @@ export default function Home() {
 
         {/* Constrained Comments & Feedback Content */}
         <div className="mx-auto mt-16 flex w-full max-w-3xl flex-col gap-10">
-          {/* Playful Emotional Feedback Panel: Rating & Reactions */}
-          <motion.div className="w-full" {...revealInView(0.16, 16)}>
-            <Card
-              variant="secondary"
-              className="border-default-100/50 bg-surface-secondary/15 rounded-3xl border p-6 shadow-sm sm:p-8"
-            >
-              <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
-                {/* Star Rating section */}
-                <div className="flex flex-col items-center gap-2 sm:items-start">
-                  <Typography
-                    type="body-xs"
-                    weight="bold"
-                    className="text-muted/60 font-mono text-[10px] tracking-wider uppercase"
-                  >
-                    Rate your Odyssey experience
-                  </Typography>
-                  <div className="flex items-center gap-3">
-                    <Rating
-                      aria-label="Platform Rating"
-                      value={rating}
-                      onValueChange={handleRatingChange}
-                      size="md"
-                      style={
-                        { "--rating-active-color": "var(--color-accent)" } as React.CSSProperties
-                      }
-                    >
-                      <Rating.Item value={1} />
-                      <Rating.Item value={2} />
-                      <Rating.Item value={3} />
-                      <Rating.Item value={4} />
-                      <Rating.Item value={5} />
-                    </Rating>
-                    {rating > 0 && (
-                      <span className="text-accent font-mono text-xs font-semibold">
-                        {rating} / 5
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Emoji Reaction button group */}
-                <div className="flex flex-col items-center gap-2 sm:items-end">
-                  <Typography
-                    type="body-xs"
-                    weight="bold"
-                    className="text-muted/60 font-mono text-[10px] tracking-wider uppercase"
-                  >
-                    React to the workspace
-                  </Typography>
-                  <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
-                    {Object.entries(reactions).map(([emoji, { count, selected }]) => (
-                      <EmojiReactionButton
-                        key={emoji}
-                        isSelected={selected}
-                        onChange={() => toggleReaction(emoji)}
-                        size="sm"
-                      >
-                        <EmojiReactionButton.Emoji>{emoji}</EmojiReactionButton.Emoji>
-                        {count > 0 && (
-                          <EmojiReactionButton.Count>{count}</EmojiReactionButton.Count>
-                        )}
-                      </EmojiReactionButton>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-
           {mounted && !isAuthenticated ? (
             <motion.div className="w-full" {...revealInView(0.2, 16)}>
               <div className="border-default-100 bg-surface-secondary/20 flex flex-col gap-4 rounded-2xl border p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
