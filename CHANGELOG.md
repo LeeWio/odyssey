@@ -1,3 +1,18 @@
+# [1.79.0](https://github.com/LeeWio/odyssey/compare/v1.78.0...v1.79.0) (2026-08-16)
+
+
+### Bug Fixes
+
+* **ui:** enable sliding selection transition in ModeSwitch segment control ([1f74c11](https://github.com/LeeWio/odyssey/commit/1f74c111e286ae0d115215b788b143d857fb9c29))
+* **ui:** resolve next-themes transition blocking and enable sliding ModeSwitch animation ([fc2ec6c](https://github.com/LeeWio/odyssey/commit/fc2ec6c906eb0af682525576a9cc6cc9e4434e7b))
+* **ui:** restore sliding selection animation to ModeSwitch segment control ([80c2d05](https://github.com/LeeWio/odyssey/commit/80c2d05c026220dee1fdb044e4ad5694a53cbe35))
+
+
+### Features
+
+* **ui:** adopt high-performance Grainient shader background generator for cards ([0d1966c](https://github.com/LeeWio/odyssey/commit/0d1966c499bc755c08054bda6952cbd7a90aba8b)), closes [hi#performance](https://github.com/hi/issues/performance)
+* **ui:** implement Apple Music-style dynamic mesh gradient card background generator ([bfb07ca](https://github.com/LeeWio/odyssey/commit/bfb07cac3870aeb8447340ebe88314132dedd48b)), closes [hi#performance](https://github.com/hi/issues/performance)
+
 # [1.78.0](https://github.com/LeeWio/odyssey/compare/v1.77.0...v1.78.0) (2026-08-16)
 
 
