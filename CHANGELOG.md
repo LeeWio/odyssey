@@ -1,3 +1,10 @@
+# [1.74.0](https://github.com/LeeWio/odyssey/compare/v1.73.0...v1.74.0) (2026-08-16)
+
+
+### Features
+
+* **editor/guestbook:** implement complete rich-text ecosystem and polished guestbook gradient titles ([cff8502](https://github.com/LeeWio/odyssey/commit/cff8502c18fc0edd9d36b3913d7e07f99469bf63))
+
 # [1.73.0](https://github.com/LeeWio/odyssey/compare/v1.72.0...v1.73.0) (2026-08-15)
 
 
