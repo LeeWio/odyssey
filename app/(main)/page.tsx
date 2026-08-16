@@ -94,8 +94,7 @@ const faqItems = [
     subtitle: "Design, technology, and everything in between",
     content:
       "I’m drawn to digital experiences where thoughtful design, technology, and storytelling come together — especially ideas that leave room for experimentation.",
-    iconUrl:
-      "https://3dicons.sgp1.cdn.digitaloceanspaces.com/v1/dynamic/color/file-text-dynamic-color.png",
+    iconUrl: "https://img.icons8.com/3d-fluency/94/adobe-animate.png",
   },
   {
     content: "Enhance your browsing experience by installing our official browser extension",

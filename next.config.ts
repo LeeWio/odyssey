@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
       "img.heroui.chat",
       "bvconuycpdvgzbvbkijl.supabase.co",
       "3dicons.sgp1.cdn.digitaloceanspaces.com",
+      "img.icons8.com",
     ],
     remotePatterns: [
       {
@@ -36,6 +37,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "3dicons.sgp1.cdn.digitaloceanspaces.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "img.icons8.com",
         pathname: "/**",
       },
     ],
