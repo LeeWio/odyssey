@@ -1,24 +1,14 @@
 "use client";
 
-import {
-  AlertDialog,
-  Button,
-  Chip,
-  Form,
-  Label,
-  Modal,
-  Spinner,
-  Switch,
-  Tabs,
-  TextArea,
-  TextField,
-} from "@heroui/react";
+import { AlertDialog, Button, Chip, Modal, Spinner, Tabs, Tooltip } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
-import { type FormEvent, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
+import { MomentMediaGallery } from "@/features/moment/moment-media-gallery";
 import {
+  type MomentRequest,
   type MomentResponse,
   useCreateMomentMutation,
   useDeleteMomentMutation,
@@ -27,6 +17,7 @@ import {
   useLikeMomentMutation,
   useUpdateMomentMutation,
 } from "@/lib/features/moment";
+import { MomentComposer } from "../moment-composer";
 import { usePortalContainer } from "../use-portal-container";
 
 // --- Single Timeline Node Component ---
@@ -80,6 +71,8 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
         <div className="text-foreground/95 text-sm leading-relaxed whitespace-pre-wrap md:text-base">
           {moment.content}
         </div>
+
+        <MomentMediaGallery images={moment.images} />
 
         {/* Action Bar */}
         <div className="border-border/40 flex items-center gap-2 border-t pt-3">
@@ -146,10 +139,6 @@ export function MomentsPage() {
   const [momentToEdit, setMomentToEdit] = useState<MomentResponse | null>(null);
   const [momentToDelete, setMomentToDelete] = useState<MomentResponse | null>(null);
 
-  // Form Fields
-  const [formContent, setFormContent] = useState("");
-  const [formIsPublished, setFormIsPublished] = useState(true);
-
   const [adminSort, setAdminSort] = useState<DataGridSortDescriptor>({
     column: "createdAt",
     direction: "descending",
@@ -157,27 +146,15 @@ export function MomentsPage() {
 
   const handleCreateOpen = () => {
     setMomentToEdit(null);
-    setFormContent("");
-    setFormIsPublished(true);
     setIsFormFormOpen(true);
   };
 
   const handleEditClick = useCallback((moment: MomentResponse) => {
     setMomentToEdit(moment);
-    setFormContent(moment.content);
-    setFormIsPublished(moment.isPublished);
     setIsFormFormOpen(true);
   }, []);
 
-  const handleFormSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!formContent.trim()) return;
-
-    const body = {
-      content: formContent.trim(),
-      isPublished: formIsPublished,
-    };
-
+  const handleFormSubmit = async (body: MomentRequest) => {
     try {
       if (momentToEdit) {
         await updateMoment({ id: momentToEdit.id, body }).unwrap();
@@ -226,6 +203,7 @@ export function MomentsPage() {
         accessorKey: "content",
         header: "Content",
         id: "content",
+        isRowHeader: true,
         minWidth: 320,
         cell: (item) => <span className="line-clamp-2 text-sm">{item.content}</span>,
       },
@@ -238,6 +216,17 @@ export function MomentsPage() {
           <Chip size="sm" variant="soft" color={item.isPublished ? "success" : "warning"}>
             {item.isPublished ? "Published" : "Draft"}
           </Chip>
+        ),
+      },
+      {
+        accessorKey: "images",
+        header: "Media",
+        id: "images",
+        minWidth: 100,
+        cell: (item) => (
+          <span className="text-muted text-sm tabular-nums">
+            {item.images.length} image{item.images.length === 1 ? "" : "s"}
+          </span>
         ),
       },
       {
@@ -266,17 +255,30 @@ export function MomentsPage() {
         minWidth: 160,
         cell: (item) => (
           <div className="flex items-center justify-end gap-2">
-            <Button isIconOnly size="sm" variant="tertiary" onPress={() => handleEditClick(item)}>
-              <Icon icon="gravity-ui:pencil" className="size-4" aria-hidden="true" />
-            </Button>
-            <Button
-              isIconOnly
-              size="sm"
-              variant="danger-soft"
-              onPress={() => setMomentToDelete(item)}
-            >
-              <Icon icon="gravity-ui:trash-bin" className="size-4" aria-hidden="true" />
-            </Button>
+            <Tooltip>
+              <Button
+                isIconOnly
+                aria-label={`Edit moment ${item.id}`}
+                size="sm"
+                variant="tertiary"
+                onPress={() => handleEditClick(item)}
+              >
+                <Icon icon="gravity-ui:pencil" className="size-4" aria-hidden="true" />
+              </Button>
+              <Tooltip.Content>Edit moment</Tooltip.Content>
+            </Tooltip>
+            <Tooltip>
+              <Button
+                isIconOnly
+                aria-label={`Delete moment ${item.id}`}
+                size="sm"
+                variant="danger-soft"
+                onPress={() => setMomentToDelete(item)}
+              >
+                <Icon icon="gravity-ui:trash-bin" className="size-4" aria-hidden="true" />
+              </Button>
+              <Tooltip.Content>Delete moment</Tooltip.Content>
+            </Tooltip>
           </div>
         ),
       },
@@ -387,46 +389,22 @@ export function MomentsPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <Modal.Container>
-            <Modal.Dialog className="sm:max-w-lg">
-              <Form onSubmit={handleFormSubmit} className="flex flex-col gap-5">
-                <Modal.Header>
-                  <div className="text-lg font-bold">
-                    {momentToEdit ? "Edit Moment" : "Create Moment"}
-                  </div>
-                </Modal.Header>
-                <Modal.Body className="flex flex-col gap-4">
-                  <TextField isRequired name="content" className="flex flex-col gap-1.5">
-                    <Label className="text-sm font-semibold">Content</Label>
-                    <TextArea
-                      value={formContent}
-                      onChange={(e) => setFormContent(e.target.value)}
-                      placeholder="Share what's on your mind today..."
-                      className="min-h-32"
-                      variant="secondary"
-                      maxLength={500}
-                    />
-                  </TextField>
-
-                  <div className="pt-2">
-                    <Switch isSelected={formIsPublished} onChange={setFormIsPublished}>
-                      <Switch.Content>
-                        <Switch.Control>
-                          <Switch.Thumb />
-                        </Switch.Control>
-                        Publish immediately to the public timeline
-                      </Switch.Content>
-                    </Switch>
-                  </div>
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button variant="ghost" onPress={() => setIsFormFormOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" variant="primary" isDisabled={isCreating || isUpdating}>
-                    {isCreating || isUpdating ? <Spinner size="sm" /> : "Submit"}
-                  </Button>
-                </Modal.Footer>
-              </Form>
+            <Modal.Dialog className="max-h-[90dvh] overflow-y-auto sm:max-w-3xl">
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading className="text-lg font-bold">
+                  {momentToEdit ? "Edit Moment" : "Create Moment"}
+                </Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <MomentComposer
+                  key={momentToEdit?.id ?? "new"}
+                  initialMoment={momentToEdit}
+                  isSaving={isCreating || isUpdating}
+                  onCancel={() => setIsFormFormOpen(false)}
+                  onSubmit={handleFormSubmit}
+                />
+              </Modal.Body>
             </Modal.Dialog>
           </Modal.Container>
         </Modal.Backdrop>
@@ -448,8 +426,8 @@ export function MomentsPage() {
                 <AlertDialog.Heading>Delete Moment?</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                Are you sure you want to permanently delete this moment? This action cannot be
-                undone and will remove it from the timeline.
+                This will remove the moment from the timeline. It can still be recovered from the
+                database while retention is enabled.
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button variant="ghost" onPress={() => setMomentToDelete(null)}>

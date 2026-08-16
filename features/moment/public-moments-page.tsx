@@ -2,14 +2,20 @@
 
 import { Bell, Heart, Play } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
-import { Button, Card, Chip, Skeleton, Tooltip, Typography } from "@heroui/react";
-import { useState } from "react";
+import { Button, Card, Chip, Skeleton, Tooltip, Typography, toast } from "@heroui/react";
+import { useCallback, useMemo, useState } from "react";
 
+import { useAppSelector } from "@/lib/hooks";
+import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   type MomentResponse,
+  useGetLikedMomentIdsQuery,
   useGetPublicMomentsQuery,
+  useLazyGetPublicMomentsQuery,
   useLikeMomentMutation,
+  useUnlikeMomentMutation,
 } from "@/lib/features/moment";
+import { MomentMediaGallery } from "./moment-media-gallery";
 
 const MOMENTS_PAGE_SIZE = 12;
 
@@ -48,29 +54,15 @@ function MomentSkeleton() {
   );
 }
 
-function MomentItem({ moment }: { moment: MomentResponse }) {
-  const [likeMoment] = useLikeMomentMutation();
-  const [optimisticLikesCount, setOptimisticLikesCount] = useState<number | null>(null);
-  const [isLiking, setIsLiking] = useState(false);
-  const isLiked = optimisticLikesCount !== null;
-  const likesCount = optimisticLikesCount
-    ? Math.max(moment.likesCount, optimisticLikesCount)
-    : moment.likesCount;
+interface MomentItemProps {
+  isLiked: boolean;
+  isLiking: boolean;
+  likesCount: number;
+  moment: MomentResponse;
+  onToggleLike: (id: number, isLiked: boolean) => void;
+}
 
-  const handleLike = async () => {
-    if (isLiked || isLiking) return;
-
-    setOptimisticLikesCount(moment.likesCount + 1);
-    setIsLiking(true);
-    try {
-      await likeMoment(moment.id).unwrap();
-    } catch {
-      setOptimisticLikesCount(null);
-    } finally {
-      setIsLiking(false);
-    }
-  };
-
+function MomentItem({ isLiked, isLiking, likesCount, moment, onToggleLike }: MomentItemProps) {
   return (
     <article className="group grid gap-4 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-8">
       <div className="hidden pt-5 text-right sm:block">
@@ -99,21 +91,22 @@ function MomentItem({ moment }: { moment: MomentResponse }) {
               {moment.content}
             </Card.Description>
           </Card.Header>
+          <MomentMediaGallery images={moment.images} />
           <Card.Footer className="border-separator justify-between border-t p-0 pt-4">
             <Tooltip>
               <Button
                 size="sm"
                 variant={isLiked ? "danger" : "ghost"}
                 isPending={isLiking}
-                aria-label={isLiked ? "Moment liked" : "Like moment"}
-                onPress={handleLike}
+                aria-label={isLiked ? "Unlike moment" : "Like moment"}
+                onPress={() => onToggleLike(moment.id, isLiked)}
               >
                 <Heart aria-hidden="true" className="size-4" />
-                <span className="tabular-nums">{likesCount}</span>
+                <span className="tabular-nums">{Math.max(0, likesCount)}</span>
               </Button>
               <Tooltip.Content>{isLiked ? "Liked" : "Like this moment"}</Tooltip.Content>
             </Tooltip>
-            <span className="text-muted text-xs">Moment #{moment.id}</span>
+            <span className="text-muted text-xs">A note from the day</span>
           </Card.Footer>
         </Card>
       </div>
@@ -122,9 +115,75 @@ function MomentItem({ moment }: { moment: MomentResponse }) {
 }
 
 export function PublicMomentsPage() {
-  const [page, setPage] = useState(0);
-  const moments = useGetPublicMomentsQuery({ page, size: MOMENTS_PAGE_SIZE });
-  const entries = moments.data?.list ?? [];
+  const [extraEntries, setExtraEntries] = useState<MomentResponse[]>([]);
+  const [nextPage, setNextPage] = useState(1);
+  const [likeOverrides, setLikeOverrides] = useState<Map<number, boolean>>(new Map());
+  const [pendingLikeIds, setPendingLikeIds] = useState<Set<number>>(new Set());
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const moments = useGetPublicMomentsQuery({ page: 0, size: MOMENTS_PAGE_SIZE });
+  const [loadPage, loadingMore] = useLazyGetPublicMomentsQuery();
+  const entries = useMemo(() => {
+    const merged = new Map<number, MomentResponse>();
+    moments.data?.list.forEach((moment) => merged.set(moment.id, moment));
+    extraEntries.forEach((moment) => merged.set(moment.id, moment));
+    return [...merged.values()];
+  }, [extraEntries, moments.data?.list]);
+  const momentIds = useMemo(() => entries.map(({ id }) => id), [entries]);
+  const likedMoments = useGetLikedMomentIdsQuery(momentIds, {
+    skip: !isAuthenticated || momentIds.length === 0,
+  });
+  const [likeMoment] = useLikeMomentMutation();
+  const [unlikeMoment] = useUnlikeMomentMutation();
+  const serverLikedIds = useMemo(() => new Set(likedMoments.data ?? []), [likedMoments.data]);
+
+  const handleToggleLike = useCallback(
+    async (id: number, isLiked: boolean) => {
+      if (!isAuthenticated) {
+        toast.warning("Sign in to like moments.");
+        return;
+      }
+      if (pendingLikeIds.has(id)) return;
+
+      setLikeOverrides((current) => {
+        const next = new Map(current);
+        next.set(id, !isLiked);
+        return next;
+      });
+      setPendingLikeIds((current) => new Set(current).add(id));
+
+      try {
+        if (isLiked) await unlikeMoment(id).unwrap();
+        else await likeMoment(id).unwrap();
+      } catch {
+        setLikeOverrides((current) => {
+          const next = new Map(current);
+          next.delete(id);
+          return next;
+        });
+      } finally {
+        setPendingLikeIds((current) => {
+          const next = new Set(current);
+          next.delete(id);
+          return next;
+        });
+      }
+    },
+    [isAuthenticated, likeMoment, pendingLikeIds, unlikeMoment]
+  );
+
+  const handleLoadMore = useCallback(async () => {
+    try {
+      const result = await loadPage({ page: nextPage, size: MOMENTS_PAGE_SIZE }).unwrap();
+      setExtraEntries((current) => {
+        const merged = new Map(current.map((moment) => [moment.id, moment]));
+        result.list.forEach((moment) => merged.set(moment.id, moment));
+        return [...merged.values()];
+      });
+      setNextPage((current) => current + 1);
+    } catch {
+      toast.danger("Couldn't load more moments.");
+    }
+  }, [loadPage, nextPage]);
 
   return (
     <div className="bg-background min-h-[100dvh] px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
@@ -143,7 +202,7 @@ export function PublicMomentsPage() {
         </header>
 
         <section aria-label="Moments timeline" className="mt-16">
-          {moments.isLoading ? (
+          {moments.isLoading && entries.length === 0 ? (
             <MomentSkeleton />
           ) : moments.isError ? (
             <Card variant="secondary" className="items-start gap-3 p-7">
@@ -160,7 +219,22 @@ export function PublicMomentsPage() {
           ) : entries.length > 0 ? (
             <div className="space-y-5 sm:space-y-7">
               {entries.map((moment) => (
-                <MomentItem key={moment.id} moment={moment} />
+                <MomentItem
+                  key={moment.id}
+                  isLiked={likeOverrides.get(moment.id) ?? serverLikedIds.has(moment.id)}
+                  isLiking={pendingLikeIds.has(moment.id)}
+                  likesCount={
+                    moment.likesCount +
+                    (likeOverrides.has(moment.id) &&
+                    likeOverrides.get(moment.id) !== serverLikedIds.has(moment.id)
+                      ? likeOverrides.get(moment.id)
+                        ? 1
+                        : -1
+                      : 0)
+                  }
+                  moment={moment}
+                  onToggleLike={handleToggleLike}
+                />
               ))}
             </div>
           ) : (
@@ -180,29 +254,11 @@ export function PublicMomentsPage() {
           )}
         </section>
 
-        {moments.data && moments.data.totalPages > 1 ? (
-          <div className="border-default-200 mt-10 flex items-center justify-between gap-4 border-t pt-6">
-            <Typography color="muted" type="body-xs">
-              Page {page + 1} of {moments.data.totalPages}
-            </Typography>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="secondary"
-                isDisabled={page === 0}
-                onPress={() => setPage((current) => Math.max(0, current - 1))}
-              >
-                Previous
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                isDisabled={page >= moments.data.totalPages - 1}
-                onPress={() => setPage((current) => current + 1)}
-              >
-                Next
-              </Button>
-            </div>
+        {moments.data && nextPage < moments.data.totalPages ? (
+          <div className="border-default-200 mt-10 flex justify-center border-t pt-6">
+            <Button isPending={loadingMore.isFetching} variant="secondary" onPress={handleLoadMore}>
+              Load more moments
+            </Button>
           </div>
         ) : null}
       </div>

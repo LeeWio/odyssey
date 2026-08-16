@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 export const FileResponseSchema = z.object({
+  // Optional during rolling deployments; Moment uploads reject a missing ID with a recoverable UI error.
+  id: z.number().optional(),
   fileName: z.string(),
   originalName: z.string(),
   fileUrl: z.string(),

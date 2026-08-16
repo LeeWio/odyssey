@@ -41,6 +41,29 @@ export const momentApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, id) => [{ type: "Moment", id }],
     }),
 
+    getLikedMomentIds: builder.query<number[], number[]>({
+      query: (ids) => ({
+        url: "/api/v1/public/moments/liked",
+        params: { ids },
+      }),
+      rawResponseSchema: apiResponseSchema(z.array(z.number())),
+      transformResponse: (response: ApiResponse<number[]>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, ids) => ids.map((id) => ({ type: "Moment", id })),
+    }),
+
+    unlikeMoment: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/api/v1/public/moments/${id}/like`,
+        method: "DELETE",
+      }),
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Couldn't update moment reaction." });
+      },
+      invalidatesTags: (_result, _error, id) => [{ type: "Moment", id }],
+    }),
+
     /**
      * Admin: Get all moments (paginated)
      */
@@ -142,7 +165,10 @@ export const momentApi = baseApi.injectEndpoints({
 
 export const {
   useGetPublicMomentsQuery,
+  useLazyGetPublicMomentsQuery,
+  useGetLikedMomentIdsQuery,
   useLikeMomentMutation,
+  useUnlikeMomentMutation,
   useGetAllMomentsQuery,
   useGetMomentByIdQuery,
   useCreateMomentMutation,

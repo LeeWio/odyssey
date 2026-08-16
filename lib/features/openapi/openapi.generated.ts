@@ -236,7 +236,12 @@ export interface OpenApiComponents {
       data?: OpenApiComponents["schemas"]["PostResponse"];
       traceId?: string;
     };
-    MomentRequest: { content: string; isPublished: boolean };
+    MomentRequest: {
+      content: string;
+      isPublished: boolean;
+      images?: Array<OpenApiComponents["schemas"]["MomentImageRequest"]>;
+    };
+    MomentImageRequest: { fileId: number; altText: string };
     ApiResponseMomentResponse: {
       code?: number;
       message?: string;
@@ -250,6 +255,18 @@ export interface OpenApiComponents {
       isPublished?: boolean;
       createdAt?: string;
       updatedAt?: string;
+      images?: Array<OpenApiComponents["schemas"]["MomentImageResponse"]>;
+    };
+    MomentImageResponse: {
+      id?: number;
+      fileId?: number;
+      originalName?: string;
+      fileUrl?: string;
+      thumbnailUrl?: string;
+      width?: number;
+      height?: number;
+      altText?: string;
+      sortOrder?: number;
     };
     MenuRequest: {
       name: string;
@@ -428,6 +445,7 @@ export interface OpenApiComponents {
       traceId?: string;
     };
     FileResponse: {
+      id?: number;
       fileName?: string;
       originalName?: string;
       fileUrl?: string;
