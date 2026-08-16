@@ -112,37 +112,6 @@ const faqItems = [
   },
 ];
 
-const fieldNotes = [
-  {
-    index: "01",
-    time: "07:18",
-    title: "The room wakes slowly.",
-    body: "Before the notifications arrive, there is coffee, a familiar record, and a few quiet minutes to decide what deserves attention.",
-    accent: "from-amber-400/20 via-orange-300/5 to-transparent",
-  },
-  {
-    index: "02",
-    time: "11:42",
-    title: "A system begins to hold.",
-    body: "The best part of building is often invisible: one less exception, one clearer boundary, one small decision that makes tomorrow easier.",
-    accent: "from-sky-400/18 via-indigo-300/5 to-transparent",
-  },
-  {
-    index: "03",
-    time: "16:07",
-    title: "The numbers keep breathing.",
-    body: "Markets move, but observation can stay still. A chart becomes more useful when it is allowed to be context instead of instruction.",
-    accent: "from-emerald-400/18 via-teal-300/5 to-transparent",
-  },
-  {
-    index: "04",
-    time: "23:26",
-    title: "Leave something unfinished.",
-    body: "A question in the margin is not a loose end. Sometimes it is simply where the next day knows to begin.",
-    accent: "from-violet-400/18 via-fuchsia-300/5 to-transparent",
-  },
-] as const;
-
 export default function Home() {
   const mounted = useMounted();
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -299,88 +268,6 @@ export default function Home() {
             transition={{ duration: 2.4, ease: "easeInOut", repeat: Infinity }}
           />
         </MotionSurface>
-      </section>
-
-      <section
-        aria-labelledby="field-notes-title"
-        className="relative mx-auto grid w-full max-w-6xl gap-12 px-6 py-24 sm:px-10 sm:py-32 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-20"
-      >
-        <div className="lg:sticky lg:top-28 lg:self-start">
-          <MotionTypography
-            color="muted"
-            type="body-xs"
-            className="font-mono tracking-[0.18em] uppercase"
-            {...revealInView(0, 8)}
-          >
-            Field notes · one ordinary day
-          </MotionTypography>
-          <MotionTypography
-            id="field-notes-title"
-            type="h2"
-            weight="bold"
-            className="mt-4 max-w-sm text-[clamp(2rem,4vw,3.6rem)] leading-[1.02] tracking-[-0.045em]"
-            {...revealInView(0.06, 14)}
-          >
-            Small moments make the larger story.
-          </MotionTypography>
-          <MotionTypography
-            color="muted"
-            type="body-sm"
-            className="mt-5 max-w-sm leading-7"
-            {...revealInView(0.12, 12)}
-          >
-            No grand itinerary. Just a day passing through sound, systems, numbers, and the thoughts
-            left on the desk after dark.
-          </MotionTypography>
-        </div>
-
-        <div className="relative flex flex-col">
-          <span
-            aria-hidden="true"
-            className="bg-separator absolute top-4 bottom-4 left-[1.2rem] w-px sm:left-[1.45rem]"
-          />
-          {fieldNotes.map((note, index) => (
-            <motion.article
-              key={note.index}
-              className="relative grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 pb-12 last:pb-0 sm:grid-cols-[3rem_minmax(0,1fr)] sm:gap-6 sm:pb-16"
-              {...revealInView(index * 0.04, 24)}
-            >
-              <div className="relative z-10 flex size-10 items-center justify-center sm:size-12">
-                <span className="bg-background border-separator text-muted flex size-8 items-center justify-center rounded-full border font-mono text-[0.65rem] sm:size-9">
-                  {note.index}
-                </span>
-              </div>
-              <MotionSurface
-                variant="secondary"
-                className="group relative min-h-52 overflow-hidden rounded-[2rem] p-7 sm:min-h-60 sm:p-9"
-              >
-                <motion.span
-                  aria-hidden="true"
-                  className={`absolute inset-0 bg-linear-to-br ${note.accent}`}
-                  initial={false}
-                  whileInView={shouldReduceMotion ? undefined : { opacity: [0.45, 0.8] }}
-                  viewport={{ once: true, amount: 0.55 }}
-                  transition={{ duration: 1.4, ease: easeOut }}
-                />
-                <div className="relative flex h-full flex-col">
-                  <Typography color="muted" type="body-xs" className="font-mono tracking-[0.14em]">
-                    {note.time}
-                  </Typography>
-                  <Typography
-                    type="h3"
-                    weight="semibold"
-                    className="mt-auto max-w-md tracking-[-0.025em]"
-                  >
-                    {note.title}
-                  </Typography>
-                  <Typography color="muted" type="body-sm" className="mt-3 max-w-lg leading-6">
-                    {note.body}
-                  </Typography>
-                </div>
-              </MotionSurface>
-            </motion.article>
-          ))}
-        </div>
       </section>
 
       <section
