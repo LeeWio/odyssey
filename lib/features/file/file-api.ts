@@ -1,13 +1,6 @@
-import { toast } from "@heroui/react";
 import { z } from "zod";
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
-import {
-  apiResponseSchema,
-  baseApi,
-  getApiErrorMessage,
-  pageResultSchema,
-  transformApiError,
-} from "@/lib/api";
+import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
 import { notifyMutation } from "@/lib/toast";
 import { FileResponseSchema, type FileResponse } from "./file-contracts";
 
@@ -42,13 +35,6 @@ export const fileApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(FileResponseSchema),
       transformResponse: (response: ApiResponse<FileResponse>) => response.data,
       transformErrorResponse: transformApiError,
-      onQueryStarted(file, { queryFulfilled }) {
-        void toast.promise(queryFulfilled, {
-          loading: `Uploading ${file.name}...`,
-          success: `Uploaded ${file.name}.`,
-          error: (error) => getApiErrorMessage(error, `Couldn't upload ${file.name}.`),
-        });
-      },
       invalidatesTags: ["File"],
     }),
 

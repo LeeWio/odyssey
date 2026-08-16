@@ -84,6 +84,7 @@ export function RichTextModal() {
   const [recoveryDraft, setRecoveryDraft] = useState<RichTextDraft | null>(null);
   const [isEditorReady, setIsEditorReady] = useState(false);
   const [isPostDataReady, setIsPostDataReady] = useState(false);
+  const [isCoverUploading, setIsCoverUploading] = useState(false);
   const [draftRevision, setDraftRevision] = useState(0);
   const [mediaIssues, setMediaIssues] = useState(() =>
     getMediaValidationIssues(normalizeJSONContent(undefined))
@@ -108,7 +109,7 @@ export function RichTextModal() {
   const [createPost, { isLoading: isCreating }] = useCreatePostMutation();
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation();
 
-  const isPending = isCreating || isUpdating;
+  const isPending = isCreating || isUpdating || isCoverUploading;
   const hasContentSchemaError = contentSchemaError?.activeId === activeId;
 
   // Fetch existing post data if activeId is a numeric string (existing ID)
@@ -131,6 +132,7 @@ export function RichTextModal() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsEditorReady(false);
     setIsPostDataReady(false);
+    setIsCoverUploading(false);
     setIsContentDirty(false);
     setIsMetadataDirty(false);
     setIsDraftRecoveryDialogOpen(false);
@@ -341,6 +343,8 @@ export function RichTextModal() {
     <>
       <Modal key={activeId}>
         <Modal.Backdrop
+          isDismissable={false}
+          isKeyboardDismissDisabled={isPending}
           isOpen={isOpen}
           onOpenChange={(nextIsOpen) => {
             if (!nextIsOpen) requestClose();
@@ -358,6 +362,7 @@ export function RichTextModal() {
                 size="sm"
                 className="absolute top-4 right-4 z-50 overflow-hidden backdrop-blur-xl"
                 aria-label={showForm ? "Back to editor" : "Open settings"}
+                isDisabled={isCoverUploading}
                 onPress={() => setShowForm((prev) => !prev)}
                 whileHover={{
                   scale: 1.06,
@@ -480,7 +485,11 @@ export function RichTextModal() {
                           transition={{ type: "spring", bounce: 0, duration: 0.5 }}
                           className="flex h-full shrink-0 flex-col overflow-hidden backdrop-blur-sm"
                         >
-                          <RichTextForm data={postData} onChange={handlePostDataChange} />
+                          <RichTextForm
+                            data={postData}
+                            onChange={handlePostDataChange}
+                            onUploadStateChange={setIsCoverUploading}
+                          />
 
                           <div className="min-w-[320px] p-6 pb-8 md:px-10 lg:px-16">
                             <div className="flex w-full flex-col gap-4">
@@ -506,6 +515,7 @@ export function RichTextModal() {
                                   variant="secondary"
                                   onPress={() => handleSave("DRAFT")}
                                   isDisabled={
+                                    isCoverUploading ||
                                     hasContentSchemaError ||
                                     mediaIssues.some(
                                       (issue) =>
@@ -526,7 +536,11 @@ export function RichTextModal() {
                                   fullWidth
                                   variant="primary"
                                   onPress={() => handleSave("PUBLISHED")}
-                                  isDisabled={hasContentSchemaError || mediaIssues.length > 0}
+                                  isDisabled={
+                                    isCoverUploading ||
+                                    hasContentSchemaError ||
+                                    mediaIssues.length > 0
+                                  }
                                   isPending={isPending}
                                 >
                                   {({ isPending }) => (

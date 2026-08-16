@@ -31,6 +31,7 @@ import type { PostRequest, PostStatus } from "@/features/blog";
 interface RichTextFormProps {
   data: Partial<PostRequest>;
   onChange: (data: Partial<PostRequest>) => void;
+  onUploadStateChange?: (isUploading: boolean) => void;
 }
 
 interface UploadFile {
@@ -83,7 +84,7 @@ function getFormatColor(ext: string): FileFormatColor {
   return map[ext.toLowerCase()] ?? "gray";
 }
 
-export function RichTextForm({ data, onChange }: RichTextFormProps) {
+export function RichTextForm({ data, onChange, onUploadStateChange }: RichTextFormProps) {
   const { data: categories = [] } = useGetCategoriesQuery();
   const { data: columns = [] } = useGetColumnsQuery();
   const { data: tags = [] } = useGetAllTagsQuery();
@@ -117,8 +118,9 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
     return () => {
       activeUploadRef.current?.abort();
       activeUploadRef.current = null;
+      onUploadStateChange?.(false);
     };
-  }, []);
+  }, [onUploadStateChange]);
 
   const uploadCover = useCallback(
     async (file: File) => {
@@ -137,6 +139,7 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
       const id = `${Date.now()}-${file.name}`;
       const request = uploadFile(file);
 
+      onUploadStateChange?.(true);
       activeUploadRef.current = {
         id,
         abort: request.abort,
@@ -180,6 +183,7 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
           },
         ]);
         handleFieldChange("coverImage", response.fileUrl);
+        toast.success(`Uploaded ${file.name}.`);
       } catch {
         clearInterval(progressInterval);
 
@@ -194,14 +198,16 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
             status: "failed",
           },
         ]);
+        toast.danger(`Couldn't upload ${file.name}.`);
       } finally {
         clearInterval(progressInterval);
         if (activeUploadRef.current?.id === id) {
           activeUploadRef.current = null;
+          onUploadStateChange?.(false);
         }
       }
     },
-    [handleFieldChange, uploadFile]
+    [handleFieldChange, onUploadStateChange, uploadFile]
   );
 
   const handleSelect = useCallback(
@@ -229,12 +235,13 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
       if (activeUploadRef.current?.id === id) {
         activeUploadRef.current.abort();
         activeUploadRef.current = null;
+        onUploadStateChange?.(false);
       }
 
       setFiles([]);
       handleFieldChange("coverImage", undefined);
     },
-    [handleFieldChange]
+    [handleFieldChange, onUploadStateChange]
   );
   return (
     <div className="flex h-full w-full scrollbar-none flex-col overflow-y-auto">
@@ -251,7 +258,7 @@ export function RichTextForm({ data, onChange }: RichTextFormProps) {
             <DropZone.Icon />
             <DropZone.Label>Drag files here or click to browse</DropZone.Label>
             <DropZone.Description>
-              Supports JPEG, PNG, PDF, and MP4 up to 50 MB.
+              Supports JPEG, PNG, GIF, and WebP up to 10 MB.
             </DropZone.Description>
             <DropZone.Trigger>Select File</DropZone.Trigger>
           </DropZone.Area>
