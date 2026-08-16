@@ -782,6 +782,37 @@ export default function Home() {
           ) : null}
         </div>
       </section>
+
+      <section
+        id="faq"
+        aria-labelledby="faq-title"
+        className="mx-auto w-full max-w-4xl scroll-mt-24 px-6 py-24 text-center sm:px-10 sm:py-32"
+      >
+        <header className="flex flex-col items-center text-center">
+          <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
+            FAQ
+          </MotionChip>
+          <MotionTypography
+            id="faq-title"
+            align="center"
+            type="h2"
+            weight="bold"
+            className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
+            {...revealInView(0.06)}
+          >
+            Questions, answered.
+          </MotionTypography>
+          <MotionTypography
+            align="center"
+            type="body"
+            color="muted"
+            className="mt-3 max-w-xl text-balance"
+            {...revealInView(0.12, 14)}
+          >
+            Some answers to questions that tend to come up.
+          </MotionTypography>
+        </header>
+      </section>
     </div>
   );
 }
