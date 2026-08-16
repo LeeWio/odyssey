@@ -4,7 +4,8 @@ import { Card, Chip, Typography } from "@heroui/react";
 import { ArrowRight, Book } from "@gravity-ui/icons";
 import Image from "next/image";
 import Link from "next/link";
-import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
+import { getSmartColorTone } from "@/components/background/smart-color-surface";
+import { MeshGradient, type MeshTone } from "@/components/background/mesh-gradient";
 import type { ColumnResponse } from "@/lib/features/column";
 
 export function ColumnCard({ column }: { column: ColumnResponse }) {
@@ -17,13 +18,13 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
       src={column.coverImage}
     />
   ) : (
-    <SmartColorSurface
-      className="h-full"
+    <MeshGradient
+      className="h-full w-full"
       seed={`column-${column.slug}`}
-      tone={getSmartColorTone({ title: column.name })}
+      tone={getSmartColorTone({ title: column.name }) as MeshTone}
     >
       <Book aria-hidden="true" className="absolute right-6 bottom-5 size-16 text-white/28" />
-    </SmartColorSurface>
+    </MeshGradient>
   );
 
   return (

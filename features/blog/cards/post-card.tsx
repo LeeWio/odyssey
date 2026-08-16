@@ -5,6 +5,7 @@ import { Chip, Surface, Typography, cn } from "@heroui/react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { MeshGradient, type MeshTone } from "@/components/background/mesh-gradient";
 
 export type PostCardVariant = "default" | "gradient-header" | "full-gradient";
 
@@ -19,6 +20,16 @@ interface PostCardProps {
   className?: string;
   variant?: PostCardVariant;
   gradient?: string; // e.g. "from-purple-500 to-blue-500"
+}
+
+function getMeshTone(category: string): MeshTone {
+  const source = category.toLowerCase();
+  if (/music|song|audio|音乐|歌曲/.test(source)) return "music";
+  if (/design|ui|ux|设计/.test(source)) return "design";
+  if (/market|invest|stock|finance|投资|市场/.test(source)) return "investing";
+  if (/code|develop|javascript|typescript|react|java|编程|开发/.test(source)) return "coding";
+  if (/life|travel|training|生活|旅行|训练/.test(source)) return "life";
+  return "neutral";
 }
 
 export const PostCard = ({
@@ -79,14 +90,15 @@ export const PostCard = ({
               className="object-cover transition-transform duration-500 group-hover:scale-110"
             />
           ) : (
-            <div
-              className={cn(
-                "flex h-full w-full items-center justify-center bg-gradient-to-br",
-                gradient
-              )}
+            <MeshGradient
+              seed={title}
+              tone={getMeshTone(category)}
+              className="flex h-full w-full items-center justify-center"
             >
-              <Typography className="text-sm text-white/40 italic">Chronicle</Typography>
-            </div>
+              <Typography className="text-sm font-medium text-white/50 italic select-none">
+                Chronicle
+              </Typography>
+            </MeshGradient>
           )}
           <div className="absolute top-4 left-4">
             <Chip
