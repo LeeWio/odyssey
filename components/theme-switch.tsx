@@ -32,19 +32,19 @@ export const ModeSwitch = () => {
   return (
     <Segment
       aria-label="Color mode"
-      selectedKey={theme || DEFAULT_THEME_MODE}
+      selectedKey={coerceThemeMode(theme) || DEFAULT_THEME_MODE}
       onSelectionChange={(key) => setTheme(coerceThemeMode(String(key)))}
       size="sm"
     >
-      <Segment.Item aria-label="Light" id="light">
+      <Segment.Item key="light" aria-label="Light" id="light">
         <Segment.Separator />
         <SunMaxFillIcon aria-hidden="true" />
       </Segment.Item>
-      <Segment.Item aria-label="Dark" id="dark">
+      <Segment.Item key="dark" aria-label="Dark" id="dark">
         <Segment.Separator />
         <MoonFillIcon aria-hidden="true" />
       </Segment.Item>
-      <Segment.Item aria-label="System" id="system">
+      <Segment.Item key="system" aria-label="System" id="system">
         <Segment.Separator />
         <DisplayFillIcon aria-hidden="true" />
       </Segment.Item>
