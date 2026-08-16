@@ -35,6 +35,7 @@ import {
   selectIsSignUpOpen,
   setLoginOpen,
   setSignUpOpen,
+  toggleDashboard,
 } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { LogIn } from "./auth/log-in";
@@ -99,8 +100,8 @@ const getNavigationItem = (id: NavigationId | null) => {
         title: "Words that survive the build.",
         description:
           "Field notes on design systems, accessible engineering, and structural decisions that resist contact with the real world.",
-        href: "/explore",
-        cta: "Explore writing",
+        href: "/chronicle",
+        cta: "Explore chronicle",
       };
     case "daily":
       return {
@@ -110,8 +111,8 @@ const getNavigationItem = (id: NavigationId | null) => {
         title: "How I spend the hours.",
         description:
           "Four pillars of focus, patience, biomechanics, and compiled logic that shape the rhythm of each day.",
-        href: "/blog",
-        cta: "Open day logs",
+        href: "/persona",
+        cta: "Open persona",
       };
     case "travelogue":
       return {
@@ -121,19 +122,19 @@ const getNavigationItem = (id: NavigationId | null) => {
         title: "Moments framed in flow.",
         description:
           "Brutalist structures, wild coastlines, and silent weather studies collected across slow journeys in Iceland, Europe, and Asia.",
-        href: "/links",
-        cta: "View Travelogue",
+        href: "/universe",
+        cta: "View Universe Space",
       };
     case "more":
       return {
         id: "more" as const,
-        label: "Archive",
-        eyebrow: "Projects & field notes",
-        title: "The rest of the notebook.",
+        label: "Dashboard",
+        eyebrow: "Operations & telemetry",
+        title: "The personal cockpit.",
         description:
-          "A repository of field notes, shipping products, open-source utilities, and useful objects collected along the journey.",
-        href: "/projects",
-        cta: "Browse projects",
+          "A live dashboard showcasing system health, focus telemetry, code commits, and project workspace actions.",
+        href: "/dashboard",
+        cta: "Launch Workbench",
       };
     default:
       return null;
@@ -176,11 +177,12 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 A study on design components that withstand edge cases and browser divergence.
               </Card.Description>
             </Card.Header>
+            <Card.Content />
             <Card.Footer>
               <Chip size="sm" color="accent" variant="soft">
                 Featured essay
               </Chip>
-              <Button size="sm" variant="ghost" onPress={() => onNavigate("/blog")}>
+              <Button size="sm" variant="ghost" onPress={() => onNavigate("/chronicle")}>
                 Read story
               </Button>
             </Card.Footer>
@@ -197,13 +199,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 aria-label="Latest Chronicle notes"
                 selectionMode="none"
                 onAction={(key) => {
-                  if (key === "columns") {
-                    onNavigate("/columns");
-                  } else if (key === "explore") {
-                    onNavigate("/explore");
-                  } else {
-                    onNavigate("/blog");
-                  }
+                  onNavigate("/chronicle");
                 }}
               >
                 <ListBox.Item id="systems" textValue="Designing for the second draft">
@@ -287,7 +283,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label="Open Soul Soothe"
-                onPress={() => onNavigate("/blog")}
+                onPress={() => onNavigate("/persona")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
               </Button>
@@ -346,7 +342,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label="Open Patience & Wait"
-                onPress={() => onNavigate("/blog")}
+                onPress={() => onNavigate("/persona")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
               </Button>
@@ -410,17 +406,11 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                     <Icon icon="lucide:check" className="size-2.5" />
                   </div>
                 </div>
-                <div className="flex flex-col items-center gap-1.5">
-                  <span className="text-muted text-[8px] font-bold uppercase">S</span>
-                  <div className="bg-default/50 text-muted flex size-5 items-center justify-center rounded-full">
-                    <span className="text-[10px] font-bold">·</span>
-                  </div>
+                <div className="flex size-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-sm shadow-rose-500/25">
+                  <Icon icon="lucide:check" className="size-2.5" />
                 </div>
-                <div className="flex flex-col items-center gap-1.5">
-                  <span className="text-muted text-[8px] font-bold uppercase">S</span>
-                  <div className="bg-default/50 text-muted flex size-5 items-center justify-center rounded-full">
-                    <span className="text-[10px] font-bold">·</span>
-                  </div>
+                <div className="bg-default/50 text-muted flex size-5 items-center justify-center rounded-full">
+                  <span className="text-[10px] font-bold">·</span>
                 </div>
               </div>
             </Card.Content>
@@ -435,7 +425,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label="Open Sweat It Out"
-                onPress={() => onNavigate("/blog")}
+                onPress={() => onNavigate("/persona")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
               </Button>
@@ -489,7 +479,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label="Open Code & Build"
-                onPress={() => onNavigate("/blog")}
+                onPress={() => onNavigate("/persona")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
               </Button>
@@ -611,7 +601,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 size="sm"
                 variant="ghost"
                 aria-label="Open Field Notes"
-                onPress={() => onNavigate("/moments")}
+                onPress={() => onNavigate("/dashboard")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>
@@ -640,7 +630,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 size="sm"
                 variant="ghost"
                 aria-label="Browse projects"
-                onPress={() => onNavigate("/projects")}
+                onPress={() => onNavigate("/dashboard")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>
@@ -669,7 +659,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 size="sm"
                 variant="ghost"
                 aria-label="Browse writing by date"
-                onPress={() => onNavigate("/archive")}
+                onPress={() => onNavigate("/chronicle")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>
@@ -698,7 +688,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
                 size="sm"
                 variant="ghost"
                 aria-label="Browse equipment"
-                onPress={() => onNavigate("/uses")}
+                onPress={() => onNavigate("/persona")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
               </Button>
@@ -1305,14 +1295,21 @@ export const Navbar = () => {
 
             {mounted && isAuthenticated ? (
               <Dropdown>
-                <Dropdown.Trigger aria-label="Open account menu" className="rounded-xl p-1.5">
-                  <Badge.Anchor>
-                    <Avatar size="sm" className="size-8">
-                      <Avatar.Fallback>{username?.charAt(0).toUpperCase() || "U"}</Avatar.Fallback>
-                    </Avatar>
-                    <Badge color="success" placement="bottom-right" size="sm" />
-                  </Badge.Anchor>
-                </Dropdown.Trigger>
+                <Tooltip delay={500} closeDelay={100}>
+                  <Dropdown.Trigger aria-label="Open account menu" className="rounded-xl p-1.5">
+                    <Badge.Anchor>
+                      <Avatar size="sm" className="size-8">
+                        <Avatar.Fallback>
+                          {username?.charAt(0).toUpperCase() || "U"}
+                        </Avatar.Fallback>
+                      </Avatar>
+                      <Badge color="success" placement="bottom-right" size="sm" />
+                    </Badge.Anchor>
+                  </Dropdown.Trigger>
+                  <Tooltip.Content placement="bottom" offset={8}>
+                    Account
+                  </Tooltip.Content>
+                </Tooltip>
                 <Dropdown.Popover className="min-w-[250px]">
                   <div className="px-3 pt-3 pb-2">
                     <p className="truncate text-sm font-semibold">{username || "User"}</p>
@@ -1321,7 +1318,7 @@ export const Navbar = () => {
                   <Dropdown.Menu
                     aria-label="Account actions"
                     onAction={(key) => {
-                      if (key === "dashboard") router.push("/blog");
+                      if (key === "dashboard") dispatch(toggleDashboard());
                       if (key === "library") router.push("/library");
                       if (key === "notifications") router.push("/notifications");
                       if (key === "logout") handleLogout();

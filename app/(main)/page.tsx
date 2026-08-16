@@ -279,6 +279,8 @@ export default function Home() {
                   sizes="288px"
                   src="/IMG_5332.JPG"
                 />
+                {/* Subtle transparent boundary border layer */}
+                <div className="pointer-events-none absolute inset-0 rounded-[1.75rem] border border-black/10 dark:border-white/10" />
               </motion.div>
 
               <div className="max-w-lg">
@@ -343,12 +345,18 @@ export default function Home() {
                   </KPI.Header>
                   <KPI.Content className="grid-cols-[1fr_1fr] items-end">
                     <div className="flex flex-col gap-2">
-                      <KPI.Value maximumFractionDigits={2} value={nasdaqData.current} />
+                      <KPI.Value
+                        className="text-foreground font-mono text-3xl leading-none font-black tabular-nums"
+                        maximumFractionDigits={2}
+                        value={nasdaqData.current}
+                      />
                       <TrendChip trend={isPositive ? "up" : "down"} variant="tertiary">
                         <TrendChip.Indicator>
                           {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
                         </TrendChip.Indicator>
-                        {Math.abs(nasdaqData.changePct).toFixed(2)}%
+                        <span className="font-mono font-semibold tabular-nums">
+                          {Math.abs(nasdaqData.changePct).toFixed(2)}%
+                        </span>
                         <TrendChip.Suffix>today</TrendChip.Suffix>
                       </TrendChip>
                     </div>
@@ -420,7 +428,7 @@ export default function Home() {
             {/* Right side: Live Telemetry KPIs */}
             <div className="relative grid gap-4 p-6 sm:grid-cols-3 lg:p-0">
               {/* KPI 1: Deep Work focus */}
-              <KPI className="bg-background/40 border-default-100/50 rounded-2xl border p-5 shadow-sm">
+              <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
                 <KPI.Header>
                   <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
                     Today&apos;s Focus
@@ -439,7 +447,7 @@ export default function Home() {
               </KPI>
 
               {/* KPI 2: Written Chronicles size */}
-              <KPI className="bg-background/40 border-default-100/50 rounded-2xl border p-5 shadow-sm">
+              <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
                 <KPI.Header>
                   <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
                     Written Essays
@@ -460,7 +468,7 @@ export default function Home() {
               </KPI>
 
               {/* KPI 3: Repository Commits */}
-              <KPI className="bg-background/40 border-default-100/50 rounded-2xl border p-5 shadow-sm">
+              <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
                 <KPI.Header>
                   <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
                     Active Commits
@@ -609,7 +617,7 @@ export default function Home() {
         <div className="mx-auto mt-16 flex w-full max-w-3xl flex-col gap-10">
           {mounted && !isAuthenticated ? (
             <motion.div className="w-full" {...revealInView(0.2, 16)}>
-              <div className="border-default-100 bg-surface-secondary/20 flex flex-col gap-4 rounded-2xl border p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+              <div className="bg-surface-secondary/30 flex flex-col gap-4 rounded-2xl p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div>
                   <Typography type="body-sm" weight="semibold">
                     Sign in to add an entry

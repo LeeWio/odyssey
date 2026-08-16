@@ -235,9 +235,14 @@ export function NotificationPopover() {
   return (
     <Badge.Anchor>
       <Popover>
-        <Button isIconOnly variant="ghost" size="sm">
-          <Icon aria-hidden="true" className="size-4" icon="gravity-ui:bell-fill" />
-        </Button>
+        <Tooltip delay={500} closeDelay={100}>
+          <Button isIconOnly variant="ghost" size="sm" aria-label="Notifications">
+            <Icon aria-hidden="true" className="size-4" icon="gravity-ui:bell-fill" />
+          </Button>
+          <Tooltip.Content placement="bottom" offset={8}>
+            Notifications
+          </Tooltip.Content>
+        </Tooltip>
         <Popover.Content className="w-full max-w-105">
           <Popover.Dialog className="p-0">
             <Card variant="transparent" className="w-full">

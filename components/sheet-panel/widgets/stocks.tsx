@@ -107,7 +107,7 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
       </KPI.Header>
       <KPI.Content className="grid-cols-[1fr_1fr] items-end">
         <div className="flex flex-col gap-1">
-          <KPI.Value className="text-3xl" maximumFractionDigits={2} value={indexData.current} />
+          <KPI.Value maximumFractionDigits={2} value={indexData.current} />
           <div className="flex items-center gap-1.5">
             <TrendChip trend={isPositive ? "up" : "down"} variant="tertiary">
               <TrendChip.Indicator>

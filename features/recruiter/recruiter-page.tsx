@@ -380,7 +380,7 @@ export function RecruiterPage() {
                 </KPI.Header>
                 <KPI.Content className="mt-3 items-end gap-1">
                   <KPI.Value
-                    className="text-foreground font-mono text-2xl leading-none font-black tabular-nums"
+                    className="font-mono leading-none font-black tabular-nums"
                     value={kpi.value}
                     currency={kpi.title.includes("Revenue") ? "USD" : undefined}
                     style={

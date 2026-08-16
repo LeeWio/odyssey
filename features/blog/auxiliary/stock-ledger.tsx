@@ -337,7 +337,6 @@ export function StockLedger() {
                     <KPI.Content className="grid-cols-[1fr_1fr] items-end">
                       <div className="flex flex-col gap-1">
                         <KPI.Value
-                          className="text-3xl"
                           currency={stat.isCurrency ? "USD" : undefined}
                           maximumFractionDigits={stat.isCurrency ? 0 : 2}
                           style={stat.isCurrency ? "currency" : "decimal"}
