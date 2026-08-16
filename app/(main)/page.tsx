@@ -95,7 +95,7 @@ const faqItems = [
     content:
       "I’m drawn to digital experiences where thoughtful design, technology, and storytelling come together — especially ideas that leave room for experimentation.",
     iconUrl:
-      "https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/b91186-shield/front/400/color.webp",
+      "https://3dicons.sgp1.cdn.digitaloceanspaces.com/v1/dynamic/color/file-text-dynamic-color.png",
   },
   {
     content: "Enhance your browsing experience by installing our official browser extension",
