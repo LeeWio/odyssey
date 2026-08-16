@@ -24,6 +24,7 @@ import {
   Popover,
   TextArea,
   Description,
+  Accordion,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
@@ -35,7 +36,7 @@ import { selectIsAuthenticated } from "@/lib/features/auth";
 import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { PencilToSquare } from "@gravity-ui/icons";
+import { PencilToSquare, ChevronDown } from "@gravity-ui/icons";
 import GradientText from "@/components/ui/gradient-text";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -66,6 +67,29 @@ const mockSong: MediaItem = {
     },
   ],
 };
+
+const faqItems = [
+  {
+    content: "Stay informed about your account activity with real-time notifications.",
+    iconUrl: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/3dicons/bell-small.png",
+    subtitle: "Receive account activity updates",
+    title: "Set Up Notifications",
+  },
+  {
+    content: "Enhance your browsing experience by installing our official browser extension",
+    iconUrl: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/3dicons/compass-small.png",
+    subtitle: "Connect your browser to your account",
+    title: "Set up Browser Extension",
+  },
+  {
+    content:
+      "Begin your journey into the world of digital collectibles by creating your first NFT. ",
+    iconUrl:
+      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/3dicons/mint-collective-small.png",
+    subtitle: "Create your first collectible",
+    title: "Mint Collectible",
+  },
+];
 
 const fieldNotes = [
   {
@@ -786,7 +810,7 @@ export default function Home() {
       <section
         id="faq"
         aria-labelledby="faq-title"
-        className="mx-auto w-full max-w-4xl scroll-mt-24 px-6 py-24 text-center sm:px-10 sm:py-32"
+        className="mx-auto flex w-full max-w-4xl scroll-mt-24 flex-col items-center px-6 py-24 text-center sm:px-10 sm:py-32"
       >
         <header className="flex flex-col items-center text-center">
           <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
@@ -812,6 +836,43 @@ export default function Home() {
             Some answers to questions that tend to come up.
           </MotionTypography>
         </header>
+
+        <motion.div className="mt-12 flex w-full justify-center" {...revealInView(0.18, 20)}>
+          <Accordion className="bg-surface-1/10 w-full rounded-2xl" variant="surface">
+            {faqItems.map((item, index) => (
+              <Accordion.Item
+                key={index}
+                className="group/item first:**:data-[slot=accordion-trigger]:rounded-t-2xl last:[&:not(:has([data-slot=accordion-trigger][aria-expanded='true']))_[data-slot=accordion-trigger]]:rounded-b-2xl"
+              >
+                <Accordion.Heading>
+                  <Accordion.Trigger className="group hover:bg-surface flex items-center gap-2 transition-none">
+                    {item.iconUrl ? (
+                      <Image
+                        alt={item.title}
+                        className="h-11 w-11 transition-[scale,rotate] duration-300 ease-out group-hover/item:scale-120 group-hover/item:-rotate-10 group-hover/item:drop-shadow-lg"
+                        src={item.iconUrl}
+                        width={44}
+                        height={44}
+                      />
+                    ) : null}
+                    <div className="flex flex-col gap-0 text-start">
+                      <span className="leading-5 font-medium">{item.title}</span>
+                      <span className="text-muted/80 leading-6 font-normal">{item.subtitle}</span>
+                    </div>
+                    <Accordion.Indicator className="text-muted/50 [&>svg]:size-4">
+                      <ChevronDown />
+                    </Accordion.Indicator>
+                  </Accordion.Trigger>
+                </Accordion.Heading>
+                <Accordion.Panel>
+                  <Accordion.Body className="text-muted/80 text-start">
+                    {item.content}
+                  </Accordion.Body>
+                </Accordion.Panel>
+              </Accordion.Item>
+            ))}
+          </Accordion>
+        </motion.div>
       </section>
     </div>
   );
