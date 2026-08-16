@@ -1,3 +1,15 @@
+# [1.75.0](https://github.com/LeeWio/odyssey/compare/v1.74.0...v1.75.0) (2026-08-16)
+
+
+### Bug Fixes
+
+* **editor:** keep modal open during cover uploads ([6765ed7](https://github.com/LeeWio/odyssey/commit/6765ed710196d798b771dad3dba4747a01763ea5))
+
+
+### Features
+
+* **building:** deploy beautiful layout and placeholder page templates ([6328a5f](https://github.com/LeeWio/odyssey/commit/6328a5f542fc6814dfb2049ab616915b1817c882)), closes [hi#fidelity](https://github.com/hi/issues/fidelity)
+
 # [1.74.0](https://github.com/LeeWio/odyssey/compare/v1.73.0...v1.74.0) (2026-08-16)
 
 
