@@ -1,3 +1,10 @@
+# [1.78.0](https://github.com/LeeWio/odyssey/compare/v1.77.0...v1.78.0) (2026-08-16)
+
+
+### Features
+
+* **ui:** unify feature pages into four cohesive visual spaces and apply design polish ([a5dbe30](https://github.com/LeeWio/odyssey/commit/a5dbe301966be6c8294cca94a37f2cb6e4db5e82))
+
 # [1.77.0](https://github.com/LeeWio/odyssey/compare/v1.76.0...v1.77.0) (2026-08-16)
 
 
