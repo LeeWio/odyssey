@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       "images.unsplash.com",
       "heroui-assets.nyc3.cdn.digitaloceanspaces.com",
       "img.heroui.chat",
+      "bvconuycpdvgzbvbkijl.supabase.co",
     ],
     remotePatterns: [
       {
@@ -24,6 +25,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "img.heroui.chat",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "bvconuycpdvgzbvbkijl.supabase.co",
         pathname: "/**",
       },
     ],

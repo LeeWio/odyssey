@@ -76,6 +76,28 @@ const faqItems = [
     title: "Set Up Notifications",
   },
   {
+    title: "Is This Website Finished?",
+    subtitle: "Probably never — and that’s the point",
+    content:
+      "This site is an ongoing experiment. I’m constantly refining interactions, adding new ideas, and occasionally breaking things while trying something new.",
+    iconUrl: "/icons/rocket.png",
+  },
+  {
+    title: "How Fast Do You Reply?",
+    subtitle: "Usually within a few days",
+    content:
+      "I read every message myself. Replies may take a little time, but I’ll usually get back to you within a few days.",
+    iconUrl: "/icons/mail.png",
+  },
+  {
+    title: "What Do You Like Building?",
+    subtitle: "Design, technology, and everything in between",
+    content:
+      "I’m drawn to digital experiences where thoughtful design, technology, and storytelling come together — especially ideas that leave room for experimentation.",
+    iconUrl:
+      "https://bvconuycpdvgzbvbkijl.supabase.co/storage/v1/object/public/sizes/b91186-shield/front/400/color.webp",
+  },
+  {
     content: "Enhance your browsing experience by installing our official browser extension",
     iconUrl: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/3dicons/compass-small.png",
     subtitle: "Connect your browser to your account",
