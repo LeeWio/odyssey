@@ -35,6 +35,7 @@ export const ModeSwitch = () => {
       selectedKey={coerceThemeMode(theme) || DEFAULT_THEME_MODE}
       onSelectionChange={(key) => setTheme(coerceThemeMode(String(key)))}
       size="sm"
+      variant="ghost"
     >
       <Segment.Item key="light" aria-label="Light" id="light">
         <Segment.Separator />
