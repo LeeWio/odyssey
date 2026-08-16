@@ -1,3 +1,10 @@
+# [1.77.0](https://github.com/LeeWio/odyssey/compare/v1.76.0...v1.77.0) (2026-08-16)
+
+
+### Features
+
+* **moment:** add resilient media publishing ([d8b97aa](https://github.com/LeeWio/odyssey/commit/d8b97aa7d69e1c194b4fb8d7f3d4356b40d25e54))
+
 # [1.76.0](https://github.com/LeeWio/odyssey/compare/v1.75.0...v1.76.0) (2026-08-16)
 
 
