@@ -2,7 +2,7 @@
 
 import { Button, Dropdown, Label } from "@heroui/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
-import { ChevronDown, Heading1, Heading2, Heading3, Text } from "@gravity-ui/icons";
+import { Heading1, Heading2, Heading3, Text } from "@gravity-ui/icons";
 import type { ComponentType, SVGProps } from "react";
 
 const BLOCK_TYPES = [
@@ -53,18 +53,14 @@ export function BlockTypeSelector() {
     <Dropdown>
       <Button
         aria-label={`Block type: ${activeItem.label}`}
-        className="min-w-32 justify-between"
         isDisabled={isDisabled || isReadOnly}
         size="sm"
-        variant="ghost"
+        variant="tertiary"
       >
-        <span className="flex items-center gap-2">
-          <BlockTypeIcon icon={activeItem.icon} />
-          <span className="text-xs">{activeItem.label}</span>
-        </span>
-        <ChevronDown aria-hidden="true" className="text-muted size-3.5" />
+        <BlockTypeIcon icon={activeItem.icon} />
+        <span className="text-xs">{activeItem.label}</span>
       </Button>
-      <Dropdown.Popover className="min-w-52" placement="bottom start">
+      <Dropdown.Popover placement="bottom start">
         <Dropdown.Menu
           aria-label="Choose block type"
           selectedKeys={new Set([normalizedActiveBlock])}

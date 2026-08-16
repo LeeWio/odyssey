@@ -5,6 +5,7 @@ export { Emoji } from "./emoji";
 export { Indent } from "./indent";
 export { Image } from "./image";
 export { Mathematics } from "./mathematics";
+export { Attachment, Audio, MediaFileHandler, Youtube } from "./media";
 export { Column, Columns } from "./multi-column";
 export { TableKit } from "./table";
 export { Subscript } from "./subscript";

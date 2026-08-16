@@ -35,6 +35,7 @@ export function ImageMenu() {
   const imageAttributes = useRichTextEditorState((state) => state.editor.getAttributes("image"));
   const src = typeof imageAttributes?.src === "string" ? imageAttributes.src : "";
   const alt = typeof imageAttributes?.alt === "string" ? imageAttributes.alt : "";
+  const caption = typeof imageAttributes?.caption === "string" ? imageAttributes.caption : "";
   const widthPercent = normalizeImageWidthPercent(imageAttributes?.widthPercent);
   const alignment = normalizeImageAlignment(imageAttributes?.alignment);
 
@@ -61,7 +62,12 @@ export function ImageMenu() {
   }, [src]);
 
   const updateImageAttributes = useCallback(
-    (attributes: { alignment?: ImageAlignment; alt?: string; widthPercent?: number }) => {
+    (attributes: {
+      alignment?: ImageAlignment;
+      alt?: string;
+      caption?: string;
+      widthPercent?: number;
+    }) => {
       editor?.chain().updateAttributes("image", attributes).run();
     },
     [editor]
@@ -162,15 +168,27 @@ export function ImageMenu() {
               <Icon aria-hidden="true" icon="gravity-ui:text" />
             </Button>
             <Popover.Content className="w-72" placement="top">
-              <Popover.Dialog className="p-3">
+              <Popover.Dialog className="flex flex-col gap-3 p-3">
                 <Popover.Arrow />
-                <TextField name="image-alt-text">
+                <TextField isRequired isInvalid={!alt.trim()} name="image-alt-text">
                   <Label>Alternative text</Label>
                   <Input
                     autoFocus
+                    aria-describedby="image-alt-help"
                     value={alt}
                     variant="secondary"
                     onChange={(event) => updateImageAttributes({ alt: event.target.value })}
+                  />
+                  <p id="image-alt-help" className="text-muted text-xs">
+                    Describe the image for people who cannot see it. Required to publish.
+                  </p>
+                </TextField>
+                <TextField name="image-caption">
+                  <Label>Caption</Label>
+                  <Input
+                    value={caption}
+                    variant="secondary"
+                    onChange={(event) => updateImageAttributes({ caption: event.target.value })}
                   />
                 </TextField>
               </Popover.Dialog>

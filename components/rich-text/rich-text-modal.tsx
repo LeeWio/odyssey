@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertDialog, Button, Modal, Spinner, toast } from "@heroui/react";
+import { Alert, AlertDialog, Button, Modal, Spinner, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import type { Editor } from "@tiptap/react";
 import { AnimatePresence, motion } from "motion/react";
@@ -18,12 +18,14 @@ import {
   saveRichTextDraft,
 } from "./utils/editor-draft";
 import {
-  hasPendingImageUploads,
+  getMediaValidationIssues,
+  hasPendingMediaUploads,
   normalizeJSONContent,
   normalizeRichTextDocument,
   parseJSONContent,
-  removeTemporaryImageAttributes,
+  removeTemporaryMediaAttributes,
 } from "./utils/document-normalizer";
+import { serializeRichTextPayload } from "./utils/content-schema";
 import {
   useCreatePostMutation,
   useGetAdminPostByIdQuery,
@@ -83,6 +85,9 @@ export function RichTextModal() {
   const [isEditorReady, setIsEditorReady] = useState(false);
   const [isPostDataReady, setIsPostDataReady] = useState(false);
   const [draftRevision, setDraftRevision] = useState(0);
+  const [mediaIssues, setMediaIssues] = useState(() =>
+    getMediaValidationIssues(normalizeJSONContent(undefined))
+  );
   const [contentSchemaError, setContentSchemaError] = useState<{
     activeId: string;
     message: string;
@@ -131,6 +136,7 @@ export function RichTextModal() {
     setIsDraftRecoveryDialogOpen(false);
     setRecoveryDraft(null);
     setContentSchemaError(null);
+    setMediaIssues([]);
   }, [activeId, isOpen]);
 
   useEffect(() => {
@@ -187,7 +193,7 @@ export function RichTextModal() {
     }
 
     const content = editorRef.current.getJSON();
-    if (hasPendingImageUploads(content)) return;
+    if (hasPendingMediaUploads(content)) return;
 
     const timer = window.setTimeout(() => {
       saveRichTextDraft(activeId, content, postData);
@@ -286,8 +292,17 @@ export function RichTextModal() {
       return;
     }
 
-    if (hasPendingImageUploads(content)) {
-      toast.warning("Finish or remove image uploads before saving.");
+    const nextMediaIssues = getMediaValidationIssues(content);
+    const hasUnresolvedUpload = nextMediaIssues.some(
+      (issue) => issue.code === "pending-upload" || issue.code === "missing-source"
+    );
+    if (hasUnresolvedUpload) {
+      toast.warning("Finish, retry, or remove media uploads before saving.");
+      return;
+    }
+
+    if (statusOverride === "PUBLISHED" && nextMediaIssues.length > 0) {
+      toast.warning("Resolve the media accessibility issues before publishing.");
       return;
     }
 
@@ -302,7 +317,9 @@ export function RichTextModal() {
       ...(postData as PostRequest),
       title,
       slug,
-      content: JSON.stringify(normalizeRichTextDocument(removeTemporaryImageAttributes(content))),
+      content: serializeRichTextPayload(
+        normalizeRichTextDocument(removeTemporaryMediaAttributes(content))
+      ),
       contentType: "JSON",
       status: statusOverride || postData.status || "DRAFT",
     };
@@ -417,6 +434,7 @@ export function RichTextModal() {
                           const content = JSON.stringify(editor.getJSON());
                           initialEditorContentRef.current = content;
                           setIsContentDirty(false);
+                          setMediaIssues(getMediaValidationIssues(editor.getJSON()));
                           setIsEditorReady(true);
                         }}
                         onContentError={(error) => {
@@ -429,6 +447,7 @@ export function RichTextModal() {
                           setIsContentDirty(
                             JSON.stringify(editor.getJSON()) !== initialEditorContentRef.current
                           );
+                          setMediaIssues(getMediaValidationIssues(editor.getJSON()));
                           setDraftRevision((revision) => revision + 1);
                         }}
                       />
@@ -465,12 +484,35 @@ export function RichTextModal() {
 
                           <div className="min-w-[320px] p-6 pb-8 md:px-10 lg:px-16">
                             <div className="flex w-full flex-col gap-4">
+                              {mediaIssues.length > 0 && (
+                                <Alert status="warning">
+                                  <Alert.Content>
+                                    <Alert.Title>Media needs attention</Alert.Title>
+                                    <Alert.Description>
+                                      {mediaIssues.some(
+                                        (issue) =>
+                                          issue.code === "pending-upload" ||
+                                          issue.code === "missing-source"
+                                      )
+                                        ? "Finish, retry, or remove incomplete uploads before saving."
+                                        : "Add alternative text to every image before publishing."}
+                                    </Alert.Description>
+                                  </Alert.Content>
+                                </Alert>
+                              )}
                               <div className="flex w-full items-center gap-3">
                                 <Button
                                   fullWidth
                                   variant="secondary"
                                   onPress={() => handleSave("DRAFT")}
-                                  isDisabled={hasContentSchemaError}
+                                  isDisabled={
+                                    hasContentSchemaError ||
+                                    mediaIssues.some(
+                                      (issue) =>
+                                        issue.code === "pending-upload" ||
+                                        issue.code === "missing-source"
+                                    )
+                                  }
                                   isPending={isPending}
                                 >
                                   {({ isPending }) => (
@@ -484,7 +526,7 @@ export function RichTextModal() {
                                   fullWidth
                                   variant="primary"
                                   onPress={() => handleSave("PUBLISHED")}
-                                  isDisabled={hasContentSchemaError}
+                                  isDisabled={hasContentSchemaError || mediaIssues.length > 0}
                                   isPending={isPending}
                                 >
                                   {({ isPending }) => (

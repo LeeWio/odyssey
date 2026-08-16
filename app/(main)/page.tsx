@@ -36,6 +36,7 @@ import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { PencilToSquare } from "@gravity-ui/icons";
+import GradientText from "@/components/ui/gradient-text";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -663,7 +664,9 @@ export default function Home() {
             className="mt-4 text-center text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-[-0.04em] text-balance"
             {...revealInView(0.06)}
           >
-            Since you’re here,
+            <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
+              Since you’re here,
+            </GradientText>
           </MotionTypography>
 
           <MotionTypography
@@ -672,7 +675,9 @@ export default function Home() {
             className="text-center text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-[-0.04em] text-balance"
             {...revealInView(0.06)}
           >
-            leave a few words behind.
+            <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
+              tell me what’s on your mind.
+            </GradientText>
           </MotionTypography>
         </header>
 

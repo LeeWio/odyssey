@@ -12,10 +12,14 @@ import {
   LayoutCellsLarge,
   LayoutColumns,
   ListOl,
+  ListCheck,
   ListUl,
+  MusicNote,
   Magnifier,
   Minus,
   Picture,
+  Paperclip,
+  Play,
   QuoteOpen,
   Sparkles,
   Text,
@@ -29,6 +33,7 @@ import {
 } from "@heroui-pro/react";
 import type { ComponentType, SVGProps } from "react";
 import { useEffect, useRef } from "react";
+import { OPEN_YOUTUBE_DIALOG_EVENT } from "../media-insert-dialog";
 
 const SLASH_COMMAND_GROUPS = [
   { id: "text", label: "Text" },
@@ -97,6 +102,17 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     id: "ordered-list",
     keywords: ["list", "number", "ordered"],
     title: "Numbered list",
+  },
+  {
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).toggleTaskList().run();
+    },
+    description: "Create a checklist with nestable tasks",
+    group: "blocks",
+    icon: icon(ListCheck),
+    id: "task-list",
+    keywords: ["check", "checklist", "task", "todo"],
+    title: "Task list",
   },
   {
     command: ({ editor, range }) => {
@@ -188,6 +204,40 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     id: "image",
     keywords: ["image", "media", "photo", "picture", "upload"],
     title: "Image",
+  },
+  {
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).insertContent({ type: "audio" }).run();
+    },
+    description: "Upload an audio player with retry support",
+    group: "media",
+    icon: icon(MusicNote),
+    id: "audio",
+    keywords: ["audio", "music", "podcast", "sound", "upload"],
+    title: "Audio",
+  },
+  {
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).insertContent({ type: "attachment" }).run();
+    },
+    description: "Upload a downloadable file",
+    group: "media",
+    icon: icon(Paperclip),
+    id: "attachment",
+    keywords: ["attachment", "download", "file", "upload"],
+    title: "Attachment",
+  },
+  {
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).run();
+      editor.view.dom.dispatchEvent(new Event(OPEN_YOUTUBE_DIALOG_EVENT));
+    },
+    description: "Embed a privacy-enhanced YouTube player",
+    group: "media",
+    icon: icon(Play),
+    id: "youtube",
+    keywords: ["embed", "video", "youtube"],
+    title: "YouTube",
   },
   {
     command: ({ editor, range }) => {

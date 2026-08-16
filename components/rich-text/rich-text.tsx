@@ -10,7 +10,6 @@ import { useAppSelector } from "@/lib/hooks";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
 import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
 import { ExtensionKit, createExtensionKit } from "./extensions/extension-kit";
-import { ImageUploadHandler } from "./extensions/image";
 import { ColumnsMenu } from "./menus/columns-menu/columns-menu";
 import { ImageMenu } from "./menus/image-menu/image-menu";
 import { LinkMenu } from "./menus/link-menu/link-menu";
@@ -18,6 +17,9 @@ import { MathMenu } from "./menus/math-menu";
 import { TableMenu } from "./menus/table-menu/table-menu";
 import { TextMenu } from "./menus/text-menu/text-menu";
 import { RichTextTableOfContents } from "./table-of-contents";
+import { EditorFooter } from "./editor-footer";
+import { BlockDragHandle } from "./block-drag-handle";
+import { MediaInsertDialog } from "./media-insert-dialog";
 
 export interface RichTextProps {
   content?: JSONContent;
@@ -76,7 +78,6 @@ export function RichText({
       className="flex h-full w-full flex-col overflow-hidden"
     >
       <RichTextEditor.Shell className="relative flex h-full flex-1 flex-col overflow-hidden border-none bg-transparent">
-        <ImageUploadHandler />
         <FixedToolbar />
         <TextMenu />
         <LinkMenu />
@@ -84,9 +85,11 @@ export function RichText({
         <TableMenu />
         <MathMenu />
         <ColumnsMenu />
+        <BlockDragHandle />
+        <MediaInsertDialog />
         <RichTextEditor.Content
           id={scrollContainerId}
-          className="min-h-0 flex-1 scrollbar-none overflow-y-auto outline-none focus:outline-none [&_.ProseMirror-selectednode]:outline-none [&.resize-cursor]:cursor-col-resize"
+          className="[&_.ProseMirror-selectednode]:outline-accent/40 min-h-0 flex-1 scrollbar-none overflow-y-auto outline-none focus:outline-none [&_.ProseMirror-selectednode]:rounded-md [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-offset-2 [&.resize-cursor]:cursor-col-resize"
         />
         {showTableOfContents && (
           <RichTextTableOfContents
@@ -99,11 +102,7 @@ export function RichText({
           />
         )}
         <SuggestionToolbar />
-
-        {/* <RichTextEditor.Footer className="flex shrink-0 items-center justify-between select-none">
-          <span>JSON-first editor state</span>
-          <RichTextEditor.CharacterCount showWords />
-        </RichTextEditor.Footer> */}
+        <EditorFooter />
       </RichTextEditor.Shell>
     </RichTextEditor>
   );

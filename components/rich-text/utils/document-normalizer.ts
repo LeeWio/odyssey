@@ -1,6 +1,8 @@
+import { isValidYoutubeUrl } from "@tiptap/extension-youtube";
 import type { JSONContent } from "@tiptap/react";
 
 import { normalizeLinkUrl } from "./link-utils";
+import { decodeRichTextPayload } from "./content-schema";
 
 // The minimal valid, standard ProseMirror document structure
 export const EMPTY_DOC: JSONContent = {
@@ -8,50 +10,12 @@ export const EMPTY_DOC: JSONContent = {
   content: [{ type: "paragraph" }],
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isJSONContentTree(value: unknown): value is JSONContent {
-  const pending: unknown[] = [value];
-
-  while (pending.length > 0) {
-    const node = pending.pop();
-
-    if (!isRecord(node) || typeof node.type !== "string") return false;
-    if (node.text !== undefined && typeof node.text !== "string") return false;
-    if (node.attrs !== undefined && !isRecord(node.attrs)) return false;
-
-    if (node.marks !== undefined) {
-      if (!Array.isArray(node.marks)) return false;
-
-      for (const mark of node.marks) {
-        if (!isRecord(mark) || typeof mark.type !== "string") return false;
-        if (mark.attrs !== undefined && !isRecord(mark.attrs)) return false;
-      }
-    }
-
-    if (node.content !== undefined) {
-      if (!Array.isArray(node.content)) return false;
-      pending.push(...node.content);
-    }
-  }
-
-  return true;
-}
-
 export function parseJSONContent(value: unknown): JSONContent | null {
-  if (typeof value === "string") {
-    try {
-      return parseJSONContent(JSON.parse(value));
-    } catch {
-      return null;
-    }
+  try {
+    return decodeRichTextPayload(value).document;
+  } catch {
+    return null;
   }
-
-  return isJSONContentTree(value) && value.type === "doc" && Array.isArray(value.content)
-    ? value
-    : null;
 }
 
 function getNodeTextContent(node: JSONContent): string {
@@ -165,13 +129,51 @@ export const normalizeJSONContent = (value: unknown): JSONContent => {
   return content && content.content?.length ? normalizeRichTextDocument(content) : EMPTY_DOC;
 };
 
-export function hasPendingImageUploads(content: JSONContent): boolean {
-  if (typeof content.attrs?.uploadId === "string") return true;
-
-  return content.content?.some(hasPendingImageUploads) ?? false;
+export interface MediaValidationIssue {
+  code: "invalid-youtube" | "missing-alt" | "missing-source" | "pending-upload";
+  nodeType: string;
 }
 
-export function removeTemporaryImageAttributes(content: JSONContent): JSONContent {
+export function hasPendingMediaUploads(content: JSONContent): boolean {
+  if (typeof content.attrs?.uploadId === "string") return true;
+
+  return content.content?.some(hasPendingMediaUploads) ?? false;
+}
+
+export const hasPendingImageUploads = hasPendingMediaUploads;
+
+export function getMediaValidationIssues(content: JSONContent): MediaValidationIssue[] {
+  const issues: MediaValidationIssue[] = [];
+
+  const visit = (node: JSONContent) => {
+    const nodeType = node.type || "unknown";
+    const src = typeof node.attrs?.src === "string" ? node.attrs.src.trim() : "";
+
+    if (typeof node.attrs?.uploadId === "string") {
+      issues.push({ code: "pending-upload", nodeType });
+    }
+
+    if (["attachment", "audio", "image"].includes(nodeType) && !src) {
+      issues.push({ code: "missing-source", nodeType });
+    }
+
+    if (nodeType === "image" && src) {
+      const alt = typeof node.attrs?.alt === "string" ? node.attrs.alt.trim() : "";
+      if (!alt) issues.push({ code: "missing-alt", nodeType });
+    }
+
+    if (nodeType === "youtube") {
+      if (!src || !isValidYoutubeUrl(src)) issues.push({ code: "invalid-youtube", nodeType });
+    }
+
+    node.content?.forEach(visit);
+  };
+
+  visit(content);
+  return issues;
+}
+
+export function removeTemporaryMediaAttributes(content: JSONContent): JSONContent {
   const node = { ...content };
   delete node.attrs;
   delete node.content;
@@ -181,6 +183,8 @@ export function removeTemporaryImageAttributes(content: JSONContent): JSONConten
   return {
     ...node,
     ...(Object.keys(attrs).length > 0 ? { attrs } : {}),
-    ...(content.content ? { content: content.content.map(removeTemporaryImageAttributes) } : {}),
+    ...(content.content ? { content: content.content.map(removeTemporaryMediaAttributes) } : {}),
   };
 }
+
+export const removeTemporaryImageAttributes = removeTemporaryMediaAttributes;

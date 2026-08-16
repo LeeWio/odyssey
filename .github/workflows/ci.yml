@@ -40,6 +40,30 @@ jobs:
       - name: Run Linter
         run: bun run lint
 
+      - name: Run TypeScript Checks
+        run: bun run typecheck
+
+      - name: Run Unit Tests
+        run: bun run test:unit
+
+  rich-text-browser-smoke:
+    name: Rich Text Browser Smoke
+    runs-on: ubuntu-latest
+    env:
+      HEROUI_AUTH_TOKEN: ${{ secrets.HEROUI_AUTH_TOKEN }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Project
+        uses: ./.github/actions/setup-project
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run Rich Text Browser Smoke Tests
+        run: bun run test:e2e
+
   build-and-audit:
     name: Production Build & Web Vitals Audit
     runs-on: ubuntu-latest

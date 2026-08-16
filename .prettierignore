@@ -6,3 +6,6 @@ out
 *.min.css
 CHANGELOG.md
 .env.production
+.reference
+playwright-report
+test-results

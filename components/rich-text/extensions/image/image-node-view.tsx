@@ -54,6 +54,7 @@ function getFileExtension(fileName: string): string {
 export function ImageNodeView({ deleteNode, editor, node, updateAttributes }: NodeViewProps) {
   const src = typeof node.attrs.src === "string" ? node.attrs.src : "";
   const alt = typeof node.attrs.alt === "string" ? node.attrs.alt : "";
+  const caption = typeof node.attrs.caption === "string" ? node.attrs.caption : "";
   const uploadId = typeof node.attrs.uploadId === "string" ? node.attrs.uploadId : null;
   const alignment = normalizeImageAlignment(node.attrs.alignment);
   const widthPercent = normalizeImageWidthPercent(node.attrs.widthPercent);
@@ -273,50 +274,51 @@ export function ImageNodeView({ deleteNode, editor, node, updateAttributes }: No
       contentEditable={false}
       data-drag-handle
     >
-      <Surface
-        variant="transparent"
-        className="relative max-w-full flex-none overflow-hidden rounded-2xl"
-        style={{ width: `${widthPercent}%` }}
-      >
-        <NextImage
-          alt={alt}
-          className="h-auto w-full object-contain"
-          height={900}
-          sizes="(max-width: 768px) 100vw, 960px"
-          src={src}
-          unoptimized
-          width={1600}
-        />
-        {pendingUpload && (
-          <div className="bg-overlay/80 absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-3 text-sm backdrop-blur-sm">
-            <span className="min-w-0 truncate">
-              {isFailed ? pendingUpload.error : `Uploading ${pendingUpload.file.name}…`}
-            </span>
-            <div className="flex shrink-0 items-center gap-1">
-              {isFailed && (
+      <figure className="max-w-full flex-none" style={{ width: `${widthPercent}%` }}>
+        <Surface variant="transparent" className="relative overflow-hidden rounded-2xl">
+          <NextImage
+            alt={alt}
+            className="h-auto w-full object-contain"
+            height={900}
+            sizes="(max-width: 768px) 100vw, 960px"
+            src={src}
+            unoptimized
+            width={1600}
+          />
+          {pendingUpload && (
+            <div className="bg-overlay/80 absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-3 text-sm backdrop-blur-sm">
+              <span className="min-w-0 truncate">
+                {isFailed ? pendingUpload.error : `Uploading ${pendingUpload.file.name}…`}
+              </span>
+              <div className="flex shrink-0 items-center gap-1">
+                {isFailed && (
+                  <Button
+                    isIconOnly
+                    aria-label="Retry image upload"
+                    size="sm"
+                    variant="secondary"
+                    onPress={() => void beginUpload(uploadId!, true)}
+                  >
+                    <Icon aria-hidden="true" icon="gravity-ui:arrow-rotate-right" />
+                  </Button>
+                )}
                 <Button
                   isIconOnly
-                  aria-label="Retry image upload"
+                  aria-label="Cancel image replacement"
                   size="sm"
                   variant="secondary"
-                  onPress={() => void beginUpload(uploadId!, true)}
+                  onPress={() => cancelUpload(uploadId!)}
                 >
-                  <Icon aria-hidden="true" icon="gravity-ui:arrow-rotate-right" />
+                  <Icon aria-hidden="true" icon="gravity-ui:xmark" />
                 </Button>
-              )}
-              <Button
-                isIconOnly
-                aria-label="Cancel image replacement"
-                size="sm"
-                variant="secondary"
-                onPress={() => cancelUpload(uploadId!)}
-              >
-                <Icon aria-hidden="true" icon="gravity-ui:xmark" />
-              </Button>
+              </div>
             </div>
-          </div>
+          )}
+        </Surface>
+        {caption && (
+          <figcaption className="text-muted mt-2 text-center text-sm">{caption}</figcaption>
         )}
-      </Surface>
+      </figure>
     </NodeViewWrapper>
   );
 }

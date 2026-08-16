@@ -8,6 +8,9 @@ import { MathInsertPopover } from "./math-insert-popover";
 import { MultiColumnMenu } from "./multi-column-menu";
 import { TableSelector } from "./table-selector";
 import { BlockTypeSelector } from "./block-type-selector";
+import { CodeLanguageSelector } from "./code-language-selector";
+import { FindReplacePopover } from "./find-replace-popover";
+import { ContentInteroperabilityDialog } from "./content-interoperability-dialog";
 
 export function FixedToolbar() {
   const { editor } = useRichTextEditor();
@@ -21,6 +24,11 @@ export function FixedToolbar() {
         <RichTextEditor.ActionButton aria-label="Redo action" tooltip="Redo" action="redo">
           <Icon icon="gravity-ui:arrow-uturn-cw-right" />
         </RichTextEditor.ActionButton>
+      </RichTextEditor.ToolbarGroup>
+      <RichTextEditor.ToolbarSeparator />
+      <RichTextEditor.ToolbarGroup aria-label="Document tools">
+        <FindReplacePopover />
+        <ContentInteroperabilityDialog />
       </RichTextEditor.ToolbarGroup>
       <RichTextEditor.ToolbarSeparator />
       <RichTextEditor.ToolbarGroup aria-label="Block type">
@@ -53,12 +61,24 @@ export function FixedToolbar() {
         <RichTextEditor.ToggleButton command="orderedList" tooltip="Numbered List">
           <Icon icon="gravity-ui:list-ol" />
         </RichTextEditor.ToggleButton>
+        <RichTextEditor.CommandButton
+          aria-label="Toggle task list"
+          tooltip="Task list"
+          isActive={(currentEditor) => currentEditor.isActive("taskList")}
+          isDisabled={(currentEditor) =>
+            !currentEditor.can().chain().focus().toggleTaskList().run()
+          }
+          onCommand={(currentEditor) => currentEditor.chain().focus().toggleTaskList().run()}
+        >
+          <Icon icon="gravity-ui:list-check" />
+        </RichTextEditor.CommandButton>
         <RichTextEditor.ToggleButton command="blockquote" tooltip="Blockquote">
           <Icon icon="gravity-ui:quote-open" />
         </RichTextEditor.ToggleButton>
         <RichTextEditor.ToggleButton command="codeBlock" tooltip="Code Block">
           <Icon icon="gravity-ui:curly-brackets" />
         </RichTextEditor.ToggleButton>
+        <CodeLanguageSelector />
 
         <MathInsertPopover />
 

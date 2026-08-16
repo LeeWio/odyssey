@@ -50,6 +50,51 @@
     @apply ring-accent/35 ring-offset-background ring-2 ring-offset-2 outline-none;
   }
 
+  .ProseMirror ul.odyssey-task-list {
+    @apply my-3 list-none space-y-1 pl-0;
+  }
+
+  .ProseMirror li.odyssey-task-item {
+    @apply flex items-start gap-2;
+  }
+
+  .ProseMirror li.odyssey-task-item > label {
+    @apply mt-1 flex size-5 shrink-0 items-center justify-center;
+  }
+
+  .ProseMirror li.odyssey-task-item > label input[type="checkbox"] {
+    accent-color: var(--accent);
+    cursor: var(--cursor-interactive);
+  }
+
+  .ProseMirror li.odyssey-task-item > div {
+    @apply min-w-0 flex-1;
+  }
+
+  .ProseMirror li.odyssey-task-item > div > p {
+    @apply my-0;
+  }
+
+  .ProseMirror li.odyssey-task-item[data-checked="true"] > div > p {
+    @apply text-muted line-through;
+  }
+
+  .ProseMirror div[data-youtube-video] {
+    @apply my-8 aspect-video w-full overflow-hidden rounded-2xl;
+  }
+
+  .ProseMirror div[data-youtube-video] iframe {
+    @apply h-full w-full border-0;
+  }
+
+  .odyssey-block-drag-handle {
+    @apply bg-surface/90 flex items-center rounded-lg shadow-sm backdrop-blur-md;
+  }
+
+  .odyssey-block-drag-handle[data-dragging="true"] {
+    @apply opacity-60;
+  }
+
   .tiptap-mathematics-render :where(.katex-display) {
     @apply m-0;
   }

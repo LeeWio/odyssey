@@ -44,23 +44,21 @@ function NotificationSkeleton() {
 
 function NotificationEmptyState({ unreadOnly }: { unreadOnly: boolean }) {
   return (
-    <Card variant="secondary" className="p-0">
-      <EmptyState size="md">
-        <EmptyState.Header>
-          <EmptyState.Media variant="icon">
-            <Bell aria-hidden="true" />
-          </EmptyState.Media>
-          <EmptyState.Title>
-            {unreadOnly ? "You are all caught up" : "No notifications yet"}
-          </EmptyState.Title>
-          <EmptyState.Description>
-            {unreadOnly
-              ? "New activity will appear here when it needs your attention."
-              : "Updates about your account and writing will appear here."}
-          </EmptyState.Description>
-        </EmptyState.Header>
-      </EmptyState>
-    </Card>
+    <EmptyState size="md">
+      <EmptyState.Header>
+        <EmptyState.Media variant="icon">
+          <Icon className="text-default-400" icon="solar:bell-off-linear" width={40} />
+        </EmptyState.Media>
+        <EmptyState.Title>
+          {unreadOnly ? "You are all caught up" : "No notifications yet"}
+        </EmptyState.Title>
+        <EmptyState.Description className="max-w-xs text-pretty">
+          {unreadOnly
+            ? "New activity will appear here when it needs your attention."
+            : "Updates about your account and writing will appear here."}
+        </EmptyState.Description>
+      </EmptyState.Header>
+    </EmptyState>
   );
 }
 

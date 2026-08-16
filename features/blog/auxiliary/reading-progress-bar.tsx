@@ -54,8 +54,11 @@ export function ReadingProgressBar() {
     <div className="bg-default-100/50 pointer-events-none fixed top-0 right-0 left-0 z-[100] h-1 w-full backdrop-blur-sm">
       <div
         ref={barRef}
-        className="bg-accent h-full w-full origin-left shadow-[0_0_10px_rgba(var(--accent-rgb),0.5)]"
-        style={{ transform: "scaleX(0)" }}
+        className="bg-accent h-full w-full origin-left"
+        style={{
+          boxShadow: "0 0 10px color-mix(in oklab, var(--accent) 50%, transparent)",
+          transform: "scaleX(0)",
+        }}
       />
       <div
         ref={glowRef}
