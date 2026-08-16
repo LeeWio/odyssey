@@ -132,7 +132,6 @@ export function Providers({ children, lang, messages, themeProps }: ProvidersPro
           <NextThemesProvider
             attribute="class"
             defaultTheme={DEFAULT_THEME_MODE}
-            disableTransitionOnChange
             enableSystem
             storageKey={THEME_MODE_STORAGE_KEY}
             {...themeProps}
