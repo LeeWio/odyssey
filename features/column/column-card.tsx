@@ -4,9 +4,47 @@ import { Card, Chip, Typography } from "@heroui/react";
 import { ArrowRight, Book } from "@gravity-ui/icons";
 import Image from "next/image";
 import Link from "next/link";
-import { getSmartColorTone } from "@/components/background/smart-color-surface";
-import { MeshGradient, type MeshTone } from "@/components/background/mesh-gradient";
+import Grainient from "@/components/background/grainient";
 import type { ColumnResponse } from "@/lib/features/column";
+
+const PALETTES = [
+  { color1: "#ff9ffc", color2: "#5227ff", color3: "#b497cf" }, // Purple Dream
+  { color1: "#ff4f6b", color2: "#ff7847", color3: "#1a0810" }, // Peach Dawn
+  { color1: "#0fa3b8", color2: "#1d47b5", color3: "#040b2b" }, // Midnight Ocean
+  { color1: "#72dbab", color2: "#1bb8be", color3: "#041421" }, // Emerald Glow
+  { color1: "#df3b78", color2: "#9c1bb5", color3: "#180614" }, // Velvet Nebula
+  { color1: "#c98f12", color2: "#b32252", color3: "#0a031c" }, // Cyberpunk Amber
+];
+
+function getGrainientProps(seed: string) {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  hash = hash >>> 0;
+
+  const palette = PALETTES[hash % PALETTES.length]!;
+
+  const warpStrength = 0.5 + ((hash % 10) / 10) * 1.5;
+  const warpFrequency = 3.0 + ((hash % 13) / 13) * 6.0;
+  const warpSpeed = 1.0 + ((hash % 7) / 7) * 2.0;
+  const blendAngle = hash % 360;
+  const rotationAmount = 200.0 + ((hash % 15) / 15) * 600.0;
+  const zoom = 0.6 + ((hash % 8) / 8) * 0.6;
+
+  return {
+    ...palette,
+    warpStrength,
+    warpFrequency,
+    warpSpeed,
+    blendAngle,
+    rotationAmount,
+    zoom,
+    grainAmount: 0.05,
+    timeSpeed: 0.12,
+  };
+}
 
 export function ColumnCard({ column }: { column: ColumnResponse }) {
   const visual = column.coverImage ? (
@@ -18,13 +56,13 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
       src={column.coverImage}
     />
   ) : (
-    <MeshGradient
-      className="h-full w-full"
-      seed={`column-${column.slug}`}
-      tone={getSmartColorTone({ title: column.name }) as MeshTone}
-    >
-      <Book aria-hidden="true" className="absolute right-6 bottom-5 size-16 text-white/28" />
-    </MeshGradient>
+    <div className="relative h-full w-full">
+      <Grainient {...getGrainientProps(column.name)} className="absolute inset-0" />
+      <Book
+        aria-hidden="true"
+        className="absolute relative right-6 bottom-5 z-10 size-16 text-white/28"
+      />
+    </div>
   );
 
   return (

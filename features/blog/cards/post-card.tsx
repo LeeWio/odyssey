@@ -5,7 +5,7 @@ import { Chip, Surface, Typography, cn } from "@heroui/react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { MeshGradient, type MeshTone } from "@/components/background/mesh-gradient";
+import Grainient from "@/components/background/grainient";
 
 export type PostCardVariant = "default" | "gradient-header" | "full-gradient";
 
@@ -22,14 +22,43 @@ interface PostCardProps {
   gradient?: string; // e.g. "from-purple-500 to-blue-500"
 }
 
-function getMeshTone(category: string): MeshTone {
-  const source = category.toLowerCase();
-  if (/music|song|audio|音乐|歌曲/.test(source)) return "music";
-  if (/design|ui|ux|设计/.test(source)) return "design";
-  if (/market|invest|stock|finance|投资|市场/.test(source)) return "investing";
-  if (/code|develop|javascript|typescript|react|java|编程|开发/.test(source)) return "coding";
-  if (/life|travel|training|生活|旅行|训练/.test(source)) return "life";
-  return "neutral";
+const PALETTES = [
+  { color1: "#ff9ffc", color2: "#5227ff", color3: "#b497cf" }, // Purple Dream
+  { color1: "#ff4f6b", color2: "#ff7847", color3: "#1a0810" }, // Peach Dawn (IMG_5380.jpg style)
+  { color1: "#0fa3b8", color2: "#1d47b5", color3: "#040b2b" }, // Midnight Ocean (IMG_5379.jpg style)
+  { color1: "#72dbab", color2: "#1bb8be", color3: "#041421" }, // Emerald Glow
+  { color1: "#df3b78", color2: "#9c1bb5", color3: "#180614" }, // Velvet Nebula
+  { color1: "#c98f12", color2: "#b32252", color3: "#0a031c" }, // Cyberpunk Amber
+];
+
+function getGrainientProps(seed: string) {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  hash = hash >>> 0;
+
+  const palette = PALETTES[hash % PALETTES.length]!;
+
+  const warpStrength = 0.5 + ((hash % 10) / 10) * 1.5;
+  const warpFrequency = 3.0 + ((hash % 13) / 13) * 6.0;
+  const warpSpeed = 1.0 + ((hash % 7) / 7) * 2.0;
+  const blendAngle = hash % 360;
+  const rotationAmount = 200.0 + ((hash % 15) / 15) * 600.0;
+  const zoom = 0.6 + ((hash % 8) / 8) * 0.6;
+
+  return {
+    ...palette,
+    warpStrength,
+    warpFrequency,
+    warpSpeed,
+    blendAngle,
+    rotationAmount,
+    zoom,
+    grainAmount: 0.05,
+    timeSpeed: 0.12,
+  };
 }
 
 export const PostCard = ({
@@ -90,15 +119,12 @@ export const PostCard = ({
               className="object-cover transition-transform duration-500 group-hover:scale-110"
             />
           ) : (
-            <MeshGradient
-              seed={title}
-              tone={getMeshTone(category)}
-              className="flex h-full w-full items-center justify-center"
-            >
-              <Typography className="text-sm font-medium text-white/50 italic select-none">
+            <div className="relative flex h-full w-full items-center justify-center">
+              <Grainient {...getGrainientProps(title)} className="absolute inset-0" />
+              <Typography className="relative z-10 text-sm font-medium text-white/50 italic select-none">
                 Chronicle
               </Typography>
-            </MeshGradient>
+            </div>
           )}
           <div className="absolute top-4 left-4">
             <Chip
