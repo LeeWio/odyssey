@@ -6,7 +6,7 @@ const baseMoment = {
   id: 7,
   content: "A short field note.",
   likesCount: 3,
-  isPublished: true,
+  visibility: "public",
   createdAt: "2026-08-16T10:00:00Z",
   updatedAt: "2026-08-16T10:00:00Z",
 };

@@ -16,7 +16,7 @@ export const MomentResponseSchema = z.object({
   id: z.number(),
   content: z.string(),
   likesCount: z.number(),
-  isPublished: z.boolean(),
+  visibility: z.enum(["public", "followers", "private"]),
   createdAt: z.string(),
   updatedAt: z.string(),
   images: z.array(MomentImageResponseSchema).default([]),
@@ -32,6 +32,6 @@ export interface MomentImageRequest {
 
 export interface MomentRequest {
   content: string;
-  isPublished: boolean;
+  visibility: "public" | "followers" | "private";
   images: MomentImageRequest[];
 }

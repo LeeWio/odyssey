@@ -208,13 +208,17 @@ export function MomentsPage() {
         cell: (item) => <span className="line-clamp-2 text-sm">{item.content}</span>,
       },
       {
-        accessorKey: "isPublished",
+        accessorKey: "visibility",
         header: "Status",
-        id: "isPublished",
+        id: "visibility",
         minWidth: 120,
         cell: (item) => (
-          <Chip size="sm" variant="soft" color={item.isPublished ? "success" : "warning"}>
-            {item.isPublished ? "Published" : "Draft"}
+          <Chip
+            size="sm"
+            variant="soft"
+            color={item.visibility === "public" ? "success" : "warning"}
+          >
+            <span className="capitalize">{item.visibility}</span>
           </Chip>
         ),
       },

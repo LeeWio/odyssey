@@ -76,7 +76,9 @@ export function MomentComposer({
   onSubmit,
 }: MomentComposerProps) {
   const [content, setContent] = useState(initialMoment?.content ?? "");
-  const [isPublished, setIsPublished] = useState(initialMoment?.isPublished ?? true);
+  const [isPublished, setIsPublished] = useState(
+    initialMoment ? initialMoment.visibility === "public" : true
+  );
   const [images, setImages] = useState<ComposerImage[]>(() =>
     (initialMoment?.images ?? []).map(existingImage)
   );
@@ -270,7 +272,11 @@ export function MomentComposer({
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!canSubmit) return;
-    await onSubmit({ content: content.trim(), images: imageRequests, isPublished });
+    await onSubmit({
+      content: content.trim(),
+      images: imageRequests,
+      visibility: isPublished ? "public" : "private",
+    });
   };
 
   return (

@@ -10,6 +10,7 @@ import {
   TextArea,
   ScrollShadow,
   ProgressCircle,
+  Spinner,
 } from "@heroui/react";
 import { DropZone, useDropZonePickerContext } from "@heroui-pro/react";
 import type { DropZoneProps } from "react-aria-components";
@@ -18,6 +19,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useAppSelector } from "@/lib/hooks";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
 import { useGetCurrentUserQuery } from "@/lib/features/user/user-api";
+import { useCreateMomentMutation } from "@/lib/features/moment/moment-api";
+import { useUploadFileMutation } from "@/lib/features/file/file-api";
 import { ComposerTool, ComposerToolProps } from "./composer-tool";
 
 // ==========================================
@@ -237,8 +240,12 @@ interface MomentComposerProps {
 // ==========================================
 export const MomentComposer = ({ isOpen, onOpenChange }: MomentComposerProps) => {
   const [content, setContent] = useState("");
-  const [attachments, setAttachments] = useState<string[]>([]);
+  const [attachments, setAttachments] = useState<{ file: File; preview: string }[]>([]);
   const [visibility, setVisibility] = useState("public");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [createMoment] = useCreateMomentMutation();
+  const [uploadFile] = useUploadFileMutation();
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
@@ -255,8 +262,11 @@ export const MomentComposer = ({ isOpen, onOpenChange }: MomentComposerProps) =>
     : null;
 
   const handleSelectFiles = (fileList: FileList) => {
-    const newUrls = Array.from(fileList).map((file) => URL.createObjectURL(file));
-    setAttachments((prev) => [...prev, ...newUrls]);
+    const newAttachments = Array.from(fileList).map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setAttachments((prev) => [...prev, ...newAttachments]);
   };
 
   const handleDrop = useCallback(async (e: DropEvent) => {
@@ -267,8 +277,11 @@ export const MomentComposer = ({ isOpen, onOpenChange }: MomentComposerProps) =>
         dropped.push(await item.getFile());
       }
     }
-    const newUrls = dropped.map((file) => URL.createObjectURL(file));
-    setAttachments((prev) => [...prev, ...newUrls]);
+    const newAttachments = dropped.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setAttachments((prev) => [...prev, ...newAttachments]);
   }, []);
 
   const handleToolAction = (actionId: string) => {
@@ -276,18 +289,56 @@ export const MomentComposer = ({ isOpen, onOpenChange }: MomentComposerProps) =>
   };
 
   const handleRemoveAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleShare = () => {
-    console.log("Submitting Moment:", { content, attachments, visibility });
-    // TODO: 调用后端 API 提交 Moment 动态
+    setAttachments((prev) => {
+      const removed = prev[index];
+      if (removed) {
+        URL.revokeObjectURL(removed.preview);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const charCount = content.length;
   const percentage = Math.min((charCount / 280) * 100, 100);
   const charColor = charCount < 240 ? "accent" : charCount < 280 ? "warning" : "danger";
-  const isSubmitDisabled = (!content.trim() && attachments.length === 0) || charCount > 280;
+  const isSubmitDisabled =
+    (!content.trim() && attachments.length === 0) || charCount > 280 || isSubmitting;
+
+  const handleShare = async () => {
+    if (isSubmitDisabled) return;
+    setIsSubmitting(true);
+    try {
+      // 1. Upload images in parallel if any
+      const uploadedImages = await Promise.all(
+        attachments.map(async ({ file }) => {
+          const res = await uploadFile(file).unwrap();
+          if (!res.id) throw new Error("Uploaded file is missing an ID.");
+          return {
+            fileId: res.id,
+            altText: file.name || "Moment Attachment",
+          };
+        })
+      );
+
+      // 2. Submit the moment
+      await createMoment({
+        content,
+        visibility: visibility as "public" | "followers" | "private",
+        images: uploadedImages,
+      }).unwrap();
+
+      // 3. Clear state & close composer on success
+      attachments.forEach((a) => URL.revokeObjectURL(a.preview));
+      setContent("");
+      setAttachments([]);
+      setVisibility("public");
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to share moment:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Modal>
@@ -307,7 +358,10 @@ export const MomentComposer = ({ isOpen, onOpenChange }: MomentComposerProps) =>
                   className="flex w-full flex-col gap-2 border-none bg-transparent p-0 outline-none"
                 >
                   <ContentInput value={content} onChange={setContent} maxLength={2000} />
-                  <AttachmentPreview attachments={attachments} onRemove={handleRemoveAttachment} />
+                  <AttachmentPreview
+                    attachments={attachments.map((a) => a.preview)}
+                    onRemove={handleRemoveAttachment}
+                  />
                 </DropZone.Area>
                 <ComposerToolbar onAction={handleToolAction} />
               </Modal.Body>
@@ -359,11 +413,14 @@ export const MomentComposer = ({ isOpen, onOpenChange }: MomentComposerProps) =>
                   variant="tertiary"
                   onPress={handleShare}
                   isDisabled={isSubmitDisabled}
-                  slot="close"
                   size="sm"
                 >
-                  <Icon icon="gravity-ui:location-arrow-fill" className="size-4" />
-                  Share
+                  {isSubmitting ? (
+                    <Spinner size="sm" color="current" className="mr-1.5" />
+                  ) : (
+                    <Icon icon="gravity-ui:location-arrow-fill" className="size-4" />
+                  )}
+                  {isSubmitting ? "Sharing..." : "Share"}
                 </Button>
               </Modal.Footer>
               <DropZone.Input accept="image/*" multiple onSelect={handleSelectFiles} />
