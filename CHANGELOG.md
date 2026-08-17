@@ -1,3 +1,10 @@
+# [1.80.0](https://github.com/LeeWio/odyssey/compare/v1.79.0...v1.80.0) (2026-08-17)
+
+
+### Features
+
+* **moments:** refactor MomentComposer into high-polish controlled modal ([e76b595](https://github.com/LeeWio/odyssey/commit/e76b595b9226c3d69f3b12d85a1ce3c202bb08b7)), closes [hi#polish](https://github.com/hi/issues/polish) [hi#performance](https://github.com/hi/issues/performance)
+
 # [1.79.0](https://github.com/LeeWio/odyssey/compare/v1.78.0...v1.79.0) (2026-08-16)
 
 
