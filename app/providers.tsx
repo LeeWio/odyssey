@@ -40,7 +40,10 @@ if (process.env.NODE_ENV === "development") {
     if (
       typeof args[0] === "string" &&
       (args[0].includes("Encountered a script tag while rendering React component") ||
-        args[0].includes("Scripts inside React components are never executed"))
+        args[0].includes("Scripts inside React components are never executed") ||
+        args[0].includes("params are being enumerated") ||
+        args[0].includes("The keys of searchParams were accessed directly") ||
+        args[0].includes("sync-dynamic-apis"))
     ) {
       return;
     }
