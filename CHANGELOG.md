@@ -1,3 +1,10 @@
+# [1.81.0](https://github.com/LeeWio/odyssey/compare/v1.80.1...v1.81.0) (2026-08-17)
+
+
+### Features
+
+* **moment:** integrate real API and support type-safe visibility dropdown ([487cd44](https://github.com/LeeWio/odyssey/commit/487cd44e092bdd984e9d1f1aa3d58f1b9bc23507))
+
 ## [1.80.1](https://github.com/LeeWio/odyssey/compare/v1.80.0...v1.80.1) (2026-08-17)
 
 
