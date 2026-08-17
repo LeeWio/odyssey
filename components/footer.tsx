@@ -126,7 +126,6 @@ export function Footer() {
                 Built for the open web
               </Typography>
             )}
-
             <Link
               className="w-fit text-xs text-white/58"
               href="https://beian.miit.gov.cn/"

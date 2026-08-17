@@ -17,7 +17,7 @@ import {
   useLikeMomentMutation,
   useUpdateMomentMutation,
 } from "@/lib/features/moment";
-import { MomentComposer } from "../moment-composer";
+import { MomentComposer } from "../../moments/moment-composer";
 import { usePortalContainer } from "../use-portal-container";
 
 // --- Single Timeline Node Component ---
@@ -380,35 +380,7 @@ export function MomentsPage() {
         </div>
       )}
 
-      {/* Create / Edit Modal */}
-      <Modal>
-        <Modal.Backdrop
-          isOpen={isFormOpen}
-          onOpenChange={setIsFormFormOpen}
-          variant="blur"
-          UNSTABLE_portalContainer={portalContainer || undefined}
-        >
-          <Modal.Container>
-            <Modal.Dialog className="max-h-[90dvh] overflow-y-auto sm:max-w-3xl">
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading className="text-lg font-bold">
-                  {momentToEdit ? "Edit Moment" : "Create Moment"}
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body>
-                <MomentComposer
-                  key={momentToEdit?.id ?? "new"}
-                  initialMoment={momentToEdit}
-                  isSaving={isCreating || isUpdating}
-                  onCancel={() => setIsFormFormOpen(false)}
-                  onSubmit={handleFormSubmit}
-                />
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      <MomentComposer isOpen={isFormOpen} onOpenChange={setIsFormFormOpen} />
 
       {/* Delete Confirmation AlertDialog */}
       <AlertDialog>
