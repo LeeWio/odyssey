@@ -1,3 +1,10 @@
+## [1.80.1](https://github.com/LeeWio/odyssey/compare/v1.80.0...v1.80.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* **dx:** silence Next.js 15 sync-dynamic-apis warnings during development ([d16cf25](https://github.com/LeeWio/odyssey/commit/d16cf25aa1bd4853f59fe2b07fdc57f9a23603a8))
+
 # [1.80.0](https://github.com/LeeWio/odyssey/compare/v1.79.0...v1.80.0) (2026-08-17)
 
 
