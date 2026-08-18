@@ -26,7 +26,11 @@ export default defineConfig({
         url: "http://localhost/",
       },
     },
-    include: ["components/rich-text/**/*.test.ts", "lib/features/**/*.test.ts", "features/moment/__tests__/**/*.test.ts"],
+    include: [
+      "components/rich-text/**/*.test.ts",
+      "lib/features/**/*.test.ts",
+      "features/moment/__tests__/**/*.test.ts",
+    ],
     setupFiles: ["./components/rich-text/testing/setup.ts"],
   },
 });
