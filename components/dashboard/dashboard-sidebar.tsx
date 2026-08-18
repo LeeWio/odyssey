@@ -54,20 +54,6 @@ function SidebarContents({
 }: SidebarContentsProps) {
   return (
     <>
-      <Sidebar.Header>
-        <div className="flex items-center gap-3 px-1 py-2">
-          <span
-            aria-hidden="true"
-            className="bg-accent text-accent-foreground flex size-7 shrink-0 items-center justify-center rounded-md text-sm font-semibold"
-          >
-            O
-          </span>
-          <div className="flex min-w-0 flex-col" data-sidebar="label">
-            <span className="text-foreground truncate text-sm font-semibold">Odyssey</span>
-            <span className="text-muted truncate text-xs">Administration</span>
-          </div>
-        </div>
-      </Sidebar.Header>
       <Sidebar.Content>
         {NAV_GROUPS.map((group) => (
           <Sidebar.Group key={group.label}>
