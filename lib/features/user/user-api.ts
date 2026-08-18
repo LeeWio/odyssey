@@ -66,15 +66,15 @@ export const userApi = baseApi.injectEndpoints({
      * Update user status (e.g. ban / activate)
      */
     updateUserStatus: builder.mutation<
-      UserResponse,
+      UserResponse | null,
       { id: number; status: "ACTIVE" | "INACTIVE" | "PENDING" | "BANNED" | "DELETED" }
     >({
       query: ({ id, status }) => ({
         url: `/api/v1/admin/users/${id}/status?status=${status}`,
         method: "PATCH",
       }),
-      rawResponseSchema: apiResponseSchema(UserResponseSchema),
-      transformResponse: (response: ApiResponse<UserResponse>) => response.data,
+      rawResponseSchema: apiResponseSchema(UserResponseSchema.nullable()),
+      transformResponse: (response: ApiResponse<UserResponse | null>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         await notifyMutation(queryFulfilled, {

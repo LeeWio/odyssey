@@ -4,12 +4,20 @@ import { useState, useMemo } from "react";
 import { Button, Chip, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
+import { AnimatePresence, motion } from "motion/react";
 
 import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { MomentCard, MomentCardSkeleton, MomentPublisher, useMomentFeed } from "@/features/moment";
 
 type FilterType = "all" | "text" | "photos";
+
+const springConfig = {
+  type: "spring" as const,
+  stiffness: 380,
+  damping: 38,
+  mass: 1,
+};
 
 export default function MomentsPage() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -35,7 +43,12 @@ export default function MomentsPage() {
 
   return (
     <div className="bg-background min-h-screen px-4 pt-28 pb-24 sm:px-6 lg:pt-32">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 350, damping: 35, delay: 0.05 }}
+        className="mx-auto flex w-full max-w-xl flex-col gap-6"
+      >
         {/* 1. Header Area */}
         <header className="flex w-full flex-col gap-3.5 text-left">
           <div className="flex w-full flex-row items-center justify-between">
@@ -95,38 +108,84 @@ export default function MomentsPage() {
 
         {/* 3. Core Feed Main Section */}
         <main className="flex w-full flex-col gap-5">
-          {isLoading && moments.length === 0 ? (
-            Array.from({ length: 3 }).map((_, i) => <MomentCardSkeleton key={i} />)
-          ) : isError ? (
-            <div className="text-danger bg-surface-secondary/40 border-separator/20 flex w-full flex-col items-center gap-3 rounded-3xl border py-12 text-sm">
-              <Icon icon="gravity-ui:triangle-exclamation" className="text-danger-500 size-8" />
-              <span>Failed to load moments. Please try again.</span>
-              <Button size="sm" variant="secondary" onPress={() => refetch()}>
-                Retry
-              </Button>
-            </div>
-          ) : filteredMoments.length > 0 ? (
-            <>
-              {filteredMoments.map((moment) => (
-                <MomentCard key={moment.id} moment={moment} />
-              ))}
+          <AnimatePresence mode="popLayout" initial={false}>
+            {isLoading && moments.length === 0 ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <motion.div
+                  key={`skeleton-${i}`}
+                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                  transition={springConfig}
+                  className="w-full"
+                >
+                  <MomentCardSkeleton />
+                </motion.div>
+              ))
+            ) : isError ? (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={springConfig}
+                className="text-danger bg-surface-secondary/40 border-separator/20 flex w-full flex-col items-center gap-3 rounded-3xl border py-12 text-sm"
+              >
+                <Icon icon="gravity-ui:triangle-exclamation" className="text-danger-500 size-8" />
+                <span>Failed to load moments. Please try again.</span>
+                <Button size="sm" variant="secondary" onPress={() => refetch()}>
+                  Retry
+                </Button>
+              </motion.div>
+            ) : filteredMoments.length > 0 ? (
+              <motion.div key="feed" className="flex w-full flex-col gap-5">
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {filteredMoments.map((moment) => (
+                    <motion.div
+                      key={moment.id}
+                      layout
+                      initial={{ opacity: 0, y: 15, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -15, scale: 0.95 }}
+                      transition={springConfig}
+                      className="w-full"
+                    >
+                      <MomentCard moment={moment} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
 
-              {hasMore && filter === "all" && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Button isPending={isFetchingMore} variant="secondary" onPress={loadMore}>
-                    Load more moments
-                  </Button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-muted bg-surface-secondary/30 border-separator/10 flex w-full flex-col items-center gap-2 rounded-3xl border py-16 text-center text-sm">
-              <Icon icon="gravity-ui:feather" className="text-muted-foreground/40 size-8" />
-              <span>No moments match this filter.</span>
-            </div>
-          )}
+                {hasMore && filter === "all" && (
+                  <motion.div
+                    key="load-more"
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="mt-4 flex w-full justify-center"
+                  >
+                    <Button isPending={isFetchingMore} variant="secondary" onPress={loadMore}>
+                      Load more moments
+                    </Button>
+                  </motion.div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={springConfig}
+                className="text-muted bg-surface-secondary/30 border-separator/10 flex w-full flex-col items-center gap-2 rounded-3xl border py-16 text-center text-sm"
+              >
+                <Icon icon="gravity-ui:feather" className="text-muted-foreground/40 size-8" />
+                <span>No moments match this filter.</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
-      </div>
+      </motion.div>
 
       {/* 4. Publisher Modal */}
       {mounted && isAuthenticated && (
