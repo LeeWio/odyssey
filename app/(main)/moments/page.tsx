@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Button, Chip, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useMounted } from "@mantine/hooks";
 
 import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated } from "@/lib/features/auth";
@@ -14,6 +15,9 @@ export default function MomentsPage() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [filter, setFilter] = useState<FilterType>("all");
   const [isPublisherOpen, setIsPublisherOpen] = useState(false);
+
+  // Client hydration mounting check using unified project hook
+  const mounted = useMounted();
 
   // Fetch paginated public moments
   const { moments, isLoading, isError, isFetchingMore, hasMore, loadMore, refetch } =
@@ -38,7 +42,7 @@ export default function MomentsPage() {
             <Typography type="h2" weight="bold" className="text-3xl tracking-tight">
               Moments
             </Typography>
-            {isAuthenticated && (
+            {mounted && isAuthenticated && (
               <Button
                 size="sm"
                 variant="outline"
@@ -125,7 +129,7 @@ export default function MomentsPage() {
       </div>
 
       {/* 4. Publisher Modal */}
-      {isAuthenticated && (
+      {mounted && isAuthenticated && (
         <MomentPublisher isOpen={isPublisherOpen} onOpenChange={setIsPublisherOpen} />
       )}
     </div>

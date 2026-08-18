@@ -119,7 +119,7 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
   const timeLabel = moment ? formatRelativeTime(moment.createdAt) : "Recently";
 
   return (
-    <Card className="w-104 max-w-full" variant="default">
+    <Card className="w-full" variant="default">
       {/* 1. Card Header */}
       <CardHeader
         authorName={authorName}
@@ -161,7 +161,7 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
 
 export const MomentCardSkeleton = () => {
   return (
-    <Card className="w-104 max-w-full" variant="default">
+    <Card className="w-full" variant="default">
       <Card.Header className="flex flex-row items-center justify-between">
         <div className="flex min-w-0 flex-row items-center gap-3">
           <Skeleton className="size-10 rounded-full" />
