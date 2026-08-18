@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Card, Skeleton, toast, AlertDialog, Button } from "@heroui/react";
+import { Card, Skeleton, toast, AlertDialog, Button, Typography } from "@heroui/react";
 import type { JSONContent } from "@tiptap/core";
 
 import { useAppSelector } from "@/lib/hooks";
@@ -20,6 +20,7 @@ import { CardHeader } from "./card-header";
 import { CardContent } from "./card-content";
 import { CardFooter } from "./card-footer";
 import { CarouselModal } from "../gallery/carousel-modal";
+import { Icon } from "@iconify/react";
 
 // Default content for fallback
 const defaultContent: JSONContent = {
@@ -163,27 +164,36 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
           onOpenChange={setIsDeleteDialogOpen}
           variant="blur"
         >
-          <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md">
-              <AlertDialog.Header>
-                <AlertDialog.Heading>Delete Moment</AlertDialog.Heading>
+          <AlertDialog.Container size="xs">
+            <AlertDialog.Dialog className="max-w-[calc(100vw-32px)] sm:max-w-md">
+              <AlertDialog.Header className="mx-auto flex flex-row">
+                <Icon
+                  icon="gravity-ui:trash-bin"
+                  className="text-danger drop-shadow-danger size-28 sm:size-32 md:size-36"
+                />
               </AlertDialog.Header>
-              <AlertDialog.Body>
-                <p className="text-muted text-sm">
-                  Are you sure you want to delete this moment? This action cannot be undone.
-                </p>
+              <AlertDialog.Body className="mt-6 flex flex-col gap-2">
+                <Typography type="h5" align="center" weight="bold">
+                  Delete Moment
+                </Typography>
+
+                <Typography type="body-sm" color="muted" align="center">
+                  Are you sure you want to delete this moment?
+                  <br />
+                  All information associated with this moment will be immediately deleted
+                </Typography>
               </AlertDialog.Body>
               <AlertDialog.Footer className="flex justify-end gap-2">
-                <Button size="sm" variant="ghost" onPress={() => setIsDeleteDialogOpen(false)}>
-                  Cancel
-                </Button>
                 <Button
-                  size="sm"
+                  fullWidth
                   variant="danger"
                   onPress={handleDeleteConfirm}
                   isPending={isDeleting}
                 >
                   Delete
+                </Button>
+                <Button fullWidth variant="secondary" onPress={() => setIsDeleteDialogOpen(false)}>
+                  Cancel
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>
