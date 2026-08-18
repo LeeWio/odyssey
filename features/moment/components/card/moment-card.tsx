@@ -100,12 +100,12 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
 
   // Image URLs and structural formatting for Carousel Modal
   const imageUrls = useMemo(() => {
-    return moment?.images?.map((img) => img.fileUrl) || [];
+    return moment?.images?.slice(0, 8).map((img) => img.fileUrl) || [];
   }, [moment]);
 
   const carouselImages = useMemo(() => {
     return (
-      moment?.images?.map((img) => ({
+      moment?.images?.slice(0, 8).map((img) => ({
         src: img.fileUrl,
         alt: img.altText || "Moment Image",
       })) || []

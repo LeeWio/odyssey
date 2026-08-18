@@ -30,11 +30,36 @@ describe("Moment Card Utility Helpers", () => {
       expect(styles[3]).toContain("translateX(110px)");
     });
 
-    it("defaults to 5 images layout for larger or custom sizes", () => {
+    it("handles 5 images", () => {
       const styles = getTransformStyles(5);
       expect(styles).toHaveLength(5);
       expect(styles[0]).toContain("translateX(-120px)");
       expect(styles[4]).toContain("translateX(118px)");
+    });
+
+    it("handles 6 images", () => {
+      const styles = getTransformStyles(6);
+      expect(styles).toHaveLength(6);
+      expect(styles[0]).toContain("translateX(-125px)");
+      expect(styles[5]).toContain("translateX(125px)");
+    });
+
+    it("handles 7 images", () => {
+      const styles = getTransformStyles(7);
+      expect(styles).toHaveLength(7);
+      expect(styles[0]).toContain("translateX(-132px)");
+      expect(styles[6]).toContain("translateX(132px)");
+    });
+
+    it("handles 8 images and caps larger values to 8", () => {
+      const styles = getTransformStyles(8);
+      expect(styles).toHaveLength(8);
+      expect(styles[0]).toContain("translateX(-140px)");
+      expect(styles[7]).toContain("translateX(140px)");
+
+      const overLimitStyles = getTransformStyles(12);
+      expect(overLimitStyles).toHaveLength(8);
+      expect(overLimitStyles).toEqual(styles);
     });
   });
 
