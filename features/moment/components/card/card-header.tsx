@@ -23,7 +23,7 @@ export const CardHeader = ({
   onDelete,
 }: CardHeaderProps) => {
   return (
-    <div className="flex w-full flex-row items-center justify-between p-4 pb-3">
+    <div className="flex w-full flex-row items-center justify-between">
       <div className="flex min-w-0 flex-row items-center gap-3">
         <Avatar>
           {authorAvatar ? <Avatar.Image alt={authorName} src={authorAvatar} /> : null}

@@ -12,7 +12,7 @@ interface CardFooterProps {
 
 export const CardFooter = ({ isLiked, isLiking, likesCount, onLikeToggle }: CardFooterProps) => {
   return (
-    <div className="flex w-full flex-row items-center justify-between p-4 pt-3">
+    <div className="flex w-full flex-row items-center justify-between">
       <div className="flex flex-row items-center gap-1">
         <Button
           size="sm"

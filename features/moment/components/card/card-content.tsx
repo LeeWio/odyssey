@@ -19,7 +19,7 @@ export const CardContent = ({
   onCardClick,
 }: CardContentProps) => {
   return (
-    <div className="flex flex-col gap-3 px-4 py-1">
+    <div className="flex flex-col gap-3">
       <RichTextEditor
         key={momentId}
         isReadOnly
