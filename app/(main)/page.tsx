@@ -40,6 +40,7 @@ import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { PencilToSquare, ChevronDown } from "@gravity-ui/icons";
 import GradientText from "@/components/ui/gradient-text";
+import { MomentCard } from "@/features/moment";
 
 const MotionAccordion = motion.create(Accordion);
 

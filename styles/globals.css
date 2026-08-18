@@ -28,7 +28,7 @@
     }
   }
 }
-
+/* 
 @layer components {
   .tiptap-mathematics-render {
     @apply max-w-full align-middle;
@@ -154,4 +154,4 @@
       transition: none;
     }
   }
-}
+} */

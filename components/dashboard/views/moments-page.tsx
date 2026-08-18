@@ -2,11 +2,12 @@
 
 import { AlertDialog, Button, Chip, Modal, Spinner, Tabs, Tooltip } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
+import { Carousel } from "@heroui-pro/react/carousel";
+import type { EmblaCarouselType } from "embla-carousel";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 
-import { MomentMediaGallery } from "@/features/moment/moment-media-gallery";
 import {
   type MomentRequest,
   type MomentResponse,
@@ -17,7 +18,7 @@ import {
   useLikeMomentMutation,
   useUpdateMomentMutation,
 } from "@/lib/features/moment";
-import { MomentComposer } from "../../moments/moment-composer";
+import { MomentPublisher } from "@/features/moment";
 import { usePortalContainer } from "../use-portal-container";
 
 // --- Single Timeline Node Component ---
@@ -29,6 +30,14 @@ interface TimelineItemProps {
 
 function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
   const [localLiked, setLocalLiked] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  const [carouselApi, setCarouselApi] = useState<EmblaCarouselType>();
+
+  useEffect(() => {
+    if (activeImageIndex !== null && carouselApi) {
+      carouselApi.scrollTo(activeImageIndex, true);
+    }
+  }, [activeImageIndex, carouselApi]);
 
   const handleLikeClick = async () => {
     const wasLiked = localLiked;
@@ -40,6 +49,15 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
       setLocalLiked(wasLiked);
     }
   };
+
+  const carouselImages = useMemo(() => {
+    return (
+      moment.images?.map((img) => ({
+        src: img.fileUrl,
+        alt: img.altText || "Moment Image",
+      })) || []
+    );
+  }, [moment.images]);
 
   return (
     <motion.div
@@ -72,7 +90,25 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
           {moment.content}
         </div>
 
-        <MomentMediaGallery images={moment.images} />
+        {moment.images && moment.images.length > 0 && (
+          <div className="flex flex-row gap-2 overflow-x-auto pb-1">
+            {moment.images.map((img, idx) => (
+              <button
+                key={img.id}
+                className="border-separator/30 group relative size-16 min-w-16 overflow-hidden rounded-xl border transition-transform active:scale-95"
+                onClick={() => {
+                  setActiveImageIndex(idx);
+                }}
+              >
+                <img
+                  src={img.thumbnailUrl || img.fileUrl}
+                  alt={img.altText}
+                  className="size-full object-cover transition-transform group-hover:scale-105"
+                />
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Action Bar */}
         <div className="border-border/40 flex items-center gap-2 border-t pt-3">
@@ -101,6 +137,52 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
           </Button>
         </div>
       </div>
+
+      {/* Modal image viewer using exact HeroUI Pro Carousel code */}
+      <Modal>
+        <Modal.Backdrop
+          isOpen={activeImageIndex !== null}
+          onOpenChange={(open) => !open && setActiveImageIndex(null)}
+          variant="blur"
+        >
+          <Modal.Container size="md">
+            <Modal.Dialog
+              aria-label="Moment image viewer"
+              className="max-w-md border-none bg-transparent p-0 shadow-none"
+            >
+              <Modal.CloseTrigger className="z-50 text-white" />
+              <Modal.Body className="flex items-center justify-center overflow-visible p-0">
+                <div className="w-full max-w-sm">
+                  <Carousel opts={{ loop: true }} setApi={setCarouselApi}>
+                    <Carousel.Content>
+                      {carouselImages.map((image, i) => (
+                        <Carousel.Item key={i}>
+                          <div className="overflow-hidden rounded-3xl">
+                            <img
+                              alt={image.alt}
+                              className="aspect-[1/1] w-full object-cover select-none"
+                              draggable={false}
+                              src={image.src}
+                            />
+                          </div>
+                        </Carousel.Item>
+                      ))}
+                    </Carousel.Content>
+                    <Carousel.Previous />
+                    <Carousel.Next />
+                    <Carousel.Dots />
+                    <Carousel.Thumbnails>
+                      {carouselImages.map((image, i) => (
+                        <Carousel.Thumbnail key={i} alt={image.alt} index={i} src={image.src} />
+                      ))}
+                    </Carousel.Thumbnails>
+                  </Carousel>
+                </div>
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
     </motion.div>
   );
 }
@@ -384,7 +466,7 @@ export function MomentsPage() {
         </div>
       )}
 
-      <MomentComposer isOpen={isFormOpen} onOpenChange={setIsFormFormOpen} />
+      <MomentPublisher isOpen={isFormOpen} onOpenChange={setIsFormFormOpen} />
 
       {/* Delete Confirmation AlertDialog */}
       <AlertDialog>

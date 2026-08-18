@@ -1,5 +1,7 @@
-import { PublicMomentsPage } from "@/features/moment/public-moments-page";
+"use client";
+
+import { PublicFeedView } from "@/features/moment";
 
 export default function MomentsPage() {
-  return <PublicMomentsPage />;
+  return <PublicFeedView />;
 }

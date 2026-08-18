@@ -1,3 +1,4 @@
+import { MomentCard } from "@/features/moment";
 import { TourPage } from "@/features/tour";
 import type { Metadata } from "next";
 

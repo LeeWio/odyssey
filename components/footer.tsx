@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 
 import { SmartColorSurface } from "@/components/background/smart-color-surface";
 import { useSubscribeMutation } from "@/lib/features/openapi";
+import { MomentCard } from "@/features/moment";
 
 const FOOTER_LINKS = [
   { href: "/about", label: "About" },
