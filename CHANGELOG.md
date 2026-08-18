@@ -1,3 +1,15 @@
+# [1.82.0](https://github.com/LeeWio/odyssey/compare/v1.81.0...v1.82.0) (2026-08-18)
+
+
+### Bug Fixes
+
+* **moments:** make composer input auto-resize ([65a9688](https://github.com/LeeWio/odyssey/commit/65a96887a580c611547cf442e1e1d1865ff4b9aa))
+
+
+### Features
+
+* **dashboard:** organize access navigation ([d996ba6](https://github.com/LeeWio/odyssey/commit/d996ba6e075b4ed8b6c48c7d229ae12d4d64b734))
+
 # [1.81.0](https://github.com/LeeWio/odyssey/compare/v1.80.1...v1.81.0) (2026-08-17)
 
 
