@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import {
   Avatar,
@@ -111,18 +111,29 @@ interface ContentInputProps {
 }
 
 const ContentInput = ({ value, onChange, maxLength, minLength }: ContentInputProps) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [value]);
+
   return (
     <TextArea
+      ref={textareaRef}
       fullWidth
       aria-label="Moment content"
       placeholder="What's happening?"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       variant="secondary"
-      rows={8}
+      rows={3}
       maxLength={maxLength}
       minLength={minLength}
-      className="min-h-20 w-full resize-none border-none bg-transparent focus:ring-0 focus:outline-none"
+      className="max-h-64 min-h-20 w-full resize-none overflow-y-auto border-none bg-transparent focus:ring-0 focus:outline-none"
     />
   );
 };
