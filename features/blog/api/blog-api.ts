@@ -453,6 +453,7 @@ export const postApi = baseApi.injectEndpoints({
 
 export const {
   useSearchAdminPostsQuery,
+  useLazySearchAdminPostsQuery,
   useGetAdminPostByIdQuery,
   useCreatePostMutation,
   useUpdatePostMutation,

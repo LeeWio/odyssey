@@ -96,25 +96,28 @@ export const friendLinkApi = baseApi.injectEndpoints({
     /**
      * Update friend link details (Admin)
      */
-    updateFriendLink: builder.mutation<FriendLinkResponse, { id: number; body: FriendLinkRequest }>(
-      {
-        query: ({ id, body }) => ({
-          url: `/api/v1/admin/friend-links/${id}`,
-          method: "PUT",
-          body,
-        }),
-        rawResponseSchema: apiResponseSchema(FriendLinkResponseSchema),
-        transformResponse: (response: ApiResponse<FriendLinkResponse>) => response.data,
-        transformErrorResponse: transformApiError,
-        async onQueryStarted(_arg, { queryFulfilled }) {
+    updateFriendLink: builder.mutation<
+      FriendLinkResponse,
+      { id: number; body: FriendLinkRequest; silent?: boolean }
+    >({
+      query: ({ id, body }) => ({
+        url: `/api/v1/admin/friend-links/${id}`,
+        method: "PUT",
+        body,
+      }),
+      rawResponseSchema: apiResponseSchema(FriendLinkResponseSchema),
+      transformResponse: (response: ApiResponse<FriendLinkResponse>) => response.data,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted({ silent }, { queryFulfilled }) {
+        if (!silent) {
           await notifyMutation(queryFulfilled, {
             error: "Failed to update friend link.",
             success: "Friend link updated.",
           });
-        },
-        invalidatesTags: (_result, _error, { id }) => ["FriendLink", { type: "FriendLink", id }],
-      }
-    ),
+        }
+      },
+      invalidatesTags: (_result, _error, { id }) => ["FriendLink", { type: "FriendLink", id }],
+    }),
 
     /**
      * Moderate friend link application status (Admin)

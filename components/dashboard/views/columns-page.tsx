@@ -1,6 +1,6 @@
 "use client";
 
-import { CirclePlus, Eye, Pencil, TrashBin } from "@gravity-ui/icons";
+import { CirclePlus, Eye, FileText, Folder, FolderOpen, Pencil, TrashBin } from "@gravity-ui/icons";
 import {
   AlertDialog,
   Button,
@@ -17,7 +17,12 @@ import {
   TextField,
   Tooltip,
 } from "@heroui/react";
-import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
+import {
+  DataGrid,
+  type DataGridColumn,
+  type DataGridSelection,
+  type DataGridSortDescriptor,
+} from "@heroui-pro/react";
 import { type FormEvent, useCallback, useMemo, useState } from "react";
 import {
   type ColumnRequest,
@@ -47,6 +52,18 @@ function columnRequest(column: ColumnResponse): ColumnRequest {
   };
 }
 
+type ColumnGridRow = {
+  id: string;
+  kind: "column" | "post";
+  name: string;
+  slug: string;
+  count: number;
+  isPublished: boolean;
+  createdAt: string;
+  source?: ColumnResponse;
+  children?: ColumnGridRow[];
+};
+
 export function ColumnsPage() {
   const portalContainer = usePortalContainer();
   const { data: columns = [], error, isLoading } = useGetColumnsQuery();
@@ -58,6 +75,7 @@ export function ColumnsPage() {
     column: "createdAt",
     direction: "descending",
   });
+  const [expandedKeys, setExpandedKeys] = useState<DataGridSelection>(new Set());
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState<ColumnResponse | null>(null);
@@ -87,6 +105,30 @@ export function ColumnsPage() {
       return result * direction;
     });
   }, [filteredColumns, sortDescriptor]);
+
+  const gridRows = useMemo<ColumnGridRow[]>(
+    () =>
+      sortedColumns.map((column) => ({
+        children: column.posts.map((post) => ({
+          count: post.views,
+          createdAt: post.publishedAt || column.createdAt,
+          id: `post-${post.id}`,
+          isPublished: Boolean(post.publishedAt),
+          kind: "post" as const,
+          name: post.title,
+          slug: post.slug,
+        })),
+        count: column.postsCount,
+        createdAt: column.createdAt,
+        id: `column-${column.id}`,
+        isPublished: column.isPublished,
+        kind: "column" as const,
+        name: column.name,
+        slug: column.slug,
+        source: column,
+      })),
+    [sortedColumns]
+  );
 
   const openCreate = () => {
     setSelectedColumn(null);
@@ -152,36 +194,59 @@ export function ColumnsPage() {
     }
   };
 
-  const columnsDefinition = useMemo<DataGridColumn<ColumnResponse>[]>(
+  const columnsDefinition = useMemo<DataGridColumn<ColumnGridRow>[]>(
     () => [
       {
         accessorKey: "name",
+        allowsResizing: true,
         allowsSorting: true,
-        cell: (column) => (
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="truncate text-sm font-semibold">{column.name}</span>
-            <span className="text-muted truncate font-mono text-xs">/{column.slug}</span>
-          </div>
-        ),
+        cell: (row) => {
+          const Icon =
+            row.kind === "column"
+              ? expandedKeys instanceof Set && expandedKeys.has(row.id)
+                ? FolderOpen
+                : Folder
+              : FileText;
+
+          return (
+            <div className="flex min-w-0 items-center gap-2">
+              <Icon
+                aria-hidden="true"
+                className={
+                  row.kind === "column"
+                    ? "text-warning size-4 shrink-0"
+                    : "text-muted size-4 shrink-0"
+                }
+              />
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <span className="truncate text-sm font-semibold">{row.name}</span>
+                <span className="text-muted truncate font-mono text-xs">/{row.slug}</span>
+              </div>
+            </div>
+          );
+        },
         header: "Column",
         id: "name",
         isRowHeader: true,
         minWidth: 240,
+        pinned: "start",
       },
       {
-        accessorKey: "postsCount",
+        accessorKey: "count",
+        allowsResizing: true,
         allowsSorting: true,
-        cell: (column) => <span className="text-muted tabular-nums">{column.postsCount}</span>,
-        header: "Essays",
+        cell: (row) => <span className="text-muted tabular-nums">{row.count}</span>,
+        header: "Essays / Views",
         id: "postsCount",
         minWidth: 100,
       },
       {
         accessorKey: "isPublished",
+        allowsResizing: true,
         allowsSorting: true,
-        cell: (column) => (
-          <Chip color={column.isPublished ? "success" : "warning"} size="sm" variant="soft">
-            {column.isPublished ? "Published" : "Draft"}
+        cell: (row) => (
+          <Chip color={row.isPublished ? "success" : "warning"} size="sm" variant="soft">
+            {row.isPublished ? "Published" : "Draft"}
           </Chip>
         ),
         header: "Visibility",
@@ -190,11 +255,10 @@ export function ColumnsPage() {
       },
       {
         accessorKey: "createdAt",
+        allowsResizing: true,
         allowsSorting: true,
-        cell: (column) => (
-          <span className="text-muted text-sm">
-            {new Date(column.createdAt).toLocaleDateString()}
-          </span>
+        cell: (row) => (
+          <span className="text-muted text-sm">{new Date(row.createdAt).toLocaleDateString()}</span>
         ),
         header: "Created",
         id: "createdAt",
@@ -202,55 +266,60 @@ export function ColumnsPage() {
       },
       {
         align: "end",
-        cell: (column) => (
-          <div className="flex items-center justify-end gap-2">
-            <Tooltip delay={0}>
-              <Button
-                isDisabled={!column.isPublished}
-                isIconOnly
-                aria-label="Preview public column"
-                onPress={() => previewColumn(column)}
-                size="sm"
-                variant="tertiary"
-              >
-                <Eye className="size-4" />
-              </Button>
-              <Tooltip.Content>
-                {column.isPublished ? "Preview public column" : "Publish the column to preview it"}
-              </Tooltip.Content>
-            </Tooltip>
-            <Tooltip delay={0}>
-              <Button
-                isIconOnly
-                aria-label="Edit column"
-                onPress={() => openEdit(column)}
-                size="sm"
-                variant="tertiary"
-              >
-                <Pencil className="size-4" />
-              </Button>
-              <Tooltip.Content>Edit column</Tooltip.Content>
-            </Tooltip>
-            <Tooltip delay={0}>
-              <Button
-                isIconOnly
-                aria-label="Delete column"
-                onPress={() => openDelete(column)}
-                size="sm"
-                variant="danger-soft"
-              >
-                <TrashBin className="size-4" />
-              </Button>
-              <Tooltip.Content>Delete column</Tooltip.Content>
-            </Tooltip>
-          </div>
-        ),
+        allowsResizing: false,
+        cell: (row) =>
+          row.source ? (
+            <div className="flex items-center justify-end gap-2">
+              <Tooltip delay={0}>
+                <Button
+                  isDisabled={!row.source.isPublished}
+                  isIconOnly
+                  aria-label="Preview public column"
+                  onPress={() => previewColumn(row.source!)}
+                  size="sm"
+                  variant="tertiary"
+                >
+                  <Eye className="size-4" />
+                </Button>
+                <Tooltip.Content>
+                  {row.source.isPublished
+                    ? "Preview public column"
+                    : "Publish the column to preview it"}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip delay={0}>
+                <Button
+                  isIconOnly
+                  aria-label="Edit column"
+                  onPress={() => openEdit(row.source!)}
+                  size="sm"
+                  variant="tertiary"
+                >
+                  <Pencil className="size-4" />
+                </Button>
+                <Tooltip.Content>Edit column</Tooltip.Content>
+              </Tooltip>
+              <Tooltip delay={0}>
+                <Button
+                  isIconOnly
+                  aria-label="Delete column"
+                  onPress={() => openDelete(row.source!)}
+                  size="sm"
+                  variant="danger-soft"
+                >
+                  <TrashBin className="size-4" />
+                </Button>
+                <Tooltip.Content>Delete column</Tooltip.Content>
+              </Tooltip>
+            </div>
+          ) : null,
         header: "Actions",
         id: "actions",
-        minWidth: 168,
+        pinned: "end",
+        width: 168,
       },
     ],
-    [openDelete, openEdit, previewColumn]
+    [expandedKeys, openDelete, openEdit, previewColumn]
   );
 
   return (
@@ -292,13 +361,18 @@ export function ColumnsPage() {
         </div>
       ) : (
         <DataGrid
+          allowsColumnResize
           aria-label="Columns"
           columns={columnsDefinition}
           contentClassName="min-w-[808px]"
-          data={sortedColumns}
-          getRowId={(column) => column.id}
+          data={gridRows}
+          expandedKeys={expandedKeys}
+          getChildren={(row) => row.children}
+          getRowId={(row) => row.id}
           isLoadingMore={isLoading}
           sortDescriptor={sortDescriptor}
+          treeColumn="name"
+          onExpandedChange={setExpandedKeys}
           onSortChange={setSortDescriptor}
         />
       )}

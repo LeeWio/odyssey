@@ -1,6 +1,14 @@
 "use client";
 
-import { CirclePlay, Eye, Funnel, Pencil, TrashBin } from "@gravity-ui/icons";
+import {
+  ArrowDownToLine,
+  CirclePlay,
+  Eye,
+  Funnel,
+  Pencil,
+  TrashBin,
+  Xmark,
+} from "@gravity-ui/icons";
 import {
   Avatar,
   Button,
@@ -8,11 +16,20 @@ import {
   Dropdown,
   Label,
   SearchField,
+  Separator,
   Spinner,
   Tooltip,
   toast,
 } from "@heroui/react";
-import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
+import {
+  ActionBar,
+  DataGrid,
+  EmptyState,
+  type DataGridColumn,
+  type DataGridColumnSize,
+  type DataGridSelection,
+  type DataGridSortDescriptor,
+} from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useCallback, useMemo, useState } from "react";
 import { useGetAllRolesQuery } from "@/lib/features/role";
@@ -146,9 +163,14 @@ function UsersRowActions({ user }: { user: UserResponse }) {
 export function UsersPage() {
   const portalContainer = usePortalContainer();
   const { data: users = [], isLoading } = useGetAllUsersQuery();
+  const [updateUserStatus, { isLoading: isBulkUpdating }] = useUpdateUserStatusMutation();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedKeys, setSelectedKeys] = useState<DataGridSelection>(new Set());
+  const [columnWidths, setColumnWidths] = useState<Map<string | number, DataGridColumnSize>>(
+    () => new Map()
+  );
   const [sortDescriptor, setSortDescriptor] = useState<DataGridSortDescriptor>({
     column: "id",
     direction: "ascending",
@@ -182,7 +204,10 @@ export function UsersPage() {
   // Sort users client-side
   const sortedUsers = useMemo(() => {
     if (!sortDescriptor.column) return filteredUsers;
-    const col = sortDescriptor.column as keyof UserResponse;
+    const col =
+      sortDescriptor.column === "member"
+        ? "username"
+        : (sortDescriptor.column as keyof UserResponse);
 
     return [...filteredUsers].sort((a, b) => {
       const first = a[col];
@@ -200,20 +225,94 @@ export function UsersPage() {
     });
   }, [filteredUsers, sortDescriptor]);
 
+  const selectedIds = useMemo(() => {
+    if (selectedKeys === "all") {
+      return new Set(
+        filteredUsers.filter((user) => user.status !== "DELETED").map((user) => user.id)
+      );
+    }
+
+    return new Set(
+      [...selectedKeys]
+        .map((key) => Number(key))
+        .filter((id) => Number.isInteger(id) && users.some((user) => user.id === id))
+    );
+  }, [filteredUsers, selectedKeys, users]);
+
+  const selectedUsers = useMemo(
+    () => users.filter((user) => selectedIds.has(user.id)),
+    [selectedIds, users]
+  );
+
+  const handleBulkStatusChange = useCallback(
+    async (status: "ACTIVE" | "INACTIVE") => {
+      if (selectedIds.size === 0) return;
+
+      try {
+        await Promise.all([...selectedIds].map((id) => updateUserStatus({ id, status }).unwrap()));
+        setSelectedKeys(new Set());
+      } catch {
+        // Individual mutation failures are reported by the shared API handler.
+      }
+    },
+    [selectedIds, updateUserStatus]
+  );
+
+  const handleExportSelected = useCallback(() => {
+    if (selectedUsers.length === 0) return;
+
+    const escapeCsv = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`;
+    const csv = [
+      "ID,Username,Email,Status,Roles,Joined",
+      ...selectedUsers.map((user) =>
+        [
+          user.id,
+          user.username,
+          user.email,
+          user.status,
+          user.roles.join("; "),
+          formatDate(user.createdAt),
+        ]
+          .map(escapeCsv)
+          .join(",")
+      ),
+    ].join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+
+    link.download = "odyssey-users.csv";
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [selectedUsers]);
+
+  const handleRowAction = useCallback(
+    (key: string | number) => {
+      const user = users.find((item) => item.id === Number(key));
+      if (user) toast.success(`${user.username} selected`);
+    },
+    [users]
+  );
+
   const columns = useMemo<DataGridColumn<UserResponse>[]>(
     () => [
       {
         accessorKey: "id",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => <span className="font-medium tabular-nums">{item.id}</span>,
         header: "ID",
         id: "id",
-        isRowHeader: true,
         minWidth: 80,
+        width: columnWidths.get("id") ?? 80,
       },
       {
+        accessorKey: "username",
+        allowsResizing: true,
+        allowsSorting: true,
         id: "member",
         header: "Member",
+        isRowHeader: true,
         cell: (item) => {
           const name = item.nickname || item.username;
           return (
@@ -229,9 +328,12 @@ export function UsersPage() {
           );
         },
         minWidth: 220,
+        pinned: "start",
+        width: columnWidths.get("member") ?? 240,
       },
       {
         accessorKey: "status",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => (
           <Chip color={STATUS_COLORS[item.status]} size="sm" variant="soft">
@@ -241,23 +343,27 @@ export function UsersPage() {
         header: "Status",
         id: "status",
         minWidth: 120,
+        width: columnWidths.get("status") ?? 120,
       },
       {
+        allowsResizing: true,
         id: "roles",
         header: "Roles",
         cell: (item) => (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex min-w-0 gap-1 overflow-hidden">
             {item.roles.map((role) => (
-              <Chip key={role} size="sm" variant="soft" className="text-xs uppercase">
+              <Chip key={role} size="sm" variant="soft" className="shrink-0 text-xs uppercase">
                 {role}
               </Chip>
             ))}
           </div>
         ),
         minWidth: 160,
+        width: columnWidths.get("roles") ?? 180,
       },
       {
         accessorKey: "createdAt",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => (
           <span className="text-muted tabular-nums">{formatDate(item.createdAt)}</span>
@@ -265,17 +371,22 @@ export function UsersPage() {
         header: "Joined Date",
         id: "createdAt",
         minWidth: 140,
+        width: columnWidths.get("createdAt") ?? 140,
       },
       {
         align: "end",
+        allowsResizing: false,
         cell: (item) => <UsersRowActions user={item} />,
         header: "Actions",
         id: "actions",
-        minWidth: 140,
+        pinned: "end",
+        width: 140,
       },
     ],
-    []
+    [columnWidths]
   );
+
+  const selectionCount = selectedKeys === "all" ? selectedIds.size : selectedIds.size;
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
@@ -351,15 +462,95 @@ export function UsersPage() {
       </div>
 
       <DataGrid
+        allowsColumnResize
         aria-label="Users"
         columns={columns}
-        contentClassName="min-w-[820px]"
+        contentClassName="min-w-[980px]"
         data={sortedUsers}
+        disabledKeys={users.filter((user) => user.status === "DELETED").map((user) => user.id)}
         getRowId={(item) => item.id}
-        isLoadingMore={isLoading}
+        headingHeight={40}
+        renderEmptyState={() => (
+          <EmptyState size="sm">
+            <EmptyState.Header>
+              <EmptyState.Title>No users found</EmptyState.Title>
+              <EmptyState.Description>
+                Adjust the search or status filter to continue.
+              </EmptyState.Description>
+            </EmptyState.Header>
+          </EmptyState>
+        )}
+        rowHeight={56}
+        scrollContainerClassName="max-h-[min(52vh,42rem)] overflow-y-auto"
+        selectedKeys={selectedKeys}
+        selectionBehavior="toggle"
+        selectionMode="multiple"
+        showSelectionCheckboxes
         sortDescriptor={sortDescriptor}
+        variant="secondary"
+        virtualized
+        onColumnResizeEnd={(widths) => setColumnWidths(new Map(widths))}
+        onRowAction={handleRowAction}
+        onSelectionChange={setSelectedKeys}
         onSortChange={setSortDescriptor}
       />
+
+      <ActionBar aria-label="Bulk user actions" isOpen={selectionCount > 0}>
+        <ActionBar.Prefix>
+          <Chip className="size-5 shrink-0 tabular-nums" size="sm">
+            {selectionCount}
+          </Chip>
+        </ActionBar.Prefix>
+        <Separator />
+        <ActionBar.Content>
+          <Button
+            aria-label="Activate selected users"
+            isDisabled={isBulkUpdating}
+            size="sm"
+            variant="ghost"
+            onPress={() => void handleBulkStatusChange("ACTIVE")}
+          >
+            <CirclePlay className="size-4" />
+            <span className="action-bar__label">Activate</span>
+          </Button>
+          <Button
+            aria-label="Deactivate selected users"
+            isDisabled={isBulkUpdating}
+            size="sm"
+            variant="ghost"
+            onPress={() => void handleBulkStatusChange("INACTIVE")}
+          >
+            <TrashBin className="size-4" />
+            <span className="action-bar__label">Deactivate</span>
+          </Button>
+          <Button
+            aria-label="Export selected users"
+            size="sm"
+            variant="ghost"
+            onPress={handleExportSelected}
+          >
+            <ArrowDownToLine className="size-4" />
+            <span className="action-bar__label">Export</span>
+          </Button>
+        </ActionBar.Content>
+        <Separator />
+        <ActionBar.Suffix>
+          <Tooltip delay={0}>
+            <Tooltip.Trigger aria-label="Clear selection">
+              <Button
+                isIconOnly
+                aria-label="Clear selection"
+                size="sm"
+                variant="ghost"
+                onPress={() => setSelectedKeys(new Set())}
+              >
+                <Xmark className="size-4" />
+              </Button>
+            </Tooltip.Trigger>
+            <Tooltip.Content>Clear selection</Tooltip.Content>
+          </Tooltip>
+        </ActionBar.Suffix>
+      </ActionBar>
     </div>
   );
 }

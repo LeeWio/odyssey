@@ -2,13 +2,18 @@
 
 import { CirclePlus, Pencil, TrashBin } from "@gravity-ui/icons";
 import { AlertDialog, Button, Chip, SearchField, Spinner, Tooltip } from "@heroui/react";
-import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
-import { useCallback, useMemo, useState } from "react";
+import {
+  DataGrid,
+  EmptyState,
+  type DataGridColumn,
+  type DataGridSortDescriptor,
+} from "@heroui-pro/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   type PostResponse,
   useDeletePostMutation,
-  useSearchAdminPostsQuery,
+  useLazySearchAdminPostsQuery,
 } from "@/features/blog";
 import { openRichText } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
@@ -19,30 +24,65 @@ export function PostsPage() {
   const portalContainer = usePortalContainer();
   const dispatch = useAppDispatch();
 
-  // Pagination & Sorting State
-  const [page] = useState(0);
-  const [size] = useState(10);
+  const pageSize = 30;
   const [sortDescriptor, setSortDescriptor] = useState<DataGridSortDescriptor>({
     column: "createdAt",
     direction: "descending",
   });
 
-  // Search State
   const [search, setSearch] = useState("");
-
-  const { data, isLoading, isFetching } = useSearchAdminPostsQuery({
-    page,
-    size,
-    sort: sortDescriptor.column
-      ? [`${sortDescriptor.column},${sortDescriptor.direction === "descending" ? "desc" : "asc"}`]
-      : undefined,
-  });
+  const [posts, setPosts] = useState<PostResponse[]>([]);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [nextPage, setNextPage] = useState(0);
+  const requestSequence = useRef(0);
+  const [loadPosts, { isFetching, isLoading }] = useLazySearchAdminPostsQuery();
 
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation();
 
   // Alert State
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<PostResponse | null>(null);
+
+  const loadPage = useCallback(
+    async (page: number, replace = false) => {
+      const sequence = ++requestSequence.current;
+      const response = await loadPosts({
+        page,
+        size: pageSize,
+        sort: sortDescriptor.column
+          ? [
+              `${sortDescriptor.column},${sortDescriptor.direction === "descending" ? "desc" : "asc"}`,
+            ]
+          : undefined,
+      })
+        .unwrap()
+        .catch(() => null);
+
+      if (!response) return;
+
+      if (sequence !== requestSequence.current) return;
+
+      setPosts((current) => {
+        if (replace) return response.list;
+
+        const existingIds = new Set(current.map((post) => post.id));
+        return [...current, ...response.list.filter((post) => !existingIds.has(post.id))];
+      });
+      setNextPage(page + 1);
+      setTotalPosts(response.total);
+    },
+    [loadPosts, sortDescriptor]
+  );
+
+  useEffect(() => {
+    void loadPage(0, true);
+  }, [loadPage]);
+
+  const hasMore = posts.length < totalPosts;
+
+  const handleLoadMore = useCallback(() => {
+    if (!isFetching && hasMore) void loadPage(nextPage);
+  }, [hasMore, isFetching, loadPage, nextPage]);
 
   const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
@@ -79,6 +119,8 @@ export function PostsPage() {
     if (!postToDelete) return;
     try {
       await deletePost(postToDelete.id).unwrap();
+      setPosts((current) => current.filter((post) => post.id !== postToDelete.id));
+      setTotalPosts((current) => Math.max(0, current - 1));
       setIsDeleteAlertOpen(false);
       setPostToDelete(null);
     } catch {
@@ -86,10 +128,22 @@ export function PostsPage() {
     }
   };
 
+  const filteredPosts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return posts;
+
+    return posts.filter((post) =>
+      [post.title, post.slug, post.category?.name || "", post.series?.name || ""].some((value) =>
+        value.toLowerCase().includes(query)
+      )
+    );
+  }, [posts, search]);
+
   const columns = useMemo<DataGridColumn<PostResponse>[]>(
     () => [
       {
         accessorKey: "id",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => <span className="font-medium tabular-nums">{item.id}</span>,
         header: "ID",
@@ -99,6 +153,7 @@ export function PostsPage() {
       },
       {
         accessorKey: "title",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => (
           <div className="flex flex-col gap-0.5">
@@ -109,9 +164,11 @@ export function PostsPage() {
         header: "Title",
         id: "title",
         minWidth: 240,
+        pinned: "start",
       },
       {
         accessorKey: "status",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => {
           const variants: Record<string, "soft" | "primary" | "secondary" | "tertiary"> = {
@@ -136,6 +193,7 @@ export function PostsPage() {
       },
       {
         accessorKey: "category",
+        allowsResizing: true,
         allowsSorting: false,
         cell: (item) => (
           <Chip size="sm" variant="secondary">
@@ -148,6 +206,7 @@ export function PostsPage() {
       },
       {
         accessorKey: "series",
+        allowsResizing: true,
         allowsSorting: false,
         cell: (item) =>
           item.series ? (
@@ -163,6 +222,7 @@ export function PostsPage() {
       },
       {
         accessorKey: "views",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => <span className="text-muted text-sm tabular-nums">{item.views}</span>,
         header: "Views",
@@ -171,6 +231,7 @@ export function PostsPage() {
       },
       {
         accessorKey: "createdAt",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => (
           <span className="text-muted text-sm tabular-nums">
@@ -183,6 +244,7 @@ export function PostsPage() {
       },
       {
         align: "end",
+        allowsResizing: false,
         cell: (item) => (
           <div className="flex items-center justify-end gap-2">
             <Tooltip delay={0}>
@@ -214,7 +276,8 @@ export function PostsPage() {
         ),
         header: "Actions",
         id: "actions",
-        minWidth: 120,
+        pinned: "end",
+        width: 120,
       },
     ],
     [handleEditClick, handleDeleteClick]
@@ -225,9 +288,9 @@ export function PostsPage() {
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <h2 className="text-foreground text-base font-semibold">Post Management</h2>
-          {data && (
+          {totalPosts > 0 && (
             <Chip size="sm" variant="soft">
-              {data.total}
+              {totalPosts}
             </Chip>
           )}
         </div>
@@ -254,16 +317,38 @@ export function PostsPage() {
         </SearchField>
       </div>
 
-      <DataGrid
-        aria-label="Posts"
-        columns={columns}
-        contentClassName="min-w-[1060px]"
-        data={data?.list || []}
-        getRowId={(item) => item.id}
-        isLoadingMore={isLoading || isFetching}
-        sortDescriptor={sortDescriptor}
-        onSortChange={setSortDescriptor}
-      />
+      {isLoading && posts.length === 0 ? (
+        <div className="flex h-56 items-center justify-center">
+          <Spinner size="md" />
+        </div>
+      ) : (
+        <DataGrid
+          allowsColumnResize
+          aria-label="Posts"
+          columns={columns}
+          contentClassName="h-[min(52vh,42rem)] min-w-[1060px] overflow-auto"
+          data={filteredPosts}
+          getRowId={(item) => item.id}
+          headingHeight={40}
+          isLoadingMore={isLoading || isFetching}
+          loadMoreContent={<Spinner size="sm" />}
+          renderEmptyState={() => (
+            <EmptyState size="sm">
+              <EmptyState.Header>
+                <EmptyState.Title>No posts found</EmptyState.Title>
+                <EmptyState.Description>
+                  Adjust the search or create a new article.
+                </EmptyState.Description>
+              </EmptyState.Header>
+            </EmptyState>
+          )}
+          rowHeight={56}
+          sortDescriptor={sortDescriptor}
+          virtualized
+          onLoadMore={hasMore ? handleLoadMore : undefined}
+          onSortChange={setSortDescriptor}
+        />
+      )}
 
       {/* Delete Confirmation Alert */}
       <AlertDialog>

@@ -1,6 +1,14 @@
 "use client";
 
-import { CirclePlus, Globe, Pencil, ThumbsDown, ThumbsUp, TrashBin } from "@gravity-ui/icons";
+import {
+  CirclePlus,
+  Globe,
+  Pencil,
+  ThumbsDown,
+  ThumbsUp,
+  TrashBin,
+  Xmark,
+} from "@gravity-ui/icons";
 import {
   AlertDialog,
   Button,
@@ -16,9 +24,15 @@ import {
   TextField,
   Tooltip,
   Typography,
+  toast,
 } from "@heroui/react";
 import Image from "next/image";
-import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
+import {
+  DataGrid,
+  type DataGridColumn,
+  type DataGridReorderEvent,
+  type DataGridSortDescriptor,
+} from "@heroui-pro/react";
 import { type FormEvent, useCallback, useMemo, useState } from "react";
 
 import {
@@ -40,12 +54,13 @@ export function FriendLinksPage() {
   const [page] = useState(0);
   const [size] = useState(10);
   const [sortDescriptor, setSortDescriptor] = useState<DataGridSortDescriptor>({
-    column: "createdAt",
-    direction: "descending",
+    column: "sortOrder",
+    direction: "ascending",
   });
 
   // Search State
   const [search, setSearch] = useState("");
+  const [reorderedLinks, setReorderedLinks] = useState<FriendLinkResponse[] | null>(null);
 
   const { data, isLoading, isFetching } = useGetAdminFriendLinksQuery({
     page,
@@ -79,7 +94,85 @@ export function FriendLinksPage() {
 
   const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
+    setReorderedLinks(null);
   }, []);
+
+  const handleSortChange = useCallback((descriptor: DataGridSortDescriptor) => {
+    setReorderedLinks(null);
+    setSortDescriptor(descriptor);
+  }, []);
+
+  const filteredLinks = useMemo(() => {
+    const links = reorderedLinks ?? data?.list ?? [];
+    const query = search.trim().toLowerCase();
+
+    if (!query) return links;
+
+    return links.filter(
+      (link) =>
+        link.name.toLowerCase().includes(query) ||
+        link.url.toLowerCase().includes(query) ||
+        link.email?.toLowerCase().includes(query)
+    );
+  }, [data?.list, reorderedLinks, search]);
+
+  const canReorder =
+    search.trim().length === 0 &&
+    sortDescriptor.column === "sortOrder" &&
+    sortDescriptor.direction === "ascending";
+
+  const handleReorder = useCallback(
+    ({ reorderedData }: DataGridReorderEvent<FriendLinkResponse>) => {
+      if (!canReorder) return;
+
+      setReorderedLinks(
+        reorderedData.map((link, index) => ({
+          ...link,
+          sortOrder: page * size + index,
+        }))
+      );
+    },
+    [canReorder, page, size]
+  );
+
+  const handleSaveOrder = useCallback(async () => {
+    if (!reorderedLinks || !data?.list) return;
+
+    const originalOrder = new Map(data.list.map((link) => [link.id, link.sortOrder]));
+    const changedLinks = reorderedLinks.filter(
+      (link) => originalOrder.get(link.id) !== link.sortOrder
+    );
+
+    if (changedLinks.length === 0) {
+      setReorderedLinks(null);
+      return;
+    }
+
+    try {
+      await Promise.all(
+        changedLinks.map((link) =>
+          updateLink({
+            id: link.id,
+            body: {
+              avatar: link.avatar || undefined,
+              description: link.description || undefined,
+              email: link.email || undefined,
+              isPublished: link.isPublished,
+              name: link.name,
+              sortOrder: link.sortOrder,
+              status: link.status,
+              url: link.url,
+            },
+            silent: true,
+          }).unwrap()
+        )
+      );
+      toast.success("Friend link order saved.");
+      setReorderedLinks(null);
+    } catch {
+      toast.danger("Unable to save the new friend link order.");
+    }
+  }, [data, reorderedLinks, updateLink]);
 
   const handleCreateOpen = () => {
     setSelectedLink(null);
@@ -151,6 +244,7 @@ export function FriendLinksPage() {
     () => [
       {
         accessorKey: "id",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => <span className="font-medium tabular-nums">{item.id}</span>,
         header: "ID",
@@ -160,6 +254,7 @@ export function FriendLinksPage() {
       },
       {
         accessorKey: "name",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => (
           <div className="flex items-center gap-3">
@@ -188,9 +283,11 @@ export function FriendLinksPage() {
         header: "Site",
         id: "name",
         minWidth: 200,
+        pinned: "start",
       },
       {
         accessorKey: "status",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => {
           const colors: Record<FriendLinkStatus, "success" | "warning" | "danger"> = {
@@ -210,6 +307,7 @@ export function FriendLinksPage() {
       },
       {
         accessorKey: "url",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => (
           <a
@@ -228,6 +326,7 @@ export function FriendLinksPage() {
       },
       {
         accessorKey: "sortOrder",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => <span className="text-sm tabular-nums">{item.sortOrder}</span>,
         header: "Sort",
@@ -236,6 +335,7 @@ export function FriendLinksPage() {
       },
       {
         accessorKey: "isPublished",
+        allowsResizing: true,
         allowsSorting: true,
         cell: (item) => (
           <Switch
@@ -265,6 +365,7 @@ export function FriendLinksPage() {
       },
       {
         align: "end",
+        allowsResizing: false,
         cell: (item) => (
           <div className="flex items-center justify-end gap-1.5">
             {item.status === "APPLYING" ? (
@@ -336,7 +437,8 @@ export function FriendLinksPage() {
         ),
         header: "Actions",
         id: "actions",
-        minWidth: 180,
+        pinned: "end",
+        width: 180,
       },
     ],
     [handleEditClick, updateLink, handleModerate]
@@ -362,29 +464,50 @@ export function FriendLinksPage() {
           Add Link
         </Button>
 
-        <SearchField
-          className="w-full sm:w-[240px]"
-          name="link-search"
-          onChange={handleSearchChange}
-          value={search}
-        >
-          <SearchField.Group>
-            <SearchField.SearchIcon />
-            <SearchField.Input placeholder="Search links..." />
-            <SearchField.ClearButton />
-          </SearchField.Group>
-        </SearchField>
+        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:flex-nowrap">
+          {reorderedLinks ? (
+            <>
+              <Button isPending={isUpdating} size="sm" onPress={() => void handleSaveOrder()}>
+                Save Order
+              </Button>
+              <Button
+                isDisabled={isUpdating}
+                isIconOnly
+                aria-label="Discard reordered friend links"
+                size="sm"
+                variant="tertiary"
+                onPress={() => setReorderedLinks(null)}
+              >
+                <Xmark className="size-4" />
+              </Button>
+            </>
+          ) : null}
+          <SearchField
+            className="w-full sm:w-[240px]"
+            name="link-search"
+            onChange={handleSearchChange}
+            value={search}
+          >
+            <SearchField.Group>
+              <SearchField.SearchIcon />
+              <SearchField.Input placeholder="Search links..." />
+              <SearchField.ClearButton />
+            </SearchField.Group>
+          </SearchField>
+        </div>
       </div>
 
       <DataGrid
+        allowsColumnResize
         aria-label="Friend Links"
         columns={columns}
         contentClassName="min-w-[1000px]"
-        data={data?.list || []}
+        data={filteredLinks}
         getRowId={(item) => item.id}
         isLoadingMore={isLoading || isFetching}
+        onReorder={canReorder ? handleReorder : undefined}
         sortDescriptor={sortDescriptor}
-        onSortChange={setSortDescriptor}
+        onSortChange={handleSortChange}
       />
 
       {/* Create / Edit Modal */}
