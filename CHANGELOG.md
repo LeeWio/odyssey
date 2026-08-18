@@ -1,3 +1,10 @@
+# [1.83.0](https://github.com/LeeWio/odyssey/compare/v1.82.0...v1.83.0) (2026-08-18)
+
+
+### Features
+
+* **dashboard:** enhance data grid workflows ([bcdc944](https://github.com/LeeWio/odyssey/commit/bcdc944aeea91236866b377d315f5a30b9210f53))
+
 # [1.82.0](https://github.com/LeeWio/odyssey/compare/v1.81.0...v1.82.0) (2026-08-18)
 
 
