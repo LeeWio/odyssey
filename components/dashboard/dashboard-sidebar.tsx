@@ -1,12 +1,10 @@
 "use client";
 
-import { Bars, LayoutSideContentLeft } from "@gravity-ui/icons";
-
 import { Chip } from "@heroui/react";
-import { Sidebar, useSidebar } from "@heroui-pro/react";
+import { Sidebar } from "@heroui-pro/react";
 import type { NavItem } from "./nav-items";
 
-import { NAV_ITEMS } from "./nav-items";
+import { NAV_GROUPS } from "./nav-items";
 
 interface DashboardSidebarProps {
   pathname: string;
@@ -21,12 +19,13 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   return (
     <>
-      <Sidebar className="h-auto">
+      <Sidebar>
         <SidebarContents
           basePath={basePath}
           disableNavigation={disableNavigation}
           pathname={pathname}
         />
+        <Sidebar.Rail />
       </Sidebar>
       <Sidebar.Mobile>
         <SidebarContents
@@ -53,50 +52,40 @@ function SidebarContents({
   idPrefix = "",
   pathname,
 }: SidebarContentsProps) {
-  const { toggleSidebar, setMobileOpen } = useSidebar();
-
   return (
     <>
-      <Sidebar.Header>{""}</Sidebar.Header>
+      <Sidebar.Header>
+        <div className="flex items-center gap-3 px-1 py-2">
+          <span
+            aria-hidden="true"
+            className="bg-accent text-accent-foreground flex size-7 shrink-0 items-center justify-center rounded-md text-sm font-semibold"
+          >
+            O
+          </span>
+          <div className="flex min-w-0 flex-col" data-sidebar="label">
+            <span className="text-foreground truncate text-sm font-semibold">Odyssey</span>
+            <span className="text-muted truncate text-xs">Administration</span>
+          </div>
+        </div>
+      </Sidebar.Header>
       <Sidebar.Content>
-        <Sidebar.Group>
-          <Sidebar.Menu aria-label="Toggle navigation">
-            <Sidebar.MenuItem
-              id="toggle-menu"
-              textValue="Toggle Menu"
-              className="lg:hidden"
-              onAction={() => setMobileOpen(true)}
-            >
-              <Sidebar.MenuIcon>
-                <Bars className="size-4" />
-              </Sidebar.MenuIcon>
-              <Sidebar.MenuLabel>Menu</Sidebar.MenuLabel>
-            </Sidebar.MenuItem>
-            <Sidebar.MenuItem
-              id="collapse-sidebar"
-              textValue="Collapse Sidebar"
-              className="hidden lg:flex"
-              onAction={() => toggleSidebar()}
-            >
-              <Sidebar.MenuIcon>
-                <LayoutSideContentLeft className="size-4" />
-              </Sidebar.MenuIcon>
-              <Sidebar.MenuLabel>Collapse Sidebar</Sidebar.MenuLabel>
-            </Sidebar.MenuItem>
-          </Sidebar.Menu>
-          <Sidebar.Menu aria-label="Dashboard navigation">
-            {NAV_ITEMS.map((item) => (
-              <SidebarNavItem
-                key={item.href}
-                basePath={basePath}
-                disableNavigation={disableNavigation}
-                idPrefix={idPrefix}
-                item={item}
-                pathname={pathname}
-              />
-            ))}
-          </Sidebar.Menu>
-        </Sidebar.Group>
+        {NAV_GROUPS.map((group) => (
+          <Sidebar.Group key={group.label}>
+            <Sidebar.GroupLabel>{group.label}</Sidebar.GroupLabel>
+            <Sidebar.Menu aria-label={`${group.label} navigation`}>
+              {group.items.map((item) => (
+                <SidebarNavItem
+                  key={item.href}
+                  basePath={basePath}
+                  disableNavigation={disableNavigation}
+                  idPrefix={idPrefix}
+                  item={item}
+                  pathname={pathname}
+                />
+              ))}
+            </Sidebar.Menu>
+          </Sidebar.Group>
+        ))}
       </Sidebar.Content>
     </>
   );
@@ -130,6 +119,7 @@ function SidebarNavItem({
       id={`${idPrefix}${item.href}`}
       isCurrent={isCurrent}
       textValue={item.label}
+      tooltip={item.label}
     >
       <Sidebar.MenuIcon>
         <Icon className="size-4" />

@@ -8,6 +8,7 @@ import { selectIsDashboardOpen, toggleDashboard } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 import { AppShell } from "./app-shell";
+import { AccessPlaceholderPage } from "./views/access-placeholder-page";
 import { AnalyticsPage } from "./views/analytics-page";
 import { CategoriesPage } from "./views/categories-page";
 import { CommentsPage } from "./views/comments-page";
@@ -68,8 +69,43 @@ export function DashboardSheet() {
         return <OrdersPage />;
       case "/users":
         return <UsersPage />;
+      case "/groups":
+        return (
+          <AccessPlaceholderPage
+            title="User Groups"
+            description="Organize members across departments, teams, and temporary collaborations."
+          />
+        );
+      case "/roles":
+        return (
+          <AccessPlaceholderPage
+            title="Roles"
+            description="Bundle permissions into responsibilities that can be assigned to users and groups."
+          />
+        );
       case "/permissions":
         return <PermissionsPage />;
+      case "/access-policies":
+        return (
+          <AccessPlaceholderPage
+            title="Access Policies"
+            description="Define security requirements for sign-in, sessions, devices, and network access."
+          />
+        );
+      case "/service-accounts":
+        return (
+          <AccessPlaceholderPage
+            title="Service Accounts"
+            description="Manage non-human identities and the scoped access they use for automation."
+          />
+        );
+      case "/audit-logs":
+        return (
+          <AccessPlaceholderPage
+            title="Audit Logs"
+            description="Review administrative activity, permission changes, and security events."
+          />
+        );
       case "/tracker":
         return <TrackerPage />;
       case "/settings":
