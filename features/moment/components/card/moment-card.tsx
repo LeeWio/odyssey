@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Card, Skeleton, toast } from "@heroui/react";
+import { Card, Skeleton, toast, AlertDialog, Button } from "@heroui/react";
 import type { JSONContent } from "@tiptap/core";
 
 import { useAppSelector } from "@/lib/hooks";
@@ -67,6 +67,7 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
 
   const [deleteMoment] = useDeleteMomentMutation();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Gallery view Modal state
   const [activeImageIndex, setActiveIndex] = useState<number | null>(null);
@@ -77,18 +78,17 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
     moment?.likesCount
   );
 
-  const handleDelete = async () => {
+  const handleDeleteConfirm = async () => {
     if (!moment?.id) return;
-    if (confirm("Are you sure you want to delete this moment?")) {
-      setIsDeleting(true);
-      try {
-        await deleteMoment(moment.id).unwrap();
-        toast.success("Moment deleted successfully.");
-      } catch (err) {
-        console.error("Failed to delete moment:", err);
-      } finally {
-        setIsDeleting(false);
-      }
+    setIsDeleting(true);
+    try {
+      await deleteMoment(moment.id).unwrap();
+      toast.success("Moment deleted successfully.");
+      setIsDeleteDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to delete moment:", err);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -128,7 +128,7 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
         timeLabel={timeLabel}
         isAdmin={isAdmin}
         isDeleting={isDeleting}
-        onDelete={moment?.id ? handleDelete : undefined}
+        onDelete={moment?.id ? () => setIsDeleteDialogOpen(true) : undefined}
       />
 
       {/* 2. Card Content */}
@@ -155,6 +155,41 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
           onClose={() => setActiveIndex(null)}
         />
       )}
+
+      {/* 5. Delete Confirmation AlertDialog */}
+      <AlertDialog>
+        <AlertDialog.Backdrop
+          isOpen={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          variant="blur"
+        >
+          <AlertDialog.Container>
+            <AlertDialog.Dialog className="sm:max-w-md">
+              <AlertDialog.Header>
+                <AlertDialog.Heading>Delete Moment</AlertDialog.Heading>
+              </AlertDialog.Header>
+              <AlertDialog.Body>
+                <p className="text-muted text-sm">
+                  Are you sure you want to delete this moment? This action cannot be undone.
+                </p>
+              </AlertDialog.Body>
+              <AlertDialog.Footer className="flex justify-end gap-2">
+                <Button size="sm" variant="ghost" onPress={() => setIsDeleteDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onPress={handleDeleteConfirm}
+                  isPending={isDeleting}
+                >
+                  Delete
+                </Button>
+              </AlertDialog.Footer>
+            </AlertDialog.Dialog>
+          </AlertDialog.Container>
+        </AlertDialog.Backdrop>
+      </AlertDialog>
     </Card>
   );
 };
