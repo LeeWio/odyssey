@@ -519,7 +519,7 @@ export function FriendLinksPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <Modal.Container size="sm">
-            <Modal.Dialog className="sm:max-w-md">
+            <Modal.Dialog className="sm:max-w-md" aria-label="Modal dialog">
               <Modal.CloseTrigger />
               <Form onSubmit={handleFormSubmit}>
                 <Modal.Header>
@@ -640,7 +640,7 @@ export function FriendLinksPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md">
+            <AlertDialog.Dialog className="sm:max-w-md" aria-label="Alert dialog">
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />

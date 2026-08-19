@@ -314,7 +314,7 @@ export function RolesPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <Modal.Container size="sm">
-            <Modal.Dialog className="sm:max-w-md">
+            <Modal.Dialog className="sm:max-w-md" aria-label="Role Form">
               <Modal.CloseTrigger />
               <Form onSubmit={handleFormSubmit}>
                 <Modal.Header>
@@ -397,7 +397,7 @@ export function RolesPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md">
+            <AlertDialog.Dialog className="sm:max-w-md" aria-label="Confirm Deletion">
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Avatar, Button, Card, Chip, Tag, TagGroup, Typography, Pagination } from "@heroui/react";
 import { Segment, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
@@ -35,10 +35,17 @@ export default function MomentsPage() {
   const pageSize = 6;
 
   const [, scrollTo] = useWindowScroll();
+  const feedRef = useRef<HTMLElement>(null);
 
-  // Automatically scroll smoothly to top of the page when changing pages
+  // Automatically scroll smoothly to the feed anchor when changing pages
   useEffect(() => {
-    scrollTo({ y: 0 });
+    if (feedRef.current) {
+      // 120px offset to accommodate the sticky navbar and layout padding
+      const yOffset = feedRef.current.getBoundingClientRect().top + window.scrollY - 120;
+      scrollTo({ y: yOffset });
+    } else {
+      scrollTo({ y: 0 });
+    }
   }, [currentPage, scrollTo]);
 
   // Client hydration mounting check using unified project hook
@@ -55,7 +62,7 @@ export default function MomentsPage() {
     size: pageSize,
   });
 
-  const moments = publicData?.list || [];
+  const moments = useMemo(() => publicData?.list || [], [publicData?.list]);
   const totalItems = publicData?.total || 0;
   const totalPages = publicData?.totalPages || 1;
 
@@ -201,7 +208,7 @@ export default function MomentsPage() {
           </div>
 
           {/* 3. Core Feed Main Section */}
-          <main className="flex w-full flex-col gap-5">
+          <main ref={feedRef} className="flex w-full flex-col gap-5">
             <AnimatePresence mode="popLayout" initial={false}>
               {isLoading && moments.length === 0 ? (
                 Array.from({ length: 3 }).map((_, i) => (

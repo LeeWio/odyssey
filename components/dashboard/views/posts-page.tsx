@@ -359,7 +359,7 @@ export function PostsPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md">
+            <AlertDialog.Dialog className="sm:max-w-md" aria-label="Alert dialog">
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />

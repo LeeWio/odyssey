@@ -387,7 +387,7 @@ export function CommentsPage() {
           onOpenChange={(open) => !open && setCommentToDelete(null)}
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md">
+            <AlertDialog.Dialog className="sm:max-w-md" aria-label="Alert dialog">
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />

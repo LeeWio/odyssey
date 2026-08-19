@@ -94,8 +94,8 @@ export const userApi = baseApi.injectEndpoints({
         method: "PUT",
         body: { roleIds },
       }),
-      rawResponseSchema: apiResponseSchema(z.unknown()),
-      transformResponse: (response: ApiResponse<void>) => response.data,
+      rawResponseSchema: apiResponseSchema(z.null()),
+      transformResponse: () => undefined,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         await notifyMutation(queryFulfilled, {
