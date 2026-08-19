@@ -15,6 +15,7 @@ import { useGetPublicMomentsQuery } from "@/lib/features/moment";
 import { MomentCard, MomentCardSkeleton, MomentPublisher } from "@/features/moment";
 
 type FilterType = "all" | "text" | "photos";
+type ViewMode = "list" | "grid";
 
 const springConfig = {
   type: "spring" as const,
@@ -27,6 +28,7 @@ export default function MomentsPage() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const [filter, setFilter] = useState<FilterType>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [isPublisherOpen, setIsPublisherOpen] = useState(false);
 
@@ -203,17 +205,44 @@ export default function MomentsPage() {
 
           {/* 2. Advanced Segment Filter & Metrics selector row */}
           <div className="border-default-100 flex w-full flex-row items-center justify-between border-b pb-3.5">
-            <Segment
-              size="sm"
-              selectedKey={filter}
-              onSelectionChange={(key) => {
-                setFilter(key as FilterType);
-              }}
-            >
-              <Segment.Item id="all">All</Segment.Item>
-              <Segment.Item id="text">Notes</Segment.Item>
-              <Segment.Item id="photos">Photos</Segment.Item>
-            </Segment>
+            <div className="flex items-center gap-3">
+              <Segment
+                size="sm"
+                selectedKey={filter}
+                onSelectionChange={(key) => {
+                  setFilter(key as FilterType);
+                }}
+              >
+                <Segment.Item id="all">All</Segment.Item>
+                <Segment.Item id="text">Notes</Segment.Item>
+                <Segment.Item id="photos">Photos</Segment.Item>
+              </Segment>
+
+              <div className="bg-surface-secondary border-default-100 hidden items-center gap-1 rounded-lg border p-0.5 sm:flex">
+                <button
+                  aria-label="List View"
+                  onClick={() => setViewMode("list")}
+                  className={`rounded-md p-1.5 transition-colors ${
+                    viewMode === "list"
+                      ? "bg-surface text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon icon="gravity-ui:list" className="size-3.5" />
+                </button>
+                <button
+                  aria-label="Grid View"
+                  onClick={() => setViewMode("grid")}
+                  className={`rounded-md p-1.5 transition-colors ${
+                    viewMode === "grid"
+                      ? "bg-surface text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon icon="gravity-ui:layout-cells-large" className="size-3.5" />
+                </button>
+              </div>
+            </div>
 
             <div className="flex items-center gap-2">
               {selectedTopic && (
@@ -273,25 +302,33 @@ export default function MomentsPage() {
                   </Button>
                 </motion.div>
               ) : filteredMoments.length > 0 ? (
-                <motion.div key="feed" className="flex w-full flex-col gap-5">
-                  <AnimatePresence mode="popLayout" initial={false}>
-                    {filteredMoments.map((moment, index) => (
-                      <motion.div
-                        key={moment.id}
-                        layout
-                        initial={{ opacity: 0, y: 15, scale: 0.97 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -15, scale: 0.95 }}
-                        transition={{
-                          ...springConfig,
-                          delay: index * 0.03, // 30ms staggered cascading delay
-                        }}
-                        className="w-full"
-                      >
-                        <MomentCard moment={moment} />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                <motion.div key="feed" className="w-full">
+                  <div
+                    className={`w-full transition-all duration-500 ${
+                      viewMode === "grid"
+                        ? "block columns-1 gap-5 space-y-5 sm:columns-2"
+                        : "flex flex-col gap-5"
+                    }`}
+                  >
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      {filteredMoments.map((moment, index) => (
+                        <motion.div
+                          key={moment.id}
+                          layout
+                          initial={{ opacity: 0, y: 15, scale: 0.97 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -15, scale: 0.95 }}
+                          transition={{
+                            ...springConfig,
+                            delay: index * 0.03, // 30ms staggered cascading delay
+                          }}
+                          className={`w-full ${viewMode === "grid" ? "inline-block break-inside-avoid" : ""}`}
+                        >
+                          <MomentCard moment={moment} />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
 
                   {/* Standard HeroUI Pagination footer bar */}
                   {!isLoading && totalPages > 1 && (
