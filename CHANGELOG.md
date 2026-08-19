@@ -1,3 +1,10 @@
+# [1.92.0](https://github.com/LeeWio/odyssey/compare/v1.91.0...v1.92.0) (2026-08-19)
+
+
+### Features
+
+* **moments:** add interactive List vs. Masonry Grid view toggle for visual variety ([1bfd768](https://github.com/LeeWio/odyssey/commit/1bfd7682cb82d355c5773fba4f2e600b5b89aa30))
+
 # [1.91.0](https://github.com/LeeWio/odyssey/compare/v1.90.0...v1.91.0) (2026-08-19)
 
 
