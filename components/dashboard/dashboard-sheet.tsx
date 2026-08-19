@@ -22,6 +22,7 @@ import { OrdersPage } from "./views/orders-page";
 import { PermissionsPage } from "./views/permissions-page";
 import { PostsPage } from "./views/posts-page";
 import { SettingsPage } from "./views/settings-page";
+import { RolesPage } from "./views/roles-page";
 import { TagsPage } from "./views/tags-page";
 import { TrackerPage } from "./views/tracker-page";
 import { UsersPage } from "./views/users-page";
@@ -77,12 +78,7 @@ export function DashboardSheet() {
           />
         );
       case "/roles":
-        return (
-          <AccessPlaceholderPage
-            title="Roles"
-            description="Bundle permissions into responsibilities that can be assigned to users and groups."
-          />
-        );
+        return <RolesPage />;
       case "/permissions":
         return <PermissionsPage />;
       case "/access-policies":
