@@ -1,3 +1,10 @@
+# [1.86.0](https://github.com/LeeWio/odyssey/compare/v1.85.0...v1.86.0) (2026-08-19)
+
+
+### Features
+
+* **moment:** align MomentResponse typings with backend author fields ([6d9ec4c](https://github.com/LeeWio/odyssey/commit/6d9ec4c96dd1f776c39fb5d43fcf5537ff575a44))
+
 # [1.85.0](https://github.com/LeeWio/odyssey/compare/v1.84.0...v1.85.0) (2026-08-19)
 
 
