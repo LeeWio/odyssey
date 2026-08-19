@@ -1,3 +1,10 @@
+## [1.88.4](https://github.com/LeeWio/odyssey/compare/v1.88.3...v1.88.4) (2026-08-19)
+
+
+### Bug Fixes
+
+* **dashboard:** align updateUserRoles API contract and resolve dialog accessibility warnings ([0af7c0d](https://github.com/LeeWio/odyssey/commit/0af7c0d237aaa04c0e4513c92684850b09be602a))
+
 ## [1.88.3](https://github.com/LeeWio/odyssey/compare/v1.88.2...v1.88.3) (2026-08-19)
 
 
