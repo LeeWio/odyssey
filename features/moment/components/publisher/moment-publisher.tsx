@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Modal } from "@heroui/react";
 import { DropZone } from "@heroui-pro/react";
 
@@ -13,7 +13,6 @@ import { MOMENT_CHARACTER_LIMIT } from "../../utils/character-count";
 import { PublisherHeader } from "./publisher-header";
 import { PublisherEditor } from "./publisher-editor";
 import { PublisherGallery } from "./publisher-gallery";
-import { PublisherTopics } from "./publisher-topics";
 import { PublisherToolbar } from "./publisher-toolbar";
 
 interface MomentPublisherProps {
@@ -22,7 +21,6 @@ interface MomentPublisherProps {
 }
 
 export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) => {
-  const [isTopicPickerOpen, setIsTopicPickerOpen] = useState(false);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
 
@@ -95,14 +93,6 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
                   />
 
                   <PublisherGallery attachments={attachments} onRemove={handleRemoveAttachment} />
-
-                  {(isTopicPickerOpen || topics.length > 0) && (
-                    <PublisherTopics
-                      topics={topics}
-                      onAddTopic={addTopic}
-                      onRemoveTopic={removeTopic}
-                    />
-                  )}
                 </DropZone.Area>
 
                 {/* 3. Toolbar */}
@@ -111,9 +101,9 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
                   isSubmitting={isSubmitting}
                   isSubmitDisabled={isSubmitDisabled}
                   onPublish={publishMoment}
-                  onAction={(action) => {
-                    if (action === "topic") setIsTopicPickerOpen((open) => !open);
-                  }}
+                  topics={topics}
+                  onAddTopic={addTopic}
+                  onRemoveTopic={removeTopic}
                 />
               </Modal.Body>
 
