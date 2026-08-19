@@ -1,3 +1,10 @@
+# [1.87.0](https://github.com/LeeWio/odyssey/compare/v1.86.0...v1.87.0) (2026-08-19)
+
+
+### Features
+
+* **user:** replace binary admin toggle with standard multiple-selection Role Assignment dropdown ([47e1234](https://github.com/LeeWio/odyssey/commit/47e12343470b0d73127f5d3ab10b87505d5df81e))
+
 # [1.86.0](https://github.com/LeeWio/odyssey/compare/v1.85.0...v1.86.0) (2026-08-19)
 
 
