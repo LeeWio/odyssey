@@ -1,3 +1,10 @@
+## [1.88.1](https://github.com/LeeWio/odyssey/compare/v1.88.0...v1.88.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **permissions:** resolve infinite re-render loop by using serialized value-equality sync ([4881239](https://github.com/LeeWio/odyssey/commit/4881239b632f2de0c4ba85b40c4dbb2f3b2f4460))
+
 # [1.88.0](https://github.com/LeeWio/odyssey/compare/v1.87.0...v1.88.0) (2026-08-19)
 
 
