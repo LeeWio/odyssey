@@ -1,3 +1,10 @@
+# [1.91.0](https://github.com/LeeWio/odyssey/compare/v1.90.0...v1.91.0) (2026-08-19)
+
+
+### Features
+
+* **moments:** map fetched moments timestamps to drive dynamic footprints heatmap density ([9f18ea9](https://github.com/LeeWio/odyssey/commit/9f18ea94e7d71f2d5312a73a95684aae8c43559f))
+
 # [1.90.0](https://github.com/LeeWio/odyssey/compare/v1.89.0...v1.90.0) (2026-08-19)
 
 
