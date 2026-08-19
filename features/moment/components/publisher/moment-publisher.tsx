@@ -67,7 +67,7 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
     <Modal>
       <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
         <Modal.Container size="lg">
-          <Modal.Dialog>
+          <Modal.Dialog aria-label="Moment Publisher">
             <DropZone className="w-full border-none bg-transparent p-0 shadow-none">
               {/* 1. Header */}
               <PublisherHeader

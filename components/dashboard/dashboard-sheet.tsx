@@ -117,7 +117,7 @@ export function DashboardSheet() {
     <Sheet isOpen={isOpen} onOpenChange={handleOpenChange} isDetached>
       <Sheet.Backdrop variant="blur">
         <Sheet.Content>
-          <Sheet.Dialog id="dashboard-sheet-container">
+          <Sheet.Dialog id="dashboard-sheet-container" aria-label="Dashboard Overlay">
             <Sheet.Handle />
             <AppShell pathname={currentPath} onNavigate={setCurrentPath}>
               {renderContent()}

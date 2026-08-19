@@ -88,14 +88,14 @@ export const userApi = baseApi.injectEndpoints({
     /**
      * Update user roles
      */
-    updateUserRoles: builder.mutation<UserResponse, { id: number; roleIds: number[] }>({
+    updateUserRoles: builder.mutation<void, { id: number; roleIds: number[] }>({
       query: ({ id, roleIds }) => ({
         url: `/api/v1/admin/users/${id}/roles`,
         method: "PUT",
         body: { roleIds },
       }),
-      rawResponseSchema: apiResponseSchema(UserResponseSchema),
-      transformResponse: (response: ApiResponse<UserResponse>) => response.data,
+      rawResponseSchema: apiResponseSchema(z.unknown()),
+      transformResponse: (response: ApiResponse<void>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         await notifyMutation(queryFulfilled, {
