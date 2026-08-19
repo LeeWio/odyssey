@@ -36,12 +36,15 @@ export function PermissionsPage() {
     { skip: !selectedRole }
   );
 
-  // Sync checked IDs once fetched during rendering
-  const [prevRoleMenuIds, setPrevRoleMenuIds] = useState<number[] | null>(null);
+  // Local state for checkboxes
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
 
-  if (roleMenuIds !== prevRoleMenuIds) {
-    setPrevRoleMenuIds(roleMenuIds);
+  // Track the serialized menu IDs to safely adjust state when query data changes
+  const roleMenuIdsKey = roleMenuIds.join(",");
+  const [prevRoleMenuIdsKey, setPrevRoleMenuIdsKey] = useState<string>("");
+
+  if (roleMenuIdsKey !== prevRoleMenuIdsKey) {
+    setPrevRoleMenuIdsKey(roleMenuIdsKey);
     setCheckedIds(new Set(roleMenuIds));
   }
 
