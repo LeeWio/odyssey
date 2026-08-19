@@ -24,6 +24,7 @@ export const MenuResponseSchema: z.ZodType<MenuResponse> = baseMenuSchema.extend
   children: z
     .lazy(() => z.array(MenuResponseSchema))
     .nullable()
+    .optional()
     .transform((children) => children ?? []),
 });
 
