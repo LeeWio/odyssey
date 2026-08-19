@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Avatar, Button, Card, Chip, Tag, TagGroup, Typography, Pagination } from "@heroui/react";
 import { Segment, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
@@ -33,6 +33,11 @@ export default function MomentsPage() {
   // Controlled Pagination State (1-based index)
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+
+  // Automatically scroll smoothly to top of the page when changing pages
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
 
   // Client hydration mounting check using unified project hook
   const mounted = useMounted();
