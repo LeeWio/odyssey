@@ -172,7 +172,11 @@ export default function MomentsPage() {
   return (
     <div className="bg-background min-h-screen px-4 pt-28 pb-24 sm:px-6 lg:pt-32">
       {/* Dual Column Layout Grid */}
-      <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-[1fr_280px]">
+      <div
+        className={`mx-auto grid w-full grid-cols-1 gap-8 transition-all duration-500 md:grid-cols-[1fr_280px] ${
+          viewMode === "grid" ? "max-w-7xl" : "max-w-5xl"
+        }`}
+      >
         {/* Left Column: Principal moments feed */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
