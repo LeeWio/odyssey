@@ -1,7 +1,20 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Avatar, Button, Card, Chip, Tag, TagGroup, Typography, Pagination } from "@heroui/react";
+import {
+  Avatar,
+  Button,
+  Card,
+  Chip,
+  Tag,
+  TagGroup,
+  Typography,
+  Pagination,
+  Dropdown,
+  Label,
+  Description,
+  type Selection,
+} from "@heroui/react";
 import { Segment, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useMounted, useScrollIntoView } from "@mantine/hooks";
@@ -222,30 +235,62 @@ export default function MomentsPage() {
                 <Segment.Item id="photos">Photos</Segment.Item>
               </Segment>
 
-              <div className="bg-surface-secondary border-default-100 hidden items-center gap-1 rounded-lg border p-0.5 sm:flex">
-                <button
-                  aria-label="List View"
-                  onClick={() => setViewMode("list")}
-                  className={`rounded-md p-1.5 transition-colors ${
-                    viewMode === "list"
-                      ? "bg-surface text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
+              <Dropdown>
+                <Button
+                  size="sm"
+                  variant="tertiary"
+                  className="text-muted-foreground hover:text-foreground hover:border-default-200 hidden border border-transparent px-2 sm:flex"
                 >
-                  <Icon icon="gravity-ui:list" className="size-3.5" />
-                </button>
-                <button
-                  aria-label="Grid View"
-                  onClick={() => setViewMode("grid")}
-                  className={`rounded-md p-1.5 transition-colors ${
-                    viewMode === "grid"
-                      ? "bg-surface text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <Icon icon="gravity-ui:layout-cells-large" className="size-3.5" />
-                </button>
-              </div>
+                  <Icon
+                    icon={viewMode === "list" ? "gravity-ui:list" : "gravity-ui:layout-cells-large"}
+                    className="size-4"
+                  />
+                  {viewMode === "list" ? "List View" : "Grid View"}
+                  <Icon icon="gravity-ui:chevron-down" className="ml-1 size-3 opacity-70" />
+                </Button>
+                <Dropdown.Popover className="max-w-[260px]" placement="bottom end">
+                  <Dropdown.Menu
+                    selectionMode="single"
+                    selectedKeys={new Set([viewMode])}
+                    onSelectionChange={(keys: Selection) => {
+                      const selected = Array.from(keys as Set<string>)[0] as ViewMode | undefined;
+                      if (selected) setViewMode(selected);
+                    }}
+                  >
+                    <Dropdown.Item
+                      id="list"
+                      textValue="List view"
+                      className="flex flex-col items-start gap-1"
+                    >
+                      <Dropdown.ItemIndicator />
+                      <div className="flex items-center gap-1.5">
+                        <Icon icon="gravity-ui:list" className="text-muted-foreground size-4" />
+                        <Label>List view</Label>
+                      </div>
+                      <Description>
+                        A single-column chronological feed, perfect for reading notes.
+                      </Description>
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      id="grid"
+                      textValue="Grid view"
+                      className="flex flex-col items-start gap-1"
+                    >
+                      <Dropdown.ItemIndicator />
+                      <div className="flex items-center gap-1.5">
+                        <Icon
+                          icon="gravity-ui:layout-cells-large"
+                          className="text-muted-foreground size-4"
+                        />
+                        <Label>Grid view</Label>
+                      </div>
+                      <Description>
+                        A two-column masonry gallery layout, optimized for photos.
+                      </Description>
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown>
             </div>
 
             <div className="flex items-center gap-2">
