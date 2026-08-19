@@ -26,16 +26,8 @@ export const MomentResponseSchema = z.object({
   updatedAt: z.string(),
   images: z.array(MomentImageResponseSchema).default([]),
   topics: z.array(MomentTopicResponseSchema).default([]),
-  authorName: z.string().optional(),
-  authorAvatar: z.string().optional(),
-  user: z
-    .object({
-      id: z.number(),
-      username: z.string(),
-      nickname: z.string().nullable(),
-      avatar: z.string().nullable(),
-    })
-    .optional(),
+  authorName: z.string().nullable().optional(),
+  authorAvatar: z.string().nullable().optional(),
 });
 
 export type MomentImageResponse = z.infer<typeof MomentImageResponseSchema>;

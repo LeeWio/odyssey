@@ -61,22 +61,15 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
     skip: !isAuthenticated,
   });
 
-  // 1. Resolve base author details from the moment payload (future-proof)
-  const authorUser = moment?.user;
-  const baseAuthorName =
-    moment?.authorName || authorUser?.nickname || authorUser?.username || "wei.li";
-
+  // 1. Resolve base author details from the moment payload
+  const baseAuthorName = moment?.authorName || "wei.li";
   const baseAuthorAvatar =
-    moment?.authorAvatar ||
-    authorUser?.avatar ||
-    "https://img.heroui.chat/image/avatar?w=400&h=400&u=3";
+    moment?.authorAvatar || "https://img.heroui.chat/image/avatar?w=400&h=400&u=3";
 
   // 2. Real-time session enhancement: Use viewer's latest session data if the viewer is the author
   const isViewerTheAuthor =
     currentUser &&
-    (currentUser.username === baseAuthorName ||
-      currentUser.nickname === baseAuthorName ||
-      (authorUser && currentUser.id === authorUser.id));
+    (currentUser.username === baseAuthorName || currentUser.nickname === baseAuthorName);
 
   const authorName = isViewerTheAuthor
     ? currentUser.nickname || currentUser.username || baseAuthorName

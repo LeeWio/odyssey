@@ -281,6 +281,8 @@ export interface OpenApiComponents {
       content?: string;
       likesCount?: number;
       visibility?: "public" | "followers" | "private";
+      authorName?: string;
+      authorAvatar?: string;
       images?: Array<OpenApiComponents["schemas"]["MomentImageResponse"]>;
       topics?: Array<OpenApiComponents["schemas"]["MomentTopicResponse"]>;
       createdAt?: string;
@@ -472,6 +474,12 @@ export interface OpenApiComponents {
     CommentRequest: { content: string; postId: number; parentId?: number };
     CommentReportRequest: { reason: string; description?: string };
     PostReportRequest: { reason: string; description?: string };
+    ContentAnalyticsEventRequest: {
+      action: "IMPRESSION" | "CLICK" | "READING_PROGRESS";
+      postId: number;
+      progressPercent?: number;
+      activeSeconds?: number;
+    };
     RegisterRequest: { username: string; email: string; password: string };
     ApiResponse: { code?: number; message?: string; data?: unknown; traceId?: string };
     RefreshTokenRequest: { refreshToken: string };
@@ -747,11 +755,11 @@ export interface OpenApiComponents {
       traceId?: string;
     };
     TreeLong: {
-      config?: OpenApiComponents["schemas"]["TreeNodeConfig"];
-      parentId?: number;
-      weight?: unknown;
       name?: { empty?: boolean };
       id?: number;
+      weight?: unknown;
+      parentId?: number;
+      config?: OpenApiComponents["schemas"]["TreeNodeConfig"];
       empty?: boolean;
       [key: string]: unknown;
     };
@@ -1559,6 +1567,7 @@ export interface OpenApiComponents {
     SummaryMetrics: {
       sessions?: OpenApiComponents["schemas"]["Metric"];
       users?: OpenApiComponents["schemas"]["Metric"];
+      returningVisitors?: OpenApiComponents["schemas"]["Metric"];
       bounceRate?: OpenApiComponents["schemas"]["Metric"];
       avgSession?: OpenApiComponents["schemas"]["Metric"];
     };
@@ -1600,6 +1609,30 @@ export interface OpenApiComponents {
     };
     TopContentItem: { title?: string; url?: string; count?: number };
     VisitTrendItem: { date?: string; pv?: number; uv?: number };
+    ApiResponseContentFunnelResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["ContentFunnelResponse"];
+      traceId?: string;
+    };
+    ContentFunnelResponse: {
+      postId?: number;
+      start?: string;
+      end?: string;
+      impressions?: number;
+      clicks?: number;
+      readers25Percent?: number;
+      readers50Percent?: number;
+      readers75Percent?: number;
+      completedReads?: number;
+      likes?: number;
+      favorites?: number;
+      verifiedSubscriptions?: number;
+      returningVisitors?: number;
+      averageActiveReadSeconds?: number;
+      clickThroughRate?: number;
+      completionRate?: number;
+    };
     BatchDeleteRequest: { ids: Array<number> };
     ApiError: { code?: number; message?: string; data?: unknown; traceId?: string };
   };

@@ -343,6 +343,23 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
+    recordContentEvent: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
+      { body: OpenApiComponents["schemas"]["ContentAnalyticsEventRequest"] }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/public/analytics/content-events`,
+        method: "POST",
+        body: arg.body,
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
     requestPasswordReset: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
       { body: OpenApiComponents["schemas"]["PasswordResetRequest"] }
@@ -1419,6 +1436,20 @@ export const openapiApi = baseApi.injectEndpoints({
       providesTags: ["OpenApi"],
     }),
 
+    getContentFunnel: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseContentFunnelResponse"]>,
+      { days?: number; postId?: number }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/analytics/content-funnel`,
+        params: { days: arg.days, postId: arg.postId },
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
     clearLogs: builder.mutation<OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>, void>(
       {
         query: () => ({ url: `/api/v1/admin/logs/clear`, method: "DELETE" }),
@@ -1471,6 +1502,7 @@ export const {
   useSubscribeMutation,
   useUnfavoritePostMutation,
   useReportPostMutation,
+  useRecordContentEventMutation,
   useRequestPasswordResetMutation,
   useConfirmPasswordResetMutation,
   useListWebhooksQuery,
@@ -1549,6 +1581,7 @@ export const {
   useGetCommentModerationLogsQuery,
   useGetHighRiskCommentsQuery,
   useGetTrending1Query,
+  useGetContentFunnelQuery,
   useClearLogsMutation,
   useClearLogs1Mutation,
 } = openapiApi;
