@@ -1,3 +1,10 @@
+# [1.90.0](https://github.com/LeeWio/odyssey/compare/v1.89.0...v1.90.0) (2026-08-19)
+
+
+### Features
+
+* **moments:** implement smart anchor scroll restoration on pagination ([f959e5b](https://github.com/LeeWio/odyssey/commit/f959e5b7a3a64a9b7cc38f1039c3648578a13c7c))
+
 # [1.89.0](https://github.com/LeeWio/odyssey/compare/v1.88.4...v1.89.0) (2026-08-19)
 
 
