@@ -1,3 +1,10 @@
+## [1.92.1](https://github.com/LeeWio/odyssey/compare/v1.92.0...v1.92.1) (2026-08-19)
+
+
+### Performance Improvements
+
+* **frontend:** implement RTK Query optimistic updates, hover prefetching, next.config console removal, and eslint ignores ([8c0de98](https://github.com/LeeWio/odyssey/commit/8c0de98442166830122fd44e81593e48224ea007))
+
 # [1.92.0](https://github.com/LeeWio/odyssey/compare/v1.91.0...v1.92.0) (2026-08-19)
 
 
