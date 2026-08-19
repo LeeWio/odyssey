@@ -1,5 +1,6 @@
 "use client";
 
+import { Tag, TagGroup } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react";
 import BounceCards from "@/components/ui/bounce-cards";
 import type { MomentTopicResponse } from "@/lib/features/moment";
@@ -35,11 +36,15 @@ export const CardContent = ({
       </RichTextEditor>
 
       {topics.length > 0 && (
-        <div className="text-accent flex flex-wrap gap-x-3 gap-y-1 text-sm font-medium">
-          {topics.map((topic) => (
-            <span key={topic.id}>#{topic.slug}</span>
-          ))}
-        </div>
+        <TagGroup aria-label="Topics" size="sm" selectionMode="none">
+          <TagGroup.List className="flex flex-wrap gap-1.5">
+            {topics.map((topic) => (
+              <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
+                #{topic.slug}
+              </Tag>
+            ))}
+          </TagGroup.List>
+        </TagGroup>
       )}
 
       {imageUrls.length > 0 && (
