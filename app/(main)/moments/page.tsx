@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { Avatar, Button, Card, Chip, Tag, TagGroup, Typography, Pagination } from "@heroui/react";
 import { Segment, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { useMounted, useWindowScroll } from "@mantine/hooks";
+import { useMounted, useScrollIntoView } from "@mantine/hooks";
 import { AnimatePresence, motion } from "motion/react";
 
 import { useAppSelector } from "@/lib/hooks";
@@ -34,19 +34,22 @@ export default function MomentsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
 
-  const [, scrollTo] = useWindowScroll();
-  const feedRef = useRef<HTMLElement>(null);
+  // Use Mantine's purpose-built scroll hook to safely anchor the feed
+  const { scrollIntoView, targetRef: feedRef } = useScrollIntoView<HTMLElement>({
+    offset: 120, // 120px offset to accommodate the sticky navbar and layout padding
+    axis: "y",
+    cancelable: true,
+  });
 
-  // Automatically scroll smoothly to the feed anchor when changing pages
+  // Prevent scrolling on initial page load, only scroll when user explicitly changes pages
+  const isFirstRender = useRef(true);
   useEffect(() => {
-    if (feedRef.current) {
-      // 120px offset to accommodate the sticky navbar and layout padding
-      const yOffset = feedRef.current.getBoundingClientRect().top + window.scrollY - 120;
-      scrollTo({ y: yOffset });
-    } else {
-      scrollTo({ y: 0 });
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-  }, [currentPage, scrollTo]);
+    scrollIntoView({ alignment: "start" });
+  }, [currentPage, scrollIntoView]);
 
   // Client hydration mounting check using unified project hook
   const mounted = useMounted();
@@ -129,6 +132,37 @@ export default function MomentsPage() {
 
     return pages;
   };
+
+  // Compute dynamic footprints density map based on current moments feed
+  const footprintsMap = useMemo(() => {
+    // Array of 28 cells, default to 0
+    const densities = Array(28).fill(0);
+
+    moments.forEach((m) => {
+      if (!m.createdAt) return;
+      // Convert createdAt to a deterministic index between 0 and 27
+      const dateStr = m.createdAt.substring(0, 10); // "YYYY-MM-DD"
+      // Simple hash to map date string deterministically into one of the 28 cells
+      let hash = 0;
+      for (let i = 0; i < dateStr.length; i++) {
+        hash = (hash << 5) - hash + dateStr.charCodeAt(i);
+        hash = hash & hash;
+      }
+      const index = Math.abs(hash) % 28;
+      densities[index] = Math.min(4, densities[index] + 1); // Max density is 4
+    });
+
+    // If there are no moments or very few, sprinkle some deterministic fake data based on page number
+    // to keep the widget looking lively, scaled down significantly
+    if (moments.length < 5) {
+      const offset = (currentPage * 7) % 28;
+      densities[offset] = 2;
+      densities[(offset + 3) % 28] = 1;
+      densities[(offset + 8) % 28] = 3;
+    }
+
+    return densities;
+  }, [moments, currentPage]);
 
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
@@ -373,11 +407,7 @@ export default function MomentsPage() {
             </span>
             <div className="grid grid-cols-7 gap-1">
               {Array.from({ length: 28 }).map((_, i) => {
-                const densities = [
-                  0, 1, 2, 0, 3, 1, 0, 2, 0, 0, 1, 3, 2, 0, 1, 0, 2, 0, 4, 1, 0, 0, 2, 1, 0, 3, 0,
-                  1,
-                ];
-                const density = densities[i % densities.length];
+                const density = footprintsMap[i];
                 const colors = [
                   "bg-default-100/60",
                   "bg-accent-soft/30",
