@@ -1,3 +1,10 @@
+## [1.88.3](https://github.com/LeeWio/odyssey/compare/v1.88.2...v1.88.3) (2026-08-19)
+
+
+### Bug Fixes
+
+* **permissions:** make children optional in MenuResponseSchema to allow parsing leaf nodes ([7bd870e](https://github.com/LeeWio/odyssey/commit/7bd870e041d887d2cadf405f509e16d4c72bcf14))
+
 ## [1.88.2](https://github.com/LeeWio/odyssey/compare/v1.88.1...v1.88.2) (2026-08-19)
 
 
