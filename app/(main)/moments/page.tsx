@@ -234,13 +234,31 @@ export default function MomentsPage() {
                 <Segment.Item id="text">Notes</Segment.Item>
                 <Segment.Item id="photos">Photos</Segment.Item>
               </Segment>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {selectedTopic && (
+                <Chip
+                  size="sm"
+                  color="accent"
+                  variant="soft"
+                  className="animate-fade-in flex h-6 items-center gap-1 pr-1.5 pl-2.5"
+                >
+                  <span className="flex items-center gap-1">
+                    <span>#{selectedTopic}</span>
+                    <button
+                      aria-label="Remove topic filter"
+                      onClick={() => setSelectedTopic(null)}
+                      className="hover:bg-accent/20 rounded-full p-0.5 transition-colors"
+                    >
+                      <Icon icon="gravity-ui:xmark" className="size-3" />
+                    </button>
+                  </span>
+                </Chip>
+              )}
 
               <Dropdown>
-                <Button
-                  size="sm"
-                  variant="tertiary"
-                  className="text-muted-foreground hover:text-foreground hover:border-default-200 hidden border border-transparent px-2 sm:flex"
-                >
+                <Button size="sm" variant="tertiary">
                   <Icon
                     icon={viewMode === "list" ? "gravity-ui:list" : "gravity-ui:layout-cells-large"}
                     className="size-4"
@@ -291,31 +309,6 @@ export default function MomentsPage() {
                   </Dropdown.Menu>
                 </Dropdown.Popover>
               </Dropdown>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {selectedTopic && (
-                <Chip
-                  size="sm"
-                  color="accent"
-                  variant="soft"
-                  className="animate-fade-in flex h-6 items-center gap-1 pr-1.5 pl-2.5"
-                >
-                  <span className="flex items-center gap-1">
-                    <span>#{selectedTopic}</span>
-                    <button
-                      aria-label="Remove topic filter"
-                      onClick={() => setSelectedTopic(null)}
-                      className="hover:bg-accent/20 rounded-full p-0.5 transition-colors"
-                    >
-                      <Icon icon="gravity-ui:xmark" className="size-3" />
-                    </button>
-                  </span>
-                </Chip>
-              )}
-              <span className="text-muted-foreground font-mono text-xs font-medium tabular-nums">
-                {filteredMoments.length} listed
-              </span>
             </div>
           </div>
 
