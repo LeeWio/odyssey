@@ -15,16 +15,9 @@ export interface ComposerToolProps {
 
 export function ComposerTool({ icon, label, onClick, disabled = false }: ComposerToolProps) {
   return (
-    <Button
-      isDisabled={disabled}
-      variant="tertiary"
-      onClick={onClick}
-      className="flex h-18 w-18 min-w-18 flex-col items-center justify-center gap-1 rounded-2xl transition"
-    >
-      <span className="flex size-6 items-center justify-center">
-        <Icon icon={icon} className="size-5" />
-      </span>
-      <span className="text-sm leading-none">{label}</span>
+    <Button isDisabled={disabled} variant="tertiary" onClick={onClick}>
+      <Icon icon={icon} className="size-5" aria-label={label} />
+      {label}
     </Button>
   );
 }
