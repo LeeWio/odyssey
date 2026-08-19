@@ -185,13 +185,20 @@ export const commentApi = baseApi.injectEndpoints({
           toast.danger(getApiErrorMessage(error, "Failed to publish comment"));
         }
       },
-      invalidatesTags: (_result, _error, { postId }) =>
-        postId
-          ? [
-              { type: "Comment", id: `POST_${postId}` },
-              { type: "Comment", id: "ADMIN_LIST" },
-            ]
-          : ["Comment", { type: "Comment", id: "ADMIN_LIST" }],
+      invalidatesTags: (_result, _error, { postId, parentId }) => {
+        const tags: Array<{ type: "Comment"; id: string | number }> = [
+          { type: "Comment", id: "ADMIN_LIST" },
+        ];
+        if (postId) {
+          tags.push({ type: "Comment", id: `POST_${postId}` });
+          if (parentId) {
+            tags.push({ type: "Comment", id: `REPLIES_${parentId}` });
+          } else {
+            tags.push({ type: "Comment", id: `POST_${postId}_ROOTS` });
+          }
+        }
+        return tags;
+      },
     }),
 
     /**

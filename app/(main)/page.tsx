@@ -15,7 +15,7 @@ import { MediaPlayButton } from "@/features/media/components/media-play-button";
 import type { MediaItem } from "@/features/media/types";
 import { useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
 import { useGetGitHubActivityQuery } from "@/lib/features/github";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ItemCard, KPI, TrendChip } from "@heroui-pro/react";
 import {
   Card,
@@ -125,6 +125,9 @@ export default function Home() {
     { pollingInterval: 300000, refetchOnFocus: true }
   );
   const isPositive = nasdaqData ? nasdaqData.changePct >= 0 : false;
+  const sparklineData = useMemo(() => {
+    return mapSparkline(nasdaqData?.sparkline);
+  }, [nasdaqData?.sparkline]);
   const { data: githubActivity, isLoading: isGitHubActivityLoading } = useGetGitHubActivityQuery(
     undefined,
     { pollingInterval: 3600000, refetchOnFocus: true }
@@ -363,7 +366,7 @@ export default function Home() {
                     </div>
                     <KPI.Chart
                       color="var(--color-accent)"
-                      data={mapSparkline(nasdaqData.sparkline)}
+                      data={sparklineData}
                       height={60}
                       strokeWidth={1.5}
                     />

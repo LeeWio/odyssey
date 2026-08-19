@@ -29,6 +29,7 @@ export const tagApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<TagResponse[]>) => response.data,
       transformErrorResponse: transformApiError,
       providesTags: [{ type: "Tag", id: "LIST" }],
+      keepUnusedDataFor: 300,
     }),
 
     /**

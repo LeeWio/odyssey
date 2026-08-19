@@ -210,7 +210,7 @@ export const PostCard = ({
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       className={cn("h-full", className)}
     >
-      <Link href={href} className="group block h-full">
+      <Link href={href} className="group block h-full" prefetch={false}>
         {content}
       </Link>
     </motion.div>

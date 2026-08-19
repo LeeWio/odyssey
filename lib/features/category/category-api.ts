@@ -36,6 +36,7 @@ export const categoryApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<CategoryResponse[]>) => response.data,
       transformErrorResponse: transformApiError,
       providesTags: [{ type: "Category", id: "LIST" }],
+      keepUnusedDataFor: 300,
     }),
 
     /**

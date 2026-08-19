@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import { MotionCard, MotionChip, MotionTypography } from "@/components/ui";
 import type { PostDigestResponse, PostResponse } from "@/features/blog/api/blog-api";
@@ -11,7 +12,6 @@ import {
   Card,
   Chip,
   Label,
-  Link,
   Pagination,
   ProgressBar,
   ScrollShadow,
@@ -64,7 +64,7 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
   const shouldReduceMotion = useReducedMotion() ?? false;
 
   return (
-    <Link className="block h-full no-underline" href={`/single/${post.slug}`}>
+    <Link className="block h-full no-underline" href={`/single/${post.slug}`} prefetch={false}>
       <MotionCard
         variant="secondary"
         className="h-full overflow-hidden p-0"
@@ -117,7 +117,7 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
 
 function FeaturedPost({ post }: { post: PostDigestResponse }) {
   return (
-    <Link className="block no-underline" href={`/single/${post.slug}`}>
+    <Link className="block no-underline" href={`/single/${post.slug}`} prefetch={false}>
       <Card variant="tertiary" className="overflow-hidden p-0 md:flex-row md:items-stretch">
         <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden md:aspect-auto md:w-[46%]">
           <SmartColorSurface

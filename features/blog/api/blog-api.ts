@@ -366,6 +366,47 @@ export const postApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       transformErrorResponse: transformApiError,
+      async onQueryStarted(postId, { dispatch, getState, queryFulfilled }) {
+        const state = getState() as Record<string, unknown>;
+        const apiState = state.api as
+          | Record<string, Record<string, { data?: { id?: number }; originalArgs?: unknown }>>
+          | undefined;
+        const queries = apiState?.queries;
+        const patches = [];
+        if (queries) {
+          for (const [queryKey, entry] of Object.entries(queries)) {
+            if (queryKey.startsWith("getPublicPostBySlug(") && entry.data?.id === postId) {
+              const slug = entry.originalArgs as string;
+              if (slug) {
+                const patch = dispatch(
+                  postApi.util.updateQueryData("getPublicPostBySlug", slug, (draft) => {
+                    draft.isLiked = true;
+                    draft.likesCount = (draft.likesCount ?? 0) + 1;
+                  })
+                );
+                patches.push(patch);
+              }
+            }
+            if (queryKey.startsWith("getAdminPostById(") && entry.data?.id === postId) {
+              const id = entry.originalArgs as number;
+              if (id) {
+                const patch = dispatch(
+                  postApi.util.updateQueryData("getAdminPostById", id, (draft) => {
+                    draft.isLiked = true;
+                    draft.likesCount = (draft.likesCount ?? 0) + 1;
+                  })
+                );
+                patches.push(patch);
+              }
+            }
+          }
+        }
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
       invalidatesTags: (_result, _error, id) => [{ type: "Post", id }],
     }),
 
@@ -378,6 +419,47 @@ export const postApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       transformErrorResponse: transformApiError,
+      async onQueryStarted(postId, { dispatch, getState, queryFulfilled }) {
+        const state = getState() as Record<string, unknown>;
+        const apiState = state.api as
+          | Record<string, Record<string, { data?: { id?: number }; originalArgs?: unknown }>>
+          | undefined;
+        const queries = apiState?.queries;
+        const patches = [];
+        if (queries) {
+          for (const [queryKey, entry] of Object.entries(queries)) {
+            if (queryKey.startsWith("getPublicPostBySlug(") && entry.data?.id === postId) {
+              const slug = entry.originalArgs as string;
+              if (slug) {
+                const patch = dispatch(
+                  postApi.util.updateQueryData("getPublicPostBySlug", slug, (draft) => {
+                    draft.isLiked = false;
+                    draft.likesCount = Math.max(0, (draft.likesCount ?? 0) - 1);
+                  })
+                );
+                patches.push(patch);
+              }
+            }
+            if (queryKey.startsWith("getAdminPostById(") && entry.data?.id === postId) {
+              const id = entry.originalArgs as number;
+              if (id) {
+                const patch = dispatch(
+                  postApi.util.updateQueryData("getAdminPostById", id, (draft) => {
+                    draft.isLiked = false;
+                    draft.likesCount = Math.max(0, (draft.likesCount ?? 0) - 1);
+                  })
+                );
+                patches.push(patch);
+              }
+            }
+          }
+        }
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
       invalidatesTags: (_result, _error, id) => [{ type: "Post", id }],
     }),
 
@@ -390,6 +472,47 @@ export const postApi = baseApi.injectEndpoints({
         method: "POST",
       }),
       transformErrorResponse: transformApiError,
+      async onQueryStarted(postId, { dispatch, getState, queryFulfilled }) {
+        const state = getState() as Record<string, unknown>;
+        const apiState = state.api as
+          | Record<string, Record<string, { data?: { id?: number }; originalArgs?: unknown }>>
+          | undefined;
+        const queries = apiState?.queries;
+        const patches = [];
+        if (queries) {
+          for (const [queryKey, entry] of Object.entries(queries)) {
+            if (queryKey.startsWith("getPublicPostBySlug(") && entry.data?.id === postId) {
+              const slug = entry.originalArgs as string;
+              if (slug) {
+                const patch = dispatch(
+                  postApi.util.updateQueryData("getPublicPostBySlug", slug, (draft) => {
+                    draft.isFavorited = true;
+                    draft.favoritesCount = (draft.favoritesCount ?? 0) + 1;
+                  })
+                );
+                patches.push(patch);
+              }
+            }
+            if (queryKey.startsWith("getAdminPostById(") && entry.data?.id === postId) {
+              const id = entry.originalArgs as number;
+              if (id) {
+                const patch = dispatch(
+                  postApi.util.updateQueryData("getAdminPostById", id, (draft) => {
+                    draft.isFavorited = true;
+                    draft.favoritesCount = (draft.favoritesCount ?? 0) + 1;
+                  })
+                );
+                patches.push(patch);
+              }
+            }
+          }
+        }
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
       invalidatesTags: (_result, _error, id) => [{ type: "Post", id }],
     }),
 
