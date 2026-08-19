@@ -234,14 +234,17 @@ export default function MomentsPage() {
               ) : filteredMoments.length > 0 ? (
                 <motion.div key="feed" className="flex w-full flex-col gap-5">
                   <AnimatePresence mode="popLayout" initial={false}>
-                    {filteredMoments.map((moment) => (
+                    {filteredMoments.map((moment, index) => (
                       <motion.div
                         key={moment.id}
                         layout
                         initial={{ opacity: 0, y: 15, scale: 0.97 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -15, scale: 0.95 }}
-                        transition={springConfig}
+                        transition={{
+                          ...springConfig,
+                          delay: index * 0.03, // 30ms staggered cascading delay
+                        }}
                         className="w-full"
                       >
                         <MomentCard moment={moment} />
