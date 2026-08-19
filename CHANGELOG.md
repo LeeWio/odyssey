@@ -1,3 +1,10 @@
+# [1.88.0](https://github.com/LeeWio/odyssey/compare/v1.87.0...v1.88.0) (2026-08-19)
+
+
+### Features
+
+* **roles:** implement full security RolesPage CRUD view ([18cb263](https://github.com/LeeWio/odyssey/commit/18cb263a81f04ca8843a0029aa03ad6c9aea695a))
+
 # [1.87.0](https://github.com/LeeWio/odyssey/compare/v1.86.0...v1.87.0) (2026-08-19)
 
 
