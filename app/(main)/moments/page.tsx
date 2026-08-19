@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Avatar, Button, Card, Chip, Tag, TagGroup, Typography, Pagination } from "@heroui/react";
 import { Segment, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { useMounted } from "@mantine/hooks";
+import { useMounted, useWindowScroll } from "@mantine/hooks";
 import { AnimatePresence, motion } from "motion/react";
 
 import { useAppSelector } from "@/lib/hooks";
@@ -34,10 +34,12 @@ export default function MomentsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
+  const [, scrollTo] = useWindowScroll();
+
   // Automatically scroll smoothly to top of the page when changing pages
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
+    scrollTo({ y: 0 });
+  }, [currentPage, scrollTo]);
 
   // Client hydration mounting check using unified project hook
   const mounted = useMounted();
