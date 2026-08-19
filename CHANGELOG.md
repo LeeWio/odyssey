@@ -1,3 +1,10 @@
+# [1.85.0](https://github.com/LeeWio/odyssey/compare/v1.84.0...v1.85.0) (2026-08-19)
+
+
+### Features
+
+* **moment:** add forward-compatible author resolution support to MomentCard ([98adcee](https://github.com/LeeWio/odyssey/commit/98adcee56aa6618c7519caf3cf587bef8ed3ed29))
+
 # [1.84.0](https://github.com/LeeWio/odyssey/compare/v1.83.0...v1.84.0) (2026-08-19)
 
 
