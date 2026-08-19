@@ -5,6 +5,10 @@ import { Button, ProgressCircle, ScrollShadow, Spinner } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "motion/react";
 import { ComposerTool, type ComposerToolProps } from "./composer-tool";
+import {
+  MOMENT_CHARACTER_LIMIT,
+  MOMENT_SHORT_FORM_CHARACTER_LIMIT,
+} from "../../utils/character-count";
 
 interface PublisherToolbarProps {
   charCount: number;
@@ -32,8 +36,21 @@ export const PublisherToolbar = ({
     { id: "location", icon: "gravity-ui:map-pin", label: "Location" },
   ];
 
-  const percentage = Math.min((charCount / 280) * 100, 100);
-  const charColor = charCount < 240 ? "accent" : charCount < 280 ? "warning" : "danger";
+  const warningThreshold = MOMENT_CHARACTER_LIMIT - 200;
+  const isLongForm = charCount > MOMENT_SHORT_FORM_CHARACTER_LIMIT;
+  const percentage = Math.min(
+    (isLongForm
+      ? (charCount - MOMENT_SHORT_FORM_CHARACTER_LIMIT) /
+        (MOMENT_CHARACTER_LIMIT - MOMENT_SHORT_FORM_CHARACTER_LIMIT)
+      : charCount / MOMENT_SHORT_FORM_CHARACTER_LIMIT) * 100,
+    100
+  );
+  const charColor =
+    charCount < warningThreshold
+      ? "accent"
+      : charCount < MOMENT_CHARACTER_LIMIT
+        ? "warning"
+        : "danger";
 
   return (
     <div className="flex w-full flex-col gap-3">
@@ -88,13 +105,16 @@ export const PublisherToolbar = ({
                     <ProgressCircle.FillCircle strokeWidth={3} strokeLinecap="round" />
                   </ProgressCircle.Track>
                 </ProgressCircle>
-                {charCount >= 240 && (
+                {(charCount >= MOMENT_SHORT_FORM_CHARACTER_LIMIT - 40 ||
+                  charCount >= warningThreshold) && (
                   <span
                     className={`font-mono text-xs font-medium ${
-                      charCount >= 280 ? "text-danger" : "text-warning"
+                      charCount >= MOMENT_CHARACTER_LIMIT ? "text-danger" : "text-warning"
                     }`}
                   >
-                    {280 - charCount}
+                    {charCount >= warningThreshold
+                      ? MOMENT_CHARACTER_LIMIT - charCount
+                      : `${charCount}/${MOMENT_CHARACTER_LIMIT}`}
                   </span>
                 )}
               </motion.div>

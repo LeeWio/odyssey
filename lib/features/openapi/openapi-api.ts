@@ -25,6 +25,34 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
+    getMyPreferences: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseNotificationPreferenceResponse"]>,
+      void
+    >({
+      query: () => ({ url: `/api/v1/user/notifications/preferences` }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
+    updateMyPreferences: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseNotificationPreferenceResponse"]>,
+      { body: OpenApiComponents["schemas"]["NotificationPreferenceRequest"] }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/user/notifications/preferences`,
+        method: "PUT",
+        body: arg.body,
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
     updateWebhook: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseWebhookResponse"]>,
       { id: number; body: OpenApiComponents["schemas"]["WebhookRequest"] }
@@ -84,6 +112,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/admin/series/${arg.id}` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -105,6 +134,43 @@ export const openapiApi = baseApi.injectEndpoints({
       { id: number }
     >({
       query: (arg) => ({ url: `/api/v1/admin/series/${arg.id}`, method: "DELETE" }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    updateChecklistItem: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanChecklistItemResponse"]>,
+      {
+        taskId: number;
+        checklistItemId: number;
+        body: OpenApiComponents["schemas"]["KanbanChecklistItemRequest"];
+      }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist/${arg.checklistItemId}`,
+        method: "PUT",
+        body: arg.body,
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    deleteChecklistItem: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
+      { taskId: number; checklistItemId: number }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist/${arg.checklistItemId}`,
+        method: "DELETE",
+      }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
@@ -135,6 +201,23 @@ export const openapiApi = baseApi.injectEndpoints({
       { id: number }
     >({
       query: (arg) => ({ url: `/api/v1/admin/kanban/tasks/${arg.id}`, method: "DELETE" }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    assignTaskAssignees: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanItemResponse"]>,
+      { id: number; body: OpenApiComponents["schemas"]["KanbanTaskAssigneeRequest"] }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/kanban/tasks/${arg.id}/assignees`,
+        method: "PUT",
+        body: arg.body,
+      }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
@@ -199,6 +282,17 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
+    getColumn: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseSeriesResponse"]>,
+      { id: number }
+    >({
+      query: (arg) => ({ url: `/api/v1/admin/columns/${arg.id}` }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
     subscribe: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
       { email: string }
@@ -217,12 +311,63 @@ export const openapiApi = baseApi.injectEndpoints({
     }),
 
     unfavoritePost: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePostInteractionResponse"]>,
       { postId: number }
     >({
       query: (arg) => ({
         url: `/api/v1/public/interactions/posts/${arg.postId}/unfavorite`,
         method: "POST",
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    reportPost: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
+      { id: number; body: OpenApiComponents["schemas"]["PostReportRequest"] }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/public/blog/posts/${arg.id}/report`,
+        method: "POST",
+        body: arg.body,
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    requestPasswordReset: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
+      { body: OpenApiComponents["schemas"]["PasswordResetRequest"] }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/auth/password/reset/request`,
+        method: "POST",
+        body: arg.body,
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    confirmPasswordReset: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
+      { body: OpenApiComponents["schemas"]["PasswordResetConfirmRequest"] }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/auth/password/reset/confirm`,
+        method: "POST",
+        body: arg.body,
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
@@ -239,6 +384,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/admin/webhooks` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -308,6 +454,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/admin/series` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -329,6 +476,19 @@ export const openapiApi = baseApi.injectEndpoints({
       void
     >({
       query: () => ({ url: `/api/v1/admin/search/rebuild`, method: "POST" }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    deletePosts: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
+      { body: OpenApiComponents["schemas"]["BatchDeleteRequest"] }
+    >({
+      query: (arg) => ({ url: `/api/v1/admin/posts`, method: "DELETE", body: arg.body }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
@@ -436,6 +596,19 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
+    copyPost: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePostResponse"]>,
+      { id: number }
+    >({
+      query: (arg) => ({ url: `/api/v1/admin/posts/${arg.id}/copy`, method: "POST" }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
     archivePost: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
       { id: number; body: OpenApiComponents["schemas"]["PostArchiveRequest"] }
@@ -497,6 +670,64 @@ export const openapiApi = baseApi.injectEndpoints({
       { body: OpenApiComponents["schemas"]["KanbanItemRequest"] }
     >({
       query: (arg) => ({ url: `/api/v1/admin/kanban/tasks`, method: "POST", body: arg.body }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    retrieveChecklistItems: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseListKanbanChecklistItemResponse"]>,
+      { taskId: number }
+    >({
+      query: (arg) => ({ url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist` }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
+    createChecklistItem: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanChecklistItemResponse"]>,
+      { taskId: number; body: OpenApiComponents["schemas"]["KanbanChecklistItemRequest"] }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist`,
+        method: "POST",
+        body: arg.body,
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    adjustChecklistItemSequence: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
+      { taskId: number; body: Array<number> }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist/sequence`,
+        method: "POST",
+        body: arg.body,
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    duplicateTask: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanItemResponse"]>,
+      { id: number }
+    >({
+      query: (arg) => ({ url: `/api/v1/admin/kanban/tasks/${arg.id}/duplicate`, method: "POST" }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
@@ -572,6 +803,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/admin/configs` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -593,6 +825,48 @@ export const openapiApi = baseApi.injectEndpoints({
       void
     >({
       query: () => ({ url: `/api/v1/admin/comments/repair-counters`, method: "POST" }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    resolvePostReport: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
+      {
+        postId: number;
+        reporterId: number;
+        body: OpenApiComponents["schemas"]["PostReportResolutionRequest"];
+      }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/posts/reports/${arg.postId}/${arg.reporterId}`,
+        method: "PATCH",
+        body: arg.body,
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
+    completeChecklistItem: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanChecklistItemResponse"]>,
+      {
+        taskId: number;
+        checklistItemId: number;
+        body: OpenApiComponents["schemas"]["KanbanChecklistItemCompletionRequest"];
+      }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist/${arg.checklistItemId}/completion`,
+        method: "PATCH",
+        body: arg.body,
+      }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
@@ -635,6 +909,17 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
+    getLikedPosts: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePageResultLikedPostResponse"]>,
+      { pageable: OpenApiComponents["schemas"]["Pageable"] }
+    >({
+      query: (arg) => ({ url: `/api/v1/user/library/likes`, params: { pageable: arg.pageable } }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
     getPublicStatistics: builder.query<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponsePublicStatsResponse"]>,
       void
@@ -642,6 +927,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/public/stats` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -652,6 +938,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/public/stats/trending`, params: { limit: arg.limit } }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -662,6 +949,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/public/series` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -672,6 +960,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/public/series/${arg.slug}` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -682,6 +971,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/public/series/${arg.slug}/tree` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -689,6 +979,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/public/seo/sitemap.xml` }),
 
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -696,6 +987,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/public/seo/robots.txt` }),
 
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -703,6 +995,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/public/seo/feed.xml` }),
 
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -716,6 +1009,7 @@ export const openapiApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -726,6 +1020,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/public/search/quick`, params: { keyword: arg.keyword } }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -736,6 +1031,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/public/newsletter/verify`, params: { token: arg.token } }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -749,6 +1045,7 @@ export const openapiApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -759,6 +1056,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/public/github/stats` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -769,6 +1067,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/public/configs` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -779,6 +1078,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/public/configs/${arg.key}` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -789,6 +1089,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/public/blog/preview/${arg.token}` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -818,6 +1119,7 @@ export const openapiApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -828,6 +1130,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/public/blog/facets` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -838,6 +1141,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/public/blog/discovery` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -851,6 +1155,7 @@ export const openapiApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -864,6 +1169,7 @@ export const openapiApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -874,6 +1180,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/admin/users/${arg.id}` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -890,6 +1197,28 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
+    retrieveRevision: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePostRevisionDetailResponse"]>,
+      { id: number; revisionId: number }
+    >({
+      query: (arg) => ({ url: `/api/v1/admin/posts/${arg.id}/revisions/${arg.revisionId}` }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
+    retrieveRevisionSummaries: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseListPostRevisionSummaryResponse"]>,
+      { id: number }
+    >({
+      query: (arg) => ({ url: `/api/v1/admin/posts/${arg.id}/revisions/summary` }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
     compareRevisions: builder.query<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponsePostDiffResponse"]>,
       { id: number; baseId: number; targetId: number }
@@ -900,6 +1229,31 @@ export const openapiApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
+    getPostReports: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePageResultPostReportResponse"]>,
+      {
+        status?: "OPEN" | "ACTIONED" | "DISMISSED";
+        postId?: number;
+        reporterUsername?: string;
+        pageable: OpenApiComponents["schemas"]["Pageable"];
+      }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/posts/reports`,
+        params: {
+          status: arg.status,
+          postId: arg.postId,
+          reporterUsername: arg.reporterUsername,
+          pageable: arg.pageable,
+        },
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -910,6 +1264,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/admin/observability/snapshot` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -933,6 +1288,7 @@ export const openapiApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -943,6 +1299,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/admin/links/broken`, params: { pageable: arg.pageable } }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -953,6 +1310,32 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/admin/kanban` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
+    getStorageInventory: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseStorageInventoryResponse"]>,
+      void
+    >({
+      query: () => ({ url: `/api/v1/admin/files/inventory` }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
+    verifyStorageIntegrity: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseStorageIntegrityResponse"]>,
+      { pageable: OpenApiComponents["schemas"]["Pageable"] }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/files/integrity`,
+        params: { pageable: arg.pageable },
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -976,6 +1359,7 @@ export const openapiApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -986,6 +1370,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: () => ({ url: `/api/v1/admin/comments/overview` }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -1005,6 +1390,7 @@ export const openapiApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -1018,6 +1404,7 @@ export const openapiApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -1028,6 +1415,7 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({ url: `/api/v1/admin/analytics/trending`, params: { limit: arg.limit } }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
+
       providesTags: ["OpenApi"],
     }),
 
@@ -1061,6 +1449,8 @@ export const openapiApi = baseApi.injectEndpoints({
 
 export const {
   useAssignRolesMutation,
+  useGetMyPreferencesQuery,
+  useUpdateMyPreferencesMutation,
   useUpdateWebhookMutation,
   useDeleteWebhookMutation,
   useEnableUserMutation,
@@ -1068,14 +1458,21 @@ export const {
   useRetrieveSeriesQuery,
   useUpdateSeriesMutation,
   useDeleteSeriesMutation,
+  useUpdateChecklistItemMutation,
+  useDeleteChecklistItemMutation,
   useUpdateTaskMutation,
   useDeleteTaskMutation,
+  useAssignTaskAssigneesMutation,
   useUpdateColumnMutation,
   useDeleteColumnMutation,
   useUpdateConfigMutation,
   useDeleteConfigMutation,
+  useGetColumnQuery,
   useSubscribeMutation,
   useUnfavoritePostMutation,
+  useReportPostMutation,
+  useRequestPasswordResetMutation,
+  useConfirmPasswordResetMutation,
   useListWebhooksQuery,
   useCreateWebhookMutation,
   useTestWebhookMutation,
@@ -1084,6 +1481,7 @@ export const {
   useRetrieveAllSeriesQuery,
   useCreateSeriesMutation,
   useRebuildIndexMutation,
+  useDeletePostsMutation,
   useWithdrawFromReviewMutation,
   useSubmitForReviewMutation,
   useSchedulePostMutation,
@@ -1091,11 +1489,16 @@ export const {
   useReviewPostMutation,
   useRestoreArchivedPostMutation,
   useCreatePreviewTokenMutation,
+  useCopyPostMutation,
   useArchivePostMutation,
   useRegenerateStaticHtmlMutation,
   useRebuildPostMetadataMutation,
   useTriggerManualScanMutation,
   useCreateTaskMutation,
+  useRetrieveChecklistItemsQuery,
+  useCreateChecklistItemMutation,
+  useAdjustChecklistItemSequenceMutation,
+  useDuplicateTaskMutation,
   useRelocateTaskMutation,
   useCreateColumnMutation,
   useAdjustColumnSequenceMutation,
@@ -1103,8 +1506,11 @@ export const {
   useGetAllConfigsQuery,
   useCreateConfigMutation,
   useRepairCommentCountersMutation,
+  useResolvePostReportMutation,
+  useCompleteChecklistItemMutation,
   usePinCommentMutation,
   useFeatureCommentMutation,
+  useGetLikedPostsQuery,
   useGetPublicStatisticsQuery,
   useGetTrendingQuery,
   useRetrievePublicSeriesQuery,
@@ -1128,11 +1534,16 @@ export const {
   useGetWebhookLogsQuery,
   useGetUserByIdQuery,
   useDeleteUserMutation,
+  useRetrieveRevisionQuery,
+  useRetrieveRevisionSummariesQuery,
   useCompareRevisionsQuery,
+  useGetPostReportsQuery,
   useGetSystemSnapshotQuery,
   useGetLogsQuery,
   useGetBrokenLinksQuery,
   useRetrieveBoardQuery,
+  useGetStorageInventoryQuery,
+  useVerifyStorageIntegrityQuery,
   useGetCommentReportsQuery,
   useGetCommentGovernanceOverviewQuery,
   useGetCommentModerationLogsQuery,

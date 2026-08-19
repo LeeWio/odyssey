@@ -21,6 +21,7 @@ import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } fro
 import type { FileResponse } from "@/lib/features/file";
 import { useUploadFileMutation } from "@/lib/features/file";
 import type { MomentImageResponse, MomentRequest, MomentResponse } from "@/lib/features/moment";
+import { MOMENT_CHARACTER_LIMIT } from "@/features/moment/utils/character-count";
 
 const MAX_IMAGES = 9;
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
@@ -76,7 +77,7 @@ export function MomentComposer({
   onSubmit,
 }: MomentComposerProps) {
   const [content, setContent] = useState(initialMoment?.content ?? "");
-  const [isPublished, setIsPublished] = useState(
+  const [isPublic, setIsPublic] = useState(
     initialMoment ? initialMoment.visibility === "public" : true
   );
   const [images, setImages] = useState<ComposerImage[]>(() =>
@@ -257,7 +258,10 @@ export function MomentComposer({
   const hasIncompleteUploads = images.some((image) => image.status !== "complete");
   const hasMissingAlt = images.some((image) => !image.altText.trim());
   const canSubmit =
-    content.trim().length > 0 && !hasIncompleteUploads && !hasMissingAlt && !isSaving;
+    (content.trim().length > 0 || images.length > 0) &&
+    !hasIncompleteUploads &&
+    !hasMissingAlt &&
+    !isSaving;
   const characterCount = content.length;
 
   const imageRequests = useMemo(
@@ -275,21 +279,24 @@ export function MomentComposer({
     await onSubmit({
       content: content.trim(),
       images: imageRequests,
-      visibility: isPublished ? "public" : "private",
+      visibility: isPublic ? "public" : "private",
+      topicSlugs: [],
     });
   };
 
   return (
     <Form className="flex flex-col gap-5" onSubmit={handleSubmit}>
       <div className="flex w-full flex-col gap-5">
-        <TextField isRequired className="flex flex-col gap-1.5" name="content">
+        <TextField className="flex flex-col gap-1.5" name="content">
           <div className="flex items-center justify-between gap-4">
             <Label className="text-sm font-semibold">Moment</Label>
-            <span className="text-muted text-xs tabular-nums">{characterCount} / 2000</span>
+            <span className="text-muted text-xs tabular-nums">
+              {characterCount} / {MOMENT_CHARACTER_LIMIT}
+            </span>
           </div>
           <TextArea
             className="min-h-36"
-            maxLength={2000}
+            maxLength={MOMENT_CHARACTER_LIMIT}
             placeholder="Share a small thing worth keeping…"
             value={content}
             variant="secondary"
@@ -429,7 +436,7 @@ export function MomentComposer({
           ) : null}
         </div>
 
-        <Switch isSelected={isPublished} onChange={setIsPublished}>
+        <Switch isSelected={isPublic} onChange={setIsPublic}>
           <Switch.Content>
             <Switch.Control>
               <Switch.Thumb />

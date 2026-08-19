@@ -12,6 +12,11 @@ export const MomentImageResponseSchema = z.object({
   sortOrder: z.number(),
 });
 
+export const MomentTopicResponseSchema = z.object({
+  id: z.number(),
+  slug: z.string(),
+});
+
 export const MomentResponseSchema = z.object({
   id: z.number(),
   content: z.string(),
@@ -20,9 +25,11 @@ export const MomentResponseSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   images: z.array(MomentImageResponseSchema).default([]),
+  topics: z.array(MomentTopicResponseSchema).default([]),
 });
 
 export type MomentImageResponse = z.infer<typeof MomentImageResponseSchema>;
+export type MomentTopicResponse = z.infer<typeof MomentTopicResponseSchema>;
 export type MomentResponse = z.infer<typeof MomentResponseSchema>;
 
 export interface MomentImageRequest {
@@ -34,4 +41,5 @@ export interface MomentRequest {
   content: string;
   visibility: "public" | "followers" | "private";
   images: MomentImageRequest[];
+  topicSlugs: string[];
 }

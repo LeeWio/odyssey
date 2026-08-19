@@ -34,7 +34,8 @@ describe("MomentResponseSchema", () => {
     expect(parsed.images[0]).toMatchObject({ fileId: 91, sortOrder: 0 });
   });
 
-  it("defaults legacy text-only responses to an empty image list", () => {
+  it("defaults legacy text-only responses to empty media and topic lists", () => {
     expect(MomentResponseSchema.parse(baseMoment).images).toEqual([]);
+    expect(MomentResponseSchema.parse(baseMoment).topics).toEqual([]);
   });
 });

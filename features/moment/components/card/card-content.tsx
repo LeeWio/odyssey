@@ -2,6 +2,7 @@
 
 import { RichTextEditor } from "@heroui-pro/react";
 import BounceCards from "@/components/ui/bounce-cards";
+import type { MomentTopicResponse } from "@/lib/features/moment";
 import type { JSONContent } from "@tiptap/core";
 import { getTransformStyles } from "../../utils/transform-styles";
 
@@ -9,6 +10,7 @@ interface CardContentProps {
   momentId: string | number;
   parsedContent: JSONContent;
   imageUrls: string[];
+  topics: MomentTopicResponse[];
   onCardClick?: (index: number) => void;
 }
 
@@ -16,6 +18,7 @@ export const CardContent = ({
   momentId,
   parsedContent,
   imageUrls,
+  topics,
   onCardClick,
 }: CardContentProps) => {
   return (
@@ -30,6 +33,14 @@ export const CardContent = ({
           <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0" />
         </RichTextEditor.Shell>
       </RichTextEditor>
+
+      {topics.length > 0 && (
+        <div className="text-accent flex flex-wrap gap-x-3 gap-y-1 text-sm font-medium">
+          {topics.map((topic) => (
+            <span key={topic.id}>#{topic.slug}</span>
+          ))}
+        </div>
+      )}
 
       {imageUrls.length > 0 && (
         <div className="flex w-full -translate-x-1 justify-center">

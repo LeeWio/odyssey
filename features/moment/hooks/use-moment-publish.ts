@@ -2,12 +2,15 @@ import { useState, useCallback } from "react";
 import type { JSONContent } from "@tiptap/core";
 import { useCreateMomentMutation } from "@/lib/features/moment";
 import { useUploadFileMutation } from "@/lib/features/file/file-api";
+import { MOMENT_CHARACTER_LIMIT } from "../utils/character-count";
+import { MOMENT_TOPIC_LIMIT } from "../utils/topic-slug";
 
 export const useMomentPublish = (onSuccess?: () => void) => {
   const [editorValue, setEditorValue] = useState<JSONContent | undefined>(undefined);
   const [charCount, setCharCount] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
   const [attachments, setAttachments] = useState<{ file: File; preview: string }[]>([]);
+  const [topics, setTopics] = useState<string[]>([]);
   const [visibility, setVisibility] = useState("public");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,12 +59,14 @@ export const useMomentPublish = (onSuccess?: () => void) => {
     setCharCount(0);
     setIsEmpty(true);
     setAttachments([]);
+    setTopics([]);
     setVisibility("public");
     setIsSubmitting(false);
   }, [attachments]);
 
   const publishMoment = async () => {
-    if ((isEmpty && attachments.length === 0) || charCount > 280 || isSubmitting) return;
+    if ((isEmpty && attachments.length === 0) || charCount > MOMENT_CHARACTER_LIMIT || isSubmitting)
+      return;
     setIsSubmitting(true);
     try {
       // 1. Upload images in parallel if any
@@ -81,6 +86,7 @@ export const useMomentPublish = (onSuccess?: () => void) => {
         content: editorValue ? JSON.stringify(editorValue) : "",
         visibility: visibility as "public" | "followers" | "private",
         images: uploadedImages,
+        topicSlugs: topics,
       }).unwrap();
 
       // 3. Reset states & call callback
@@ -103,6 +109,15 @@ export const useMomentPublish = (onSuccess?: () => void) => {
     setIsEmpty,
     attachments,
     setAttachments,
+    topics,
+    addTopic: (topic: string) =>
+      setTopics((current) =>
+        current.length >= MOMENT_TOPIC_LIMIT || current.includes(topic)
+          ? current
+          : [...current, topic]
+      ),
+    removeTopic: (topic: string) =>
+      setTopics((current) => current.filter((item) => item !== topic)),
     visibility,
     setVisibility,
     isSubmitting,

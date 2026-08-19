@@ -137,6 +137,7 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
         momentId={moment?.id ?? "default"}
         parsedContent={parsedContent}
         imageUrls={imageUrls}
+        topics={moment?.topics ?? []}
         onCardClick={setActiveIndex}
       />
 
