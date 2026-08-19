@@ -32,7 +32,7 @@ export default function MomentsPage() {
 
   // Controlled Pagination State (1-based index)
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 6;
 
   const [, scrollTo] = useWindowScroll();
 
@@ -309,10 +309,10 @@ export default function MomentsPage() {
                   className="w-full"
                 >
                   {/* Standard, beautiful HeroUI EmptyState */}
-                  <EmptyState className="bg-default-50/50 border-default-100 rounded-3xl border py-12">
+                  <EmptyState className="border-border rounded-2xl border border-dashed">
                     <EmptyState.Header>
                       <EmptyState.Media variant="icon">
-                        <Icon icon="gravity-ui:feather" className="size-5" />
+                        <Icon icon="gravity-ui:brush" className="size-5" />
                       </EmptyState.Media>
                       <EmptyState.Title>No moments found</EmptyState.Title>
                       <EmptyState.Description>
