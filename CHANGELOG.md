@@ -1,3 +1,10 @@
+# [1.89.0](https://github.com/LeeWio/odyssey/compare/v1.88.4...v1.89.0) (2026-08-19)
+
+
+### Features
+
+* **moments:** implement classic controlled Pagination for moments feed ([48da102](https://github.com/LeeWio/odyssey/commit/48da10203ab082b0f04bbf0979870347a7bc2cd1))
+
 ## [1.88.4](https://github.com/LeeWio/odyssey/compare/v1.88.3...v1.88.4) (2026-08-19)
 
 
