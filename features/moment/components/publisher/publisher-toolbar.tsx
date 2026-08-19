@@ -336,7 +336,7 @@ export const PublisherToolbar = ({
         </div>
 
         {/* Right share CTA */}
-        <Button variant="tertiary" onPress={onPublish} isDisabled={isSubmitDisabled} size="sm">
+        <Button variant="secondary" onPress={onPublish} isDisabled={isSubmitDisabled} size="sm">
           {isSubmitting ? (
             <Spinner size="sm" color="current" className="mr-1.5" />
           ) : (

@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  ArrowDownToLine,
-  CirclePlay,
-  Eye,
-  Funnel,
-  Pencil,
-  TrashBin,
-  Xmark,
-} from "@gravity-ui/icons";
+import { ArrowDownToLine, CirclePlay, Eye, Funnel, TrashBin, Xmark } from "@gravity-ui/icons";
 import {
   Avatar,
   Button,
@@ -20,6 +12,8 @@ import {
   Spinner,
   Tooltip,
   toast,
+  Header,
+  type Selection,
 } from "@heroui/react";
 import {
   ActionBar,
@@ -67,8 +61,16 @@ function UsersRowActions({ user }: { user: UserResponse }) {
   const [updateRoles, { isLoading: isRolesUpdating }] = useUpdateUserRolesMutation();
 
   const isActive = user.status === "ACTIVE";
-  // Support both ADMIN and ROLE_ADMIN role checks
-  const isAdmin = user.roles.includes("ADMIN") || user.roles.includes("ROLE_ADMIN");
+
+  // Map user's role string codes back to role IDs as keys for Dropdown multi-select controlled state
+  const userRoleIds = useMemo(() => {
+    return new Set(
+      user.roles
+        .map((code) => rolesList.find((r) => r.code === code)?.id)
+        .filter((id): id is number => id !== undefined)
+        .map(String)
+    );
+  }, [user.roles, rolesList]);
 
   const handleStatusToggle = async () => {
     try {
@@ -78,20 +80,15 @@ function UsersRowActions({ user }: { user: UserResponse }) {
     }
   };
 
-  const handleRolesToggle = async () => {
+  const handleRolesChange = async (keys: Selection) => {
+    if (keys === "all") return;
+    const selectedIds = Array.from(keys as Set<string>).map(Number);
+    if (selectedIds.length === 0) {
+      toast.warning("A user must have at least one security role.");
+      return;
+    }
     try {
-      const adminRole = rolesList.find((r) => r.code === "ROLE_ADMIN" || r.code === "ADMIN");
-      const userRole = rolesList.find((r) => r.code === "ROLE_USER" || r.code === "USER");
-
-      if (!userRole || !adminRole) {
-        toast.danger("Roles configuration not loaded yet");
-        return;
-      }
-
-      // If they are currently Admin, demote them to just USER. If not, promote to both USER and ADMIN.
-      const roleIds = isAdmin ? [userRole.id] : [userRole.id, adminRole.id];
-
-      await updateRoles({ id: user.id, roleIds }).unwrap();
+      await updateRoles({ id: user.id, roleIds: selectedIds }).unwrap();
     } catch {
       // Handled globally
     }
@@ -121,12 +118,16 @@ function UsersRowActions({ user }: { user: UserResponse }) {
         <Tooltip.Content>{isActive ? "Deactivate user" : "Activate user"}</Tooltip.Content>
       </Tooltip>
 
-      {/* Dropdown for other role actions */}
+      {/* Dropdown for role assignments and other actions */}
       <Dropdown>
         <Tooltip delay={0}>
           <Tooltip.Trigger aria-label="More actions">
             <Button isIconOnly size="sm" variant="tertiary">
-              <Icon icon="gravity-ui:ellipsis-vertical" className="size-4" />
+              {isRolesUpdating ? (
+                <Spinner size="sm" />
+              ) : (
+                <Icon icon="gravity-ui:ellipsis-vertical" className="size-4" />
+              )}
             </Button>
           </Tooltip.Trigger>
           <Tooltip.Content>More actions</Tooltip.Content>
@@ -136,23 +137,30 @@ function UsersRowActions({ user }: { user: UserResponse }) {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <Dropdown.Menu>
-            <Dropdown.Item
-              id="view-user"
-              textValue="View details"
-              onAction={() => toast.success(`User: ${user.username} (${user.email})`)}
+            <Dropdown.Section>
+              <Dropdown.Item
+                id="view-user"
+                textValue="View details"
+                onAction={() => toast.success(`User: ${user.username} (${user.email})`)}
+              >
+                <Eye className="size-4" />
+                <Label>View Details</Label>
+              </Dropdown.Item>
+            </Dropdown.Section>
+
+            <Dropdown.Section
+              selectionMode="multiple"
+              selectedKeys={userRoleIds}
+              onSelectionChange={handleRolesChange}
             >
-              <Eye className="size-4" />
-              <Label>View Details</Label>
-            </Dropdown.Item>
-            <Dropdown.Item
-              id="toggle-role"
-              textValue={isAdmin ? "Demote from Admin" : "Promote to Admin"}
-              onAction={handleRolesToggle}
-              isDisabled={isRolesUpdating}
-            >
-              <Pencil className="size-4" />
-              <Label>{isAdmin ? "Demote from Admin" : "Promote to Admin"}</Label>
-            </Dropdown.Item>
+              <Header>Assign Roles</Header>
+              {rolesList.map((role) => (
+                <Dropdown.Item key={role.id} id={role.id.toString()} textValue={role.name}>
+                  <Dropdown.ItemIndicator />
+                  <Label>{role.name.replace("ROLE_", "")}</Label>
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Section>
           </Dropdown.Menu>
         </Dropdown.Popover>
       </Dropdown>
