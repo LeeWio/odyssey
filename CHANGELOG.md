@@ -1,3 +1,10 @@
+## [1.88.2](https://github.com/LeeWio/odyssey/compare/v1.88.1...v1.88.2) (2026-08-19)
+
+
+### Bug Fixes
+
+* **permissions:** utilize asynchronous useEffect to resolve infinite re-render loop without ESLint warnings ([4f35b7a](https://github.com/LeeWio/odyssey/commit/4f35b7a4f92766e43cdbd34d2f3deeb68fac2f51))
+
 ## [1.88.1](https://github.com/LeeWio/odyssey/compare/v1.88.0...v1.88.1) (2026-08-19)
 
 
