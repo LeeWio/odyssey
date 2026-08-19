@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button, Chip, Typography } from "@heroui/react";
+import { Avatar, Button, Card, Chip, Tag, TagGroup, Typography } from "@heroui/react";
+import { Segment, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
 import { AnimatePresence, motion } from "motion/react";
 
 import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated } from "@/lib/features/auth";
+import { useGetCurrentUserQuery } from "@/lib/features/user/user-api";
+import { useGetPublicTagsQuery } from "@/lib/features/tag/tag-api";
 import { MomentCard, MomentCardSkeleton, MomentPublisher, useMomentFeed } from "@/features/moment";
 
 type FilterType = "all" | "text" | "photos";
@@ -21,7 +24,9 @@ const springConfig = {
 
 export default function MomentsPage() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+
   const [filter, setFilter] = useState<FilterType>("all");
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [isPublisherOpen, setIsPublisherOpen] = useState(false);
 
   // Client hydration mounting check using unified project hook
@@ -31,161 +36,305 @@ export default function MomentsPage() {
   const { moments, isLoading, isError, isFetchingMore, hasMore, loadMore, refetch } =
     useMomentFeed(15);
 
+  // Fetch optional currentUser profile details for the personal aside card
+  const { data: currentUser } = useGetCurrentUserQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  // Fetch tags cloud suggestions
+  const { data: publicTags = [] } = useGetPublicTagsQuery();
+
   // Client-side filtering of loaded moments
   const filteredMoments = useMemo(() => {
     return moments.filter((m) => {
+      // 1. Media filter
       const hasImages = m.images && m.images.length > 0;
-      if (filter === "text") return !hasImages;
-      if (filter === "photos") return hasImages;
+      if (filter === "text" && hasImages) return false;
+      if (filter === "photos" && !hasImages) return false;
+
+      // 2. Topic tag filter
+      if (selectedTopic) {
+        const hasTopic = m.topics?.some(
+          (t) => t.slug.toLowerCase() === selectedTopic.toLowerCase()
+        );
+        if (!hasTopic) return false;
+      }
+
       return true;
     });
-  }, [moments, filter]);
+  }, [moments, filter, selectedTopic]);
+
+  // Profile data for sidebar widget
+  const ownerName = currentUser?.nickname || currentUser?.username || "wei.li";
+  const ownerAvatar = currentUser?.avatar || "https://img.heroui.chat/image/avatar?w=400&h=400&u=3";
 
   return (
     <div className="bg-background min-h-screen px-4 pt-28 pb-24 sm:px-6 lg:pt-32">
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 350, damping: 35, delay: 0.05 }}
-        className="mx-auto flex w-full max-w-xl flex-col gap-6"
-      >
-        {/* 1. Header Area */}
-        <header className="flex w-full flex-col gap-3.5 text-left">
-          <div className="flex w-full flex-row items-center justify-between">
-            <Typography type="h2" weight="bold" className="text-3xl tracking-tight">
-              Moments
+      {/* Dual Column Layout Grid */}
+      <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-8 md:grid-cols-[1fr_280px]">
+        {/* Left Column: Principal moments feed */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 350, damping: 35, delay: 0.05 }}
+          className="flex flex-col gap-6"
+        >
+          {/* 1. Header Area */}
+          <header className="flex w-full flex-col gap-3.5 text-left">
+            <div className="flex w-full flex-row items-center justify-between">
+              <Typography type="h2" weight="bold" className="text-3xl tracking-tight">
+                Moments
+              </Typography>
+              {mounted && isAuthenticated && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onPress={() => setIsPublisherOpen(true)}
+                  className="gap-1.5 transition-transform active:scale-95"
+                >
+                  <Icon icon="gravity-ui:plus" className="size-4" />
+                  <span>Publish</span>
+                </Button>
+              )}
+            </div>
+            <Typography color="muted" type="body-sm" className="leading-relaxed">
+              Captured design details, development notes, and fleeting fragments of everyday design.
             </Typography>
-            {mounted && isAuthenticated && (
-              <Button
-                size="sm"
-                variant="outline"
-                onPress={() => setIsPublisherOpen(true)}
-                className="gap-1.5"
-              >
-                <Icon icon="gravity-ui:plus" className="size-4" />
-                <span>Publish</span>
-              </Button>
-            )}
-          </div>
-          <Typography color="muted" type="body-sm" className="leading-relaxed">
-            Captured design details, development notes, and fleeting fragments of everyday design.
-          </Typography>
-        </header>
+          </header>
 
-        {/* 2. Filters & Metrics Selector Row */}
-        <div className="border-separator/20 flex w-full flex-row items-center justify-between border-b py-1">
-          <div className="flex flex-row gap-1.5">
-            <Chip
-              variant={filter === "all" ? "soft" : "tertiary"}
-              color={filter === "all" ? "accent" : "default"}
-              className="cursor-pointer text-xs"
-              onClick={() => setFilter("all")}
+          {/* 2. Advanced Segment Filter & Metrics selector row */}
+          <div className="border-default-100 flex w-full flex-row items-center justify-between border-b pb-3.5">
+            <Segment
+              size="sm"
+              selectedKey={filter}
+              onSelectionChange={(key) => {
+                setFilter(key as FilterType);
+              }}
             >
-              All
-            </Chip>
-            <Chip
-              variant={filter === "text" ? "soft" : "tertiary"}
-              color={filter === "text" ? "accent" : "default"}
-              className="cursor-pointer text-xs"
-              onClick={() => setFilter("text")}
-            >
-              Field Notes
-            </Chip>
-            <Chip
-              variant={filter === "photos" ? "soft" : "tertiary"}
-              color={filter === "photos" ? "accent" : "default"}
-              className="cursor-pointer text-xs"
-              onClick={() => setFilter("photos")}
-            >
-              Captures
-            </Chip>
+              <Segment.Item id="all">All</Segment.Item>
+              <Segment.Item id="text">Notes</Segment.Item>
+              <Segment.Item id="photos">Photos</Segment.Item>
+            </Segment>
+
+            <div className="flex items-center gap-2">
+              {selectedTopic && (
+                <Chip
+                  size="sm"
+                  color="accent"
+                  variant="soft"
+                  className="animate-fade-in flex h-6 items-center gap-1 pr-1.5 pl-2.5"
+                >
+                  <span className="flex items-center gap-1">
+                    <span>#{selectedTopic}</span>
+                    <button
+                      aria-label="Remove topic filter"
+                      onClick={() => setSelectedTopic(null)}
+                      className="hover:bg-accent/20 rounded-full p-0.5 transition-colors"
+                    >
+                      <Icon icon="gravity-ui:xmark" className="size-3" />
+                    </button>
+                  </span>
+                </Chip>
+              )}
+              <span className="text-muted-foreground font-mono text-xs font-medium tabular-nums">
+                {filteredMoments.length} listed
+              </span>
+            </div>
           </div>
 
-          <span className="text-muted font-mono text-xs font-medium">
-            {filteredMoments.length} listed
-          </span>
-        </div>
-
-        {/* 3. Core Feed Main Section */}
-        <main className="flex w-full flex-col gap-5">
-          <AnimatePresence mode="popLayout" initial={false}>
-            {isLoading && moments.length === 0 ? (
-              Array.from({ length: 3 }).map((_, i) => (
+          {/* 3. Core Feed Main Section */}
+          <main className="flex w-full flex-col gap-5">
+            <AnimatePresence mode="popLayout" initial={false}>
+              {isLoading && moments.length === 0 ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <motion.div
+                    key={`skeleton-${i}`}
+                    initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                    transition={springConfig}
+                    className="w-full"
+                  >
+                    <MomentCardSkeleton />
+                  </motion.div>
+                ))
+              ) : isError ? (
                 <motion.div
-                  key={`skeleton-${i}`}
-                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                  key="error"
+                  initial={{ opacity: 0, scale: 0.97 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.97 }}
+                  transition={springConfig}
+                  className="text-danger bg-surface-secondary/40 border-separator/20 flex w-full flex-col items-center gap-3 rounded-3xl border py-12 text-sm"
+                >
+                  <Icon icon="gravity-ui:triangle-exclamation" className="text-danger-500 size-8" />
+                  <span>Failed to load moments. Please try again.</span>
+                  <Button size="sm" variant="secondary" onPress={() => refetch()}>
+                    Retry
+                  </Button>
+                </motion.div>
+              ) : filteredMoments.length > 0 ? (
+                <motion.div key="feed" className="flex w-full flex-col gap-5">
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    {filteredMoments.map((moment) => (
+                      <motion.div
+                        key={moment.id}
+                        layout
+                        initial={{ opacity: 0, y: 15, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -15, scale: 0.95 }}
+                        transition={springConfig}
+                        className="w-full"
+                      >
+                        <MomentCard moment={moment} />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+
+                  {hasMore && filter === "all" && !selectedTopic && (
+                    <motion.div
+                      key="load-more"
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="mt-4 flex w-full justify-center"
+                    >
+                      <Button isPending={isFetchingMore} variant="secondary" onPress={loadMore}>
+                        Load more moments
+                      </Button>
+                    </motion.div>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0, scale: 0.97 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.97 }}
                   transition={springConfig}
                   className="w-full"
                 >
-                  <MomentCardSkeleton />
+                  {/* Standard, beautiful HeroUI EmptyState */}
+                  <EmptyState className="bg-default-50/50 border-default-100 rounded-3xl border py-12">
+                    <EmptyState.Header>
+                      <EmptyState.Media variant="icon">
+                        <Icon icon="gravity-ui:feather" className="size-5" />
+                      </EmptyState.Media>
+                      <EmptyState.Title>No moments found</EmptyState.Title>
+                      <EmptyState.Description>
+                        No updates match your current filter settings.
+                      </EmptyState.Description>
+                    </EmptyState.Header>
+                    {selectedTopic && (
+                      <EmptyState.Content>
+                        <Button size="sm" variant="outline" onPress={() => setSelectedTopic(null)}>
+                          Clear Topic Filter
+                        </Button>
+                      </EmptyState.Content>
+                    )}
+                  </EmptyState>
                 </motion.div>
-              ))
-            ) : isError ? (
-              <motion.div
-                key="error"
-                initial={{ opacity: 0, scale: 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.97 }}
-                transition={springConfig}
-                className="text-danger bg-surface-secondary/40 border-separator/20 flex w-full flex-col items-center gap-3 rounded-3xl border py-12 text-sm"
-              >
-                <Icon icon="gravity-ui:triangle-exclamation" className="text-danger-500 size-8" />
-                <span>Failed to load moments. Please try again.</span>
-                <Button size="sm" variant="secondary" onPress={() => refetch()}>
-                  Retry
-                </Button>
-              </motion.div>
-            ) : filteredMoments.length > 0 ? (
-              <motion.div key="feed" className="flex w-full flex-col gap-5">
-                <AnimatePresence mode="popLayout" initial={false}>
-                  {filteredMoments.map((moment) => (
-                    <motion.div
-                      key={moment.id}
-                      layout
-                      initial={{ opacity: 0, y: 15, scale: 0.97 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -15, scale: 0.95 }}
-                      transition={springConfig}
-                      className="w-full"
-                    >
-                      <MomentCard moment={moment} />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+              )}
+            </AnimatePresence>
+          </main>
+        </motion.div>
 
-                {hasMore && filter === "all" && (
-                  <motion.div
-                    key="load-more"
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="mt-4 flex w-full justify-center"
-                  >
-                    <Button isPending={isFetchingMore} variant="secondary" onPress={loadMore}>
-                      Load more moments
-                    </Button>
-                  </motion.div>
-                )}
-              </motion.div>
-            ) : (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0, scale: 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.97 }}
-                transition={springConfig}
-                className="text-muted bg-surface-secondary/30 border-separator/10 flex w-full flex-col items-center gap-2 rounded-3xl border py-16 text-center text-sm"
-              >
-                <Icon icon="gravity-ui:feather" className="text-muted-foreground/40 size-8" />
-                <span>No moments match this filter.</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </main>
-      </motion.div>
+        {/* Right Column: Aesthetic Widgets (Visible only on md viewports and wider) */}
+        <aside className="hidden h-fit flex-col gap-6 md:sticky md:top-32 md:flex">
+          {/* Widget 1: Profile card with session metrics */}
+          <Card className="border-default-100 bg-content1 flex flex-col gap-3.5 rounded-2xl border p-4 shadow-sm">
+            <div className="flex items-center gap-3 select-none">
+              <Avatar size="sm" className="size-10">
+                <Avatar.Image src={ownerAvatar} alt={ownerName} />
+                <Avatar.Fallback>{ownerName.substring(0, 2).toUpperCase()}</Avatar.Fallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="text-foreground mb-1 text-sm leading-none font-bold">
+                  {ownerName}
+                </span>
+                <span className="text-muted-foreground text-[10px] leading-none font-medium">
+                  Creator / Builder
+                </span>
+              </div>
+            </div>
+            <Typography color="muted" type="body-xs" className="leading-normal">
+              Writing system, designing experiences, and capturing moments across the Nebula.
+            </Typography>
+          </Card>
+
+          {/* Widget 2: Micro Github contribution-like grid (Footprints) */}
+          <Card className="border-default-100 bg-content1 flex flex-col gap-3 rounded-2xl border p-4 shadow-sm">
+            <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase select-none">
+              Footprints
+            </span>
+            <div className="grid grid-cols-7 gap-1">
+              {Array.from({ length: 28 }).map((_, i) => {
+                const densities = [
+                  0, 1, 2, 0, 3, 1, 0, 2, 0, 0, 1, 3, 2, 0, 1, 0, 2, 0, 4, 1, 0, 0, 2, 1, 0, 3, 0,
+                  1,
+                ];
+                const density = densities[i % densities.length];
+                const colors = [
+                  "bg-default-100/60",
+                  "bg-accent-soft/30",
+                  "bg-accent-soft/60",
+                  "bg-accent-soft",
+                  "bg-accent",
+                ];
+                return (
+                  <div
+                    key={i}
+                    className={`aspect-square w-full rounded-sm ${colors[density]} cursor-pointer transition-all duration-200 hover:scale-110`}
+                  />
+                );
+              })}
+            </div>
+            <div className="text-muted-foreground flex items-center justify-between pt-1 text-[9px] font-medium select-none">
+              <span>Less</span>
+              <div className="flex gap-1">
+                <div className="bg-default-100/60 size-2 rounded-sm" />
+                <div className="bg-accent-soft/30 size-2 rounded-sm" />
+                <div className="bg-accent-soft/60 size-2 rounded-sm" />
+                <div className="bg-accent-soft size-2 rounded-sm" />
+                <div className="bg-accent size-2 rounded-sm" />
+              </div>
+              <span>More</span>
+            </div>
+          </Card>
+
+          {/* Widget 3: Popular tags topic cloud */}
+          {publicTags.length > 0 && (
+            <Card className="border-default-100 bg-content1 flex flex-col gap-3 rounded-2xl border p-4 shadow-sm">
+              <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase select-none">
+                Topics Cloud
+              </span>
+              <TagGroup aria-label="Popular Topics" size="sm" selectionMode="none">
+                <TagGroup.List className="flex flex-wrap gap-1.5">
+                  {publicTags.slice(0, 12).map((tag) => {
+                    const isSelected = selectedTopic?.toLowerCase() === tag.slug.toLowerCase();
+                    return (
+                      <Tag
+                        key={tag.id}
+                        id={tag.slug}
+                        textValue={tag.name}
+                        onPress={() => setSelectedTopic(isSelected ? null : tag.slug)}
+                        className={`cursor-pointer transition-all duration-200 select-none ${
+                          isSelected
+                            ? "bg-accent text-accent-foreground scale-105 border-transparent"
+                            : "bg-default-50 hover:bg-default-100 border-default-100 border"
+                        }`}
+                      >
+                        #{tag.name}
+                      </Tag>
+                    );
+                  })}
+                </TagGroup.List>
+              </TagGroup>
+            </Card>
+          )}
+        </aside>
+      </div>
 
       {/* 4. Publisher Modal */}
       {mounted && isAuthenticated && (

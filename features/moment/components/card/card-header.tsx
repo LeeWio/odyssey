@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Button, Dropdown, Spinner } from "@heroui/react";
+import { Avatar, Button, Dropdown, Spinner, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 
 interface CardHeaderProps {
@@ -24,15 +24,19 @@ export const CardHeader = ({
 }: CardHeaderProps) => {
   return (
     <div className="flex w-full flex-row items-center justify-between">
-      <div className="flex min-w-0 flex-row items-center gap-3">
+      <div className="flex min-w-0 flex-row items-center gap-2">
         <Avatar>
           {authorAvatar ? <Avatar.Image alt={authorName} src={authorAvatar} /> : null}
           <Avatar.Fallback>{fallbackInitial}</Avatar.Fallback>
         </Avatar>
 
         <div className="flex min-w-0 flex-col">
-          <span className="text-foreground truncate text-sm font-medium">{authorName}</span>
-          <span className="text-muted text-xs">{timeLabel}</span>
+          <Typography className="leading-none" weight="bold" truncate align="start" type="body">
+            {authorName}
+          </Typography>
+          <Typography truncate align="start" type="body-xs" color="muted">
+            {timeLabel}
+          </Typography>
         </div>
       </div>
 
