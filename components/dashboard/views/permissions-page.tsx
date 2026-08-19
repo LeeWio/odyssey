@@ -1,18 +1,16 @@
 "use client";
 
 import {
+  Accordion,
   Button,
   Card,
   Checkbox,
-  Chip,
   Description,
   Label,
   ListBox,
   Spinner,
-  Tooltip,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { type MenuResponse, useGetAdminMenuTreeQuery } from "@/lib/features/permission";
 import {
@@ -22,257 +20,10 @@ import {
   useGetRoleMenuIdsQuery,
 } from "@/lib/features/role";
 
-// --- 模块卡片组件 (一级菜单 Catalog) ---
-function PermissionModuleCard({
-  rootNode,
-  checkedIds,
-  onCheckChange,
-}: {
-  rootNode: MenuResponse;
-  checkedIds: Set<number>;
-  onCheckChange: (id: number, checked: boolean) => void;
-}) {
-  const isChecked = checkedIds.has(rootNode.id);
-  const [isOpen, setIsOpen] = useState(true);
-
-  // 1. 核心过滤：根节点下直属的二级 MENU 子菜单 (type !== 2) 与 直属的操作 BUTTON (type === 2)
-  const menuChildren = rootNode.children?.filter((c) => c.type !== 2) || [];
-  const actionChildren = rootNode.children?.filter((c) => c.type === 2) || [];
-
-  // 辅助函数：计算当前模块已选中的子权限个数
-  const getSelectionCount = (node: MenuResponse): { selected: number; total: number } => {
-    let selected = 0;
-    let total = 0;
-
-    const traverse = (n: MenuResponse) => {
-      total++;
-      if (checkedIds.has(n.id)) {
-        selected++;
-      }
-      n.children?.forEach(traverse);
-    };
-
-    node.children?.forEach(traverse);
-    return { selected, total };
-  };
-
-  const { selected, total } = getSelectionCount(rootNode);
-
-  return (
-    <Card className="border-border/80 bg-surface mb-5 overflow-hidden rounded-3xl border shadow-sm transition-all duration-300 hover:shadow-md">
-      {/* 模块大头部与全局全选 */}
-      <Card.Header className="bg-surface-secondary/40 border-border/40 flex items-center justify-between border-b px-5 py-4 select-none">
-        <div className="flex items-center gap-3">
-          <Checkbox
-            isSelected={isChecked}
-            onChange={(checked) => onCheckChange(rootNode.id, checked)}
-          >
-            <Checkbox.Content>
-              <Checkbox.Control>
-                <Checkbox.Indicator />
-              </Checkbox.Control>
-              <span className="text-foreground flex items-center gap-2 text-sm font-bold select-none">
-                {rootNode.icon && <Icon icon={rootNode.icon} className="text-primary size-5" />}
-                {rootNode.name}
-              </span>
-            </Checkbox.Content>
-          </Checkbox>
-          <Chip size="sm" variant="soft" color="accent" className="scale-90 font-mono text-[9px]">
-            {rootNode.type === 0 ? "目录" : rootNode.type === 1 ? "菜单" : "操作"}
-          </Chip>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {total > 0 && (
-            <span className="text-muted text-xs font-semibold tabular-nums">
-              已选 {selected} / {total} 项
-            </span>
-          )}
-          <Tooltip delay={0}>
-            <Button
-              isIconOnly
-              size="sm"
-              variant="ghost"
-              onPress={() => setIsOpen(!isOpen)}
-              className="size-7"
-              aria-label={isOpen ? "收起模块" : "展开模块"}
-            >
-              <Icon
-                icon="gravity-ui:chevron-down"
-                className={`text-muted size-4 transition-transform duration-300 ${
-                  isOpen ? "rotate-180" : ""
-                }`}
-              />
-            </Button>
-            <Tooltip.Content>{isOpen ? "收起模块" : "展开模块"}</Tooltip.Content>
-          </Tooltip>
-        </div>
-      </Card.Header>
-
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <Card.Content className="flex flex-col gap-5 p-5">
-              {/* 直属操作按钮 (如果根分类直属挂载了 BUTTON 类型) */}
-              {actionChildren.length > 0 && (
-                <div className="bg-surface-secondary/30 border-border/20 mb-2 grid grid-cols-1 gap-3 rounded-2xl border p-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {actionChildren.map((action) => {
-                    const isActionChecked = checkedIds.has(action.id);
-                    return (
-                      <Card
-                        key={action.id}
-                        className="bg-surface border-border/50 hover:bg-surface-secondary/40 rounded-xl border p-3.5 shadow-none transition-colors duration-250"
-                      >
-                        <Checkbox
-                          isSelected={isActionChecked}
-                          onChange={(checked) => onCheckChange(action.id, checked)}
-                          variant="secondary"
-                          className="w-full"
-                        >
-                          <Checkbox.Content>
-                            <Checkbox.Control>
-                              <Checkbox.Indicator />
-                            </Checkbox.Control>
-                            <div className="flex flex-col items-start gap-1 select-none">
-                              <span className="text-foreground text-xs leading-none font-bold">
-                                {action.name}
-                              </span>
-                              {action.permission && (
-                                <span className="text-default-400 mt-1 font-mono text-[10px] leading-none">
-                                  ({action.permission})
-                                </span>
-                              )}
-                            </div>
-                          </Checkbox.Content>
-                        </Checkbox>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* 直属子菜单分组 (二级 MENU 子分类) */}
-              {menuChildren.length > 0
-                ? menuChildren.map((child) => (
-                    <PermissionSubGroup
-                      key={child.id}
-                      node={child}
-                      checkedIds={checkedIds}
-                      onCheckChange={onCheckChange}
-                    />
-                  ))
-                : actionChildren.length === 0 && (
-                    <p className="text-muted py-4 text-center text-xs">暂无分配任何子权限</p>
-                  )}
-            </Card.Content>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Card>
-  );
-}
-
-// --- 子菜单/操作级权限分组组件 (二级菜单) ---
-function PermissionSubGroup({
-  node,
-  checkedIds,
-  onCheckChange,
-}: {
-  node: MenuResponse;
-  checkedIds: Set<number>;
-  onCheckChange: (id: number, checked: boolean) => void;
-}) {
-  const isChecked = checkedIds.has(node.id);
-
-  // 区分操作型权限(BUTTON/叶子节点，即 type === 2) 与 嵌套子菜单(MENU，即 type !== 2)
-  const menuChildren = node.children?.filter((c) => c.type !== 2) || [];
-  const actionChildren = node.children?.filter((c) => c.type === 2) || [];
-
-  return (
-    <div className="bg-surface-secondary/20 border-border/30 flex flex-col gap-4 rounded-2xl border p-4">
-      {/* 子菜单栏头 */}
-      <div className="border-border/20 flex items-center justify-between border-b pb-2.5 select-none">
-        <Checkbox isSelected={isChecked} onChange={(checked) => onCheckChange(node.id, checked)}>
-          <Checkbox.Content>
-            <Checkbox.Control>
-              <Checkbox.Indicator />
-            </Checkbox.Control>
-            <span className="text-foreground flex items-center gap-2 text-xs font-bold select-none md:text-sm">
-              {node.icon && <Icon icon={node.icon} className="text-muted size-4" />}
-              {node.name}
-            </span>
-          </Checkbox.Content>
-        </Checkbox>
-        <Chip size="sm" variant="soft" className="scale-90 font-mono text-[8px]">
-          {node.type === 0 ? "目录" : node.type === 1 ? "菜单" : "操作"}
-        </Chip>
-      </div>
-
-      {/* 核心改版：操作型叶子节点权限，100% 采用官方 Checkbox + Card 网格排列 */}
-      {actionChildren.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {actionChildren.map((action) => {
-            const isActionChecked = checkedIds.has(action.id);
-            return (
-              <Card key={action.id} className="transition-colors duration-250">
-                <Checkbox
-                  isSelected={isActionChecked}
-                  onChange={(checked) => onCheckChange(action.id, checked)}
-                  variant="secondary"
-                  className="w-full"
-                >
-                  <Checkbox.Content>
-                    <Checkbox.Control>
-                      <Checkbox.Indicator />
-                    </Checkbox.Control>
-                    <div className="flex flex-col items-start gap-1 select-none">
-                      <span className="text-foreground text-xs leading-none font-bold">
-                        {action.name}
-                      </span>
-                      {action.permission && (
-                        <span className="text-default-400 mt-1 font-mono text-[10px] leading-none">
-                          ({action.permission})
-                        </span>
-                      )}
-                    </div>
-                  </Checkbox.Content>
-                </Checkbox>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      {/* 如果仍然有多级层级菜单，递归渲染 */}
-      {menuChildren.length > 0 && (
-        <div className="border-border/40 flex flex-col gap-4 border-l pl-4">
-          {menuChildren.map((subChild) => (
-            <PermissionSubGroup
-              key={subChild.id}
-              node={subChild}
-              checkedIds={checkedIds}
-              onCheckChange={onCheckChange}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-const EMPTY_ROLES: RoleResponse[] = [];
-const EMPTY_MENUS: MenuResponse[] = [];
-const EMPTY_ROLE_MENUS: number[] = [];
-
 export function PermissionsPage() {
   // Query roles and entire menu structure
-  const { data: roles = EMPTY_ROLES, isLoading: isRolesLoading } = useGetAllRolesQuery();
-  const { data: menuTree = EMPTY_MENUS, isLoading: isTreeLoading } = useGetAdminMenuTreeQuery();
+  const { data: roles = [], isLoading: isRolesLoading } = useGetAllRolesQuery();
+  const { data: menuTree = [], isLoading: isTreeLoading } = useGetAdminMenuTreeQuery();
 
   // Selected active role state
   const [selectedRoleState, setSelectedRoleState] = useState<RoleResponse | null>(null);
@@ -280,8 +31,10 @@ export function PermissionsPage() {
   const setSelectedRole = setSelectedRoleState;
 
   // Query assigned menu IDs for the active selected role
-  const { data: roleMenuIds = EMPTY_ROLE_MENUS, isFetching: isRoleMenusLoading } =
-    useGetRoleMenuIdsQuery(selectedRole?.id as number, { skip: !selectedRole });
+  const { data: roleMenuIds = [], isFetching: isRoleMenusLoading } = useGetRoleMenuIdsQuery(
+    selectedRole?.id as number,
+    { skip: !selectedRole }
+  );
 
   // Sync checked IDs once fetched during rendering
   const [prevRoleMenuIds, setPrevRoleMenuIds] = useState<number[] | null>(null);
@@ -295,6 +48,7 @@ export function PermissionsPage() {
   // Mutation to save assignment
   const [assignRoleMenus, { isLoading: isSaving }] = useAssignRoleMenusMutation();
 
+  // Helper: toggle a node and recursively toggle all of its descendant children
   const handleNodeToggle = (nodeId: number, isChecked: boolean) => {
     const nextChecked = new Set(checkedIds);
 
@@ -351,23 +105,23 @@ export function PermissionsPage() {
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
-      {/* 头部说明 */}
+      {/* Header Description */}
       <div className="border-border flex flex-col gap-2 border-b pb-4">
         <h1 className="text-foreground text-2xl font-bold tracking-tight">安全角色与权限配置</h1>
         <p className="text-muted mt-1 text-sm">
-          设置系统安全角色并对一、二级菜单、系统级接口、按钮（BUTTON）行为进行细粒度鉴权映射。
+          通过为不同的安全角色勾选菜单、功能页或细粒度按钮行为（Create、Edit、Delete），实现全站精细化权限控制。
         </p>
       </div>
 
       <div className="mt-2 grid grid-cols-1 items-start gap-6 md:grid-cols-[280px_1fr]">
-        {/* Left Card: Roles List */}
+        {/* Left Side: Roles list card */}
         <Card className="border-border/60 bg-surface shrink-0 rounded-3xl border shadow-sm">
           <Card.Header className="border-border/40 flex flex-col items-start gap-1 border-b p-5 select-none">
             <Card.Title className="flex items-center gap-1.5 text-sm font-bold">
               <Icon icon="gravity-ui:person" className="text-primary size-4" />
               安全角色 (Roles)
             </Card.Title>
-            <Card.Description className="text-xs">选择角色绑定细粒度授权</Card.Description>
+            <Card.Description className="text-xs">选择角色并配置其专属权限</Card.Description>
           </Card.Header>
 
           <Card.Content className="p-2">
@@ -402,18 +156,18 @@ export function PermissionsPage() {
           </Card.Content>
         </Card>
 
-        {/* Right Panel: Permissions Modules Grid */}
+        {/* Right Side: Permissions Mapping (100% native HeroUI Accordion structure) */}
         <div className="flex flex-col gap-1">
-          {/* 保存全局动作按钮区 */}
+          {/* Action Header bar */}
           <div className="bg-surface border-border/50 mb-4 flex items-center justify-between rounded-2xl border px-5 py-3 shadow-sm select-none">
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-1.5 text-sm font-bold">
                 <Icon icon="gravity-ui:sliders" className="text-primary size-4" />
-                权限映射表 (Permissions)
+                权限绑定菜单数 (Menus & Actions)
               </div>
               {selectedRole && (
                 <span className="text-muted text-xs">
-                  正在配置角色：
+                  当前选中角色：
                   <span className="text-foreground font-semibold">{selectedRole.name}</span>
                 </span>
               )}
@@ -435,7 +189,7 @@ export function PermissionsPage() {
                 ) : (
                   <>
                     <Icon icon="gravity-ui:circle-check" className="size-4" />
-                    <span>保存权限映射</span>
+                    <span>保存权限配置</span>
                   </>
                 )}
               </Button>
@@ -450,21 +204,125 @@ export function PermissionsPage() {
             )}
 
             {menuTree.length === 0 ? (
-              <div className="text-default-400 bg-surface border-border flex h-48 flex-col items-center justify-center gap-2 rounded-3xl border">
-                <Icon icon="gravity-ui:circle-dashed" className="size-8 animate-spin" />
-                <span className="text-xs">系统当前未映射任何权限树节点</span>
+              <div className="text-default-400 bg-surface border-border flex h-56 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed p-6 text-center">
+                <Icon icon="gravity-ui:circle-dashed" className="text-accent size-8 animate-spin" />
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-foreground text-sm font-semibold">
+                    系统当前未映射任何权限树节点
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    请在数据库 sys_menu 表中初始化种子菜单数据。
+                  </span>
+                </div>
               </div>
             ) : (
-              <div>
-                {menuTree.map((root) => (
-                  <PermissionModuleCard
-                    key={root.id}
-                    rootNode={root}
-                    checkedIds={checkedIds}
-                    onCheckChange={handleNodeToggle}
-                  />
-                ))}
-              </div>
+              /* 100% Native HeroUI Accordion */
+              <Accordion
+                variant="surface"
+                allowsMultipleExpanded
+                className="flex flex-col gap-3 p-0"
+              >
+                {menuTree.map((root) => {
+                  const isChecked = checkedIds.has(root.id);
+                  const subMenus = root.children?.filter((c) => c.type !== 2) || [];
+
+                  return (
+                    <Accordion.Item key={root.id} id={root.id.toString()}>
+                      <Accordion.Heading>
+                        <Accordion.Trigger>
+                          <div
+                            className="flex items-center gap-3 select-none"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Checkbox
+                              isSelected={isChecked}
+                              onChange={(checked) => handleNodeToggle(root.id, checked)}
+                            >
+                              <span className="text-foreground flex items-center gap-1.5 text-sm font-bold">
+                                {root.icon && (
+                                  <Icon icon={root.icon} className="text-primary size-4" />
+                                )}
+                                {root.name}
+                              </span>
+                            </Checkbox>
+                          </div>
+                          <Accordion.Indicator />
+                        </Accordion.Trigger>
+                      </Accordion.Heading>
+                      <Accordion.Panel>
+                        <Accordion.Body className="flex flex-col gap-4 px-1 py-2">
+                          {subMenus.length > 0 ? (
+                            subMenus.map((subMenu) => {
+                              const isSubChecked = checkedIds.has(subMenu.id);
+                              const actions = subMenu.children?.filter((c) => c.type === 2) || [];
+
+                              return (
+                                <Card
+                                  key={subMenu.id}
+                                  className="bg-default-50/50 border-default-100 rounded-xl border p-4 shadow-none"
+                                >
+                                  <Card.Header className="border-default-100 flex items-center justify-between border-b p-0 pb-2 select-none">
+                                    <Checkbox
+                                      isSelected={isSubChecked}
+                                      onChange={(checked) => handleNodeToggle(subMenu.id, checked)}
+                                    >
+                                      <span className="text-foreground flex items-center gap-1.5 text-xs font-bold md:text-sm">
+                                        {subMenu.icon && (
+                                          <Icon
+                                            icon={subMenu.icon}
+                                            className="text-muted-foreground size-3.5"
+                                          />
+                                        )}
+                                        {subMenu.name}
+                                      </span>
+                                    </Checkbox>
+                                  </Card.Header>
+                                  <Card.Content className="flex flex-wrap gap-x-5 gap-y-3 p-0 pt-3">
+                                    {actions.length > 0 ? (
+                                      actions.map((action) => {
+                                        const isActionChecked = checkedIds.has(action.id);
+                                        return (
+                                          <Checkbox
+                                            key={action.id}
+                                            isSelected={isActionChecked}
+                                            onChange={(checked) =>
+                                              handleNodeToggle(action.id, checked)
+                                            }
+                                            className="select-none"
+                                          >
+                                            <div className="flex flex-col items-start gap-0.5">
+                                              <span className="text-foreground text-xs font-semibold">
+                                                {action.name}
+                                              </span>
+                                              {action.permission && (
+                                                <span className="text-muted-foreground font-mono text-[9px] leading-none">
+                                                  {action.permission}
+                                                </span>
+                                              )}
+                                            </div>
+                                          </Checkbox>
+                                        );
+                                      })
+                                    ) : (
+                                      <span className="text-muted-foreground text-xs">
+                                        无额外页面操作动作
+                                      </span>
+                                    )}
+                                  </Card.Content>
+                                </Card>
+                              );
+                            })
+                          ) : (
+                            <p className="text-muted-foreground py-2 text-center text-xs">
+                              暂无分配任何子菜单
+                            </p>
+                          )}
+                        </Accordion.Body>
+                      </Accordion.Panel>
+                    </Accordion.Item>
+                  );
+                })}
+              </Accordion>
             )}
           </div>
         </div>
