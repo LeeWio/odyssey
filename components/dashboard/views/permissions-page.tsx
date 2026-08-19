@@ -277,37 +277,39 @@ export function PermissionsPage() {
                                       </span>
                                     </Checkbox>
                                   </Card.Header>
-                                  <Card.Content className="flex flex-wrap gap-x-5 gap-y-3 p-0 pt-3">
-                                    {actions.length > 0 ? (
-                                      actions.map((action) => {
-                                        const isActionChecked = checkedIds.has(action.id);
-                                        return (
-                                          <Checkbox
-                                            key={action.id}
-                                            isSelected={isActionChecked}
-                                            onChange={(checked) =>
-                                              handleNodeToggle(action.id, checked)
-                                            }
-                                            className="select-none"
-                                          >
-                                            <div className="flex flex-col items-start gap-0.5">
-                                              <span className="text-foreground text-xs font-semibold">
-                                                {action.name}
-                                              </span>
-                                              {action.permission && (
-                                                <span className="text-muted-foreground font-mono text-[9px] leading-none">
-                                                  {action.permission}
+                                  <Card.Content>
+                                    <div className="flex flex-wrap gap-x-5 gap-y-3 pt-3">
+                                      {actions.length > 0 ? (
+                                        actions.map((action) => {
+                                          const isActionChecked = checkedIds.has(action.id);
+                                          return (
+                                            <Checkbox
+                                              key={action.id}
+                                              isSelected={isActionChecked}
+                                              onChange={(checked) =>
+                                                handleNodeToggle(action.id, checked)
+                                              }
+                                              className="select-none"
+                                            >
+                                              <div className="flex flex-col items-start gap-0.5">
+                                                <span className="text-foreground text-xs font-semibold">
+                                                  {action.name}
                                                 </span>
-                                              )}
-                                            </div>
-                                          </Checkbox>
-                                        );
-                                      })
-                                    ) : (
-                                      <span className="text-muted-foreground text-xs">
-                                        无额外页面操作动作
-                                      </span>
-                                    )}
+                                                {action.permission && (
+                                                  <span className="text-muted-foreground font-mono text-[9px] leading-none">
+                                                    {action.permission}
+                                                  </span>
+                                                )}
+                                              </div>
+                                            </Checkbox>
+                                          );
+                                        })
+                                      ) : (
+                                        <span className="text-muted-foreground text-xs">
+                                          无额外页面操作动作
+                                        </span>
+                                      )}
+                                    </div>
                                   </Card.Content>
                                 </Card>
                               );
