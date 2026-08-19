@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Avatar, Button, Card, Chip, Tag, TagGroup, Typography } from "@heroui/react";
+import { Avatar, Button, Card, Chip, Tag, TagGroup, Typography, Pagination } from "@heroui/react";
 import { Segment, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
@@ -11,7 +11,8 @@ import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useGetCurrentUserQuery } from "@/lib/features/user/user-api";
 import { useGetPublicTagsQuery } from "@/lib/features/tag/tag-api";
-import { MomentCard, MomentCardSkeleton, MomentPublisher, useMomentFeed } from "@/features/moment";
+import { useGetPublicMomentsQuery } from "@/lib/features/moment";
+import { MomentCard, MomentCardSkeleton, MomentPublisher } from "@/features/moment";
 
 type FilterType = "all" | "text" | "photos";
 
@@ -29,12 +30,27 @@ export default function MomentsPage() {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [isPublisherOpen, setIsPublisherOpen] = useState(false);
 
+  // Controlled Pagination State (1-based index)
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
   // Client hydration mounting check using unified project hook
   const mounted = useMounted();
 
-  // Fetch paginated public moments
-  const { moments, isLoading, isError, isFetchingMore, hasMore, loadMore, refetch } =
-    useMomentFeed(15);
+  // Fetch paginated public moments from backend
+  const {
+    data: publicData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetPublicMomentsQuery({
+    page: currentPage - 1, // backend expects 0-based page index
+    size: pageSize,
+  });
+
+  const moments = publicData?.list || [];
+  const totalItems = publicData?.total || 0;
+  const totalPages = publicData?.totalPages || 1;
 
   // Fetch optional currentUser profile details for the personal aside card
   const { data: currentUser } = useGetCurrentUserQuery(undefined, {
@@ -67,6 +83,41 @@ export default function MomentsPage() {
   // Profile data for sidebar widget
   const ownerName = currentUser?.nickname || currentUser?.username || "wei.li";
   const ownerAvatar = currentUser?.avatar || "https://img.heroui.chat/image/avatar?w=400&h=400&u=3";
+
+  // Compute pagination range with ellipsis for display
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (currentPage > 3) {
+        pages.push("ellipsis");
+      }
+
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push("ellipsis");
+      }
+
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
+  const startItem = (currentPage - 1) * pageSize + 1;
+  const endItem = Math.min(currentPage * pageSize, totalItems);
 
   return (
     <div className="bg-background min-h-screen px-4 pt-28 pb-24 sm:px-6 lg:pt-32">
@@ -191,19 +242,54 @@ export default function MomentsPage() {
                     ))}
                   </AnimatePresence>
 
-                  {hasMore && filter === "all" && !selectedTopic && (
-                    <motion.div
-                      key="load-more"
-                      layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="mt-4 flex w-full justify-center"
-                    >
-                      <Button isPending={isFetchingMore} variant="secondary" onPress={loadMore}>
-                        Load more moments
-                      </Button>
-                    </motion.div>
+                  {/* Standard HeroUI Pagination footer bar */}
+                  {!isLoading && totalPages > 1 && (
+                    <div className="border-default-100 mt-4 w-full border-t pt-6">
+                      <Pagination className="w-full flex-row flex-wrap items-center justify-between gap-4">
+                        <Pagination.Summary className="text-muted-foreground font-mono text-xs font-medium">
+                          Showing {startItem} - {endItem} of {totalItems} moments
+                        </Pagination.Summary>
+
+                        <Pagination.Content>
+                          <Pagination.Item>
+                            <Pagination.Previous
+                              isDisabled={currentPage === 1}
+                              onPress={() => setCurrentPage((p) => p - 1)}
+                            >
+                              <Pagination.PreviousIcon />
+                              <span>Previous</span>
+                            </Pagination.Previous>
+                          </Pagination.Item>
+
+                          {getPageNumbers().map((p, i) =>
+                            p === "ellipsis" ? (
+                              <Pagination.Item key={`ellipsis-${i}`}>
+                                <Pagination.Ellipsis />
+                              </Pagination.Item>
+                            ) : (
+                              <Pagination.Item key={p}>
+                                <Pagination.Link
+                                  isActive={p === currentPage}
+                                  onPress={() => setCurrentPage(p)}
+                                >
+                                  {p}
+                                </Pagination.Link>
+                              </Pagination.Item>
+                            )
+                          )}
+
+                          <Pagination.Item>
+                            <Pagination.Next
+                              isDisabled={currentPage === totalPages}
+                              onPress={() => setCurrentPage((p) => p + 1)}
+                            >
+                              <span>Next</span>
+                              <Pagination.NextIcon />
+                            </Pagination.Next>
+                          </Pagination.Item>
+                        </Pagination.Content>
+                      </Pagination>
+                    </div>
                   )}
                 </motion.div>
               ) : (
