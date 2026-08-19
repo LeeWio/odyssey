@@ -11,7 +11,7 @@ import {
   Spinner,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type MenuResponse, useGetAdminMenuTreeQuery } from "@/lib/features/permission";
 import {
   type RoleResponse,
@@ -39,14 +39,15 @@ export function PermissionsPage() {
   // Local state for checkboxes
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
 
-  // Track the serialized menu IDs to safely adjust state when query data changes
-  const roleMenuIdsKey = roleMenuIds.join(",");
-  const [prevRoleMenuIdsKey, setPrevRoleMenuIdsKey] = useState<string>("");
-
-  if (roleMenuIdsKey !== prevRoleMenuIdsKey) {
-    setPrevRoleMenuIdsKey(roleMenuIdsKey);
-    setCheckedIds(new Set(roleMenuIds));
-  }
+  // Synchronize checked IDs safely to the local checkboxes state whenever the backend roleMenuIds are fetched/changed
+  useEffect(() => {
+    if (roleMenuIds) {
+      const timer = setTimeout(() => {
+        setCheckedIds(new Set(roleMenuIds));
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [roleMenuIds]);
 
   // Mutation to save assignment
   const [assignRoleMenus, { isLoading: isSaving }] = useAssignRoleMenusMutation();
