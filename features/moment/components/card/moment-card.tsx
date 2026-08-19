@@ -61,9 +61,31 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
     skip: !isAuthenticated,
   });
 
-  const authorName = currentUser?.nickname || currentUser?.username || "wei.li";
-  const authorAvatar =
-    currentUser?.avatar || "https://img.heroui.chat/image/avatar?w=400&h=400&u=3";
+  // 1. Resolve base author details from the moment payload (future-proof)
+  const authorUser = moment?.user;
+  const baseAuthorName =
+    moment?.authorName || authorUser?.nickname || authorUser?.username || "wei.li";
+
+  const baseAuthorAvatar =
+    moment?.authorAvatar ||
+    authorUser?.avatar ||
+    "https://img.heroui.chat/image/avatar?w=400&h=400&u=3";
+
+  // 2. Real-time session enhancement: Use viewer's latest session data if the viewer is the author
+  const isViewerTheAuthor =
+    currentUser &&
+    (currentUser.username === baseAuthorName ||
+      currentUser.nickname === baseAuthorName ||
+      (authorUser && currentUser.id === authorUser.id));
+
+  const authorName = isViewerTheAuthor
+    ? currentUser.nickname || currentUser.username || baseAuthorName
+    : baseAuthorName;
+
+  const authorAvatar = isViewerTheAuthor
+    ? currentUser.avatar || baseAuthorAvatar
+    : baseAuthorAvatar;
+
   const fallbackInitial = authorName.slice(0, 2).toUpperCase();
 
   const [deleteMoment] = useDeleteMomentMutation();
