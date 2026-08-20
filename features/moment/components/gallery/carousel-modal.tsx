@@ -28,7 +28,7 @@ export const CarouselModal = ({ images, activeIndex, onClose }: CarouselModalPro
         onOpenChange={(open) => !open && onClose()}
         variant="blur"
       >
-        <Modal.Container size="cover">
+        <Modal.Container size="lg">
           <Modal.Dialog aria-label="Image viewer">
             <Modal.CloseTrigger className="z-50" />
             <Modal.Body>
@@ -36,7 +36,7 @@ export const CarouselModal = ({ images, activeIndex, onClose }: CarouselModalPro
                 <Carousel.Content>
                   {images.map((image, i) => (
                     <Carousel.Item key={i}>
-                      <div className="relative aspect-square w-full overflow-hidden rounded-3xl">
+                      <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
                         <Image
                           alt={image.alt}
                           className="object-cover select-none"
