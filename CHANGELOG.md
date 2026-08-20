@@ -1,3 +1,10 @@
+# [1.93.0](https://github.com/LeeWio/odyssey/compare/v1.92.2...v1.93.0) (2026-08-20)
+
+
+### Features
+
+* **rich-text:** implement context-aware menu actions for tables, images, and task lists ([e91f514](https://github.com/LeeWio/odyssey/commit/e91f514d3ce3e75d44674b0e96bcacb84fd62cdd))
+
 ## [1.92.2](https://github.com/LeeWio/odyssey/compare/v1.92.1...v1.92.2) (2026-08-20)
 
 
