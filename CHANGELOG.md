@@ -1,3 +1,10 @@
+## [1.95.1](https://github.com/LeeWio/odyssey/compare/v1.95.0...v1.95.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* **moments:** render single image as aspect-ratio-preserving block and remove GALLERY_MASK ([1a8dff0](https://github.com/LeeWio/odyssey/commit/1a8dff098f9b8768153034c8b2c12911173e6140))
+
 # [1.95.0](https://github.com/LeeWio/odyssey/compare/v1.94.0...v1.95.0) (2026-08-20)
 
 
