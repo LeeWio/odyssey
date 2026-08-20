@@ -1,3 +1,10 @@
+# [1.94.0](https://github.com/LeeWio/odyssey/compare/v1.93.0...v1.94.0) (2026-08-20)
+
+
+### Features
+
+* **moments:** implement dynamic breathing geometry for BounceCards photo layouts ([022237d](https://github.com/LeeWio/odyssey/commit/022237d46b867657e77525988f3a9fd512bfb901))
+
 # [1.93.0](https://github.com/LeeWio/odyssey/compare/v1.92.2...v1.93.0) (2026-08-20)
 
 
