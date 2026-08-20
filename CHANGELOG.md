@@ -1,3 +1,10 @@
+## [1.95.2](https://github.com/LeeWio/odyssey/compare/v1.95.1...v1.95.2) (2026-08-20)
+
+
+### Bug Fixes
+
+* **moments:** resolve horizontal layout overflow of unbroken text strings and broken image alt-text ([0b04843](https://github.com/LeeWio/odyssey/commit/0b04843acccba005c9266ba24406dd2b2aaf2bcc))
+
 ## [1.95.1](https://github.com/LeeWio/odyssey/compare/v1.95.0...v1.95.1) (2026-08-20)
 
 
