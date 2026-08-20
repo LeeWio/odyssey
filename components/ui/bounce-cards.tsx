@@ -238,7 +238,7 @@ export default function BounceCards({
               draggable={false}
               loading="lazy"
               decoding="async"
-              className="absolute inset-0 block size-full object-cover brightness-[0.97] contrast-[0.96] select-none"
+              className="absolute inset-0 block size-full overflow-hidden object-cover break-all brightness-[0.97] contrast-[0.96] select-none"
             />
           </div>
         );

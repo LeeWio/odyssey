@@ -69,7 +69,7 @@ export const CardContent = ({
           alt={`moment-image-${index}`}
           fill
           unoptimized
-          className="pointer-events-none absolute inset-0 block size-full rounded-2xl object-cover"
+          className="pointer-events-none absolute inset-0 block size-full overflow-hidden rounded-2xl object-cover break-all"
         />
       </div>
     ));
@@ -78,15 +78,15 @@ export const CardContent = ({
   // Case 0: Single Image layout (Render standard, non-cropped high-fidelity image)
   if (count === 1) {
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex w-full min-w-0 flex-col gap-3">
         <RichTextEditor
           key={momentId}
           isReadOnly
           defaultValue={parsedContent}
-          className="h-auto min-h-0 w-full"
+          className="h-auto min-h-0 w-full min-w-0"
         >
-          <RichTextEditor.Shell className="h-auto min-h-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
-            <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0" />
+          <RichTextEditor.Shell className="h-auto min-h-0 w-full min-w-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
+            <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-all [&_.ProseMirror_p]:break-all" />
           </RichTextEditor.Shell>
         </RichTextEditor>
 
@@ -112,7 +112,7 @@ export const CardContent = ({
             width={360}
             height={360}
             unoptimized
-            className="pointer-events-none h-auto max-h-[360px] w-full object-contain"
+            className="pointer-events-none h-auto max-h-[360px] w-full overflow-hidden object-contain break-all"
             draggable={false}
           />
         </div>
@@ -123,16 +123,16 @@ export const CardContent = ({
   // Case 1: Stack layout (Side-by-side on wide screens, vertical on mobile)
   if (galleryStyle === "stack" && count > 0) {
     return (
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start sm:gap-6">
+      <div className="flex w-full min-w-0 flex-col justify-between gap-4 sm:flex-row sm:items-start sm:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <RichTextEditor
             key={momentId}
             isReadOnly
             defaultValue={parsedContent}
-            className="h-auto min-h-0 w-full"
+            className="h-auto min-h-0 w-full min-w-0"
           >
-            <RichTextEditor.Shell className="h-auto min-h-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
-              <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0" />
+            <RichTextEditor.Shell className="h-auto min-h-0 w-full min-w-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
+              <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-all [&_.ProseMirror_p]:break-all" />
             </RichTextEditor.Shell>
           </RichTextEditor>
 
@@ -155,9 +155,6 @@ export const CardContent = ({
             randomRotation={true}
             sensitivity={200}
             sendToBackOnClick={false}
-            autoplay
-            autoplayDelay={3000}
-            pauseOnHover
           />
         </div>
       </div>
@@ -166,15 +163,15 @@ export const CardContent = ({
 
   // Case 2: BounceCards layout (Default Vertical Stacking)
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex w-full min-w-0 flex-col gap-3">
       <RichTextEditor
         key={momentId}
         isReadOnly
         defaultValue={parsedContent}
-        className="h-auto min-h-0 w-full"
+        className="h-auto min-h-0 w-full min-w-0"
       >
-        <RichTextEditor.Shell className="h-auto min-h-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
-          <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0" />
+        <RichTextEditor.Shell className="h-auto min-h-0 w-full min-w-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
+          <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-all [&_.ProseMirror_p]:break-all" />
         </RichTextEditor.Shell>
       </RichTextEditor>
 
