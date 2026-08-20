@@ -113,6 +113,12 @@ export const useContentItemActions = (currentNode: Node | null, currentNodePos: 
         case "orderedList":
           chain.toggleOrderedList().run();
           break;
+        case "blockquote":
+          chain.toggleBlockquote().run();
+          break;
+        case "codeBlock":
+          chain.toggleCodeBlock().run();
+          break;
       }
     },
     [editor, currentNodePos]
@@ -152,6 +158,68 @@ export const useContentItemActions = (currentNode: Node | null, currentNodePos: 
     editor.view.dispatch(transaction.scrollIntoView());
   }, [editor, currentNode, currentNodePos]);
 
+  // Context-Aware Table actions
+  const addTableColumnBefore = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().addColumnBefore().run();
+  }, [editor]);
+
+  const addTableColumnAfter = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().addColumnAfter().run();
+  }, [editor]);
+
+  const deleteTableColumn = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().deleteColumn().run();
+  }, [editor]);
+
+  const addTableRowBefore = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().addRowBefore().run();
+  }, [editor]);
+
+  const addTableRowAfter = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().addRowAfter().run();
+  }, [editor]);
+
+  const deleteTableRow = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().deleteRow().run();
+  }, [editor]);
+
+  const deleteTable = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().deleteTable().run();
+  }, [editor]);
+
+  // Context-Aware Image actions
+  const updateImageAttributes = useCallback(
+    (attrs: Record<string, unknown>) => {
+      if (!editor || currentNodePos === -1) return;
+      editor
+        .chain()
+        .focus()
+        .setNodeSelection(currentNodePos)
+        .updateAttributes("image", attrs)
+        .run();
+    },
+    [editor, currentNodePos]
+  );
+
+  // Context-Aware Task actions
+  const toggleTaskChecked = useCallback(() => {
+    if (!editor || currentNodePos === -1 || !currentNode) return;
+    const checked = !currentNode.attrs.checked;
+    editor
+      .chain()
+      .focus()
+      .setNodeSelection(currentNodePos)
+      .updateAttributes("taskItem", { checked })
+      .run();
+  }, [editor, currentNode, currentNodePos]);
+
   return {
     deleteNode,
     copyNodeToClipboard,
@@ -163,5 +231,14 @@ export const useContentItemActions = (currentNode: Node | null, currentNodePos: 
     toggleNodeType,
     moveNodeUp,
     moveNodeDown,
+    addTableColumnBefore,
+    addTableColumnAfter,
+    deleteTableColumn,
+    addTableRowBefore,
+    addTableRowAfter,
+    deleteTableRow,
+    deleteTable,
+    updateImageAttributes,
+    toggleTaskChecked,
   };
 };
