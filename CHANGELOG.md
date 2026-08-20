@@ -1,3 +1,10 @@
+# [1.95.0](https://github.com/LeeWio/odyssey/compare/v1.94.0...v1.95.0) (2026-08-20)
+
+
+### Features
+
+* **moments:** implement adaptive dual-track gallery split layout utilizing Stack and BounceCards ([02c7ec6](https://github.com/LeeWio/odyssey/commit/02c7ec6cb359ca9015d27ef4070eff659cfe42c9))
+
 # [1.94.0](https://github.com/LeeWio/odyssey/compare/v1.93.0...v1.94.0) (2026-08-20)
 
 
