@@ -27,9 +27,6 @@ const DEFAULT_TRANSFORMS = [
   "rotate(-3deg) translate(120px)",
 ];
 
-const GALLERY_MASK =
-  "linear-gradient(to right, rgba(0,0,0,0.58) 0%, black 8%, black 92%, rgba(0,0,0,0.58) 100%)";
-
 export default function BounceCards({
   className = "",
   images = [],
@@ -205,18 +202,6 @@ export default function BounceCards({
       style={{
         width: containerWidth,
         height: containerHeight,
-
-        /*
-         * Edge integration
-         *
-         * The gallery never fully disappears.
-         * The outer photos are only softened,
-         * which helps the group blend into
-         * bg-surface without creating a
-         * visible carousel-style fade.
-         */
-        maskImage: GALLERY_MASK,
-        WebkitMaskImage: GALLERY_MASK,
       }}
     >
       {images.map((src, index) => {

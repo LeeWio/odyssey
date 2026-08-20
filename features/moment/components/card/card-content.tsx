@@ -75,6 +75,51 @@ export const CardContent = ({
     ));
   }, [imageUrls, onCardClick]);
 
+  // Case 0: Single Image layout (Render standard, non-cropped high-fidelity image)
+  if (count === 1) {
+    return (
+      <div className="flex flex-col gap-3">
+        <RichTextEditor
+          key={momentId}
+          isReadOnly
+          defaultValue={parsedContent}
+          className="h-auto min-h-0 w-full"
+        >
+          <RichTextEditor.Shell className="h-auto min-h-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
+            <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0" />
+          </RichTextEditor.Shell>
+        </RichTextEditor>
+
+        {topics.length > 0 && (
+          <TagGroup aria-label="Topics" size="sm" selectionMode="none">
+            <TagGroup.List className="flex flex-wrap gap-1.5">
+              {topics.map((topic) => (
+                <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
+                  #{topic.slug}
+                </Tag>
+              ))}
+            </TagGroup.List>
+          </TagGroup>
+        )}
+
+        <div
+          className="bg-surface-secondary border-separator/10 relative mt-1 max-w-full cursor-pointer self-center overflow-hidden rounded-2xl border shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99] sm:max-w-[360px] sm:self-start"
+          onClick={() => onCardClick?.(0)}
+        >
+          <Image
+            src={imageUrls[0]}
+            alt="moment-image"
+            width={360}
+            height={360}
+            unoptimized
+            className="pointer-events-none h-auto max-h-[360px] w-full object-contain"
+            draggable={false}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // Case 1: Stack layout (Side-by-side on wide screens, vertical on mobile)
   if (galleryStyle === "stack" && count > 0) {
     return (
@@ -110,6 +155,9 @@ export const CardContent = ({
             randomRotation={true}
             sensitivity={200}
             sendToBackOnClick={false}
+            autoplay
+            autoplayDelay={3000}
+            pauseOnHover
           />
         </div>
       </div>
