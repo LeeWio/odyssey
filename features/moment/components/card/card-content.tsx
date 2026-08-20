@@ -15,6 +15,22 @@ interface CardContentProps {
   onCardClick?: (index: number) => void;
 }
 
+const getDynamicCardSize = (count: number) => {
+  if (count === 1) return 240;
+  if (count === 2) return 130;
+  if (count === 3) return 110;
+  if (count === 4) return 94;
+  return 82;
+};
+
+const getDynamicContainerHeight = (count: number) => {
+  if (count === 1) return 240;
+  if (count === 2) return 140;
+  if (count === 3) return 120;
+  if (count === 4) return 110;
+  return 108;
+};
+
 export const CardContent = ({
   momentId,
   parsedContent,
@@ -22,6 +38,10 @@ export const CardContent = ({
   topics,
   onCardClick,
 }: CardContentProps) => {
+  const count = imageUrls.length;
+  const cardSize = getDynamicCardSize(count);
+  const containerHeight = getDynamicContainerHeight(count);
+
   return (
     <div className="flex flex-col gap-3">
       <RichTextEditor
@@ -47,16 +67,16 @@ export const CardContent = ({
         </TagGroup>
       )}
 
-      {imageUrls.length > 0 && (
+      {count > 0 && (
         <div className="flex w-full -translate-x-1 justify-center">
           <BounceCards
             images={imageUrls}
-            cardSize={82}
+            cardSize={cardSize}
             containerWidth={360}
-            containerHeight={108}
+            containerHeight={containerHeight}
             animationDelay={0.2}
             animationStagger={0.045}
-            transformStyles={getTransformStyles(imageUrls.length)}
+            transformStyles={getTransformStyles(count)}
             enableHover={true}
             onCardClick={onCardClick}
           />

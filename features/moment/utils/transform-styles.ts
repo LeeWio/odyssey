@@ -2,20 +2,28 @@ export const getTransformStyles = (count: number) => {
   const cappedCount = Math.min(count, 8);
 
   if (cappedCount === 1) return ["rotate(0deg)"];
+
   if (cappedCount === 2) {
-    return ["rotate(-3deg) translateX(-45px)", "rotate(3deg) translateX(45px)"];
+    return ["rotate(-4deg) translateX(-50px)", "rotate(4deg) translateX(50px)"];
   }
+
   if (cappedCount === 3) {
-    return ["rotate(-4deg) translateX(-90px)", "rotate(1deg)", "rotate(3deg) translateX(90px)"];
-  }
-  if (cappedCount === 4) {
     return [
-      "rotate(-4deg) translateX(-110px)",
-      "rotate(-1deg) translateX(-36px)",
-      "rotate(2deg) translateX(36px)",
-      "rotate(3deg) translateX(110px)",
+      "rotate(-5deg) translateX(-90px) translateY(2px)",
+      "rotate(1deg) translateY(-4px)",
+      "rotate(4deg) translateX(90px) translateY(2px)",
     ];
   }
+
+  if (cappedCount === 4) {
+    return [
+      "rotate(-6deg) translateX(-110px) translateY(4px)",
+      "rotate(-2deg) translateX(-38px) translateY(-3px)",
+      "rotate(2deg) translateX(38px) translateY(-3px)",
+      "rotate(5deg) translateX(110px) translateY(4px)",
+    ];
+  }
+
   if (cappedCount === 5) {
     return [
       "rotate(4deg) translateX(-120px)",
@@ -25,6 +33,7 @@ export const getTransformStyles = (count: number) => {
       "rotate(-5deg) translateX(118px)",
     ];
   }
+
   if (cappedCount === 6) {
     return [
       "rotate(4deg) translateX(-125px)",
@@ -35,6 +44,7 @@ export const getTransformStyles = (count: number) => {
       "rotate(3deg) translateX(125px)",
     ];
   }
+
   if (cappedCount === 7) {
     return [
       "rotate(-4deg) translateX(-132px)",
@@ -46,6 +56,7 @@ export const getTransformStyles = (count: number) => {
       "rotate(-5deg) translateX(132px)",
     ];
   }
+
   // 8 images (Capped limit)
   return [
     "rotate(4deg) translateX(-140px)",

@@ -28,7 +28,7 @@ export const CarouselModal = ({ images, activeIndex, onClose }: CarouselModalPro
         onOpenChange={(open) => !open && onClose()}
         variant="blur"
       >
-        <Modal.Container size="md">
+        <Modal.Container size="cover">
           <Modal.Dialog aria-label="Image viewer">
             <Modal.CloseTrigger className="z-50" />
             <Modal.Body>

@@ -11,15 +11,15 @@ describe("Moment Card Utility Helpers", () => {
     it("handles 2 images with balanced offsets", () => {
       const styles = getTransformStyles(2);
       expect(styles).toHaveLength(2);
-      expect(styles[0]).toContain("rotate(-3deg)");
-      expect(styles[1]).toContain("rotate(3deg)");
+      expect(styles[0]).toContain("rotate(-4deg)");
+      expect(styles[1]).toContain("rotate(4deg)");
     });
 
     it("handles 3 images with center image straight", () => {
       const styles = getTransformStyles(3);
       expect(styles).toHaveLength(3);
       expect(styles[0]).toContain("translateX(-90px)");
-      expect(styles[1]).toBe("rotate(1deg)");
+      expect(styles[1]).toBe("rotate(1deg) translateY(-4px)");
       expect(styles[2]).toContain("translateX(90px)");
     });
 
