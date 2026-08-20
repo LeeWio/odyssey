@@ -18,7 +18,7 @@ import { TableMenu } from "./menus/table-menu/table-menu";
 import { TextMenu } from "./menus/text-menu/text-menu";
 import { RichTextTableOfContents } from "./table-of-contents";
 import { EditorFooter } from "./editor-footer";
-import { BlockDragHandle } from "./block-drag-handle";
+import { ContentItemMenu } from "./menus/content-item-menu";
 import { MediaInsertDialog } from "./media-insert-dialog";
 
 export interface RichTextProps {
@@ -85,7 +85,7 @@ export function RichText({
         <TableMenu />
         <MathMenu />
         <ColumnsMenu />
-        <BlockDragHandle />
+        <ContentItemMenu />
         <MediaInsertDialog />
         <RichTextEditor.Content
           id={scrollContainerId}

@@ -53,7 +53,8 @@ describe("Columns commands", () => {
     expect(editor.commands.setColumnCount(2)).toBe(true);
 
     const json = editor.getJSON();
-    const columns = json.content?.find((node) => node.type === "columns");
+    const columns = json.content?.find((node) => node.type === "columns") as
+      JSONContent | undefined;
 
     // The second column should only have ONE child paragraph
     const secondColumn = columns?.content?.[1];

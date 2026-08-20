@@ -134,6 +134,70 @@ function moveToAdjacentColumn(
   return true;
 }
 
+function exitColumns(
+  state: EditorState,
+  dispatch: ((tr: Transaction) => void) | undefined
+): boolean {
+  const { selection } = state;
+  const columnsType = state.schema.nodes.columns;
+
+  if (!columnsType || !selection.empty) {
+    return false;
+  }
+
+  const context = findColumnsContext(state.doc, selection, columnsType);
+
+  if (!context) {
+    return false;
+  }
+
+  const { $from } = selection;
+  const isLastColumn = context.columnIndex === context.node.childCount - 1;
+
+  if (!isLastColumn) {
+    return false;
+  }
+
+  const currentColumn = context.node.child(context.columnIndex);
+  const currentBlock = $from.parent;
+
+  if (
+    currentBlock.isTextblock &&
+    currentBlock.content.size === 0 &&
+    currentColumn.lastChild === currentBlock
+  ) {
+    if (dispatch) {
+      const { tr } = state;
+      const defaultBlockType =
+        state.schema.nodes.paragraph || state.schema.nodes.column.contentMatch.defaultType;
+
+      if (!defaultBlockType) return false;
+
+      const newBlock = defaultBlockType.createAndFill();
+      if (!newBlock) return false;
+
+      const insertPos = context.pos + context.node.nodeSize;
+      tr.insert(insertPos, newBlock);
+
+      let selectionPos = insertPos + 1;
+
+      if (currentColumn.childCount > 1) {
+        const fromBefore = $from.before();
+        const fromAfter = $from.after();
+        tr.delete(fromBefore, fromAfter);
+        selectionPos -= fromAfter - fromBefore;
+      }
+
+      tr.setSelection(Selection.near(tr.doc.resolve(selectionPos), 1));
+      tr.scrollIntoView();
+      dispatch(tr);
+    }
+    return true;
+  }
+
+  return false;
+}
+
 function setSelectionInsideColumns(
   tr: Transaction,
   columnsPos: number,
@@ -235,6 +299,7 @@ export const Columns = Node.create<ColumnsOptions>({
         moveToAdjacentColumn(this.editor.state, this.editor.view.dispatch, 1),
       "Mod-Alt-ArrowLeft": () =>
         moveToAdjacentColumn(this.editor.state, this.editor.view.dispatch, -1),
+      Enter: () => exitColumns(this.editor.state, this.editor.view.dispatch),
     };
   },
 
@@ -329,7 +394,13 @@ export const Columns = Node.create<ColumnsOptions>({
 
           const range = $from.blockRange($to);
 
-          if (!range || range.depth !== 0) {
+          if (!range) {
+            return false;
+          }
+
+          const parent = $from.node(range.depth);
+
+          if (!parent.canReplaceWith(range.startIndex, range.endIndex, columnsType)) {
             return false;
           }
 

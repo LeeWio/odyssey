@@ -1,6 +1,6 @@
 "use client";
 
-import {
+import React, {
   useCallback,
   useEffect,
   useId,
@@ -30,6 +30,63 @@ function haveSameWidths(first: number[], second: number[]) {
     first.every((width, index) => Math.abs(width - second[index]) < 0.01)
   );
 }
+
+interface ColumnsResizeOverlayProps {
+  groupId: string;
+  persistedWidths: number[];
+  panelIds: string[];
+  onLayoutChange: (layout: Layout) => void;
+  onPointerDownCapture: () => void;
+  onKeyUpCapture: () => void;
+}
+
+const ColumnsResizeOverlay = React.memo(function ColumnsResizeOverlay({
+  groupId,
+  persistedWidths,
+  panelIds,
+  onLayoutChange,
+  onPointerDownCapture,
+  onKeyUpCapture,
+}: ColumnsResizeOverlayProps) {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-10" contentEditable={false}>
+      <Resizable
+        className="pointer-events-none [--resizable-handle-hit-area:1rem] [--resizable-handle-size:1rem]"
+        id={groupId}
+        onKeyUpCapture={onKeyUpCapture}
+        onLayoutChange={onLayoutChange}
+        onPointerDownCapture={onPointerDownCapture}
+        orientation="horizontal"
+      >
+        {persistedWidths.flatMap((width, index) => {
+          const panel = (
+            <Resizable.Panel
+              key={panelIds[index]}
+              className="pointer-events-none"
+              defaultSize={width}
+              id={panelIds[index]}
+              minSize={15}
+            />
+          );
+
+          if (index === persistedWidths.length - 1) return [panel];
+
+          return [
+            panel,
+            <Resizable.Handle
+              key={`${panelIds[index]}-handle`}
+              aria-label={`Resize columns ${index + 1} and ${index + 2}`}
+              className="pointer-events-auto"
+              id={`${panelIds[index]}-handle`}
+              type="handle"
+              variant="tertiary"
+            />,
+          ];
+        })}
+      </Resizable>
+    </div>
+  );
+});
 
 export function ColumnsNodeView({ editor, getPos, node, updateAttributes }: NodeViewProps) {
   const groupId = useId();
@@ -88,6 +145,22 @@ export function ColumnsNodeView({ editor, getPos, node, updateAttributes }: Node
 
   useEffect(() => () => cleanupResizeRef.current(), []);
 
+  const handleLayoutChange = useCallback(
+    (layout: Layout) => {
+      const layoutWidths = panelIds.map((panelId) => layout[panelId]);
+
+      if (layoutWidths.some((width) => !Number.isFinite(width))) return;
+
+      const widths = normalizeColumnWidths(layoutWidths, node.childCount);
+      pendingWidthsRef.current = widths;
+
+      if (!haveSameWidths(widths, persistedWidths)) {
+        setPreviewWidths(widths);
+      }
+    },
+    [panelIds, node.childCount, persistedWidths]
+  );
+
   const style: ColumnsStyle = {
     "--column-widths": getColumnGridTemplate(displayedWidths),
   };
@@ -103,54 +176,15 @@ export function ColumnsNodeView({ editor, getPos, node, updateAttributes }: Node
       <NodeViewContent className="contents *:grid *:[grid-template-columns:var(--column-widths)] *:gap-4" />
 
       {isColumnsActive && editor.isEditable && (
-        <div className="pointer-events-none absolute inset-0 z-10" contentEditable={false}>
-          <Resizable
-            key={layoutKey}
-            className="pointer-events-none [--resizable-handle-hit-area:1rem] [--resizable-handle-size:1rem]"
-            id={groupId}
-            onKeyUpCapture={commitPendingWidths}
-            onLayoutChange={(layout: Layout) => {
-              const layoutWidths = panelIds.map((panelId) => layout[panelId]);
-
-              if (layoutWidths.some((width) => !Number.isFinite(width))) return;
-
-              const widths = normalizeColumnWidths(layoutWidths, node.childCount);
-              pendingWidthsRef.current = widths;
-
-              if (!haveSameWidths(widths, persistedWidths)) {
-                setPreviewWidths(widths);
-              }
-            }}
-            onPointerDownCapture={beginPointerResize}
-            orientation="horizontal"
-          >
-            {persistedWidths.flatMap((width, index) => {
-              const panel = (
-                <Resizable.Panel
-                  key={panelIds[index]}
-                  className="pointer-events-none"
-                  defaultSize={width}
-                  id={panelIds[index]}
-                  minSize={15}
-                />
-              );
-
-              if (index === persistedWidths.length - 1) return [panel];
-
-              return [
-                panel,
-                <Resizable.Handle
-                  key={`${panelIds[index]}-handle`}
-                  aria-label={`Resize columns ${index + 1} and ${index + 2}`}
-                  className="pointer-events-auto"
-                  id={`${panelIds[index]}-handle`}
-                  type="handle"
-                  variant="tertiary"
-                />,
-              ];
-            })}
-          </Resizable>
-        </div>
+        <ColumnsResizeOverlay
+          key={layoutKey}
+          groupId={groupId}
+          persistedWidths={persistedWidths}
+          panelIds={panelIds}
+          onLayoutChange={handleLayoutChange}
+          onPointerDownCapture={beginPointerResize}
+          onKeyUpCapture={commitPendingWidths}
+        />
       )}
     </NodeViewWrapper>
   );

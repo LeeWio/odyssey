@@ -1,6 +1,5 @@
 "use client";
 
-import { Button, Popover } from "@heroui/react";
 import {
   RichTextEditor,
   Segment,
@@ -112,7 +111,7 @@ export function ColumnsMenu() {
           aria-label="Column count"
           selectedKey={columnCount ? String(columnCount) : null}
           size="sm"
-          variant="ghost"
+          variant="default"
           onSelectionChange={(key) => {
             const count = Number(key);
 
@@ -120,46 +119,31 @@ export function ColumnsMenu() {
           }}
         >
           <Segment.Item aria-label="Two columns" id="2">
-            <Icon aria-hidden="true" icon="gravity-ui:layout-columns" />2
+            <Icon aria-hidden="true" icon="gravity-ui:layout-split-columns" />
           </Segment.Item>
           <Segment.Item aria-label="Three columns" id="3">
-            <Icon aria-hidden="true" icon="gravity-ui:layout-columns-3" />3
+            <Icon aria-hidden="true" icon="gravity-ui:layout-split-columns-3" />
           </Segment.Item>
         </Segment>
 
-        <RichTextEditor.ToolbarSeparator orientation="vertical" />
-
-        <Popover>
-          <Button aria-label="Choose column widths" size="sm" variant="ghost">
-            <Icon aria-hidden="true" icon="gravity-ui:sliders" />
-            Layout
-          </Button>
-          <Popover.Content className="w-max" placement="top">
-            <Popover.Dialog className="flex flex-col gap-2 p-2">
-              <Popover.Arrow />
-              <Popover.Heading className="px-1 text-sm">Column widths</Popover.Heading>
-              <Segment
-                aria-label="Column width preset"
-                selectedKey={columnState?.activePreset}
-                size="sm"
-                onSelectionChange={(key) => setLayoutPreset(String(key) as ColumnLayoutPreset)}
-              >
-                {availableLayoutOptions.map(({ label, preset }) => (
-                  <Segment.Item key={preset} id={preset}>
-                    {label}
-                  </Segment.Item>
-                ))}
-              </Segment>
-            </Popover.Dialog>
-          </Popover.Content>
-        </Popover>
-
-        <RichTextEditor.ToolbarSeparator orientation="vertical" />
+        <Segment
+          aria-label="Column width preset"
+          selectedKey={columnState?.activePreset}
+          size="sm"
+          onSelectionChange={(key) => setLayoutPreset(String(key) as ColumnLayoutPreset)}
+        >
+          {availableLayoutOptions.map(({ label, preset }) => (
+            <Segment.Item key={preset} id={preset}>
+              {label}
+            </Segment.Item>
+          ))}
+        </Segment>
 
         <RichTextEditor.CommandButton
           aria-label="Remove column layout"
           tooltip="Remove column layout"
-          onCommand={(currentEditor) => currentEditor.chain().focus().unsetColumns().run()}
+          variant="danger"
+          onCommand={(editor) => editor.chain().focus().unsetColumns().run()}
         >
           <Icon aria-hidden="true" icon="gravity-ui:scissors" />
         </RichTextEditor.CommandButton>
