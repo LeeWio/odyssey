@@ -430,7 +430,18 @@ export const Columns = Node.create<ColumnsOptions>({
               let mergedContent = columnNode.content;
 
               for (let remainder = count; remainder < currentCount; remainder += 1) {
-                mergedContent = mergedContent.append(context.node.child(remainder).content);
+                const remainderNode = context.node.child(remainder);
+
+                if (!isEmptyPlaceholderColumn(remainderNode)) {
+                  if (
+                    isEmptyPlaceholderColumn(columnNode) &&
+                    mergedContent === columnNode.content
+                  ) {
+                    mergedContent = remainderNode.content;
+                  } else {
+                    mergedContent = mergedContent.append(remainderNode.content);
+                  }
+                }
               }
 
               columnNode = columnNode.copy(mergedContent);

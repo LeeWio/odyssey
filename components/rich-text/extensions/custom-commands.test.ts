@@ -46,6 +46,20 @@ describe("Indent commands", () => {
 });
 
 describe("Columns commands", () => {
+  it("does not add an extra empty block when reducing column count", () => {
+    const editor = createEditor({ type: "doc", content: [{ type: "paragraph" }] });
+
+    expect(editor.commands.insertColumns(3)).toBe(true);
+    expect(editor.commands.setColumnCount(2)).toBe(true);
+
+    const json = editor.getJSON();
+    const columns = json.content?.find((node) => node.type === "columns");
+
+    // The second column should only have ONE child paragraph
+    const secondColumn = columns?.content?.[1];
+    expect(secondColumn?.content?.length).toBe(1);
+  });
+
   it("inserts columns, changes count and normalizes widths", () => {
     const editor = createEditor({ type: "doc", content: [{ type: "paragraph" }] });
 
