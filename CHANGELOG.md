@@ -1,3 +1,10 @@
+## [1.92.2](https://github.com/LeeWio/odyssey/compare/v1.92.1...v1.92.2) (2026-08-20)
+
+
+### Bug Fixes
+
+* **rich-text:** prevent extra empty block when reducing column count ([a6494f8](https://github.com/LeeWio/odyssey/commit/a6494f889bc6fc187501fb424feea99af721ee54))
+
 ## [1.92.1](https://github.com/LeeWio/odyssey/compare/v1.92.0...v1.92.1) (2026-08-19)
 
 
