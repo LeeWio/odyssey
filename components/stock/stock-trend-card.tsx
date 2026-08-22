@@ -89,7 +89,7 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
               <span
                 className={cn(
                   "cursor-pointer text-sm font-semibold transition-all hover:scale-105",
-                  isUp ? "text-green-500" : "text-danger-500"
+                  isUp ? "text-danger" : "text-success"
                 )}
               >
                 {isUp ? "+" : ""}

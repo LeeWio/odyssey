@@ -137,8 +137,14 @@ export const CardContent = ({
         </div>
 
         {/* Right Side: Stack component at the trailing end */}
-        <div className="mt-2 mr-2 h-28 w-28 shrink-0 sm:h-32 sm:w-32">
-          <Stack randomRotation sendToBackOnClick={false} cards={stackCards} />
+        <div className="h-28 w-28 shrink-0 sm:h-32 sm:w-32">
+          <Stack
+            autoplay={true}
+            pauseOnHover={true}
+            randomRotation
+            sendToBackOnClick={false}
+            cards={stackCards}
+          />
         </div>
       </div>
     );
