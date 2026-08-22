@@ -76,7 +76,7 @@ export const CardContent = ({
           <BounceCards
             images={imageUrls}
             cardSize={cardSize}
-            containerWidth={360}
+            containerWidth={280}
             containerHeight={containerHeight}
             animationDelay={0.2}
             animationStagger={0.045}

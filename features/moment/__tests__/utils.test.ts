@@ -18,44 +18,44 @@ describe("Moment Card Utility Helpers", () => {
     it("handles 3 images with center image straight", () => {
       const styles = getTransformStyles(3);
       expect(styles).toHaveLength(3);
-      expect(styles[0]).toContain("translateX(-90px)");
+      expect(styles[0]).toContain("translateX(-60px)");
       expect(styles[1]).toBe("rotate(1deg) translateY(-4px)");
-      expect(styles[2]).toContain("translateX(90px)");
+      expect(styles[2]).toContain("translateX(60px)");
     });
 
     it("handles 4 images", () => {
       const styles = getTransformStyles(4);
       expect(styles).toHaveLength(4);
-      expect(styles[0]).toContain("translateX(-110px)");
-      expect(styles[3]).toContain("translateX(110px)");
+      expect(styles[0]).toContain("translateX(-75px)");
+      expect(styles[3]).toContain("translateX(75px)");
     });
 
     it("handles 5 images", () => {
       const styles = getTransformStyles(5);
       expect(styles).toHaveLength(5);
-      expect(styles[0]).toContain("translateX(-120px)");
-      expect(styles[4]).toContain("translateX(118px)");
+      expect(styles[0]).toContain("translateX(-80px)");
+      expect(styles[4]).toContain("translateX(80px)");
     });
 
     it("handles 6 images", () => {
       const styles = getTransformStyles(6);
       expect(styles).toHaveLength(6);
-      expect(styles[0]).toContain("translateX(-125px)");
-      expect(styles[5]).toContain("translateX(125px)");
+      expect(styles[0]).toContain("translateX(-85px)");
+      expect(styles[5]).toContain("translateX(85px)");
     });
 
     it("handles 7 images", () => {
       const styles = getTransformStyles(7);
       expect(styles).toHaveLength(7);
-      expect(styles[0]).toContain("translateX(-132px)");
-      expect(styles[6]).toContain("translateX(132px)");
+      expect(styles[0]).toContain("translateX(-90px)");
+      expect(styles[6]).toContain("translateX(90px)");
     });
 
     it("handles 8 images and caps larger values to 8", () => {
       const styles = getTransformStyles(8);
       expect(styles).toHaveLength(8);
-      expect(styles[0]).toContain("translateX(-140px)");
-      expect(styles[7]).toContain("translateX(140px)");
+      expect(styles[0]).toContain("translateX(-95px)");
+      expect(styles[7]).toContain("translateX(95px)");
 
       const overLimitStyles = getTransformStyles(12);
       expect(overLimitStyles).toHaveLength(8);
