@@ -1,3 +1,10 @@
+# [1.116.0](https://github.com/LeeWio/odyssey/compare/v1.115.0...v1.116.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** integrate Stack component for moment card gallery with horizontal layout when images count > 3 ([6b2fc35](https://github.com/LeeWio/odyssey/commit/6b2fc35cba2c0b89a9ce1c1626dc178850d32ae5))
+
 # [1.115.0](https://github.com/LeeWio/odyssey/compare/v1.114.0...v1.115.0) (2026-08-22)
 
 
