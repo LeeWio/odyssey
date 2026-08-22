@@ -91,7 +91,6 @@ const Masonry: React.FC<MasonryProps> = ({
 
   const [containerRef, { width }] = useMeasure<HTMLDivElement>();
   const [imagesReady, setImagesReady] = useState(false);
-  const [grid, setGrid] = useState<GridItem[]>([]);
   const hasMounted = useRef(false);
 
   const getInitialPosition = (item: GridItem) => {
@@ -210,7 +209,6 @@ const Masonry: React.FC<MasonryProps> = ({
     });
 
     hasMounted.current = true;
-    setGrid(computedGrid);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, items, imagesReady, columns]);
 
@@ -238,7 +236,7 @@ const Masonry: React.FC<MasonryProps> = ({
 
   return (
     <div ref={containerRef} className="relative h-full min-h-[500px] w-full">
-      {grid.map((item) => {
+      {items.map((item) => {
         // Fallback calculations for the initial first paint
         const gap = 24;
         const totalGaps = (columns - 1) * gap;
