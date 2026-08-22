@@ -1,7 +1,10 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 import { MomentCard } from "@/features/moment/components/card/moment-card";
 import type { MomentResponse, MomentImageResponse } from "@/lib/features/moment";
+
+gsap.registerPlugin(useGSAP);
 
 const useMedia = (queries: string[], values: number[], defaultValue: number): number => {
   const get = () => {
@@ -101,10 +104,7 @@ const Masonry: React.FC<MasonryProps> = ({
   const [containerRef, { width }] = useMeasure<HTMLDivElement>();
   const [imagesReady, setImagesReady] = useState(false);
   const hasMounted = useRef(false);
-
-  // Persistent GSAP Context reference to ensure garbage collection ONLY on component unmount
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ctxRef = useRef<any>(null);
+  const prevGridRef = useRef<GridItem[]>([]);
 
   const getInitialPosition = (item: GridItem) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
@@ -146,65 +146,84 @@ const Masonry: React.FC<MasonryProps> = ({
       }
     });
     preloadImages(urls).then(() => setImagesReady(true));
-     
   }, [items]);
 
-  // Cleanly dispose and revert all active GSAP animations ONLY when the component completely unmounts!
-  useEffect(() => {
-    return () => {
-      if (ctxRef.current) {
-        ctxRef.current.revert();
-      }
-    };
-  }, []);
+  // High-performance real-time DOM measuring layout calculations using the useGSAP hook
+  const { contextSafe } = useGSAP(
+    () => {
+      if (!imagesReady || !width) return;
 
-  // High-performance real-time DOM measuring layout calculations
-  useLayoutEffect(() => {
-    if (!imagesReady || !width) return;
+      const runLayout = () => {
+        const colHeights = new Array(columns).fill(0);
+        const gap = 24; // Spacious premium gap
+        const totalGaps = (columns - 1) * gap;
+        const columnWidth = (width - totalGaps) / columns;
 
-    // Encapsulate layout packing and GSAP flight tweens into a reusable reflow function
-    const runLayout = () => {
-      const colHeights = new Array(columns).fill(0);
-      const gap = 24; // Spacious premium gap
-      const totalGaps = (columns - 1) * gap;
-      const columnWidth = (width - totalGaps) / columns;
+        const computedGrid = items.map((item) => {
+          const element = containerRef.current?.querySelector(
+            `[data-key="${item.id}"]`
+          ) as HTMLElement;
+          const innerCard = element?.firstElementChild as HTMLElement;
 
-      const computedGrid = items.map((item) => {
-        const element = containerRef.current?.querySelector(
-          `[data-key="${item.id}"]`
-        ) as HTMLElement;
-        const innerCard = element?.firstElementChild as HTMLElement;
+          // Measure real fractional height using getBoundingClientRect() to avoid rounding overlap errors
+          const actualHeight = innerCard ? innerCard.getBoundingClientRect().height : 320;
 
-        // Measure real offsetHeight, fallback to a standard card height approximation
-        const actualHeight = innerCard ? innerCard.offsetHeight : 320;
+          // Classically distribute items dynamically into the currently shortest column (Greedy Packing Algorithm)
+          const col = colHeights.indexOf(Math.min(...colHeights));
+          const x = col * (columnWidth + gap);
+          const y = colHeights[col];
 
-        // Classically distribute items dynamically into the currently shortest column (Greedy Packing Algorithm)
-        const col = colHeights.indexOf(Math.min(...colHeights));
-        const x = col * (columnWidth + gap);
-        const y = colHeights[col];
+          // Update single column height
+          colHeights[col] += actualHeight + gap;
 
-        // Update single column height
-        colHeights[col] += actualHeight + gap;
+          return {
+            ...item,
+            x,
+            y,
+            w: columnWidth,
+            h: actualHeight,
+          };
+        });
 
-        return {
-          ...item,
-          x,
-          y,
-          w: columnWidth,
-          h: actualHeight,
+        // Check if layout has actually changed before running any animations or updating DOM styles.
+        // This prevents redundant ResizeObserver initial fires from canceling ongoing staggered entry animations.
+        const isLayoutIdentical = () => {
+          const oldGrid = prevGridRef.current;
+          if (oldGrid.length !== computedGrid.length) return false;
+          for (let i = 0; i < computedGrid.length; i++) {
+            const n = computedGrid[i];
+            const o = oldGrid[i];
+            if (
+              n.id !== o.id ||
+              Math.abs(n.x - o.x) > 0.1 ||
+              Math.abs(n.y - o.y) > 0.1 ||
+              Math.abs(n.w - o.w) > 0.1 ||
+              Math.abs(n.h - o.h) > 0.1
+            ) {
+              return false;
+            }
+          }
+          return true;
         };
-      });
 
-      // Stretch parent container style height to match the tallest column perfectly
-      if (containerRef.current) {
-        containerRef.current.style.height = `${Math.max(...colHeights)}px`;
-      }
+        if (hasMounted.current && isLayoutIdentical()) {
+          return;
+        }
 
-      // Wrap GSAP animations in a clean GSAP Context and store reference without rendering-revert!
-      const ctx = gsap.context(() => {
+        // Cache the latest layout grid
+        prevGridRef.current = computedGrid;
+
+        // Stretch parent container style height to match the tallest column perfectly
+        if (containerRef.current) {
+          containerRef.current.style.height = `${Math.max(...colHeights)}px`;
+        }
+
+        // Animate positions cleanly.
+        // DO NOT animate 'width' or 'height' with GSAP to avoid layout thrashing and infinite ResizeObserver loop feedback!
+        // The container width is already set instantly by React's style, so the card naturally reflows and calculates the correct height.
         computedGrid.forEach((item, index) => {
           const selector = `[data-key="${item.id}"]`;
-          const animProps = { x: item.x, y: item.y, width: item.w };
+          const animProps = { x: item.x, y: item.y };
 
           if (!hasMounted.current) {
             const start = getInitialPosition(item);
@@ -214,7 +233,6 @@ const Masonry: React.FC<MasonryProps> = ({
                 opacity: 0,
                 x: start.x,
                 y: start.y,
-                width: item.w,
                 filter: "blur(8px)",
               },
               {
@@ -236,34 +254,39 @@ const Masonry: React.FC<MasonryProps> = ({
             });
           }
         });
-      }, containerRef);
 
-      hasMounted.current = true;
-      ctxRef.current = ctx; // Update active context reference
-    };
+        hasMounted.current = true;
+      };
 
-    // Run the initial layout calculation
-    runLayout();
-
-    // Dynamically observe ONLY the inner card elements ([data-key] > div)
-    // This catches dynamic image loads, skeleton-to-chart swaps, text expansion, etc.
-    // while perfectly avoiding loop-back triggers from our wrapper size writes!
-    const resizeObserver = new ResizeObserver(() => {
+      // Run initial layout
       runLayout();
-    });
 
-    // Observe each card's inner element
-    const innerCards = containerRef.current?.querySelectorAll("[data-key] > div");
-    innerCards?.forEach((card) => resizeObserver.observe(card));
+      // Set up ResizeObserver to observe when inner card height changes (e.g. image loads, text reflow, comments toggled)
+      // Throttled with requestAnimationFrame to prevent layout thrashing and align reflows with monitor refresh rate.
+      let rAFId: number;
+      const resizeObserver = new ResizeObserver(() => {
+        cancelAnimationFrame(rAFId);
+        rAFId = requestAnimationFrame(() => {
+          runLayout();
+        });
+      });
 
-    // Clean up observer on re-layout or unmount
-    return () => {
-      resizeObserver.disconnect();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, items, imagesReady, columns]);
+      // Observe each card's inner element
+      const innerCards = containerRef.current?.querySelectorAll("[data-key] > div");
+      innerCards?.forEach((card) => resizeObserver.observe(card));
 
-  const handleMouseEnter = (id: string) => {
+      return () => {
+        resizeObserver.disconnect();
+        cancelAnimationFrame(rAFId);
+      };
+    },
+    {
+      dependencies: [width, items, imagesReady, columns],
+      scope: containerRef,
+    }
+  );
+
+  const handleMouseEnter = contextSafe((id: string) => {
     if (scaleOnHover) {
       gsap.to(`[data-key="${id}"]`, {
         scale: hoverScale,
@@ -272,9 +295,9 @@ const Masonry: React.FC<MasonryProps> = ({
         overwrite: "auto",
       });
     }
-  };
+  });
 
-  const handleMouseLeave = (id: string) => {
+  const handleMouseLeave = contextSafe((id: string) => {
     if (scaleOnHover) {
       gsap.to(`[data-key="${id}"]`, {
         scale: 1,
@@ -283,7 +306,7 @@ const Masonry: React.FC<MasonryProps> = ({
         overwrite: "auto",
       });
     }
-  };
+  });
 
   return (
     <div ref={containerRef} className="relative h-full min-h-[500px] w-full">
@@ -300,7 +323,7 @@ const Masonry: React.FC<MasonryProps> = ({
             className="absolute box-content"
             style={{
               width: columnWidth,
-              willChange: "transform, width, height, opacity",
+              willChange: "transform, opacity",
               opacity: imagesReady ? 1 : 0, // Prevent flash of raw layout before measuring
             }}
             onMouseEnter={() => handleMouseEnter(item.id)}
