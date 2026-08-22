@@ -53,7 +53,7 @@ import {
 } from "@/lib/features/library";
 import type { PostDigestResponse } from "@/lib/features/post";
 import { getReadingPositionHref } from "@/lib/reading-position";
-import { formatRelativeTime } from "@/lib/relative-time";
+import { useRelativeTime } from "@/lib/relative-time";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
@@ -142,6 +142,7 @@ function RecommendedCard({
 }
 
 function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
+  const formatRelativeTime = useRelativeTime();
   const { lastReadAt, post, positionAnchor, progressPercent } = entry;
   const href = getReadingPositionHref(post.slug, positionAnchor);
 
@@ -363,6 +364,7 @@ function CollectionCard({
 }
 
 export function LibraryPage() {
+  const formatRelativeTime = useRelativeTime();
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [historyPage, setHistoryPage] = useState(0);

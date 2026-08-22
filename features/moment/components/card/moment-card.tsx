@@ -13,7 +13,7 @@ import {
   useGetPublicMomentsQuery,
   useDeleteMomentMutation,
 } from "@/lib/features/moment";
-import { formatRelativeTime } from "@/lib/relative-time";
+import { useRelativeTime } from "@/lib/relative-time";
 import { CommentSystem } from "@/components/comment";
 
 import { parseMomentContent } from "../../utils/content-parser";
@@ -46,6 +46,7 @@ interface MomentCardProps {
 }
 
 export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: MomentCardProps) => {
+  const formatRelativeTime = useRelativeTime();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isAdmin = useAppSelector(selectIsAdmin);
 

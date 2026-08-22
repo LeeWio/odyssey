@@ -5,7 +5,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { Card, Skeleton } from "@heroui/react";
 
 import { useGetGuestbookEntriesQuery } from "@/lib/features/comment";
-import { formatRelativeTime } from "@/lib/relative-time";
+import { useRelativeTime } from "@/lib/relative-time";
 import ScrollingBanner from "./scrolling-banner";
 import GuestbookCard from "./guestbook-card";
 
@@ -119,6 +119,7 @@ function GuestbookSkeletonCard() {
 }
 
 export default function GuestbookBoard() {
+  const formatRelativeTime = useRelativeTime();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { data: rawEntries = [], isLoading } = useGetGuestbookEntriesQuery();
 
@@ -132,7 +133,7 @@ export default function GuestbookBoard() {
 
     // Prepend live entries to the default entries to ensure scroll banner has enough items
     return [...live, ...defaultEntries];
-  }, [rawEntries]);
+  }, [rawEntries, formatRelativeTime]);
 
   const columns = React.useMemo(() => {
     const cols: GuestbookEntry[][] = [[], [], [], []];

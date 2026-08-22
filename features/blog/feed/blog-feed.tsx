@@ -28,7 +28,7 @@ import { selectIsAuthenticated } from "@/lib/features/auth";
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
-import { formatRelativeTime } from "@/lib/relative-time";
+import { useRelativeTime } from "@/lib/relative-time";
 
 const PAGE_SIZE = 8;
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -177,6 +177,7 @@ function FeedSkeleton() {
 }
 
 function ContinueReading({ entries }: { entries: ReadingHistoryResponse[] }) {
+  const formatRelativeTime = useRelativeTime();
   return (
     <section aria-labelledby="continue-reading-title" className="mt-12">
       <div className="mb-5 flex items-end justify-between gap-4">

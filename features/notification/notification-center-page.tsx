@@ -22,7 +22,7 @@ import {
   getNotificationIcon,
   getNotificationTypeLabel,
 } from "@/lib/notification-presentation";
-import { formatRelativeTime } from "@/lib/relative-time";
+import { useRelativeTime } from "@/lib/relative-time";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
@@ -63,6 +63,7 @@ function NotificationEmptyState({ unreadOnly }: { unreadOnly: boolean }) {
 }
 
 export function NotificationCenterPage() {
+  const formatRelativeTime = useRelativeTime();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);

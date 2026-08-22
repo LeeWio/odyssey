@@ -25,7 +25,7 @@ import {
   useMarkNotificationAsReadMutation,
 } from "@/lib/features/notification";
 import { getNotificationIcon, getNotificationTypeLabel } from "@/lib/notification-presentation";
-import { formatRelativeTime } from "@/lib/relative-time";
+import { useRelativeTime } from "@/lib/relative-time";
 
 const POPOVER_PAGE_SIZE = 8;
 
@@ -73,7 +73,7 @@ function NotificationPopoverEmptyState({ unreadOnly }: { unreadOnly: boolean }) 
   );
 }
 
-function NotificationRow({
+function NotificationItem({
   isPending,
   notification,
   onPress,
@@ -82,6 +82,7 @@ function NotificationRow({
   notification: NotificationResponse;
   onPress: (notification: NotificationResponse) => void;
 }) {
+  const formatRelativeTime = useRelativeTime();
   return (
     <li className={notification.read ? "" : "bg-accent/5"}>
       <Button

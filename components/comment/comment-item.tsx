@@ -5,7 +5,7 @@ import { Avatar, Button, Chip, Surface, Typography, cn, toast } from "@heroui/re
 import { useEffect, useState } from "react";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
-import { formatRelativeTime } from "@/lib/relative-time";
+import { useRelativeTime } from "@/lib/relative-time";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
 import { CommentInput } from "./comment-input";
@@ -45,6 +45,7 @@ export function CommentItem({
   onReport,
   onRetry,
 }: CommentItemProps) {
+  const formatRelativeTime = useRelativeTime();
   const {
     activeReplyId,
     setActiveReplyId,
