@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { MomentCard } from "@/features/moment/components/card/moment-card";
 import type { MomentResponse, MomentImageResponse } from "@/lib/features/moment";
+import { parseMomentContent, isDocumentEmpty } from "@/features/moment/utils/content-parser";
 
 gsap.registerPlugin(useGSAP);
 
@@ -168,9 +169,12 @@ const Masonry: React.FC<MasonryProps> = ({
           // Measure real fractional height using getBoundingClientRect() to avoid rounding overlap errors
           const actualHeight = innerCard ? innerCard.getBoundingClientRect().height : 320;
 
-          // Detect if this card has more than 3 images (using stack.tsx) and should span 2 columns
+          // Detect if this card has more than 3 images (using stack.tsx), contains actual text, and should span 2 columns
+          const hasText = item.moment.content
+            ? !isDocumentEmpty(parseMomentContent(item.moment.content))
+            : false;
           const spansTwoColumns =
-            columns > 1 && item.moment.images && item.moment.images.length > 3;
+            columns > 1 && item.moment.images && item.moment.images.length > 3 && hasText;
 
           let col = 0;
           let x = 0;
@@ -348,8 +352,12 @@ const Masonry: React.FC<MasonryProps> = ({
         const totalGaps = (columns - 1) * gap;
         const columnWidth = width ? (width - totalGaps) / columns : 280;
 
-        // Determine if the card is wide (spans 2 columns) based on columns and image count
-        const isWide = columns > 1 && item.moment.images && item.moment.images.length > 3;
+        // Determine if the card is wide (spans 2 columns) based on columns, image count and text presence
+        const hasText = item.moment.content
+          ? !isDocumentEmpty(parseMomentContent(item.moment.content))
+          : false;
+        const isWide =
+          columns > 1 && item.moment.images && item.moment.images.length > 3 && hasText;
         const cardWidth = isWide ? 2 * columnWidth + gap : columnWidth;
 
         return (
