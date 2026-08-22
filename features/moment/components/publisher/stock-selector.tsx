@@ -18,7 +18,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useLazySearchStocksQuery } from "@/lib/features/stock/stock-api";
 import { StockTrendCard } from "@/components/stock/stock-trend-card";
 import { EmptyState } from "@heroui-pro/react";
-import { useDebouncedValue } from "@mantine/hooks";
+import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
 
 interface StockSelectorProps {
   onSelect: (symbol: string | null) => void;
@@ -54,6 +54,7 @@ const viewVariants = {
 };
 
 export function StockSelector({ onSelect, attachedStockSymbol }: StockSelectorProps) {
+  const isMobile = useMediaQuery("(max-width: 640px)");
   const [isOpen, setIsOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword] = useDebouncedValue(keyword, 400);
@@ -116,6 +117,8 @@ export function StockSelector({ onSelect, attachedStockSymbol }: StockSelectorPr
     return tempSelectedSymbol !== attachedStockSymbol;
   }, [tempSelectedSymbol, attachedStockSymbol]);
 
+  const popoverWidth = isMobile ? 290 : view === "search" ? 320 : 480;
+
   return (
     <Popover isOpen={isOpen} onOpenChange={handleOpenChange}>
       <Popover.Trigger>
@@ -133,7 +136,7 @@ export function StockSelector({ onSelect, attachedStockSymbol }: StockSelectorPr
       <Popover.Content className="w-fit overflow-hidden" placement="top">
         <Popover.Dialog className="flex min-h-75 flex-col gap-3 overflow-hidden">
           <motion.div
-            animate={{ width: view === "search" ? 320 : 480 }}
+            animate={{ width: popoverWidth }}
             transition={{ type: "spring", stiffness: 350, damping: 32 }}
             className="flex h-full w-full flex-col gap-3"
           >
