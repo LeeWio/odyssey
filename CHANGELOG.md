@@ -1,3 +1,10 @@
+# [1.97.0](https://github.com/LeeWio/odyssey/compare/v1.96.1...v1.97.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** optimize MomentsPage and Masonry layout for full mobile responsive experience ([605d1c8](https://github.com/LeeWio/odyssey/commit/605d1c8f9ecc75a04f1e7998a8d66b36f39c2ba7))
+
 ## [1.96.1](https://github.com/LeeWio/odyssey/compare/v1.96.0...v1.96.1) (2026-08-22)
 
 
