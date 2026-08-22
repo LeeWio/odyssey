@@ -102,6 +102,10 @@ const Masonry: React.FC<MasonryProps> = ({
   const [imagesReady, setImagesReady] = useState(false);
   const hasMounted = useRef(false);
 
+  // Persistent GSAP Context reference to ensure garbage collection ONLY on component unmount
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ctxRef = useRef<any>(null);
+
   const getInitialPosition = (item: GridItem) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
     if (!containerRect) return { x: item.x, y: item.y };
@@ -145,6 +149,15 @@ const Masonry: React.FC<MasonryProps> = ({
      
   }, [items]);
 
+  // Cleanly dispose and revert all active GSAP animations ONLY when the component completely unmounts!
+  useEffect(() => {
+    return () => {
+      if (ctxRef.current) {
+        ctxRef.current.revert();
+      }
+    };
+  }, []);
+
   // High-performance real-time DOM measuring layout calculations
   useLayoutEffect(() => {
     if (!imagesReady || !width) return;
@@ -183,7 +196,7 @@ const Masonry: React.FC<MasonryProps> = ({
       containerRef.current.style.height = `${Math.max(...colHeights)}px`;
     }
 
-    // Wrap GSAP animations in a clean, self-garbage-collecting GSAP Context!
+    // Wrap GSAP animations in a clean GSAP Context and store reference without rendering-revert!
     const ctx = gsap.context(() => {
       computedGrid.forEach((item, index) => {
         const selector = `[data-key="${item.id}"]`;
@@ -211,6 +224,7 @@ const Masonry: React.FC<MasonryProps> = ({
             }
           );
         } else {
+          // Absolute zero flashing: GSAP gracefully transitions inline styles smoothly from their CURRENT properties during resizes!
           gsap.to(selector, {
             ...animProps,
             duration: duration,
@@ -222,9 +236,9 @@ const Masonry: React.FC<MasonryProps> = ({
     }, containerRef);
 
     hasMounted.current = true;
+    ctxRef.current = ctx; // Update active context reference
 
-    // Context cleanup function to revert and dispose of all active/killed tweens completely on unmount!
-    return () => ctx.revert();
+    // DO NOT return ctx.revert() here to prevent yanking cards back to (0,0) on every single resize pixel!
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, items, imagesReady, columns]);
 
