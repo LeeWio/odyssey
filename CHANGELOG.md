@@ -1,3 +1,10 @@
+# [1.110.0](https://github.com/LeeWio/odyssey/compare/v1.109.0...v1.110.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** smooth dynamic resize transitions in absolute Masonry by decoupling GSAP context unmount ([93c5d74](https://github.com/LeeWio/odyssey/commit/93c5d74cb4abd60262aa49785102c1d628a3398a))
+
 # [1.109.0](https://github.com/LeeWio/odyssey/compare/v1.108.0...v1.109.0) (2026-08-22)
 
 
