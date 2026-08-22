@@ -1,3 +1,10 @@
+## [1.117.1](https://github.com/LeeWio/odyssey/compare/v1.117.0...v1.117.1) (2026-08-22)
+
+
+### Bug Fixes
+
+* **moments:** prevent empty TipTap document JSON from rendering raw, hide empty RichTextEditor ([cf5506d](https://github.com/LeeWio/odyssey/commit/cf5506d0317b4e72993bbede7a69cb26585e6c0e))
+
 # [1.117.0](https://github.com/LeeWio/odyssey/compare/v1.116.0...v1.117.0) (2026-08-22)
 
 
