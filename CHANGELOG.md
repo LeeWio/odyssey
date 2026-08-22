@@ -1,3 +1,10 @@
+# [1.118.0](https://github.com/LeeWio/odyssey/compare/v1.117.1...v1.118.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** center Stack component inside card when there is no text content ([b625f52](https://github.com/LeeWio/odyssey/commit/b625f522a9f2c25bb505463daf1fbdca6065d9ec))
+
 ## [1.117.1](https://github.com/LeeWio/odyssey/compare/v1.117.0...v1.117.1) (2026-08-22)
 
 
