@@ -100,6 +100,7 @@ const Masonry: React.FC<MasonryProps> = ({
 
   const [containerRef, { width }] = useMeasure<HTMLDivElement>();
   const [imagesReady, setImagesReady] = useState(false);
+  const [grid, setGrid] = useState<GridItem[]>([]);
   const hasMounted = useRef(false);
 
   // High-performance position caching to skip redundant GSAP calls on unrelated renders!
@@ -166,17 +167,53 @@ const Masonry: React.FC<MasonryProps> = ({
       // Measure real offsetHeight, fallback to a standard card height approximation
       const actualHeight = innerCard ? innerCard.offsetHeight : 320;
 
-      const col = colHeights.indexOf(Math.min(...colHeights));
-      const x = col * (columnWidth + gap);
-      const y = colHeights[col];
+      // Check if this card contains a stock symbol and we have enough columns to span
+      const isStockCard = !!item.moment.stockSymbol;
+      const shouldSpan2 = isStockCard && columns >= 3;
 
-      colHeights[col] += actualHeight + gap;
+      let col = 0;
+      let x = 0;
+      let y = 0;
+      let cardWidth = columnWidth;
+
+      if (shouldSpan2) {
+        // Multi-Column Spanning: Find the adjacent column pair with the minimum combined height
+        let minPairHeight = Number.MAX_VALUE;
+        let bestColIndex = 0;
+
+        for (let i = 0; i < columns - 1; i++) {
+          const pairHeight = Math.max(colHeights[i], colHeights[i + 1]);
+          if (pairHeight < minPairHeight) {
+            minPairHeight = pairHeight;
+            bestColIndex = i;
+          }
+        }
+
+        col = bestColIndex;
+        x = col * (columnWidth + gap);
+        y = minPairHeight;
+        cardWidth = 2 * columnWidth + gap; // Dual-column span width
+
+        // Update BOTH adjacent columns to the new track height
+        const nextHeight = y + actualHeight + gap;
+        colHeights[col] = nextHeight;
+        colHeights[col + 1] = nextHeight;
+      } else {
+        // Standard Single-Column Placement: Find the single shortest column
+        col = colHeights.indexOf(Math.min(...colHeights));
+        x = col * (columnWidth + gap);
+        y = colHeights[col];
+        cardWidth = columnWidth;
+
+        // Update single column height
+        colHeights[col] += actualHeight + gap;
+      }
 
       return {
         ...item,
         x,
         y,
-        w: columnWidth,
+        w: cardWidth,
         h: actualHeight,
       };
     });
@@ -243,6 +280,7 @@ const Masonry: React.FC<MasonryProps> = ({
     }, containerRef);
 
     hasMounted.current = true;
+    setGrid(computedGrid);
 
     // Context cleanup function to revert and dispose of all active/killed tweens completely on unmount!
     return () => ctx.revert();
@@ -273,11 +311,15 @@ const Masonry: React.FC<MasonryProps> = ({
 
   return (
     <div ref={containerRef} className="relative h-full min-h-[500px] w-full">
-      {items.map((item) => {
+      {grid.map((item) => {
         // Fallback calculations for the initial first paint
         const gap = 24;
         const totalGaps = (columns - 1) * gap;
         const columnWidth = width ? (width - totalGaps) / columns : 280;
+
+        const isStockCard = !!item.moment.stockSymbol;
+        const shouldSpan2 = isStockCard && columns >= 3;
+        const cardWidth = shouldSpan2 ? 2 * columnWidth + gap : columnWidth;
 
         return (
           <div
@@ -285,7 +327,7 @@ const Masonry: React.FC<MasonryProps> = ({
             data-key={item.id}
             className="absolute box-content"
             style={{
-              width: columnWidth,
+              width: cardWidth,
               willChange: "transform, width, height, opacity",
               opacity: imagesReady ? 1 : 0, // Prevent flash of raw layout before measuring
             }}
