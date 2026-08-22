@@ -9,6 +9,7 @@ import type { JSONContent } from "@tiptap/core";
 import { getTransformStyles } from "../../utils/transform-styles";
 import { useMemo } from "react";
 import { StockTrendCard } from "@/components/stock/stock-trend-card";
+import { isDocumentEmpty } from "../../utils/content-parser";
 
 interface CardContentProps {
   momentId: string | number;
@@ -73,15 +74,17 @@ export const CardContent = ({
       <div className="flex w-full flex-row items-start justify-between gap-4">
         {/* Left Side: Text content + tags + stock */}
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <RichTextEditor
-            isReadOnly
-            defaultValue={parsedContent}
-            className="h-auto min-h-0 w-full min-w-0"
-          >
-            <RichTextEditor.Shell className="h-auto min-h-0 w-full min-w-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
-              <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-all [&_.ProseMirror_p]:break-all" />
-            </RichTextEditor.Shell>
-          </RichTextEditor>
+          {!isDocumentEmpty(parsedContent) && (
+            <RichTextEditor
+              isReadOnly
+              defaultValue={parsedContent}
+              className="h-auto min-h-0 w-full min-w-0"
+            >
+              <RichTextEditor.Shell className="h-auto min-h-0 w-full min-w-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
+                <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-all [&_.ProseMirror_p]:break-all" />
+              </RichTextEditor.Shell>
+            </RichTextEditor>
+          )}
 
           {/* Topics Tags Group */}
           {topics.length > 0 && (
@@ -100,7 +103,7 @@ export const CardContent = ({
         </div>
 
         {/* Right Side: Stack component at the trailing end */}
-        <div className="mt-2 mr-2 h-28 w-28 flex-shrink-0 sm:h-32 sm:w-32">
+        <div className="mt-2 mr-2 h-28 w-28 shrink-0 sm:h-32 sm:w-32">
           <Stack randomRotation sendToBackOnClick={false} cards={stackCards} />
         </div>
       </div>
@@ -109,15 +112,17 @@ export const CardContent = ({
 
   return (
     <div className="flex w-full flex-col gap-3">
-      <RichTextEditor
-        isReadOnly
-        defaultValue={parsedContent}
-        className="h-auto min-h-0 w-full min-w-0"
-      >
-        <RichTextEditor.Shell className="h-auto min-h-0 w-full min-w-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
-          <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-all [&_.ProseMirror_p]:break-all" />
-        </RichTextEditor.Shell>
-      </RichTextEditor>
+      {!isDocumentEmpty(parsedContent) && (
+        <RichTextEditor
+          isReadOnly
+          defaultValue={parsedContent}
+          className="h-auto min-h-0 w-full min-w-0"
+        >
+          <RichTextEditor.Shell className="h-auto min-h-0 w-full min-w-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
+            <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-all [&_.ProseMirror_p]:break-all" />
+          </RichTextEditor.Shell>
+        </RichTextEditor>
+      )}
 
       {/* 2. Topics Tags Group */}
       {topics.length > 0 && (
