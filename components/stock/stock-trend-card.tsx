@@ -35,12 +35,12 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
       <Card
         className={cn(
           "w-full rounded-2xl p-4",
-          variant === "transparent" && "border-none bg-transparent p-0 shadow-none",
+          variant === "transparent" && "bg-transparent shadow-none p-0 border-none",
           className
         )}
         variant={variant}
       >
-        <div className="flex w-full items-center justify-between pb-2">
+        <div className="flex items-center justify-between w-full pb-2">
           <Skeleton className="h-5 w-16 rounded-md" />
           <Skeleton className="h-5 w-14 rounded-md" />
         </div>
@@ -53,7 +53,7 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
 
   if (isError || !data) {
     return (
-      <EmptyState className="bg-surface-secondary border-default-100 rounded-2xl border p-4">
+      <EmptyState className="bg-surface-secondary border border-default-100 p-4 rounded-2xl">
         <EmptyState.Header>
           <EmptyState.Media variant="icon">
             <Icon icon="gravity-ui:chart-line-arrow-up" className="size-4" />
@@ -70,19 +70,19 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
     <Card
       className={cn(
         "w-full rounded-2xl p-4",
-        variant !== "transparent" && "border-default-100 border",
-        variant === "transparent" && "border-none bg-transparent p-0 shadow-none",
+        variant !== "transparent" && "border border-default-100",
+        variant === "transparent" && "bg-transparent shadow-none p-0 border-none",
         className
       )}
       variant={variant}
     >
       {/* 1. Miniature Portfolio Header (Strictly Single-row Robinhood style) */}
-      <div className="flex w-full items-center justify-between pb-2 select-none">
+      <div className="flex items-center justify-between w-full pb-2 select-none">
         {/* Left Side: Stock Symbol with Hover Name Tooltip */}
         <div className="flex flex-col">
           <Tooltip delay={0} closeDelay={100}>
             <Tooltip.Trigger aria-label="Stock Symbol">
-              <span className="text-foreground hover:text-accent cursor-pointer text-sm font-semibold tracking-tight transition-colors">
+              <span className="text-foreground text-sm font-semibold tracking-tight cursor-pointer hover:text-accent transition-colors">
                 {data.symbol}
               </span>
             </Tooltip.Trigger>
@@ -97,14 +97,8 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
         <div className="flex flex-col items-end">
           <Tooltip delay={0} closeDelay={100}>
             <Tooltip.Trigger aria-label="Change Percentage">
-              <span
-                className={cn(
-                  "cursor-pointer text-sm font-semibold transition-all hover:scale-105",
-                  isUp ? "text-green-500" : "text-danger-500"
-                )}
-              >
-                {isUp ? "+" : ""}
-                {data.changePct?.toFixed(2)}%
+              <span className={cn("text-sm font-semibold cursor-pointer hover:scale-105 transition-all", isUp ? "text-green-500" : "text-danger-500")}>
+                {isUp ? "+" : ""}{data.changePct?.toFixed(2)}%
               </span>
             </Tooltip.Trigger>
             <Tooltip.Content showArrow placement="top">
@@ -118,11 +112,7 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
       {/* 2. Sparkline Chart */}
       <div className="w-full pt-2">
         {formattedTrendPoints.length > 0 ? (
-          <LineChart
-            data={formattedTrendPoints}
-            height={80}
-            margin={{ bottom: 0, left: 0, right: 0, top: 4 }}
-          >
+          <LineChart data={formattedTrendPoints} height={80} margin={{ bottom: 0, left: 0, right: 0, top: 4 }}>
             <LineChart.YAxis hide domain={["dataMin - 10", "dataMax + 10"]} />
             <LineChart.Line
               dataKey="price"
