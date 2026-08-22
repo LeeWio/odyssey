@@ -21,18 +21,27 @@ const useMedia = (queries: string[], values: number[], defaultValue: number): nu
   return value;
 };
 
+// Optimized useMeasure utilizing requestAnimationFrame (rAF) to throttle updates
+// preventing layout thrashing and aligning reflows with monitor vertical sync.
 const useMeasure = <T extends HTMLElement>() => {
   const ref = useRef<T | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
 
   useLayoutEffect(() => {
     if (!ref.current) return;
+    let animationFrameId: number;
     const ro = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect;
-      setSize({ width, height });
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = requestAnimationFrame(() => {
+        const { width, height } = entry.contentRect;
+        setSize({ width, height });
+      });
     });
     ro.observe(ref.current);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   return [ref, size] as const;
@@ -92,6 +101,11 @@ const Masonry: React.FC<MasonryProps> = ({
   const [containerRef, { width }] = useMeasure<HTMLDivElement>();
   const [imagesReady, setImagesReady] = useState(false);
   const hasMounted = useRef(false);
+
+  // High-performance position caching to skip redundant GSAP calls on unrelated renders!
+  const prevPositionsRef = useRef<Record<string, { x: number; y: number; w: number; h: number }>>(
+    {}
+  );
 
   const getInitialPosition = (item: GridItem) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
@@ -172,43 +186,66 @@ const Masonry: React.FC<MasonryProps> = ({
       containerRef.current.style.height = `${Math.max(...colHeights)}px`;
     }
 
-    // Trigger premium GSAP absolute-positioning transitions!
-    computedGrid.forEach((item, index) => {
-      const selector = `[data-key="${item.id}"]`;
-      const animProps = { x: item.x, y: item.y, width: item.w, height: item.h };
+    // Wrap GSAP animations in a clean, self-garbage-collecting GSAP Context!
+    const ctx = gsap.context(() => {
+      computedGrid.forEach((item, index) => {
+        const selector = `[data-key="${item.id}"]`;
+        const animProps = { x: item.x, y: item.y, width: item.w, height: item.h };
 
-      if (!hasMounted.current) {
-        const start = getInitialPosition(item);
-        gsap.fromTo(
-          selector,
-          {
-            opacity: 0,
-            x: start.x,
-            y: start.y,
-            width: item.w,
-            height: item.h,
-            filter: "blur(8px)",
-          },
-          {
-            opacity: 1,
+        // Position diffing cache: check if coordinates have actually changed!
+        const prev = prevPositionsRef.current[item.id];
+        const hasChanged =
+          !prev || prev.x !== item.x || prev.y !== item.y || prev.w !== item.w || prev.h !== item.h;
+
+        // If coordinates have not changed, we can completely skip animating this card!
+        if (!hasChanged) {
+          return;
+        }
+
+        if (!hasMounted.current) {
+          const start = getInitialPosition(item);
+          gsap.fromTo(
+            selector,
+            {
+              opacity: 0,
+              x: start.x,
+              y: start.y,
+              width: item.w,
+              height: item.h,
+              filter: "blur(8px)",
+            },
+            {
+              opacity: 1,
+              ...animProps,
+              filter: "blur(0px)",
+              duration: 0.8,
+              ease: "power3.out",
+              delay: index * stagger,
+            }
+          );
+        } else {
+          gsap.to(selector, {
             ...animProps,
-            filter: "blur(0px)",
-            duration: 0.8,
-            ease: "power3.out",
-            delay: index * stagger,
-          }
-        );
-      } else {
-        gsap.to(selector, {
-          ...animProps,
-          duration: duration,
-          ease: ease,
-          overwrite: "auto",
-        });
-      }
-    });
+            duration: duration,
+            ease: ease,
+            overwrite: "auto",
+          });
+        }
+
+        // Cache the new position coordinates
+        prevPositionsRef.current[item.id] = {
+          x: item.x,
+          y: item.y,
+          w: item.w,
+          h: item.h,
+        };
+      });
+    }, containerRef);
 
     hasMounted.current = true;
+
+    // Context cleanup function to revert and dispose of all active/killed tweens completely on unmount!
+    return () => ctx.revert();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, items, imagesReady, columns]);
 
