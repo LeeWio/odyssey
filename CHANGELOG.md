@@ -1,3 +1,10 @@
+# [1.114.0](https://github.com/LeeWio/odyssey/compare/v1.113.0...v1.114.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** decouple wrapper height from GSAP and resolve dynamic card overlaps via inner ResizeObserver self-healing reflows ([16df1d4](https://github.com/LeeWio/odyssey/commit/16df1d441448ca597177f1e1e97d1241ffd5e782))
+
 # [1.113.0](https://github.com/LeeWio/odyssey/compare/v1.112.0...v1.113.0) (2026-08-22)
 
 
