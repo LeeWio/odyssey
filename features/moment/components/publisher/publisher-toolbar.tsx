@@ -20,6 +20,7 @@ import type { Key } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "motion/react";
 import { ComposerTool, type ComposerToolProps } from "./composer-tool";
+import { StockSelector } from "./stock-selector";
 import { useGetPublicTagsQuery } from "@/lib/features/tag/tag-api";
 import { normalizeMomentTopicSlug } from "../../utils/topic-slug";
 import {
@@ -50,6 +51,8 @@ interface PublisherToolbarProps {
   topics: string[];
   onAddTopic: (topic: string) => void;
   onRemoveTopic: (topic: string) => void;
+  onAttachStock?: (symbol: string | null) => void;
+  attachedStockSymbol?: string | null;
 }
 
 export const PublisherToolbar = ({
@@ -61,6 +64,8 @@ export const PublisherToolbar = ({
   topics,
   onAddTopic,
   onRemoveTopic,
+  onAttachStock,
+  attachedStockSymbol,
 }: PublisherToolbarProps) => {
   const { openFilePicker } = useDropZonePickerContext();
   const { contains } = useFilter({ sensitivity: "base" });
@@ -114,7 +119,6 @@ export const PublisherToolbar = ({
 
   return (
     <div className="flex w-full flex-col gap-3">
-      {/* 1. Tools Scrollshadow list */}
       <ScrollShadow
         hideScrollBar
         variant="fade"
@@ -126,7 +130,7 @@ export const PublisherToolbar = ({
             return (
               <Popover key={tool.id}>
                 <Popover.Trigger>
-                  <Button variant="tertiary" isDisabled={tool.disabled}>
+                  <Button size="sm" variant="tertiary" isDisabled={tool.disabled}>
                     <Icon icon={tool.icon} className="size-5" />
                     {tool.label}
                   </Button>
@@ -258,6 +262,9 @@ export const PublisherToolbar = ({
             />
           );
         })}
+        {onAttachStock && (
+          <StockSelector onSelect={onAttachStock} attachedStockSymbol={attachedStockSymbol} />
+        )}
       </ScrollShadow>
 
       {/* 2. Divider-free footer row with metrics & share button */}
@@ -335,8 +342,7 @@ export const PublisherToolbar = ({
           </AnimatePresence>
         </div>
 
-        {/* Right share CTA */}
-        <Button variant="secondary" onPress={onPublish} isDisabled={isSubmitDisabled} size="sm">
+        <Button variant="primary" onPress={onPublish} isDisabled={isSubmitDisabled} size="sm">
           {isSubmitting ? (
             <Spinner size="sm" color="current" className="mr-1.5" />
           ) : (

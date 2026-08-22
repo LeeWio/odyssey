@@ -55,13 +55,17 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
     handleDrop,
     handleRemoveAttachment,
     publishMoment,
+    attachedStockSymbol,
+    setAttachedStockSymbol,
   } = useMomentPublish(() => {
     // on success callback
     onOpenChange(false);
   });
 
   const isSubmitDisabled =
-    (isEmpty && attachments.length === 0) || charCount > MOMENT_CHARACTER_LIMIT || isSubmitting;
+    (isEmpty && attachments.length === 0 && !attachedStockSymbol) ||
+    charCount > MOMENT_CHARACTER_LIMIT ||
+    isSubmitting;
 
   return (
     <Modal>
@@ -104,6 +108,8 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
                   topics={topics}
                   onAddTopic={addTopic}
                   onRemoveTopic={removeTopic}
+                  onAttachStock={setAttachedStockSymbol}
+                  attachedStockSymbol={attachedStockSymbol}
                 />
               </Modal.Body>
 

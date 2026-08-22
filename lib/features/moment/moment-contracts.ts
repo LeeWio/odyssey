@@ -20,6 +20,7 @@ export const MomentTopicResponseSchema = z.object({
 export const MomentResponseSchema = z.object({
   id: z.number(),
   content: z.string(),
+  stockSymbol: z.string().nullable().optional(),
   likesCount: z.number(),
   visibility: z.enum(["public", "followers", "private"]),
   createdAt: z.string(),
@@ -44,4 +45,5 @@ export interface MomentRequest {
   visibility: "public" | "followers" | "private";
   images: MomentImageRequest[];
   topicSlugs: string[];
+  stockSymbol?: string | null;
 }

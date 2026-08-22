@@ -14,6 +14,9 @@ export const useMomentPublish = (onSuccess?: () => void) => {
   const [visibility, setVisibility] = useState("public");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Custom stock trend widget attachment state
+  const [attachedStockSymbol, setAttachedStockSymbol] = useState<string | null>(null);
+
   const [createMoment] = useCreateMomentMutation();
   const [uploadFile] = useUploadFileMutation();
 
@@ -60,12 +63,17 @@ export const useMomentPublish = (onSuccess?: () => void) => {
     setIsEmpty(true);
     setAttachments([]);
     setTopics([]);
+    setAttachedStockSymbol(null);
     setVisibility("public");
     setIsSubmitting(false);
   }, [attachments]);
 
   const publishMoment = async () => {
-    if ((isEmpty && attachments.length === 0) || charCount > MOMENT_CHARACTER_LIMIT || isSubmitting)
+    if (
+      (isEmpty && attachments.length === 0 && !attachedStockSymbol) ||
+      charCount > MOMENT_CHARACTER_LIMIT ||
+      isSubmitting
+    )
       return;
     setIsSubmitting(true);
     try {
@@ -81,12 +89,36 @@ export const useMomentPublish = (onSuccess?: () => void) => {
         })
       );
 
+      // Construct standard rich-text content
+      let finalContent = "";
+      if (editorValue) {
+        finalContent = JSON.stringify(editorValue);
+      } else if (attachedStockSymbol) {
+        // Fallback for stock only publishing
+        const fallbackEditor: JSONContent = {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: "Shared stock coordinates:",
+                },
+              ],
+            },
+          ],
+        };
+        finalContent = JSON.stringify(fallbackEditor);
+      }
+
       // 2. Submit the moment
       await createMoment({
-        content: editorValue ? JSON.stringify(editorValue) : "",
+        content: finalContent,
         visibility: visibility as "public" | "followers" | "private",
         images: uploadedImages,
         topicSlugs: topics,
+        stockSymbol: attachedStockSymbol,
       }).unwrap();
 
       // 3. Reset states & call callback
@@ -126,5 +158,7 @@ export const useMomentPublish = (onSuccess?: () => void) => {
     handleRemoveAttachment,
     publishMoment,
     handleReset,
+    attachedStockSymbol,
+    setAttachedStockSymbol,
   };
 };

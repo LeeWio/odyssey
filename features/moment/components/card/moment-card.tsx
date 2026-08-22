@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, Skeleton, toast, AlertDialog, Button, Typography } from "@heroui/react";
 import type { JSONContent } from "@tiptap/core";
+import { AnimatePresence, motion } from "motion/react";
 
 import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
@@ -13,6 +14,7 @@ import {
   useDeleteMomentMutation,
 } from "@/lib/features/moment";
 import { formatRelativeTime } from "@/lib/relative-time";
+import { CommentSystem } from "@/components/comment";
 
 import { parseMomentContent } from "../../utils/content-parser";
 import { useMomentLike } from "../../hooks/use-moment-like";
@@ -88,11 +90,42 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
   // Gallery view Modal state
   const [activeImageIndex, setActiveIndex] = useState<number | null>(null);
 
+  // Expanded comments system state
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+
+  // Bookmarking state
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
   // Likes hook
   const { isLiked, likesCount, isLiking, toggleLike } = useMomentLike(
     moment?.id,
     moment?.likesCount
   );
+
+  useEffect(() => {
+    if (!moment?.id) return;
+    const bookmarks = JSON.parse(localStorage.getItem("moments_bookmarks") || "[]");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsBookmarked(bookmarks.includes(moment.id));
+  }, [moment?.id]);
+
+  const handleBookmarkToggle = () => {
+    if (!moment?.id) return;
+    const bookmarks = JSON.parse(localStorage.getItem("moments_bookmarks") || "[]");
+    let updated;
+    if (bookmarks.includes(moment.id)) {
+      updated = bookmarks.filter((id: number) => id !== moment.id);
+      setIsBookmarked(false);
+      toast.success("Removed from bookmarks");
+    } else {
+      updated = [...bookmarks, moment.id];
+      setIsBookmarked(true);
+      toast.success("Saved to bookmarks");
+    }
+    localStorage.setItem("moments_bookmarks", JSON.stringify(updated));
+    // Dispatch custom event to notify MomentsPage of bookmark list updates
+    window.dispatchEvent(new Event("moments_bookmarks_changed"));
+  };
 
   const handleDeleteConfirm = async () => {
     if (!moment?.id) return;
@@ -108,10 +141,21 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
     }
   };
 
-  // Content parsing
-  const parsedContent = useMemo(() => {
-    if (!moment) return defaultContent;
-    return parseMomentContent(moment.content);
+  // Content and widget parsing
+  const { parsedContent, stockSymbol } = useMemo(() => {
+    if (!moment) return { parsedContent: defaultContent };
+    console.log(
+      "Moment Card [Debug] - id:",
+      moment.id,
+      "content:",
+      moment.content,
+      "stockSymbol:",
+      moment.stockSymbol
+    );
+    return {
+      parsedContent: parseMomentContent(moment.content),
+      stockSymbol: moment.stockSymbol || undefined,
+    };
   }, [moment]);
 
   // Image URLs and structural formatting for Carousel Modal
@@ -154,6 +198,7 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
         imageUrls={imageUrls}
         topics={moment?.topics ?? []}
         onCardClick={setActiveIndex}
+        stockSymbol={stockSymbol}
       />
 
       {/* 3. Card Footer */}
@@ -162,9 +207,28 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
         isLiking={isLiking}
         likesCount={likesCount}
         onLikeToggle={toggleLike}
+        isCommentsOpen={isCommentsOpen}
+        onCommentToggle={() => setIsCommentsOpen(!isCommentsOpen)}
+        isBookmarked={isBookmarked}
+        onBookmarkToggle={handleBookmarkToggle}
       />
 
-      {/* 4. Shared Photo Carousel Modal */}
+      {/* 4. Expanded Comments Section */}
+      <AnimatePresence>
+        {isCommentsOpen && moment?.id && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="border-default-100/60 mt-3 overflow-hidden border-t px-1 pt-4"
+          >
+            <CommentSystem postId={moment.id} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 5. Shared Photo Carousel Modal */}
       {carouselImages.length > 0 && (
         <CarouselModal
           images={carouselImages}
@@ -173,7 +237,7 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
         />
       )}
 
-      {/* 5. Delete Confirmation AlertDialog */}
+      {/* 6. Delete Confirmation AlertDialog */}
       <AlertDialog>
         <AlertDialog.Backdrop
           isOpen={isDeleteDialogOpen}
