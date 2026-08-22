@@ -70,6 +70,40 @@ export const CardContent = ({
   }, [imageUrls, isStackLayout, onCardClick]);
 
   if (isStackLayout) {
+    const isTextEmpty = isDocumentEmpty(parsedContent);
+
+    if (isTextEmpty) {
+      return (
+        <div className="flex w-full flex-col gap-4">
+          {/* Centered Stack when there is no text content */}
+          <div className="flex w-full justify-center py-2">
+            <div className="h-28 w-28 shrink-0 sm:h-32 sm:w-32">
+              <Stack randomRotation sendToBackOnClick={false} cards={stackCards} />
+            </div>
+          </div>
+
+          {/* Topics Tags Group (Centered) */}
+          {topics.length > 0 && (
+            <TagGroup aria-label="Topics" size="sm" selectionMode="none">
+              <TagGroup.List className="flex flex-wrap justify-center gap-1.5">
+                {topics.map((topic) => (
+                  <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
+                    #{topic.slug}
+                  </Tag>
+                ))}
+              </TagGroup.List>
+            </TagGroup>
+          )}
+
+          {stockSymbol && (
+            <div className="flex w-full justify-center">
+              <StockTrendCard symbol={stockSymbol} variant="transparent" />
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="flex w-full flex-row items-start justify-between gap-4">
         {/* Left Side: Text content + tags + stock */}
