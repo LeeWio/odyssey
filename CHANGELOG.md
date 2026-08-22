@@ -1,3 +1,15 @@
+# [1.115.0](https://github.com/LeeWio/odyssey/compare/v1.114.0...v1.115.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** resolve dynamic card overlaps by decoupling grid state and enabling ResizeObserver ([b5365bf](https://github.com/LeeWio/odyssey/commit/b5365bf64e0bafcdd65ee7267222c26200185009))
+
+
+### Performance Improvements
+
+* **moments:** optimize masonry layout with useGSAP and subpixel layout dirty checking to prevent flashing ([2bd07b2](https://github.com/LeeWio/odyssey/commit/2bd07b2a788df4a246767a96bc407339de2dd242))
+
 # [1.114.0](https://github.com/LeeWio/odyssey/compare/v1.113.0...v1.114.0) (2026-08-22)
 
 
