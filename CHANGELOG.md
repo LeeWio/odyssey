@@ -1,3 +1,10 @@
+# [1.117.0](https://github.com/LeeWio/odyssey/compare/v1.116.0...v1.117.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** add 2-column wide spanning support in Masonry for stack-card moments ([f7df486](https://github.com/LeeWio/odyssey/commit/f7df4863a47048ad19d5272a95749cacad6d1648))
+
 # [1.116.0](https://github.com/LeeWio/odyssey/compare/v1.115.0...v1.116.0) (2026-08-22)
 
 
