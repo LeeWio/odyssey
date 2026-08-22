@@ -30,6 +30,43 @@ const useMedia = (queries: string[], values: number[], defaultValue: number): nu
   return value;
 };
 
+// Helper to dynamically estimate a Moment's height for optimal column-height balancing (greedy packing)
+const estimateMomentHeight = (moment: MomentResponse) => {
+  let height = 180; // Base card container (header, footer, padding margins)
+
+  // 1. Text height
+  if (moment.content) {
+    const len = moment.content.length;
+    if (len > 1500) height += 180;
+    else if (len > 800) height += 120;
+    else if (len > 300) height += 70;
+    else height += 35;
+  }
+
+  // 2. Image gallery matching card's dynamic size
+  const imageCount = moment.images?.length || 0;
+  if (imageCount > 0) {
+    let galleryHeight = 108;
+    if (imageCount === 1) galleryHeight = 240;
+    else if (imageCount === 2) galleryHeight = 140;
+    else if (imageCount === 3) galleryHeight = 120;
+    else if (imageCount === 4) galleryHeight = 110;
+    height += galleryHeight + 16;
+  }
+
+  // 3. Stock trend widget
+  if (moment.stockSymbol) {
+    height += 150;
+  }
+
+  // 4. Topic Tags
+  if (moment.topics && moment.topics.length > 0) {
+    height += 36;
+  }
+
+  return height;
+};
+
 const Masonry: React.FC<MasonryProps> = ({ items }) => {
   // Breakpoints mapping to column count (Strictly 1 column for all mobile devices under 768px for readable layout)
   const columns = useMedia(
@@ -38,12 +75,20 @@ const Masonry: React.FC<MasonryProps> = ({ items }) => {
     1
   );
 
-  // Distribute items sequentially into column tracks to prevent overlapping completely
+  // Distribute items dynamically into the currently shortest column (Greedy Packing Algorithm)
+  // This guarantees organic row-level staggering and balanced bottom columns!
   const columnsData = useMemo(() => {
     const cols = Array.from({ length: columns }, () => [] as Item[]);
-    items.forEach((item, index) => {
-      cols[index % columns].push(item);
+    const colHeights = new Array(columns).fill(0);
+
+    items.forEach((item) => {
+      const shortestColIndex = colHeights.indexOf(Math.min(...colHeights));
+      cols[shortestColIndex].push(item);
+
+      const itemHeight = estimateMomentHeight(item.moment);
+      colHeights[shortestColIndex] += itemHeight;
     });
+
     return cols;
   }, [items, columns]);
 
