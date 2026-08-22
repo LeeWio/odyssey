@@ -1,3 +1,10 @@
+# [1.102.0](https://github.com/LeeWio/odyssey/compare/v1.101.0...v1.102.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** pivot timeline filtering to date-intervals and introduce responsive sidebar with live trending widgets ([c469014](https://github.com/LeeWio/odyssey/commit/c46901476c672b81d6ae17ef67ce403651b7a9d6))
+
 # [1.101.0](https://github.com/LeeWio/odyssey/compare/v1.100.0...v1.101.0) (2026-08-22)
 
 
