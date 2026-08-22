@@ -1,3 +1,10 @@
+# [1.104.0](https://github.com/LeeWio/odyssey/compare/v1.103.0...v1.104.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** restore and elevate classic absolute-positioned GSAP Masonry layout matching demo.tsx ([994e8f7](https://github.com/LeeWio/odyssey/commit/994e8f7545727e3aa0d58e6b865660980ba8acc7))
+
 # [1.103.0](https://github.com/LeeWio/odyssey/compare/v1.102.0...v1.103.0) (2026-08-22)
 
 
