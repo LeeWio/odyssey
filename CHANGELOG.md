@@ -1,3 +1,10 @@
+## [1.96.1](https://github.com/LeeWio/odyssey/compare/v1.96.0...v1.96.1) (2026-08-22)
+
+
+### Bug Fixes
+
+* **relative-time:** handle timezone-less ISO strings as UTC to resolve local parse discrepancy ([fdff4d9](https://github.com/LeeWio/odyssey/commit/fdff4d90c0fab8b2c46717ba7465b1da30d5b2c8))
+
 # [1.96.0](https://github.com/LeeWio/odyssey/compare/v1.95.2...v1.96.0) (2026-08-22)
 
 
