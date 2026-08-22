@@ -1,3 +1,10 @@
+# [1.112.0](https://github.com/LeeWio/odyssey/compare/v1.111.0...v1.112.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** resolve vertical card overlaps via dynamic inner ResizeObserver self-healing reflows ([5c39abe](https://github.com/LeeWio/odyssey/commit/5c39abe263fee24022ab240a1744ecbdbbf8a0f2))
+
 # [1.111.0](https://github.com/LeeWio/odyssey/compare/v1.110.0...v1.111.0) (2026-08-22)
 
 
