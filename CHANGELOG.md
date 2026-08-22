@@ -1,3 +1,10 @@
+# [1.96.0](https://github.com/LeeWio/odyssey/compare/v1.95.2...v1.96.0) (2026-08-22)
+
+
+### Features
+
+* **moment:** integrate first-class stock attachment and premium layout-tweening Masonry with Framer Motion ([d5bff3a](https://github.com/LeeWio/odyssey/commit/d5bff3ac9c06a8ea600ec8496768d17548fb56c7))
+
 ## [1.95.2](https://github.com/LeeWio/odyssey/compare/v1.95.1...v1.95.2) (2026-08-20)
 
 
