@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Card, Skeleton, cn } from "@heroui/react";
+import { Card, Skeleton, cn, Tooltip } from "@heroui/react";
 import { useGetStockTrendQuery } from "@/lib/features/stock/stock-api";
 import { LineChart } from "@heroui-pro/react/line-chart";
 import { EmptyState } from "@heroui-pro/react";
@@ -32,16 +32,17 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
 
   if (isLoading) {
     return (
-      <Card className={cn("w-full border-none p-4", className)} variant={variant}>
+      <Card
+        className={cn(
+          "w-full rounded-2xl p-4",
+          variant === "transparent" && "border-none bg-transparent p-0 shadow-none",
+          className
+        )}
+        variant={variant}
+      >
         <div className="flex w-full items-center justify-between pb-2">
-          <div className="flex flex-col gap-1.5">
-            <Skeleton className="h-4 w-16 rounded-md" />
-            <Skeleton className="h-3 w-24 rounded-md" />
-          </div>
-          <div className="flex flex-col items-end gap-1.5">
-            <Skeleton className="h-4 w-14 rounded-md" />
-            <Skeleton className="h-3 w-20 rounded-md" />
-          </div>
+          <Skeleton className="h-5 w-16 rounded-md" />
+          <Skeleton className="h-5 w-14 rounded-md" />
         </div>
         <div className="w-full pt-2">
           <Skeleton className="h-20 w-full rounded-lg" />
@@ -67,23 +68,50 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
 
   return (
     <Card
-      className={cn("border-default-100 w-full rounded-2xl border p-4", className)}
+      className={cn(
+        "w-full rounded-2xl p-4",
+        variant !== "transparent" && "border-default-100 border",
+        variant === "transparent" && "border-none bg-transparent p-0 shadow-none",
+        className
+      )}
       variant={variant}
     >
-      {/* 1. Miniature Portfolio Header */}
+      {/* 1. Miniature Portfolio Header (Strictly Single-row Robinhood style) */}
       <div className="flex w-full items-center justify-between pb-2 select-none">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-foreground text-sm font-semibold tracking-tight">
-            {data.symbol}
-          </span>
-          <span className="text-muted-foreground line-clamp-1 max-w-40 text-xs">{data.name}</span>
+        {/* Left Side: Stock Symbol with Hover Name Tooltip */}
+        <div className="flex flex-col">
+          <Tooltip delay={0} closeDelay={100}>
+            <Tooltip.Trigger aria-label="Stock Symbol">
+              <span className="text-foreground hover:text-accent cursor-pointer text-sm font-semibold tracking-tight transition-colors">
+                {data.symbol}
+              </span>
+            </Tooltip.Trigger>
+            <Tooltip.Content showArrow placement="top">
+              <Tooltip.Arrow />
+              <p className="text-xs font-medium">{data.name}</p>
+            </Tooltip.Content>
+          </Tooltip>
         </div>
-        <div className="flex flex-col items-end gap-0.5">
-          <span className="text-foreground text-sm font-semibold">¥{data.current?.toFixed(2)}</span>
-          <span className={cn("text-xs font-medium", isUp ? "text-green-500" : "text-danger-500")}>
-            {isUp ? "+" : ""}
-            {data.changePct?.toFixed(2)}%
-          </span>
+
+        {/* Right Side: Change percentage with Hover Price Tooltip */}
+        <div className="flex flex-col items-end">
+          <Tooltip delay={0} closeDelay={100}>
+            <Tooltip.Trigger aria-label="Change Percentage">
+              <span
+                className={cn(
+                  "cursor-pointer text-sm font-semibold transition-all hover:scale-105",
+                  isUp ? "text-green-500" : "text-danger-500"
+                )}
+              >
+                {isUp ? "+" : ""}
+                {data.changePct?.toFixed(2)}%
+              </span>
+            </Tooltip.Trigger>
+            <Tooltip.Content showArrow placement="top">
+              <Tooltip.Arrow />
+              <p className="text-xs font-semibold">Price: ¥{data.current?.toFixed(2)}</p>
+            </Tooltip.Content>
+          </Tooltip>
         </div>
       </div>
 

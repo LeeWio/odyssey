@@ -87,7 +87,7 @@ export const CardContent = ({
         </div>
       )}
 
-      {stockSymbol && <StockTrendCard symbol={stockSymbol} />}
+      {stockSymbol && <StockTrendCard symbol={stockSymbol} variant="transparent" />}
     </div>
   );
 };
