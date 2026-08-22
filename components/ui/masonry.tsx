@@ -168,19 +168,51 @@ const Masonry: React.FC<MasonryProps> = ({
           // Measure real fractional height using getBoundingClientRect() to avoid rounding overlap errors
           const actualHeight = innerCard ? innerCard.getBoundingClientRect().height : 320;
 
-          // Classically distribute items dynamically into the currently shortest column (Greedy Packing Algorithm)
-          const col = colHeights.indexOf(Math.min(...colHeights));
-          const x = col * (columnWidth + gap);
-          const y = colHeights[col];
+          // Detect if this card has more than 3 images (using stack.tsx) and should span 2 columns
+          const spansTwoColumns =
+            columns > 1 && item.moment.images && item.moment.images.length > 3;
 
-          // Update single column height
-          colHeights[col] += actualHeight + gap;
+          let col = 0;
+          let x = 0;
+          let y = 0;
+          let itemWidth = columnWidth;
+
+          if (spansTwoColumns) {
+            // Find the adjacent pair of columns (col, col+1) with the shortest maximum height
+            let minMaxHeight = Infinity;
+            let targetCol = 0;
+
+            for (let c = 0; c < columns - 1; c++) {
+              const currentMax = Math.max(colHeights[c], colHeights[c + 1]);
+              if (currentMax < minMaxHeight) {
+                minMaxHeight = currentMax;
+                targetCol = c;
+              }
+            }
+
+            col = targetCol;
+            x = col * (columnWidth + gap);
+            y = minMaxHeight;
+            itemWidth = 2 * columnWidth + gap;
+
+            // Update heights of both columns
+            colHeights[col] = y + actualHeight + gap;
+            colHeights[col + 1] = y + actualHeight + gap;
+          } else {
+            // Standard single column placement
+            col = colHeights.indexOf(Math.min(...colHeights));
+            x = col * (columnWidth + gap);
+            y = colHeights[col];
+            itemWidth = columnWidth;
+
+            colHeights[col] += actualHeight + gap;
+          }
 
           return {
             ...item,
             x,
             y,
-            w: columnWidth,
+            w: itemWidth,
             h: actualHeight,
           };
         });
@@ -316,13 +348,17 @@ const Masonry: React.FC<MasonryProps> = ({
         const totalGaps = (columns - 1) * gap;
         const columnWidth = width ? (width - totalGaps) / columns : 280;
 
+        // Determine if the card is wide (spans 2 columns) based on columns and image count
+        const isWide = columns > 1 && item.moment.images && item.moment.images.length > 3;
+        const cardWidth = isWide ? 2 * columnWidth + gap : columnWidth;
+
         return (
           <div
             key={item.id}
             data-key={item.id}
             className="absolute box-content"
             style={{
-              width: columnWidth,
+              width: cardWidth,
               willChange: "transform, opacity",
               opacity: imagesReady ? 1 : 0, // Prevent flash of raw layout before measuring
             }}
