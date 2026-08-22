@@ -1,3 +1,10 @@
+# [1.120.0](https://github.com/LeeWio/odyssey/compare/v1.119.0...v1.120.0) (2026-08-22)
+
+
+### Features
+
+* **rich-text:** implement custom CodeBlockLowlight extension with HeroUI Pro CodeBlock and editable NodeView ([ed221db](https://github.com/LeeWio/odyssey/commit/ed221db53fe38f7d3ee1bb1e5b264f1801b9c8e7))
+
 # [1.119.0](https://github.com/LeeWio/odyssey/compare/v1.118.0...v1.119.0) (2026-08-22)
 
 
