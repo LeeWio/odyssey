@@ -1,3 +1,10 @@
+## [1.121.1](https://github.com/LeeWio/odyssey/compare/v1.121.0...v1.121.1) (2026-08-22)
+
+
+### Bug Fixes
+
+* **rich-text:** transpile lowlight package to resolve Next.js SSR ESM chunk loading errors ([65572e8](https://github.com/LeeWio/odyssey/commit/65572e8482c1e6268eb074508cb2af80cd67d9ec))
+
 # [1.121.0](https://github.com/LeeWio/odyssey/compare/v1.120.0...v1.121.0) (2026-08-22)
 
 
