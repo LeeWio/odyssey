@@ -100,13 +100,7 @@ const Masonry: React.FC<MasonryProps> = ({
 
   const [containerRef, { width }] = useMeasure<HTMLDivElement>();
   const [imagesReady, setImagesReady] = useState(false);
-  const [grid, setGrid] = useState<GridItem[]>([]);
   const hasMounted = useRef(false);
-
-  // High-performance position caching to skip redundant GSAP calls on unrelated renders!
-  const prevPositionsRef = useRef<Record<string, { x: number; y: number; w: number; h: number }>>(
-    {}
-  );
 
   const getInitialPosition = (item: GridItem) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
@@ -177,7 +171,7 @@ const Masonry: React.FC<MasonryProps> = ({
       let cardWidth = columnWidth;
 
       if (shouldSpan2) {
-        // Multi-Column Spanning: Find the adjacent column pair with the minimum combined height
+        // Multi-Column Spanning: Find the adjacent column pair with the combined height
         let minPairHeight = Number.MAX_VALUE;
         let bestColIndex = 0;
 
@@ -229,16 +223,6 @@ const Masonry: React.FC<MasonryProps> = ({
         const selector = `[data-key="${item.id}"]`;
         const animProps = { x: item.x, y: item.y, width: item.w, height: item.h };
 
-        // Position diffing cache: check if coordinates have actually changed!
-        const prev = prevPositionsRef.current[item.id];
-        const hasChanged =
-          !prev || prev.x !== item.x || prev.y !== item.y || prev.w !== item.w || prev.h !== item.h;
-
-        // If coordinates have not changed, we can completely skip animating this card!
-        if (!hasChanged) {
-          return;
-        }
-
         if (!hasMounted.current) {
           const start = getInitialPosition(item);
           gsap.fromTo(
@@ -268,19 +252,10 @@ const Masonry: React.FC<MasonryProps> = ({
             overwrite: "auto",
           });
         }
-
-        // Cache the new position coordinates
-        prevPositionsRef.current[item.id] = {
-          x: item.x,
-          y: item.y,
-          w: item.w,
-          h: item.h,
-        };
       });
     }, containerRef);
 
     hasMounted.current = true;
-    setGrid(computedGrid);
 
     // Context cleanup function to revert and dispose of all active/killed tweens completely on unmount!
     return () => ctx.revert();
@@ -311,7 +286,7 @@ const Masonry: React.FC<MasonryProps> = ({
 
   return (
     <div ref={containerRef} className="relative h-full min-h-[500px] w-full">
-      {grid.map((item) => {
+      {items.map((item) => {
         // Fallback calculations for the initial first paint
         const gap = 24;
         const totalGaps = (columns - 1) * gap;

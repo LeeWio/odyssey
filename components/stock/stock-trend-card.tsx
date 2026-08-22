@@ -1,22 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Card, Skeleton, cn, Button, Tooltip, CardVariants } from "@heroui/react";
+import { useMemo } from "react";
+import { Card, Skeleton, cn } from "@heroui/react";
 import { useGetStockTrendQuery } from "@/lib/features/stock/stock-api";
-import { AreaChart } from "@heroui-pro/react/area-chart";
-import { ChartTooltip, EmptyState, Segment } from "@heroui-pro/react";
+import { LineChart } from "@heroui-pro/react/line-chart";
+import { EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 
 interface StockTrendCardProps {
   symbol: string;
   className?: string;
-  variant?: CardVariants["variant"];
+  variant?: "default" | "secondary" | "tertiary" | "transparent";
 }
 
 export function StockTrendCard({ symbol, className, variant = "default" }: StockTrendCardProps) {
-  const [period, setPeriod] = useState<string>("1M");
-
-  const { data, isLoading, isError } = useGetStockTrendQuery({ symbol, period });
+  // Lock period to 1M for compact portfolio timeline view
+  const { data, isLoading, isError } = useGetStockTrendQuery({ symbol, period: "1M" });
 
   const isUp = useMemo(() => {
     if (!data) return true;
@@ -25,72 +24,41 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
 
   const formattedTrendPoints = useMemo(() => {
     if (!data?.trendPoints) return [];
-    return data.trendPoints.map((p) => {
-      const parts = p.date.split("-");
-      const shortDate = parts.length === 3 ? `${parts[1]}/${parts[2]}` : p.date;
-      return {
-        ...p,
-        shortDate,
-      };
-    });
+    return data.trendPoints.map((p) => ({
+      ...p,
+      price: p.price,
+    }));
   }, [data]);
 
   if (isLoading) {
     return (
-      <Card className={cn("w-full", className)} variant={variant}>
-        <Card.Header className="flex-row items-center justify-between">
-          <Skeleton className="h-6 w-28" />
-
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-6 w-16" />
-            <Skeleton className="h-6 w-12" />
+      <Card className={cn("w-full border-none p-4", className)} variant={variant}>
+        <div className="flex w-full items-center justify-between pb-2">
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-4 w-16 rounded-md" />
+            <Skeleton className="h-3 w-24 rounded-md" />
           </div>
-        </Card.Header>
-
-        <Card.Content>
-          <div className="relative h-50 w-full overflow-hidden">
-            <div className="absolute inset-0 flex flex-col justify-between py-2">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="border-default-200/40 border-t" />
-              ))}
-            </div>
-
-            <div className="absolute inset-x-0 top-8 bottom-6 flex items-end gap-4">
-              {[38, 44, 41, 52, 48, 58, 63, 60, 72, 68, 76, 71, 82, 78, 86, 80, 88, 84, 92, 89].map(
-                (height, index) => (
-                  <Skeleton key={index} className="flex-1" style={{ height: `${height}%` }} />
-                )
-              )}
-            </div>
-
-            <div className="absolute inset-x-0 bottom-0 flex justify-between">
-              <Skeleton className="h-3 w-8 rounded-sm" />
-              <Skeleton className="h-3 w-8 rounded-sm" />
-              <Skeleton className="h-3 w-8 rounded-sm" />
-              <Skeleton className="h-3 w-8 rounded-sm" />
-              <Skeleton className="h-3 w-8 rounded-sm" />
-            </div>
+          <div className="flex flex-col items-end gap-1.5">
+            <Skeleton className="h-4 w-14 rounded-md" />
+            <Skeleton className="h-3 w-20 rounded-md" />
           </div>
-        </Card.Content>
+        </div>
+        <div className="w-full pt-2">
+          <Skeleton className="h-20 w-full rounded-lg" />
+        </div>
       </Card>
     );
   }
 
   if (isError || !data) {
     return (
-      <EmptyState className="bg-surface-secondary">
+      <EmptyState className="bg-surface-secondary border-default-100 rounded-2xl border p-4">
         <EmptyState.Header>
           <EmptyState.Media variant="icon">
-            <Icon icon="gravity-ui:chart-line-arrow-up" />
+            <Icon icon="gravity-ui:chart-line-arrow-up" className="size-4" />
           </EmptyState.Media>
-          <EmptyState.Title>No Trend Data Yet</EmptyState.Title>
-          <EmptyState.Description>
-            There isn&apos;t enough market data to display the price trend yet.
-          </EmptyState.Description>
+          <EmptyState.Title className="text-xs">No Trend Data Yet</EmptyState.Title>
         </EmptyState.Header>
-        <EmptyState.Content className="flex-row gap-2">
-          <Button>Try Again</Button>
-        </EmptyState.Content>
       </EmptyState>
     );
   }
@@ -98,77 +66,50 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
   const strokeColor = isUp ? "var(--color-success, #17c964)" : "var(--color-danger, #f31260)";
 
   return (
-    <Card className={cn("w-full", className)} variant={variant}>
-      <Card.Header className="flex-row items-center justify-between">
-        <Card.Title>
-          <Tooltip delay={0} closeDelay={100}>
-            <Tooltip.Trigger aria-label="Stock name">{data.symbol}</Tooltip.Trigger>
-            <Tooltip.Content showArrow placement="top">
-              <Tooltip.Arrow />
-              <p>{data.name}</p>
-            </Tooltip.Content>
-          </Tooltip>
-        </Card.Title>
-        <Segment
-          selectedKey={period}
-          onSelectionChange={(key) => setPeriod(key as string)}
-          size="sm"
-        >
-          <Segment.Item id="1W">1W</Segment.Item>
-          <Segment.Item id="1M">1M</Segment.Item>
-          <Segment.Item id="1Y">1Y</Segment.Item>
-        </Segment>
-      </Card.Header>
-      <Card.Content className="flex flex-col gap-2">
+    <Card
+      className={cn("border-default-100 w-full rounded-2xl border p-4", className)}
+      variant={variant}
+    >
+      {/* 1. Miniature Portfolio Header */}
+      <div className="flex w-full items-center justify-between pb-2 select-none">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-foreground text-sm font-semibold tracking-tight">
+            {data.symbol}
+          </span>
+          <span className="text-muted-foreground line-clamp-1 max-w-40 text-xs">{data.name}</span>
+        </div>
+        <div className="flex flex-col items-end gap-0.5">
+          <span className="text-foreground text-sm font-semibold">¥{data.current?.toFixed(2)}</span>
+          <span className={cn("text-xs font-medium", isUp ? "text-green-500" : "text-danger-500")}>
+            {isUp ? "+" : ""}
+            {data.changePct?.toFixed(2)}%
+          </span>
+        </div>
+      </div>
+
+      {/* 2. Sparkline Chart */}
+      <div className="w-full pt-2">
         {formattedTrendPoints.length > 0 ? (
-          <AreaChart data={formattedTrendPoints} height={200}>
-            <defs>
-              <linearGradient id={`stock-fill-${symbol}-${period}`} x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor={strokeColor} stopOpacity={0.2} />
-                <stop offset="100%" stopColor={strokeColor} stopOpacity={0.02} />
-              </linearGradient>
-            </defs>
-            <AreaChart.Grid vertical={false} />
-            <AreaChart.XAxis dataKey="shortDate" tickMargin={8} />
-            <AreaChart.YAxis
-              domain={["dataMin - 10", "dataMax + 10"]}
-              tickFormatter={(v: number) => `¥${v.toFixed(0)}`}
-              width={50}
-            />
-            <AreaChart.Area
+          <LineChart
+            data={formattedTrendPoints}
+            height={80}
+            margin={{ bottom: 0, left: 0, right: 0, top: 4 }}
+          >
+            <LineChart.YAxis hide domain={["dataMin - 10", "dataMax + 10"]} />
+            <LineChart.Line
               dataKey="price"
               dot={false}
-              fill={`url(#stock-fill-${symbol}-${period})`}
-              name="Price"
               stroke={strokeColor}
               strokeWidth={2}
               type="monotone"
             />
-            <AreaChart.Tooltip
-              content={({ active, label, payload }) => {
-                if (!active || !payload?.length) return null;
-
-                return (
-                  <ChartTooltip>
-                    <ChartTooltip.Header>{label}</ChartTooltip.Header>
-                    {payload.map((entry) => (
-                      <ChartTooltip.Item key={String(entry.dataKey)}>
-                        <ChartTooltip.Indicator color={entry.color ?? entry.stroke} />
-                        <ChartTooltip.Label>{entry.name}</ChartTooltip.Label>
-                        <ChartTooltip.Value>¥{Number(entry.value).toFixed(2)}</ChartTooltip.Value>
-                      </ChartTooltip.Item>
-                    ))}
-                  </ChartTooltip>
-                );
-              }}
-            />
-          </AreaChart>
+          </LineChart>
         ) : (
-          <div className="border-default-200/50 flex h-50 items-center justify-center rounded-xl border border-dashed">
-            <span className="text-muted-foreground text-xs">No trend coordinates available</span>
+          <div className="border-default-200/50 flex h-20 items-center justify-center rounded-xl border border-dashed">
+            <span className="text-muted-foreground text-xs">No coordinates available</span>
           </div>
         )}
-      </Card.Content>
+      </div>
     </Card>
   );
 }
