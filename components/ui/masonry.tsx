@@ -100,7 +100,6 @@ const Masonry: React.FC<MasonryProps> = ({
 
   const [containerRef, { width }] = useMeasure<HTMLDivElement>();
   const [imagesReady, setImagesReady] = useState(false);
-  const [grid, setGrid] = useState<GridItem[]>([]);
   const hasMounted = useRef(false);
 
   const getInitialPosition = (item: GridItem) => {
@@ -223,7 +222,6 @@ const Masonry: React.FC<MasonryProps> = ({
     }, containerRef);
 
     hasMounted.current = true;
-    setGrid(computedGrid);
 
     // Context cleanup function to revert and dispose of all active/killed tweens completely on unmount!
     return () => ctx.revert();
@@ -254,7 +252,7 @@ const Masonry: React.FC<MasonryProps> = ({
 
   return (
     <div ref={containerRef} className="relative h-full min-h-[500px] w-full">
-      {grid.map((item) => {
+      {items.map((item) => {
         // Fallback calculations for the initial first paint
         const gap = 24;
         const totalGaps = (columns - 1) * gap;
