@@ -1,3 +1,10 @@
+# [1.107.0](https://github.com/LeeWio/odyssey/compare/v1.106.0...v1.107.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** streamline stock sparkline to single-row layout with symbolic tooltips ([3eaf664](https://github.com/LeeWio/odyssey/commit/3eaf6648f3248df2414c62e837e48e053c0daf83))
+
 # [1.106.0](https://github.com/LeeWio/odyssey/compare/v1.105.2...v1.106.0) (2026-08-22)
 
 
