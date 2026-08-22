@@ -32,7 +32,7 @@ export default function MomentsPage() {
   if (!mounted) return null;
 
   return (
-    <div className="bg-background min-h-screen px-4 pt-28 pb-24 sm:px-6 lg:pt-32">
+    <div className="bg-background min-h-screen px-4 pt-24 pb-16 md:px-6 md:pt-28 md:pb-24 lg:pt-32">
       <div className="mx-auto w-full max-w-[1440px]">
         {isLoading ? (
           <div className="flex h-[500px] flex-col items-center justify-center gap-3">
@@ -45,7 +45,11 @@ export default function MomentsPage() {
           </div>
         ) : (
           <div className="w-full overflow-hidden">
-            <ScrollShadow hideScrollBar className="h-[calc(100vh-280px)] w-full pr-1" size={100}>
+            <ScrollShadow
+              hideScrollBar
+              className="h-auto w-full pr-1 md:h-[calc(100vh-280px)] md:overflow-y-auto"
+              size={100}
+            >
               <div className="relative w-full">
                 <Masonry items={masonryItems} />
               </div>

@@ -31,10 +31,10 @@ const useMedia = (queries: string[], values: number[], defaultValue: number): nu
 };
 
 const Masonry: React.FC<MasonryProps> = ({ items }) => {
-  // Breakpoints mapping to column count
+  // Breakpoints mapping to column count (Strictly 1 column for all mobile devices under 768px for readable layout)
   const columns = useMedia(
-    ["(min-width:1500px)", "(min-width:1000px)", "(min-width:600px)", "(min-width:400px)"],
-    [4, 3, 2, 2],
+    ["(min-width:1400px)", "(min-width:1024px)", "(min-width:768px)"],
+    [4, 3, 2],
     1
   );
 
@@ -48,10 +48,10 @@ const Masonry: React.FC<MasonryProps> = ({ items }) => {
   }, [items, columns]);
 
   return (
-    <div className="flex w-full items-start gap-6">
+    <div className="flex w-full items-start gap-4 md:gap-6">
       <AnimatePresence mode="popLayout">
         {columnsData.map((columnItems, colIndex) => (
-          <div key={colIndex} className="flex min-w-0 flex-1 flex-col gap-6">
+          <div key={colIndex} className="flex min-w-0 flex-1 flex-col gap-4 md:gap-6">
             {columnItems.map((item) => (
               <motion.div
                 key={item.id}
