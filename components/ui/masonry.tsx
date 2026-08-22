@@ -146,6 +146,7 @@ const Masonry: React.FC<MasonryProps> = ({
       }
     });
     preloadImages(urls).then(() => setImagesReady(true));
+     
   }, [items]);
 
   // Cleanly dispose and revert all active GSAP animations ONLY when the component completely unmounts!
