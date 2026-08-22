@@ -146,7 +146,6 @@ const Masonry: React.FC<MasonryProps> = ({
       }
     });
     preloadImages(urls).then(() => setImagesReady(true));
-     
   }, [items]);
 
   // Cleanly dispose and revert all active GSAP animations ONLY when the component completely unmounts!
@@ -204,7 +203,7 @@ const Masonry: React.FC<MasonryProps> = ({
       const ctx = gsap.context(() => {
         computedGrid.forEach((item, index) => {
           const selector = `[data-key="${item.id}"]`;
-          const animProps = { x: item.x, y: item.y, width: item.w, height: item.h };
+          const animProps = { x: item.x, y: item.y, width: item.w };
 
           if (!hasMounted.current) {
             const start = getInitialPosition(item);
@@ -215,7 +214,6 @@ const Masonry: React.FC<MasonryProps> = ({
                 x: start.x,
                 y: start.y,
                 width: item.w,
-                height: item.h,
                 filter: "blur(8px)",
               },
               {
