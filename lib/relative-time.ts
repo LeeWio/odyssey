@@ -6,7 +6,11 @@ export function formatRelativeTime(
 ) {
   if (!value) return fallback;
 
-  const timestamp = new Date(value).getTime();
+  // Treat timezone-less ISO strings from server as UTC to prevent browser local timezone parse discrepancies
+  const dateStr =
+    value.includes("T") && !value.endsWith("Z") && !value.includes("+") ? `${value}Z` : value;
+
+  const timestamp = new Date(dateStr).getTime();
   if (!Number.isFinite(timestamp)) return fallback;
 
   const seconds = Math.round((timestamp - now) / 1000);
