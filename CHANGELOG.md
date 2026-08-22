@@ -1,3 +1,10 @@
+## [1.105.1](https://github.com/LeeWio/odyssey/compare/v1.105.0...v1.105.1) (2026-08-22)
+
+
+### Performance Improvements
+
+* **moments:** optimize Masonry grid performance with position caching, rAF throttling, and GSAP context GC ([b7a384c](https://github.com/LeeWio/odyssey/commit/b7a384c97e50880ef700161c0e70e578325bb032))
+
 # [1.105.0](https://github.com/LeeWio/odyssey/compare/v1.104.0...v1.105.0) (2026-08-22)
 
 
