@@ -1,3 +1,10 @@
+# [1.99.0](https://github.com/LeeWio/odyssey/compare/v1.98.0...v1.99.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** implement greedy column-height balancing in Masonry to achieve row-level staggering ([6fbe3e9](https://github.com/LeeWio/odyssey/commit/6fbe3e9bc0108e8ed37a3e46c6635106ff054ffa))
+
 # [1.98.0](https://github.com/LeeWio/odyssey/compare/v1.97.0...v1.98.0) (2026-08-22)
 
 
