@@ -1,3 +1,10 @@
+# [1.100.0](https://github.com/LeeWio/odyssey/compare/v1.99.0...v1.100.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** optimize BounceCards width and fanned image translations to prevent visual overflow ([1709597](https://github.com/LeeWio/odyssey/commit/1709597790c1cc31b5938212b01b898672b1845e))
+
 # [1.99.0](https://github.com/LeeWio/odyssey/compare/v1.98.0...v1.99.0) (2026-08-22)
 
 
