@@ -1,3 +1,10 @@
+# [1.109.0](https://github.com/LeeWio/odyssey/compare/v1.108.0...v1.109.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** stabilize absolute Masonry by decoupling render loop from grid state ([aa92cc2](https://github.com/LeeWio/odyssey/commit/aa92cc2cfa47c67782eba66ea83421d0747e7ab3))
+
 # [1.108.0](https://github.com/LeeWio/odyssey/compare/v1.107.0...v1.108.0) (2026-08-22)
 
 
