@@ -1,3 +1,10 @@
+# [1.98.0](https://github.com/LeeWio/odyssey/compare/v1.97.0...v1.98.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** make StockSelector popover width fully mobile responsive ([24208e8](https://github.com/LeeWio/odyssey/commit/24208e8b9a38a79caaef8eec5426e6f53a7f4d44))
+
 # [1.97.0](https://github.com/LeeWio/odyssey/compare/v1.96.1...v1.97.0) (2026-08-22)
 
 
