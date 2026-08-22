@@ -1,3 +1,10 @@
+# [1.122.0](https://github.com/LeeWio/odyssey/compare/v1.121.1...v1.122.0) (2026-08-22)
+
+
+### Features
+
+* **rich-text:** add hljs style highlights in editor mode and tidy CodeBlock structure ([9729649](https://github.com/LeeWio/odyssey/commit/9729649ab5328a79326c8f3dc27df3657ca0e2a5))
+
 ## [1.121.1](https://github.com/LeeWio/odyssey/compare/v1.121.0...v1.121.1) (2026-08-22)
 
 
