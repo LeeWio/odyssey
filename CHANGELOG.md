@@ -1,3 +1,10 @@
+# [1.101.0](https://github.com/LeeWio/odyssey/compare/v1.100.0...v1.101.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** integrate fully responsive native overflow-scrolling Tabs category bar ([d7766f3](https://github.com/LeeWio/odyssey/commit/d7766f37017f7bdf70452025ac226e3bbda8c41d))
+
 # [1.100.0](https://github.com/LeeWio/odyssey/compare/v1.99.0...v1.100.0) (2026-08-22)
 
 
