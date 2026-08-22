@@ -1,3 +1,10 @@
+# [1.111.0](https://github.com/LeeWio/odyssey/compare/v1.110.0...v1.111.0) (2026-08-22)
+
+
+### Features
+
+* **stock:** apply user's customized compact single-row StockTrendCard ([ea61360](https://github.com/LeeWio/odyssey/commit/ea61360db3409c664fa52e1fffdfa78c6efedf27))
+
 # [1.110.0](https://github.com/LeeWio/odyssey/compare/v1.109.0...v1.110.0) (2026-08-22)
 
 
