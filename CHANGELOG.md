@@ -1,3 +1,10 @@
+# [1.121.0](https://github.com/LeeWio/odyssey/compare/v1.120.0...v1.121.0) (2026-08-22)
+
+
+### Features
+
+* **rich-text:** set higher priority on custom CodeBlockLowlight extension to override default StarterKit CodeBlock ([d311f1d](https://github.com/LeeWio/odyssey/commit/d311f1dc92b2f780bc2dd3e24e76293520a30c69))
+
 # [1.120.0](https://github.com/LeeWio/odyssey/compare/v1.119.0...v1.120.0) (2026-08-22)
 
 
