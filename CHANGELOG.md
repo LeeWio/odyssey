@@ -1,3 +1,10 @@
+# [1.119.0](https://github.com/LeeWio/odyssey/compare/v1.118.0...v1.119.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** restrict 2-column wide spanning to moments with text content ([7a9593c](https://github.com/LeeWio/odyssey/commit/7a9593ce700513bd95622d838b72250001a80973))
+
 # [1.118.0](https://github.com/LeeWio/odyssey/compare/v1.117.1...v1.118.0) (2026-08-22)
 
 
