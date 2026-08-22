@@ -1,3 +1,10 @@
+# [1.106.0](https://github.com/LeeWio/odyssey/compare/v1.105.2...v1.106.0) (2026-08-22)
+
+
+### Features
+
+* **moments:** streamline StockTrendCard to sparkline portfolio and stabilize absolute Masonry layout ([857de53](https://github.com/LeeWio/odyssey/commit/857de53372c384b18f302769908ea38457d14b16))
+
 ## [1.105.2](https://github.com/LeeWio/odyssey/compare/v1.105.1...v1.105.2) (2026-08-22)
 
 
