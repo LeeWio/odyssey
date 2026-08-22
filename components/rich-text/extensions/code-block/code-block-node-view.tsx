@@ -39,20 +39,15 @@ export function CodeBlockNodeView({ node, updateAttributes }: NodeViewProps) {
 
   return (
     <NodeViewWrapper className="code-block-node-view my-4">
-      <CodeBlock className="border-default-200/60 dark:border-default-100/50 bg-content1/50 dark:bg-content1/20 overflow-hidden rounded-xl border shadow-sm">
-        <CodeBlock.Header className="border-default-200/60 dark:border-default-100/50 bg-default-100/30 dark:bg-default-50/10 flex items-center justify-between border-b px-4 py-2">
+      <CodeBlock>
+        <CodeBlock.Header>
           {isReadOnly ? (
             <span className="text-muted text-xs font-semibold tracking-wider uppercase">
               {selectedLabel}
             </span>
           ) : (
             <Dropdown>
-              <Button
-                aria-label={`Code language: ${selectedLabel}`}
-                size="sm"
-                variant="ghost"
-                className="text-default-600 hover:text-default-800 h-7 px-2 text-xs font-semibold"
-              >
+              <Button aria-label={`Code language: ${selectedLabel}`} size="sm" variant="ghost">
                 <span className="uppercase">{selectedLabel}</span>
                 <Icon icon="gravity-ui:chevron-down" className="ml-1 size-3.5 opacity-70" />
               </Button>
