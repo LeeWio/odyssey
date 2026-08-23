@@ -1,3 +1,10 @@
+# [1.124.0](https://github.com/LeeWio/odyssey/compare/v1.123.0...v1.124.0) (2026-08-23)
+
+
+### Features
+
+* **ui:** optimize moments page feed height for natural adaptive window scrolling ([8b11433](https://github.com/LeeWio/odyssey/commit/8b11433693b57bad50c55a629f55035ddf3bff3e))
+
 # [1.123.0](https://github.com/LeeWio/odyssey/compare/v1.122.0...v1.123.0) (2026-08-23)
 
 
