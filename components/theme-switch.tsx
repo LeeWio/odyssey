@@ -1,7 +1,7 @@
 "use client";
 
 import { Skeleton } from "@heroui/react";
-import { Segment } from "@heroui-pro/react";
+import { Segment, SegmentRootProps } from "@heroui-pro/react";
 import { useMounted } from "@mantine/hooks";
 import { useTheme } from "next-themes";
 import { selectThemeVariant, setThemeVariant } from "@/lib/features/ui";
@@ -14,6 +14,7 @@ import {
   type ThemeVariant,
 } from "@/lib/theme";
 import { DisplayFillIcon, MoonFillIcon, SunMaxFillIcon } from "./icons";
+import { Icon } from "@iconify/react";
 
 const THEME_VARIANT_LABELS: Record<ThemeVariant, string> = {
   brutalism: "Brutal",
@@ -21,7 +22,12 @@ const THEME_VARIANT_LABELS: Record<ThemeVariant, string> = {
   mouve: "Mouve",
 };
 
-export const ModeSwitch = () => {
+interface ModeSwitchProps {
+  size?: SegmentRootProps["size"];
+  variant?: SegmentRootProps["variant"];
+}
+
+export const ModeSwitch = ({ size = "sm", variant = "ghost" }: ModeSwitchProps) => {
   const { theme, setTheme } = useTheme();
   const mounted = useMounted();
 
@@ -34,20 +40,20 @@ export const ModeSwitch = () => {
       aria-label="Color mode"
       selectedKey={coerceThemeMode(theme) || DEFAULT_THEME_MODE}
       onSelectionChange={(key) => setTheme(coerceThemeMode(String(key)))}
-      size="sm"
-      variant="ghost"
+      size={size}
+      variant={variant}
     >
       <Segment.Item aria-label="Light" id="light">
         <Segment.Separator />
-        <SunMaxFillIcon aria-hidden="true" />
+        <Icon icon="gravity-ui:sun" aria-hidden="true" />
       </Segment.Item>
       <Segment.Item aria-label="Dark" id="dark">
         <Segment.Separator />
-        <MoonFillIcon aria-hidden="true" />
+        <Icon icon="gravity-ui:moon" aria-hidden="true" />
       </Segment.Item>
       <Segment.Item aria-label="System" id="system">
         <Segment.Separator />
-        <DisplayFillIcon aria-hidden="true" />
+        <Icon icon="gravity-ui:display" aria-hidden="true" />
       </Segment.Item>
     </Segment>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { MomentCard } from "@/features/moment/components/card/moment-card";
@@ -103,9 +103,22 @@ const Masonry: React.FC<MasonryProps> = ({
   );
 
   const [containerRef, { width }] = useMeasure<HTMLDivElement>();
-  const [imagesReady, setImagesReady] = useState(false);
+  const [readyImageBatch, setReadyImageBatch] = useState<string | null>(null);
   const hasMounted = useRef(false);
   const prevGridRef = useRef<GridItem[]>([]);
+  const cardRefs = useRef(new Map<string, HTMLDivElement>());
+
+  const imageBatchKey = useMemo(
+    () =>
+      items
+        .map(
+          (item) =>
+            `${item.id}:${item.moment.images?.map((image) => image.fileUrl).join(",") ?? ""}`
+        )
+        .join("|"),
+    [items]
+  );
+  const imagesReady = readyImageBatch === imageBatchKey;
 
   const getInitialPosition = (item: GridItem) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
@@ -138,6 +151,7 @@ const Masonry: React.FC<MasonryProps> = ({
 
   // Preload all moment image assets before firing grid alignment
   useEffect(() => {
+    let cancelled = false;
     const urls: string[] = [];
     items.forEach((i) => {
       if (i.moment?.images) {
@@ -146,8 +160,17 @@ const Masonry: React.FC<MasonryProps> = ({
         });
       }
     });
-    preloadImages(urls).then(() => setImagesReady(true));
-  }, [items]);
+    hasMounted.current = false;
+    prevGridRef.current = [];
+
+    preloadImages(urls).then(() => {
+      if (!cancelled) setReadyImageBatch(imageBatchKey);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [imageBatchKey, items]);
 
   // High-performance real-time DOM measuring layout calculations using the useGSAP hook
   const { contextSafe } = useGSAP(
@@ -155,19 +178,21 @@ const Masonry: React.FC<MasonryProps> = ({
       if (!imagesReady || !width) return;
 
       const runLayout = () => {
-        const colHeights = new Array(columns).fill(0);
+        // Keep one bottom coordinate per column. A spanning card advances every
+        // column it occupies, so later cards can never be placed inside it.
+        const colHeights = new Array<number>(columns).fill(0);
         const gap = 24; // Spacious premium gap
         const totalGaps = (columns - 1) * gap;
         const columnWidth = (width - totalGaps) / columns;
 
         const computedGrid = items.map((item) => {
-          const element = containerRef.current?.querySelector(
-            `[data-key="${item.id}"]`
-          ) as HTMLElement;
-          const innerCard = element?.firstElementChild as HTMLElement;
+          const element = cardRefs.current.get(item.id);
+          const innerCard = element?.firstElementChild as HTMLElement | null;
 
-          // Measure real fractional height using getBoundingClientRect() to avoid rounding overlap errors
-          const actualHeight = innerCard ? innerCard.getBoundingClientRect().height : 320;
+          // offsetHeight deliberately ignores GSAP's hover transform. Measuring
+          // getBoundingClientRect() here makes a hovered card appear taller and
+          // can move the following cards into an inconsistent layout.
+          const actualHeight = innerCard?.offsetHeight || 320;
 
           // Detect if this card has more than 3 images (using stack.tsx), contains actual text, and should span 2 columns
           const hasText = item.moment.content
@@ -182,7 +207,8 @@ const Masonry: React.FC<MasonryProps> = ({
           let itemWidth = columnWidth;
 
           if (spansTwoColumns) {
-            // Find the adjacent pair of columns (col, col+1) with the shortest maximum height
+            // Find the adjacent pair of columns (col, col+1) with the shortest
+            // maximum height. Both columns are then advanced to the same bottom.
             let minMaxHeight = Infinity;
             let targetCol = 0;
 
@@ -249,22 +275,26 @@ const Masonry: React.FC<MasonryProps> = ({
         // Cache the latest layout grid
         prevGridRef.current = computedGrid;
 
-        // Stretch parent container style height to match the tallest column perfectly
+        // Stretch parent container to the actual content bottom. Do not include
+        // the trailing gap; this also prevents a long list from growing based
+        // on a stale previous layout snapshot.
         if (containerRef.current) {
-          containerRef.current.style.height = `${Math.max(...colHeights)}px`;
+          const contentHeight = Math.max(0, Math.max(...colHeights) - gap);
+          containerRef.current.style.height = `${contentHeight}px`;
         }
 
         // Animate positions cleanly.
         // DO NOT animate 'width' or 'height' with GSAP to avoid layout thrashing and infinite ResizeObserver loop feedback!
         // The container width is already set instantly by React's style, so the card naturally reflows and calculates the correct height.
         computedGrid.forEach((item, index) => {
-          const selector = `[data-key="${item.id}"]`;
+          const element = cardRefs.current.get(item.id);
+          if (!element) return;
           const animProps = { x: item.x, y: item.y };
 
           if (!hasMounted.current) {
             const start = getInitialPosition(item);
             gsap.fromTo(
-              selector,
+              element,
               {
                 opacity: 0,
                 x: start.x,
@@ -282,7 +312,7 @@ const Masonry: React.FC<MasonryProps> = ({
             );
           } else {
             // Absolute zero flashing: GSAP gracefully transitions inline styles smoothly from their CURRENT properties during resizes!
-            gsap.to(selector, {
+            gsap.to(element, {
               ...animProps,
               duration: duration,
               ease: ease,
@@ -307,9 +337,12 @@ const Masonry: React.FC<MasonryProps> = ({
         });
       });
 
-      // Observe each card's inner element
-      const innerCards = containerRef.current?.querySelectorAll("[data-key] > div");
-      innerCards?.forEach((card) => resizeObserver.observe(card));
+      // Observe the exact rendered nodes instead of querying by data attributes.
+      // This remains correct when a large list is reconciled or filtered.
+      cardRefs.current.forEach((element) => {
+        const innerCard = element.firstElementChild;
+        if (innerCard) resizeObserver.observe(innerCard);
+      });
 
       return () => {
         resizeObserver.disconnect();
@@ -322,9 +355,9 @@ const Masonry: React.FC<MasonryProps> = ({
     }
   );
 
-  const handleMouseEnter = contextSafe((id: string) => {
+  const handleMouseEnter = contextSafe((event: React.MouseEvent<HTMLDivElement>) => {
     if (scaleOnHover) {
-      gsap.to(`[data-key="${id}"]`, {
+      gsap.to(event.currentTarget, {
         scale: hoverScale,
         duration: 0.35,
         ease: "power2.out",
@@ -333,9 +366,9 @@ const Masonry: React.FC<MasonryProps> = ({
     }
   });
 
-  const handleMouseLeave = contextSafe((id: string) => {
+  const handleMouseLeave = contextSafe((event: React.MouseEvent<HTMLDivElement>) => {
     if (scaleOnHover) {
-      gsap.to(`[data-key="${id}"]`, {
+      gsap.to(event.currentTarget, {
         scale: 1,
         duration: 0.35,
         ease: "power2.out",
@@ -363,6 +396,10 @@ const Masonry: React.FC<MasonryProps> = ({
         return (
           <div
             key={item.id}
+            ref={(node) => {
+              if (node) cardRefs.current.set(item.id, node);
+              else cardRefs.current.delete(item.id);
+            }}
             data-key={item.id}
             className="absolute box-content"
             style={{
@@ -370,8 +407,8 @@ const Masonry: React.FC<MasonryProps> = ({
               willChange: "transform, opacity",
               opacity: imagesReady ? 1 : 0, // Prevent flash of raw layout before measuring
             }}
-            onMouseEnter={() => handleMouseEnter(item.id)}
-            onMouseLeave={() => handleMouseLeave(item.id)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             <div className="relative h-auto w-full">
               <MomentCard moment={item.moment} />
