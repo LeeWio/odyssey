@@ -4,15 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Card, Chip, Typography, buttonVariants, cn } from "@heroui/react";
 import { Stepper } from "@heroui-pro/react";
-import {
-  Compass,
-  Sparkles,
-  Monitor,
-  CheckCircle2,
-  ChevronRight,
-  ChevronLeft,
-  ArrowRight,
-} from "lucide-react";
+import { Icon } from "@iconify/react";
 import Link from "next/link";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -21,7 +13,7 @@ const TOUR_STEPS = [
   {
     title: "Welcome to Odyssey",
     description: "The core vision and philosophy",
-    icon: Compass,
+    icon: "gravity-ui:compass",
     heading: "A Connected Digital Notebook",
     body: "Odyssey is a personal knowledge product designed as a living universe. Unlike flat chronological blogs, Odyssey maps knowledge dynamically as a spatial ecosystem of interconnected stars, topics, and essays.",
     badge: "VISION",
@@ -29,7 +21,7 @@ const TOUR_STEPS = [
   {
     title: "Planetary Constellations",
     description: "Our 3D interactive knowledge space",
-    icon: Sparkles,
+    icon: "gravity-ui:sparkles",
     heading: "The 3D Interactive Map",
     body: "Step into our immersive three-dimensional constellations space to explore articles physically! Stars are mapped to categories like Creative, Design, and Systems, surrounded by glowing space dust and orbiting article satellites.",
     badge: "INTERACTIVE R3F",
@@ -37,7 +29,7 @@ const TOUR_STEPS = [
   {
     title: "The Creator Rig",
     description: "Physical hardware & workspace staples",
-    icon: Monitor,
+    icon: "gravity-ui:display",
     heading: "Workspace利器 & Tools",
     body: 'Browse our comprehensive Uses page to inspect the mechanical keys, 16" MacBook Pro M3 Max, 5K Studio Display, Ghostty terminal, and development utilities powering our low-level RTOS and graphics compilation workflows.',
     badge: "TOOLKIT",
@@ -45,7 +37,7 @@ const TOUR_STEPS = [
   {
     title: "Complete the Orbit",
     description: "Unleash the full experience",
-    icon: CheckCircle2,
+    icon: "gravity-ui:circle-check",
     heading: "You're Ready to Explore",
     body: "Now that you understand the coordinate system, launch the AI Copilot to ask questions, explore the milestone Roadmap, schedule deep focus blocks in the Planner, or leave a note in the moderated Guestbook!",
     badge: "MISSION COMPLETE",
@@ -65,7 +57,6 @@ export function TourPage() {
   };
 
   const activeContent = TOUR_STEPS[activeStep] || TOUR_STEPS[0];
-  const IconComponent = activeContent.icon;
 
   return (
     <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
@@ -78,7 +69,7 @@ export function TourPage() {
           className="border-default-200/50 mb-16 flex flex-col items-center border-b pb-8 text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <Compass className="text-accent size-3" />
+            <Icon icon="gravity-ui:compass" className="text-accent size-3" />
             Interactive Onboarding
           </Chip>
           <Typography
@@ -114,12 +105,11 @@ export function TourPage() {
               onStepChange={setActiveStep}
             >
               {TOUR_STEPS.map((s) => {
-                const StepIcon = s.icon;
                 return (
                   <Stepper.Step key={s.title}>
                     <Stepper.Indicator>
                       <Stepper.Icon>
-                        <StepIcon className="size-4" />
+                        <Icon icon={s.icon} className="size-4" />
                       </Stepper.Icon>
                     </Stepper.Indicator>
                     <Stepper.Content className="flex-1">
@@ -164,7 +154,7 @@ export function TourPage() {
                     weight="bold"
                     className="flex items-center gap-3 tracking-tight"
                   >
-                    <IconComponent className="text-accent size-6 shrink-0" />
+                    <Icon icon={activeContent.icon} className="text-accent size-6 shrink-0" />
                     {activeContent.heading}
                   </Typography>
                   <Typography
@@ -187,7 +177,7 @@ export function TourPage() {
                       )}
                     >
                       Read Core Story
-                      <ArrowRight className="size-3.5" />
+                      <Icon icon="gravity-ui:arrow-right" className="size-3.5" />
                     </Link>
                   </div>
                 )}
@@ -201,7 +191,7 @@ export function TourPage() {
                       )}
                     >
                       Launch 3D Universe
-                      <ArrowRight className="size-3.5" />
+                      <Icon icon="gravity-ui:arrow-right" className="size-3.5" />
                     </Link>
                   </div>
                 )}
@@ -215,7 +205,7 @@ export function TourPage() {
                       )}
                     >
                       Browse Uses Desk
-                      <ArrowRight className="size-3.5" />
+                      <Icon icon="gravity-ui:arrow-right" className="size-3.5" />
                     </Link>
                   </div>
                 )}
@@ -254,7 +244,7 @@ export function TourPage() {
                   "flex items-center justify-center gap-1.5 disabled:opacity-50"
                 )}
               >
-                <ChevronLeft className="size-4" />
+                <Icon icon="gravity-ui:chevron-left" className="size-4" />
                 Back
               </button>
 
@@ -267,7 +257,7 @@ export function TourPage() {
                 )}
               >
                 Continue
-                <ChevronRight className="size-4" />
+                <Icon icon="gravity-ui:chevron-right" className="size-4" />
               </button>
             </div>
           </Card>

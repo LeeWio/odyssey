@@ -12,7 +12,7 @@ import {
   type ChatStatus,
 } from "@heroui-pro/react";
 import { Markdown } from "@heroui-pro/react/markdown";
-import { Sparkles, ArrowUp, Terminal, Cpu, Monitor, Compass, Mail } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -23,18 +23,26 @@ type Message = {
 };
 
 const SUGGESTIONS = [
-  { icon: Compass, label: "Tell me about your design philosophy", query: "design philosophy" },
   {
-    icon: Monitor,
+    icon: "gravity-ui:compass",
+    label: "Tell me about your design philosophy",
+    query: "design philosophy",
+  },
+  {
+    icon: "gravity-ui:display",
     label: "What hardware & software do you use?",
     query: "what hardware and software setup do you use?",
   },
   {
-    icon: Cpu,
+    icon: "gravity-ui:cpu",
     label: "What is your low-level system experience?",
     query: "rtos systems and low-level coding experience",
   },
-  { icon: Mail, label: "How can I contact or connect with you?", query: "how can I contact you" },
+  {
+    icon: "gravity-ui:envelope",
+    label: "How can I contact or connect with you?",
+    query: "how can I contact you",
+  },
 ];
 
 const INITIAL_MESSAGES: Message[] = [
@@ -228,7 +236,7 @@ Feel free to pick one of the suggestions below, or type your own question!`;
           className="mb-6 flex flex-col items-center text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <Sparkles className="text-accent size-3" />
+            <Icon icon="gravity-ui:sparkles" className="text-accent size-3" />
             Odyssey AI Assistant
           </Chip>
           <Typography type="h2" weight="bold" className="mt-3 tracking-tight">
@@ -301,7 +309,7 @@ Feel free to pick one of the suggestions below, or type your own question!`;
           >
             <PromptSuggestion>
               <PromptSuggestion.Items className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {SUGGESTIONS.map(({ icon: IconComponent, label, query }) => (
+                {SUGGESTIONS.map(({ icon: suggestionIcon, label, query }) => (
                   <PromptSuggestion.Item
                     key={label}
                     className="bg-surface-secondary border-default-200/60 hover:bg-default-100/50 group h-auto items-center justify-start rounded-xl border p-3 text-left transition-all duration-200"
@@ -313,7 +321,7 @@ Feel free to pick one of the suggestions below, or type your own question!`;
                   >
                     <span className="inline-flex min-w-0 items-center gap-3">
                       <div className="bg-default-100/80 text-default-500 group-hover:bg-default-200 group-hover:text-foreground flex size-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 group-hover:scale-105">
-                        <IconComponent className="size-4" />
+                        <Icon icon={suggestionIcon} className="size-4" />
                       </div>
                       <span className="text-muted/90 group-hover:text-foreground truncate text-xs font-semibold">
                         {label}
@@ -346,7 +354,7 @@ Feel free to pick one of the suggestions below, or type your own question!`;
             <PromptInput.Toolbar>
               <PromptInput.ToolbarStart>
                 <div className="text-muted/60 flex items-center gap-1.5 pl-2 text-xs">
-                  <Terminal className="size-3.5" />
+                  <Icon icon="gravity-ui:terminal" className="size-3.5" />
                   <span className="font-mono font-semibold tracking-wide uppercase">
                     Local Stream
                   </span>
@@ -354,7 +362,7 @@ Feel free to pick one of the suggestions below, or type your own question!`;
               </PromptInput.ToolbarStart>
               <PromptInput.ToolbarEnd>
                 <PromptInput.Send className="bg-accent/10 hover:bg-accent/20 text-accent flex size-8 items-center justify-center rounded-xl p-0">
-                  <ArrowUp className="size-4" />
+                  <Icon icon="gravity-ui:arrow-up" className="size-4" />
                 </PromptInput.Send>
               </PromptInput.ToolbarEnd>
             </PromptInput.Toolbar>

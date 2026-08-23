@@ -6,7 +6,7 @@ import Image from "next/image";
 import type { EmblaCarouselType } from "embla-carousel";
 import { Carousel } from "@heroui-pro/react/carousel";
 import { Card, Chip, Typography } from "@heroui/react";
-import { Camera, MapPin, Film, Eye, Image as ImageIcon } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -89,7 +89,7 @@ export function GalleryPage() {
           className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <Camera className="text-accent size-3" />
+            <Icon icon="gravity-ui:camera" className="text-accent size-3" />
             Medium Format Portfolio
           </Chip>
           <Typography
@@ -146,7 +146,7 @@ export function GalleryPage() {
               {/* Photo Title */}
               <div>
                 <div className="text-muted/60 mb-2 flex items-center gap-2 font-mono text-[10px] font-bold tracking-wider uppercase">
-                  <Eye className="text-accent size-3.5" />
+                  <Icon icon="gravity-ui:eye" className="text-accent size-3.5" />
                   MUSEUM PLATE
                 </div>
                 <Typography type="h3" weight="bold" className="text-foreground tracking-tight">
@@ -170,7 +170,7 @@ export function GalleryPage() {
                 {/* Location */}
                 <div className="flex items-center gap-3 text-xs">
                   <div className="bg-default-100 text-default-500 flex size-7 shrink-0 items-center justify-center rounded-lg">
-                    <MapPin className="size-3.5" />
+                    <Icon icon="gravity-ui:map-pin" className="size-3.5" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-muted/60 font-mono text-[9px] font-bold tracking-wider uppercase">
@@ -183,7 +183,7 @@ export function GalleryPage() {
                 {/* Camera */}
                 <div className="flex items-center gap-3 text-xs">
                   <div className="bg-default-100 text-default-500 flex size-7 shrink-0 items-center justify-center rounded-lg">
-                    <Camera className="size-3.5" />
+                    <Icon icon="gravity-ui:camera" className="size-3.5" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-muted/60 font-mono text-[9px] font-bold tracking-wider uppercase">
@@ -196,7 +196,7 @@ export function GalleryPage() {
                 {/* Film Stock */}
                 <div className="flex items-center gap-3 text-xs">
                   <div className="bg-default-100 text-default-500 flex size-7 shrink-0 items-center justify-center rounded-lg">
-                    <Film className="size-3.5" />
+                    <Icon icon="gravity-ui:video" className="size-3.5" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-muted/60 font-mono text-[9px] font-bold tracking-wider uppercase">
@@ -211,7 +211,7 @@ export function GalleryPage() {
             {/* Index telemetry indicator */}
             <div className="border-default-100 text-muted/50 mt-6 flex items-center justify-between border-t border-dashed pt-4 font-mono text-[11px] font-semibold">
               <span className="flex items-center gap-1.5 uppercase">
-                <ImageIcon className="text-accent size-3.5" />
+                <Icon icon="gravity-ui:picture" className="text-accent size-3.5" />
                 FRAME
               </span>
               <span className="text-foreground">

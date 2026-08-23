@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { Card, Chip, Typography, Button } from "@heroui/react";
 import { KPI } from "@heroui-pro/react/kpi";
 import { DataGrid, type DataGridColumn } from "@heroui-pro/react";
-import { Sparkles, Search, CheckCircle2, Cpu, Layout, FileCheck, UserCheck } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -255,7 +255,7 @@ export function RecruiterPage() {
           className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <UserCheck className="text-accent size-3" />
+            <Icon icon="gravity-ui:person-check" className="text-accent size-3" />
             Recruiter Assessment Sandbox
           </Chip>
           <Typography
@@ -279,7 +279,7 @@ export function RecruiterPage() {
             onPress={() => setProfile("systems")}
             className="shrink-0 gap-2"
           >
-            <Cpu className="size-4" />
+            <Icon icon="gravity-ui:cpu" className="size-4" />
             Systems & Kernel Engineer
           </Button>
           <Button
@@ -288,7 +288,7 @@ export function RecruiterPage() {
             onPress={() => setProfile("frontend")}
             className="shrink-0 gap-2"
           >
-            <Layout className="size-4" />
+            <Icon icon="gravity-ui:layout-cells-large" className="size-4" />
             UI & Design Systems Engineer
           </Button>
           <Button
@@ -297,7 +297,7 @@ export function RecruiterPage() {
             onPress={() => setProfile("creative")}
             className="shrink-0 gap-2"
           >
-            <Sparkles className="size-4" />
+            <Icon icon="gravity-ui:sparkles" className="size-4" />
             Creative Tech Polymath
           </Button>
         </div>
@@ -327,7 +327,7 @@ export function RecruiterPage() {
                 weight="semibold"
                 className="text-foreground flex items-center gap-1.5 text-xs"
               >
-                <FileCheck className="text-accent size-4" />
+                <Icon icon="gravity-ui:file-check" className="text-accent size-4" />
                 Scenario Highlights:
               </Typography>
               <Typography color="muted" type="body-xs" className="mt-2 leading-relaxed">
@@ -358,7 +358,7 @@ export function RecruiterPage() {
             </div>
 
             <div className="border-default-100/60 text-muted/50 mt-5 flex items-center gap-2 border-t pt-4 font-mono text-[11px] font-semibold uppercase">
-              <CheckCircle2 className="text-success size-3.5 shrink-0" />
+              <Icon icon="gravity-ui:circle-check" className="text-success size-3.5 shrink-0" />
               Pre-Vetted Experience verified via Local Code commits
             </div>
           </Card>
@@ -411,7 +411,10 @@ export function RecruiterPage() {
 
             {/* Search Input bar */}
             <div className="relative flex w-full max-w-xs shrink-0 items-center">
-              <Search className="text-muted/40 pointer-events-none absolute left-3 size-4" />
+              <Icon
+                icon="gravity-ui:magnifier"
+                className="text-muted/40 pointer-events-none absolute left-3 size-4"
+              />
               <input
                 type="text"
                 placeholder="Search achievements..."

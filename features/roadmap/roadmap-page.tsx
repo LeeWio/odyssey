@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { Card, Chip, Typography } from "@heroui/react";
 import { Timeline, TrendChip } from "@heroui-pro/react";
-import { Sparkles, Compass, Zap, Lock, Music } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -14,7 +14,7 @@ const roadmapEvents = [
     status: "muted" as const,
     tag: "Future Vision",
     tagColor: "default" as const,
-    icon: Compass,
+    icon: "gravity-ui:compass",
     description:
       "Architecting immersive spatial galleries for modular synthesizers and analog photography, projecting our physical equipment into vision-OS style web containers.",
     metrics: { label: "Spatial scale", value: "3D rooms" },
@@ -25,7 +25,7 @@ const roadmapEvents = [
     status: "current" as const,
     tag: "Active Rollout",
     tagColor: "accent" as const,
-    icon: Sparkles,
+    icon: "gravity-ui:sparkles",
     trend: { value: "+42%", direction: "up" as const, label: "Engagement" },
     description:
       "Assembled the R3F 3D spatial orbit universe with local space dust, article satellites, and camera directors. Launched the Copilot Assistant page powered by HeroUI Pro AI components.",
@@ -37,7 +37,7 @@ const roadmapEvents = [
     status: "success" as const,
     tag: "Shipped",
     tagColor: "success" as const,
-    icon: Music,
+    icon: "gravity-ui:music-note",
     description:
       "Constructed the high-performance vae-song-stream URL proxy utilizing secure CDN rewrites and 302 HTTP redirections, linked to the global floating MiniPlayer.",
     metrics: { label: "Redirect latency", value: "<15ms" },
@@ -48,7 +48,7 @@ const roadmapEvents = [
     status: "success" as const,
     tag: "Shipped",
     tagColor: "success" as const,
-    icon: Lock,
+    icon: "gravity-ui:lock",
     trend: { value: "100%", direction: "up" as const, label: "RBAC Controls" },
     description:
       "Integrated the unified sheet-panel dashboard for posts, moments, user profiles, and granular role-based permissions management.",
@@ -60,7 +60,7 @@ const roadmapEvents = [
     status: "success" as const,
     tag: "Shipped",
     tagColor: "success" as const,
-    icon: Zap,
+    icon: "gravity-ui:thunderbolt",
     trend: { value: "-35%", direction: "down" as const, label: "Lighthouse TTFB" },
     description:
       "Completed the core architectural refactor to Next.js 16 with Turbopack compiling, migrating components to HeroUI React components for AAA accessibility.",
@@ -99,12 +99,10 @@ export function RoadmapPage() {
         <div className="mt-10">
           <Timeline density="comfortable" size="md">
             {roadmapEvents.map((event) => {
-              const Icon = event.icon;
-
               return (
                 <Timeline.Item key={event.title} status={event.status}>
                   <Timeline.Marker aria-hidden="true" className="p-1">
-                    <Icon className="size-4" />
+                    <Icon icon={event.icon} className="size-4" />
                   </Timeline.Marker>
                   <Timeline.Content className="gap-4 pb-12">
                     <div className="flex flex-col gap-3">

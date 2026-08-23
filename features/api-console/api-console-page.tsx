@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { motion } from "motion/react";
 import { Card, Chip, Typography, Button, cn } from "@heroui/react";
 import { HoverCard, EmptyState } from "@heroui-pro/react";
-import { Terminal, Send, Database, Cpu, RefreshCw, Clock } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -191,7 +191,7 @@ export function ApiConsolePage() {
           className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <Terminal className="text-accent size-3" />
+            <Icon icon="gravity-ui:terminal" className="text-accent size-3" />
             API Playground Console
           </Chip>
           <Typography
@@ -329,9 +329,9 @@ export function ApiConsolePage() {
                 className="bg-accent mt-2 w-full gap-2 rounded-xl border-none font-bold text-white"
               >
                 {responseState.loading ? (
-                  <RefreshCw className="size-4 animate-spin" />
+                  <Icon icon="gravity-ui:arrow-clockwise" className="size-4 animate-spin" />
                 ) : (
-                  <Send className="size-4" />
+                  <Icon icon="gravity-ui:paper-plane" className="size-4" />
                 )}
                 Send Live Request
               </Button>
@@ -361,7 +361,10 @@ export function ApiConsolePage() {
             <div className="flex min-h-0 flex-1 flex-col justify-center">
               {responseState.loading ? (
                 <div className="flex flex-col items-center justify-center gap-3 py-16">
-                  <RefreshCw className="text-accent size-8 animate-spin" />
+                  <Icon
+                    icon="gravity-ui:arrow-clockwise"
+                    className="text-accent size-8 animate-spin"
+                  />
                   <span className="text-muted/60 font-mono text-xs">
                     Executing dynamic proxy resolver...
                   </span>
@@ -380,7 +383,7 @@ export function ApiConsolePage() {
                       variant="icon"
                       className="bg-default-100/50 border-default-200 border"
                     >
-                      <Database className="text-muted/60" />
+                      <Icon icon="gravity-ui:database" className="text-muted/60" />
                     </EmptyState.Media>
                     <EmptyState.Title className="mt-4 text-sm font-bold">
                       Console Offline
@@ -398,11 +401,11 @@ export function ApiConsolePage() {
             {responseState.data && (
               <div className="border-default-100/60 text-muted/40 flex shrink-0 items-center justify-between border-t bg-black/25 px-5 py-3 font-mono text-[10px] font-semibold uppercase">
                 <span className="flex items-center gap-1">
-                  <Clock className="text-success size-3" />
+                  <Icon icon="gravity-ui:clock" className="text-success size-3" />
                   PROXY TIME: 1.2s
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Cpu className="size-3 text-cyan-500" />
+                  <Icon icon="gravity-ui:cpu" className="size-3 text-cyan-500" />
                   Vae song redirected safely
                 </span>
               </div>

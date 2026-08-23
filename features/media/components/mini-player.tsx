@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Card, Slider } from "@heroui/react";
-import { SkipBack, SkipForward, Play, Pause, Shuffle } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import React, { useMemo } from "react";
@@ -75,20 +75,20 @@ export const MiniPlayer: React.FC = () => {
                   variant={shuffle ? "primary" : "tertiary"}
                   onClick={toggleShuffle}
                 >
-                  <Shuffle size={16} />
+                  <Icon icon="gravity-ui:shuffle" className="size-4" />
                 </Button>
                 <Button isIconOnly size="sm" variant="tertiary" onClick={previous}>
-                  <SkipBack size={16} fill="currentColor" />
+                  <Icon icon="gravity-ui:track-previous" className="size-4" />
                 </Button>
                 <Button isIconOnly size="md" variant="secondary" onClick={toggle}>
                   {playing ? (
-                    <Pause size={20} fill="currentColor" />
+                    <Icon icon="gravity-ui:pause-fill" className="size-5" />
                   ) : (
-                    <Play size={20} fill="currentColor" />
+                    <Icon icon="gravity-ui:play-fill" className="size-5" />
                   )}
                 </Button>
                 <Button isIconOnly size="sm" variant="tertiary" onClick={next}>
-                  <SkipForward size={16} fill="currentColor" />
+                  <Icon icon="gravity-ui:track-next" className="size-4" />
                 </Button>
               </div>
             </div>

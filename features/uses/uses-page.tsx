@@ -2,8 +2,8 @@
 
 import { motion } from "motion/react";
 import { Card, Chip, Typography } from "@heroui/react";
-import { Monitor, Terminal, Headphones, LayoutTemplate, Briefcase } from "lucide-react";
 import { usesData } from "./uses-data";
+import { Icon } from "@iconify/react";
 
 export function UsesPage() {
   return (
@@ -17,7 +17,7 @@ export function UsesPage() {
         >
           <div className="max-w-2xl">
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <Briefcase aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:briefcase" aria-hidden="true" className="size-4" />
               Equipment & Tools
             </div>
             <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
@@ -94,12 +94,12 @@ export function UsesPage() {
 function getCategoryIcon(name: string) {
   switch (name) {
     case "Workspace":
-      return <Monitor className="text-default-500 size-6" />;
+      return <Icon icon="gravity-ui:display" className="text-default-500 size-6" />;
     case "Coding":
-      return <Terminal className="text-default-500 size-6" />;
+      return <Icon icon="gravity-ui:terminal" className="text-default-500 size-6" />;
     case "Audio & Video":
-      return <Headphones className="text-default-500 size-6" />;
+      return <Icon icon="gravity-ui:headphones" className="text-default-500 size-6" />;
     default:
-      return <LayoutTemplate className="text-default-500 size-6" />;
+      return <Icon icon="gravity-ui:layout-cells-large" className="text-default-500 size-6" />;
   }
 }

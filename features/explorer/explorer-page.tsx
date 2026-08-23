@@ -4,17 +4,7 @@ import { useState, useMemo } from "react";
 import { motion } from "motion/react";
 import { Card, Chip, Typography, type Selection } from "@heroui/react";
 import { FileTree } from "@heroui-pro/react";
-import {
-  Folder,
-  FolderOpen,
-  FileCode,
-  FileText,
-  Braces,
-  GripHorizontal,
-  Compass,
-  Cpu,
-  Database,
-} from "lucide-react";
+import { Icon } from "@iconify/react";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -114,9 +104,9 @@ const WORKSPACE_METADATA: Record<string, FileMetadata> = {
 
 const folderIcon = ({ isExpanded }: { isExpanded: boolean }) =>
   isExpanded ? (
-    <FolderOpen className="text-accent size-4" />
+    <Icon icon="gravity-ui:folder-open" className="text-accent size-4" />
   ) : (
-    <Folder className="text-accent/80 size-4" />
+    <Icon icon="gravity-ui:folder" className="text-accent/80 size-4" />
   );
 
 export function ExplorerPage() {
@@ -140,7 +130,7 @@ export function ExplorerPage() {
           className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <GripHorizontal className="text-accent size-3" />
+            <Icon icon="gravity-ui:grip-horizontal" className="text-accent size-3" />
             Repository Explorer
           </Chip>
           <Typography
@@ -181,7 +171,7 @@ export function ExplorerPage() {
             >
               <FileTree.Item icon={folderIcon} id="app" textValue="app" title="app">
                 <FileTree.Item
-                  icon={<Braces className="text-default-500 size-4" />}
+                  icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
                   id="app-layout"
                   textValue="layout.tsx"
                   title="layout.tsx"
@@ -194,7 +184,7 @@ export function ExplorerPage() {
                     title="constellations"
                   >
                     <FileTree.Item
-                      icon={<Braces className="text-default-500 size-4" />}
+                      icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
                       id="app-const"
                       textValue="page.tsx"
                       title="page.tsx"
@@ -206,7 +196,7 @@ export function ExplorerPage() {
               <FileTree.Item icon={folderIcon} id="features" textValue="features" title="features">
                 <FileTree.Item icon={folderIcon} id="uses" textValue="uses" title="uses">
                   <FileTree.Item
-                    icon={<Braces className="text-default-500 size-4" />}
+                    icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
                     id="uses-page"
                     textValue="uses-page.tsx"
                     title="uses-page.tsx"
@@ -214,7 +204,7 @@ export function ExplorerPage() {
                 </FileTree.Item>
                 <FileTree.Item icon={folderIcon} id="copilot" textValue="copilot" title="copilot">
                   <FileTree.Item
-                    icon={<Braces className="text-default-500 size-4" />}
+                    icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
                     id="copilot-page"
                     textValue="copilot-page.tsx"
                     title="copilot-page.tsx"
@@ -222,7 +212,7 @@ export function ExplorerPage() {
                 </FileTree.Item>
                 <FileTree.Item icon={folderIcon} id="roadmap" textValue="roadmap" title="roadmap">
                   <FileTree.Item
-                    icon={<Braces className="text-default-500 size-4" />}
+                    icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
                     id="roadmap-page"
                     textValue="roadmap-page.tsx"
                     title="roadmap-page.tsx"
@@ -243,14 +233,14 @@ export function ExplorerPage() {
                   title="constellation"
                 >
                   <FileTree.Item
-                    icon={<Braces className="text-default-500 size-4" />}
+                    icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
                     id="const-universe"
                     textValue="universe.tsx"
                     title="universe.tsx"
                   />
                 </FileTree.Item>
                 <FileTree.Item
-                  icon={<Braces className="text-default-500 size-4" />}
+                  icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
                   id="comp-navbar"
                   textValue="navbar.tsx"
                   title="navbar.tsx"
@@ -259,15 +249,15 @@ export function ExplorerPage() {
 
               <FileTree.Item icon={folderIcon} id="docs" textValue="docs" title="docs">
                 <FileTree.Item
-                  icon={<FileText className="text-default-500 size-4" />}
-                  id="rules-doc"
+                  icon={<Icon icon="gravity-ui:file-text" className="text-default-500 size-4" />}
+                  id="doc-rules"
                   textValue="00-project-rules.md"
-                  title="0ProjectRules"
+                  title="00-project-rules.md"
                 />
               </FileTree.Item>
 
               <FileTree.Item
-                icon={<Braces className="text-default-500 size-4" />}
+                icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
                 id="pkg-json"
                 textValue="package.json"
                 title="package.json"
@@ -286,7 +276,7 @@ export function ExplorerPage() {
                   {/* Title & Badge */}
                   <div>
                     <div className="text-muted/60 mb-2 flex items-center gap-2 font-mono text-[10px] font-bold tracking-wider uppercase">
-                      <FileCode className="text-accent size-3.5" />
+                      <Icon icon="gravity-ui:file-code" className="text-accent size-3.5" />
                       FILE PREVIEW
                     </div>
                     <Typography type="h3" weight="bold" className="text-foreground tracking-tight">
@@ -343,7 +333,7 @@ export function ExplorerPage() {
                       Exports & Constants
                     </Typography>
                     <div className="border-default-100/50 flex flex-wrap items-center gap-2 rounded-xl border bg-black/40 p-3 font-mono text-xs text-cyan-400">
-                      <Cpu className="size-3 shrink-0 text-cyan-500" />
+                      <Icon icon="gravity-ui:cpu" className="size-3 shrink-0 text-cyan-500" />
                       {activeFile.exports.map((exp, idx) => (
                         <span key={exp}>
                           {exp}
@@ -362,7 +352,7 @@ export function ExplorerPage() {
                       type="body-sm"
                       className="text-accent mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold tracking-wider uppercase"
                     >
-                      <Compass className="size-3.5" />
+                      <Icon icon="gravity-ui:compass" className="size-3.5" />
                       Did you know?
                     </Typography>
                     <Typography color="muted" type="body-sm" className="leading-relaxed italic">
@@ -372,7 +362,10 @@ export function ExplorerPage() {
                 </div>
               ) : (
                 <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-                  <Database className="text-default-300 mb-4 size-10 animate-pulse" />
+                  <Icon
+                    icon="gravity-ui:database"
+                    className="text-default-300 mb-4 size-10 animate-pulse"
+                  />
                   <Typography type="h4" weight="bold">
                     No Node Selected
                   </Typography>

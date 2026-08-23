@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { CalendarDateTime } from "@internationalized/date";
 import { Chip, Typography } from "@heroui/react";
 import { Agenda, useAgenda, type AgendaEventType } from "@heroui-pro/react";
-import { Calendar } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -133,7 +133,7 @@ export function SchedulePage() {
           className="border-default-200/50 mb-10 flex flex-col items-center border-b pb-8 text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <Calendar className="text-accent size-3" />
+            <Icon icon="gravity-ui:calendar" className="text-accent size-3" />
             Interactive Scheduler
           </Chip>
           <Typography
