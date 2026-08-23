@@ -2,12 +2,13 @@
 
 import React, { useMemo, useState } from "react";
 import { useGetPublicMomentsQuery } from "@/lib/features/moment";
-import { Spinner, Typography, ScrollShadow, Tabs, Card } from "@heroui/react";
+import { Spinner, Typography, ScrollShadow, Tabs, Card, Chip } from "@heroui/react";
 import { useMounted } from "@mantine/hooks";
 import { useNow } from "next-intl";
 import { Icon } from "@iconify/react";
 import { StockTrendCard } from "@/components/stock/stock-trend-card";
 import Masonry from "@/components/ui/masonry";
+import { Widget } from "@heroui-pro/react";
 
 export default function MomentsPage() {
   const mounted = useMounted();
@@ -159,12 +160,8 @@ export default function MomentsPage() {
               <Typography className="text-danger">Failed to load moments feed.</Typography>
             </div>
           ) : (
-            <div className="w-full overflow-hidden">
-              <ScrollShadow
-                hideScrollBar
-                className="h-auto w-full pr-1 md:h-[calc(100vh-360px)] md:overflow-y-auto"
-                size={100}
-              >
+            <div className="w-full">
+              <ScrollShadow hideScrollBar className="h-auto w-full" size={100}>
                 <div className="relative w-full">
                   {masonryItems.length === 0 ? (
                     <div className="flex h-[300px] flex-col items-center justify-center gap-2 text-center">
@@ -187,36 +184,19 @@ export default function MomentsPage() {
         {/* Right Column: Trending Topics & Market Movers Sidebar (Main 25%, Hidden on Mobile/Tablet) */}
         <aside className="hidden lg:col-span-4 lg:block xl:col-span-3">
           <div className="sticky top-32 flex flex-col gap-6">
-            {/* Widget 1: Trending Topics List */}
-            <Card variant="secondary" className="p-5">
-              <Card.Header className="border-default-100/60 flex flex-row items-center gap-2 border-b p-0 pb-3">
-                <Icon icon="gravity-ui:hashtag" className="text-accent size-4" />
-                <Typography type="h3" className="text-sm font-semibold">
-                  Trending Topics
-                </Typography>
-              </Card.Header>
-              <div className="flex flex-col gap-3.5 pt-4">
-                {trendingTopics.length === 0 ? (
-                  <span className="text-muted-foreground text-xs italic">
-                    No topics active today
-                  </span>
-                ) : (
-                  trendingTopics.map(({ slug, count }) => (
-                    <div
-                      key={slug}
-                      className="group flex cursor-pointer items-center justify-between"
-                    >
-                      <span className="text-muted-foreground group-hover:text-accent text-sm font-medium transition-colors">
-                        #{slug}
-                      </span>
-                      <span className="text-muted bg-default-100 rounded-full px-2 py-0.5 font-mono text-xs">
-                        {count} posts
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </Card>
+            <Widget className="w-full max-w-130">
+              <Widget.Header className="flex flex-row">
+                <Widget.Title className="flex flex-row items-center justify-center gap-1">
+                  <Icon icon="gravity-ui:hashtag" className="text-accent size-4" />
+                  Hot Topics
+                </Widget.Title>
+              </Widget.Header>
+              <Widget.Content className="flex flex-row flex-wrap gap-1">
+                {trendingTopics.map(({ slug, count }) => (
+                  <Chip key={slug}>#{slug}</Chip>
+                ))}
+              </Widget.Content>
+            </Widget>
 
             {/* Widget 2: Market Movers (Directly renders miniature interactive stock cards!) */}
             <Card variant="secondary" className="p-5">
