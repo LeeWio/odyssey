@@ -1,3 +1,10 @@
+# [1.123.0](https://github.com/LeeWio/odyssey/compare/v1.122.0...v1.123.0) (2026-08-23)
+
+
+### Features
+
+* **ui:** add motion/react animations and ICP record link to footer ([45fe506](https://github.com/LeeWio/odyssey/commit/45fe50699585e4365f4e9854f96c25d0b832e467))
+
 # [1.122.0](https://github.com/LeeWio/odyssey/compare/v1.121.1...v1.122.0) (2026-08-22)
 
 
