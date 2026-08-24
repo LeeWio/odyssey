@@ -84,7 +84,7 @@ export function useComments() {
     const rawComments = rawCommentsList || [];
 
     function processNode(node: CommentNode): EnhancedComment | null {
-      if (deletions.includes(node.id)) return null;
+      const isDeleted = deletions.includes(node.id);
 
       const localLike = likes[node.id];
       const isLiked =
@@ -111,7 +111,11 @@ export function useComments() {
       return {
         id: node.id,
         parentId: node.parentId || null,
-        content: localEdit !== undefined ? localEdit : node.content,
+        content: isDeleted
+          ? "[Comment deleted]"
+          : localEdit !== undefined
+            ? localEdit
+            : node.content,
         username: node.username || "Anonymous",
         nickname: node.nickname || node.username || "Anonymous",
         avatar: node.avatar || "",
@@ -122,6 +126,7 @@ export function useComments() {
         likesCount,
         isLiked,
         isEdited: localEdit !== undefined,
+        isDeleted,
         isReported,
         children: processedChildren,
       };

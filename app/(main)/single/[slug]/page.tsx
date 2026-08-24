@@ -3,6 +3,7 @@
 import {
   Breadcrumbs,
   BreadcrumbsItem,
+  Badge,
   Button,
   Chip,
   FieldError,
@@ -96,6 +97,7 @@ export default function SinglePage({ params }: SinglePageProps) {
   const { slug } = use(params);
   const [isActionBarOpen, setIsActionBarOpen] = useState(false);
   const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
   const [readingProgress, setReadingProgress] = useState(0);
   const [readingProgressPostId, setReadingProgressPostId] = useState<number | null>(null);
   const [collectionPendingId, setCollectionPendingId] = useState<number | null>(null);
@@ -778,20 +780,28 @@ export default function SinglePage({ params }: SinglePageProps) {
         >
           <Sheet.Backdrop variant="blur">
             <Sheet.Content className="mx-auto w-[min(760px,calc(100vw-2rem))] max-w-none">
-              <Sheet.Dialog>
+              <Sheet.Dialog className="h-full min-h-0">
                 <Sheet.CloseTrigger />
-
                 <Sheet.Header>
-                  <Sheet.Heading className="flex flex-row items-center gap-2">
+                  <Sheet.Heading className="relative flex flex-row items-center gap-2">
                     <Comments aria-hidden="true" className="text-muted size-5" />
                     Comments
+                    <Badge
+                      className="absolute top-1/2 left-2 ml-2 w-fit min-w-5 -translate-y-1/2 tabular-nums"
+                      color="default"
+                      size="sm"
+                      variant="soft"
+                    >
+                      {commentCount}
+                    </Badge>
                   </Sheet.Heading>
                 </Sheet.Header>
 
-                <Sheet.Body className="min-h-0 overflow-y-auto">
+                <Sheet.Body className="flex min-h-0 flex-1 flex-col overflow-hidden">
                   {postId ? (
                     <CommentSystem
                       postId={postId}
+                      onCountChange={setCommentCount}
                       onRequestClose={() => setIsCommentSheetOpen(false)}
                     />
                   ) : (
@@ -801,13 +811,13 @@ export default function SinglePage({ params }: SinglePageProps) {
                   )}
                 </Sheet.Body>
 
-                <Sheet.Footer>
+                {/* <Sheet.Footer>
                   <Sheet.Close>
                     <Button fullWidth variant="secondary">
                       Done
                     </Button>
                   </Sheet.Close>
-                </Sheet.Footer>
+                </Sheet.Footer> */}
               </Sheet.Dialog>
             </Sheet.Content>
           </Sheet.Backdrop>

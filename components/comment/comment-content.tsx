@@ -11,6 +11,7 @@ interface CommentContentProps {
   onEditCancel: () => void;
   isReported?: boolean;
   isEdited?: boolean;
+  isDeleted?: boolean;
 }
 
 export function CommentContent({
@@ -20,6 +21,7 @@ export function CommentContent({
   onEditCancel,
   isReported = false,
   isEdited = false,
+  isDeleted = false,
 }: CommentContentProps) {
   const [editedText, setEditedText] = useState(content);
 
@@ -75,8 +77,12 @@ export function CommentContent({
     );
   }
 
+  if (isDeleted) {
+    return <p className="text-muted text-[15px] leading-[1.45] italic">[Comment deleted]</p>;
+  }
+
   return (
-    <p className="text-foreground/90 text-sm leading-6 [overflow-wrap:anywhere] whitespace-pre-wrap">
+    <p className="text-foreground/90 text-[15px] leading-[1.45] [overflow-wrap:anywhere] whitespace-pre-wrap">
       {content}
       {isEdited && <span className="text-muted ml-2 text-xs">Edited</span>}
     </p>

@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowUp, Comments } from "@gravity-ui/icons";
-import { Alert, Button, Skeleton, ToggleButton, ToggleButtonGroup, type Key } from "@heroui/react";
+import { ArrowUp, ChevronDown, Comments } from "@gravity-ui/icons";
+import { Alert, Button, ButtonGroup, Dropdown, Label, Skeleton, type Key } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { CommentItem } from "./comment-item";
 import { type SortOrder, useCommentContext } from "./context/comment-context";
@@ -66,28 +66,39 @@ export function CommentList({
         {isFetching && !isLoading ? ", updating" : ""}
       </p>
 
-      {totalCount > 1 && (
-        <div className="flex justify-end">
-          <ToggleButtonGroup
-            disallowEmptySelection
-            aria-label="Sort comments"
-            selectedKeys={new Set<Key>([sortOrder])}
-            selectionMode="single"
-            size="sm"
-            onSelectionChange={(keys) => {
-              const nextSortOrder = keys.values().next().value;
-              if (isSortOrder(nextSortOrder)) setSortOrder(nextSortOrder);
-            }}
-          >
-            {(Object.entries(SORT_LABELS) as [SortOrder, string][]).map(([key, label], index) => (
-              <ToggleButton key={key} id={key} variant="ghost">
-                {index > 0 && <ToggleButtonGroup.Separator />}
-                {label}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-        </div>
-      )}
+      <div className="flex items-center justify-end gap-2 px-1">
+        {isFetching && !isLoading && (
+          <span className="text-muted text-xs" aria-live="polite">
+            Updating…
+          </span>
+        )}
+        {totalCount > 1 && (
+          <ButtonGroup aria-label="Sort comments" size="sm" variant="tertiary">
+            <Button>{SORT_LABELS[sortOrder]}</Button>
+            <Dropdown>
+              <Button isIconOnly aria-label="Choose comment sort">
+                <ChevronDown aria-hidden="true" />
+              </Button>
+              <Dropdown.Popover placement="bottom end">
+                <Dropdown.Menu
+                  selectedKeys={new Set<Key>([sortOrder])}
+                  selectionMode="single"
+                  onAction={(key) => {
+                    if (isSortOrder(key)) setSortOrder(key);
+                  }}
+                >
+                  {(Object.entries(SORT_LABELS) as [SortOrder, string][]).map(([key, label]) => (
+                    <Dropdown.Item key={key} id={key} textValue={label}>
+                      <Label>{label}</Label>
+                      <Dropdown.ItemIndicator />
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown.Popover>
+            </Dropdown>
+          </ButtonGroup>
+        )}
+      </div>
 
       {newCommentCount > 0 && (
         <Button size="sm" variant="outline" className="self-center" onPress={handleRefresh}>
@@ -133,7 +144,7 @@ export function CommentList({
           </EmptyState.Header>
         </EmptyState>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="divide-border/40 flex flex-col divide-y">
           {comments.map((comment) => (
             <CommentItem
               key={comment.id}

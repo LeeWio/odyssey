@@ -178,19 +178,6 @@ export function CommentInput({
               : "Press Enter to send. Press Shift and Enter for a new line."}
           </PromptInput.Footer>
         </PromptInput>
-
-        <PromptSuggestion className="gap-3">
-          <PromptSuggestion.Header>
-            <PromptSuggestion.Description>Suggestions</PromptSuggestion.Description>
-          </PromptSuggestion.Header>
-          <PromptSuggestion.Items className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {COMMENT_SUGGESTIONS.map((suggestion) => (
-              <PromptSuggestion.Item key={suggestion} onPress={() => applySuggestion(suggestion)}>
-                {suggestion}
-              </PromptSuggestion.Item>
-            ))}
-          </PromptSuggestion.Items>
-        </PromptSuggestion>
       </div>
     );
   }
@@ -225,6 +212,7 @@ export function CommentInput({
                     maxLength={1000}
                     placeholder={placeholder}
                     rows={7}
+                    ref={textareaRef}
                     value={content}
                     variant="secondary"
                     onChange={handleChange}
@@ -232,6 +220,22 @@ export function CommentInput({
                   <Description>{content.length}/1000</Description>
                 </TextField>
               </Form>
+
+              <PromptSuggestion className="gap-3">
+                <PromptSuggestion.Header>
+                  <PromptSuggestion.Description>Suggestions</PromptSuggestion.Description>
+                </PromptSuggestion.Header>
+                <PromptSuggestion.Items className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {COMMENT_SUGGESTIONS.map((suggestion) => (
+                    <PromptSuggestion.Item
+                      key={suggestion}
+                      onPress={() => applySuggestion(suggestion)}
+                    >
+                      {suggestion}
+                    </PromptSuggestion.Item>
+                  ))}
+                </PromptSuggestion.Items>
+              </PromptSuggestion>
             </Modal.Body>
             <Modal.Footer>
               <Button

@@ -1,7 +1,8 @@
 "use client";
 
 import { Ellipsis, Flag, Heart, HeartFill, Link, Pencil, TrashBin } from "@gravity-ui/icons";
-import { Button, Dropdown } from "@heroui/react";
+import { Button, Dropdown, Tooltip } from "@heroui/react";
+import { MotionButton } from "@/components/ui";
 import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./hooks/simulation-store";
 
@@ -38,38 +39,48 @@ export function CommentActions({
   const isUnapproved = comment.status === "PENDING" || comment.id < 0;
 
   return (
-    <div role="group" aria-label="Comment actions" className="flex items-center gap-1">
-      <Button
+    <div role="group" aria-label="Comment actions" className="mt-2 flex items-center gap-3">
+      <MotionButton
+        className="text-muted hover:text-foreground h-auto min-h-0 min-w-0 gap-1 px-0 py-0 text-sm"
         size="sm"
         variant="ghost"
         aria-label={comment.isLiked ? "Unlike comment" : "Like comment"}
         isDisabled={isUnavailable}
+        whileTap={{ scale: 0.92 }}
         onPress={onLikeToggle}
       >
         {comment.isLiked ? <HeartFill className="text-danger" /> : <Heart />}
         <span>{comment.likesCount}</span>
-      </Button>
+      </MotionButton>
 
       {depth < 5 && (
-        <Button
+        <MotionButton
+          className="text-muted hover:text-foreground h-auto min-h-0 min-w-0 px-0 py-0 text-sm"
           size="sm"
           variant="ghost"
           isDisabled={isUnavailable || isUnapproved}
+          whileTap={{ scale: 0.96 }}
           onPress={onReplyToggle}
         >
           {isReplying ? "Cancel" : "Reply"}
-        </Button>
+        </MotionButton>
       )}
 
       <Dropdown>
-        <Button
-          size="sm"
-          variant="ghost"
-          aria-label="More comment actions"
-          isDisabled={isUnavailable}
-        >
-          <Ellipsis aria-hidden="true" />
-        </Button>
+        <Tooltip delay={0}>
+          <Button
+            className="text-muted/50 hover:text-foreground h-auto min-h-0 min-w-0 px-0 py-0 sm:opacity-50 sm:group-hover:opacity-100"
+            size="sm"
+            variant="ghost"
+            aria-label="More comment actions"
+            isDisabled={isUnavailable}
+          >
+            <Ellipsis aria-hidden="true" />
+          </Button>
+          <Tooltip.Content>
+            <p>More actions</p>
+          </Tooltip.Content>
+        </Tooltip>
         <Dropdown.Popover>
           <Dropdown.Menu
             onAction={(key) => {

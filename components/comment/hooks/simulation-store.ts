@@ -23,6 +23,7 @@ export interface EnhancedComment {
   likesCount: number;
   isLiked: boolean;
   isEdited?: boolean;
+  isDeleted?: boolean;
   isPending?: boolean;
   isFailed?: boolean;
   isReported?: boolean;
