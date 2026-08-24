@@ -1,3 +1,10 @@
+# [1.125.0](https://github.com/LeeWio/odyssey/compare/v1.124.0...v1.125.0) (2026-08-24)
+
+
+### Features
+
+* **comment:** redesign conversation threads ([02ba941](https://github.com/LeeWio/odyssey/commit/02ba94192b3140812f82eced945542d67820d848))
+
 # [1.124.0](https://github.com/LeeWio/odyssey/compare/v1.123.0...v1.124.0) (2026-08-23)
 
 
