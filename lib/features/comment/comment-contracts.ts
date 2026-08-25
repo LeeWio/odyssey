@@ -57,3 +57,11 @@ export interface GuestbookRequest {
   content: string;
   parentId?: number;
 }
+
+/**
+ * Transport-only options for safely retrying a publish request.
+ * The key is sent as an HTTP header and must never be serialized into the body.
+ */
+export interface CommentPublishOptions {
+  idempotencyKey?: string;
+}

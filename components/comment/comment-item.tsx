@@ -18,11 +18,11 @@ interface CommentItemProps {
   comment: EnhancedComment;
   onLikeToggle: (id: number, isLiked: boolean) => void;
   onAuthenticationRequired?: () => void;
-  onReplySubmit: (content: string, parentId: number) => Promise<void>;
-  onEditSave: (id: number, content: string) => void;
-  onDelete: (id: number) => void;
-  onReport: (id: number) => void;
-  onRetry: (tempId: number, content: string, parentId: number | null) => Promise<void>;
+  onReplySubmit: (content: string, parentId: number) => Promise<boolean>;
+  onEditSave: (id: number, content: string) => Promise<boolean>;
+  onDelete: (id: number) => Promise<boolean>;
+  onReport: (id: number) => Promise<boolean>;
+  onRetry: (tempId: number, content: string, parentId: number | null) => Promise<boolean>;
   onLoadReplies: (parentId: number) => Promise<void>;
   loadingReplyIds: Set<number>;
   hasMoreReplies: (parentId: number) => boolean;
@@ -319,9 +319,8 @@ function CommentRow({
             isEditing={isEditing}
             isDeleted={isDeleted}
             onEditCancel={() => setIsEditing(false)}
-            onEditSave={(content) => {
-              onEditSave(comment.id, content);
-              setIsEditing(false);
+            onEditSave={async (content) => {
+              if (await onEditSave(comment.id, content)) setIsEditing(false);
             }}
           />
         </div>

@@ -5,110 +5,37 @@ import {
   Avatar,
   AvatarFallback,
   Button,
-  Form,
   Label,
   ListBox,
   Select,
   Spinner,
   Tabs,
-  TextArea,
-  TextField,
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { type FormEvent, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import {
   type CommentResponse,
   type CommentStatus,
   useDeleteCommentMutation,
   useGetAdminCommentsQuery,
-  useGetPostCommentsQuery,
   useModerateCommentMutation,
-  usePublishCommentMutation,
 } from "@/lib/features/comment";
+import { CommentSystem } from "@/components/comment";
 import { useGetPublicPostsQuery } from "@/features/blog";
-
-// --- Recursive Component for Public Comments ---
-function CommentTreeItem({
-  comment,
-  onReply,
-}: {
-  comment: CommentResponse;
-  onReply: (c: CommentResponse) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex gap-4">
-        <Avatar size="sm" className="mt-1 shrink-0">
-          <AvatarFallback>{comment.username?.[0]?.toUpperCase() || "A"}</AvatarFallback>
-        </Avatar>
-        <div className="flex flex-1 flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">{comment.username}</span>
-              <span className="text-muted text-xs tabular-nums">
-                {new Date(comment.createdAt).toLocaleString()}
-              </span>
-            </div>
-            <Button size="sm" variant="ghost" onPress={() => onReply(comment)} className="text-xs">
-              <Icon icon="gravity-ui:reply" className="size-3.5" aria-hidden="true" />
-              Reply
-            </Button>
-          </div>
-          <div className="text-foreground/90 text-sm leading-relaxed">{comment.content}</div>
-        </div>
-      </div>
-      {comment.children && comment.children.length > 0 && (
-        <div className="border-border ml-4 flex flex-col gap-6 border-l pl-6">
-          {comment.children.map((child) => (
-            <CommentTreeItem key={child.id} comment={child} onReply={onReply} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function CommentsPage() {
   const [activeTab, setActiveTab] = useState<string>("admin"); // Default to admin moderation inside admin panel
 
   // --- Public Tab State ---
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
-  const [replyToComment, setReplyToComment] = useState<CommentResponse | null>(null);
-  const [newCommentContent, setNewCommentContent] = useState("");
 
   const { data: postsData, isLoading: isPostsLoading } = useGetPublicPostsQuery({
     page: 0,
     size: 50,
   });
   const posts = postsData?.list || [];
-
-  const { data: commentsData, isLoading: isCommentsLoading } = useGetPostCommentsQuery(
-    { postId: selectedPostId!, page: 0, size: 100 },
-    { skip: !selectedPostId }
-  );
-  const comments = commentsData || [];
-
-  const [publishComment, { isLoading: isPublishing }] = usePublishCommentMutation();
-
-  const handlePublishSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!selectedPostId || !newCommentContent.trim()) return;
-
-    try {
-      await publishComment({
-        content: newCommentContent.trim(),
-        postId: selectedPostId,
-        parentId: replyToComment ? replyToComment.id : undefined,
-      }).unwrap();
-
-      setNewCommentContent("");
-      setReplyToComment(null);
-    } catch {
-      // Handled globally
-    }
-  };
 
   // --- Admin Tab State ---
   const [adminSort, setAdminSort] = useState<DataGridSortDescriptor>({
@@ -271,7 +198,6 @@ export function CommentsPage() {
             onChange={(val) => {
               if (val) {
                 setSelectedPostId(Number(val));
-                setReplyToComment(null);
               } else {
                 setSelectedPostId(null);
               }
@@ -295,71 +221,20 @@ export function CommentsPage() {
           </Select>
 
           {selectedPostId && (
-            <div className="bg-surface border-border flex flex-col gap-8 rounded-3xl border p-6 md:p-8">
-              {/* Comment Threading List */}
-              <div className="flex flex-col gap-6">
-                <h3 className="text-lg font-bold">Comment Thread</h3>
-                {isCommentsLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Spinner size="md" />
-                  </div>
-                ) : comments.length === 0 ? (
-                  <p className="text-muted py-4 text-sm">No comments found for this post.</p>
-                ) : (
-                  <div className="flex flex-col gap-8">
-                    {comments.map((comment: CommentResponse) => (
-                      <CommentTreeItem
-                        key={comment.id}
-                        comment={comment}
-                        onReply={setReplyToComment}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Publish Comment Form */}
-              <Form
-                onSubmit={handlePublishSubmit}
-                className="bg-surface-secondary flex flex-col gap-4 rounded-2xl p-4 md:p-6"
-              >
-                <h4 className="text-base font-semibold">
-                  {replyToComment ? "Reply to Selected Comment" : "Leave a Comment"}
-                </h4>
-
-                {replyToComment && (
-                  <div className="bg-surface border-border flex items-center justify-between rounded-lg border px-4 py-2">
-                    <span className="text-muted text-sm">
-                      Replying to{" "}
-                      <span className="text-foreground font-semibold">
-                        @{replyToComment.username}
-                      </span>
+            <CommentSystem postId={selectedPostId}>
+              {({ commentList, commentInput, totalCount }) => (
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-lg font-bold">Comment Thread</h3>
+                    <span className="text-muted text-sm tabular-nums">
+                      {totalCount} {totalCount === 1 ? "comment" : "comments"}
                     </span>
-                    <Button size="sm" variant="ghost" onPress={() => setReplyToComment(null)}>
-                      <Icon icon="gravity-ui:xmark" className="size-4" aria-hidden="true" />
-                      Cancel
-                    </Button>
                   </div>
-                )}
-
-                <TextField isRequired name="content" className="w-full">
-                  <Label className="sr-only">Comment Content</Label>
-                  <TextArea
-                    value={newCommentContent}
-                    onChange={(e) => setNewCommentContent(e.target.value)}
-                    placeholder="Write your thoughts here..."
-                    className="min-h-24"
-                    variant="secondary"
-                  />
-                </TextField>
-
-                <div className="flex justify-end">
-                  <Button type="submit" variant="primary" isDisabled={isPublishing}>
-                    {isPublishing ? <Spinner size="sm" /> : "Post Comment"}
-                  </Button>
+                  {commentList}
+                  {commentInput}
                 </div>
-              </Form>
-            </div>
+              )}
+            </CommentSystem>
           )}
         </div>
       )}

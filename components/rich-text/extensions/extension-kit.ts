@@ -2,7 +2,6 @@ import {
   BlockFormatTransition,
   Attachment,
   Audio,
-  CodeBlockLowlight,
   Column,
   Columns,
   DetailsKit,
@@ -32,7 +31,6 @@ export interface ExtensionKitOptions {
 export function createExtensionKit(options: ExtensionKitOptions = {}) {
   return [
     BlockFormatTransition,
-    CodeBlockLowlight,
     ...DetailsKit,
     Emoji,
     Image,

@@ -29,7 +29,7 @@ function CommentSystemContent({
 }: Pick<CommentSystemProps, "onRequestClose" | "children">) {
   const {
     comments,
-    backendTotal,
+    totalCount,
     isLoading,
     isFetching,
     error,
@@ -37,8 +37,8 @@ function CommentSystemContent({
     loadMore,
     refetch,
     addPendingComment,
-    removePendingComment,
     markPendingCommentSubmitted,
+    markPendingCommentRetrying,
     markPendingCommentFailed,
     loadReplies,
     loadingReplyIds,
@@ -53,15 +53,13 @@ function CommentSystemContent({
     reportComment,
   } = useCommentMutations({
     addPendingComment,
-    removePendingComment,
     markPendingCommentSubmitted,
     markPendingCommentFailed,
-    refetch,
+    markPendingCommentRetrying,
   });
 
   useCommentHighlight();
 
-  const totalCount = backendTotal;
   const commentList = (
     <CommentList
       comments={comments}

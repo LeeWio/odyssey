@@ -135,11 +135,6 @@ export function useComments() {
     setPendingComments((prev) => [comment, ...prev]);
   };
 
-  // Function to remove a pending comment or promote it
-  const removePendingComment = (id: number) => {
-    setPendingComments((prev) => prev.filter((c) => c.id !== id));
-  };
-
   // Function to mark a pending comment as failed
   const markPendingCommentFailed = (id: number) => {
     setPendingComments((prev) =>
@@ -151,6 +146,14 @@ export function useComments() {
     setPendingComments((prev) =>
       prev.map((c) =>
         c.id === id ? { ...c, isFailed: false, isPending: false, status: "PENDING" } : c
+      )
+    );
+  };
+
+  const markPendingCommentRetrying = (id: number) => {
+    setPendingComments((prev) =>
+      prev.map((comment) =>
+        comment.id === id ? { ...comment, isFailed: false, isPending: true } : comment
       )
     );
   };
@@ -422,7 +425,8 @@ export function useComments() {
     (count, comment) => count + (comment.parentId === null ? 1 : 0),
     0
   );
-  const canonicalCommentsCount = Math.max(0, totalComments - pendingRootCount);
+  const remoteTotal = useCursorRoots ? cursorRootsResult.data?.total : pagedRootsResult.data?.total;
+  const canonicalCommentsCount = Math.max(0, remoteTotal ?? totalComments - pendingRootCount);
 
   useEffect(() => {
     commentDebug("query:state", {
@@ -449,7 +453,7 @@ export function useComments() {
   return {
     comments: paginatedComments,
     allCommentsCount: enrichedComments.length,
-    backendTotal: canonicalCommentsCount,
+    totalCount: canonicalCommentsCount,
     isLoading,
     isFetching,
     error,
@@ -458,8 +462,8 @@ export function useComments() {
     refetch,
     resetVisible,
     addPendingComment,
-    removePendingComment,
     markPendingCommentSubmitted,
+    markPendingCommentRetrying,
     markPendingCommentFailed,
     pendingComments,
     loadReplies,

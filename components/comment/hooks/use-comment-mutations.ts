@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "@heroui/react";
+import { useRef } from "react";
 import {
   useDeleteMyCommentMutation,
   useEditMyCommentMutation,
@@ -16,18 +17,16 @@ import { commentDebug } from "@/lib/comment-debug";
 
 interface MutationHookProps {
   addPendingComment: (c: EnhancedComment) => void;
-  removePendingComment: (id: number) => void;
   markPendingCommentSubmitted: (id: number) => void;
   markPendingCommentFailed: (id: number) => void;
-  refetch: () => Promise<unknown>;
+  markPendingCommentRetrying: (id: number) => void;
 }
 
 export function useCommentMutations({
   addPendingComment,
-  removePendingComment,
   markPendingCommentSubmitted,
   markPendingCommentFailed,
-  refetch,
+  markPendingCommentRetrying,
 }: MutationHookProps) {
   const { isGuestbook, postId, currentUser, isAuthenticated } = useCommentContext();
   const [publishCommentApi] = usePublishCommentMutation();
@@ -37,6 +36,15 @@ export function useCommentMutations({
   const [likeCommentApi] = useLikeCommentMutation();
   const [unlikeCommentApi] = useUnlikeCommentMutation();
   const [reportCommentApi] = useReportCommentMutation();
+  const idempotencyKeys = useRef(new Map<number, string>());
+  const tempIdSequence = useRef(0);
+
+  const createIdempotencyKey = () => {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+      return crypto.randomUUID();
+    }
+    return `comment-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  };
 
   // Helper to construct optimistic comment
   const createOptimisticComment = (
@@ -72,34 +80,42 @@ export function useCommentMutations({
     content: string,
     parentId: number | null = null,
     existingTempId?: number
-  ) => {
+  ): Promise<boolean> => {
     if (!isAuthenticated) {
       toast.warning("Please sign in to post a comment.");
-      return;
+      return false;
     }
 
-    const tempId = existingTempId || -Date.now();
+    if (!isGuestbook && postId <= 0) {
+      toast.danger("This comment thread is unavailable.");
+      return false;
+    }
+
+    const tempId = existingTempId ?? -(Date.now() * 1000 + (tempIdSequence.current++ % 1000));
+    const idempotencyKey = idempotencyKeys.current.get(tempId) ?? createIdempotencyKey();
+    idempotencyKeys.current.set(tempId, idempotencyKey);
     commentDebug("mutation:publish-start", { postId, parentId, tempId, isGuestbook });
 
     if (existingTempId) {
-      // Re-mark it as pending
-      removePendingComment(tempId);
+      markPendingCommentRetrying(tempId);
+    } else {
+      const optimistic = createOptimisticComment(tempId, content, parentId);
+      addPendingComment(optimistic);
     }
-
-    const optimistic = createOptimisticComment(tempId, content, parentId);
-    addPendingComment(optimistic);
 
     try {
       if (isGuestbook) {
         await postGuestbookEntryApi({
           content,
           parentId: parentId || undefined,
+          idempotencyKey,
         }).unwrap();
       } else {
         await publishCommentApi({
           content,
           postId,
           parentId: parentId || undefined,
+          idempotencyKey,
         }).unwrap();
       }
 
@@ -107,7 +123,9 @@ export function useCommentMutations({
       // Keep the locally submitted comment visible while moderation and the
       // invalidated canonical query settle. The backend remains the durable source.
       markPendingCommentSubmitted(tempId);
+      idempotencyKeys.current.delete(tempId);
       commentDebug("mutation:publish-marked-submitted", { postId, parentId, tempId });
+      return true;
     } catch (err) {
       commentDebug("mutation:publish-api-rejected", {
         postId,
@@ -117,12 +135,17 @@ export function useCommentMutations({
       });
       console.error("Comment submission failed, keeping in local failed list:", err);
       markPendingCommentFailed(tempId);
+      return false;
     }
   };
 
   // 2. RETRY (Retry a failed local comment)
-  const retryPublishComment = async (tempId: number, content: string, parentId: number | null) => {
-    await publishComment(content, parentId, tempId);
+  const retryPublishComment = async (
+    tempId: number,
+    content: string,
+    parentId: number | null
+  ): Promise<boolean> => {
+    return publishComment(content, parentId, tempId);
   };
 
   // 3. TOGGLE LIKE (Nexus is the source of truth)
@@ -145,9 +168,10 @@ export function useCommentMutations({
   const editComment = async (id: number, newContent: string) => {
     try {
       await editMyCommentApi({ id, content: newContent }).unwrap();
-      await refetch();
+      return true;
     } catch (err) {
       console.error("Failed to sync comment edit:", err);
+      return false;
     }
   };
 
@@ -155,9 +179,10 @@ export function useCommentMutations({
   const deleteComment = async (id: number) => {
     try {
       await deleteMyCommentApi(id).unwrap();
-      await refetch();
+      return true;
     } catch (err) {
       console.error("Failed to sync comment deletion:", err);
+      return false;
     }
   };
 
@@ -165,9 +190,10 @@ export function useCommentMutations({
   const reportComment = async (id: number) => {
     try {
       await reportCommentApi({ id, reason: "inappropriate" }).unwrap();
-      await refetch();
+      return true;
     } catch (err) {
       console.error("Failed to sync comment report:", err);
+      return false;
     }
   };
 

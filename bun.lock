@@ -19,7 +19,6 @@
         "@splinetool/react-spline": "^4.1.0",
         "@tiptap/core": "3.30.1",
         "@tiptap/extension-audio": "3.30.1",
-        "@tiptap/extension-code-block-lowlight": "3.30.2",
         "@tiptap/extension-details": "3.30.1",
         "@tiptap/extension-drag-handle": "3.30.1",
         "@tiptap/extension-drag-handle-react": "3.30.1",
@@ -53,7 +52,6 @@
         "fuzzysort": "^3.1.0",
         "gsap": "^3.15.0",
         "katex": "0.16.47",
-        "lowlight": "3.3.0",
         "maplibre-gl": ">=5.15.0",
         "marked": ">=18.0.0",
         "match-sorter": "^8.3.0",
@@ -689,8 +687,6 @@
     "@tiptap/extension-code": ["@tiptap/extension-code@3.30.1", "", { "peerDependencies": { "@tiptap/core": "3.30.1" } }, "sha512-oqLEOLZel3lrLhACP4vMhH5RNbV9yxFsJYiOmQjjEFEoCEWWxVfJuhZ+8NFS3mUCdgy77G62XimjEvqC3+7V7Q=="],
 
     "@tiptap/extension-code-block": ["@tiptap/extension-code-block@3.30.1", "", { "peerDependencies": { "@tiptap/core": "3.30.1", "@tiptap/pm": "3.30.1" } }, "sha512-j19Ml9BpvHgTMSN4SfkJ26B5xSuHaxPXvMoXyAX1iOoSc4J92sCqShLGgpmtce42sIroYFRs4sBv0ndBRDcxtA=="],
-
-    "@tiptap/extension-code-block-lowlight": ["@tiptap/extension-code-block-lowlight@3.30.2", "", { "peerDependencies": { "@tiptap/core": "3.30.2", "@tiptap/extension-code-block": "3.30.2", "@tiptap/pm": "3.30.2", "highlight.js": "^11", "lowlight": "^2 || ^3" } }, "sha512-xmC1MOAMl7QmcayV0H/SLxpJ84o4SPwzAcJDhtgUWFdWyf8aO5rnNtUj/2HnvLXlM1nqZPMjTBOmSK7qgPwSZw=="],
 
     "@tiptap/extension-collaboration": ["@tiptap/extension-collaboration@3.30.1", "", { "peerDependencies": { "@tiptap/core": "3.30.1", "@tiptap/pm": "3.30.1", "@tiptap/y-tiptap": "^3.0.7", "yjs": "^13" } }, "sha512-9B/BAUcMNqvL8Ki59MzIyqbhmIPSGAC/gKyaUoAwaTpW8qI7oPg62BMU42WeJ6XC8I7GswQaIcIoWr8vSgVnmg=="],
 
@@ -1520,7 +1516,7 @@
 
     "heroui-pro": ["heroui-pro@1.0.0-beta.12", "", { "dependencies": { "@clack/prompts": "1.1.0", "chalk": "5.6.2", "commander": "14.0.3", "eventsource": "4.1.0", "figlet": "1.11.0", "find-up": "7.0.0", "jwt-decode": "4.0.0", "open": "11.0.0", "semver": "7.7.2", "tar": "7.5.13" }, "optionalDependencies": { "@zowe/secrets-for-zowe-sdk": "8.29.4" }, "bin": { "heroui-pro": "dist/cli/index.js" } }, "sha512-NrgBHqRTjB5Hszyg6KfmoC/medQsakaDCR9+LBccod/pufZ1OZT53DUck7wHcHlKr2Rb9unh+VMZqPcS51Qz3A=="],
 
-    "highlight.js": ["highlight.js@11.11.2", "", {}, "sha512-oaXMACAU0kzOMXBjWpNcX+vlwSBCIAiZ9BHa7gA15NOTtT2L/l8OSZDuqS2XppOhZBPJ7hm4o8ep2kyuip2uEQ=="],
+    "highlight.js": ["highlight.js@10.7.3", "", {}, "sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A=="],
 
     "hls.js": ["hls.js@1.6.16", "", {}, "sha512-VSIRpLfRwlAAdGL4wiTucx2ScRipo0ed1FBatWkyt832jC4CReKstga6yIhYVwGu9LOBjuX9wzmRMeQdBJtzEA=="],
 
@@ -1789,8 +1785,6 @@
     "longest-streak": ["longest-streak@3.1.0", "", {}, "sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g=="],
 
     "loose-envify": ["loose-envify@1.4.0", "", { "dependencies": { "js-tokens": "^3.0.0 || ^4.0.0" }, "bin": { "loose-envify": "cli.js" } }, "sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q=="],
-
-    "lowlight": ["lowlight@3.3.0", "", { "dependencies": { "@types/hast": "^3.0.0", "devlop": "^1.0.0", "highlight.js": "~11.11.0" } }, "sha512-0JNhgFoPvP6U6lE/UdVsSq99tn6DhjjpAj5MxG49ewd2mOBVtwWYIT8ClyABhq198aXXODMU6Ox8DrGy/CpTZQ=="],
 
     "lru-cache": ["lru-cache@11.5.2", "", {}, "sha512-4pfM1Ff0x50o0tQwb5ucw/RzNyD0/YJME6IVcStalZuMWxdt3sR3huStTtxz4PUmvZfRguvDejasvQ2kifR11g=="],
 
@@ -2701,8 +2695,6 @@
     "@typescript-eslint/visitor-keys/eslint-visitor-keys": ["eslint-visitor-keys@5.0.1", "", {}, "sha512-tD40eHxA35h0PEIZNeIjkHoDR4YjjJp34biM0mDvplBe//mB+IHCqHDGV7pxF+7MklTvighcCPPZC7ynWyjdTA=="],
 
     "chalk/supports-color": ["supports-color@7.2.0", "", { "dependencies": { "has-flag": "^4.0.0" } }, "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw=="],
-
-    "cli-highlight/highlight.js": ["highlight.js@10.7.3", "", {}, "sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A=="],
 
     "cli-highlight/parse5": ["parse5@5.1.1", "", {}, "sha512-ugq4DFI0Ptb+WWjAdOK16+u/nHfiIrcE+sh8kZMaM0WllQKLI9rOUq6c2b7cwPkXdzfQESqvoqK6ug7U/Yyzug=="],
 

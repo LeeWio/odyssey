@@ -26,6 +26,7 @@ export interface CursorPageResult<T> {
   list: T[];
   nextCursor: number | null;
   hasMore: boolean;
+  total: number;
 }
 
 export const apiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
@@ -56,4 +57,5 @@ export const cursorPageResultSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
       .transform((items) => items ?? []),
     nextCursor: z.number().nullable(),
     hasMore: z.boolean(),
+    total: z.number().nonnegative().default(0),
   });

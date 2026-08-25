@@ -29,7 +29,7 @@ interface CommentInputProps {
   hideTrigger?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
   onAuthenticationRequired?: () => void;
-  onSubmit: (content: string) => Promise<void>;
+  onSubmit: (content: string) => Promise<boolean>;
   placeholder?: string;
   submitButtonText?: string;
 }
@@ -109,7 +109,11 @@ export function CommentInput({
     setIsSubmitting(true);
     commentDebug("input:submit-start", { replyId, contentLength: content.trim().length });
     try {
-      await onSubmit(content.trim());
+      const submitted = await onSubmit(content.trim());
+      if (!submitted) {
+        commentDebug("input:submit-not-accepted", { replyId });
+        return;
+      }
       commentDebug("input:submit-resolved", { replyId });
       setContent("");
       clearDraft();
