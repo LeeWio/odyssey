@@ -818,7 +818,13 @@ interface CommentSheetProps {
 
 function CommentSheet({ isOpen, onOpenChange, header, body, footer }: CommentSheetProps) {
   return (
-    <Sheet isDetached isOpen={isOpen} placement="bottom" onOpenChange={onOpenChange}>
+    <Sheet
+      isDetached
+      isDismissable={false}
+      isOpen={isOpen}
+      placement="bottom"
+      onOpenChange={onOpenChange}
+    >
       <Sheet.Backdrop variant="blur">
         <Sheet.Content className="mx-auto w-[min(760px,calc(100vw-2rem))] max-w-none">
           <Sheet.Dialog className="h-full min-h-0">
