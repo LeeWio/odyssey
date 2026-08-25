@@ -1,3 +1,10 @@
+# [1.126.0](https://github.com/LeeWio/odyssey/compare/v1.125.0...v1.126.0) (2026-08-25)
+
+
+### Features
+
+* **comments:** paginate roots and lazy-load replies ([c10c908](https://github.com/LeeWio/odyssey/commit/c10c908804a29a7e1e323a1ba072e13dad3965dc))
+
 # [1.125.0](https://github.com/LeeWio/odyssey/compare/v1.124.0...v1.125.0) (2026-08-24)
 
 
