@@ -1,3 +1,10 @@
+## [1.127.1](https://github.com/LeeWio/odyssey/compare/v1.127.0...v1.127.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **comments:** prevent sheet dismissal flicker ([3230add](https://github.com/LeeWio/odyssey/commit/3230add677e1d7d733b0c1e905fc8a1a4974d4a6))
+
 # [1.127.0](https://github.com/LeeWio/odyssey/compare/v1.126.0...v1.127.0) (2026-08-25)
 
 
