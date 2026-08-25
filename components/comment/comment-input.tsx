@@ -141,54 +141,44 @@ export function CommentInput({
 
   if (!isReply && !hideTrigger) {
     return (
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 px-1">
-          <Avatar size="sm" variant="soft" className="shrink-0">
-            <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
-          </Avatar>
-          <Typography color="muted" type="body-xs" weight="semibold">
-            Join the discussion
-          </Typography>
-        </div>
-        <PromptInput
-          layout="inline"
-          maxHeight={160}
-          size="lg"
-          status={isSubmitting ? "submitted" : "ready"}
-          value={content}
-          variant="secondary"
-          onSubmit={() => void submitComment()}
-          onValueChange={handleValueChange}
-        >
-          <PromptInput.Shell>
-            <PromptInput.Content>
-              <PromptInput.TextArea
-                ref={textareaRef}
-                aria-label="Add a comment"
-                maxLength={1000}
-                placeholder="Add a comment"
-              />
-            </PromptInput.Content>
-            <PromptInput.Toolbar>
-              <PromptInput.ToolbarStart>
-                <Avatar size="sm" variant="soft" className="shrink-0">
-                  <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
-                </Avatar>
-              </PromptInput.ToolbarStart>
-              <PromptInput.ToolbarEnd>
-                <PromptInput.Send aria-label="Send comment">
-                  <ArrowUp aria-hidden="true" className="size-4" />
-                </PromptInput.Send>
-              </PromptInput.ToolbarEnd>
-            </PromptInput.Toolbar>
-          </PromptInput.Shell>
-          <PromptInput.Footer className="sr-only" aria-live="polite">
-            {content.length > 0
-              ? `${content.length} of 1000 characters`
-              : "Press Enter to send. Press Shift and Enter for a new line."}
-          </PromptInput.Footer>
-        </PromptInput>
-      </div>
+      <PromptInput
+        layout="inline"
+        maxHeight={160}
+        size="lg"
+        status={isSubmitting ? "submitted" : "ready"}
+        value={content}
+        variant="secondary"
+        onSubmit={() => void submitComment()}
+        onValueChange={handleValueChange}
+      >
+        <PromptInput.Shell>
+          <PromptInput.Content>
+            <PromptInput.TextArea
+              ref={textareaRef}
+              aria-label="Add a comment"
+              maxLength={1000}
+              placeholder="Add a comment"
+            />
+          </PromptInput.Content>
+          <PromptInput.Toolbar>
+            <PromptInput.ToolbarStart>
+              <Avatar size="sm" variant="soft" className="shrink-0">
+                <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
+              </Avatar>
+            </PromptInput.ToolbarStart>
+            <PromptInput.ToolbarEnd>
+              <PromptInput.Send aria-label="Send comment">
+                <ArrowUp aria-hidden="true" className="size-4" />
+              </PromptInput.Send>
+            </PromptInput.ToolbarEnd>
+          </PromptInput.Toolbar>
+        </PromptInput.Shell>
+        <PromptInput.Footer className="sr-only" aria-live="polite">
+          {content.length > 0
+            ? `${content.length} of 1000 characters`
+            : "Press Enter to send. Press Shift and Enter for a new line."}
+        </PromptInput.Footer>
+      </PromptInput>
     );
   }
 

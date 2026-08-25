@@ -102,7 +102,6 @@ export function useCommentMutations({
       // The backend is the only durable source. Pending comments disappear until
       // moderation makes them visible through the canonical read endpoint.
       removePendingComment(tempId);
-      await refetch();
     } catch (err) {
       console.error("Comment submission failed, keeping in local failed list:", err);
       markPendingCommentFailed(tempId);

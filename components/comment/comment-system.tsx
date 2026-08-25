@@ -19,7 +19,6 @@ interface CommentSystemProps {
 
 export interface CommentSystemRenderParts {
   totalCount: number;
-  isFetching: boolean;
   commentList: React.ReactNode;
   commentInput: React.ReactNode;
 }
@@ -30,7 +29,6 @@ function CommentSystemContent({
 }: Pick<CommentSystemProps, "onRequestClose" | "children">) {
   const {
     comments,
-    allCommentsCount,
     backendTotal,
     isLoading,
     isFetching,
@@ -61,8 +59,7 @@ function CommentSystemContent({
 
   useCommentHighlight();
 
-  const totalCount = backendTotal || allCommentsCount;
-  const isRefreshing = isFetching && !isLoading;
+  const totalCount = backendTotal;
   const commentList = (
     <CommentList
       comments={comments}
@@ -93,7 +90,7 @@ function CommentSystemContent({
   );
 
   if (children) {
-    return children({ totalCount, isFetching: isRefreshing, commentList, commentInput });
+    return children({ totalCount, commentList, commentInput });
   }
 
   return (
@@ -102,7 +99,7 @@ function CommentSystemContent({
       className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col"
     >
       <div className="shrink-0 pb-4">
-        <CommentHeader isFetching={isRefreshing} totalCount={totalCount} />
+        <CommentHeader totalCount={totalCount} />
       </div>
       <ScrollShadow
         hideScrollBar

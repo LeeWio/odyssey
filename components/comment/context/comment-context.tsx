@@ -18,8 +18,6 @@ interface CommentContextType {
   currentUser: string | null;
   highlightedCommentId: number | null;
   setHighlightedCommentId: (id: number | null) => void;
-  newCommentCount: number;
-  setNewCommentCount: (count: number) => void;
   hasUnsavedDraft: boolean;
   setHasUnsavedDraft: (hasDraft: boolean) => void;
 }
@@ -38,7 +36,6 @@ export function CommentProvider({
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [highlightedCommentId, setHighlightedCommentId] = useState<number | null>(null);
-  const [newCommentCount, setNewCommentCount] = useState<number>(0);
   const [hasUnsavedDraft, setHasUnsavedDraft] = useState<boolean>(false);
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -57,8 +54,6 @@ export function CommentProvider({
         currentUser,
         highlightedCommentId,
         setHighlightedCommentId,
-        newCommentCount,
-        setNewCommentCount,
         hasUnsavedDraft,
         setHasUnsavedDraft,
       }}

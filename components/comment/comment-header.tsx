@@ -3,11 +3,11 @@
 import { ChevronDown, Comments } from "@gravity-ui/icons";
 import { Button, Chip, Dropdown, Label, Typography, type Key } from "@heroui/react";
 import { Sheet } from "@heroui-pro/react";
+import { memo } from "react";
 import { type SortOrder, useCommentContext } from "./context/comment-context";
 
 interface CommentHeaderProps {
   totalCount: number;
-  isFetching?: boolean;
   inSheet?: boolean;
 }
 
@@ -21,9 +21,8 @@ function isSortOrder(value: Key | undefined): value is SortOrder {
   return value === "newest" || value === "oldest" || value === "likes";
 }
 
-export function CommentHeader({
+export const CommentHeader = memo(function CommentHeader({
   totalCount,
-  isFetching = false,
   inSheet = false,
 }: CommentHeaderProps) {
   const { sortOrder, setSortOrder } = useCommentContext();
@@ -49,36 +48,34 @@ export function CommentHeader({
       )}
 
       <div className="flex items-center gap-2">
-        {isFetching && (
-          <Typography color="muted" type="body-xs" aria-live="polite">
-            Updating…
-          </Typography>
-        )}
-        {totalCount > 1 && (
-          <Dropdown>
-            <Button size="sm" variant="tertiary" aria-label="Choose comment sort">
-              {SORT_LABELS[sortOrder]}
-              <ChevronDown aria-hidden="true" />
-            </Button>
-            <Dropdown.Popover placement="bottom end">
-              <Dropdown.Menu
-                selectedKeys={new Set<Key>([sortOrder])}
-                selectionMode="single"
-                onAction={(key) => {
-                  if (isSortOrder(key)) setSortOrder(key);
-                }}
-              >
-                {(Object.entries(SORT_LABELS) as [SortOrder, string][]).map(([key, label]) => (
-                  <Dropdown.Item key={key} id={key} textValue={label}>
-                    <Label>{label}</Label>
-                    <Dropdown.ItemIndicator />
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown.Popover>
-          </Dropdown>
-        )}
+        <Dropdown>
+          <Button
+            isDisabled={totalCount <= 1}
+            size="sm"
+            variant="tertiary"
+            aria-label="Choose comment sort"
+          >
+            {SORT_LABELS[sortOrder]}
+            <ChevronDown aria-hidden="true" />
+          </Button>
+          <Dropdown.Popover placement="bottom end">
+            <Dropdown.Menu
+              selectedKeys={new Set<Key>([sortOrder])}
+              selectionMode="single"
+              onAction={(key) => {
+                if (isSortOrder(key)) setSortOrder(key);
+              }}
+            >
+              {(Object.entries(SORT_LABELS) as [SortOrder, string][]).map(([key, label]) => (
+                <Dropdown.Item key={key} id={key} textValue={label}>
+                  <Label>{label}</Label>
+                  <Dropdown.ItemIndicator />
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown>
       </div>
     </div>
   );
-}
+});

@@ -12,7 +12,6 @@ import {
   Modal,
   Popover,
   ProgressCircle,
-  ScrollShadow,
   TextField,
   Tooltip,
   Skeleton,
@@ -21,14 +20,14 @@ import {
   Separator,
   Avatar,
 } from "@heroui/react";
-import { ActionBar, RichTextEditor, Sheet } from "@heroui-pro/react";
+import { ActionBar, RichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, type ReactNode, use, useEffect, useMemo, useRef, useState } from "react";
-import { CommentHeader, CommentSystem } from "@/components/comment";
+import { type FormEvent, use, useEffect, useMemo, useRef, useState } from "react";
+import { CommentSheet } from "@/components/comment";
 import { MotionRichTextEditor } from "@/components/ui";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
@@ -610,6 +609,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                 size="sm"
                 variant="ghost"
                 aria-label="Open comments"
+                isDisabled={!postId}
                 onPress={() => setIsCommentSheetOpen(true)}
               >
                 <Icon icon="gravity-ui:comments" />
@@ -629,7 +629,12 @@ export default function SinglePage({ params }: SinglePageProps) {
                       <Icon icon="lucide:share-2" className="size-4" />
                       Share
                     </Button>
-                    <Button fullWidth variant="ghost" onPress={() => setIsCommentSheetOpen(true)}>
+                    <Button
+                      fullWidth
+                      variant="ghost"
+                      isDisabled={!postId}
+                      onPress={() => setIsCommentSheetOpen(true)}
+                    >
                       <Icon icon="lucide:message-square" className="size-4" />
                       Comments
                     </Button>
@@ -771,73 +776,15 @@ export default function SinglePage({ params }: SinglePageProps) {
         </Modal>
 
         {postId ? (
-          <CommentSystem postId={postId} onRequestClose={() => setIsCommentSheetOpen(false)}>
-            {({ totalCount, isFetching, commentList, commentInput }) => (
-              <CommentSheet
-                body={
-                  <ScrollShadow
-                    hideScrollBar
-                    className="min-h-0 flex-1 overflow-y-auto"
-                    orientation="vertical"
-                    size={32}
-                  >
-                    {commentList}
-                  </ScrollShadow>
-                }
-                footer={commentInput}
-                header={<CommentHeader inSheet isFetching={isFetching} totalCount={totalCount} />}
-                isOpen={isCommentSheetOpen}
-                onOpenChange={setIsCommentSheetOpen}
-              />
-            )}
-          </CommentSystem>
-        ) : (
           <CommentSheet
-            body={
-              <Typography color="muted" type="body-sm">
-                Comments will be available once the article loads.
-              </Typography>
-            }
-            header={<Sheet.Heading>Comments</Sheet.Heading>}
+            key={postId}
             isOpen={isCommentSheetOpen}
+            postId={postId}
             onOpenChange={setIsCommentSheetOpen}
           />
-        )}
+        ) : null}
       </div>
     </>
-  );
-}
-
-interface CommentSheetProps {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-  header: ReactNode;
-  body: ReactNode;
-  footer?: ReactNode;
-}
-
-function CommentSheet({ isOpen, onOpenChange, header, body, footer }: CommentSheetProps) {
-  return (
-    <Sheet
-      isDetached
-      isDismissable={false}
-      isOpen={isOpen}
-      placement="bottom"
-      onOpenChange={onOpenChange}
-    >
-      <Sheet.Backdrop variant="blur">
-        <Sheet.Content className="mx-auto w-[min(760px,calc(100vw-2rem))] max-w-none">
-          <Sheet.Dialog className="h-full min-h-0">
-            <Sheet.CloseTrigger />
-            <Sheet.Header>{header}</Sheet.Header>
-            <Sheet.Body className="flex min-h-0 flex-1 flex-col overflow-hidden">{body}</Sheet.Body>
-            {footer ? (
-              <Sheet.Footer className="flex-col items-stretch">{footer}</Sheet.Footer>
-            ) : null}
-          </Sheet.Dialog>
-        </Sheet.Content>
-      </Sheet.Backdrop>
-    </Sheet>
   );
 }
 

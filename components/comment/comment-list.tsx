@@ -1,10 +1,9 @@
 "use client";
 
-import { ArrowUp, Comments } from "@gravity-ui/icons";
+import { Comments } from "@gravity-ui/icons";
 import { Alert, Button, Skeleton } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { CommentItem } from "./comment-item";
-import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./types";
 
 interface CommentListProps {
@@ -48,26 +47,12 @@ export function CommentList({
   loadingReplyIds,
   hasMoreReplies,
 }: CommentListProps) {
-  const { newCommentCount, setNewCommentCount } = useCommentContext();
-
-  const handleRefresh = async () => {
-    setNewCommentCount(0);
-    await refetch();
-  };
-
   return (
     <div className="flex flex-col gap-5">
       <p className="sr-only" aria-live="polite">
         {totalCount} {totalCount === 1 ? "comment" : "comments"}
         {isFetching && !isLoading ? ", updating" : ""}
       </p>
-
-      {newCommentCount > 0 && (
-        <Button size="sm" variant="secondary" className="self-center" onPress={handleRefresh}>
-          <ArrowUp />
-          Show {newCommentCount} new {newCommentCount === 1 ? "comment" : "comments"}
-        </Button>
-      )}
 
       {isLoading ? (
         <div className="flex flex-col gap-6" aria-label="Loading comments">

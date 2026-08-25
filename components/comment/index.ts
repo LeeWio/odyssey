@@ -1,4 +1,6 @@
 export { CommentSystem } from "./comment-system";
+export { CommentSheet } from "./comment-sheet";
+export type { CommentSystemRenderParts } from "./comment-system";
 export { CommentHeader } from "./comment-header";
 export { CommentProvider, useCommentContext } from "./context/comment-context";
 export type { EnhancedComment } from "./types";

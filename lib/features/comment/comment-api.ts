@@ -195,6 +195,7 @@ export const commentApi = baseApi.injectEndpoints({
             tags.push({ type: "Comment", id: `REPLIES_${parentId}` });
           } else {
             tags.push({ type: "Comment", id: `POST_${postId}_ROOTS` });
+            tags.push({ type: "Comment", id: `POST_${postId}_HOT_ROOTS` });
           }
         }
         return tags;
@@ -346,7 +347,6 @@ export const commentApi = baseApi.injectEndpoints({
         }
       },
       invalidatesTags: [
-        "Comment",
         { type: "Comment", id: "GUESTBOOK" },
         { type: "Comment", id: "ADMIN_LIST" },
       ],

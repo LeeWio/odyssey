@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   useGetGuestbookRootsQuery,
   useGetHotGuestbookRootsQuery,
@@ -30,24 +30,24 @@ interface ReplyPage {
 }
 
 export function useComments() {
-  const { isGuestbook, postId, sortOrder, setNewCommentCount, highlightedCommentId } =
-    useCommentContext();
+  const { isGuestbook, postId, sortOrder, highlightedCommentId } = useCommentContext();
 
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE_STEP);
-  const [rootPages, setRootPages] = useState<CommentResponse[]>([]);
-  const [rootCursor, setRootCursor] = useState<number | undefined>();
-  const [rootHasMore, setRootHasMore] = useState(false);
-  const [pagedPage, setPagedPage] = useState(0);
-  const [pagedHasMore, setPagedHasMore] = useState(false);
+  const queryKey = `${isGuestbook ? "guestbook" : "post"}:${postId}:${sortOrder}`;
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
+  const [additionalRoots, setAdditionalRoots] = useState<Record<string, CommentResponse[]>>({});
+  const [cursorStates, setCursorStates] = useState<
+    Record<string, { cursor?: number; hasMore: boolean }>
+  >({});
+  const [pagedStates, setPagedStates] = useState<
+    Record<string, { page: number; hasMore: boolean }>
+  >({});
   const [replyPages, setReplyPages] = useState<Record<number, ReplyPage>>({});
   const [loadingReplyIds, setLoadingReplyIds] = useState<Set<number>>(new Set());
-  const prevTotalCommentsRef = useRef<number>(0);
-  const skipNextCountRef = useRef(false);
 
   const useCursorRoots = sortOrder === "newest";
   const postCommentsResult = useGetPostCommentRootsCursorQuery(
     { postId, size: PAGE_SIZE },
-    { skip: isGuestbook || !useCursorRoots }
+    { skip: isGuestbook || !useCursorRoots || postId <= 0 }
   );
   const guestbookRootsResult = useGetGuestbookRootsCursorQuery(
     { size: PAGE_SIZE },
@@ -60,11 +60,11 @@ export function useComments() {
       size: PAGE_SIZE,
       sort: sortOrder === "oldest" ? ["createdAt,asc"] : undefined,
     },
-    { skip: isGuestbook || useCursorRoots || sortOrder === "likes" }
+    { skip: isGuestbook || useCursorRoots || sortOrder === "likes" || postId <= 0 }
   );
   const postHotRootsResult = useGetHotPostCommentRootsQuery(
     { postId, page: 0, size: PAGE_SIZE },
-    { skip: isGuestbook || useCursorRoots || sortOrder !== "likes" }
+    { skip: isGuestbook || useCursorRoots || sortOrder !== "likes" || postId <= 0 }
   );
   const guestbookPagedRootsResult = useGetGuestbookRootsQuery(
     {
@@ -94,38 +94,36 @@ export function useComments() {
     : sortOrder === "likes"
       ? postHotRootsResult
       : postRootsResult;
-  const rawCommentsList = useMemo(() => rootPages, [rootPages]);
   const activeRootsResult = useCursorRoots ? cursorRootsResult : pagedRootsResult;
   const isLoading = activeRootsResult.isLoading;
   const isFetching = activeRootsResult.isFetching;
   const error = activeRootsResult.error;
   const refetch = activeRootsResult.refetch;
-
-  useEffect(() => {
-    if (!useCursorRoots) return;
-    const data = cursorRootsResult.data;
-    const timer = setTimeout(() => {
-      setRootPages(data?.list ?? []);
-      setRootCursor(data?.nextCursor ?? undefined);
-      setRootHasMore(Boolean(data?.hasMore));
-      setVisibleCount(PAGE_SIZE_STEP);
-      setReplyPages({});
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [cursorRootsResult.data, useCursorRoots]);
-
-  useEffect(() => {
-    if (useCursorRoots) return;
-    const data = pagedRootsResult.data;
-    const timer = setTimeout(() => {
-      setRootPages(data?.list ?? []);
-      setVisibleCount(PAGE_SIZE_STEP);
-      setReplyPages({});
-      setPagedPage(0);
-      setPagedHasMore(Boolean(data && data.page < data.totalPages));
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [isGuestbook, pagedRootsResult.data, postId, sortOrder, useCursorRoots]);
+  const baseComments = useMemo(
+    () => (useCursorRoots ? cursorRootsResult.data?.list : pagedRootsResult.data?.list) ?? [],
+    [cursorRootsResult.data?.list, pagedRootsResult.data?.list, useCursorRoots]
+  );
+  const rawCommentsList = useMemo(() => {
+    const existingIds = new Set(baseComments.map((comment) => comment.id));
+    const appendedComments = additionalRoots[queryKey] ?? [];
+    return [...baseComments, ...appendedComments.filter((comment) => !existingIds.has(comment.id))];
+  }, [additionalRoots, baseComments, queryKey]);
+  const cursorState = cursorStates[queryKey];
+  const rootCursor = cursorState?.cursor ?? cursorRootsResult.data?.nextCursor ?? undefined;
+  const rootHasMore = cursorState?.hasMore ?? Boolean(cursorRootsResult.data?.hasMore);
+  const pagedState = pagedStates[queryKey];
+  const pagedPage = pagedState?.page ?? 0;
+  const pagedHasMore =
+    pagedState?.hasMore ?? Boolean(pagedRootsResult.data && pagedRootsResult.data.totalPages > 1);
+  const requestedVisibleCount = visibleCounts[queryKey] ?? PAGE_SIZE_STEP;
+  const increaseVisibleCount = useCallback(
+    () =>
+      setVisibleCounts((previous) => ({
+        ...previous,
+        [queryKey]: (previous[queryKey] ?? PAGE_SIZE_STEP) + PAGE_SIZE_STEP,
+      })),
+    [queryKey]
+  );
 
   // Local state for pending comments (optimistic UI that haven't been synced to DB yet)
   const [pendingComments, setPendingComments] = useState<EnhancedComment[]>([]);
@@ -219,26 +217,22 @@ export function useComments() {
 
     // Keep optimistic replies visible until the canonical tree is refetched.
     const inlineReplies = pendingComments.filter((c) => c.parentId !== null);
-    if (inlineReplies.length > 0) {
-      const injectReplies = (nodes: EnhancedComment[]) => {
-        for (const node of nodes) {
-          const repliesForThisNode = inlineReplies.filter((r) => r.parentId === node.id);
-          // filter out any replies that might already be in children
-          const existingIds = new Set(node.children.map((c) => c.id));
-          const uniqueReplies = repliesForThisNode.filter((r) => !existingIds.has(r.id));
+    const injectReplies = (nodes: EnhancedComment[]): EnhancedComment[] =>
+      nodes.map((node) => {
+        const repliesForThisNode = inlineReplies.filter((reply) => reply.parentId === node.id);
+        const existingIds = new Set(node.children.map((child) => child.id));
+        const uniqueReplies = repliesForThisNode.filter((reply) => !existingIds.has(reply.id));
 
-          node.children = [...node.children, ...uniqueReplies];
+        return {
+          ...node,
+          children: injectReplies([...node.children, ...uniqueReplies]),
+        };
+      });
 
-          if (node.children.length > 0) {
-            injectReplies(node.children);
-          }
-        }
-      };
-      injectReplies(allRoots);
-    }
+    const rootsWithPendingReplies = inlineReplies.length > 0 ? injectReplies(allRoots) : allRoots;
 
     // Apply Sorting to Top-Level Roots
-    allRoots.sort((a, b) => {
+    rootsWithPendingReplies.sort((a, b) => {
       if (sortOrder === "newest") {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       } else if (sortOrder === "oldest") {
@@ -251,12 +245,32 @@ export function useComments() {
       return 0;
     });
 
-    return allRoots;
+    return rootsWithPendingReplies;
   }, [rawCommentsList, pendingComments, replyPages, sortOrder, postId]);
 
+  const highlightedRootIndex = highlightedCommentId
+    ? enrichedComments.findIndex((comment) => {
+        if (comment.id === highlightedCommentId) return true;
+        const findInTree = (node: EnhancedComment): boolean =>
+          node.id === highlightedCommentId || node.children.some(findInTree);
+        return findInTree(comment);
+      })
+    : -1;
+  const visibleCount = Math.max(
+    requestedVisibleCount,
+    highlightedRootIndex >= requestedVisibleCount
+      ? Math.ceil((highlightedRootIndex + 1) / PAGE_SIZE_STEP) * PAGE_SIZE_STEP
+      : 0
+  );
+
   const loadMore = useCallback(async () => {
+    if (enrichedComments.length > visibleCount) {
+      increaseVisibleCount();
+      return;
+    }
+
     if (!useCursorRoots && !pagedHasMore) {
-      setVisibleCount((prev) => prev + PAGE_SIZE_STEP);
+      increaseVisibleCount();
       return;
     }
 
@@ -278,30 +292,47 @@ export function useComments() {
               size: PAGE_SIZE,
               sort: ["createdAt,asc"],
             }).unwrap();
-      skipNextCountRef.current = true;
-      setRootPages((previous) => [...previous, ...result.list]);
-      setPagedPage(nextPage);
-      setPagedHasMore(result.page < result.totalPages);
-      setVisibleCount((prev) => prev + PAGE_SIZE_STEP);
+      setAdditionalRoots((previous) => {
+        const existing = new Set((previous[queryKey] ?? []).map((comment) => comment.id));
+        return {
+          ...previous,
+          [queryKey]: [
+            ...(previous[queryKey] ?? []),
+            ...result.list.filter((comment) => !existing.has(comment.id)),
+          ],
+        };
+      });
+      setPagedStates((previous) => ({
+        ...previous,
+        [queryKey]: { page: nextPage, hasMore: result.page < result.totalPages },
+      }));
+      increaseVisibleCount();
       return;
     }
 
     if (!rootHasMore || !rootCursor) {
-      setVisibleCount((prev) => prev + PAGE_SIZE_STEP);
+      increaseVisibleCount();
       return;
     }
 
     const result = isGuestbook
       ? await loadGuestbookRoots({ cursor: rootCursor, size: PAGE_SIZE }).unwrap()
       : await loadPostRoots({ postId, cursor: rootCursor, size: PAGE_SIZE }).unwrap();
-    skipNextCountRef.current = true;
-    setRootPages((previous) => {
-      const existingIds = new Set(previous.map((comment) => comment.id));
-      return [...previous, ...result.list.filter((comment) => !existingIds.has(comment.id))];
+    setAdditionalRoots((previous) => {
+      const existingIds = new Set((previous[queryKey] ?? []).map((comment) => comment.id));
+      return {
+        ...previous,
+        [queryKey]: [
+          ...(previous[queryKey] ?? []),
+          ...result.list.filter((comment) => !existingIds.has(comment.id)),
+        ],
+      };
     });
-    setRootCursor(result.nextCursor ?? undefined);
-    setRootHasMore(result.hasMore);
-    setVisibleCount((prev) => prev + PAGE_SIZE_STEP);
+    setCursorStates((previous) => ({
+      ...previous,
+      [queryKey]: { cursor: result.nextCursor ?? undefined, hasMore: result.hasMore },
+    }));
+    increaseVisibleCount();
   }, [
     isGuestbook,
     loadGuestbookHotRoots,
@@ -310,13 +341,17 @@ export function useComments() {
     loadPostHotRoots,
     loadPostPagedRoots,
     loadPostRoots,
+    increaseVisibleCount,
+    enrichedComments.length,
     pagedHasMore,
     pagedPage,
     postId,
+    queryKey,
     rootCursor,
     rootHasMore,
     sortOrder,
     useCursorRoots,
+    visibleCount,
   ]);
 
   const loadReplies = useCallback(
@@ -358,70 +393,31 @@ export function useComments() {
     [loadRepliesQuery, loadingReplyIds, replyPages]
   );
 
-  // Track new comments and trigger notifications
-  useEffect(() => {
-    if (isLoading) return;
-    const currentTotal = enrichedComments.filter((c) => !c.isPending && !c.isFailed).length;
-    if (skipNextCountRef.current) {
-      skipNextCountRef.current = false;
-      prevTotalCommentsRef.current = currentTotal;
-      return;
-    }
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    if (prevTotalCommentsRef.current > 0 && currentTotal > prevTotalCommentsRef.current) {
-      const diff = currentTotal - prevTotalCommentsRef.current;
-      timer = setTimeout(() => {
-        setNewCommentCount(diff);
-      }, 0);
-    }
-    prevTotalCommentsRef.current = currentTotal;
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [enrichedComments, isLoading, setNewCommentCount]);
-
-  // Handle Hash Anchoring (if highlighted ID needs to be visible)
-  useEffect(() => {
-    if (highlightedCommentId) {
-      // Find comment position in the enriched list to auto-expand visibleCount if it's currently truncated
-      const idx = enrichedComments.findIndex((c) => {
-        // Simple search (check roots first)
-        if (c.id === highlightedCommentId) return true;
-        // Deep search recursively
-        const findInTree = (node: EnhancedComment): boolean => {
-          if (node.id === highlightedCommentId) return true;
-          return node.children.some(findInTree);
-        };
-        return findInTree(c);
-      });
-
-      if (idx !== -1 && idx >= visibleCount) {
-        // Expand visible range to make it visible
-        const timer = setTimeout(() => {
-          setVisibleCount(Math.ceil((idx + 1) / PAGE_SIZE_STEP) * PAGE_SIZE_STEP);
-        }, 0);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [highlightedCommentId, enrichedComments, visibleCount]);
-
   // Load More logic
   const paginatedComments = useMemo(() => {
     return enrichedComments.slice(0, visibleCount);
   }, [enrichedComments, visibleCount]);
 
-  const hasMore = useCursorRoots ? rootHasMore : enrichedComments.length > visibleCount;
+  const hasMore = useCursorRoots
+    ? rootHasMore
+    : enrichedComments.length > visibleCount || pagedHasMore;
 
-  const resetVisible = () => {
-    setVisibleCount(PAGE_SIZE_STEP);
-  };
+  const resetVisible = useCallback(
+    () => setVisibleCounts((previous) => ({ ...previous, [queryKey]: PAGE_SIZE_STEP })),
+    [queryKey]
+  );
 
   const totalComments = enrichedComments.length;
+  const pendingRootCount = pendingComments.reduce(
+    (count, comment) => count + (comment.parentId === null ? 1 : 0),
+    0
+  );
+  const canonicalCommentsCount = Math.max(0, totalComments - pendingRootCount);
 
   return {
     comments: paginatedComments,
     allCommentsCount: enrichedComments.length,
-    backendTotal: totalComments,
+    backendTotal: canonicalCommentsCount,
     isLoading,
     isFetching,
     error,
