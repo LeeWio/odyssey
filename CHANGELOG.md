@@ -1,3 +1,10 @@
+## [1.127.8](https://github.com/LeeWio/odyssey/compare/v1.127.7...v1.127.8) (2026-08-25)
+
+
+### Bug Fixes
+
+* **comments:** use server publish status ([83bf91c](https://github.com/LeeWio/odyssey/commit/83bf91c7dcb66d462ceb4560312e047aabad982e))
+
 ## [1.127.7](https://github.com/LeeWio/odyssey/compare/v1.127.6...v1.127.7) (2026-08-25)
 
 
