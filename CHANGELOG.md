@@ -1,3 +1,10 @@
+## [1.127.7](https://github.com/LeeWio/odyssey/compare/v1.127.6...v1.127.7) (2026-08-25)
+
+
+### Bug Fixes
+
+* **comments:** unify publishing and remove lowlight extension ([d8aa5d7](https://github.com/LeeWio/odyssey/commit/d8aa5d77591e94731c40e4af3dae2bbfadc0c127))
+
 ## [1.127.6](https://github.com/LeeWio/odyssey/compare/v1.127.5...v1.127.6) (2026-08-25)
 
 
