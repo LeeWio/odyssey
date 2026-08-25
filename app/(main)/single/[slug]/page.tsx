@@ -182,6 +182,8 @@ export default function SinglePage({ params }: SinglePageProps) {
   }, 700);
 
   useMotionValueEvent(scrollY, "change", (latestScrollY) => {
+    if (isCommentSheetOpen) return;
+
     const previousScrollY = scrollY.getPrevious() ?? 0;
     const isPastArticleHeader = latestScrollY > 160;
     const isScrollingUp = latestScrollY < previousScrollY;
@@ -191,6 +193,8 @@ export default function SinglePage({ params }: SinglePageProps) {
   });
 
   useMotionValueEvent(scrollYProgress, "change", (latestProgress) => {
+    if (isCommentSheetOpen) return;
+
     setReadingProgress(Math.round(latestProgress * 100));
   });
 

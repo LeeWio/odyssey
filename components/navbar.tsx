@@ -856,6 +856,8 @@ export const Navbar = () => {
 
   useEffect(() => {
     const updateCompactState = () => {
+      if (document.documentElement.style.overflow === "hidden") return;
+
       const scrollTop = window.scrollY;
       const nextCompact = compactStateRef.current ? scrollTop > 24 : scrollTop > 64;
 
