@@ -15,6 +15,7 @@ import {
   useLazyGetPostCommentRootsQuery,
   useLazyGetPostCommentRootsCursorQuery,
   useLazyGetCommentRepliesCursorQuery,
+  type CommentStatus,
   type CommentResponse,
 } from "@/lib/features/comment";
 import { useCommentContext, useCommentSortContext } from "../context/comment-context";
@@ -142,11 +143,9 @@ export function useComments() {
     );
   };
 
-  const markPendingCommentSubmitted = (id: number) => {
+  const markPendingCommentSubmitted = (id: number, status: CommentStatus = "PENDING") => {
     setPendingComments((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, isFailed: false, isPending: false, status: "PENDING" } : c
-      )
+      prev.map((c) => (c.id === id ? { ...c, isFailed: false, isPending: false, status } : c))
     );
   };
 

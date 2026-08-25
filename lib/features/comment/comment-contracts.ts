@@ -25,9 +25,18 @@ const baseCommentFields = {
 
 const baseCommentSchema = z.object(baseCommentFields);
 
+export const CommentStatusSchema = z.enum(["PENDING", "APPROVED", "REJECTED", "SPAM"]);
+
+export const CommentPublishResponseSchema = z.object({
+  id: z.number(),
+  status: CommentStatusSchema,
+});
+
 export type CommentResponse = z.infer<typeof baseCommentSchema> & {
   children?: CommentResponse[];
 };
+
+export type CommentPublishResponse = z.infer<typeof CommentPublishResponseSchema>;
 
 export const CommentResponseSchema: z.ZodType<CommentResponse> = baseCommentSchema.extend({
   children: z

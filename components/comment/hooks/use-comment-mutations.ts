@@ -3,6 +3,7 @@
 import { toast } from "@heroui/react";
 import { useRef } from "react";
 import {
+  type CommentStatus,
   useDeleteMyCommentMutation,
   useEditMyCommentMutation,
   useLikeCommentMutation,
@@ -17,7 +18,7 @@ import { commentDebug } from "@/lib/comment-debug";
 
 interface MutationHookProps {
   addPendingComment: (c: EnhancedComment) => void;
-  markPendingCommentSubmitted: (id: number) => void;
+  markPendingCommentSubmitted: (id: number, status?: CommentStatus) => void;
   markPendingCommentFailed: (id: number) => void;
   markPendingCommentRetrying: (id: number) => void;
 }
@@ -105,24 +106,25 @@ export function useCommentMutations({
 
     try {
       if (isGuestbook) {
-        await postGuestbookEntryApi({
+        const submission = await postGuestbookEntryApi({
           content,
           parentId: parentId || undefined,
           idempotencyKey,
         }).unwrap();
+        markPendingCommentSubmitted(tempId, submission?.status);
       } else {
-        await publishCommentApi({
+        const submission = await publishCommentApi({
           content,
           postId,
           parentId: parentId || undefined,
           idempotencyKey,
         }).unwrap();
+        markPendingCommentSubmitted(tempId, submission?.status);
       }
 
       commentDebug("mutation:publish-api-resolved", { postId, parentId, tempId });
       // Keep the locally submitted comment visible while moderation and the
       // invalidated canonical query settle. The backend remains the durable source.
-      markPendingCommentSubmitted(tempId);
       idempotencyKeys.current.delete(tempId);
       commentDebug("mutation:publish-marked-submitted", { postId, parentId, tempId });
       return true;

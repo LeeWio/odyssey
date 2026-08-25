@@ -11,9 +11,11 @@ import {
 } from "@/lib/api";
 import {
   CommentAnchorContextResponseSchema,
+  CommentPublishResponseSchema,
   CommentResponseSchema,
   type CommentAnchorContextResponse,
   type CommentPublishOptions,
+  type CommentPublishResponse,
   type CommentRequest,
   type CommentResponse,
   type CommentStatus,
@@ -192,13 +194,18 @@ export const commentApi = baseApi.injectEndpoints({
     /**
      * Public: Publish a new comment
      */
-    publishComment: builder.mutation<void, CommentRequest & CommentPublishOptions>({
+    publishComment: builder.mutation<
+      CommentPublishResponse | null,
+      CommentRequest & CommentPublishOptions
+    >({
       query: ({ idempotencyKey, ...body }) => ({
         url: "/api/v1/public/comments",
         method: "POST",
         headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
         body,
       }),
+      rawResponseSchema: apiResponseSchema(CommentPublishResponseSchema.nullable()),
+      transformResponse: (response: ApiResponse<CommentPublishResponse | null>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted({ parentId, postId }, { queryFulfilled }) {
         commentDebug("api:publish-start", { postId, parentId });
@@ -354,13 +361,18 @@ export const commentApi = baseApi.injectEndpoints({
     /**
      * Public: Submit a new guestbook entry (requires login)
      */
-    postGuestbookEntry: builder.mutation<void, GuestbookRequest & CommentPublishOptions>({
+    postGuestbookEntry: builder.mutation<
+      CommentPublishResponse | null,
+      GuestbookRequest & CommentPublishOptions
+    >({
       query: ({ idempotencyKey, ...body }) => ({
         url: "/api/v1/public/guestbook",
         method: "POST",
         headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
         body,
       }),
+      rawResponseSchema: apiResponseSchema(CommentPublishResponseSchema.nullable()),
+      transformResponse: (response: ApiResponse<CommentPublishResponse | null>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
