@@ -1,3 +1,10 @@
+## [1.127.3](https://github.com/LeeWio/odyssey/compare/v1.127.2...v1.127.3) (2026-08-25)
+
+
+### Bug Fixes
+
+* **comments:** stabilize sheet layout during scroll lock ([bcccb73](https://github.com/LeeWio/odyssey/commit/bcccb739c4f199c8c7c596bc314db385cb431631))
+
 ## [1.127.2](https://github.com/LeeWio/odyssey/compare/v1.127.1...v1.127.2) (2026-08-25)
 
 
