@@ -96,6 +96,7 @@ export function CommentItem(props: CommentItemProps) {
   const replies = useMemo(() => flattenReplies(comment), [comment]);
   const replyTotal = Math.max(comment.replyCount ?? 0, replies.length);
   const shouldReduceMotion = useReducedMotion();
+  const shouldAnimateEntry = !comment.isPending && !shouldReduceMotion;
   const hasHighlightedReply = replies.some(
     ({ comment: reply }) => reply.id === highlightedCommentId
   );
@@ -112,11 +113,10 @@ export function CommentItem(props: CommentItemProps) {
     <MotionSurface
       className="group scroll-mt-24 px-1 py-6 first:pt-2 sm:px-2"
       variant={highlightedCommentId === comment.id ? "secondary" : "transparent"}
-      layout
-      initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+      initial={shouldAnimateEntry ? { opacity: 0, y: 10 } : false}
       animate={{ opacity: 1, y: 0 }}
-      exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
-      transition={{ duration: 0.22, ease: "easeOut" }}
+      exit={shouldAnimateEntry ? { opacity: 0, y: -8 } : undefined}
+      transition={shouldAnimateEntry ? { duration: 0.22, ease: "easeOut" } : { duration: 0 }}
     >
       <article id={`comment-card-${comment.id}`}>
         <CommentRow {...props} comment={comment} depth={1} />

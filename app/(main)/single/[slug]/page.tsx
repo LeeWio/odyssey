@@ -54,6 +54,7 @@ import {
   useRecordReadingProgressMutation,
 } from "@/lib/features/library";
 import { getReadingPositionId } from "@/lib/reading-position";
+import { commentDebug } from "@/lib/comment-debug";
 import { useAppSelector } from "@/lib/hooks";
 import { ArticleSidebar } from "./article-sidebar";
 
@@ -182,7 +183,10 @@ export default function SinglePage({ params }: SinglePageProps) {
   }, 700);
 
   useMotionValueEvent(scrollY, "change", (latestScrollY) => {
-    if (isCommentSheetOpen) return;
+    if (isCommentSheetOpen) {
+      commentDebug("page:scroll-ignored", { latestScrollY, reason: "comment-sheet-open" });
+      return;
+    }
 
     const previousScrollY = scrollY.getPrevious() ?? 0;
     const isPastArticleHeader = latestScrollY > 160;
@@ -193,10 +197,17 @@ export default function SinglePage({ params }: SinglePageProps) {
   });
 
   useMotionValueEvent(scrollYProgress, "change", (latestProgress) => {
-    if (isCommentSheetOpen) return;
+    if (isCommentSheetOpen) {
+      commentDebug("page:progress-ignored", { latestProgress, reason: "comment-sheet-open" });
+      return;
+    }
 
     setReadingProgress(Math.round(latestProgress * 100));
   });
+
+  useEffect(() => {
+    commentDebug("page:comment-sheet-state", { postId, isCommentSheetOpen });
+  }, [isCommentSheetOpen, postId]);
 
   useEffect(() => () => revealWhenScrollSettles.cancel(), [revealWhenScrollSettles]);
 

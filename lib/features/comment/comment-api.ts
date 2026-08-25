@@ -18,6 +18,7 @@ import {
   type CommentStatus,
   type GuestbookRequest,
 } from "./comment-contracts";
+import { commentDebug } from "@/lib/comment-debug";
 
 export const commentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -177,11 +178,18 @@ export const commentApi = baseApi.injectEndpoints({
         body,
       }),
       transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
+      async onQueryStarted({ parentId, postId }, { queryFulfilled }) {
+        commentDebug("api:publish-start", { postId, parentId });
         try {
           await queryFulfilled;
+          commentDebug("api:publish-fulfilled", { postId, parentId });
           toast.success("Comment published successfully!");
         } catch (error: unknown) {
+          commentDebug("api:publish-rejected", {
+            postId,
+            parentId,
+            error: error instanceof Error ? error.message : String(error),
+          });
           toast.danger(getApiErrorMessage(error, "Failed to publish comment"));
         }
       },
@@ -198,6 +206,7 @@ export const commentApi = baseApi.injectEndpoints({
             tags.push({ type: "Comment", id: `POST_${postId}_HOT_ROOTS` });
           }
         }
+        commentDebug("api:publish-invalidates", { postId, parentId, tags });
         return tags;
       },
     }),

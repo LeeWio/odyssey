@@ -11,6 +11,7 @@ export function useCommentDraft(postId: number, replyId: number | null) {
   }, [postId, replyId]);
 
   const [draft, _setDraft] = useState<string>("");
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Load draft on mount/change
   useEffect(() => {
@@ -19,6 +20,7 @@ export function useCommentDraft(postId: number, replyId: number | null) {
     const stored = localStorage.getItem(key);
     const timer = setTimeout(() => {
       _setDraft(stored || "");
+      setIsHydrated(true);
     }, 0);
     return () => clearTimeout(timer);
   }, [getStorageKey]);
@@ -44,5 +46,5 @@ export function useCommentDraft(postId: number, replyId: number | null) {
     localStorage.removeItem(key);
   }, [getStorageKey]);
 
-  return [draft, setDraft, clearDraft] as const;
+  return [draft, setDraft, clearDraft, isHydrated] as const;
 }

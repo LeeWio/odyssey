@@ -38,6 +38,7 @@ import {
   toggleDashboard,
 } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { commentDebug } from "@/lib/comment-debug";
 import { LogIn } from "./auth/log-in";
 import { SignUp } from "./auth/sign-up";
 import { CommandPalette } from "./command-palette";
@@ -856,7 +857,10 @@ export const Navbar = () => {
 
   useEffect(() => {
     const updateCompactState = () => {
-      if (document.documentElement.style.overflow === "hidden") return;
+      if (document.documentElement.style.overflow === "hidden") {
+        commentDebug("navbar:scroll-ignored", { reason: "html-overflow-hidden" });
+        return;
+      }
 
       const scrollTop = window.scrollY;
       const nextCompact = compactStateRef.current ? scrollTop > 24 : scrollTop > 64;
@@ -864,6 +868,7 @@ export const Navbar = () => {
       if (nextCompact === compactStateRef.current) return;
       compactStateRef.current = nextCompact;
       setIsCompact(nextCompact);
+      commentDebug("navbar:compact-state", { nextCompact, scrollTop });
     };
 
     updateCompactState();
@@ -874,7 +879,10 @@ export const Navbar = () => {
 
   useEffect(() => {
     const measureNavigation = () => {
-      if (document.documentElement.style.overflow === "hidden") return;
+      if (document.documentElement.style.overflow === "hidden") {
+        commentDebug("navbar:measure-ignored", { reason: "html-overflow-hidden" });
+        return;
+      }
 
       const brandWidth = brandRef.current?.offsetWidth ?? 0;
       const navigationItemsWidth = navigationItemsRef.current?.offsetWidth ?? 0;
@@ -895,6 +903,8 @@ export const Navbar = () => {
         panelWidth
       );
       const expandedWidth = Math.min(viewportWidth, 1280);
+
+      commentDebug("navbar:measure", { compactWidth, expandedWidth, panelWidth: panelWidth });
 
       setNavigationWidths((current) => {
         if (
@@ -973,6 +983,45 @@ export const Navbar = () => {
     : isCompact
       ? navigationWidths.compact
       : navigationWidths.expanded;
+
+  useEffect(() => {
+    commentDebug("navbar:render", {
+      isCompact,
+      isNavigationOpen,
+      targetNavigationWidth,
+      navigationWidths,
+    });
+  });
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      const bounds = panel.getBoundingClientRect();
+      commentDebug("navbar:resize", {
+        width: bounds.width,
+        height: bounds.height,
+        x: bounds.x,
+        y: bounds.y,
+        htmlOverflow: document.documentElement.style.overflow,
+      });
+    });
+    resizeObserver.observe(panel);
+    const mutationObserver = new MutationObserver((mutations) => {
+      commentDebug("navbar:dom-mutation", {
+        mutations: mutations.map((mutation) => mutation.attributeName),
+        htmlOverflow: document.documentElement.style.overflow,
+        bodyOverflow: document.body.style.overflow,
+      });
+    });
+    mutationObserver.observe(panel, { attributes: true, attributeFilter: ["style", "class"] });
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, []);
 
   // Micro-stagger orchestrator for left-hand header elements
   const textEntrance = {

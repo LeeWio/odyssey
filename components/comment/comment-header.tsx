@@ -3,8 +3,9 @@
 import { ChevronDown, Comments } from "@gravity-ui/icons";
 import { Button, Chip, Dropdown, Label, Typography, type Key } from "@heroui/react";
 import { Sheet } from "@heroui-pro/react";
-import { memo } from "react";
-import { type SortOrder, useCommentContext } from "./context/comment-context";
+import { memo, useEffect } from "react";
+import { commentDebug } from "@/lib/comment-debug";
+import { type SortOrder, useCommentSortContext } from "./context/comment-context";
 
 interface CommentHeaderProps {
   totalCount: number;
@@ -25,7 +26,16 @@ export const CommentHeader = memo(function CommentHeader({
   totalCount,
   inSheet = false,
 }: CommentHeaderProps) {
-  const { sortOrder, setSortOrder } = useCommentContext();
+  const { sortOrder, setSortOrder } = useCommentSortContext();
+
+  useEffect(() => {
+    commentDebug("header:render", { totalCount, inSheet, sortOrder });
+  });
+
+  useEffect(() => {
+    commentDebug("header:mounted", { inSheet });
+    return () => commentDebug("header:unmounted", { inSheet });
+  }, [inSheet]);
 
   const heading = (
     <>

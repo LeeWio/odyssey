@@ -3,6 +3,8 @@
 import { Comments } from "@gravity-ui/icons";
 import { Alert, Button, Skeleton } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
+import { useEffect } from "react";
+import { commentDebug } from "@/lib/comment-debug";
 import { CommentItem } from "./comment-item";
 import type { EnhancedComment } from "./types";
 
@@ -47,6 +49,24 @@ export function CommentList({
   loadingReplyIds,
   hasMoreReplies,
 }: CommentListProps) {
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const dialog = document.querySelector<HTMLElement>("[data-slot='sheet-dialog']");
+      const bounds = dialog?.getBoundingClientRect();
+      commentDebug("list:state", {
+        commentsCount: comments.length,
+        totalCount,
+        isLoading,
+        isFetching,
+        hasError: Boolean(error),
+        sheetHeight: bounds?.height,
+        sheetY: bounds?.y,
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [comments.length, error, isFetching, isLoading, totalCount]);
+
   return (
     <div className="flex flex-col gap-5">
       <p className="sr-only" aria-live="polite">

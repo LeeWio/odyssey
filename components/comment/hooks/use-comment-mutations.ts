@@ -12,6 +12,7 @@ import {
 } from "@/lib/features/comment";
 import { useCommentContext } from "../context/comment-context";
 import type { EnhancedComment } from "../types";
+import { commentDebug } from "@/lib/comment-debug";
 
 interface MutationHookProps {
   addPendingComment: (c: EnhancedComment) => void;
@@ -78,6 +79,7 @@ export function useCommentMutations({
     }
 
     const tempId = existingTempId || -Date.now();
+    commentDebug("mutation:publish-start", { postId, parentId, tempId, isGuestbook });
 
     if (existingTempId) {
       // Re-mark it as pending
@@ -101,10 +103,18 @@ export function useCommentMutations({
         }).unwrap();
       }
 
+      commentDebug("mutation:publish-api-resolved", { postId, parentId, tempId });
       // Keep the locally submitted comment visible while moderation and the
       // invalidated canonical query settle. The backend remains the durable source.
       markPendingCommentSubmitted(tempId);
+      commentDebug("mutation:publish-marked-submitted", { postId, parentId, tempId });
     } catch (err) {
+      commentDebug("mutation:publish-api-rejected", {
+        postId,
+        parentId,
+        tempId,
+        error: err instanceof Error ? err.message : String(err),
+      });
       console.error("Comment submission failed, keeping in local failed list:", err);
       markPendingCommentFailed(tempId);
     }

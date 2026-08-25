@@ -18,6 +18,7 @@ import type React from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
+import { commentDebug } from "@/lib/comment-debug";
 import { useCommentContext } from "./context/comment-context";
 import { useCommentDraft } from "./hooks/use-comment-draft";
 
@@ -51,13 +52,13 @@ export function CommentInput({
   placeholder = "Share your thoughts...",
   submitButtonText = "Post comment",
 }: CommentInputProps) {
-  const { postId, isAuthenticated, currentUser, setHasUnsavedDraft } = useCommentContext();
-  const [draft, setDraft, clearDraft] = useCommentDraft(postId, replyId);
+  const { postId, isAuthenticated, currentUser } = useCommentContext();
+  const [draft, setDraft, clearDraft, isDraftHydrated] = useCommentDraft(postId, replyId);
   const [content, setContent] = useState("");
-  const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const didHydrateDraft = useRef(false);
   const dispatch = useAppDispatch();
   const formId = useId();
   const modalIsOpen = isOpen ?? internalOpen;
@@ -65,21 +66,14 @@ export function CommentInput({
   const initialLetter = currentUser ? currentUser.slice(0, 2).toUpperCase() : "AN";
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setContent(draft);
-      setHasHydratedDraft(true);
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, [draft]);
+    didHydrateDraft.current = false;
+  }, [postId, replyId]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setHasUnsavedDraft(hasHydratedDraft && content.trim().length > 0);
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, [content, hasHydratedDraft, setHasUnsavedDraft]);
+    if (!isDraftHydrated || didHydrateDraft.current) return;
+    didHydrateDraft.current = true;
+    setContent(draft);
+  }, [draft, isDraftHydrated]);
 
   const setModalOpen = (nextIsOpen: boolean) => {
     if (isOpen === undefined) setInternalOpen(nextIsOpen);
@@ -96,6 +90,13 @@ export function CommentInput({
   };
 
   const submitComment = async () => {
+    commentDebug("input:submit-called", {
+      replyId,
+      isAuthenticated,
+      hasContent: Boolean(content.trim()),
+      isSubmitting,
+    });
+
     if (!isAuthenticated) {
       setModalOpen(false);
       onAuthenticationRequired?.();
@@ -106,16 +107,22 @@ export function CommentInput({
     if (!content.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
+    commentDebug("input:submit-start", { replyId, contentLength: content.trim().length });
     try {
       await onSubmit(content.trim());
+      commentDebug("input:submit-resolved", { replyId });
       setContent("");
       clearDraft();
-      setHasUnsavedDraft(false);
       setModalOpen(false);
     } catch (error) {
+      commentDebug("input:submit-rejected", {
+        replyId,
+        error: error instanceof Error ? error.message : String(error),
+      });
       console.error("Comment submission failed:", error);
     } finally {
       setIsSubmitting(false);
+      commentDebug("input:submit-finally", { replyId });
     }
   };
 
@@ -145,7 +152,6 @@ export function CommentInput({
         layout="inline"
         maxHeight={160}
         size="lg"
-        status={isSubmitting ? "submitted" : "ready"}
         value={content}
         variant="secondary"
         onSubmit={() => void submitComment()}
@@ -167,7 +173,10 @@ export function CommentInput({
               </Avatar>
             </PromptInput.ToolbarStart>
             <PromptInput.ToolbarEnd>
-              <PromptInput.Send aria-label="Send comment">
+              <PromptInput.Send
+                aria-label="Send comment"
+                status={isSubmitting ? "submitted" : "ready"}
+              >
                 <ArrowUp aria-hidden="true" className="size-4" />
               </PromptInput.Send>
             </PromptInput.ToolbarEnd>

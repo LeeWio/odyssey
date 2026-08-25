@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useGetGuestbookRootsQuery,
   useGetHotGuestbookRootsQuery,
@@ -17,8 +17,9 @@ import {
   useLazyGetCommentRepliesCursorQuery,
   type CommentResponse,
 } from "@/lib/features/comment";
-import { useCommentContext } from "../context/comment-context";
+import { useCommentContext, useCommentSortContext } from "../context/comment-context";
 import type { EnhancedComment } from "../types";
+import { commentDebug } from "@/lib/comment-debug";
 
 const PAGE_SIZE = 20;
 const PAGE_SIZE_STEP = 5;
@@ -30,7 +31,8 @@ interface ReplyPage {
 }
 
 export function useComments() {
-  const { isGuestbook, postId, sortOrder, highlightedCommentId } = useCommentContext();
+  const { isGuestbook, postId, highlightedCommentId } = useCommentContext();
+  const { sortOrder } = useCommentSortContext();
 
   const queryKey = `${isGuestbook ? "guestbook" : "post"}:${postId}:${sortOrder}`;
   const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
@@ -421,6 +423,28 @@ export function useComments() {
     0
   );
   const canonicalCommentsCount = Math.max(0, totalComments - pendingRootCount);
+
+  useEffect(() => {
+    commentDebug("query:state", {
+      queryKey,
+      isLoading,
+      isFetching,
+      error: Boolean(error),
+      baseCount: baseComments.length,
+      enrichedCount: enrichedComments.length,
+      pendingCount: pendingComments.length,
+      totalCount: canonicalCommentsCount,
+    });
+  }, [
+    baseComments.length,
+    canonicalCommentsCount,
+    enrichedComments.length,
+    error,
+    isFetching,
+    isLoading,
+    pendingComments.length,
+    queryKey,
+  ]);
 
   return {
     comments: paginatedComments,
