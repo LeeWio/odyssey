@@ -874,6 +874,8 @@ export const Navbar = () => {
 
   useEffect(() => {
     const measureNavigation = () => {
+      if (document.documentElement.style.overflow === "hidden") return;
+
       const brandWidth = brandRef.current?.offsetWidth ?? 0;
       const navigationItemsWidth = navigationItemsRef.current?.offsetWidth ?? 0;
       const actionsWidth = actionsRef.current?.offsetWidth ?? 0;
