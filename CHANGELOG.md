@@ -1,3 +1,10 @@
+# [1.127.0](https://github.com/LeeWio/odyssey/compare/v1.126.0...v1.127.0) (2026-08-25)
+
+
+### Features
+
+* **comments:** refine discussion interface ([3323de1](https://github.com/LeeWio/odyssey/commit/3323de152dc13000e730427bf4f8ed7139754679))
+
 # [1.126.0](https://github.com/LeeWio/odyssey/compare/v1.125.0...v1.126.0) (2026-08-25)
 
 
