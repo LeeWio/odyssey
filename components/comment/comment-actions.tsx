@@ -4,7 +4,7 @@ import { Ellipsis, Flag, Heart, HeartFill, Link, Pencil, TrashBin } from "@gravi
 import { Button, Dropdown, Tooltip } from "@heroui/react";
 import { MotionButton } from "@/components/ui";
 import { useCommentContext } from "./context/comment-context";
-import type { EnhancedComment } from "./hooks/simulation-store";
+import type { EnhancedComment } from "./types";
 
 interface CommentActionsProps {
   comment: EnhancedComment;
@@ -33,7 +33,7 @@ export function CommentActions({
   const normalizedUser = currentUser?.toLowerCase();
   const isAuthor =
     Boolean(isAuthenticated && normalizedUser) &&
-    (normalizedUser === comment.username.toLowerCase() ||
+    (normalizedUser === (comment.username ?? "").toLowerCase() ||
       normalizedUser === comment.nickname?.toLowerCase());
   const isUnavailable = Boolean(comment.isPending || comment.isFailed);
   const isUnapproved = comment.status === "PENDING" || comment.id < 0;
@@ -44,12 +44,12 @@ export function CommentActions({
         className="text-muted hover:text-foreground h-auto min-h-0 min-w-0 gap-1 px-0 py-0 text-sm"
         size="sm"
         variant="ghost"
-        aria-label={comment.isLiked ? "Unlike comment" : "Like comment"}
+        aria-label={comment.likedByCurrentUser ? "Unlike comment" : "Like comment"}
         isDisabled={isUnavailable}
         whileTap={{ scale: 0.92 }}
         onPress={onLikeToggle}
       >
-        {comment.isLiked ? <HeartFill className="text-danger" /> : <Heart />}
+        {comment.likedByCurrentUser ? <HeartFill className="text-danger" /> : <Heart />}
         <span>{comment.likesCount}</span>
       </MotionButton>
 

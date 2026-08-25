@@ -1,10 +1,9 @@
 "use client";
 
 import type React from "react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
-import { type EnhancedComment, simulationStore } from "../hooks/simulation-store";
 
 export type SortOrder = "newest" | "oldest" | "likes";
 
@@ -23,20 +22,6 @@ interface CommentContextType {
   setNewCommentCount: (count: number) => void;
   hasUnsavedDraft: boolean;
   setHasUnsavedDraft: (hasDraft: boolean) => void;
-
-  // React state memory-driven simulation store to avoid synchronous localStorage reads on render
-  likes: Record<number, { count: number; isLiked: boolean }>;
-  setLikes: React.Dispatch<
-    React.SetStateAction<Record<number, { count: number; isLiked: boolean }>>
-  >;
-  edits: Record<number, string>;
-  setEdits: React.Dispatch<React.SetStateAction<Record<number, string>>>;
-  deletions: number[];
-  setDeletions: React.Dispatch<React.SetStateAction<number[]>>;
-  reports: number[];
-  setReports: React.Dispatch<React.SetStateAction<number[]>>;
-  localComments: EnhancedComment[];
-  setLocalComments: React.Dispatch<React.SetStateAction<EnhancedComment[]>>;
 }
 
 const CommentContext = createContext<CommentContextType | undefined>(undefined);
@@ -55,26 +40,6 @@ export function CommentProvider({
   const [highlightedCommentId, setHighlightedCommentId] = useState<number | null>(null);
   const [newCommentCount, setNewCommentCount] = useState<number>(0);
   const [hasUnsavedDraft, setHasUnsavedDraft] = useState<boolean>(false);
-
-  // Simulated Storage memory state
-  const [likes, setLikes] = useState<Record<number, { count: number; isLiked: boolean }>>({});
-  const [edits, setEdits] = useState<Record<number, string>>({});
-  const [deletions, setDeletions] = useState<number[]>([]);
-  const [reports, setReports] = useState<number[]>([]);
-  const [localComments, setLocalComments] = useState<EnhancedComment[]>([]);
-
-  // Load from simulation store exactly once on mount (client-side only)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const timer = setTimeout(() => {
-      setLikes({}); // Initialize as empty to respect backend-driven values
-      setEdits({});
-      setDeletions([]);
-      setReports([]);
-      setLocalComments(simulationStore.getLocalComments(postId));
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [postId]);
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const currentUser = useAppSelector(selectCurrentUser);
@@ -96,18 +61,6 @@ export function CommentProvider({
         setNewCommentCount,
         hasUnsavedDraft,
         setHasUnsavedDraft,
-
-        // Expose state and setters
-        likes,
-        setLikes,
-        edits,
-        setEdits,
-        deletions,
-        setDeletions,
-        reports,
-        setReports,
-        localComments,
-        setLocalComments,
       }}
     >
       {children}

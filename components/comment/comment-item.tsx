@@ -12,17 +12,20 @@ import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
 import { CommentInput } from "./comment-input";
 import { useCommentContext } from "./context/comment-context";
-import type { EnhancedComment } from "./hooks/simulation-store";
+import type { EnhancedComment } from "./types";
 
 interface CommentItemProps {
   comment: EnhancedComment;
-  onLikeToggle: (id: number, isLiked: boolean, currentLikes: number) => void;
+  onLikeToggle: (id: number, isLiked: boolean) => void;
   onAuthenticationRequired?: () => void;
   onReplySubmit: (content: string, parentId: number) => Promise<void>;
   onEditSave: (id: number, content: string) => void;
   onDelete: (id: number) => void;
   onReport: (id: number) => void;
   onRetry: (tempId: number, content: string, parentId: number | null) => Promise<void>;
+  onLoadReplies: (parentId: number) => Promise<void>;
+  loadingReplyIds: Set<number>;
+  hasMoreReplies: (parentId: number) => boolean;
 }
 
 interface ReplyRowProps extends Omit<CommentItemProps, "comment"> {
@@ -91,6 +94,7 @@ export function CommentItem(props: CommentItemProps) {
   const { comment } = props;
   const { highlightedCommentId } = useCommentContext();
   const replies = useMemo(() => flattenReplies(comment), [comment]);
+  const replyTotal = Math.max(comment.replyCount ?? 0, replies.length);
   const shouldReduceMotion = useReducedMotion();
   const hasHighlightedReply = replies.some(
     ({ comment: reply }) => reply.id === highlightedCommentId
@@ -120,7 +124,7 @@ export function CommentItem(props: CommentItemProps) {
       <article id={`comment-card-${comment.id}`}>
         <CommentRow {...props} comment={comment} depth={1} />
 
-        {replies.length > 0 && (
+        {(replies.length > 0 || replyTotal > 0) && (
           <div className="border-border/40 mt-4 ml-8 border-l pl-3 sm:ml-10 sm:pl-4">
             <Button
               className="text-muted hover:text-foreground h-auto min-h-0 min-w-0 gap-1 px-0 py-0 text-xs"
@@ -128,15 +132,21 @@ export function CommentItem(props: CommentItemProps) {
               variant="ghost"
               aria-controls={repliesId}
               aria-expanded={isExpanded}
-              onPress={() => setIsExpanded((expanded) => !expanded)}
+              onPress={async () => {
+                if (!isExpanded && replies.length === 0 && replyTotal > 0) {
+                  await props.onLoadReplies(comment.id);
+                }
+                setIsExpanded((expanded) => !expanded);
+              }}
             >
               {isExpanded ? (
                 <ArrowUp aria-hidden="true" className="size-3.5" />
               ) : (
                 <ArrowDown aria-hidden="true" className="size-3.5" />
               )}
-              {isExpanded ? "Hide" : "View"} {replies.length}{" "}
-              {replies.length === 1 ? "reply" : "replies"}
+              {props.loadingReplyIds.has(comment.id)
+                ? "Loading replies..."
+                : `${isExpanded ? "Hide" : "View"} ${replyTotal} ${replyTotal === 1 ? "reply" : "replies"}`}
             </Button>
 
             <AnimatePresence initial={false}>
@@ -161,6 +171,17 @@ export function CommentItem(props: CommentItemProps) {
                       />
                     ))}
                   </div>
+                  {isExpanded && props.hasMoreReplies(comment.id) && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="mt-3 ml-1 self-start text-xs"
+                      onPress={() => props.onLoadReplies(comment.id)}
+                      isDisabled={props.loadingReplyIds.has(comment.id)}
+                    >
+                      Load more replies
+                    </Button>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -212,7 +233,7 @@ function CommentRow({
   const dispatch = useAppDispatch();
   const isReplying = activeReplyId === comment.id;
   const isHighlighted = highlightedCommentId === comment.id;
-  const isDeleted = comment.isDeleted === true;
+  const isDeleted = comment.deletedPlaceholder === true;
   const displayName = getDisplayName(comment);
   const initialLetter = displayName.slice(0, 2).toUpperCase();
 
@@ -291,10 +312,9 @@ function CommentRow({
         <div className="mt-1">
           <CommentContent
             content={comment.content}
-            isEdited={comment.isEdited}
+            isEdited={Boolean(comment.editedAt)}
             isEditing={isEditing}
             isDeleted={isDeleted}
-            isReported={comment.isReported}
             onEditCancel={() => setIsEditing(false)}
             onEditSave={(content) => {
               onEditSave(comment.id, content);
@@ -308,7 +328,7 @@ function CommentRow({
             className="mt-3"
             size="sm"
             variant="secondary"
-            onPress={() => onRetry(comment.id, comment.content, comment.parentId)}
+            onPress={() => onRetry(comment.id, comment.content, comment.parentId ?? null)}
           >
             <ArrowRotateRight aria-hidden="true" />
             Retry
@@ -327,7 +347,7 @@ function CommentRow({
               onCopyLink={copyCommentLink}
               onDelete={() => onDelete(comment.id)}
               onEditStart={() => setIsEditing(true)}
-              onLikeToggle={() => onLikeToggle(comment.id, comment.isLiked, comment.likesCount)}
+              onLikeToggle={() => onLikeToggle(comment.id, Boolean(comment.likedByCurrentUser))}
               onReplyToggle={() => {
                 if (!isAuthenticated) {
                   onAuthenticationRequired?.();

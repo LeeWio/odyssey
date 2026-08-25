@@ -36,6 +36,9 @@ function CommentSystemContent({
     addPendingComment,
     removePendingComment,
     markPendingCommentFailed,
+    loadReplies,
+    loadingReplyIds,
+    hasMoreReplies,
   } = useComments();
   const {
     publishComment,
@@ -81,6 +84,9 @@ function CommentSystemContent({
           onReplySubmit={(content, parentId) => publishComment(content, parentId)}
           onReport={reportComment}
           onRetry={retryPublishComment}
+          onLoadReplies={loadReplies}
+          loadingReplyIds={loadingReplyIds}
+          hasMoreReplies={hasMoreReplies}
         />
       </ScrollShadow>
 

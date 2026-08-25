@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "@gravity-ui/icons";
-import { Alert, Button, TextArea, TextField } from "@heroui/react";
+import { Button, TextArea, TextField } from "@heroui/react";
 import { useEffect, useState } from "react";
 
 interface CommentContentProps {
@@ -9,7 +9,6 @@ interface CommentContentProps {
   isEditing: boolean;
   onEditSave: (newContent: string) => void;
   onEditCancel: () => void;
-  isReported?: boolean;
   isEdited?: boolean;
   isDeleted?: boolean;
 }
@@ -19,7 +18,6 @@ export function CommentContent({
   isEditing,
   onEditSave,
   onEditCancel,
-  isReported = false,
   isEdited = false,
   isDeleted = false,
 }: CommentContentProps) {
@@ -60,20 +58,6 @@ export function CommentContent({
           </Button>
         </div>
       </div>
-    );
-  }
-
-  if (isReported) {
-    return (
-      <Alert status="warning">
-        <Alert.Indicator />
-        <Alert.Content>
-          <Alert.Title>Comment under review</Alert.Title>
-          <Alert.Description>
-            This comment has been reported to the moderation team.
-          </Alert.Description>
-        </Alert.Content>
-      </Alert>
     );
   }
 

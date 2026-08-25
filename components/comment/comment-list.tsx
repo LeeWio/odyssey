@@ -5,7 +5,7 @@ import { Alert, Button, ButtonGroup, Dropdown, Label, Skeleton, type Key } from 
 import { EmptyState } from "@heroui-pro/react";
 import { CommentItem } from "./comment-item";
 import { type SortOrder, useCommentContext } from "./context/comment-context";
-import type { EnhancedComment } from "./hooks/simulation-store";
+import type { EnhancedComment } from "./types";
 
 interface CommentListProps {
   comments: EnhancedComment[];
@@ -16,13 +16,16 @@ interface CommentListProps {
   loadMore: () => void;
   refetch: () => Promise<unknown>;
   totalCount: number;
-  onLikeToggle: (id: number, isLiked: boolean, currentLikes: number) => void;
+  onLikeToggle: (id: number, isLiked: boolean) => void;
   onAuthenticationRequired?: () => void;
   onReplySubmit: (content: string, parentId: number) => Promise<void>;
   onEditSave: (id: number, content: string) => void;
   onDelete: (id: number) => void;
   onReport: (id: number) => void;
   onRetry: (tempId: number, content: string, parentId: number | null) => Promise<void>;
+  onLoadReplies: (parentId: number) => Promise<void>;
+  loadingReplyIds: Set<number>;
+  hasMoreReplies: (parentId: number) => boolean;
 }
 
 const SORT_LABELS: Record<SortOrder, string> = {
@@ -51,6 +54,9 @@ export function CommentList({
   onDelete,
   onReport,
   onRetry,
+  onLoadReplies,
+  loadingReplyIds,
+  hasMoreReplies,
 }: CommentListProps) {
   const { newCommentCount, setNewCommentCount, sortOrder, setSortOrder } = useCommentContext();
 
@@ -156,6 +162,9 @@ export function CommentList({
               onReplySubmit={onReplySubmit}
               onReport={onReport}
               onRetry={onRetry}
+              onLoadReplies={onLoadReplies}
+              loadingReplyIds={loadingReplyIds}
+              hasMoreReplies={hasMoreReplies}
             />
           ))}
 

@@ -11,7 +11,7 @@ import {
   useUnlikeCommentMutation,
 } from "@/lib/features/comment";
 import { useCommentContext } from "../context/comment-context";
-import { type EnhancedComment, simulationStore } from "./simulation-store";
+import type { EnhancedComment } from "../types";
 
 interface MutationHookProps {
   addPendingComment: (c: EnhancedComment) => void;
@@ -26,18 +26,7 @@ export function useCommentMutations({
   markPendingCommentFailed,
   refetch,
 }: MutationHookProps) {
-  const {
-    isGuestbook,
-    postId,
-    currentUser,
-    isAuthenticated,
-    edits,
-    setLikes,
-    setEdits,
-    setDeletions,
-    setReports,
-    setLocalComments,
-  } = useCommentContext();
+  const { isGuestbook, postId, currentUser, isAuthenticated } = useCommentContext();
   const [publishCommentApi] = usePublishCommentMutation();
   const [postGuestbookEntryApi] = usePostGuestbookEntryMutation();
   const [editMyCommentApi] = useEditMyCommentMutation();
@@ -59,12 +48,18 @@ export function useCommentMutations({
       username: currentUser || "Anonymous",
       nickname: currentUser || "Anonymous",
       avatar: "",
-      status: "APPROVED",
+      status: "PENDING",
       postId,
       createdAt: new Date().toISOString(),
       children: [],
       likesCount: 0,
-      isLiked: false,
+      reportsCount: 0,
+      replyCount: 0,
+      likedByCurrentUser: false,
+      pinned: false,
+      featured: false,
+      deletedPlaceholder: false,
+      editedAt: null,
       isPending: true,
     };
   };
@@ -104,25 +99,8 @@ export function useCommentMutations({
         }).unwrap();
       }
 
-      // On Success, save to local persistent list (awaiting moderation) so it doesn't vanish
-      const approvedCommentCopy: EnhancedComment = {
-        id: tempId, // keep tempId for matching
-        parentId,
-        content,
-        username: currentUser || "Anonymous",
-        nickname: currentUser || "Anonymous",
-        avatar: "",
-        status: "PENDING", // Visible awaiting moderation
-        postId,
-        createdAt: new Date().toISOString(),
-        children: [],
-        likesCount: 0,
-        isLiked: false,
-      };
-      simulationStore.addLocalComment(postId, approvedCommentCopy);
-      setLocalComments((prev) => [...prev, approvedCommentCopy]);
-
-      // On Success, remove from pending list and fetch actual comments
+      // The backend is the only durable source. Pending comments disappear until
+      // moderation makes them visible through the canonical read endpoint.
       removePendingComment(tempId);
       await refetch();
     } catch (err) {
@@ -136,13 +114,9 @@ export function useCommentMutations({
     await publishComment(content, parentId, tempId);
   };
 
-  // 3. TOGGLE LIKE (Memory-only Optimistic state + Real API Sync)
-  const toggleLike = async (id: number, currentIsLiked: boolean, currentLikes: number) => {
+  // 3. TOGGLE LIKE (Nexus is the source of truth)
+  const toggleLike = async (id: number, currentIsLiked: boolean) => {
     const nextLiked = !currentIsLiked;
-    const nextCount = nextLiked ? currentLikes + 1 : Math.max(0, currentLikes - 1);
-
-    // Set local optimistic state in memory
-    setLikes((prev) => ({ ...prev, [id]: { count: nextCount, isLiked: nextLiked } }));
 
     try {
       if (nextLiked) {
@@ -152,65 +126,37 @@ export function useCommentMutations({
       }
     } catch (err) {
       console.error("Failed to sync comment like state:", err);
-      // Rollback optimistic state if backend fails
-      setLikes((prev) => ({ ...prev, [id]: { count: currentLikes, isLiked: currentIsLiked } }));
       toast.danger("Couldn't update comment reaction.");
     }
   };
 
-  // 4. EDIT COMMENT (Optimistic UI + Real API Sync)
+  // 4. EDIT COMMENT
   const editComment = async (id: number, newContent: string) => {
-    const hadPreviousEdit = Object.hasOwn(edits, id);
-    const previousEdit = edits[id];
-    setEdits((prev) => ({ ...prev, [id]: newContent }));
-
     try {
       await editMyCommentApi({ id, content: newContent }).unwrap();
+      await refetch();
     } catch (err) {
       console.error("Failed to sync comment edit:", err);
-      setEdits((prev) => {
-        const next = { ...prev };
-        if (hadPreviousEdit && previousEdit !== undefined) {
-          next[id] = previousEdit;
-        } else {
-          delete next[id];
-        }
-        return next;
-      });
     }
   };
 
-  // 5. DELETE COMMENT (Optimistic UI + Real API Sync)
+  // 5. DELETE COMMENT
   const deleteComment = async (id: number) => {
-    let removedLocalComment: EnhancedComment | undefined;
-    setDeletions((prev) => (prev.includes(id) ? prev : [...prev, id]));
-    setLocalComments((prev) => {
-      removedLocalComment = prev.find((c) => c.id === id);
-      return prev.filter((c) => c.id !== id);
-    });
-
     try {
       await deleteMyCommentApi(id).unwrap();
+      await refetch();
     } catch (err) {
       console.error("Failed to sync comment deletion:", err);
-      setDeletions((prev) => prev.filter((deletedId) => deletedId !== id));
-      if (removedLocalComment) {
-        setLocalComments((prev) =>
-          prev.some((c) => c.id === id) ? prev : [...prev, removedLocalComment as EnhancedComment]
-        );
-      }
     }
   };
 
-  // 6. REPORT COMMENT (Optimistic UI + Real API Sync)
+  // 6. REPORT COMMENT
   const reportComment = async (id: number) => {
-    setReports((prev) => (prev.includes(id) ? prev : [...prev, id]));
-
     try {
       await reportCommentApi({ id, reason: "inappropriate" }).unwrap();
+      await refetch();
     } catch (err) {
       console.error("Failed to sync comment report:", err);
-      setReports((prev) => prev.filter((reportedId) => reportedId !== id));
     }
   };
 
