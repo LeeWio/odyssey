@@ -1,3 +1,10 @@
+## [1.127.2](https://github.com/LeeWio/odyssey/compare/v1.127.1...v1.127.2) (2026-08-25)
+
+
+### Bug Fixes
+
+* **comments:** stabilize sheet updates during publishing ([1e5c3bd](https://github.com/LeeWio/odyssey/commit/1e5c3bd1903997ba352b408949a3f6743f3e0b66))
+
 ## [1.127.1](https://github.com/LeeWio/odyssey/compare/v1.127.0...v1.127.1) (2026-08-25)
 
 
