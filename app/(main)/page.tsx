@@ -156,7 +156,7 @@ export default function Home() {
     <div className="bg-background w-full overflow-x-clip">
       <section
         aria-labelledby="home-hero-title"
-        className="mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col items-center justify-center px-6 pt-24 pb-16 text-center sm:px-10"
+        className="mx-auto flex min-h-[100dvh] w-full flex-col items-center justify-center px-6 pt-24 pb-16 text-center sm:px-10"
       >
         <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
           A personal field journal
@@ -560,7 +560,7 @@ export default function Home() {
         aria-labelledby="guestbook-title"
         className="mx-auto w-full scroll-mt-24 py-24 sm:py-32"
       >
-        <header className="relative mx-auto flex max-w-4xl flex-col items-center px-6 text-center sm:px-10">
+        <header className="relative mx-auto flex flex-col items-center px-6 text-center sm:px-10">
           <Popover isOpen={isGuestbookPopoverOpen} onOpenChange={setIsGuestbookPopoverOpen}>
             <Popover.Trigger className="absolute -top-8 -right-20">
               <Image

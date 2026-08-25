@@ -1,6 +1,5 @@
 "use client";
 
-import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import {
   type PostDigestResponse,
   useGetFeaturedPostsQuery,
@@ -114,17 +113,6 @@ function ArticleList({
               textValue={post.title}
               aria-current={isCurrent ? "page" : undefined}
             >
-              <SmartColorSurface
-                className="size-10 shrink-0 rounded-xl"
-                seed={`rail-${post.slug}`}
-                tone={getSmartColorTone({
-                  categoryName: post.category?.name,
-                  title: post.title,
-                })}
-              >
-                <span aria-hidden="true" className="block size-full" />
-              </SmartColorSurface>
-
               <div className="min-w-0 flex-1">
                 <Label className="line-clamp-2 leading-5">{post.title}</Label>
                 <Description className="line-clamp-1">{description}</Description>

@@ -19,6 +19,7 @@ import {
   Typography,
   Separator,
   Avatar,
+  Card,
 } from "@heroui/react";
 import { ActionBar, RichTextEditor } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
@@ -44,7 +45,6 @@ import {
   useUnlikePostMutation,
 } from "@/features/blog";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
-import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import { ReadingSession } from "@/components/reading/reading-session";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
@@ -355,34 +355,27 @@ export default function SinglePage({ params }: SinglePageProps) {
               </div>
             </div>
           ) : (
-            <SmartColorSurface
-              className="rounded-4xl"
-              seed={article.slug}
-              tone={getSmartColorTone({
-                categoryName: article.category?.name,
-                title: article.title,
-              })}
-            >
+            <Card variant="tertiary" className="overflow-hidden rounded-4xl p-0">
               <div className="flex min-h-[430px] flex-col justify-end gap-6 p-7 sm:p-10 lg:p-14">
-                <Breadcrumbs className="text-xs font-medium text-white/72">
-                  <BreadcrumbsItem className="text-white/72" href="/blog">
-                    <span className="text-white/72">Chronicle</span>
+                <Breadcrumbs className="text-muted text-xs font-medium">
+                  <BreadcrumbsItem className="text-muted" href="/blog">
+                    <span className="text-muted">Chronicle</span>
                   </BreadcrumbsItem>
                   {article.series ? (
                     <BreadcrumbsItem
-                      className="text-white/72"
+                      className="text-muted"
                       href={`/columns/${article.series.slug}`}
                     >
-                      <span className="text-white/72">{article.series.name}</span>
+                      <span className="text-muted">{article.series.name}</span>
                     </BreadcrumbsItem>
                   ) : null}
-                  <BreadcrumbsItem className="text-white/72">
-                    <span className="text-white/72">
+                  <BreadcrumbsItem className="text-muted">
+                    <span className="text-muted">
                       {article.category ? article.category.name : "Uncategorized"}
                     </span>
                   </BreadcrumbsItem>
-                  <BreadcrumbsItem className="text-white/72">
-                    <span className="flex items-center gap-1.5 text-white/72">
+                  <BreadcrumbsItem className="text-muted">
+                    <span className="text-muted flex items-center gap-1.5">
                       <Icon aria-hidden="true" icon="lucide:clock" className="size-3.5" />
                       {getEstimatedReadingMinutes(article)} min read
                     </span>
@@ -391,7 +384,7 @@ export default function SinglePage({ params }: SinglePageProps) {
 
                 <Typography
                   type="h1"
-                  className="max-w-4xl leading-[1.02] font-bold text-balance text-white"
+                  className="text-foreground max-w-4xl leading-[1.02] font-bold text-balance"
                 >
                   {article.title}
                 </Typography>
@@ -399,25 +392,25 @@ export default function SinglePage({ params }: SinglePageProps) {
                 {article.summary && (
                   <Typography
                     type="body"
-                    className="max-w-2xl text-lg leading-relaxed font-normal text-balance text-white/76"
+                    className="text-muted max-w-2xl text-lg leading-relaxed font-normal text-balance"
                   >
                     {article.summary}
                   </Typography>
                 )}
 
-                <div className="flex flex-col items-start justify-between gap-6 border-t border-white/16 pt-6 sm:flex-row sm:items-center">
+                <div className="border-default/50 flex flex-col items-start justify-between gap-6 border-t pt-6 sm:flex-row sm:items-center">
                   <div className="flex items-center gap-3 select-none">
-                    <Avatar size="sm" className="bg-white/14 text-white">
+                    <Avatar size="sm" className="bg-surface-secondary text-foreground">
                       <Avatar.Fallback>
                         {(article.authorName || "Anonymous").slice(0, 2).toUpperCase()}
                       </Avatar.Fallback>
                     </Avatar>
 
                     <div className="flex flex-col text-left">
-                      <Typography type="body-sm" weight="semibold" className="text-white">
+                      <Typography type="body-sm" weight="semibold" className="text-foreground">
                         {article.authorName || "Anonymous"}
                       </Typography>
-                      <Typography type="body-xs" className="text-white/62">
+                      <Typography type="body-xs" className="text-muted">
                         {new Date(article.createdAt).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "long",
@@ -433,7 +426,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                         key={tag.id}
                         size="sm"
                         variant="soft"
-                        className="bg-white/12 text-white"
+                        className="bg-surface-secondary text-foreground"
                       >
                         {tag.name}
                       </Chip>
@@ -441,7 +434,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                   </div>
                 </div>
               </div>
-            </SmartColorSurface>
+            </Card>
           )}
         </div>
       </header>
