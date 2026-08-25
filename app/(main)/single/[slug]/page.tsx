@@ -3,7 +3,6 @@
 import {
   Breadcrumbs,
   BreadcrumbsItem,
-  Badge,
   Button,
   Chip,
   FieldError,
@@ -13,6 +12,7 @@ import {
   Modal,
   Popover,
   ProgressCircle,
+  ScrollShadow,
   TextField,
   Tooltip,
   Skeleton,
@@ -21,15 +21,14 @@ import {
   Separator,
   Avatar,
 } from "@heroui/react";
-import { Comments } from "@gravity-ui/icons";
 import { ActionBar, RichTextEditor, Sheet } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, use, useEffect, useMemo, useRef, useState } from "react";
-import { CommentSystem } from "@/components/comment";
+import { type FormEvent, type ReactNode, use, useEffect, useMemo, useRef, useState } from "react";
+import { CommentHeader, CommentSystem } from "@/components/comment";
 import { MotionRichTextEditor } from "@/components/ui";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
@@ -97,7 +96,6 @@ export default function SinglePage({ params }: SinglePageProps) {
   const { slug } = use(params);
   const [isActionBarOpen, setIsActionBarOpen] = useState(false);
   const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
-  const [commentCount, setCommentCount] = useState(0);
   const [readingProgress, setReadingProgress] = useState(0);
   const [readingProgressPostId, setReadingProgressPostId] = useState<number | null>(null);
   const [collectionPendingId, setCollectionPendingId] = useState<number | null>(null);
@@ -772,58 +770,68 @@ export default function SinglePage({ params }: SinglePageProps) {
           </Modal.Backdrop>
         </Modal>
 
-        <Sheet
-          isDetached
-          isOpen={isCommentSheetOpen}
-          placement="bottom"
-          onOpenChange={setIsCommentSheetOpen}
-        >
-          <Sheet.Backdrop variant="blur">
-            <Sheet.Content className="mx-auto w-[min(760px,calc(100vw-2rem))] max-w-none">
-              <Sheet.Dialog className="h-full min-h-0">
-                <Sheet.CloseTrigger />
-                <Sheet.Header>
-                  <Sheet.Heading className="relative flex flex-row items-center gap-2">
-                    <Comments aria-hidden="true" className="text-muted size-5" />
-                    Comments
-                    <Badge
-                      className="absolute top-1/2 left-2 ml-2 w-fit min-w-5 -translate-y-1/2 tabular-nums"
-                      color="default"
-                      size="sm"
-                      variant="soft"
-                    >
-                      {commentCount}
-                    </Badge>
-                  </Sheet.Heading>
-                </Sheet.Header>
-
-                <Sheet.Body className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                  {postId ? (
-                    <CommentSystem
-                      postId={postId}
-                      onCountChange={setCommentCount}
-                      onRequestClose={() => setIsCommentSheetOpen(false)}
-                    />
-                  ) : (
-                    <p className="text-muted text-sm">
-                      Comments will be available once the article loads.
-                    </p>
-                  )}
-                </Sheet.Body>
-
-                {/* <Sheet.Footer>
-                  <Sheet.Close>
-                    <Button fullWidth variant="secondary">
-                      Done
-                    </Button>
-                  </Sheet.Close>
-                </Sheet.Footer> */}
-              </Sheet.Dialog>
-            </Sheet.Content>
-          </Sheet.Backdrop>
-        </Sheet>
+        {postId ? (
+          <CommentSystem postId={postId} onRequestClose={() => setIsCommentSheetOpen(false)}>
+            {({ totalCount, isFetching, commentList, commentInput }) => (
+              <CommentSheet
+                body={
+                  <ScrollShadow
+                    hideScrollBar
+                    className="min-h-0 flex-1 overflow-y-auto"
+                    orientation="vertical"
+                    size={32}
+                  >
+                    {commentList}
+                  </ScrollShadow>
+                }
+                footer={commentInput}
+                header={<CommentHeader inSheet isFetching={isFetching} totalCount={totalCount} />}
+                isOpen={isCommentSheetOpen}
+                onOpenChange={setIsCommentSheetOpen}
+              />
+            )}
+          </CommentSystem>
+        ) : (
+          <CommentSheet
+            body={
+              <Typography color="muted" type="body-sm">
+                Comments will be available once the article loads.
+              </Typography>
+            }
+            header={<Sheet.Heading>Comments</Sheet.Heading>}
+            isOpen={isCommentSheetOpen}
+            onOpenChange={setIsCommentSheetOpen}
+          />
+        )}
       </div>
     </>
+  );
+}
+
+interface CommentSheetProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  header: ReactNode;
+  body: ReactNode;
+  footer?: ReactNode;
+}
+
+function CommentSheet({ isOpen, onOpenChange, header, body, footer }: CommentSheetProps) {
+  return (
+    <Sheet isDetached isOpen={isOpen} placement="bottom" onOpenChange={onOpenChange}>
+      <Sheet.Backdrop variant="blur">
+        <Sheet.Content className="mx-auto w-[min(760px,calc(100vw-2rem))] max-w-none">
+          <Sheet.Dialog className="h-full min-h-0">
+            <Sheet.CloseTrigger />
+            <Sheet.Header>{header}</Sheet.Header>
+            <Sheet.Body className="flex min-h-0 flex-1 flex-col overflow-hidden">{body}</Sheet.Body>
+            {footer ? (
+              <Sheet.Footer className="flex-col items-stretch">{footer}</Sheet.Footer>
+            ) : null}
+          </Sheet.Dialog>
+        </Sheet.Content>
+      </Sheet.Backdrop>
+    </Sheet>
   );
 }
 

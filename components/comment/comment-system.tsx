@@ -1,8 +1,9 @@
 "use client";
 
 import { ScrollShadow } from "@heroui/react";
-import { useEffect } from "react";
+import type React from "react";
 import { CommentInput } from "./comment-input";
+import { CommentHeader } from "./comment-header";
 import { CommentList } from "./comment-list";
 import { CommentProvider } from "./context/comment-context";
 import { useCommentHighlight } from "./hooks/use-comment-highlight";
@@ -13,16 +14,20 @@ interface CommentSystemProps {
   postId?: number;
   isGuestbook?: boolean;
   onRequestClose?: () => void;
-  onCountChange?: (count: number) => void;
+  children?: (parts: CommentSystemRenderParts) => React.ReactNode;
+}
+
+export interface CommentSystemRenderParts {
+  totalCount: number;
+  isFetching: boolean;
+  commentList: React.ReactNode;
+  commentInput: React.ReactNode;
 }
 
 function CommentSystemContent({
   onRequestClose,
-  onCountChange,
-}: {
-  onRequestClose?: () => void;
-  onCountChange?: (count: number) => void;
-}) {
+  children,
+}: Pick<CommentSystemProps, "onRequestClose" | "children">) {
   const {
     comments,
     allCommentsCount,
@@ -56,49 +61,59 @@ function CommentSystemContent({
 
   useCommentHighlight();
 
-  useEffect(() => {
-    onCountChange?.(backendTotal || allCommentsCount);
-  }, [allCommentsCount, backendTotal, onCountChange]);
+  const totalCount = backendTotal || allCommentsCount;
+  const isRefreshing = isFetching && !isLoading;
+  const commentList = (
+    <CommentList
+      comments={comments}
+      error={error}
+      hasMore={hasMore}
+      isFetching={isFetching}
+      isLoading={isLoading}
+      loadMore={loadMore}
+      refetch={refetch}
+      totalCount={totalCount}
+      onDelete={deleteComment}
+      onEditSave={editComment}
+      onLikeToggle={toggleLike}
+      onAuthenticationRequired={onRequestClose}
+      onReplySubmit={(content, parentId) => publishComment(content, parentId)}
+      onReport={reportComment}
+      onRetry={retryPublishComment}
+      onLoadReplies={loadReplies}
+      loadingReplyIds={loadingReplyIds}
+      hasMoreReplies={hasMoreReplies}
+    />
+  );
+  const commentInput = (
+    <CommentInput
+      onAuthenticationRequired={onRequestClose}
+      onSubmit={(content) => publishComment(content, null)}
+    />
+  );
+
+  if (children) {
+    return children({ totalCount, isFetching: isRefreshing, commentList, commentInput });
+  }
 
   return (
     <section
       aria-label="Comments"
       className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col"
     >
+      <div className="shrink-0 pb-4">
+        <CommentHeader isFetching={isRefreshing} totalCount={totalCount} />
+      </div>
       <ScrollShadow
         hideScrollBar
         className="min-h-0 flex-1 overflow-y-auto"
         orientation="vertical"
         size={32}
       >
-        <CommentList
-          comments={comments}
-          error={error}
-          hasMore={hasMore}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          loadMore={loadMore}
-          refetch={refetch}
-          totalCount={backendTotal || allCommentsCount}
-          onDelete={deleteComment}
-          onEditSave={editComment}
-          onLikeToggle={toggleLike}
-          onAuthenticationRequired={onRequestClose}
-          onReplySubmit={(content, parentId) => publishComment(content, parentId)}
-          onReport={reportComment}
-          onRetry={retryPublishComment}
-          onLoadReplies={loadReplies}
-          loadingReplyIds={loadingReplyIds}
-          hasMoreReplies={hasMoreReplies}
-        />
+        {commentList}
       </ScrollShadow>
 
-      <div className="shrink-0 pt-4">
-        <CommentInput
-          onAuthenticationRequired={onRequestClose}
-          onSubmit={(content) => publishComment(content, null)}
-        />
-      </div>
+      <div className="shrink-0 pt-4">{commentInput}</div>
     </section>
   );
 }
@@ -107,11 +122,11 @@ export function CommentSystem({
   postId = 0,
   isGuestbook = false,
   onRequestClose,
-  onCountChange,
+  children,
 }: CommentSystemProps) {
   return (
     <CommentProvider postId={postId} isGuestbook={isGuestbook}>
-      <CommentSystemContent onCountChange={onCountChange} onRequestClose={onRequestClose} />
+      <CommentSystemContent onRequestClose={onRequestClose}>{children}</CommentSystemContent>
     </CommentProvider>
   );
 }

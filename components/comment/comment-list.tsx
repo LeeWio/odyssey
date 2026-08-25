@@ -1,21 +1,10 @@
 "use client";
 
-import { ArrowRotateRight, ArrowUp, ChevronDown, Comments } from "@gravity-ui/icons";
-import {
-  Alert,
-  Button,
-  ButtonGroup,
-  Chip,
-  Dropdown,
-  Label,
-  Skeleton,
-  Tooltip,
-  Typography,
-  type Key,
-} from "@heroui/react";
+import { ArrowUp, Comments } from "@gravity-ui/icons";
+import { Alert, Button, Skeleton } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { CommentItem } from "./comment-item";
-import { type SortOrder, useCommentContext } from "./context/comment-context";
+import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./types";
 
 interface CommentListProps {
@@ -39,16 +28,6 @@ interface CommentListProps {
   hasMoreReplies: (parentId: number) => boolean;
 }
 
-const SORT_LABELS: Record<SortOrder, string> = {
-  newest: "Recent",
-  oldest: "Oldest",
-  likes: "Top",
-};
-
-function isSortOrder(value: Key | undefined): value is SortOrder {
-  return value === "newest" || value === "oldest" || value === "likes";
-}
-
 export function CommentList({
   comments,
   isLoading,
@@ -69,7 +48,7 @@ export function CommentList({
   loadingReplyIds,
   hasMoreReplies,
 }: CommentListProps) {
-  const { newCommentCount, setNewCommentCount, sortOrder, setSortOrder } = useCommentContext();
+  const { newCommentCount, setNewCommentCount } = useCommentContext();
 
   const handleRefresh = async () => {
     setNewCommentCount(0);
@@ -82,73 +61,6 @@ export function CommentList({
         {totalCount} {totalCount === 1 ? "comment" : "comments"}
         {isFetching && !isLoading ? ", updating" : ""}
       </p>
-
-      <div className="flex flex-col gap-4 pb-2 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Typography type="h4" weight="semibold">
-              Discussion
-            </Typography>
-            <Chip size="sm" variant="soft" color="accent" className="tabular-nums">
-              {totalCount}
-            </Chip>
-          </div>
-          <Typography color="muted" type="body-sm" className="mt-1">
-            {totalCount === 0
-              ? "Be the first to share a perspective."
-              : "Thoughts from the community."}
-          </Typography>
-        </div>
-
-        <div className="flex items-center justify-between gap-2 sm:justify-end">
-          {isFetching && !isLoading && (
-            <Typography color="muted" type="body-xs" aria-live="polite">
-              Updating…
-            </Typography>
-          )}
-          {totalCount > 1 && (
-            <ButtonGroup aria-label="Sort comments" size="sm" variant="tertiary">
-              <Button>{SORT_LABELS[sortOrder]}</Button>
-              <Dropdown>
-                <Button isIconOnly aria-label="Choose comment sort">
-                  <ChevronDown aria-hidden="true" />
-                </Button>
-                <Dropdown.Popover placement="bottom end">
-                  <Dropdown.Menu
-                    selectedKeys={new Set<Key>([sortOrder])}
-                    selectionMode="single"
-                    onAction={(key) => {
-                      if (isSortOrder(key)) setSortOrder(key);
-                    }}
-                  >
-                    {(Object.entries(SORT_LABELS) as [SortOrder, string][]).map(([key, label]) => (
-                      <Dropdown.Item key={key} id={key} textValue={label}>
-                        <Label>{label}</Label>
-                        <Dropdown.ItemIndicator />
-                      </Dropdown.Item>
-                    ))}
-                  </Dropdown.Menu>
-                </Dropdown.Popover>
-              </Dropdown>
-            </ButtonGroup>
-          )}
-          <Tooltip delay={0} closeDelay={100}>
-            <Tooltip.Trigger aria-label="Refresh comments">
-              <Button
-                isIconOnly
-                size="sm"
-                variant="tertiary"
-                aria-label="Refresh comments"
-                isPending={isFetching}
-                onPress={handleRefresh}
-              >
-                <ArrowRotateRight aria-hidden="true" />
-              </Button>
-            </Tooltip.Trigger>
-            <Tooltip.Content>Refresh comments</Tooltip.Content>
-          </Tooltip>
-        </div>
-      </div>
 
       {newCommentCount > 0 && (
         <Button size="sm" variant="secondary" className="self-center" onPress={handleRefresh}>
