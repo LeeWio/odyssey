@@ -94,10 +94,7 @@ export function useComments() {
     : sortOrder === "likes"
       ? postHotRootsResult
       : postRootsResult;
-  const rawCommentsList = useMemo(
-    () => rootPages,
-    [rootPages]
-  );
+  const rawCommentsList = useMemo(() => rootPages, [rootPages]);
   const activeRootsResult = useCursorRoots ? cursorRootsResult : pagedRootsResult;
   const isLoading = activeRootsResult.isLoading;
   const isFetching = activeRootsResult.isFetching;
@@ -168,7 +165,10 @@ export function useComments() {
       const loadedReplies = replyPages[node.id]?.comments ?? [];
       for (const child of loadedReplies) {
         const processedChild = processNode(child);
-        if (processedChild && !processedChildren.some((existing) => existing.id === processedChild.id)) {
+        if (
+          processedChild &&
+          !processedChildren.some((existing) => existing.id === processedChild.id)
+        ) {
           processedChildren.push(processedChild);
         }
       }
@@ -265,10 +265,19 @@ export function useComments() {
       const result = isGuestbook
         ? sortOrder === "likes"
           ? await loadGuestbookHotRoots({ page: nextPage, size: PAGE_SIZE }).unwrap()
-          : await loadGuestbookPagedRoots({ page: nextPage, size: PAGE_SIZE, sort: ["createdAt,asc"] }).unwrap()
+          : await loadGuestbookPagedRoots({
+              page: nextPage,
+              size: PAGE_SIZE,
+              sort: ["createdAt,asc"],
+            }).unwrap()
         : sortOrder === "likes"
           ? await loadPostHotRoots({ postId, page: nextPage, size: PAGE_SIZE }).unwrap()
-          : await loadPostPagedRoots({ postId, page: nextPage, size: PAGE_SIZE, sort: ["createdAt,asc"] }).unwrap();
+          : await loadPostPagedRoots({
+              postId,
+              page: nextPage,
+              size: PAGE_SIZE,
+              sort: ["createdAt,asc"],
+            }).unwrap();
       skipNextCountRef.current = true;
       setRootPages((previous) => [...previous, ...result.list]);
       setPagedPage(nextPage);
