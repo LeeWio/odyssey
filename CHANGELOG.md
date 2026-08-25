@@ -1,3 +1,10 @@
+## [1.127.6](https://github.com/LeeWio/odyssey/compare/v1.127.5...v1.127.6) (2026-08-25)
+
+
+### Bug Fixes
+
+* **comments:** prevent Chrome submit flicker ([cb11bcd](https://github.com/LeeWio/odyssey/commit/cb11bcd7e150a98fe244ca32e72afd8e39eb5615))
+
 ## [1.127.5](https://github.com/LeeWio/odyssey/compare/v1.127.4...v1.127.5) (2026-08-25)
 
 
