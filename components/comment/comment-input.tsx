@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUp } from "@gravity-ui/icons";
+import { ArrowUp, Xmark } from "@gravity-ui/icons";
 import {
   Avatar,
   Button,
@@ -10,6 +10,8 @@ import {
   Modal,
   TextArea,
   TextField,
+  Surface,
+  Typography,
 } from "@heroui/react";
 import { PromptInput, PromptSuggestion } from "@heroui-pro/react";
 import type React from "react";
@@ -139,7 +141,15 @@ export function CommentInput({
 
   if (!isReply && !hideTrigger) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2 px-1">
+          <Avatar size="sm" variant="soft" className="shrink-0">
+            <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
+          </Avatar>
+          <Typography className="text-muted text-xs font-medium tracking-[0.12em] uppercase">
+            Join the discussion
+          </Typography>
+        </div>
         <PromptInput
           layout="inline"
           maxHeight={160}
@@ -179,6 +189,76 @@ export function CommentInput({
           </PromptInput.Footer>
         </PromptInput>
       </div>
+    );
+  }
+
+  if (isReply && hideTrigger) {
+    return (
+      <Surface
+        variant="secondary"
+        className="border-default-200/70 mt-4 flex flex-col gap-3 rounded-xl border p-3 sm:p-4"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <Avatar size="sm" variant="soft" className="shrink-0">
+              <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
+            </Avatar>
+            <div className="min-w-0">
+              <Typography className="text-foreground truncate text-sm font-semibold">
+                Replying to {replyTo}
+              </Typography>
+              <p className="text-muted text-xs">Keep the thread moving.</p>
+            </div>
+          </div>
+          <Button
+            isIconOnly
+            size="sm"
+            variant="ghost"
+            aria-label="Cancel reply"
+            onPress={() => onOpenChange?.(false)}
+          >
+            <Xmark aria-hidden="true" />
+          </Button>
+        </div>
+
+        <Form id={formId} className="flex flex-col gap-3" onSubmit={handleFormSubmit}>
+          <TextField isRequired fullWidth name="reply">
+            <Label className="sr-only">Reply content</Label>
+            <TextArea
+              autoFocus
+              aria-label={heading}
+              fullWidth
+              maxLength={1000}
+              placeholder={placeholder}
+              rows={4}
+              ref={textareaRef}
+              value={content}
+              variant="secondary"
+              onChange={handleChange}
+            />
+            <Description className="text-right">{content.length}/1000</Description>
+          </TextField>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              isDisabled={isSubmitting}
+              onPress={() => onOpenChange?.(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              variant="primary"
+              type="submit"
+              isDisabled={!content.trim() || isSubmitting}
+              isPending={isSubmitting}
+            >
+              {submitButtonText}
+            </Button>
+          </div>
+        </Form>
+      </Surface>
     );
   }
 

@@ -1,7 +1,18 @@
 "use client";
 
-import { ArrowUp, ChevronDown, Comments } from "@gravity-ui/icons";
-import { Alert, Button, ButtonGroup, Dropdown, Label, Skeleton, type Key } from "@heroui/react";
+import { ArrowRotateRight, ArrowUp, ChevronDown, Comments } from "@gravity-ui/icons";
+import {
+  Alert,
+  Button,
+  ButtonGroup,
+  Chip,
+  Dropdown,
+  Label,
+  Skeleton,
+  Tooltip,
+  Typography,
+  type Key,
+} from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { CommentItem } from "./comment-item";
 import { type SortOrder, useCommentContext } from "./context/comment-context";
@@ -66,48 +77,81 @@ export function CommentList({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <p className="sr-only" aria-live="polite">
         {totalCount} {totalCount === 1 ? "comment" : "comments"}
         {isFetching && !isLoading ? ", updating" : ""}
       </p>
 
-      <div className="flex items-center justify-end gap-2 px-1">
-        {isFetching && !isLoading && (
-          <span className="text-muted text-xs" aria-live="polite">
-            Updating…
-          </span>
-        )}
-        {totalCount > 1 && (
-          <ButtonGroup aria-label="Sort comments" size="sm" variant="tertiary">
-            <Button>{SORT_LABELS[sortOrder]}</Button>
-            <Dropdown>
-              <Button isIconOnly aria-label="Choose comment sort">
-                <ChevronDown aria-hidden="true" />
+      <div className="border-default-200/70 flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <Typography className="text-foreground text-lg font-semibold tracking-tight">
+              Discussion
+            </Typography>
+            <Chip size="sm" variant="soft" color="accent" className="tabular-nums">
+              {totalCount}
+            </Chip>
+          </div>
+          <p className="text-muted mt-1 text-sm">
+            {totalCount === 0
+              ? "Be the first to share a perspective."
+              : "Thoughts from the community."}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between gap-2 sm:justify-end">
+          {isFetching && !isLoading && (
+            <span className="text-muted text-xs" aria-live="polite">
+              Updating…
+            </span>
+          )}
+          {totalCount > 1 && (
+            <ButtonGroup aria-label="Sort comments" size="sm" variant="tertiary">
+              <Button>{SORT_LABELS[sortOrder]}</Button>
+              <Dropdown>
+                <Button isIconOnly aria-label="Choose comment sort">
+                  <ChevronDown aria-hidden="true" />
+                </Button>
+                <Dropdown.Popover placement="bottom end">
+                  <Dropdown.Menu
+                    selectedKeys={new Set<Key>([sortOrder])}
+                    selectionMode="single"
+                    onAction={(key) => {
+                      if (isSortOrder(key)) setSortOrder(key);
+                    }}
+                  >
+                    {(Object.entries(SORT_LABELS) as [SortOrder, string][]).map(([key, label]) => (
+                      <Dropdown.Item key={key} id={key} textValue={label}>
+                        <Label>{label}</Label>
+                        <Dropdown.ItemIndicator />
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown>
+            </ButtonGroup>
+          )}
+          <Tooltip delay={0} closeDelay={100}>
+            <Tooltip.Trigger aria-label="Refresh comments">
+              <Button
+                isIconOnly
+                size="sm"
+                variant="tertiary"
+                aria-label="Refresh comments"
+                isPending={isFetching}
+                onPress={handleRefresh}
+              >
+                <ArrowRotateRight aria-hidden="true" />
               </Button>
-              <Dropdown.Popover placement="bottom end">
-                <Dropdown.Menu
-                  selectedKeys={new Set<Key>([sortOrder])}
-                  selectionMode="single"
-                  onAction={(key) => {
-                    if (isSortOrder(key)) setSortOrder(key);
-                  }}
-                >
-                  {(Object.entries(SORT_LABELS) as [SortOrder, string][]).map(([key, label]) => (
-                    <Dropdown.Item key={key} id={key} textValue={label}>
-                      <Label>{label}</Label>
-                      <Dropdown.ItemIndicator />
-                    </Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown.Popover>
-            </Dropdown>
-          </ButtonGroup>
-        )}
+            </Tooltip.Trigger>
+            <Tooltip.Content>Refresh comments</Tooltip.Content>
+          </Tooltip>
+        </div>
       </div>
 
       {newCommentCount > 0 && (
-        <Button size="sm" variant="outline" className="self-center" onPress={handleRefresh}>
+        <Button size="sm" variant="secondary" className="self-center" onPress={handleRefresh}>
           <ArrowUp />
           Show {newCommentCount} new {newCommentCount === 1 ? "comment" : "comments"}
         </Button>
@@ -116,12 +160,12 @@ export function CommentList({
       {isLoading ? (
         <div className="flex flex-col gap-6" aria-label="Loading comments">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="flex gap-3">
-              <Skeleton className="size-8 shrink-0 rounded-full" />
-              <div className="flex flex-1 flex-col gap-2 pt-1">
-                <Skeleton className="h-3.5 w-28 rounded-md" />
-                <Skeleton className="h-3.5 w-full rounded-md" />
-                <Skeleton className="h-3.5 w-2/3 rounded-md" />
+            <div key={index} className="border-default-200/60 flex gap-3 border-b py-5 first:pt-1">
+              <Skeleton className="size-10 shrink-0 rounded-full" />
+              <div className="flex flex-1 flex-col gap-3 pt-1">
+                <Skeleton className="h-3.5 w-36 rounded-md" />
+                <Skeleton className="h-4 w-full rounded-md" />
+                <Skeleton className="h-4 w-4/5 rounded-md" />
               </div>
             </div>
           ))}
@@ -138,7 +182,7 @@ export function CommentList({
           </Button>
         </Alert>
       ) : comments.length === 0 ? (
-        <EmptyState size="sm" className="py-8">
+        <EmptyState size="sm" className="border-default-200/70 border-y py-12">
           <EmptyState.Header>
             <EmptyState.Media variant="icon">
               <Comments />
@@ -150,7 +194,7 @@ export function CommentList({
           </EmptyState.Header>
         </EmptyState>
       ) : (
-        <div className="divide-border/40 flex flex-col divide-y">
+        <div className="flex flex-col">
           {comments.map((comment) => (
             <CommentItem
               key={comment.id}
@@ -169,7 +213,7 @@ export function CommentList({
           ))}
 
           {hasMore && (
-            <Button size="sm" variant="outline" className="mt-6 self-center" onPress={loadMore}>
+            <Button size="sm" variant="secondary" className="mt-6 self-center" onPress={loadMore}>
               Load more comments
             </Button>
           )}

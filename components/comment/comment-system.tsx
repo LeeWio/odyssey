@@ -61,7 +61,10 @@ function CommentSystemContent({
   }, [allCommentsCount, backendTotal, onCountChange]);
 
   return (
-    <section aria-label="Comments" className="flex min-h-0 flex-1 flex-col">
+    <section
+      aria-label="Comments"
+      className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col"
+    >
       <ScrollShadow
         hideScrollBar
         className="min-h-0 flex-1 overflow-y-auto"
@@ -90,7 +93,7 @@ function CommentSystemContent({
         />
       </ScrollShadow>
 
-      <div className="shrink-0 pt-4">
+      <div className="border-default-200/70 shrink-0 border-t pt-4">
         <CommentInput
           onAuthenticationRequired={onRequestClose}
           onSubmit={(content) => publishComment(content, null)}

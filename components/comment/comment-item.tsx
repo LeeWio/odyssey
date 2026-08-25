@@ -111,7 +111,7 @@ export function CommentItem(props: CommentItemProps) {
   return (
     <MotionSurface
       className={cn(
-        "group scroll-mt-24 rounded-none px-1 py-5 first:pt-0 sm:px-2",
+        "group border-default-200/60 scroll-mt-24 border-b px-1 py-6 first:pt-2 sm:px-2",
         highlightedCommentId === comment.id && "bg-default-100/60"
       )}
       variant="transparent"
@@ -125,9 +125,9 @@ export function CommentItem(props: CommentItemProps) {
         <CommentRow {...props} comment={comment} depth={1} />
 
         {(replies.length > 0 || replyTotal > 0) && (
-          <div className="border-border/40 mt-4 ml-8 border-l pl-3 sm:ml-10 sm:pl-4">
+          <div className="border-default-300/70 mt-5 ml-5 border-l pl-4 sm:ml-12 sm:pl-5">
             <Button
-              className="text-muted hover:text-foreground h-auto min-h-0 min-w-0 gap-1 px-0 py-0 text-xs"
+              className="text-muted hover:text-foreground h-auto min-h-0 min-w-0 gap-1.5 px-0 py-0 text-xs font-medium"
               size="sm"
               variant="ghost"
               aria-controls={repliesId}
@@ -272,7 +272,7 @@ function CommentRow({
       </Avatar>
 
       <div className="min-w-0 flex-1">
-        <header className="flex flex-wrap items-center gap-x-1.5 gap-y-1 leading-tight">
+        <header className="flex flex-wrap items-center gap-x-2 gap-y-1.5 leading-tight">
           <Typography className="max-w-full truncate" type="body-sm" weight="semibold">
             {displayName}
           </Typography>
@@ -288,12 +288,22 @@ function CommentRow({
             </Button>
           )}
           <time
-            className="text-muted/60 text-xs"
+            className="text-muted/60 text-xs tabular-nums"
             dateTime={comment.createdAt}
             title={formatCommentTimestamp(comment.createdAt)}
           >
             · {formatCompactCommentTime(comment.createdAt, now)}
           </time>
+          {comment.pinned && (
+            <Chip size="sm" variant="soft" color="accent" className="h-5 px-1.5 text-[10px]">
+              Pinned
+            </Chip>
+          )}
+          {comment.featured && (
+            <Chip size="sm" variant="soft" color="warning" className="h-5 px-1.5 text-[10px]">
+              Featured
+            </Chip>
+          )}
           {comment.isFailed ? (
             <Chip size="sm" color="danger" variant="soft">
               Not sent
@@ -309,7 +319,7 @@ function CommentRow({
           ) : null}
         </header>
 
-        <div className="mt-1">
+        <div className="mt-2 max-w-[68ch]">
           <CommentContent
             content={comment.content}
             isEdited={Boolean(comment.editedAt)}

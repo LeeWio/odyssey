@@ -1,7 +1,16 @@
 "use client";
 
-import { Ellipsis, Flag, Heart, HeartFill, Link, Pencil, TrashBin } from "@gravity-ui/icons";
-import { Button, Dropdown, Tooltip } from "@heroui/react";
+import {
+  ArrowShapeTurnUpLeft,
+  Ellipsis,
+  Flag,
+  Heart,
+  HeartFill,
+  Link,
+  Pencil,
+  TrashBin,
+} from "@gravity-ui/icons";
+import { Button, Dropdown, Separator, Tooltip } from "@heroui/react";
 import { MotionButton } from "@/components/ui";
 import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./types";
@@ -39,9 +48,9 @@ export function CommentActions({
   const isUnapproved = comment.status === "PENDING" || comment.id < 0;
 
   return (
-    <div role="group" aria-label="Comment actions" className="mt-2 flex items-center gap-3">
+    <div role="group" aria-label="Comment actions" className="mt-3 flex items-center gap-1">
       <MotionButton
-        className="text-muted hover:text-foreground h-auto min-h-0 min-w-0 gap-1 px-0 py-0 text-sm"
+        className="text-muted hover:bg-default-100 hover:text-foreground h-8 min-w-0 gap-1.5 rounded-md px-2 text-xs"
         size="sm"
         variant="ghost"
         aria-label={comment.likedByCurrentUser ? "Unlike comment" : "Like comment"}
@@ -50,33 +59,38 @@ export function CommentActions({
         onPress={onLikeToggle}
       >
         {comment.likedByCurrentUser ? <HeartFill className="text-danger" /> : <Heart />}
-        <span>{comment.likesCount}</span>
+        <span className="tabular-nums">{comment.likesCount}</span>
       </MotionButton>
+
+      <Separator orientation="vertical" className="mx-1 h-4" />
 
       {depth < 5 && (
         <MotionButton
-          className="text-muted hover:text-foreground h-auto min-h-0 min-w-0 px-0 py-0 text-sm"
+          className="text-muted hover:bg-default-100 hover:text-foreground h-8 min-w-0 gap-1.5 rounded-md px-2 text-xs"
           size="sm"
           variant="ghost"
           isDisabled={isUnavailable || isUnapproved}
           whileTap={{ scale: 0.96 }}
           onPress={onReplyToggle}
         >
+          <ArrowShapeTurnUpLeft aria-hidden="true" />
           {isReplying ? "Cancel" : "Reply"}
         </MotionButton>
       )}
 
       <Dropdown>
         <Tooltip delay={0}>
-          <Button
-            className="text-muted/50 hover:text-foreground h-auto min-h-0 min-w-0 px-0 py-0 sm:opacity-50 sm:group-hover:opacity-100"
-            size="sm"
-            variant="ghost"
-            aria-label="More comment actions"
-            isDisabled={isUnavailable}
-          >
-            <Ellipsis aria-hidden="true" />
-          </Button>
+          <Tooltip.Trigger aria-label="More comment actions">
+            <Button
+              className="text-muted/60 hover:bg-default-100 hover:text-foreground h-8 min-w-0 rounded-md px-2 sm:opacity-50 sm:group-hover:opacity-100"
+              size="sm"
+              variant="ghost"
+              aria-label="More comment actions"
+              isDisabled={isUnavailable}
+            >
+              <Ellipsis aria-hidden="true" />
+            </Button>
+          </Tooltip.Trigger>
           <Tooltip.Content>
             <p>More actions</p>
           </Tooltip.Content>
