@@ -1,3 +1,10 @@
+## [1.127.4](https://github.com/LeeWio/odyssey/compare/v1.127.3...v1.127.4) (2026-08-25)
+
+
+### Bug Fixes
+
+* **navbar:** ignore modal scroll lock measurements ([dcfdf0a](https://github.com/LeeWio/odyssey/commit/dcfdf0aa3edc480d9f058386872863fc8606f357))
+
 ## [1.127.3](https://github.com/LeeWio/odyssey/compare/v1.127.2...v1.127.3) (2026-08-25)
 
 
