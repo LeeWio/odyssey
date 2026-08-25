@@ -38,6 +38,7 @@ function CommentSystemContent({
     refetch,
     addPendingComment,
     removePendingComment,
+    markPendingCommentSubmitted,
     markPendingCommentFailed,
     loadReplies,
     loadingReplyIds,
@@ -53,6 +54,7 @@ function CommentSystemContent({
   } = useCommentMutations({
     addPendingComment,
     removePendingComment,
+    markPendingCommentSubmitted,
     markPendingCommentFailed,
     refetch,
   });

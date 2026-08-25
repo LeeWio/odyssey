@@ -16,6 +16,7 @@ import type { EnhancedComment } from "../types";
 interface MutationHookProps {
   addPendingComment: (c: EnhancedComment) => void;
   removePendingComment: (id: number) => void;
+  markPendingCommentSubmitted: (id: number) => void;
   markPendingCommentFailed: (id: number) => void;
   refetch: () => Promise<unknown>;
 }
@@ -23,6 +24,7 @@ interface MutationHookProps {
 export function useCommentMutations({
   addPendingComment,
   removePendingComment,
+  markPendingCommentSubmitted,
   markPendingCommentFailed,
   refetch,
 }: MutationHookProps) {
@@ -99,9 +101,9 @@ export function useCommentMutations({
         }).unwrap();
       }
 
-      // The backend is the only durable source. Pending comments disappear until
-      // moderation makes them visible through the canonical read endpoint.
-      removePendingComment(tempId);
+      // Keep the locally submitted comment visible while moderation and the
+      // invalidated canonical query settle. The backend remains the durable source.
+      markPendingCommentSubmitted(tempId);
     } catch (err) {
       console.error("Comment submission failed, keeping in local failed list:", err);
       markPendingCommentFailed(tempId);

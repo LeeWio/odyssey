@@ -145,6 +145,14 @@ export function useComments() {
     );
   };
 
+  const markPendingCommentSubmitted = (id: number) => {
+    setPendingComments((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, isFailed: false, isPending: false, status: "PENDING" } : c
+      )
+    );
+  };
+
   // Enrich & Transform raw comments from RTK query
   const enrichedComments = useMemo(() => {
     const rawComments = rawCommentsList || [];
@@ -427,6 +435,7 @@ export function useComments() {
     resetVisible,
     addPendingComment,
     removePendingComment,
+    markPendingCommentSubmitted,
     markPendingCommentFailed,
     pendingComments,
     loadReplies,
