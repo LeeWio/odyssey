@@ -1,3 +1,10 @@
+# [1.128.0](https://github.com/LeeWio/odyssey/compare/v1.127.8...v1.128.0) (2026-08-25)
+
+
+### Features
+
+* **ui:** refine full-width archive and motion interactions ([4d782e9](https://github.com/LeeWio/odyssey/commit/4d782e97f483a8faf8a865ef65826b7a4a6ac6f2))
+
 ## [1.127.8](https://github.com/LeeWio/odyssey/compare/v1.127.7...v1.127.8) (2026-08-25)
 
 
