@@ -93,7 +93,7 @@ function CommentSystemContent({
         />
       </ScrollShadow>
 
-      <div className="border-default-200/70 shrink-0 border-t pt-4">
+      <div className="shrink-0 pt-4">
         <CommentInput
           onAuthenticationRequired={onRequestClose}
           onSubmit={(content) => publishComment(content, null)}

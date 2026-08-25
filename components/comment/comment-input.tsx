@@ -146,7 +146,7 @@ export function CommentInput({
           <Avatar size="sm" variant="soft" className="shrink-0">
             <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
           </Avatar>
-          <Typography className="text-muted text-xs font-medium tracking-[0.12em] uppercase">
+          <Typography color="muted" type="body-xs" weight="semibold">
             Join the discussion
           </Typography>
         </div>
@@ -194,20 +194,19 @@ export function CommentInput({
 
   if (isReply && hideTrigger) {
     return (
-      <Surface
-        variant="secondary"
-        className="border-default-200/70 mt-4 flex flex-col gap-3 rounded-xl border p-3 sm:p-4"
-      >
+      <Surface variant="secondary" className="mt-4 flex flex-col gap-3 p-3 sm:p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
             <Avatar size="sm" variant="soft" className="shrink-0">
               <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
             </Avatar>
             <div className="min-w-0">
-              <Typography className="text-foreground truncate text-sm font-semibold">
+              <Typography type="body-sm" weight="semibold" truncate>
                 Replying to {replyTo}
               </Typography>
-              <p className="text-muted text-xs">Keep the thread moving.</p>
+              <Typography color="muted" type="body-xs">
+                Keep the thread moving.
+              </Typography>
             </div>
           </div>
           <Button
@@ -269,7 +268,9 @@ export function CommentInput({
           <Avatar size="sm" variant="soft" className="shrink-0">
             <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
           </Avatar>
-          <span className="text-muted text-left text-sm">Write a comment...</span>
+          <Typography color="muted" type="body-sm" align="start">
+            Write a comment...
+          </Typography>
         </Button>
       )}
 

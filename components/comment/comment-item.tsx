@@ -110,11 +110,8 @@ export function CommentItem(props: CommentItemProps) {
 
   return (
     <MotionSurface
-      className={cn(
-        "group border-default-200/60 scroll-mt-24 border-b px-1 py-6 first:pt-2 sm:px-2",
-        highlightedCommentId === comment.id && "bg-default-100/60"
-      )}
-      variant="transparent"
+      className="group scroll-mt-24 px-1 py-6 first:pt-2 sm:px-2"
+      variant={highlightedCommentId === comment.id ? "secondary" : "transparent"}
       layout
       initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -125,9 +122,8 @@ export function CommentItem(props: CommentItemProps) {
         <CommentRow {...props} comment={comment} depth={1} />
 
         {(replies.length > 0 || replyTotal > 0) && (
-          <div className="border-default-300/70 mt-5 ml-5 border-l pl-4 sm:ml-12 sm:pl-5">
+          <div className="mt-5 ml-5 pl-4 sm:ml-12 sm:pl-5">
             <Button
-              className="text-muted hover:text-foreground h-auto min-h-0 min-w-0 gap-1.5 px-0 py-0 text-xs font-medium"
               size="sm"
               variant="ghost"
               aria-controls={repliesId}
@@ -175,7 +171,7 @@ export function CommentItem(props: CommentItemProps) {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="mt-3 ml-1 self-start text-xs"
+                      className="mt-3 ml-1 self-start"
                       onPress={() => props.onLoadReplies(comment.id)}
                       isDisabled={props.loadingReplyIds.has(comment.id)}
                     >
@@ -273,12 +269,11 @@ function CommentRow({
 
       <div className="min-w-0 flex-1">
         <header className="flex flex-wrap items-center gap-x-2 gap-y-1.5 leading-tight">
-          <Typography className="max-w-full truncate" type="body-sm" weight="semibold">
+          <Typography truncate type="body-sm" weight="semibold">
             {displayName}
           </Typography>
           {replyTo && replyToId !== undefined && (
             <Button
-              className="text-muted hover:text-foreground h-auto min-h-0 min-w-0 px-0 py-0 text-xs"
               size="sm"
               variant="ghost"
               aria-label={`Reply to ${replyTo}`}
@@ -287,20 +282,18 @@ function CommentRow({
               → {replyTo}
             </Button>
           )}
-          <time
-            className="text-muted/60 text-xs tabular-nums"
-            dateTime={comment.createdAt}
-            title={formatCommentTimestamp(comment.createdAt)}
-          >
-            · {formatCompactCommentTime(comment.createdAt, now)}
-          </time>
+          <Typography color="muted" type="body-xs" className="tabular-nums">
+            <time dateTime={comment.createdAt} title={formatCommentTimestamp(comment.createdAt)}>
+              · {formatCompactCommentTime(comment.createdAt, now)}
+            </time>
+          </Typography>
           {comment.pinned && (
-            <Chip size="sm" variant="soft" color="accent" className="h-5 px-1.5 text-[10px]">
+            <Chip size="sm" variant="soft" color="accent">
               Pinned
             </Chip>
           )}
           {comment.featured && (
-            <Chip size="sm" variant="soft" color="warning" className="h-5 px-1.5 text-[10px]">
+            <Chip size="sm" variant="soft" color="warning">
               Featured
             </Chip>
           )}

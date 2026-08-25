@@ -83,28 +83,28 @@ export function CommentList({
         {isFetching && !isLoading ? ", updating" : ""}
       </p>
 
-      <div className="border-default-200/70 flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 pb-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <Typography className="text-foreground text-lg font-semibold tracking-tight">
+            <Typography type="h4" weight="semibold">
               Discussion
             </Typography>
             <Chip size="sm" variant="soft" color="accent" className="tabular-nums">
               {totalCount}
             </Chip>
           </div>
-          <p className="text-muted mt-1 text-sm">
+          <Typography color="muted" type="body-sm" className="mt-1">
             {totalCount === 0
               ? "Be the first to share a perspective."
               : "Thoughts from the community."}
-          </p>
+          </Typography>
         </div>
 
         <div className="flex items-center justify-between gap-2 sm:justify-end">
           {isFetching && !isLoading && (
-            <span className="text-muted text-xs" aria-live="polite">
+            <Typography color="muted" type="body-xs" aria-live="polite">
               Updating…
-            </span>
+            </Typography>
           )}
           {totalCount > 1 && (
             <ButtonGroup aria-label="Sort comments" size="sm" variant="tertiary">
@@ -160,7 +160,7 @@ export function CommentList({
       {isLoading ? (
         <div className="flex flex-col gap-6" aria-label="Loading comments">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="border-default-200/60 flex gap-3 border-b py-5 first:pt-1">
+            <div key={index} className="flex gap-3 py-5 first:pt-1">
               <Skeleton className="size-10 shrink-0 rounded-full" />
               <div className="flex flex-1 flex-col gap-3 pt-1">
                 <Skeleton className="h-3.5 w-36 rounded-md" />
@@ -182,7 +182,7 @@ export function CommentList({
           </Button>
         </Alert>
       ) : comments.length === 0 ? (
-        <EmptyState size="sm" className="border-default-200/70 border-y py-12">
+        <EmptyState size="sm" className="py-12">
           <EmptyState.Header>
             <EmptyState.Media variant="icon">
               <Comments />

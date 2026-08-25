@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "@gravity-ui/icons";
-import { Button, Chip, TextArea, TextField } from "@heroui/react";
+import { Button, Chip, TextArea, TextField, Typography } from "@heroui/react";
 import { useEffect, useState } from "react";
 
 interface CommentContentProps {
@@ -63,20 +63,20 @@ export function CommentContent({
 
   if (isDeleted) {
     return (
-      <p className="text-muted bg-default-100/50 w-fit rounded-md px-2.5 py-1.5 text-sm italic">
+      <Chip size="sm" variant="soft">
         Comment deleted
-      </p>
+      </Chip>
     );
   }
 
   return (
-    <p className="text-foreground/90 text-[15px] leading-[1.45] [overflow-wrap:anywhere] whitespace-pre-wrap">
+    <Typography type="body" className="[overflow-wrap:anywhere] whitespace-pre-wrap">
       {content}
       {isEdited && (
-        <Chip size="sm" variant="soft" className="ml-2 inline-flex align-middle text-[10px]">
+        <Chip size="sm" variant="soft" className="ml-2 inline-flex align-middle">
           Edited
         </Chip>
       )}
-    </p>
+    </Typography>
   );
 }

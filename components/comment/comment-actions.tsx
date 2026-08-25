@@ -10,7 +10,7 @@ import {
   Pencil,
   TrashBin,
 } from "@gravity-ui/icons";
-import { Button, Dropdown, Separator, Tooltip } from "@heroui/react";
+import { Button, Dropdown, Tooltip } from "@heroui/react";
 import { MotionButton } from "@/components/ui";
 import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./types";
@@ -50,7 +50,6 @@ export function CommentActions({
   return (
     <div role="group" aria-label="Comment actions" className="mt-3 flex items-center gap-1">
       <MotionButton
-        className="text-muted hover:bg-default-100 hover:text-foreground h-8 min-w-0 gap-1.5 rounded-md px-2 text-xs"
         size="sm"
         variant="ghost"
         aria-label={comment.likedByCurrentUser ? "Unlike comment" : "Like comment"}
@@ -62,11 +61,8 @@ export function CommentActions({
         <span className="tabular-nums">{comment.likesCount}</span>
       </MotionButton>
 
-      <Separator orientation="vertical" className="mx-1 h-4" />
-
       {depth < 5 && (
         <MotionButton
-          className="text-muted hover:bg-default-100 hover:text-foreground h-8 min-w-0 gap-1.5 rounded-md px-2 text-xs"
           size="sm"
           variant="ghost"
           isDisabled={isUnavailable || isUnapproved}
@@ -82,7 +78,6 @@ export function CommentActions({
         <Tooltip delay={0}>
           <Tooltip.Trigger aria-label="More comment actions">
             <Button
-              className="text-muted/60 hover:bg-default-100 hover:text-foreground h-8 min-w-0 rounded-md px-2 sm:opacity-50 sm:group-hover:opacity-100"
               size="sm"
               variant="ghost"
               aria-label="More comment actions"
