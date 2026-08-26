@@ -62,6 +62,7 @@ export const PostResponseSchema = z.object({
   isLiked: z.boolean().nullable().default(false),
   isFavorited: z.boolean().nullable().default(false),
   authorName: z.string().nullable().default("Anonymous"),
+  authorAvatar: z.string().nullable().default(""),
   category: CategoryResponseSchema.nullable(),
   series: SeriesResponseSchema.nullable(),
   seriesOrder: z.number().nullable(),
