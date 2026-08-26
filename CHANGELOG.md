@@ -1,3 +1,10 @@
+# [1.129.0](https://github.com/LeeWio/odyssey/compare/v1.128.0...v1.129.0) (2026-08-26)
+
+
+### Features
+
+* **footer:** add Chinese registration details ([7304a69](https://github.com/LeeWio/odyssey/commit/7304a69e13fac6ad66fe3e382cd050645094d46b))
+
 # [1.128.0](https://github.com/LeeWio/odyssey/compare/v1.127.8...v1.128.0) (2026-08-25)
 
 
