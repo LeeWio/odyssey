@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
       "bvconuycpdvgzbvbkijl.supabase.co",
       "3dicons.sgp1.cdn.digitaloceanspaces.com",
       "img.icons8.com",
+      "beian.mps.gov.cn",
     ],
     remotePatterns: [
       {
@@ -48,6 +49,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "img.icons8.com",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "beian.mps.gov.cn",
+        pathname: "/web/assets/**",
       },
     ],
   },

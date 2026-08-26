@@ -4,6 +4,7 @@ import { Button, Input, Link, toast } from "@heroui/react";
 import { useCallback, useState, type FormEvent } from "react";
 import { useSubscribeMutation } from "@/lib/features/openapi";
 import { motion, useReducedMotion } from "motion/react";
+import Image from "next/image";
 import { ModeSwitch } from "./theme-switch";
 import { Icon, IconProps } from "@iconify/react";
 
@@ -116,7 +117,7 @@ export function Footer() {
 
   return (
     <footer className="flex w-full flex-col">
-      <div className="mx-auto  px-6 pt-16 pb-8 sm:pt-24 lg:px-8 lg:pt-32">
+      <div className="mx-auto px-6 pt-16 pb-8 sm:pt-24 lg:px-8 lg:pt-32">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <motion.div {...reveal(0)} className="space-y-8 md:pr-8">
             <div className="flex items-center justify-start">
@@ -192,6 +193,21 @@ export function Footer() {
               target="_blank"
             >
               鄂ICP备2026038770号-1
+            </Link>
+            <Link
+              className="flex w-fit items-center gap-1 text-xs transition-colors"
+              href="https://beian.mps.gov.cn/#/query/webSearch?code=44030002016102"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Image
+                alt=""
+                aria-hidden="true"
+                height={20}
+                src="https://beian.mps.gov.cn/web/assets/logo01.6189a29f.png"
+                width={20}
+              />
+              粤公网安备44030002016102号
             </Link>
           </div>
           <ModeSwitch size="sm" variant="default" />
