@@ -1,3 +1,11 @@
+# [1.131.0](https://github.com/LeeWio/odyssey/compare/v1.130.0...v1.131.0) (2026-08-26)
+
+
+### Features
+
+* **background:** integrate useResolvedThemeMode into backdrop and grainient ([1541aaf](https://github.com/LeeWio/odyssey/commit/1541aaf568cf6f3adec728f248cccd1348eed3f4))
+* **single:** optimize In Progress section with Carousel and real API author data ([e1409e0](https://github.com/LeeWio/odyssey/commit/e1409e0fa30a04b5b46ff7ff5b39aff99f08247d))
+
 # [1.130.0](https://github.com/LeeWio/odyssey/compare/v1.129.0...v1.130.0) (2026-08-26)
 
 
