@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { Renderer, Program, Mesh, Triangle } from "ogl";
+import { useResolvedThemeMode } from "@/hooks/use-resolved-theme-mode";
 
 interface GrainientProps {
   timeSpeed?: number;
@@ -23,20 +24,44 @@ interface GrainientProps {
   centerX?: number;
   centerY?: number;
   zoom?: number;
-  color1?: string;
-  color2?: string;
-  color3?: string;
   className?: string;
 }
 
-const hexToRgb = (hex: string): [number, number, number] => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!result) return [1, 1, 1];
-  return [
-    parseInt(result[1], 16) / 255,
-    parseInt(result[2], 16) / 255,
-    parseInt(result[3], 16) / 255,
-  ];
+type GrainientPalette = {
+  light: [string, string, string];
+  dark: [string, string, string];
+};
+
+const PALETTES: GrainientPalette[] = [
+  {
+    light: ["#f0a8e3", "#7253df", "#342575"],
+    dark: ["#ff9ffc", "#5227ff", "#b497cf"],
+  },
+  {
+    light: ["#a8f5ef", "#3f71ed", "#25448f"],
+    dark: ["#6ef5ef", "#3f71ed", "#172b92"],
+  },
+  {
+    light: ["#ffc1d1", "#ee6487", "#702c68"],
+    dark: ["#ff8a9d", "#d83b72", "#35133e"],
+  },
+  {
+    light: ["#b9f4bd", "#32c4b5", "#17628f"],
+    dark: ["#72dbab", "#1bb8be", "#041421"],
+  },
+  {
+    light: ["#ffe59a", "#ee8d67", "#713d76"],
+    dark: ["#ffd166", "#ef476f", "#3a0ca3"],
+  },
+];
+
+const hexToRgb = (hex: string): Float32Array => {
+  const value = hex.replace("#", "");
+  return new Float32Array([
+    parseInt(value.slice(0, 2), 16) / 255,
+    parseInt(value.slice(2, 4), 16) / 255,
+    parseInt(value.slice(4, 6), 16) / 255,
+  ]);
 };
 
 const vertex = `#version 300 es
@@ -159,12 +184,13 @@ const Grainient: React.FC<GrainientProps> = ({
   centerX = 0.0,
   centerY = 0.0,
   zoom = 0.9,
-  color1 = "#FF9FFC",
-  color2 = "#5227FF",
-  color3 = "#B497CF",
   className = "",
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [paletteIndex] = React.useState(() => Math.floor(Math.random() * PALETTES.length));
+  const { mode } = useResolvedThemeMode();
+  const palette = PALETTES[paletteIndex]!;
+  const colors = palette[mode];
 
   // Effect 1: build WebGL context once, pause when offscreen / tab hidden
   useEffect(() => {
@@ -324,9 +350,9 @@ const Grainient: React.FC<GrainientProps> = ({
     u.uSaturation.value = saturation;
     u.uCenterOffset.value = new Float32Array([centerX, centerY]);
     u.uZoom.value = zoom;
-    u.uColor1.value = new Float32Array(hexToRgb(color1));
-    u.uColor2.value = new Float32Array(hexToRgb(color2));
-    u.uColor3.value = new Float32Array(hexToRgb(color3));
+    u.uColor1.value = hexToRgb(colors[0]);
+    u.uColor2.value = hexToRgb(colors[1]);
+    u.uColor3.value = hexToRgb(colors[2]);
   }, [
     timeSpeed,
     colorBalance,
@@ -347,9 +373,7 @@ const Grainient: React.FC<GrainientProps> = ({
     centerX,
     centerY,
     zoom,
-    color1,
-    color2,
-    color3,
+    colors,
   ]);
 
   return <div ref={containerRef} className={`h-full w-full overflow-hidden ${className}`.trim()} />;

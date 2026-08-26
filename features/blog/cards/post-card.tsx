@@ -22,15 +22,6 @@ interface PostCardProps {
   gradient?: string; // e.g. "from-purple-500 to-blue-500"
 }
 
-const PALETTES = [
-  { color1: "#ff9ffc", color2: "#5227ff", color3: "#b497cf" }, // Purple Dream
-  { color1: "#ff4f6b", color2: "#ff7847", color3: "#1a0810" }, // Peach Dawn (IMG_5380.jpg style)
-  { color1: "#0fa3b8", color2: "#1d47b5", color3: "#040b2b" }, // Midnight Ocean (IMG_5379.jpg style)
-  { color1: "#72dbab", color2: "#1bb8be", color3: "#041421" }, // Emerald Glow
-  { color1: "#df3b78", color2: "#9c1bb5", color3: "#180614" }, // Velvet Nebula
-  { color1: "#c98f12", color2: "#b32252", color3: "#0a031c" }, // Cyberpunk Amber
-];
-
 function getGrainientProps(seed: string) {
   let hash = 2166136261;
   for (let i = 0; i < seed.length; i++) {
@@ -38,8 +29,6 @@ function getGrainientProps(seed: string) {
     hash = Math.imul(hash, 16777619);
   }
   hash = hash >>> 0;
-
-  const palette = PALETTES[hash % PALETTES.length]!;
 
   const warpStrength = 0.5 + ((hash % 10) / 10) * 1.5;
   const warpFrequency = 3.0 + ((hash % 13) / 13) * 6.0;
@@ -49,7 +38,6 @@ function getGrainientProps(seed: string) {
   const zoom = 0.6 + ((hash % 8) / 8) * 0.6;
 
   return {
-    ...palette,
     warpStrength,
     warpFrequency,
     warpSpeed,

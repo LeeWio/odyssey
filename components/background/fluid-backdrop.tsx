@@ -8,8 +8,8 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useResolvedThemeMode } from "@/hooks/use-resolved-theme-mode";
 
 type FluidBackdropProps = {
   scrollYProgress: MotionValue<number>;
@@ -18,20 +18,11 @@ type FluidBackdropProps = {
 export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
   const shouldReduceMotion = useReducedMotion();
   const reducedMotion = Boolean(shouldReduceMotion);
-  const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const { mode } = useResolvedThemeMode();
 
   // Initialize mouse coordinates as MotionValues (performance-optimized, avoids React re-renders)
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-
-  // Avoid hydration mismatch and set mounted state
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Set mouse tracking
   useEffect(() => {
@@ -62,7 +53,7 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
   const mouseSpringX = useSpring(mouseX, { stiffness: 2.5, damping: 20, mass: 3.5 });
   const mouseSpringY = useSpring(mouseY, { stiffness: 2.5, damping: 20, mass: 3.5 });
 
-  const isDark = !mounted || resolvedTheme === "dark";
+  const isDark = mode === "dark";
 
   // =========================================================================
   // OPACITY CROSSFADE CHANNELS WITH ASYMMETRIC STAGGERING

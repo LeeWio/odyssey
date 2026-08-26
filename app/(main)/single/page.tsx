@@ -6,9 +6,6 @@ const IN_PROGRESS_CARDS = [
   {
     title: "Aurora Fields",
     description: "A soft cyan current moving through electric blue.",
-    color1: "#6ef5ef",
-    color2: "#3f71ed",
-    color3: "#172b92",
     blendAngle: -18,
     warpFrequency: 4.1,
     warpSpeed: 1.15,
@@ -19,9 +16,6 @@ const IN_PROGRESS_CARDS = [
   {
     title: "Violet Bloom",
     description: "Lavender light folding into a deep violet edge.",
-    color1: "#f1a3de",
-    color2: "#7848ed",
-    color3: "#22136d",
     blendAngle: 34,
     warpFrequency: 5.8,
     warpSpeed: 1.55,
@@ -32,9 +26,6 @@ const IN_PROGRESS_CARDS = [
   {
     title: "Blue Hour",
     description: "A slow cobalt gradient with a bright magenta seam.",
-    color1: "#e77df3",
-    color2: "#3c48df",
-    color3: "#17105e",
     blendAngle: 122,
     warpFrequency: 3.6,
     warpSpeed: 0.85,
@@ -45,9 +36,6 @@ const IN_PROGRESS_CARDS = [
   {
     title: "Emerald Current",
     description: "A cool green stream crossing a clear blue field.",
-    color1: "#a8f58e",
-    color2: "#20c9c8",
-    color3: "#07509e",
     blendAngle: -62,
     warpFrequency: 6.4,
     warpSpeed: 1.8,
