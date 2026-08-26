@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef } from "react";
 import { Renderer, Program, Mesh, Triangle } from "ogl";
 
@@ -350,12 +352,7 @@ const Grainient: React.FC<GrainientProps> = ({
     color3,
   ]);
 
-  return (
-    <div
-      ref={containerRef}
-      className={`relative h-full w-full overflow-hidden ${className}`.trim()}
-    />
-  );
+  return <div ref={containerRef} className={`h-full w-full overflow-hidden ${className}`.trim()} />;
 };
 
 export default Grainient;
