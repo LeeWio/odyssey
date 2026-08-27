@@ -1,3 +1,10 @@
+# [1.132.0](https://github.com/LeeWio/odyssey/compare/v1.131.0...v1.132.0) (2026-08-27)
+
+
+### Features
+
+* refine the journal time capsule ([f4a629c](https://github.com/LeeWio/odyssey/commit/f4a629cf2760603fd71b626256e5d5001a852261))
+
 # [1.131.0](https://github.com/LeeWio/odyssey/compare/v1.130.0...v1.131.0) (2026-08-26)
 
 
