@@ -190,6 +190,15 @@ export interface OpenApiComponents {
       posts?: Array<OpenApiComponents["schemas"]["PostResponse"]>;
       createdAt?: string;
     };
+    SeriesSummaryResponse: {
+      id?: number;
+      name?: string;
+      slug?: string;
+      description?: string;
+      coverImage?: string;
+      postsCount?: number;
+      createdAt?: string;
+    };
     RoleRequest: { name: string; code: string; description?: string };
     ApiResponseRoleResponse: {
       code?: number;
@@ -1053,8 +1062,12 @@ export interface OpenApiComponents {
       spotlight?: OpenApiComponents["schemas"]["PostDigestResponse"];
       curated?: Array<OpenApiComponents["schemas"]["PostDigestResponse"]>;
       latest?: Array<OpenApiComponents["schemas"]["PostDigestResponse"]>;
+      trending?: Array<OpenApiComponents["schemas"]["PostDigestResponse"]>;
       mostRead?: Array<OpenApiComponents["schemas"]["PostDigestResponse"]>;
+      series?: Array<OpenApiComponents["schemas"]["SeriesSummaryResponse"]>;
       categoryGroups?: Array<OpenApiComponents["schemas"]["CategoryGroup"]>;
+      generatedAt?: string;
+      algorithmVersion?: string;
     };
     CategoryGroup: {
       category?: OpenApiComponents["schemas"]["CategoryResponse"];
