@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRotateRight, BookOpen } from "@gravity-ui/icons";
+import { ArrowRotateRight } from "@gravity-ui/icons";
 import {
   Button,
   Card,
@@ -15,6 +15,7 @@ import {
   Typography,
 } from "@heroui/react";
 import { useDeferredValue, useMemo, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { useGetPublicColumnsQuery } from "@/lib/features/column";
 import { ColumnCard } from "./column-card";
 
@@ -28,6 +29,7 @@ function getCreatedAtTime(value: string) {
 
 export function ColumnsIndex() {
   const { data: columns = [], error, isLoading, refetch } = useGetPublicColumnsQuery();
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const [search, setSearch] = useState("");
   const [availability, setAvailability] = useState<AvailabilityFilter>("all");
   const [sort, setSort] = useState<ColumnSort>("newest");
@@ -69,180 +71,198 @@ export function ColumnsIndex() {
     }
   };
 
+  const revealInView = (delay = 0, distance = 20) => ({
+    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.3 },
+    transition: {
+      duration: shouldReduceMotion ? 0 : 0.65,
+      delay,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  });
+
   return (
-    <div className="bg-background min-h-[100dvh] px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-6xl">
-        <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_14rem] lg:items-end">
-          <div className="max-w-3xl">
-            <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <BookOpen aria-hidden="true" className="size-4" />
-              Columns
-            </div>
-            <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-              Follow an idea beyond one essay.
-            </Typography>
-            <Typography color="muted" type="body" className="mt-5 max-w-xl">
-              Focused reading paths collecting the work, context, and questions that belong
-              together.
-            </Typography>
-          </div>
-          <div className="border-default-200 border-l pl-5 sm:pl-6">
-            <Typography className="font-mono text-3xl tabular-nums" type="body">
-              {columns.length.toLocaleString("en-US")}
-            </Typography>
-            <Typography color="muted" type="body-sm" className="mt-1">
-              published reading paths
-            </Typography>
-          </div>
-        </header>
+    <main className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+      <header className="flex flex-col items-center text-center">
+        <motion.div {...revealInView(0, 10)}>
+          <Chip color="default" size="sm" variant="secondary">
+            Columns
+          </Chip>
+        </motion.div>
+        <motion.div {...revealInView(0.06)}>
+          <Typography
+            type="h1"
+            weight="bold"
+            className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[1.02] tracking-[-0.05em] text-balance"
+          >
+            Follow an idea beyond one essay.
+          </Typography>
+        </motion.div>
+        <motion.div {...revealInView(0.12, 14)}>
+          <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
+            Focused reading paths collecting the work, context, and questions that belong together.
+          </Typography>
+        </motion.div>
+      </header>
 
-        <section aria-label="Published columns" className="mt-14">
-          {isLoading ? (
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }, (_, index) => (
-                <Card key={index} variant="secondary" className="overflow-hidden p-0">
-                  <Skeleton className="aspect-[16/9] w-full rounded-none" />
-                  <Card.Header>
-                    <Skeleton className="h-5 w-20 rounded-lg" />
-                    <Skeleton className="h-7 w-3/4 rounded-lg" />
-                    <Skeleton className="h-4 w-full rounded-lg" />
-                  </Card.Header>
-                </Card>
-              ))}
-            </div>
-          ) : error ? (
-            <Card variant="secondary" className="items-start gap-4 p-7">
-              <Card.Header>
-                <Card.Title>Columns are unavailable</Card.Title>
-                <Card.Description>Try loading this page again in a moment.</Card.Description>
-              </Card.Header>
-              <Button size="sm" variant="secondary" onPress={() => refetch()}>
-                <ArrowRotateRight aria-hidden="true" className="size-4" />
-                Retry
-              </Button>
-            </Card>
-          ) : columns.length === 0 ? (
-            <Card variant="secondary" className="items-start gap-3 p-7">
-              <Card.Header>
-                <Card.Title>No columns published yet</Card.Title>
-                <Card.Description>
-                  New reading paths will appear here when they are ready.
-                </Card.Description>
-              </Card.Header>
-            </Card>
-          ) : (
-            <>
-              <div className="border-default-200 grid gap-5 border-y py-6 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-end">
-                <div className="min-w-0">
-                  <SearchField fullWidth name="column-search" value={search} onChange={setSearch}>
-                    <Label className="sr-only">Search columns</Label>
-                    <SearchField.Group>
-                      <SearchField.SearchIcon />
-                      <SearchField.Input placeholder="Search reading paths" />
-                      <SearchField.ClearButton aria-label="Clear column search" />
-                    </SearchField.Group>
-                  </SearchField>
-                  <TagGroup
-                    aria-label="Filter columns by reading availability"
-                    selectedKeys={new Set([availability])}
-                    selectionMode="single"
-                    size="sm"
-                    variant="surface"
-                    className="mt-4"
-                    onSelectionChange={handleAvailabilityChange}
-                  >
-                    <TagGroup.List className="flex-wrap">
-                      <Tag id="all" textValue="All columns">
-                        All paths
-                        <span className="text-muted text-xs tabular-nums">{columns.length}</span>
-                      </Tag>
-                      <Tag id="ready" textValue="Ready to read">
-                        Ready to read
-                        <span className="text-muted text-xs tabular-nums">
-                          {columns.filter((column) => column.postsCount > 0).length}
-                        </span>
-                      </Tag>
-                      <Tag id="starting" textValue="Starting soon">
-                        Starting soon
-                        <span className="text-muted text-xs tabular-nums">
-                          {columns.filter((column) => column.postsCount === 0).length}
-                        </span>
-                      </Tag>
-                    </TagGroup.List>
-                  </TagGroup>
-                </div>
-                <Select
-                  fullWidth
-                  value={sort}
-                  variant="secondary"
-                  onChange={(value) => {
-                    if (value === "newest" || value === "most-essays" || value === "alphabetical") {
-                      setSort(value);
-                    }
-                  }}
+      <motion.section aria-label="Published columns" className="mt-12" {...revealInView(0.18, 16)}>
+        {isLoading ? (
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }, (_, index) => (
+              <Card key={index} variant="secondary" className="overflow-hidden p-0">
+                <Skeleton className="aspect-[16/9] w-full rounded-none" />
+                <Card.Header>
+                  <Skeleton className="h-5 w-20 rounded-lg" />
+                  <Skeleton className="h-7 w-3/4 rounded-lg" />
+                  <Skeleton className="h-4 w-full rounded-lg" />
+                </Card.Header>
+              </Card>
+            ))}
+          </div>
+        ) : error ? (
+          <Card variant="secondary" className="items-start gap-4 p-7">
+            <Card.Header>
+              <Card.Title>Columns are unavailable</Card.Title>
+              <Card.Description>Try loading this page again in a moment.</Card.Description>
+            </Card.Header>
+            <Button size="sm" variant="secondary" onPress={() => refetch()}>
+              <ArrowRotateRight aria-hidden="true" className="size-4" />
+              Retry
+            </Button>
+          </Card>
+        ) : columns.length === 0 ? (
+          <Card variant="secondary" className="items-start gap-3 p-7">
+            <Card.Header>
+              <Card.Title>No columns published yet</Card.Title>
+              <Card.Description>
+                New reading paths will appear here when they are ready.
+              </Card.Description>
+            </Card.Header>
+          </Card>
+        ) : (
+          <>
+            <div className="border-default-200 grid gap-5 border-y py-6 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-end">
+              <div className="min-w-0">
+                <SearchField fullWidth name="column-search" value={search} onChange={setSearch}>
+                  <Label className="sr-only">Search columns</Label>
+                  <SearchField.Group>
+                    <SearchField.SearchIcon />
+                    <SearchField.Input placeholder="Search reading paths" />
+                    <SearchField.ClearButton aria-label="Clear column search" />
+                  </SearchField.Group>
+                </SearchField>
+                <TagGroup
+                  aria-label="Filter columns by reading availability"
+                  selectedKeys={new Set([availability])}
+                  selectionMode="single"
+                  size="sm"
+                  variant="surface"
+                  className="mt-4"
+                  onSelectionChange={handleAvailabilityChange}
                 >
-                  <Label>Sort paths</Label>
-                  <Select.Trigger>
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox>
-                      <ListBox.Item id="newest" textValue="Newest first">
-                        Newest first
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                      <ListBox.Item id="most-essays" textValue="Most essays">
-                        Most essays
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                      <ListBox.Item id="alphabetical" textValue="Alphabetical">
-                        Alphabetical
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
+                  <TagGroup.List className="flex-wrap">
+                    <Tag id="all" textValue="All columns">
+                      All paths
+                      <span className="text-muted text-xs tabular-nums">{columns.length}</span>
+                    </Tag>
+                    <Tag id="ready" textValue="Ready to read">
+                      Ready to read
+                      <span className="text-muted text-xs tabular-nums">
+                        {columns.filter((column) => column.postsCount > 0).length}
+                      </span>
+                    </Tag>
+                    <Tag id="starting" textValue="Starting soon">
+                      Starting soon
+                      <span className="text-muted text-xs tabular-nums">
+                        {columns.filter((column) => column.postsCount === 0).length}
+                      </span>
+                    </Tag>
+                  </TagGroup.List>
+                </TagGroup>
               </div>
+              <Select
+                fullWidth
+                value={sort}
+                variant="secondary"
+                onChange={(value) => {
+                  if (value === "newest" || value === "most-essays" || value === "alphabetical") {
+                    setSort(value);
+                  }
+                }}
+              >
+                <Label>Sort paths</Label>
+                <Select.Trigger>
+                  <Select.Value />
+                  <Select.Indicator />
+                </Select.Trigger>
+                <Select.Popover>
+                  <ListBox>
+                    <ListBox.Item id="newest" textValue="Newest first">
+                      Newest first
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                    <ListBox.Item id="most-essays" textValue="Most essays">
+                      Most essays
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                    <ListBox.Item id="alphabetical" textValue="Alphabetical">
+                      Alphabetical
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  </ListBox>
+                </Select.Popover>
+              </Select>
+            </div>
 
-              <div className="mt-7 flex items-center justify-between gap-4">
-                <Typography color="muted" type="body-sm">
-                  {visibleColumns.length} {visibleColumns.length === 1 ? "path" : "paths"} to
-                  explore
-                </Typography>
-                {search || availability !== "all" ? (
-                  <Button size="sm" variant="tertiary" onPress={clearFilters}>
-                    Clear filters
-                  </Button>
-                ) : null}
+            <div className="mt-7 flex items-center justify-between gap-4">
+              <Typography color="muted" type="body-sm">
+                {visibleColumns.length} {visibleColumns.length === 1 ? "path" : "paths"} to explore
+              </Typography>
+              {search || availability !== "all" ? (
+                <Button size="sm" variant="tertiary" onPress={clearFilters}>
+                  Clear filters
+                </Button>
+              ) : null}
+            </div>
+
+            {visibleColumns.length > 0 ? (
+              <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {visibleColumns.map((column, index) => (
+                  <motion.div
+                    key={column.id}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{
+                      duration: shouldReduceMotion ? 0 : 0.65,
+                      delay: Math.min(index, 5) * 0.05,
+                      ease: [0.22, 1, 0.36, 1] as const,
+                    }}
+                  >
+                    <ColumnCard column={column} />
+                  </motion.div>
+                ))}
               </div>
-
-              {visibleColumns.length > 0 ? (
-                <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                  {visibleColumns.map((column) => (
-                    <ColumnCard key={column.id} column={column} />
-                  ))}
-                </div>
-              ) : (
-                <Card variant="secondary" className="mt-6 items-start gap-4 p-7">
-                  <Card.Header>
-                    <Chip size="sm" variant="soft">
-                      No matches
-                    </Chip>
-                    <Card.Title>No reading paths match these filters</Card.Title>
-                    <Card.Description>
-                      Try a different title, topic, or availability filter.
-                    </Card.Description>
-                  </Card.Header>
-                  <Button size="sm" variant="secondary" onPress={clearFilters}>
-                    Show all columns
-                  </Button>
-                </Card>
-              )}
-            </>
-          )}
-        </section>
-      </div>
-    </div>
+            ) : (
+              <Card variant="secondary" className="mt-6 items-start gap-4 p-7">
+                <Card.Header>
+                  <Chip size="sm" variant="soft">
+                    No matches
+                  </Chip>
+                  <Card.Title>No reading paths match these filters</Card.Title>
+                  <Card.Description>
+                    Try a different title, topic, or availability filter.
+                  </Card.Description>
+                </Card.Header>
+                <Button size="sm" variant="secondary" onPress={clearFilters}>
+                  Show all columns
+                </Button>
+              </Card>
+            )}
+          </>
+        )}
+      </motion.section>
+    </main>
   );
 }

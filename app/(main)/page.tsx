@@ -139,9 +139,9 @@ export default function Home() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const reveal = (delay = 0, distance = 18) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance, filter: "blur(8px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-    transition: { duration: shouldReduceMotion ? 0 : 0.7, delay, ease: easeOut },
+    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
   });
 
   const revealInView = (delay = 0, distance = 20) => ({

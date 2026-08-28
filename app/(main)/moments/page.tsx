@@ -1,226 +1,181 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useGetPublicMomentsQuery } from "@/lib/features/moment";
-import { Spinner, Typography, Tabs, Card, Chip } from "@heroui/react";
-import { useMounted } from "@mantine/hooks";
+import { useMemo, useState } from "react";
+import { Button, Chip, Tabs, Typography } from "@heroui/react";
+import { EmptyState } from "@heroui-pro/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useNow } from "next-intl";
-import { Icon } from "@iconify/react";
-import { StockTrendCard } from "@/components/stock/stock-trend-card";
-import { MomentCard } from "@/features/moment";
-import { Widget } from "@heroui-pro/react";
+
+import { MomentCard, MomentCardSkeleton } from "@/features/moment";
+import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
+
+const easeOut = [0.22, 1, 0.36, 1] as const;
+
+const timeframes = [
+  { id: "all", label: "All notes" },
+  { id: "today", label: "Today" },
+  { id: "yesterday", label: "Yesterday" },
+  { id: "week", label: "This week" },
+  { id: "month", label: "This month" },
+] as const;
+
+type Timeframe = (typeof timeframes)[number]["id"];
+
+function getMomentTimestamp(value: string) {
+  const date =
+    value.includes("T") && !value.endsWith("Z") && !value.includes("+") ? `${value}Z` : value;
+
+  return new Date(date).getTime();
+}
 
 export default function MomentsPage() {
-  const mounted = useMounted();
-  const [activeTab, setActiveTab] = useState<string>("all");
-  const now = useNow(); // Pure React 19 idempotent date hook
+  const now = useNow();
+  const shouldReduceMotion = useReducedMotion() ?? false;
+  const [activeTab, setActiveTab] = useState<Timeframe>("all");
+  const { moments, isLoading, isError, isFetchingMore, hasMore, loadMore, refetch } =
+    useMomentFeed(12);
 
-  // Fetch public moments from backend
-  const {
-    data: publicData,
-    isLoading,
-    isError,
-  } = useGetPublicMomentsQuery({
-    page: 0,
-    size: 24,
+  const revealInView = (delay = 0, distance = 20) => ({
+    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.3 },
+    transition: {
+      duration: shouldReduceMotion ? 0 : 0.65,
+      delay,
+      ease: easeOut,
+    },
   });
 
-  const moments = useMemo(() => publicData?.list || [], [publicData?.list]);
-
-  // Client-side date and time interval filter (Pure render-safe computations)
   const filteredMoments = useMemo(() => {
     if (activeTab === "all") return moments;
 
     const nowMs = now.getTime();
-    const MS_PER_DAY = 24 * 60 * 60 * 1000;
+    const day = 24 * 60 * 60 * 1000;
 
-    return moments.filter((m) => {
-      // Formulate timezone-safe date-string to prevent parsing deviations
-      const dateStr =
-        m.createdAt.includes("T") && !m.createdAt.endsWith("Z") && !m.createdAt.includes("+")
-          ? `${m.createdAt}Z`
-          : m.createdAt;
-
-      const timestamp = new Date(dateStr).getTime();
+    return moments.filter((moment) => {
+      const timestamp = getMomentTimestamp(moment.createdAt);
       if (!Number.isFinite(timestamp)) return false;
 
-      const diffMs = nowMs - timestamp;
+      const age = nowMs - timestamp;
 
       switch (activeTab) {
         case "today":
-          return diffMs < MS_PER_DAY;
+          return age < day;
         case "yesterday":
-          return diffMs >= MS_PER_DAY && diffMs < 2 * MS_PER_DAY;
+          return age >= day && age < day * 2;
         case "week":
-          return diffMs < 7 * MS_PER_DAY;
+          return age < day * 7;
         case "month":
-          return diffMs < 30 * MS_PER_DAY;
+          return age < day * 30;
         default:
           return true;
       }
     });
-  }, [moments, activeTab, now]);
-
-  // Client-side data aggregation for the sidebar widgets
-  const { trendingTopics, trendingStocks } = useMemo(() => {
-    const topicCounts: Record<string, number> = {};
-    const stockCounts: Record<string, number> = {};
-
-    moments.forEach((m) => {
-      // Count topics
-      if (m.topics) {
-        m.topics.forEach((t) => {
-          topicCounts[t.slug] = (topicCounts[t.slug] || 0) + 1;
-        });
-      }
-      // Count stocks
-      if (m.stockSymbol) {
-        stockCounts[m.stockSymbol] = (stockCounts[m.stockSymbol] || 0) + 1;
-      }
-    });
-
-    // Sort descending and slice top 5 topics
-    const sortedTopics = Object.entries(topicCounts)
-      .map(([slug, count]) => ({ slug, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-
-    // Sort descending and slice top 3 stocks
-    const sortedStocks = Object.entries(stockCounts)
-      .map(([symbol, count]) => ({ symbol, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 3);
-
-    return {
-      trendingTopics: sortedTopics,
-      trendingStocks: sortedStocks,
-    };
-  }, [moments]);
-
-  if (!mounted) return null;
+  }, [activeTab, moments, now]);
 
   return (
-    <div className="bg-background min-h-screen px-4 pt-24 pb-16 md:px-6 md:pt-28 md:pb-24 lg:pt-32">
-      {/* Responsive two-column split grid (1 col on mobile, 12 cols with 75/25 split on desktop) */}
-      <div className="mx-auto w-full max-w-[1440px] lg:grid lg:grid-cols-12 lg:gap-8 xl:gap-12">
-        {/* Left Column: Timeline Feed Area (Main 75%) */}
-        <div className="flex min-w-0 flex-col lg:col-span-8 xl:col-span-9">
-          {/* Cinematic Date-Based Navigation Bar (Auto handles horizontal scrolling natively!) */}
-          <div className="mb-8 flex justify-center">
-            <Tabs
-              selectedKey={activeTab}
-              onSelectionChange={(key) => setActiveTab(key as string)}
-              variant="secondary"
-              className="w-full max-w-4xl"
-            >
-              <Tabs.ListContainer className="border-default-100 border-b bg-transparent p-0">
-                <Tabs.List aria-label="Moment Date Filters" className="gap-6 sm:gap-8">
-                  <Tabs.Tab id="all" className="h-12 px-1 text-sm font-medium">
-                    All
-                    <Tabs.Indicator />
-                  </Tabs.Tab>
-                  <Tabs.Tab id="today" className="h-12 px-1 text-sm font-medium">
-                    Today
-                    <Tabs.Indicator />
-                  </Tabs.Tab>
-                  <Tabs.Tab id="yesterday" className="h-12 px-1 text-sm font-medium">
-                    Yesterday
-                    <Tabs.Indicator />
-                  </Tabs.Tab>
-                  <Tabs.Tab id="week" className="h-12 px-1 text-sm font-medium">
-                    This Week
-                    <Tabs.Indicator />
-                  </Tabs.Tab>
-                  <Tabs.Tab id="month" className="h-12 px-1 text-sm font-medium">
-                    This Month
-                    <Tabs.Indicator />
-                  </Tabs.Tab>
-                </Tabs.List>
-              </Tabs.ListContainer>
-            </Tabs>
+    <main className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+      <header className="flex flex-col items-center text-center">
+        <motion.div {...revealInView(0, 10)}>
+          <Chip color="default" size="sm" variant="secondary">
+            Moments
+          </Chip>
+        </motion.div>
+        <motion.div {...revealInView(0.06)}>
+          <Typography
+            type="h1"
+            weight="bold"
+            className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] tracking-[-0.05em]"
+          >
+            This &amp; That
+          </Typography>
+        </motion.div>
+        <motion.div {...revealInView(0.12, 14)}>
+          <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
+            Small observations, passing fascinations, and things worth keeping close.
+          </Typography>
+        </motion.div>
+      </header>
+
+      <motion.div className="mx-auto mt-12 w-full max-w-2xl" {...revealInView(0.18, 16)}>
+        <Tabs selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(key as Timeframe)}>
+          <Tabs.ListContainer>
+            <Tabs.List aria-label="Filter moments by date">
+              {timeframes.map((timeframe) => (
+                <Tabs.Tab key={timeframe.id} id={timeframe.id}>
+                  {timeframe.label}
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+              ))}
+            </Tabs.List>
+          </Tabs.ListContainer>
+        </Tabs>
+      </motion.div>
+
+      <section aria-label="Moments feed" className="mx-auto mt-12 w-full max-w-3xl">
+        {isLoading ? (
+          <div className="flex flex-col gap-6" aria-busy="true" aria-live="polite">
+            {Array.from({ length: 3 }, (_, index) => (
+              <MomentCardSkeleton key={index} />
+            ))}
           </div>
+        ) : isError ? (
+          <EmptyState className="bg-surface-secondary rounded-2xl">
+            <EmptyState.Header>
+              <EmptyState.Title>Moments are taking a moment</EmptyState.Title>
+              <EmptyState.Description className="max-w-sm text-pretty">
+                The feed could not be loaded right now. Please try again.
+              </EmptyState.Description>
+            </EmptyState.Header>
+            <EmptyState.Content>
+              <Button size="sm" variant="secondary" onPress={() => refetch()}>
+                Try again
+              </Button>
+            </EmptyState.Content>
+          </EmptyState>
+        ) : filteredMoments.length === 0 ? (
+          <EmptyState className="bg-surface-secondary rounded-2xl">
+            <EmptyState.Header>
+              <EmptyState.Title>Nothing in this stretch of time</EmptyState.Title>
+              <EmptyState.Description className="max-w-sm text-pretty">
+                Try a wider window to see more notes from the archive.
+              </EmptyState.Description>
+            </EmptyState.Header>
+            {activeTab !== "all" ? (
+              <EmptyState.Content>
+                <Button size="sm" variant="secondary" onPress={() => setActiveTab("all")}>
+                  Show all notes
+                </Button>
+              </EmptyState.Content>
+            ) : null}
+          </EmptyState>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {filteredMoments.map((moment, index) => (
+              <motion.div
+                key={moment.id}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.65,
+                  delay: Math.min(index, 5) * 0.05,
+                  ease: easeOut,
+                }}
+              >
+                <MomentCard moment={moment} />
+              </motion.div>
+            ))}
 
-          {isLoading ? (
-            <div className="flex h-[400px] flex-col items-center justify-center gap-3">
-              <Spinner size="lg" color="accent" />
-              <span className="text-muted-foreground text-sm font-medium">
-                Loading waterfall...
-              </span>
-            </div>
-          ) : isError ? (
-            <div className="flex h-[400px] flex-col items-center justify-center gap-2">
-              <Typography className="text-danger">Failed to load moments feed.</Typography>
-            </div>
-          ) : (
-            <div className="w-full">
-              {filteredMoments.length === 0 ? (
-                <div className="flex h-[300px] flex-col items-center justify-center gap-2 text-center">
-                  <Typography color="muted" type="body-sm" className="font-medium">
-                    No moments found in this timeframe.
-                  </Typography>
-                  <Typography color="muted" type="body-xs">
-                    Try publishing a new moment or choosing a wider timeframe.
-                  </Typography>
-                </div>
-              ) : (
-                <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-                  {filteredMoments.map((moment) => (
-                    <div key={moment.id} className="w-full">
-                      <MomentCard moment={moment} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Right Column: Trending Topics & Market Movers Sidebar (Main 25%, Hidden on Mobile/Tablet) */}
-        <aside className="hidden lg:col-span-4 lg:block xl:col-span-3">
-          <div className="sticky top-32 flex flex-col gap-6">
-            <Widget className="w-full max-w-130">
-              <Widget.Header className="flex flex-row">
-                <Widget.Title className="flex flex-row items-center justify-center gap-1">
-                  <Icon icon="gravity-ui:hashtag" className="text-accent size-4" />
-                  Hot Topics
-                </Widget.Title>
-              </Widget.Header>
-              <Widget.Content className="flex flex-row flex-wrap gap-1">
-                {trendingTopics.map(({ slug, count }) => (
-                  <Chip key={slug}>#{slug}</Chip>
-                ))}
-              </Widget.Content>
-            </Widget>
-
-            {/* Widget 2: Market Movers (Directly renders miniature interactive stock cards!) */}
-            <Card variant="secondary" className="p-5">
-              <Card.Header className="border-default-100/60 flex flex-row items-center gap-2 border-b p-0 pb-3">
-                <Icon icon="gravity-ui:chart-mixed" className="text-accent size-4" />
-                <Typography type="h3" className="text-sm font-semibold">
-                  Market Movers
-                </Typography>
-              </Card.Header>
-              <div className="flex flex-col gap-4 pt-4">
-                {trendingStocks.length === 0 ? (
-                  <span className="text-muted-foreground text-xs italic">
-                    No attached stock trends yet
-                  </span>
-                ) : (
-                  trendingStocks.map(({ symbol }) => (
-                    <div key={symbol} className="w-full">
-                      <StockTrendCard
-                        symbol={symbol}
-                        variant="transparent"
-                        className="border-none p-0 shadow-none"
-                      />
-                    </div>
-                  ))
-                )}
+            {hasMore ? (
+              <div className="flex justify-center pt-2">
+                <Button isPending={isFetchingMore} size="sm" variant="secondary" onPress={loadMore}>
+                  Load more notes
+                </Button>
               </div>
-            </Card>
+            ) : null}
           </div>
-        </aside>
-      </div>
-    </div>
+        )}
+      </section>
+    </main>
   );
 }

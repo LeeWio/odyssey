@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { Tabs, Card, Chip, Skeleton, Typography, Button } from "@heroui/react";
-import { MotionCard, MotionChip, MotionTypography, MotionSurface } from "@/components/ui";
-import { Icon } from "@iconify/react";
-import { useMounted } from "@mantine/hooks";
+import { Tabs, Card, Chip, Skeleton, Typography } from "@heroui/react";
+import { MotionChip, MotionTypography } from "@/components/ui";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Eye, Play } from "@gravity-ui/icons";
+import { Eye } from "@gravity-ui/icons";
 
 // Sub-components from our modular features
 import { BlogFeed } from "@/features/blog";
@@ -32,7 +30,6 @@ function formatDate(value?: string | null) {
 
 export default function ChroniclePage() {
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const mounted = useMounted();
   const [activeTab, setActiveTab] = useState<string>("featured");
 
   const { data: featuredData, isLoading: isFeaturedLoading } = useGetFeaturedPostsQuery({
@@ -48,22 +45,10 @@ export default function ChroniclePage() {
   const recentPosts = recentData?.list ?? [];
 
   const reveal = (delay = 0, distance = 18) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance, filter: "blur(8px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-    transition: { duration: shouldReduceMotion ? 0 : 0.7, delay, ease: easeOut },
+    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
   });
-
-  if (!mounted) {
-    return (
-      <div className="bg-background min-h-screen w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-        <div className="mx-auto w-full max-w-6xl space-y-12">
-          <Skeleton className="h-6 w-32 rounded-full" />
-          <Skeleton className="h-16 w-3/4 rounded-2xl" />
-          <Skeleton className="h-6 w-1/2 rounded-lg" />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
@@ -97,7 +82,6 @@ export default function ChroniclePage() {
           <Tabs
             selectedKey={activeTab}
             onSelectionChange={(key) => setActiveTab(key as string)}
-            variant="secondary"
             className="w-full max-w-4xl"
           >
             <Tabs.ListContainer className="border-default-100 border-b bg-transparent p-0">
@@ -178,20 +162,9 @@ export default function ChroniclePage() {
                               ) : null}
                             </Card.Header>
 
-                            <Card.Footer className="border-default-100/50 mt-8 flex items-center justify-between border-t pt-5">
-                              <div className="flex flex-col">
-                                <span className="text-muted/80 text-xs font-semibold tracking-wider uppercase">
-                                  Published
-                                </span>
-                                <span className="text-foreground mt-0.5 text-xs font-medium">
-                                  {formatDate(featuredPost.publishedAt)}
-                                </span>
-                              </div>
-                              <Button variant="ghost" size="sm" className="rounded-xl font-medium">
-                                Read Essay
-                                <ArrowRight className="size-3.5" />
-                              </Button>
-                            </Card.Footer>
+                            <Typography color="muted" type="body-xs" className="mt-6 tabular-nums">
+                              Published {formatDate(featuredPost.publishedAt)}
+                            </Typography>
                           </div>
                         </div>
                       </Card>

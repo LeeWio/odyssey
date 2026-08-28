@@ -74,29 +74,22 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
     >
       <MotionCard
         variant="secondary"
-        className="group-focus-visible:ring-accent flex h-full flex-col p-5 group-focus-visible:ring-2 sm:p-6"
-        initial={
-          shouldReduceMotion ? false : { opacity: 0, y: 16, scale: 0.985, filter: "blur(3px)" }
-        }
-        whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+        className="group-focus-visible:ring-accent flex h-full flex-col group-focus-visible:ring-2"
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
         whileHover={
           shouldReduceMotion
             ? undefined
             : { y: -2, transition: { duration: motionDuration.interaction, ease: easeOut } }
         }
-        whileTap={
-          shouldReduceMotion
-            ? undefined
-            : { scale: 0.985, transition: { duration: motionDuration.interaction, ease: easeOut } }
-        }
         viewport={{ once: true, amount: 0.2 }}
         transition={{
           delay: shouldReduceMotion ? 0 : Math.min(index, 3) * 0.04,
-          duration: shouldReduceMotion ? 0 : motionDuration.reveal,
+          duration: shouldReduceMotion ? 0 : 0.65,
           ease: easeOut,
         }}
       >
-        <Card.Header className="gap-4 p-0">
+        <Card.Header className="gap-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 flex-wrap gap-2">
               {category ? (
@@ -120,7 +113,7 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
             <Card.Description className="line-clamp-3 leading-6">{post.summary}</Card.Description>
           ) : null}
         </Card.Header>
-        <Card.Footer className="text-muted mt-auto flex flex-wrap items-center justify-between gap-3 p-0 pt-8 text-xs">
+        <Card.Footer className="text-muted mt-auto flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
             <span className="truncate">{getDisplayAuthor(post.authorName)}</span>
             <span>{formatDate(post.createdAt)}</span>
@@ -146,45 +139,38 @@ function FeaturedPost({ post }: { post: PostDigestResponse }) {
     >
       <MotionCard
         variant="tertiary"
-        className="group-focus-visible:ring-accent group-focus-visible:ring-2"
-        initial={shouldReduceMotion ? false : { opacity: 0, y: 16, scale: 0.985 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        className="group-focus-visible:ring-accent flex flex-col group-focus-visible:ring-2"
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
         whileHover={
           shouldReduceMotion
             ? undefined
             : { y: -2, transition: { duration: motionDuration.interaction, ease: easeOut } }
         }
-        whileTap={
-          shouldReduceMotion
-            ? undefined
-            : { scale: 0.985, transition: { duration: motionDuration.interaction, ease: easeOut } }
-        }
         transition={{
-          duration: shouldReduceMotion ? 0 : motionDuration.reveal,
+          duration: shouldReduceMotion ? 0 : 0.65,
           ease: easeOut,
         }}
       >
-        <div className="flex flex-1 flex-col gap-5 p-6 sm:p-8 lg:p-10">
+        <Card.Header>
           <Chip color="accent" size="sm" variant="soft">
             Featured
           </Chip>
-          <Card.Header className="p-0">
-            <Card.Title className="text-3xl leading-tight tracking-normal sm:text-4xl lg:text-5xl">
-              {post.title}
-            </Card.Title>
-            {post.summary ? (
-              <Card.Description className="line-clamp-2 leading-6">{post.summary}</Card.Description>
-            ) : null}
-          </Card.Header>
-          <Card.Footer className="gap-3 p-0">
-            <Typography color="muted" type="body-xs">
-              {getDisplayAuthor(post.authorName)}
-            </Typography>
-            <Typography color="muted" type="body-xs">
-              {formatDate(post.publishedAt)}
-            </Typography>
-          </Card.Footer>
-        </div>
+          <Card.Title className="text-3xl leading-tight tracking-normal sm:text-4xl lg:text-5xl">
+            {post.title}
+          </Card.Title>
+          {post.summary ? (
+            <Card.Description className="line-clamp-2 leading-6">{post.summary}</Card.Description>
+          ) : null}
+        </Card.Header>
+        <Card.Footer className="mt-auto gap-3">
+          <Typography color="muted" type="body-xs">
+            {getDisplayAuthor(post.authorName)}
+          </Typography>
+          <Typography color="muted" type="body-xs">
+            {formatDate(post.publishedAt)}
+          </Typography>
+        </Card.Footer>
       </MotionCard>
     </Link>
   );
@@ -598,9 +584,9 @@ export default function BlogFeed() {
   };
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-4 pt-24 pb-28 sm:px-8 sm:pt-28 lg:px-10 lg:pt-32">
+    <main className="mx-auto w-full max-w-7xl px-6 py-24 sm:px-10 sm:py-32">
       <div className="w-full">
-        <header className="flex w-full flex-col items-start">
+        <header className="flex w-full flex-col items-center text-center">
           <MotionChip
             color="accent"
             size="sm"
@@ -614,7 +600,7 @@ export default function BlogFeed() {
           <MotionTypography
             type="h1"
             weight="bold"
-            className="mt-5 text-5xl leading-[0.98] tracking-normal sm:text-6xl lg:text-7xl"
+            className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.05em]"
             initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -628,7 +614,7 @@ export default function BlogFeed() {
           <MotionTypography
             color="muted"
             type="body"
-            className="mt-5 w-full"
+            className="mt-3 max-w-xl text-balance"
             initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -640,7 +626,7 @@ export default function BlogFeed() {
             Essays on software, design, markets, and the questions that remain useful over time.
           </MotionTypography>
           <MotionLink
-            className="text-accent mt-5 inline-flex cursor-[var(--cursor-interactive)] items-center gap-2 text-sm font-medium no-underline"
+            className="text-accent mt-2 inline-flex cursor-[var(--cursor-interactive)] items-center gap-2 text-sm font-medium no-underline"
             href="/columns"
             whileHover={shouldReduceMotion ? undefined : { x: 2 }}
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
@@ -656,7 +642,7 @@ export default function BlogFeed() {
 
         <section
           aria-label="Browse the archive"
-          className="bg-surface-secondary mt-10 flex flex-col gap-4 rounded-2xl p-3 sm:p-4"
+          className="bg-surface-secondary mx-auto mt-12 flex w-full max-w-6xl flex-col gap-4 rounded-2xl p-3 sm:p-4"
         >
           <SearchField
             fullWidth
@@ -713,7 +699,7 @@ export default function BlogFeed() {
           </div>
         </section>
 
-        <div className="mt-14 grid gap-10 xl:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)] xl:items-start">
+        <div className="mt-12 grid gap-10 xl:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)] xl:items-start">
           <div className="min-w-0">
             <AnimatePresence initial={false} mode="wait">
               {!keyword && !selectedCategoryId && featuredPost ? (
@@ -990,6 +976,6 @@ export default function BlogFeed() {
           </aside>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

@@ -100,27 +100,29 @@ function FriendLinkCard({ link }: { link: FriendLinkResponse }) {
     >
       <Card
         variant="secondary"
-        className="group-hover:bg-surface-secondary h-full gap-4 p-5 transition-colors"
+        className="group-hover:bg-surface-secondary h-full transition-colors"
       >
-        <Card.Header className="flex-row items-center gap-3 p-0">
+        <Card.Header className="flex-row items-center gap-3">
           <Avatar className="border-default-200 shrink-0 border" size="md" variant="soft">
             {avatar ? <Avatar.Image alt={`${link.name} avatar`} src={avatar} /> : null}
             <Avatar.Fallback>{getInitials(link.name) || "L"}</Avatar.Fallback>
           </Avatar>
           <div className="min-w-0 grow">
             <Card.Title className="truncate text-base">{link.name}</Card.Title>
-            <span className="text-muted mt-1 block truncate font-mono text-xs">
+            <Typography color="muted" type="body-xs" className="mt-1 truncate font-mono">
               {new URL(url).hostname}
-            </span>
+            </Typography>
           </div>
           <ArrowUpRight
             aria-hidden="true"
             className="text-muted size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
           />
         </Card.Header>
-        <Card.Description className="line-clamp-3 text-sm leading-6">
-          {link.description || "A fellow traveler worth visiting."}
-        </Card.Description>
+        <Card.Content>
+          <Typography color="muted" type="body-sm" className="line-clamp-3 leading-6">
+            {link.description || "A fellow traveler worth visiting."}
+          </Typography>
+        </Card.Content>
       </Card>
     </a>
   );
@@ -138,7 +140,11 @@ function matchesFriendLink(link: FriendLinkResponse, query: string) {
   return searchable.includes(query);
 }
 
-export function FriendLinksPage() {
+interface FriendLinksPageProps {
+  compact?: boolean;
+}
+
+export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
   const { data: friendLinks = [], error, isLoading, refetch } = useGetPublicFriendLinksQuery();
   const [applyFriendLink, { isLoading: isApplying }] = useApplyFriendLinkMutation();
   const [application, setApplication] = useState<FriendLinkApplication>(EMPTY_APPLICATION);
@@ -193,32 +199,38 @@ export function FriendLinksPage() {
   };
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-6xl">
-        <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-end">
-          <div className="max-w-3xl">
-            <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <Globe aria-hidden="true" className="size-4" />
-              The blogroll
+    <div
+      className={
+        compact ? "w-full" : "bg-background min-h-[100dvh] w-full px-6 py-24 sm:px-10 sm:py-32"
+      }
+    >
+      <div className={compact ? "w-full" : "mx-auto w-full max-w-6xl"}>
+        {!compact ? (
+          <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-end">
+            <div className="max-w-3xl">
+              <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
+                <Globe aria-hidden="true" className="size-4" />
+                The blogroll
+              </div>
+              <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
+                Good places lead to better ideas.
+              </Typography>
+              <Typography color="muted" type="body" className="mt-5 max-w-xl">
+                A small collection of people and projects making thoughtful work on the open web.
+              </Typography>
             </div>
-            <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-              Good places lead to better ideas.
-            </Typography>
-            <Typography color="muted" type="body" className="mt-5 max-w-xl">
-              A small collection of people and projects making thoughtful work on the open web.
-            </Typography>
-          </div>
-          <div className="border-default-200 border-l pl-5 sm:pl-6">
-            <Typography className="font-mono text-3xl tabular-nums" type="body">
-              {validLinks.length.toLocaleString("en-US")}
-            </Typography>
-            <Typography color="muted" type="body-sm" className="mt-1">
-              places to visit
-            </Typography>
-          </div>
-        </header>
+            <div className="border-default-200 border-l pl-5 sm:pl-6">
+              <Typography className="font-mono text-3xl tabular-nums" type="body">
+                {validLinks.length.toLocaleString("en-US")}
+              </Typography>
+              <Typography color="muted" type="body-sm" className="mt-1">
+                places to visit
+              </Typography>
+            </div>
+          </header>
+        ) : null}
 
-        <section aria-label="Friend links" className="mt-14">
+        <section aria-label="Friend links" className={compact ? "" : "mt-14"}>
           {!isLoading && !error && validLinks.length > 0 ? (
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <SearchField
@@ -311,7 +323,9 @@ export function FriendLinksPage() {
           ) : null}
         </section>
 
-        <section className="border-default-200 mt-20 grid gap-10 border-t pt-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(23rem,0.7fr)] lg:gap-16">
+        <section
+          className={`border-default-200 grid gap-10 border-t pt-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(23rem,0.7fr)] lg:gap-16 ${compact ? "mt-16" : "mt-20"}`}
+        >
           <div className="max-w-xl">
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
               <CircleLink aria-hidden="true" className="size-4" />

@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import type { EmblaCarouselType } from "embla-carousel";
 import { Carousel } from "@heroui-pro/react/carousel";
 import { Card, Chip, Typography } from "@heroui/react";
-import { Icon } from "@iconify/react";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -54,9 +53,14 @@ const GALLERY_ITEMS = [
   },
 ];
 
-export function GalleryPage() {
+interface GalleryPageProps {
+  compact?: boolean;
+}
+
+export function GalleryPage({ compact = false }: GalleryPageProps) {
   const [api, setApi] = useState<EmblaCarouselType>();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
 
   // Sync state with Embla programmatic selection
   useEffect(() => {
@@ -79,148 +83,110 @@ export function GalleryPage() {
   const activePhoto = GALLERY_ITEMS[currentIndex] || GALLERY_ITEMS[0];
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-5xl">
-        {/* Header */}
+    <main className={compact ? "w-full" : "mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32"}>
+      {!compact ? (
         <motion.header
-          initial={{ opacity: 0, y: 15 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: easeOut }}
-          className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
+          transition={{ duration: 0.65, ease: easeOut }}
+          className="flex flex-col items-center text-center"
         >
-          <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <Icon icon="gravity-ui:camera" className="text-accent size-3" />
-            Medium Format Portfolio
+          <Chip color="accent" size="sm" variant="soft">
+            Gallery
           </Chip>
           <Typography
             type="h1"
             weight="bold"
-            className="mt-4 text-4xl leading-tight text-balance sm:text-5xl"
+            className="mt-4 max-w-3xl text-4xl leading-tight tracking-tight text-balance sm:text-5xl"
           >
             Analog Observances
           </Typography>
-          <Typography color="muted" type="body" className="mt-4 max-w-xl leading-relaxed">
-            Slow, deliberate framing of landscapes and quiet geometry captured exclusively on
-            medium-format analog film.
+          <Typography color="muted" type="body" className="mt-4 max-w-xl text-balance">
+            Slow, deliberate framing of landscapes and quiet geometry captured on medium-format
+            film.
           </Typography>
         </motion.header>
+      ) : null}
 
-        {/* Museum-style Layout Split */}
-        <div className="mt-10 grid items-start gap-8 md:grid-cols-12">
-          {/* Left Panel: Carousel Slider */}
-          <div className="flex w-full flex-col items-center md:col-span-7">
-            <Carousel setApi={setApi} opts={{ loop: true }} type="in-place" className="w-full">
-              <Carousel.Content>
-                {GALLERY_ITEMS.map((item) => (
-                  <Carousel.Item key={item.src}>
-                    <div className="border-default-200/40 relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-3xl border bg-black/10 shadow-sm">
-                      <Image
-                        fill
-                        alt={item.alt}
-                        className="h-full w-full object-cover select-none"
-                        draggable={false}
-                        src={item.src}
-                      />
-                    </div>
-                  </Carousel.Item>
-                ))}
-              </Carousel.Content>
-              <Carousel.Previous className="left-4" />
-              <Carousel.Next className="right-4" />
-              <Carousel.Dots className="mt-4" />
+      <motion.section
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.65, ease: easeOut, delay: shouldReduceMotion ? 0 : 0.08 }}
+        className={`${compact ? "" : "mt-12"}grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]`}
+      >
+        <Carousel setApi={setApi} opts={{ loop: true }} type="in-place" className="w-full">
+          <Carousel.Content>
+            {GALLERY_ITEMS.map((item) => (
+              <Carousel.Item key={item.src}>
+                <Card className="overflow-hidden p-0" variant="transparent">
+                  <div className="relative aspect-[4/3]">
+                    <Image
+                      fill
+                      alt={item.alt}
+                      className="object-cover select-none"
+                      draggable={false}
+                      sizes="(min-width: 1024px) 720px, 100vw"
+                      src={item.src}
+                    />
+                  </div>
+                </Card>
+              </Carousel.Item>
+            ))}
+          </Carousel.Content>
+          <Carousel.Previous className="left-4" />
+          <Carousel.Next className="right-4" />
+          <Carousel.Dots className="mt-4" />
+          <Carousel.Thumbnails className="mt-6">
+            {GALLERY_ITEMS.map((item, index) => (
+              <Carousel.Thumbnail key={item.src} index={index} src={item.src} alt={item.alt} />
+            ))}
+          </Carousel.Thumbnails>
+        </Carousel>
 
-              <Carousel.Thumbnails className="mt-6">
-                {GALLERY_ITEMS.map((item, i) => (
-                  <Carousel.Thumbnail key={item.src} index={i} src={item.src} alt={item.alt} />
-                ))}
-              </Carousel.Thumbnails>
-            </Carousel>
-          </div>
-
-          {/* Right Panel: Museum Plate Metadata Metadata Details Card */}
-          <Card
-            variant="secondary"
-            className="border-default-200/50 bg-surface-secondary/20 flex min-h-[420px] flex-col justify-between rounded-2xl border p-6 shadow-sm md:col-span-5"
-          >
-            <div className="flex flex-col gap-6">
-              {/* Photo Title */}
-              <div>
-                <div className="text-muted/60 mb-2 flex items-center gap-2 font-mono text-[10px] font-bold tracking-wider uppercase">
-                  <Icon icon="gravity-ui:eye" className="text-accent size-3.5" />
-                  MUSEUM PLATE
+        <Card className="flex h-full flex-col" variant="secondary">
+          <Card.Header>
+            <Typography color="muted" type="body-xs" className="font-mono tracking-wide">
+              From the frame
+            </Typography>
+            <Card.Title className="mt-2 text-balance">{activePhoto.title}</Card.Title>
+            <Card.Description className="mt-3 line-clamp-3 leading-relaxed">
+              {activePhoto.description}
+            </Card.Description>
+          </Card.Header>
+          <Card.Content>
+            <dl className="flex flex-col gap-5">
+              {[
+                ["Location", activePhoto.location],
+                ["Camera", activePhoto.camera],
+                ["Film", activePhoto.film],
+              ].map(([label, value]) => (
+                <div key={label} className="flex flex-col gap-1">
+                  <dt>
+                    <Typography color="muted" type="body-xs" className="font-mono tracking-wide">
+                      {label}
+                    </Typography>
+                  </dt>
+                  <dd>
+                    <Typography type="body" weight="medium">
+                      {value}
+                    </Typography>
+                  </dd>
                 </div>
-                <Typography type="h3" weight="bold" className="text-foreground tracking-tight">
-                  {activePhoto.title}
-                </Typography>
-              </div>
-
-              {/* Photo Description */}
-              <div>
-                <Typography
-                  color="muted"
-                  type="body"
-                  className="text-foreground/85 text-sm leading-relaxed"
-                >
-                  {activePhoto.description}
-                </Typography>
-              </div>
-
-              {/* Telemetry metadata tags */}
-              <div className="border-default-100/60 flex flex-col gap-3.5 border-t pt-5">
-                {/* Location */}
-                <div className="flex items-center gap-3 text-xs">
-                  <div className="bg-default-100 text-default-500 flex size-7 shrink-0 items-center justify-center rounded-lg">
-                    <Icon icon="gravity-ui:map-pin" className="size-3.5" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-muted/60 font-mono text-[9px] font-bold tracking-wider uppercase">
-                      Location
-                    </span>
-                    <span className="text-foreground font-semibold">{activePhoto.location}</span>
-                  </div>
-                </div>
-
-                {/* Camera */}
-                <div className="flex items-center gap-3 text-xs">
-                  <div className="bg-default-100 text-default-500 flex size-7 shrink-0 items-center justify-center rounded-lg">
-                    <Icon icon="gravity-ui:camera" className="size-3.5" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-muted/60 font-mono text-[9px] font-bold tracking-wider uppercase">
-                      Camera Rig
-                    </span>
-                    <span className="text-foreground font-semibold">{activePhoto.camera}</span>
-                  </div>
-                </div>
-
-                {/* Film Stock */}
-                <div className="flex items-center gap-3 text-xs">
-                  <div className="bg-default-100 text-default-500 flex size-7 shrink-0 items-center justify-center rounded-lg">
-                    <Icon icon="gravity-ui:video" className="size-3.5" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-muted/60 font-mono text-[9px] font-bold tracking-wider uppercase">
-                      Film Stock
-                    </span>
-                    <span className="text-foreground font-semibold">{activePhoto.film}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Index telemetry indicator */}
-            <div className="border-default-100 text-muted/50 mt-6 flex items-center justify-between border-t border-dashed pt-4 font-mono text-[11px] font-semibold">
-              <span className="flex items-center gap-1.5 uppercase">
-                <Icon icon="gravity-ui:picture" className="text-accent size-3.5" />
-                FRAME
-              </span>
-              <span className="text-foreground">
-                {currentIndex + 1} / {GALLERY_ITEMS.length}
-              </span>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </div>
+              ))}
+            </dl>
+          </Card.Content>
+          <Card.Footer className="mt-auto flex items-center justify-between">
+            <Typography color="muted" type="body-xs" className="font-mono tracking-wide">
+              Frame
+            </Typography>
+            <Typography type="body-sm" weight="medium" className="tabular-nums">
+              {String(currentIndex + 1).padStart(2, "0")} /{" "}
+              {String(GALLERY_ITEMS.length).padStart(2, "0")}
+            </Typography>
+          </Card.Footer>
+        </Card>
+      </motion.section>
+    </main>
   );
 }

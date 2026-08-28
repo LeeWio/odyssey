@@ -29,7 +29,7 @@ function getGrainientProps(seed: string) {
     blendAngle,
     rotationAmount,
     zoom,
-    grainAmount: 0.05,
+    grainAmount: 0,
     timeSpeed: 0.12,
   };
 }

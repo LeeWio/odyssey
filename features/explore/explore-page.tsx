@@ -7,7 +7,6 @@ import {
   Calendar,
   Eye,
   Hashtag,
-  Layers,
   Xmark,
 } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
@@ -27,6 +26,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { motion, useReducedMotion } from "motion/react";
 
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import type { PostResponse } from "@/features/blog";
@@ -192,6 +192,7 @@ function ExploreSearchField({
 export function ExplorePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const selectedCategoryId = parsePositiveInteger(searchParams.get("category"));
   const selectedTagId = parsePositiveInteger(searchParams.get("tag"));
   const page = Math.max(0, (parsePositiveInteger(searchParams.get("page")) ?? 1) - 1);
@@ -271,279 +272,300 @@ export function ExplorePage() {
     ? `Results for “${normalizedQuery}”`
     : selectedCategory?.name || selectedTag?.name || "All writing";
 
+  const revealInView = (delay = 0, distance = 20) => ({
+    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.3 },
+    transition: {
+      duration: shouldReduceMotion ? 0 : 0.65,
+      delay,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  });
+
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-6xl">
-        <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-end">
-          <div className="max-w-3xl">
-            <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <Layers aria-hidden="true" className="size-4" />
-              Explore the archive
+    <main className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+      <header className="flex flex-col items-center text-center">
+        <motion.div {...revealInView(0, 10)}>
+          <Chip color="default" size="sm" variant="secondary">
+            Explore
+          </Chip>
+        </motion.div>
+        <motion.div {...revealInView(0.06)}>
+          <Typography
+            type="h1"
+            weight="bold"
+            className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[1.02] tracking-[-0.05em] text-balance"
+          >
+            Find the thread to follow.
+          </Typography>
+        </motion.div>
+        <motion.div {...revealInView(0.12, 14)}>
+          <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
+            Browse writing by subject, follow the tags that recur, or search for the question you
+            have in mind.
+          </Typography>
+        </motion.div>
+      </header>
+
+      <motion.section
+        aria-label="Explore filters"
+        className="border-default-200 mt-12 border-y py-7"
+        {...revealInView(0.18, 16)}
+      >
+        <ExploreSearchField
+          key={queryFromUrl}
+          initialQuery={queryFromUrl}
+          onQueryChange={(query) => updateSearch({ page: undefined, q: query || undefined })}
+        />
+
+        <div className="mt-7 grid gap-7">
+          <div className="min-w-0">
+            <div className="mb-3 flex items-center gap-2">
+              <BookOpen aria-hidden="true" className="text-muted size-4" />
+              <Typography type="body-sm" weight="semibold">
+                Topics
+              </Typography>
             </div>
-            <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-              Find the thread to follow.
-            </Typography>
-            <Typography color="muted" type="body" className="mt-5 max-w-xl">
-              Browse writing by subject, follow the tags that recur, or search for the question you
-              have in mind.
-            </Typography>
-          </div>
-          <div className="border-default-200 border-l pl-5 sm:pl-6">
-            <Typography className="font-mono text-3xl tabular-nums" type="body">
-              {(facetsQuery.data?.totalPublishedCount ?? 0).toLocaleString("en-US")}
-            </Typography>
-            <Typography color="muted" type="body-sm" className="mt-1">
-              published pieces to explore
-            </Typography>
-          </div>
-        </header>
-
-        <section aria-label="Explore filters" className="border-default-200 mt-14 border-y py-7">
-          <ExploreSearchField
-            key={queryFromUrl}
-            initialQuery={queryFromUrl}
-            onQueryChange={(query) => updateSearch({ page: undefined, q: query || undefined })}
-          />
-
-          <div className="mt-7 grid gap-7">
-            <div className="min-w-0">
-              <div className="mb-3 flex items-center gap-2">
-                <BookOpen aria-hidden="true" className="text-muted size-4" />
-                <Typography type="body-sm" weight="semibold">
-                  Topics
-                </Typography>
+            {facetsQuery.isLoading ? (
+              <div className="flex gap-2">
+                {["w-20", "w-28", "w-24", "w-32"].map((width) => (
+                  <Skeleton key={width} className={`h-8 ${width} rounded-full`} />
+                ))}
               </div>
-              {facetsQuery.isLoading ? (
-                <div className="flex gap-2">
-                  {["w-20", "w-28", "w-24", "w-32"].map((width) => (
-                    <Skeleton key={width} className={`h-8 ${width} rounded-full`} />
-                  ))}
-                </div>
-              ) : categories.length > 0 ? (
-                <TagGroup
-                  aria-label="Filter writing by topic"
-                  selectedKeys={
-                    new Set([selectedCategoryId ? `category-${selectedCategoryId}` : "all"])
-                  }
-                  selectionMode="single"
-                  size="sm"
-                  variant="surface"
-                  onSelectionChange={handleCategoryChange}
-                >
-                  <TagGroup.List className="flex-wrap">
-                    <Tag id="all" textValue="All topics">
-                      All topics
-                      <span className="text-muted text-xs tabular-nums">
-                        {facetsQuery.data?.totalPublishedCount ?? 0}
-                      </span>
-                    </Tag>
-                    {categories.map((category) => (
-                      <Tag
-                        key={category.id}
-                        id={`category-${category.id}`}
-                        textValue={category.name}
-                      >
-                        {category.name}
-                        <span className="text-muted text-xs tabular-nums">{category.count}</span>
-                      </Tag>
-                    ))}
-                  </TagGroup.List>
-                </TagGroup>
-              ) : facetsQuery.isError ? (
-                <Button size="sm" variant="secondary" onPress={() => facetsQuery.refetch()}>
-                  <ArrowRotateLeft aria-hidden="true" className="size-4" />
-                  Reload topics
-                </Button>
-              ) : null}
-            </div>
-
-            <div className="min-w-0">
-              <div className="mb-3 flex items-center gap-2">
-                <Hashtag aria-hidden="true" className="text-muted size-4" />
-                <Typography type="body-sm" weight="semibold">
-                  Tags
-                </Typography>
-              </div>
-              {facetsQuery.isLoading ? (
-                <div className="flex gap-2">
-                  {["w-16", "w-24", "w-20", "w-28", "w-20"].map((width, index) => (
-                    <Skeleton key={`${width}-${index}`} className={`h-8 ${width} rounded-full`} />
-                  ))}
-                </div>
-              ) : tags.length > 0 ? (
-                <TagGroup
-                  aria-label="Filter writing by tag"
-                  selectedKeys={new Set([selectedTagId ? `tag-${selectedTagId}` : "all"])}
-                  selectionMode="single"
-                  size="sm"
-                  variant="surface"
-                  onSelectionChange={handleTagChange}
-                >
-                  <TagGroup.List className="flex-wrap">
-                    <Tag id="all" textValue="All tags">
-                      All tags
-                    </Tag>
-                    {tags.map((tag) => (
-                      <Tag key={tag.id} id={`tag-${tag.id}`} textValue={tag.name}>
-                        #{tag.name}
-                        <span className="text-muted text-xs tabular-nums">{tag.count}</span>
-                      </Tag>
-                    ))}
-                  </TagGroup.List>
-                </TagGroup>
-              ) : null}
-            </div>
-
-            <div className="border-default-200 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-muted flex items-center gap-2 text-sm">
-                <Calendar aria-hidden="true" className="size-4" />
-                Prefer to browse the notebook by when it was published?
-              </div>
-              <Link
-                className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
-                href="/archive"
+            ) : categories.length > 0 ? (
+              <TagGroup
+                aria-label="Filter writing by topic"
+                selectedKeys={
+                  new Set([selectedCategoryId ? `category-${selectedCategoryId}` : "all"])
+                }
+                selectionMode="single"
+                size="sm"
+                variant="surface"
+                onSelectionChange={handleCategoryChange}
               >
-                Browse by date
-                <ArrowRight aria-hidden="true" className="size-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="explore-results"
-          aria-busy={postsQuery.isFetching}
-          aria-labelledby="explore-results-title"
-          className="scroll-mt-28 pt-14"
-        >
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <Typography id="explore-results-title" type="h2" weight="semibold">
-                {resultsTitle}
-              </Typography>
-              <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
-                {postsQuery.data
-                  ? `${postsQuery.data.total.toLocaleString("en-US")} articles found`
-                  : "Searching the archive"}
-              </Typography>
-            </div>
-            {hasActiveFilters ? (
-              <Button size="sm" variant="ghost" onPress={clearFilters}>
-                <Xmark aria-hidden="true" className="size-4" />
-                Clear filters
+                <TagGroup.List className="flex-wrap">
+                  <Tag id="all" textValue="All topics">
+                    All topics
+                    <span className="text-muted text-xs tabular-nums">
+                      {facetsQuery.data?.totalPublishedCount ?? 0}
+                    </span>
+                  </Tag>
+                  {categories.map((category) => (
+                    <Tag key={category.id} id={`category-${category.id}`} textValue={category.name}>
+                      {category.name}
+                      <span className="text-muted text-xs tabular-nums">{category.count}</span>
+                    </Tag>
+                  ))}
+                </TagGroup.List>
+              </TagGroup>
+            ) : facetsQuery.isError ? (
+              <Button size="sm" variant="secondary" onPress={() => facetsQuery.refetch()}>
+                <ArrowRotateLeft aria-hidden="true" className="size-4" />
+                Reload topics
               </Button>
             ) : null}
           </div>
 
-          {postsQuery.isLoading ? <ExploreSkeleton /> : null}
+          <div className="min-w-0">
+            <div className="mb-3 flex items-center gap-2">
+              <Hashtag aria-hidden="true" className="text-muted size-4" />
+              <Typography type="body-sm" weight="semibold">
+                Tags
+              </Typography>
+            </div>
+            {facetsQuery.isLoading ? (
+              <div className="flex gap-2">
+                {["w-16", "w-24", "w-20", "w-28", "w-20"].map((width, index) => (
+                  <Skeleton key={`${width}-${index}`} className={`h-8 ${width} rounded-full`} />
+                ))}
+              </div>
+            ) : tags.length > 0 ? (
+              <TagGroup
+                aria-label="Filter writing by tag"
+                selectedKeys={new Set([selectedTagId ? `tag-${selectedTagId}` : "all"])}
+                selectionMode="single"
+                size="sm"
+                variant="surface"
+                onSelectionChange={handleTagChange}
+              >
+                <TagGroup.List className="flex-wrap">
+                  <Tag id="all" textValue="All tags">
+                    All tags
+                  </Tag>
+                  {tags.map((tag) => (
+                    <Tag key={tag.id} id={`tag-${tag.id}`} textValue={tag.name}>
+                      #{tag.name}
+                      <span className="text-muted text-xs tabular-nums">{tag.count}</span>
+                    </Tag>
+                  ))}
+                </TagGroup.List>
+              </TagGroup>
+            ) : null}
+          </div>
 
-          {!postsQuery.isLoading && postsQuery.isError ? (
-            <EmptyState size="lg">
-              <EmptyState.Header>
-                <EmptyState.Media variant="icon">
-                  <BookOpen aria-hidden="true" />
-                </EmptyState.Media>
-                <EmptyState.Title>The archive is unavailable</EmptyState.Title>
-                <EmptyState.Description>
-                  The selected writing could not be loaded. Please try again in a moment.
-                </EmptyState.Description>
-              </EmptyState.Header>
+          <div className="border-default-200 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-muted flex items-center gap-2 text-sm">
+              <Calendar aria-hidden="true" className="size-4" />
+              Prefer to browse the notebook by when it was published?
+            </div>
+            <Link
+              className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
+              href="/archive"
+            >
+              Browse by date
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </Link>
+          </div>
+        </div>
+      </motion.section>
+
+      <motion.section
+        id="explore-results"
+        aria-busy={postsQuery.isFetching}
+        aria-labelledby="explore-results-title"
+        className="scroll-mt-28 pt-14"
+        {...revealInView(0.22, 20)}
+      >
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <Typography id="explore-results-title" type="h2" weight="semibold">
+              {resultsTitle}
+            </Typography>
+            <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
+              {postsQuery.data
+                ? `${postsQuery.data.total.toLocaleString("en-US")} articles found`
+                : "Searching the archive"}
+            </Typography>
+          </div>
+          {hasActiveFilters ? (
+            <Button size="sm" variant="ghost" onPress={clearFilters}>
+              <Xmark aria-hidden="true" className="size-4" />
+              Clear filters
+            </Button>
+          ) : null}
+        </div>
+
+        {postsQuery.isLoading ? <ExploreSkeleton /> : null}
+
+        {!postsQuery.isLoading && postsQuery.isError ? (
+          <EmptyState size="lg">
+            <EmptyState.Header>
+              <EmptyState.Media variant="icon">
+                <BookOpen aria-hidden="true" />
+              </EmptyState.Media>
+              <EmptyState.Title>The archive is unavailable</EmptyState.Title>
+              <EmptyState.Description>
+                The selected writing could not be loaded. Please try again in a moment.
+              </EmptyState.Description>
+            </EmptyState.Header>
+            <EmptyState.Content>
+              <Button variant="outline" onPress={() => postsQuery.refetch()}>
+                <ArrowRotateLeft aria-hidden="true" />
+                Try again
+              </Button>
+            </EmptyState.Content>
+          </EmptyState>
+        ) : null}
+
+        {!postsQuery.isLoading && !postsQuery.isError && posts.length === 0 ? (
+          <EmptyState size="lg">
+            <EmptyState.Header>
+              <EmptyState.Media variant="icon">
+                <BookOpen aria-hidden="true" />
+              </EmptyState.Media>
+              <EmptyState.Title>No writing matches these filters</EmptyState.Title>
+              <EmptyState.Description>
+                Try another phrase or widen the topics and tags you are browsing.
+              </EmptyState.Description>
+            </EmptyState.Header>
+            {hasActiveFilters ? (
               <EmptyState.Content>
-                <Button variant="outline" onPress={() => postsQuery.refetch()}>
-                  <ArrowRotateLeft aria-hidden="true" />
-                  Try again
+                <Button variant="outline" onPress={clearFilters}>
+                  Clear filters
                 </Button>
               </EmptyState.Content>
-            </EmptyState>
-          ) : null}
+            ) : null}
+          </EmptyState>
+        ) : null}
 
-          {!postsQuery.isLoading && !postsQuery.isError && posts.length === 0 ? (
-            <EmptyState size="lg">
-              <EmptyState.Header>
-                <EmptyState.Media variant="icon">
-                  <BookOpen aria-hidden="true" />
-                </EmptyState.Media>
-                <EmptyState.Title>No writing matches these filters</EmptyState.Title>
-                <EmptyState.Description>
-                  Try another phrase or widen the topics and tags you are browsing.
-                </EmptyState.Description>
-              </EmptyState.Header>
-              {hasActiveFilters ? (
-                <EmptyState.Content>
-                  <Button variant="outline" onPress={clearFilters}>
-                    Clear filters
-                  </Button>
-                </EmptyState.Content>
-              ) : null}
-            </EmptyState>
-          ) : null}
+        {!postsQuery.isLoading && !postsQuery.isError && posts.length > 0 ? (
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post, index) => (
+              <motion.div
+                key={post.id}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.65,
+                  delay: Math.min(index, 5) * 0.05,
+                  ease: [0.22, 1, 0.36, 1] as const,
+                }}
+              >
+                <ExplorePostCard post={post} />
+              </motion.div>
+            ))}
+          </div>
+        ) : null}
 
-          {!postsQuery.isLoading && !postsQuery.isError && posts.length > 0 ? (
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {posts.map((post) => (
-                <ExplorePostCard key={post.id} post={post} />
-              ))}
-            </div>
-          ) : null}
+        {!postsQuery.isLoading && !postsQuery.isError && totalPages > 1 ? (
+          <Pagination className="mt-12 w-full" size="sm">
+            <Pagination.Summary>
+              Showing {startItem}-{endItem} of {postsQuery.data?.total ?? 0}
+            </Pagination.Summary>
+            <Pagination.Content>
+              <Pagination.Item>
+                <Pagination.Previous
+                  isDisabled={page === 0}
+                  onPress={() => handlePageChange(page - 1)}
+                >
+                  <Pagination.PreviousIcon />
+                  <span>Previous</span>
+                </Pagination.Previous>
+              </Pagination.Item>
+              {getPageNumbers(page, totalPages).map((value) =>
+                typeof value === "number" ? (
+                  <Pagination.Item key={value}>
+                    <Pagination.Link
+                      isActive={value === page + 1}
+                      onPress={() => handlePageChange(value - 1)}
+                    >
+                      {value}
+                    </Pagination.Link>
+                  </Pagination.Item>
+                ) : (
+                  <Pagination.Item key={value}>
+                    <Pagination.Ellipsis />
+                  </Pagination.Item>
+                )
+              )}
+              <Pagination.Item>
+                <Pagination.Next
+                  isDisabled={page >= totalPages - 1}
+                  onPress={() => handlePageChange(page + 1)}
+                >
+                  <span>Next</span>
+                  <Pagination.NextIcon />
+                </Pagination.Next>
+              </Pagination.Item>
+            </Pagination.Content>
+          </Pagination>
+        ) : null}
+      </motion.section>
 
-          {!postsQuery.isLoading && !postsQuery.isError && totalPages > 1 ? (
-            <Pagination className="mt-12 w-full" size="sm">
-              <Pagination.Summary>
-                Showing {startItem}-{endItem} of {postsQuery.data?.total ?? 0}
-              </Pagination.Summary>
-              <Pagination.Content>
-                <Pagination.Item>
-                  <Pagination.Previous
-                    isDisabled={page === 0}
-                    onPress={() => handlePageChange(page - 1)}
-                  >
-                    <Pagination.PreviousIcon />
-                    <span>Previous</span>
-                  </Pagination.Previous>
-                </Pagination.Item>
-                {getPageNumbers(page, totalPages).map((value) =>
-                  typeof value === "number" ? (
-                    <Pagination.Item key={value}>
-                      <Pagination.Link
-                        isActive={value === page + 1}
-                        onPress={() => handlePageChange(value - 1)}
-                      >
-                        {value}
-                      </Pagination.Link>
-                    </Pagination.Item>
-                  ) : (
-                    <Pagination.Item key={value}>
-                      <Pagination.Ellipsis />
-                    </Pagination.Item>
-                  )
-                )}
-                <Pagination.Item>
-                  <Pagination.Next
-                    isDisabled={page >= totalPages - 1}
-                    onPress={() => handlePageChange(page + 1)}
-                  >
-                    <span>Next</span>
-                    <Pagination.NextIcon />
-                  </Pagination.Next>
-                </Pagination.Item>
-              </Pagination.Content>
-            </Pagination>
-          ) : null}
-        </section>
-
-        <div className="border-default-200 mt-16 flex flex-col gap-3 border-t pt-7 sm:flex-row sm:items-center sm:justify-between">
-          <Typography color="muted" type="body-sm">
-            Prefer a guided sequence? Follow a column from beginning to end.
-          </Typography>
-          <Link
-            className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
-            href="/columns"
-          >
-            Browse columns
-            <ArrowRight aria-hidden="true" className="size-4" />
-          </Link>
-        </div>
+      <div className="border-default-200 mt-16 flex flex-col gap-3 border-t pt-7 sm:flex-row sm:items-center sm:justify-between">
+        <Typography color="muted" type="body-sm">
+          Prefer a guided sequence? Follow a column from beginning to end.
+        </Typography>
+        <Link
+          className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
+          href="/columns"
+        >
+          Browse columns
+          <ArrowRight aria-hidden="true" className="size-4" />
+        </Link>
       </div>
-    </div>
+    </main>
   );
 }

@@ -1,105 +1,115 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Card, Chip, Typography } from "@heroui/react";
-import { usesData } from "./uses-data";
 import { Icon } from "@iconify/react";
 
-export function UsesPage() {
-  return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-4xl">
-        <motion.header
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="border-default-200 grid gap-8 border-b pb-10 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
-        >
-          <div className="max-w-2xl">
-            <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <Icon icon="gravity-ui:briefcase" aria-hidden="true" className="size-4" />
-              Equipment & Tools
-            </div>
-            <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-              What I use on a daily basis.
-            </Typography>
-            <Typography color="muted" type="body" className="mt-5 max-w-xl leading-7">
-              A comprehensive list of the hardware, software, and tools I use to design, write code,
-              and stay productive. This setup evolves over time, but these are the current staples.
-            </Typography>
-          </div>
-          <Chip className="w-fit" size="sm" variant="soft">
-            Updated 2026
-          </Chip>
-        </motion.header>
+import { usesData } from "./uses-data";
 
-        <div className="mt-16 flex flex-col gap-16">
-          {usesData.map((category, index) => (
-            <motion.section
-              key={category.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
+const easeOut = [0.22, 1, 0.36, 1] as const;
+
+interface UsesPageProps {
+  compact?: boolean;
+}
+
+export function UsesPage({ compact = false }: UsesPageProps) {
+  const shouldReduceMotion = useReducedMotion() ?? false;
+  const reveal = (delay = 0, distance = 20) => ({
+    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.25 },
+    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
+  });
+
+  return (
+    <section
+      className={compact ? "w-full" : "mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32"}
+    >
+      {!compact ? (
+        <header className="flex flex-col items-center text-center">
+          <motion.div {...reveal(0, 10)}>
+            <Chip color="default" size="sm" variant="secondary">
+              Uses
+            </Chip>
+          </motion.div>
+          <motion.div {...reveal(0.06)}>
+            <Typography
+              type="h1"
+              weight="bold"
+              className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[1.02] tracking-[-0.05em] text-balance"
             >
-              <div className="mb-8">
-                <Typography type="h2" weight="bold" className="flex items-center gap-3">
+              The tools behind the work.
+            </Typography>
+          </motion.div>
+          <motion.div {...reveal(0.12, 14)}>
+            <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
+              A small, evolving set of hardware and software that makes space for writing, building,
+              and paying attention.
+            </Typography>
+          </motion.div>
+        </header>
+      ) : null}
+
+      <div className={compact ? "flex flex-col gap-16" : "mt-16 flex flex-col gap-20"}>
+        {usesData.map((category, index) => (
+          <motion.section
+            key={category.name}
+            className="grid gap-8 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1.35fr)] lg:gap-12"
+            {...reveal(index * 0.06, 20)}
+          >
+            <header className="self-start lg:sticky lg:top-28">
+              <div className="flex items-center gap-3">
+                <span className="bg-surface-secondary text-muted flex size-10 items-center justify-center rounded-xl">
                   {getCategoryIcon(category.name)}
+                </span>
+                <Typography type="h2" weight="bold" className="tracking-[-0.03em]">
                   {category.name}
                 </Typography>
-                {category.description && (
-                  <Typography color="muted" type="body-sm" className="mt-2">
-                    {category.description}
-                  </Typography>
-                )}
               </div>
+              {category.description ? (
+                <Typography color="muted" type="body-sm" className="mt-4 max-w-sm leading-6">
+                  {category.description}
+                </Typography>
+              ) : null}
+            </header>
 
-              <div className="grid gap-6 sm:grid-cols-2">
-                {category.items.map((item) => (
-                  <Card key={item.name} variant="secondary" className="h-full p-6">
-                    <div className="flex h-full flex-col gap-4">
-                      <div>
-                        <Typography type="h4" weight="semibold">
-                          {item.name}
-                        </Typography>
-                        <Typography color="muted" type="body-sm" className="mt-2 leading-relaxed">
-                          {item.description}
-                        </Typography>
-                      </div>
-
-                      {item.tags && item.tags.length > 0 && (
-                        <div className="mt-auto flex flex-wrap gap-2 pt-4">
-                          {item.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="text-muted/80 bg-default-100 rounded-md px-2 py-0.5 text-xs font-medium"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </motion.section>
-          ))}
-        </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {category.items.map((item) => (
+                <Card key={item.name} className="h-full" variant="secondary">
+                  <Card.Header>
+                    <Card.Title className="text-base">{item.name}</Card.Title>
+                    <Card.Description className="line-clamp-3 leading-6">
+                      {item.description}
+                    </Card.Description>
+                  </Card.Header>
+                  {item.tags?.length ? (
+                    <Card.Footer className="mt-auto flex flex-wrap gap-2">
+                      {item.tags.map((tag) => (
+                        <Chip key={tag} size="sm" variant="tertiary">
+                          {tag}
+                        </Chip>
+                      ))}
+                    </Card.Footer>
+                  ) : null}
+                </Card>
+              ))}
+            </div>
+          </motion.section>
+        ))}
       </div>
-    </div>
+    </section>
   );
 }
 
 function getCategoryIcon(name: string) {
   switch (name) {
     case "Workspace":
-      return <Icon icon="gravity-ui:display" className="text-default-500 size-6" />;
+      return <Icon aria-hidden="true" icon="gravity-ui:display" className="size-5" />;
     case "Coding":
-      return <Icon icon="gravity-ui:terminal" className="text-default-500 size-6" />;
+      return <Icon aria-hidden="true" icon="gravity-ui:terminal" className="size-5" />;
     case "Audio & Video":
-      return <Icon icon="gravity-ui:headphones" className="text-default-500 size-6" />;
+      return <Icon aria-hidden="true" icon="gravity-ui:headphones" className="size-5" />;
     default:
-      return <Icon icon="gravity-ui:layout-cells-large" className="text-default-500 size-6" />;
+      return <Icon aria-hidden="true" icon="gravity-ui:layout-cells-large" className="size-5" />;
   }
 }

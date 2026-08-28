@@ -108,7 +108,6 @@ export function ContentInteroperabilityDialog() {
             <Modal.Body className="gap-4">
               <Tabs
                 selectedKey={mode}
-                variant="secondary"
                 onSelectionChange={(key) => {
                   setMode(String(key) as "import" | "export");
                   setAnalysis(null);

@@ -167,11 +167,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
         </Card.Header>
 
         <Card.Content className="p-0">
-          <Tabs
-            selectedKey={selectedTab}
-            variant="secondary"
-            onSelectionChange={handleSelectionChange}
-          >
+          <Tabs selectedKey={selectedTab} onSelectionChange={handleSelectionChange}>
             <Tabs.ListContainer>
               <Tabs.List aria-label="Article suggestions">
                 <Tabs.Tab id="related">

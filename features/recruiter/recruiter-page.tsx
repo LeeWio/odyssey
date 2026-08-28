@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion } from "motion/react";
-import { Card, Chip, Typography, Button } from "@heroui/react";
+import { Button, Card, Chip, Label, SearchField, Typography } from "@heroui/react";
 import { KPI } from "@heroui-pro/react/kpi";
 import { DataGrid, type DataGridColumn } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
@@ -65,7 +65,11 @@ const EXPERIENCE_DATABASE: ExperienceItem[] = [
 
 type HiringProfile = "systems" | "frontend" | "creative";
 
-export function RecruiterPage() {
+interface RecruiterPageProps {
+  compact?: boolean;
+}
+
+export function RecruiterPage({ compact = false }: RecruiterPageProps) {
   const [profile, setProfile] = useState<HiringProfile>("systems");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -245,8 +249,10 @@ export function RecruiterPage() {
   }, [searchQuery]);
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-5xl">
+    <section
+      className={compact ? "w-full" : "mx-auto w-full max-w-5xl px-6 py-24 sm:px-10 sm:py-32"}
+    >
+      <div className="w-full">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: 15 }}
@@ -409,20 +415,20 @@ export function RecruiterPage() {
               </span>
             </div>
 
-            {/* Search Input bar */}
-            <div className="relative flex w-full max-w-xs shrink-0 items-center">
-              <Icon
-                icon="gravity-ui:magnifier"
-                className="text-muted/40 pointer-events-none absolute left-3 size-4"
-              />
-              <input
-                type="text"
-                placeholder="Search achievements..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="border-default-200/60 bg-surface-secondary/40 focus:border-accent/40 w-full rounded-xl border py-2 pr-4 pl-9 font-mono text-xs focus:outline-none"
-              />
-            </div>
+            <SearchField
+              fullWidth
+              className="w-full max-w-xs shrink-0"
+              name="experience-search"
+              value={searchQuery}
+              onChange={setSearchQuery}
+            >
+              <Label className="sr-only">Search experience</Label>
+              <SearchField.Group>
+                <SearchField.SearchIcon />
+                <SearchField.Input placeholder="Search achievements" />
+                <SearchField.ClearButton aria-label="Clear experience search" />
+              </SearchField.Group>
+            </SearchField>
           </div>
 
           {/* Experience registry DataGrid */}
@@ -438,6 +444,6 @@ export function RecruiterPage() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

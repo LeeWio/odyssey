@@ -1,8 +1,7 @@
 "use client";
 
-import { Bookmark, Calendar, Person } from "@gravity-ui/icons";
+import { Calendar, Person } from "@gravity-ui/icons";
 import { Chip, Surface, Typography, cn } from "@heroui/react";
-import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import Grainient from "@/components/background/grainient";
@@ -44,7 +43,7 @@ function getGrainientProps(seed: string) {
     blendAngle,
     rotationAmount,
     zoom,
-    grainAmount: 0.05,
+    grainAmount: 0,
     timeSpeed: 0.12,
   };
 }
@@ -88,11 +87,6 @@ export const PostCard = ({
               className="object-cover opacity-60 mix-blend-overlay transition-transform duration-500 group-hover:scale-110"
             />
           )}
-          <div className="absolute top-4 right-4 z-10">
-            <button className="bg-background/20 hover:bg-background/40 flex size-8 items-center justify-center rounded-lg text-white backdrop-blur-md transition-colors">
-              <Bookmark className="size-4" />
-            </button>
-          </div>
         </div>
       )}
 
@@ -192,15 +186,10 @@ export const PostCard = ({
   );
 
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      className={cn("h-full", className)}
-    >
+    <div className={cn("h-full", className)}>
       <Link href={href} className="group block h-full" prefetch={false}>
         {content}
       </Link>
-    </motion.div>
+    </div>
   );
 };
