@@ -2,12 +2,12 @@
 
 import React, { useMemo, useState } from "react";
 import { useGetPublicMomentsQuery } from "@/lib/features/moment";
-import { Spinner, Typography, ScrollShadow, Tabs, Card, Chip } from "@heroui/react";
+import { Spinner, Typography, Tabs, Card, Chip } from "@heroui/react";
 import { useMounted } from "@mantine/hooks";
 import { useNow } from "next-intl";
 import { Icon } from "@iconify/react";
 import { StockTrendCard } from "@/components/stock/stock-trend-card";
-import Masonry from "@/components/ui/masonry";
+import { MomentCard } from "@/features/moment";
 import { Widget } from "@heroui-pro/react";
 
 export default function MomentsPage() {
@@ -97,14 +97,6 @@ export default function MomentsPage() {
     };
   }, [moments]);
 
-  // Map backend moments directly to Masonry items
-  const masonryItems = useMemo(() => {
-    return filteredMoments.map((moment) => ({
-      id: moment.id.toString(),
-      moment,
-    }));
-  }, [filteredMoments]);
-
   if (!mounted) return null;
 
   return (
@@ -161,22 +153,24 @@ export default function MomentsPage() {
             </div>
           ) : (
             <div className="w-full">
-              <ScrollShadow hideScrollBar className="h-auto w-full" size={100}>
-                <div className="relative w-full">
-                  {masonryItems.length === 0 ? (
-                    <div className="flex h-[300px] flex-col items-center justify-center gap-2 text-center">
-                      <Typography color="muted" type="body-sm" className="font-medium">
-                        No moments found in this timeframe.
-                      </Typography>
-                      <Typography color="muted" type="body-xs">
-                        Try publishing a new moment or choosing a wider timeframe.
-                      </Typography>
-                    </div>
-                  ) : (
-                    <Masonry items={masonryItems} />
-                  )}
+              {filteredMoments.length === 0 ? (
+                <div className="flex h-[300px] flex-col items-center justify-center gap-2 text-center">
+                  <Typography color="muted" type="body-sm" className="font-medium">
+                    No moments found in this timeframe.
+                  </Typography>
+                  <Typography color="muted" type="body-xs">
+                    Try publishing a new moment or choosing a wider timeframe.
+                  </Typography>
                 </div>
-              </ScrollShadow>
+              ) : (
+                <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+                  {filteredMoments.map((moment) => (
+                    <div key={moment.id} className="w-full">
+                      <MomentCard moment={moment} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

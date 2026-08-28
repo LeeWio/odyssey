@@ -40,7 +40,7 @@ import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { PencilToSquare, ChevronDown } from "@gravity-ui/icons";
 import GradientText from "@/components/ui/gradient-text";
-import { MomentCard } from "@/features/moment";
+import { FeaturedWriting, MomentsShowcase } from "@/components/home/content-dispatch";
 
 const MotionAccordion = motion.create(Accordion);
 
@@ -133,7 +133,6 @@ export default function Home() {
     { pollingInterval: 3600000, refetchOnFocus: true }
   );
 
-  const [isMessageInputOpen, setIsMessageInputOpen] = useState(false);
   const [isGuestbookPopoverOpen, setIsGuestbookPopoverOpen] = useState(false);
 
   const dispatch = useAppDispatch();
@@ -554,6 +553,9 @@ export default function Home() {
           </div>
         </motion.section>
       </section>
+
+      <FeaturedWriting />
+      <MomentsShowcase />
 
       <section
         id="guestbook"

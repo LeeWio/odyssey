@@ -54,7 +54,7 @@ export function DeviceBreakdownCard({ days }: { days?: number }) {
   const formattedTotal = formatCount(total);
 
   return (
-    <Card className="h-full rounded-2xl">
+    <Card className="h-full">
       <Card.Header>
         <Card.Title className="text-base">Traffic by device</Card.Title>
         <Card.Description>How visitors are reaching your site.</Card.Description>

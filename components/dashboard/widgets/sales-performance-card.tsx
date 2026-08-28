@@ -19,7 +19,7 @@ export function SalesPerformanceCard() {
   }, [data]);
 
   return (
-    <Card className="rounded-2xl">
+    <Card>
       <Card.Header className="flex-row items-center justify-between">
         <Card.Title className="text-base">Traffic Trends (PV/UV)</Card.Title>
         <TrendChip

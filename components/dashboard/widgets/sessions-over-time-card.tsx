@@ -37,7 +37,7 @@ export function SessionsOverTimeCard({ days }: { days?: number }) {
   const trend = growthRate >= 0 ? ("up" as const) : ("down" as const);
 
   return (
-    <Card className="rounded-2xl">
+    <Card>
       <Card.Header className="flex-row items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <Card.Title className="text-base">Sessions over time</Card.Title>

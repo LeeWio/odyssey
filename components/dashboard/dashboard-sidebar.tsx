@@ -1,10 +1,10 @@
 "use client";
 
-import { Chip } from "@heroui/react";
+import { Avatar, Chip } from "@heroui/react";
 import { Sidebar } from "@heroui-pro/react";
 import type { NavItem } from "./nav-items";
 
-import { NAV_GROUPS } from "./nav-items";
+import { FOOTER_ITEMS, NAV_GROUPS } from "./nav-items";
 
 interface DashboardSidebarProps {
   pathname: string;
@@ -20,20 +20,70 @@ export function DashboardSidebar({
   return (
     <>
       <Sidebar>
+        <Sidebar.Header>
+          <div className="flex items-center gap-3 px-1 py-2">
+            <Avatar color="accent" variant="soft" size="sm">
+              <Avatar.Fallback className="font-semibold">O</Avatar.Fallback>
+            </Avatar>
+            <div className="min-w-0" data-sidebar="label">
+              <p className="text-foreground truncate text-sm font-semibold">Odyssey</p>
+              <p className="text-muted truncate text-xs">Personal workspace</p>
+            </div>
+          </div>
+        </Sidebar.Header>
         <SidebarContents
           basePath={basePath}
           disableNavigation={disableNavigation}
           pathname={pathname}
         />
+        <Sidebar.Footer>
+          <Sidebar.Menu aria-label="Workspace actions">
+            {FOOTER_ITEMS.map((item) => (
+              <SidebarNavItem
+                key={item.href}
+                basePath={basePath}
+                disableNavigation={disableNavigation}
+                idPrefix="footer-"
+                item={item}
+                pathname={pathname}
+              />
+            ))}
+          </Sidebar.Menu>
+        </Sidebar.Footer>
         <Sidebar.Rail />
       </Sidebar>
       <Sidebar.Mobile>
+        <Sidebar.Header>
+          <div className="flex items-center gap-3 px-1 py-2">
+            <Avatar color="accent" variant="soft" size="sm">
+              <Avatar.Fallback className="font-semibold">O</Avatar.Fallback>
+            </Avatar>
+            <div className="min-w-0">
+              <p className="text-foreground truncate text-sm font-semibold">Odyssey</p>
+              <p className="text-muted truncate text-xs">Personal workspace</p>
+            </div>
+          </div>
+        </Sidebar.Header>
         <SidebarContents
           basePath={basePath}
           disableNavigation={disableNavigation}
           idPrefix="mobile-"
           pathname={pathname}
         />
+        <Sidebar.Footer>
+          <Sidebar.Menu aria-label="Workspace actions">
+            {FOOTER_ITEMS.map((item) => (
+              <SidebarNavItem
+                key={item.href}
+                basePath={basePath}
+                disableNavigation={disableNavigation}
+                idPrefix="mobile-footer-"
+                item={item}
+                pathname={pathname}
+              />
+            ))}
+          </Sidebar.Menu>
+        </Sidebar.Footer>
       </Sidebar.Mobile>
     </>
   );

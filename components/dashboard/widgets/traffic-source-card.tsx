@@ -14,7 +14,7 @@ function formatYTick(value: number): string {
 
 export function TrafficSourceCard() {
   return (
-    <Card className="rounded-2xl">
+    <Card>
       <Card.Header className="flex-row items-center justify-between">
         <Card.Title className="text-base">Traffic Source</Card.Title>
         <div className="flex items-center gap-4">

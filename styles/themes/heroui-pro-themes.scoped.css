@@ -1129,3 +1129,8 @@ html[data-theme^="brutalism-"] {
   --brutalism-font-display: var(--font-brutalism-display);
   --font-sans: var(--font-brutalism-body);
 }
+html[data-theme^="brutalism-"] {
+  --brutalism-font-body: var(--font-brutalism-body);
+  --brutalism-font-display: var(--font-brutalism-display);
+  --font-sans: var(--font-brutalism-body);
+}

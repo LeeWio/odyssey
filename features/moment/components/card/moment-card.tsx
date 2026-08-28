@@ -145,14 +145,6 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
   // Content and widget parsing
   const { parsedContent, stockSymbol } = useMemo(() => {
     if (!moment) return { parsedContent: defaultContent };
-    console.log(
-      "Moment Card [Debug] - id:",
-      moment.id,
-      "content:",
-      moment.content,
-      "stockSymbol:",
-      moment.stockSymbol
-    );
     return {
       parsedContent: parseMomentContent(moment.content),
       stockSymbol: moment.stockSymbol || undefined,

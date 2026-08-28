@@ -1,6 +1,6 @@
 "use client";
 
-import { Chip, Kbd, toast, type Key } from "@heroui/react";
+import { Chip, Kbd, ToggleButton, ToggleButtonGroup, toast, type Key } from "@heroui/react";
 import { Command, EmptyState } from "@heroui-pro/react";
 import { useHotkeys, useOs } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
@@ -212,36 +212,29 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
         <Command.Container size="lg">
           <Command.Dialog filter={() => true} inputValue={inputValue} onInputChange={setInputValue}>
             <Command.Header className="flex items-start gap-2 px-4">
-              {COMMAND_SCOPES.map((scope) => {
-                const isActive = activeSource === scope.source;
-
-                return (
-                  <Chip
-                    key={scope.label}
-                    aria-pressed={isActive}
-                    color={isActive ? "accent" : "default"}
-                    onClick={() => {
-                      setActiveSource((current) =>
-                        current === scope.source ? null : scope.source
-                      );
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        setActiveSource((current) =>
-                          current === scope.source ? null : scope.source
-                        );
-                      }
-                    }}
-                    role="button"
-                    size="sm"
-                    tabIndex={0}
-                    variant={isActive ? "primary" : "soft"}
-                  >
-                    <Chip.Label>{scope.label}</Chip.Label>
-                  </Chip>
-                );
-              })}
+              <ToggleButtonGroup
+                aria-label="Search scope"
+                className="flex-wrap"
+                disallowEmptySelection={false}
+                isDetached
+                selectedKeys={new Set(activeSource ? [activeSource] : ["all"])}
+                selectionMode="single"
+                size="sm"
+                onSelectionChange={(keys) => {
+                  const selected = [...keys][0];
+                  setActiveSource(
+                    selected === "all" || selected === undefined
+                      ? null
+                      : (selected as CommandSource)
+                  );
+                }}
+              >
+                {COMMAND_SCOPES.map((scope) => (
+                  <ToggleButton key={scope.label} id={scope.source ?? "all"} className="text-xs">
+                    {scope.label}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
             </Command.Header>
 
             <Command.InputGroup>

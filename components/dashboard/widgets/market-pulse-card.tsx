@@ -33,9 +33,7 @@ export function MarketPulseCard() {
                   key={index.symbol}
                   className="bg-surface-secondary ring-border/50 flex flex-col gap-1 rounded-2xl p-4 ring-1"
                 >
-                  <span className="text-muted text-[10px] font-bold tracking-widest uppercase">
-                    {index.name}
-                  </span>
+                  <span className="text-muted text-xs font-medium">{index.name}</span>
                   <div className="flex items-baseline justify-between">
                     <NumberValue
                       className="text-foreground text-lg font-bold tabular-nums"
