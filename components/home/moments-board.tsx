@@ -13,7 +13,7 @@ import ScrollingBanner from "@/components/corners/scrolling-banner";
 type MomentBoardEntry = {
   avatar: string;
   name: string;
-  role: string;
+  timeLabel: string;
   content: MomentResponse["content"];
 };
 
@@ -59,16 +59,20 @@ function MomentBoardCard({ entry, index }: { entry: MomentBoardEntry; index: num
         variant="default"
         className="shadow-small flex w-full max-w-full min-w-0 origin-center cursor-pointer flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-0.5 hover:scale-[1.02]"
       >
-        <Card.Header className="flex flex-row items-center gap-3">
-          <Avatar size="sm">
-            <Avatar.Image alt={entry.name} src={entry.avatar} />
-            <Avatar.Fallback>{fallbackInitials}</Avatar.Fallback>
-          </Avatar>
-          <div className="min-w-0">
-            <Card.Title className="truncate text-sm">{entry.name}</Card.Title>
-            <Typography color="muted" type="body-xs" className="mt-0.5">
-              {entry.role}
-            </Typography>
+        <Card.Header className="flex w-full flex-row items-center justify-between">
+          <div className="flex min-w-0 flex-row items-center gap-2">
+            <Avatar>
+              <Avatar.Image alt={entry.name} src={entry.avatar} />
+              <Avatar.Fallback>{fallbackInitials}</Avatar.Fallback>
+            </Avatar>
+            <div className="flex min-w-0 flex-col">
+              <Typography className="leading-none" weight="bold" truncate align="start" type="body">
+                {entry.name}
+              </Typography>
+              <Typography truncate align="start" type="body-xs" color="muted">
+                {entry.timeLabel}
+              </Typography>
+            </div>
           </div>
         </Card.Header>
         <Card.Content className="min-w-0 overflow-hidden">
@@ -104,7 +108,7 @@ export function MomentsBoard({
       moments.map((moment) => ({
         avatar: moment.authorAvatar || `https://i.pravatar.cc/150?u=moment-${moment.id}`,
         name: moment.authorName || "wei.li",
-        role: `Moment · ${formatRelativeTime(moment.createdAt)}`,
+        timeLabel: formatRelativeTime(moment.createdAt),
         content: moment.content,
       })),
     [moments, formatRelativeTime]
