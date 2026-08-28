@@ -229,10 +229,10 @@ export function MomentsShowcase() {
 
   const { data: moments, isLoading } = useGetPublicMomentsQuery({
     page: 0,
-    size: 8,
+    size: 16,
   });
 
-  const recentMoments = moments?.list.slice(0, 8) ?? [];
+  const recentMoments = moments?.list.slice(0, 16) ?? [];
   if (!isLoading && recentMoments.length === 0) return null;
 
   return (

@@ -123,19 +123,19 @@ const getNavigationItem = (id: NavigationId | null) => {
         title: "Moments framed in flow.",
         description:
           "Brutalist structures, wild coastlines, and silent weather studies collected across slow journeys in Iceland, Europe, and Asia.",
-        href: "/universe",
-        cta: "View Universe Space",
+        href: "/gallery",
+        cta: "View gallery",
       };
     case "more":
       return {
         id: "more" as const,
-        label: "Dashboard",
-        eyebrow: "Operations & telemetry",
-        title: "The personal cockpit.",
+        label: "Archive",
+        eyebrow: "Writing, in sequence",
+        title: "The work, in context.",
         description:
-          "A live dashboard showcasing system health, focus telemetry, code commits, and project workspace actions.",
-        href: "/dashboard",
-        cta: "Launch Workbench",
+          "A chronological path through essays, notes, and the threads that connect them over time.",
+        href: "/archive",
+        cta: "Browse archive",
       };
     default:
       return null;
@@ -199,7 +199,7 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
               <ListBox
                 aria-label="Latest Chronicle notes"
                 selectionMode="none"
-                onAction={(key) => {
+                onAction={() => {
                   onNavigate("/chronicle");
                 }}
               >
@@ -581,59 +581,47 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
   if (id === "more") {
     return (
       <div className="grid gap-4 md:col-span-8 md:grid-cols-4">
-        {/* Field notes */}
+        {/* Moments */}
         <motion.div {...reveal(0)}>
           <Card className="group h-full" variant="tertiary">
             <Card.Header>
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:notebook-pen" className="size-5" />
               </div>
-              <Card.Title>Field Notes</Card.Title>
+              <Card.Title>Moments</Card.Title>
               <Card.Description>
                 Short observations, work-in-progress notes, and things worth keeping close.
               </Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
               <Chip size="sm" variant="soft" color="accent">
-                Notebook
+                Notes
               </Chip>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="ghost"
-                aria-label="Open Field Notes"
-                onPress={() => onNavigate("/dashboard")}
-              >
-                <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
+              <Button size="sm" variant="ghost" onPress={() => onNavigate("/moments")}>
+                Browse notes
               </Button>
             </Card.Footer>
           </Card>
         </motion.div>
 
-        {/* Project 2: Built projects */}
+        {/* Columns */}
         <motion.div {...reveal(1)}>
           <Card className="group h-full" variant="default">
             <Card.Header>
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:blocks" className="size-5" />
               </div>
-              <Card.Title>Built Projects</Card.Title>
+              <Card.Title>Columns</Card.Title>
               <Card.Description>
-                Tools, experiments, and open-source work shaped through practical use.
+                Longer-running threads that follow one idea beyond a single essay.
               </Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
               <Chip size="sm" variant="soft">
-                In progress
+                Series
               </Chip>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="ghost"
-                aria-label="Browse projects"
-                onPress={() => onNavigate("/dashboard")}
-              >
-                <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
+              <Button size="sm" variant="ghost" onPress={() => onNavigate("/columns")}>
+                Browse columns
               </Button>
             </Card.Footer>
           </Card>
@@ -655,43 +643,31 @@ function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProp
               <Chip size="sm" variant="soft" color="accent">
                 Timeline
               </Chip>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="ghost"
-                aria-label="Browse writing by date"
-                onPress={() => onNavigate("/chronicle")}
-              >
-                <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
+              <Button size="sm" variant="ghost" onPress={() => onNavigate("/archive")}>
+                Browse archive
               </Button>
             </Card.Footer>
           </Card>
         </motion.div>
 
-        {/* Project 4: Equipment & Setup */}
+        {/* Tools */}
         <motion.div {...reveal(3)}>
           <Card className="group h-full" variant="default">
             <Card.Header>
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:briefcase" className="size-5" />
               </div>
-              <Card.Title>Equipment</Card.Title>
+              <Card.Title>Uses</Card.Title>
               <Card.Description>
                 The physical hardware, tools, and visual setup behind my daily workflows.
               </Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
               <Chip size="sm" variant="soft">
-                Staples
+                Tools
               </Chip>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="ghost"
-                aria-label="Browse equipment"
-                onPress={() => onNavigate("/persona")}
-              >
-                <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
+              <Button size="sm" variant="ghost" onPress={() => onNavigate("/uses")}>
+                Browse tools
               </Button>
             </Card.Footer>
           </Card>
@@ -1575,7 +1551,7 @@ export const Navbar = () => {
                             <span>
                               <span className="block text-base font-semibold">Archive</span>
                               <span className="text-muted mt-0.5 block text-xs font-normal">
-                                Projects & objects
+                                Essays & notes
                               </span>
                             </span>
                             <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-4" />
