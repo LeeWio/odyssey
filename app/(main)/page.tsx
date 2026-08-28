@@ -236,7 +236,7 @@ export default function Home() {
           </MotionTypography>
         </header>
 
-        <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
           <MotionCard
             variant="secondary"
             className="group relative min-h-[34rem] overflow-hidden lg:col-span-7"

@@ -61,7 +61,7 @@ function MomentBoardCard({ entry, index }: { entry: MomentBoardEntry; index: num
       >
         <Card.Header className="flex w-full flex-row items-center justify-between">
           <div className="flex min-w-0 flex-row items-center gap-2">
-            <Avatar>
+            <Avatar size="sm">
               <Avatar.Image alt={entry.name} src={entry.avatar} />
               <Avatar.Fallback>{fallbackInitials}</Avatar.Fallback>
             </Avatar>
@@ -122,36 +122,29 @@ export function MomentsBoard({
 
   if (isLoading && entries.length === 0) return <MomentsBoardSkeleton />;
 
-  const firstColumn = isMobile ? entries : columns[0];
-
   return (
     <div className="w-full">
       <div className="columns-1 gap-4 sm:columns-2 md:columns-3 lg:columns-4">
-        {[firstColumn, columns[1], columns[2], columns[3]].map((column, index) => (
-          <ScrollingBanner
-            key={index}
-            isVertical
-            className={
-              index === 0
-                ? "w-full min-w-0"
-                : index === 1
-                  ? "hidden w-full min-w-0 sm:flex"
-                  : index === 2
-                    ? "hidden w-full min-w-0 md:flex"
-                    : "hidden w-full min-w-0 lg:flex"
-            }
-            duration={isMobile ? 200 : 150}
-            shouldPauseOnHover
-          >
-            {column.map((entry, entryIndex) => (
-              <MomentBoardCard
-                key={`${entry.name}-${entryIndex}`}
-                entry={entry}
-                index={entryIndex}
-              />
-            ))}
-          </ScrollingBanner>
-        ))}
+        <ScrollingBanner isVertical duration={isMobile ? 200 : 150} shouldPauseOnHover>
+          {(isMobile ? entries : columns[0]).map((entry, index) => (
+            <MomentBoardCard key={`${entry.name}-${index}`} entry={entry} index={index} />
+          ))}
+        </ScrollingBanner>
+        <ScrollingBanner isVertical className="hidden sm:flex" duration={150} shouldPauseOnHover>
+          {columns[1].map((entry, index) => (
+            <MomentBoardCard key={`${entry.name}-${index}`} entry={entry} index={index} />
+          ))}
+        </ScrollingBanner>
+        <ScrollingBanner isVertical className="hidden md:flex" duration={150} shouldPauseOnHover>
+          {columns[2].map((entry, index) => (
+            <MomentBoardCard key={`${entry.name}-${index}`} entry={entry} index={index} />
+          ))}
+        </ScrollingBanner>
+        <ScrollingBanner isVertical className="hidden lg:flex" duration={150} shouldPauseOnHover>
+          {columns[3].map((entry, index) => (
+            <MomentBoardCard key={`${entry.name}-${index}`} entry={entry} index={index} />
+          ))}
+        </ScrollingBanner>
       </div>
     </div>
   );
