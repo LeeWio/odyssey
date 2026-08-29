@@ -1,3 +1,10 @@
+# [1.133.0](https://github.com/LeeWio/odyssey/compare/v1.132.0...v1.133.0) (2026-08-29)
+
+
+### Features
+
+* refine discovery and notification experience ([a5f879f](https://github.com/LeeWio/odyssey/commit/a5f879fd067b16a07d14b382ce8f6eae2aa92dfd))
+
 # [1.132.0](https://github.com/LeeWio/odyssey/compare/v1.131.0...v1.132.0) (2026-08-27)
 
 
