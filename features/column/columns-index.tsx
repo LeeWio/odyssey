@@ -121,18 +121,20 @@ export function ColumnsIndex() {
             ))}
           </div>
         ) : error ? (
-          <Card variant="secondary" className="items-start gap-4 p-7">
+          <Card variant="secondary">
             <Card.Header>
               <Card.Title>Columns are unavailable</Card.Title>
               <Card.Description>Try loading this page again in a moment.</Card.Description>
             </Card.Header>
-            <Button size="sm" variant="secondary" onPress={() => refetch()}>
-              <ArrowRotateRight aria-hidden="true" className="size-4" />
-              Retry
-            </Button>
+            <Card.Footer>
+              <Button size="sm" variant="secondary" onPress={() => refetch()}>
+                <ArrowRotateRight aria-hidden="true" className="size-4" />
+                Retry
+              </Button>
+            </Card.Footer>
           </Card>
         ) : columns.length === 0 ? (
-          <Card variant="secondary" className="items-start gap-3 p-7">
+          <Card variant="secondary">
             <Card.Header>
               <Card.Title>No columns published yet</Card.Title>
               <Card.Description>
@@ -245,7 +247,7 @@ export function ColumnsIndex() {
                 ))}
               </div>
             ) : (
-              <Card variant="secondary" className="mt-6 items-start gap-4 p-7">
+              <Card variant="secondary" className="mt-6">
                 <Card.Header>
                   <Chip size="sm" variant="soft">
                     No matches
@@ -255,9 +257,11 @@ export function ColumnsIndex() {
                     Try a different title, topic, or availability filter.
                   </Card.Description>
                 </Card.Header>
-                <Button size="sm" variant="secondary" onPress={clearFilters}>
-                  Show all columns
-                </Button>
+                <Card.Footer>
+                  <Button size="sm" variant="secondary" onPress={clearFilters}>
+                    Show all columns
+                  </Button>
+                </Card.Footer>
               </Card>
             )}
           </>

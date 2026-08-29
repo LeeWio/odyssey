@@ -35,6 +35,7 @@ function getGrainientProps(seed: string) {
 }
 
 export function ColumnCard({ column }: { column: ColumnResponse }) {
+  const essaysLabel = `${column.postsCount} ${column.postsCount === 1 ? "essay" : "essays"}`;
   const visual = column.coverImage ? (
     <Image
       alt={`${column.name} cover`}
@@ -46,10 +47,7 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
   ) : (
     <div className="relative h-full w-full">
       <Grainient {...getGrainientProps(column.name)} className="absolute inset-0" />
-      <Book
-        aria-hidden="true"
-        className="absolute relative right-6 bottom-5 z-10 size-16 text-white/28"
-      />
+      <Book aria-hidden="true" className="absolute right-6 bottom-5 z-10 size-16 text-white/28" />
     </div>
   );
 
@@ -65,7 +63,7 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
             <Chip size="sm" variant="soft">
               Column
             </Chip>
-            <span className="text-muted text-xs tabular-nums">{column.postsCount} essays</span>
+            <span className="text-muted text-xs tabular-nums">{essaysLabel}</span>
           </div>
           <Card.Title>{column.name}</Card.Title>
           {column.description ? <Card.Description>{column.description}</Card.Description> : null}

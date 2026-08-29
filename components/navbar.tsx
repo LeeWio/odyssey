@@ -715,6 +715,7 @@ export const Navbar = () => {
     panel: 0,
   });
   const { data: unreadNotificationCount = 0 } = useGetUnreadNotificationCountQuery(undefined, {
+    pollingInterval: 60_000,
     skip: !isAuthenticated,
   });
   const activeItem = getNavigationItem(activeNavigation);

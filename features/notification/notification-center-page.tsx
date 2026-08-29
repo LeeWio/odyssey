@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Check, TrashBin } from "@gravity-ui/icons";
+import { ArrowRotateLeft, Bell, Bookmark, Check, CircleCheck, TrashBin } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
 import { AlertDialog, Button, Card, Chip, Tabs, Tooltip, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
@@ -10,12 +10,16 @@ import { useState } from "react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   type NotificationResponse,
+  type NotificationView,
   useClearReadNotificationsMutation,
   useDeleteNotificationMutation,
   useGetMyNotificationsQuery,
   useGetUnreadNotificationCountQuery,
   useMarkAllNotificationsAsReadMutation,
+  useMarkNotificationAsDoneMutation,
   useMarkNotificationAsReadMutation,
+  useReopenNotificationMutation,
+  useSetNotificationSavedMutation,
 } from "@/lib/features/notification";
 import {
   formatNotificationDate,
@@ -32,10 +36,14 @@ function NotificationSkeleton() {
   return (
     <div aria-busy="true" aria-label="Loading notifications" className="space-y-3" role="status">
       {Array.from({ length: 5 }, (_, index) => (
-        <Card key={index} variant="secondary" className="gap-3 p-5">
-          <div className="bg-default-200 h-4 w-24 animate-pulse rounded" />
-          <div className="bg-default-200 h-5 w-2/3 animate-pulse rounded" />
-          <div className="bg-default-200 h-4 w-full animate-pulse rounded" />
+        <Card key={index} variant="secondary">
+          <Card.Header>
+            <div className="bg-default-200 h-4 w-24 animate-pulse rounded" />
+            <div className="bg-default-200 h-5 w-2/3 animate-pulse rounded" />
+          </Card.Header>
+          <Card.Content>
+            <div className="bg-default-200 h-4 w-full animate-pulse rounded" />
+          </Card.Content>
         </Card>
       ))}
     </div>
@@ -67,12 +75,13 @@ export function NotificationCenterPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const [view, setView] = useState<"all" | "unread">("all");
+  const [view, setView] = useState<NotificationView>("inbox");
   const [page, setPage] = useState(0);
   const [notificationPendingRead, setNotificationPendingRead] = useState<number | null>(null);
   const [notificationPendingDeletion, setNotificationPendingDeletion] = useState<number | null>(
     null
   );
+  const [notificationPendingAction, setNotificationPendingAction] = useState<number | null>(null);
   const [isClearReadOpen, setIsClearReadOpen] = useState(false);
   const { data: unreadNotificationCount = 0 } = useGetUnreadNotificationCountQuery(undefined, {
     skip: !isAuthenticated,
@@ -83,7 +92,7 @@ export function NotificationCenterPage() {
       page,
       size: NOTIFICATIONS_PAGE_SIZE,
       sort: ["createdAt,desc"],
-      unreadOnly: view === "unread",
+      view,
     },
     { skip: !isAuthenticated }
   );
@@ -91,6 +100,9 @@ export function NotificationCenterPage() {
   const [markAllNotificationsAsRead, { isLoading: isMarkingAllRead }] =
     useMarkAllNotificationsAsReadMutation();
   const [deleteNotification] = useDeleteNotificationMutation();
+  const [markNotificationAsDone] = useMarkNotificationAsDoneMutation();
+  const [reopenNotification] = useReopenNotificationMutation();
+  const [setNotificationSaved] = useSetNotificationSavedMutation();
   const [clearReadNotifications, { isLoading: isClearingRead }] =
     useClearReadNotificationsMutation();
 
@@ -145,6 +157,39 @@ export function NotificationCenterPage() {
     }
   };
 
+  const handleSaveNotification = async (notification: NotificationResponse) => {
+    setNotificationPendingAction(notification.id);
+    try {
+      await setNotificationSaved({ id: notification.id, saved: !notification.saved }).unwrap();
+    } catch {
+      // The mutation displays its own failure toast.
+    } finally {
+      setNotificationPendingAction(null);
+    }
+  };
+
+  const handleCompleteNotification = async (notificationId: number) => {
+    setNotificationPendingAction(notificationId);
+    try {
+      await markNotificationAsDone(notificationId).unwrap();
+    } catch {
+      // The mutation displays its own failure toast.
+    } finally {
+      setNotificationPendingAction(null);
+    }
+  };
+
+  const handleReopenNotification = async (notificationId: number) => {
+    setNotificationPendingAction(notificationId);
+    try {
+      await reopenNotification(notificationId).unwrap();
+    } catch {
+      // The mutation displays its own failure toast.
+    } finally {
+      setNotificationPendingAction(null);
+    }
+  };
+
   const handleClearReadNotifications = async () => {
     try {
       await clearReadNotifications().unwrap();
@@ -196,6 +241,13 @@ export function NotificationCenterPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
+              size="sm"
+              variant="ghost"
+              onPress={() => router.push("/notifications/settings")}
+            >
+              Preferences
+            </Button>
+            <Button
               isDisabled={unreadNotificationCount === 0}
               isPending={isMarkingAllRead}
               size="sm"
@@ -216,27 +268,22 @@ export function NotificationCenterPage() {
           <Tabs
             selectedKey={view}
             onSelectionChange={(key) => {
-              setView(key === "unread" ? "unread" : "all");
+              setView(key === "saved" || key === "done" ? key : "inbox");
               setPage(0);
             }}
           >
             <Tabs.ListContainer>
               <Tabs.List aria-label="Notification views">
-                <Tabs.Tab id="all">
-                  All activity
+                <Tabs.Tab id="inbox">
+                  Inbox
                   <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab id="unread">
-                  Unread
-                  {unreadNotificationCount > 0 ? (
-                    <Chip
-                      className="h-5 min-w-5 px-1 font-mono text-[10px]"
-                      color="accent"
-                      size="sm"
-                    >
-                      {unreadNotificationCount > 99 ? "99+" : unreadNotificationCount}
-                    </Chip>
-                  ) : null}
+                <Tabs.Tab id="saved">
+                  Saved
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+                <Tabs.Tab id="done">
+                  Done
                   <Tabs.Indicator />
                 </Tabs.Tab>
               </Tabs.List>
@@ -248,19 +295,19 @@ export function NotificationCenterPage() {
           {notifications.isLoading ? (
             <NotificationSkeleton />
           ) : notifications.isError ? (
-            <Card variant="secondary" className="items-start gap-2 p-7">
+            <Card variant="secondary">
               <Card.Header>
                 <Card.Title>Notifications are unavailable</Card.Title>
                 <Card.Description>Try loading this page again in a moment.</Card.Description>
               </Card.Header>
-              <Card.Footer className="p-0">
+              <Card.Footer>
                 <Button size="sm" variant="secondary" onPress={() => notifications.refetch()}>
                   Try again
                 </Button>
               </Card.Footer>
             </Card>
           ) : notificationEntries.length === 0 ? (
-            <NotificationEmptyState unreadOnly={view === "unread"} />
+            <NotificationEmptyState unreadOnly={false} />
           ) : (
             <div className="divide-default-200 border-default-200 divide-y border-y">
               {notificationEntries.map((notification) => (
@@ -311,20 +358,66 @@ export function NotificationCenterPage() {
                       </time>
                     </span>
                   </Button>
-                  <Tooltip>
-                    <Button
-                      isIconOnly
-                      aria-label={`Delete notification: ${notification.title}`}
-                      className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                      isPending={notificationPendingDeletion === notification.id}
-                      size="sm"
-                      variant="ghost"
-                      onPress={() => handleDeleteNotification(notification.id)}
-                    >
-                      <TrashBin aria-hidden="true" className="size-4" />
-                    </Button>
-                    <Tooltip.Content>Delete notification</Tooltip.Content>
-                  </Tooltip>
+                  <div className="flex shrink-0 items-start">
+                    <Tooltip>
+                      <Button
+                        isIconOnly
+                        aria-label={notification.saved ? "Remove from saved" : "Save notification"}
+                        isPending={notificationPendingAction === notification.id}
+                        size="sm"
+                        variant="ghost"
+                        onPress={() => handleSaveNotification(notification)}
+                      >
+                        <Bookmark aria-hidden="true" className="size-4" />
+                      </Button>
+                      <Tooltip.Content>
+                        {notification.saved ? "Remove from saved" : "Save for later"}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    {view !== "done" ? (
+                      <Tooltip>
+                        <Button
+                          isIconOnly
+                          aria-label={`Complete notification: ${notification.title}`}
+                          isPending={notificationPendingAction === notification.id}
+                          size="sm"
+                          variant="ghost"
+                          onPress={() => handleCompleteNotification(notification.id)}
+                        >
+                          <CircleCheck aria-hidden="true" className="size-4" />
+                        </Button>
+                        <Tooltip.Content>Mark done</Tooltip.Content>
+                      </Tooltip>
+                    ) : (
+                      <Tooltip>
+                        <Button
+                          isIconOnly
+                          aria-label={`Reopen notification: ${notification.title}`}
+                          isPending={notificationPendingAction === notification.id}
+                          size="sm"
+                          variant="ghost"
+                          onPress={() => handleReopenNotification(notification.id)}
+                        >
+                          <ArrowRotateLeft aria-hidden="true" className="size-4" />
+                        </Button>
+                        <Tooltip.Content>Return to inbox</Tooltip.Content>
+                      </Tooltip>
+                    )}
+                    <Tooltip>
+                      <Button
+                        isIconOnly
+                        aria-label={`Delete notification: ${notification.title}`}
+                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                        isPending={notificationPendingDeletion === notification.id}
+                        size="sm"
+                        variant="ghost"
+                        onPress={() => handleDeleteNotification(notification.id)}
+                      >
+                        <TrashBin aria-hidden="true" className="size-4" />
+                      </Button>
+                      <Tooltip.Content>Delete notification</Tooltip.Content>
+                    </Tooltip>
+                  </div>
                 </article>
               ))}
             </div>
@@ -373,7 +466,8 @@ export function NotificationCenterPage() {
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="text-sm">
-                  This removes read notifications from your inbox. Unread notifications will remain.
+                  This removes read, unsaved notifications from your active inbox. Saved and
+                  completed history will remain.
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>

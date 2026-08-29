@@ -7,6 +7,33 @@ import Link from "next/link";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
+const PILLARS = [
+  {
+    icon: "lucide:sparkles",
+    title: "Cinematic Aesthetics",
+    description:
+      "Software can feel alive through restrained motion, deliberate contrast, and type that leaves room to breathe.",
+  },
+  {
+    icon: "lucide:accessibility",
+    title: "Accessibility by Default",
+    description:
+      "Visual beauty only matters when it remains usable with a keyboard, a screen reader, and every viewport in between.",
+  },
+  {
+    icon: "lucide:cpu",
+    title: "Low-Level Systems & Code",
+    description:
+      "Embedded systems, compilers, and GPU work inform the care given to every interaction and rendering detail.",
+  },
+  {
+    icon: "lucide:camera",
+    title: "Analog Observances",
+    description:
+      "Film photography trains the same patience: notice the frame, make fewer decisions, and let composition carry the weight.",
+  },
+] as const;
+
 interface AboutPageProps {
   compact?: boolean;
 }
@@ -65,11 +92,42 @@ export function AboutPage({ compact = false }: AboutPageProps) {
                 3D Constellations space.
               </Typography>
             </div>
-            <div className="border-default-200 bg-default-100 relative aspect-video overflow-hidden rounded-3xl border md:col-span-5 md:h-full">
-              <div className="text-default-300/30 absolute inset-0 flex items-center justify-center text-4xl font-black italic select-none">
-                ODYSSEY
-              </div>
-            </div>
+            <Card className="h-full md:col-span-5" variant="secondary">
+              <Card.Header>
+                <Chip size="sm" variant="soft" color="accent">
+                  A living index
+                </Chip>
+                <Card.Title className="mt-3">What belongs here</Card.Title>
+                <Card.Description className="leading-6">
+                  A notebook for the work itself and the references, tools, images, and questions
+                  that keep shaping it.
+                </Card.Description>
+              </Card.Header>
+              <Card.Content>
+                <dl className="flex flex-col gap-4">
+                  {[
+                    ["Writing", "Essays, notes, and ongoing columns."],
+                    ["Practice", "Tools, systems, and daily rituals."],
+                    ["Observation", "Photographs, music, and places worth returning to."],
+                  ].map(([label, description]) => (
+                    <div key={label} className="flex flex-col gap-1">
+                      <dt>
+                        <Typography
+                          color="muted"
+                          type="body-xs"
+                          className="font-mono tracking-wide"
+                        >
+                          {label}
+                        </Typography>
+                      </dt>
+                      <dd>
+                        <Typography type="body-sm">{description}</Typography>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </Card.Content>
+            </Card>
           </div>
         </motion.section>
 
@@ -90,61 +148,16 @@ export function AboutPage({ compact = false }: AboutPageProps) {
             </Typography>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Card variant="secondary" className="p-6">
-              <div className="bg-default-100 mb-4 flex size-10 items-center justify-center rounded-xl">
-                <Icon icon="lucide:sparkles" className="text-accent size-5" />
-              </div>
-              <Typography type="h4" weight="semibold">
-                Cinematic Aesthetics
-              </Typography>
-              <Typography color="muted" type="body-sm" className="mt-2 leading-relaxed">
-                Websites should feel alive. By utilizing subtle post-processing blooms, 3D orbits,
-                and balanced type scales, we elevate software into an interactive product
-                experience.
-              </Typography>
-            </Card>
-
-            <Card variant="secondary" className="p-6">
-              <div className="bg-default-100 mb-4 flex size-10 items-center justify-center rounded-xl">
-                <Icon icon="lucide:accessibility" className="text-accent size-5" />
-              </div>
-              <Typography type="h4" weight="semibold">
-                Accessibility by Default
-              </Typography>
-              <Typography color="muted" type="body-sm" className="mt-2 leading-relaxed">
-                Visual beauty is empty if it cannot be accessed. Following strict WCAG parameters,
-                everything here works natively under screen readers, keyboard loops, and responsive
-                viewports.
-              </Typography>
-            </Card>
-
-            <Card variant="secondary" className="p-6">
-              <div className="bg-default-100 mb-4 flex size-10 items-center justify-center rounded-xl">
-                <Icon icon="lucide:cpu" className="text-accent size-5" />
-              </div>
-              <Typography type="h4" weight="semibold">
-                Low-Level Systems & Code
-              </Typography>
-              <Typography color="muted" type="body-sm" className="mt-2 leading-relaxed">
-                Deeply passionate about embedded kernels (QNX, RTOS), compilations, and shaders.
-                Writing performant Rust, C, and GPU-driven logic forms the bedrock of our software.
-              </Typography>
-            </Card>
-
-            <Card variant="secondary" className="p-6">
-              <div className="bg-default-100 mb-4 flex size-10 items-center justify-center rounded-xl">
-                <Icon icon="lucide:camera" className="text-accent size-5" />
-              </div>
-              <Typography type="h4" weight="semibold">
-                Analog Observances
-              </Typography>
-              <Typography color="muted" type="body-sm" className="mt-2 leading-relaxed">
-                Capturing geometry and silent weather patterns on medium format film. Slow
-                photography encourages deliberate composition and focus—lessons that carry over into
-                our code structure.
-              </Typography>
-            </Card>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {PILLARS.map((pillar) => (
+              <Card key={pillar.title} className="h-full" variant="secondary">
+                <Card.Header>
+                  <Icon aria-hidden="true" icon={pillar.icon} className="text-accent size-5" />
+                  <Card.Title>{pillar.title}</Card.Title>
+                  <Card.Description className="leading-6">{pillar.description}</Card.Description>
+                </Card.Header>
+              </Card>
+            ))}
           </div>
         </motion.section>
 
