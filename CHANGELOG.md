@@ -1,3 +1,10 @@
+# [1.134.0](https://github.com/LeeWio/odyssey/compare/v1.133.0...v1.134.0) (2026-08-29)
+
+
+### Features
+
+* add newsletter lifecycle pages ([a98d131](https://github.com/LeeWio/odyssey/commit/a98d131a552ab1dd103b00f9bc3deaabe5d575d2))
+
 # [1.133.0](https://github.com/LeeWio/odyssey/compare/v1.132.0...v1.133.0) (2026-08-29)
 
 
