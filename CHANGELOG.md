@@ -1,3 +1,10 @@
+# [1.140.0](https://github.com/LeeWio/odyssey/compare/v1.139.0...v1.140.0) (2026-08-30)
+
+
+### Features
+
+* add workflow status filters ([d5276f4](https://github.com/LeeWio/odyssey/commit/d5276f49cdd07100414a1c644e2ca5d8cde0a7a6))
+
 # [1.139.0](https://github.com/LeeWio/odyssey/compare/v1.138.0...v1.139.0) (2026-08-30)
 
 
