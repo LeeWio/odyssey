@@ -1,3 +1,10 @@
+# [1.136.0](https://github.com/LeeWio/odyssey/compare/v1.135.0...v1.136.0) (2026-08-30)
+
+
+### Features
+
+* complete kanban task workflows ([7899eef](https://github.com/LeeWio/odyssey/commit/7899eef7e82c67bde179789c29b10e01618ebc61))
+
 # [1.135.0](https://github.com/LeeWio/odyssey/compare/v1.134.0...v1.135.0) (2026-08-30)
 
 
