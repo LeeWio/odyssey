@@ -263,9 +263,9 @@ function TrackerColumn({
 
   return (
     <Kanban.Column className="gap-0">
-      <div className="bg-background sticky top-0 z-10 pt-2">
+      <div className="sticky top-0 z-10 pt-2">
         <Kanban.ColumnHeader
-          className={`rounded-t-[calc(var(--radius-2xl)_+_var(--radius-sm))] px-3 py-2.5 ${meta.bodyBg}`}
+          className={`rounded-t-[calc(var(--radius-2xl)+var(--radius-sm))] px-3 py-2.5 ${meta.bodyBg}`}
         >
           <span
             className={`flex items-center gap-2 rounded-[calc(var(--radius)*infinity)] px-3 py-1 ${meta.pillBg}`}
