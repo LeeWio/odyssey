@@ -1,10 +1,9 @@
 "use client";
 
-import { Button, Card, Input, Link, toast } from "@heroui/react";
-import { useState, type FormEvent } from "react";
+import { Card, Link } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
-import { useSubscribeMutation } from "@/lib/features/openapi";
+import { NewsletterSubscribeForm } from "@/features/newsletter/newsletter-subscribe-form";
 import { ModeSwitch } from "./theme-switch";
 
 const footerLinks = [
@@ -17,8 +16,6 @@ const footerLinks = [
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
 export function Footer() {
-  const [email, setEmail] = useState("");
-  const [subscribe, { isLoading: isSubscribing }] = useSubscribeMutation();
   const shouldReduceMotion = useReducedMotion() ?? false;
 
   const reveal = (delay = 0) => ({
@@ -27,29 +24,6 @@ export function Footer() {
     viewport: { once: true, margin: "-40px" },
     transition: { duration: shouldReduceMotion ? 0 : 0.6, delay, ease: easeOut },
   });
-
-  const handleSubscribe = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const normalizedEmail = email.trim();
-
-    if (!normalizedEmail) {
-      toast.warning("Enter an email address to subscribe.");
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-      toast.warning("Enter a valid email address.");
-      return;
-    }
-
-    try {
-      await subscribe({ email: normalizedEmail }).unwrap();
-      setEmail("");
-      toast.success("Check your inbox to confirm your subscription.");
-    } catch {
-      // The generated mutation reports API failures through the shared toast helper.
-    }
-  };
 
   return (
     <footer className="w-full">
@@ -65,26 +39,9 @@ export function Footer() {
               </Card.Description>
             </Card.Header>
             <Card.Content className="p-0">
-              <form
-                className="flex w-full max-w-lg flex-col gap-3 sm:flex-row sm:items-center"
-                onSubmit={handleSubscribe}
-              >
-                <Input
-                  aria-label="Email address"
-                  autoComplete="email"
-                  className="min-w-0 sm:flex-1"
-                  name="email"
-                  placeholder="you@example.com"
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  disabled={isSubscribing}
-                  variant="secondary"
-                />
-                <Button type="submit" isPending={isSubscribing}>
-                  Subscribe
-                </Button>
-              </form>
+              <div className="max-w-lg">
+                <NewsletterSubscribeForm variant="inline" />
+              </div>
             </Card.Content>
           </Card>
         </motion.div>

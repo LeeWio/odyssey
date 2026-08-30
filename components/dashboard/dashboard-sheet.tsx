@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { AppShell } from "./app-shell";
 import { AccessPlaceholderPage } from "./views/access-placeholder-page";
 import { AnalyticsPage } from "./views/analytics-page";
+import { AudiencePage } from "./views/audience-page";
 import { CategoriesPage } from "./views/categories-page";
 import { CommentsPage } from "./views/comments-page";
 import { ColumnsPage } from "./views/columns-page";
@@ -70,6 +71,8 @@ export function DashboardSheet() {
         return <OrdersPage />;
       case "/users":
         return <UsersPage />;
+      case "/audience":
+        return <AudiencePage />;
       case "/groups":
         return (
           <AccessPlaceholderPage

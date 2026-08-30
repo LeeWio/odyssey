@@ -1,9 +1,11 @@
 "use client";
 
-import { Bell, Bookmark, CircleChevronRight } from "@gravity-ui/icons";
-import { Button, Chip, Input, InputGroup, ListBox, Surface, Typography, cn } from "@heroui/react";
+import { Bell, CircleChevronRight } from "@gravity-ui/icons";
+import { Chip, Surface, Typography, cn } from "@heroui/react";
 import { ItemCard } from "@heroui-pro/react";
 import Link from "next/link";
+
+import { NewsletterSubscribeForm } from "@/features/newsletter/newsletter-subscribe-form";
 
 const CATEGORIES = [
   { id: 1, name: "Design", count: 12, color: "primary" },
@@ -128,16 +130,7 @@ export function BlogSidebar() {
         <Typography className="text-default-500 mb-6 text-xs leading-relaxed">
           Curated articles and thoughts in your inbox.
         </Typography>
-        <div className="flex flex-col gap-3">
-          <Input
-            placeholder="your@example.com"
-            variant="secondary"
-            className="bg-background rounded-xl"
-          />
-          <Button className="bg-foreground text-background w-full rounded-xl font-bold">
-            Subscribe
-          </Button>
-        </div>
+        <NewsletterSubscribeForm />
         <Typography className="text-default-400 mt-4 text-center text-[10px]">
           No spam. Unsubscribe anytime.
         </Typography>

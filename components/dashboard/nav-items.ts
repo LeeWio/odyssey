@@ -68,6 +68,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     label: "Users & Access",
     items: [
       { href: "/users", icon: Person, label: "Users" },
+      { href: "/audience", icon: Persons, label: "Audience" },
       { href: "/groups", icon: Persons, label: "Groups" },
       { href: "/roles", icon: PersonGear, label: "Roles" },
       { href: "/permissions", icon: Shield, label: "Permissions" },
