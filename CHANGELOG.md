@@ -1,3 +1,10 @@
+# [1.139.0](https://github.com/LeeWio/odyssey/compare/v1.138.0...v1.139.0) (2026-08-30)
+
+
+### Features
+
+* add editorial workflow actions ([6221a4f](https://github.com/LeeWio/odyssey/commit/6221a4fe16c6567a743478deed04edbc700e57d9))
+
 # [1.138.0](https://github.com/LeeWio/odyssey/compare/v1.137.0...v1.138.0) (2026-08-30)
 
 
