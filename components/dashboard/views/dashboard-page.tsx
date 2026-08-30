@@ -10,8 +10,9 @@ import {
   ArrowsRotateLeft,
   Sparkles,
 } from "@gravity-ui/icons";
-import { Button, Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
+import { Button, Card, Chip, Link, Skeleton, Tabs, Typography } from "@heroui/react";
 import { EmptyState, KPI, KPIGroup, Timeline, Widget } from "@heroui-pro/react";
+import { useMemo, useState } from "react";
 import {
   type ContentOperationsOverview,
   type ContentWorkflowResponse,
@@ -175,6 +176,12 @@ function WorkflowWidget({
   isLoading: boolean;
   onRetry: () => void;
 }) {
+  const [filter, setFilter] = useState("all");
+  const visibleItems = useMemo(
+    () => data?.items.filter((item) => filter === "all" || item.status === filter) ?? [],
+    [data?.items, filter]
+  );
+
   return (
     <Widget>
       <Widget.Header>
@@ -219,38 +226,69 @@ function WorkflowWidget({
             </EmptyState.Header>
           </EmptyState>
         ) : (
-          data?.items.map((item) => (
-            <Link className="group no-underline" href={item.href} key={item.id}>
-              <Card className="group-hover:bg-surface-secondary transition-colors">
-                <Card.Header className="flex-row items-start gap-3">
-                  <div className="bg-accent-soft text-accent flex size-9 shrink-0 items-center justify-center rounded-lg">
-                    <FileText className="size-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <Card.Title className="truncate text-sm">{item.title}</Card.Title>
-                      <Chip
-                        color={
-                          item.priority === "HIGH"
-                            ? "danger"
-                            : item.priority === "MEDIUM"
-                              ? "warning"
-                              : "default"
-                        }
-                        size="sm"
-                        variant="soft"
-                      >
-                        {item.action}
-                      </Chip>
-                    </div>
-                    <Card.Description className="mt-1 line-clamp-2">
-                      {item.description}
-                    </Card.Description>
-                  </div>
-                </Card.Header>
-              </Card>
-            </Link>
-          ))
+          <>
+            <Tabs
+              className="w-full"
+              selectedKey={filter}
+              onSelectionChange={(key) => setFilter(String(key))}
+            >
+              <Tabs.ListContainer>
+                <Tabs.List aria-label="Filter workflow actions">
+                  <Tabs.Tab id="all">All</Tabs.Tab>
+                  <Tabs.Tab id="PENDING_REVIEW">Review</Tabs.Tab>
+                  <Tabs.Tab id="REJECTED">Rejected</Tabs.Tab>
+                  <Tabs.Tab id="SCHEDULED">Scheduled</Tabs.Tab>
+                  <Tabs.Tab id="DRAFT">Drafts</Tabs.Tab>
+                </Tabs.List>
+              </Tabs.ListContainer>
+            </Tabs>
+            {visibleItems.length === 0 ? (
+              <EmptyState size="sm">
+                <EmptyState.Header>
+                  <EmptyState.Media variant="icon">
+                    <Check />
+                  </EmptyState.Media>
+                  <EmptyState.Title>No matching actions</EmptyState.Title>
+                  <EmptyState.Description>
+                    Nothing in this workflow state needs attention.
+                  </EmptyState.Description>
+                </EmptyState.Header>
+              </EmptyState>
+            ) : (
+              visibleItems.map((item) => (
+                <Link className="group no-underline" href={item.href} key={item.id}>
+                  <Card className="group-hover:bg-surface-secondary transition-colors">
+                    <Card.Header className="flex-row items-start gap-3">
+                      <div className="bg-accent-soft text-accent flex size-9 shrink-0 items-center justify-center rounded-lg">
+                        <FileText className="size-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <Card.Title className="truncate text-sm">{item.title}</Card.Title>
+                          <Chip
+                            color={
+                              item.priority === "HIGH"
+                                ? "danger"
+                                : item.priority === "MEDIUM"
+                                  ? "warning"
+                                  : "default"
+                            }
+                            size="sm"
+                            variant="soft"
+                          >
+                            {item.action}
+                          </Chip>
+                        </div>
+                        <Card.Description className="mt-1 line-clamp-2">
+                          {item.description}
+                        </Card.Description>
+                      </div>
+                    </Card.Header>
+                  </Card>
+                </Link>
+              ))
+            )}
+          </>
         )}
       </Widget.Content>
     </Widget>
