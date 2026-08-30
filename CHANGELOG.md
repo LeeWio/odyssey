@@ -1,3 +1,10 @@
+# [1.135.0](https://github.com/LeeWio/odyssey/compare/v1.134.0...v1.135.0) (2026-08-30)
+
+
+### Features
+
+* add newsletter audience dashboard ([ab76aab](https://github.com/LeeWio/odyssey/commit/ab76aab638894fe4336576441ab29e9988f3b37c))
+
 # [1.134.0](https://github.com/LeeWio/odyssey/compare/v1.133.0...v1.134.0) (2026-08-29)
 
 
