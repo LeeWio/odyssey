@@ -131,3 +131,23 @@ export const ContentOperationsOverviewSchema = z.object({
 });
 
 export type ContentOperationsOverview = z.infer<typeof ContentOperationsOverviewSchema>;
+
+export const EditorialCalendarEntrySchema = z.object({
+  id: z.string(),
+  type: z.enum(["POST", "MOMENT"]),
+  title: z.string(),
+  date: z.string(),
+  timestamp: z.string(),
+  status: z
+    .enum(["DRAFT", "PENDING_REVIEW", "SCHEDULED", "PUBLISHED", "REJECTED", "ARCHIVED"])
+    .nullable(),
+  href: z.string(),
+});
+
+export const EditorialCalendarResponseSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  entries: z.array(EditorialCalendarEntrySchema).default([]),
+});
+
+export type EditorialCalendarResponse = z.infer<typeof EditorialCalendarResponseSchema>;

@@ -1,5 +1,6 @@
 import {
   ArrowRightFromSquare,
+  Calendar,
   ChartColumn,
   CircleQuestion,
   ClockArrowRotateLeft,
@@ -43,6 +44,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { href: "/", icon: House, label: "Dashboard" },
       { badge: "New", href: "/tracker", icon: ListCheck, label: "Tracker" },
       { href: "/analytics", icon: ChartColumn, label: "Analytics" },
+      { href: "/schedule", icon: Calendar, label: "Schedule" },
     ],
   },
   {

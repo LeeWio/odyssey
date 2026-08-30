@@ -23,6 +23,7 @@ import { OrdersPage } from "./views/orders-page";
 import { PermissionsPage } from "./views/permissions-page";
 import { PostsPage } from "./views/posts-page";
 import { SettingsPage } from "./views/settings-page";
+import { EditorialCalendarPage } from "./views/editorial-calendar-page";
 import { RolesPage } from "./views/roles-page";
 import { TagsPage } from "./views/tags-page";
 import { TrackerPage } from "./views/tracker-page";
@@ -67,6 +68,8 @@ export function DashboardSheet() {
         return <FilesPage />;
       case "/analytics":
         return <AnalyticsPage />;
+      case "/schedule":
+        return <EditorialCalendarPage />;
       case "/orders":
         return <OrdersPage />;
       case "/users":

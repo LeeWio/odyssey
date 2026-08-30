@@ -6,6 +6,8 @@ import {
   TrafficResponseSchema,
   ContentOperationsOverviewSchema,
   type ContentOperationsOverview,
+  EditorialCalendarResponseSchema,
+  type EditorialCalendarResponse,
   type AnalyticsOverviewResponse,
   type DashboardStatsResponse,
   type TopPageResponse,
@@ -36,6 +38,21 @@ export const dashboardApi = baseApi.injectEndpoints({
       providesTags: ["Dashboard"],
       rawResponseSchema: apiResponseSchema(ContentOperationsOverviewSchema),
       transformResponse: (response: { data: ContentOperationsOverview }) => response.data,
+      transformErrorResponse: transformApiError,
+    }),
+
+    getEditorialCalendar: builder.query<
+      EditorialCalendarResponse,
+      { from?: string; to?: string } | void
+    >({
+      query: (range) => ({
+        url: "/api/v1/admin/dashboard/editorial-calendar",
+        method: "GET",
+        params: range ?? undefined,
+      }),
+      providesTags: ["Dashboard"],
+      rawResponseSchema: apiResponseSchema(EditorialCalendarResponseSchema),
+      transformResponse: (response: { data: EditorialCalendarResponse }) => response.data,
       transformErrorResponse: transformApiError,
     }),
 
@@ -88,6 +105,7 @@ export const dashboardApi = baseApi.injectEndpoints({
 export const {
   useGetDashboardStatsQuery,
   useGetContentOperationsOverviewQuery,
+  useGetEditorialCalendarQuery,
   useGetAnalyticsOverviewQuery,
   useGetTopPagesQuery,
   useGetTrafficAnalyticsQuery,
