@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const KanbanPrioritySchema = z.enum(["LOW", "MEDIUM", "HIGH"]);
+export const KanbanTaskSizeSchema = z.enum(["S", "M", "L", "XL"]);
 
 export const KanbanAssigneeSchema = z.object({
   id: z.number(),
@@ -31,6 +32,8 @@ export const KanbanTaskSchema = z.object({
   title: z.string(),
   content: z.string().nullable(),
   priority: KanbanPrioritySchema,
+  epic: z.string(),
+  size: KanbanTaskSizeSchema,
   orderIndex: z.number(),
   columnId: z.number(),
   reminderAt: z.string().nullable(),
@@ -61,6 +64,8 @@ export const KanbanTaskRequestSchema = z.object({
   title: z.string().min(1).max(255),
   content: z.string().max(2000).nullable().optional(),
   priority: KanbanPrioritySchema,
+  epic: z.string().max(255).optional(),
+  size: KanbanTaskSizeSchema.optional(),
   columnId: z.number(),
   orderIndex: z.number().nonnegative().optional(),
   reminderAt: z.string().nullable().optional(),

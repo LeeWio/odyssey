@@ -43,6 +43,15 @@ export const kanbanApi = baseApi.injectEndpoints({
       transformErrorResponse: transformApiError,
       invalidatesTags: [{ type: "Kanban", id: "BOARD" }],
     }),
+    createKanbanTask: builder.mutation<void, KanbanTaskRequest>({
+      query: (body) => ({
+        url: "/api/v1/admin/kanban/tasks",
+        method: "POST",
+        body,
+      }),
+      transformErrorResponse: transformApiError,
+      invalidatesTags: [{ type: "Kanban", id: "BOARD" }],
+    }),
     getKanbanChecklist: builder.query<KanbanTask["checklistItems"], number>({
       query: (taskId) => `/api/v1/admin/kanban/tasks/${taskId}/checklist`,
       rawResponseSchema: apiResponseSchema(KanbanTaskSchema.shape.checklistItems),
@@ -108,6 +117,7 @@ export const {
   useDuplicateKanbanTaskMutation,
   useDeleteKanbanTaskMutation,
   useUpdateKanbanTaskMutation,
+  useCreateKanbanTaskMutation,
   useGetKanbanChecklistQuery,
   useCreateKanbanChecklistItemMutation,
   useCompleteKanbanChecklistItemMutation,

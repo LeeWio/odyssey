@@ -2,12 +2,13 @@
 
 import { useMemo } from "react";
 import { isTextDropItem, useDragAndDrop } from "react-aria-components/useDragAndDrop";
-import type { UseKanbanReturn } from "@heroui-pro/react";
+import type { UseKanbanCardPlaceholderReturn, UseKanbanReturn } from "@heroui-pro/react";
 
 export function usePersistentKanbanColumn<T extends object>(
   kanban: UseKanbanReturn<T>,
   column: string,
-  onPersist: (keys: string[]) => void
+  onPersist: (keys: string[]) => void,
+  options?: { renderDropIndicator?: UseKanbanCardPlaceholderReturn["renderDropIndicator"] }
 ) {
   const items = useMemo(
     () => kanban.list.items.filter((item) => kanban.getColumn(item) === column),
@@ -49,6 +50,7 @@ export function usePersistentKanbanColumn<T extends object>(
       }
       queueMicrotask(() => onPersist(keys));
     },
+    renderDropIndicator: options?.renderDropIndicator,
   });
 
   return { dragAndDropHooks, items };

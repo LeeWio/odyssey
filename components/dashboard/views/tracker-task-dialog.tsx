@@ -27,16 +27,20 @@ import type { TrackerTask } from "./tracker-page";
 
 interface TrackerTaskDialogProps {
   columns: KanbanColumn[];
+  initialColumnId?: number | null;
   isOpen: boolean;
   task: TrackerTask | null;
   onOpenChange: (open: boolean) => void;
+  onCreate?: (body: KanbanTaskRequest) => Promise<void>;
   onSave: (task: TrackerTask, body: KanbanTaskRequest) => Promise<void>;
 }
 
 export function TrackerTaskDialog({
   columns,
+  initialColumnId,
   isOpen,
   task,
+  onCreate,
   onOpenChange,
   onSave,
 }: TrackerTaskDialogProps) {
@@ -45,7 +49,9 @@ export function TrackerTaskDialog({
   const [priority, setPriority] = useState<KanbanTask["priority"]>(
     task?.source.priority ?? "MEDIUM"
   );
-  const [columnId, setColumnId] = useState(String(task?.source.columnId ?? ""));
+  const [columnId, setColumnId] = useState(
+    String(task?.source.columnId ?? initialColumnId ?? columns[0]?.id ?? "")
+  );
   const [newItem, setNewItem] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const checklist = useGetKanbanChecklistQuery(task ? Number(task.id) : 0, {
@@ -57,19 +63,23 @@ export function TrackerTaskDialog({
   const [deleteItem] = useDeleteKanbanChecklistItemMutation();
 
   async function save() {
-    if (!task || !title.trim()) return;
+    if (!title.trim()) return;
     setIsSaving(true);
     try {
-      await onSave(task, {
+      const body = {
         title: title.trim(),
         content: content.trim() || null,
         priority,
+        epic: task?.source.epic ?? "Odyssey workspace",
+        size: task?.source.size ?? "M",
         columnId: Number(columnId),
-        orderIndex: task.source.orderIndex,
-        reminderAt: task.source.reminderAt,
-        tagIds: task.source.tags.map((tag) => tag.id),
-        assigneeIds: task.source.assignees.map((assignee) => assignee.id),
-      });
+        orderIndex: task?.source.orderIndex ?? 0,
+        reminderAt: task?.source.reminderAt ?? null,
+        tagIds: task ? task.source.tags.map((tag) => tag.id) : null,
+        assigneeIds: task ? task.source.assignees.map((assignee) => assignee.id) : null,
+      } satisfies KanbanTaskRequest;
+      if (task) await onSave(task, body);
+      else await onCreate?.(body);
       onOpenChange(false);
     } finally {
       setIsSaving(false);
@@ -135,7 +145,7 @@ export function TrackerTaskDialog({
           <Modal.Dialog aria-label="Edit tracker task" className="sm:max-w-lg">
             <Modal.CloseTrigger />
             <Modal.Header>
-              <Modal.Heading>Edit task</Modal.Heading>
+              <Modal.Heading>{task ? "Edit task" : "Add task"}</Modal.Heading>
               <p className="text-muted text-sm">
                 Keep the brief, status, and next action together.
               </p>
@@ -196,64 +206,66 @@ export function TrackerTaskDialog({
                   </Select.Popover>
                 </Select>
               </div>
-              <div className="border-separator flex flex-col gap-3 border-t pt-4">
-                <div className="flex items-center justify-between">
-                  <Label>Checklist</Label>
-                  {checklist.isFetching ? <Spinner size="sm" /> : null}
+              {task ? (
+                <div className="border-separator flex flex-col gap-3 border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Checklist</Label>
+                    {checklist.isFetching ? <Spinner size="sm" /> : null}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {checklist.data?.map((item) => (
+                      <div className="flex items-center gap-2" key={item.id}>
+                        <Checkbox
+                          isSelected={item.completed}
+                          onChange={(selected) => void toggleChecklist(item.id, selected)}
+                        >
+                          <Checkbox.Control>
+                            <Checkbox.Indicator>
+                              <Check />
+                            </Checkbox.Indicator>
+                          </Checkbox.Control>
+                        </Checkbox>
+                        <Input
+                          aria-label="Checklist item"
+                          className="min-w-0 flex-1"
+                          defaultValue={item.title}
+                          onBlur={(event) => void renameChecklist(item, event.target.value)}
+                        />
+                        <Button
+                          isIconOnly
+                          aria-label="Delete checklist item"
+                          size="sm"
+                          variant="ghost"
+                          onPress={() => void removeChecklistItem(item.id)}
+                        >
+                          <TrashBin className="size-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      aria-label="New checklist item"
+                      className="min-w-0 flex-1"
+                      placeholder="Add a next action"
+                      value={newItem}
+                      onChange={(event) => setNewItem(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") void addChecklistItem();
+                      }}
+                    />
+                    <Button
+                      isDisabled={!newItem.trim()}
+                      isPending={isCreating}
+                      size="sm"
+                      variant="secondary"
+                      onPress={() => void addChecklistItem()}
+                    >
+                      <Plus className="size-4" /> Add
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-2">
-                  {checklist.data?.map((item) => (
-                    <div className="flex items-center gap-2" key={item.id}>
-                      <Checkbox
-                        isSelected={item.completed}
-                        onChange={(selected) => void toggleChecklist(item.id, selected)}
-                      >
-                        <Checkbox.Control>
-                          <Checkbox.Indicator>
-                            <Check />
-                          </Checkbox.Indicator>
-                        </Checkbox.Control>
-                      </Checkbox>
-                      <Input
-                        aria-label="Checklist item"
-                        className="min-w-0 flex-1"
-                        defaultValue={item.title}
-                        onBlur={(event) => void renameChecklist(item, event.target.value)}
-                      />
-                      <Button
-                        isIconOnly
-                        aria-label="Delete checklist item"
-                        size="sm"
-                        variant="ghost"
-                        onPress={() => void removeChecklistItem(item.id)}
-                      >
-                        <TrashBin className="size-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    aria-label="New checklist item"
-                    className="min-w-0 flex-1"
-                    placeholder="Add a next action"
-                    value={newItem}
-                    onChange={(event) => setNewItem(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") void addChecklistItem();
-                    }}
-                  />
-                  <Button
-                    isDisabled={!newItem.trim()}
-                    isPending={isCreating}
-                    size="sm"
-                    variant="secondary"
-                    onPress={() => void addChecklistItem()}
-                  >
-                    <Plus className="size-4" /> Add
-                  </Button>
-                </div>
-              </div>
+              ) : null}
             </Modal.Body>
             <Modal.Footer>
               <Button size="sm" variant="tertiary" onPress={() => onOpenChange(false)}>
@@ -265,7 +277,7 @@ export function TrackerTaskDialog({
                 size="sm"
                 onPress={() => void save()}
               >
-                Save changes
+                {task ? "Save changes" : "Create task"}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

@@ -3,23 +3,22 @@
 import {
   ArrowRight,
   ArrowRotateLeft,
-  CircleCheck,
-  CircleDashed,
-  CirclePlay,
+  Calendar,
   Copy,
+  Ellipsis,
   Pencil,
   Plus,
-  Stopwatch,
+  ThunderboltFill,
   TrashBin,
 } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
 import { Avatar, Button, Chip, Header, Label, ProgressBar, Skeleton, toast } from "@heroui/react";
 import type { UseKanbanReturn } from "@heroui-pro/react";
-import { ContextMenu, Kanban, KPI, KPIGroup, useKanban } from "@heroui-pro/react";
-import type { ComponentType } from "react";
-import { Fragment, useMemo, useState } from "react";
+import { ContextMenu, Kanban, useKanban, useKanbanCardPlaceholder } from "@heroui-pro/react";
+import { useState } from "react";
 import type { KanbanColumn, KanbanTask } from "@/lib/features/kanban";
 import {
+  useCreateKanbanTaskMutation,
   useDeleteKanbanTaskMutation,
   useDuplicateKanbanTaskMutation,
   useGetKanbanBoardQuery,
@@ -34,35 +33,47 @@ type TrackerStatus = string;
 export type TrackerTask = {
   id: string;
   title: string;
-  description: string;
   status: TrackerStatus;
-  tag: { color: "accent" | "success" | "warning" | "danger"; label: string };
+  categories: string[];
+  epic: string;
+  priority: { color: "accent" | "success" | "warning" | "danger"; label: string };
+  size: "S" | "M" | "L" | "XL";
   assignees: Array<{ avatar: string; name: string }>;
   dueDate?: string;
   subtasks?: { completed: number; total: number };
   source: KanbanTask;
 };
 
-const COLUMN_META: Record<
-  "Done" | "In Progress" | "To Do",
-  { indicator: string; icon: ComponentType<{ className?: string }> }
-> = {
-  Done: { icon: CircleCheck, indicator: "bg-success" },
-  "In Progress": { icon: CirclePlay, indicator: "bg-warning" },
-  "To Do": { icon: CircleDashed, indicator: "bg-accent" },
-};
+interface ColumnMeta {
+  bodyBg: string;
+  btnStyle: string;
+  countColor: string;
+  indicator: string;
+  pillBg: string;
+}
 
-const KPI_META: Record<
-  TrackerStatus,
-  {
-    icon: ComponentType<{ className?: string }>;
-    label: string;
-    status: "success" | "warning" | "danger";
-  }
-> = {
-  Done: { icon: CircleCheck, label: "Completed", status: "success" },
-  "In Progress": { icon: CirclePlay, label: "In Progress", status: "warning" },
-  "To Do": { icon: CircleDashed, label: "To Do", status: "danger" },
+const COLUMN_META_STYLES: Record<string, ColumnMeta> = {
+  Done: {
+    bodyBg: "bg-success/8",
+    btnStyle: "text-success border-success/30 hover:bg-success/10",
+    countColor: "text-success",
+    indicator: "bg-success",
+    pillBg: "bg-success/15",
+  },
+  "In Progress": {
+    bodyBg: "bg-warning/8",
+    btnStyle: "text-warning border-warning/30 hover:bg-warning/10",
+    countColor: "text-warning",
+    indicator: "bg-warning",
+    pillBg: "bg-warning/15",
+  },
+  "To Do": {
+    bodyBg: "bg-accent/8",
+    btnStyle: "text-accent border-accent/30 hover:bg-accent/10",
+    countColor: "text-accent",
+    indicator: "bg-accent",
+    pillBg: "bg-accent/15",
+  },
 };
 
 function getTaskColumn(task: TrackerTask) {
@@ -79,6 +90,7 @@ export function TrackerPage() {
   if (board.isLoading) return <TrackerLoading />;
   if (board.isError) return <TrackerError onRetry={() => board.refetch()} />;
   if (!board.data) return null;
+  if (board.data.length === 0) return <TrackerEmpty onRetry={() => board.refetch()} />;
 
   return (
     <LiveTrackerBoard
@@ -103,7 +115,9 @@ function LiveTrackerBoard({ board, onRefresh }: { board: KanbanColumn[]; onRefre
   const [duplicateTask] = useDuplicateKanbanTaskMutation();
   const [deleteTask] = useDeleteKanbanTaskMutation();
   const [updateTask] = useUpdateKanbanTaskMutation();
+  const [createTask] = useCreateKanbanTaskMutation();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [newTaskColumnId, setNewTaskColumnId] = useState<number | null>(null);
 
   const moveTask = async (taskId: string, targetColumn: string) => {
     const targetColumnId = board.find((column) => column.name === targetColumn)?.id;
@@ -139,47 +153,11 @@ function LiveTrackerBoard({ board, onRefresh }: { board: KanbanColumn[]; onRefre
 
   const selectedTask = selectedTaskId ? (kanban.list.getItem(selectedTaskId) ?? null) : null;
 
-  // Counts derived from the live kanban list so KPIs update as cards are
-  // dragged (`rerender-derived-state-no-effect`).
-  const counts = useMemo(() => {
-    const base = Object.fromEntries(columns.map((column) => [column, 0])) as Record<string, number>;
-
-    for (const item of kanban.list.items) {
-      base[item.status] = (base[item.status] ?? 0) + 1;
-    }
-
-    return base;
-  }, [columns, kanban.list.items]);
-
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
       <p className="text-muted text-sm">Track work across your team.</p>
 
-      <KPIGroup>
-        {columns.map((column, index) => {
-          const meta = KPI_META[column as keyof typeof KPI_META] ?? KPI_META["To Do"];
-          const Icon = meta.icon;
-
-          return (
-            <Fragment key={column}>
-              {index > 0 ? <KPIGroup.Separator /> : null}
-              <KPI>
-                <KPI.Header>
-                  <KPI.Icon status={meta.status}>
-                    <Icon />
-                  </KPI.Icon>
-                  <KPI.Title>{meta.label}</KPI.Title>
-                </KPI.Header>
-                <KPI.Content>
-                  <KPI.Value maximumFractionDigits={0} value={counts[column]} />
-                </KPI.Content>
-              </KPI>
-            </Fragment>
-          );
-        })}
-      </KPIGroup>
-
-      <Kanban>
+      <Kanban hideScrollBar className="items-start overflow-visible">
         {columns.map((column) => (
           <TrackerColumn
             key={column}
@@ -206,6 +184,10 @@ function LiveTrackerBoard({ board, onRefresh }: { board: KanbanColumn[]; onRefre
               }
             }}
             onEdit={(id) => setSelectedTaskId(id)}
+            onAdd={() => {
+              const targetColumn = board.find((item) => item.name === column);
+              if (targetColumn) setNewTaskColumnId(targetColumn.id);
+            }}
           />
         ))}
       </Kanban>
@@ -223,6 +205,23 @@ function LiveTrackerBoard({ board, onRefresh }: { board: KanbanColumn[]; onRefre
           toast.success("Task updated.");
         }}
       />
+      <TrackerTaskDialog
+        key={newTaskColumnId ? `new-${newTaskColumnId}` : "new-tracker-task-dialog"}
+        columns={board}
+        initialColumnId={newTaskColumnId}
+        isOpen={newTaskColumnId !== null}
+        task={null}
+        onOpenChange={(open) => {
+          if (!open) setNewTaskColumnId(null);
+        }}
+        onCreate={async (body) => {
+          await createTask(body).unwrap();
+          setNewTaskColumnId(null);
+          onRefresh();
+          toast.success("Task created.");
+        }}
+        onSave={async () => undefined}
+      />
     </div>
   );
 }
@@ -235,6 +234,7 @@ interface TrackerColumnProps {
   onDuplicate: (taskId: string) => Promise<void>;
   onDelete: (taskId: string) => Promise<void>;
   onEdit: (taskId: string) => void;
+  onAdd: () => void;
 }
 
 function TrackerColumn({
@@ -245,28 +245,63 @@ function TrackerColumn({
   onDuplicate,
   onDelete,
   onEdit,
+  onAdd,
 }: TrackerColumnProps) {
-  const { dragAndDropHooks, items } = usePersistentKanbanColumn(kanban, column, onPersist);
-  const meta = COLUMN_META[column as keyof typeof COLUMN_META] ?? COLUMN_META["To Do"];
+  const { renderDropIndicator } = useKanbanCardPlaceholder({
+    renderIndicator: (target) => <Kanban.DropIndicator target={target} />,
+  });
+  const { dragAndDropHooks, items } = usePersistentKanbanColumn(kanban, column, onPersist, {
+    renderDropIndicator,
+  });
+  const meta = COLUMN_META_STYLES[column] ?? {
+    bodyBg: "bg-default/8",
+    btnStyle: "text-muted border-default/30 hover:bg-default/10",
+    countColor: "text-muted",
+    indicator: "bg-default",
+    pillBg: "bg-default/15",
+  };
 
   return (
-    <Kanban.Column>
-      <Kanban.ColumnHeader>
-        <Kanban.ColumnIndicator className={meta.indicator} />
-        <Kanban.ColumnTitle>{column}</Kanban.ColumnTitle>
-        <Kanban.ColumnCount>{items.length}</Kanban.ColumnCount>
-        <Kanban.ColumnActions>
-          <IconButton label={`Add ${column} task`} size="sm" variant="ghost">
-            <Plus className="size-4" />
-          </IconButton>
-        </Kanban.ColumnActions>
-      </Kanban.ColumnHeader>
-      <Kanban.ColumnBody>
+    <Kanban.Column className="gap-0">
+      <div className="bg-background sticky top-0 z-10 pt-2">
+        <Kanban.ColumnHeader
+          className={`rounded-t-[calc(var(--radius-2xl)_+_var(--radius-sm))] px-3 py-2.5 ${meta.bodyBg}`}
+        >
+          <span
+            className={`flex items-center gap-2 rounded-[calc(var(--radius)*infinity)] px-3 py-1 ${meta.pillBg}`}
+          >
+            <Kanban.ColumnIndicator className={meta.indicator} />
+            <Kanban.ColumnTitle>{column}</Kanban.ColumnTitle>
+          </span>
+          <Kanban.ColumnCount className={meta.countColor}>{items.length}</Kanban.ColumnCount>
+          <Kanban.ColumnActions>
+            <IconButton
+              label={`Add ${column} task`}
+              className={meta.countColor}
+              size="sm"
+              variant="ghost"
+              onPress={onAdd}
+            >
+              <Plus />
+            </IconButton>
+            <IconButton
+              label={`More ${column} options`}
+              className={meta.countColor}
+              size="sm"
+              variant="ghost"
+            >
+              <Ellipsis />
+            </IconButton>
+          </Kanban.ColumnActions>
+        </Kanban.ColumnHeader>
+      </div>
+      <Kanban.ColumnBody className={`rounded-t-none ${meta.bodyBg}`}>
         <Kanban.CardList
           aria-label={column}
+          className="pt-0 pb-2"
           dragAndDropHooks={dragAndDropHooks}
           items={items}
-          renderEmptyState={() => <span className="text-muted text-xs">Drop tasks here</span>}
+          renderEmptyState={() => "No tasks yet."}
         >
           {(task) => (
             <Kanban.Card textValue={task.title}>
@@ -284,6 +319,12 @@ function TrackerColumn({
             </Kanban.Card>
           )}
         </Kanban.CardList>
+        <div className="p-2 pt-0">
+          <Button fullWidth className={meta.btnStyle} variant="outline" onPress={onAdd}>
+            <Plus />
+            New task
+          </Button>
+        </div>
       </Kanban.ColumnBody>
     </Kanban.Column>
   );
@@ -359,32 +400,38 @@ function TrackerCardContextMenu({
 
 function TrackerCardContent({ task }: { task: TrackerTask }) {
   const isDone = task.status === "Done";
+  const priorityDot = {
+    danger: "bg-danger",
+    warning: "bg-warning",
+    success: "bg-success",
+    accent: "bg-accent",
+  }[task.priority.color];
 
   return (
-    <div className="flex flex-col gap-2 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <Chip color={task.tag.color} size="sm" variant="soft">
-          {task.tag.label}
-        </Chip>
-        {task.dueDate ? (
-          <span className="text-muted inline-flex items-center gap-1 text-xs tabular-nums">
-            <Stopwatch className="size-3" />
-            {task.dueDate}
-          </span>
-        ) : null}
+    <div className="flex flex-col gap-3">
+      <div className="flex items-start gap-2">
+        <span className={`mt-1 size-2.5 shrink-0 rounded-sm ${priorityDot}`} />
+        <span
+          className={`text-foreground leading-snug font-semibold ${isDone ? "line-through opacity-60" : ""}`}
+        >
+          {task.title}
+        </span>
       </div>
 
-      <span
-        className={`text-foreground text-sm leading-snug font-medium ${
-          isDone ? "line-through opacity-60" : ""
-        }`}
-      >
-        {task.title}
-      </span>
-
-      {task.description ? (
-        <span className="text-muted text-xs leading-snug">{task.description}</span>
-      ) : null}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Chip color={task.priority.color} size="sm" variant="soft">
+          {task.priority.label}
+        </Chip>
+        <Chip size="sm" variant="secondary">
+          {task.size}
+        </Chip>
+        {task.assignees.slice(0, 3).map((assignee) => (
+          <Avatar key={assignee.name} className="ring-background size-5 ring-2" size="sm">
+            <Avatar.Image alt={assignee.name} src={assignee.avatar} />
+            <Avatar.Fallback>{assignee.name[0]}</Avatar.Fallback>
+          </Avatar>
+        ))}
+      </div>
 
       {task.subtasks ? (
         <div className="flex items-center gap-2">
@@ -405,30 +452,33 @@ function TrackerCardContent({ task }: { task: TrackerTask }) {
         </div>
       ) : null}
 
-      <div className="mt-0.5 flex -space-x-2">
-        {task.assignees.slice(0, 3).map((assignee) => (
-          <Avatar key={assignee.name} className="ring-background size-5 ring-2" size="sm">
-            <Avatar.Image alt={assignee.name} src={assignee.avatar} />
-            <Avatar.Fallback>
-              {assignee.name
-                .split(" ")
-                .map((part) => part[0])
-                .join("")}
-            </Avatar.Fallback>
-          </Avatar>
-        ))}
-        {task.assignees.length > 3 ? (
-          <Avatar className="ring-background size-5 ring-2" size="sm">
-            <Avatar.Fallback className="text-xs">+{task.assignees.length - 3}</Avatar.Fallback>
-          </Avatar>
+      <div className="text-muted flex items-center justify-between gap-2 text-xs">
+        <span className="flex min-w-0 items-center gap-1">
+          <ThunderboltFill className="text-warning size-3 shrink-0" />
+          <span className="truncate">{task.epic}</span>
+        </span>
+        {task.dueDate ? (
+          <span className="flex shrink-0 items-center gap-1 tabular-nums">
+            <Calendar className="size-3" />
+            {task.dueDate}
+          </span>
         ) : null}
       </div>
+
+      {task.categories.length > 0 ? (
+        <div className="flex flex-wrap gap-1">
+          {task.categories.slice(0, 3).map((category) => (
+            <Chip key={category} size="sm" variant="secondary">
+              {category}
+            </Chip>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
 
 function toTrackerTask(task: KanbanTask, status: string): TrackerTask {
-  const primaryTag = task.tags[0];
   const priorityTag = {
     HIGH: { color: "danger" as const, label: "High" },
     LOW: { color: "success" as const, label: "Low" },
@@ -441,7 +491,6 @@ function toTrackerTask(task: KanbanTask, status: string): TrackerTask {
       avatar: assignee.avatar ?? "",
       name: assignee.nickname || assignee.username,
     })),
-    description: task.content ?? "",
     dueDate: task.reminderAt
       ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(
           new Date(task.reminderAt)
@@ -452,7 +501,10 @@ function toTrackerTask(task: KanbanTask, status: string): TrackerTask {
     subtasks: task.checklistItems.length
       ? { completed, total: task.checklistItems.length }
       : undefined,
-    tag: primaryTag ? { color: "accent", label: primaryTag.name } : priorityTag,
+    categories: task.tags.map((tag) => tag.name),
+    epic: task.epic,
+    priority: priorityTag,
+    size: task.size,
     title: task.title,
     source: task,
   };
@@ -487,6 +539,26 @@ function TrackerError({ onRetry }: { onRetry: () => void }) {
         <EmptyState.Content>
           <Button variant="outline" onPress={onRetry}>
             <ArrowRotateLeft aria-hidden="true" className="size-4" /> Refresh
+          </Button>
+        </EmptyState.Content>
+      </EmptyState>
+    </div>
+  );
+}
+
+function TrackerEmpty({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="mx-auto flex max-w-7xl px-5 pt-8 pb-10">
+      <EmptyState className="bg-surface-secondary w-full rounded-2xl">
+        <EmptyState.Header>
+          <EmptyState.Title>Your tracker is ready for its first task</EmptyState.Title>
+          <EmptyState.Description>
+            Default columns will appear after the workspace finishes initializing.
+          </EmptyState.Description>
+        </EmptyState.Header>
+        <EmptyState.Content>
+          <Button variant="outline" onPress={onRetry}>
+            <ArrowRotateLeft aria-hidden="true" className="size-4" /> Refresh board
           </Button>
         </EmptyState.Content>
       </EmptyState>
