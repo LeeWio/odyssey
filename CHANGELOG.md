@@ -1,3 +1,16 @@
+# [1.138.0](https://github.com/LeeWio/odyssey/compare/v1.137.0...v1.138.0) (2026-08-30)
+
+
+### Bug Fixes
+
+* refine tracker column styling ([85ab312](https://github.com/LeeWio/odyssey/commit/85ab3123d9900ac396faafb4764174c9c60c3f63))
+
+
+### Features
+
+* add content operations dashboard ([238a029](https://github.com/LeeWio/odyssey/commit/238a029c08b7c8318d8f9c9ace7aa63607d9798c))
+* add editorial calendar workspace ([1ea441e](https://github.com/LeeWio/odyssey/commit/1ea441edf16fbd38b10d293816c85244a4bb7bb5))
+
 # [1.137.0](https://github.com/LeeWio/odyssey/compare/v1.136.0...v1.137.0) (2026-08-30)
 
 
