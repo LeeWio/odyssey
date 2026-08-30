@@ -4,6 +4,8 @@ import {
   DashboardStatsResponseSchema,
   TopPagesResponseSchema,
   TrafficResponseSchema,
+  ContentOperationsOverviewSchema,
+  type ContentOperationsOverview,
   type AnalyticsOverviewResponse,
   type DashboardStatsResponse,
   type TopPageResponse,
@@ -23,6 +25,17 @@ export const dashboardApi = baseApi.injectEndpoints({
       providesTags: ["Dashboard"],
       rawResponseSchema: apiResponseSchema(DashboardStatsResponseSchema),
       transformResponse: (response: { data: DashboardStatsResponse }) => response.data,
+      transformErrorResponse: transformApiError,
+    }),
+
+    getContentOperationsOverview: builder.query<ContentOperationsOverview, void>({
+      query: () => ({
+        url: "/api/v1/admin/dashboard/content-overview",
+        method: "GET",
+      }),
+      providesTags: ["Dashboard"],
+      rawResponseSchema: apiResponseSchema(ContentOperationsOverviewSchema),
+      transformResponse: (response: { data: ContentOperationsOverview }) => response.data,
       transformErrorResponse: transformApiError,
     }),
 
@@ -74,6 +87,7 @@ export const dashboardApi = baseApi.injectEndpoints({
 
 export const {
   useGetDashboardStatsQuery,
+  useGetContentOperationsOverviewQuery,
   useGetAnalyticsOverviewQuery,
   useGetTopPagesQuery,
   useGetTrafficAnalyticsQuery,

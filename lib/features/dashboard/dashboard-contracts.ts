@@ -80,3 +80,54 @@ export type DashboardStatsResponse = z.infer<typeof DashboardStatsResponseSchema
 export type AnalyticsOverviewResponse = z.infer<typeof AnalyticsOverviewResponseSchema>;
 export type TopPageResponse = z.infer<typeof TopPageSchema>;
 export type TrafficResponse = z.infer<typeof TrafficResponseSchema>;
+
+export const ContentOperationsSummarySchema = z.object({
+  publishedPosts: z.number().default(0),
+  drafts: z.number().default(0),
+  pendingReview: z.number().default(0),
+  scheduled: z.number().default(0),
+  moments: z.number().default(0),
+  pendingComments: z.number().default(0),
+  unreadNotifications: z.number().default(0),
+  activeSubscribers: z.number().default(0),
+});
+
+export const ContentOperationsAttentionItemSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  title: z.string(),
+  description: z.string(),
+  href: z.string(),
+  severity: z.enum(["INFO", "WARNING", "CRITICAL"]),
+  count: z.number().default(0),
+});
+
+export const ContentOperationsQueueItemSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  title: z.string(),
+  excerpt: z.string().nullable().optional(),
+  status: z
+    .enum(["DRAFT", "PENDING_REVIEW", "SCHEDULED", "PUBLISHED", "REJECTED", "ARCHIVED"])
+    .nullable(),
+  updatedAt: z.string().nullable(),
+  href: z.string(),
+});
+
+export const ContentOperationsActivityItemSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  title: z.string(),
+  occurredAt: z.string().nullable(),
+  href: z.string(),
+});
+
+export const ContentOperationsOverviewSchema = z.object({
+  summary: ContentOperationsSummarySchema,
+  attentionItems: z.array(ContentOperationsAttentionItemSchema).default([]),
+  editorialQueue: z.array(ContentOperationsQueueItemSchema).default([]),
+  recentActivity: z.array(ContentOperationsActivityItemSchema).default([]),
+  generatedAt: z.string(),
+});
+
+export type ContentOperationsOverview = z.infer<typeof ContentOperationsOverviewSchema>;
