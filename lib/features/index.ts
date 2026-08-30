@@ -5,6 +5,7 @@ export * from "./dashboard";
 export * from "./file";
 export * from "./friend-link";
 export * from "./github";
+export * from "./kanban";
 export * from "./library";
 export * from "./locale";
 export * from "./market";

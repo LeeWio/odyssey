@@ -149,6 +149,7 @@ export const baseApi = createApi({
     "Library",
     "OpenApi",
     "Column",
+    "Kanban",
   ],
   endpoints: () => ({}),
 });
