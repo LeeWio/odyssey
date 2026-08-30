@@ -8,6 +8,8 @@ import {
   type ContentOperationsOverview,
   EditorialCalendarResponseSchema,
   type EditorialCalendarResponse,
+  ContentWorkflowResponseSchema,
+  type ContentWorkflowResponse,
   type AnalyticsOverviewResponse,
   type DashboardStatsResponse,
   type TopPageResponse,
@@ -53,6 +55,17 @@ export const dashboardApi = baseApi.injectEndpoints({
       providesTags: ["Dashboard"],
       rawResponseSchema: apiResponseSchema(EditorialCalendarResponseSchema),
       transformResponse: (response: { data: EditorialCalendarResponse }) => response.data,
+      transformErrorResponse: transformApiError,
+    }),
+
+    getContentWorkflow: builder.query<ContentWorkflowResponse, void>({
+      query: () => ({
+        url: "/api/v1/admin/dashboard/content-workflow",
+        method: "GET",
+      }),
+      providesTags: ["Dashboard"],
+      rawResponseSchema: apiResponseSchema(ContentWorkflowResponseSchema),
+      transformResponse: (response: { data: ContentWorkflowResponse }) => response.data,
       transformErrorResponse: transformApiError,
     }),
 
@@ -106,6 +119,7 @@ export const {
   useGetDashboardStatsQuery,
   useGetContentOperationsOverviewQuery,
   useGetEditorialCalendarQuery,
+  useGetContentWorkflowQuery,
   useGetAnalyticsOverviewQuery,
   useGetTopPagesQuery,
   useGetTrafficAnalyticsQuery,

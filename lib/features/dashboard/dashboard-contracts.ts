@@ -151,3 +151,28 @@ export const EditorialCalendarResponseSchema = z.object({
 });
 
 export type EditorialCalendarResponse = z.infer<typeof EditorialCalendarResponseSchema>;
+
+export const ContentWorkflowItemSchema = z.object({
+  id: z.string(),
+  type: z.literal("POST"),
+  title: z.string(),
+  description: z.string(),
+  action: z.string(),
+  priority: z.enum(["HIGH", "MEDIUM", "LOW"]),
+  status: z.enum(["DRAFT", "PENDING_REVIEW", "SCHEDULED", "PUBLISHED", "REJECTED", "ARCHIVED"]),
+  relevantAt: z.string().nullable(),
+  href: z.string(),
+});
+
+export const ContentWorkflowResponseSchema = z.object({
+  items: z.array(ContentWorkflowItemSchema).default([]),
+  summary: z.object({
+    needsReview: z.number().default(0),
+    scheduled: z.number().default(0),
+    drafts: z.number().default(0),
+    rejected: z.number().default(0),
+    total: z.number().default(0),
+  }),
+});
+
+export type ContentWorkflowResponse = z.infer<typeof ContentWorkflowResponseSchema>;

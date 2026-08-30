@@ -2,7 +2,6 @@
 
 import {
   ArrowRight,
-  Bell,
   Calendar,
   Check,
   CircleExclamation,
@@ -15,7 +14,9 @@ import { Button, Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { EmptyState, KPI, KPIGroup, Timeline, Widget } from "@heroui-pro/react";
 import {
   type ContentOperationsOverview,
+  type ContentWorkflowResponse,
   useGetContentOperationsOverviewQuery,
+  useGetContentWorkflowQuery,
 } from "@/lib/features/dashboard";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -38,6 +39,7 @@ const STATUS_COLORS: Record<string, "accent" | "success" | "warning" | "danger" 
 
 export function DashboardPage() {
   const { data, isError, isFetching, isLoading, refetch } = useGetContentOperationsOverviewQuery();
+  const workflow = useGetContentWorkflowQuery();
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 pt-8 pb-10">
@@ -86,7 +88,12 @@ export function DashboardPage() {
         <>
           <SummaryWidget data={data?.summary} isLoading={isLoading} />
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.05fr_1.4fr]">
-            <AttentionWidget items={data?.attentionItems ?? []} isLoading={isLoading} />
+            <WorkflowWidget
+              data={workflow.data}
+              isError={workflow.isError}
+              isLoading={workflow.isLoading}
+              onRetry={() => void workflow.refetch()}
+            />
             <EditorialQueueWidget items={data?.editorialQueue ?? []} isLoading={isLoading} />
           </div>
           <ActivityWidget items={data?.recentActivity ?? []} isLoading={isLoading} />
@@ -157,53 +164,89 @@ function SummaryWidget({
   );
 }
 
-function AttentionWidget({
-  items,
+function WorkflowWidget({
+  data,
+  isError,
   isLoading,
+  onRetry,
 }: {
-  items: ContentOperationsOverview["attentionItems"];
+  data?: ContentWorkflowResponse;
+  isError: boolean;
   isLoading: boolean;
+  onRetry: () => void;
 }) {
   return (
     <Widget>
       <Widget.Header>
         <div>
-          <Widget.Title>Needs attention</Widget.Title>
-          <Widget.Description>Small things worth handling next</Widget.Description>
+          <Widget.Title>Next actions</Widget.Title>
+          <Widget.Description>Keep the editorial loop moving</Widget.Description>
         </div>
-        <Bell className="text-muted size-4" />
+        <Chip color="accent" size="sm" variant="soft">
+          {data?.summary.total ?? 0} open
+        </Chip>
       </Widget.Header>
       <Widget.Content className="flex flex-col gap-3">
         {isLoading ? (
-          <ListSkeleton count={3} />
-        ) : items.length === 0 ? (
+          <ListSkeleton count={4} />
+        ) : isError ? (
+          <EmptyState size="sm">
+            <EmptyState.Header>
+              <EmptyState.Media variant="icon">
+                <CircleExclamation />
+              </EmptyState.Media>
+              <EmptyState.Title>Workflow is unavailable</EmptyState.Title>
+              <EmptyState.Description>
+                Try again to refresh the next actions.
+              </EmptyState.Description>
+            </EmptyState.Header>
+            <EmptyState.Content>
+              <Button onPress={onRetry} size="sm" variant="secondary">
+                Try again
+              </Button>
+            </EmptyState.Content>
+          </EmptyState>
+        ) : data?.items.length === 0 ? (
           <EmptyState size="sm">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
                 <Check />
               </EmptyState.Media>
-              <EmptyState.Title>Everything is in order</EmptyState.Title>
+              <EmptyState.Title>Nothing is waiting</EmptyState.Title>
               <EmptyState.Description>
-                No content issues need your attention right now.
+                Your publishing workflow is clear for now.
               </EmptyState.Description>
             </EmptyState.Header>
           </EmptyState>
         ) : (
-          items.map((item) => (
+          data?.items.map((item) => (
             <Link className="group no-underline" href={item.href} key={item.id}>
               <Card className="group-hover:bg-surface-secondary transition-colors">
-                <Card.Header className="flex-row items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <Card.Title className="text-sm">{item.title}</Card.Title>
-                    <Card.Description className="mt-1">{item.description}</Card.Description>
+                <Card.Header className="flex-row items-start gap-3">
+                  <div className="bg-accent-soft text-accent flex size-9 shrink-0 items-center justify-center rounded-lg">
+                    <FileText className="size-4" />
                   </div>
-                  <Chip
-                    color={item.severity === "WARNING" ? "warning" : "accent"}
-                    size="sm"
-                    variant="soft"
-                  >
-                    {item.count}
-                  </Chip>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Card.Title className="truncate text-sm">{item.title}</Card.Title>
+                      <Chip
+                        color={
+                          item.priority === "HIGH"
+                            ? "danger"
+                            : item.priority === "MEDIUM"
+                              ? "warning"
+                              : "default"
+                        }
+                        size="sm"
+                        variant="soft"
+                      >
+                        {item.action}
+                      </Chip>
+                    </div>
+                    <Card.Description className="mt-1 line-clamp-2">
+                      {item.description}
+                    </Card.Description>
+                  </div>
                 </Card.Header>
               </Card>
             </Link>
