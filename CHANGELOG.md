@@ -1,3 +1,10 @@
+# [1.137.0](https://github.com/LeeWio/odyssey/compare/v1.136.0...v1.137.0) (2026-08-30)
+
+
+### Features
+
+* align tracker with HeroUI kanban ([e029146](https://github.com/LeeWio/odyssey/commit/e029146d658ff3d60be2eedd478e929a585263a7))
+
 # [1.136.0](https://github.com/LeeWio/odyssey/compare/v1.135.0...v1.136.0) (2026-08-30)
 
 
