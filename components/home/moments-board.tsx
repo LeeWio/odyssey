@@ -57,7 +57,7 @@ function MomentBoardCard({ entry, index }: { entry: MomentBoardEntry; index: num
     >
       <Card
         variant="default"
-        className="shadow-small flex w-full max-w-full min-w-0 origin-center cursor-pointer flex-col overflow-hidden transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-medium"
+        className="shadow-small hover:shadow-medium flex w-full max-w-full min-w-0 origin-center cursor-pointer flex-col overflow-hidden transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5"
       >
         <Card.Header className="flex w-full flex-row items-center justify-between">
           <div className="flex min-w-0 flex-row items-center gap-2">
