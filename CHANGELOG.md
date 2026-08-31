@@ -1,3 +1,10 @@
+## [1.140.1](https://github.com/LeeWio/odyssey/compare/v1.140.0...v1.140.1) (2026-08-31)
+
+
+### Bug Fixes
+
+* align scrolling card hover surfaces ([bef8567](https://github.com/LeeWio/odyssey/commit/bef856775146368665a7153a8a6e936329e4e1fb))
+
 # [1.140.0](https://github.com/LeeWio/odyssey/compare/v1.139.0...v1.140.0) (2026-08-30)
 
 
