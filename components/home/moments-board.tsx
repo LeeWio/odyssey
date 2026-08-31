@@ -57,7 +57,7 @@ function MomentBoardCard({ entry, index }: { entry: MomentBoardEntry; index: num
     >
       <Card
         variant="default"
-        className="shadow-small flex w-full max-w-full min-w-0 origin-center cursor-pointer flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-0.5 hover:scale-[1.02]"
+        className="shadow-small flex w-full max-w-full min-w-0 origin-center cursor-pointer flex-col overflow-hidden transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-medium"
       >
         <Card.Header className="flex w-full flex-row items-center justify-between">
           <div className="flex min-w-0 flex-row items-center gap-2">
@@ -140,8 +140,8 @@ export function MomentsBoard({
   const fourthColumn = columns[3];
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-10">
-      <div className="columns-1 gap-4 sm:columns-2 md:columns-3 lg:columns-4">
+    <div className="w-full py-10">
+      <div className="columns-1 gap-4 px-1 sm:columns-2 md:columns-3 lg:columns-4">
         <ScrollingBanner isVertical duration={isMobile ? 200 : 120} shouldPauseOnHover={true}>
           {firstColumn.map((entry, index) => (
             <MomentBoardCard key={`${entry.name}-${index}`} entry={entry} index={index} />

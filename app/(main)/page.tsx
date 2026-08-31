@@ -615,7 +615,7 @@ export default function Home() {
         </header>
 
         {/* Beautiful Guestbook Testimonials Board */}
-        <motion.div className="mt-6 w-full overflow-hidden" {...revealInView(0.12, 20)}>
+        <motion.div className="mt-6 w-full" {...revealInView(0.12, 20)}>
           <GuestbookBoard />
         </motion.div>
 

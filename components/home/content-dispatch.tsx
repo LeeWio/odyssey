@@ -239,7 +239,7 @@ export function MomentsShowcase() {
     <section
       id="moments-showcase"
       aria-labelledby="moments-showcase-title"
-      className="mx-auto w-full max-w-7xl scroll-mt-24 px-6 py-24 sm:px-10 sm:py-32"
+      className="mx-auto w-full max-w-7xl scroll-mt-24 py-24 sm:py-32"
     >
       <header className="flex flex-col items-center text-center">
         <motion.div {...revealInView(0, 10)}>

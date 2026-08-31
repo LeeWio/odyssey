@@ -184,7 +184,8 @@ export function ColumnsIndex() {
                 </TagGroup>
               </div>
               <Select
-                fullWidth
+                aria-label="Sort reading paths"
+                className="w-full lg:w-52 lg:justify-self-end"
                 value={sort}
                 variant="secondary"
                 onChange={(value) => {

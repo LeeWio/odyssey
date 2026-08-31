@@ -346,6 +346,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           <Card variant="secondary" className="p-5 sm:p-6">
             <Form className="gap-5" validationBehavior="native" onSubmit={handleSubmit}>
               <TextField
+                fullWidth
                 isRequired
                 name="name"
                 value={application.name}
@@ -361,6 +362,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               </TextField>
 
               <TextField
+                fullWidth
                 isRequired
                 name="url"
                 type="url"
@@ -373,6 +375,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               </TextField>
 
               <TextField
+                fullWidth
                 isRequired
                 name="email"
                 type="email"
@@ -385,6 +388,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               </TextField>
 
               <TextField
+                fullWidth
                 name="avatar"
                 type="url"
                 value={application.avatar}
@@ -402,6 +406,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               </TextField>
 
               <TextField
+                fullWidth
                 name="description"
                 value={application.description}
                 onChange={(value) => updateApplication("description", value)}
