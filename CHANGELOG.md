@@ -1,3 +1,10 @@
+## [1.141.1](https://github.com/LeeWio/odyssey/compare/v1.141.0...v1.141.1) (2026-08-31)
+
+
+### Bug Fixes
+
+* refine guestbook layout and site metadata ([fd38ed2](https://github.com/LeeWio/odyssey/commit/fd38ed28847321c80c65467b60675886e12be84e))
+
 # [1.141.0](https://github.com/LeeWio/odyssey/compare/v1.140.1...v1.141.0) (2026-08-31)
 
 
