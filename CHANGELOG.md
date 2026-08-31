@@ -1,3 +1,10 @@
+# [1.141.0](https://github.com/LeeWio/odyssey/compare/v1.140.1...v1.141.0) (2026-08-31)
+
+
+### Features
+
+* update site identity and favicon ([a51ba89](https://github.com/LeeWio/odyssey/commit/a51ba8916f2da0612310657c2af34ec04782dc35))
+
 ## [1.140.1](https://github.com/LeeWio/odyssey/compare/v1.140.0...v1.140.1) (2026-08-31)
 
 
