@@ -15,7 +15,7 @@ import {
   useLazyGetPostCommentRootsQuery,
   useLazyGetPostCommentRootsCursorQuery,
   useLazyGetCommentRepliesCursorQuery,
-  type CommentStatus,
+  type CommentPublishResponse,
   type CommentResponse,
 } from "@/lib/features/comment";
 import { useCommentContext, useCommentSortContext } from "../context/comment-context";
@@ -143,9 +143,22 @@ export function useComments() {
     );
   };
 
-  const markPendingCommentSubmitted = (id: number, status: CommentStatus = "PENDING") => {
+  const markPendingCommentSubmitted = (
+    tempId: number,
+    submission: CommentPublishResponse | null
+  ) => {
     setPendingComments((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, isFailed: false, isPending: false, status } : c))
+      prev.map((comment) =>
+        comment.id === tempId
+          ? {
+              ...comment,
+              id: submission?.id ?? comment.id,
+              isFailed: false,
+              isPending: false,
+              status: submission?.status ?? "PENDING",
+            }
+          : comment
+      )
     );
   };
 
@@ -420,12 +433,14 @@ export function useComments() {
   );
 
   const totalComments = enrichedComments.length;
-  const pendingRootCount = pendingComments.reduce(
-    (count, comment) => count + (comment.parentId === null ? 1 : 0),
-    0
-  );
   const remoteTotal = useCursorRoots ? cursorRootsResult.data?.total : pagedRootsResult.data?.total;
-  const canonicalCommentsCount = Math.max(0, remoteTotal ?? totalComments - pendingRootCount);
+  // Chromium may paint the sheet title before the first roots response arrives.
+  // Do not expose that fabricated zero as a visible count.
+  const isInitialCountLoading = isLoading && remoteTotal === undefined;
+  // During a publish, RTK Query can briefly expose the previous server total while
+  // the locally submitted root is already rendered. Never let that stale total
+  // make the header count move backwards or flicker.
+  const canonicalCommentsCount = Math.max(0, remoteTotal ?? 0, totalComments);
 
   useEffect(() => {
     commentDebug("query:state", {
@@ -437,6 +452,7 @@ export function useComments() {
       enrichedCount: enrichedComments.length,
       pendingCount: pendingComments.length,
       totalCount: canonicalCommentsCount,
+      isInitialCountLoading,
     });
   }, [
     baseComments.length,
@@ -445,6 +461,7 @@ export function useComments() {
     error,
     isFetching,
     isLoading,
+    isInitialCountLoading,
     pendingComments.length,
     queryKey,
   ]);
@@ -453,6 +470,7 @@ export function useComments() {
     comments: paginatedComments,
     allCommentsCount: enrichedComments.length,
     totalCount: canonicalCommentsCount,
+    isInitialCountLoading,
     isLoading,
     isFetching,
     error,

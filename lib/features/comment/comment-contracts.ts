@@ -73,4 +73,9 @@ export interface GuestbookRequest {
  */
 export interface CommentPublishOptions {
   idempotencyKey?: string;
+  /**
+   * Lets the comment sheet reconcile its optimistic item before the related
+   * query caches are invalidated. This is transport-only and is never sent.
+   */
+  deferInvalidation?: boolean;
 }

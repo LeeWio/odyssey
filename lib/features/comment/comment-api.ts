@@ -27,6 +27,28 @@ type CommentTag = { type: "Comment"; id: string | number };
 
 const commentTag = (id: string | number): CommentTag => ({ type: "Comment", id });
 
+export function publishedCommentTags(postId: number, parentId?: number): CommentTag[] {
+  const tags: CommentTag[] = [
+    commentTag("ADMIN_LIST"),
+    commentTag("MY_COMMENTS"),
+    commentTag(`POST_${postId}`),
+    commentTag(`POST_${postId}_ROOTS`),
+    commentTag(`POST_${postId}_HOT_ROOTS`),
+    commentTag(`POST_${postId}_NEW`),
+    commentTag(`POST_${postId}_NEW_COUNT`),
+  ];
+  if (parentId) tags.push(commentTag(`REPLIES_${parentId}`));
+  return tags;
+}
+
+export const publishedGuestbookCommentTags: CommentTag[] = [
+  commentTag("GUESTBOOK"),
+  commentTag("GUESTBOOK_NEW"),
+  commentTag("GUESTBOOK_NEW_COUNT"),
+  commentTag("ADMIN_LIST"),
+  commentTag("MY_COMMENTS"),
+];
+
 function collectCommentIds(comments: CommentResponse[]): number[] {
   return comments.flatMap((comment) => [
     comment.id,
@@ -198,12 +220,15 @@ export const commentApi = baseApi.injectEndpoints({
       CommentPublishResponse | null,
       CommentRequest & CommentPublishOptions
     >({
-      query: ({ idempotencyKey, ...body }) => ({
-        url: "/api/v1/public/comments",
-        method: "POST",
-        headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
-        body,
-      }),
+      query: ({ idempotencyKey, deferInvalidation, ...body }) => {
+        void deferInvalidation;
+        return {
+          url: "/api/v1/public/comments",
+          method: "POST",
+          headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+          body,
+        };
+      },
       rawResponseSchema: apiResponseSchema(CommentPublishResponseSchema.nullable()),
       transformResponse: (response: ApiResponse<CommentPublishResponse | null>) => response.data,
       transformErrorResponse: transformApiError,
@@ -222,18 +247,9 @@ export const commentApi = baseApi.injectEndpoints({
           toast.danger(getApiErrorMessage(error, "Failed to publish comment"));
         }
       },
-      invalidatesTags: (_result, error, { postId, parentId }) => {
-        if (error) return [];
-        const tags: CommentTag[] = [
-          commentTag("ADMIN_LIST"),
-          commentTag("MY_COMMENTS"),
-          commentTag(`POST_${postId}`),
-          commentTag(`POST_${postId}_ROOTS`),
-          commentTag(`POST_${postId}_HOT_ROOTS`),
-          commentTag(`POST_${postId}_NEW`),
-          commentTag(`POST_${postId}_NEW_COUNT`),
-        ];
-        if (parentId) tags.push(commentTag(`REPLIES_${parentId}`));
+      invalidatesTags: (_result, error, { postId, parentId, deferInvalidation }) => {
+        if (error || deferInvalidation) return [];
+        const tags = publishedCommentTags(postId, parentId);
         commentDebug("api:publish-invalidates", { postId, parentId, tags });
         return tags;
       },
@@ -365,12 +381,15 @@ export const commentApi = baseApi.injectEndpoints({
       CommentPublishResponse | null,
       GuestbookRequest & CommentPublishOptions
     >({
-      query: ({ idempotencyKey, ...body }) => ({
-        url: "/api/v1/public/guestbook",
-        method: "POST",
-        headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
-        body,
-      }),
+      query: ({ idempotencyKey, deferInvalidation, ...body }) => {
+        void deferInvalidation;
+        return {
+          url: "/api/v1/public/guestbook",
+          method: "POST",
+          headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+          body,
+        };
+      },
       rawResponseSchema: apiResponseSchema(CommentPublishResponseSchema.nullable()),
       transformResponse: (response: ApiResponse<CommentPublishResponse | null>) => response.data,
       transformErrorResponse: transformApiError,
@@ -382,16 +401,8 @@ export const commentApi = baseApi.injectEndpoints({
           toast.danger(getApiErrorMessage(error, "Failed to post entry"));
         }
       },
-      invalidatesTags: (_result, error) =>
-        error
-          ? []
-          : [
-              commentTag("GUESTBOOK"),
-              commentTag("GUESTBOOK_NEW"),
-              commentTag("GUESTBOOK_NEW_COUNT"),
-              commentTag("ADMIN_LIST"),
-              commentTag("MY_COMMENTS"),
-            ],
+      invalidatesTags: (_result, error, { deferInvalidation }) =>
+        error || deferInvalidation ? [] : publishedGuestbookCommentTags,
     }),
 
     /**

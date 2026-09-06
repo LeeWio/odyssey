@@ -19,6 +19,7 @@ interface CommentSystemProps {
 
 export interface CommentSystemRenderParts {
   totalCount: number;
+  isInitialCountLoading: boolean;
   commentList: React.ReactNode;
   commentInput: React.ReactNode;
 }
@@ -30,6 +31,7 @@ function CommentSystemContent({
   const {
     comments,
     totalCount,
+    isInitialCountLoading,
     isLoading,
     isFetching,
     error,
@@ -90,7 +92,7 @@ function CommentSystemContent({
   );
 
   if (children) {
-    return children({ totalCount, commentList, commentInput });
+    return children({ totalCount, isInitialCountLoading, commentList, commentInput });
   }
 
   return (
@@ -99,7 +101,7 @@ function CommentSystemContent({
       className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col"
     >
       <div className="shrink-0 pb-4">
-        <CommentHeader totalCount={totalCount} />
+        <CommentHeader isCountLoading={isInitialCountLoading} totalCount={totalCount} />
       </div>
       <ScrollShadow
         hideScrollBar

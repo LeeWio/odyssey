@@ -3,7 +3,10 @@
 import { toast } from "@heroui/react";
 import { useRef } from "react";
 import {
-  type CommentStatus,
+  commentApi,
+  type CommentPublishResponse,
+  publishedCommentTags,
+  publishedGuestbookCommentTags,
   useDeleteMyCommentMutation,
   useEditMyCommentMutation,
   useLikeCommentMutation,
@@ -12,13 +15,14 @@ import {
   useReportCommentMutation,
   useUnlikeCommentMutation,
 } from "@/lib/features/comment";
+import { useAppDispatch } from "@/lib/hooks";
 import { useCommentContext } from "../context/comment-context";
 import type { EnhancedComment } from "../types";
 import { commentDebug } from "@/lib/comment-debug";
 
 interface MutationHookProps {
   addPendingComment: (c: EnhancedComment) => void;
-  markPendingCommentSubmitted: (id: number, status?: CommentStatus) => void;
+  markPendingCommentSubmitted: (id: number, submission: CommentPublishResponse | null) => void;
   markPendingCommentFailed: (id: number) => void;
   markPendingCommentRetrying: (id: number) => void;
 }
@@ -29,6 +33,7 @@ export function useCommentMutations({
   markPendingCommentFailed,
   markPendingCommentRetrying,
 }: MutationHookProps) {
+  const dispatch = useAppDispatch();
   const { isGuestbook, postId, currentUser, isAuthenticated } = useCommentContext();
   const [publishCommentApi] = usePublishCommentMutation();
   const [postGuestbookEntryApi] = usePostGuestbookEntryMutation();
@@ -39,6 +44,21 @@ export function useCommentMutations({
   const [reportCommentApi] = useReportCommentMutation();
   const idempotencyKeys = useRef(new Map<number, string>());
   const tempIdSequence = useRef(0);
+
+  const invalidateAfterReconciliation = (parentId: number | null) => {
+    const invalidate = () => {
+      const tags = isGuestbook
+        ? publishedGuestbookCommentTags
+        : publishedCommentTags(postId, parentId ?? undefined);
+      dispatch(commentApi.util.invalidateTags(tags));
+    };
+
+    if (typeof requestAnimationFrame === "undefined") {
+      queueMicrotask(invalidate);
+      return;
+    }
+    requestAnimationFrame(invalidate);
+  };
 
   const createIdempotencyKey = () => {
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -110,17 +130,21 @@ export function useCommentMutations({
           content,
           parentId: parentId || undefined,
           idempotencyKey,
+          deferInvalidation: true,
         }).unwrap();
-        markPendingCommentSubmitted(tempId, submission?.status);
+        markPendingCommentSubmitted(tempId, submission);
       } else {
         const submission = await publishCommentApi({
           content,
           postId,
           parentId: parentId || undefined,
           idempotencyKey,
+          deferInvalidation: true,
         }).unwrap();
-        markPendingCommentSubmitted(tempId, submission?.status);
+        markPendingCommentSubmitted(tempId, submission);
       }
+
+      invalidateAfterReconciliation(parentId);
 
       commentDebug("mutation:publish-api-resolved", { postId, parentId, tempId });
       // Keep the locally submitted comment visible while moderation and the

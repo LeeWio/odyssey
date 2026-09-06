@@ -3,12 +3,12 @@
 import { ChevronDown, Comments } from "@gravity-ui/icons";
 import { Button, Chip, Dropdown, Label, Typography, type Key } from "@heroui/react";
 import { Sheet } from "@heroui-pro/react";
-import { memo, useEffect } from "react";
-import { commentDebug } from "@/lib/comment-debug";
+import { memo } from "react";
 import { type SortOrder, useCommentSortContext } from "./context/comment-context";
 
 interface CommentHeaderProps {
   totalCount: number;
+  isCountLoading?: boolean;
   inSheet?: boolean;
 }
 
@@ -24,25 +24,23 @@ function isSortOrder(value: Key | undefined): value is SortOrder {
 
 export const CommentHeader = memo(function CommentHeader({
   totalCount,
+  isCountLoading = false,
   inSheet = false,
 }: CommentHeaderProps) {
   const { sortOrder, setSortOrder } = useCommentSortContext();
-
-  useEffect(() => {
-    commentDebug("header:render", { totalCount, inSheet, sortOrder });
-  });
-
-  useEffect(() => {
-    commentDebug("header:mounted", { inSheet });
-    return () => commentDebug("header:unmounted", { inSheet });
-  }, [inSheet]);
 
   const heading = (
     <>
       <Comments aria-hidden="true" />
       Comments
-      <Chip size="sm" variant="soft" color="accent" className="tabular-nums">
-        {totalCount}
+      <Chip
+        aria-hidden={isCountLoading || undefined}
+        size="sm"
+        variant="soft"
+        color="accent"
+        className={isCountLoading ? "invisible tabular-nums" : "tabular-nums"}
+      >
+        {isCountLoading ? 0 : totalCount}
       </Chip>
     </>
   );
