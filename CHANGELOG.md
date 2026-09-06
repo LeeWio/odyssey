@@ -1,3 +1,10 @@
+## [1.142.1](https://github.com/LeeWio/odyssey/compare/v1.142.0...v1.142.1) (2026-09-06)
+
+
+### Bug Fixes
+
+* stabilize comment count updates ([8ceb96e](https://github.com/LeeWio/odyssey/commit/8ceb96ef3c46a314a643126d8310a7fa26d990c1))
+
 # [1.142.0](https://github.com/LeeWio/odyssey/compare/v1.141.1...v1.142.0) (2026-09-06)
 
 
