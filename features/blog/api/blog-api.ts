@@ -84,10 +84,24 @@ export const PostDigestResponseSchema = z.object({
   category: CategoryResponseSchema.nullable(),
   views: z.number(),
   likesCount: z.number(),
+  commentsCount: z
+    .number()
+    .nullish()
+    .transform((value) => value ?? 0),
   publishedAt: z.string().nullable().optional(),
 });
 
 export type PostDigestResponse = z.infer<typeof PostDigestResponseSchema>;
+
+const PostInteractionResponseSchema = z.object({
+  postId: z.number(),
+  liked: z.boolean(),
+  favorited: z.boolean(),
+  likesCount: z.number(),
+  favoritesCount: z.number(),
+});
+
+export type PostInteractionResponse = z.infer<typeof PostInteractionResponseSchema>;
 
 // Post Search Document (Elasticsearch)
 export const PostDocumentSchema = z.object({
@@ -361,11 +375,13 @@ export const postApi = baseApi.injectEndpoints({
     /**
      * User: Like post
      */
-    likePost: builder.mutation<void, number>({
+    likePost: builder.mutation<PostInteractionResponse, number>({
       query: (postId) => ({
         url: `/api/v1/public/interactions/posts/${postId}/like`,
         method: "POST",
       }),
+      rawResponseSchema: apiResponseSchema(PostInteractionResponseSchema),
+      transformResponse: (response: ApiResponse<PostInteractionResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(postId, { dispatch, getState, queryFulfilled }) {
         const state = getState() as Record<string, unknown>;
@@ -414,11 +430,13 @@ export const postApi = baseApi.injectEndpoints({
     /**
      * User: Unlike post
      */
-    unlikePost: builder.mutation<void, number>({
+    unlikePost: builder.mutation<PostInteractionResponse, number>({
       query: (postId) => ({
         url: `/api/v1/public/interactions/posts/${postId}/unlike`,
         method: "POST",
       }),
+      rawResponseSchema: apiResponseSchema(PostInteractionResponseSchema),
+      transformResponse: (response: ApiResponse<PostInteractionResponse>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted(postId, { dispatch, getState, queryFulfilled }) {
         const state = getState() as Record<string, unknown>;

@@ -24,7 +24,7 @@ import type { Key } from "react";
 import { useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 
-import { useGetFeaturedPostsQuery } from "@/features/blog/api/blog-api";
+import { ArticleEngagementCard, useGetFeaturedPostsQuery } from "@/features/blog";
 import { useGetPublicColumnsQuery } from "@/lib/features/column";
 import {
   useRetrieveArchiveQuery,
@@ -135,80 +135,7 @@ function SectionHeading({
 }
 
 function PostCard({ post }: { post: PostDigest }) {
-  const title = post.title || "Untitled story";
-
-  return (
-    <Link
-      className="group block h-full no-underline"
-      href={post.slug ? `/single/${post.slug}` : "/single"}
-    >
-      <Card
-        role="article"
-        variant="secondary"
-        className="group-hover:bg-surface-tertiary h-full overflow-hidden p-0"
-      >
-        {post.coverImage ? (
-          <div className="bg-surface-tertiary relative aspect-[16/9] overflow-hidden">
-            {/* The HeroUI Card media slot accepts regular responsive media. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt=""
-              className="h-full w-full object-cover"
-              loading="lazy"
-              src={post.coverImage}
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 border border-black/5 dark:border-white/10"
-            />
-          </div>
-        ) : (
-          <div className="bg-surface-tertiary text-muted flex aspect-[16/9] items-center justify-center">
-            <BookOpen aria-hidden="true" className="size-7" />
-          </div>
-        )}
-
-        <Card.Header className="gap-3">
-          {post.category?.name ? (
-            <Chip className="self-start" size="sm" variant="soft">
-              {post.category.name}
-            </Chip>
-          ) : null}
-          <Card.Title className="line-clamp-2 text-xl leading-snug">{title}</Card.Title>
-          {post.summary ? (
-            <Card.Description className="line-clamp-3 leading-6">{post.summary}</Card.Description>
-          ) : null}
-        </Card.Header>
-
-        <Card.Footer className="mt-auto flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <Avatar size="sm" variant="soft">
-              {post.authorAvatar ? (
-                <Avatar.Image alt={getDisplayAuthor(post.authorName)} src={post.authorAvatar} />
-              ) : null}
-              <Avatar.Fallback>{getInitials(post.authorName)}</Avatar.Fallback>
-            </Avatar>
-            <div className="min-w-0">
-              <Typography truncate type="body-xs" weight="medium">
-                {getDisplayAuthor(post.authorName)}
-              </Typography>
-              <Typography color="muted" type="body-xs">
-                {formatDate(post.publishedAt)}
-              </Typography>
-            </div>
-          </div>
-          <Typography
-            className="flex shrink-0 items-center gap-1.5 tabular-nums"
-            color="muted"
-            type="body-xs"
-          >
-            <Eye aria-hidden="true" className="size-3.5" />
-            {(post.views ?? 0).toLocaleString("en-US")}
-          </Typography>
-        </Card.Footer>
-      </Card>
-    </Link>
-  );
+  return <ArticleEngagementCard post={post} />;
 }
 
 function PostGrid({ posts }: { posts: PostDigest[] }) {

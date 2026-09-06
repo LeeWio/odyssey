@@ -5,6 +5,7 @@ export * from "./reader/reader-view";
 export * from "./reader/typography";
 export * from "./reader/medium-image-zoom";
 export * from "./cards/post-card";
+export * from "./cards/article-engagement-card";
 export * from "./interactive/comment-section";
 export * from "./auxiliary/music-mini-widget";
 export * from "./api/blog-api";

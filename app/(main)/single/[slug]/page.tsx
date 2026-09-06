@@ -26,7 +26,7 @@ import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, use, useEffect, useMemo, useRef, useState } from "react";
 import { CommentSheet } from "@/components/comment";
 import { MotionRichTextEditor } from "@/components/ui";
@@ -92,10 +92,13 @@ function getReadingPositionAnchor(postId: number) {
 
 export default function SinglePage({ params }: SinglePageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const { slug } = use(params);
   const [isActionBarOpen, setIsActionBarOpen] = useState(false);
-  const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
+  const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(
+    () => searchParams.get("comments") === "1"
+  );
   const [readingProgress, setReadingProgress] = useState(0);
   const [readingProgressPostId, setReadingProgressPostId] = useState<number | null>(null);
   const [collectionPendingId, setCollectionPendingId] = useState<number | null>(null);
@@ -108,6 +111,11 @@ export default function SinglePage({ params }: SinglePageProps) {
   );
   const readingProgressRef = useRef({ postId: null as number | null, progress: 0 });
   const restoredPositionRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("comments") !== "1") return;
+    router.replace(`/single/${slug}`, { scroll: false });
+  }, [router, searchParams, slug]);
 
   const { scrollY, scrollYProgress } = useScroll();
   const { data: serverArticle, isLoading: queryIsLoading } = useGetPublicPostBySlugQuery(slug);
