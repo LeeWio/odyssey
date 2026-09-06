@@ -1,3 +1,10 @@
+# [1.142.0](https://github.com/LeeWio/odyssey/compare/v1.141.1...v1.142.0) (2026-09-06)
+
+
+### Features
+
+* add interactive article engagement cards ([6ab5dc5](https://github.com/LeeWio/odyssey/commit/6ab5dc5bbabd7823bf8ba33a32bd678cbd2582a3))
+
 ## [1.141.1](https://github.com/LeeWio/odyssey/compare/v1.141.0...v1.141.1) (2026-08-31)
 
 
