@@ -1,3 +1,10 @@
+## [1.142.3](https://github.com/LeeWio/odyssey/compare/v1.142.2...v1.142.3) (2026-09-07)
+
+
+### Bug Fixes
+
+* **auth:** use Link for resend action and refine OTP copy ([badbe07](https://github.com/LeeWio/odyssey/commit/badbe07a5755730d496d5e8d419687ca9fd410c0))
+
 ## [1.142.2](https://github.com/LeeWio/odyssey/compare/v1.142.1...v1.142.2) (2026-09-07)
 
 
