@@ -7,6 +7,7 @@ import {
   Input,
   InputOTP,
   Label,
+  Link,
   REGEXP_ONLY_DIGITS,
   Spinner,
   TextField,
@@ -207,10 +208,8 @@ export const LoginContent = ({ onSuccess, onSwitchToSignUp }: LoginContentProps)
             aria-live="polite"
           >
             <p className="text-muted text-sm">{t("didntReceiveCode")}</p>
-            <Button
-              className="text-foreground h-auto min-w-0 p-0 text-sm font-normal underline"
+            <Link
               isDisabled={isSendingOtp || isLoggingIn || resendCooldown > 0}
-              variant="ghost"
               onPress={handleResend}
             >
               {isSendingOtp
@@ -218,7 +217,7 @@ export const LoginContent = ({ onSuccess, onSwitchToSignUp }: LoginContentProps)
                 : resendCooldown > 0
                   ? t("resendIn", { seconds: resendCooldown })
                   : t("resend")}
-            </Button>
+            </Link>
           </div>
           <Button fullWidth variant="tertiary" onPress={changeEmail} isDisabled={isLoggingIn}>
             <Icon icon="solar:arrow-left-linear" aria-hidden="true" />

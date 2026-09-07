@@ -38,7 +38,7 @@ export const AuthView = ({
   <>
     <Modal.Header>
       <Modal.Heading className="text-xl font-medium">{title}</Modal.Heading>
-      {subtitle ? <p className="text-muted text-sm break-words">{subtitle}</p> : null}
+      {subtitle ? <p className="text-muted text-sm wrap-break-word">{subtitle}</p> : null}
     </Modal.Header>
     <Modal.Body data-scrollbar="none">{children}</Modal.Body>
   </>
@@ -154,13 +154,8 @@ interface AuthSwitchPromptProps {
 }
 
 export const AuthSwitchPrompt = ({ actionLabel, onAction, text }: AuthSwitchPromptProps) => (
-  <div className="text-small mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1">
+  <div className="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-sm">
     <span>{text}</span>
-    <Link
-      className="text-small text-accent font-normal underline underline-offset-2"
-      onPress={onAction}
-    >
-      {actionLabel}
-    </Link>
+    <Link onPress={onAction}>{actionLabel}</Link>
   </div>
 );

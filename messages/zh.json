@@ -20,7 +20,7 @@
     "codeSentTo": "验证码已发送至 {email}",
     "didntReceiveCode": "没有收到验证码？",
     "resend": "重新发送",
-    "resendIn": "{seconds} 秒后重发",
+    "resendIn": "{seconds} 秒后重试",
     "sending": "发送中...",
     "changeEmail": "修改邮箱",
     "continueWithEmail": "使用邮箱继续",
