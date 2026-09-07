@@ -190,7 +190,7 @@ export const SignupContent = ({ onSuccess, onSwitchToLogIn }: SignupContentProps
           </Form>
           <AuthDivider />
           <Button fullWidth variant="tertiary" onPress={() => switchView(false)}>
-            <Icon icon="solar:arrow-left-linear" aria-hidden="true" />
+            <Icon icon="gravity-ui:arrow-shape-turn-up-left" aria-hidden="true" />
             {t("otherOptions")}
           </Button>
         </AuthStep>
