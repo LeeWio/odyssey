@@ -1,3 +1,10 @@
+## [1.142.2](https://github.com/LeeWio/odyssey/compare/v1.142.1...v1.142.2) (2026-09-07)
+
+
+### Bug Fixes
+
+* **auth:** unify login and signup dialog transitions ([1500ebd](https://github.com/LeeWio/odyssey/commit/1500ebd466ebe524ca51c38fc3269ecb707bc157))
+
 ## [1.142.1](https://github.com/LeeWio/odyssey/compare/v1.142.0...v1.142.1) (2026-09-06)
 
 
