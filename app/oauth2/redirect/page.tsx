@@ -8,6 +8,7 @@ import { baseApi } from "@/lib/api";
 import { setCredentials, setPermissions } from "@/lib/features/auth";
 import { permissionApi, type MenuResponse } from "@/lib/features/permission";
 import { useAppDispatch } from "@/lib/hooks";
+import { getSafeRedirectPath, OAUTH_REDIRECT_KEY } from "@/components/auth/auth-utils";
 
 // Safe helper to decode JWT payload on the client side with Node SSR guard
 const decodeJwt = (token: string) => {
@@ -59,13 +60,13 @@ function RedirectHandler() {
       // Fallback referrer path check
       let referrer = "/";
       if (typeof window !== "undefined") {
-        referrer = localStorage.getItem("oauth_redirect_referrer") || "/";
+        referrer = getSafeRedirectPath(localStorage.getItem(OAUTH_REDIRECT_KEY));
       }
 
       if (!payload) {
         toast.danger("Invalid token received from server");
         if (typeof window !== "undefined") {
-          localStorage.removeItem("oauth_redirect_referrer");
+          localStorage.removeItem(OAUTH_REDIRECT_KEY);
         }
         router.push("/");
         return;
@@ -95,14 +96,14 @@ function RedirectHandler() {
 
         // 5. Restore the user's active page and clear session tracker
         if (typeof window !== "undefined") {
-          localStorage.removeItem("oauth_redirect_referrer");
+          localStorage.removeItem(OAUTH_REDIRECT_KEY);
         }
 
         toast.success("Successfully authenticated with Odyssey!");
         router.push(referrer);
       } catch {
         if (typeof window !== "undefined") {
-          localStorage.removeItem("oauth_redirect_referrer");
+          localStorage.removeItem(OAUTH_REDIRECT_KEY);
         }
         toast.danger("Authentication succeeded, but failed to sync user permissions.");
         router.push("/");

@@ -7,6 +7,7 @@ export type { ThemeVariant } from "../../theme";
 
 interface UiState {
   authDialogs: {
+    authMode: "login" | "signup" | null;
     isLoginOpen: boolean;
     isSignUpOpen: boolean;
   };
@@ -29,6 +30,7 @@ interface UiState {
 
 const initialState: UiState = {
   authDialogs: {
+    authMode: null,
     isLoginOpen: false,
     isSignUpOpen: false,
   },
@@ -54,12 +56,30 @@ export const uiSlice = createSlice({
   initialState,
   reducers: {
     setLoginOpen: (state, action: PayloadAction<boolean>) => {
-      state.authDialogs ??= { isLoginOpen: false, isSignUpOpen: false };
+      state.authDialogs ??= { authMode: null, isLoginOpen: false, isSignUpOpen: false };
       state.authDialogs.isLoginOpen = action.payload;
+      if (action.payload) {
+        state.authDialogs.authMode = "login";
+        state.authDialogs.isSignUpOpen = false;
+      } else if (state.authDialogs.authMode === "login") {
+        state.authDialogs.authMode = null;
+      }
     },
     setSignUpOpen: (state, action: PayloadAction<boolean>) => {
-      state.authDialogs ??= { isLoginOpen: false, isSignUpOpen: false };
+      state.authDialogs ??= { authMode: null, isLoginOpen: false, isSignUpOpen: false };
       state.authDialogs.isSignUpOpen = action.payload;
+      if (action.payload) {
+        state.authDialogs.authMode = "signup";
+        state.authDialogs.isLoginOpen = false;
+      } else if (state.authDialogs.authMode === "signup") {
+        state.authDialogs.authMode = null;
+      }
+    },
+    setAuthMode: (state, action: PayloadAction<"login" | "signup" | null>) => {
+      state.authDialogs ??= { authMode: null, isLoginOpen: false, isSignUpOpen: false };
+      state.authDialogs.authMode = action.payload;
+      state.authDialogs.isLoginOpen = action.payload === "login";
+      state.authDialogs.isSignUpOpen = action.payload === "signup";
     },
     toggleSheet: (state) => {
       state.sheet.isOpen = !state.sheet.isOpen;
@@ -101,6 +121,7 @@ export const uiSlice = createSlice({
 export const {
   setLoginOpen,
   setSignUpOpen,
+  setAuthMode,
   toggleSheet,
   setSheetOpen,
   setThemeVariant,
@@ -113,6 +134,7 @@ export const {
 
 export const selectIsLoginOpen = (state: RootState) => state.ui.authDialogs?.isLoginOpen ?? false;
 export const selectIsSignUpOpen = (state: RootState) => state.ui.authDialogs?.isSignUpOpen ?? false;
+export const selectAuthMode = (state: RootState) => state.ui.authDialogs?.authMode ?? null;
 export const selectIsSheetOpen = (state: RootState) => state.ui.sheet?.isOpen;
 export const selectThemeVariant = (state: RootState) => state.ui.theme?.variant;
 export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard?.isOpen;

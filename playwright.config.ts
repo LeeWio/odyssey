@@ -24,7 +24,8 @@ export default defineConfig({
   webServer: externalBaseUrl
     ? undefined
     : {
-        command: "ENABLE_RICH_TEXT_TEST_ROUTE=1 bunx next dev --hostname 127.0.0.1 --port 3100",
+        command:
+          "ENABLE_AUTH_TEST_ROUTE=1 ENABLE_RICH_TEXT_TEST_ROUTE=1 npx next dev --hostname 127.0.0.1 --port 3100",
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
         url: `${baseURL}/test/rich-text`,

@@ -30,17 +30,10 @@ import {
 } from "@/lib/features/auth";
 import { NotificationPopover } from "@/features/notification/notification-popover";
 import { useGetUnreadNotificationCountQuery } from "@/lib/features/notification";
-import {
-  selectIsLoginOpen,
-  selectIsSignUpOpen,
-  setLoginOpen,
-  setSignUpOpen,
-  toggleDashboard,
-} from "@/lib/features/ui";
+import { selectAuthMode, setAuthMode, toggleDashboard } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
-import { LogIn } from "./auth/log-in";
-import { SignUp } from "./auth/sign-up";
+import { AuthDialog } from "./auth/auth-dialog";
 import { CommandPalette } from "./command-palette";
 import { Logo, MoonFillIcon, SearchIcon, SunMaxFillIcon } from "./icons";
 
@@ -701,8 +694,7 @@ export const Navbar = () => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
   const email = useAppSelector(selectUserEmail);
-  const isLoginOpen = useAppSelector(selectIsLoginOpen);
-  const isSignUpOpen = useAppSelector(selectIsSignUpOpen);
+  const authMode = useAppSelector(selectAuthMode);
 
   const [activeNavigation, setActiveNavigation] = useState<NavigationId | null>(null);
   const [isLocked, setIsLocked] = useState(false);
@@ -926,16 +918,6 @@ export const Navbar = () => {
     void logout();
   };
 
-  const switchToSignUp = () => {
-    dispatch(setLoginOpen(false));
-    window.setTimeout(() => dispatch(setSignUpOpen(true)), 220);
-  };
-
-  const switchToLogIn = () => {
-    dispatch(setSignUpOpen(false));
-    window.setTimeout(() => dispatch(setLoginOpen(true)), 220);
-  };
-
   const openAuthFromMobileMenu = (mode: "login" | "signup") => {
     cancelClose();
     cancelPreview();
@@ -943,10 +925,7 @@ export const Navbar = () => {
     setIsLocked(false);
     setIsMobileMenuOpen(false);
 
-    window.setTimeout(
-      () => dispatch(mode === "login" ? setLoginOpen(true) : setSignUpOpen(true)),
-      reduceMotion ? 0 : 220
-    );
+    dispatch(setAuthMode(mode));
   };
 
   const isNavigationOpen = Boolean(activeItem || isMobileMenuOpen);
@@ -1377,7 +1356,7 @@ export const Navbar = () => {
                 size="sm"
                 variant="ghost"
                 className="hidden h-9 rounded-xl px-3.5 font-semibold sm:flex"
-                onPress={() => dispatch(setLoginOpen(true))}
+                onPress={() => dispatch(setAuthMode("login"))}
               >
                 Sign in
               </Button>
@@ -1675,16 +1654,7 @@ export const Navbar = () => {
       </motion.div>
 
       <CommandPalette isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} />
-      <SignUp
-        isOpen={isSignUpOpen}
-        onOpenChange={(open) => dispatch(setSignUpOpen(open))}
-        onSwitchToLogIn={switchToLogIn}
-      />
-      <LogIn
-        isOpen={isLoginOpen}
-        onOpenChange={(open) => dispatch(setLoginOpen(open))}
-        onSwitchToSignUp={switchToSignUp}
-      />
+      <AuthDialog mode={authMode} onModeChange={(mode) => dispatch(setAuthMode(mode))} />
     </>
   );
 };

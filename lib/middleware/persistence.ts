@@ -136,7 +136,7 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
       const variant = theme ? coerceThemeVariant(theme) : DEFAULT_THEME_VARIANT;
 
       preloadedState.ui = {
-        authDialogs: { isLoginOpen: false, isSignUpOpen: false },
+        authDialogs: { authMode: null, isLoginOpen: false, isSignUpOpen: false },
         theme: { variant: variant as ThemeVariant },
         sheet: { isOpen: false },
         dashboard: { isOpen: false },

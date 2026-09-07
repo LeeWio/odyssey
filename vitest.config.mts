@@ -28,6 +28,7 @@ export default defineConfig({
     },
     include: [
       "components/rich-text/**/*.test.ts",
+      "components/auth/**/*.test.ts",
       "lib/features/**/*.test.ts",
       "features/moment/__tests__/**/*.test.ts",
     ],
