@@ -1,3 +1,10 @@
+# [1.144.0](https://github.com/LeeWio/odyssey/compare/v1.143.1...v1.144.0) (2026-09-08)
+
+
+### Features
+
+* **media:** polish mini player controls ([e30578f](https://github.com/LeeWio/odyssey/commit/e30578f52895273cb03a4ce87f44ebca41ca1652))
+
 ## [1.143.1](https://github.com/LeeWio/odyssey/compare/v1.143.0...v1.143.1) (2026-09-08)
 
 
