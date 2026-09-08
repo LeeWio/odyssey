@@ -1,3 +1,10 @@
+## [1.143.1](https://github.com/LeeWio/odyssey/compare/v1.143.0...v1.143.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **carousel:** replace lucide React icons with Iconify ([1b98300](https://github.com/LeeWio/odyssey/commit/1b983004ece34f49118493d267de85c135403e86))
+
 # [1.143.0](https://github.com/LeeWio/odyssey/compare/v1.142.3...v1.143.0) (2026-09-08)
 
 
