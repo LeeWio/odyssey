@@ -2,6 +2,7 @@ export interface MediaTrack {
   id: string;
   title: string;
   artist?: string;
+  cover?: string;
   src: string;
   duration?: number;
 }
@@ -30,6 +31,7 @@ export interface PlayerState {
 
 export interface MediaPlayerAPI {
   play: (media: MediaItem) => void;
+  playAt: (index: number) => void;
   pause: () => void;
   resume: () => void;
   toggle: () => void;

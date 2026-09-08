@@ -37,6 +37,10 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     playerRef.current?.pause();
   }, []);
 
+  const playAt = useCallback((index: number) => {
+    playerRef.current?.playAt(index);
+  }, []);
+
   const resume = useCallback(() => {
     playerRef.current?.resume();
   }, []);
@@ -73,6 +77,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     () => ({
       ...state,
       play,
+      playAt,
       pause,
       resume,
       toggle,
@@ -83,7 +88,20 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       seek,
       setVolume,
     }),
-    [state, play, pause, resume, toggle, toggleShuffle, stop, next, previous, seek, setVolume]
+    [
+      state,
+      play,
+      playAt,
+      pause,
+      resume,
+      toggle,
+      toggleShuffle,
+      stop,
+      next,
+      previous,
+      seek,
+      setVolume,
+    ]
   );
 
   return <MediaContext.Provider value={value}>{children}</MediaContext.Provider>;

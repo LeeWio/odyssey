@@ -14,6 +14,9 @@ interface UiState {
   sheet: {
     isOpen: boolean;
   };
+  miniPlayer: {
+    isOpen: boolean;
+  };
   theme: {
     variant: ThemeVariant;
   };
@@ -35,6 +38,9 @@ const initialState: UiState = {
     isSignUpOpen: false,
   },
   sheet: {
+    isOpen: false,
+  },
+  miniPlayer: {
     isOpen: false,
   },
   theme: {
@@ -87,6 +93,12 @@ export const uiSlice = createSlice({
     setSheetOpen: (state, action: PayloadAction<boolean>) => {
       state.sheet.isOpen = action.payload;
     },
+    toggleMiniPlayer: (state) => {
+      state.miniPlayer.isOpen = !state.miniPlayer.isOpen;
+    },
+    setMiniPlayerOpen: (state, action: PayloadAction<boolean>) => {
+      state.miniPlayer.isOpen = action.payload;
+    },
     setThemeVariant: (state, action: PayloadAction<ThemeVariant>) => {
       state.theme.variant = action.payload;
     },
@@ -124,6 +136,8 @@ export const {
   setAuthMode,
   toggleSheet,
   setSheetOpen,
+  toggleMiniPlayer,
+  setMiniPlayerOpen,
   setThemeVariant,
   toggleDashboard,
   toggleRichText,
@@ -136,6 +150,7 @@ export const selectIsLoginOpen = (state: RootState) => state.ui.authDialogs?.isL
 export const selectIsSignUpOpen = (state: RootState) => state.ui.authDialogs?.isSignUpOpen ?? false;
 export const selectAuthMode = (state: RootState) => state.ui.authDialogs?.authMode ?? null;
 export const selectIsSheetOpen = (state: RootState) => state.ui.sheet?.isOpen;
+export const selectIsMiniPlayerOpen = (state: RootState) => state.ui.miniPlayer?.isOpen ?? false;
 export const selectThemeVariant = (state: RootState) => state.ui.theme?.variant;
 export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard?.isOpen;
 export const selectIsRichTextOpen = (state: RootState) => state.ui.richText?.isOpen;

@@ -1,14 +1,15 @@
 "use client";
 
 import { useMemo } from "react";
-import { TargetIcon } from "@/components/icons";
-import { setSheetOpen } from "@/lib/features/ui";
-import { useAppDispatch } from "@/lib/hooks";
+import { PlayFillIcon, TargetIcon } from "@/components/icons";
+import { selectIsMiniPlayerOpen, setMiniPlayerOpen, setSheetOpen } from "@/lib/features/ui";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { createActionCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 
 export function useSystemCommands(): CommandItem[] {
   const dispatch = useAppDispatch();
+  const isMiniPlayerOpen = useAppSelector(selectIsMiniPlayerOpen);
 
   return useMemo(
     () => [
@@ -39,7 +40,25 @@ export function useSystemCommands(): CommandItem[] {
           closeOnExecute: true,
         },
       }),
+      createActionCommand({
+        id: "system-toggle-mini-player",
+        title: isMiniPlayerOpen ? "Close MiniPlayer" : "Open MiniPlayer",
+        description: isMiniPlayerOpen ? "Hide the mini player" : "Show the mini player",
+        icon: PlayFillIcon,
+        category: "System",
+        source: "system",
+        order: 1110,
+        keywords: ["mini player", "miniplayer", "music", "media", "播放器", "迷你播放器", "音乐"],
+        intent: CommandIntent.EXECUTE,
+        defaultVisible: true,
+        payload: {
+          action: () => {
+            dispatch(setMiniPlayerOpen(!isMiniPlayerOpen));
+          },
+          closeOnExecute: true,
+        },
+      }),
     ],
-    [dispatch]
+    [dispatch, isMiniPlayerOpen]
   );
 }

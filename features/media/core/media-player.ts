@@ -74,6 +74,14 @@ export class MediaPlayer {
     this.loadTrack(tracks[0]);
   }
 
+  playAt(index: number) {
+    if (!this.audio || !Number.isInteger(index) || index < 0 || index >= this.state.queue.length)
+      return;
+
+    this.updateState({ currentIndex: index, currentTime: 0, duration: 0 });
+    this.loadTrack(this.state.queue[index]);
+  }
+
   private loadTrack(track: MediaTrack) {
     if (!this.audio) return;
 

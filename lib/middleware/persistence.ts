@@ -139,6 +139,7 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
         authDialogs: { authMode: null, isLoginOpen: false, isSignUpOpen: false },
         theme: { variant: variant as ThemeVariant },
         sheet: { isOpen: false },
+        miniPlayer: { isOpen: false },
         dashboard: { isOpen: false },
         richText: { isOpen: false, activeId: draftId || null },
       };
