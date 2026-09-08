@@ -1,3 +1,10 @@
+# [1.143.0](https://github.com/LeeWio/odyssey/compare/v1.142.3...v1.143.0) (2026-09-08)
+
+
+### Features
+
+* **footer:** add interactive social cards and RSS feed ([c967bb4](https://github.com/LeeWio/odyssey/commit/c967bb468722f5c59f1fa03c7e9602975dc9a770))
+
 ## [1.142.3](https://github.com/LeeWio/odyssey/compare/v1.142.2...v1.142.3) (2026-09-07)
 
 
