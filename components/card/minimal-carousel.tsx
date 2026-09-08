@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { MoreHorizontal, Copy } from "lucide-react";
 import { Button, Card } from "@heroui/react";
 import { MotionButton } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -89,7 +88,7 @@ export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
                         variant="tertiary"
                         onPress={() => onCopyClick?.(activeCard)}
                       >
-                        {copyLabel} <Copy size={16} />
+                        {copyLabel} <Icon icon="lucide:copy" width={16} height={16} />
                       </MotionButton>
                     </Card.Header>
 
@@ -141,7 +140,7 @@ export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
                   >
                     <Card.Header className="flex-row items-start justify-between">
                       <card.icon size={activeId ? 20 : 28} />
-                      <MoreHorizontal size={16} />
+                      <Icon icon="lucide:ellipsis" width={16} height={16} />
                     </Card.Header>
 
                     <Card.Footer>
