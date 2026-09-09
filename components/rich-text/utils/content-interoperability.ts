@@ -1,8 +1,7 @@
 import { generateHTML, generateJSON, type JSONContent } from "@tiptap/core";
 import type { Editor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 
-import { ExtensionKit } from "../extensions/extension-kit";
+import { createConversionExtensions } from "../extensions/extension-kit";
 import { parseJSONContent } from "./document-normalizer";
 
 export type ContentInteroperabilityFormat = "markdown" | "html" | "json";
@@ -24,7 +23,7 @@ export interface ContentExportAnalysis {
   warnings: ContentInteroperabilityWarning[];
 }
 
-const CONVERSION_EXTENSIONS = [StarterKit, ...ExtensionKit];
+const CONVERSION_EXTENSIONS = createConversionExtensions();
 const SUPPORTED_HTML_TAGS = new Set([
   "a",
   "audio",

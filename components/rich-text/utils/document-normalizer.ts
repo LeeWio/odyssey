@@ -51,22 +51,6 @@ export function parseJSONContent(value: unknown): JSONContent | null {
   }
 }
 
-function getNodeTextContent(node: JSONContent): string {
-  if (typeof node.text === "string") return node.text;
-
-  return node.content?.map(getNodeTextContent).join("") ?? "";
-}
-
-function createAnchorSlug(value: string, position: number): string {
-  const slug = value
-    .normalize("NFKD")
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-+|-+$/g, "");
-
-  return slug || `section-${position}`;
-}
-
 function normalizeMarks(marks: JSONContent["marks"]): JSONContent["marks"] {
   return marks?.flatMap((mark) => {
     if (mark.type !== "link") {
@@ -98,48 +82,13 @@ function normalizeMarks(marks: JSONContent["marks"]): JSONContent["marks"] {
 
 /**
  * Creates a safe copy of a Tiptap document for rendering or persistence.
- * Heading IDs derive from heading text and remain deterministic across readers.
+ * Heading IDs are managed by Tiptap's Table of Contents extension.
  */
 export function normalizeRichTextDocument(content: JSONContent): JSONContent {
-  const usedAnchorIds = new Set<string>();
-  let headingPosition = 0;
-
   const normalizeNode = (node: JSONContent): JSONContent => {
     const normalizedContent = node.content?.map(normalizeNode);
     const normalizedMarks = normalizeMarks(node.marks);
     const attrs = node.attrs ? { ...node.attrs } : undefined;
-
-    if (node.type === "heading") {
-      headingPosition += 1;
-
-      const baseId = createAnchorSlug(
-        getNodeTextContent({
-          ...node,
-          ...(normalizedContent ? { content: normalizedContent } : {}),
-        }),
-        headingPosition
-      );
-      let id = baseId;
-      let duplicateCount = 2;
-
-      while (usedAnchorIds.has(id)) {
-        id = `${baseId}-${duplicateCount}`;
-        duplicateCount += 1;
-      }
-
-      usedAnchorIds.add(id);
-
-      return {
-        ...node,
-        attrs: {
-          ...attrs,
-          id,
-          "data-toc-id": id,
-        },
-        ...(normalizedMarks ? { marks: normalizedMarks } : {}),
-        ...(normalizedContent ? { content: normalizedContent } : {}),
-      };
-    }
 
     return {
       ...node,

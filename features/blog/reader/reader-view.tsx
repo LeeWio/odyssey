@@ -249,8 +249,6 @@ export function ReaderView({ slug }: ReaderViewProps) {
     return doc ? normalizeRichTextDocument(doc) : null;
   }, [article]);
 
-  console.log("[READER-DEBUG] article loaded:", article ? "yes" : "no", "slug:", slug);
-
   if (isLoading) {
     return (
       <div className="bg-background flex min-h-screen items-center justify-center">

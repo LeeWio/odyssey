@@ -1,5 +1,4 @@
 import {
-  BlockFormatTransition,
   Attachment,
   Audio,
   Column,
@@ -23,6 +22,7 @@ import type { TableOfContentsOptions } from "@tiptap/extension-table-of-contents
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { FindAndReplace } from "@tiptap/extension-find-and-replace";
 import { Markdown } from "@tiptap/markdown";
+import StarterKit from "@tiptap/starter-kit";
 
 export interface ExtensionKitOptions {
   tableOfContents?: Partial<TableOfContentsOptions>;
@@ -30,7 +30,6 @@ export interface ExtensionKitOptions {
 
 export function createExtensionKit(options: ExtensionKitOptions = {}) {
   return [
-    BlockFormatTransition,
     ...DetailsKit,
     Emoji,
     Image,
@@ -76,3 +75,11 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
 }
 
 export const ExtensionKit = createExtensionKit();
+
+/**
+ * Extensions used by non-editor content conversion helpers.
+ * RichTextEditor injects these base extensions itself at runtime.
+ */
+export function createConversionExtensions() {
+  return [StarterKit.configure({ heading: { levels: [1, 2, 3] } }), ...createExtensionKit()];
+}

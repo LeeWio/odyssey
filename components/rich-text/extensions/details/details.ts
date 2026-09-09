@@ -8,21 +8,17 @@ import {
 import { Plugin, PluginKey, Selection, TextSelection } from "@tiptap/pm/state";
 
 const DETAILS_CONTENT_SELECTOR = ':scope > [data-type="detailsContent"]';
-const DETAILS_TOGGLE_EVENT = "toggleDetailsContent";
-const DETAILS_ANIMATION_DURATION = 180;
 let detailsContentId = 0;
 
 function createIndicatorIcon() {
-  const namespace = "http://www.w3.org/2000/svg";
-  const icon = document.createElementNS(namespace, "svg");
-  const path = document.createElementNS(namespace, "path");
+  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
   icon.setAttribute("aria-hidden", "true");
   icon.setAttribute("class", "size-4");
   icon.setAttribute("fill", "none");
   icon.setAttribute("viewBox", "0 0 16 16");
   icon.dataset.detailsIndicatorIcon = "true";
-
   path.setAttribute("d", "M3.75 6 8 10.25 12.25 6");
   path.setAttribute("stroke", "currentColor");
   path.setAttribute("stroke-linecap", "round");
@@ -31,68 +27,6 @@ function createIndicatorIcon() {
   icon.append(path);
 
   return icon;
-}
-
-function animateDetailsContent(panel: HTMLElement, isOpen: boolean) {
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const activeAnimations = panel.getAnimations();
-  const currentHeight = panel.hidden ? 0 : panel.getBoundingClientRect().height;
-  const currentOpacity = panel.hidden
-    ? 0
-    : activeAnimations.length > 0
-      ? Number.parseFloat(getComputedStyle(panel).opacity)
-      : isOpen
-        ? 0
-        : 1;
-
-  activeAnimations.forEach((animation) => animation.cancel());
-  panel.hidden = false;
-  panel.setAttribute("aria-hidden", String(!isOpen));
-
-  if (prefersReducedMotion) {
-    panel.hidden = !isOpen;
-
-    return;
-  }
-
-  const targetHeight = isOpen ? panel.scrollHeight : 0;
-  const targetOpacity = isOpen ? 1 : 0;
-  const animation = panel.animate(
-    [
-      { height: `${currentHeight}px`, opacity: currentOpacity },
-      { height: `${targetHeight}px`, opacity: targetOpacity },
-    ],
-    {
-      duration: DETAILS_ANIMATION_DURATION,
-      easing: "cubic-bezier(0.23, 1, 0.32, 1)",
-      fill: "both",
-    }
-  );
-
-  void animation.finished
-    .then(() => {
-      const remainsOpen = panel.dataset.expanded === "true";
-
-      panel.hidden = !remainsOpen;
-      animation.cancel();
-    })
-    .catch(() => {
-      // Reversing the disclosure cancels the previous animation intentionally.
-    });
-}
-
-function installAnimationAdapter(panel: HTMLElement) {
-  if (panel.dataset.detailsAnimationReady === "true") return;
-
-  panel.dataset.detailsAnimationReady = "true";
-  panel.addEventListener(
-    DETAILS_TOGGLE_EVENT,
-    (event) => {
-      event.stopImmediatePropagation();
-      animateDetailsContent(panel, panel.dataset.expanded === "true");
-    },
-    { capture: true }
-  );
 }
 
 function renderToggleButton({ element, isOpen, node }: DetailsRenderToggleButtonOptions) {
@@ -117,6 +51,7 @@ function renderToggleButton({ element, isOpen, node }: DetailsRenderToggleButton
 
     panel.classList.add("accordion__panel");
     panel.dataset.expanded = String(isOpen);
+    panel.hidden = !isOpen;
     panel.setAttribute("aria-hidden", String(!isOpen));
 
     if (!panel.id) {
@@ -125,7 +60,6 @@ function renderToggleButton({ element, isOpen, node }: DetailsRenderToggleButton
     }
 
     element.setAttribute("aria-controls", panel.id);
-    installAnimationAdapter(panel);
   };
 
   syncPanel();

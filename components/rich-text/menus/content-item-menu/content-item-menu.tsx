@@ -3,9 +3,9 @@
 import { Button, Dropdown, Label, Header } from "@heroui/react";
 import { useRichTextEditor } from "@heroui-pro/react";
 import DragHandle from "@tiptap/extension-drag-handle-react";
-import { ArrowDown, ArrowUp, Copy, Grip, TrashBin } from "@gravity-ui/icons";
+import { ArrowDown, ArrowUp, Copy, CopyPlus, Grip, TrashBin } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useContentItemState } from "./hooks/use-content-item-state";
 import { useContentItemActions } from "./hooks/use-content-item-actions";
 
@@ -59,15 +59,15 @@ export function ContentItemMenu() {
     return false;
   }, [editor, activeBlock]);
 
-  if (!editor || isDisabled || isReadOnly) return null;
-
   const selectBlock = () => {
-    if (!activeBlock) return false;
+    if (!editor || !activeBlock) return false;
 
     return editor.chain().focus().setNodeSelection(activeBlock.position).run();
   };
 
   const handleOpenChange = (nextIsOpen: boolean) => {
+    if (!editor) return;
+
     setIsMenuOpen(nextIsOpen);
 
     if (nextIsOpen) {
@@ -78,29 +78,63 @@ export function ContentItemMenu() {
     }
   };
 
-  const runAction = (action: string) => {
+  useEffect(() => {
+    if (!editor || isDisabled || isReadOnly) return;
+
+    const handleKeyboardOpen = (event: KeyboardEvent) => {
+      const isContextMenuKey = event.key === "ContextMenu" || event.key === "Apps";
+      const isShiftF10 = event.shiftKey && event.key === "F10";
+
+      if (
+        event.defaultPrevented ||
+        event.isComposing ||
+        (!isContextMenuKey && !isShiftF10) ||
+        !editor.isFocused ||
+        isMenuOpen
+      ) {
+        return;
+      }
+
+      const resolvedSelection = editor.state.doc.resolve(editor.state.selection.from);
+      for (let depth = resolvedSelection.depth; depth > 0; depth -= 1) {
+        const node = resolvedSelection.node(depth);
+        if (!node.isBlock) continue;
+
+        const position = resolvedSelection.before(depth);
+        setActiveBlock({ node, position });
+        editor.chain().focus().setNodeSelection(position).run();
+        editor.commands.setMeta("lockDragHandle", true);
+        setIsMenuOpen(true);
+        event.preventDefault();
+        return;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyboardOpen);
+    return () => document.removeEventListener("keydown", handleKeyboardOpen);
+  }, [editor, isDisabled, isMenuOpen, isReadOnly, setActiveBlock, setIsMenuOpen]);
+
+  if (!editor || isDisabled || isReadOnly) return null;
+
+  const runAction = async (action: string) => {
     if (!activeBlock) return;
 
-    if (
-      action === "copy" ||
-      action === "delete" ||
-      action === "move-up" ||
-      action === "move-down"
-    ) {
-      if (action === "copy") {
-        actions.duplicateNode();
-        setAnnouncement("Block duplicated");
-      } else if (action === "delete") {
-        actions.deleteNode();
-        setAnnouncement("Block deleted");
-        setActiveBlock(null);
-      } else if (action === "move-up") {
-        actions.moveNodeUp();
-        setAnnouncement("Block moved up");
-      } else if (action === "move-down") {
-        actions.moveNodeDown();
-        setAnnouncement("Block moved down");
-      }
+    if (action === "copy") {
+      const copied = await actions.copyNodeToClipboard();
+      setAnnouncement(copied ? "Block copied" : "Unable to copy block");
+    } else if (action === "duplicate") {
+      actions.duplicateNode();
+      setAnnouncement("Block duplicated");
+    } else if (action === "delete") {
+      actions.deleteNode();
+      setAnnouncement("Block deleted");
+      setActiveBlock(null);
+    } else if (action === "move-up") {
+      actions.moveNodeUp();
+      setAnnouncement("Block moved up");
+    } else if (action === "move-down") {
+      actions.moveNodeDown();
+      setAnnouncement("Block moved down");
     }
 
     // Context Table Actions
@@ -216,9 +250,10 @@ export function ContentItemMenu() {
           setActiveBlock({ node, position: pos });
         }}
       >
-        <Dropdown trigger="longPress" isOpen={isMenuOpen} onOpenChange={handleOpenChange}>
+        <Dropdown isOpen={isMenuOpen} onOpenChange={handleOpenChange}>
           <Button
             aria-label="Block actions"
+            aria-keyshortcuts="Shift+F10"
             className="cursor-grab active:cursor-grabbing"
             isIconOnly
             size="sm"
@@ -378,8 +413,12 @@ export function ContentItemMenu() {
                   </Dropdown.Popover>
                 </Dropdown.SubmenuTrigger>
 
-                <Dropdown.Item id="copy" textValue="Duplicate block">
+                <Dropdown.Item id="copy" textValue="Copy block">
                   <Copy aria-hidden="true" className="size-4" />
+                  <Label>Copy</Label>
+                </Dropdown.Item>
+                <Dropdown.Item id="duplicate" textValue="Duplicate block">
+                  <CopyPlus aria-hidden="true" className="size-4" />
                   <Label>Duplicate</Label>
                 </Dropdown.Item>
                 <Dropdown.Item id="delete" textValue="Delete block" variant="danger">

@@ -115,3 +115,7 @@ export function clearMediaUpload(editor: Editor, id: string) {
   uploads?.delete(id);
   if (uploads?.size === 0) queuedMediaUploads.delete(editor);
 }
+
+export function clearMediaUploads(editor: Editor) {
+  queuedMediaUploads.delete(editor);
+}

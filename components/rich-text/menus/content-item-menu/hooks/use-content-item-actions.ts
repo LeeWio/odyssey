@@ -15,28 +15,38 @@ export const useContentItemActions = (currentNode: Node | null, currentNodePos: 
   }, [editor, currentNodePos]);
 
   const copyNodeToClipboard = useCallback(async () => {
-    if (!editor || currentNodePos === -1 || !currentNode) return;
+    if (!editor || currentNodePos === -1) return false;
 
-    editor.chain().focus().setMeta("hideDragHandle", true).setNodeSelection(currentNodePos).run();
+    const node = editor.state.doc.nodeAt(currentNodePos);
+    if (!node) return false;
+
+    const slice = editor.state.doc.slice(currentNodePos, currentNodePos + node.nodeSize);
+    const { dom, text } = editor.view.serializeForClipboard(slice);
 
     try {
-      const html = editor.getHTML();
-      const text = editor.getText();
+      if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": new Blob([dom.innerHTML], { type: "text/html" }),
+            "text/plain": new Blob([text], { type: "text/plain" }),
+          }),
+        ]);
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        return false;
+      }
 
-      const data = [
-        new ClipboardItem({
-          "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([text], { type: "text/plain" }),
-        }),
-      ];
-
-      await navigator.clipboard.write(data);
-    } catch (err) {
-      console.error("Failed to copy using Clipboard API, falling back...", err);
-      const text = editor.getText();
-      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        return false;
+      }
     }
-  }, [editor, currentNode, currentNodePos]);
+  }, [editor, currentNodePos]);
 
   const duplicateNode = useCallback(() => {
     if (!editor || currentNodePos === -1 || !currentNode) return;

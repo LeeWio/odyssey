@@ -29,6 +29,7 @@ const SHORTCUT_GROUPS = [
       { action: "Heading 1", keys: ["⌘/Ctrl", "Alt", "1"] },
       { action: "Code block", keys: ["⌘/Ctrl", "Alt", "0"] },
       { action: "Task list", keys: ["⌘/Ctrl", "Shift", "9"] },
+      { action: "Block actions menu", keys: ["Shift", "F10"] },
       { action: "Indent list item", keys: ["Tab"] },
     ],
   },

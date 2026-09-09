@@ -39,7 +39,7 @@ function createMediaNode(editor: Editor, file: File): JSONContent {
 }
 
 function insertFiles(editor: Editor, files: File[], position?: number) {
-  if (files.length === 0) return;
+  if (!editor.isEditable || files.length === 0) return;
 
   const content = files.map((file) => createMediaNode(editor, file));
   const chain = editor.chain().focus();

@@ -105,6 +105,9 @@ test("selects, reorders, duplicates and deletes blocks from the drag handle menu
   page,
 }) => {
   const editor = page.locator(editorSelector);
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"], {
+    origin: new URL(page.url()).origin,
+  });
   const paragraph = editor.locator("p").filter({ hasText: "Bold and linked text" });
 
   await paragraph.hover();
@@ -122,6 +125,18 @@ test("selects, reorders, duplicates and deletes blocks from the drag handle menu
   await expect(page.getByTestId("draft-status")).toHaveText("Editor ready");
   await expect(editor.locator(":scope > ul").first()).toHaveText("List item");
   await expect(editor.locator(":scope > p").first()).toContainText("Bold and linked text");
+
+  await paragraph.click();
+  await page.keyboard.press("Shift+F10");
+  await expect(page.getByRole("menu", { name: "Block actions" })).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  await paragraph.hover();
+  await page.getByRole("button", { name: "Block actions" }).click();
+  await page.getByRole("menuitem", { name: "Copy" }).click();
+  await expect
+    .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+    .toContain("Bold and linked text");
 
   await paragraph.hover();
   await page.getByRole("button", { name: "Block actions" }).click();
@@ -146,7 +161,7 @@ test("filters and inserts blocks from the slash menu with the keyboard", async (
   await expect(editor.locator("h2").last()).toBeEmpty();
 });
 
-test("animates paragraph and heading transformations and respects reduced motion", async ({
+test("transforms paragraph and heading blocks and respects reduced motion", async ({
   page,
 }) => {
   const editor = page.locator(editorSelector);
@@ -157,18 +172,7 @@ test("animates paragraph and heading transformations and respects reduced motion
   await page.getByRole("menuitemradio", { name: "Heading 2" }).click();
 
   const heading = editor.locator("h2").filter({ hasText: "Bold and linked text" });
-  const animations = await heading.evaluate((element) =>
-    element.getAnimations().map((animation) => ({
-      duration: animation.effect?.getTiming().duration,
-      keyframes: animation.effect instanceof KeyframeEffect ? animation.effect.getKeyframes() : [],
-    }))
-  );
-
-  expect(animations).toHaveLength(1);
-  expect(animations[0]?.duration).toBe(200);
-  expect(animations[0]?.keyframes[0]).toHaveProperty("fontSize");
-
-  await page.waitForTimeout(250);
+  await expect(heading).toBeVisible();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await heading.click();
   await page.getByRole("button", { name: "Block type: Heading 2" }).click();

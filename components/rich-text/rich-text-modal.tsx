@@ -2,9 +2,11 @@
 
 import { Alert, AlertDialog, Button, Modal, Spinner, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { Editor } from "@tiptap/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 import { RichText } from "@/components/rich-text/rich-text";
 import { RichTextForm } from "@/components/rich-text/rich-text-form";
@@ -74,7 +76,7 @@ export function RichTextModal() {
 
   const [showForm, setShowForm] = useState(false);
   const editorRef = useRef<Editor | null>(null);
-  const initialEditorContentRef = useRef<string | null>(null);
+  const initialEditorDocumentRef = useRef<ProseMirrorNode | null>(null);
   const initialPostDataRef = useRef(serializePostData(EMPTY_POST_DATA));
   const [isContentDirty, setIsContentDirty] = useState(false);
   const [isMetadataDirty, setIsMetadataDirty] = useState(false);
@@ -84,7 +86,6 @@ export function RichTextModal() {
   const [isEditorReady, setIsEditorReady] = useState(false);
   const [isPostDataReady, setIsPostDataReady] = useState(false);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
-  const [draftRevision, setDraftRevision] = useState(0);
   const [mediaIssues, setMediaIssues] = useState(() =>
     getMediaValidationIssues(normalizeJSONContent(undefined))
   );
@@ -111,6 +112,23 @@ export function RichTextModal() {
   const isPending = isCreating || isUpdating || isCoverUploading;
   const hasContentSchemaError = contentSchemaError?.activeId === activeId;
 
+  const saveDraft = useDebouncedCallback(
+    (
+      draftId: string | null,
+      editor: Editor | null,
+      data: Partial<PostRequest>,
+      isEnabled: boolean
+    ) => {
+      if (!isEnabled || !draftId || !editor || editor.isDestroyed) return;
+
+      const content = editor.getJSON();
+      if (hasPendingMediaUploads(content)) return;
+
+      saveRichTextDraft(draftId, content, data);
+    },
+    750
+  );
+
   // Fetch existing post data if activeId is a numeric string (existing ID)
   const isExistingPost = activeId && !isNaN(Number(activeId));
   const { data: existingPost, isLoading: isFetching } = useGetAdminPostByIdQuery(Number(activeId), {
@@ -127,7 +145,7 @@ export function RichTextModal() {
 
   useEffect(() => {
     editorRef.current = null;
-    initialEditorContentRef.current = null;
+    initialEditorDocumentRef.current = null;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsEditorReady(false);
     setIsPostDataReady(false);
@@ -178,30 +196,17 @@ export function RichTextModal() {
   const handlePostDataChange = (nextPostData: Partial<PostRequest>) => {
     setPostData(nextPostData);
     setIsMetadataDirty(serializePostData(nextPostData) !== initialPostDataRef.current);
-    setDraftRevision((revision) => revision + 1);
+    saveDraft(
+      activeId,
+      editorRef.current,
+      nextPostData,
+      Boolean(isOpen && activeId && isPostDataReady && !hasContentSchemaError)
+    );
   };
 
   useEffect(() => {
-    if (
-      !isOpen ||
-      !activeId ||
-      !isDirty ||
-      hasContentSchemaError ||
-      !isPostDataReady ||
-      !editorRef.current
-    ) {
-      return;
-    }
-
-    const content = editorRef.current.getJSON();
-    if (hasPendingMediaUploads(content)) return;
-
-    const timer = window.setTimeout(() => {
-      saveRichTextDraft(activeId, content, postData);
-    }, 750);
-
-    return () => window.clearTimeout(timer);
-  }, [activeId, draftRevision, hasContentSchemaError, isDirty, isOpen, isPostDataReady, postData]);
+    return () => saveDraft.cancel();
+  }, [activeId, hasContentSchemaError, isOpen, saveDraft]);
 
   useEffect(() => {
     if (!isOpen || !isDirty) return;
@@ -216,6 +221,7 @@ export function RichTextModal() {
   }, [isDirty, isOpen]);
 
   const closeEditor = () => {
+    saveDraft.cancel();
     dispatch(closeRichText());
     setShowForm(false);
     setIsDiscardDialogOpen(false);
@@ -262,12 +268,14 @@ export function RichTextModal() {
       return;
     }
 
-    const restoredContent = editorRef.current.getJSON();
     const restoredPostData = recoveryDraft.postData;
     setPostData(restoredPostData);
-    setIsContentDirty(JSON.stringify(restoredContent) !== initialEditorContentRef.current);
+    setIsContentDirty(
+      initialEditorDocumentRef.current
+        ? !initialEditorDocumentRef.current.eq(editorRef.current.state.doc)
+        : true
+    );
     setIsMetadataDirty(serializePostData(restoredPostData) !== initialPostDataRef.current);
-    setDraftRevision((revision) => revision + 1);
     setRecoveryDraft(null);
     setIsDraftRecoveryDialogOpen(false);
   };
@@ -433,11 +441,14 @@ export function RichTextModal() {
                         showTableOfContents
                         onReady={(editor) => {
                           editorRef.current = editor;
-                          const content = JSON.stringify(editor.getJSON());
-                          initialEditorContentRef.current = content;
-                          setIsContentDirty(false);
-                          setMediaIssues(getMediaValidationIssues(editor.getJSON()));
-                          setIsEditorReady(true);
+                          initialEditorDocumentRef.current = editor.state.doc;
+                          const content = editor.getJSON();
+                          queueMicrotask(() => {
+                            if (editor.isDestroyed) return;
+                            setIsContentDirty(false);
+                            setMediaIssues(getMediaValidationIssues(content));
+                            setIsEditorReady(true);
+                          });
                         }}
                         onContentError={(error) => {
                           setContentSchemaError({
@@ -446,11 +457,29 @@ export function RichTextModal() {
                           });
                         }}
                         onUpdate={(editor) => {
-                          setIsContentDirty(
-                            JSON.stringify(editor.getJSON()) !== initialEditorContentRef.current
+                          const content = editor.getJSON();
+                          const nextMediaIssues = getMediaValidationIssues(content);
+
+                          saveDraft(
+                            activeId,
+                            editor,
+                            postData,
+                            Boolean(isOpen && activeId && isPostDataReady && !hasContentSchemaError)
                           );
-                          setMediaIssues(getMediaValidationIssues(editor.getJSON()));
-                          setDraftRevision((revision) => revision + 1);
+
+                          queueMicrotask(() => {
+                            if (editor.isDestroyed) return;
+                            setIsContentDirty(
+                              initialEditorDocumentRef.current
+                                ? !initialEditorDocumentRef.current.eq(editor.state.doc)
+                                : true
+                            );
+                            setMediaIssues((currentIssues) =>
+                              JSON.stringify(currentIssues) === JSON.stringify(nextMediaIssues)
+                                ? currentIssues
+                                : nextMediaIssues
+                            );
+                          });
                         }}
                       />
                       {hasContentSchemaError && (

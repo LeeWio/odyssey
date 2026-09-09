@@ -1,10 +1,9 @@
 "use client";
 
 import { RichTextEditor } from "@heroui-pro/react";
-import type { TableOfContentData } from "@tiptap/extension-table-of-contents";
 import type { Editor } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/react";
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo } from "react";
 import { selectRichTextState } from "@/lib/features";
 import { useAppSelector } from "@/lib/hooks";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
@@ -20,6 +19,7 @@ import { RichTextTableOfContents } from "./table-of-contents";
 import { EditorFooter } from "./editor-footer";
 import { ContentItemMenu } from "./menus/content-item-menu";
 import { MediaInsertDialog } from "./media-insert-dialog";
+import { clearMediaUploads } from "./extensions/media";
 
 export interface RichTextProps {
   content?: JSONContent;
@@ -40,13 +40,11 @@ export function RichText({
 }: RichTextProps) {
   const { initialValue, isReadOnly } = useAppSelector(selectRichTextState);
   const scrollContainerId = useId();
-  const [tableOfContentsItems, setTableOfContentsItems] = useState<TableOfContentData>([]);
   const extensions = useMemo(
     () =>
       showTableOfContents
         ? createExtensionKit({
             tableOfContents: {
-              onUpdate: setTableOfContentsItems,
               scrollParent: () => document.getElementById(scrollContainerId) ?? window,
             },
           })
@@ -67,6 +65,9 @@ export function RichText({
         },
         onContentError: ({ error }) => {
           onContentError?.(error);
+        },
+        onUnmount: ({ editor }) => {
+          clearMediaUploads(editor);
         },
         onUpdate: ({ editor }) => {
           onUpdate?.(editor);
@@ -93,7 +94,6 @@ export function RichText({
         />
         {showTableOfContents && (
           <RichTextTableOfContents
-            items={tableOfContentsItems}
             maxHeadingLevel={2}
             position="container"
             scrollMode="editor"
