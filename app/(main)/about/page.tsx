@@ -1,8 +1,7 @@
-'use client'
+"use client";
 import Masonry from "@/components/ui/masonry";
 import { AboutPage } from "@/features/about";
 import type { Metadata } from "next";
-
 
 const items = [
   {
@@ -25,19 +24,20 @@ const items = [
   },
 ];
 
-
 export default function AboutRoute() {
-  return <div className="w-screen flex flex-row items-center justify-center h-screen">
-    <Masonry
-      items={items}
-      ease="power3.out"
-      duration={0.6}
-      stagger={0.05}
-      animateFrom="bottom"
-      scaleOnHover
-      hoverScale={0.95}
-      blurToFocus
-      colorShiftOnHover={false}
-    />
-  </div>;
+  return (
+    <div className="flex h-screen w-screen flex-row items-center justify-center">
+      <Masonry
+        items={items}
+        ease="power3.out"
+        duration={0.6}
+        stagger={0.05}
+        animateFrom="bottom"
+        scaleOnHover
+        hoverScale={0.95}
+        blurToFocus
+        colorShiftOnHover={false}
+      />
+    </div>
+  );
 }
