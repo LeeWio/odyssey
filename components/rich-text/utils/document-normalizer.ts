@@ -2,7 +2,6 @@ import { isValidYoutubeUrl } from "@tiptap/extension-youtube";
 import type { JSONContent } from "@tiptap/react";
 
 import { normalizeLinkUrl } from "./link-utils";
-import { decodeRichTextPayload } from "./content-schema";
 
 // The minimal valid, standard ProseMirror document structure
 export const EMPTY_DOC: JSONContent = {
@@ -10,9 +9,43 @@ export const EMPTY_DOC: JSONContent = {
   content: [{ type: "paragraph" }],
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Basic shape validation before handing a document to Tiptap's schema. */
+export function isJSONContentTree(value: unknown): value is JSONContent {
+  const pending: unknown[] = [value];
+
+  while (pending.length > 0) {
+    const node = pending.pop();
+    if (!isRecord(node) || typeof node.type !== "string") return false;
+    if (node.text !== undefined && typeof node.text !== "string") return false;
+    if (node.attrs !== undefined && !isRecord(node.attrs)) return false;
+
+    if (node.marks !== undefined) {
+      if (!Array.isArray(node.marks)) return false;
+      for (const mark of node.marks) {
+        if (!isRecord(mark) || typeof mark.type !== "string") return false;
+        if (mark.attrs !== undefined && !isRecord(mark.attrs)) return false;
+      }
+    }
+
+    if (node.content !== undefined) {
+      if (!Array.isArray(node.content)) return false;
+      pending.push(...node.content);
+    }
+  }
+
+  return true;
+}
+
 export function parseJSONContent(value: unknown): JSONContent | null {
   try {
-    return decodeRichTextPayload(value).document;
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    return isJSONContentTree(parsed) && parsed.type === "doc" && Array.isArray(parsed.content)
+      ? parsed
+      : null;
   } catch {
     return null;
   }

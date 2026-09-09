@@ -20,7 +20,7 @@ const FORMAT_OPTIONS: Array<{
 }> = [
   { id: "markdown", label: "Markdown", extension: "md" },
   { id: "html", label: "HTML", extension: "html" },
-  { id: "json", label: "Versioned JSON", extension: "json" },
+  { id: "json", label: "Tiptap JSON", extension: "json" },
 ];
 
 export function ContentInteroperabilityDialog() {

@@ -3,17 +3,13 @@ import type { Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
 import { ExtensionKit } from "../extensions/extension-kit";
-import {
-  decodeRichTextPayload,
-  RichTextSchemaError,
-  serializeRichTextPayload,
-} from "./content-schema";
+import { parseJSONContent } from "./document-normalizer";
 
 export type ContentInteroperabilityFormat = "markdown" | "html" | "json";
 
 export interface ContentInteroperabilityWarning {
   blocking: boolean;
-  code: "invalid-content" | "migration" | "round-trip-change" | "unsupported-html";
+  code: "invalid-content" | "round-trip-change" | "unsupported-html";
   message: string;
 }
 
@@ -159,10 +155,7 @@ function roundTripWarning(
 }
 
 function invalidAnalysis(error: unknown): ContentImportAnalysis {
-  const message =
-    error instanceof RichTextSchemaError || error instanceof Error
-      ? error.message
-      : "The content could not be parsed.";
+  const message = error instanceof Error ? error.message : "The content could not be parsed.";
   return {
     canonicalSource: "",
     document: null,
@@ -177,20 +170,14 @@ export function analyzeContentImport(
 ): ContentImportAnalysis {
   try {
     if (format === "json") {
-      const decoded = decodeRichTextPayload(source);
-      const document = validateAgainstEditor(editor, decoded.document);
+      const document = parseJSONContent(JSON.parse(source));
+      if (!document) throw new Error("The content is not a valid Tiptap JSON document.");
+
+      const validatedDocument = validateAgainstEditor(editor, document);
       return {
-        canonicalSource: serializeRichTextPayload(document, true),
-        document,
-        warnings: decoded.migrated
-          ? [
-              {
-                blocking: false,
-                code: "migration",
-                message: `Legacy schema v${decoded.sourceVersion} will be migrated to v2 on import.`,
-              },
-            ]
-          : [],
+        canonicalSource: JSON.stringify(validatedDocument, null, 2),
+        document: validatedDocument,
+        warnings: [],
       };
     }
 
@@ -230,7 +217,7 @@ export function analyzeContentExport(
 ): ContentExportAnalysis {
   const document = validateAgainstEditor(editor, editor.getJSON());
   if (format === "json") {
-    return { source: serializeRichTextPayload(document, true), warnings: [] };
+    return { source: JSON.stringify(document, null, 2), warnings: [] };
   }
 
   if (format === "html") {

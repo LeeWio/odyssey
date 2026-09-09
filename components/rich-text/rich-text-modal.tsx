@@ -25,7 +25,6 @@ import {
   parseJSONContent,
   removeTemporaryMediaAttributes,
 } from "./utils/document-normalizer";
-import { serializeRichTextPayload } from "./utils/content-schema";
 import {
   useCreatePostMutation,
   useGetAdminPostByIdQuery,
@@ -319,9 +318,7 @@ export function RichTextModal() {
       ...(postData as PostRequest),
       title,
       slug,
-      content: serializeRichTextPayload(
-        normalizeRichTextDocument(removeTemporaryMediaAttributes(content))
-      ),
+      content: JSON.stringify(normalizeRichTextDocument(removeTemporaryMediaAttributes(content))),
       contentType: "JSON",
       status: statusOverride || postData.status || "DRAFT",
     };
