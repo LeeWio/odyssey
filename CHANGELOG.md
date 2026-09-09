@@ -1,3 +1,10 @@
+# [1.146.0](https://github.com/LeeWio/odyssey/compare/v1.145.0...v1.146.0) (2026-09-09)
+
+
+### Features
+
+* **home:** cap moments showcase and add edge shadows ([fee158b](https://github.com/LeeWio/odyssey/commit/fee158b244d63073c09cc68ece0efadd7f7db5f2))
+
 # [1.145.0](https://github.com/LeeWio/odyssey/compare/v1.144.0...v1.145.0) (2026-09-09)
 
 
