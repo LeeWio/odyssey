@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Kbd, Modal } from "@heroui/react";
-import { RichTextEditor } from "@heroui-pro/react";
+import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Keyboard } from "@gravity-ui/icons";
 import { useEffect, useState } from "react";
 

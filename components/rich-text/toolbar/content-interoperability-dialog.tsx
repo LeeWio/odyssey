@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, Button, Label, ListBox, Modal, Select, Tabs, TextArea, toast } from "@heroui/react";
-import { useRichTextEditor } from "@heroui-pro/react";
+import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { useMemo, useState } from "react";
 

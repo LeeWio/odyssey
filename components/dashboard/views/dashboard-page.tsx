@@ -11,7 +11,8 @@ import {
   Sparkles,
 } from "@gravity-ui/icons";
 import { Button, Card, Chip, Link, Skeleton, Tabs, Typography } from "@heroui/react";
-import { EmptyState, KPI, KPIGroup, Timeline, Widget } from "@heroui-pro/react";
+import { EmptyState, KPIGroup, Timeline, Widget } from "@heroui-pro/react";
+import { KPI } from "@heroui-pro/react/kpi";
 import { useMemo, useState } from "react";
 import {
   type ContentOperationsOverview,

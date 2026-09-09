@@ -11,7 +11,8 @@ import {
   TextField,
   Tooltip,
 } from "@heroui/react";
-import { CellSwitch, useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
+import { CellSwitch } from "@heroui-pro/react";
+import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import { ArrowRight, ChevronDown, ChevronUp, Magnifier } from "@gravity-ui/icons";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useEffect, useRef, useState } from "react";

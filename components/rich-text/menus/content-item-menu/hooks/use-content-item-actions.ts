@@ -1,7 +1,12 @@
-import { useRichTextEditor } from "@heroui-pro/react";
+import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import type { Node } from "@tiptap/pm/model";
 import { NodeSelection } from "@tiptap/pm/state";
 import { useCallback } from "react";
+import { hasPendingMediaUploads } from "../../../utils/document-normalizer";
+
+export function canDuplicateNode(node: Node | null) {
+  return node !== null && !hasPendingMediaUploads(node.toJSON());
+}
 
 /**
  * Hook to define actions for the ContentItemMenu.
@@ -48,14 +53,16 @@ export const useContentItemActions = (currentNode: Node | null, currentNodePos: 
     }
   }, [editor, currentNodePos]);
 
+  const canDuplicate = canDuplicateNode(currentNode);
+
   const duplicateNode = useCallback(() => {
-    if (!editor || currentNodePos === -1 || !currentNode) return;
-    editor
+    if (!editor || currentNodePos === -1 || !currentNode || !canDuplicate) return false;
+    return editor
       .chain()
       .focus()
       .insertContentAt(currentNodePos + currentNode.nodeSize, currentNode.toJSON())
       .run();
-  }, [editor, currentNode, currentNodePos]);
+  }, [canDuplicate, editor, currentNode, currentNodePos]);
 
   const addBefore = useCallback(() => {
     if (!editor || currentNodePos === -1) return;
@@ -234,6 +241,7 @@ export const useContentItemActions = (currentNode: Node | null, currentNodePos: 
     deleteNode,
     copyNodeToClipboard,
     duplicateNode,
+    canDuplicate,
     addBefore,
     addBelow,
     resetTextFormatting,

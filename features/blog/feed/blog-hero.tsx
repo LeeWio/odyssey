@@ -2,7 +2,7 @@
 
 import { ArrowRight } from "@gravity-ui/icons";
 import { Avatar, Button, Typography } from "@heroui/react";
-import { Carousel } from "@heroui-pro/react";
+import { Carousel } from "@heroui-pro/react/carousel";
 import { motion } from "motion/react";
 import Link from "next/link";
 

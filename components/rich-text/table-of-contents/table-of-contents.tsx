@@ -1,6 +1,7 @@
 "use client";
 
-import { FloatingToc, useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
+import { FloatingToc } from "@heroui-pro/react";
+import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import type {
   TableOfContentData,
   TableOfContentDataItem,
@@ -87,11 +88,17 @@ export const RichTextTableOfContents = memo(
     updateLocationHash = true,
   }: TableOfContentsProps) => {
     const { editor } = useRichTextEditor();
-    const storedItems =
-      useRichTextEditorState((state) => state.editor.storage.tableOfContents?.content) ||
-      EMPTY_TABLE_OF_CONTENTS;
-    const cursorPosition =
-      useRichTextEditorState((state) => state.editor.state.selection.from) ?? null;
+    const editorState = useRichTextEditorState(
+      (state) => ({
+        cursorPosition: state.editor.state.selection.from,
+        storedItems: state.editor.storage.tableOfContents?.content || EMPTY_TABLE_OF_CONTENTS,
+      }),
+      (previous, next) =>
+        previous?.cursorPosition === next?.cursorPosition &&
+        previous?.storedItems === next?.storedItems
+    );
+    const storedItems = editorState?.storedItems ?? EMPTY_TABLE_OF_CONTENTS;
+    const cursorPosition = editorState?.cursorPosition ?? null;
     const allItems = controlledItems ?? storedItems;
     const items = useMemo(
       () => allItems.filter((item) => item.originalLevel <= maxHeadingLevel).slice(0, maxShowCount),

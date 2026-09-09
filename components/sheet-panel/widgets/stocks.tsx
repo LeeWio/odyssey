@@ -1,7 +1,8 @@
 "use client";
 
 import { Button, Skeleton } from "@heroui/react";
-import { KPI, Segment, TrendChip } from "@heroui-pro/react";
+import { Segment, TrendChip } from "@heroui-pro/react";
+import { KPI } from "@heroui-pro/react/kpi";
 import { useState } from "react";
 import { type Key } from "react-aria-components";
 import { ArrowDownIcon, ArrowUpIcon, FileTextIcon, TargetIcon } from "@/components/icons";

@@ -1,7 +1,7 @@
 "use client";
 
 import { Skeleton } from "@heroui/react";
-import { KPI } from "@heroui-pro/react";
+import { KPI } from "@heroui-pro/react/kpi";
 import { useMemo } from "react";
 
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";

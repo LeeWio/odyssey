@@ -1,15 +1,10 @@
 "use client";
 
 import { Avatar, Card, Chip, ColorSwatch, ScrollShadow, Surface, Typography } from "@heroui/react";
-import {
-  Carousel,
-  ChartTooltip,
-  KPI,
-  KPIGroup,
-  PieChart,
-  TrendChip,
-  Widget,
-} from "@heroui-pro/react";
+import { ChartTooltip, KPIGroup, TrendChip, Widget } from "@heroui-pro/react";
+import { Carousel } from "@heroui-pro/react/carousel";
+import { KPI } from "@heroui-pro/react/kpi";
+import { PieChart } from "@heroui-pro/react/pie-chart";
 import { Fragment, useEffect, useMemo, useState } from "react";
 
 const PORTFOLIO_KPIS = [

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Popover, Tooltip } from "@heroui/react";
-import { useRichTextEditor } from "@heroui-pro/react";
+import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { emojiToShortcode } from "@tiptap/extension-emoji";
 import type { Editor } from "@tiptap/react";

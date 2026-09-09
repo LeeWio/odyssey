@@ -1,12 +1,12 @@
 "use client";
 
 import { Button, Input, Label, Modal, Popover, Slider, TextField, toast } from "@heroui/react";
+import { Segment } from "@heroui-pro/react";
 import {
   RichTextEditor,
-  Segment,
   useRichTextEditor,
   useRichTextEditorState,
-} from "@heroui-pro/react";
+} from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { isNodeSelection } from "@tiptap/core";
 import NextImage from "next/image";

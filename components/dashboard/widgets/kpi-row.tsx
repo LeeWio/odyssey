@@ -1,7 +1,7 @@
 "use client";
 
 import { Skeleton } from "@heroui/react";
-import { KPI } from "@heroui-pro/react";
+import { KPI } from "@heroui-pro/react/kpi";
 import { Comment, Eye, FileText, Person } from "@gravity-ui/icons";
 import { useGetDashboardStatsQuery } from "@/lib/features/dashboard";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useOverlayState } from "@heroui/react";
-import { RichTextEditor } from "@heroui-pro/react";
+import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { LinkMenuEdit } from "../menus/link-menu/link-menu-edit";
 

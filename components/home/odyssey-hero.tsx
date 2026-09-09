@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, Flame, PlayFill, Sparkles } from "@gravity-ui/icons";
 import { Button, Card, Chip, Surface, Tooltip, Typography } from "@heroui/react";
-import { Carousel } from "@heroui-pro/react";
+import { Carousel } from "@heroui-pro/react/carousel";
 import type { EmblaCarouselType } from "embla-carousel";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Label, Modal, TextField } from "@heroui/react";
-import { useRichTextEditor } from "@heroui-pro/react";
+import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { isValidYoutubeUrl } from "@tiptap/extension-youtube";
 import { useEffect, useState } from "react";
 

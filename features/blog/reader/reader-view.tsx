@@ -1,7 +1,8 @@
 "use client";
 
 import { Button, cn, Separator, Spinner, Surface, Tooltip, Typography, toast } from "@heroui/react";
-import { ActionBar, EmptyState, RichTextEditor } from "@heroui-pro/react";
+import { ActionBar, EmptyState } from "@heroui-pro/react";
+import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";

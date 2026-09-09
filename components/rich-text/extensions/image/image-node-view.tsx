@@ -16,6 +16,7 @@ import {
   getImageUpload,
   markImageUploadFailed,
   queueImageUpload,
+  registerImageUploadAbort,
   releaseImageUpload,
   retryImageUpload,
   validateImageFile,
@@ -61,6 +62,12 @@ export function ImageNodeView({ deleteNode, editor, node, updateAttributes }: No
   const [, setUploadVersion] = useState(0);
   const [uploadFile] = useUploadFileMutation();
   const activeUploadRef = useRef<ActiveUpload | null>(null);
+  const altRef = useRef(alt);
+  const uploadCleanupRef = useRef<{ id: string; timer: number } | null>(null);
+
+  useEffect(() => {
+    altRef.current = alt;
+  }, [alt]);
 
   const refreshUpload = useCallback(() => {
     setUploadVersion((version) => version + 1);
@@ -90,44 +97,50 @@ export function ImageNodeView({ deleteNode, editor, node, updateAttributes }: No
       if (!queuedUpload) return;
 
       const request = uploadFile(queuedUpload.file);
-      activeUploadRef.current = { abort: request.abort, id };
+      const activeUpload = { abort: request.abort, id };
+      activeUploadRef.current = activeUpload;
+      registerImageUploadAbort(editor, id, request.abort);
       refreshUpload();
 
       try {
         const response = await request.unwrap();
 
-        if (activeUploadRef.current?.id !== id) return;
+        if (activeUploadRef.current !== activeUpload) return;
 
         clearImageUpload(editor, id);
         activeUploadRef.current = null;
         updateAttributes({
-          alt: alt || createImageAltText(queuedUpload.file.name),
+          alt: altRef.current || createImageAltText(queuedUpload.file.name),
           src: response.fileUrl,
           uploadId: null,
         });
       } catch {
-        if (activeUploadRef.current?.id !== id) return;
+        if (activeUploadRef.current !== activeUpload) return;
 
         markImageUploadFailed(editor, id, "Upload failed. Try again.");
         refreshUpload();
       } finally {
-        if (activeUploadRef.current?.id === id) {
+        if (activeUploadRef.current === activeUpload) {
           activeUploadRef.current = null;
         }
       }
     },
-    [alt, editor, refreshUpload, updateAttributes, uploadFile]
+    [editor, refreshUpload, updateAttributes, uploadFile]
   );
 
   useEffect(() => {
     if (!uploadId) return;
 
-    const timer = window.setTimeout(() => {
-      void beginUpload(uploadId);
-    }, 0);
+    const queuedCleanup = uploadCleanupRef.current;
+    if (queuedCleanup?.id === uploadId) {
+      window.clearTimeout(queuedCleanup.timer);
+      uploadCleanupRef.current = null;
+    }
+
+    const startTimer = window.setTimeout(() => void beginUpload(uploadId), 0);
 
     return () => {
-      window.clearTimeout(timer);
+      window.clearTimeout(startTimer);
 
       if (activeUploadRef.current?.id === uploadId) {
         activeUploadRef.current.abort();
@@ -135,23 +148,18 @@ export function ImageNodeView({ deleteNode, editor, node, updateAttributes }: No
         releaseImageUpload(editor, uploadId);
       }
 
-      if (getImageUpload(editor, uploadId)?.status === "pending") {
-        clearImageUpload(editor, uploadId);
-      }
+      const cleanupTimer = window.setTimeout(() => {
+        if (getImageUpload(editor, uploadId)?.status !== "uploading") {
+          clearImageUpload(editor, uploadId);
+        }
+
+        if (uploadCleanupRef.current?.timer === cleanupTimer) {
+          uploadCleanupRef.current = null;
+        }
+      }, 0);
+      uploadCleanupRef.current = { id: uploadId, timer: cleanupTimer };
     };
   }, [beginUpload, editor, uploadId]);
-
-  useEffect(() => {
-    return () => {
-      const activeUpload = activeUploadRef.current;
-
-      if (activeUpload) {
-        activeUpload.abort();
-        releaseImageUpload(editor, activeUpload.id);
-        activeUploadRef.current = null;
-      }
-    };
-  }, [editor]);
 
   const queueUpload = useCallback(
     (file: File) => {

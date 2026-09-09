@@ -1,4 +1,4 @@
-import { useRichTextEditor } from "@heroui-pro/react";
+import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 
 export function useRichTextCommands() {
   const { editor } = useRichTextEditor();

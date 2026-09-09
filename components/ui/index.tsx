@@ -1,7 +1,9 @@
 "use client";
 
 import { Button, Card, Chip, Separator, Surface, Typography } from "@heroui/react";
-import { ItemCard, KPI, RichTextEditor } from "@heroui-pro/react";
+import { ItemCard } from "@heroui-pro/react";
+import { KPI } from "@heroui-pro/react/kpi";
+import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { motion } from "motion/react";
 
 export const MotionTypography = motion.create(Typography);

@@ -11,6 +11,9 @@ export default defineConfig({
       "@heroui-pro/react/resizable": fileURLToPath(
         new URL("./components/rich-text/testing/heroui-pro-resizable.mock.ts", import.meta.url)
       ),
+      "@heroui-pro/react/rich-text-editor": fileURLToPath(
+        new URL("./components/rich-text/testing/heroui-pro.mock.ts", import.meta.url)
+      ),
       "@heroui-pro/react": fileURLToPath(
         new URL("./components/rich-text/testing/heroui-pro.mock.ts", import.meta.url)
       ),

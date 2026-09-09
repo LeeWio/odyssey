@@ -1,7 +1,8 @@
 "use client";
 
 import { Card, Skeleton } from "@heroui/react";
-import { AreaChart, NumberValue, TrendChip } from "@heroui-pro/react";
+import { NumberValue, TrendChip } from "@heroui-pro/react";
+import { AreaChart } from "@heroui-pro/react/area-chart";
 import { useGetAnalyticsOverviewQuery } from "@/lib/features/dashboard";
 import { useMemo } from "react";
 

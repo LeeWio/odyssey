@@ -111,8 +111,11 @@ test("selects, reorders, duplicates and deletes blocks from the drag handle menu
   const paragraph = editor.locator("p").filter({ hasText: "Bold and linked text" });
 
   await paragraph.hover();
-  await expect(page.getByRole("button", { name: "Block actions" })).toBeVisible();
-  await page.getByRole("button", { name: "Block actions" }).click();
+  const blockActions = page.getByRole("button", { name: "Block actions" });
+  await expect(blockActions).toBeVisible();
+  await blockActions.click();
+  await expect(page.getByRole("menu", { name: "Block actions" })).toBeHidden();
+  await blockActions.click({ delay: 600 });
   await expect(page.getByRole("menu", { name: "Block actions" })).toBeVisible();
   await expect(paragraph).toHaveClass(/ProseMirror-selectednode/);
 
@@ -132,21 +135,30 @@ test("selects, reorders, duplicates and deletes blocks from the drag handle menu
   await page.keyboard.press("Escape");
 
   await paragraph.hover();
-  await page.getByRole("button", { name: "Block actions" }).click();
+  await page.getByRole("button", { name: "Block actions" }).click({ delay: 600 });
   await page.getByRole("menuitem", { name: "Copy" }).click();
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
     .toContain("Bold and linked text");
 
   await paragraph.hover();
-  await page.getByRole("button", { name: "Block actions" }).click();
+  await page.getByRole("button", { name: "Block actions" }).click({ delay: 600 });
   await page.getByRole("menuitem", { name: "Duplicate" }).click();
   await expect(editor.locator("p").filter({ hasText: "Bold and linked text" })).toHaveCount(2);
 
   await editor.locator("p").filter({ hasText: "Bold and linked text" }).last().hover();
-  await page.getByRole("button", { name: "Block actions" }).click();
+  await page.getByRole("button", { name: "Block actions" }).click({ delay: 600 });
   await page.getByRole("menuitem", { name: "Delete" }).click();
   await expect(editor.locator("p").filter({ hasText: "Bold and linked text" })).toHaveCount(1);
+});
+
+test("opens block actions for a selected atom node with the keyboard", async ({ page }) => {
+  const image = page.getByRole("img", { name: "Schema fixture" });
+
+  await image.click();
+  await page.keyboard.press("Shift+F10");
+  await expect(page.getByRole("menu", { name: "Block actions" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "Align Center" })).toBeVisible();
 });
 
 test("filters and inserts blocks from the slash menu with the keyboard", async ({ page }) => {
@@ -161,9 +173,7 @@ test("filters and inserts blocks from the slash menu with the keyboard", async (
   await expect(editor.locator("h2").last()).toBeEmpty();
 });
 
-test("transforms paragraph and heading blocks and respects reduced motion", async ({
-  page,
-}) => {
+test("transforms paragraph and heading blocks and respects reduced motion", async ({ page }) => {
   const editor = page.locator(editorSelector);
   const paragraph = editor.locator("p").filter({ hasText: "Bold and linked text" });
 

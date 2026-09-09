@@ -1,11 +1,11 @@
 "use client";
 
+import { Segment } from "@heroui-pro/react";
 import {
   RichTextEditor,
-  Segment,
   useRichTextEditor,
   useRichTextEditorState,
-} from "@heroui-pro/react";
+} from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import type { Editor } from "@tiptap/react";
 import { useCallback } from "react";

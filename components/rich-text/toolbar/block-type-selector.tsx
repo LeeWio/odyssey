@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Dropdown, Label } from "@heroui/react";
-import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
+import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import { Heading1, Heading2, Heading3, Text } from "@gravity-ui/icons";
 import type { ComponentType, SVGProps } from "react";
 

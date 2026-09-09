@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@heroui/react";
-import { Carousel } from "@heroui-pro/react";
+import { Carousel } from "@heroui-pro/react/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useMemo } from "react";
 

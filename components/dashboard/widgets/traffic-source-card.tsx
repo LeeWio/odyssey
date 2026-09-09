@@ -2,7 +2,7 @@
 
 import { EllipsisVertical } from "@gravity-ui/icons";
 import { Card } from "@heroui/react";
-import { LineChart } from "@heroui-pro/react";
+import { LineChart } from "@heroui-pro/react/line-chart";
 import { TRAFFIC_DATA } from "../data/traffic";
 import { IconButton } from "../icon-button";
 

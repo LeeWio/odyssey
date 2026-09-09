@@ -2,7 +2,8 @@
 
 import { LogoGithub, LogoGitlab, Receipt } from "@gravity-ui/icons";
 import { Button, Card, ProgressBar, Separator, Surface, Tooltip, Typography } from "@heroui/react";
-import { Carousel, ItemCard, ItemCardGroup } from "@heroui-pro/react";
+import { ItemCard, ItemCardGroup } from "@heroui-pro/react";
+import { Carousel } from "@heroui-pro/react/carousel";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
 import { motion } from "motion/react";

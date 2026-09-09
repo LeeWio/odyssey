@@ -21,7 +21,8 @@ import {
   Avatar,
   Card,
 } from "@heroui/react";
-import { ActionBar, RichTextEditor } from "@heroui-pro/react";
+import { ActionBar } from "@heroui-pro/react";
+import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";

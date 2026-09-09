@@ -70,6 +70,19 @@ function serializePostData(data: Partial<PostRequest>): string {
   });
 }
 
+function areMediaIssuesEqual(
+  currentIssues: ReturnType<typeof getMediaValidationIssues>,
+  nextIssues: ReturnType<typeof getMediaValidationIssues>
+) {
+  return (
+    currentIssues.length === nextIssues.length &&
+    currentIssues.every(
+      (issue, index) =>
+        issue.code === nextIssues[index]?.code && issue.nodeType === nextIssues[index]?.nodeType
+    )
+  );
+}
+
 export function RichTextModal() {
   const { isOpen, activeId } = useAppSelector(selectRichTextState);
   const dispatch = useAppDispatch();
@@ -128,6 +141,17 @@ export function RichTextModal() {
     },
     750
   );
+  const updateMediaIssues = useDebouncedCallback((editor: Editor) => {
+    if (editor.isDestroyed) return;
+
+    const nextMediaIssues = getMediaValidationIssues(editor.getJSON());
+    queueMicrotask(() => {
+      if (editor.isDestroyed) return;
+      setMediaIssues((currentIssues) =>
+        areMediaIssuesEqual(currentIssues, nextMediaIssues) ? currentIssues : nextMediaIssues
+      );
+    });
+  }, 200);
 
   // Fetch existing post data if activeId is a numeric string (existing ID)
   const isExistingPost = activeId && !isNaN(Number(activeId));
@@ -205,8 +229,11 @@ export function RichTextModal() {
   };
 
   useEffect(() => {
-    return () => saveDraft.cancel();
-  }, [activeId, hasContentSchemaError, isOpen, saveDraft]);
+    return () => {
+      saveDraft.cancel();
+      updateMediaIssues.cancel();
+    };
+  }, [activeId, hasContentSchemaError, isOpen, saveDraft, updateMediaIssues]);
 
   useEffect(() => {
     if (!isOpen || !isDirty) return;
@@ -457,15 +484,13 @@ export function RichTextModal() {
                           });
                         }}
                         onUpdate={(editor) => {
-                          const content = editor.getJSON();
-                          const nextMediaIssues = getMediaValidationIssues(content);
-
                           saveDraft(
                             activeId,
                             editor,
                             postData,
                             Boolean(isOpen && activeId && isPostDataReady && !hasContentSchemaError)
                           );
+                          updateMediaIssues(editor);
 
                           queueMicrotask(() => {
                             if (editor.isDestroyed) return;
@@ -473,11 +498,6 @@ export function RichTextModal() {
                               initialEditorDocumentRef.current
                                 ? !initialEditorDocumentRef.current.eq(editor.state.doc)
                                 : true
-                            );
-                            setMediaIssues((currentIssues) =>
-                              JSON.stringify(currentIssues) === JSON.stringify(nextMediaIssues)
-                                ? currentIssues
-                                : nextMediaIssues
                             );
                           });
                         }}

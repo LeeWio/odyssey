@@ -1,4 +1,4 @@
-import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
+import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useCallback, useState } from "react";
 import { LinkMenuEdit } from "./link-menu-edit";
 import { LinkMenuPreview } from "./link-menu-preview";
@@ -14,12 +14,7 @@ export function LinkMenu() {
   }, [editor]);
 
   const handleEdit = () => setMode("edit");
-  const handleClose = () => {};
-
-  const handleCancel = () => {
-    setMode("preview");
-    handleClose();
-  };
+  const handleCancel = () => setMode("preview");
 
   return (
     <RichTextEditor.BubbleMenu

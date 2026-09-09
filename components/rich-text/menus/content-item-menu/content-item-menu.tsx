@@ -1,8 +1,9 @@
 "use client";
 
 import { Button, Dropdown, Label, Header } from "@heroui/react";
-import { useRichTextEditor } from "@heroui-pro/react";
+import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import DragHandle from "@tiptap/extension-drag-handle-react";
+import { NodeSelection } from "@tiptap/pm/state";
 import { ArrowDown, ArrowUp, Copy, CopyPlus, Grip, TrashBin } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
 import { useEffect, useMemo, useState } from "react";
@@ -72,6 +73,7 @@ export function ContentItemMenu() {
 
     if (nextIsOpen) {
       selectBlock();
+      // The React wrapper registers the plugin directly, so it is controlled through plugin meta.
       editor.commands.setMeta("lockDragHandle", true);
     } else {
       editor.commands.setMeta("lockDragHandle", false);
@@ -92,6 +94,15 @@ export function ContentItemMenu() {
         !editor.isFocused ||
         isMenuOpen
       ) {
+        return;
+      }
+
+      if (editor.state.selection instanceof NodeSelection && editor.state.selection.node?.isBlock) {
+        const { from, node } = editor.state.selection;
+        setActiveBlock({ node, position: from });
+        editor.commands.setMeta("lockDragHandle", true);
+        setIsMenuOpen(true);
+        event.preventDefault();
         return;
       }
 
@@ -250,7 +261,7 @@ export function ContentItemMenu() {
           setActiveBlock({ node, position: pos });
         }}
       >
-        <Dropdown isOpen={isMenuOpen} onOpenChange={handleOpenChange}>
+        <Dropdown trigger="longPress" isOpen={isMenuOpen} onOpenChange={handleOpenChange}>
           <Button
             aria-label="Block actions"
             aria-keyshortcuts="Shift+F10"
@@ -417,7 +428,11 @@ export function ContentItemMenu() {
                   <Copy aria-hidden="true" className="size-4" />
                   <Label>Copy</Label>
                 </Dropdown.Item>
-                <Dropdown.Item id="duplicate" textValue="Duplicate block">
+                <Dropdown.Item
+                  id="duplicate"
+                  isDisabled={!actions.canDuplicate}
+                  textValue="Duplicate block"
+                >
                   <CopyPlus aria-hidden="true" className="size-4" />
                   <Label>Duplicate</Label>
                 </Dropdown.Item>

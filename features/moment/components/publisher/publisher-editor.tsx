@@ -1,7 +1,9 @@
 "use client";
 
-import { RichTextEditor } from "@heroui-pro/react";
-import type { RichTextEditorValueChangeDetails } from "@heroui-pro/react";
+import {
+  RichTextEditor,
+  type RichTextEditorValueChangeDetails,
+} from "@heroui-pro/react/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 
 interface PublisherEditorProps {

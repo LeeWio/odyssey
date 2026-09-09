@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Dropdown, Label, Tooltip } from "@heroui/react";
-import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
+import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { areEqualColumnWidths } from "../extensions/multi-column/column-widths";
 import {

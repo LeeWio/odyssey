@@ -24,7 +24,7 @@
   "dependencies": {
     "@gravity-ui/icons": "^2.18.0",
     "@gsap/react": "^2.1.2",
-    "@heroui-pro/react": "^1.0.0-beta.7",
+    "@heroui-pro/react": "^1.0.0-beta.8",
     "@heroui/react": "^3.2.4",
     "@heroui/styles": "^3.2.4",
     "@iconify/react": "^6.0.2",
@@ -69,7 +69,7 @@
     "fuzzysort": "^3.1.0",
     "gsap": "^3.15.0",
     "katex": "0.16.47",
-    "maplibre-gl": ">=5.15.0",
+    "maplibre-gl": ">=6.0.0",
     "marked": ">=18.0.0",
     "match-sorter": "^8.3.0",
     "motion": "^12.40.0",

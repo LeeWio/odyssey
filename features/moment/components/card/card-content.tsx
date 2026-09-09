@@ -1,7 +1,7 @@
 "use client";
 
 import { Tag, TagGroup } from "@heroui/react";
-import { RichTextEditor } from "@heroui-pro/react";
+import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import BounceCards from "@/components/ui/bounce-cards";
 import Stack from "../gallery/stack";
 import type { MomentTopicResponse } from "@/lib/features/moment";

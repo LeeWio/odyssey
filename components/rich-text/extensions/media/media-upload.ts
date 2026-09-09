@@ -4,6 +4,7 @@ export type MediaKind = "attachment" | "audio" | "image";
 export type MediaUploadStatus = "failed" | "pending" | "uploading";
 
 export interface QueuedMediaUpload {
+  abort?: () => void;
   error?: string;
   file: File;
   kind: MediaKind;
@@ -44,6 +45,10 @@ function getUploadQueue(editor: Editor) {
   return uploads;
 }
 
+function getExistingUploadQueue(editor: Editor) {
+  return queuedMediaUploads.get(editor);
+}
+
 export function inferMediaKind(file: File): MediaKind {
   if (file.type.startsWith("image/")) return "image";
   if (file.type.startsWith("audio/")) return "audio";
@@ -77,7 +82,7 @@ export function queueMediaUpload(editor: Editor, file: File, kind = inferMediaKi
 }
 
 export function claimMediaUpload(editor: Editor, id: string): QueuedMediaUpload | null {
-  const upload = getUploadQueue(editor).get(id);
+  const upload = getExistingUploadQueue(editor)?.get(id);
   if (!upload || upload.status !== "pending") return null;
 
   upload.status = "uploading";
@@ -85,37 +90,49 @@ export function claimMediaUpload(editor: Editor, id: string): QueuedMediaUpload 
 }
 
 export function getMediaUpload(editor: Editor, id: string): QueuedMediaUpload | null {
-  return getUploadQueue(editor).get(id) ?? null;
+  return getExistingUploadQueue(editor)?.get(id) ?? null;
 }
 
 export function releaseMediaUpload(editor: Editor, id: string) {
-  const upload = getUploadQueue(editor).get(id);
-  if (upload?.status === "uploading") upload.status = "pending";
+  const upload = getExistingUploadQueue(editor)?.get(id);
+  if (upload?.status === "uploading") {
+    upload.abort = undefined;
+    upload.status = "pending";
+  }
+}
+
+export function registerMediaUploadAbort(editor: Editor, id: string, abort: () => void) {
+  const upload = getExistingUploadQueue(editor)?.get(id);
+  if (upload?.status === "uploading") upload.abort = abort;
 }
 
 export function failMediaUpload(editor: Editor, id: string, error: string) {
-  const upload = getUploadQueue(editor).get(id);
+  const upload = getExistingUploadQueue(editor)?.get(id);
   if (!upload) return;
 
   upload.error = error;
+  upload.abort = undefined;
   upload.status = "failed";
 }
 
 export function retryMediaUpload(editor: Editor, id: string): QueuedMediaUpload | null {
-  const upload = getUploadQueue(editor).get(id);
-  if (!upload) return null;
+  const upload = getExistingUploadQueue(editor)?.get(id);
+  if (!upload || upload.status !== "failed") return null;
 
   upload.error = undefined;
+  upload.abort = undefined;
   upload.status = "uploading";
   return upload;
 }
 
 export function clearMediaUpload(editor: Editor, id: string) {
-  const uploads = queuedMediaUploads.get(editor);
+  const uploads = getExistingUploadQueue(editor);
   uploads?.delete(id);
   if (uploads?.size === 0) queuedMediaUploads.delete(editor);
 }
 
 export function clearMediaUploads(editor: Editor) {
+  const uploads = queuedMediaUploads.get(editor);
+  uploads?.forEach((upload) => upload.abort?.());
   queuedMediaUploads.delete(editor);
 }

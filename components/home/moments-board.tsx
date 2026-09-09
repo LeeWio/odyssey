@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Avatar, Card, Skeleton, Typography } from "@heroui/react";
-import { RichTextEditor } from "@heroui-pro/react";
+import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useMediaQuery } from "@mantine/hooks";
 import { motion } from "motion/react";
 import { useRelativeTime } from "@/lib/relative-time";

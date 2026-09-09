@@ -1,7 +1,11 @@
 "use client";
 
 import { Surface } from "@heroui/react";
-import { RichTextEditor, useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
+import {
+  RichTextEditor,
+  useRichTextEditor,
+  useRichTextEditorState,
+} from "@heroui-pro/react/rich-text-editor";
 import { isNodeSelection } from "@tiptap/core";
 import { useCallback } from "react";
 import { MathEditorPanel, type MathKind } from "../../mathematics/math-editor-popover";

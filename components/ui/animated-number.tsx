@@ -1,6 +1,6 @@
 "use client";
 
-import { NumberStepper } from "@heroui-pro/react";
+import { NumberStepper } from "@heroui-pro/react/number-stepper";
 import type { ComponentProps } from "react";
 
 interface AnimatedNumberProps {

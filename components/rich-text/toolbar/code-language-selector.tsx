@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Dropdown, Label } from "@heroui/react";
-import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
+import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import { Code } from "@gravity-ui/icons";
 
 const CODE_LANGUAGES = [

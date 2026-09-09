@@ -5,12 +5,15 @@ import {
   failMediaUpload,
   getMediaUpload,
   queueMediaUpload,
+  registerMediaUploadAbort,
   releaseMediaUpload,
   retryMediaUpload,
   validateMediaFile,
 } from "../media/media-upload";
 
 export { ACCEPTED_IMAGE_TYPES, MAX_IMAGE_SIZE } from "../media/media-upload";
+
+export const registerImageUploadAbort = registerMediaUploadAbort;
 
 export function createImageAltText(fileName: string): string {
   const extensionStart = fileName.lastIndexOf(".");

@@ -1,6 +1,6 @@
 "use client";
 
-import { RichTextEditor } from "@heroui-pro/react";
+import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import type { Editor } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/react";
 import { useId, useMemo } from "react";

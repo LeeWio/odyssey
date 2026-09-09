@@ -1,4 +1,4 @@
-import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react";
+import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import { useCallback } from "react";
 import { isCustomNodeSelected } from "@/components/rich-text/utils/is-custom-node-selected";
 import { isTextSelected } from "@/components/rich-text/utils/is-text-selected";

@@ -1,6 +1,7 @@
 import { Globe } from "@gravity-ui/icons";
 import { Button, ButtonGroup, InputGroup, Label, TextField, toast } from "@heroui/react";
-import { CellSwitch, RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
+import { CellSwitch } from "@heroui-pro/react";
+import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { getMarkRange } from "@tiptap/core";
 import { useCallback, useState } from "react";

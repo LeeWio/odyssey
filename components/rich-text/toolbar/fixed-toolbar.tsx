@@ -1,7 +1,7 @@
 "use client";
 
 import { ScrollShadow } from "@heroui/react";
-import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react";
+import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { EmojiToolbarPicker } from "./emoji-picker";
 import { LinkPopover } from "./link-popover";

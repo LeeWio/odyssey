@@ -24,13 +24,13 @@ import {
   Sparkles,
   Text,
 } from "@gravity-ui/icons";
+import { EmptyState } from "@heroui-pro/react";
 import {
-  EmptyState,
   filterRichTextEditorSuggestionItems,
   RichTextEditor,
   type RichTextEditorSuggestionItem,
   type RichTextEditorSuggestionMenuRenderProps,
-} from "@heroui-pro/react";
+} from "@heroui-pro/react/rich-text-editor";
 import type { ComponentType, SVGProps } from "react";
 import { useEffect, useRef } from "react";
 import { OPEN_YOUTUBE_DIALOG_EVENT } from "../media-insert-dialog";

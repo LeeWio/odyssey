@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar } from "@heroui/react";
-import { Map } from "@heroui-pro/react";
+import { Map } from "@heroui-pro/react/map";
 
 const demoMapStyles = {
   dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
