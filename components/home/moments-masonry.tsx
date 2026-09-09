@@ -4,7 +4,7 @@ import { useElementSize } from "@mantine/hooks";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { useReducedMotion } from "motion/react";
-import { useCallback, useMemo, useRef, useState, useEffect } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MomentCard } from "@/features/moment";
 import type { MomentResponse } from "@/lib/features/moment";
@@ -32,7 +32,10 @@ interface MeasuredMomentProps {
   onHeightChange: (id: number, height: number) => void;
 }
 
-function MeasuredMoment({ moment, onHeightChange }: MeasuredMomentProps) {
+const MeasuredMoment = memo(function MeasuredMoment({
+  moment,
+  onHeightChange,
+}: MeasuredMomentProps) {
   const { ref, height } = useElementSize<HTMLDivElement>();
 
   useEffect(() => {
@@ -44,7 +47,7 @@ function MeasuredMoment({ moment, onHeightChange }: MeasuredMomentProps) {
       <MomentCard moment={moment} />
     </div>
   );
-}
+});
 
 function getColumns(width: number) {
   if (width >= 1100) return 4;
@@ -57,17 +60,47 @@ export function MomentsMasonry({ moments }: MomentsMasonryProps) {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const scopeRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef(new Map<number, HTMLDivElement>());
+  const previousPositions = useRef(new Map<number, Pick<GridItem, "x" | "y">>());
+  const pendingHeights = useRef(new Map<number, number>());
+  const heightFrame = useRef<number | null>(null);
   const hasAnimated = useRef(false);
   const [measuredHeights, setMeasuredHeights] = useState<Map<number, number>>(new Map());
   const { ref: measureRef, width } = useElementSize<HTMLDivElement>();
 
-  const onHeightChange = useCallback((id: number, height: number) => {
+  const flushMeasuredHeights = useCallback(() => {
+    heightFrame.current = null;
+    if (pendingHeights.current.size === 0) return;
+
     setMeasuredHeights((current) => {
-      if (current.get(id) === height) return current;
+      let changed = false;
       const next = new Map(current);
-      next.set(id, height);
-      return next;
+
+      pendingHeights.current.forEach((height, id) => {
+        if (next.get(id) !== height) {
+          next.set(id, height);
+          changed = true;
+        }
+      });
+      pendingHeights.current.clear();
+
+      return changed ? next : current;
     });
+  }, []);
+
+  const onHeightChange = useCallback(
+    (id: number, height: number) => {
+      pendingHeights.current.set(id, height);
+      if (heightFrame.current === null) {
+        heightFrame.current = requestAnimationFrame(flushMeasuredHeights);
+      }
+    },
+    [flushMeasuredHeights]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (heightFrame.current !== null) cancelAnimationFrame(heightFrame.current);
+    };
   }, []);
 
   const columns = getColumns(width);
@@ -109,38 +142,53 @@ export function MomentsMasonry({ moments }: MomentsMasonryProps) {
       const positionedNodes = grid
         .map((item) => ({ item, node: itemRefs.current.get(item.id) }))
         .filter((entry): entry is { item: GridItem; node: HTMLDivElement } => Boolean(entry.node));
-      const nodes = positionedNodes.map(({ node }) => node);
+      const nextPositions = new Map(
+        positionedNodes.map(({ item }) => [item.id, { x: item.x, y: item.y }])
+      );
 
-      if (nodes.length === 0) return;
-
-      const targetX = (index: number) => positionedNodes[index]?.item.x ?? 0;
-      const targetY = (index: number) => positionedNodes[index]?.item.y ?? 0;
+      if (positionedNodes.length === 0) return;
 
       if (shouldReduceMotion) {
+        const nodes = positionedNodes.map(({ node }) => node);
         gsap.set(nodes, {
           opacity: 1,
-          x: targetX,
-          y: targetY,
+          x: (index) => positionedNodes[index]?.item.x ?? 0,
+          y: (index) => positionedNodes[index]?.item.y ?? 0,
           clearProps: "filter",
         });
+        previousPositions.current = nextPositions;
         hasAnimated.current = true;
         return;
       }
+
+      const entriesToAnimate = hasAnimated.current
+        ? positionedNodes.filter(({ item }) => {
+            const previous = previousPositions.current.get(item.id);
+            return !previous || previous.x !== item.x || previous.y !== item.y;
+          })
+        : positionedNodes;
+      previousPositions.current = nextPositions;
+
+      if (entriesToAnimate.length === 0) return;
+
+      const nodes = entriesToAnimate.map(({ node }) => node);
+      const targetX = (index: number) => entriesToAnimate[index]?.item.x ?? 0;
+      const targetY = (index: number) => entriesToAnimate[index]?.item.y ?? 0;
 
       if (!hasAnimated.current) {
         gsap.fromTo(
           nodes,
           {
             opacity: 0,
+            scale: 0.985,
             x: targetX,
             y: () => window.innerHeight + 160,
-            filter: "blur(12px)",
           },
           {
             opacity: 1,
+            scale: 1,
             x: targetX,
             y: targetY,
-            filter: "blur(0px)",
             duration: 0.8,
             ease: EASE,
             stagger: 0.045,
@@ -173,6 +221,14 @@ export function MomentsMasonry({ moments }: MomentsMasonryProps) {
       style={{ height: containerHeight || undefined }}
     >
       <div
+        aria-hidden="true"
+        className="from-background via-background/70 pointer-events-none absolute inset-x-0 top-0 z-10 h-10 bg-linear-to-b to-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="from-background via-background/70 pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-linear-to-t to-transparent"
+      />
+      <div
         ref={measureRef}
         className="relative w-full"
         style={{ height: containerHeight || undefined }}
@@ -192,7 +248,7 @@ export function MomentsMasonry({ moments }: MomentsMasonryProps) {
               style={{
                 width: item.width,
                 opacity: allMeasured ? undefined : 0,
-                willChange: "transform, opacity",
+                willChange: "transform",
               }}
             >
               <div className="w-full transition-transform duration-300 ease-out hover:scale-[0.985]">

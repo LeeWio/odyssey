@@ -19,6 +19,8 @@ const formatDate = (date?: string | null) => {
   }).format(new Date(date));
 };
 
+const MOMENTS_SHOWCASE_LIMIT = 18;
+
 function getGrainientProps(seed: string, index: number) {
   let hash = 2166136261;
   for (let i = 0; i < seed.length; i++) {
@@ -229,10 +231,10 @@ export function MomentsShowcase() {
 
   const { data: moments, isLoading } = useGetPublicMomentsQuery({
     page: 0,
-    size: 16,
+    size: MOMENTS_SHOWCASE_LIMIT,
   });
 
-  const recentMoments = moments?.list.slice(0, 16) ?? [];
+  const recentMoments = moments?.list.slice(0, MOMENTS_SHOWCASE_LIMIT) ?? [];
   if (!isLoading && recentMoments.length === 0) return null;
 
   return (
@@ -275,7 +277,7 @@ export function MomentsShowcase() {
       <motion.div className="mt-12" {...revealInView(0.2, 20)}>
         {isLoading && recentMoments.length === 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 8 }, (_, index) => (
+            {Array.from({ length: MOMENTS_SHOWCASE_LIMIT }, (_, index) => (
               <Skeleton key={index} className="h-44 w-full rounded-2xl" />
             ))}
           </div>
