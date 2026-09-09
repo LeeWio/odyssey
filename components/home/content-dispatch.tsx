@@ -5,9 +5,9 @@ import { Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
 import { Carousel } from "@heroui-pro/react/carousel";
 import Grainient from "@/components/background/grainient";
+import { MomentsMasonry } from "@/components/home/moments-masonry";
 import { useGetPublicMomentsQuery } from "@/lib/features/moment";
 import { useGetFeaturedPostsQuery } from "@/lib/features/post";
-import { MomentsBoard } from "@/components/home/moments-board";
 
 const formatDate = (date?: string | null) => {
   if (!date) return "Recently";
@@ -239,7 +239,7 @@ export function MomentsShowcase() {
     <section
       id="moments-showcase"
       aria-labelledby="moments-showcase-title"
-      className="mx-auto w-full max-w-7xl scroll-mt-24 py-24 sm:py-32"
+      className="mx-auto w-full max-w-7xl scroll-mt-24 px-6 py-24 sm:py-32"
     >
       <header className="flex flex-col items-center text-center">
         <motion.div {...revealInView(0, 10)}>
@@ -280,7 +280,7 @@ export function MomentsShowcase() {
             ))}
           </div>
         ) : (
-          <MomentsBoard moments={recentMoments} isLoading={isLoading} />
+          <MomentsMasonry moments={recentMoments} />
         )}
       </motion.div>
     </section>
