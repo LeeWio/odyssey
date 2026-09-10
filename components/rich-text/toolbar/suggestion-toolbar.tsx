@@ -1,6 +1,15 @@
 "use client";
 
-import { Description, Header, Kbd, Label, ListBox, ScrollShadow, Separator } from "@heroui/react";
+import {
+  Avatar,
+  Description,
+  Header,
+  Kbd,
+  Label,
+  ListBox,
+  ScrollShadow,
+  Separator,
+} from "@heroui/react";
 import {
   Check,
   CircleChevronDown,
@@ -32,7 +41,8 @@ import {
   type RichTextEditorSuggestionMenuRenderProps,
 } from "@heroui-pro/react/rich-text-editor";
 import type { ComponentType, SVGProps } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useGetAllUsersQuery, type UserResponse } from "@/lib/features/user";
 import { OPEN_YOUTUBE_DIALOG_EVENT } from "../media-insert-dialog";
 
 const SLASH_COMMAND_GROUPS = [
@@ -47,6 +57,11 @@ interface SlashCommandItem extends RichTextEditorSuggestionItem {
   description: string;
   group: SlashCommandGroup;
   id: string;
+}
+
+interface MentionItem extends RichTextEditorSuggestionItem {
+  id: string;
+  user: UserResponse;
 }
 
 const icon = (IconComponent: ComponentType<SVGProps<SVGSVGElement>>) => (
@@ -450,16 +465,154 @@ function SuggestionMenuContent({
   );
 }
 
-export function SuggestionToolbar() {
+function MentionMenuContent({
+  editor,
+  items,
+  selectedIndex,
+  selectItem,
+  setSelectedIndex,
+  query,
+}: RichTextEditorSuggestionMenuRenderProps<MentionItem>) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const selectedItem = items[selectedIndex];
+
+  useEffect(() => {
+    if (!selectedItem) return;
+
+    scrollContainerRef.current
+      ?.querySelector<HTMLElement>(`[data-mention-user-id="${selectedItem.id}"]`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [selectedItem]);
+
+  useEffect(() => {
+    const editorElement = editor.view.dom;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.isComposing ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        items.length === 0
+      ) {
+        return;
+      }
+
+      let nextIndex: number | undefined;
+      if (event.key === "ArrowDown") nextIndex = Math.min(selectedIndex + 1, items.length - 1);
+      else if (event.key === "ArrowUp") nextIndex = Math.max(selectedIndex - 1, 0);
+      else if (event.key === "Home") nextIndex = 0;
+      else if (event.key === "End") nextIndex = items.length - 1;
+      else if (event.key === "Enter" || event.key === "Tab") {
+        const item = items[selectedIndex];
+        if (!item) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        selectItem(item);
+        return;
+      } else return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      setSelectedIndex(nextIndex);
+    };
+
+    editorElement.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () => editorElement.removeEventListener("keydown", handleKeyDown, { capture: true });
+  }, [editor, items, selectItem, selectedIndex, setSelectedIndex]);
+
+  if (items.length === 0) {
+    return <div className="text-muted px-3 py-2 text-sm">No users found for “{query}”.</div>;
+  }
+
   return (
-    <RichTextEditor.SuggestionMenu<SlashCommandItem>
-      char="/"
-      className="p-0"
-      items={getSlashItems}
-      maxHeight={384}
-      pluginKey="slash-command-menu"
+    <div
+      ref={scrollContainerRef}
+      className="w-fit max-w-[min(24rem,calc(100vw-1rem))] min-w-64 overflow-y-auto"
     >
-      {(props) => <SuggestionMenuContent {...props} />}
-    </RichTextEditor.SuggestionMenu>
+      <ListBox
+        aria-label="Mention user"
+        className="w-64 p-1"
+        selectedKeys={selectedItem ? new Set([selectedItem.id]) : new Set()}
+        selectionMode="single"
+        onAction={(key) => {
+          const item = items.find((candidate) => candidate.id === String(key));
+          if (item) selectItem(item);
+        }}
+      >
+        {items.map((item, index) => (
+          <ListBox.Item
+            key={item.id}
+            className="data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent-soft-foreground"
+            id={item.id}
+            data-mention-user-id={item.id}
+            textValue={item.title}
+            onHoverStart={() => setSelectedIndex(index)}
+            onMouseDown={(event) => event.preventDefault()}
+          >
+            <Avatar size="sm">
+              {item.user.avatar ? <Avatar.Image alt={item.title} src={item.user.avatar} /> : null}
+              <Avatar.Fallback>{item.title.slice(0, 1).toUpperCase()}</Avatar.Fallback>
+            </Avatar>
+            <div className="flex min-w-0 flex-col">
+              <Label>{item.title}</Label>
+              <Description className="truncate">{item.description}</Description>
+            </div>
+            <ListBox.ItemIndicator />
+          </ListBox.Item>
+        ))}
+      </ListBox>
+    </div>
+  );
+}
+
+export function SuggestionToolbar() {
+  // TODO: replace the admin-only endpoint with a public user search endpoint.
+  const { data: users = [] } = useGetAllUsersQuery();
+
+  const mentionItems = useMemo(
+    () =>
+      users.map((user): MentionItem => ({
+        command: ({ editor, range }) => {
+          editor
+            .chain()
+            .focus()
+            .insertContentAt(range, [
+              {
+                type: "mention",
+                attrs: { id: String(user.id), label: user.username },
+              },
+              { type: "text", text: " " },
+            ])
+            .run();
+        },
+        description: user.nickname || user.email,
+        id: String(user.id),
+        keywords: [user.username, user.nickname || "", user.email],
+        title: user.username,
+        user,
+      })),
+    [users]
+  );
+
+  return (
+    <>
+      <RichTextEditor.SuggestionMenu<SlashCommandItem>
+        char="/"
+        className="p-0"
+        items={getSlashItems}
+        maxHeight={384}
+        pluginKey="slash-command-menu"
+      >
+        {(props) => <SuggestionMenuContent {...props} />}
+      </RichTextEditor.SuggestionMenu>
+      <RichTextEditor.SuggestionMenu<MentionItem>
+        char="@"
+        className="w-fit min-w-0"
+        items={({ query }) => filterRichTextEditorSuggestionItems(mentionItems, query)}
+        pluginKey="mention-menu"
+      >
+        {(props) => <MentionMenuContent {...props} />}
+      </RichTextEditor.SuggestionMenu>
+    </>
   );
 }

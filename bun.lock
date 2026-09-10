@@ -29,6 +29,7 @@
         "@tiptap/extension-link": "3.30.1",
         "@tiptap/extension-list": "3.30.1",
         "@tiptap/extension-mathematics": "3.30.1",
+        "@tiptap/extension-mention": "3.30.1",
         "@tiptap/extension-node-range": "3.30.1",
         "@tiptap/extension-subscript": "3.30.1",
         "@tiptap/extension-superscript": "3.30.1",
@@ -730,6 +731,8 @@
     "@tiptap/extension-list-keymap": ["@tiptap/extension-list-keymap@3.30.1", "", { "peerDependencies": { "@tiptap/extension-list": "3.30.1" } }, "sha512-ju39AnbRyWr1vG4GnMM7BritV/9heGMeH103wccXgJU9hOEqzwmN9zpf5CZqeRnXOjzwQiojrEL+nwm5MnuboA=="],
 
     "@tiptap/extension-mathematics": ["@tiptap/extension-mathematics@3.30.1", "", { "peerDependencies": { "@tiptap/core": "3.30.1", "@tiptap/pm": "3.30.1", "katex": "^0.16.4 || ^0.17.0 || ^0.18.0" } }, "sha512-E+/WZivUX2sHgddFmkcCspswmED3mlzpNb7IQA6PkEZeCEXNRNyLmQgjKBDiCEMctY95A1t8MF+R5rozB5cqNw=="],
+
+    "@tiptap/extension-mention": ["@tiptap/extension-mention@3.30.1", "", { "peerDependencies": { "@tiptap/core": "3.30.1", "@tiptap/pm": "3.30.1", "@tiptap/suggestion": "3.30.1" } }, "sha512-XM0m73+pPgPB277oUGOs9L8Wf5kR9H8+IVkj/kGdEOr7gw98wWARc6lfEulSd9ZttbDXkPKGt4Gsz9PsBsKq1A=="],
 
     "@tiptap/extension-node-range": ["@tiptap/extension-node-range@3.30.1", "", { "peerDependencies": { "@tiptap/core": "3.30.1", "@tiptap/pm": "3.30.1" } }, "sha512-vPvgHul8ZmPqkbXDQAv18UketGBAPj7xM1je6HJGbcT4wIXzLOFpXpA7Kwj7DkTfisY+fqxdAYYrvrMc8EzGcQ=="],
 

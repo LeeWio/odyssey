@@ -5,6 +5,7 @@ export const UserResponseSchema = z.object({
   username: z.string(),
   email: z.string(),
   nickname: z.string().nullable(),
+  avatar: z.string().nullable().optional(),
   status: z.enum(["ACTIVE", "INACTIVE", "PENDING", "BANNED", "DELETED"]),
   createdAt: z.string(),
   roles: z.array(z.string()),

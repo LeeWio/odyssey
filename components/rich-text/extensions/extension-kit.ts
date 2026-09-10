@@ -9,6 +9,7 @@ import {
   Image,
   MediaFileHandler,
   Mathematics,
+  Mention,
   Subscript,
   Superscript,
   TableKit,
@@ -50,6 +51,7 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
     Youtube,
     MediaFileHandler,
     Mathematics,
+    Mention,
     Typography,
     TaskList.configure({
       HTMLAttributes: {
