@@ -1,3 +1,10 @@
+## [1.146.1](https://github.com/LeeWio/odyssey/compare/v1.146.0...v1.146.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **rich-text:** render task items with HeroUI checkboxes ([d117f66](https://github.com/LeeWio/odyssey/commit/d117f66ce82ef012b3c658aa36f27fb42039d86e))
+
 # [1.146.0](https://github.com/LeeWio/odyssey/compare/v1.145.0...v1.146.0) (2026-09-09)
 
 
