@@ -1,3 +1,10 @@
+# [1.147.0](https://github.com/LeeWio/odyssey/compare/v1.146.1...v1.147.0) (2026-09-10)
+
+
+### Features
+
+* **rich-text:** add user mention suggestions ([f7db254](https://github.com/LeeWio/odyssey/commit/f7db254a3c4c970c64ce0a4b4bf5fcf87c44307c))
+
 ## [1.146.1](https://github.com/LeeWio/odyssey/compare/v1.146.0...v1.146.1) (2026-09-10)
 
 
