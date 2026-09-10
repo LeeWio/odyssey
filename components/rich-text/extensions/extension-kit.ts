@@ -20,9 +20,21 @@ import {
 } from ".";
 import type { TableOfContentsOptions } from "@tiptap/extension-table-of-contents";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
+import { ReactNodeViewRenderer } from "@tiptap/react";
 import { FindAndReplace } from "@tiptap/extension-find-and-replace";
 import { Markdown } from "@tiptap/markdown";
 import StarterKit from "@tiptap/starter-kit";
+
+import { TaskItemNodeView } from "./task-list/task-item-node-view";
+
+const HeroUITaskItem = TaskItem.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(TaskItemNodeView, {
+      as: "li",
+      className: "flex items-start gap-2",
+    });
+  },
+});
 
 export interface ExtensionKitOptions {
   tableOfContents?: Partial<TableOfContentsOptions>;
@@ -41,10 +53,10 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
     Typography,
     TaskList.configure({
       HTMLAttributes: {
-        class: "odyssey-task-list",
+        class: "odyssey-task-list my-3 list-none space-y-1 pl-0",
       },
     }),
-    TaskItem.configure({
+    HeroUITaskItem.configure({
       nested: true,
       HTMLAttributes: {
         class: "odyssey-task-item",
