@@ -1,3 +1,15 @@
+# [1.148.0](https://github.com/LeeWio/odyssey/compare/v1.147.1...v1.148.0) (2026-09-11)
+
+
+### Bug Fixes
+
+* **rich-text:** show mention suggestion avatars ([1e75cb8](https://github.com/LeeWio/odyssey/commit/1e75cb8fdd1db8da17b029a8c93570c198404f06))
+
+
+### Features
+
+* **ui:** show account avatars from profile or email ([b94e361](https://github.com/LeeWio/odyssey/commit/b94e361b6f3899f8c1d3779baa898ff2f2f00984))
+
 # [1.147.0](https://github.com/LeeWio/odyssey/compare/v1.146.1...v1.147.0) (2026-09-10)
 
 
