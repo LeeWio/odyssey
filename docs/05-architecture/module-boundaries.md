@@ -142,7 +142,7 @@
 
 ### Market / Stock
 
-位置：`components/blog/stock-ledger`、`components/sheet-panel/widgets/stocks`、`lib/features/market`
+位置：`components/blog/stock-ledger`、`components/cockpit/widgets/stocks`、`lib/features/market`
 
 职责：
 

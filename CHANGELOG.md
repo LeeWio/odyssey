@@ -1,10 +1,3 @@
-## [1.147.1](https://github.com/LeeWio/odyssey/compare/v1.147.0...v1.147.1) (2026-09-11)
-
-
-### Performance Improvements
-
-* **home:** optimize moments masonry layout ([42bd90c](https://github.com/LeeWio/odyssey/commit/42bd90c6628e72d0ebe46e3a75c4e04fb551ac0c))
-
 # [1.147.0](https://github.com/LeeWio/odyssey/compare/v1.146.1...v1.147.0) (2026-09-10)
 
 

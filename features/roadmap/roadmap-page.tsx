@@ -51,7 +51,7 @@ const roadmapEvents = [
     icon: "gravity-ui:lock",
     trend: { value: "100%", direction: "up" as const, label: "RBAC Controls" },
     description:
-      "Integrated the unified sheet-panel dashboard for posts, moments, user profiles, and granular role-based permissions management.",
+      "Integrated the unified Cockpit dashboard for posts, moments, user profiles, and granular role-based permissions management.",
     metrics: { label: "Data Integrity", value: "Zod Schema Verified" },
   },
   {

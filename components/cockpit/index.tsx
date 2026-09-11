@@ -1,0 +1,97 @@
+"use client";
+
+import { Card, Chip, Typography } from "@heroui/react";
+import { Sheet } from "@heroui-pro/react";
+import { useHotkeys } from "@mantine/hooks";
+import { useState } from "react";
+import { useRealTime } from "@/hooks/use-real-time";
+import { selectIsSheetOpen, setSheetOpen, toggleSheet } from "@/lib/features/ui";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { MusicMiniWidget } from "@/features/blog";
+import { SunMaxFillIcon } from "../icons";
+import { useThemeSwitch } from "../theme-switch";
+import { AnimatedNumber } from "../ui/animated-number";
+import { Stocks } from "./widgets/stocks";
+
+export function Cockpit() {
+  const isOpen = useAppSelector(selectIsSheetOpen);
+  const dispatch = useAppDispatch();
+
+  const { ModeSwitch, VariantSwitch } = useThemeSwitch();
+  const { formattedDate, hours, minutes } = useRealTime();
+
+  const [weather] = useState({ tempMin: 10, tempMax: 30 });
+
+  useHotkeys(
+    [
+      [
+        "mod+j",
+        () => {
+          dispatch(toggleSheet());
+        },
+      ],
+    ],
+    [],
+    true
+  );
+
+  return (
+    <Sheet
+      isOpen={isOpen}
+      onOpenChange={(open) => dispatch(setSheetOpen(open))}
+      isDetached
+      placement="top"
+    >
+      <Sheet.Backdrop variant="blur">
+        <Sheet.Content>
+          <Sheet.Dialog>
+            <Sheet.Heading className="sr-only">Odyssey control center</Sheet.Heading>
+            <Sheet.Header className="block">
+              <Stocks />
+            </Sheet.Header>
+            <Sheet.Body className="grid grid-cols-[minmax(0,1fr)_8.5rem] items-stretch gap-3 sm:flex sm:gap-4">
+              <Card className="min-w-0 sm:max-w-80">
+                <Card.Header className="flex items-center justify-center">
+                  <Chip variant="primary" color="success" size="lg">
+                    {formattedDate}
+                  </Chip>
+                </Card.Header>
+
+                <Card.Content className="flex flex-row items-center justify-center">
+                  <AnimatedNumber
+                    value={parseInt(hours, 10)}
+                    className="text-muted text-[clamp(2.5rem,13vw,6rem)] leading-none font-bold tabular-nums"
+                    format={{ minimumIntegerDigits: 2 }}
+                  />
+                  <span className="text-accent relative top-[-0.06em] text-[clamp(2.5rem,13vw,6rem)] leading-none font-bold tabular-nums">
+                    :
+                  </span>
+                  <AnimatedNumber
+                    value={parseInt(minutes, 10)}
+                    className="text-warning text-[clamp(2.5rem,13vw,6rem)] leading-none font-bold tabular-nums"
+                    format={{ minimumIntegerDigits: 2 }}
+                  />
+                </Card.Content>
+
+                <Card.Footer className="flex items-center justify-center gap-2">
+                  <SunMaxFillIcon className="text-warning-hover size-7" />
+                  <Typography className="text-2xl font-bold tracking-tight">
+                    {weather.tempMin}-{weather.tempMax}°
+                  </Typography>
+                </Card.Footer>
+              </Card>
+              <MusicMiniWidget
+                className="h-full w-full sm:w-40"
+                title="Realize"
+                artist="Yanzi Sun"
+                cover="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&auto=format&fit=crop&q=60"
+              />
+            </Sheet.Body>
+            <Sheet.Footer className="flex! flex-row! flex-wrap items-center justify-center gap-2"></Sheet.Footer>
+            <Sheet.Handle />
+          </Sheet.Dialog>
+        </Sheet.Content>
+      </Sheet.Backdrop>
+    </Sheet>
+  );
+}
