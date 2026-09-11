@@ -1,3 +1,10 @@
+## [1.148.1](https://github.com/LeeWio/odyssey/compare/v1.148.0...v1.148.1) (2026-09-11)
+
+
+### Bug Fixes
+
+* restore production build after cockpit rename ([0f18516](https://github.com/LeeWio/odyssey/commit/0f18516a20f77bdb854b131286d5a7d5ceca6a5f))
+
 # [1.148.0](https://github.com/LeeWio/odyssey/compare/v1.147.1...v1.148.0) (2026-09-11)
 
 
