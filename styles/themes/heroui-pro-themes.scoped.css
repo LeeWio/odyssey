@@ -991,7 +991,12 @@
       background-color: color-mix(in oklab, var(--surface-secondary) 1%, transparent);
     }
   }
-  :where([data-theme^="glass-"]) .table__header,
+  :where([data-theme^="glass-"]) .table__header {
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+    border-start-start-radius: min(32px, var(--radius-2xl));
+    border-start-end-radius: min(32px, var(--radius-2xl));
+  }
   :where([data-theme^="glass-"]) .accordion__trigger,
   :where([data-theme^="glass-"]) .slider__track,
   :where([data-theme^="glass-"]) .progress-bar__track,

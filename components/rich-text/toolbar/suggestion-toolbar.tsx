@@ -298,7 +298,6 @@ const getSlashItems = ({ query }: { query: string }): SlashCommandItem[] =>
   filterRichTextEditorSuggestionItems(SLASH_COMMANDS, query);
 
 function SuggestionMenuContent({
-  editor,
   items,
   query,
   selectedIndex,
@@ -319,56 +318,6 @@ function SuggestionMenuContent({
       ?.querySelector<HTMLElement>(`[data-slash-command-id="${selectedItem.id}"]`)
       ?.scrollIntoView({ block: "nearest" });
   }, [selectedItem]);
-
-  useEffect(() => {
-    const editorElement = editor.view.dom;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.isComposing ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.altKey ||
-        items.length === 0
-      ) {
-        return;
-      }
-
-      let nextIndex: number | undefined;
-
-      if (event.key === "ArrowDown") {
-        nextIndex = Math.min(selectedIndex + 1, items.length - 1);
-      } else if (event.key === "ArrowUp") {
-        nextIndex = Math.max(selectedIndex - 1, 0);
-      } else if (event.key === "Home") {
-        nextIndex = 0;
-      } else if (event.key === "End") {
-        nextIndex = items.length - 1;
-      } else if (event.key === "Enter" || event.key === "Tab") {
-        const item = items[selectedIndex];
-
-        if (!item) return;
-
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        selectItem(item);
-
-        return;
-      } else {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      setSelectedIndex(nextIndex);
-    };
-
-    editorElement.addEventListener("keydown", handleKeyDown, { capture: true });
-
-    return () => {
-      editorElement.removeEventListener("keydown", handleKeyDown, { capture: true });
-    };
-  }, [editor, items, selectItem, selectedIndex, setSelectedIndex]);
 
   if (items.length === 0) {
     return (
@@ -466,7 +415,6 @@ function SuggestionMenuContent({
 }
 
 function MentionMenuContent({
-  editor,
   items,
   selectedIndex,
   selectItem,
@@ -483,42 +431,6 @@ function MentionMenuContent({
       ?.querySelector<HTMLElement>(`[data-mention-user-id="${selectedItem.id}"]`)
       ?.scrollIntoView({ block: "nearest" });
   }, [selectedItem]);
-
-  useEffect(() => {
-    const editorElement = editor.view.dom;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.isComposing ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.altKey ||
-        items.length === 0
-      ) {
-        return;
-      }
-
-      let nextIndex: number | undefined;
-      if (event.key === "ArrowDown") nextIndex = Math.min(selectedIndex + 1, items.length - 1);
-      else if (event.key === "ArrowUp") nextIndex = Math.max(selectedIndex - 1, 0);
-      else if (event.key === "Home") nextIndex = 0;
-      else if (event.key === "End") nextIndex = items.length - 1;
-      else if (event.key === "Enter" || event.key === "Tab") {
-        const item = items[selectedIndex];
-        if (!item) return;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        selectItem(item);
-        return;
-      } else return;
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      setSelectedIndex(nextIndex);
-    };
-
-    editorElement.addEventListener("keydown", handleKeyDown, { capture: true });
-    return () => editorElement.removeEventListener("keydown", handleKeyDown, { capture: true });
-  }, [editor, items, selectItem, selectedIndex, setSelectedIndex]);
 
   if (items.length === 0) {
     return <div className="text-muted px-3 py-2 text-sm">No users found for “{query}”.</div>;
