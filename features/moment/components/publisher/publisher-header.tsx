@@ -1,13 +1,15 @@
 "use client";
 
-import { Avatar, Button, Dropdown, Label, Description, Modal } from "@heroui/react";
+import { Button, Dropdown, Label, Description, Modal } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { UserAvatar } from "@/components/user-avatar";
 
 interface PublisherHeaderProps {
   visibility: string;
   onVisibilityChange: (value: string) => void;
   user: {
     avatar?: string | null;
+    email?: string | null;
     nickname?: string | null;
     username?: string | null;
   } | null;
@@ -15,8 +17,6 @@ interface PublisherHeaderProps {
 
 export const PublisherHeader = ({ visibility, onVisibilityChange, user }: PublisherHeaderProps) => {
   const displayName = user?.nickname || user?.username || "wei.li";
-  const avatarUrl = user?.avatar || null;
-  const fallbackInitial = (user?.username || displayName).charAt(0).toUpperCase();
 
   const getVisibilityIcon = (value: string) => {
     if (value === "private") return "gravity-ui:lock";
@@ -27,10 +27,7 @@ export const PublisherHeader = ({ visibility, onVisibilityChange, user }: Publis
   return (
     <Modal.Header className="flex flex-row items-center justify-between">
       <div className="flex flex-row items-center gap-3">
-        <Avatar>
-          {avatarUrl && <Avatar.Image alt={displayName} src={avatarUrl} />}
-          <Avatar.Fallback>{fallbackInitial}</Avatar.Fallback>
-        </Avatar>
+        <UserAvatar name={displayName} avatar={user?.avatar} email={user?.email} />
         <div className="flex flex-col">
           <span className="text-foreground text-sm font-medium">{displayName}</span>
           <span className="text-muted text-xs">Share a moment...</span>

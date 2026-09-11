@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  Avatar,
-  Badge,
   Button,
   Card,
   Chip,
@@ -28,8 +26,10 @@ import {
   selectUserEmail,
   useLogoutMutation,
 } from "@/lib/features/auth";
+import { useGetCurrentUserQuery } from "@/lib/features/user";
 import { NotificationPopover } from "@/features/notification/notification-popover";
 import { useGetUnreadNotificationCountQuery } from "@/lib/features/notification";
+import { UserAvatar } from "@/components/user-avatar";
 import { selectAuthMode, setAuthMode, toggleDashboard } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
@@ -695,6 +695,9 @@ export const Navbar = () => {
   const username = useAppSelector(selectCurrentUser);
   const email = useAppSelector(selectUserEmail);
   const authMode = useAppSelector(selectAuthMode);
+  const { data: currentUser } = useGetCurrentUserQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
   const [activeNavigation, setActiveNavigation] = useState<NavigationId | null>(null);
   const [isLocked, setIsLocked] = useState(false);
@@ -1306,14 +1309,13 @@ export const Navbar = () => {
               <Dropdown>
                 <Tooltip delay={500} closeDelay={100}>
                   <Dropdown.Trigger aria-label="Open account menu" className="rounded-xl p-1.5">
-                    <Badge.Anchor>
-                      <Avatar size="sm" className="size-8">
-                        <Avatar.Fallback>
-                          {username?.charAt(0).toUpperCase() || "U"}
-                        </Avatar.Fallback>
-                      </Avatar>
-                      <Badge color="success" placement="bottom-right" size="sm" />
-                    </Badge.Anchor>
+                    <UserAvatar
+                      size="sm"
+                      className="size-8"
+                      name={username || "User"}
+                      avatar={currentUser?.avatar}
+                      email={email}
+                    />
                   </Dropdown.Trigger>
                   <Tooltip.Content placement="bottom" offset={8}>
                     Account

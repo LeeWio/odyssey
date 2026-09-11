@@ -1,10 +1,11 @@
 "use client";
 
 import { ArrowDown, ArrowRotateRight, ArrowUp } from "@gravity-ui/icons";
-import { Avatar, Button, Chip, Typography, cn, toast } from "@heroui/react";
+import { Button, Chip, Typography, cn, toast } from "@heroui/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useNow } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+import { UserAvatar } from "@/components/user-avatar";
 import { MotionSurface } from "@/components/ui";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
@@ -231,7 +232,6 @@ function CommentRow({
   const isHighlighted = highlightedCommentId === comment.id;
   const isDeleted = comment.deletedPlaceholder === true;
   const displayName = getDisplayName(comment);
-  const initialLetter = displayName.slice(0, 2).toUpperCase();
 
   useEffect(() => {
     if (!isHighlighted) return;
@@ -262,10 +262,13 @@ function CommentRow({
 
   return (
     <div className={cn("group flex gap-3", depth === 1 ? "sm:gap-4" : "sm:gap-3")}>
-      <Avatar size={depth === 1 ? "md" : "sm"} variant="soft" className="shrink-0">
-        {comment.avatar && <Avatar.Image src={comment.avatar} alt={displayName} />}
-        <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
-      </Avatar>
+      <UserAvatar
+        size={depth === 1 ? "md" : "sm"}
+        variant="soft"
+        className="shrink-0"
+        name={displayName}
+        avatar={comment.avatar}
+      />
 
       <div className="min-w-0 flex-1">
         <header className="flex flex-wrap items-center gap-x-2 gap-y-1.5 leading-tight">

@@ -2,7 +2,6 @@
 
 import { ArrowUp, Xmark } from "@gravity-ui/icons";
 import {
-  Avatar,
   Button,
   Description,
   Form,
@@ -16,8 +15,11 @@ import {
 import { PromptInput, PromptSuggestion } from "@heroui-pro/react";
 import type React from "react";
 import { useEffect, useId, useRef, useState } from "react";
+import { UserAvatar } from "@/components/user-avatar";
+import { selectUserEmail } from "@/lib/features/auth";
 import { setLoginOpen } from "@/lib/features/ui";
-import { useAppDispatch } from "@/lib/hooks";
+import { useGetCurrentUserQuery } from "@/lib/features/user";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
 import { useCommentContext } from "./context/comment-context";
 import { useCommentDraft } from "./hooks/use-comment-draft";
@@ -53,6 +55,10 @@ export function CommentInput({
   submitButtonText = "Post comment",
 }: CommentInputProps) {
   const { postId, isAuthenticated, currentUser } = useCommentContext();
+  const email = useAppSelector(selectUserEmail);
+  const { data: currentUserProfile } = useGetCurrentUserQuery(undefined, {
+    skip: !isAuthenticated,
+  });
   const [draft, setDraft, clearDraft, isDraftHydrated] = useCommentDraft(postId, replyId);
   const [content, setContent] = useState("");
   const [internalOpen, setInternalOpen] = useState(false);
@@ -63,7 +69,7 @@ export function CommentInput({
   const formId = useId();
   const modalIsOpen = isOpen ?? internalOpen;
   const isReply = replyId !== null;
-  const initialLetter = currentUser ? currentUser.slice(0, 2).toUpperCase() : "AN";
+  const composerName = currentUser || "Anonymous";
 
   useEffect(() => {
     didHydrateDraft.current = false;
@@ -172,9 +178,14 @@ export function CommentInput({
           </PromptInput.Content>
           <PromptInput.Toolbar>
             <PromptInput.ToolbarStart>
-              <Avatar size="sm" variant="soft" className="shrink-0">
-                <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
-              </Avatar>
+              <UserAvatar
+                size="sm"
+                variant="soft"
+                className="shrink-0"
+                name={composerName}
+                avatar={currentUserProfile?.avatar}
+                email={email}
+              />
             </PromptInput.ToolbarStart>
             <PromptInput.ToolbarEnd>
               <PromptInput.Send
@@ -200,9 +211,14 @@ export function CommentInput({
       <Surface variant="secondary" className="mt-4 flex flex-col gap-3 p-3 sm:p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
-            <Avatar size="sm" variant="soft" className="shrink-0">
-              <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
-            </Avatar>
+            <UserAvatar
+              size="sm"
+              variant="soft"
+              className="shrink-0"
+              name={composerName}
+              avatar={currentUserProfile?.avatar}
+              email={email}
+            />
             <div className="min-w-0">
               <Typography type="body-sm" weight="semibold" truncate>
                 Replying to {replyTo}
@@ -268,9 +284,14 @@ export function CommentInput({
     <>
       {!hideTrigger && (
         <Button fullWidth variant="secondary" onPress={openComposer}>
-          <Avatar size="sm" variant="soft" className="shrink-0">
-            <Avatar.Fallback>{initialLetter}</Avatar.Fallback>
-          </Avatar>
+          <UserAvatar
+            size="sm"
+            variant="soft"
+            className="shrink-0"
+            name={composerName}
+            avatar={currentUserProfile?.avatar}
+            email={email}
+          />
           <Typography color="muted" type="body-sm" align="start">
             Write a comment...
           </Typography>

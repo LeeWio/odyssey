@@ -5,7 +5,7 @@ import { Modal } from "@heroui/react";
 import { DropZone } from "@heroui-pro/react";
 
 import { useAppSelector } from "@/lib/hooks";
-import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
+import { selectCurrentUser, selectIsAuthenticated, selectUserEmail } from "@/lib/features/auth";
 import { useGetCurrentUserQuery } from "@/lib/features/user/user-api";
 
 import { useMomentPublish } from "../../hooks/use-moment-publish";
@@ -23,6 +23,7 @@ interface MomentPublisherProps {
 export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
+  const email = useAppSelector(selectUserEmail);
 
   const { data: currentUser } = useGetCurrentUserQuery(undefined, {
     skip: !isAuthenticated,
@@ -32,10 +33,11 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
     if (!isAuthenticated) return null;
     return {
       avatar: currentUser?.avatar,
+      email,
       nickname: currentUser?.nickname,
       username: username,
     };
-  }, [isAuthenticated, username, currentUser]);
+  }, [isAuthenticated, username, email, currentUser]);
 
   const {
     editorValue,
