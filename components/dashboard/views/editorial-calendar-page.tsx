@@ -29,6 +29,12 @@ function toIsoDate(date: CalendarDate) {
   return date.toString();
 }
 
+function toCalendarDate(value: { year: number; month: number; day: number }): CalendarDate {
+  return value instanceof CalendarDate
+    ? value
+    : new CalendarDate(value.year, value.month, value.day);
+}
+
 function monthRange(date: CalendarDate) {
   const monthStart = startOfMonth(date);
 
@@ -124,12 +130,14 @@ export function EditorialCalendarPage() {
             <Widget.Content className="flex justify-center">
               <Calendar
                 aria-label="Editorial calendar"
-                focusedValue={focusedDate}
+                focusedValue={focusedDate as never}
                 firstDayOfWeek="mon"
-                value={selectedDate}
+                value={selectedDate as never}
                 weeksInMonth={6}
-                onChange={(value) => setSelectedDate(value)}
-                onFocusChange={(value) => setFocusedDate(value as CalendarDate)}
+                onChange={(value) => {
+                  if (value && !Array.isArray(value)) setSelectedDate(toCalendarDate(value));
+                }}
+                onFocusChange={(value) => setFocusedDate(toCalendarDate(value))}
               >
                 <Calendar.Header>
                   <Calendar.Heading />
