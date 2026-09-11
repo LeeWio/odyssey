@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Avatar,
-  Description,
-  Header,
-  Kbd,
-  Label,
-  ListBox,
-  ScrollShadow,
-  Separator,
-} from "@heroui/react";
+import { Description, Header, Kbd, Label, ListBox, ScrollShadow, Separator } from "@heroui/react";
 import {
   Check,
   CircleChevronDown,
@@ -42,6 +33,7 @@ import {
 } from "@heroui-pro/react/rich-text-editor";
 import type { ComponentType, SVGProps } from "react";
 import { useEffect, useMemo, useRef } from "react";
+import { UserAvatar } from "@/components/user-avatar";
 import { useGetAllUsersQuery, type UserResponse } from "@/lib/features/user";
 import { OPEN_YOUTUBE_DIALOG_EVENT } from "../media-insert-dialog";
 
@@ -461,10 +453,12 @@ function MentionMenuContent({
             onHoverStart={() => setSelectedIndex(index)}
             onMouseDown={(event) => event.preventDefault()}
           >
-            <Avatar size="sm">
-              {item.user.avatar ? <Avatar.Image alt={item.title} src={item.user.avatar} /> : null}
-              <Avatar.Fallback>{item.title.slice(0, 1).toUpperCase()}</Avatar.Fallback>
-            </Avatar>
+            <UserAvatar
+              size="sm"
+              name={item.title}
+              avatar={item.user.avatar}
+              email={item.user.email}
+            />
             <div className="flex min-w-0 flex-col">
               <Label>{item.title}</Label>
               <Description className="truncate">{item.description}</Description>

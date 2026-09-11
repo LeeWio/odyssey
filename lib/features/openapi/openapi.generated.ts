@@ -1139,6 +1139,7 @@ export interface OpenApiComponents {
       username?: string;
       email?: string;
       nickname?: string;
+      avatar?: string;
       status?: "ACTIVE" | "INACTIVE" | "PENDING" | "BANNED" | "DELETED";
       createdAt?: string;
       roles?: Array<string>;
