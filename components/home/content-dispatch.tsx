@@ -3,6 +3,7 @@
 import { ArrowUpRight, Calendar } from "@gravity-ui/icons";
 import { Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
+import { useMemo } from "react";
 import { Carousel } from "@heroui-pro/react/carousel";
 import Grainient from "@/components/background/grainient";
 import { MomentsMasonry } from "@/components/home/moments-masonry";
@@ -234,7 +235,10 @@ export function MomentsShowcase() {
     size: MOMENTS_SHOWCASE_LIMIT,
   });
 
-  const recentMoments = moments?.list.slice(0, MOMENTS_SHOWCASE_LIMIT) ?? [];
+  const recentMoments = useMemo(
+    () => moments?.list.slice(0, MOMENTS_SHOWCASE_LIMIT) ?? [],
+    [moments?.list]
+  );
   if (!isLoading && recentMoments.length === 0) return null;
 
   return (
