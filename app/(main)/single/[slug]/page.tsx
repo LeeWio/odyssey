@@ -32,6 +32,7 @@ import { type FormEvent, use, useEffect, useMemo, useRef, useState } from "react
 import { CommentSheet } from "@/components/comment";
 import { MotionRichTextEditor } from "@/components/ui";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
+import { BlockEntranceAnimation } from "@/components/rich-text/extensions/block-entrance-animation";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import {
   normalizeRichTextDocument,
@@ -58,6 +59,10 @@ import { getReadingPositionId } from "@/lib/reading-position";
 import { commentDebug } from "@/lib/comment-debug";
 import { useAppSelector } from "@/lib/hooks";
 import { ArticleSidebar } from "./article-sidebar";
+
+// HeroUI passes extensions to useEditor as a dependency. Keep this reference
+// stable across reading-progress renders so scrolling never recreates the editor.
+const READER_EXTENSIONS = [...ExtensionKit, BlockEntranceAnimation];
 
 interface SinglePageProps {
   params: Promise<{
@@ -491,7 +496,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                     <MotionRichTextEditor
                       key={article.content}
                       isReadOnly
-                      extensions={ExtensionKit}
+                      extensions={READER_EXTENSIONS}
                       defaultValue={parsedContent}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}

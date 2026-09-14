@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CommentSystem } from "@/components/comment";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
+import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import {
   normalizeRichTextDocument,
@@ -481,7 +482,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
             style={{ willChange: "opacity" }}
           >
             <RichTextEditor.Shell className="border-none bg-transparent">
-              <RichTextEditor.Content />
+              <AnimatedRichTextContent />
               <RichTextTableOfContents placement="right" />
             </RichTextEditor.Shell>
           </MotionRichTextEditor>
