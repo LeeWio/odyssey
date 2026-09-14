@@ -1,3 +1,10 @@
+## [1.149.1](https://github.com/LeeWio/odyssey/compare/v1.149.0...v1.149.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* **rich-text:** prevent table scrollbar flicker ([4a32424](https://github.com/LeeWio/odyssey/commit/4a32424edc7faaf75712b1cb916c1ce8822ef54b))
+
 # [1.149.0](https://github.com/LeeWio/odyssey/compare/v1.148.1...v1.149.0) (2026-09-14)
 
 
