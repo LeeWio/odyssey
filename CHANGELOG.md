@@ -1,3 +1,10 @@
+# [1.149.0](https://github.com/LeeWio/odyssey/compare/v1.148.1...v1.149.0) (2026-09-14)
+
+
+### Features
+
+* **rich-text:** animate blocks on viewport entry ([b504941](https://github.com/LeeWio/odyssey/commit/b504941ebd2776fcd90608ad0a5f5c68747e7683))
+
 ## [1.148.1](https://github.com/LeeWio/odyssey/compare/v1.148.0...v1.148.1) (2026-09-11)
 
 
