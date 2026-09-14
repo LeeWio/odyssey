@@ -14,7 +14,7 @@ class TableView extends TiptapTableView {
   ) {
     super(node, cellMinWidth, view, HTMLAttributes);
 
-    this.dom.className = "tableWrapper w-full max-w-full overflow-x-auto";
+    this.dom.className = "tableWrapper w-full max-w-full overflow-x-auto overflow-y-hidden";
   }
 }
 

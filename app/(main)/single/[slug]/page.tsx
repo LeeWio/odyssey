@@ -23,6 +23,7 @@ import {
 } from "@heroui/react";
 import { ActionBar } from "@heroui-pro/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
+import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
@@ -32,7 +33,6 @@ import { type FormEvent, use, useEffect, useMemo, useRef, useState } from "react
 import { CommentSheet } from "@/components/comment";
 import { MotionRichTextEditor } from "@/components/ui";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
-import { BlockEntranceAnimation } from "@/components/rich-text/extensions/block-entrance-animation";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import {
   normalizeRichTextDocument,
@@ -62,7 +62,7 @@ import { ArticleSidebar } from "./article-sidebar";
 
 // HeroUI passes extensions to useEditor as a dependency. Keep this reference
 // stable across reading-progress renders so scrolling never recreates the editor.
-const READER_EXTENSIONS = [...ExtensionKit, BlockEntranceAnimation];
+const READER_EXTENSIONS = ExtensionKit;
 
 interface SinglePageProps {
   params: Promise<{
@@ -503,7 +503,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                       transition={{ duration: 0.8, ease: "easeOut" }}
                     >
                       <RichTextEditor.Shell className="border-none bg-transparent p-0">
-                        <RichTextEditor.Content />
+                        <AnimatedRichTextContent />
                         <RichTextTableOfContents placement="right" />
                       </RichTextEditor.Shell>
                     </MotionRichTextEditor>

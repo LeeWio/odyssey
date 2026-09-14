@@ -1,7 +1,13 @@
-import { expect, test } from "@playwright/test";
+import type { JSONContent } from "@tiptap/core";
+import { RICH_TEXT_DOCUMENT_FIXTURE } from "../../components/rich-text/testing/rich-text-document.fixture";
+import { expect, test, type Page } from "@playwright/test";
 
-test("scrolling preserves the reader and does not replay revealed blocks", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "no-preference" });
+const paragraphs = Array.from({ length: 80 }, (_, index) => ({
+  type: "paragraph",
+  content: [{ type: "text", text: `Paragraph ${index + 1}. Read once, reveal once.` }],
+}));
+
+async function openArticle(page: Page, content: JSONContent[] = paragraphs) {
   await page.route("**/api/v1/public/blog/posts/entrance-regression", (route) =>
     route.fulfill({
       json: {
@@ -14,10 +20,7 @@ test("scrolling preserves the reader and does not replay revealed blocks", async
           contentType: "JSON",
           content: JSON.stringify({
             type: "doc",
-            content: Array.from({ length: 80 }, (_, index) => ({
-              type: "paragraph",
-              content: [{ type: "text", text: `Paragraph ${index + 1}. Read once, reveal once.` }],
-            })),
+            content,
           }),
           status: "PUBLISHED",
           isFeatured: false,
@@ -35,6 +38,12 @@ test("scrolling preserves the reader and does not replay revealed blocks", async
   );
 
   await page.goto("/single/entrance-regression");
+  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+}
+
+test("scrolling preserves the reader and does not replay revealed blocks", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openArticle(page);
   const editor = page.locator('.ProseMirror[contenteditable="false"]');
   await expect(editor.locator(":scope > p")).toHaveCount(80);
   const originalEditor = await editor.elementHandle();
@@ -44,7 +53,7 @@ test("scrolling preserves the reader and does not replay revealed blocks", async
   const last = editor.locator(":scope > p").last();
   await first.scrollIntoViewIfNeeded();
   await expect(first).toHaveCSS("opacity", "1");
-  await expect(last).toHaveCSS("visibility", "hidden");
+  await expect(last).toHaveCSS("opacity", "0");
 
   // Keep a record of even brief resets, rather than only checking the final frame.
   const replay = await first.evaluateHandle((block) => {
@@ -68,4 +77,67 @@ test("scrolling preserves the reader and does not replay revealed blocks", async
   }
 
   await replay.evaluate(({ observer }) => observer.disconnect());
+});
+
+test("nested reading units wait for the viewport without animating parent and child together", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const fixture = RICH_TEXT_DOCUMENT_FIXTURE.content!.filter((node) =>
+    ["bulletList", "taskList", "table", "columns", "details", "image"].includes(node.type!)
+  );
+  await openArticle(page, [...paragraphs, ...fixture, ...paragraphs]);
+  const editor = page.locator('.ProseMirror[contenteditable="false"]');
+  const row = editor.locator("tr").first();
+  const listItem = editor.locator("ul:not(.odyssey-task-list) > li").first();
+  const task = editor.locator("li.node-taskItem").first();
+  const columnParagraph = editor.locator('[data-type="column"] p').first();
+  const details = editor.locator(".odyssey-details");
+  const image = editor.locator(".react-renderer.node-image");
+
+  for (const target of [listItem, task, row, columnParagraph, details, image]) {
+    await expect(target).toHaveCSS("opacity", "0");
+  }
+  await expect(editor.locator(".tableWrapper")).toHaveCSS("opacity", "1");
+  await expect(row.locator("p")).toHaveCSS("opacity", "1");
+  await expect(listItem.locator("p")).toHaveCSS("opacity", "1");
+
+  for (const target of [listItem, task, row, columnParagraph, details, image]) {
+    await target.scrollIntoViewIfNeeded();
+    await expect(target).toHaveCSS("opacity", "1");
+    await expect(target).toHaveCSS("transform", "none");
+  }
+});
+
+test("reduced motion reveals pending content immediately and never re-hides it", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openArticle(page);
+  const last = page.locator(".ProseMirror > p").last();
+  await expect(last).toHaveCSS("opacity", "0");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(last).toHaveCSS("opacity", "1");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await last.scrollIntoViewIfNeeded();
+  await expect(last).toHaveCSS("opacity", "1");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(last).toHaveCSS("opacity", "1");
+});
+
+test("a block taller than the viewport still reveals on entry", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openArticle(page, [
+    ...paragraphs,
+    {
+      type: "codeBlock",
+      content: [{ type: "text", text: "A very long code block\n".repeat(1500) }],
+    },
+  ]);
+  const block = page.locator(".ProseMirror > pre");
+  await expect(block).toHaveCSS("opacity", "0");
+  await block.evaluate((element) => element.scrollIntoView({ block: "start" }));
+  await expect(block).toHaveCSS("opacity", "1");
 });
