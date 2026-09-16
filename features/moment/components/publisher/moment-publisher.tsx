@@ -46,6 +46,10 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
   const {
     mediaItems,
     removeMedia,
+    updateMediaAlt,
+    retryMedia,
+    hasIncompleteUploads,
+    hasMissingAlt,
     editorValue,
     setEditorValue,
     charCount,
@@ -70,7 +74,9 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
   const isSubmitDisabled =
     (isEmpty && mediaItems.length === 0 && !attachedStockSymbol) ||
     charCount > MOMENT_CHARACTER_LIMIT ||
-    isSubmitting;
+    isSubmitting ||
+    hasIncompleteUploads ||
+    hasMissingAlt;
 
   return (
     <Modal>
@@ -105,12 +111,10 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
                   />
 
                   <PublisherGallery
-                    items={mediaItems.map(({ id, preview, altText }) => ({
-                      id,
-                      preview,
-                      altText,
-                    }))}
+                    items={mediaItems}
                     onRemove={removeMedia}
+                    onAltChange={updateMediaAlt}
+                    onRetry={retryMedia}
                   />
                 </DropZone.Area>
 

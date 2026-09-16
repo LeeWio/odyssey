@@ -37,6 +37,7 @@ import {
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 
 import { ArchiveTimeline, ArchiveTimelineSkeleton } from "./archive-timeline";
+import { RemoteMedia } from "@/components/ui/remote-media";
 
 const PAGE_SIZE = 6;
 
@@ -213,13 +214,7 @@ function StoryList({
           <ListView.ItemContent className="items-center gap-3">
             {post.coverImage ? (
               <div className="relative size-14 shrink-0 overflow-hidden rounded-xl">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt=""
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                  src={post.coverImage}
-                />
+                <RemoteMedia alt="" className="h-full w-full object-cover" src={post.coverImage} />
                 <div
                   aria-hidden="true"
                   className="pointer-events-none absolute inset-0 border border-black/5 dark:border-white/10"
@@ -260,8 +255,7 @@ function LeadStoryCard({ post }: { post: PostDigest }) {
     <Card variant="tertiary" className="h-full overflow-hidden p-0">
       {post.coverImage ? (
         <div className="relative aspect-[16/9] overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="" className="h-full w-full object-cover" loading="lazy" src={post.coverImage} />
+          <RemoteMedia alt="" className="h-full w-full object-cover" src={post.coverImage} />
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 border border-black/5 dark:border-white/10"
@@ -323,8 +317,7 @@ function SpotlightCard({ post }: { post: PostDigest }) {
     <Card variant="tertiary" className="h-full overflow-hidden p-0">
       {post.coverImage ? (
         <div className="bg-surface-secondary relative aspect-[16/9] overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="" className="h-full w-full object-cover" src={post.coverImage} />
+          <RemoteMedia alt="" className="h-full w-full object-cover" src={post.coverImage} />
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 border border-black/5 dark:border-white/10"

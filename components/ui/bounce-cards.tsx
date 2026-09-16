@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { RemoteMedia } from "@/components/ui/remote-media";
 
 interface BounceCardsProps {
   className?: string;
@@ -232,14 +233,10 @@ export default function BounceCards({
             onMouseLeave={handleMouseLeave}
             onClick={() => onCardClick?.(index)}
           >
-            {/* API media can use arbitrary hosts; retain native loading without a remote allowlist. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <RemoteMedia
               src={src}
               alt=""
               draggable={false}
-              loading="lazy"
-              decoding="async"
               className="absolute inset-0 block size-full overflow-hidden object-cover break-all brightness-[0.97] contrast-[0.96] select-none"
             />
           </div>

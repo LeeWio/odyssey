@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { JSONContent } from "@tiptap/core";
 import { toast } from "@heroui/react";
 import {
@@ -7,6 +7,7 @@ import {
   type MomentImageResponse,
   type MomentResponse,
 } from "@/lib/features/moment";
+import type { FileResponse } from "@/lib/features/file";
 import { useUploadFileMutation } from "@/lib/features/file/file-api";
 import { MOMENT_CHARACTER_LIMIT } from "../utils/character-count";
 import { MOMENT_TOPIC_LIMIT } from "../utils/topic-slug";
@@ -17,6 +18,8 @@ import {
   validateMomentImageFile,
 } from "../utils/media-limits";
 
+export type PublisherMediaStatus = "uploading" | "complete" | "failed";
+
 export type PublisherMediaItem =
   | {
       id: string;
@@ -25,6 +28,7 @@ export type PublisherMediaItem =
       fileId: number;
       altText: string;
       existing: MomentImageResponse;
+      status: "complete";
     }
   | {
       id: string;
@@ -32,6 +36,11 @@ export type PublisherMediaItem =
       preview: string;
       file: File;
       altText: string;
+      status: PublisherMediaStatus;
+      progress: number;
+      fileId?: number;
+      response?: FileResponse;
+      errorMessage?: string;
     };
 
 function toExistingMedia(image: MomentImageResponse): PublisherMediaItem {
@@ -42,6 +51,7 @@ function toExistingMedia(image: MomentImageResponse): PublisherMediaItem {
     fileId: image.fileId,
     altText: image.altText,
     existing: image,
+    status: "complete",
   };
 }
 
@@ -77,6 +87,96 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
   const [createMoment] = useCreateMomentMutation();
   const [updateMoment] = useUpdateMomentMutation();
   const [uploadFile] = useUploadFileMutation();
+  const activeUploads = useRef(new Map<string, { abort: () => void }>());
+
+  useEffect(() => {
+    const uploads = activeUploads.current;
+    return () => {
+      uploads.forEach(({ abort }) => abort());
+      uploads.clear();
+    };
+  }, []);
+
+  const runUpload = (id: string, file: File) => {
+    activeUploads.current.get(id)?.abort();
+    const request = uploadFile(file);
+    activeUploads.current.set(id, { abort: () => request.abort() });
+
+    void (async () => {
+      try {
+        const response = await request.unwrap();
+        if (response.id === undefined) {
+          const errorMessage = "Uploaded file is missing an ID.";
+          setMediaItems((prev) =>
+            prev.map((item) =>
+              item.id === id && item.kind === "local"
+                ? {
+                    ...item,
+                    status: "failed",
+                    progress: 0,
+                    errorMessage,
+                    response: undefined,
+                    fileId: undefined,
+                  }
+                : item
+            )
+          );
+          toast.danger(errorMessage);
+          return;
+        }
+
+        setMediaItems((prev) =>
+          prev.map((item) =>
+            item.id === id && item.kind === "local"
+              ? {
+                  ...item,
+                  status: "complete",
+                  progress: 100,
+                  response,
+                  fileId: response.id,
+                  errorMessage: undefined,
+                }
+              : item
+          )
+        );
+      } catch {
+        if (!activeUploads.current.has(id)) return;
+        setMediaItems((prev) =>
+          prev.map((item) =>
+            item.id === id && item.kind === "local"
+              ? {
+                  ...item,
+                  status: "failed",
+                  progress: 0,
+                  errorMessage: "Upload failed. Check the connection and try again.",
+                }
+              : item
+          )
+        );
+        toast.danger(`Couldn't upload ${file.name}. You can retry it.`);
+      } finally {
+        activeUploads.current.delete(id);
+      }
+    })();
+  };
+
+  const startUpload = (id: string, file: File) => {
+    setMediaItems((prev) =>
+      prev.map((item) =>
+        item.id === id && item.kind === "local"
+          ? {
+              ...item,
+              status: "uploading",
+              progress: 8,
+              errorMessage: undefined,
+              fileId: undefined,
+              response: undefined,
+            }
+          : item
+      )
+    );
+    runUpload(id, file);
+  };
 
   const appendFiles = (files: File[]) => {
     const remaining = MOMENT_MAX_IMAGES - mediaItems.length;
@@ -85,7 +185,7 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
       return;
     }
 
-    const accepted: PublisherMediaItem[] = [];
+    const accepted: Extract<PublisherMediaItem, { kind: "local" }>[] = [];
     for (const file of files) {
       if (accepted.length >= remaining) {
         toast.warning(`Only ${remaining} more image${remaining === 1 ? "" : "s"} can be added.`);
@@ -102,11 +202,14 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
         preview: URL.createObjectURL(file),
         file,
         altText: defaultMomentAltText(file.name),
+        status: "uploading",
+        progress: 8,
       });
     }
 
     if (accepted.length === 0) return;
-    setMediaItems([...mediaItems, ...accepted]);
+    setMediaItems((prev) => [...prev, ...accepted]);
+    accepted.forEach((item) => runUpload(item.id, item.file));
   };
 
   const handleSelectFiles = (fileList: FileList) => {
@@ -127,6 +230,8 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
   };
 
   const removeMedia = (id: string) => {
+    activeUploads.current.get(id)?.abort();
+    activeUploads.current.delete(id);
     setMediaItems((prev) => {
       const target = prev.find((item) => item.id === id);
       if (target?.kind === "local") {
@@ -136,7 +241,19 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
     });
   };
 
+  const updateMediaAlt = (id: string, altText: string) => {
+    setMediaItems((prev) => prev.map((item) => (item.id === id ? { ...item, altText } : item)));
+  };
+
+  const retryMedia = (id: string) => {
+    const target = mediaItems.find((item) => item.id === id);
+    if (!target || target.kind !== "local") return;
+    startUpload(target.id, target.file);
+  };
+
   const handleReset = () => {
+    activeUploads.current.forEach(({ abort }) => abort());
+    activeUploads.current.clear();
     mediaItems.forEach((item) => {
       if (item.kind === "local") URL.revokeObjectURL(item.preview);
     });
@@ -150,33 +267,29 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
     setIsSubmitting(false);
   };
 
+  const hasIncompleteUploads = mediaItems.some((item) => item.status !== "complete");
+  const hasMissingAlt = mediaItems.some((item) => !item.altText.trim());
+
   const publishMoment = async () => {
     if (
       (isEmpty && mediaItems.length === 0 && !attachedStockSymbol) ||
       charCount > MOMENT_CHARACTER_LIMIT ||
-      isSubmitting
+      isSubmitting ||
+      hasIncompleteUploads ||
+      hasMissingAlt
     )
       return;
     setIsSubmitting(true);
     try {
-      const localItems = mediaItems.filter(
-        (item): item is Extract<PublisherMediaItem, { kind: "local" }> => item.kind === "local"
-      );
-      const existingItems = mediaItems.filter(
-        (item): item is Extract<PublisherMediaItem, { kind: "existing" }> =>
-          item.kind === "existing"
-      );
-
-      const uploadedImages = await Promise.all(
-        localItems.map(async ({ file, altText }) => {
-          const res = await uploadFile(file).unwrap();
-          if (!res.id) throw new Error("Uploaded file is missing an ID.");
-          return {
-            fileId: res.id,
-            altText: altText || defaultMomentAltText(file.name),
-          };
-        })
-      );
+      const images = mediaItems.map((item) => {
+        if (item.kind === "existing") {
+          return { fileId: item.fileId, altText: item.altText.trim() };
+        }
+        if (!item.fileId) {
+          throw new Error("Uploaded file is missing an ID.");
+        }
+        return { fileId: item.fileId, altText: item.altText.trim() };
+      });
 
       let finalContent = "";
       if (editorValue) {
@@ -202,10 +315,7 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
       const body = {
         content: finalContent,
         visibility,
-        images: [
-          ...existingItems.map(({ fileId, altText }) => ({ fileId, altText })),
-          ...uploadedImages,
-        ],
+        images,
         topicSlugs: topics,
         stockSymbol: attachedStockSymbol,
       };
@@ -228,6 +338,10 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
   return {
     mediaItems,
     removeMedia,
+    updateMediaAlt,
+    retryMedia,
+    hasIncompleteUploads,
+    hasMissingAlt,
     editorValue,
     setEditorValue,
     charCount,

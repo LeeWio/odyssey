@@ -7,6 +7,7 @@ import { Avatar, Link, Skeleton, Typography } from "@heroui/react";
 import { useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { RemoteMedia } from "@/components/ui/remote-media";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -68,12 +69,10 @@ function MemoryStory({ post }: { post: ArchiveTimelinePost }) {
           data-memory-media
           className="bg-surface-secondary relative float-end ms-6 mb-5 aspect-[4/5] w-[38%] min-w-36 overflow-hidden rounded-2xl sm:ms-8 sm:mb-7 sm:min-w-44 lg:w-[32%]"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <RemoteMedia
             alt=""
             data-memory-image
             className="absolute start-0 -top-[10%] h-[120%] w-full max-w-none object-cover will-change-transform"
-            loading="lazy"
             src={post.coverImage}
           />
           <div

@@ -1,5 +1,11 @@
 import { useState, useCallback, useEffect, useRef, type ReactNode } from "react";
-import { motion, useMotionValue, useAnimationFrame, useTransform } from "motion/react";
+import {
+  motion,
+  useMotionValue,
+  useAnimationFrame,
+  useTransform,
+  useReducedMotion,
+} from "motion/react";
 
 interface GradientTextProps {
   children: ReactNode;
@@ -22,12 +28,30 @@ export default function GradientText({
   pauseOnHover = false,
   yoyo = true,
 }: GradientTextProps) {
-  const [isPaused, setIsPaused] = useState(false);
+  const shouldReduceMotion = useReducedMotion() ?? false;
+  const [isHoveredPaused, setIsHoveredPaused] = useState(false);
+  const [isInView, setIsInView] = useState(true);
+  const rootRef = useRef<HTMLDivElement>(null);
   const progress = useMotionValue(0);
   const elapsedRef = useRef(0);
   const lastTimeRef = useRef<number | null>(null);
 
   const animationDuration = animationSpeed * 1000;
+  const isPaused = shouldReduceMotion || isHoveredPaused || !isInView;
+
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry?.isIntersecting ?? true);
+      },
+      { rootMargin: "64px", threshold: 0.01 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   useAnimationFrame((time) => {
     if (isPaused) {
@@ -54,15 +78,14 @@ export default function GradientText({
         progress.set(100 - ((cycleTime - animationDuration) / animationDuration) * 100);
       }
     } else {
-      // Continuously increase position for seamless looping
       progress.set((elapsedRef.current / animationDuration) * 100);
     }
   });
 
   useEffect(() => {
     elapsedRef.current = 0;
-    progress.set(0);
-  }, [animationSpeed, progress, yoyo]);
+    progress.set(shouldReduceMotion ? 50 : 0);
+  }, [animationSpeed, progress, shouldReduceMotion, yoyo]);
 
   const backgroundPosition = useTransform(progress, (p) => {
     if (direction === "horizontal") {
@@ -70,17 +93,16 @@ export default function GradientText({
     } else if (direction === "vertical") {
       return `50% ${p}%`;
     } else {
-      // For diagonal, move only horizontally to avoid interference patterns
       return `${p}% 50%`;
     }
   });
 
   const handleMouseEnter = useCallback(() => {
-    if (pauseOnHover) setIsPaused(true);
+    if (pauseOnHover) setIsHoveredPaused(true);
   }, [pauseOnHover]);
 
   const handleMouseLeave = useCallback(() => {
-    if (pauseOnHover) setIsPaused(false);
+    if (pauseOnHover) setIsHoveredPaused(false);
   }, [pauseOnHover]);
 
   const gradientAngle =
@@ -89,7 +111,6 @@ export default function GradientText({
       : direction === "vertical"
         ? "to bottom"
         : "to bottom right";
-  // Duplicate first color at the end for seamless looping
   const gradientColors = [...colors, colors[0]].join(", ");
 
   const gradientStyle = {
@@ -105,6 +126,7 @@ export default function GradientText({
 
   return (
     <motion.div
+      ref={rootRef}
       className={`relative mx-auto flex max-w-fit cursor-pointer flex-row items-center justify-center overflow-hidden rounded-[1.25rem] font-medium backdrop-blur transition-shadow duration-500 ${showBorder ? "px-2 py-1" : ""} ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

@@ -55,7 +55,6 @@ function setup(moment?: MomentResponse) {
   }
   const container = document.createElement("div");
   root = createRoot(container);
-  // Avoid JSX so this test follows the repository's .test.ts convention.
   act(() => root!.render(createElement(Harness)));
   return success;
 }
@@ -66,6 +65,17 @@ function makeFile(name: string, type: string, size = 1024) {
   return file;
 }
 
+function asFileList(files: File[]) {
+  return {
+    ...Object.fromEntries(files.map((file, index) => [String(index), file])),
+    length: files.length,
+    item: (index: number) => files[index] ?? null,
+    [Symbol.iterator]: function* () {
+      yield* files;
+    },
+  } as unknown as FileList;
+}
+
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal("URL", {
@@ -73,6 +83,10 @@ beforeEach(() => {
     createObjectURL: vi.fn(() => "blob:preview"),
     revokeObjectURL: vi.fn(),
   });
+  api.upload.mockImplementation(() => ({
+    abort: vi.fn(),
+    unwrap: () => Promise.resolve({ id: 91 }),
+  }));
 });
 
 afterEach(() => {
@@ -109,21 +123,21 @@ describe("moment publishing", () => {
     expect(api.upload).not.toHaveBeenCalled();
   });
 
-  it("uploads new local images alongside preserved existing ones", async () => {
+  it("uploads selected images eagerly and reuses their file IDs on publish", async () => {
     api.update.mockReturnValue({ unwrap: () => Promise.resolve() });
-    api.upload.mockReturnValue({ unwrap: () => Promise.resolve({ id: 91 }) });
     setup(original);
     const file = makeFile("extra.webp", "image/webp");
-    act(() =>
-      state.handleSelectFiles({
-        length: 1,
-        0: file,
-        item: () => file,
-        [Symbol.iterator]: function* () {
-          yield file;
-        },
-      } as unknown as FileList)
-    );
+    await act(async () => {
+      state.handleSelectFiles(asFileList([file]));
+    });
+    expect(api.upload).toHaveBeenCalledOnce();
+    expect(state.mediaItems.at(-1)).toMatchObject({
+      kind: "local",
+      status: "complete",
+      fileId: 91,
+      altText: "extra",
+    });
+
     await act(async () => state.publishMoment());
     expect(api.upload).toHaveBeenCalledOnce();
     expect(api.update.mock.calls[0][0].body.images).toEqual([
@@ -132,38 +146,52 @@ describe("moment publishing", () => {
     ]);
   });
 
+  it("blocks publish while uploads are incomplete or alt text is missing", async () => {
+    let resolveUpload: ((value: { id: number }) => void) | undefined;
+    api.upload.mockImplementation(() => ({
+      abort: vi.fn(),
+      unwrap: () =>
+        new Promise<{ id: number }>((resolve) => {
+          resolveUpload = resolve;
+        }),
+    }));
+    api.update.mockReturnValue({ unwrap: () => Promise.resolve() });
+    setup(original);
+    const file = makeFile("pending.webp", "image/webp");
+    await act(async () => {
+      state.handleSelectFiles(asFileList([file]));
+    });
+    expect(state.hasIncompleteUploads).toBe(true);
+    await act(async () => state.publishMoment());
+    expect(api.update).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveUpload?.({ id: 91 });
+    });
+    expect(state.hasIncompleteUploads).toBe(false);
+
+    act(() => state.updateMediaAlt(state.mediaItems.at(-1)!.id, "   "));
+    expect(state.hasMissingAlt).toBe(true);
+    await act(async () => state.publishMoment());
+    expect(api.update).not.toHaveBeenCalled();
+
+    act(() => state.updateMediaAlt(state.mediaItems.at(-1)!.id, "Pending shot"));
+    await act(async () => state.publishMoment());
+    expect(api.update).toHaveBeenCalledOnce();
+  });
+
   it("rejects unsupported types, oversized files, and overflow beyond the image cap", () => {
     setup(original);
     const badType = makeFile("notes.txt", "text/plain");
     const tooBig = makeFile("huge.webp", "image/webp", 11 * 1024 * 1024);
-    act(() =>
-      state.handleSelectFiles({
-        length: 2,
-        0: badType,
-        1: tooBig,
-        item: (index: number) => (index === 0 ? badType : tooBig),
-        [Symbol.iterator]: function* () {
-          yield badType;
-          yield tooBig;
-        },
-      } as unknown as FileList)
-    );
+    act(() => state.handleSelectFiles(asFileList([badType, tooBig])));
     expect(state.mediaItems).toHaveLength(1);
     expect(toast.danger).toHaveBeenCalled();
 
     const fillers = Array.from({ length: MOMENT_MAX_IMAGES }, (_, index) =>
       makeFile(`ok-${index}.png`, "image/png")
     );
-    act(() =>
-      state.handleSelectFiles({
-        ...Object.fromEntries(fillers.map((file, index) => [String(index), file])),
-        length: fillers.length,
-        item: (index: number) => fillers[index] ?? null,
-        [Symbol.iterator]: function* () {
-          yield* fillers;
-        },
-      } as unknown as FileList)
-    );
+    act(() => state.handleSelectFiles(asFileList(fillers)));
     expect(state.mediaItems.length).toBe(MOMENT_MAX_IMAGES);
     expect(toast.warning).toHaveBeenCalled();
   });
