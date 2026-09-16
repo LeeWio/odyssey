@@ -1,3 +1,11 @@
+# [1.152.0](https://github.com/LeeWio/odyssey/compare/v1.151.0...v1.152.0) (2026-09-16)
+
+
+### Features
+
+* **moment:** refresh list caches after mutations ([67b0385](https://github.com/LeeWio/odyssey/commit/67b03852532e15cf747cc12d66bdd83a80dc987b))
+* **moment:** validate media uploads and unify publisher gallery ([afe1101](https://github.com/LeeWio/odyssey/commit/afe1101383011ea2cca71b04eb41086def23736d))
+
 # [1.151.0](https://github.com/LeeWio/odyssey/compare/v1.150.0...v1.151.0) (2026-09-16)
 
 
