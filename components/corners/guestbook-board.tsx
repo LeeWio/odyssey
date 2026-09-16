@@ -125,7 +125,7 @@ export default function GuestbookBoard() {
 
   const mappedEntries = React.useMemo(() => {
     const live = (rawEntries || []).map((comment) => ({
-      avatar: comment.avatar || `/IMG_2232.JPG
+      avatar: comment.avatar || "/IMG_2232.JPG",
       name: comment.nickname || comment.username || "Anonymous",
       role: `Explorer · ${formatRelativeTime(comment.createdAt)}`,
       content: comment.content,
