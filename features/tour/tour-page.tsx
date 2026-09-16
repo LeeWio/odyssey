@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Card, Chip, Typography, buttonVariants, cn } from "@heroui/react";
+import { Button, Card, Chip, Typography, buttonVariants, cn } from "@heroui/react";
 import { Stepper } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
@@ -68,7 +68,7 @@ export function TourPage() {
           transition={{ duration: 0.6, ease: easeOut }}
           className="border-default-200/50 mb-16 flex flex-col items-center border-b pb-8 text-center"
         >
-          <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
+          <Chip color="accent" size="sm" variant="soft">
             <Icon icon="gravity-ui:compass" className="text-accent size-3" />
             Interactive Onboarding
           </Chip>
@@ -236,29 +236,25 @@ export function TourPage() {
 
             {/* Stepper Programmatic control row */}
             <div className="border-default-100/60 mt-8 flex items-center justify-between border-t pt-5">
-              <button
-                disabled={activeStep === 0}
-                onClick={handleBack}
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "sm" }),
-                  "flex items-center justify-center gap-1.5 disabled:opacity-50"
-                )}
+              <Button
+                variant="outline"
+                size="sm"
+                isDisabled={activeStep === 0}
+                onPress={handleBack}
               >
-                <Icon icon="gravity-ui:chevron-left" className="size-4" />
+                <Icon icon="gravity-ui:chevron-left" aria-hidden="true" />
                 Back
-              </button>
+              </Button>
 
-              <button
-                disabled={activeStep === totalSteps - 1}
-                onClick={handleNext}
-                className={cn(
-                  buttonVariants({ variant: "primary", size: "sm" }),
-                  "flex items-center justify-center gap-1.5 disabled:opacity-50"
-                )}
+              <Button
+                variant="primary"
+                size="sm"
+                isDisabled={activeStep === totalSteps - 1}
+                onPress={handleNext}
               >
                 Continue
-                <Icon icon="gravity-ui:chevron-right" className="size-4" />
-              </button>
+                <Icon icon="gravity-ui:chevron-right" aria-hidden="true" />
+              </Button>
             </div>
           </Card>
         </div>

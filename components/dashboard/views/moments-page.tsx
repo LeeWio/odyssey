@@ -139,20 +139,20 @@ function TimelineItem({ moment }: TimelineItemProps) {
         {moment.images && moment.images.length > 0 && (
           <div className="flex flex-row gap-2 overflow-x-auto pb-1">
             {moment.images.map((img, idx) => (
-              <button
-                key={img.id}
-                type="button"
-                className="border-separator/30 group relative size-16 min-w-16 overflow-hidden rounded-xl border transition-transform active:scale-95 motion-reduce:transition-none"
-                onClick={() => {
-                  setActiveImageIndex(idx);
-                }}
-              >
-                <RemoteMedia
-                  src={img.thumbnailUrl || img.fileUrl}
-                  alt={img.altText}
-                  className="size-full object-cover transition-transform group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-                />
-              </button>
+              <div key={img.id} className="size-16 min-w-16 overflow-hidden rounded-xl">
+                <Button
+                  isIconOnly
+                  variant="tertiary"
+                  aria-label={img.altText || `Open image ${idx + 1}`}
+                  onPress={() => setActiveImageIndex(idx)}
+                >
+                  <RemoteMedia
+                    src={img.thumbnailUrl || img.fileUrl}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                </Button>
+              </div>
             ))}
           </div>
         )}
@@ -461,27 +461,29 @@ export function MomentsPage() {
               ))}
             </div>
           ) : publicMoments.length === 0 ? (
-            <EmptyState className="bg-surface border-border rounded-2xl border p-10">
-              <EmptyState.Header>
-                <EmptyState.Title>No moments on the timeline yet</EmptyState.Title>
-                <EmptyState.Description>
-                  Publish a short update from the Management Console to see it previewed here with
-                  the same rich text readers will see.
-                </EmptyState.Description>
-              </EmptyState.Header>
-              <EmptyState.Content>
-                <Button
-                  size="sm"
-                  onPress={() => {
-                    setActiveTab("admin");
-                    handleCreateOpen();
-                  }}
-                >
-                  <Icon icon="gravity-ui:circle-plus" className="size-4" aria-hidden="true" />
-                  Create moment
-                </Button>
-              </EmptyState.Content>
-            </EmptyState>
+            <div className="bg-surface border-border rounded-2xl border">
+              <EmptyState>
+                <EmptyState.Header>
+                  <EmptyState.Title>No moments on the timeline yet</EmptyState.Title>
+                  <EmptyState.Description>
+                    Publish a short update from the Management Console to see it previewed here with
+                    the same rich text readers will see.
+                  </EmptyState.Description>
+                </EmptyState.Header>
+                <EmptyState.Content>
+                  <Button
+                    size="sm"
+                    onPress={() => {
+                      setActiveTab("admin");
+                      handleCreateOpen();
+                    }}
+                  >
+                    <Icon icon="gravity-ui:circle-plus" aria-hidden="true" />
+                    Create moment
+                  </Button>
+                </EmptyState.Content>
+              </EmptyState>
+            </div>
           ) : (
             <div className="relative flex flex-col gap-8 pl-4">
               {/* Timeline Vertical Axis Line */}

@@ -12,13 +12,13 @@ import {
   Skeleton,
   Tabs,
   TextArea,
+  ToggleButton,
   Tooltip,
   toast,
 } from "@heroui/react";
 import { EmptyState, ItemCard, Sheet, Timeline } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "motion/react";
-import Image from "next/image";
 import { useMemo, useState } from "react";
 
 // --- Types & Interfaces ---
@@ -374,7 +374,7 @@ export function ProfileCard({
                     size="md"
                     variant="outline"
                     aria-label="Edit Profile Settings"
-                    onClick={handleOpenEditSheet}
+                    onPress={handleOpenEditSheet}
                   >
                     <Icon icon="lucide:settings" className="text-default-500 size-4" />
                   </Button>
@@ -385,7 +385,7 @@ export function ProfileCard({
               <Button
                 variant="outline"
                 size="md"
-                onClick={handleOpenEditSheet}
+                onPress={handleOpenEditSheet}
                 className="gap-1.5 font-medium"
               >
                 <Icon icon="lucide:pencil" className="size-4" />
@@ -401,7 +401,7 @@ export function ProfileCard({
                     size="md"
                     variant="outline"
                     aria-label="Share Profile"
-                    onClick={handleShareProfile}
+                    onPress={handleShareProfile}
                   >
                     <Icon icon="lucide:share-2" className="text-default-500 size-4" />
                   </Button>
@@ -412,7 +412,7 @@ export function ProfileCard({
               <Button
                 variant={isFollowing ? "outline" : "primary"}
                 size="md"
-                onClick={handleFollowToggle}
+                onPress={handleFollowToggle}
                 className="gap-1.5 font-semibold transition-all duration-300"
               >
                 <Icon
@@ -700,7 +700,7 @@ export function ProfileCard({
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => setActiveTab("badges")}
+                          onPress={() => setActiveTab("badges")}
                           className="text-xs"
                         >
                           View All Badges
@@ -789,40 +789,38 @@ export function ProfileCard({
                       </InputGroup>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
-                      {/* Rarity filter tabs represented as custom buttons for premium look */}
-                      <div className="bg-default-100 border-default-100 flex items-center rounded-lg border p-0.5">
+                      <div className="flex flex-wrap gap-1">
                         {["all", "legendary", "epic", "rare", "common"].map((rarity) => (
-                          <button
+                          <ToggleButton
                             key={rarity}
-                            onClick={() => setRarityFilter(rarity)}
-                            className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-all ${
-                              rarityFilter === rarity
-                                ? "bg-background text-foreground animate-fade-in shadow-sm"
-                                : "text-default-400 hover:text-default-500"
-                            }`}
+                            size="sm"
+                            isSelected={rarityFilter === rarity}
+                            onChange={(selected) => {
+                              if (selected) setRarityFilter(rarity);
+                            }}
                           >
                             {rarity}
-                          </button>
+                          </ToggleButton>
                         ))}
                       </div>
 
-                      {/* Sorting Selection buttons */}
-                      <div className="border-default-150 bg-default-50 flex items-center gap-1 rounded-lg border p-0.5">
+                      <div className="flex flex-wrap gap-1">
                         {[
                           { id: "date-desc", label: "Newest", icon: "lucide:calendar-days" },
                           { id: "rarity-desc", label: "Rarity", icon: "lucide:sparkles" },
                           { id: "name-asc", label: "A-Z", icon: "lucide:sort-asc" },
                         ].map((btn) => (
-                          <Button
+                          <ToggleButton
                             key={btn.id}
                             size="sm"
-                            variant={sortBy === btn.id ? "primary" : "outline"}
-                            onClick={() => setSortBy(btn.id)}
-                            className="h-7 px-2.5 text-xs font-semibold"
+                            isSelected={sortBy === btn.id}
+                            onChange={(selected) => {
+                              if (selected) setSortBy(btn.id);
+                            }}
                           >
-                            <Icon icon={btn.icon} className="size-3.5" />
+                            <Icon icon={btn.icon} aria-hidden="true" />
                             {btn.label}
-                          </Button>
+                          </ToggleButton>
                         ))}
                       </div>
                     </div>
@@ -842,7 +840,7 @@ export function ProfileCard({
                         size="sm"
                         variant="outline"
                         className="mt-4"
-                        onClick={() => {
+                        onPress={() => {
                           setBadgeSearch("");
                           setRarityFilter("all");
                         }}
@@ -880,9 +878,7 @@ export function ProfileCard({
                                             ? "Unpin badge from featured"
                                             : "Pin badge to featured"
                                         }
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
+                                        onPress={() => {
                                           onBadgePinToggle(badge.id);
                                         }}
                                         className="absolute top-3 right-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
@@ -1184,38 +1180,24 @@ export function ProfileCard({
                     {PRESET_AVATARS.map((item) => {
                       const isActive = editAvatarUrl === item.url;
                       return (
-                        <Tooltip key={item.id} delay={100}>
+                        <Tooltip key={item.id}>
                           <Tooltip.Trigger>
-                            <button
-                              type="button"
+                            <ToggleButton
+                              isIconOnly
+                              size="lg"
                               aria-label={`Select avatar ${item.name}`}
-                              onClick={() => setEditAvatarUrl(item.url)}
-                              className={`relative size-12 overflow-hidden rounded-full transition-all duration-300 hover:scale-105 active:scale-95 ${
-                                isActive
-                                  ? "ring-primary dark:ring-offset-background scale-105 ring-4 ring-offset-2"
-                                  : "opacity-60 hover:opacity-100"
-                              }`}
+                              isSelected={isActive}
+                              onChange={(selected) => {
+                                if (selected) setEditAvatarUrl(item.url);
+                              }}
                             >
-                              <Image
-                                src={item.url}
-                                alt={item.name}
-                                width={48}
-                                height={48}
-                                className="object-cover"
-                              />
-                              {isActive && (
-                                <div className="bg-primary/20 absolute inset-0 flex items-center justify-center">
-                                  <Icon
-                                    icon="lucide:check"
-                                    className="size-5 font-extrabold text-white drop-shadow-md"
-                                  />
-                                </div>
-                              )}
-                            </button>
+                              <Avatar>
+                                <Avatar.Image src={item.url} alt={item.name} />
+                                <Avatar.Fallback>{item.name.slice(0, 1)}</Avatar.Fallback>
+                              </Avatar>
+                            </ToggleButton>
                           </Tooltip.Trigger>
-                          <Tooltip.Content className="bg-background border-default-100 rounded-md border p-2 text-xs">
-                            {item.name}
-                          </Tooltip.Content>
+                          <Tooltip.Content>{item.name}</Tooltip.Content>
                         </Tooltip>
                       );
                     })}
@@ -1230,29 +1212,20 @@ export function ProfileCard({
                     <Icon icon="lucide:palette" className="size-3.5" />
                     Cover Brand Gradient
                   </h4>
-                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {PRESET_GRADIENTS.map((item) => {
                       const isActive = editGradient === item.value;
                       return (
-                        <button
+                        <ToggleButton
                           key={item.id}
-                          type="button"
                           aria-label={`Select banner ${item.name}`}
-                          onClick={() => setEditGradient(item.value)}
-                          className={`relative flex h-10 w-full items-center justify-between rounded-xl px-3 text-left transition-all duration-300 hover:brightness-105 ${item.value} ${
-                            isActive
-                              ? "ring-foreground dark:ring-offset-background font-bold text-white shadow-lg ring-2 ring-offset-2"
-                              : "text-white/90 opacity-75 hover:opacity-100"
-                          }`}
+                          isSelected={isActive}
+                          onChange={(selected) => {
+                            if (selected) setEditGradient(item.value);
+                          }}
                         >
-                          <span className="text-xs font-semibold drop-shadow-md">{item.name}</span>
-                          {isActive && (
-                            <Icon
-                              icon="lucide:circle-check"
-                              className="size-4 shrink-0 text-white drop-shadow-md"
-                            />
-                          )}
-                        </button>
+                          <span className={`rounded-md ${item.value}`}>{item.name}</span>
+                        </ToggleButton>
                       );
                     })}
                   </div>
@@ -1306,7 +1279,7 @@ export function ProfileCard({
                 </Sheet.Close>
                 <Button
                   variant="primary"
-                  onClick={handleSaveProfileEdits}
+                  onPress={handleSaveProfileEdits}
                   className="px-5 font-semibold"
                 >
                   Save Changes
@@ -1422,7 +1395,7 @@ export interface ProfileCardEmptyProps {
 export function ProfileCardEmpty({ isOwnProfile = true, onReset }: ProfileCardEmptyProps) {
   return (
     <Card className="border-default-100 bg-surface/50 flex min-h-[400px] items-center justify-center border p-8 shadow-xl backdrop-blur-md">
-      <EmptyState className="w-full max-w-md py-6">
+      <EmptyState>
         <EmptyState.Header>
           <EmptyState.Media
             variant="icon"
@@ -1430,18 +1403,16 @@ export function ProfileCardEmpty({ isOwnProfile = true, onReset }: ProfileCardEm
           >
             <Icon icon="lucide:user-x" className="size-8" />
           </EmptyState.Media>
-          <EmptyState.Title className="text-center text-xl font-bold">
-            User Profile Empty
-          </EmptyState.Title>
-          <EmptyState.Description className="text-default-400 mt-2 text-center text-sm leading-relaxed">
+          <EmptyState.Title>User Profile Empty</EmptyState.Title>
+          <EmptyState.Description>
             {isOwnProfile
               ? "We couldn't locate any profile configurations or badges under your account yet. Complete your onboarding to unlock accomplishments!"
               : "This user profile has not been fully configured or does not contain any badges to display at this moment."}
           </EmptyState.Description>
         </EmptyState.Header>
-        <EmptyState.Content className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+        <EmptyState.Content className="flex-row gap-2">
           {isOwnProfile && onReset && (
-            <Button variant="primary" size="md" onClick={onReset} className="gap-1.5 font-semibold">
+            <Button variant="primary" size="md" onPress={onReset}>
               <Icon icon="lucide:user-plus" className="size-4" />
               Configure Profile
             </Button>
@@ -1449,7 +1420,7 @@ export function ProfileCardEmpty({ isOwnProfile = true, onReset }: ProfileCardEm
           <Button
             variant="outline"
             size="md"
-            onClick={() => toast.info("Guide link shared!")}
+            onPress={() => toast.info("Guide link shared!")}
             className="gap-1.5"
           >
             <Icon icon="lucide:help-circle" className="size-4" />

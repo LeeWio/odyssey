@@ -1,5 +1,8 @@
 "use client";
 
+import { Button, Chip, Typography } from "@heroui/react";
+import { EmptyState } from "@heroui-pro/react";
+import { Xmark } from "@gravity-ui/icons";
 import { motion } from "motion/react";
 import { Star, Article } from "./types";
 
@@ -20,7 +23,7 @@ export function DetailPanel({ activeStar, onClose }: DetailPanelProps) {
     >
       {/* Header Info */}
       <div className="pointer-events-auto rounded-3xl border border-white/10 bg-black/40 p-6 backdrop-blur-xl">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-3xl font-black tracking-tighter text-white italic">
               {activeStar.name}
@@ -29,23 +32,19 @@ export function DetailPanel({ activeStar, onClose }: DetailPanelProps) {
               {activeStar.articles.length} Articles
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-white/20 transition-colors hover:text-white"
+          <Button
+            isIconOnly
+            size="sm"
+            variant="ghost"
+            aria-label="Close star details"
+            onPress={onClose}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M12 4L4 12M4 4L12 12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
+            <Xmark aria-hidden="true" />
+          </Button>
         </div>
-        <p className="mt-4 text-xs leading-relaxed font-light text-white/50">
-          {activeStar.description}
-        </p>
+        <div className="mt-4">
+          <Typography>{activeStar.description}</Typography>
+        </div>
       </div>
 
       {/* Article List */}
@@ -55,9 +54,11 @@ export function DetailPanel({ activeStar, onClose }: DetailPanelProps) {
             <ArticleListItem key={article.id} article={article} />
           ))}
           {activeStar.articles.length === 0 && (
-            <div className="py-10 text-center text-[10px] font-bold tracking-widest text-white/20 uppercase">
-              No articles found
-            </div>
+            <EmptyState size="sm">
+              <EmptyState.Header>
+                <EmptyState.Title>No articles found</EmptyState.Title>
+              </EmptyState.Header>
+            </EmptyState>
           )}
         </div>
       </div>
@@ -72,7 +73,6 @@ export function DetailPanel({ activeStar, onClose }: DetailPanelProps) {
                 <div className="ml-1 h-0 w-0 border-t-[6px] border-b-[6px] border-l-[8px] border-t-transparent border-b-transparent border-l-black" />
               </div>
             </div>
-            {/* Mock Image Placeholder */}
             <div className="flex h-full w-full items-center justify-center text-4xl font-black text-cyan-500/20 italic">
               ODYSSEY
             </div>
@@ -92,18 +92,15 @@ export function DetailPanel({ activeStar, onClose }: DetailPanelProps) {
 
           <div className="mt-4 flex flex-wrap gap-2">
             {activeStar.articles[0].topics.map((t) => (
-              <span
-                key={t}
-                className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[8px] font-bold tracking-widest text-white/40 uppercase"
-              >
+              <Chip key={t} size="sm" variant="soft">
                 {t}
-              </span>
+              </Chip>
             ))}
           </div>
 
-          <button className="mt-6 w-full rounded-xl bg-white py-3 text-[10px] font-black tracking-widest text-black uppercase transition-colors hover:bg-cyan-500">
-            Read Article →
-          </button>
+          <div className="mt-6">
+            <Button fullWidth>Read Article →</Button>
+          </div>
         </div>
       )}
     </motion.div>
@@ -118,18 +115,9 @@ function ArticleListItem({ article }: { article: Article }) {
           <div className="line-clamp-1 text-xs font-medium text-white/80 transition-colors group-hover:text-white">
             {article.title}
           </div>
-          <div className="text-[9px] font-medium text-white/30">{article.publishedAt}</div>
-        </div>
-        <div className="text-white/20 transition-colors group-hover:text-cyan-500">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M6 12L10 8L6 4"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <div className="text-[9px] font-medium tracking-wider text-white/30 uppercase">
+            {article.publishedAt} · {article.readingTime} min
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@heroui/react";
 import { motion } from "motion/react";
 import { UniverseStats, ViewLevel } from "./types";
 
@@ -43,18 +44,16 @@ export function HUD({ stats, viewLevel, onViewChange, onExplore }: HUDProps) {
           <StatItem label="Years" value={stats.years} />
         </motion.div>
 
-        <motion.button
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          onClick={onExplore}
-          className="group pointer-events-auto flex items-center gap-3 text-[10px] font-bold tracking-[0.3em] text-white uppercase"
+          className="pointer-events-auto"
         >
-          Explore the universe
-          <div className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 transition-colors group-hover:border-cyan-500">
-            <div className="h-1 w-1 rounded-full bg-white group-hover:bg-cyan-500" />
-          </div>
-        </motion.button>
+          <Button variant="secondary" onPress={onExplore}>
+            Explore the universe
+          </Button>
+        </motion.div>
       </div>
 
       {/* Bottom Left: Interaction Hints */}
@@ -139,17 +138,13 @@ function ViewSelectorItem({
   onClick: () => void;
 }) {
   return (
-    <button onClick={onClick} className="group flex items-center gap-3">
-      <span
-        className={`text-[10px] tracking-widest transition-colors ${active ? "text-white" : "text-white/30 group-hover:text-white/60"}`}
-      >
-        {label}
-      </span>
-      <div
-        className={`h-3 w-3 rounded-full border transition-all ${active ? "border-cyan-500 bg-cyan-500/20" : "border-white/20 group-hover:border-white/40"}`}
-      >
-        {active && <div className="mx-auto mt-[3px] h-1 w-1 rounded-full bg-cyan-500" />}
-      </div>
-    </button>
+    <Button
+      variant={active ? "secondary" : "ghost"}
+      onPress={onClick}
+      aria-pressed={active}
+      aria-label={`View ${label}`}
+    >
+      {label}
+    </Button>
   );
 }

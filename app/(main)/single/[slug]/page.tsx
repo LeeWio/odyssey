@@ -744,20 +744,27 @@ export default function SinglePage({ params }: SinglePageProps) {
           <ActionBar.Suffix>
             <Tooltip delay={100}>
               <Tooltip.Trigger className="flex flex-row">
-                <ProgressCircle
-                  className="cursor-pointer"
-                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                  aria-label="Reading progress"
-                  color="default"
-                  maxValue={100}
+                <Button
+                  isIconOnly
+                  variant="ghost"
                   size="sm"
-                  value={readingProgress}
+                  aria-label={`Reading progress ${readingProgress}%. Scroll to top`}
+                  onPress={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
-                  <ProgressCircle.Track>
-                    <ProgressCircle.TrackCircle />
-                    <ProgressCircle.FillCircle />
-                  </ProgressCircle.Track>
-                </ProgressCircle>
+                  <ProgressCircle
+                    className="pointer-events-none"
+                    color="default"
+                    maxValue={100}
+                    size="sm"
+                    value={readingProgress}
+                    aria-hidden="true"
+                  >
+                    <ProgressCircle.Track>
+                      <ProgressCircle.TrackCircle />
+                      <ProgressCircle.FillCircle />
+                    </ProgressCircle.Track>
+                  </ProgressCircle>
+                </Button>
               </Tooltip.Trigger>
               <Tooltip.Content>{readingProgress}% , back to top</Tooltip.Content>
             </Tooltip>

@@ -31,12 +31,9 @@ export const MediaPlayButton: React.FC<MediaPlayButtonProps> = ({
 
   const isPlaying = isCurrent && playing;
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
+  const handlePress = () => {
     if (isCurrent) {
       toggle();
-
       return;
     }
 
@@ -72,7 +69,7 @@ export const MediaPlayButton: React.FC<MediaPlayButtonProps> = ({
             }
       }
     >
-      <Button isIconOnly aria-label={isPlaying ? "Pause" : "Play"} onClick={handleClick} {...props}>
+      <Button isIconOnly aria-label={isPlaying ? "Pause" : "Play"} onPress={handlePress} {...props}>
         <AnimatePresence mode="wait" initial={false}>
           {isPlaying ? (
             <motion.div

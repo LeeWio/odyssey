@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion } from "motion/react";
-import { Card, Chip, Typography, Button, cn } from "@heroui/react";
+import { Card, Chip, Typography, Button } from "@heroui/react";
 import { HoverCard, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 
@@ -190,7 +190,7 @@ export function ApiConsolePage() {
           transition={{ duration: 0.6, ease: easeOut }}
           className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
         >
-          <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
+          <Chip color="accent" size="sm" variant="soft">
             <Icon icon="gravity-ui:terminal" className="text-accent size-3" />
             API Playground Console
           </Chip>
@@ -223,30 +223,22 @@ export function ApiConsolePage() {
                 {API_ENDPOINTS.map((endpoint) => {
                   const isActive = endpoint.id === activeEndpoint.id;
                   return (
-                    <button
+                    <Button
                       key={endpoint.id}
-                      onClick={() => setActiveEndpointId(endpoint.id)}
-                      className={cn(
-                        "flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all duration-200",
-                        isActive
-                          ? "bg-accent/10 border-accent/40 text-accent font-bold"
-                          : "border-default-100/50 hover:bg-default-100/30 text-foreground bg-transparent"
-                      )}
+                      fullWidth
+                      variant={isActive ? "secondary" : "ghost"}
+                      onPress={() => setActiveEndpointId(endpoint.id)}
+                      aria-pressed={isActive}
                     >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span
-                          className={cn(
-                            "shrink-0 rounded px-2 py-0.5 font-mono text-[10px] font-bold",
-                            endpoint.method === "GET"
-                              ? "bg-success/10 text-success"
-                              : "bg-warning/10 text-warning"
-                          )}
-                        >
-                          {endpoint.method}
-                        </span>
-                        <span className="truncate font-mono text-xs">{endpoint.path}</span>
-                      </div>
-                    </button>
+                      <Chip
+                        size="sm"
+                        variant="soft"
+                        color={endpoint.method === "GET" ? "success" : "warning"}
+                      >
+                        {endpoint.method}
+                      </Chip>
+                      <Typography type="body-xs">{endpoint.path}</Typography>
+                    </Button>
                   );
                 })}
               </div>
@@ -351,7 +343,7 @@ export function ApiConsolePage() {
 
               {/* Dynamic Status chip */}
               {responseState.status && (
-                <Chip size="sm" variant="soft" color="success" className="font-bold">
+                <Chip size="sm" variant="soft" color="success">
                   {responseState.status} {responseState.statusText}
                 </Chip>
               )}
@@ -377,18 +369,13 @@ export function ApiConsolePage() {
                 </div>
               ) : (
                 /* EmptyState displays clean fallback when no requests have been sent yet */
-                <EmptyState className="p-8">
+                <EmptyState>
                   <EmptyState.Header>
-                    <EmptyState.Media
-                      variant="icon"
-                      className="bg-default-100/50 border-default-200 border"
-                    >
-                      <Icon icon="gravity-ui:database" className="text-muted/60" />
+                    <EmptyState.Media variant="icon">
+                      <Icon icon="gravity-ui:database" aria-hidden="true" />
                     </EmptyState.Media>
-                    <EmptyState.Title className="mt-4 text-sm font-bold">
-                      Console Offline
-                    </EmptyState.Title>
-                    <EmptyState.Description className="text-muted/60 mt-1 max-w-xs text-xs">
+                    <EmptyState.Title>Console Offline</EmptyState.Title>
+                    <EmptyState.Description>
                       No request blocks executed. Fine-tune your endpoint parameters on the left and
                       click &quot;Send Live Request&quot; to trigger actual CDN streams.
                     </EmptyState.Description>
