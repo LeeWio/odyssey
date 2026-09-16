@@ -1,3 +1,11 @@
+## [1.155.1](https://github.com/LeeWio/odyssey/compare/v1.155.0...v1.155.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* **a11y:** harden motion and control labeling ([99edbae](https://github.com/LeeWio/odyssey/commit/99edbaef0d464aa3cc713a751717dd3c12dfee13))
+* **ui:** use local fallback avatars ([9846a60](https://github.com/LeeWio/odyssey/commit/9846a601dc2d4b3f81021e6941c0c6bf7de91ac4))
+
 # [1.155.0](https://github.com/LeeWio/odyssey/compare/v1.154.0...v1.155.0) (2026-09-16)
 
 
