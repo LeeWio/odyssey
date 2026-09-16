@@ -106,7 +106,7 @@ export function MomentsBoard({
   const entries = React.useMemo<MomentBoardEntry[]>(
     () =>
       moments.map((moment) => ({
-        avatar: moment.authorAvatar || `https://i.pravatar.cc/150?u=moment-${moment.id}`,
+        avatar: moment.authorAvatar || `/IMG_2232.JPG
         name: moment.authorName || "wei.li",
         timeLabel: formatRelativeTime(moment.createdAt),
         content: moment.content,
