@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react";
 import { UserAvatar } from "@/components/user-avatar";
 
 interface PublisherHeaderProps {
+  isEditing?: boolean;
   visibility: string;
   onVisibilityChange: (value: string) => void;
   user: {
@@ -15,7 +16,12 @@ interface PublisherHeaderProps {
   } | null;
 }
 
-export const PublisherHeader = ({ visibility, onVisibilityChange, user }: PublisherHeaderProps) => {
+export const PublisherHeader = ({
+  isEditing = false,
+  visibility,
+  onVisibilityChange,
+  user,
+}: PublisherHeaderProps) => {
   const displayName = user?.nickname || user?.username || "wei.li";
 
   const getVisibilityIcon = (value: string) => {
@@ -30,7 +36,9 @@ export const PublisherHeader = ({ visibility, onVisibilityChange, user }: Publis
         <UserAvatar name={displayName} avatar={user?.avatar} email={user?.email} />
         <div className="flex flex-col">
           <span className="text-foreground text-sm font-medium">{displayName}</span>
-          <span className="text-muted text-xs">Share a moment...</span>
+          <span className="text-muted text-xs">
+            {isEditing ? "Edit this moment..." : "Share a moment..."}
+          </span>
         </div>
       </div>
 

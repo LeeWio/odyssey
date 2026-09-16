@@ -14,6 +14,7 @@ import {
   SearchField,
   Tag,
   TagGroup,
+  Tooltip,
   useFilter,
 } from "@heroui/react";
 import type { Key } from "@heroui/react";
@@ -92,11 +93,11 @@ export const PublisherToolbar = ({
 
   const tools: ComposerToolProps[] = [
     { id: "image", icon: "gravity-ui:picture", label: "Image" },
-    { id: "video", icon: "gravity-ui:video", label: "Video" },
-    { id: "poll", icon: "gravity-ui:seal-check", label: "Poll" },
-    { id: "emoji", icon: "gravity-ui:face-smile", label: "Emoji" },
+    { id: "video", icon: "gravity-ui:video", label: "Video", disabled: true },
+    { id: "poll", icon: "gravity-ui:seal-check", label: "Poll", disabled: true },
+    { id: "emoji", icon: "gravity-ui:face-smile", label: "Emoji", disabled: true },
     { id: "topic", icon: "gravity-ui:hashtag", label: "Topic" },
-    { id: "location", icon: "gravity-ui:map-pin", label: "Location" },
+    { id: "location", icon: "gravity-ui:map-pin", label: "Location", disabled: true },
   ];
 
   const handleRemoveTags = (keys: Set<Key>) => {
@@ -250,11 +251,11 @@ export const PublisherToolbar = ({
             );
           }
 
-          return (
+          const toolButton = (
             <ComposerTool
-              key={tool.id}
               {...tool}
               onClick={() => {
+                if (tool.disabled) return;
                 if (tool.id === "image") {
                   openFilePicker();
                 } else if (onAction) {
@@ -262,6 +263,17 @@ export const PublisherToolbar = ({
                 }
               }}
             />
+          );
+
+          if (!tool.disabled) {
+            return <span key={tool.id}>{toolButton}</span>;
+          }
+
+          return (
+            <Tooltip key={tool.id}>
+              <span className="inline-flex">{toolButton}</span>
+              <Tooltip.Content>Coming soon</Tooltip.Content>
+            </Tooltip>
           );
         })}
         {onAttachStock && (

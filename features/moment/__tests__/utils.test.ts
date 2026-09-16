@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { getTransformStyles } from "@/features/moment/utils/transform-styles";
-import { parseMomentContent } from "@/features/moment/utils/content-parser";
+import {
+  extractMomentPlainText,
+  parseMomentContent,
+} from "@/features/moment/utils/content-parser";
 
 describe("Moment Card Utility Helpers", () => {
   describe("getTransformStyles", () => {
@@ -116,6 +119,30 @@ describe("Moment Card Utility Helpers", () => {
           },
         ],
       });
+    });
+  });
+
+  describe("extractMomentPlainText", () => {
+    it("flattens TipTap JSON into readable preview text", () => {
+      const content = JSON.stringify({
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "First line" }],
+          },
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Second line" }],
+          },
+        ],
+      });
+
+      expect(extractMomentPlainText(content)).toBe("First line\nSecond line");
+    });
+
+    it("returns legacy plain text unchanged", () => {
+      expect(extractMomentPlainText("Field note")).toBe("Field note");
     });
   });
 });

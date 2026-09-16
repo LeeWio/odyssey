@@ -55,21 +55,27 @@ export const parseMomentContent = (content: string): JSONContent => {
   };
 };
 
+const collectPlainText = (nodes: JSONContent[] | undefined): string => {
+  if (!nodes?.length) return "";
+  return nodes
+    .map((node) => {
+      if (node.type === "text") return node.text ?? "";
+      const nested = collectPlainText(node.content);
+      if (node.type === "paragraph" || node.type === "heading") {
+        return nested ? `${nested}\n` : "";
+      }
+      return nested;
+    })
+    .join("")
+    .replace(/\n+$/, "");
+};
+
 export const isDocumentEmpty = (doc: JSONContent | null | undefined): boolean => {
   if (!doc) return true;
   if (!doc.content || doc.content.length === 0) return true;
-
-  const hasText = (nodes: JSONContent[]): boolean => {
-    for (const node of nodes) {
-      if (node.type === "text" && node.text && node.text.trim().length > 0) {
-        return true;
-      }
-      if (node.content && node.content.length > 0) {
-        if (hasText(node.content)) return true;
-      }
-    }
-    return false;
-  };
-
-  return !hasText(doc.content);
+  return collectPlainText(doc.content).trim().length === 0;
 };
+
+/** Flatten TipTap JSON or legacy plain text into a single preview string. */
+export const extractMomentPlainText = (content: string): string =>
+  collectPlainText(parseMomentContent(content).content).trim();

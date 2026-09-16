@@ -82,6 +82,7 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
             <DropZone className="w-full border-none bg-transparent p-0 shadow-none">
               {/* 1. Header */}
               <PublisherHeader
+                isEditing={!!initialMoment}
                 visibility={visibility}
                 onVisibilityChange={(value) => {
                   if (value === "public" || value === "followers" || value === "private")
@@ -97,6 +98,7 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
                   className="flex w-full flex-col gap-2 border-none bg-transparent p-0 outline-none"
                 >
                   <PublisherEditor
+                    isEditing={!!initialMoment}
                     value={editorValue}
                     onValueChange={(val, details) => {
                       setEditorValue(val);

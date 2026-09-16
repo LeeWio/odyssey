@@ -13,39 +13,29 @@ import {
   useDeleteMomentMutation,
   useGetAllMomentsQuery,
   useGetPublicMomentsQuery,
-  useLikeMomentMutation,
 } from "@/lib/features/moment";
-import { MomentPublisher } from "@/features/moment";
+import { extractMomentPlainText, MomentPublisher, useMomentLike } from "@/features/moment";
 import { usePortalContainer } from "../use-portal-container";
 
 // --- Single Timeline Node Component ---
 interface TimelineItemProps {
   moment: MomentResponse;
-  onLike: (id: number) => Promise<unknown>;
-  isLiking: boolean;
 }
 
-function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
-  const [localLiked, setLocalLiked] = useState(false);
+function TimelineItem({ moment }: TimelineItemProps) {
+  const { isLiked, likesCount, isLiking, toggleLike } = useMomentLike(
+    moment.id,
+    moment.likesCount
+  );
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const [carouselApi, setCarouselApi] = useState<EmblaCarouselType>();
+  const previewText = useMemo(() => extractMomentPlainText(moment.content), [moment.content]);
 
   useEffect(() => {
     if (activeImageIndex !== null && carouselApi) {
       carouselApi.scrollTo(activeImageIndex, true);
     }
   }, [activeImageIndex, carouselApi]);
-
-  const handleLikeClick = async () => {
-    const wasLiked = localLiked;
-    setLocalLiked(!wasLiked);
-
-    try {
-      await onLike(moment.id);
-    } catch {
-      setLocalLiked(wasLiked);
-    }
-  };
 
   const carouselImages = useMemo(() => {
     return (
@@ -83,9 +73,11 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
           </span>
         </div>
 
-        <div className="text-foreground/95 text-sm leading-relaxed whitespace-pre-wrap md:text-base">
-          {moment.content}
-        </div>
+        {previewText ? (
+          <div className="text-foreground/95 text-sm leading-relaxed whitespace-pre-wrap md:text-base">
+            {previewText}
+          </div>
+        ) : null}
 
         {moment.images && moment.images.length > 0 && (
           <div className="flex flex-row gap-2 overflow-x-auto pb-1">
@@ -115,24 +107,22 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
             size="sm"
             variant="ghost"
             className={`gap-1.5 rounded-full px-4 text-xs ${
-              localLiked ? "text-danger bg-danger-soft/10" : "text-muted"
+              isLiked ? "text-danger bg-danger-soft/10" : "text-muted"
             }`}
-            onPress={handleLikeClick}
+            onPress={() => void toggleLike()}
             isDisabled={isLiking}
           >
             <motion.div
-              animate={{ scale: localLiked ? [1, 1.35, 1] : 1 }}
+              animate={{ scale: isLiked ? [1, 1.35, 1] : 1 }}
               transition={{ duration: 0.3 }}
             >
               <Icon
-                icon={localLiked ? "gravity-ui:heart-fill" : "gravity-ui:heart"}
-                className={`size-4 ${localLiked ? "text-danger" : ""}`}
+                icon={isLiked ? "gravity-ui:heart-fill" : "gravity-ui:heart"}
+                className={`size-4 ${isLiked ? "text-danger" : ""}`}
                 aria-hidden="true"
               />
             </motion.div>
-            <span className="font-semibold tabular-nums">
-              {moment.likesCount + (localLiked ? 1 : 0)}
-            </span>
+            <span className="font-semibold tabular-nums">{likesCount}</span>
           </Button>
         </div>
       </div>
@@ -198,14 +188,6 @@ export function MomentsPage() {
     size: 50,
   });
   const publicMoments = publicData?.list || [];
-  const [likeMoment, { isLoading: isLiking }] = useLikeMomentMutation();
-
-  const handleLikeMoment = useCallback(
-    async (id: number) => {
-      await likeMoment(id).unwrap();
-    },
-    [likeMoment]
-  );
 
   // --- Management Console State ---
   const { data: adminData, isLoading: isAdminLoading } = useGetAllMomentsQuery({
@@ -216,7 +198,7 @@ export function MomentsPage() {
   const [deleteMoment, { isLoading: isDeleting }] = useDeleteMomentMutation();
 
   // --- Dialog & Modal States ---
-  const [isFormOpen, setIsFormFormOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [momentToEdit, setMomentToEdit] = useState<MomentResponse>();
   const [momentToDelete, setMomentToDelete] = useState<MomentResponse | null>(null);
 
@@ -227,12 +209,12 @@ export function MomentsPage() {
 
   const handleCreateOpen = () => {
     setMomentToEdit(undefined);
-    setIsFormFormOpen(true);
+    setIsFormOpen(true);
   };
 
   const handleEditClick = useCallback((moment: MomentResponse) => {
     setMomentToEdit(moment);
-    setIsFormFormOpen(true);
+    setIsFormOpen(true);
   }, []);
 
   const handleDeleteConfirm = async () => {
@@ -273,7 +255,11 @@ export function MomentsPage() {
         id: "content",
         isRowHeader: true,
         minWidth: 320,
-        cell: (item) => <span className="line-clamp-2 text-sm">{item.content}</span>,
+        cell: (item) => (
+          <span className="line-clamp-2 text-sm">
+            {extractMomentPlainText(item.content) || "—"}
+          </span>
+        ),
       },
       {
         accessorKey: "visibility",
@@ -424,12 +410,7 @@ export function MomentsPage() {
               {/* Timeline Vertical Axis Line */}
               <div className="bg-border/60 absolute top-0 bottom-0 left-[21px] w-0.5" />
               {publicMoments.map((moment) => (
-                <TimelineItem
-                  key={moment.id}
-                  moment={moment}
-                  onLike={handleLikeMoment}
-                  isLiking={isLiking}
-                />
+                <TimelineItem key={moment.id} moment={moment} />
               ))}
             </div>
           )}
@@ -457,7 +438,7 @@ export function MomentsPage() {
           key={momentToEdit?.id ?? "new"}
           initialMoment={momentToEdit}
           isOpen={isFormOpen}
-          onOpenChange={setIsFormFormOpen}
+          onOpenChange={setIsFormOpen}
         />
       )}
 
