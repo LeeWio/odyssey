@@ -14,7 +14,7 @@ API 架构负责隔离前端应用与后端服务、外部服务、本地数据�
 
 ## 统一业务 API 层
 
-位置：`lib/features/api/base-api.ts`
+位置：`lib/api/base-api.ts`
 
 `baseApi` 是所有业务 endpoint 的根。它负责：
 

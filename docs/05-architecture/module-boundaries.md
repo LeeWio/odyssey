@@ -127,7 +127,7 @@
 
 ### Music
 
-位置：`components/music`、`components/blog/music-mini-widget`、`app/vae-song-stream`
+位置：`components/music`、`features/blog/auxiliary/music-mini-widget`、`app/vae-song-stream`
 
 职责：
 
@@ -142,7 +142,7 @@
 
 ### Market / Stock
 
-位置：`components/blog/stock-ledger`、`components/cockpit/widgets/stocks`、`lib/features/market`
+位置：`features/blog/auxiliary/stock-ledger`、`components/cockpit/widgets/stocks`、`lib/features/market`
 
 职责：
 

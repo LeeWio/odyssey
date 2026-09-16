@@ -54,7 +54,7 @@ Shared Infrastructure
 
 ## Feature UI Layer
 
-位置：`components/<feature>/`
+位置：`features/<feature>/`（页面级组合可留在 `components/`）
 
 职责：
 
@@ -67,6 +67,7 @@ Shared Infrastructure
 - 优先使用 HeroUI 组件组合。
 - 组件 API 应稳定、显式、可预测。
 - 只在必要时持有局部状态，避免复制服务端状态。
+- Feature UI 不承载 RTK Query endpoint 定义；数据能力从 `@/lib/features/<feature>` 导入。
 
 ## Feature Data Layer
 
@@ -84,10 +85,11 @@ Shared Infrastructure
 - 一个 feature 不应直接修改另一个 feature 的内部状态。
 - 跨 feature 的行为应通过公共 action、公共 selector 或上层编排完成。
 - API 响应必须在边界处归一化，组件不应承担后端兼容逻辑。
+- `lib/features/*` 禁止依赖 `features/*` 或 `components/*`。
 
 ## API Boundary
 
-位置：`lib/features/api/base-api.ts`、`next.config.ts` rewrites、`app/*/route.ts`
+位置：`lib/api/base-api.ts`、`next.config.ts` rewrites、`app/*/route.ts`
 
 职责：
 
@@ -121,25 +123,24 @@ Shared Infrastructure
 
 允许：
 
-- `app` -> `components`
-- `app` -> `lib`
+- `app` -> `features` / `components` / `lib`
+- `features` -> `lib/features` / `components/ui`
 - `components` -> `lib/features`
 - `components` -> `components/ui`
-- `lib/features/<feature>` -> `lib/features/api`
+- `lib/features/<feature>` -> `lib/api`
 - `lib/features/<feature>` -> `types`
 
 禁止：
 
-- `lib/features` 依赖 `app`
-- `lib/features` 依赖页面组件
+- `lib/features` 依赖 `app`、`features` 或页面组件
 - 通用组件依赖具体业务页面
 - 组件绕过 API 层直接访问业务后端
 - 多个 feature 通过互相导入内部文件形成循环依赖
 
 ## 新功能落位规则
 
-- 新页面：先放入 `app/`，复杂 UI 立即下沉到 `components/<feature>/`。
-- 新后端接口：放入 `lib/features/<feature>/<feature>-api.ts`。
+- 新页面：先放入 `app/`，复杂 UI 立即下沉到 `features/<feature>/`。
+- 新后端接口：放入 `lib/features/<feature>/<feature>-api.ts`，类型与 schema 同目录（如 `*-contracts.ts`）。
 - 新全局 UI 状态：放入 `ui-slice`，但必须证明是跨页面或跨模块状态。
 - 新领域状态：放入对应 feature slice。
 - 新通用视觉组件：放入 `components/ui/`，并遵循 HeroUI 组合优先原则。

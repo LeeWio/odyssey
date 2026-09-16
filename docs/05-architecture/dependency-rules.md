@@ -70,7 +70,7 @@ import { SomeInternalHelper } from "@/lib/features/post/internal/helper";
 组件分为三类：
 
 - 通用 UI：`components/ui`
-- 业务组件：`components/<feature>`
+- 业务组件：`features/<feature>`（遗留页面壳可暂留在 `components/`）
 - 页面组合组件：靠近具体产品表面的模块组件
 
 规则：
@@ -80,6 +80,7 @@ import { SomeInternalHelper } from "@/lib/features/post/internal/helper";
 - 页面组合组件可以编排多个业务组件。
 - 不要让低层组件导入高层组件。
 - 不要用全局组件目录隐藏单页一次性实现。
+- Post 数据能力从 `@/lib/features/post` 导入，不要经 `@/features/blog` 再导出。
 
 ## 状态依赖规则
 
