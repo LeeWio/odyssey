@@ -20,7 +20,7 @@ import {
   useGetPublicPostBySlugQuery,
   useLikePostMutation,
   useUnlikePostMutation,
-} from "../api/blog-api";
+} from "@/lib/features/post";
 import { MotionRichTextEditor } from "@/components/ui";
 
 interface ReaderViewProps {

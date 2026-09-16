@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import Grainient from "@/components/background/grainient";
-import { useLikePostMutation, useUnlikePostMutation } from "@/features/blog/api/blog-api";
+import { useLikePostMutation, useUnlikePostMutation } from "@/lib/features/post";
 import { setLoginOpen } from "@/lib/features/ui";
 import { usePublishCommentMutation } from "@/lib/features/comment";
 import { selectIsAuthenticated } from "@/lib/features/auth";

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { MotionCard, MotionChip, MotionTypography } from "@/components/ui";
-import type { PostDigestResponse, PostResponse } from "@/features/blog/api/blog-api";
-import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/features/blog/api/blog-api";
+import type { PostDigestResponse, PostResponse } from "@/lib/features/post";
+import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
 import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import { EmptyState } from "@heroui-pro/react";
 import {
