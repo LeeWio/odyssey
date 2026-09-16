@@ -32,6 +32,7 @@ import {
   useGetColumnsQuery,
   useUpdateEditorialColumnMutation,
 } from "@/lib/features/column";
+import { toUrlSlug, validateUrlSlug } from "@/lib/utils/slug";
 import { usePortalContainer } from "../use-portal-container";
 
 const emptyForm: ColumnRequest = {
@@ -80,6 +81,7 @@ export function ColumnsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState<ColumnResponse | null>(null);
   const [form, setForm] = useState<ColumnRequest>(emptyForm);
+  const [slugTouched, setSlugTouched] = useState(false);
 
   const filteredColumns = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -133,12 +135,14 @@ export function ColumnsPage() {
   const openCreate = () => {
     setSelectedColumn(null);
     setForm(emptyForm);
+    setSlugTouched(false);
     setIsFormOpen(true);
   };
 
   const openEdit = useCallback((column: ColumnResponse) => {
     setSelectedColumn(column);
     setForm(columnRequest(column));
+    setSlugTouched(true);
     setIsFormOpen(true);
   }, []);
 
@@ -151,23 +155,16 @@ export function ColumnsPage() {
     window.open(`/columns/${column.slug}`, "_blank", "noopener,noreferrer");
   }, []);
 
-  const fillSlug = () => {
-    if (form.slug || !form.name) return;
-    setForm((current) => ({
-      ...current,
-      slug: current.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, ""),
-    }));
-  };
-
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const slug = form.slug.trim() || toUrlSlug(form.name);
+    if (!slugTouched && slug !== form.slug) {
+      setForm((current) => ({ ...current, slug }));
+    }
     const payload = {
       ...form,
       name: form.name.trim(),
-      slug: form.slug.trim(),
+      slug,
       description: form.description?.trim(),
       coverImage: form.coverImage?.trim(),
     };
@@ -397,29 +394,26 @@ export function ColumnsPage() {
                     <Input
                       placeholder="e.g. Building durable software"
                       value={form.name}
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, name: event.target.value }))
-                      }
-                      onBlur={fillSlug}
+                      onChange={(event) => {
+                        const name = event.target.value;
+                        setForm((current) => ({
+                          ...current,
+                          name,
+                          slug: slugTouched ? current.slug : toUrlSlug(name),
+                        }));
+                      }}
                     />
                     <FieldError />
                   </TextField>
-                  <TextField
-                    isRequired
-                    name="slug"
-                    validate={(value) =>
-                      /^[a-z0-9-]+$/.test(value)
-                        ? null
-                        : "Use lowercase letters, numbers, and hyphens only"
-                    }
-                  >
+                  <TextField isRequired name="slug" validate={(value) => validateUrlSlug(value)}>
                     <Label>Slug</Label>
                     <Input
                       placeholder="durable-software"
                       value={form.slug}
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, slug: event.target.value }))
-                      }
+                      onChange={(event) => {
+                        setSlugTouched(true);
+                        setForm((current) => ({ ...current, slug: event.target.value }));
+                      }}
                     />
                     <FieldError />
                   </TextField>

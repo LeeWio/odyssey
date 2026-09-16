@@ -26,6 +26,7 @@ import {
   useGetAllTagsQuery,
   useUpdateTagMutation,
 } from "@/lib/features/tag";
+import { toUrlSlug, validateUrlSlug } from "@/lib/utils/slug";
 import { usePortalContainer } from "../use-portal-container";
 
 export function TagsPage() {
@@ -53,6 +54,7 @@ export function TagsPage() {
   // Form Fields
   const [formName, setFormName] = useState("");
   const [formSlug, setFormSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
 
   const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
@@ -98,6 +100,7 @@ export function TagsPage() {
     setSelectedTag(null);
     setFormName("");
     setFormSlug("");
+    setSlugTouched(false);
     setIsFormModalOpen(true);
   };
 
@@ -106,6 +109,7 @@ export function TagsPage() {
     setSelectedTag(tag);
     setFormName(tag.name);
     setFormSlug(tag.slug);
+    setSlugTouched(true);
     setIsFormModalOpen(true);
   }, []);
 
@@ -115,23 +119,24 @@ export function TagsPage() {
     setIsDeleteAlertOpen(true);
   }, []);
 
-  // Auto-generate slug from name if empty
-  const handleNameBlur = () => {
-    if (!formSlug && formName) {
-      const generated = formName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-      setFormSlug(generated);
+  const handleNameChange = (value: string) => {
+    setFormName(value);
+    // Keep slug in sync while typing so Create does not validate an empty field.
+    if (!slugTouched) {
+      setFormSlug(toUrlSlug(value));
     }
   };
 
   // Form Submit (Create or Update)
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const slug = formSlug.trim() || toUrlSlug(formName);
+    if (!slugTouched && slug !== formSlug) {
+      setFormSlug(slug);
+    }
     const body: TagRequest = {
       name: formName.trim(),
-      slug: formSlug.trim(),
+      slug,
     };
 
     try {
@@ -319,8 +324,7 @@ export function TagsPage() {
                       variant="secondary"
                       placeholder="e.g. Next.js"
                       value={formName}
-                      onChange={(e) => setFormName(e.target.value)}
-                      onBlur={handleNameBlur}
+                      onChange={(e) => handleNameChange(e.target.value)}
                     />
                     <FieldError />
                   </TextField>
@@ -329,19 +333,17 @@ export function TagsPage() {
                     isRequired
                     name="slug"
                     type="text"
-                    validate={(val) => {
-                      if (!/^[a-z0-9-]+$/.test(val)) {
-                        return "Slug must only contain lowercase letters, numbers, and hyphens";
-                      }
-                      return null;
-                    }}
+                    validate={(val) => validateUrlSlug(val)}
                   >
                     <Label className="text-sm font-medium">Slug</Label>
                     <Input
                       variant="secondary"
                       placeholder="e.g. next-js"
                       value={formSlug}
-                      onChange={(e) => setFormSlug(e.target.value)}
+                      onChange={(e) => {
+                        setSlugTouched(true);
+                        setFormSlug(e.target.value);
+                      }}
                     />
                     <FieldError />
                   </TextField>

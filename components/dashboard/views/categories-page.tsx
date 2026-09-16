@@ -27,6 +27,7 @@ import {
   useGetCategoriesQuery,
   useUpdateCategoryMutation,
 } from "@/lib/features/category";
+import { toUrlSlug, validateUrlSlug } from "@/lib/utils/slug";
 import { usePortalContainer } from "../use-portal-container";
 
 export function CategoriesPage() {
@@ -54,6 +55,7 @@ export function CategoriesPage() {
   // Form Fields
   const [formName, setFormName] = useState("");
   const [formSlug, setFormSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
   const [formDescription, setFormDescription] = useState("");
 
   const handleSearchChange = useCallback((value: string) => {
@@ -103,6 +105,7 @@ export function CategoriesPage() {
     setSelectedCategory(null);
     setFormName("");
     setFormSlug("");
+    setSlugTouched(false);
     setFormDescription("");
     setIsFormModalOpen(true);
   };
@@ -112,6 +115,7 @@ export function CategoriesPage() {
     setSelectedCategory(category);
     setFormName(category.name);
     setFormSlug(category.slug);
+    setSlugTouched(true);
     setFormDescription(category.description || "");
     setIsFormModalOpen(true);
   }, []);
@@ -122,23 +126,23 @@ export function CategoriesPage() {
     setIsDeleteAlertOpen(true);
   }, []);
 
-  // Auto-generate slug from name if empty
-  const handleNameBlur = () => {
-    if (!formSlug && formName) {
-      const generated = formName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-      setFormSlug(generated);
+  const handleNameChange = (value: string) => {
+    setFormName(value);
+    if (!slugTouched) {
+      setFormSlug(toUrlSlug(value));
     }
   };
 
   // Form Submit (Create or Update)
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const slug = formSlug.trim() || toUrlSlug(formName);
+    if (!slugTouched && slug !== formSlug) {
+      setFormSlug(slug);
+    }
     const body: CategoryRequest = {
       name: formName.trim(),
-      slug: formSlug.trim(),
+      slug,
       description: formDescription.trim(),
     };
 
@@ -335,8 +339,7 @@ export function CategoriesPage() {
                       variant="secondary"
                       placeholder="e.g. Technology"
                       value={formName}
-                      onChange={(e) => setFormName(e.target.value)}
-                      onBlur={handleNameBlur}
+                      onChange={(e) => handleNameChange(e.target.value)}
                     />
                     <FieldError />
                   </TextField>
@@ -345,19 +348,17 @@ export function CategoriesPage() {
                     isRequired
                     name="slug"
                     type="text"
-                    validate={(val) => {
-                      if (!/^[a-z0-9-]+$/.test(val)) {
-                        return "Slug must only contain lowercase letters, numbers, and hyphens";
-                      }
-                      return null;
-                    }}
+                    validate={(val) => validateUrlSlug(val)}
                   >
                     <Label className="text-sm font-medium">Slug</Label>
                     <Input
                       variant="secondary"
                       placeholder="e.g. technology"
                       value={formSlug}
-                      onChange={(e) => setFormSlug(e.target.value)}
+                      onChange={(e) => {
+                        setSlugTouched(true);
+                        setFormSlug(e.target.value);
+                      }}
                     />
                     <FieldError />
                   </TextField>
