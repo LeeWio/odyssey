@@ -15,8 +15,8 @@ export interface ComposerToolProps {
 
 export function ComposerTool({ icon, label, onClick, disabled = false }: ComposerToolProps) {
   return (
-    <Button size="sm" isDisabled={disabled} variant="tertiary" onClick={onClick}>
-      <Icon icon={icon} className="size-5" aria-label={label} />
+    <Button size="sm" isDisabled={disabled} variant="tertiary" onPress={onClick}>
+      <Icon icon={icon} className="size-5" aria-hidden="true" />
       {label}
     </Button>
   );

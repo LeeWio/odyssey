@@ -84,6 +84,7 @@ import { SomeInternalHelper } from "@/lib/features/post/internal/helper";
 - 用户上传 / API 媒体优先使用 `RemoteMedia`（原生 `<img>`）；仅对 `next.config` `remotePatterns` 中的稳定 CDN 使用 `next/image`。
 - Feature UI（`features/*`）禁止依赖 `app/*`；Post 数据从 `@/lib/features/post` 导入，不要深路径到 `post-api`。
 - 首页等重型动效组件（如 `GradientText`、`MomentsMasonry`、`GuestbookBoard`、`ArchiveTimeline`、GSAP 阅读进度）优先 `next/dynamic`，并尊重 `prefers-reduced-motion`。
+- 交互控件优先原生语义：图标按钮要有名字，装饰性图标 `aria-hidden`，可点击媒体用 `button`，滚动/进场动效需在 `prefers-reduced-motion` 下停用或降级。
 - Bun 以 `overrides` 钉依赖；不要再维护一份重复的 `resolutions`（`bun install --yarn` 审计仍可读 overrides）。
 
 ## 状态依赖规则

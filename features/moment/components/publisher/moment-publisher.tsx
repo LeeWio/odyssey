@@ -135,7 +135,12 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
                 />
               </Modal.Body>
 
-              <DropZone.Input accept={MOMENT_IMAGE_ACCEPT} multiple onSelect={handleSelectFiles} />
+              <DropZone.Input
+                accept={MOMENT_IMAGE_ACCEPT}
+                multiple
+                aria-label="Upload moment images"
+                onSelect={handleSelectFiles}
+              />
             </DropZone>
           </Modal.Dialog>
         </Modal.Container>

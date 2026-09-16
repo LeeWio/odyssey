@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { useReducedMotion } from "motion/react";
 import { RemoteMedia } from "@/components/ui/remote-media";
 
 interface BounceCardsProps {
@@ -45,8 +46,9 @@ export default function BounceCards({
   enableHover = false,
   onCardClick,
 }: BounceCardsProps) {
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const containerRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const cardRefs = useRef<(HTMLButtonElement | HTMLDivElement | null)[]>([]);
 
   /**
    * Entrance
@@ -56,9 +58,15 @@ export default function BounceCards({
    * rather than a UI component demonstrating itself.
    */
   useEffect(() => {
-    const cards = cardRefs.current.filter((card): card is HTMLDivElement => card !== null);
+    const cards = cardRefs.current.filter(
+      (card): card is HTMLButtonElement | HTMLDivElement => card !== null
+    );
 
     if (!cards.length) return;
+    if (shouldReduceMotion) {
+      gsap.set(cards, { opacity: 1, scale: 1, y: 0, clearProps: "opacity" });
+      return;
+    }
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -82,7 +90,7 @@ export default function BounceCards({
     }, containerRef);
 
     return () => ctx.revert();
-  }, [images.length, animationDelay, animationStagger, easeType]);
+  }, [images.length, animationDelay, animationStagger, easeType, shouldReduceMotion]);
 
   /**
    * Remove rotation while preserving
@@ -127,7 +135,7 @@ export default function BounceCards({
    * - no dramatic "gallery explosion"
    */
   const handleMouseEnter = (hoveredIndex: number) => {
-    if (!enableHover) return;
+    if (!enableHover || shouldReduceMotion) return;
 
     cardRefs.current.forEach((card, index) => {
       if (!card) return;
@@ -178,7 +186,7 @@ export default function BounceCards({
   };
 
   const handleMouseLeave = () => {
-    if (!enableHover) return;
+    if (!enableHover || shouldReduceMotion) return;
 
     cardRefs.current.forEach((card, index) => {
       if (!card) return;
@@ -207,6 +215,41 @@ export default function BounceCards({
     >
       {images.map((src, index) => {
         const transform = transformStyles[index] ?? "none";
+        const sharedClassName = `bg-surface-secondary ring-separator-tertiary absolute aspect-square overflow-hidden rounded-[15px] ring-1 will-change-transform ring-inset ${onCardClick ? "cursor-pointer" : ""}`;
+        const sharedStyle = {
+          width: cardSize,
+          transform,
+          zIndex: index,
+          boxShadow: "0 4px 14px color-mix(in oklch, var(--foreground) 5%, transparent)",
+        } as const;
+        const media = (
+          <RemoteMedia
+            src={src}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 block size-full overflow-hidden object-cover break-all brightness-[0.97] contrast-[0.96] select-none"
+          />
+        );
+
+        if (onCardClick) {
+          return (
+            <button
+              key={`${src}-${index}`}
+              type="button"
+              aria-label={`Open image ${index + 1} of ${images.length}`}
+              ref={(element) => {
+                cardRefs.current[index] = element;
+              }}
+              className={sharedClassName}
+              style={sharedStyle}
+              onMouseEnter={() => handleMouseEnter(index)}
+              onMouseLeave={handleMouseLeave}
+              onClick={() => onCardClick(index)}
+            >
+              {media}
+            </button>
+          );
+        }
 
         return (
           <div
@@ -214,31 +257,12 @@ export default function BounceCards({
             ref={(element) => {
               cardRefs.current[index] = element;
             }}
-            className={`bg-surface-secondary ring-separator-tertiary absolute aspect-square overflow-hidden rounded-[15px] ring-1 will-change-transform ring-inset ${onCardClick ? "cursor-pointer" : ""}`}
-            style={{
-              width: cardSize,
-              transform,
-              zIndex: index,
-
-              /*
-               * Just enough separation
-               * for overlapping photographs.
-               *
-               * The Moment Card itself owns
-               * the primary elevation.
-               */
-              boxShadow: "0 4px 14px color-mix(in oklch, var(--foreground) 5%, transparent)",
-            }}
+            className={sharedClassName}
+            style={sharedStyle}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
-            onClick={() => onCardClick?.(index)}
           >
-            <RemoteMedia
-              src={src}
-              alt=""
-              draggable={false}
-              className="absolute inset-0 block size-full overflow-hidden object-cover break-all brightness-[0.97] contrast-[0.96] select-none"
-            />
+            {media}
           </div>
         );
       })}

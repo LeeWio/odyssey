@@ -99,6 +99,7 @@ const ScrollingBanner = React.forwardRef<HTMLDivElement, ScrollingBannerProps>(
             "animate-scrolling-banner-vertical": isVertical,
             "direction-[reverse]": isReverse,
             "hover:paused": shouldPauseOnHover,
+            "motion-reduce:animate-none": true,
           })}
         >
           {React.Children.map(children, (child) => React.cloneElement(child as React.ReactElement))}

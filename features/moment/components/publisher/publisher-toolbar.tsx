@@ -19,7 +19,7 @@ import {
 } from "@heroui/react";
 import type { Key } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ComposerTool, type ComposerToolProps } from "./composer-tool";
 import { StockSelector } from "./stock-selector";
 import { useGetPublicTagsQuery } from "@/lib/features/tag";
@@ -72,6 +72,7 @@ export const PublisherToolbar = ({
   onAttachStock,
   attachedStockSymbol,
 }: PublisherToolbarProps) => {
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const { openFilePicker } = useDropZonePickerContext();
   const { contains } = useFilter({ sensitivity: "base" });
 
@@ -319,14 +320,18 @@ export const PublisherToolbar = ({
           <AnimatePresence>
             {charCount > 0 && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.6, x: -5 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.6, x: -5 }}
                 animate={{ opacity: 1, scale: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.6, x: -5 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 26,
-                }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.6, x: -5 }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : {
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 26,
+                      }
+                }
                 className="flex flex-row items-center gap-2"
               >
                 <ProgressCircle
@@ -369,9 +374,13 @@ export const PublisherToolbar = ({
                 aria-label={`${isEditing ? "Save" : "Share"} moment. ${submitDisabledReason}`}
               >
                 {isSubmitting ? (
-                  <Spinner size="sm" color="current" className="mr-1.5" />
+                  <Spinner size="sm" color="current" className="mr-1.5" aria-hidden="true" />
                 ) : (
-                  <Icon icon="gravity-ui:location-arrow-fill" className="size-4" />
+                  <Icon
+                    icon="gravity-ui:location-arrow-fill"
+                    className="size-4"
+                    aria-hidden="true"
+                  />
                 )}
                 {isEditing
                   ? isSubmitting
@@ -385,11 +394,17 @@ export const PublisherToolbar = ({
             <Tooltip.Content>{submitDisabledReason}</Tooltip.Content>
           </Tooltip>
         ) : (
-          <Button variant="primary" onPress={onPublish} isDisabled={isSubmitDisabled} size="sm">
+          <Button
+            variant="primary"
+            onPress={onPublish}
+            isDisabled={isSubmitDisabled}
+            size="sm"
+            aria-label={isEditing ? "Save moment" : "Share moment"}
+          >
             {isSubmitting ? (
-              <Spinner size="sm" color="current" className="mr-1.5" />
+              <Spinner size="sm" color="current" className="mr-1.5" aria-hidden="true" />
             ) : (
-              <Icon icon="gravity-ui:location-arrow-fill" className="size-4" />
+              <Icon icon="gravity-ui:location-arrow-fill" className="size-4" aria-hidden="true" />
             )}
             {isEditing
               ? isSubmitting

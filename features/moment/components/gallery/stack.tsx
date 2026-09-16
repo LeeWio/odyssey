@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useTransform, type PanInfo } from "motion/react";
+import { motion, useMotionValue, useReducedMotion, useTransform, type PanInfo } from "motion/react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
@@ -72,6 +72,7 @@ export default function Stack({
   mobileClickOnly = false,
   mobileBreakpoint = 768,
 }: StackProps) {
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const [isMobile, setIsMobile] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -85,7 +86,7 @@ export default function Stack({
     return () => window.removeEventListener("resize", checkMobile);
   }, [mobileBreakpoint]);
 
-  const shouldDisableDrag = mobileClickOnly && isMobile;
+  const shouldDisableDrag = shouldReduceMotion || (mobileClickOnly && isMobile);
   const shouldEnableClick = sendToBackOnClick || shouldDisableDrag;
 
   const [stack, setStack] = useState<
@@ -183,21 +184,20 @@ export default function Stack({
   };
 
   useEffect(() => {
-    if (autoplay && stack.length > 1 && !isPaused) {
-      const interval = setInterval(() => {
-        const topCardId = stack[stack.length - 1].id;
-        sendToBack(topCardId);
-      }, autoplayDelay);
+    if (shouldReduceMotion || !autoplay || stack.length <= 1 || isPaused) return;
+    const interval = setInterval(() => {
+      const topCardId = stack[stack.length - 1].id;
+      sendToBack(topCardId);
+    }, autoplayDelay);
 
-      return () => clearInterval(interval);
-    }
-  }, [autoplay, autoplayDelay, stack, isPaused]);
+    return () => clearInterval(interval);
+  }, [autoplay, autoplayDelay, stack, isPaused, shouldReduceMotion]);
 
   return (
     <div
       className="relative h-full w-full"
       style={{
-        perspective: 600,
+        perspective: shouldReduceMotion ? undefined : 600,
       }}
       onMouseEnter={() => pauseOnHover && setIsPaused(true)}
       onMouseLeave={() => pauseOnHover && setIsPaused(false)}
@@ -212,18 +212,34 @@ export default function Stack({
           >
             <motion.div
               className="h-full w-full overflow-hidden rounded-2xl"
+              role={shouldEnableClick ? "button" : undefined}
+              tabIndex={shouldEnableClick ? 0 : undefined}
+              aria-label={shouldEnableClick ? "Cycle image stack" : undefined}
               onClick={() => shouldEnableClick && sendToBack(card.id)}
+              onKeyDown={(event) => {
+                if (!shouldEnableClick) return;
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  sendToBack(card.id);
+                }
+              }}
               animate={{
-                rotateZ: (stack.length - index - 1) * 4 + card.randomRotate,
-                scale: 1 + index * 0.06 - stack.length * 0.06,
+                rotateZ: shouldReduceMotion
+                  ? 0
+                  : (stack.length - index - 1) * 4 + card.randomRotate,
+                scale: shouldReduceMotion ? 1 : 1 + index * 0.06 - stack.length * 0.06,
                 transformOrigin: "90% 90%",
               }}
               initial={false}
-              transition={{
-                type: "spring",
-                stiffness: animationConfig.stiffness,
-                damping: animationConfig.damping,
-              }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : {
+                      type: "spring",
+                      stiffness: animationConfig.stiffness,
+                      damping: animationConfig.damping,
+                    }
+              }
             >
               {card.content}
             </motion.div>
