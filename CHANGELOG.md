@@ -1,3 +1,10 @@
+## [1.155.3](https://github.com/LeeWio/odyssey/compare/v1.155.2...v1.155.3) (2026-09-16)
+
+
+### Bug Fixes
+
+* **ui:** use Avatar initials instead of local JPG fallbacks ([66b57a4](https://github.com/LeeWio/odyssey/commit/66b57a4b3e55729ef9ac2dc8dce4fd4df3b4af00))
+
 ## [1.155.2](https://github.com/LeeWio/odyssey/compare/v1.155.1...v1.155.2) (2026-09-16)
 
 
