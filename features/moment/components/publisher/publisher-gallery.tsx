@@ -1,17 +1,24 @@
 "use client";
 
-import Image from "next/image";
 import { Button, ScrollShadow } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "motion/react";
 
-interface PublisherGalleryProps {
-  attachments: { preview: string }[];
-  onRemove: (index: number) => void;
+import { RemoteMedia } from "@/components/ui/remote-media";
+
+export interface PublisherGalleryItem {
+  id: string;
+  preview: string;
+  altText?: string;
 }
 
-export const PublisherGallery = ({ attachments, onRemove }: PublisherGalleryProps) => {
-  if (attachments.length === 0) return null;
+interface PublisherGalleryProps {
+  items: PublisherGalleryItem[];
+  onRemove: (id: string) => void;
+}
+
+export const PublisherGallery = ({ items, onRemove }: PublisherGalleryProps) => {
+  if (items.length === 0) return null;
 
   return (
     <ScrollShadow
@@ -21,9 +28,9 @@ export const PublisherGallery = ({ attachments, onRemove }: PublisherGalleryProp
       orientation="horizontal"
     >
       <AnimatePresence mode="popLayout">
-        {attachments.map((item, index) => (
+        {items.map((item, index) => (
           <motion.div
-            key={item.preview}
+            key={item.id}
             layout
             initial={{ opacity: 0, scale: 0.85, x: 15 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -35,12 +42,9 @@ export const PublisherGallery = ({ attachments, onRemove }: PublisherGalleryProp
             }}
             className="group border-separator/30 bg-surface-secondary relative size-20 min-w-20 overflow-hidden rounded-xl border"
           >
-            <Image
+            <RemoteMedia
               src={item.preview}
-              unoptimized
-              alt={`Attachment ${index + 1}`}
-              width={80}
-              height={80}
+              alt={item.altText || `Attachment ${index + 1}`}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
 
@@ -49,7 +53,7 @@ export const PublisherGallery = ({ attachments, onRemove }: PublisherGalleryProp
               size="sm"
               variant="ghost"
               className="hover:bg-danger absolute top-1 right-1 z-20 size-5 min-w-1.25 opacity-90 transition-all duration-200 hover:text-white active:scale-90 md:opacity-0 md:group-hover:opacity-100"
-              onPress={() => onRemove(index)}
+              onPress={() => onRemove(item.id)}
               aria-label="Remove image"
             >
               <Icon icon="gravity-ui:xmark" className="size-2.5" />

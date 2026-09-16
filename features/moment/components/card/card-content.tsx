@@ -3,6 +3,7 @@
 import { Tag, TagGroup } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import BounceCards from "@/components/ui/bounce-cards";
+import { RemoteMedia } from "@/components/ui/remote-media";
 import Stack from "../gallery/stack";
 import type { MomentTopicResponse } from "@/lib/features/moment";
 import type { JSONContent } from "@tiptap/core";
@@ -59,9 +60,7 @@ export const CardContent = ({
         className="border-default-200/60 bg-background h-full w-full cursor-pointer overflow-hidden rounded-2xl border shadow-sm"
         onClick={() => onCardClick?.(idx)}
       >
-        {/* API media can use arbitrary hosts; retain native loading without a remote allowlist. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <RemoteMedia
           src={url}
           alt={`moment-img-${idx}`}
           className="pointer-events-none h-full w-full object-cover"

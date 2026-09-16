@@ -10,6 +10,7 @@ import { useGetCurrentUserQuery } from "@/lib/features/user/user-api";
 
 import { useMomentPublish } from "../../hooks/use-moment-publish";
 import { MOMENT_CHARACTER_LIMIT } from "../../utils/character-count";
+import { MOMENT_IMAGE_ACCEPT } from "../../utils/media-limits";
 import { PublisherHeader } from "./publisher-header";
 import { PublisherEditor } from "./publisher-editor";
 import { PublisherGallery } from "./publisher-gallery";
@@ -43,15 +44,14 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
   }, [isAuthenticated, username, email, currentUser]);
 
   const {
-    existingImages,
-    removeExistingImage,
+    mediaItems,
+    removeMedia,
     editorValue,
     setEditorValue,
     charCount,
     setCharCount,
     isEmpty,
     setIsEmpty,
-    attachments,
     topics,
     addTopic,
     removeTopic,
@@ -60,17 +60,15 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
     isSubmitting,
     handleSelectFiles,
     handleDrop,
-    handleRemoveAttachment,
     publishMoment,
     attachedStockSymbol,
     setAttachedStockSymbol,
   } = useMomentPublish(() => {
-    // on success callback
     onOpenChange(false);
   }, initialMoment);
 
   const isSubmitDisabled =
-    (isEmpty && attachments.length === 0 && existingImages.length === 0 && !attachedStockSymbol) ||
+    (isEmpty && mediaItems.length === 0 && !attachedStockSymbol) ||
     charCount > MOMENT_CHARACTER_LIMIT ||
     isSubmitting;
 
@@ -80,7 +78,6 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
         <Modal.Container size="lg">
           <Modal.Dialog aria-label={initialMoment ? "Edit Moment" : "Moment Publisher"}>
             <DropZone className="w-full border-none bg-transparent p-0 shadow-none">
-              {/* 1. Header */}
               <PublisherHeader
                 isEditing={!!initialMoment}
                 visibility={visibility}
@@ -91,7 +88,6 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
                 user={userProfile}
               />
 
-              {/* 2. Body Area */}
               <Modal.Body className="flex flex-col gap-2">
                 <DropZone.Area
                   onDrop={handleDrop}
@@ -109,15 +105,15 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
                   />
 
                   <PublisherGallery
-                    attachments={existingImages.map((image) => ({
-                      preview: image.thumbnailUrl || image.fileUrl,
+                    items={mediaItems.map(({ id, preview, altText }) => ({
+                      id,
+                      preview,
+                      altText,
                     }))}
-                    onRemove={removeExistingImage}
+                    onRemove={removeMedia}
                   />
-                  <PublisherGallery attachments={attachments} onRemove={handleRemoveAttachment} />
                 </DropZone.Area>
 
-                {/* 3. Toolbar */}
                 <PublisherToolbar
                   charCount={charCount}
                   isSubmitting={isSubmitting}
@@ -132,7 +128,7 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
                 />
               </Modal.Body>
 
-              <DropZone.Input accept="image/*" multiple onSelect={handleSelectFiles} />
+              <DropZone.Input accept={MOMENT_IMAGE_ACCEPT} multiple onSelect={handleSelectFiles} />
             </DropZone>
           </Modal.Dialog>
         </Modal.Container>

@@ -1,32 +1,75 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import type { JSONContent } from "@tiptap/core";
+import { toast } from "@heroui/react";
 import {
   useCreateMomentMutation,
   useUpdateMomentMutation,
+  type MomentImageResponse,
   type MomentResponse,
 } from "@/lib/features/moment";
 import { useUploadFileMutation } from "@/lib/features/file/file-api";
 import { MOMENT_CHARACTER_LIMIT } from "../utils/character-count";
 import { MOMENT_TOPIC_LIMIT } from "../utils/topic-slug";
 import { parseMomentContent, isDocumentEmpty } from "../utils/content-parser";
+import {
+  MOMENT_MAX_IMAGES,
+  defaultMomentAltText,
+  validateMomentImageFile,
+} from "../utils/media-limits";
+
+export type PublisherMediaItem =
+  | {
+      id: string;
+      kind: "existing";
+      preview: string;
+      fileId: number;
+      altText: string;
+      existing: MomentImageResponse;
+    }
+  | {
+      id: string;
+      kind: "local";
+      preview: string;
+      file: File;
+      altText: string;
+    };
+
+function toExistingMedia(image: MomentImageResponse): PublisherMediaItem {
+  return {
+    id: `existing-${image.id}`,
+    kind: "existing",
+    preview: image.thumbnailUrl || image.fileUrl,
+    fileId: image.fileId,
+    altText: image.altText,
+    existing: image,
+  };
+}
+
+function createLocalId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return `local-${crypto.randomUUID()}`;
+  }
+  return `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
 
 export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentResponse) => {
   const initialContent = initialMoment ? parseMomentContent(initialMoment.content) : undefined;
   const countText = (node: JSONContent): number =>
     (node.text?.length ?? 0) +
     (node.content?.reduce((sum, child) => sum + countText(child), 0) ?? 0);
-  const [existingImages, setExistingImages] = useState(initialMoment?.images ?? []);
+  const [mediaItems, setMediaItems] = useState<PublisherMediaItem[]>(
+    () => initialMoment?.images.map(toExistingMedia) ?? []
+  );
+
   const [editorValue, setEditorValue] = useState<JSONContent | undefined>(initialContent);
   const [charCount, setCharCount] = useState(initialContent ? countText(initialContent) : 0);
   const [isEmpty, setIsEmpty] = useState(isDocumentEmpty(initialContent));
-  const [attachments, setAttachments] = useState<{ file: File; preview: string }[]>([]);
   const [topics, setTopics] = useState<string[]>(
     initialMoment?.topics.map((topic) => topic.slug) ?? []
   );
   const [visibility, setVisibility] = useState(initialMoment?.visibility ?? "public");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Custom stock trend widget attachment state
   const [attachedStockSymbol, setAttachedStockSymbol] = useState<string | null>(
     initialMoment?.stockSymbol ?? null
   );
@@ -35,49 +78,72 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
   const [updateMoment] = useUpdateMomentMutation();
   const [uploadFile] = useUploadFileMutation();
 
-  const handleSelectFiles = useCallback((fileList: FileList) => {
-    const newAttachments = Array.from(fileList).map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-    setAttachments((prev) => [...prev, ...newAttachments]);
-  }, []);
+  const appendFiles = (files: File[]) => {
+    const remaining = MOMENT_MAX_IMAGES - mediaItems.length;
+    if (remaining <= 0) {
+      toast.warning("A moment can contain up to 9 images.");
+      return;
+    }
 
-  const handleDrop = useCallback(
-    async (e: { items: Iterable<{ kind: string; getFile?: () => Promise<File | null> }> }) => {
-      const dropped: File[] = [];
-      for (const item of Array.from(e.items)) {
-        if (item.kind === "file" && item.getFile) {
-          const file = await item.getFile();
-          if (file) dropped.push(file);
-        }
+    const accepted: PublisherMediaItem[] = [];
+    for (const file of files) {
+      if (accepted.length >= remaining) {
+        toast.warning(`Only ${remaining} more image${remaining === 1 ? "" : "s"} can be added.`);
+        break;
       }
-      const newAttachments = dropped.map((file) => ({
-        file,
+      const error = validateMomentImageFile(file);
+      if (error) {
+        toast.danger(error);
+        continue;
+      }
+      accepted.push({
+        id: createLocalId(),
+        kind: "local",
         preview: URL.createObjectURL(file),
-      }));
-      setAttachments((prev) => [...prev, ...newAttachments]);
-    },
-    []
-  );
+        file,
+        altText: defaultMomentAltText(file.name),
+      });
+    }
 
-  const handleRemoveAttachment = useCallback((index: number) => {
-    setAttachments((prev) => {
-      const removed = prev[index];
-      if (removed) {
-        URL.revokeObjectURL(removed.preview);
+    if (accepted.length === 0) return;
+    setMediaItems([...mediaItems, ...accepted]);
+  };
+
+  const handleSelectFiles = (fileList: FileList) => {
+    appendFiles(Array.from(fileList));
+  };
+
+  const handleDrop = async (e: {
+    items: Iterable<{ kind: string; getFile?: () => Promise<File | null> }>;
+  }) => {
+    const dropped: File[] = [];
+    for (const item of Array.from(e.items)) {
+      if (item.kind === "file" && item.getFile) {
+        const file = await item.getFile();
+        if (file) dropped.push(file);
       }
-      return prev.filter((_, i) => i !== index);
+    }
+    appendFiles(dropped);
+  };
+
+  const removeMedia = (id: string) => {
+    setMediaItems((prev) => {
+      const target = prev.find((item) => item.id === id);
+      if (target?.kind === "local") {
+        URL.revokeObjectURL(target.preview);
+      }
+      return prev.filter((item) => item.id !== id);
     });
-  }, []);
+  };
 
   const handleReset = () => {
-    attachments.forEach((a) => URL.revokeObjectURL(a.preview));
+    mediaItems.forEach((item) => {
+      if (item.kind === "local") URL.revokeObjectURL(item.preview);
+    });
     setEditorValue(undefined);
     setCharCount(0);
     setIsEmpty(true);
-    setAttachments([]);
-    setExistingImages([]);
+    setMediaItems([]);
     setTopics([]);
     setAttachedStockSymbol(null);
     setVisibility("public");
@@ -86,34 +152,36 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
 
   const publishMoment = async () => {
     if (
-      (isEmpty &&
-        attachments.length === 0 &&
-        existingImages.length === 0 &&
-        !attachedStockSymbol) ||
+      (isEmpty && mediaItems.length === 0 && !attachedStockSymbol) ||
       charCount > MOMENT_CHARACTER_LIMIT ||
       isSubmitting
     )
       return;
     setIsSubmitting(true);
     try {
-      // 1. Upload images in parallel if any
+      const localItems = mediaItems.filter(
+        (item): item is Extract<PublisherMediaItem, { kind: "local" }> => item.kind === "local"
+      );
+      const existingItems = mediaItems.filter(
+        (item): item is Extract<PublisherMediaItem, { kind: "existing" }> =>
+          item.kind === "existing"
+      );
+
       const uploadedImages = await Promise.all(
-        attachments.map(async ({ file }) => {
+        localItems.map(async ({ file, altText }) => {
           const res = await uploadFile(file).unwrap();
           if (!res.id) throw new Error("Uploaded file is missing an ID.");
           return {
             fileId: res.id,
-            altText: file.name || "Moment Attachment",
+            altText: altText || defaultMomentAltText(file.name),
           };
         })
       );
 
-      // Construct standard rich-text content
       let finalContent = "";
       if (editorValue) {
         finalContent = JSON.stringify(editorValue);
       } else if (attachedStockSymbol) {
-        // Fallback for stock only publishing
         const fallbackEditor: JSONContent = {
           type: "doc",
           content: [
@@ -131,12 +199,11 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
         finalContent = JSON.stringify(fallbackEditor);
       }
 
-      // 2. Submit the moment
       const body = {
         content: finalContent,
         visibility,
         images: [
-          ...existingImages.map(({ fileId, altText }) => ({ fileId, altText })),
+          ...existingItems.map(({ fileId, altText }) => ({ fileId, altText })),
           ...uploadedImages,
         ],
         topicSlugs: topics,
@@ -148,7 +215,6 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
         await createMoment(body).unwrap();
       }
 
-      // 3. Reset states & call callback
       handleReset();
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -160,17 +226,14 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
   };
 
   return {
-    existingImages,
-    removeExistingImage: (index: number) =>
-      setExistingImages((images) => images.filter((_, i) => i !== index)),
+    mediaItems,
+    removeMedia,
     editorValue,
     setEditorValue,
     charCount,
     setCharCount,
     isEmpty,
     setIsEmpty,
-    attachments,
-    setAttachments,
     topics,
     addTopic: (topic: string) =>
       setTopics((current) =>
@@ -185,7 +248,6 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
     isSubmitting,
     handleSelectFiles,
     handleDrop,
-    handleRemoveAttachment,
     publishMoment,
     handleReset,
     attachedStockSymbol,

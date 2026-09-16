@@ -3,13 +3,24 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MomentResponse } from "@/lib/features/moment";
 import { useMomentPublish } from "../hooks/use-moment-publish";
+import { MOMENT_MAX_IMAGES } from "../utils/media-limits";
 
 const api = vi.hoisted(() => ({ create: vi.fn(), update: vi.fn(), upload: vi.fn() }));
+const toast = vi.hoisted(() => ({
+  warning: vi.fn(),
+  danger: vi.fn(),
+  success: vi.fn(),
+}));
+
 vi.mock("@/lib/features/moment", () => ({
   useCreateMomentMutation: () => [api.create],
   useUpdateMomentMutation: () => [api.update],
 }));
 vi.mock("@/lib/features/file/file-api", () => ({ useUploadFileMutation: () => [api.upload] }));
+vi.mock("@heroui/react", async () => {
+  const actual = await vi.importActual<typeof import("@heroui/react")>("@heroui/react");
+  return { ...actual, toast };
+});
 
 const original: MomentResponse = {
   id: 42,
@@ -49,7 +60,20 @@ function setup(moment?: MomentResponse) {
   return success;
 }
 
-beforeEach(() => vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true));
+function makeFile(name: string, type: string, size = 1024) {
+  const file = new File(["x".repeat(Math.min(size, 16))], name, { type });
+  Object.defineProperty(file, "size", { value: size });
+  return file;
+}
+
+beforeEach(() => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  vi.stubGlobal("URL", {
+    ...URL,
+    createObjectURL: vi.fn(() => "blob:preview"),
+    revokeObjectURL: vi.fn(),
+  });
+});
 
 afterEach(() => {
   act(() => root?.unmount());
@@ -79,10 +103,69 @@ describe("moment publishing", () => {
   it("removes only the selected existing image without uploading it again", async () => {
     api.update.mockReturnValue({ unwrap: () => Promise.resolve() });
     setup(original);
-    act(() => state.removeExistingImage(0));
+    act(() => state.removeMedia(state.mediaItems[0].id));
     await act(async () => state.publishMoment());
     expect(api.update.mock.calls[0][0].body.images).toEqual([]);
     expect(api.upload).not.toHaveBeenCalled();
+  });
+
+  it("uploads new local images alongside preserved existing ones", async () => {
+    api.update.mockReturnValue({ unwrap: () => Promise.resolve() });
+    api.upload.mockReturnValue({ unwrap: () => Promise.resolve({ id: 91 }) });
+    setup(original);
+    const file = makeFile("extra.webp", "image/webp");
+    act(() =>
+      state.handleSelectFiles({
+        length: 1,
+        0: file,
+        item: () => file,
+        [Symbol.iterator]: function* () {
+          yield file;
+        },
+      } as unknown as FileList)
+    );
+    await act(async () => state.publishMoment());
+    expect(api.upload).toHaveBeenCalledOnce();
+    expect(api.update.mock.calls[0][0].body.images).toEqual([
+      { fileId: 90, altText: "A photo" },
+      { fileId: 91, altText: "extra" },
+    ]);
+  });
+
+  it("rejects unsupported types, oversized files, and overflow beyond the image cap", () => {
+    setup(original);
+    const badType = makeFile("notes.txt", "text/plain");
+    const tooBig = makeFile("huge.webp", "image/webp", 11 * 1024 * 1024);
+    act(() =>
+      state.handleSelectFiles({
+        length: 2,
+        0: badType,
+        1: tooBig,
+        item: (index: number) => (index === 0 ? badType : tooBig),
+        [Symbol.iterator]: function* () {
+          yield badType;
+          yield tooBig;
+        },
+      } as unknown as FileList)
+    );
+    expect(state.mediaItems).toHaveLength(1);
+    expect(toast.danger).toHaveBeenCalled();
+
+    const fillers = Array.from({ length: MOMENT_MAX_IMAGES }, (_, index) =>
+      makeFile(`ok-${index}.png`, "image/png")
+    );
+    act(() =>
+      state.handleSelectFiles({
+        ...Object.fromEntries(fillers.map((file, index) => [String(index), file])),
+        length: fillers.length,
+        item: (index: number) => fillers[index] ?? null,
+        [Symbol.iterator]: function* () {
+          yield* fillers;
+        },
+      } as unknown as FileList)
+    );
+    expect(state.mediaItems.length).toBe(MOMENT_MAX_IMAGES);
+    expect(toast.warning).toHaveBeenCalled();
   });
 
   it("retains the draft and keeps the dialog open on failure", async () => {
@@ -91,7 +174,8 @@ describe("moment publishing", () => {
     const success = setup(original);
     await act(async () => state.publishMoment());
     expect(success).not.toHaveBeenCalled();
-    expect(state.existingImages).toEqual(original.images);
+    expect(state.mediaItems).toHaveLength(1);
+    expect(state.mediaItems[0]).toMatchObject({ kind: "existing", fileId: 90 });
     expect(state.isSubmitting).toBe(false);
     log.mockRestore();
   });

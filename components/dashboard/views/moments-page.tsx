@@ -15,6 +15,7 @@ import {
   useGetPublicMomentsQuery,
 } from "@/lib/features/moment";
 import { extractMomentPlainText, MomentPublisher, useMomentLike } from "@/features/moment";
+import { RemoteMedia } from "@/components/ui/remote-media";
 import { usePortalContainer } from "../use-portal-container";
 
 // --- Single Timeline Node Component ---
@@ -86,9 +87,7 @@ function TimelineItem({ moment }: TimelineItemProps) {
                   setActiveImageIndex(idx);
                 }}
               >
-                {/* API media can use arbitrary hosts; retain native loading without a remote allowlist. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <RemoteMedia
                   src={img.thumbnailUrl || img.fileUrl}
                   alt={img.altText}
                   className="size-full object-cover transition-transform group-hover:scale-105"
@@ -144,9 +143,7 @@ function TimelineItem({ moment }: TimelineItemProps) {
                       {carouselImages.map((image, i) => (
                         <Carousel.Item key={i}>
                           <div className="overflow-hidden rounded-3xl">
-                            {/* API media can use arbitrary hosts; retain native loading without a remote allowlist. */}
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
+                            <RemoteMedia
                               alt={image.alt}
                               className="aspect-[1/1] w-full object-cover select-none"
                               draggable={false}

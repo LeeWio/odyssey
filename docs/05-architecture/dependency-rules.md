@@ -81,6 +81,7 @@ import { SomeInternalHelper } from "@/lib/features/post/internal/helper";
 - 不要让低层组件导入高层组件。
 - 不要用全局组件目录隐藏单页一次性实现。
 - Post 数据能力从 `@/lib/features/post` 导入，不要经 `@/features/blog` 再导出。
+- 用户上传 / API 媒体优先使用 `RemoteMedia`（原生 `<img>`）；仅对 `next.config` `remotePatterns` 中的稳定 CDN 使用 `next/image`。
 
 ## 状态依赖规则
 
