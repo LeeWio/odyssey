@@ -1,3 +1,15 @@
+# [1.153.0](https://github.com/LeeWio/odyssey/compare/v1.152.0...v1.153.0) (2026-09-16)
+
+
+### Bug Fixes
+
+* **dashboard:** generate slugs while typing names ([86866a4](https://github.com/LeeWio/odyssey/commit/86866a4c67521818c93aba095018cb17f99c889e))
+
+
+### Features
+
+* polish media flows and accessibility surfaces ([6285aa9](https://github.com/LeeWio/odyssey/commit/6285aa9e366df7ad29b524f11779a33ffa6fa3e1))
+
 # [1.152.0](https://github.com/LeeWio/odyssey/compare/v1.151.0...v1.152.0) (2026-09-16)
 
 
