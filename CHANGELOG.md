@@ -1,3 +1,10 @@
+# [1.150.0](https://github.com/LeeWio/odyssey/compare/v1.149.1...v1.150.0) (2026-09-16)
+
+
+### Features
+
+* **moment:** support editing existing moments in publisher ([207fed2](https://github.com/LeeWio/odyssey/commit/207fed28cc676844c0b15cdfd349835b99874aed))
+
 ## [1.149.1](https://github.com/LeeWio/odyssey/compare/v1.149.0...v1.149.1) (2026-09-14)
 
 
