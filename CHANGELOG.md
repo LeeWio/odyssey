@@ -1,3 +1,10 @@
+## [1.155.2](https://github.com/LeeWio/odyssey/compare/v1.155.1...v1.155.2) (2026-09-16)
+
+
+### Bug Fixes
+
+* **ui:** close broken fallback avatar string literals ([8c3a96c](https://github.com/LeeWio/odyssey/commit/8c3a96c8e3c4bc0e34e99241947cab6bfa0408bf))
+
 ## [1.155.1](https://github.com/LeeWio/odyssey/compare/v1.155.0...v1.155.1) (2026-09-16)
 
 
