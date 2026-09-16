@@ -1,13 +1,30 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { ArrowUpRight, Calendar } from "@gravity-ui/icons";
 import { Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
 import { Carousel } from "@heroui-pro/react/carousel";
 import Grainient from "@/components/background/grainient";
-import { MomentsMasonry } from "@/components/home/moments-masonry";
 import { useGetPublicMomentsQuery } from "@/lib/features/moment";
 import { useGetFeaturedPostsQuery } from "@/lib/features/post";
+
+const MomentsMasonry = dynamic(
+  () =>
+    import("@/components/home/moments-masonry").then((mod) => ({
+      default: mod.MomentsMasonry,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <Skeleton key={index} className="aspect-[4/5] w-full rounded-2xl" />
+        ))}
+      </div>
+    ),
+  }
+);
 
 const formatDate = (date?: string | null) => {
   if (!date) return "Recently";

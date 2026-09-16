@@ -16,6 +16,7 @@ import type { MediaItem } from "@/features/media/types";
 import { useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
 import { useGetGitHubActivityQuery } from "@/lib/features/github";
 import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { ItemCard, TrendChip } from "@heroui-pro/react";
 import { KPI } from "@heroui-pro/react/kpi";
 import {
@@ -40,8 +41,12 @@ import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { PencilToSquare, ChevronDown } from "@gravity-ui/icons";
-import GradientText from "@/components/ui/gradient-text";
 import { FeaturedWriting, MomentsShowcase } from "@/components/home/content-dispatch";
+
+const GradientText = dynamic(() => import("@/components/ui/gradient-text"), {
+  ssr: false,
+  loading: () => <span className="contents" />,
+});
 
 const MotionAccordion = motion.create(Accordion);
 
