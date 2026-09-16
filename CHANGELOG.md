@@ -1,3 +1,15 @@
+# [1.155.0](https://github.com/LeeWio/odyssey/compare/v1.154.0...v1.155.0) (2026-09-16)
+
+
+### Features
+
+* **dashboard:** enrich Moments timeline preview and empty states ([e5ac891](https://github.com/LeeWio/odyssey/commit/e5ac891a4f92c3be64100f88ff0ccbdf5fb1cf2c))
+
+
+### Performance Improvements
+
+* lazy-load GSAP and heavy visual surfaces ([d68c701](https://github.com/LeeWio/odyssey/commit/d68c70119ea4211c854c5c67e53dc7c40099f619))
+
 # [1.154.0](https://github.com/LeeWio/odyssey/compare/v1.153.0...v1.154.0) (2026-09-16)
 
 
