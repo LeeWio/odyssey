@@ -13,7 +13,11 @@ export { useMomentFeed } from "./hooks/use-moment-feed";
 
 // 3. Utils
 export { getTransformStyles } from "./utils/transform-styles";
-export { extractMomentPlainText, parseMomentContent } from "./utils/content-parser";
+export {
+  extractMomentPlainText,
+  isDocumentEmpty,
+  parseMomentContent,
+} from "./utils/content-parser";
 export { MOMENT_CHARACTER_LIMIT, MOMENT_SHORT_FORM_CHARACTER_LIMIT } from "./utils/character-count";
 export { MOMENT_TOPIC_LIMIT, normalizeMomentTopicSlug } from "./utils/topic-slug";
 export {

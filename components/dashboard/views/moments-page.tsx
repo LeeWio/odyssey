@@ -1,11 +1,27 @@
 "use client";
 
-import { AlertDialog, Button, Chip, Modal, Spinner, Tabs, Tooltip } from "@heroui/react";
-import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
+import {
+  AlertDialog,
+  Button,
+  Chip,
+  Modal,
+  Spinner,
+  Tag,
+  TagGroup,
+  Tabs,
+  Tooltip,
+} from "@heroui/react";
+import {
+  DataGrid,
+  EmptyState,
+  type DataGridColumn,
+  type DataGridSortDescriptor,
+} from "@heroui-pro/react";
 import { Carousel } from "@heroui-pro/react/carousel";
+import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import type { EmblaCarouselType } from "embla-carousel";
 import { Icon } from "@iconify/react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useMemo, useState, useEffect } from "react";
 
 import {
@@ -14,7 +30,13 @@ import {
   useGetAllMomentsQuery,
   useGetPublicMomentsQuery,
 } from "@/lib/features/moment";
-import { extractMomentPlainText, MomentPublisher, useMomentLike } from "@/features/moment";
+import {
+  extractMomentPlainText,
+  isDocumentEmpty,
+  MomentPublisher,
+  parseMomentContent,
+  useMomentLike,
+} from "@/features/moment";
 import { RemoteMedia } from "@/components/ui/remote-media";
 import { usePortalContainer } from "../use-portal-container";
 
@@ -24,10 +46,12 @@ interface TimelineItemProps {
 }
 
 function TimelineItem({ moment }: TimelineItemProps) {
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const { isLiked, likesCount, isLiking, toggleLike } = useMomentLike(moment.id, moment.likesCount);
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const [carouselApi, setCarouselApi] = useState<EmblaCarouselType>();
-  const previewText = useMemo(() => extractMomentPlainText(moment.content), [moment.content]);
+  const parsedContent = useMemo(() => parseMomentContent(moment.content), [moment.content]);
+  const hasContent = !isDocumentEmpty(parsedContent);
 
   useEffect(() => {
     if (activeImageIndex !== null && carouselApi) {
@@ -46,10 +70,13 @@ function TimelineItem({ moment }: TimelineItemProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      transition={{
+        duration: shouldReduceMotion ? 0 : 0.45,
+        ease: [0.16, 1, 0.3, 1],
+      }}
       className="relative flex gap-6 pl-1"
     >
       {/* Axis Marker Circle */}
@@ -62,19 +89,51 @@ function TimelineItem({ moment }: TimelineItemProps) {
 
       {/* Message Bubble Card */}
       <div className="bg-surface border-border flex flex-1 flex-col gap-4 rounded-3xl border p-5 shadow-sm transition-all duration-350 hover:shadow-md md:p-6">
-        <div className="border-border/60 flex items-center justify-between border-b pb-3">
-          <span className="text-muted text-xs font-semibold tracking-tight uppercase">
-            MOMENT #{moment.id}
-          </span>
-          <span className="text-muted text-xs tabular-nums">
+        <div className="border-border/60 flex items-center justify-between gap-3 border-b pb-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-muted text-xs font-semibold tracking-tight uppercase">
+              MOMENT #{moment.id}
+            </span>
+            <Chip
+              size="sm"
+              variant="soft"
+              color={moment.visibility === "public" ? "success" : "warning"}
+            >
+              <span className="capitalize">{moment.visibility}</span>
+            </Chip>
+            {moment.stockSymbol ? (
+              <Chip size="sm" variant="soft" color="accent">
+                ${moment.stockSymbol}
+              </Chip>
+            ) : null}
+          </div>
+          <span className="text-muted shrink-0 text-xs tabular-nums">
             {new Date(moment.createdAt).toLocaleString()}
           </span>
         </div>
 
-        {previewText ? (
-          <div className="text-foreground/95 text-sm leading-relaxed whitespace-pre-wrap md:text-base">
-            {previewText}
-          </div>
+        {hasContent ? (
+          <RichTextEditor
+            isReadOnly
+            defaultValue={parsedContent}
+            className="h-auto min-h-0 w-full min-w-0"
+          >
+            <RichTextEditor.Shell className="h-auto min-h-0 w-full min-w-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
+              <RichTextEditor.Content className="text-foreground/95 h-auto min-h-0 bg-transparent text-sm leading-relaxed outline-none md:text-base [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-words" />
+            </RichTextEditor.Shell>
+          </RichTextEditor>
+        ) : null}
+
+        {moment.topics.length > 0 ? (
+          <TagGroup aria-label={`Topics for moment ${moment.id}`} size="sm" selectionMode="none">
+            <TagGroup.List className="flex flex-wrap gap-1.5">
+              {moment.topics.map((topic) => (
+                <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
+                  #{topic.slug}
+                </Tag>
+              ))}
+            </TagGroup.List>
+          </TagGroup>
         ) : null}
 
         {moment.images && moment.images.length > 0 && (
@@ -82,7 +141,8 @@ function TimelineItem({ moment }: TimelineItemProps) {
             {moment.images.map((img, idx) => (
               <button
                 key={img.id}
-                className="border-separator/30 group relative size-16 min-w-16 overflow-hidden rounded-xl border transition-transform active:scale-95"
+                type="button"
+                className="border-separator/30 group relative size-16 min-w-16 overflow-hidden rounded-xl border transition-transform active:scale-95 motion-reduce:transition-none"
                 onClick={() => {
                   setActiveImageIndex(idx);
                 }}
@@ -90,7 +150,7 @@ function TimelineItem({ moment }: TimelineItemProps) {
                 <RemoteMedia
                   src={img.thumbnailUrl || img.fileUrl}
                   alt={img.altText}
-                  className="size-full object-cover transition-transform group-hover:scale-105"
+                  className="size-full object-cover transition-transform group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                 />
               </button>
             ))}
@@ -107,9 +167,10 @@ function TimelineItem({ moment }: TimelineItemProps) {
             }`}
             onPress={() => void toggleLike()}
             isDisabled={isLiking}
+            aria-label={isLiked ? "Unlike moment" : "Like moment"}
           >
             <motion.div
-              animate={{ scale: isLiked ? [1, 1.35, 1] : 1 }}
+              animate={shouldReduceMotion ? undefined : { scale: isLiked ? [1, 1.35, 1] : 1 }}
               transition={{ duration: 0.3 }}
             >
               <Icon
@@ -212,9 +273,12 @@ export function MomentsPage() {
   }, []);
 
   const handleDeleteConfirm = async () => {
-    if (momentToDelete) {
+    if (!momentToDelete) return;
+    try {
       await deleteMoment(momentToDelete.id).unwrap();
       setMomentToDelete(null);
+    } catch {
+      // Keep the dialog open; mutation toast already reports the failure.
     }
   };
 
@@ -384,21 +448,40 @@ export function MomentsPage() {
       {activeTab === "public" && (
         <div className="mx-auto w-full max-w-2xl">
           {isPublicLoading ? (
-            <div className="flex justify-center py-12">
-              <Spinner size="md" />
+            <div
+              className="flex flex-col gap-6 py-6"
+              aria-busy="true"
+              aria-label="Loading timeline"
+            >
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="flex gap-6 pl-1">
+                  <div className="bg-surface-secondary size-9 shrink-0 rounded-full" />
+                  <div className="bg-surface-secondary h-36 flex-1 rounded-3xl" />
+                </div>
+              ))}
             </div>
           ) : publicMoments.length === 0 ? (
-            <div className="bg-surface border-border flex flex-col items-center justify-center rounded-2xl border p-12 text-center shadow-sm">
-              <Icon
-                icon="gravity-ui:circle-exclamation"
-                className="text-muted mb-3 size-10"
-                aria-hidden="true"
-              />
-              <p className="text-muted text-sm">
-                No moments published on the timeline yet. Go to the Management Console to create
-                one!
-              </p>
-            </div>
+            <EmptyState className="bg-surface border-border rounded-2xl border p-10">
+              <EmptyState.Header>
+                <EmptyState.Title>No moments on the timeline yet</EmptyState.Title>
+                <EmptyState.Description>
+                  Publish a short update from the Management Console to see it previewed here with
+                  the same rich text readers will see.
+                </EmptyState.Description>
+              </EmptyState.Header>
+              <EmptyState.Content>
+                <Button
+                  size="sm"
+                  onPress={() => {
+                    setActiveTab("admin");
+                    handleCreateOpen();
+                  }}
+                >
+                  <Icon icon="gravity-ui:circle-plus" className="size-4" aria-hidden="true" />
+                  Create moment
+                </Button>
+              </EmptyState.Content>
+            </EmptyState>
           ) : (
             <div className="relative flex flex-col gap-8 pl-4">
               {/* Timeline Vertical Axis Line */}
@@ -423,6 +506,22 @@ export function MomentsPage() {
             isLoadingMore={isAdminLoading}
             sortDescriptor={adminSort}
             onSortChange={setAdminSort}
+            renderEmptyState={() => (
+              <EmptyState size="sm">
+                <EmptyState.Header>
+                  <EmptyState.Title>No moments yet</EmptyState.Title>
+                  <EmptyState.Description>
+                    Create your first moment to start the timeline.
+                  </EmptyState.Description>
+                </EmptyState.Header>
+                <EmptyState.Content>
+                  <Button size="sm" onPress={handleCreateOpen}>
+                    <Icon icon="gravity-ui:circle-plus" className="size-4" aria-hidden="true" />
+                    Add Moment
+                  </Button>
+                </EmptyState.Content>
+              </EmptyState>
+            )}
           />
         </div>
       )}
