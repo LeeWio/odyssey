@@ -1,15 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "motion/react";
-import { Tabs, Typography } from "@heroui/react";
+import { Skeleton, Tabs, Typography } from "@heroui/react";
 import { MotionChip, MotionTypography } from "@/components/ui";
 
 // Sub-components from our modular features
 import { AboutPage } from "@/features/about";
 import { UsesPage } from "@/features/uses";
 import { RecruiterPage } from "@/features/recruiter";
-import GuestbookBoard from "@/components/corners/guestbook-board";
+
+const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-board"), {
+  ssr: false,
+  loading: () => <Skeleton className="min-h-64 w-full rounded-3xl" />,
+});
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 

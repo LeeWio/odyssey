@@ -22,6 +22,7 @@ import {
 } from "@heroui/react";
 import type { Key } from "react";
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { useDebounce } from "use-debounce";
 
 import { ArticleEngagementCard } from "@/features/blog";
@@ -36,8 +37,13 @@ import {
 } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 
-import { ArchiveTimeline, ArchiveTimelineSkeleton } from "./archive-timeline";
+import { ArchiveTimelineSkeleton } from "./archive-timeline";
 import { RemoteMedia } from "@/components/ui/remote-media";
+
+const ArchiveTimeline = dynamic(
+  () => import("./archive-timeline").then((mod) => ({ default: mod.ArchiveTimeline })),
+  { ssr: false, loading: () => <ArchiveTimelineSkeleton /> }
+);
 
 const PAGE_SIZE = 6;
 

@@ -1,10 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Calendar, Person } from "@gravity-ui/icons";
 import { Chip, Surface, Typography, cn } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
-import Grainient from "@/components/background/grainient";
+
+const Grainient = dynamic(() => import("@/components/background/grainient"), {
+  ssr: false,
+  loading: () => <div className="bg-surface-secondary absolute inset-0" aria-hidden />,
+});
 
 export type PostCardVariant = "default" | "gradient-header" | "full-gradient";
 

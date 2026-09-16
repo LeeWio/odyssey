@@ -5,9 +5,13 @@ import { ArrowUpRight, Calendar } from "@gravity-ui/icons";
 import { Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
 import { Carousel } from "@heroui-pro/react/carousel";
-import Grainient from "@/components/background/grainient";
 import { useGetPublicMomentsQuery } from "@/lib/features/moment";
 import { useGetFeaturedPostsQuery } from "@/lib/features/post";
+
+const Grainient = dynamic(() => import("@/components/background/grainient"), {
+  ssr: false,
+  loading: () => <div className="bg-surface-secondary absolute inset-0" aria-hidden />,
+});
 
 const MomentsMasonry = dynamic(
   () =>

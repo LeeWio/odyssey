@@ -6,22 +6,46 @@ import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { CommentSystem } from "@/components/comment";
 import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
-import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import {
   normalizeRichTextDocument,
   parseJSONContent,
 } from "@/components/rich-text/utils/document-normalizer";
-import { ReadingProgressBar } from "../auxiliary/reading-progress-bar";
 import {
   useGetPublicPostBySlugQuery,
   useLikePostMutation,
   useUnlikePostMutation,
 } from "@/lib/features/post";
 import { MotionRichTextEditor } from "@/components/ui";
+
+const ReadingProgressBar = dynamic(
+  () =>
+    import("../auxiliary/reading-progress-bar").then((mod) => ({
+      default: mod.ReadingProgressBar,
+    })),
+  { ssr: false }
+);
+
+const AnimatedRichTextContent = dynamic(
+  () =>
+    import("@/components/rich-text/animated-rich-text-content").then((mod) => ({
+      default: mod.AnimatedRichTextContent,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-3 py-6" aria-hidden>
+        <div className="bg-surface-secondary h-4 w-11/12 rounded" />
+        <div className="bg-surface-secondary h-4 w-10/12 rounded" />
+        <div className="bg-surface-secondary h-4 w-9/12 rounded" />
+      </div>
+    ),
+  }
+);
 
 interface ReaderViewProps {
   slug: string;

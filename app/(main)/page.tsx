@@ -35,7 +35,6 @@ import { useMounted } from "@mantine/hooks";
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 
-import GuestbookBoard from "@/components/corners/guestbook-board";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
 import { setLoginOpen } from "@/lib/features/ui";
@@ -46,6 +45,11 @@ import { FeaturedWriting, MomentsShowcase } from "@/components/home/content-disp
 const GradientText = dynamic(() => import("@/components/ui/gradient-text"), {
   ssr: false,
   loading: () => <span className="contents" />,
+});
+
+const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-board"), {
+  ssr: false,
+  loading: () => <Skeleton className="min-h-64 w-full rounded-3xl" />,
 });
 
 const MotionAccordion = motion.create(Accordion);

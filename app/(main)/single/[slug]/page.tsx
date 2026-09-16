@@ -23,11 +23,11 @@ import {
 } from "@heroui/react";
 import { ActionBar } from "@heroui-pro/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
-import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, use, useEffect, useMemo, useRef, useState } from "react";
 import { CommentSheet } from "@/components/comment";
@@ -48,6 +48,23 @@ import {
 } from "@/lib/features/post";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 import { ReadingSession } from "@/components/reading/reading-session";
+
+const AnimatedRichTextContent = dynamic(
+  () =>
+    import("@/components/rich-text/animated-rich-text-content").then((mod) => ({
+      default: mod.AnimatedRichTextContent,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-3 py-6" aria-hidden>
+        <Skeleton className="h-4 w-11/12 rounded" />
+        <Skeleton className="h-4 w-10/12 rounded" />
+        <Skeleton className="h-4 w-9/12 rounded" />
+      </div>
+    ),
+  }
+);
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useAddPostToCollectionMutation,

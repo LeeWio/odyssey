@@ -1,11 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Card, Chip, Typography } from "@heroui/react";
 import { ArrowRight, Book } from "@gravity-ui/icons";
 import Image from "next/image";
 import Link from "next/link";
-import Grainient from "@/components/background/grainient";
 import type { ColumnResponse } from "@/lib/features/column";
+
+const Grainient = dynamic(() => import("@/components/background/grainient"), {
+  ssr: false,
+  loading: () => <div className="bg-surface-secondary absolute inset-0" aria-hidden />,
+});
 
 function getGrainientProps(seed: string) {
   let hash = 2166136261;

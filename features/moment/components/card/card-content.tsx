@@ -1,8 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Tag, TagGroup } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
-import BounceCards from "@/components/ui/bounce-cards";
 import { RemoteMedia } from "@/components/ui/remote-media";
 import Stack from "../gallery/stack";
 import type { MomentTopicResponse } from "@/lib/features/moment";
@@ -11,6 +11,11 @@ import { getTransformStyles } from "../../utils/transform-styles";
 import { useMemo } from "react";
 import { StockTrendCard } from "@/components/stock/stock-trend-card";
 import { isDocumentEmpty } from "../../utils/content-parser";
+
+const BounceCards = dynamic(() => import("@/components/ui/bounce-cards"), {
+  ssr: false,
+  loading: () => <div className="bg-surface-secondary min-h-40 w-full rounded-2xl" aria-hidden />,
+});
 
 interface CardContentProps {
   momentId: string | number;

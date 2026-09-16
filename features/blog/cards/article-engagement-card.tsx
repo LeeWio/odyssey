@@ -1,16 +1,21 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Button, Card, Form, Input, Link, TextField, Tooltip, toast } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
-import Grainient from "@/components/background/grainient";
 import { useLikePostMutation, useUnlikePostMutation } from "@/lib/features/post";
 import { setLoginOpen } from "@/lib/features/ui";
 import { usePublishCommentMutation } from "@/lib/features/comment";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { Icon } from "@iconify/react";
+
+const Grainient = dynamic(() => import("@/components/background/grainient"), {
+  ssr: false,
+  loading: () => <div className="bg-surface-secondary absolute inset-0" aria-hidden />,
+});
 
 export interface ArticleEngagementCardPost {
   id?: number;
