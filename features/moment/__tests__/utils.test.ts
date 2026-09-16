@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getTransformStyles } from "@/features/moment/utils/transform-styles";
-import {
-  extractMomentPlainText,
-  parseMomentContent,
-} from "@/features/moment/utils/content-parser";
+import { extractMomentPlainText, parseMomentContent } from "@/features/moment/utils/content-parser";
 
 describe("Moment Card Utility Helpers", () => {
   describe("getTransformStyles", () => {

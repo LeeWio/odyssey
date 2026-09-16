@@ -23,10 +23,7 @@ interface TimelineItemProps {
 }
 
 function TimelineItem({ moment }: TimelineItemProps) {
-  const { isLiked, likesCount, isLiking, toggleLike } = useMomentLike(
-    moment.id,
-    moment.likesCount
-  );
+  const { isLiked, likesCount, isLiking, toggleLike } = useMomentLike(moment.id, moment.likesCount);
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const [carouselApi, setCarouselApi] = useState<EmblaCarouselType>();
   const previewText = useMemo(() => extractMomentPlainText(moment.content), [moment.content]);
