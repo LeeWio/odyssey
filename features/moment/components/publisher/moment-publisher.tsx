@@ -50,6 +50,7 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
     retryMedia,
     hasIncompleteUploads,
     hasMissingAlt,
+    submitBlockReason,
     editorValue,
     setEditorValue,
     charCount,
@@ -112,6 +113,7 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
 
                   <PublisherGallery
                     items={mediaItems}
+                    highlightMissingAlt={hasMissingAlt}
                     onRemove={removeMedia}
                     onAltChange={updateMediaAlt}
                     onRetry={retryMedia}
@@ -122,6 +124,7 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
                   charCount={charCount}
                   isSubmitting={isSubmitting}
                   isSubmitDisabled={isSubmitDisabled}
+                  submitDisabledReason={submitBlockReason}
                   onPublish={publishMoment}
                   isEditing={!!initialMoment}
                   topics={topics}

@@ -88,12 +88,42 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
   const [updateMoment] = useUpdateMomentMutation();
   const [uploadFile] = useUploadFileMutation();
   const activeUploads = useRef(new Map<string, { abort: () => void }>());
+  const progressTimers = useRef(new Map<string, number>());
+
+  const clearProgressPulse = (id: string) => {
+    const timer = progressTimers.current.get(id);
+    if (timer !== undefined) {
+      window.clearInterval(timer);
+      progressTimers.current.delete(id);
+    }
+  };
+
+  const startProgressPulse = (id: string) => {
+    clearProgressPulse(id);
+    if (typeof window === "undefined") return;
+    const timer = window.setInterval(() => {
+      setMediaItems((prev) =>
+        prev.map((item) => {
+          if (item.id !== id || item.kind !== "local" || item.status !== "uploading") return item;
+          if (item.progress >= 92) return item;
+          return {
+            ...item,
+            progress: Math.min(item.progress + 6 + Math.random() * 10, 92),
+          };
+        })
+      );
+    }, 350);
+    progressTimers.current.set(id, timer);
+  };
 
   useEffect(() => {
     const uploads = activeUploads.current;
+    const timers = progressTimers.current;
     return () => {
       uploads.forEach(({ abort }) => abort());
       uploads.clear();
+      timers.forEach((timer) => window.clearInterval(timer));
+      timers.clear();
     };
   }, []);
 
@@ -101,10 +131,12 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
     activeUploads.current.get(id)?.abort();
     const request = uploadFile(file);
     activeUploads.current.set(id, { abort: () => request.abort() });
+    startProgressPulse(id);
 
     void (async () => {
       try {
         const response = await request.unwrap();
+        clearProgressPulse(id);
         if (response.id === undefined) {
           const errorMessage = "Uploaded file is missing an ID.";
           setMediaItems((prev) =>
@@ -140,6 +172,7 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
           )
         );
       } catch {
+        clearProgressPulse(id);
         if (!activeUploads.current.has(id)) return;
         setMediaItems((prev) =>
           prev.map((item) =>
@@ -232,6 +265,7 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
   const removeMedia = (id: string) => {
     activeUploads.current.get(id)?.abort();
     activeUploads.current.delete(id);
+    clearProgressPulse(id);
     setMediaItems((prev) => {
       const target = prev.find((item) => item.id === id);
       if (target?.kind === "local") {
@@ -254,6 +288,8 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
   const handleReset = () => {
     activeUploads.current.forEach(({ abort }) => abort());
     activeUploads.current.clear();
+    progressTimers.current.forEach((timer) => window.clearInterval(timer));
+    progressTimers.current.clear();
     mediaItems.forEach((item) => {
       if (item.kind === "local") URL.revokeObjectURL(item.preview);
     });
@@ -269,6 +305,16 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
 
   const hasIncompleteUploads = mediaItems.some((item) => item.status !== "complete");
   const hasMissingAlt = mediaItems.some((item) => !item.altText.trim());
+  const submitBlockReason = (() => {
+    if (isSubmitting) return null;
+    if (hasIncompleteUploads) return "Wait for image uploads to finish";
+    if (hasMissingAlt) return "Add alt text for every image";
+    if (charCount > MOMENT_CHARACTER_LIMIT) return "Character limit exceeded";
+    if (isEmpty && mediaItems.length === 0 && !attachedStockSymbol) {
+      return "Write something or add media first";
+    }
+    return null;
+  })();
 
   const publishMoment = async () => {
     if (
@@ -342,6 +388,7 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
     retryMedia,
     hasIncompleteUploads,
     hasMissingAlt,
+    submitBlockReason,
     editorValue,
     setEditorValue,
     charCount,

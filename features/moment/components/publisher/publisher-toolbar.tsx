@@ -22,7 +22,7 @@ import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "motion/react";
 import { ComposerTool, type ComposerToolProps } from "./composer-tool";
 import { StockSelector } from "./stock-selector";
-import { useGetPublicTagsQuery } from "@/lib/features/tag/tag-api";
+import { useGetPublicTagsQuery } from "@/lib/features/tag";
 import { normalizeMomentTopicSlug } from "../../utils/topic-slug";
 import {
   MOMENT_CHARACTER_LIMIT,
@@ -48,6 +48,7 @@ interface PublisherToolbarProps {
   charCount: number;
   isSubmitting: boolean;
   isSubmitDisabled: boolean;
+  submitDisabledReason?: string | null;
   onPublish: () => void;
   onAction?: (actionId: string) => void;
   topics: string[];
@@ -62,6 +63,7 @@ export const PublisherToolbar = ({
   charCount,
   isSubmitting,
   isSubmitDisabled,
+  submitDisabledReason = null,
   onPublish,
   onAction,
   topics,
@@ -356,20 +358,48 @@ export const PublisherToolbar = ({
           </AnimatePresence>
         </div>
 
-        <Button variant="primary" onPress={onPublish} isDisabled={isSubmitDisabled} size="sm">
-          {isSubmitting ? (
-            <Spinner size="sm" color="current" className="mr-1.5" />
-          ) : (
-            <Icon icon="gravity-ui:location-arrow-fill" className="size-4" />
-          )}
-          {isEditing
-            ? isSubmitting
-              ? "Saving..."
-              : "Save"
-            : isSubmitting
-              ? "Sharing..."
-              : "Share"}
-        </Button>
+        {isSubmitDisabled && submitDisabledReason ? (
+          <Tooltip>
+            <span className="inline-flex">
+              <Button
+                variant="primary"
+                onPress={onPublish}
+                isDisabled
+                size="sm"
+                aria-label={`${isEditing ? "Save" : "Share"} moment. ${submitDisabledReason}`}
+              >
+                {isSubmitting ? (
+                  <Spinner size="sm" color="current" className="mr-1.5" />
+                ) : (
+                  <Icon icon="gravity-ui:location-arrow-fill" className="size-4" />
+                )}
+                {isEditing
+                  ? isSubmitting
+                    ? "Saving..."
+                    : "Save"
+                  : isSubmitting
+                    ? "Sharing..."
+                    : "Share"}
+              </Button>
+            </span>
+            <Tooltip.Content>{submitDisabledReason}</Tooltip.Content>
+          </Tooltip>
+        ) : (
+          <Button variant="primary" onPress={onPublish} isDisabled={isSubmitDisabled} size="sm">
+            {isSubmitting ? (
+              <Spinner size="sm" color="current" className="mr-1.5" />
+            ) : (
+              <Icon icon="gravity-ui:location-arrow-fill" className="size-4" />
+            )}
+            {isEditing
+              ? isSubmitting
+                ? "Saving..."
+                : "Save"
+              : isSubmitting
+                ? "Sharing..."
+                : "Share"}
+          </Button>
+        )}
       </div>
     </div>
   );
