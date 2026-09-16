@@ -82,6 +82,8 @@ import { SomeInternalHelper } from "@/lib/features/post/internal/helper";
 - 不要用全局组件目录隐藏单页一次性实现。
 - Post 数据能力从 `@/lib/features/post` 导入，不要经 `@/features/blog` 再导出。
 - 用户上传 / API 媒体优先使用 `RemoteMedia`（原生 `<img>`）；仅对 `next.config` `remotePatterns` 中的稳定 CDN 使用 `next/image`。
+- Feature UI（`features/*`）禁止依赖 `app/*`；Post 数据从 `@/lib/features/post` 导入，不要深路径到 `post-api`。
+- 首页等重型动效组件（如 `GradientText`、`MomentsMasonry`）优先 `next/dynamic`，并尊重 `prefers-reduced-motion`。
 
 ## 状态依赖规则
 
