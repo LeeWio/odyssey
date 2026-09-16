@@ -1,3 +1,15 @@
+# [1.154.0](https://github.com/LeeWio/odyssey/compare/v1.153.0...v1.154.0) (2026-09-16)
+
+
+### Features
+
+* **moment:** polish publisher upload feedback and a11y ([48e6ffd](https://github.com/LeeWio/odyssey/commit/48e6ffd87811decb31938fbf8de9f86f7ff99fd1))
+
+
+### Performance Improvements
+
+* **home:** lazy-load GradientText and MomentsMasonry ([c392a52](https://github.com/LeeWio/odyssey/commit/c392a5226a79fac9da0e946ecc08d441f32419ac))
+
 # [1.153.0](https://github.com/LeeWio/odyssey/compare/v1.152.0...v1.153.0) (2026-09-16)
 
 
