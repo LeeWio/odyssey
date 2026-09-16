@@ -9,14 +9,11 @@ import { motion } from "motion/react";
 import { useCallback, useMemo, useState, useEffect } from "react";
 
 import {
-  type MomentRequest,
   type MomentResponse,
-  useCreateMomentMutation,
   useDeleteMomentMutation,
   useGetAllMomentsQuery,
   useGetPublicMomentsQuery,
   useLikeMomentMutation,
-  useUpdateMomentMutation,
 } from "@/lib/features/moment";
 import { MomentPublisher } from "@/features/moment";
 import { usePortalContainer } from "../use-portal-container";
@@ -100,6 +97,8 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
                   setActiveImageIndex(idx);
                 }}
               >
+                {/* API media can use arbitrary hosts; retain native loading without a remote allowlist. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={img.thumbnailUrl || img.fileUrl}
                   alt={img.altText}
@@ -158,6 +157,8 @@ function TimelineItem({ moment, onLike, isLiking }: TimelineItemProps) {
                       {carouselImages.map((image, i) => (
                         <Carousel.Item key={i}>
                           <div className="overflow-hidden rounded-3xl">
+                            {/* API media can use arbitrary hosts; retain native loading without a remote allowlist. */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               alt={image.alt}
                               className="aspect-[1/1] w-full object-cover select-none"
@@ -212,13 +213,11 @@ export function MomentsPage() {
     size: 50,
   });
 
-  const [createMoment, { isLoading: isCreating }] = useCreateMomentMutation();
-  const [updateMoment, { isLoading: isUpdating }] = useUpdateMomentMutation();
   const [deleteMoment, { isLoading: isDeleting }] = useDeleteMomentMutation();
 
   // --- Dialog & Modal States ---
   const [isFormOpen, setIsFormFormOpen] = useState(false);
-  const [momentToEdit, setMomentToEdit] = useState<MomentResponse | null>(null);
+  const [momentToEdit, setMomentToEdit] = useState<MomentResponse>();
   const [momentToDelete, setMomentToDelete] = useState<MomentResponse | null>(null);
 
   const [adminSort, setAdminSort] = useState<DataGridSortDescriptor>({
@@ -227,7 +226,7 @@ export function MomentsPage() {
   });
 
   const handleCreateOpen = () => {
-    setMomentToEdit(null);
+    setMomentToEdit(undefined);
     setIsFormFormOpen(true);
   };
 
@@ -235,19 +234,6 @@ export function MomentsPage() {
     setMomentToEdit(moment);
     setIsFormFormOpen(true);
   }, []);
-
-  const handleFormSubmit = async (body: MomentRequest) => {
-    try {
-      if (momentToEdit) {
-        await updateMoment({ id: momentToEdit.id, body }).unwrap();
-      } else {
-        await createMoment(body).unwrap();
-      }
-      setIsFormFormOpen(false);
-    } catch {
-      // Handled globally
-    }
-  };
 
   const handleDeleteConfirm = async () => {
     if (momentToDelete) {
@@ -466,7 +452,14 @@ export function MomentsPage() {
         </div>
       )}
 
-      <MomentPublisher isOpen={isFormOpen} onOpenChange={setIsFormFormOpen} />
+      {isFormOpen && (
+        <MomentPublisher
+          key={momentToEdit?.id ?? "new"}
+          initialMoment={momentToEdit}
+          isOpen={isFormOpen}
+          onOpenChange={setIsFormFormOpen}
+        />
+      )}
 
       {/* Delete Confirmation AlertDialog */}
       <AlertDialog>

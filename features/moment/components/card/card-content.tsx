@@ -37,7 +37,6 @@ const getDynamicContainerHeight = (count: number) => {
 };
 
 export const CardContent = ({
-  momentId,
   parsedContent,
   imageUrls,
   topics,
@@ -60,6 +59,8 @@ export const CardContent = ({
         className="border-default-200/60 bg-background h-full w-full cursor-pointer overflow-hidden rounded-2xl border shadow-sm"
         onClick={() => onCardClick?.(idx)}
       >
+        {/* API media can use arbitrary hosts; retain native loading without a remote allowlist. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={url}
           alt={`moment-img-${idx}`}

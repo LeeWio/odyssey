@@ -1,23 +1,38 @@
 import { useState, useCallback } from "react";
 import type { JSONContent } from "@tiptap/core";
-import { useCreateMomentMutation } from "@/lib/features/moment";
+import {
+  useCreateMomentMutation,
+  useUpdateMomentMutation,
+  type MomentResponse,
+} from "@/lib/features/moment";
 import { useUploadFileMutation } from "@/lib/features/file/file-api";
 import { MOMENT_CHARACTER_LIMIT } from "../utils/character-count";
 import { MOMENT_TOPIC_LIMIT } from "../utils/topic-slug";
+import { parseMomentContent, isDocumentEmpty } from "../utils/content-parser";
 
-export const useMomentPublish = (onSuccess?: () => void) => {
-  const [editorValue, setEditorValue] = useState<JSONContent | undefined>(undefined);
-  const [charCount, setCharCount] = useState(0);
-  const [isEmpty, setIsEmpty] = useState(true);
+export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentResponse) => {
+  const initialContent = initialMoment ? parseMomentContent(initialMoment.content) : undefined;
+  const countText = (node: JSONContent): number =>
+    (node.text?.length ?? 0) +
+    (node.content?.reduce((sum, child) => sum + countText(child), 0) ?? 0);
+  const [existingImages, setExistingImages] = useState(initialMoment?.images ?? []);
+  const [editorValue, setEditorValue] = useState<JSONContent | undefined>(initialContent);
+  const [charCount, setCharCount] = useState(initialContent ? countText(initialContent) : 0);
+  const [isEmpty, setIsEmpty] = useState(isDocumentEmpty(initialContent));
   const [attachments, setAttachments] = useState<{ file: File; preview: string }[]>([]);
-  const [topics, setTopics] = useState<string[]>([]);
-  const [visibility, setVisibility] = useState("public");
+  const [topics, setTopics] = useState<string[]>(
+    initialMoment?.topics.map((topic) => topic.slug) ?? []
+  );
+  const [visibility, setVisibility] = useState(initialMoment?.visibility ?? "public");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Custom stock trend widget attachment state
-  const [attachedStockSymbol, setAttachedStockSymbol] = useState<string | null>(null);
+  const [attachedStockSymbol, setAttachedStockSymbol] = useState<string | null>(
+    initialMoment?.stockSymbol ?? null
+  );
 
   const [createMoment] = useCreateMomentMutation();
+  const [updateMoment] = useUpdateMomentMutation();
   const [uploadFile] = useUploadFileMutation();
 
   const handleSelectFiles = useCallback((fileList: FileList) => {
@@ -56,21 +71,25 @@ export const useMomentPublish = (onSuccess?: () => void) => {
     });
   }, []);
 
-  const handleReset = useCallback(() => {
+  const handleReset = () => {
     attachments.forEach((a) => URL.revokeObjectURL(a.preview));
     setEditorValue(undefined);
     setCharCount(0);
     setIsEmpty(true);
     setAttachments([]);
+    setExistingImages([]);
     setTopics([]);
     setAttachedStockSymbol(null);
     setVisibility("public");
     setIsSubmitting(false);
-  }, [attachments]);
+  };
 
   const publishMoment = async () => {
     if (
-      (isEmpty && attachments.length === 0 && !attachedStockSymbol) ||
+      (isEmpty &&
+        attachments.length === 0 &&
+        existingImages.length === 0 &&
+        !attachedStockSymbol) ||
       charCount > MOMENT_CHARACTER_LIMIT ||
       isSubmitting
     )
@@ -113,26 +132,37 @@ export const useMomentPublish = (onSuccess?: () => void) => {
       }
 
       // 2. Submit the moment
-      await createMoment({
+      const body = {
         content: finalContent,
-        visibility: visibility as "public" | "followers" | "private",
-        images: uploadedImages,
+        visibility,
+        images: [
+          ...existingImages.map(({ fileId, altText }) => ({ fileId, altText })),
+          ...uploadedImages,
+        ],
         topicSlugs: topics,
         stockSymbol: attachedStockSymbol,
-      }).unwrap();
+      };
+      if (initialMoment) {
+        await updateMoment({ id: initialMoment.id, body }).unwrap();
+      } else {
+        await createMoment(body).unwrap();
+      }
 
       // 3. Reset states & call callback
       handleReset();
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Failed to share moment:", error);
-      throw error;
+      // Keep the draft open; the API layer displays the mutation error.
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return {
+    existingImages,
+    removeExistingImage: (index: number) =>
+      setExistingImages((images) => images.filter((_, i) => i !== index)),
     editorValue,
     setEditorValue,
     charCount,

@@ -43,6 +43,7 @@ interface AutocompleteValueProps {
 }
 
 interface PublisherToolbarProps {
+  isEditing?: boolean;
   charCount: number;
   isSubmitting: boolean;
   isSubmitDisabled: boolean;
@@ -56,6 +57,7 @@ interface PublisherToolbarProps {
 }
 
 export const PublisherToolbar = ({
+  isEditing = false,
   charCount,
   isSubmitting,
   isSubmitDisabled,
@@ -348,7 +350,13 @@ export const PublisherToolbar = ({
           ) : (
             <Icon icon="gravity-ui:location-arrow-fill" className="size-4" />
           )}
-          {isSubmitting ? "Sharing..." : "Share"}
+          {isEditing
+            ? isSubmitting
+              ? "Saving..."
+              : "Save"
+            : isSubmitting
+              ? "Sharing..."
+              : "Share"}
         </Button>
       </div>
     </div>

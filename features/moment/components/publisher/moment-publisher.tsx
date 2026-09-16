@@ -15,12 +15,15 @@ import { PublisherEditor } from "./publisher-editor";
 import { PublisherGallery } from "./publisher-gallery";
 import { PublisherToolbar } from "./publisher-toolbar";
 
+import type { MomentResponse } from "@/lib/features/moment";
+
 interface MomentPublisherProps {
+  initialMoment?: MomentResponse;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
 }
 
-export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) => {
+export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentPublisherProps) => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
   const email = useAppSelector(selectUserEmail);
@@ -40,6 +43,8 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
   }, [isAuthenticated, username, email, currentUser]);
 
   const {
+    existingImages,
+    removeExistingImage,
     editorValue,
     setEditorValue,
     charCount,
@@ -62,10 +67,10 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
   } = useMomentPublish(() => {
     // on success callback
     onOpenChange(false);
-  });
+  }, initialMoment);
 
   const isSubmitDisabled =
-    (isEmpty && attachments.length === 0 && !attachedStockSymbol) ||
+    (isEmpty && attachments.length === 0 && existingImages.length === 0 && !attachedStockSymbol) ||
     charCount > MOMENT_CHARACTER_LIMIT ||
     isSubmitting;
 
@@ -73,12 +78,15 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
     <Modal>
       <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
         <Modal.Container size="lg">
-          <Modal.Dialog aria-label="Moment Publisher">
+          <Modal.Dialog aria-label={initialMoment ? "Edit Moment" : "Moment Publisher"}>
             <DropZone className="w-full border-none bg-transparent p-0 shadow-none">
               {/* 1. Header */}
               <PublisherHeader
                 visibility={visibility}
-                onVisibilityChange={setVisibility}
+                onVisibilityChange={(value) => {
+                  if (value === "public" || value === "followers" || value === "private")
+                    setVisibility(value);
+                }}
                 user={userProfile}
               />
 
@@ -98,6 +106,12 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
                     maxLength={MOMENT_CHARACTER_LIMIT}
                   />
 
+                  <PublisherGallery
+                    attachments={existingImages.map((image) => ({
+                      preview: image.thumbnailUrl || image.fileUrl,
+                    }))}
+                    onRemove={removeExistingImage}
+                  />
                   <PublisherGallery attachments={attachments} onRemove={handleRemoveAttachment} />
                 </DropZone.Area>
 
@@ -107,6 +121,7 @@ export const MomentPublisher = ({ isOpen, onOpenChange }: MomentPublisherProps) 
                   isSubmitting={isSubmitting}
                   isSubmitDisabled={isSubmitDisabled}
                   onPublish={publishMoment}
+                  isEditing={!!initialMoment}
                   topics={topics}
                   onAddTopic={addTopic}
                   onRemoveTopic={removeTopic}

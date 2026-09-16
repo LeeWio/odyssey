@@ -37,6 +37,7 @@ export const PublisherGallery = ({ attachments, onRemove }: PublisherGalleryProp
           >
             <Image
               src={item.preview}
+              unoptimized
               alt={`Attachment ${index + 1}`}
               width={80}
               height={80}
