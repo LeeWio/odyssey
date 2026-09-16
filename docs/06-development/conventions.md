@@ -64,7 +64,7 @@ Animation decisions must follow [Animation Design Specification](../04-design/an
 - HeroUI components in any module should be considered Motion-compatible by default unless a specific component limitation is documented
 - `app/page.tsx`: mixed motion and CSS; acceptable only because the page combines component motion with lightweight decorative pulses and marquee-style effects
 - `features/blog/auxiliary/reading-progress-bar.tsx`: GSAP is justified because it is scroll-linked and progress-driven
-- `features/blog/feed/chronicle-deck.tsx`: GSAP is justified because it is timeline-led and orchestrates a multi-card sequence
+- `app/(main)/single/archive-timeline.tsx`: GSAP is justified because it is scroll-linked timeline choreography
 - `components/music/*`: mostly `motion/react` plus CSS micro-effects; should stay on that path unless the interaction becomes scroll-driven
 - `components/auth/*`: `motion/react` is the right default for modal/login transitions
 - `features/blog/*` loaders and placeholders: CSS is appropriate and should stay simple

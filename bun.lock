@@ -82,7 +82,6 @@
         "tailwind-variants": ">=3.2.0",
         "three": "^0.185.1",
         "use-debounce": "^10.1.1",
-        "uuid": "^14.0.0",
         "zod": "^4.4.3",
       },
       "devDependencies": {
@@ -98,7 +97,6 @@
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "@types/three": "^0.185.3",
-        "@types/uuid": "^11.0.0",
         "eslint": "^9",
         "eslint-config-next": "16.2.11",
         "eslint-config-prettier": "^10.1.8",
@@ -894,8 +892,6 @@
     "@types/unist": ["@types/unist@3.0.3", "", {}, "sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q=="],
 
     "@types/use-sync-external-store": ["@types/use-sync-external-store@0.0.6", "", {}, "sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg=="],
-
-    "@types/uuid": ["@types/uuid@11.0.0", "", { "dependencies": { "uuid": "*" } }, "sha512-HVyk8nj2m+jcFRNazzqyVKiZezyhDKrGUA3jlEcg/nZ6Ms+qHwocba1Y/AaVaznJTAM9xpdFSh+ptbNrhOGvZA=="],
 
     "@types/webxr": ["@types/webxr@0.5.24", "", {}, "sha512-h8fgEd/DpoS9CBrjEQXR+dIDraopAEfu4wYVNY2tEPwk60stPWhvZMf4Foo5FakuQ7HFZoa8WceaWFervK2Ovg=="],
 
