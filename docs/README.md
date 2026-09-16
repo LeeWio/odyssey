@@ -19,13 +19,13 @@ Odyssey is a personal product, not just a blog. This documentation space is orga
 ## Start Here
 
 1. [Project Rules](./00-project-rules.md)
-1. [Vision](./01-introduction/vision.md)
-1. [Project Background](./01-introduction/background.md)
+1. [Vision](./01-introduction/product-vision.md)
+1. [Project Background](./01-introduction/overview.md)
 1. [Roadmap](./02-planning/roadmap.md)
-1. [Architecture Overview](./05-architecture/overview.md)
+1. [Architecture Overview](./05-architecture/architecture-overview.md)
 1. [Development Setup](./06-development/setup.md)
 1. [Design System](./04-design/design-system.md)
-1. [Animation Design Specification](./04-design/animation-design-specification.md)
+1. [Animation Design Specification](./04-design/animation.md)
 
 ## Current Shape
 
@@ -46,7 +46,6 @@ Odyssey is a personal product, not just a blog. This documentation space is orga
 - `01-introduction/`: mission, background, and principles
 - `02-planning/`: roadmap, milestones, backlog, changelog, future strategy
 - `03-product/`: features, flows, IA, interaction, content strategy
-- `04-design/`: system, theme, typography, motion, accessibility, animation spec
 - `04-design/`: system, theme, typography, motion, accessibility, animation spec
 - `05-architecture/`: frontend, backend, data, API, deployment, folders
 - `06-development/`: setup, style, conventions, workflow, release, testing

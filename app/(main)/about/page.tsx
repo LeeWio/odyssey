@@ -1,7 +1,5 @@
 "use client";
 import Masonry from "@/components/ui/masonry";
-import { AboutPage } from "@/features/about";
-import type { Metadata } from "next";
 
 const items = [
   {

@@ -232,6 +232,8 @@ export default function BounceCards({
             onMouseLeave={handleMouseLeave}
             onClick={() => onCardClick?.(index)}
           >
+            {/* API media can use arbitrary hosts; retain native loading without a remote allowlist. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={src}
               alt=""

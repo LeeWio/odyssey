@@ -1,6 +1,6 @@
 "use client";
 
-import { QuadraticBezierLine, Sparkles, type QuadraticBezierLineRef } from "@react-three/drei";
+import { QuadraticBezierLine, Sparkles } from "@react-three/drei";
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";

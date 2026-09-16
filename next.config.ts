@@ -10,15 +10,6 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    domains: [
-      "images.unsplash.com",
-      "heroui-assets.nyc3.cdn.digitaloceanspaces.com",
-      "img.heroui.chat",
-      "bvconuycpdvgzbvbkijl.supabase.co",
-      "3dicons.sgp1.cdn.digitaloceanspaces.com",
-      "img.icons8.com",
-      "beian.mps.gov.cn",
-    ],
     remotePatterns: [
       {
         protocol: "https",

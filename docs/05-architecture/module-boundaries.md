@@ -16,7 +16,7 @@
 
 ### Home
 
-位置：`app/page.tsx`、`components/home`、`components/background`、`components/music`
+位置：`app/(main)/page.tsx`、`components/home`、`components/background`、`components/music`
 
 职责：
 
@@ -32,7 +32,7 @@
 
 ### Blog / Article
 
-位置：`app/blog`、`app/single`、`components/blog`、`lib/features/post`
+位置：`app/(main)/blog`、`app/(main)/single`、`features/blog`、`lib/features/post`
 
 职责：
 

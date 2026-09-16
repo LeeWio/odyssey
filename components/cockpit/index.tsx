@@ -9,7 +9,6 @@ import { selectIsSheetOpen, setSheetOpen, toggleSheet } from "@/lib/features/ui"
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { MusicMiniWidget } from "@/features/blog";
 import { SunMaxFillIcon } from "../icons";
-import { useThemeSwitch } from "../theme-switch";
 import { AnimatedNumber } from "../ui/animated-number";
 import { Stocks } from "./widgets/stocks";
 
@@ -17,7 +16,6 @@ export function Cockpit() {
   const isOpen = useAppSelector(selectIsSheetOpen);
   const dispatch = useAppDispatch();
 
-  const { ModeSwitch, VariantSwitch } = useThemeSwitch();
   const { formattedDate, hours, minutes } = useRealTime();
 
   const [weather] = useState({ tempMin: 10, tempMax: 30 });

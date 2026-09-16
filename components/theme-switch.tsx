@@ -13,7 +13,6 @@ import {
   THEME_VARIANTS,
   type ThemeVariant,
 } from "@/lib/theme";
-import { DisplayFillIcon, MoonFillIcon, SunMaxFillIcon } from "./icons";
 import { Icon } from "@iconify/react";
 
 const THEME_VARIANT_LABELS: Record<ThemeVariant, string> = {

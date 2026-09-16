@@ -10,9 +10,9 @@
 
 ```text
 app
-  -> components
+  -> features / components
     -> lib/features
-      -> lib/features/api
+      -> lib/api
         -> types / utils
 
 components
@@ -23,7 +23,7 @@ components
 
 ## 允许依赖
 
-- `app/*` 可以依赖 `components/*`、`lib/*`、`config/*`。
+- `app/*` 可以依赖 `features/*`、`components/*`、`lib/*`、`config/*`。
 - 页面组合组件可以依赖 feature UI、feature hooks 和共享 UI。
 - feature UI 可以依赖对应 feature API hook。
 - feature API 可以依赖 `baseApi`、`types`、Zod 和必要的相邻基础 schema。
@@ -33,7 +33,7 @@ components
 
 ## 禁止依赖
 
-- `lib/features/*` 禁止依赖 `app/*`。
+- `lib/features/*` 禁止依赖 `app/*`、`features/*` 和 `components/*`；ESLint 检查别名及相对路径导入。
 - `lib/features/*` 禁止依赖 `components/*`。
 - `components/ui` 禁止依赖具体业务 feature。
 - route handler 禁止依赖客户端组件。
@@ -139,3 +139,16 @@ import { SomeInternalHelper } from "@/lib/features/post/internal/helper";
 - 是否新增了不必要的全局状态？
 - 是否引入了新的视觉或动画体系？
 - 是否可以通过 feature 入口暴露稳定能力？
+
+## 当前目录归属
+
+| 目录            | 职责                                    | 示例                                         |
+| --------------- | --------------------------------------- | -------------------------------------------- |
+| `app/`          | 路由、布局和服务端入口                  | `app/(main)/blog/page.tsx`                   |
+| `features/`     | 页面业务组合、领域 UI 和交互 hooks      | `features/blog`、`features/moment`           |
+| `lib/features/` | API、响应 schema、领域类型和 Redux 状态 | `lib/features/post/post-api.ts`              |
+| `components/`   | 跨页面复用的 UI 与既有业务组件          | `components/comment`、`components/rich-text` |
+
+Blog 的 API 已从 `features/blog/api` 移入 `lib/features/post`，修复领域数据层反向依赖 UI 层的问题。消费者统一从 `@/lib/features/post` 导入；endpoint 名称和缓存标签保持一致。
+
+Dashboard 与富文本编辑器仍保留在既有组件目录；后续只有在模块归属或复用需求明确时才迁移，不以移动目录本身作为目标。Moment 的页面与发布交互归 `features/moment`，请求合约归 `lib/features/moment`。
