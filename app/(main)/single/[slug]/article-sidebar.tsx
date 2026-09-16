@@ -4,7 +4,7 @@ import {
   type PostDigestResponse,
   useGetFeaturedPostsQuery,
   useGetRelatedPostsQuery,
-} from "@/features/blog";
+} from "@/lib/features/post";
 import { Book, Flame, Sparkles } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
 import {

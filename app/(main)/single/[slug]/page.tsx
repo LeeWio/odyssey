@@ -38,14 +38,14 @@ import {
   normalizeRichTextDocument,
   parseJSONContent,
 } from "@/components/rich-text/utils/document-normalizer";
-import type { PostResponse } from "@/features/blog";
+import { ArticleTypography } from "@/features/blog";
 import {
-  ArticleTypography,
+  type PostResponse,
   useFavoritePostMutation,
   useGetPublicPostBySlugQuery,
   useLikePostMutation,
   useUnlikePostMutation,
-} from "@/features/blog";
+} from "@/lib/features/post";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 import { ReadingSession } from "@/components/reading/reading-session";
 import { selectIsAuthenticated } from "@/lib/features/auth";

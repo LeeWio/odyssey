@@ -14,7 +14,7 @@ import {
   type PostResponse,
   useDeletePostMutation,
   useLazySearchAdminPostsQuery,
-} from "@/features/blog";
+} from "@/lib/features/post";
 import { openRichText } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
 import { NEW_RICH_TEXT_DRAFT_ID } from "@/components/rich-text/utils/editor-draft";

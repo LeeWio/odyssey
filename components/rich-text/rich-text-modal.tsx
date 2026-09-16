@@ -33,7 +33,7 @@ import {
   useUpdatePostMutation,
   type PostResponse,
   type PostRequest,
-} from "@/features/blog";
+} from "@/lib/features/post";
 
 const EMPTY_POST_DATA: Partial<PostRequest> = {
   status: "DRAFT",

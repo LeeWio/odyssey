@@ -23,7 +23,7 @@ import {
   useModerateCommentMutation,
 } from "@/lib/features/comment";
 import { CommentSystem } from "@/components/comment";
-import { useGetPublicPostsQuery } from "@/features/blog";
+import { useGetPublicPostsQuery } from "@/lib/features/post";
 
 export function CommentsPage() {
   const [activeTab, setActiveTab] = useState<string>("admin"); // Default to admin moderation inside admin panel

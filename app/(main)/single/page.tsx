@@ -24,7 +24,8 @@ import type { Key } from "react";
 import { useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 
-import { ArticleEngagementCard, useGetFeaturedPostsQuery } from "@/features/blog";
+import { ArticleEngagementCard } from "@/features/blog";
+import { useGetFeaturedPostsQuery } from "@/lib/features/post";
 import { useGetPublicColumnsQuery } from "@/lib/features/column";
 import {
   useRetrieveArchiveQuery,

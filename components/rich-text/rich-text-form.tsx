@@ -26,7 +26,7 @@ import { useGetCategoriesQuery } from "@/lib/features/category";
 import { useGetColumnsQuery } from "@/lib/features/column";
 import { useUploadFileMutation } from "@/lib/features/file";
 import { useGetAllTagsQuery } from "@/lib/features/tag";
-import type { PostRequest, PostStatus } from "@/features/blog";
+import type { PostRequest, PostStatus } from "@/lib/features/post";
 
 interface RichTextFormProps {
   data: Partial<PostRequest>;

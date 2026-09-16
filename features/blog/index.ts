@@ -8,4 +8,3 @@ export * from "./cards/post-card";
 export * from "./cards/article-engagement-card";
 export * from "./interactive/comment-section";
 export * from "./auxiliary/music-mini-widget";
-export * from "@/lib/features/post";

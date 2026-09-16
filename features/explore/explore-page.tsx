@@ -29,8 +29,8 @@ import { useDebouncedCallback } from "use-debounce";
 import { motion, useReducedMotion } from "motion/react";
 
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
-import type { PostResponse } from "@/features/blog";
-import { useGetPublicPostsQuery } from "@/features/blog";
+import type { PostResponse } from "@/lib/features/post";
+import { useGetPublicPostsQuery } from "@/lib/features/post";
 import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
 
 const PAGE_SIZE = 9;

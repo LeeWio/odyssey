@@ -1,6 +1,6 @@
 import type { JSONContent } from "@tiptap/react";
 
-import type { PostRequest, PostStatus } from "@/features/blog";
+import type { PostRequest, PostStatus } from "@/lib/features/post";
 import { parseJSONContent } from "./document-normalizer";
 
 const DRAFT_STORAGE_PREFIX = "odyssey_rich_text_draft:";

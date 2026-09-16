@@ -15,7 +15,7 @@ import { ArchivePage } from "@/features/archive";
 import { ExplorePage } from "@/features/explore";
 
 // API hooks to fetch fresh content for the featured tab
-import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/features/blog";
+import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
