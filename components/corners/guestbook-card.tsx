@@ -6,23 +6,28 @@ import { cn } from "@heroui/react";
 import { motion } from "motion/react";
 
 export type GuestbookCardProps = React.HTMLAttributes<HTMLDivElement> & {
-  avatar: string;
+  avatar?: string | null;
   name: string;
   role: string;
   content: string;
   index?: number;
 };
 
+function initialsFromName(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?"
+  );
+}
+
 const GuestbookCard = React.forwardRef<HTMLDivElement, GuestbookCardProps>(
   ({ children, name, avatar, content, className, index = 0, ...props }, ref) => {
-    const fallbackInitials = name
-      ? name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .slice(0, 2)
-          .toUpperCase()
-      : "JD";
+    const fallbackInitials = initialsFromName(name);
 
     return (
       <motion.div
@@ -32,7 +37,7 @@ const GuestbookCard = React.forwardRef<HTMLDivElement, GuestbookCardProps>(
         transition={{
           duration: 0.5,
           delay: index * 0.05,
-          ease: [0.23, 1, 0.32, 1], // Emil's custom premium ease-out curve
+          ease: [0.23, 1, 0.32, 1],
         }}
         style={{ display: "flex", flexDirection: "column" }}
       >
@@ -50,7 +55,7 @@ const GuestbookCard = React.forwardRef<HTMLDivElement, GuestbookCardProps>(
         >
           <Card.Header className="flex flex-row items-center gap-2">
             <Avatar size="sm">
-              <Avatar.Image alt={name} src={avatar} />
+              {avatar ? <Avatar.Image alt={name} src={avatar} /> : null}
               <Avatar.Fallback>{fallbackInitials}</Avatar.Fallback>
             </Avatar>
             <span className="text-small text-foreground">{name}</span>

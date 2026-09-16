@@ -11,7 +11,7 @@ import { isDocumentEmpty, parseMomentContent } from "@/features/moment/utils/con
 import ScrollingBanner from "@/components/corners/scrolling-banner";
 
 type MomentBoardEntry = {
-  avatar: string;
+  avatar?: string | null;
   name: string;
   timeLabel: string;
   content: MomentResponse["content"];
@@ -62,7 +62,7 @@ function MomentBoardCard({ entry, index }: { entry: MomentBoardEntry; index: num
         <Card.Header className="flex w-full flex-row items-center justify-between">
           <div className="flex min-w-0 flex-row items-center gap-2">
             <Avatar size="sm">
-              <Avatar.Image alt={entry.name} src={entry.avatar} />
+              {entry.avatar ? <Avatar.Image alt={entry.name} src={entry.avatar} /> : null}
               <Avatar.Fallback>{fallbackInitials}</Avatar.Fallback>
             </Avatar>
             <div className="flex min-w-0 flex-col">
@@ -106,7 +106,7 @@ export function MomentsBoard({
   const entries = React.useMemo<MomentBoardEntry[]>(
     () =>
       moments.map((moment) => ({
-        avatar: moment.authorAvatar || "/IMG_2232.JPG",
+        avatar: moment.authorAvatar || null,
         name: moment.authorName || "wei.li",
         timeLabel: formatRelativeTime(moment.createdAt),
         content: moment.content,

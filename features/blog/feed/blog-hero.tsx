@@ -13,7 +13,6 @@ const FEATURED_ITEMS = [
       name: "Liwei",
       date: "Jul 24, 2026",
       readTime: "8 min read",
-      avatar: "/IMG_2232.JPG",
     },
     href: "/single/building-a-home-like-blog",
     gradient: "from-indigo-500/20 via-purple-500/20 to-blue-500/20",
@@ -27,7 +26,6 @@ const FEATURED_ITEMS = [
       name: "Odysseus",
       date: "Aug 01, 2026",
       readTime: "12 min read",
-      avatar: "/IMG_2260.JPG",
     },
     href: "/single/minimalist-design-philosophy",
     gradient: "from-amber-500/20 via-orange-500/20 to-rose-500/20",
@@ -63,8 +61,7 @@ export function BlogHero() {
                     </Typography>
 
                     <div className="mt-4 flex items-center gap-4">
-                      <Avatar size="md" className="ring-background ring-2">
-                        <Avatar.Image src={item.author.avatar} alt={item.author.name} />
+                      <Avatar size="md">
                         <Avatar.Fallback>{item.author.name[0]}</Avatar.Fallback>
                       </Avatar>
                       <div className="flex flex-col">
