@@ -1,3 +1,10 @@
+# [1.157.0](https://github.com/LeeWio/odyssey/compare/v1.156.2...v1.157.0) (2026-09-17)
+
+
+### Features
+
+* **about:** rebuild full-bleed About with personality and HeroUI ([c958c6c](https://github.com/LeeWio/odyssey/commit/c958c6cec134aa98b02ddbd2bee403fc9b1fa9f6))
+
 ## [1.156.2](https://github.com/LeeWio/odyssey/compare/v1.156.1...v1.156.2) (2026-09-17)
 
 
