@@ -7,7 +7,6 @@ import {
   Emoji,
   Indent,
   Image,
-  MediaFileHandler,
   Mathematics,
   Mention,
   Subscript,
@@ -19,6 +18,7 @@ import {
   Youtube,
   createTableOfContents,
 } from ".";
+import { createMediaFileHandler } from "./media/file-handler";
 import type { TableOfContentsOptions } from "@tiptap/extension-table-of-contents";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { ReactNodeViewRenderer } from "@tiptap/react";
@@ -72,7 +72,7 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
     Audio.configure({}),
     Attachment.configure({}),
     Youtube.configure({}),
-    ...(fileHandler ? [MediaFileHandler.configure({})] : []),
+    ...(fileHandler ? [createMediaFileHandler()] : []),
     Mathematics.configure({}),
     Mention.configure({}),
     Typography.configure({}),
