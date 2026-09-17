@@ -30,7 +30,7 @@ export const LineHeightPicker = memo(function LineHeightPicker({
   return (
     <Dropdown>
       <Button size="sm" variant="ghost" aria-label="Line height">
-        <span className="truncate">{currentLineHeight.label}</span>
+        <Label className="truncate font-normal">{currentLineHeight.label}</Label>
         <Icon icon="gravity-ui:chevron-down" className="text-default-400" />
       </Button>
       <Dropdown.Popover>

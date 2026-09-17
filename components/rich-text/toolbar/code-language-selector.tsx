@@ -38,7 +38,7 @@ export function CodeLanguageSelector() {
       variant="tertiary"
     >
       <Code aria-hidden="true" className="size-4" />
-      <span className="text-xs">{selectedLabel}</span>
+      <Label className="text-xs font-normal">{selectedLabel}</Label>
     </Button>
   );
 

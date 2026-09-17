@@ -33,7 +33,7 @@ export const FontFamilyPicker = memo(function FontFamilyPicker({
   return (
     <Dropdown>
       <Button size="sm" variant="ghost" aria-label="Font family">
-        <span className="truncate">{currentFamily.label}</span>
+        <Label className="truncate font-normal">{currentFamily.label}</Label>
         <Icon icon="gravity-ui:chevron-down" className="text-default-400" />
       </Button>
       <Dropdown.Popover>

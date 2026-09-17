@@ -469,10 +469,8 @@ function MentionMenuContent({
             onMouseDown={(event) => event.preventDefault()}
           >
             <UserAvatar size="sm" name={item.title} avatar={item.user.avatar} />
-            <div className="flex min-w-0 flex-col">
-              <Label>{item.title}</Label>
-              <Description className="truncate">{item.description}</Description>
-            </div>
+            <Label className="min-w-0 truncate">{item.title}</Label>
+            <Description className="min-w-0 truncate">{item.description}</Description>
             <ListBox.ItemIndicator />
           </ListBox.Item>
         ))}

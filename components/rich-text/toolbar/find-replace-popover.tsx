@@ -145,13 +145,13 @@ export function FindReplacePopover() {
           <Popover.Heading className="sr-only">Find and replace</Popover.Heading>
 
           <div className="flex items-center gap-1 px-4 pt-3">
-            <span
+            <Description
               aria-atomic="true"
               aria-live="polite"
               className="text-muted mr-auto text-sm font-medium tabular-nums"
             >
               {currentResult} / {resultCount}
-            </span>
+            </Description>
             <Tooltip delay={0}>
               <Button
                 aria-label="Previous match"

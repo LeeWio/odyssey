@@ -1,5 +1,6 @@
 "use client";
 
+import { Header } from "@heroui/react";
 import { FloatingToc } from "@heroui-pro/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import type {
@@ -254,14 +255,15 @@ export const RichTextTableOfContents = memo(
           </FloatingToc.Trigger>
 
           <FloatingToc.Content className="max-h-80 w-72 overflow-y-auto">
-            <span className="text-muted mb-1 block px-3 py-1 text-[10px] font-semibold tracking-wider uppercase select-none">
+            <Header className="text-muted mb-1 px-3 py-1 text-[10px] font-semibold tracking-wider uppercase select-none">
               Contents
-            </span>
+            </Header>
             {items.map((item) => (
               <FloatingToc.Item
                 key={item.id}
                 active={item.id === activeId}
                 level={item.level}
+                // FloatingToc.Item documents onClick (not onPress) — keep the documented API.
                 onClick={(event) => onItemClick(event, item)}
               >
                 {item.textContent}

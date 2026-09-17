@@ -58,7 +58,7 @@ export function BlockTypeSelector() {
         variant="tertiary"
       >
         <BlockTypeIcon icon={activeItem.icon} />
-        <span className="text-xs">{activeItem.label}</span>
+        <Label className="text-xs font-normal">{activeItem.label}</Label>
       </Button>
       <Dropdown.Popover placement="bottom start">
         <Dropdown.Menu

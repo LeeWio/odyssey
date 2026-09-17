@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Popover, Button, Tooltip } from "@heroui/react";
+import { Popover, Button, Label, Tooltip } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { motion, useReducedMotion } from "motion/react";
 
@@ -87,11 +87,11 @@ export function TableSelector({ onSelect }: TableSelectorProps) {
                     }
               }
             >
-              <span className="flex h-5 shrink-0 items-center">Insert table</span>
+              <Label className="flex h-5 shrink-0 items-center">Insert table</Label>
 
-              <span className="flex h-5 shrink-0 items-center tabular-nums">
+              <Label className="flex h-5 shrink-0 items-center tabular-nums">
                 {hoveredGrid.cols} × {hoveredGrid.rows} table
-              </span>
+              </Label>
             </motion.div>
           </Popover.Heading>
 

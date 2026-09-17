@@ -126,7 +126,7 @@ export function MultiColumnMenu() {
             {commandState.columnCount === 2 && (
               <>
                 <Icon aria-hidden="true" className="ms-auto size-4" icon="gravity-ui:check" />
-                <span className="sr-only">Current layout</span>
+                <Label className="sr-only">Current layout</Label>
               </>
             )}
           </Dropdown.Item>
@@ -141,7 +141,7 @@ export function MultiColumnMenu() {
             {commandState.columnCount === 3 && (
               <>
                 <Icon aria-hidden="true" className="ms-auto size-4" icon="gravity-ui:check" />
-                <span className="sr-only">Current layout</span>
+                <Label className="sr-only">Current layout</Label>
               </>
             )}
           </Dropdown.Item>
