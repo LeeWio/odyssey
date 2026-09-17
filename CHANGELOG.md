@@ -1,3 +1,10 @@
+## [1.155.6](https://github.com/LeeWio/odyssey/compare/v1.155.5...v1.155.6) (2026-09-17)
+
+
+### Performance Improvements
+
+* **web:** lazy-load moment overlays and mini player ([f895fe9](https://github.com/LeeWio/odyssey/commit/f895fe9ffaea9e559c7a5107bde33988141d054a))
+
 ## [1.155.5](https://github.com/LeeWio/odyssey/compare/v1.155.4...v1.155.5) (2026-09-17)
 
 
