@@ -1,3 +1,10 @@
+## [1.155.9](https://github.com/LeeWio/odyssey/compare/v1.155.8...v1.155.9) (2026-09-17)
+
+
+### Bug Fixes
+
+* **rich-text:** hide bubble menus when read-only ([daa9558](https://github.com/LeeWio/odyssey/commit/daa955887b826b76b593cc1402add378819f48e2))
+
 ## [1.155.8](https://github.com/LeeWio/odyssey/compare/v1.155.7...v1.155.8) (2026-09-17)
 
 
