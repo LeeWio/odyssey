@@ -8,7 +8,7 @@ import { selectRichTextState } from "@/lib/features";
 import { useAppSelector } from "@/lib/hooks";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
 import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
-import { ExtensionKit, createEditExtensionKit } from "./extensions/extension-kit";
+import { ExtensionKit, createExtensionKit } from "./extensions/extension-kit";
 import { ColumnsMenu } from "./menus/columns-menu/columns-menu";
 import { ImageMenu } from "./menus/image-menu/image-menu";
 import { LinkMenu } from "./menus/link-menu/link-menu";
@@ -43,7 +43,7 @@ export function RichText({
   const extensions = useMemo(
     () =>
       showTableOfContents
-        ? createEditExtensionKit({
+        ? createExtensionKit({
             tableOfContents: {
               scrollParent: () => document.getElementById(scrollContainerId) ?? window,
             },
@@ -58,7 +58,7 @@ export function RichText({
     <RichTextEditor
       extensions={extensions}
       editorOptions={{
-        autofocus: true,
+        autofocus: !isReadOnly,
         enableContentCheck: true,
         onCreate: ({ editor }) => {
           onReady?.(editor);
@@ -79,15 +79,19 @@ export function RichText({
       className="flex h-full w-full flex-col overflow-hidden"
     >
       <RichTextEditor.Shell className="relative flex h-full flex-1 flex-col overflow-hidden border-none bg-transparent">
-        <FixedToolbar />
-        <TextMenu />
-        <LinkMenu />
-        <ImageMenu />
-        <TableMenu />
-        <MathMenu />
-        <ColumnsMenu />
-        <ContentItemMenu />
-        <MediaInsertDialog />
+        {!isReadOnly ? (
+          <>
+            <FixedToolbar />
+            <TextMenu />
+            <LinkMenu />
+            <ImageMenu />
+            <TableMenu />
+            <MathMenu />
+            <ColumnsMenu />
+            <ContentItemMenu />
+            <MediaInsertDialog />
+          </>
+        ) : null}
         <RichTextEditor.Content
           id={scrollContainerId}
           className="[&_.ProseMirror-selectednode]:outline-accent/40 min-h-0 flex-1 scrollbar-none overflow-y-auto outline-none focus:outline-none [&_.ProseMirror-selectednode]:rounded-md [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-offset-2 [&.resize-cursor]:cursor-col-resize"
@@ -101,8 +105,12 @@ export function RichText({
             updateLocationHash={false}
           />
         )}
-        <SuggestionToolbar />
-        <EditorFooter />
+        {!isReadOnly ? (
+          <>
+            <SuggestionToolbar />
+            <EditorFooter />
+          </>
+        ) : null}
       </RichTextEditor.Shell>
     </RichTextEditor>
   );

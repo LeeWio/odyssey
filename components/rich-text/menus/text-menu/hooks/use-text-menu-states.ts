@@ -5,7 +5,7 @@ import { isTextSelected } from "@/components/rich-text/utils/is-text-selected";
 import type { ShouldShowProps } from "../../types";
 
 export const useTextMenuStates = () => {
-  const { editor } = useRichTextEditor();
+  const { editor, isReadOnly } = useRichTextEditor();
 
   const states = useRichTextEditorState((ctx) => {
     if (!ctx.editor) {
@@ -62,7 +62,7 @@ export const useTextMenuStates = () => {
 
   const shouldShow = useCallback(
     ({ view, from }: ShouldShowProps) => {
-      if (!editor || !view || view.isDestroyed || editor.view.dragging) {
+      if (!editor || isReadOnly || !view || view.isDestroyed || editor.view.dragging) {
         return false;
       }
 
@@ -82,7 +82,7 @@ export const useTextMenuStates = () => {
 
       return isTextSelected({ editor });
     },
-    [editor]
+    [editor, isReadOnly]
   );
 
   return {

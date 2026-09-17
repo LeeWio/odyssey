@@ -19,6 +19,7 @@ import {
   Youtube,
   createTableOfContents,
 } from ".";
+import type { TableOfContentsOptions } from "@tiptap/extension-table-of-contents";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { FindAndReplace } from "@tiptap/extension-find-and-replace";
@@ -26,11 +27,6 @@ import { Markdown } from "@tiptap/markdown";
 import StarterKit from "@tiptap/starter-kit";
 
 import { TaskItemNodeView } from "./task-list/task-item-node-view";
-import {
-  createReadExtensionKit,
-  ReadExtensionKit,
-  type ReadExtensionKitOptions,
-} from "./read-extension-kit";
 
 import "katex/dist/katex.min.css";
 
@@ -43,12 +39,16 @@ const HeroUITaskItem = TaskItem.extend({
   },
 });
 
-export type ExtensionKitOptions = ReadExtensionKitOptions;
+export interface ExtensionKitOptions {
+  tableOfContents?: Partial<TableOfContentsOptions>;
+}
 
-export { createReadExtensionKit, ReadExtensionKit };
-
-/** Full editing surface used by the composer modal and admin editor. */
-export function createEditExtensionKit(options: ExtensionKitOptions = {}) {
+/**
+ * Single shared TipTap extension kit for both reading and editing.
+ * Read-only surfaces should hide bubble menus / toolbars via `isReadOnly`,
+ * not by mounting a second kit.
+ */
+export function createExtensionKit(options: ExtensionKitOptions = {}) {
   return [
     ...DetailsKit,
     Emoji,
@@ -95,17 +95,25 @@ export function createEditExtensionKit(options: ExtensionKitOptions = {}) {
   ];
 }
 
-/** @deprecated Prefer createEditExtensionKit — kept for existing editor call sites. */
-export function createExtensionKit(options: ExtensionKitOptions = {}) {
-  return createEditExtensionKit(options);
+/** @deprecated Alias kept for older call sites — prefer createExtensionKit. */
+export function createEditExtensionKit(options: ExtensionKitOptions = {}) {
+  return createExtensionKit(options);
 }
 
-export const ExtensionKit = createEditExtensionKit();
+/** @deprecated Prefer createExtensionKit — reading and editing share one kit. */
+export function createReadExtensionKit(options: ExtensionKitOptions = {}) {
+  return createExtensionKit(options);
+}
+
+export const ExtensionKit = createExtensionKit();
+
+/** @deprecated Prefer ExtensionKit. */
+export const ReadExtensionKit = ExtensionKit;
 
 /**
  * Extensions used by non-editor content conversion helpers.
  * RichTextEditor injects these base extensions itself at runtime.
  */
 export function createConversionExtensions() {
-  return [StarterKit.configure({ heading: { levels: [1, 2, 3] } }), ...createEditExtensionKit()];
+  return [StarterKit.configure({ heading: { levels: [1, 2, 3] } }), ...createExtensionKit()];
 }

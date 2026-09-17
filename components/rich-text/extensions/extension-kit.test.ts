@@ -1,7 +1,6 @@
 import { generateHTML, generateJSON, type JSONContent } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
-import { createConversionExtensions, createEditExtensionKit } from "./extension-kit";
-import { createReadExtensionKit } from "./read-extension-kit";
+import { createConversionExtensions, createExtensionKit } from "./extension-kit";
 
 describe("conversion extensions", () => {
   it("round-trips link and underline marks through the shared schema", () => {
@@ -37,15 +36,12 @@ describe("conversion extensions", () => {
   });
 });
 
-describe("read vs edit extension kits", () => {
-  it("keeps the read kit smaller than the edit kit", () => {
-    const readNames = createReadExtensionKit().map((ext) => ext.name);
-    const editNames = createEditExtensionKit().map((ext) => ext.name);
+describe("shared extension kit", () => {
+  it("exposes one kit used for both reading and editing", () => {
+    const names = createExtensionKit().map((ext) => ext.name);
 
-    expect(readNames).not.toContain("findAndReplace");
-    expect(readNames).not.toContain("fileHandler");
-    expect(readNames).not.toContain("markdown");
-    expect(editNames).toEqual(expect.arrayContaining(["findAndReplace", "markdown"]));
-    expect(editNames.length).toBeGreaterThan(readNames.length);
+    expect(names).toEqual(
+      expect.arrayContaining(["emoji", "findAndReplace", "markdown", "image", "Mathematics"])
+    );
   });
 });
