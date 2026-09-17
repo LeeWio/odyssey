@@ -1,7 +1,7 @@
 import {
   FileHandlePlugin,
-  FileHandler,
-  type FileHandlerOptions,
+  FileHandler as TiptapFileHandler,
+  type FileHandlerOptions as TiptapFileHandlerOptions,
 } from "@tiptap/extension-file-handler";
 import type { Editor, JSONContent } from "@tiptap/react";
 import { PluginKey } from "@tiptap/pm/state";
@@ -20,7 +20,7 @@ import {
 
 export type FileHandlerRejectReason = string;
 
-export type MediaFileHandlerOptions = FileHandlerOptions & {
+export type FileHandlerOptions = TiptapFileHandlerOptions & {
   onReject?: (file: File, reason: FileHandlerRejectReason) => void;
 };
 
@@ -191,11 +191,11 @@ export function handleFilePaste(
 }
 
 /**
- * Odyssey media FileHandler — extends TipTap's OSS FileHandler so drop/paste
- * always go through our upload placeholders. Defaults to `consumePasteEvent: true`
- * to avoid duplicate nodes from Image / HTML paste rules.
+ * Extends TipTap FileHandler so drop/paste go through our upload placeholders.
+ * `consumePasteEvent` defaults to true to avoid duplicate nodes from Image /
+ * HTML paste rules.
  */
-export const MediaFileHandler = FileHandler.extend<MediaFileHandlerOptions>({
+export const FileHandler = TiptapFileHandler.extend<FileHandlerOptions>({
   addOptions() {
     return {
       ...this.parent?.(),
@@ -236,15 +236,5 @@ export const MediaFileHandler = FileHandler.extend<MediaFileHandlerOptions>({
     ];
   },
 });
-
-/** Per-editor instance (isolated plugin state), same pattern as other kit extensions. */
-export function createMediaFileHandler(options: Partial<MediaFileHandlerOptions> = {}) {
-  return MediaFileHandler.configure(options);
-}
-
-/** @deprecated Prefer createMediaFileHandler / MediaFileHandler.configure */
-export function createFileHandler(options: Partial<MediaFileHandlerOptions> = {}) {
-  return createMediaFileHandler(options);
-}
 
 export { createImageAltText };

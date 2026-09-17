@@ -19,7 +19,7 @@ import {
   Youtube,
   createTableOfContents,
 } from ".";
-import { createMediaFileHandler } from "./FileHandler";
+import { FileHandler } from "./FileHandler";
 import type { TableOfContentsOptions } from "@tiptap/extension-table-of-contents";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { ReactNodeViewRenderer } from "@tiptap/react";
@@ -74,7 +74,7 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
     Audio.configure({}),
     Attachment.configure({}),
     Youtube.configure({}),
-    ...(fileHandler ? [createMediaFileHandler()] : []),
+    ...(fileHandler ? [FileHandler.configure({})] : []),
     Mathematics.configure({}),
     Mention.configure({}),
     Typography.configure({}),
