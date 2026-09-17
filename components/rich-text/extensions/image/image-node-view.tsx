@@ -205,6 +205,16 @@ export function ImageNodeView({ deleteNode, editor, node, updateAttributes }: No
   if (!src) {
     const isDisabled = !editor.isEditable || isUploading;
 
+    if (!editor.isEditable && !pendingUpload) {
+      return (
+        <NodeViewWrapper className="my-8" contentEditable={false}>
+          <div className="border-separator text-muted flex min-h-32 items-center justify-center rounded-2xl border border-dashed px-4 text-sm">
+            Image unavailable
+          </div>
+        </NodeViewWrapper>
+      );
+    }
+
     return (
       <NodeViewWrapper className="my-8" contentEditable={false}>
         <DropZone className="w-full">

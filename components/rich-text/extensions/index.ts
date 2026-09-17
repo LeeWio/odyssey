@@ -13,4 +13,3 @@ export { Superscript } from "./superscript";
 export { TableOfContents, createTableOfContents } from "./table-of-contents";
 export { TextAlign } from "./text-align";
 export { Typography } from "./typography";
-export * from "./block-entrance-animation";

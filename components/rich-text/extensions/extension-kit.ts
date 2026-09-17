@@ -26,9 +26,8 @@ import { FindAndReplace } from "@tiptap/extension-find-and-replace";
 import { Markdown } from "@tiptap/markdown";
 import StarterKit from "@tiptap/starter-kit";
 
+import { EmojiBase } from "./emoji/emoji-base";
 import { TaskItemNodeView } from "./task-list/task-item-node-view";
-
-import "katex/dist/katex.min.css";
 
 const HeroUITaskItem = TaskItem.extend({
   addNodeView() {
@@ -41,22 +40,37 @@ const HeroUITaskItem = TaskItem.extend({
 
 export interface ExtensionKitOptions {
   tableOfContents?: Partial<TableOfContentsOptions>;
+  /** Inline emoji suggestion picker. Default true for the editor. */
+  emojiSuggestion?: boolean;
+  /** Drag/drop and paste file handler. Default true for the editor. */
+  fileHandler?: boolean;
+  /** Find-and-replace plugin. Default true for the editor. */
+  findAndReplace?: boolean;
+  /** Markdown import/export extension. Default true for the editor. */
+  markdown?: boolean;
 }
 
 /**
- * Single shared TipTap extension kit for both reading and editing.
- * Read-only surfaces should hide bubble menus / toolbars via `isReadOnly`,
- * not by mounting a second kit.
+ * Single TipTap extension factory for reading and editing.
+ * Turn off edit-only plugins for read surfaces; schema nodes stay shared.
  */
 export function createExtensionKit(options: ExtensionKitOptions = {}) {
+  const {
+    tableOfContents,
+    emojiSuggestion = true,
+    fileHandler = true,
+    findAndReplace = true,
+    markdown = true,
+  } = options;
+
   return [
     ...DetailsKit,
-    Emoji,
+    emojiSuggestion ? Emoji : EmojiBase,
     Image,
     Audio,
     Attachment,
     Youtube,
-    MediaFileHandler,
+    ...(fileHandler ? [MediaFileHandler] : []),
     Mathematics,
     Mention,
     Typography,
@@ -75,9 +89,13 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
           `${checked ? "Mark incomplete" : "Mark complete"}: ${node.textContent || "empty task"}`,
       },
     }),
-    FindAndReplace.configure({
-      searchDebounceMs: 0,
-    }),
+    ...(findAndReplace
+      ? [
+          FindAndReplace.configure({
+            searchDebounceMs: 0,
+          }),
+        ]
+      : []),
     Subscript,
     Superscript,
     TextAlign,
@@ -85,30 +103,33 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
     Indent,
     Column,
     Columns,
-    Markdown.configure({
-      markedOptions: {
-        gfm: true,
-      },
-    }),
+    ...(markdown
+      ? [
+          Markdown.configure({
+            markedOptions: {
+              gfm: true,
+            },
+          }),
+        ]
+      : []),
     TableKit,
-    createTableOfContents(options.tableOfContents),
+    createTableOfContents(tableOfContents),
   ];
 }
 
-/** @deprecated Alias kept for older call sites — prefer createExtensionKit. */
-export function createEditExtensionKit(options: ExtensionKitOptions = {}) {
-  return createExtensionKit(options);
-}
-
-/** @deprecated Prefer createExtensionKit — reading and editing share one kit. */
-export function createReadExtensionKit(options: ExtensionKitOptions = {}) {
-  return createExtensionKit(options);
-}
-
+/** Default editable kit. */
 export const ExtensionKit = createExtensionKit();
 
-/** @deprecated Prefer ExtensionKit. */
-export const ReadExtensionKit = ExtensionKit;
+/**
+ * Read-oriented kit: same schema nodes, without edit-only plugins.
+ * Prefer this from article readers while still sharing createExtensionKit.
+ */
+export const ReaderExtensionKit = createExtensionKit({
+  emojiSuggestion: false,
+  fileHandler: false,
+  findAndReplace: false,
+  markdown: false,
+});
 
 /**
  * Extensions used by non-editor content conversion helpers.

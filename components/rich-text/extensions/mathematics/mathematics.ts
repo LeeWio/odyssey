@@ -1,5 +1,7 @@
 import { Mathematics as TiptapMathematics } from "@tiptap/extension-mathematics";
 
+import "katex/dist/katex.min.css";
+
 export const Mathematics = TiptapMathematics.configure({
   katexOptions: {
     strict: false,

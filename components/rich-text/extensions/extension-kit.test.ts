@@ -1,6 +1,10 @@
 import { generateHTML, generateJSON, type JSONContent } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
-import { createConversionExtensions, createExtensionKit } from "./extension-kit";
+import {
+  createConversionExtensions,
+  createExtensionKit,
+  ReaderExtensionKit,
+} from "./extension-kit";
 
 describe("conversion extensions", () => {
   it("round-trips link and underline marks through the shared schema", () => {
@@ -37,11 +41,20 @@ describe("conversion extensions", () => {
 });
 
 describe("shared extension kit", () => {
-  it("exposes one kit used for both reading and editing", () => {
+  it("includes edit-only plugins by default", () => {
     const names = createExtensionKit().map((ext) => ext.name);
 
     expect(names).toEqual(
-      expect.arrayContaining(["emoji", "findAndReplace", "markdown", "image", "Mathematics"])
+      expect.arrayContaining(["emoji", "findAndReplace", "markdown", "image", "Mathematics", "fileHandler"])
     );
+  });
+
+  it("lets readers omit edit-only plugins while keeping schema nodes", () => {
+    const names = ReaderExtensionKit.map((ext) => ext.name);
+
+    expect(names).toEqual(expect.arrayContaining(["emoji", "image", "Mathematics", "audio", "attachment"]));
+    expect(names).not.toContain("findAndReplace");
+    expect(names).not.toContain("markdown");
+    expect(names).not.toContain("fileHandler");
   });
 });
