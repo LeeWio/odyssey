@@ -5,6 +5,7 @@ import {
   CloseButton,
   Description,
   Input,
+  Kbd,
   Label,
   Popover,
   Surface,
@@ -220,9 +221,9 @@ export function FindReplacePopover() {
               >
                 <CellSwitch.Trigger>
                   <CellSwitch.Label>
-                    <span aria-hidden="true" className="mr-2 text-xs font-semibold">
-                      Aa
-                    </span>
+                    <Kbd aria-hidden="true" className="me-2" variant="light">
+                      <Kbd.Content>Aa</Kbd.Content>
+                    </Kbd>
                     Match case
                   </CellSwitch.Label>
                   <CellSwitch.Control />
@@ -237,9 +238,9 @@ export function FindReplacePopover() {
               >
                 <CellSwitch.Trigger>
                   <CellSwitch.Label>
-                    <span aria-hidden="true" className="mr-2 text-xs font-semibold underline">
-                      ab
-                    </span>
+                    <Kbd aria-hidden="true" className="me-2 underline" variant="light">
+                      <Kbd.Content>ab</Kbd.Content>
+                    </Kbd>
                     Whole words
                   </CellSwitch.Label>
                   <CellSwitch.Control />

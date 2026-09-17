@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Tooltip } from "@heroui/react";
+import { Button, ButtonGroup, Tooltip, Typography } from "@heroui/react";
 import {
   RichTextEditor,
   useRichTextEditor,
@@ -22,13 +22,23 @@ export const LinkMenuPreview: React.FC<LinkMenuPreviewProps> = ({ onEdit }) => {
 
   if (!editor || !linkAttributes?.href) return null;
 
+  const href = String(linkAttributes.href);
+
   return (
-    <div className="flex flex-row p-1">
+    <div className="flex flex-row items-center gap-0.5 p-1">
       <Tooltip delay={0}>
-        <Button variant="ghost" size="sm" className="text-muted max-w-3xl" onPress={onEdit}>
-          {truncateStart(linkAttributes?.href, 34)}
+        <Button
+          aria-label={`Edit link: ${href}`}
+          className="text-muted max-w-3xl"
+          size="sm"
+          variant="ghost"
+          onPress={onEdit}
+        >
+          <Typography className="font-normal" truncate>
+            {truncateStart(href, 34)}
+          </Typography>
         </Button>
-        <Tooltip.Content>{linkAttributes?.href}</Tooltip.Content>
+        <Tooltip.Content>{href}</Tooltip.Content>
       </Tooltip>
 
       <RichTextEditor.ToolbarSeparator orientation="vertical" />
@@ -38,11 +48,9 @@ export const LinkMenuPreview: React.FC<LinkMenuPreviewProps> = ({ onEdit }) => {
           size="sm"
           variant="ghost"
           isIconOnly
+          aria-label="Open link in new tab"
           onCommand={() => {
-            const href = linkAttributes?.href;
-            if (href) {
-              window.open(href, "_blank", "noopener,noreferrer");
-            }
+            window.open(href, "_blank", "noopener,noreferrer");
           }}
           tooltip="Open in new tab"
         >
@@ -52,8 +60,9 @@ export const LinkMenuPreview: React.FC<LinkMenuPreviewProps> = ({ onEdit }) => {
           size="sm"
           isIconOnly
           variant="ghost"
-          onCommand={(editor) => {
-            editor.chain().focus().extendMarkRange("link").unsetLink().run();
+          aria-label="Remove link"
+          onCommand={(currentEditor) => {
+            currentEditor.chain().focus().extendMarkRange("link").unsetLink().run();
           }}
           tooltip="Remove link"
         >

@@ -1,8 +1,8 @@
 "use client";
 
 import { Magnifier } from "@gravity-ui/icons";
-import { Button, EmptyState, ScrollShadow, SearchField, Tooltip } from "@heroui/react";
-import { EMOJI_CATEGORIES, EMOJI_SKIN_TONES, EmojiPicker } from "@heroui-pro/react";
+import { Button, ScrollShadow, SearchField, Tooltip } from "@heroui/react";
+import { EMOJI_CATEGORIES, EMOJI_SKIN_TONES, EmojiPicker, EmptyState } from "@heroui-pro/react";
 import emojisList from "emojibase-data/en/compact.json";
 import {
   forwardRef,
@@ -109,9 +109,14 @@ function EmojiPickerContent({ inputRef, onSkinToneChange, skinTone }: EmojiPicke
         ref={gridRef}
         items={displayEmojis}
         renderEmptyState={() => (
-          <EmptyState className="flex h-full min-h-20 flex-1 flex-col items-center justify-center gap-2">
-            <Magnifier className="text-muted size-5" />
-            No emoji found.
+          <EmptyState className="flex h-full min-h-20 flex-1" size="sm">
+            <EmptyState.Header>
+              <EmptyState.Media variant="icon">
+                <Magnifier aria-hidden="true" />
+              </EmptyState.Media>
+              <EmptyState.Title>No emoji found</EmptyState.Title>
+              <EmptyState.Description>Try another search term.</EmptyState.Description>
+            </EmptyState.Header>
           </EmptyState>
         )}
       >
@@ -141,9 +146,7 @@ function EmojiPickerContent({ inputRef, onSkinToneChange, skinTone }: EmojiPicke
                     {emoji}
                   </span>
                 </Button>
-                <Tooltip.Content placement="top">
-                  <p>{label}</p>
-                </Tooltip.Content>
+                <Tooltip.Content placement="top">{label}</Tooltip.Content>
               </Tooltip>
             ))}
           </div>

@@ -1,3 +1,4 @@
+import { Surface } from "@heroui/react";
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useCallback, useState } from "react";
 import { LinkMenuEdit } from "./link-menu-edit";
@@ -29,13 +30,13 @@ export function LinkMenu() {
       }
     >
       {mode === "preview" ? (
-        <div className="popover__dialog rich-text-editor__link-popover-content p-0">
+        <Surface className="p-0" variant="transparent">
           <LinkMenuPreview onEdit={handleEdit} />
-        </div>
+        </Surface>
       ) : (
-        <div className="popover__dialog rich-text-editor__link-popover-content p-3">
+        <Surface className="flex flex-col gap-3 p-3" variant="transparent">
           <LinkMenuEdit onCancel={handleCancel} />
-        </div>
+        </Surface>
       )}
     </RichTextEditor.BubbleMenu>
   );
