@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Eye } from "@gravity-ui/icons";
 
 // Sub-components from our modular features
-import { BlogFeed } from "@/features/blog";
+import BlogFeed from "@/features/blog/feed/blog-feed";
 import { ColumnsIndex } from "@/features/column";
 import { ArchivePage } from "@/features/archive";
 import { ExplorePage } from "@/features/explore";

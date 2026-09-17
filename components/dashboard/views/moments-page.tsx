@@ -30,13 +30,13 @@ import {
   useGetAllMomentsQuery,
   useGetPublicMomentsQuery,
 } from "@/lib/features/moment";
+import { MomentPublisher } from "@/features/moment/components/publisher";
+import { useMomentLike } from "@/features/moment/hooks/use-moment-like";
 import {
   extractMomentPlainText,
   isDocumentEmpty,
-  MomentPublisher,
   parseMomentContent,
-  useMomentLike,
-} from "@/features/moment";
+} from "@/features/moment/utils/content-parser";
 import { RemoteMedia } from "@/components/ui/remote-media";
 import { usePortalContainer } from "../use-portal-container";
 

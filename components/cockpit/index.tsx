@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useRealTime } from "@/hooks/use-real-time";
 import { selectIsSheetOpen, setSheetOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { MusicMiniWidget } from "@/features/blog";
+import { MusicMiniWidget } from "@/features/blog/auxiliary/music-mini-widget";
 import { SunMaxFillIcon } from "../icons";
 import { AnimatedNumber } from "../ui/animated-number";
 import { Stocks } from "./widgets/stocks";

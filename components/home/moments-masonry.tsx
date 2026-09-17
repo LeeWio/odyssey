@@ -6,7 +6,7 @@ import { gsap } from "gsap";
 import { useReducedMotion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { MomentCard } from "@/features/moment";
+import { MomentCard } from "@/features/moment/components/card";
 import type { MomentResponse } from "@/lib/features/moment";
 
 gsap.registerPlugin(useGSAP);

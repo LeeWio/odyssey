@@ -25,8 +25,7 @@ import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useDebounce } from "use-debounce";
 
-import { ArticleEngagementCard } from "@/features/blog";
-import { useGetFeaturedPostsQuery } from "@/lib/features/post";
+import { ArticleEngagementCard } from "@/features/blog/cards/article-engagement-card";import { useGetFeaturedPostsQuery } from "@/lib/features/post";
 import { useGetPublicColumnsQuery } from "@/lib/features/column";
 import {
   useRetrieveArchiveQuery,

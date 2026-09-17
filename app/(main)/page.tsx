@@ -2,7 +2,6 @@
 
 import { ArrowDownIcon, ArrowUpIcon } from "@/components/icons";
 import { HelloApple } from "@/components/home/hello-apple";
-import { RepositoryActivity } from "@/components/home/repository-activity";
 import {
   MotionCard,
   MotionChip,
@@ -40,8 +39,6 @@ import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { PencilToSquare, ChevronDown } from "@gravity-ui/icons";
-import { FeaturedWriting, MomentsShowcase } from "@/components/home/content-dispatch";
-
 const GradientText = dynamic(() => import("@/components/ui/gradient-text"), {
   ssr: false,
   loading: () => <span className="contents" />,
@@ -51,6 +48,53 @@ const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-boar
   ssr: false,
   loading: () => <Skeleton className="min-h-64 w-full rounded-3xl" />,
 });
+
+const FeaturedWriting = dynamic(
+  () => import("@/components/home/featured-writing").then((mod) => mod.FeaturedWriting),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+        <Skeleton className="mx-auto h-10 w-48 rounded-full" />
+        <Skeleton className="mx-auto mt-6 h-12 w-72 rounded-2xl" />
+        <div className="mt-12 grid gap-4 sm:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={index} className="aspect-[16/10] w-full rounded-3xl" />
+          ))}
+        </div>
+      </div>
+    ),
+  }
+);
+
+const MomentsShowcase = dynamic(
+  () => import("@/components/home/moments-showcase").then((mod) => mod.MomentsShowcase),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mx-auto w-full max-w-7xl px-6 py-24 sm:py-32">
+        <Skeleton className="mx-auto h-10 w-40 rounded-full" />
+        <Skeleton className="mx-auto mt-6 h-12 w-64 rounded-2xl" />
+        <div className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="aspect-[4/5] w-full rounded-2xl" />
+          ))}
+        </div>
+      </div>
+    ),
+  }
+);
+
+const RepositoryActivityPanel = dynamic(
+  () =>
+    import("@/components/home/repository-activity").then((mod) => ({
+      default: mod.RepositoryActivity,
+    })),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="mt-4 h-40 w-full rounded-2xl" />,
+  }
+);
 
 const MotionAccordion = motion.create(Accordion);
 
@@ -551,7 +595,7 @@ export default function Home() {
                 </div>
               </div>
             ) : githubActivity?.available ? (
-              <RepositoryActivity activity={githubActivity} />
+              <RepositoryActivityPanel activity={githubActivity} />
             ) : (
               <Card className="w-full max-w-[620px] min-w-0 p-5" variant="secondary">
                 <Card.Title className="text-sm">GitHub activity is unavailable</Card.Title>

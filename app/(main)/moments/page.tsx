@@ -6,7 +6,7 @@ import { EmptyState } from "@heroui-pro/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNow } from "next-intl";
 
-import { MomentCard, MomentCardSkeleton } from "@/features/moment";
+import { MomentCard, MomentCardSkeleton } from "@/features/moment/components/card";
 import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
