@@ -1,3 +1,10 @@
+## [1.156.1](https://github.com/LeeWio/odyssey/compare/v1.156.0...v1.156.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **rich-text:** align TipTap skill best practices ([ef96b10](https://github.com/LeeWio/odyssey/commit/ef96b107972da690f3ab62e41b98f0d9ecb19e96))
+
 # [1.156.0](https://github.com/LeeWio/odyssey/compare/v1.155.9...v1.156.0) (2026-09-17)
 
 
