@@ -1,3 +1,10 @@
+## [1.155.5](https://github.com/LeeWio/odyssey/compare/v1.155.4...v1.155.5) (2026-09-17)
+
+
+### Performance Improvements
+
+* **reader:** defer TipTap article body behind dynamic import ([2b5cc0d](https://github.com/LeeWio/odyssey/commit/2b5cc0daaa8467c911dc953c284ea19cc35035a0))
+
 ## [1.155.4](https://github.com/LeeWio/odyssey/compare/v1.155.3...v1.155.4) (2026-09-17)
 
 
