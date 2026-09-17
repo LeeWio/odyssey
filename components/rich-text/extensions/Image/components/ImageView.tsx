@@ -1,6 +1,6 @@
 "use client";
 
-import { Surface } from "@heroui/react";
+import { Surface, Typography } from "@heroui/react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import NextImage from "next/image";
 
@@ -25,9 +25,14 @@ export function ImageView({ editor, getPos, node }: NodeViewProps) {
     if (!editor.isEditable) {
       return (
         <NodeViewWrapper className="my-8" contentEditable={false}>
-          <div className="border-separator text-muted flex min-h-32 items-center justify-center rounded-2xl border border-dashed px-4 text-sm">
-            Image unavailable
-          </div>
+          <Surface
+            variant="secondary"
+            className="flex min-h-32 items-center justify-center rounded-2xl px-4"
+          >
+            <Typography color="muted" type="body-sm">
+              Image unavailable
+            </Typography>
+          </Surface>
         </NodeViewWrapper>
       );
     }

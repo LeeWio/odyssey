@@ -1,82 +1,64 @@
 "use client";
 
 import { toast } from "@heroui/react";
-import { type ChangeEvent, type DragEvent, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useUploadFileMutation } from "@/lib/features/file";
-import { ACCEPTED_IMAGE_TYPES, validateMediaFile } from "../../media/media-upload";
+import { validateMediaFile } from "../../media/media-upload";
 
 export function useImageUploader({ onUpload }: { onUpload: (url: string) => void }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [activeFile, setActiveFile] = useState<File | null>(null);
   const [uploadFile] = useUploadFileMutation();
+  const abortRef = useRef<(() => void) | null>(null);
 
   const upload = useCallback(
     async (file: File) => {
       const validationError = validateMediaFile(file, "image");
       if (validationError) {
         toast.warning(validationError);
+        setError(validationError);
+        setActiveFile(file);
         return;
       }
 
+      abortRef.current?.();
+      setError(null);
+      setActiveFile(file);
       setLoading(true);
+
+      const request = uploadFile(file);
+      abortRef.current = request.abort;
+
       try {
-        const response = await uploadFile(file).unwrap();
+        const response = await request.unwrap();
         onUpload(response.fileUrl);
       } catch {
-        toast.danger("Image upload failed. Please try again.");
+        const message = "Upload failed. Try again.";
+        setError(message);
+        toast.danger(message);
       } finally {
+        abortRef.current = null;
         setLoading(false);
       }
     },
     [onUpload, uploadFile]
   );
 
-  return { loading, upload };
-}
+  const retry = useCallback(() => {
+    if (activeFile) void upload(activeFile);
+  }, [activeFile, upload]);
 
-export function useFilePicker() {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const openFilePicker = useCallback(() => {
-    inputRef.current?.click();
+  const clear = useCallback(() => {
+    abortRef.current?.();
+    abortRef.current = null;
+    setActiveFile(null);
+    setError(null);
+    setLoading(false);
   }, []);
 
-  const onFileChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>, upload: (file: File) => void) => {
-      const file = event.target.files?.item(0);
-      event.target.value = "";
-      if (file) void upload(file);
-    },
-    []
-  );
-
-  return { inputRef, openFilePicker, onFileChange, accept: [...ACCEPTED_IMAGE_TYPES].join(",") };
-}
-
-export function useImageDropZone({ uploader }: { uploader: (file: File) => void }) {
-  const [draggedInside, setDraggedInside] = useState(false);
-
-  const onDrop = useCallback(
-    (event: DragEvent<HTMLDivElement>) => {
-      setDraggedInside(false);
-      const files = Array.from(event.dataTransfer.files).filter((file) =>
-        file.type.startsWith("image/")
-      );
-      if (files.length === 0) return;
-
-      event.preventDefault();
-      const file = files[0];
-      if (file) uploader(file);
-    },
-    [uploader]
-  );
-
-  return {
-    draggedInside,
-    onDragEnter: () => setDraggedInside(true),
-    onDragLeave: () => setDraggedInside(false),
-    onDrop,
-  };
+  return { activeFile, clear, error, loading, retry, upload };
 }
 
 export function useAutoUploadPendingFile({

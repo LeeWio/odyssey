@@ -1,5 +1,6 @@
 "use client";
 
+import { Surface, Typography } from "@heroui/react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import { useCallback, useMemo } from "react";
 
@@ -7,10 +8,9 @@ import { takePendingImageFile } from "../pending-files";
 import { ImageUploader } from "./ImageUploader";
 
 /**
- * Placeholder node view: pick/drop an image, upload via existing file API,
- * then replace this node with a committed `image` node.
+ * Placeholder node view: HeroUI DropZone → existing file API → committed `image` node.
  */
-export function ImageUploadView({ editor, getPos, node }: NodeViewProps) {
+export function ImageUploadView({ editor, getPos, node, deleteNode }: NodeViewProps) {
   const fileKey = typeof node.attrs.fileKey === "string" ? node.attrs.fileKey : null;
   const pendingFile = useMemo(() => takePendingImageFile(fileKey), [fileKey]);
 
@@ -36,16 +36,25 @@ export function ImageUploadView({ editor, getPos, node }: NodeViewProps) {
   if (!editor.isEditable) {
     return (
       <NodeViewWrapper className="my-8" contentEditable={false}>
-        <div className="border-separator text-muted flex min-h-32 items-center justify-center rounded-2xl border border-dashed px-4 text-sm">
-          Image unavailable
-        </div>
+        <Surface
+          variant="secondary"
+          className="flex min-h-32 items-center justify-center rounded-2xl px-4"
+        >
+          <Typography color="muted" type="body-sm">
+            Image unavailable
+          </Typography>
+        </Surface>
       </NodeViewWrapper>
     );
   }
 
   return (
     <NodeViewWrapper className="my-8" contentEditable={false} data-drag-handle>
-      <ImageUploader initialFile={pendingFile} onUpload={commitImage} />
+      <ImageUploader
+        initialFile={pendingFile}
+        onCancel={() => deleteNode()}
+        onUpload={commitImage}
+      />
     </NodeViewWrapper>
   );
 }

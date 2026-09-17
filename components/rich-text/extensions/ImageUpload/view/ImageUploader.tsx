@@ -1,74 +1,119 @@
 "use client";
 
-import { Button, Spinner } from "@heroui/react";
+import { DropZone } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useCallback } from "react";
+import type { DropZoneProps } from "react-aria-components";
 
-import {
-  useAutoUploadPendingFile,
-  useFilePicker,
-  useImageDropZone,
-  useImageUploader,
-} from "./hooks";
+import { ACCEPTED_IMAGE_TYPES } from "../../media/media-upload";
+import { useAutoUploadPendingFile, useImageUploader } from "./hooks";
+
+type DropEvent = Parameters<NonNullable<DropZoneProps["onDrop"]>>[0];
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getFileExtension(fileName: string): string {
+  const extension = fileName.split(".").pop();
+  if (!extension || extension === fileName) return "IMG";
+  return extension.toLowerCase() === "jpeg" ? "JPG" : extension.toUpperCase();
+}
 
 export function ImageUploader({
   onUpload,
   initialFile = null,
+  onCancel,
 }: {
   onUpload: (url: string) => void;
   initialFile?: File | null;
+  onCancel?: () => void;
 }) {
-  const { loading, upload } = useImageUploader({ onUpload });
-  const { inputRef, openFilePicker, onFileChange, accept } = useFilePicker();
-  const { draggedInside, onDragEnter, onDragLeave, onDrop } = useImageDropZone({
-    uploader: upload,
-  });
-
+  const { activeFile, clear, error, loading, retry, upload } = useImageUploader({ onUpload });
   useAutoUploadPendingFile({ file: initialFile, upload });
 
-  const handleFileChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => onFileChange(event, upload),
-    [onFileChange, upload]
+  const isDisabled = loading;
+  const pendingFile = activeFile ?? initialFile;
+  const status = error ? "failed" : loading ? "uploading" : "complete";
+
+  const handleSelect = useCallback(
+    (files: FileList) => {
+      const file = files.item(0);
+      if (file) void upload(file);
+    },
+    [upload]
   );
 
-  if (loading) {
-    return (
-      <div className="bg-surface-secondary flex min-h-40 items-center justify-center rounded-2xl p-8">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+  const handleDrop = useCallback(
+    async (event: DropEvent) => {
+      const fileItem = event.items.find((item) => item.kind === "file");
+      if (fileItem?.kind === "file") {
+        void upload(await fileItem.getFile());
+      }
+    },
+    [upload]
+  );
 
   return (
-    <div
-      className={`bg-surface-secondary flex flex-col items-center justify-center rounded-2xl px-8 py-10 transition-colors ${
-        draggedInside ? "bg-default/60" : ""
-      }`}
-      contentEditable={false}
-      onDragEnter={onDragEnter}
-      onDragLeave={onDragLeave}
-      onDragOver={(event) => event.preventDefault()}
-      onDrop={onDrop}
-    >
-      <Icon
-        aria-hidden="true"
-        className="text-muted mb-4 size-12 opacity-40"
-        icon="gravity-ui:picture"
+    <DropZone className="w-full">
+      {!pendingFile && (
+        <DropZone.Area
+          isDisabled={isDisabled}
+          getDropOperation={(types) =>
+            [...ACCEPTED_IMAGE_TYPES].some((type) => types.has(type)) ? "copy" : "cancel"
+          }
+          onDrop={handleDrop}
+        >
+          <DropZone.Icon>
+            <Icon aria-hidden="true" icon="gravity-ui:picture" />
+          </DropZone.Icon>
+          <DropZone.Label>Add an image</DropZone.Label>
+          <DropZone.Description>PNG, JPG, GIF, WebP, or SVG up to 10 MB.</DropZone.Description>
+          <DropZone.Trigger isDisabled={isDisabled}>Select image</DropZone.Trigger>
+        </DropZone.Area>
+      )}
+
+      <DropZone.Input
+        accept={[...ACCEPTED_IMAGE_TYPES].join(",")}
+        disabled={isDisabled}
+        onSelect={handleSelect}
       />
-      <p className="text-muted mb-3 text-center text-sm">
-        {draggedInside ? "Drop image here" : "Drag and drop or upload an image"}
-      </p>
-      <Button size="sm" variant="secondary" isDisabled={draggedInside} onPress={openFilePicker}>
-        <Icon aria-hidden="true" icon="gravity-ui:arrow-up-from-line" />
-        Upload image
-      </Button>
-      <input
-        ref={inputRef}
-        accept={accept}
-        className="hidden"
-        type="file"
-        onChange={handleFileChange}
-      />
-    </div>
+
+      {pendingFile && (
+        <DropZone.FileList>
+          <DropZone.FileItem status={status === "complete" ? "uploading" : status}>
+            <DropZone.FileFormatIcon format={getFileExtension(pendingFile.name)} />
+            <DropZone.FileInfo>
+              <DropZone.FileName>{pendingFile.name}</DropZone.FileName>
+              <DropZone.FileMeta>
+                {formatFileSize(pendingFile.size)} · {error ?? "Uploading…"}
+              </DropZone.FileMeta>
+              {loading && (
+                <DropZone.FileProgress aria-label={`Uploading ${pendingFile.name}`} isIndeterminate>
+                  <DropZone.FileProgressTrack>
+                    <DropZone.FileProgressFill />
+                  </DropZone.FileProgressTrack>
+                </DropZone.FileProgress>
+              )}
+            </DropZone.FileInfo>
+            {error && (
+              <DropZone.FileRetryTrigger
+                aria-label={`Retry uploading ${pendingFile.name}`}
+                onPress={() => retry()}
+              />
+            )}
+            <DropZone.FileRemoveTrigger
+              aria-label={`Remove ${pendingFile.name}`}
+              onPress={() => {
+                clear();
+                onCancel?.();
+              }}
+            />
+          </DropZone.FileItem>
+        </DropZone.FileList>
+      )}
+    </DropZone>
   );
 }

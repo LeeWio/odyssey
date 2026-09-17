@@ -1,6 +1,6 @@
 "use client";
 
-import { Link, Surface, toast } from "@heroui/react";
+import { Link, Surface, Typography, toast } from "@heroui/react";
 import { DropZone } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
@@ -181,9 +181,14 @@ export function MediaNodeView({ deleteNode, editor, node, updateAttributes }: No
     if (!editor.isEditable && !pendingUpload) {
       return (
         <NodeViewWrapper className="my-6" contentEditable={false}>
-          <div className="border-separator text-muted flex min-h-24 items-center justify-center rounded-2xl border border-dashed px-4 text-sm">
-            {kind === "audio" ? "Audio unavailable" : "Attachment unavailable"}
-          </div>
+          <Surface
+            variant="secondary"
+            className="flex min-h-24 items-center justify-center rounded-2xl px-4"
+          >
+            <Typography color="muted" type="body-sm">
+              {kind === "audio" ? "Audio unavailable" : "Attachment unavailable"}
+            </Typography>
+          </Surface>
         </NodeViewWrapper>
       );
     }
