@@ -8,13 +8,20 @@ import type { MomentTopicResponse } from "@/lib/features/moment";
 import type { JSONContent } from "@tiptap/core";
 import { getTransformStyles } from "../../utils/transform-styles";
 import { useMemo } from "react";
-import { StockTrendCard } from "@/components/stock/stock-trend-card";
 import { isDocumentEmpty, jsonContentToPlainText } from "../../utils/content-parser";
 
 const BounceCards = dynamic(() => import("@/components/ui/bounce-cards"), {
   ssr: false,
   loading: () => <div className="bg-surface-secondary min-h-40 w-full rounded-2xl" aria-hidden />,
 });
+
+const StockTrendCard = dynamic(
+  () => import("@/components/stock/stock-trend-card").then((mod) => mod.StockTrendCard),
+  {
+    ssr: false,
+    loading: () => <div className="bg-surface-secondary h-24 w-full rounded-2xl" aria-hidden />,
+  }
+);
 
 interface CardContentProps {
   momentId: string | number;

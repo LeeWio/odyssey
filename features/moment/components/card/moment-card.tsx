@@ -4,6 +4,8 @@ import { useState, useMemo, useEffect } from "react";
 import { Card, Skeleton, toast, AlertDialog, Button, Typography } from "@heroui/react";
 import type { JSONContent } from "@tiptap/core";
 import { AnimatePresence, motion } from "motion/react";
+import dynamic from "next/dynamic";
+import { Icon } from "@iconify/react";
 
 import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
@@ -14,15 +16,22 @@ import {
   useDeleteMomentMutation,
 } from "@/lib/features/moment";
 import { useRelativeTime } from "@/lib/relative-time";
-import { CommentSystem } from "@/components/comment";
 
 import { parseMomentContent } from "../../utils/content-parser";
 import { useMomentLike } from "../../hooks/use-moment-like";
 import { CardHeader } from "./card-header";
 import { CardContent } from "./card-content";
 import { CardFooter } from "./card-footer";
-import { CarouselModal } from "../gallery/carousel-modal";
-import { Icon } from "@iconify/react";
+
+const CommentSystem = dynamic(
+  () => import("@/components/comment").then((mod) => mod.CommentSystem),
+  { ssr: false }
+);
+
+const CarouselModal = dynamic(
+  () => import("../gallery/carousel-modal").then((mod) => mod.CarouselModal),
+  { ssr: false }
+);
 
 // Default content for fallback
 const defaultContent: JSONContent = {
@@ -90,9 +99,14 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
 
   // Gallery view Modal state
   const [activeImageIndex, setActiveIndex] = useState<number | null>(null);
+  const [hasOpenedCarousel, setHasOpenedCarousel] = useState(false);
 
   // Expanded comments system state
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+
+  if (activeImageIndex !== null && !hasOpenedCarousel) {
+    setHasOpenedCarousel(true);
+  }
 
   // Bookmarking state
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -221,14 +235,14 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
         )}
       </AnimatePresence>
 
-      {/* 5. Shared Photo Carousel Modal */}
-      {carouselImages.length > 0 && (
+      {/* 5. Shared Photo Carousel Modal — load only after first open */}
+      {hasOpenedCarousel && carouselImages.length > 0 ? (
         <CarouselModal
           images={carouselImages}
           activeIndex={activeImageIndex}
           onClose={() => setActiveIndex(null)}
         />
-      )}
+      ) : null}
 
       {/* 6. Delete Confirmation AlertDialog */}
       <AlertDialog>
