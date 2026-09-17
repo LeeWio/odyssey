@@ -19,8 +19,9 @@ import {
   normalizeImageAlignment,
   normalizeImageWidthPercent,
   type ImageAlignment,
-} from "../../extensions/image/image-attributes";
-import { queueImageUpload, validateImageFile } from "../../extensions/image/image-upload";
+} from "../../extensions/Image/attributes";
+import { validateMediaFile } from "../../extensions/media/media-upload";
+import { useUploadFileMutation } from "@/lib/features/file";
 import type { ShouldShowProps } from "../types";
 
 interface ImagePreview {
@@ -32,6 +33,7 @@ export function ImageMenu() {
   const [preview, setPreview] = useState<ImagePreview | null>(null);
   const replacementInputRef = useRef<HTMLInputElement>(null);
   const { editor, isReadOnly } = useRichTextEditor();
+  const [uploadFile] = useUploadFileMutation();
   const imageAttributes = useRichTextEditorState((state) => state.editor.getAttributes("image"));
   const src = typeof imageAttributes?.src === "string" ? imageAttributes.src : "";
   const alt = typeof imageAttributes?.alt === "string" ? imageAttributes.alt : "";
@@ -79,24 +81,25 @@ export function ImageMenu() {
   );
 
   const replaceImage = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
+    async (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.item(0);
       event.target.value = "";
       if (!file || !editor) return;
 
-      const validationError = validateImageFile(file);
+      const validationError = validateMediaFile(file, "image");
       if (validationError) {
         toast.warning(validationError);
         return;
       }
 
-      editor
-        .chain()
-        .focus()
-        .updateAttributes("image", { uploadId: queueImageUpload(editor, file) })
-        .run();
+      try {
+        const response = await uploadFile(file).unwrap();
+        editor.chain().focus().updateAttributes("image", { src: response.fileUrl }).run();
+      } catch {
+        toast.danger("Image upload failed. Please try again.");
+      }
     },
-    [editor]
+    [editor, uploadFile]
   );
 
   return (

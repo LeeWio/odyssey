@@ -7,6 +7,7 @@ import {
   Emoji,
   Indent,
   Image,
+  ImageUpload,
   Mathematics,
   Mention,
   Subscript,
@@ -18,7 +19,7 @@ import {
   Youtube,
   createTableOfContents,
 } from ".";
-import { createMediaFileHandler } from "./media/file-handler";
+import { createMediaFileHandler } from "./FileHandler";
 import type { TableOfContentsOptions } from "@tiptap/extension-table-of-contents";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { ReactNodeViewRenderer } from "@tiptap/react";
@@ -69,6 +70,7 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
     ...DetailsKit.map((extension) => extension.configure({})),
     (emojiSuggestion ? Emoji : EmojiBase).configure({}),
     Image.configure({}),
+    ImageUpload,
     Audio.configure({}),
     Attachment.configure({}),
     Youtube.configure({}),

@@ -16,6 +16,7 @@ export const isTableGripSelected = (node: HTMLElement | null) => {
 export const isCustomNodeSelected = (editor: Editor, node: HTMLElement | null) => {
   const customNodes = [
     "image",
+    "imageUpload",
     "audio",
     "attachment",
     "youtube",

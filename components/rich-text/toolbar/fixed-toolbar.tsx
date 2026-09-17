@@ -122,12 +122,8 @@ export function FixedToolbar() {
           <RichTextEditor.CommandButton
             aria-label="Insert image"
             tooltip="Insert image"
-            isDisabled={(currentEditor) =>
-              !currentEditor.can().chain().insertContent({ type: "image" }).run()
-            }
-            onCommand={(currentEditor) =>
-              currentEditor.chain().focus().insertContent({ type: "image" }).run()
-            }
+            isDisabled={(currentEditor) => !currentEditor.can().chain().setImageUpload().run()}
+            onCommand={(currentEditor) => currentEditor.chain().focus().setImageUpload().run()}
           >
             <Icon icon="gravity-ui:picture" />
           </RichTextEditor.CommandButton>

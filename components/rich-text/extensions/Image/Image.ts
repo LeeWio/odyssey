@@ -1,7 +1,9 @@
+import { mergeAttributes } from "@tiptap/core";
 import { Image as TiptapImage } from "@tiptap/extension-image";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import { normalizeImageAlignment, normalizeImageWidthPercent } from "./image-attributes";
-import { ImageNodeView } from "./image-node-view";
+
+import { normalizeImageAlignment, normalizeImageWidthPercent } from "./attributes";
+import { ImageView } from "./components/ImageView";
 
 function escapeHTMLAttribute(value: unknown): string {
   return String(value ?? "")
@@ -11,7 +13,15 @@ function escapeHTMLAttribute(value: unknown): string {
     .replaceAll(">", "&gt;");
 }
 
+/**
+ * Committed image node (schema name stays `image` for existing documents).
+ * Upload placeholders use the separate `imageUpload` node — see ImageUpload/.
+ */
 export const Image = TiptapImage.extend({
+  group: "block",
+  defining: true,
+  isolating: true,
+
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -30,10 +40,6 @@ export const Image = TiptapImage.extend({
           "data-width-percent": normalizeImageWidthPercent(attributes.widthPercent),
         }),
       },
-      uploadId: {
-        default: null,
-        rendered: false,
-      },
       caption: {
         default: "",
         parseHTML: (element) => element.getAttribute("data-caption") ?? "",
@@ -43,8 +49,12 @@ export const Image = TiptapImage.extend({
     };
   },
 
+  renderHTML({ HTMLAttributes }) {
+    return ["img", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)];
+  },
+
   addNodeView() {
-    return ReactNodeViewRenderer(ImageNodeView);
+    return ReactNodeViewRenderer(ImageView);
   },
 
   renderMarkdown(node) {
@@ -75,3 +85,5 @@ export const Image = TiptapImage.extend({
   allowBase64: false,
   inline: false,
 });
+
+export default Image;

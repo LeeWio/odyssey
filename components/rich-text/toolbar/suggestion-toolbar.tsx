@@ -204,7 +204,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
   },
   {
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).insertContent({ type: "image" }).run();
+      editor.chain().focus().deleteRange(range).setImageUpload().run();
     },
     description: "Upload or drop an image",
     group: "media",

@@ -7,6 +7,12 @@ export const IMAGE_ALIGNMENTS = ["left", "center", "right"] as const;
 
 export type ImageAlignment = (typeof IMAGE_ALIGNMENTS)[number];
 
+export const IMAGE_ALIGNMENT_CLASS_NAMES: Record<ImageAlignment, string> = {
+  center: "justify-center",
+  left: "justify-start",
+  right: "justify-end",
+};
+
 export function normalizeImageWidthPercent(value: unknown): number {
   const numericValue = typeof value === "number" ? value : Number(value);
 
