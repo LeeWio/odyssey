@@ -131,20 +131,18 @@ function EmojiPickerContent({ inputRef, onSkinToneChange, skinTone }: EmojiPicke
       </EmojiPicker.Grid>
       <EmojiPicker.Footer>
         <ScrollShadow hideScrollBar orientation="horizontal">
-          <div className="flex items-center gap-1 overflow-visible px-2 py-0.5 pr-3">
+          <div className="flex items-center gap-1 overflow-visible px-2 py-0.5 pe-3">
             {EMOJI_CATEGORIES.map(({ emoji, id, label }) => (
-              <Tooltip key={emoji} delay={0}>
+              <Tooltip key={id} delay={0}>
                 <Button
                   excludeFromTabOrder
                   isIconOnly
                   aria-label={label}
-                  className="hover:bg-muted/20 flex size-6 shrink-0 items-center justify-center rounded-full rounded-md"
+                  className="size-6 shrink-0 text-base"
                   variant="ghost"
                   onPress={() => scrollToCategory(id)}
                 >
-                  <span className="text-base" tabIndex={-1}>
-                    {emoji}
-                  </span>
+                  {emoji}
                 </Button>
                 <Tooltip.Content placement="top">{label}</Tooltip.Content>
               </Tooltip>
