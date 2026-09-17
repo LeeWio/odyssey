@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 @import "@heroui-pro/react/css";
-@import "katex/dist/katex.min.css";
 @import "./themes/heroui-pro-themes.scoped.css";
 
 @keyframes rich-text-block-enter {

@@ -11,7 +11,7 @@ type EditorialPanelProps = {
 };
 
 const mountainImage = "/zelda-landscape.jpg";
-const albumImage = "/music.png";
+const albumImage = "/music.webp";
 const displayFont = { fontFamily: "var(--font-display)" } as const;
 const monoFont = { fontFamily: "var(--font-mono)" } as const;
 const easeOut = [0.23, 1, 0.32, 1] as const;

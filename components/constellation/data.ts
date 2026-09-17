@@ -29,7 +29,6 @@ export const universeData: UniverseData = {
           weight: 1.0,
           articleCount: 6,
           activity: "medium",
-          modelPath: "/models/mercury.glb",
           position: new THREE.Vector3(0, 0, 0),
           topics: [
             {
@@ -99,7 +98,6 @@ export const universeData: UniverseData = {
           weight: 1.2,
           articleCount: 10,
           activity: "high",
-          modelPath: "/models/earth.glb",
           position: new THREE.Vector3(0, 0, 0),
           topics: [
             {
@@ -166,7 +164,6 @@ export const universeData: UniverseData = {
           weight: 1.5,
           articleCount: 8,
           activity: "high",
-          modelPath: "/models/saturn.glb",
           position: new THREE.Vector3(0, 0, 0),
           topics: [
             {

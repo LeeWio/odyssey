@@ -7,6 +7,7 @@ import {
   EmptyAuthResponseSchema,
   type AuthResponse,
   type LoginRequest,
+  type OAuthExchangeRequest,
   type OtpLoginRequest,
   type OtpSendRequest,
   type RefreshTokenRequest,
@@ -151,6 +152,21 @@ export const authApi = baseApi.injectEndpoints({
       },
     }),
 
+    /**
+     * Exchange a one-time OAuth login code for access/refresh tokens.
+     * The code is opaque and never contains a JWT.
+     */
+    exchangeOAuthCode: builder.mutation<AuthResponse, OAuthExchangeRequest>({
+      query: (body) => ({
+        url: "/api/v1/auth/oauth2/exchange",
+        method: "POST",
+        body,
+      }),
+      rawResponseSchema: apiResponseSchema(AuthResponseSchema),
+      transformResponse: (response: ApiResponse<AuthResponse>) => response.data!,
+      transformErrorResponse: transformApiError,
+    }),
+
     logout: builder.mutation<void, void>({
       query: () => ({
         url: "/api/v1/auth/logout",
@@ -177,5 +193,6 @@ export const {
   useSendOtpMutation,
   useLoginWithOtpMutation,
   useRefreshSessionMutation,
+  useExchangeOAuthCodeMutation,
   useLogoutMutation,
 } = authApi;

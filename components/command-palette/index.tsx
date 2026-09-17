@@ -2,7 +2,7 @@
 
 import { Chip, Kbd, ToggleButton, ToggleButtonGroup, toast, type Key } from "@heroui/react";
 import { Command, EmptyState } from "@heroui-pro/react";
-import { useHotkeys, useOs } from "@mantine/hooks";
+import { useOs } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { HighlightedText } from "@/components/highlighted-text";
@@ -185,15 +185,6 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
       void actionResult.catch(() => undefined);
     }
   };
-
-  useHotkeys([
-    [
-      "mod+k",
-      () => {
-        setIsOpen(!isOpen);
-      },
-    ],
-  ]);
 
   return (
     <Command>

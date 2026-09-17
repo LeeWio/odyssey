@@ -2,19 +2,27 @@
 
 import { Spinner, toast } from "@heroui/react";
 import { TextShimmer } from "@heroui-pro/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useRef } from "react";
+import {
+  extractOAuthCode,
+  extractOAuthError,
+  extractOAuthToken,
+  getSafeRedirectPath,
+  OAUTH_REDIRECT_KEY,
+  scrubOAuthParamsFromLocation,
+} from "@/components/auth/auth-utils";
 import { baseApi } from "@/lib/api";
+import { authApi } from "@/lib/features/auth/auth-api";
 import { setCredentials, setPermissions } from "@/lib/features/auth";
 import { permissionApi, type MenuResponse } from "@/lib/features/permission";
 import { useAppDispatch } from "@/lib/hooks";
-import { getSafeRedirectPath, OAUTH_REDIRECT_KEY } from "@/components/auth/auth-utils";
 
-// Safe helper to decode JWT payload on the client side with Node SSR guard
 const decodeJwt = (token: string) => {
   if (typeof window === "undefined") return null;
   try {
     const base64Url = token.split(".")[1];
+    if (!base64Url) return null;
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const jsonPayload = decodeURIComponent(
       window
@@ -29,7 +37,6 @@ const decodeJwt = (token: string) => {
   }
 };
 
-// Replicating standard permission extraction logic to ensure exact compatibility
 const extractPermissions = (menus: MenuResponse[]): string[] => {
   const permissions = new Set<string>();
 
@@ -49,88 +56,129 @@ const extractPermissions = (menus: MenuResponse[]): string[] => {
 };
 
 function RedirectHandler() {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const startedRef = useRef(false);
 
-  const handleAuth = useCallback(
-    async (token: string) => {
-      const payload = decodeJwt(token);
-
-      // Fallback referrer path check
+  const finishLogin = useCallback(
+    async (credentials: {
+      accessToken: string;
+      refreshToken?: string;
+      username: string;
+      email?: string;
+      roles: string[];
+    }) => {
       let referrer = "/";
       if (typeof window !== "undefined") {
         referrer = getSafeRedirectPath(localStorage.getItem(OAUTH_REDIRECT_KEY));
       }
 
-      if (!payload) {
-        toast.danger("Invalid token received from server");
-        if (typeof window !== "undefined") {
-          localStorage.removeItem(OAUTH_REDIRECT_KEY);
-        }
-        router.push("/");
-        return;
-      }
-
       try {
-        // 1. Commit JWT Credentials to Redux Store
-        const credentialsPayload = {
-          accessToken: token,
-          username: payload.sub || payload.username || "OAuth User",
-          email: payload.email || undefined,
-          roles: payload.roles || ["ROLE_USER"],
-        };
-        dispatch(setCredentials(credentialsPayload));
+        dispatch(setCredentials(credentials));
 
-        // 2. Fetch User Custom Menus and Access Rights
         const menuResult = await dispatch(
           permissionApi.endpoints.getCurrentUserMenus.initiate()
         ).unwrap();
 
-        // 3. Extract and Commit Permissions
-        const permissions = extractPermissions(menuResult);
-        dispatch(setPermissions(permissions));
-
-        // 4. Invalidate and Clean unauthenticated cache to force fresh data load
+        dispatch(setPermissions(extractPermissions(menuResult)));
         dispatch(baseApi.util.resetApiState());
 
-        // 5. Restore the user's active page and clear session tracker
         if (typeof window !== "undefined") {
           localStorage.removeItem(OAUTH_REDIRECT_KEY);
         }
 
         toast.success("Successfully authenticated with Odyssey!");
-        router.push(referrer);
+        router.replace(referrer);
       } catch {
         if (typeof window !== "undefined") {
           localStorage.removeItem(OAUTH_REDIRECT_KEY);
         }
         toast.danger("Authentication succeeded, but failed to sync user permissions.");
-        router.push("/");
+        router.replace("/");
       }
     },
     [dispatch, router]
   );
 
+  const handleLegacyToken = useCallback(
+    async (token: string) => {
+      const payload = decodeJwt(token);
+      if (!payload) {
+        toast.danger("Invalid token received from server");
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(OAUTH_REDIRECT_KEY);
+        }
+        router.replace("/");
+        return;
+      }
+
+      await finishLogin({
+        accessToken: token,
+        username: payload.sub || payload.username || "OAuth User",
+        email: payload.email || undefined,
+        roles: payload.roles || ["ROLE_USER"],
+      });
+    },
+    [finishLogin, router]
+  );
+
+  const handleLoginCode = useCallback(
+    async (code: string) => {
+      try {
+        const authResponse = await dispatch(
+          authApi.endpoints.exchangeOAuthCode.initiate({ code })
+        ).unwrap();
+
+        await finishLogin({
+          accessToken: authResponse.accessToken,
+          refreshToken: authResponse.refreshToken,
+          username: authResponse.username,
+          email: authResponse.email,
+          roles: authResponse.roles,
+        });
+      } catch {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(OAUTH_REDIRECT_KEY);
+        }
+        toast.danger("OAuth login code is invalid or expired. Please try again.");
+        router.replace("/");
+      }
+    },
+    [dispatch, finishLogin, router]
+  );
+
   useEffect(() => {
-    const token = searchParams.get("token");
-    const error = searchParams.get("error");
+    if (startedRef.current || typeof window === "undefined") return;
+    startedRef.current = true;
+
+    const { search, hash } = window.location;
+    const error = extractOAuthError(search, hash);
+    const code = extractOAuthCode(search, hash);
+    const token = extractOAuthToken(search, hash);
+
+    // Remove secrets / codes from the address bar before any further navigation.
+    scrubOAuthParamsFromLocation();
 
     if (error) {
       toast.danger(`OAuth authentication failed: ${error}`);
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("oauth_redirect_referrer");
-      }
-      router.push("/");
+      localStorage.removeItem(OAUTH_REDIRECT_KEY);
+      router.replace("/");
       return;
     }
 
-    if (token) {
-      void handleAuth(token);
-    } else {
-      router.push("/");
+    if (code) {
+      void handleLoginCode(code);
+      return;
     }
-  }, [searchParams, router, handleAuth]);
+
+    // Legacy fallback while older backends still redirect with a JWT in the URL.
+    if (token) {
+      void handleLegacyToken(token);
+      return;
+    }
+
+    router.replace("/");
+  }, [handleLegacyToken, handleLoginCode, router]);
 
   return (
     <div className="bg-background flex h-screen w-screen flex-col items-center justify-center gap-4">

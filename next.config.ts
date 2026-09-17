@@ -1,9 +1,24 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const nextConfig: NextConfig = {
   output: "standalone",
   transpilePackages: ["lowlight"],
+
+  experimental: {
+    optimizePackageImports: [
+      "@heroui/react",
+      "@heroui-pro/react",
+      "@iconify/react",
+      "@gravity-ui/icons",
+      "motion",
+    ],
+  },
 
   compiler: {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
@@ -72,4 +87,4 @@ const nextConfig: NextConfig = {
 
 const withNextIntl = createNextIntlPlugin();
 
-export default withNextIntl(nextConfig);
+export default withBundleAnalyzer(withNextIntl(nextConfig));

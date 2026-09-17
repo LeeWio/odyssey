@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { Tag, TagGroup } from "@heroui/react";
-import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { RemoteMedia } from "@/components/ui/remote-media";
 import Stack from "../gallery/stack";
 import type { MomentTopicResponse } from "@/lib/features/moment";
@@ -10,7 +9,7 @@ import type { JSONContent } from "@tiptap/core";
 import { getTransformStyles } from "../../utils/transform-styles";
 import { useMemo } from "react";
 import { StockTrendCard } from "@/components/stock/stock-trend-card";
-import { isDocumentEmpty } from "../../utils/content-parser";
+import { isDocumentEmpty, jsonContentToPlainText } from "../../utils/content-parser";
 
 const BounceCards = dynamic(() => import("@/components/ui/bounce-cards"), {
   ssr: false,
@@ -41,6 +40,15 @@ const getDynamicContainerHeight = (count: number) => {
   if (count === 4) return 110;
   return 108;
 };
+
+function MomentPlainText({ content }: { content: JSONContent }) {
+  if (isDocumentEmpty(content)) return null;
+  return (
+    <div className="text-foreground text-sm leading-relaxed break-all whitespace-pre-wrap">
+      {jsonContentToPlainText(content)}
+    </div>
+  );
+}
 
 export const CardContent = ({
   parsedContent,
@@ -80,14 +88,12 @@ export const CardContent = ({
     if (isTextEmpty) {
       return (
         <div className="flex w-full flex-col gap-4">
-          {/* Centered Stack when there is no text content */}
           <div className="flex w-full justify-center py-2">
             <div className="h-28 w-28 shrink-0 sm:h-32 sm:w-32">
               <Stack randomRotation sendToBackOnClick={false} cards={stackCards} />
             </div>
           </div>
 
-          {/* Topics Tags Group (Centered) */}
           {topics.length > 0 && (
             <TagGroup aria-label="Topics" size="sm" selectionMode="none">
               <TagGroup.List className="flex flex-wrap justify-center gap-1.5">
@@ -111,21 +117,9 @@ export const CardContent = ({
 
     return (
       <div className="flex w-full flex-row items-start justify-between gap-4">
-        {/* Left Side: Text content + tags + stock */}
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          {!isDocumentEmpty(parsedContent) && (
-            <RichTextEditor
-              isReadOnly
-              defaultValue={parsedContent}
-              className="h-auto min-h-0 w-full min-w-0"
-            >
-              <RichTextEditor.Shell className="h-auto min-h-0 w-full min-w-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
-                <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-all [&_.ProseMirror_p]:break-all" />
-              </RichTextEditor.Shell>
-            </RichTextEditor>
-          )}
+          <MomentPlainText content={parsedContent} />
 
-          {/* Topics Tags Group */}
           {topics.length > 0 && (
             <TagGroup aria-label="Topics" size="sm" selectionMode="none">
               <TagGroup.List className="flex flex-wrap gap-1.5">
@@ -141,7 +135,6 @@ export const CardContent = ({
           {stockSymbol && <StockTrendCard symbol={stockSymbol} variant="transparent" />}
         </div>
 
-        {/* Right Side: Stack component at the trailing end */}
         <div className="h-28 w-28 shrink-0 sm:h-32 sm:w-32">
           <Stack
             autoplay={true}
@@ -157,19 +150,8 @@ export const CardContent = ({
 
   return (
     <div className="flex w-full flex-col gap-3">
-      {!isDocumentEmpty(parsedContent) && (
-        <RichTextEditor
-          isReadOnly
-          defaultValue={parsedContent}
-          className="h-auto min-h-0 w-full min-w-0"
-        >
-          <RichTextEditor.Shell className="h-auto min-h-0 w-full min-w-0 rounded-none border-none bg-transparent p-0 shadow-none outline-none">
-            <RichTextEditor.Content className="h-auto min-h-0 bg-transparent outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-all [&_.ProseMirror_p]:break-all" />
-          </RichTextEditor.Shell>
-        </RichTextEditor>
-      )}
+      <MomentPlainText content={parsedContent} />
 
-      {/* 2. Topics Tags Group */}
       {topics.length > 0 && (
         <TagGroup aria-label="Topics" size="sm" selectionMode="none">
           <TagGroup.List className="flex flex-wrap gap-1.5">

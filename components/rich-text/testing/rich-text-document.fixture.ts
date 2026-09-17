@@ -160,7 +160,7 @@ export const RICH_TEXT_DOCUMENT_FIXTURE: JSONContent = {
         alignment: "center",
         alt: "Schema fixture",
         caption: "A persisted image caption",
-        src: "/odyssey-hero.png",
+        src: "/odyssey-hero.webp",
         title: null,
         widthPercent: 100,
       },

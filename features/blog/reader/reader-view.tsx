@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { CommentSystem } from "@/components/comment";
-import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
+import { ReadExtensionKit } from "@/components/rich-text/extensions/read-extension-kit";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import {
   normalizeRichTextDocument,
@@ -20,7 +20,7 @@ import {
   useLikePostMutation,
   useUnlikePostMutation,
 } from "@/lib/features/post";
-import { MotionRichTextEditor } from "@/components/ui";
+import { MotionRichTextEditor } from "@/components/ui/motion-rich-text";
 
 const ReadingProgressBar = dynamic(
   () =>
@@ -82,7 +82,7 @@ const MOCK_POST_FALLBACK = {
   slug: "fallback",
   summary:
     "Exploring how achromatic dark tones, gold accents, and fluid layouts of the HeroUI design system evoke narrative depth and visual tension.",
-  coverImage: "/er-hero.png",
+  coverImage: "/er-hero.webp",
   status: "PUBLISHED",
   isFeatured: true,
   views: 1245,
@@ -498,7 +498,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
           <MotionRichTextEditor
             key={article.content}
             isReadOnly
-            extensions={ExtensionKit}
+            extensions={ReadExtensionKit}
             defaultValue={parsedContent}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

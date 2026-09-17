@@ -8,7 +8,7 @@ import { selectRichTextState } from "@/lib/features";
 import { useAppSelector } from "@/lib/hooks";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
 import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
-import { ExtensionKit, createExtensionKit } from "./extensions/extension-kit";
+import { ExtensionKit, createEditExtensionKit } from "./extensions/extension-kit";
 import { ColumnsMenu } from "./menus/columns-menu/columns-menu";
 import { ImageMenu } from "./menus/image-menu/image-menu";
 import { LinkMenu } from "./menus/link-menu/link-menu";
@@ -43,7 +43,7 @@ export function RichText({
   const extensions = useMemo(
     () =>
       showTableOfContents
-        ? createExtensionKit({
+        ? createEditExtensionKit({
             tableOfContents: {
               scrollParent: () => document.getElementById(scrollContainerId) ?? window,
             },

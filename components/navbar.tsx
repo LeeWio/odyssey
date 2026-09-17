@@ -13,8 +13,9 @@ import {
   Tooltip,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useMounted, useOs } from "@mantine/hooks";
+import { useHotkeys, useMounted, useOs } from "@mantine/hooks";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,15 +28,27 @@ import {
   useLogoutMutation,
 } from "@/lib/features/auth";
 import { useGetCurrentUserQuery } from "@/lib/features/user";
-import { NotificationPopover } from "@/features/notification/notification-popover";
 import { useGetUnreadNotificationCountQuery } from "@/lib/features/notification";
 import { UserAvatar } from "@/components/user-avatar";
 import { selectAuthMode, setAuthMode, toggleDashboard } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
-import { AuthDialog } from "./auth/auth-dialog";
-import { CommandPalette } from "./command-palette";
 import { Logo, MoonFillIcon, SearchIcon, SunMaxFillIcon } from "./icons";
+
+const AuthDialog = dynamic(() => import("./auth/auth-dialog").then((mod) => mod.AuthDialog), {
+  ssr: false,
+});
+
+const CommandPalette = dynamic(
+  () => import("./command-palette").then((mod) => mod.CommandPalette),
+  { ssr: false }
+);
+
+const NotificationPopover = dynamic(
+  () =>
+    import("@/features/notification/notification-popover").then((mod) => mod.NotificationPopover),
+  { ssr: false }
+);
 
 type NavigationId = "chronicle" | "daily" | "travelogue" | "more";
 
@@ -703,6 +716,8 @@ export const Navbar = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [hasOpenedSearch, setHasOpenedSearch] = useState(false);
+  const [hasOpenedAuth, setHasOpenedAuth] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
   const [navigationWidths, setNavigationWidths] = useState({
     compact: 0,
@@ -715,6 +730,23 @@ export const Navbar = () => {
   });
   const activeItem = getNavigationItem(activeNavigation);
   const platformKey = mounted && (os === "macos" || os === "ios") ? "⌘" : "Ctrl";
+
+  if (isSearchOpen && !hasOpenedSearch) setHasOpenedSearch(true);
+  if (authMode && !hasOpenedAuth) setHasOpenedAuth(true);
+
+  useHotkeys(
+    [
+      [
+        "mod+k",
+        () => {
+          setHasOpenedSearch(true);
+          setIsSearchOpen((open) => !open);
+        },
+      ],
+    ],
+    [],
+    true
+  );
 
   const cancelClose = useCallback(() => {
     if (!closeTimer.current) return;
@@ -1655,8 +1687,12 @@ export const Navbar = () => {
         </AnimatePresence>
       </motion.div>
 
-      <CommandPalette isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} />
-      <AuthDialog mode={authMode} onModeChange={(mode) => dispatch(setAuthMode(mode))} />
+      {hasOpenedSearch ? (
+        <CommandPalette isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} />
+      ) : null}
+      {hasOpenedAuth ? (
+        <AuthDialog mode={authMode} onModeChange={(mode) => dispatch(setAuthMode(mode))} />
+      ) : null}
     </>
   );
 };

@@ -4,10 +4,8 @@ import {
   Column,
   Columns,
   DetailsKit,
-  Emoji,
   Indent,
   Image,
-  MediaFileHandler,
   Mathematics,
   Mention,
   Subscript,
@@ -19,18 +17,12 @@ import {
   Youtube,
   createTableOfContents,
 } from ".";
+import type { TableOfContentsOptions } from "@tiptap/extension-table-of-contents";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import { FindAndReplace } from "@tiptap/extension-find-and-replace";
-import { Markdown } from "@tiptap/markdown";
-import StarterKit from "@tiptap/starter-kit";
+import TiptapEmoji from "@tiptap/extension-emoji";
 
 import { TaskItemNodeView } from "./task-list/task-item-node-view";
-import {
-  createReadExtensionKit,
-  ReadExtensionKit,
-  type ReadExtensionKitOptions,
-} from "./read-extension-kit";
 
 import "katex/dist/katex.min.css";
 
@@ -43,20 +35,28 @@ const HeroUITaskItem = TaskItem.extend({
   },
 });
 
-export type ExtensionKitOptions = ReadExtensionKitOptions;
+/** Emoji node without suggestion UI — enough for read-only rendering. */
+const ReadEmoji = TiptapEmoji.configure({
+  enableEmoticons: false,
+  forceFallbackImages: false,
+});
 
-export { createReadExtensionKit, ReadExtensionKit };
+export interface ReadExtensionKitOptions {
+  tableOfContents?: Partial<TableOfContentsOptions>;
+}
 
-/** Full editing surface used by the composer modal and admin editor. */
-export function createEditExtensionKit(options: ExtensionKitOptions = {}) {
+/**
+ * Schema + node views needed to render published documents.
+ * Kept in a separate module so article routes do not pull edit-only TipTap deps.
+ */
+export function createReadExtensionKit(options: ReadExtensionKitOptions = {}) {
   return [
     ...DetailsKit,
-    Emoji,
+    ReadEmoji,
     Image,
     Audio,
     Attachment,
     Youtube,
-    MediaFileHandler,
     Mathematics,
     Mention,
     Typography,
@@ -75,9 +75,6 @@ export function createEditExtensionKit(options: ExtensionKitOptions = {}) {
           `${checked ? "Mark incomplete" : "Mark complete"}: ${node.textContent || "empty task"}`,
       },
     }),
-    FindAndReplace.configure({
-      searchDebounceMs: 0,
-    }),
     Subscript,
     Superscript,
     TextAlign,
@@ -85,27 +82,9 @@ export function createEditExtensionKit(options: ExtensionKitOptions = {}) {
     Indent,
     Column,
     Columns,
-    Markdown.configure({
-      markedOptions: {
-        gfm: true,
-      },
-    }),
     TableKit,
     createTableOfContents(options.tableOfContents),
   ];
 }
 
-/** @deprecated Prefer createEditExtensionKit — kept for existing editor call sites. */
-export function createExtensionKit(options: ExtensionKitOptions = {}) {
-  return createEditExtensionKit(options);
-}
-
-export const ExtensionKit = createEditExtensionKit();
-
-/**
- * Extensions used by non-editor content conversion helpers.
- * RichTextEditor injects these base extensions itself at runtime.
- */
-export function createConversionExtensions() {
-  return [StarterKit.configure({ heading: { levels: [1, 2, 3] } }), ...createEditExtensionKit()];
-}
+export const ReadExtensionKit = createReadExtensionKit();

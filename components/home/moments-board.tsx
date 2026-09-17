@@ -2,12 +2,15 @@
 
 import React from "react";
 import { Avatar, Card, Skeleton, Typography } from "@heroui/react";
-import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useMediaQuery } from "@mantine/hooks";
 import { motion } from "motion/react";
 import { useRelativeTime } from "@/lib/relative-time";
 import type { MomentResponse } from "@/lib/features/moment";
-import { isDocumentEmpty, parseMomentContent } from "@/features/moment/utils/content-parser";
+import {
+  isDocumentEmpty,
+  jsonContentToPlainText,
+  parseMomentContent,
+} from "@/features/moment/utils/content-parser";
 import ScrollingBanner from "@/components/corners/scrolling-banner";
 
 type MomentBoardEntry = {
@@ -81,11 +84,13 @@ function MomentBoardCard({ entry, index }: { entry: MomentBoardEntry; index: num
               A quiet note from lately.
             </Typography>
           ) : (
-            <RichTextEditor isReadOnly defaultValue={parsedContent} className="w-full min-w-0">
-              <RichTextEditor.Shell className="h-auto max-h-36 min-h-0 w-full min-w-0 overflow-hidden rounded-none border-none bg-transparent p-0 shadow-none outline-none">
-                <RichTextEditor.Content className="text-muted h-auto min-h-0 bg-transparent text-sm leading-6 outline-none focus:outline-none [&_.ProseMirror]:h-auto [&_.ProseMirror]:min-h-0 [&_.ProseMirror]:p-0 [&_.ProseMirror]:break-all [&_.ProseMirror_*]:max-w-full [&_.ProseMirror_p]:break-all" />
-              </RichTextEditor.Shell>
-            </RichTextEditor>
+            <Typography
+              color="muted"
+              type="body-sm"
+              className="line-clamp-5 break-all whitespace-pre-wrap"
+            >
+              {jsonContentToPlainText(parsedContent)}
+            </Typography>
           )}
         </Card.Content>
       </Card>

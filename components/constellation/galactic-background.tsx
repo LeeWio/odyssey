@@ -4,8 +4,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-// 1. Rich Galaxy Elements: Distant Stars
-const starsCount = 3000;
+const starsCount = 1200;
 const starsPositions = new Float32Array(starsCount * 3);
 for (let i = 0; i < starsCount; i++) {
   starsPositions[i * 3] = (Math.random() - 0.5) * 200;
@@ -13,8 +12,7 @@ for (let i = 0; i < starsCount; i++) {
   starsPositions[i * 3 + 2] = (Math.random() - 0.5) * 200;
 }
 
-// 1. Dust / Magnesium Clouds
-const dustCount = 1000;
+const dustCount = 360;
 const dustPositionsData = new Float32Array(dustCount * 3);
 for (let i = 0; i < dustCount; i++) {
   const r = 20 + Math.random() * 40;
@@ -40,7 +38,6 @@ export function GalacticBackground() {
 
   return (
     <group>
-      {/* Background Stars - Subtle and small to avoid square look */}
       <points ref={pointsRef}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[starsPositions, 3]} />
@@ -48,7 +45,6 @@ export function GalacticBackground() {
         <pointsMaterial size={0.1} color="#ffffff" transparent opacity={0.4} sizeAttenuation />
       </points>
 
-      {/* Magnesium Clouds / Dust - More ethereal */}
       <points ref={dustRef}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[dustPositionsData, 3]} />

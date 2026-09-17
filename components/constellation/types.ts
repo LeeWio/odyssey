@@ -26,7 +26,6 @@ export type Star = {
   weight: number;
   articleCount: number;
   activity: ActivityLevel;
-  modelPath?: string;
   position: THREE.Vector3; // Relative to constellation
   topics: Topic[];
   articles: Article[];

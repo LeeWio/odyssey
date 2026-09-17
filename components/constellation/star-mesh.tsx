@@ -1,15 +1,15 @@
 "use client";
 
-import { Float, Html } from "@react-three/drei";
+import { Html } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { useRef } from "react";
 import * as THREE from "three";
 import { ActivityLevel } from "./types";
-import { PlanetModel } from "./planet-model";
 
 interface StarMeshProps {
   name: string;
   position: THREE.Vector3;
   activity: ActivityLevel;
-  modelPath?: string;
   onClick?: () => void;
   onPointerOver?: () => void;
   onPointerOut?: () => void;
@@ -21,34 +21,38 @@ export function StarMesh({
   name,
   position,
   activity,
-  modelPath,
   onClick,
   onPointerOver,
   onPointerOut,
   isHovered = false,
   isActive = false,
 }: StarMeshProps) {
-  const pulseSpeed = 1 + (activity === "high" ? 1 : activity === "medium" ? 0.5 : 0.2);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const pulseSpeed = 0.4 + (activity === "high" ? 0.8 : activity === "medium" ? 0.45 : 0.2);
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    meshRef.current.rotation.y = state.clock.getElapsedTime() * pulseSpeed * 0.35;
+  });
 
   return (
     <group
       position={position}
       onClick={(e) => {
         e.stopPropagation();
-        if (onClick) onClick();
+        onClick?.();
       }}
       onPointerOver={(e) => {
         e.stopPropagation();
         document.body.style.cursor = "pointer";
-        if (onPointerOver) onPointerOver();
+        onPointerOver?.();
       }}
       onPointerOut={(e) => {
         e.stopPropagation();
         document.body.style.cursor = "auto";
-        if (onPointerOut) onPointerOut();
+        onPointerOut?.();
       }}
     >
-      {/* Dynamic Label */}
       <Html position={[0, 10, 0]} center distanceFactor={15}>
         <div
           className={`pointer-events-none rounded-2xl border px-4 py-1.5 text-[12px] font-black tracking-widest uppercase shadow-2xl backdrop-blur-xl transition-all duration-300 select-none ${
@@ -63,17 +67,18 @@ export function StarMesh({
         </div>
       </Html>
 
-      <Float speed={isActive ? 4 : 2} rotationIntensity={0.3} floatIntensity={0.3}>
-        <group scale={isActive ? 1.2 : isHovered ? 1.08 : 1.0}>
-          {modelPath && (
-            <PlanetModel
-              url={modelPath}
-              targetSize={12}
-              rotationSpeed={isActive ? pulseSpeed * 2 : pulseSpeed}
-            />
-          )}
-        </group>
-      </Float>
+      <group scale={isActive ? 1.2 : isHovered ? 1.08 : 1.0}>
+        <mesh ref={meshRef}>
+          <sphereGeometry args={[4.5, 24, 24]} />
+          <meshStandardMaterial
+            color={isHovered ? "#dbeafe" : "#94a3b8"}
+            emissive={isActive ? "#22d3ee" : "#334155"}
+            emissiveIntensity={isActive ? 1.4 : 0.55}
+            roughness={0.35}
+            metalness={0.2}
+          />
+        </mesh>
+      </group>
     </group>
   );
 }

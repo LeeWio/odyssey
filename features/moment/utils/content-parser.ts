@@ -76,6 +76,10 @@ export const isDocumentEmpty = (doc: JSONContent | null | undefined): boolean =>
   return collectPlainText(doc.content).trim().length === 0;
 };
 
+/** Flatten a TipTap JSON document into plain text for card previews. */
+export const jsonContentToPlainText = (doc: JSONContent | null | undefined): string =>
+  collectPlainText(doc?.content).trim();
+
 /** Flatten TipTap JSON or legacy plain text into a single preview string. */
 export const extractMomentPlainText = (content: string): string =>
-  collectPlainText(parseMomentContent(content).content).trim();
+  jsonContentToPlainText(parseMomentContent(content));

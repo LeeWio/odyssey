@@ -6,11 +6,6 @@ import { Tabs } from "@heroui/react";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import dynamic from "next/dynamic";
 
-// Modular feature views
-import { GalleryPage } from "@/features/gallery";
-import { FriendLinksPage } from "@/features/friend-links";
-
-// Dynamically import the heavy 3D WebGL Constellation view
 const UniverseView = dynamic(
   () => import("@/components/constellation").then((mod) => mod.UniverseView),
   {
@@ -23,6 +18,15 @@ const UniverseView = dynamic(
       </div>
     ),
   }
+);
+
+const GalleryPage = dynamic(() => import("@/features/gallery").then((mod) => mod.GalleryPage), {
+  ssr: false,
+});
+
+const FriendLinksPage = dynamic(
+  () => import("@/features/friend-links").then((mod) => mod.FriendLinksPage),
+  { ssr: false }
 );
 
 const easeOut = [0.22, 1, 0.36, 1] as const;

@@ -38,3 +38,7 @@ export interface RegisterRequest {
 export interface RefreshTokenRequest {
   refreshToken: string;
 }
+
+export interface OAuthExchangeRequest {
+  code: string;
+}

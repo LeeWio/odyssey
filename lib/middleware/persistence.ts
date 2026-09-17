@@ -1,6 +1,7 @@
 "use client";
 
 import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
+import { clearAuthStorage, readAuthStorage, writeAuthStorage } from "../auth-storage";
 import { removeCredentials, setCredentials, setPermissions } from "../features/auth/auth-slice";
 import { setLocale } from "../features/locale/locale-slice";
 import { setActiveId, setThemeVariant, type ThemeVariant } from "../features/ui";
@@ -29,8 +30,7 @@ persistenceMiddleware.startListening({
     if (typeof window !== "undefined") {
       if (auth.isAuthenticated) {
         // Persist session data only. Dialog visibility belongs to the UI slice and must reset on load.
-        localStorage.setItem(
-          "odyssey_auth",
+        writeAuthStorage(
           JSON.stringify({
             accessToken: auth.accessToken,
             refreshToken: auth.refreshToken,
@@ -42,7 +42,7 @@ persistenceMiddleware.startListening({
           })
         );
       } else {
-        localStorage.removeItem("odyssey_auth");
+        clearAuthStorage();
       }
     }
   },
@@ -99,7 +99,7 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
   if (typeof window === "undefined") return undefined;
 
   try {
-    const auth = localStorage.getItem("odyssey_auth");
+    const auth = readAuthStorage();
     const theme =
       localStorage.getItem(THEME_VARIANT_STORAGE_KEY) ??
       localStorage.getItem(LEGACY_THEME_STORAGE_KEY);
@@ -131,6 +131,9 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
           typeof persistedAuth.accessToken === "string" &&
           persistedAuth.accessToken.length > 0,
       };
+
+      // One-time migrate legacy localStorage → sessionStorage.
+      writeAuthStorage(auth);
     }
     if (theme || draftId) {
       const variant = theme ? coerceThemeVariant(theme) : DEFAULT_THEME_VARIANT;

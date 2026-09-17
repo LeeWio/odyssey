@@ -48,21 +48,21 @@ This is a private personal product. Some pages, data, and integrations require a
 - Music playback and recently played items
 - Market data cards, stock information, and personal dashboards
 - Gallery, projects, links, about, and uses pages
-- Constellation and universe visualizations with Three.js assets
+- Constellation and universe visualizations with Three.js (procedural meshes)
 - Admin views for content, users, roles, permissions, tags, and categories
 - RSS, API proxying, internationalization, themes, and reduced-motion support
 
 ## Technology
 
-| Layer           | Technology                                       |
-| --------------- | ------------------------------------------------ |
-| Application     | Next.js 16 · App Router · React 19 · TypeScript  |
-| UI              | HeroUI · HeroUI Pro · Tailwind CSS 4             |
-| State and data  | Redux Toolkit · RTK Query · Zod                  |
-| Editor          | Tiptap 3                                         |
-| Motion and 3D   | Motion · GSAP · React Three Fiber · Three.js     |
-| i18n and themes | next-intl · next-themes · custom theme variables |
-| Quality         | Vitest · Playwright · ESLint · Prettier          |
+| Layer           | Technology                                                |
+| --------------- | --------------------------------------------------------- |
+| Application     | Next.js 16 · App Router · React 19 · TypeScript           |
+| UI              | HeroUI · HeroUI Pro · Tailwind CSS 4                      |
+| State and data  | Redux Toolkit · RTK Query · Zod                           |
+| Editor          | Tiptap 3                                                  |
+| Motion and 3D   | Motion · GSAP · React Three Fiber · Three.js              |
+| i18n and themes | next-intl · next-themes · custom theme variables          |
+| Quality         | Vitest · Playwright · ESLint · Prettier · bundle analyzer |
 
 ## Getting started
 
@@ -97,19 +97,21 @@ Do not commit secrets. Production normally uses the same-origin API; configure `
 
 ## Commands
 
-| Command                | Description                                 |
-| ---------------------- | ------------------------------------------- |
-| `bun run dev`          | Start the development server                |
-| `bun run build`        | Create a production build                   |
-| `bun run start`        | Start the production server                 |
-| `bun run lint`         | Run ESLint                                  |
-| `bun run typecheck`    | Run TypeScript checks                       |
-| `bun run test:unit`    | Run Vitest unit tests                       |
-| `bun run test:e2e`     | Run Playwright end-to-end tests             |
-| `bun run preflight`    | Run formatting, lint, type, and unit checks |
-| `bun run api:contract` | Check the OpenAPI contract                  |
-| `bun run api:coverage` | Check OpenAPI coverage                      |
-| `bun run api:generate` | Generate the OpenAPI client                 |
+| Command                   | Description                                 |
+| ------------------------- | ------------------------------------------- |
+| `bun run dev`             | Start the development server                |
+| `bun run build`           | Create a production build                   |
+| `bun run analyze`         | Production build with bundle analyzer       |
+| `bun run assets:optimize` | Recompress large images under `public/`     |
+| `bun run start`           | Start the production server                 |
+| `bun run lint`            | Run ESLint                                  |
+| `bun run typecheck`       | Run TypeScript checks                       |
+| `bun run test:unit`       | Run Vitest unit tests                       |
+| `bun run test:e2e`        | Run Playwright end-to-end tests             |
+| `bun run preflight`       | Run formatting, lint, type, and unit checks |
+| `bun run api:contract`    | Check the OpenAPI contract                  |
+| `bun run api:coverage`    | Check OpenAPI coverage                      |
+| `bun run api:generate`    | Generate the OpenAPI client                 |
 
 Before opening a pull request:
 

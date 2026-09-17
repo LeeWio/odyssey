@@ -1,12 +1,31 @@
 "use client";
 
-import { Card, Link, toast } from "@heroui/react";
+import { Card, Link, Skeleton, toast } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
-import { MinimalCarousel, type CarouselCard } from "@/components/card/minimal-carousel";
-import { NewsletterSubscribeForm } from "@/features/newsletter/newsletter-subscribe-form";
+import type { CarouselCard } from "@/components/card/minimal-carousel";
 import { ModeSwitch } from "./theme-switch";
+
+const MinimalCarousel = dynamic(
+  () => import("@/components/card/minimal-carousel").then((mod) => mod.MinimalCarousel),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-40 w-full rounded-3xl" />,
+  }
+);
+
+const NewsletterSubscribeForm = dynamic(
+  () =>
+    import("@/features/newsletter/newsletter-subscribe-form").then(
+      (mod) => mod.NewsletterSubscribeForm
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-10 w-full max-w-lg rounded-xl" />,
+  }
+);
 
 const footerLinks = [
   { href: "/chronicle", label: "Chronicle" },

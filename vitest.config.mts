@@ -34,6 +34,7 @@ export default defineConfig({
       "components/auth/**/*.test.ts",
       "lib/features/**/*.test.ts",
       "lib/utils/**/*.test.ts",
+      "i18n/**/*.test.ts",
       "features/moment/__tests__/**/*.test.ts",
     ],
     setupFiles: ["./components/rich-text/testing/setup.ts"],

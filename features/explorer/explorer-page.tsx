@@ -69,7 +69,7 @@ const WORKSPACE_METADATA: Record<string, FileMetadata> = {
     name: "components/constellation/universe.tsx",
     purpose:
       "The main R3F assembly housing rotating galaxies, connections, dust columns, and camera directors.",
-    stack: ["React Three Fiber", "drei", "postprocessing", "gsap"],
+    stack: ["React Three Fiber", "drei"],
     exports: ["UniverseView", "CameraController", "UniverseContent"],
     fact: "Calculates global relative planetary positions and parents satellites in world space, preventing double-offsetting.",
   },

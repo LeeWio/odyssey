@@ -12,11 +12,11 @@ export function ConstellationOrbits({ color, opacity = 0.1 }: ConstellationOrbit
     <group rotation={[Math.PI / 2.5, 0, 0]}>
       {/* 3 Concentric Rings */}
       <mesh>
-        <ringGeometry args={[8, 8.05, 128]} />
+        <ringGeometry args={[8, 8.05, 64]} />
         <meshBasicMaterial color={color} transparent opacity={opacity} side={THREE.DoubleSide} />
       </mesh>
       <mesh>
-        <ringGeometry args={[12, 12.05, 128]} />
+        <ringGeometry args={[12, 12.05, 64]} />
         <meshBasicMaterial
           color={color}
           transparent
@@ -25,7 +25,7 @@ export function ConstellationOrbits({ color, opacity = 0.1 }: ConstellationOrbit
         />
       </mesh>
       <mesh>
-        <ringGeometry args={[16, 16.05, 128]} />
+        <ringGeometry args={[16, 16.05, 64]} />
         <meshBasicMaterial
           color={color}
           transparent

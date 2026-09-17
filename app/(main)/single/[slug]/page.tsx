@@ -31,8 +31,8 @@ import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, use, useEffect, useMemo, useRef, useState } from "react";
 import { CommentSheet } from "@/components/comment";
-import { MotionRichTextEditor } from "@/components/ui";
-import { ExtensionKit } from "@/components/rich-text/extensions/extension-kit";
+import { MotionRichTextEditor } from "@/components/ui/motion-rich-text";
+import { ReadExtensionKit } from "@/components/rich-text/extensions/read-extension-kit";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import {
   normalizeRichTextDocument,
@@ -79,7 +79,7 @@ import { ArticleSidebar } from "./article-sidebar";
 
 // HeroUI passes extensions to useEditor as a dependency. Keep this reference
 // stable across reading-progress renders so scrolling never recreates the editor.
-const READER_EXTENSIONS = ExtensionKit;
+const READER_EXTENSIONS = ReadExtensionKit;
 
 interface SinglePageProps {
   params: Promise<{

@@ -14,6 +14,7 @@ import { isRTL } from "@heroui/react";
 // import { Navbar } from "@/components/navbar";
 import { getMessages } from "next-intl/server";
 import { siteConfig } from "@/config/site";
+import { resolveAppLocale } from "@/i18n/locale";
 import { getInitialThemeState } from "@/lib/theme";
 import { getThemeInitScript } from "@/lib/theme-init-script";
 import { Providers } from "./providers";
@@ -47,8 +48,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const requestHeaders = await headers();
-  const acceptLanguage = requestHeaders.get("accept-language");
-  const lang = acceptLanguage?.split(/[,;]/)[0] || "en-US";
+  const lang = resolveAppLocale(requestHeaders.get("accept-language"));
   const initialTheme = getInitialThemeState(requestHeaders.get("cookie"));
 
   const messages = await getMessages({ locale: lang });

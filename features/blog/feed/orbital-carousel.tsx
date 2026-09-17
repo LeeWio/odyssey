@@ -290,7 +290,7 @@ export function OrbitalCarousel() {
                 width={0}
                 height={0}
                 sizes="(max-width: 768px) 100vw, 30vw"
-                src="/iPhone16Pro.png"
+                src="/iPhone16Pro.webp"
                 draggable={false}
                 style={{ height: "58%", width: "auto" }}
                 className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 object-contain transition-transform duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] select-none group-hover:-translate-y-2 group-hover:scale-[1.06]"
@@ -376,7 +376,7 @@ export function OrbitalCarousel() {
                   alt="PlayStation 5"
                   fill
                   sizes="(max-width: 768px) 100vw, 30vw"
-                  src="/er-hero.png"
+                  src="/er-hero.webp"
                   className="pointer-events-none object-cover select-none"
                   draggable={false}
                 />
@@ -436,7 +436,7 @@ export function OrbitalCarousel() {
                   alt="Nintendo Switch"
                   fill
                   sizes="(max-width: 768px) 100vw, 30vw"
-                  src="/zelda-hero.png"
+                  src="/zelda-hero.webp"
                   className="pointer-events-none object-cover select-none"
                   draggable={false}
                 />

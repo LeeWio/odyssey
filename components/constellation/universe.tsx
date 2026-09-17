@@ -2,8 +2,7 @@
 
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment, PerspectiveCamera } from "@react-three/drei";
-import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
+import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Suspense, useState, useRef, useMemo } from "react";
 import { universeData } from "./data";
 import { StarMesh } from "./star-mesh";
@@ -46,25 +45,19 @@ export function UniverseView() {
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#020205]">
       {/* 3D Space Scene */}
-      <Canvas dpr={[1, 2]} shadows>
+      <Canvas dpr={[1, 1.5]} gl={{ antialias: true, powerPreference: "high-performance" }}>
         <color attach="background" args={["#000000"]} />
 
-        {/* Cinematic Camera */}
         <PerspectiveCamera makeDefault position={[0, 40, 120]} fov={35} />
 
-        <ambientLight intensity={1.5} />
-
-        {/* Dynamic Studio Lighting */}
-        <pointLight position={[-40, 20, 50]} intensity={12} color="#8888ff" />
-        <pointLight position={[0, 20, 50]} intensity={12} color="#ffffff" />
-        <pointLight position={[40, 20, 50]} intensity={12} color="#ffaa44" />
-        <directionalLight position={[0, 80, 40]} intensity={1.5} />
+        <ambientLight intensity={1.2} />
+        <pointLight position={[-40, 20, 50]} intensity={8} color="#8888ff" />
+        <pointLight position={[40, 20, 50]} intensity={8} color="#ffaa44" />
+        <directionalLight position={[0, 80, 40]} intensity={1.1} />
 
         <Suspense fallback={null}>
-          {/* Infinite Starry Backdrop */}
           <GalacticBackground />
 
-          {/* Connected Knowledge Mesh */}
           <UniverseContent
             activeStar={activeStar}
             setActiveStar={setActiveStar}
@@ -72,13 +65,9 @@ export function UniverseView() {
             setHoveredStar={setHoveredStar}
           />
 
-          {/* Smooth Camera Director */}
           <CameraController activeStar={activeStar} controlsRef={controlsRef} />
-
-          <Environment preset="apartment" />
         </Suspense>
 
-        {/* Interactive Space Navigation */}
         <OrbitControls
           ref={controlsRef}
           enableDamping
@@ -89,12 +78,6 @@ export function UniverseView() {
           minDistance={15}
           maxDistance={250}
         />
-
-        {/* High-Fidelity Cinematic Post-Processing */}
-        <EffectComposer multisampling={8}>
-          <Bloom luminanceThreshold={0.4} intensity={1.2} radius={0.6} />
-          <Vignette darkness={1.1} />
-        </EffectComposer>
       </Canvas>
 
       {/* Futuristic HUD overlay */}
@@ -227,16 +210,15 @@ function UniverseContent({
           <ConstellationOrbits color={constellation.color} opacity={0.12} />
 
           {/* Dense cloud of glowing local space dust particles */}
-          <LocalDust color={constellation.color} count={220} radius={25} />
+          <LocalDust color={constellation.color} count={72} radius={25} />
 
-          {/* Render individual high fidelity planets as stars */}
+          {/* Procedural star meshes (no external GLB assets) */}
           {constellation.stars.map((star) => (
             <StarMesh
               key={star.id}
               name={star.name}
               position={star.position}
               activity={star.activity}
-              modelPath={star.modelPath}
               onClick={() => setActiveStar(star)}
               onPointerOver={() => setHoveredStar(star)}
               onPointerOut={() => setHoveredStar(null)}
@@ -247,21 +229,23 @@ function UniverseContent({
         </group>
       ))}
 
-      {/* Render all article satellites in pure absolute world coordinates to prevent parent group double-offsetting */}
+      {/* Cap satellites per star to keep draw/update cost bounded */}
       {universeData.constellations.map((constellation) =>
         constellation.stars.map((star) => {
           const starWorldPos = new THREE.Vector3().addVectors(
             constellation.position,
             star.position
           );
-          return star.articles.map((art, idx) => (
-            <ArticleSatellite
-              key={art.id}
-              starPosition={starWorldPos}
-              orbitRadius={14 + idx * 3.5}
-              speed={0.5 + idx * 0.15}
-            />
-          ));
+          return star.articles
+            .slice(0, 2)
+            .map((art, idx) => (
+              <ArticleSatellite
+                key={art.id}
+                starPosition={starWorldPos}
+                orbitRadius={14 + idx * 3.5}
+                speed={0.5 + idx * 0.15}
+              />
+            ));
         })
       )}
     </group>

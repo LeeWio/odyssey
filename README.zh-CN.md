@@ -48,21 +48,21 @@ Odyssey 关注三件事：
 - 音乐播放、最近播放与媒体展示
 - 市场数据卡片、股票信息与个人仪表盘
 - 图库、项目、链接、关于和使用记录
-- 星座/宇宙可视化与 Three.js 3D 资源
+- 星座/宇宙可视化与 Three.js（程序化网格，无外部 GLB）
 - 后台内容、用户、角色、权限、标签和分类管理
 - RSS、API 代理、国际化、主题切换与减少动效支持
 
 ## 技术栈
 
-| 层级         | 技术                                            |
-| ------------ | ----------------------------------------------- |
-| 应用         | Next.js 16 · App Router · React 19 · TypeScript |
-| UI           | HeroUI · HeroUI Pro · Tailwind CSS 4            |
-| 状态与数据   | Redux Toolkit · RTK Query · Zod                 |
-| 编辑器       | Tiptap 3                                        |
-| 动画与 3D    | Motion · GSAP · React Three Fiber · Three.js    |
-| 国际化与主题 | next-intl · next-themes · 自定义主题变量        |
-| 质量保障     | Vitest · Playwright · ESLint · Prettier         |
+| 层级         | 技术                                                      |
+| ------------ | --------------------------------------------------------- |
+| 应用         | Next.js 16 · App Router · React 19 · TypeScript           |
+| UI           | HeroUI · HeroUI Pro · Tailwind CSS 4                      |
+| 状态与数据   | Redux Toolkit · RTK Query · Zod                           |
+| 编辑器       | Tiptap 3                                                  |
+| 动画与 3D    | Motion · GSAP · React Three Fiber · Three.js              |
+| 国际化与主题 | next-intl · next-themes · 自定义主题变量                  |
+| 质量保障     | Vitest · Playwright · ESLint · Prettier · bundle analyzer |
 
 ## 快速开始
 
@@ -104,19 +104,21 @@ ENABLE_RICH_TEXT_TEST_ROUTE=1
 
 ## 常用命令
 
-| 命令                   | 说明                               |
-| ---------------------- | ---------------------------------- |
-| `bun run dev`          | 启动开发服务器                     |
-| `bun run build`        | 生成生产构建                       |
-| `bun run start`        | 启动生产服务器                     |
-| `bun run lint`         | ESLint 检查                        |
-| `bun run typecheck`    | TypeScript 检查                    |
-| `bun run test:unit`    | Vitest 单元测试                    |
-| `bun run test:e2e`     | Playwright 端到端测试              |
-| `bun run preflight`    | Prettier、Lint、类型检查和单元测试 |
-| `bun run api:contract` | OpenAPI 合约检查                   |
-| `bun run api:coverage` | OpenAPI 覆盖率检查                 |
-| `bun run api:generate` | 生成 OpenAPI 客户端                |
+| 命令                      | 说明                               |
+| ------------------------- | ---------------------------------- |
+| `bun run dev`             | 启动开发服务器                     |
+| `bun run build`           | 生成生产构建                       |
+| `bun run analyze`         | 带 bundle analyzer 的生产构建      |
+| `bun run assets:optimize` | 压缩 `public/` 下的大图            |
+| `bun run start`           | 启动生产服务器                     |
+| `bun run lint`            | ESLint 检查                        |
+| `bun run typecheck`       | TypeScript 检查                    |
+| `bun run test:unit`       | Vitest 单元测试                    |
+| `bun run test:e2e`        | Playwright 端到端测试              |
+| `bun run preflight`       | Prettier、Lint、类型检查和单元测试 |
+| `bun run api:contract`    | OpenAPI 合约检查                   |
+| `bun run api:coverage`    | OpenAPI 覆盖率检查                 |
+| `bun run api:generate`    | 生成 OpenAPI 客户端                |
 
 提交前建议运行：
 
