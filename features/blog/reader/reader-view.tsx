@@ -2,25 +2,17 @@
 
 import { Button, cn, Separator, Spinner, Surface, Tooltip, Typography, toast } from "@heroui/react";
 import { ActionBar, EmptyState } from "@heroui-pro/react";
-import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { CommentSystem } from "@/components/comment";
-import { ReadExtensionKit } from "@/components/rich-text/extensions/read-extension-kit";
-import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
-import {
-  normalizeRichTextDocument,
-  parseJSONContent,
-} from "@/components/rich-text/utils/document-normalizer";
 import {
   useGetPublicPostBySlugQuery,
   useLikePostMutation,
   useUnlikePostMutation,
 } from "@/lib/features/post";
-import { MotionRichTextEditor } from "@/components/ui/motion-rich-text";
 
 const ReadingProgressBar = dynamic(
   () =>
@@ -30,10 +22,10 @@ const ReadingProgressBar = dynamic(
   { ssr: false }
 );
 
-const AnimatedRichTextContent = dynamic(
+const ArticleBodyReader = dynamic(
   () =>
-    import("@/components/rich-text/animated-rich-text-content").then((mod) => ({
-      default: mod.AnimatedRichTextContent,
+    import("./article-body-reader").then((mod) => ({
+      default: mod.ArticleBodyReader,
     })),
   {
     ssr: false,
@@ -42,6 +34,7 @@ const AnimatedRichTextContent = dynamic(
         <div className="bg-surface-secondary h-4 w-11/12 rounded" />
         <div className="bg-surface-secondary h-4 w-10/12 rounded" />
         <div className="bg-surface-secondary h-4 w-9/12 rounded" />
+        <div className="bg-surface-secondary h-4 w-8/12 rounded" />
       </div>
     ),
   }
@@ -270,10 +263,6 @@ export function ReaderView({ slug }: ReaderViewProps) {
     }
   };
 
-  const parsedContent = useMemo(() => {
-    const doc = article?.contentType === "JSON" ? parseJSONContent(article.content) : null;
-    return doc ? normalizeRichTextDocument(doc) : null;
-  }, [article]);
 
   if (isLoading) {
     return (
@@ -494,27 +483,13 @@ export function ReaderView({ slug }: ReaderViewProps) {
         </div>
 
         {/* Core Article Prose Text (Choreographed Entrance 5) */}
-        {parsedContent ? (
-          <MotionRichTextEditor
-            key={article.content}
-            isReadOnly
-            extensions={ReadExtensionKit}
-            defaultValue={parsedContent}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.62 }}
-            style={{ willChange: "opacity" }}
-          >
-            <RichTextEditor.Shell className="border-none bg-transparent">
-              <AnimatedRichTextContent />
-              <RichTextTableOfContents placement="right" />
-            </RichTextEditor.Shell>
-          </MotionRichTextEditor>
-        ) : (
-          <p className="text-default-500 text-base leading-8">
-            This article is unavailable because its content is not a supported Tiptap document.
-          </p>
-        )}
+        <ArticleBodyReader
+          content={article.content}
+          contentType={article.contentType}
+          contentKey={article.content}
+          shellClassName="border-none bg-transparent"
+          motionDelay={0.62}
+        />
 
         {/* ☕ Minimalist Editorial Sign-off (Choreographed Entrance 6) */}
         <motion.div

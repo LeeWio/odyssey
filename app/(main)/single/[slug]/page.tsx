@@ -22,23 +22,15 @@ import {
   Card,
 } from "@heroui/react";
 import { ActionBar } from "@heroui-pro/react";
-import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type FormEvent, use, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, use, useEffect, useRef, useState } from "react";
 import { CommentSheet } from "@/components/comment";
-import { MotionRichTextEditor } from "@/components/ui/motion-rich-text";
-import { ReadExtensionKit } from "@/components/rich-text/extensions/read-extension-kit";
-import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
-import {
-  normalizeRichTextDocument,
-  parseJSONContent,
-} from "@/components/rich-text/utils/document-normalizer";
-import { ArticleTypography } from "@/features/blog";
+import { ArticleTypography } from "@/features/blog/reader/typography";
 import {
   type PostResponse,
   useFavoritePostMutation,
@@ -48,23 +40,6 @@ import {
 } from "@/lib/features/post";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 import { ReadingSession } from "@/components/reading/reading-session";
-
-const AnimatedRichTextContent = dynamic(
-  () =>
-    import("@/components/rich-text/animated-rich-text-content").then((mod) => ({
-      default: mod.AnimatedRichTextContent,
-    })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="space-y-3 py-6" aria-hidden>
-        <Skeleton className="h-4 w-11/12 rounded" />
-        <Skeleton className="h-4 w-10/12 rounded" />
-        <Skeleton className="h-4 w-9/12 rounded" />
-      </div>
-    ),
-  }
-);
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useAddPostToCollectionMutation,
@@ -77,9 +52,23 @@ import { commentDebug } from "@/lib/comment-debug";
 import { useAppSelector } from "@/lib/hooks";
 import { ArticleSidebar } from "./article-sidebar";
 
-// HeroUI passes extensions to useEditor as a dependency. Keep this reference
-// stable across reading-progress renders so scrolling never recreates the editor.
-const READER_EXTENSIONS = ReadExtensionKit;
+const ArticleBodyReader = dynamic(
+  () =>
+    import("@/features/blog/reader/article-body-reader").then((mod) => ({
+      default: mod.ArticleBodyReader,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-3 py-6" aria-hidden>
+        <Skeleton className="h-4 w-11/12 rounded" />
+        <Skeleton className="h-4 w-10/12 rounded" />
+        <Skeleton className="h-4 w-9/12 rounded" />
+        <Skeleton className="h-4 w-8/12 rounded" />
+      </div>
+    ),
+  }
+);
 
 interface SinglePageProps {
   params: Promise<{
@@ -147,10 +136,6 @@ export default function SinglePage({ params }: SinglePageProps) {
 
   const isLoading = queryIsLoading && !article;
 
-  const parsedContent = useMemo(() => {
-    const content = article?.contentType === "JSON" ? parseJSONContent(article.content) : null;
-    return content ? normalizeRichTextDocument(content) : null;
-  }, [article]);
   const [likePost, { isLoading: isLiking }] = useLikePostMutation();
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation();
   const [favoritePost, { isLoading: isFavoriting }] = useFavoritePostMutation();
@@ -172,7 +157,7 @@ export default function SinglePage({ params }: SinglePageProps) {
     optimisticFavorite?.postId === postId ? optimisticFavorite : null;
 
   useEffect(() => {
-    if (!parsedContent || !postId) return;
+    if (!article?.content || !postId) return;
 
     const targetId = getReadingPositionId(window.location.hash);
     if (!targetId) return;
@@ -180,30 +165,39 @@ export default function SinglePage({ params }: SinglePageProps) {
     const restoreKey = `${postId}:${targetId}`;
     if (restoredPositionRef.current === restoreKey) return;
 
-    let contentFrame: number | null = null;
-    const frame = window.requestAnimationFrame(() => {
-      contentFrame = window.requestAnimationFrame(() => {
-        const target = document.getElementById(targetId);
+    let cancelled = false;
+    let attempts = 0;
+    let timer: number | null = null;
 
-        if (!target || !target.closest("[data-reading-content]")) return;
+    const tryRestore = () => {
+      if (cancelled) return;
+      const target = document.getElementById(targetId);
+      if (!target || !target.closest("[data-reading-content]")) {
+        attempts += 1;
+        if (attempts < 40) {
+          timer = window.setTimeout(tryRestore, 50);
+        }
+        return;
+      }
 
-        restoredPositionRef.current = restoreKey;
-        target.setAttribute("tabindex", "-1");
-        target.scrollIntoView({
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ? "auto"
-            : "smooth",
-          block: "start",
-        });
-        target.focus({ preventScroll: true });
+      restoredPositionRef.current = restoreKey;
+      target.setAttribute("tabindex", "-1");
+      target.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "start",
       });
-    });
+      target.focus({ preventScroll: true });
+    };
+
+    timer = window.setTimeout(tryRestore, 0);
 
     return () => {
-      window.cancelAnimationFrame(frame);
-      if (contentFrame !== null) window.cancelAnimationFrame(contentFrame);
+      cancelled = true;
+      if (timer !== null) window.clearTimeout(timer);
     };
-  }, [parsedContent, postId]);
+  }, [article?.content, postId]);
   const isLiked = currentOptimisticLike?.isLiked ?? serverIsLiked;
   const likesCount = currentOptimisticLike?.likesCount ?? serverLikesCount;
   const isFavorited = currentOptimisticFavorite?.isFavorited ?? serverIsFavorited;
@@ -509,27 +503,11 @@ export default function SinglePage({ params }: SinglePageProps) {
                   estimatedMinutes={getEstimatedReadingMinutes(article)}
                 />
                 <ArticleTypography>
-                  {parsedContent ? (
-                    <MotionRichTextEditor
-                      key={article.content}
-                      isReadOnly
-                      extensions={READER_EXTENSIONS}
-                      defaultValue={parsedContent}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.8, ease: "easeOut" }}
-                    >
-                      <RichTextEditor.Shell className="border-none bg-transparent p-0">
-                        <AnimatedRichTextContent />
-                        <RichTextTableOfContents placement="right" />
-                      </RichTextEditor.Shell>
-                    </MotionRichTextEditor>
-                  ) : (
-                    <p className="text-default-500 text-base leading-8">
-                      This article is unavailable because its content is not a supported Tiptap
-                      document.
-                    </p>
-                  )}
+                  <ArticleBodyReader
+                    content={article.content}
+                    contentType={article.contentType}
+                    contentKey={article.content}
+                  />
                 </ArticleTypography>
               </>
             )}
