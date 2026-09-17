@@ -1,3 +1,10 @@
+## [1.155.8](https://github.com/LeeWio/odyssey/compare/v1.155.7...v1.155.8) (2026-09-17)
+
+
+### Performance Improvements
+
+* **home:** extract Lately KPI section into dynamic chunk ([20b2eaa](https://github.com/LeeWio/odyssey/commit/20b2eaa0a8ac0911e0802ce55b73193d04489198))
+
 ## [1.155.7](https://github.com/LeeWio/odyssey/compare/v1.155.6...v1.155.7) (2026-09-17)
 
 
