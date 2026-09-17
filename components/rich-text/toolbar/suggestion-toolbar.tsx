@@ -32,9 +32,13 @@ import {
   type RichTextEditorSuggestionMenuRenderProps,
 } from "@heroui-pro/react/rich-text-editor";
 import type { ComponentType, SVGProps } from "react";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { UserAvatar } from "@/components/user-avatar";
-import { useGetAllUsersQuery, type UserResponse } from "@/lib/features/user";
+import {
+  userApi,
+  type UserMentionResponse,
+} from "@/lib/features/user";
+import { useAppDispatch } from "@/lib/hooks";
 import { OPEN_YOUTUBE_DIALOG_EVENT } from "../media-insert-dialog";
 
 const SLASH_COMMAND_GROUPS = [
@@ -53,7 +57,7 @@ interface SlashCommandItem extends RichTextEditorSuggestionItem {
 
 interface MentionItem extends RichTextEditorSuggestionItem {
   id: string;
-  user: UserResponse;
+  user: UserMentionResponse;
 }
 
 const icon = (IconComponent: ComponentType<SVGProps<SVGSVGElement>>) => (
@@ -425,7 +429,16 @@ function MentionMenuContent({
   }, [selectedItem]);
 
   if (items.length === 0) {
-    return <div className="text-muted px-3 py-2 text-sm">No users found for “{query}”.</div>;
+    return (
+      <EmptyState className="min-w-64 px-3 py-4">
+        <EmptyState.Title>No users found</EmptyState.Title>
+        <EmptyState.Description>
+          {query.trim()
+            ? `Nothing matched “${query.trim()}”.`
+            : "Start typing a username or nickname."}
+        </EmptyState.Description>
+      </EmptyState>
+    );
   }
 
   return (
@@ -453,12 +466,7 @@ function MentionMenuContent({
             onHoverStart={() => setSelectedIndex(index)}
             onMouseDown={(event) => event.preventDefault()}
           >
-            <UserAvatar
-              size="sm"
-              name={item.title}
-              avatar={item.user.avatar}
-              email={item.user.email}
-            />
+            <UserAvatar size="sm" name={item.title} avatar={item.user.avatar} />
             <div className="flex min-w-0 flex-col">
               <Label>{item.title}</Label>
               <Description className="truncate">{item.description}</Description>
@@ -471,33 +479,47 @@ function MentionMenuContent({
   );
 }
 
-export function SuggestionToolbar() {
-  // TODO: replace the admin-only endpoint with a public user search endpoint.
-  const { data: users = [] } = useGetAllUsersQuery();
+function toMentionItem(user: UserMentionResponse): MentionItem {
+  return {
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .insertContentAt(range, [
+          {
+            type: "mention",
+            attrs: { id: String(user.id), label: user.username },
+          },
+          { type: "text", text: " " },
+        ])
+        .run();
+    },
+    description: user.nickname || user.username,
+    id: String(user.id),
+    keywords: [user.username, user.nickname || ""],
+    title: user.username,
+    user,
+  };
+}
 
-  const mentionItems = useMemo(
-    () =>
-      users.map((user): MentionItem => ({
-        command: ({ editor, range }) => {
-          editor
-            .chain()
-            .focus()
-            .insertContentAt(range, [
-              {
-                type: "mention",
-                attrs: { id: String(user.id), label: user.username },
-              },
-              { type: "text", text: " " },
-            ])
-            .run();
-        },
-        description: user.nickname || user.email,
-        id: String(user.id),
-        keywords: [user.username, user.nickname || "", user.email],
-        title: user.username,
-        user,
-      })),
-    [users]
+export function SuggestionToolbar() {
+  const dispatch = useAppDispatch();
+
+  const loadMentionItems = useCallback(
+    async ({ query }: { query: string }) => {
+      try {
+        const users = await dispatch(
+          userApi.endpoints.searchMentionUsers.initiate({
+            q: query.trim(),
+            limit: 20,
+          })
+        ).unwrap();
+        return users.map(toMentionItem);
+      } catch {
+        return [];
+      }
+    },
+    [dispatch]
   );
 
   return (
@@ -514,7 +536,7 @@ export function SuggestionToolbar() {
       <RichTextEditor.SuggestionMenu<MentionItem>
         char="@"
         className="w-fit min-w-0"
-        items={({ query }) => filterRichTextEditorSuggestionItems(mentionItems, query)}
+        items={loadMentionItems}
         pluginKey="mention-menu"
       >
         {(props) => <MentionMenuContent {...props} />}

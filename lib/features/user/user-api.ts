@@ -4,9 +4,11 @@ import { apiResponseSchema, baseApi, transformApiError } from "@/lib/api";
 import { notifyMutation } from "@/lib/toast";
 import {
   UserInfoResponseSchema,
+  UserMentionResponseSchema,
   UserResponseSchema,
   type PasswordChangeRequest,
   type UserInfoResponse,
+  type UserMentionResponse,
   type UserProfileRequest,
   type UserResponse,
 } from "./user-contracts";
@@ -49,7 +51,7 @@ export const userApi = baseApi.injectEndpoints({
     }),
 
     /**
-     * Get all users
+     * Get all users (admin)
      */
     getAllUsers: builder.query<UserResponse[], void>({
       query: () => ({
@@ -60,6 +62,20 @@ export const userApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<UserResponse[]>) => response.data || [],
       transformErrorResponse: transformApiError,
       providesTags: ["User"],
+    }),
+
+    /**
+     * Search active users for @mentions (authenticated, public-safe fields only).
+     */
+    searchMentionUsers: builder.query<UserMentionResponse[], { q?: string; limit?: number }>({
+      query: ({ q = "", limit = 20 }) => ({
+        url: "/api/v1/users/mentions",
+        params: { q, limit },
+      }),
+      rawResponseSchema: apiResponseSchema(z.array(UserMentionResponseSchema)),
+      transformResponse: (response: ApiResponse<UserMentionResponse[]>) => response.data || [],
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "User", id: "MENTIONS" }],
     }),
 
     /**
@@ -114,6 +130,8 @@ export const {
   useUpdateProfileMutation,
   useChangePasswordMutation,
   useGetAllUsersQuery,
+  useLazySearchMentionUsersQuery,
+  useSearchMentionUsersQuery,
   useUpdateUserStatusMutation,
   useUpdateUserRolesMutation,
 } = userApi;

@@ -13,6 +13,16 @@ export const UserResponseSchema = z.object({
 
 export type UserResponse = z.infer<typeof UserResponseSchema>;
 
+/** Public-safe summary for @mention pickers (no email/roles). */
+export const UserMentionResponseSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+  nickname: z.string().nullable().optional(),
+  avatar: z.string().nullable().optional(),
+});
+
+export type UserMentionResponse = z.infer<typeof UserMentionResponseSchema>;
+
 export const UserInfoResponseSchema = z.object({
   id: z.number(),
   username: z.string(),
