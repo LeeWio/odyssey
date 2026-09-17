@@ -8,7 +8,7 @@ import { selectRichTextState } from "@/lib/features";
 import { useAppSelector } from "@/lib/hooks";
 import { FixedToolbar } from "./toolbar/fixed-toolbar";
 import { SuggestionToolbar } from "./toolbar/suggestion-toolbar";
-import { ExtensionKit, createExtensionKit } from "./extensions/extension-kit";
+import { createExtensionKit } from "./extensions/extension-kit";
 import { ColumnsMenu } from "./menus/columns-menu/columns-menu";
 import { ImageMenu } from "./menus/image-menu/image-menu";
 import { LinkMenu } from "./menus/link-menu/link-menu";
@@ -40,15 +40,18 @@ export function RichText({
 }: RichTextProps) {
   const { initialValue, isReadOnly } = useAppSelector(selectRichTextState);
   const scrollContainerId = useId();
+  // Fresh extension instances per editor mount — do not share configured extensions.
   const extensions = useMemo(
     () =>
-      showTableOfContents
-        ? createExtensionKit({
-            tableOfContents: {
-              scrollParent: () => document.getElementById(scrollContainerId) ?? window,
-            },
-          })
-        : ExtensionKit,
+      createExtensionKit(
+        showTableOfContents
+          ? {
+              tableOfContents: {
+                scrollParent: () => document.getElementById(scrollContainerId) ?? window,
+              },
+            }
+          : undefined
+      ),
     [scrollContainerId, showTableOfContents]
   );
 
@@ -58,6 +61,8 @@ export function RichText({
     <RichTextEditor
       extensions={extensions}
       editorOptions={{
+        // HeroUI RichTextEditor already forces immediatelyRender/shouldRerenderOnTransaction
+        // to false for Next.js SSR (see @heroui-pro rich-text-editor + Tiptap React install guide).
         autofocus: !isReadOnly,
         enableContentCheck: true,
         onCreate: ({ editor }) => {

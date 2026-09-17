@@ -3,7 +3,7 @@
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useMemo } from "react";
 import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
-import { ReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
+import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import {
   normalizeRichTextDocument,
@@ -40,6 +40,8 @@ export function ArticleBodyReader({
     return doc ? normalizeRichTextDocument(doc) : null;
   }, [content, contentType]);
 
+  const extensions = useMemo(() => createReaderExtensionKit(), []);
+
   if (!parsedContent) {
     return (
       <p className="text-default-500 text-base leading-8">
@@ -52,7 +54,8 @@ export function ArticleBodyReader({
     <MotionRichTextEditor
       key={contentKey ?? content ?? "article-body"}
       isReadOnly
-      extensions={ReaderExtensionKit}
+      extensions={extensions}
+      // HeroUI RichTextEditor already disables immediatelyRender for Next.js SSR.
       defaultValue={parsedContent}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createConversionExtensions,
   createExtensionKit,
-  ReaderExtensionKit,
+  createReaderExtensionKit,
 } from "./extension-kit";
 
 describe("conversion extensions", () => {
@@ -57,7 +57,7 @@ describe("shared extension kit", () => {
   });
 
   it("lets readers omit edit-only plugins while keeping schema nodes", () => {
-    const names = ReaderExtensionKit.map((ext) => ext.name);
+    const names = createReaderExtensionKit().map((ext) => ext.name);
 
     expect(names).toEqual(
       expect.arrayContaining(["emoji", "image", "Mathematics", "audio", "attachment"])
@@ -65,5 +65,18 @@ describe("shared extension kit", () => {
     expect(names).not.toContain("findAndReplace");
     expect(names).not.toContain("markdown");
     expect(names).not.toContain("fileHandler");
+  });
+
+  it("returns distinct configured plugin instances per call", () => {
+    const first = createExtensionKit();
+    const second = createExtensionKit();
+
+    expect(first).not.toBe(second);
+
+    const firstFind = first.find((ext) => ext.name === "findAndReplace");
+    const secondFind = second.find((ext) => ext.name === "findAndReplace");
+    expect(firstFind).toBeDefined();
+    expect(secondFind).toBeDefined();
+    expect(firstFind).not.toBe(secondFind);
   });
 });

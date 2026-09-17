@@ -63,17 +63,19 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
     markdown = true,
   } = options;
 
+  // Clone module-level extensions so each editor gets isolated plugin state.
+  // Matches the tiptap-templates pattern of building kits via a factory call.
   return [
-    ...DetailsKit,
-    emojiSuggestion ? Emoji : EmojiBase,
-    Image,
-    Audio,
-    Attachment,
-    Youtube,
-    ...(fileHandler ? [MediaFileHandler] : []),
-    Mathematics,
-    Mention,
-    Typography,
+    ...DetailsKit.map((extension) => extension.configure({})),
+    (emojiSuggestion ? Emoji : EmojiBase).configure({}),
+    Image.configure({}),
+    Audio.configure({}),
+    Attachment.configure({}),
+    Youtube.configure({}),
+    ...(fileHandler ? [MediaFileHandler.configure({})] : []),
+    Mathematics.configure({}),
+    Mention.configure({}),
+    Typography.configure({}),
     TaskList.configure({
       HTMLAttributes: {
         class: "odyssey-task-list my-3 list-none space-y-1 pl-0",
@@ -96,13 +98,13 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
           }),
         ]
       : []),
-    Subscript,
-    Superscript,
-    TextAlign,
-    TextStyleKit,
-    Indent,
-    Column,
-    Columns,
+    Subscript.configure({}),
+    Superscript.configure({}),
+    TextAlign.configure({}),
+    TextStyleKit.configure({}),
+    Indent.configure({}),
+    Column.configure({}),
+    Columns.configure({}),
     ...(markdown
       ? [
           Markdown.configure({
@@ -112,24 +114,29 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
           }),
         ]
       : []),
-    TableKit,
+    TableKit.configure({}),
     createTableOfContents(tableOfContents),
   ];
 }
 
-/** Default editable kit. */
-export const ExtensionKit = createExtensionKit();
-
-/**
- * Read-oriented kit: same schema nodes, without edit-only plugins.
- * Prefer this from article readers while still sharing createExtensionKit.
- */
-export const ReaderExtensionKit = createExtensionKit({
+/** Default options for read-only surfaces (schema shared, edit plugins off). */
+export const READER_EXTENSION_KIT_OPTIONS: ExtensionKitOptions = {
   emojiSuggestion: false,
   fileHandler: false,
   findAndReplace: false,
   markdown: false,
-});
+};
+
+/**
+ * Build a fresh read-oriented kit. Never reuse the returned array across
+ * editor instances — TipTap extensions hold per-editor state.
+ */
+export function createReaderExtensionKit(options: ExtensionKitOptions = {}) {
+  return createExtensionKit({
+    ...READER_EXTENSION_KIT_OPTIONS,
+    ...options,
+  });
+}
 
 /**
  * Extensions used by non-editor content conversion helpers.
