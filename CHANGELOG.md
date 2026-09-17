@@ -1,3 +1,10 @@
+## [1.155.4](https://github.com/LeeWio/odyssey/compare/v1.155.3...v1.155.4) (2026-09-17)
+
+
+### Performance Improvements
+
+* **web:** harden auth handoff and cut frontend weight ([fa28100](https://github.com/LeeWio/odyssey/commit/fa281005d3540239cf05c508df4c5a26530861eb))
+
 ## [1.155.3](https://github.com/LeeWio/odyssey/compare/v1.155.2...v1.155.3) (2026-09-16)
 
 
