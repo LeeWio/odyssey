@@ -1,3 +1,10 @@
+# [1.156.0](https://github.com/LeeWio/odyssey/compare/v1.155.9...v1.156.0) (2026-09-17)
+
+
+### Features
+
+* **rich-text:** mention users via public search API ([cf701c4](https://github.com/LeeWio/odyssey/commit/cf701c4cd6532c9cc3ba0ac4cb484441d6c710ab))
+
 ## [1.155.9](https://github.com/LeeWio/odyssey/compare/v1.155.8...v1.155.9) (2026-09-17)
 
 
