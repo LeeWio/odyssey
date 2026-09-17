@@ -1,3 +1,10 @@
+## [1.155.7](https://github.com/LeeWio/odyssey/compare/v1.155.6...v1.155.7) (2026-09-17)
+
+
+### Performance Improvements
+
+* **home:** defer below-fold sections and slim feature barrels ([721769d](https://github.com/LeeWio/odyssey/commit/721769d345d972f873cb1ea78a808fb63b44ee9d))
+
 ## [1.155.6](https://github.com/LeeWio/odyssey/compare/v1.155.5...v1.155.6) (2026-09-17)
 
 
