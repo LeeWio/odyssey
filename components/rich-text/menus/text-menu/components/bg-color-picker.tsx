@@ -1,78 +1,80 @@
 "use client";
 
-import type { ColorChannel, ColorSpace } from "@heroui/react";
 import {
   Button,
+  ColorArea,
+  ColorField,
   ColorPicker,
   ColorSlider,
-  Label,
-  ListBox,
+  ColorSwatch,
+  ColorSwatchPicker,
   parseColor,
-  Select,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { memo, useState } from "react";
+import { memo } from "react";
 
 interface BgColorPickerProps {
   value: string;
   onChange: (value: string) => void;
 }
 
+const COLOR_PRESETS = [
+  "#fef08a",
+  "#bbf7d0",
+  "#a5f3fc",
+  "#bfdbfe",
+  "#ddd6fe",
+  "#fbcfe8",
+  "#fecdd3",
+  "#e5e7eb",
+  "#ffffff",
+] as const;
+
+/**
+ * Background highlight color picker — same HeroUI ColorPicker anatomy as text color.
+ */
 export const BgColorPicker = memo(function BgColorPicker({ value, onChange }: BgColorPickerProps) {
-  const [colorSpace, setColorSpace] = useState<ColorSpace>("hsl");
   const color = parseColor(value || "#ffffff");
 
-  const colorChannelsByColorSpace: Record<ColorSpace, ColorChannel[]> = {
-    hsb: ["hue", "saturation", "brightness", "alpha"],
-    hsl: ["hue", "saturation", "lightness", "alpha"],
-    rgb: ["red", "green", "blue", "alpha"],
-  };
-
   return (
-    <ColorPicker value={color} onChange={(newColor) => onChange(newColor.toString("hex"))}>
+    <ColorPicker value={color} onChange={(next) => onChange(next.toString("hex"))}>
       <Button isIconOnly size="sm" variant="tertiary" aria-label="Background color">
         <Icon icon="gravity-ui:palette" style={{ color: value || undefined }} />
       </Button>
-      <ColorPicker.Popover className="max-w-62 gap-2 px-2 py-3">
-        <Select
-          aria-label="Color space"
-          value={colorSpace}
-          variant="secondary"
-          onChange={(val) => setColorSpace(val as ColorSpace)}
+      <ColorPicker.Popover className="gap-2">
+        <ColorSwatchPicker
+          aria-label="Background color presets"
+          className="justify-center pt-2"
+          size="xs"
         >
-          <Select.Trigger>
-            <Select.Value className="uppercase" />
-            <Select.Indicator />
-          </Select.Trigger>
-          <Select.Popover>
-            <ListBox>
-              {Object.keys(colorChannelsByColorSpace).map((space) => (
-                <ListBox.Item key={space} className="uppercase" id={space} textValue={space}>
-                  {space}
-                  <ListBox.ItemIndicator />
-                </ListBox.Item>
-              ))}
-            </ListBox>
-          </Select.Popover>
-        </Select>
-        <div className="flex flex-col gap-2">
-          {colorChannelsByColorSpace[colorSpace].map((channel: ColorChannel) => (
-            // @ts-expect-error - TypeScript can't correlate dynamic colorSpace with channel type
-            <ColorSlider
-              key={channel}
-              aria-label={channel}
-              channel={channel}
-              className="gap-1 px-1"
-              colorSpace={colorSpace}
-            >
-              <Label className="capitalize">{channel}</Label>
-              <ColorSlider.Output className="text-muted" />
-              <ColorSlider.Track>
-                <ColorSlider.Thumb />
-              </ColorSlider.Track>
-            </ColorSlider>
+          {COLOR_PRESETS.map((preset) => (
+            <ColorSwatchPicker.Item key={preset} color={preset}>
+              <ColorSwatchPicker.Swatch />
+            </ColorSwatchPicker.Item>
           ))}
-        </div>
+        </ColorSwatchPicker>
+        <ColorArea
+          aria-label="Background color area"
+          className="max-w-full"
+          colorSpace="hsb"
+          xChannel="saturation"
+          yChannel="brightness"
+        >
+          <ColorArea.Thumb />
+        </ColorArea>
+        <ColorSlider aria-label="Hue slider" channel="hue" className="px-1" colorSpace="hsb">
+          <ColorSlider.Track>
+            <ColorSlider.Thumb />
+          </ColorSlider.Track>
+        </ColorSlider>
+        <ColorField aria-label="Background color field">
+          <ColorField.Group variant="secondary">
+            <ColorField.Prefix>
+              <ColorSwatch size="xs" />
+            </ColorField.Prefix>
+            <ColorField.Input />
+          </ColorField.Group>
+        </ColorField>
       </ColorPicker.Popover>
     </ColorPicker>
   );

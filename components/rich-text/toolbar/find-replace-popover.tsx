@@ -3,6 +3,7 @@
 import {
   Button,
   CloseButton,
+  Description,
   Input,
   Label,
   Popover,
@@ -11,7 +12,7 @@ import {
   TextField,
   Tooltip,
 } from "@heroui/react";
-import { CellSwitch } from "@heroui-pro/react";
+import { CellSwitch, EmptyState } from "@heroui-pro/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import { ArrowRight, ChevronDown, ChevronUp, Magnifier } from "@gravity-ui/icons";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
@@ -263,10 +264,28 @@ export function FindReplacePopover() {
             </Switch>
           </div>
 
+          {(findState?.searchTerm ?? "").trim().length > 0 && resultCount === 0 ? (
+            <div className="border-border border-t px-3 py-3">
+              <EmptyState className="py-4" size="sm">
+                <EmptyState.Header>
+                  <EmptyState.Media variant="icon">
+                    <Magnifier aria-hidden="true" />
+                  </EmptyState.Media>
+                  <EmptyState.Title>No matches</EmptyState.Title>
+                  <EmptyState.Description>
+                    Nothing matched “{findState?.searchTerm}”. Try another term or toggle regex.
+                  </EmptyState.Description>
+                </EmptyState.Header>
+              </EmptyState>
+            </div>
+          ) : null}
+
           {findState?.useRegex ? (
             <div className="border-border min-h-0 overflow-y-auto border-t px-3 py-3">
               <Surface className="flex flex-col gap-1 rounded-2xl p-2" variant="secondary">
-                <p className="text-muted px-2 py-1 text-sm font-medium">Try a search pattern</p>
+                <Description className="px-2 py-1 text-sm font-medium">
+                  Try a search pattern
+                </Description>
                 {REGEX_EXAMPLES.map((example) => (
                   <Button
                     key={example.pattern}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Dropdown, Label, Header } from "@heroui/react";
+import { Button, Dropdown, Header, Input, Label, Modal, TextField } from "@heroui/react";
 import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import DragHandle from "@tiptap/extension-drag-handle-react";
 import { NodeSelection } from "@tiptap/pm/state";
@@ -17,6 +17,8 @@ const NESTED_DRAG_OPTIONS = {
 export function ContentItemMenu() {
   const { editor, isDisabled, isReadOnly } = useRichTextEditor();
   const [announcement, setAnnouncement] = useState("");
+  const [isCaptionModalOpen, setIsCaptionModalOpen] = useState(false);
+  const [captionDraft, setCaptionDraft] = useState("");
 
   const { activeBlock, setActiveBlock, isMenuOpen, setIsMenuOpen, siblingAvailability } =
     useContentItemState();
@@ -184,12 +186,10 @@ export function ContentItemMenu() {
       actions.updateImageAttributes({ alignment: "right" });
       setAnnouncement("Aligned image right");
     } else if (action === "image-caption") {
-      const currentCaption = activeBlock.node.attrs.caption || "";
-      const caption = prompt("Enter image caption:", currentCaption);
-      if (caption !== null) {
-        actions.updateImageAttributes({ caption });
-        setAnnouncement("Image caption updated");
-      }
+      setCaptionDraft(
+        typeof activeBlock.node.attrs.caption === "string" ? activeBlock.node.attrs.caption : ""
+      );
+      setIsCaptionModalOpen(true);
     } else if (action === "image-download") {
       const src = activeBlock.node.attrs.src;
       const alt = activeBlock.node.attrs.alt;
@@ -448,6 +448,48 @@ export function ContentItemMenu() {
       <span aria-live="polite" className="sr-only" role="status">
         {announcement}
       </span>
+
+      <Modal.Backdrop
+        isOpen={isCaptionModalOpen}
+        variant="blur"
+        onOpenChange={(open) => {
+          if (!open) setIsCaptionModalOpen(false);
+        }}
+      >
+        <Modal.Container size="sm">
+          <Modal.Dialog aria-label="Edit image caption">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>Image caption</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              <TextField name="image-caption">
+                <Label>Caption</Label>
+                <Input
+                  autoFocus
+                  placeholder="Describe this image"
+                  value={captionDraft}
+                  onChange={(event) => setCaptionDraft(event.target.value)}
+                />
+              </TextField>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button slot="close" variant="secondary">
+                Cancel
+              </Button>
+              <Button
+                onPress={() => {
+                  actions.updateImageAttributes({ caption: captionDraft });
+                  setAnnouncement("Image caption updated");
+                  setIsCaptionModalOpen(false);
+                }}
+              >
+                Save
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </>
   );
 }

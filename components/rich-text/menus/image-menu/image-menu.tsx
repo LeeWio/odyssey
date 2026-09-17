@@ -1,6 +1,16 @@
 "use client";
 
-import { Button, Input, Label, Modal, Popover, Slider, TextField, toast } from "@heroui/react";
+import {
+  Button,
+  Description,
+  Input,
+  Label,
+  Modal,
+  Popover,
+  Slider,
+  TextField,
+  toast,
+} from "@heroui/react";
 import { Segment } from "@heroui-pro/react";
 import {
   RichTextEditor,
@@ -187,9 +197,9 @@ export function ImageMenu() {
                     variant="secondary"
                     onChange={(event) => updateImageAttributes({ alt: event.target.value })}
                   />
-                  <p id="image-alt-help" className="text-muted text-xs">
+                  <Description id="image-alt-help">
                     Describe the image for people who cannot see it. Required to publish.
-                  </p>
+                  </Description>
                 </TextField>
                 <TextField name="image-caption">
                   <Label>Caption</Label>

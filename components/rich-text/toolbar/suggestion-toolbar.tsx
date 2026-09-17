@@ -427,13 +427,18 @@ function MentionMenuContent({
 
   if (items.length === 0) {
     return (
-      <EmptyState className="min-w-64 px-3 py-4">
-        <EmptyState.Title>No users found</EmptyState.Title>
-        <EmptyState.Description>
-          {query.trim()
-            ? `Nothing matched “${query.trim()}”.`
-            : "Start typing a username or nickname."}
-        </EmptyState.Description>
+      <EmptyState className="min-w-64 px-3 py-4" size="sm">
+        <EmptyState.Header>
+          <EmptyState.Media variant="icon">
+            <Magnifier aria-hidden="true" />
+          </EmptyState.Media>
+          <EmptyState.Title>No users found</EmptyState.Title>
+          <EmptyState.Description>
+            {query.trim()
+              ? `Nothing matched “${query.trim()}”.`
+              : "Start typing a username or nickname."}
+          </EmptyState.Description>
+        </EmptyState.Header>
       </EmptyState>
     );
   }
