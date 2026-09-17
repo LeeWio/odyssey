@@ -6,5 +6,8 @@ export {
   createImageAltText,
   extractImageUrlsFromHtml,
   handleFilePaste,
+  htmlHasRichNonImageContent,
   insertFilesIntoEditor,
+  type FileHandlerRejectReason,
+  type MediaFileHandlerOptions,
 } from "./file-handler";

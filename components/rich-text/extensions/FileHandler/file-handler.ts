@@ -1,5 +1,10 @@
-import { FileHandler } from "@tiptap/extension-file-handler";
+import {
+  FileHandlePlugin,
+  FileHandler,
+  type FileHandlerOptions,
+} from "@tiptap/extension-file-handler";
 import type { Editor, JSONContent } from "@tiptap/react";
+import { PluginKey } from "@tiptap/pm/state";
 import { toast } from "@heroui/react";
 
 import { normalizeLinkUrl } from "../../utils/link-utils";
@@ -15,35 +20,71 @@ import {
 
 export type FileHandlerRejectReason = string;
 
-export interface CreateFileHandlerOptions {
-  allowedMimeTypes?: string[];
-  consumePasteEvent?: boolean;
+export type MediaFileHandlerOptions = FileHandlerOptions & {
   onReject?: (file: File, reason: FileHandlerRejectReason) => void;
-}
+};
 
 export const SUPPORTED_MEDIA_MIME_TYPES = [
   ...ACCEPTED_IMAGE_TYPES,
   ...ACCEPTED_AUDIO_TYPES,
 ] as string[];
 
-export function extractImageUrlsFromHtml(html: string | undefined): string[] {
-  if (!html || typeof document === "undefined") return [];
+function defaultReject(file: File, reason: string) {
+  toast.warning(`${file.name}: ${reason}`);
+}
+
+function parseHtmlDocument(html: string): Document | null {
+  if (typeof document === "undefined") return null;
 
   try {
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    const urls: string[] = [];
-
-    for (const image of doc.querySelectorAll("img[src]")) {
-      const raw = image.getAttribute("src");
-      if (!raw) continue;
-      const normalized = normalizeLinkUrl(raw);
-      if (normalized) urls.push(normalized);
-    }
-
-    return urls;
+    return new DOMParser().parseFromString(html, "text/html");
   } catch {
-    return [];
+    return null;
   }
+}
+
+/**
+ * Prefer remote/site image URLs from clipboard HTML (e.g. animated GIFs) over the
+ * accompanying File blob, which browsers often flatten to a single PNG frame.
+ */
+export function extractImageUrlsFromHtml(html: string | undefined): string[] {
+  if (!html) return [];
+
+  const doc = parseHtmlDocument(html);
+  if (!doc) return [];
+
+  const urls: string[] = [];
+
+  for (const image of doc.querySelectorAll("img[src]")) {
+    const raw = image.getAttribute("src");
+    if (!raw) continue;
+    const normalized = normalizeLinkUrl(raw);
+    if (normalized) urls.push(normalized);
+  }
+
+  return urls;
+}
+
+/**
+ * True when clipboard HTML carries meaningful non-image content (text/structure).
+ * In that case we insert the HTML via the schema instead of only uploading files.
+ */
+export function htmlHasRichNonImageContent(html: string | undefined): boolean {
+  if (!html?.trim()) return false;
+
+  const doc = parseHtmlDocument(html);
+  if (!doc) return false;
+
+  for (const image of doc.querySelectorAll("img")) {
+    image.remove();
+  }
+
+  // Ignore empty wrappers like `<p><img /></p>` — only leftover text or
+  // non-image embeds count as rich clipboard HTML.
+  const text = doc.body.textContent?.replace(/\s+/g, " ").trim() ?? "";
+  if (text.length > 0) return true;
+
+  return Boolean(doc.body.querySelector("iframe, video, audio, object, embed"));
 }
 
 function createImageAltText(fileName: string): string {
@@ -64,13 +105,9 @@ function createMediaPlaceholderNode(editor: Editor, file: File, kind: Exclude<Me
   } satisfies JSONContent;
 }
 
-function defaultReject(file: File, reason: string) {
-  toast.warning(`${file.name}: ${reason}`);
-}
-
 /**
  * Insert dropped/pasted files using the ImageUpload placeholder for images
- * (template pattern) and the media upload queue for audio/attachments.
+ * and the media upload queue for audio/attachments.
  */
 export function insertFilesIntoEditor(
   editor: Editor,
@@ -111,6 +148,12 @@ export function insertFilesIntoEditor(
   }
 }
 
+/**
+ * Paste pipeline when `consumePasteEvent` is true (we own the whole event):
+ * 1. Rich HTML (text/structure) → insert HTML via schema; also attach non-image files
+ * 2. HTML with remote image URLs only → insert committed `image` nodes (skip file blobs)
+ * 3. Otherwise → local upload placeholders via `insertFilesIntoEditor`
+ */
 export function handleFilePaste(
   editor: Editor,
   files: File[],
@@ -118,6 +161,16 @@ export function handleFilePaste(
   onReject?: (file: File, reason: string) => void
 ) {
   if (!editor.isEditable) return;
+
+  if (htmlHasRichNonImageContent(htmlContent) && htmlContent) {
+    editor.chain().focus().insertContent(htmlContent).run();
+
+    const extraFiles = files.filter((file) => !file.type.startsWith("image/"));
+    if (extraFiles.length > 0) {
+      insertFilesIntoEditor(editor, extraFiles, { onReject });
+    }
+    return;
+  }
 
   const remoteImageUrls = extractImageUrlsFromHtml(htmlContent);
   if (remoteImageUrls.length > 0) {
@@ -138,34 +191,60 @@ export function handleFilePaste(
 }
 
 /**
- * Generic TipTap FileHandler factory (OSS). Does not upload — routes files into
- * ImageUpload placeholders or media nodes that use the existing upload API.
+ * Odyssey media FileHandler — extends TipTap's OSS FileHandler so drop/paste
+ * always go through our upload placeholders. Defaults to `consumePasteEvent: true`
+ * to avoid duplicate nodes from Image / HTML paste rules.
  */
-export function createFileHandler(options: CreateFileHandlerOptions = {}) {
-  const { allowedMimeTypes, consumePasteEvent = true, onReject = defaultReject } = options;
+export const MediaFileHandler = FileHandler.extend<MediaFileHandlerOptions>({
+  addOptions() {
+    return {
+      ...this.parent?.(),
+      allowedMimeTypes: SUPPORTED_MEDIA_MIME_TYPES,
+      consumePasteEvent: true,
+      onReject: defaultReject,
+      onDrop: undefined,
+      onPaste: undefined,
+    };
+  },
 
-  return FileHandler.configure({
-    allowedMimeTypes,
-    consumePasteEvent,
-    onDrop: (editor, files, position) => {
-      insertFilesIntoEditor(editor, files, { onReject, position });
-    },
-    onPaste: (editor, files, htmlContent) => {
-      handleFilePaste(editor, files, htmlContent, onReject);
-    },
-  });
+  addProseMirrorPlugins() {
+    const {
+      allowedMimeTypes,
+      consumePasteEvent,
+      onDrop,
+      onPaste,
+      onReject = defaultReject,
+    } = this.options;
+
+    return [
+      FileHandlePlugin({
+        key: new PluginKey(this.name),
+        editor: this.editor,
+        allowedMimeTypes,
+        consumePasteEvent: consumePasteEvent ?? true,
+        onDrop:
+          onDrop ??
+          ((editor, files, position) => {
+            insertFilesIntoEditor(editor, files, { onReject, position });
+          }),
+        onPaste:
+          onPaste ??
+          ((editor, files, htmlContent) => {
+            handleFilePaste(editor, files, htmlContent, onReject);
+          }),
+      }),
+    ];
+  },
+});
+
+/** Per-editor instance (isolated plugin state), same pattern as other kit extensions. */
+export function createMediaFileHandler(options: Partial<MediaFileHandlerOptions> = {}) {
+  return MediaFileHandler.configure(options);
 }
 
-export function createMediaFileHandler(
-  options: Omit<CreateFileHandlerOptions, "allowedMimeTypes"> = {}
-) {
-  return createFileHandler({
-    consumePasteEvent: true,
-    ...options,
-  });
+/** @deprecated Prefer createMediaFileHandler / MediaFileHandler.configure */
+export function createFileHandler(options: Partial<MediaFileHandlerOptions> = {}) {
+  return createMediaFileHandler(options);
 }
-
-/** @deprecated Prefer createMediaFileHandler() per editor instance. */
-export const MediaFileHandler = createMediaFileHandler();
 
 export { createImageAltText };

@@ -1,6 +1,11 @@
 import type { Editor } from "@tiptap/react";
 import { describe, expect, it, vi } from "vitest";
-import { extractImageUrlsFromHtml, handleFilePaste, insertFilesIntoEditor } from "./file-handler";
+import {
+  extractImageUrlsFromHtml,
+  handleFilePaste,
+  htmlHasRichNonImageContent,
+  insertFilesIntoEditor,
+} from "./file-handler";
 import { clearMediaUploads, getMediaUpload } from "../media/media-upload";
 import { takePendingImageFile } from "../ImageUpload/pending-files";
 
@@ -41,6 +46,22 @@ describe("extractImageUrlsFromHtml", () => {
       "https://cdn.example.com/a.png",
       "/uploads/b.jpg",
     ]);
+  });
+});
+
+describe("htmlHasRichNonImageContent", () => {
+  it("is false for image-only clipboard HTML", () => {
+    expect(htmlHasRichNonImageContent('<p><img src="https://cdn.example.com/a.gif" /></p>')).toBe(
+      false
+    );
+  });
+
+  it("is true when HTML still has text after images are removed", () => {
+    expect(
+      htmlHasRichNonImageContent(
+        '<p>Hello from the web</p><img src="https://cdn.example.com/a.png" />'
+      )
+    ).toBe(true);
   });
 });
 
@@ -95,6 +116,24 @@ describe("insertFilesIntoEditor", () => {
         },
       },
     ]);
+  });
+
+  it("inserts rich HTML via schema and still attaches non-image files", () => {
+    const editor = createEditorMock();
+    const image = new File(["frame"], "frame.png", { type: "image/png" });
+    const pdf = new File(["%PDF"], "notes.pdf", { type: "application/pdf" });
+    const html = '<p>Copied article</p><img src="https://cdn.example.com/hero.png" />';
+
+    handleFilePaste(editor, [image, pdf], html);
+
+    expect(editor.insertContent).toHaveBeenNthCalledWith(1, html);
+    expect(editor.insertContent).toHaveBeenNthCalledWith(2, [
+      expect.objectContaining({
+        type: "attachment",
+        attrs: expect.objectContaining({ fileName: "notes.pdf" }),
+      }),
+    ]);
+    clearMediaUploads(editor);
   });
 
   it("does nothing when the editor is read-only", () => {

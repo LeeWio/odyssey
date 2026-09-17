@@ -4,7 +4,12 @@ export { Emoji } from "./emoji";
 export { Indent } from "./indent";
 export { Image } from "./Image";
 export { ImageUpload } from "./ImageUpload";
-export { MediaFileHandler, createFileHandler, createMediaFileHandler } from "./FileHandler";
+export {
+  MediaFileHandler,
+  createFileHandler,
+  createMediaFileHandler,
+  type MediaFileHandlerOptions,
+} from "./FileHandler";
 export { Mathematics } from "./mathematics";
 export { Mention } from "./mention";
 export { Attachment, Audio, Youtube } from "./media";
