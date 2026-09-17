@@ -1,3 +1,10 @@
+## [1.156.2](https://github.com/LeeWio/odyssey/compare/v1.156.1...v1.156.2) (2026-09-17)
+
+
+### Bug Fixes
+
+* **rich-text:** use HeroUI DropZone for image upload placeholders ([b0c4bdc](https://github.com/LeeWio/odyssey/commit/b0c4bdc25d7cf7055517a8c8560e9e4a3284886a))
+
 ## [1.156.1](https://github.com/LeeWio/odyssey/compare/v1.156.0...v1.156.1) (2026-09-17)
 
 
