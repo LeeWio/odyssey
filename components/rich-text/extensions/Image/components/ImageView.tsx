@@ -65,7 +65,11 @@ export function ImageView({ editor, getPos, node }: NodeViewProps) {
           />
         </Surface>
         {caption ? (
-          <figcaption className="text-muted mt-2 text-center text-sm">{caption}</figcaption>
+          <figcaption className="mt-2 text-center">
+            <Typography color="muted" type="body-sm">
+              {caption}
+            </Typography>
+          </figcaption>
         ) : null}
       </figure>
     </NodeViewWrapper>

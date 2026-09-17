@@ -1,7 +1,7 @@
 "use client";
 
-import { Link, Surface, Typography, toast } from "@heroui/react";
-import { DropZone } from "@heroui-pro/react";
+import { Chip, Link, Surface, Typography, toast } from "@heroui/react";
+import { DropZone, ItemCard } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import type { DropZoneProps } from "react-aria-components";
@@ -257,35 +257,59 @@ export function MediaNodeView({ deleteNode, editor, node, updateAttributes }: No
 
   return (
     <NodeViewWrapper className="my-6" contentEditable={false} data-drag-handle>
-      <Surface className="flex w-full items-center gap-3 rounded-xl p-3" variant="secondary">
-        <span className="bg-accent-soft text-accent-soft-foreground flex size-10 shrink-0 items-center justify-center rounded-lg">
-          <Icon
-            aria-hidden="true"
-            icon={kind === "audio" ? "gravity-ui:music-note" : "gravity-ui:paperclip"}
-          />
-        </span>
-        {kind === "audio" ? (
-          <div className="min-w-0 flex-1">
-            <p className="mb-2 truncate text-sm font-medium">{fileName || "Audio"}</p>
+      {kind === "audio" ? (
+        <div className="flex w-full flex-col gap-2">
+          <ItemCard variant="secondary" className="w-full">
+            <ItemCard.Icon>
+              <Icon aria-hidden="true" icon="gravity-ui:music-note" />
+            </ItemCard.Icon>
+            <ItemCard.Content>
+              <ItemCard.Title>{fileName || "Audio"}</ItemCard.Title>
+              {fileSize > 0 ? (
+                <ItemCard.Description>{formatFileSize(fileSize)}</ItemCard.Description>
+              ) : null}
+            </ItemCard.Content>
+            <ItemCard.Action>
+              <Chip size="sm" variant="soft">
+                Audio
+              </Chip>
+            </ItemCard.Action>
+          </ItemCard>
+          <Surface variant="secondary" className="rounded-2xl p-3">
             <audio className="w-full" controls preload="metadata" src={src}>
               <track kind="captions" />
             </audio>
-          </div>
-        ) : (
-          <div className="min-w-0 flex-1">
+          </Surface>
+        </div>
+      ) : (
+        <ItemCard variant="secondary" className="w-full">
+          <ItemCard.Icon>
+            <Icon aria-hidden="true" icon="gravity-ui:paperclip" />
+          </ItemCard.Icon>
+          <ItemCard.Content>
+            <ItemCard.Title>{fileName || "Attachment"}</ItemCard.Title>
+            {fileSize > 0 ? (
+              <ItemCard.Description>{formatFileSize(fileSize)}</ItemCard.Description>
+            ) : (
+              <ItemCard.Description>Downloadable file</ItemCard.Description>
+            )}
+          </ItemCard.Content>
+          <ItemCard.Action>
+            <Chip className="me-1" size="sm" variant="soft">
+              File
+            </Chip>
             <Link
-              className="block truncate font-medium no-underline"
+              className="text-sm font-medium"
               download={fileName || true}
               href={src}
               rel="noopener noreferrer"
               target="_blank"
             >
-              {fileName || "Download attachment"}
+              Download
             </Link>
-            {fileSize > 0 && <p className="text-muted text-xs">{formatFileSize(fileSize)}</p>}
-          </div>
-        )}
-      </Surface>
+          </ItemCard.Action>
+        </ItemCard>
+      )}
     </NodeViewWrapper>
   );
 }
