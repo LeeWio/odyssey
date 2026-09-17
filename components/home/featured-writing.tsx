@@ -12,8 +12,6 @@ const Grainient = dynamic(() => import("@/components/background/grainient"), {
   loading: () => <div className="bg-surface-secondary absolute inset-0" aria-hidden />,
 });
 
-
-
 const formatDate = (date?: string | null) => {
   if (!date) return "Recently";
 
@@ -23,7 +21,6 @@ const formatDate = (date?: string | null) => {
     year: "numeric",
   }).format(new Date(date));
 };
-
 
 function getGrainientProps(seed: string, index: number) {
   let hash = 2166136261;

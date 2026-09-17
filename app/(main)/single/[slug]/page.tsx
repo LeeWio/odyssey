@@ -183,9 +183,7 @@ export default function SinglePage({ params }: SinglePageProps) {
       restoredPositionRef.current = restoreKey;
       target.setAttribute("tabindex", "-1");
       target.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
         block: "start",
       });
       target.focus({ preventScroll: true });

@@ -34,10 +34,7 @@ import {
 import type { ComponentType, SVGProps } from "react";
 import { useCallback, useEffect, useRef } from "react";
 import { UserAvatar } from "@/components/user-avatar";
-import {
-  userApi,
-  type UserMentionResponse,
-} from "@/lib/features/user";
+import { userApi, type UserMentionResponse } from "@/lib/features/user";
 import { useAppDispatch } from "@/lib/hooks";
 import { OPEN_YOUTUBE_DIALOG_EVENT } from "../media-insert-dialog";
 

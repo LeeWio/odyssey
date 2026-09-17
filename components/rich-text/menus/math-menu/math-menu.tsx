@@ -57,8 +57,7 @@ export function MathMenu() {
       const { selection } = state;
 
       return (
-        isNodeSelection(selection) &&
-        ["inlineMath", "blockMath"].includes(selection.node.type.name)
+        isNodeSelection(selection) && ["inlineMath", "blockMath"].includes(selection.node.type.name)
       );
     },
     [isReadOnly]

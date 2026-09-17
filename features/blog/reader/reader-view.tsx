@@ -263,7 +263,6 @@ export function ReaderView({ slug }: ReaderViewProps) {
     }
   };
 
-
   if (isLoading) {
     return (
       <div className="bg-background flex min-h-screen items-center justify-center">

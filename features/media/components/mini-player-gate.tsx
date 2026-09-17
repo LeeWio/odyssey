@@ -5,10 +5,9 @@ import { useState } from "react";
 import { selectIsMiniPlayerOpen } from "@/lib/features/ui";
 import { useAppSelector } from "@/lib/hooks";
 
-const MiniPlayer = dynamic(
-  () => import("./mini-player").then((mod) => mod.MiniPlayer),
-  { ssr: false }
-);
+const MiniPlayer = dynamic(() => import("./mini-player").then((mod) => mod.MiniPlayer), {
+  ssr: false,
+});
 
 /**
  * Keep MiniPlayer off the shared main-layout graph until first open.

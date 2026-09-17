@@ -45,14 +45,23 @@ describe("shared extension kit", () => {
     const names = createExtensionKit().map((ext) => ext.name);
 
     expect(names).toEqual(
-      expect.arrayContaining(["emoji", "findAndReplace", "markdown", "image", "Mathematics", "fileHandler"])
+      expect.arrayContaining([
+        "emoji",
+        "findAndReplace",
+        "markdown",
+        "image",
+        "Mathematics",
+        "fileHandler",
+      ])
     );
   });
 
   it("lets readers omit edit-only plugins while keeping schema nodes", () => {
     const names = ReaderExtensionKit.map((ext) => ext.name);
 
-    expect(names).toEqual(expect.arrayContaining(["emoji", "image", "Mathematics", "audio", "attachment"]));
+    expect(names).toEqual(
+      expect.arrayContaining(["emoji", "image", "Mathematics", "audio", "attachment"])
+    );
     expect(names).not.toContain("findAndReplace");
     expect(names).not.toContain("markdown");
     expect(names).not.toContain("fileHandler");
