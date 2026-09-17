@@ -7,15 +7,23 @@ import { useCallback } from "react";
 import type { ShouldShowProps } from "../types";
 
 export function TableMenu() {
-  const { editor } = useRichTextEditor();
+  const { editor, isReadOnly } = useRichTextEditor();
 
-  const shouldShow = useCallback(({ editor: currentEditor, element, view }: ShouldShowProps) => {
-    if (!currentEditor.isEditable || currentEditor.view.dragging || view.isDestroyed) {
-      return false;
-    }
+  const shouldShow = useCallback(
+    ({ editor: currentEditor, element, view }: ShouldShowProps) => {
+      if (
+        isReadOnly ||
+        !currentEditor.isEditable ||
+        currentEditor.view.dragging ||
+        view.isDestroyed
+      ) {
+        return false;
+      }
 
-    return currentEditor.isActive("table") || element.contains(document.activeElement);
-  }, []);
+      return currentEditor.isActive("table") || element.contains(document.activeElement);
+    },
+    [isReadOnly]
+  );
 
   if (!editor) return null;
 

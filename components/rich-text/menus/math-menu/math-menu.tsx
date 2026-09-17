@@ -22,7 +22,7 @@ const EMPTY_MATH_SELECTION: MathSelectionState = {
 };
 
 export function MathMenu() {
-  const { editor } = useRichTextEditor();
+  const { editor, isReadOnly } = useRichTextEditor();
   const mathSelection =
     useRichTextEditorState(
       ({ editor: currentEditor }) => {
@@ -48,16 +48,21 @@ export function MathMenu() {
       (previous, next) => previous?.kind === next?.kind && previous?.latex === next?.latex
     ) ?? EMPTY_MATH_SELECTION;
 
-  const shouldShow = useCallback(({ editor: currentEditor, state }: ShouldShowProps) => {
-    const { selection } = state;
+  const shouldShow = useCallback(
+    ({ editor: currentEditor, state }: ShouldShowProps) => {
+      if (isReadOnly || !currentEditor.isEditable || currentEditor.view.dragging) {
+        return false;
+      }
 
-    return (
-      currentEditor.isEditable &&
-      !currentEditor.view.dragging &&
-      isNodeSelection(selection) &&
-      ["inlineMath", "blockMath"].includes(selection.node.type.name)
-    );
-  }, []);
+      const { selection } = state;
+
+      return (
+        isNodeSelection(selection) &&
+        ["inlineMath", "blockMath"].includes(selection.node.type.name)
+      );
+    },
+    [isReadOnly]
+  );
 
   return (
     <RichTextEditor.BubbleMenu

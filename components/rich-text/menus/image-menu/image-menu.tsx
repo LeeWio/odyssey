@@ -31,7 +31,7 @@ interface ImagePreview {
 export function ImageMenu() {
   const [preview, setPreview] = useState<ImagePreview | null>(null);
   const replacementInputRef = useRef<HTMLInputElement>(null);
-  const { editor } = useRichTextEditor();
+  const { editor, isReadOnly } = useRichTextEditor();
   const imageAttributes = useRichTextEditorState((state) => state.editor.getAttributes("image"));
   const src = typeof imageAttributes?.src === "string" ? imageAttributes.src : "";
   const alt = typeof imageAttributes?.alt === "string" ? imageAttributes.alt : "";
@@ -39,18 +39,23 @@ export function ImageMenu() {
   const widthPercent = normalizeImageWidthPercent(imageAttributes?.widthPercent);
   const alignment = normalizeImageAlignment(imageAttributes?.alignment);
 
-  const shouldShow = useCallback(({ editor, state }: ShouldShowProps) => {
-    const { selection } = state;
+  const shouldShow = useCallback(
+    ({ editor: currentEditor, state }: ShouldShowProps) => {
+      if (isReadOnly || !currentEditor.isEditable || currentEditor.view.dragging) {
+        return false;
+      }
 
-    return (
-      editor.isEditable &&
-      !editor.view.dragging &&
-      isNodeSelection(selection) &&
-      selection.node.type.name === "image" &&
-      typeof selection.node.attrs.src === "string" &&
-      selection.node.attrs.src.length > 0
-    );
-  }, []);
+      const { selection } = state;
+
+      return (
+        isNodeSelection(selection) &&
+        selection.node.type.name === "image" &&
+        typeof selection.node.attrs.src === "string" &&
+        selection.node.attrs.src.length > 0
+      );
+    },
+    [isReadOnly]
+  );
 
   const copyImageUrl = useCallback(() => {
     if (!src) return;

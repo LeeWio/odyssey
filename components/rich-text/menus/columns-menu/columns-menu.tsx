@@ -41,7 +41,7 @@ function getColumnsElement(editor: Editor) {
 }
 
 export function ColumnsMenu() {
-  const { editor } = useRichTextEditor();
+  const { editor, isReadOnly } = useRichTextEditor();
   const columnState = useRichTextEditorState(({ editor: currentEditor }) => {
     const count = getColumnCountAtSelection(currentEditor.state);
     const widths = getColumnWidthsAtSelection(currentEditor.state);
@@ -54,7 +54,12 @@ export function ColumnsMenu() {
 
   const shouldShow = useCallback(
     ({ editor: currentEditor, element, state, view }: ShouldShowProps) => {
-      if (!currentEditor.isEditable || currentEditor.view.dragging || view.isDestroyed) {
+      if (
+        isReadOnly ||
+        !currentEditor.isEditable ||
+        currentEditor.view.dragging ||
+        view.isDestroyed
+      ) {
         return false;
       }
 
@@ -66,7 +71,7 @@ export function ColumnsMenu() {
         getColumnCountAtSelection(state) !== null
       );
     },
-    []
+    [isReadOnly]
   );
 
   const setColumnCount = useCallback(

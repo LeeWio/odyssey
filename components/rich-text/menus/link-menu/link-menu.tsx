@@ -4,14 +4,14 @@ import { LinkMenuEdit } from "./link-menu-edit";
 import { LinkMenuPreview } from "./link-menu-preview";
 
 export function LinkMenu() {
-  const { editor } = useRichTextEditor();
+  const { editor, isReadOnly } = useRichTextEditor();
 
   const [mode, setMode] = useState<"preview" | "edit">("preview");
 
   const shouldShow = useCallback(() => {
-    if (!editor) return false;
-    return editor.isActive("link") && editor.isEditable;
-  }, [editor]);
+    if (!editor || isReadOnly || !editor.isEditable) return false;
+    return editor.isActive("link");
+  }, [editor, isReadOnly]);
 
   const handleEdit = () => setMode("edit");
   const handleCancel = () => setMode("preview");

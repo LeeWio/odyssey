@@ -14,7 +14,9 @@ import { FindReplacePopover } from "./find-replace-popover";
 import { ContentInteroperabilityDialog } from "./content-interoperability-dialog";
 
 export function FixedToolbar() {
-  const { editor } = useRichTextEditor();
+  const { editor, isReadOnly } = useRichTextEditor();
+
+  if (!editor || isReadOnly) return null;
 
   return (
     <ScrollShadow
