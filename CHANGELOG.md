@@ -1,3 +1,10 @@
+## [1.158.2](https://github.com/LeeWio/odyssey/compare/v1.158.1...v1.158.2) (2026-09-18)
+
+
+### Bug Fixes
+
+* **ci:** unblock e2e for comments, tasks, and entrance ([4fc5a96](https://github.com/LeeWio/odyssey/commit/4fc5a96cdb7000b2e0b10b4b7f549c0f4a229ff5))
+
 ## [1.158.1](https://github.com/LeeWio/odyssey/compare/v1.158.0...v1.158.1) (2026-09-18)
 
 
