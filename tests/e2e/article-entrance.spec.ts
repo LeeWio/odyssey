@@ -8,8 +8,23 @@ const paragraphs = Array.from({ length: 80 }, (_, index) => ({
 }));
 
 async function openArticle(page: Page, content: JSONContent[] = paragraphs) {
-  await page.route("**/api/v1/public/blog/posts/entrance-regression", (route) =>
+  await page.route("**/api/v1/public/blog/posts/entrance-regression/related**", (route) =>
+    route.fulfill({ json: { code: 200, message: "OK", data: [] } })
+  );
+  await page.route("**/api/v1/public/blog/posts/featured**", (route) =>
     route.fulfill({
+      json: {
+        code: 200,
+        message: "OK",
+        data: { list: [], total: 0, page: 0, size: 5, totalPages: 0 },
+      },
+    })
+  );
+  await page.route("**/api/v1/public/blog/posts/entrance-regression", (route) => {
+    if (route.request().url().includes("/related")) {
+      return route.fallback();
+    }
+    return route.fulfill({
       json: {
         code: 200,
         message: "OK",
@@ -34,8 +49,8 @@ async function openArticle(page: Page, content: JSONContent[] = paragraphs) {
           updatedAt: "2026-09-14T00:00:00Z",
         },
       },
-    })
-  );
+    });
+  });
 
   await page.goto("/single/entrance-regression");
   await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible({
@@ -125,8 +140,11 @@ test("reduced motion reveals pending content immediately and never re-hides it",
   await expect(last).toHaveCSS("opacity", "1");
 
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.reload();
-  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+  // Prefer goto over reload so client mocks stay authoritative under CI load.
+  await page.goto("/single/entrance-regression");
+  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible({
+    timeout: 30_000,
+  });
   await expect(page.locator(".ProseMirror > p").last()).toHaveCSS("opacity", "1");
 });
 
