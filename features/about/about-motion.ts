@@ -14,54 +14,10 @@ export const crispSpring: Transition = {
   bounce: 0.08,
 };
 
-export function bandReveal(reduce: boolean, delay = 0): Variants {
+/** Parent orchestrator only — never hide the section shell itself. */
+export function chapterReveal(reduce: boolean): Variants {
   if (reduce) {
-    return {
-      hidden: { opacity: 1, y: 0 },
-      show: { opacity: 1, y: 0 },
-    };
-  }
-
-  return {
-    hidden: { opacity: 0, y: 28 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        ...softSpring,
-        delay,
-        staggerChildren: 0.07,
-        delayChildren: 0.04,
-      },
-    },
-  };
-}
-
-export function itemReveal(reduce: boolean): Variants {
-  if (reduce) {
-    return {
-      hidden: { opacity: 1, y: 0, filter: "blur(0px)" },
-      show: { opacity: 1, y: 0, filter: "blur(0px)" },
-    };
-  }
-
-  return {
-    hidden: { opacity: 0, y: 16, filter: "blur(4px)" },
-    show: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: crispSpring,
-    },
-  };
-}
-
-export function heroContainer(reduce: boolean): Variants {
-  if (reduce) {
-    return {
-      hidden: {},
-      show: {},
-    };
+    return { hidden: {}, show: {} };
   }
 
   return {
@@ -69,13 +25,17 @@ export function heroContainer(reduce: boolean): Variants {
     show: {
       transition: {
         staggerChildren: 0.08,
-        delayChildren: 0.06,
+        delayChildren: 0.04,
       },
     },
   };
 }
 
-export function heroItem(reduce: boolean): Variants {
+/**
+ * Soft enter that stays readable even if whileInView never fires.
+ * Never park content at opacity 0 as the resting/SSR state.
+ */
+export function captionReveal(reduce: boolean): Variants {
   if (reduce) {
     return {
       hidden: { opacity: 1, y: 0 },
@@ -84,7 +44,7 @@ export function heroItem(reduce: boolean): Variants {
   }
 
   return {
-    hidden: { opacity: 0, y: 22 },
+    hidden: { opacity: 1, y: 10 },
     show: {
       opacity: 1,
       y: 0,
@@ -93,10 +53,23 @@ export function heroItem(reduce: boolean): Variants {
   };
 }
 
-export const panelSwap = {
-  initial: (reduce: boolean) => (reduce ? false : { opacity: 0, y: 10, filter: "blur(3px)" }),
-  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-  exit: (reduce: boolean) => (reduce ? { opacity: 0 } : { opacity: 0, y: -8, filter: "blur(3px)" }),
-  transition: (reduce: boolean): Transition =>
-    reduce ? { duration: 0 } : { duration: 0.28, ease: easeOut },
-};
+export function itemReveal(reduce: boolean): Variants {
+  if (reduce) {
+    return {
+      hidden: { opacity: 1, y: 0, scale: 1 },
+      show: { opacity: 1, y: 0, scale: 1 },
+    };
+  }
+
+  return {
+    hidden: { opacity: 1, y: 8, scale: 0.98 },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: crispSpring,
+    },
+  };
+}
+
+export const chapterViewport = { once: true, amount: 0.15, margin: "0px 0px -5% 0px" } as const;

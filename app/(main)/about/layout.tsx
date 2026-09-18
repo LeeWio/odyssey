@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 export const metadata: Metadata = {
   title: "About | Odyssey",
   description:
-    "The person and product behind Odyssey: a living notebook for writing, systems craft, photography, and the connections between them.",
+    "A short personality reel: taste, solitude, play, and the defaults behind Odyssey. Not a resume.",
 };
 
 export default function AboutLayout({ children }: Readonly<{ children: ReactNode }>) {
