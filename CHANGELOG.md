@@ -1,3 +1,10 @@
+# [1.158.0](https://github.com/LeeWio/odyssey/compare/v1.157.0...v1.158.0) (2026-09-18)
+
+
+### Features
+
+* **comment:** overhaul comment system for posts, guestbook, and moments ([40ab02c](https://github.com/LeeWio/odyssey/commit/40ab02c867d8591e264be1b155342b89fe9dacb0))
+
 # [1.157.0](https://github.com/LeeWio/odyssey/compare/v1.156.2...v1.157.0) (2026-09-17)
 
 
