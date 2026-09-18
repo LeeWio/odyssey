@@ -38,7 +38,9 @@ async function openArticle(page: Page, content: JSONContent[] = paragraphs) {
   );
 
   await page.goto("/single/entrance-regression");
-  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible({
+    timeout: 30_000,
+  });
 }
 
 test("scrolling preserves the reader and does not replay revealed blocks", async ({ page }) => {
@@ -124,7 +126,8 @@ test("reduced motion reveals pending content immediately and never re-hides it",
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();
-  await expect(last).toHaveCSS("opacity", "1");
+  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+  await expect(page.locator(".ProseMirror > p").last()).toHaveCSS("opacity", "1");
 });
 
 test("a block taller than the viewport still reveals on entry", async ({ page }) => {

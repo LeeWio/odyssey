@@ -34,7 +34,8 @@ const HeroUITaskItem = TaskItem.extend({
   addNodeView() {
     return ReactNodeViewRenderer(TaskItemNodeView, {
       as: "li",
-      className: "flex items-start gap-2",
+      // Keep odyssey-task-item for CSS + e2e; HTMLAttributes do not apply to React node views.
+      className: "odyssey-task-item flex items-start gap-2",
     });
   },
 });

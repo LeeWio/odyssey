@@ -107,18 +107,16 @@ export function CommentActions({
 
         <Dropdown>
           <Tooltip delay={0}>
-            <Dropdown.Trigger>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="ghost"
-                className="text-muted hover:text-foreground size-7"
-                aria-label="More comment actions"
-                isDisabled={isUnavailable}
-              >
-                <Icon icon="gravity-ui:ellipsis" aria-hidden="true" className="size-3.5" />
-              </Button>
-            </Dropdown.Trigger>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="ghost"
+              className="text-muted hover:text-foreground size-7"
+              aria-label="More comment actions"
+              isDisabled={isUnavailable}
+            >
+              <Icon icon="gravity-ui:ellipsis" aria-hidden="true" className="size-3.5" />
+            </Button>
             <Tooltip.Content>
               <p>More</p>
             </Tooltip.Content>

@@ -83,18 +83,16 @@ export const CommentHeader = memo(function CommentHeader({
         )}
 
         <Dropdown>
-          <Dropdown.Trigger>
-            <Button
-              isDisabled={totalCount <= 1}
-              size="sm"
-              variant="ghost"
-              className="text-muted hover:text-foreground h-8 gap-1 px-2 text-xs"
-              aria-label="Choose comment sort"
-            >
-              {SORT_LABELS[sortOrder]}
-              <Icon icon="gravity-ui:chevron-down" aria-hidden="true" className="size-3.5" />
-            </Button>
-          </Dropdown.Trigger>
+          <Button
+            isDisabled={totalCount <= 1}
+            size="sm"
+            variant="ghost"
+            className="text-muted hover:text-foreground h-8 gap-1 px-2 text-xs"
+            aria-label="Choose comment sort"
+          >
+            {SORT_LABELS[sortOrder]}
+            <Icon icon="gravity-ui:chevron-down" aria-hidden="true" className="size-3.5" />
+          </Button>
           <Dropdown.Popover placement="bottom end">
             <Dropdown.Menu
               selectedKeys={new Set<Key>([sortOrder])}

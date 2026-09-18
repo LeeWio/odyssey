@@ -42,7 +42,8 @@ test("preserves nested tasks and code language after save and reload", async ({ 
   const completedTask = page.getByRole("checkbox", { name: /Completed task/ });
 
   await expect(completedTask).toBeChecked();
-  await completedTask.click();
+  // HeroUI Checkbox control overlays the native input; force avoids pointer-event interception.
+  await completedTask.click({ force: true });
   await expect(completedTask).not.toBeChecked();
 
   await page.getByTestId("save-draft").click();
