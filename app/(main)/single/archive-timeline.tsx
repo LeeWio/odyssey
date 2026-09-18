@@ -1,6 +1,7 @@
 "use client";
 
-import { Eye } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { useGSAP } from "@gsap/react";
 import { EmptyState, Timeline } from "@heroui-pro/react";
 import { Avatar, Link, Skeleton, Typography } from "@heroui/react";
@@ -107,7 +108,7 @@ function MemoryStory({ post }: { post: ArchiveTimelinePost }) {
             </Typography>
           </div>
           <Typography className="flex items-center gap-1 tabular-nums" color="muted" type="body-xs">
-            <Eye aria-hidden="true" className="size-3.5" />
+            <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
             {(post.views ?? 0).toLocaleString("en-US")}
           </Typography>
           <Link

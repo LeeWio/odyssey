@@ -1,7 +1,8 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import { Breadcrumbs, Tooltip } from "@heroui/react";
-import { House } from "@gravity-ui/icons";
 import { AppLayout, Navbar, Sidebar } from "@heroui-pro/react";
 import type { ReactNode } from "react";
 import { useCallback } from "react";
@@ -40,7 +41,7 @@ export function AppShell({ children, pathname, onNavigate }: AppShellProps) {
             <Breadcrumbs aria-label="Current location" className="min-w-0">
               <Breadcrumbs.Item className="min-w-0 font-semibold">
                 <span className="flex min-w-0 items-center gap-2 overflow-hidden">
-                  <House aria-hidden="true" className="size-4 shrink-0" />
+                  <Icon icon="gravity-ui:house" aria-hidden="true" className="size-4 shrink-0" />
                   <span className="truncate">{pageLabel}</span>
                 </span>
               </Breadcrumbs.Item>

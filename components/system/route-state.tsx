@@ -1,6 +1,7 @@
 "use client";
 
-import { CircleQuestion, TriangleExclamation } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import {
   Link,
   ProgressCircle,
@@ -11,7 +12,7 @@ import {
   cn,
 } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
-import type { ComponentType, ReactNode, SVGProps } from "react";
+import type { ReactNode } from "react";
 
 interface RouteStateProps {
   actions: ReactNode;
@@ -23,23 +24,22 @@ interface RouteStateProps {
 const STATE_APPEARANCE: Record<
   RouteStateProps["kind"],
   {
-    icon: ComponentType<SVGProps<SVGSVGElement>>;
+    icon: string;
     mark: string;
   }
 > = {
   "not-found": {
-    icon: CircleQuestion,
+    icon: "gravity-ui:circle-question",
     mark: "404",
   },
   error: {
-    icon: TriangleExclamation,
+    icon: "gravity-ui:triangle-exclamation",
     mark: "Error",
   },
 };
 
 export function RouteState({ actions, description, kind, title }: RouteStateProps) {
   const appearance = STATE_APPEARANCE[kind];
-  const StateIcon = appearance.icon;
 
   return (
     <main className="bg-background flex min-h-[100dvh] items-center px-5 py-24 sm:px-8">
@@ -58,7 +58,7 @@ export function RouteState({ actions, description, kind, title }: RouteStateProp
           <EmptyState className="w-full" size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <StateIcon aria-hidden="true" />
+                <Icon icon={appearance.icon} aria-hidden="true" />
               </EmptyState.Media>
               <Typography type="h2" weight="semibold">
                 {title}

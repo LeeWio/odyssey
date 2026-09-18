@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRotateLeft, BookOpen, Eye } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { EmptyState, ListView } from "@heroui-pro/react";
 import { Carousel } from "@heroui-pro/react/carousel";
 import { useMediaQuery } from "@mantine/hooks";
@@ -152,7 +153,7 @@ function PostGrid({ posts }: { posts: PostDigest[] }) {
       <EmptyState size="lg">
         <EmptyState.Header>
           <EmptyState.Media variant="icon">
-            <BookOpen aria-hidden="true" />
+            <Icon icon="gravity-ui:book-open" aria-hidden="true" />
           </EmptyState.Media>
           <EmptyState.Title>No stories in this view</EmptyState.Title>
           <EmptyState.Description>
@@ -246,7 +247,7 @@ function StoryList({
               color="muted"
               type="body-xs"
             >
-              <Eye aria-hidden="true" className="size-3.5" />
+              <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
               {(post.views ?? 0).toLocaleString("en-US")}
             </Typography>
           </ListView.ItemAction>
@@ -502,7 +503,7 @@ function CollectionsSection({
         <EmptyState>
           <EmptyState.Header>
             <EmptyState.Media variant="icon">
-              <BookOpen aria-hidden="true" />
+              <Icon icon="gravity-ui:book-open" aria-hidden="true" />
             </EmptyState.Media>
             <EmptyState.Title>No published collections yet</EmptyState.Title>
             <EmptyState.Description>
@@ -649,7 +650,7 @@ export default function SingleIndexPage() {
                   </Alert.Description>
                 </Alert.Content>
                 <Button variant="outline" onPress={retryDiscovery}>
-                  <ArrowRotateLeft aria-hidden="true" />
+                  <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
                   Try again
                 </Button>
               </Alert>
@@ -840,7 +841,7 @@ export default function SingleIndexPage() {
                   <Alert.Description>Try the request again in a moment.</Alert.Description>
                 </Alert.Content>
                 <Button variant="outline" onPress={() => void searchQuery.refetch()}>
-                  <ArrowRotateLeft aria-hidden="true" />
+                  <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
                   Try again
                 </Button>
               </Alert>
@@ -850,7 +851,7 @@ export default function SingleIndexPage() {
               <EmptyState size="lg">
                 <EmptyState.Header>
                   <EmptyState.Media variant="icon">
-                    <BookOpen aria-hidden="true" />
+                    <Icon icon="gravity-ui:book-open" aria-hidden="true" />
                   </EmptyState.Media>
                   <EmptyState.Title>No matching stories</EmptyState.Title>
                   <EmptyState.Description>
@@ -953,7 +954,7 @@ export default function SingleIndexPage() {
                   <Alert.Description>Archived stories could not be loaded.</Alert.Description>
                 </Alert.Content>
                 <Button variant="outline" onPress={() => void archiveQuery.refetch()}>
-                  <ArrowRotateLeft aria-hidden="true" />
+                  <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
                   Try again
                 </Button>
               </Alert>

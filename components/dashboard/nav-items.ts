@@ -1,34 +1,7 @@
-import {
-  ArrowRightFromSquare,
-  Calendar,
-  ChartColumn,
-  CircleQuestion,
-  ClockArrowRotateLeft,
-  Comment,
-  Book,
-  Folder,
-  Gear,
-  House,
-  FileText,
-  Key,
-  Link,
-  ListCheck,
-  Person,
-  PersonGear,
-  Persons,
-  Picture,
-  Receipt,
-  Shield,
-  ShieldCheck,
-  Sparkles,
-  Tag,
-} from "@gravity-ui/icons";
-import type { ComponentType } from "react";
-
 export type NavItem = {
   readonly href: string;
   readonly label: string;
-  readonly icon: ComponentType<{ className?: string }>;
+  readonly icon: string;
   readonly badge?: string;
 };
 
@@ -41,51 +14,51 @@ export const NAV_GROUPS: readonly NavGroup[] = [
   {
     label: "Overview",
     items: [
-      { href: "/", icon: House, label: "Dashboard" },
-      { badge: "New", href: "/tracker", icon: ListCheck, label: "Tracker" },
-      { href: "/analytics", icon: ChartColumn, label: "Analytics" },
-      { href: "/schedule", icon: Calendar, label: "Schedule" },
+      { href: "/", icon: "gravity-ui:house", label: "Dashboard" },
+      { badge: "New", href: "/tracker", icon: "gravity-ui:list-check", label: "Tracker" },
+      { href: "/analytics", icon: "gravity-ui:chart-column", label: "Analytics" },
+      { href: "/schedule", icon: "gravity-ui:calendar", label: "Schedule" },
     ],
   },
   {
     label: "Content",
     items: [
-      { href: "/posts", icon: FileText, label: "Posts" },
-      { href: "/columns", icon: Book, label: "Columns" },
-      { href: "/categories", icon: Folder, label: "Categories" },
-      { href: "/tags", icon: Tag, label: "Tags" },
-      { href: "/comments", icon: Comment, label: "Comments" },
-      { href: "/moments", icon: Sparkles, label: "Moments" },
+      { href: "/posts", icon: "gravity-ui:file-text", label: "Posts" },
+      { href: "/columns", icon: "gravity-ui:book", label: "Columns" },
+      { href: "/categories", icon: "gravity-ui:folder", label: "Categories" },
+      { href: "/tags", icon: "gravity-ui:tag", label: "Tags" },
+      { href: "/comments", icon: "gravity-ui:comment", label: "Comments" },
+      { href: "/moments", icon: "gravity-ui:sparkles", label: "Moments" },
     ],
   },
   {
     label: "Resources",
     items: [
-      { href: "/files", icon: Picture, label: "Materials" },
-      { href: "/links", icon: Link, label: "Friend Links" },
-      { href: "/orders", icon: Receipt, label: "Orders" },
+      { href: "/files", icon: "gravity-ui:picture", label: "Materials" },
+      { href: "/links", icon: "gravity-ui:link", label: "Friend Links" },
+      { href: "/orders", icon: "gravity-ui:receipt", label: "Orders" },
     ],
   },
   {
     label: "Users & Access",
     items: [
-      { href: "/users", icon: Person, label: "Users" },
-      { href: "/audience", icon: Persons, label: "Audience" },
-      { href: "/groups", icon: Persons, label: "Groups" },
-      { href: "/roles", icon: PersonGear, label: "Roles" },
-      { href: "/permissions", icon: Shield, label: "Permissions" },
-      { href: "/access-policies", icon: ShieldCheck, label: "Access Policies" },
-      { href: "/service-accounts", icon: Key, label: "Service Accounts" },
-      { href: "/audit-logs", icon: ClockArrowRotateLeft, label: "Audit Logs" },
+      { href: "/users", icon: "gravity-ui:person", label: "Users" },
+      { href: "/audience", icon: "gravity-ui:persons", label: "Audience" },
+      { href: "/groups", icon: "gravity-ui:persons", label: "Groups" },
+      { href: "/roles", icon: "gravity-ui:person-gear", label: "Roles" },
+      { href: "/permissions", icon: "gravity-ui:shield", label: "Permissions" },
+      { href: "/access-policies", icon: "gravity-ui:shield-check", label: "Access Policies" },
+      { href: "/service-accounts", icon: "gravity-ui:key", label: "Service Accounts" },
+      { href: "/audit-logs", icon: "gravity-ui:clock-arrow-rotate-left", label: "Audit Logs" },
     ],
   },
   {
     label: "System",
-    items: [{ href: "/settings", icon: Gear, label: "Settings" }],
+    items: [{ href: "/settings", icon: "gravity-ui:gear", label: "Settings" }],
   },
 ] as const;
 
 export const FOOTER_ITEMS: readonly NavItem[] = [
-  { href: "/help", icon: CircleQuestion, label: "Help & Information" },
-  { href: "/logout", icon: ArrowRightFromSquare, label: "Log out" },
+  { href: "/help", icon: "gravity-ui:circle-question", label: "Help & Information" },
+  { href: "/logout", icon: "gravity-ui:arrow-right-from-square", label: "Log out" },
 ] as const;

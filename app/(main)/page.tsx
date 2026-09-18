@@ -22,7 +22,6 @@ import { selectIsAuthenticated } from "@/lib/features/auth";
 import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { PencilToSquare, ChevronDown } from "@gravity-ui/icons";
 
 const GradientText = dynamic(() => import("@/components/ui/gradient-text"), {
   ssr: false,
@@ -298,7 +297,7 @@ export default function Home() {
                   className="shrink-0 font-medium"
                   onPress={() => dispatch(setLoginOpen(true))}
                 >
-                  <PencilToSquare aria-hidden="true" className="size-4" />
+                  <Icon icon="gravity-ui:pencil-to-square" aria-hidden="true" className="size-4" />
                   Sign in to write
                 </Button>
               </div>
@@ -363,7 +362,7 @@ export default function Home() {
                     <span className="text-muted/80 leading-6 font-normal">{item.subtitle}</span>
                   </div>
                   <Accordion.Indicator className="text-muted/50 [&>svg]:size-4">
-                    <ChevronDown />
+                    <Icon icon="gravity-ui:chevron-down" />
                   </Accordion.Indicator>
                 </Accordion.Trigger>
               </Accordion.Heading>

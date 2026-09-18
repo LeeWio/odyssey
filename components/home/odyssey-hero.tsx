@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Flame, PlayFill, Sparkles } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Button, Card, Chip, Surface, Tooltip, Typography } from "@heroui/react";
 import { Carousel } from "@heroui-pro/react/carousel";
 import type { EmblaCarouselType } from "embla-carousel";
@@ -236,7 +237,7 @@ export function OdysseyHero() {
                           variant="soft"
                           className="bg-black/30 font-mono text-white backdrop-blur"
                         >
-                          <Flame className="size-4" />
+                          <Icon icon="gravity-ui:flame" className="size-4" />
                           Featured
                         </Chip>
                         <Chip variant="soft" className="bg-white/15 font-mono text-white">
@@ -324,7 +325,7 @@ export function OdysseyHero() {
                   className="size-14 rounded-full border-white/35 bg-black/20 text-white backdrop-blur"
                   onPress={() => api?.scrollPrev()}
                 >
-                  <ArrowLeft className="size-5" />
+                  <Icon icon="gravity-ui:arrow-left" className="size-5" />
                 </Button>
               </Tooltip.Trigger>
               <Tooltip.Content>Previous</Tooltip.Content>
@@ -339,7 +340,7 @@ export function OdysseyHero() {
                   className="size-14 rounded-full border-white/35 bg-black/20 text-white backdrop-blur"
                   onPress={() => api?.scrollNext()}
                 >
-                  <ArrowRight className="size-5" />
+                  <Icon icon="gravity-ui:arrow-right" className="size-5" />
                 </Button>
               </Tooltip.Trigger>
               <Tooltip.Content>Next</Tooltip.Content>
@@ -352,13 +353,13 @@ export function OdysseyHero() {
           className="relative z-10 mt-4 hidden flex-row items-center justify-between p-0 text-white/70 lg:flex"
         >
           <Card.Content className="flex-row items-center gap-2 p-0">
-            <Sparkles className="size-4 text-lime-200" />
+            <Icon icon="gravity-ui:sparkles" className="size-4 text-lime-200" />
             <Typography type="body-sm" className="font-mono tracking-wide text-white/70 uppercase">
               Cinematic Archive
             </Typography>
           </Card.Content>
           <Card.Content className="flex-row items-center gap-2 p-0">
-            <PlayFill className="size-4" />
+            <Icon icon="gravity-ui:play-fill" className="size-4" />
             <Typography type="body-sm" className="font-mono tracking-wide text-white/70 uppercase">
               Built For Return Visits
             </Typography>

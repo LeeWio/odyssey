@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, Envelope, Gear } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { EmptyState } from "@heroui-pro/react";
 import { Button, Card, Skeleton, Switch, Typography } from "@heroui/react";
 import { useState } from "react";
@@ -94,7 +95,7 @@ export function NotificationPreferencesPage() {
           <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <Bell aria-hidden="true" />
+                <Icon icon="gravity-ui:bell" aria-hidden="true" />
               </EmptyState.Media>
               <EmptyState.Title>Notification preferences</EmptyState.Title>
               <EmptyState.Description>
@@ -142,7 +143,7 @@ export function NotificationPreferencesPage() {
       <div className="mx-auto w-full max-w-3xl">
         <header className="max-w-2xl">
           <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-            <Gear aria-hidden="true" className="size-4" /> Delivery controls
+            <Icon icon="gravity-ui:gear" aria-hidden="true" className="size-4" /> Delivery controls
           </div>
           <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
             Notifications
@@ -207,7 +208,7 @@ export function NotificationPreferencesPage() {
               </Card.Content>
               <Card.Footer className="justify-between gap-4">
                 <div className="text-muted flex items-center gap-2 text-xs">
-                  <Envelope aria-hidden="true" className="size-4" /> Email delivery is opt-in.
+                  <Icon icon="gravity-ui:envelope" aria-hidden="true" className="size-4" /> Email delivery is opt-in.
                 </div>
                 <Button isDisabled={!isDirty} isPending={isSaving} onPress={handleSave}>
                   Save preferences

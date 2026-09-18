@@ -1,5 +1,7 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import Link from "next/link";
 import { MotionCard, MotionChip, MotionTypography } from "@/components/ui";
 import type { PostDigestResponse, PostResponse } from "@/lib/features/post";
@@ -20,7 +22,6 @@ import {
   TagGroup,
   Typography,
 } from "@heroui/react";
-import { ArrowRight, ArrowRotateLeft, BookOpen, Eye, Play } from "@gravity-ui/icons";
 import { AnimatePresence, animate as animateMotion, motion, useReducedMotion } from "motion/react";
 import { useDeferredValue, useRef, useState } from "react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
@@ -99,7 +100,7 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
               ) : null}
               {series ? (
                 <Chip size="sm" variant="tertiary">
-                  <BookOpen aria-hidden="true" className="size-3.5" />
+                  <Icon icon="gravity-ui:book-open" aria-hidden="true" className="size-3.5" />
                   {series}
                 </Chip>
               ) : null}
@@ -119,7 +120,7 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
             <span>{formatDate(post.createdAt)}</span>
           </div>
           <span className="flex shrink-0 items-center gap-1.5 tabular-nums">
-            <Eye aria-hidden="true" className="size-3.5" />
+            <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
             {post.views.toLocaleString("en-US")}
           </span>
         </Card.Footer>
@@ -288,7 +289,7 @@ function ContinueReading({
                     }}
                   >
                     Continue
-                    <Play aria-hidden="true" className="size-3.5" />
+                    <Icon icon="gravity-ui:play" aria-hidden="true" className="size-3.5" />
                   </MotionLink>
                 </Card.Footer>
               </Card>
@@ -379,7 +380,7 @@ function ArchiveRail({
             }}
           >
             Browse columns
-            <ArrowRight aria-hidden="true" className="size-4" />
+            <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
           </MotionLink>
         </Card.Footer>
       </Card>
@@ -636,7 +637,7 @@ export default function BlogFeed() {
             }}
           >
             Browse columns
-            <ArrowRight aria-hidden="true" className="size-4" />
+            <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
           </MotionLink>
         </header>
 
@@ -797,7 +798,7 @@ export default function BlogFeed() {
                     <EmptyState size="lg">
                       <EmptyState.Header>
                         <EmptyState.Media variant="icon">
-                          <BookOpen aria-hidden="true" />
+                          <Icon icon="gravity-ui:book-open" aria-hidden="true" />
                         </EmptyState.Media>
                         <EmptyState.Title>The chronicle is unavailable</EmptyState.Title>
                         <EmptyState.Description>
@@ -806,7 +807,7 @@ export default function BlogFeed() {
                       </EmptyState.Header>
                       <EmptyState.Content>
                         <Button variant="outline" onPress={() => refetch()}>
-                          <ArrowRotateLeft aria-hidden="true" />
+                          <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
                           Try again
                         </Button>
                       </EmptyState.Content>
@@ -827,7 +828,7 @@ export default function BlogFeed() {
                     <EmptyState size="lg">
                       <EmptyState.Header>
                         <EmptyState.Media variant="icon">
-                          <BookOpen aria-hidden="true" />
+                          <Icon icon="gravity-ui:book-open" aria-hidden="true" />
                         </EmptyState.Media>
                         <EmptyState.Title>
                           {keyword ? "No matching articles" : "No articles yet"}

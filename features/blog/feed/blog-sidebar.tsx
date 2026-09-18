@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, CircleChevronRight } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Chip, Surface, Typography, cn } from "@heroui/react";
 import { ItemCard } from "@heroui-pro/react";
 import Link from "next/link";
@@ -73,7 +74,7 @@ export function BlogSidebar() {
             href="/categories"
             className="text-primary flex items-center gap-1 text-xs font-bold"
           >
-            View all <CircleChevronRight className="size-3" />
+            View all <Icon icon="gravity-ui:circle-chevron-right" className="size-3" />
           </Link>
         </div>
         <div className="flex flex-col gap-2">
@@ -124,7 +125,7 @@ export function BlogSidebar() {
       {/* Newsletter Widget */}
       <Surface variant="secondary" className="relative overflow-hidden rounded-3xl p-6">
         <div className="bg-primary absolute top-4 right-4 flex size-8 items-center justify-center rounded-full text-white">
-          <Bell className="size-4" />
+          <Icon icon="gravity-ui:bell" className="size-4" />
         </div>
         <Typography className="mb-2 text-lg leading-tight font-bold">Newsletter</Typography>
         <Typography className="text-default-500 mb-6 text-xs leading-relaxed">

@@ -1,8 +1,9 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import { Button, Kbd, Modal } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
-import { Keyboard } from "@gravity-ui/icons";
 import { useEffect, useState } from "react";
 
 const SHORTCUT_GROUPS = [
@@ -69,7 +70,7 @@ export function EditorFooter() {
       <RichTextEditor.Footer className="flex shrink-0 items-center justify-between gap-3 select-none">
         <RichTextEditor.CharacterCount showWords />
         <Button size="sm" variant="tertiary" onPress={() => setIsShortcutHelpOpen(true)}>
-          <Keyboard aria-hidden="true" className="size-4" />
+          <Icon icon="gravity-ui:keyboard" aria-hidden="true" className="size-4" />
           Shortcuts
         </Button>
       </RichTextEditor.Footer>

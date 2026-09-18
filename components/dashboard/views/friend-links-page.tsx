@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  CirclePlus,
-  Globe,
-  Pencil,
-  ThumbsDown,
-  ThumbsUp,
-  TrashBin,
-  Xmark,
-} from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import {
   AlertDialog,
   Button,
@@ -316,7 +309,7 @@ export function FriendLinksPage() {
             rel="noopener noreferrer"
             className="text-accent flex items-center gap-1.5 font-mono text-xs hover:underline"
           >
-            <Globe className="size-3" />
+            <Icon icon="gravity-ui:globe" className="size-3" />
             <span className="max-w-[140px] truncate">{item.url}</span>
           </a>
         ),
@@ -377,7 +370,7 @@ export function FriendLinksPage() {
                     variant="outline"
                     onPress={() => handleModerate(item.id, "APPROVED")}
                   >
-                    <ThumbsUp className="text-success size-3.5" />
+                    <Icon icon="gravity-ui:thumbs-up" className="text-success size-3.5" />
                   </Button>
                   <Tooltip.Content>Approve</Tooltip.Content>
                 </Tooltip>
@@ -388,7 +381,7 @@ export function FriendLinksPage() {
                     variant="danger-soft"
                     onPress={() => handleModerate(item.id, "REJECTED")}
                   >
-                    <ThumbsDown className="text-danger size-3.5" />
+                    <Icon icon="gravity-ui:thumbs-down" className="text-danger size-3.5" />
                   </Button>
                   <Tooltip.Content>Reject</Tooltip.Content>
                 </Tooltip>
@@ -401,7 +394,7 @@ export function FriendLinksPage() {
                   variant="danger-soft"
                   onPress={() => handleModerate(item.id, "REJECTED")}
                 >
-                  <ThumbsDown className="text-danger size-3.5" />
+                  <Icon icon="gravity-ui:thumbs-down" className="text-danger size-3.5" />
                 </Button>
                 <Tooltip.Content>Revoke Approval</Tooltip.Content>
               </Tooltip>
@@ -413,14 +406,14 @@ export function FriendLinksPage() {
                   variant="outline"
                   onPress={() => handleModerate(item.id, "APPROVED")}
                 >
-                  <ThumbsUp className="text-success size-3.5" />
+                  <Icon icon="gravity-ui:thumbs-up" className="text-success size-3.5" />
                 </Button>
                 <Tooltip.Content>Re-approve</Tooltip.Content>
               </Tooltip>
             )}
 
             <Button isIconOnly size="sm" variant="tertiary" onPress={() => handleEditClick(item)}>
-              <Pencil className="size-3.5" />
+              <Icon icon="gravity-ui:pencil" className="size-3.5" />
             </Button>
             <Button
               isIconOnly
@@ -431,7 +424,7 @@ export function FriendLinksPage() {
                 setIsDeleteAlertOpen(true);
               }}
             >
-              <TrashBin className="size-3.5" />
+              <Icon icon="gravity-ui:trash-bin" className="size-3.5" />
             </Button>
           </div>
         ),
@@ -460,7 +453,7 @@ export function FriendLinksPage() {
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button size="sm" onPress={handleCreateOpen}>
-          <CirclePlus className="size-4" />
+          <Icon icon="gravity-ui:circle-plus" className="size-4" />
           Add Link
         </Button>
 
@@ -478,7 +471,7 @@ export function FriendLinksPage() {
                 variant="tertiary"
                 onPress={() => setReorderedLinks(null)}
               >
-                <Xmark className="size-4" />
+                <Icon icon="gravity-ui:xmark" className="size-4" />
               </Button>
             </>
           ) : null}

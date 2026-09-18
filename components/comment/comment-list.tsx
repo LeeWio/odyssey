@@ -1,6 +1,7 @@
 "use client";
 
-import { Comments } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Alert, Button, Skeleton } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { CommentItem } from "./comment-item";
@@ -82,7 +83,7 @@ export function CommentList({
         <EmptyState size="sm" className="py-12">
           <EmptyState.Header>
             <EmptyState.Media variant="icon">
-              <Comments />
+              <Icon icon="gravity-ui:comments" />
             </EmptyState.Media>
             <EmptyState.Title>No comments yet</EmptyState.Title>
             <EmptyState.Description>

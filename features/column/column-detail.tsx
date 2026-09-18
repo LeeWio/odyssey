@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, BookOpen, Eye } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import {
   Card,
   Chip,
@@ -58,7 +59,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
             className={cn(buttonVariants({ size: "sm", variant: "secondary" }), "no-underline")}
             href="/columns"
           >
-            <ArrowLeft aria-hidden="true" className="size-4" />
+            <Icon icon="gravity-ui:arrow-left" aria-hidden="true" className="size-4" />
             All columns
           </HeroLink>
         </Card>
@@ -90,7 +91,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
           className={cn(buttonVariants({ size: "sm", variant: "ghost" }), "mb-8 no-underline")}
           href="/columns"
         >
-          <ArrowLeft aria-hidden="true" className="size-4" />
+          <Icon icon="gravity-ui:arrow-left" aria-hidden="true" className="size-4" />
           All columns
         </HeroLink>
 
@@ -110,7 +111,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
               </Typography>
             ) : null}
             <div className="flex items-center gap-2 text-sm text-white/72">
-              <BookOpen aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:book-open" aria-hidden="true" className="size-4" />
               {column.postsCount} {column.postsCount === 1 ? "essay" : "essays"}
             </div>
           </div>
@@ -155,15 +156,14 @@ export function ColumnDetail({ slug }: { slug: string }) {
                     <div className="text-muted mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
                       <span>{formatDate(post.publishedAt || "")}</span>
                       <span className="flex items-center gap-1">
-                        <Eye aria-hidden="true" className="size-3.5" />
+                        <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
                         {post.views.toLocaleString("en-US")}
                       </span>
                     </div>
                   </div>
-                  <ArrowRight
+                  <Icon icon="gravity-ui:arrow-right"
                     aria-hidden="true"
-                    className="text-muted mt-1 size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
-                  />
+                    className="text-muted mt-1 size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
                 </Link>
               ))}
             </div>

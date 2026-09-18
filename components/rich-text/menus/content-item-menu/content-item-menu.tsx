@@ -4,7 +4,6 @@ import { Button, Dropdown, Header, Input, Label, Modal, TextField } from "@herou
 import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import DragHandle from "@tiptap/extension-drag-handle-react";
 import { NodeSelection } from "@tiptap/pm/state";
-import { ArrowDown, ArrowUp, Copy, CopyPlus, Grip, TrashBin } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
 import { useEffect, useMemo, useState } from "react";
 import { useContentItemState } from "./hooks/use-content-item-state";
@@ -271,7 +270,7 @@ export function ContentItemMenu() {
             variant="ghost"
             onPress={selectBlock}
           >
-            <Grip aria-hidden="true" className="size-4" />
+            <Icon icon="gravity-ui:grip" aria-hidden="true" className="size-4" />
           </Button>
           <Dropdown.Popover placement="bottom start">
             <Dropdown.Menu aria-label="Block actions" onAction={(key) => runAction(String(key))}>
@@ -304,7 +303,7 @@ export function ContentItemMenu() {
                     <Label>Delete Row</Label>
                   </Dropdown.Item>
                   <Dropdown.Item id="table-delete" textValue="Delete Table" variant="danger">
-                    <TrashBin className="text-danger size-4 shrink-0" />
+                    <Icon icon="gravity-ui:trash-bin" className="text-danger size-4 shrink-0" />
                     <Label>Delete Table</Label>
                   </Dropdown.Item>
                 </Dropdown.Section>
@@ -359,7 +358,7 @@ export function ContentItemMenu() {
                   isDisabled={!siblingAvailability.canMoveUp}
                   textValue="Move up"
                 >
-                  <ArrowUp aria-hidden="true" className="size-4" />
+                  <Icon icon="gravity-ui:arrow-up" aria-hidden="true" className="size-4" />
                   <Label>Move up</Label>
                 </Dropdown.Item>
                 <Dropdown.Item
@@ -367,7 +366,7 @@ export function ContentItemMenu() {
                   isDisabled={!siblingAvailability.canMoveDown}
                   textValue="Move down"
                 >
-                  <ArrowDown aria-hidden="true" className="size-4" />
+                  <Icon icon="gravity-ui:arrow-down" aria-hidden="true" className="size-4" />
                   <Label>Move down</Label>
                 </Dropdown.Item>
 
@@ -425,7 +424,7 @@ export function ContentItemMenu() {
                 </Dropdown.SubmenuTrigger>
 
                 <Dropdown.Item id="copy" textValue="Copy block">
-                  <Copy aria-hidden="true" className="size-4" />
+                  <Icon icon="gravity-ui:copy" aria-hidden="true" className="size-4" />
                   <Label>Copy</Label>
                 </Dropdown.Item>
                 <Dropdown.Item
@@ -433,11 +432,11 @@ export function ContentItemMenu() {
                   isDisabled={!actions.canDuplicate}
                   textValue="Duplicate block"
                 >
-                  <CopyPlus aria-hidden="true" className="size-4" />
+                  <Icon icon="gravity-ui:copy-plus" aria-hidden="true" className="size-4" />
                   <Label>Duplicate</Label>
                 </Dropdown.Item>
                 <Dropdown.Item id="delete" textValue="Delete block" variant="danger">
-                  <TrashBin aria-hidden="true" className="size-4" />
+                  <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
                   <Label>Delete</Label>
                 </Dropdown.Item>
               </Dropdown.Section>

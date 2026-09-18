@@ -1,6 +1,7 @@
 "use client";
 
-import { BroadcastSignal, MusicNote, PauseFill, PlayFill, Star, StarFill } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Button, Label, Slider, Tooltip, type ButtonProps } from "@heroui/react";
 import { Sheet } from "@heroui-pro/react";
 import Image from "next/image";
@@ -79,7 +80,7 @@ export const MiniPlayer: React.FC = () => {
               <div className="flex min-w-0 items-center gap-4">
                 <div className="bg-surface-secondary relative grid size-28 shrink-0 place-items-center overflow-hidden rounded-xl">
                   {coverFailed ? (
-                    <MusicNote aria-hidden="true" />
+                    <Icon icon="gravity-ui:music-note" aria-hidden="true" />
                   ) : (
                     <Image
                       src={DEMO_TRACK.cover}
@@ -141,10 +142,10 @@ export const MiniPlayer: React.FC = () => {
                   className="text-muted"
                   onPress={() => setSaved(!saved)}
                 >
-                  {saved ? <StarFill aria-hidden="true" /> : <Star aria-hidden="true" />}
+                  {saved ? <Icon icon="gravity-ui:star-fill" aria-hidden="true" /> : <Icon icon="gravity-ui:star" aria-hidden="true" />}
                 </Control>
                 <Control label="Previous track" className="" onPress={() => setPosition(0)}>
-                  <PlayFill />
+                  <Icon icon="gravity-ui:play-fill" />
                 </Control>
                 <Control
                   label={playing ? "Pause" : "Play"}
@@ -152,10 +153,10 @@ export const MiniPlayer: React.FC = () => {
                   variant="primary"
                   onPress={() => setPlaying(!playing)}
                 >
-                  {playing ? <PauseFill aria-hidden="true" /> : <PlayFill aria-hidden="true" />}
+                  {playing ? <Icon icon="gravity-ui:pause-fill" aria-hidden="true" /> : <Icon icon="gravity-ui:play-fill" aria-hidden="true" />}
                 </Control>
                 <Control label="Next track" className="" onPress={() => setPosition(0)}>
-                  <PlayFill />
+                  <Icon icon="gravity-ui:play-fill" />
                 </Control>
                 <Control
                   label="Audio output"
@@ -163,7 +164,7 @@ export const MiniPlayer: React.FC = () => {
                   className="text-muted"
                   onPress={() => setOutputSelected(!outputSelected)}
                 >
-                  <BroadcastSignal aria-hidden="true" />
+                  <Icon icon="gravity-ui:broadcast-signal" aria-hidden="true" />
                 </Control>
               </div>
             </div>

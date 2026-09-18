@@ -1,21 +1,20 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { Button, Dropdown, Label } from "@heroui/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
-import { Heading1, Heading2, Heading3, Text } from "@gravity-ui/icons";
-import type { ComponentType, SVGProps } from "react";
 
 const BLOCK_TYPES = [
-  { id: "paragraph", label: "Text", icon: Text },
-  { id: "heading-1", label: "Heading 1", icon: Heading1 },
-  { id: "heading-2", label: "Heading 2", icon: Heading2 },
-  { id: "heading-3", label: "Heading 3", icon: Heading3 },
+  { id: "paragraph", label: "Text", icon: "gravity-ui:text" },
+  { id: "heading-1", label: "Heading 1", icon: "gravity-ui:heading-1" },
+  { id: "heading-2", label: "Heading 2", icon: "gravity-ui:heading-2" },
+  { id: "heading-3", label: "Heading 3", icon: "gravity-ui:heading-3" },
 ] as const;
 
 type BlockType = (typeof BLOCK_TYPES)[number]["id"];
 
-function BlockTypeIcon({ icon: Icon }: { icon: ComponentType<SVGProps<SVGSVGElement>> }) {
-  return <Icon aria-hidden="true" className="size-4 shrink-0" />;
+function BlockTypeIcon({ icon }: { icon: string }) {
+  return <Icon icon={icon} aria-hidden="true" className="size-4 shrink-0" />;
 }
 
 export function BlockTypeSelector() {

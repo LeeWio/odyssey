@@ -1,7 +1,8 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import dynamic from "next/dynamic";
-import { Calendar, Person } from "@gravity-ui/icons";
 import { Chip, Surface, Typography, cn } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -166,7 +167,7 @@ export const PostCard = ({
           <div className="flex items-center gap-2">
             {variant !== "full-gradient" && (
               <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full">
-                <Person className="text-primary size-3.5" />
+                <Icon icon="gravity-ui:person" className="text-primary size-3.5" />
               </div>
             )}
             <Typography
@@ -180,7 +181,7 @@ export const PostCard = ({
           </div>
 
           <div className="flex items-center gap-1.5 opacity-60">
-            <Calendar className="size-3.5" />
+            <Icon icon="gravity-ui:calendar" className="size-3.5" />
             <Typography className="text-[10px] font-bold tracking-widest uppercase tabular-nums">
               {date}
             </Typography>

@@ -1,5 +1,7 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import {
   Button,
   CloseButton,
@@ -15,7 +17,6 @@ import {
 } from "@heroui/react";
 import { CellSwitch, EmptyState } from "@heroui-pro/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
-import { ArrowRight, ChevronDown, ChevronUp, Magnifier } from "@gravity-ui/icons";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -134,7 +135,7 @@ export function FindReplacePopover() {
   return (
     <Popover isOpen={isOpen} onOpenChange={handleOpenChange}>
       <Button aria-label="Find and replace" isDisabled={unavailable} size="sm" variant="tertiary">
-        <Magnifier aria-hidden="true" className="size-4" />
+        <Icon icon="gravity-ui:magnifier" aria-hidden="true" className="size-4" />
         Find
       </Button>
       <Popover.Content
@@ -162,7 +163,7 @@ export function FindReplacePopover() {
                 variant="tertiary"
                 onPress={() => navigate("previous")}
               >
-                <ChevronUp aria-hidden="true" className="size-4" />
+                <Icon icon="gravity-ui:chevron-up" aria-hidden="true" className="size-4" />
               </Button>
               <Tooltip.Content>Previous match (Shift+Enter)</Tooltip.Content>
             </Tooltip>
@@ -175,7 +176,7 @@ export function FindReplacePopover() {
                 variant="tertiary"
                 onPress={() => navigate("next")}
               >
-                <ChevronDown aria-hidden="true" className="size-4" />
+                <Icon icon="gravity-ui:chevron-down" aria-hidden="true" className="size-4" />
               </Button>
               <Tooltip.Content>Next match (Enter)</Tooltip.Content>
             </Tooltip>
@@ -270,7 +271,7 @@ export function FindReplacePopover() {
               <EmptyState className="py-4" size="sm">
                 <EmptyState.Header>
                   <EmptyState.Media variant="icon">
-                    <Magnifier aria-hidden="true" />
+                    <Icon icon="gravity-ui:magnifier" aria-hidden="true" />
                   </EmptyState.Media>
                   <EmptyState.Title>No matches</EmptyState.Title>
                   <EmptyState.Description>
@@ -303,7 +304,7 @@ export function FindReplacePopover() {
                         {example.pattern}
                       </code>
                     </span>
-                    <ArrowRight aria-hidden="true" className="size-4 shrink-0" />
+                    <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4 shrink-0" />
                   </Button>
                 ))}
               </Surface>

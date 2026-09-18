@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowsRotateLeft, Calendar, ChevronDown } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Button, ButtonGroup, Dropdown, Label, Tabs } from "@heroui/react";
 
 import { IconButton } from "../icon-button";
@@ -28,16 +29,16 @@ export function DashboardToolbar() {
       </Tabs>
       <div className="flex flex-wrap items-center gap-2">
         <IconButton label="Refresh" size="sm" variant="tertiary">
-          <ArrowsRotateLeft className="size-4" />
+          <Icon icon="gravity-ui:arrows-rotate-left" className="size-4" />
         </IconButton>
         <ButtonGroup size="sm" variant="tertiary">
           <Button>
-            <Calendar className="size-4" />
+            <Icon icon="gravity-ui:calendar" className="size-4" />
             Monthly
           </Button>
           <Dropdown>
             <Button isIconOnly aria-label="Change period" size="sm" variant="tertiary">
-              <ChevronDown className="size-4" />
+              <Icon icon="gravity-ui:chevron-down" className="size-4" />
             </Button>
             <Dropdown.Popover placement="bottom end">
               <Dropdown.Menu>

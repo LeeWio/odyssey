@@ -1,6 +1,7 @@
 "use client";
 
-import { CirclePlus, Eye, FileText, Folder, FolderOpen, Pencil, TrashBin } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import {
   AlertDialog,
   Button,
@@ -198,16 +199,17 @@ export function ColumnsPage() {
         allowsResizing: true,
         allowsSorting: true,
         cell: (row) => {
-          const Icon =
+          const iconName =
             row.kind === "column"
               ? expandedKeys instanceof Set && expandedKeys.has(row.id)
-                ? FolderOpen
-                : Folder
-              : FileText;
+                ? "gravity-ui:folder-open"
+                : "gravity-ui:folder"
+              : "gravity-ui:file-text";
 
           return (
             <div className="flex min-w-0 items-center gap-2">
               <Icon
+                icon={iconName}
                 aria-hidden="true"
                 className={
                   row.kind === "column"
@@ -276,7 +278,7 @@ export function ColumnsPage() {
                   size="sm"
                   variant="tertiary"
                 >
-                  <Eye className="size-4" />
+                  <Icon icon="gravity-ui:eye" className="size-4" />
                 </Button>
                 <Tooltip.Content>
                   {row.source.isPublished
@@ -292,7 +294,7 @@ export function ColumnsPage() {
                   size="sm"
                   variant="tertiary"
                 >
-                  <Pencil className="size-4" />
+                  <Icon icon="gravity-ui:pencil" className="size-4" />
                 </Button>
                 <Tooltip.Content>Edit column</Tooltip.Content>
               </Tooltip>
@@ -304,7 +306,7 @@ export function ColumnsPage() {
                   size="sm"
                   variant="danger-soft"
                 >
-                  <TrashBin className="size-4" />
+                  <Icon icon="gravity-ui:trash-bin" className="size-4" />
                 </Button>
                 <Tooltip.Content>Delete column</Tooltip.Content>
               </Tooltip>
@@ -336,7 +338,7 @@ export function ColumnsPage() {
       </div>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button onPress={openCreate} size="sm">
-          <CirclePlus className="size-4" />
+          <Icon icon="gravity-ui:circle-plus" className="size-4" />
           New Column
         </Button>
         <SearchField

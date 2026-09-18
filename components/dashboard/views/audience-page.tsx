@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRotateLeft, Envelope, Persons } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { EmptyState } from "@heroui-pro/react";
 import { Button, Card, Chip, SearchField, Skeleton, Table, Typography } from "@heroui/react";
 import { useDeferredValue, useState } from "react";
@@ -115,7 +116,7 @@ export function AudiencePage() {
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 pt-8 pb-10">
       <header className="max-w-2xl">
         <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-          <Persons aria-hidden="true" className="size-4" /> Audience
+          <Icon icon="gravity-ui:persons" aria-hidden="true" className="size-4" /> Audience
         </div>
         <Typography type="h1" weight="bold" className="mt-4 text-3xl tracking-[-0.04em]">
           Newsletter audience
@@ -316,7 +317,7 @@ export function AudiencePage() {
           <EmptyState className="bg-surface-secondary rounded-2xl" size="md">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <Envelope aria-hidden="true" />
+                <Icon icon="gravity-ui:envelope" aria-hidden="true" />
               </EmptyState.Media>
               <EmptyState.Title>Audience is unavailable</EmptyState.Title>
               <EmptyState.Description>
@@ -325,7 +326,7 @@ export function AudiencePage() {
             </EmptyState.Header>
             <EmptyState.Content>
               <Button variant="outline" onPress={() => subscribers.refetch()}>
-                <ArrowRotateLeft aria-hidden="true" className="size-4" /> Refresh
+                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" /> Refresh
               </Button>
             </EmptyState.Content>
           </EmptyState>

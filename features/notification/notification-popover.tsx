@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowRotateLeft, Bell, Check, Eye } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
 import {
   Badge,
@@ -59,7 +58,7 @@ function NotificationPopoverEmptyState({ unreadOnly }: { unreadOnly: boolean }) 
       <EmptyState size="sm">
         <EmptyState.Header>
           <EmptyState.Media variant="icon">
-            <Bell aria-hidden="true" />
+            <Icon icon="gravity-ui:bell" aria-hidden="true" />
           </EmptyState.Media>
           <EmptyState.Title>
             {unreadOnly ? "You are all caught up" : "No notifications yet"}
@@ -194,7 +193,7 @@ export function NotificationPopover() {
             size="sm"
             variant="ghost"
           >
-            <Bell aria-hidden="true" className="size-4" />
+            <Icon icon="gravity-ui:bell" aria-hidden="true" className="size-4" />
           </Button>
           <Tooltip.Content placement="bottom" offset={8}>
             Notifications
@@ -227,7 +226,7 @@ export function NotificationPopover() {
                     variant="ghost"
                     onPress={handleMarkAllRead}
                   >
-                    <Check aria-hidden="true" className="size-4" />
+                    <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" />
                   </Button>
                   <Tooltip.Content>Mark all read</Tooltip.Content>
                 </Tooltip>
@@ -263,7 +262,7 @@ export function NotificationPopover() {
                     <div className="flex flex-col items-center gap-4 px-6 py-8 text-center">
                       <p className="text-muted text-sm">Notifications could not be loaded.</p>
                       <Button size="sm" variant="ghost" onPress={() => notifications.refetch()}>
-                        <ArrowRotateLeft aria-hidden="true" className="size-4" />
+                        <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />
                         Try again
                       </Button>
                     </div>
@@ -304,7 +303,7 @@ export function NotificationPopover() {
                     router.push("/notifications");
                   }}
                 >
-                  <Eye aria-hidden="true" className="size-4" />
+                  <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-4" />
                   View all
                 </Button>
               </Card.Footer>

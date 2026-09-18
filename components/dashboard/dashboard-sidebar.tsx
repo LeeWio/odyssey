@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { Avatar, Chip } from "@heroui/react";
 import { Sidebar } from "@heroui-pro/react";
 import type { NavItem } from "./nav-items";
@@ -142,7 +143,6 @@ function SidebarNavItem({
   item,
   pathname,
 }: SidebarNavItemProps) {
-  const Icon = item.icon;
   const fullHref = basePath + item.href;
   const isCurrent =
     item.href === "/"
@@ -158,7 +158,7 @@ function SidebarNavItem({
       tooltip={item.label}
     >
       <Sidebar.MenuIcon>
-        <Icon className="size-4" />
+        <Icon icon={item.icon} className="size-4" />
       </Sidebar.MenuIcon>
       <Sidebar.MenuLabel>{item.label}</Sidebar.MenuLabel>
       {item.badge ? (

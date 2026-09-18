@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  ArrowRight,
-  ArrowRotateLeft,
-  BookOpen,
-  Calendar,
-  Eye,
-  Hashtag,
-  Xmark,
-} from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { EmptyState } from "@heroui-pro/react";
 import {
   Button,
@@ -125,7 +118,7 @@ function ExplorePostCard({ post }: { post: PostResponse }) {
             type="body-xs"
             className="flex shrink-0 items-center gap-1.5 tabular-nums"
           >
-            <Eye aria-hidden="true" className="size-3.5" />
+            <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
             {post.views.toLocaleString("en-US")}
           </Typography>
         </Card.Footer>
@@ -322,7 +315,7 @@ export function ExplorePage() {
         <div className="mt-7 grid gap-7">
           <div className="min-w-0">
             <div className="mb-3 flex items-center gap-2">
-              <BookOpen aria-hidden="true" className="text-muted size-4" />
+              <Icon icon="gravity-ui:book-open" aria-hidden="true" className="text-muted size-4" />
               <Typography type="body-sm" weight="semibold">
                 Topics
               </Typography>
@@ -361,7 +354,7 @@ export function ExplorePage() {
               </TagGroup>
             ) : facetsQuery.isError ? (
               <Button size="sm" variant="secondary" onPress={() => facetsQuery.refetch()}>
-                <ArrowRotateLeft aria-hidden="true" className="size-4" />
+                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />
                 Reload topics
               </Button>
             ) : null}
@@ -369,7 +362,7 @@ export function ExplorePage() {
 
           <div className="min-w-0">
             <div className="mb-3 flex items-center gap-2">
-              <Hashtag aria-hidden="true" className="text-muted size-4" />
+              <Icon icon="gravity-ui:hashtag" aria-hidden="true" className="text-muted size-4" />
               <Typography type="body-sm" weight="semibold">
                 Tags
               </Typography>
@@ -406,7 +399,7 @@ export function ExplorePage() {
 
           <div className="border-default-200 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-muted flex items-center gap-2 text-sm">
-              <Calendar aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:calendar" aria-hidden="true" className="size-4" />
               Prefer to browse the notebook by when it was published?
             </div>
             <Link
@@ -414,7 +407,7 @@ export function ExplorePage() {
               href="/archive"
             >
               Browse by date
-              <ArrowRight aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
             </Link>
           </div>
         </div>
@@ -440,7 +433,7 @@ export function ExplorePage() {
           </div>
           {hasActiveFilters ? (
             <Button size="sm" variant="ghost" onPress={clearFilters}>
-              <Xmark aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:xmark" aria-hidden="true" className="size-4" />
               Clear filters
             </Button>
           ) : null}
@@ -452,7 +445,7 @@ export function ExplorePage() {
           <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <BookOpen aria-hidden="true" />
+                <Icon icon="gravity-ui:book-open" aria-hidden="true" />
               </EmptyState.Media>
               <EmptyState.Title>The archive is unavailable</EmptyState.Title>
               <EmptyState.Description>
@@ -461,7 +454,7 @@ export function ExplorePage() {
             </EmptyState.Header>
             <EmptyState.Content>
               <Button variant="outline" onPress={() => postsQuery.refetch()}>
-                <ArrowRotateLeft aria-hidden="true" />
+                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
                 Try again
               </Button>
             </EmptyState.Content>
@@ -472,7 +465,7 @@ export function ExplorePage() {
           <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <BookOpen aria-hidden="true" />
+                <Icon icon="gravity-ui:book-open" aria-hidden="true" />
               </EmptyState.Media>
               <EmptyState.Title>No writing matches these filters</EmptyState.Title>
               <EmptyState.Description>
@@ -563,7 +556,7 @@ export function ExplorePage() {
           href="/columns"
         >
           Browse columns
-          <ArrowRight aria-hidden="true" className="size-4" />
+          <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
         </Link>
       </div>
     </main>

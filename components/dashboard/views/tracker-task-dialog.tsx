@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, Plus, TrashBin } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import {
   Button,
   Checkbox,
@@ -221,7 +222,7 @@ export function TrackerTaskDialog({
                         >
                           <Checkbox.Control>
                             <Checkbox.Indicator>
-                              <Check />
+                              <Icon icon="gravity-ui:check" />
                             </Checkbox.Indicator>
                           </Checkbox.Control>
                         </Checkbox>
@@ -238,7 +239,7 @@ export function TrackerTaskDialog({
                           variant="ghost"
                           onPress={() => void removeChecklistItem(item.id)}
                         >
-                          <TrashBin className="size-4" />
+                          <Icon icon="gravity-ui:trash-bin" className="size-4" />
                         </Button>
                       </div>
                     ))}
@@ -261,7 +262,7 @@ export function TrackerTaskDialog({
                       variant="secondary"
                       onPress={() => void addChecklistItem()}
                     >
-                      <Plus className="size-4" /> Add
+                      <Icon icon="gravity-ui:plus" className="size-4" /> Add
                     </Button>
                   </div>
                 </div>

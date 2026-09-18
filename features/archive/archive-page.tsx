@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRight, ArrowRotateLeft, BookOpen, Calendar, Eye } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { EmptyState } from "@heroui-pro/react";
 import {
   Button,
@@ -212,7 +213,7 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
           type="body-xs"
           className="mt-4 flex items-center gap-1.5 tabular-nums"
         >
-          <Eye aria-hidden="true" className="size-3.5" />
+          <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
           {post.views.toLocaleString("en-US")} views
         </Typography>
       </Link>
@@ -369,7 +370,7 @@ export function ArchivePage() {
 
           <div className="min-w-0">
             <div className="mb-3 flex items-center gap-2">
-              <Calendar aria-hidden="true" className="text-muted size-4" />
+              <Icon icon="gravity-ui:calendar" aria-hidden="true" className="text-muted size-4" />
               <Typography type="body-sm" weight="semibold">
                 {selectedYear ? "Month" : "Choose a year to narrow to a month"}
               </Typography>
@@ -449,7 +450,7 @@ export function ArchivePage() {
           <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <BookOpen aria-hidden="true" />
+                <Icon icon="gravity-ui:book-open" aria-hidden="true" />
               </EmptyState.Media>
               <EmptyState.Title>The archive is unavailable</EmptyState.Title>
               <EmptyState.Description>
@@ -458,7 +459,7 @@ export function ArchivePage() {
             </EmptyState.Header>
             <EmptyState.Content>
               <Button variant="outline" onPress={() => archiveQuery.refetch()}>
-                <ArrowRotateLeft aria-hidden="true" />
+                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
                 Try again
               </Button>
             </EmptyState.Content>
@@ -469,7 +470,7 @@ export function ArchivePage() {
           <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <Calendar aria-hidden="true" />
+                <Icon icon="gravity-ui:calendar" aria-hidden="true" />
               </EmptyState.Media>
               <EmptyState.Title>No writing from this period</EmptyState.Title>
               <EmptyState.Description>
@@ -551,7 +552,7 @@ export function ArchivePage() {
           href="/explore"
         >
           Explore writing
-          <ArrowRight aria-hidden="true" className="size-4" />
+          <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
         </Link>
       </motion.div>
     </main>

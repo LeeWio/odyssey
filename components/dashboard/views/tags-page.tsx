@@ -1,6 +1,7 @@
 "use client";
 
-import { CirclePlus, Pencil, TrashBin } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import {
   AlertDialog,
   Button,
@@ -217,7 +218,7 @@ export function TagsPage() {
                 onPress={() => handleEditClick(item)}
                 aria-label="Edit Tag"
               >
-                <Pencil className="size-4" />
+                <Icon icon="gravity-ui:pencil" className="size-4" />
               </Button>
               <Tooltip.Content>Edit Tag</Tooltip.Content>
             </Tooltip>
@@ -230,7 +231,7 @@ export function TagsPage() {
                 onPress={() => handleDeleteClick(item)}
                 aria-label="Delete Tag"
               >
-                <TrashBin className="size-4" />
+                <Icon icon="gravity-ui:trash-bin" className="size-4" />
               </Button>
               <Tooltip.Content>Delete Tag</Tooltip.Content>
             </Tooltip>
@@ -260,7 +261,7 @@ export function TagsPage() {
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button size="sm" onPress={handleCreateOpen}>
-          <CirclePlus className="size-4" />
+          <Icon icon="gravity-ui:circle-plus" className="size-4" />
           Add Tag
         </Button>
 

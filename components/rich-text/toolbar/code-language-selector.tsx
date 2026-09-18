@@ -1,8 +1,9 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import { Button, Dropdown, Label } from "@heroui/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
-import { Code } from "@gravity-ui/icons";
 
 const CODE_LANGUAGES = [
   { id: "plain", label: "Plain text", value: null },
@@ -37,7 +38,7 @@ export function CodeLanguageSelector() {
       size="sm"
       variant="tertiary"
     >
-      <Code aria-hidden="true" className="size-4" />
+      <Icon icon="gravity-ui:code" aria-hidden="true" className="size-4" />
       <Label className="text-xs font-normal">{selectedLabel}</Label>
     </Button>
   );

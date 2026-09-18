@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, ArrowUpRight } from "@gravity-ui/icons";
 import {
   Avatar,
   Button,
@@ -350,7 +349,7 @@ export function OrbitalCarousel() {
                       size: "sm",
                     })}
                   >
-                    <ArrowUpRight className="size-4" />
+                    <Icon icon="gravity-ui:arrow-up-right" className="size-4" />
                   </Link>
                   <Tooltip.Content>
                     <p>Get it.</p>
@@ -557,7 +556,7 @@ export function OrbitalCarousel() {
           onPress={handlePrev}
           isDisabled={activeIndex === 0}
         >
-          <ArrowLeft />
+          <Icon icon="gravity-ui:arrow-left" />
         </Button>
         <div className="flex items-center gap-1.5" role="tablist" aria-label="Slides">
           {[0, 1, 2, 3, 4].map((idx) => (
@@ -585,7 +584,7 @@ export function OrbitalCarousel() {
           onPress={handleNext}
           isDisabled={activeIndex === 4}
         >
-          <ArrowRight />
+          <Icon icon="gravity-ui:arrow-right" />
         </Button>
       </div>
     </section>

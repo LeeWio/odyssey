@@ -1,6 +1,7 @@
 "use client";
 
-import { Magnifier } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Button, ScrollShadow, SearchField, Tooltip } from "@heroui/react";
 import { EMOJI_CATEGORIES, EMOJI_SKIN_TONES, EmojiPicker, EmptyState } from "@heroui-pro/react";
 import emojisList from "emojibase-data/en/compact.json";
@@ -112,7 +113,7 @@ function EmojiPickerContent({ inputRef, onSkinToneChange, skinTone }: EmojiPicke
           <EmptyState className="flex h-full min-h-20 flex-1" size="sm">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <Magnifier aria-hidden="true" />
+                <Icon icon="gravity-ui:magnifier" aria-hidden="true" />
               </EmptyState.Media>
               <EmptyState.Title>No emoji found</EmptyState.Title>
               <EmptyState.Description>Try another search term.</EmptyState.Description>

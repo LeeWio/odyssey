@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  ArrowRight,
-  Calendar,
-  Check,
-  CircleExclamation,
-  Clock,
-  FileText,
-  ArrowsRotateLeft,
-  Sparkles,
-} from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Button, Card, Chip, Link, Skeleton, Tabs, Typography } from "@heroui/react";
 import { EmptyState, KPIGroup, Timeline, Widget } from "@heroui-pro/react";
 import { KPI } from "@heroui-pro/react/kpi";
@@ -64,7 +56,7 @@ export function DashboardPage() {
           onPress={() => void refetch()}
           variant="tertiary"
         >
-          <ArrowsRotateLeft className="size-4" />
+          <Icon icon="gravity-ui:arrows-rotate-left" className="size-4" />
           Refresh
         </Button>
       </header>
@@ -73,7 +65,7 @@ export function DashboardPage() {
         <EmptyState className="bg-surface-secondary w-full rounded-2xl">
           <EmptyState.Header>
             <EmptyState.Media variant="icon">
-              <CircleExclamation />
+              <Icon icon="gravity-ui:circle-exclamation" />
             </EmptyState.Media>
             <EmptyState.Title>Content overview is unavailable</EmptyState.Title>
             <EmptyState.Description>
@@ -116,16 +108,16 @@ function SummaryWidget({
     {
       label: "Published",
       value: data?.publishedPosts ?? 0,
-      icon: FileText,
+      icon: "gravity-ui:file-text",
       status: "success" as const,
     },
-    { label: "Drafts", value: data?.drafts ?? 0, icon: Clock, status: "warning" as const },
-    { label: "Scheduled", value: data?.scheduled ?? 0, icon: Calendar, status: "success" as const },
-    { label: "Moments", value: data?.moments ?? 0, icon: Sparkles, status: "warning" as const },
+    { label: "Drafts", value: data?.drafts ?? 0, icon: "gravity-ui:clock", status: "warning" as const },
+    { label: "Scheduled", value: data?.scheduled ?? 0, icon: "gravity-ui:calendar", status: "success" as const },
+    { label: "Moments", value: data?.moments ?? 0, icon: "gravity-ui:sparkles", status: "warning" as const },
     {
       label: "Needs attention",
       value: (data?.pendingComments ?? 0) + (data?.pendingReview ?? 0),
-      icon: CircleExclamation,
+      icon: "gravity-ui:circle-exclamation",
       status: "danger" as const,
     },
   ];
@@ -147,7 +139,7 @@ function SummaryWidget({
                 <KPI.Header className="flex-row items-center justify-between">
                   <KPI.Title>{stat.label}</KPI.Title>
                   <KPI.Icon aria-hidden="true" status={stat.status}>
-                    <stat.icon />
+                    <Icon icon={stat.icon} />
                   </KPI.Icon>
                 </KPI.Header>
                 <KPI.Content>
@@ -201,7 +193,7 @@ function WorkflowWidget({
           <EmptyState size="sm">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <CircleExclamation />
+                <Icon icon="gravity-ui:circle-exclamation" />
               </EmptyState.Media>
               <EmptyState.Title>Workflow is unavailable</EmptyState.Title>
               <EmptyState.Description>
@@ -218,7 +210,7 @@ function WorkflowWidget({
           <EmptyState size="sm">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <Check />
+                <Icon icon="gravity-ui:check" />
               </EmptyState.Media>
               <EmptyState.Title>Nothing is waiting</EmptyState.Title>
               <EmptyState.Description>
@@ -247,7 +239,7 @@ function WorkflowWidget({
               <EmptyState size="sm">
                 <EmptyState.Header>
                   <EmptyState.Media variant="icon">
-                    <Check />
+                    <Icon icon="gravity-ui:check" />
                   </EmptyState.Media>
                   <EmptyState.Title>No matching actions</EmptyState.Title>
                   <EmptyState.Description>
@@ -261,7 +253,7 @@ function WorkflowWidget({
                   <Card className="group-hover:bg-surface-secondary transition-colors">
                     <Card.Header className="flex-row items-start gap-3">
                       <div className="bg-accent-soft text-accent flex size-9 shrink-0 items-center justify-center rounded-lg">
-                        <FileText className="size-4" />
+                        <Icon icon="gravity-ui:file-text" className="size-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
@@ -311,7 +303,7 @@ function EditorialQueueWidget({
           <Widget.Description>Recently updated content</Widget.Description>
         </div>
         <Link className="text-sm no-underline" href="/posts">
-          View all <ArrowRight className="ml-1 inline size-3.5" />
+          View all <Icon icon="gravity-ui:arrow-right" className="ml-1 inline size-3.5" />
         </Link>
       </Widget.Header>
       <Widget.Content className="flex flex-col gap-2">
@@ -335,9 +327,9 @@ function EditorialQueueWidget({
             >
               <div className="bg-accent-soft text-accent flex size-9 shrink-0 items-center justify-center rounded-lg">
                 {item.type === "MOMENT" ? (
-                  <Sparkles className="size-4" />
+                  <Icon icon="gravity-ui:sparkles" className="size-4" />
                 ) : (
-                  <FileText className="size-4" />
+                  <Icon icon="gravity-ui:file-text" className="size-4" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -391,7 +383,7 @@ function ActivityWidget({
             {items.map((item) => (
               <Timeline.Item key={item.id} status={item.type === "MOMENT" ? "current" : "success"}>
                 <Timeline.Marker aria-hidden="true">
-                  {item.type === "MOMENT" ? <Sparkles /> : <FileText />}
+                  {item.type === "MOMENT" ? <Icon icon="gravity-ui:sparkles" /> : <Icon icon="gravity-ui:file-text" />}
                 </Timeline.Marker>
                 <Timeline.Content className="gap-1">
                   <Link className="text-sm no-underline" href={item.href}>

@@ -1,7 +1,8 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import { useState, useEffect } from "react";
-import { BookOpen, PencilToSquare } from "@gravity-ui/icons";
 import { Button, Card, Chip, Typography } from "@heroui/react";
 import { EmojiReactionButton, Rating } from "@heroui-pro/react";
 import { motion } from "motion/react";
@@ -95,7 +96,7 @@ export function GuestbookPage() {
         <header className="border-default-200 grid gap-8 border-b pb-10 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
           <div className="max-w-2xl">
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <BookOpen aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:book-open" aria-hidden="true" className="size-4" />
               Visitor log
             </div>
             <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
@@ -194,7 +195,7 @@ export function GuestbookPage() {
               </Typography>
             </div>
             <Button size="sm" onPress={() => dispatch(setLoginOpen(true))}>
-              <PencilToSquare aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:pencil-to-square" aria-hidden="true" className="size-4" />
               Sign in to write
             </Button>
           </div>

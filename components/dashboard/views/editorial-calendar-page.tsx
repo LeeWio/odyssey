@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  ArrowRight,
-  Calendar as CalendarIcon,
-  CircleExclamation,
-  FileText,
-  Sparkles,
-} from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { CalendarDate, getLocalTimeZone, startOfMonth, today } from "@internationalized/date";
 import { Button, Calendar, Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { EmptyState, Widget } from "@heroui-pro/react";
@@ -51,7 +46,7 @@ function formatDate(date: string) {
 }
 
 function entryIcon(type: EditorialCalendarResponse["entries"][number]["type"]) {
-  return type === "MOMENT" ? Sparkles : FileText;
+  return type === "MOMENT" ? "gravity-ui:sparkles" : "gravity-ui:file-text";
 }
 
 function entryLabel(type: EditorialCalendarResponse["entries"][number]["type"]) {
@@ -93,7 +88,7 @@ export function EditorialCalendarPage() {
           </div>
         </div>
         <Button onPress={handleToday} variant="tertiary">
-          <CalendarIcon className="size-4" />
+          <Icon icon="gravity-ui:calendar" className="size-4" />
           Today
         </Button>
       </header>
@@ -102,7 +97,7 @@ export function EditorialCalendarPage() {
         <EmptyState className="bg-surface-secondary w-full rounded-2xl">
           <EmptyState.Header>
             <EmptyState.Media variant="icon">
-              <CircleExclamation />
+              <Icon icon="gravity-ui:circle-exclamation" />
             </EmptyState.Media>
             <EmptyState.Title>Schedule is unavailable</EmptyState.Title>
             <EmptyState.Description>
@@ -177,7 +172,7 @@ export function EditorialCalendarPage() {
                 <EmptyState size="sm">
                   <EmptyState.Header>
                     <EmptyState.Media variant="icon">
-                      <CalendarIcon />
+                      <Icon icon="gravity-ui:calendar" />
                     </EmptyState.Media>
                     <EmptyState.Title>A quiet day</EmptyState.Title>
                     <EmptyState.Description>
@@ -187,14 +182,12 @@ export function EditorialCalendarPage() {
                 </EmptyState>
               ) : (
                 selectedEntries.map((entry) => {
-                  const Icon = entryIcon(entry.type);
-
                   return (
                     <Link className="group no-underline" href={entry.href} key={entry.id}>
                       <Card className="group-hover:bg-surface-secondary transition-colors">
                         <Card.Header className="flex-row items-start gap-3">
                           <div className="bg-accent-soft text-accent flex size-9 shrink-0 items-center justify-center rounded-xl">
-                            <Icon className="size-4" />
+                            <Icon icon={entryIcon(entry.type)} className="size-4" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
@@ -216,7 +209,7 @@ export function EditorialCalendarPage() {
                               }).format(new Date(entry.timestamp))}
                             </Card.Description>
                           </div>
-                          <ArrowRight className="text-muted mt-1 size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                          <Icon icon="gravity-ui:arrow-right" className="text-muted mt-1 size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
                         </Card.Header>
                       </Card>
                     </Link>

@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRight } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Avatar, Button, Typography } from "@heroui/react";
 import { Carousel } from "@heroui-pro/react/carousel";
 
@@ -80,7 +81,7 @@ export function BlogHero() {
                       onPress={() => (window.location.href = item.href)}
                     >
                       Read Article
-                      <ArrowRight className="ml-2 size-4" />
+                      <Icon icon="gravity-ui:arrow-right" className="ml-2 size-4" />
                     </Button>
                   </div>
 

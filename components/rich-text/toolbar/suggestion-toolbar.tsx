@@ -1,29 +1,8 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import { Description, Header, Kbd, Label, ListBox, ScrollShadow, Separator } from "@heroui/react";
-import {
-  Check,
-  CircleChevronDown,
-  CurlyBrackets,
-  Function as FunctionIcon,
-  Heading1,
-  Heading2,
-  Heading3,
-  LayoutCellsLarge,
-  LayoutColumns,
-  ListOl,
-  ListCheck,
-  ListUl,
-  MusicNote,
-  Magnifier,
-  Minus,
-  Picture,
-  Paperclip,
-  Play,
-  QuoteOpen,
-  Sparkles,
-  Text,
-} from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
 import {
   filterRichTextEditorSuggestionItems,
@@ -31,7 +10,6 @@ import {
   type RichTextEditorSuggestionItem,
   type RichTextEditorSuggestionMenuRenderProps,
 } from "@heroui-pro/react/rich-text-editor";
-import type { ComponentType, SVGProps } from "react";
 import { useCallback, useEffect, useRef } from "react";
 import { UserAvatar } from "@/components/user-avatar";
 import { userApi, type UserMentionResponse } from "@/lib/features/user";
@@ -57,9 +35,7 @@ interface MentionItem extends RichTextEditorSuggestionItem {
   user: UserMentionResponse;
 }
 
-const icon = (IconComponent: ComponentType<SVGProps<SVGSVGElement>>) => (
-  <IconComponent aria-hidden="true" className="size-4" />
-);
+const icon = (name: string) => <Icon icon={name} aria-hidden="true" className="size-4" />;
 
 const SLASH_COMMANDS: SlashCommandItem[] = [
   {
@@ -68,7 +44,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Continue with plain body text",
     group: "text",
-    icon: icon(Text),
+    icon: icon("gravity-ui:text"),
     id: "paragraph",
     keywords: ["body", "paragraph", "plain", "text"],
     title: "Text",
@@ -84,7 +60,9 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
           ? "Medium section heading"
           : "Small section heading",
     group: "text",
-    icon: icon(level === 1 ? Heading1 : level === 2 ? Heading2 : Heading3),
+    icon: icon(
+      level === 1 ? "gravity-ui:heading-1" : level === 2 ? "gravity-ui:heading-2" : "gravity-ui:heading-3"
+    ),
     id: `heading-${level}`,
     keywords: [`h${level}`, "heading", "section", "title"],
     title: `Heading ${level}`,
@@ -95,7 +73,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Create an unordered list",
     group: "blocks",
-    icon: icon(ListUl),
+    icon: icon("gravity-ui:list-ul"),
     id: "bullet-list",
     keywords: ["bullet", "list", "unordered"],
     title: "Bulleted list",
@@ -106,7 +84,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Create a numbered list",
     group: "blocks",
-    icon: icon(ListOl),
+    icon: icon("gravity-ui:list-ol"),
     id: "ordered-list",
     keywords: ["list", "number", "ordered"],
     title: "Numbered list",
@@ -117,7 +95,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Create a checklist with nestable tasks",
     group: "blocks",
-    icon: icon(ListCheck),
+    icon: icon("gravity-ui:list-check"),
     id: "task-list",
     keywords: ["check", "checklist", "task", "todo"],
     title: "Task list",
@@ -128,7 +106,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Highlight a quoted passage",
     group: "blocks",
-    icon: icon(QuoteOpen),
+    icon: icon("gravity-ui:quote-open"),
     id: "blockquote",
     keywords: ["blockquote", "citation", "quote"],
     title: "Blockquote",
@@ -139,7 +117,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Insert a formatted code block",
     group: "blocks",
-    icon: icon(CurlyBrackets),
+    icon: icon("gravity-ui:curly-brackets"),
     id: "code-block",
     keywords: ["code", "developer", "pre"],
     title: "Code block",
@@ -163,7 +141,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Emphasize an action or takeaway",
     group: "blocks",
-    icon: icon(Sparkles),
+    icon: icon("gravity-ui:sparkles"),
     id: "action-callout",
     keywords: ["action", "callout", "custom", "todo"],
     title: "Action callout",
@@ -180,7 +158,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Add collapsible supporting content",
     group: "blocks",
-    icon: icon(CircleChevronDown),
+    icon: icon("gravity-ui:circle-chevron-down"),
     id: "details",
     keywords: ["accordion", "collapse", "details", "disclosure"],
     title: "Details",
@@ -197,7 +175,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Insert and edit a display equation",
     group: "media",
-    icon: icon(FunctionIcon),
+    icon: icon("gravity-ui:function"),
     id: "equation",
     keywords: ["equation", "formula", "latex", "math"],
     title: "Equation",
@@ -208,7 +186,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Upload or drop an image",
     group: "media",
-    icon: icon(Picture),
+    icon: icon("gravity-ui:picture"),
     id: "image",
     keywords: ["image", "media", "photo", "picture", "upload"],
     title: "Image",
@@ -219,7 +197,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Upload an audio player with retry support",
     group: "media",
-    icon: icon(MusicNote),
+    icon: icon("gravity-ui:music-note"),
     id: "audio",
     keywords: ["audio", "music", "podcast", "sound", "upload"],
     title: "Audio",
@@ -230,7 +208,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Upload a downloadable file",
     group: "media",
-    icon: icon(Paperclip),
+    icon: icon("gravity-ui:paperclip"),
     id: "attachment",
     keywords: ["attachment", "download", "file", "upload"],
     title: "Attachment",
@@ -242,7 +220,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Embed a privacy-enhanced YouTube player",
     group: "media",
-    icon: icon(Play),
+    icon: icon("gravity-ui:play"),
     id: "youtube",
     keywords: ["embed", "video", "youtube"],
     title: "YouTube",
@@ -258,7 +236,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Insert a 3 by 3 table",
     group: "media",
-    icon: icon(LayoutCellsLarge),
+    icon: icon("gravity-ui:layout-cells-large"),
     id: "table",
     keywords: ["cells", "grid", "table"],
     title: "Table",
@@ -269,7 +247,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Split content into two columns",
     group: "media",
-    icon: icon(LayoutColumns),
+    icon: icon("gravity-ui:layout-columns"),
     id: "columns",
     keywords: ["columns", "layout", "split", "two"],
     title: "Columns",
@@ -280,7 +258,7 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     },
     description: "Separate sections with a divider",
     group: "media",
-    icon: icon(Minus),
+    icon: icon("gravity-ui:minus"),
     id: "divider",
     keywords: ["divider", "horizontal", "line", "rule", "separator"],
     title: "Divider",
@@ -317,7 +295,7 @@ function SuggestionMenuContent({
       <EmptyState className="py-6" size="sm">
         <EmptyState.Header>
           <EmptyState.Media variant="icon">
-            <Magnifier aria-hidden="true" />
+            <Icon icon="gravity-ui:magnifier" aria-hidden="true" />
           </EmptyState.Media>
           <EmptyState.Title>No commands found</EmptyState.Title>
           <EmptyState.Description>No insert command matches “{query}”.</EmptyState.Description>
@@ -373,7 +351,7 @@ function SuggestionMenuContent({
                     </span>
                     <ListBox.ItemIndicator className="text-accent ms-auto">
                       {({ isSelected }) =>
-                        isSelected ? <Check aria-hidden="true" className="size-4" /> : null
+                        isSelected ? <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" /> : null
                       }
                     </ListBox.ItemIndicator>
                   </ListBox.Item>
@@ -430,7 +408,7 @@ function MentionMenuContent({
       <EmptyState className="min-w-64 px-3 py-4" size="sm">
         <EmptyState.Header>
           <EmptyState.Media variant="icon">
-            <Magnifier aria-hidden="true" />
+            <Icon icon="gravity-ui:magnifier" aria-hidden="true" />
           </EmptyState.Media>
           <EmptyState.Title>No users found</EmptyState.Title>
           <EmptyState.Description>

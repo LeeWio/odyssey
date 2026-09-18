@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRight, Check, Envelope, Xmark } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Card, Link } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -42,7 +43,7 @@ export function NewsletterStatusPage({ action }: { action: NewsletterAction }) {
         <Card>
           <Card.Header>
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <Envelope aria-hidden="true" className="size-4" /> Newsletter
+              <Icon icon="gravity-ui:envelope" aria-hidden="true" className="size-4" /> Newsletter
             </div>
             <Card.Title className="mt-4 text-3xl tracking-[-0.03em]">{title}</Card.Title>
             <Card.Description className="mt-3 max-w-md text-base leading-7">
@@ -52,7 +53,7 @@ export function NewsletterStatusPage({ action }: { action: NewsletterAction }) {
           <Card.Content>
             {!token ? (
               <div className="text-muted flex items-center gap-3 text-sm">
-                <Xmark aria-hidden="true" className="text-danger size-5 shrink-0" />
+                <Icon icon="gravity-ui:xmark" aria-hidden="true" className="text-danger size-5 shrink-0" />
                 This link is incomplete. Please use the link from your email.
               </div>
             ) : request.isLoading ? (
@@ -62,12 +63,12 @@ export function NewsletterStatusPage({ action }: { action: NewsletterAction }) {
               </div>
             ) : request.isError ? (
               <div className="text-muted flex items-center gap-3 text-sm">
-                <Xmark aria-hidden="true" className="text-danger size-5 shrink-0" />
+                <Icon icon="gravity-ui:xmark" aria-hidden="true" className="text-danger size-5 shrink-0" />
                 This link is no longer valid. You can request a fresh subscription email below.
               </div>
             ) : isSuccessful ? (
               <div className="text-muted flex items-center gap-3 text-sm">
-                <Check aria-hidden="true" className="text-success size-5 shrink-0" />
+                <Icon icon="gravity-ui:check" aria-hidden="true" className="text-success size-5 shrink-0" />
                 Your preference has been saved.
               </div>
             ) : null}
@@ -81,7 +82,7 @@ export function NewsletterStatusPage({ action }: { action: NewsletterAction }) {
               href="/blog"
             >
               Browse writing
-              <ArrowRight aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
             </Link>
           </Card.Footer>
         </Card>

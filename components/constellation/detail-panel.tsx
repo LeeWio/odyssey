@@ -1,8 +1,9 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import { Button, Chip, Typography } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
-import { Xmark } from "@gravity-ui/icons";
 import { motion } from "motion/react";
 import { Star, Article } from "./types";
 
@@ -39,7 +40,7 @@ export function DetailPanel({ activeStar, onClose }: DetailPanelProps) {
             aria-label="Close star details"
             onPress={onClose}
           >
-            <Xmark aria-hidden="true" />
+            <Icon icon="gravity-ui:xmark" aria-hidden="true" />
           </Button>
         </div>
         <div className="mt-4">

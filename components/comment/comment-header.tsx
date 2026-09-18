@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronDown, Comments } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Button, Chip, Dropdown, Label, Typography, type Key } from "@heroui/react";
 import { Sheet } from "@heroui-pro/react";
 import { memo } from "react";
@@ -31,7 +32,7 @@ export const CommentHeader = memo(function CommentHeader({
 
   const heading = (
     <>
-      <Comments aria-hidden="true" />
+      <Icon icon="gravity-ui:comments" aria-hidden="true" />
       Comments
       <Chip
         aria-hidden={isCountLoading || undefined}
@@ -64,7 +65,7 @@ export const CommentHeader = memo(function CommentHeader({
             aria-label="Choose comment sort"
           >
             {SORT_LABELS[sortOrder]}
-            <ChevronDown aria-hidden="true" />
+            <Icon icon="gravity-ui:chevron-down" aria-hidden="true" />
           </Button>
           <Dropdown.Popover placement="bottom end">
             <Dropdown.Menu

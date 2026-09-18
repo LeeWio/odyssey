@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  ArrowRight,
-  ArrowRotateLeft,
-  ArrowUpRight,
-  Code,
-  CodeFork,
-  LogoGithub,
-  Star,
-} from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { EmptyState } from "@heroui-pro/react";
 import {
   Button,
@@ -114,7 +107,7 @@ function ProjectVisual({ project }: { project: ProjectResponse }) {
       seed={`project-${project.slug}`}
       tone={getSmartColorTone({ categoryName: project.techStack, title: project.name })}
     >
-      <Code aria-hidden="true" className="absolute right-6 bottom-5 size-16 text-white/28" />
+      <Icon icon="gravity-ui:code" aria-hidden="true" className="absolute right-6 bottom-5 size-16 text-white/28" />
     </SmartColorSurface>
   );
 }
@@ -148,13 +141,13 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
             <div className="text-muted flex shrink-0 items-center gap-3 font-mono text-xs tabular-nums">
               {starsCount > 0 ? (
                 <span className="flex items-center gap-1">
-                  <Star aria-hidden="true" className="size-3.5" />
+                  <Icon icon="gravity-ui:star" aria-hidden="true" className="size-3.5" />
                   {starsCount.toLocaleString("en-US")}
                 </span>
               ) : null}
               {forksCount > 0 ? (
                 <span className="flex items-center gap-1">
-                  <CodeFork aria-hidden="true" className="size-3.5" />
+                  <Icon icon="gravity-ui:code-fork" aria-hidden="true" className="size-3.5" />
                   {forksCount.toLocaleString("en-US")}
                 </span>
               ) : null}
@@ -182,7 +175,7 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
               target="_blank"
             >
               Open project
-              <ArrowUpRight aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:arrow-up-right" aria-hidden="true" className="size-4" />
             </a>
           ) : null}
           {githubUrl ? (
@@ -192,7 +185,7 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
               rel="noopener noreferrer"
               target="_blank"
             >
-              <LogoGithub aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:logo-github" aria-hidden="true" className="size-4" />
               Source
             </a>
           ) : null}
@@ -261,7 +254,7 @@ export function ProjectShowcasePage() {
         <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-end">
           <div className="max-w-3xl">
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <Code aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:code" aria-hidden="true" className="size-4" />
               Built in public
             </div>
             <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
@@ -289,7 +282,7 @@ export function ProjectShowcasePage() {
             <EmptyState size="lg">
               <EmptyState.Header>
                 <EmptyState.Media variant="icon">
-                  <Code aria-hidden="true" />
+                  <Icon icon="gravity-ui:code" aria-hidden="true" />
                 </EmptyState.Media>
                 <EmptyState.Title>Projects are unavailable</EmptyState.Title>
                 <EmptyState.Description>
@@ -298,7 +291,7 @@ export function ProjectShowcasePage() {
               </EmptyState.Header>
               <EmptyState.Content>
                 <Button variant="outline" onPress={() => refetch()}>
-                  <ArrowRotateLeft aria-hidden="true" />
+                  <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
                   Try again
                 </Button>
               </EmptyState.Content>
@@ -310,7 +303,7 @@ export function ProjectShowcasePage() {
               <EmptyState size="lg">
                 <EmptyState.Header>
                   <EmptyState.Media variant="icon">
-                    <Code aria-hidden="true" />
+                    <Icon icon="gravity-ui:code" aria-hidden="true" />
                   </EmptyState.Media>
                   <EmptyState.Title>No projects published yet</EmptyState.Title>
                   <EmptyState.Description>
@@ -443,7 +436,7 @@ export function ProjectShowcasePage() {
             href="/explore"
           >
             Explore writing
-            <ArrowRight aria-hidden="true" className="size-4" />
+            <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
           </Link>
         </div>
       </div>

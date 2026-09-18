@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowRotateLeft, Bell, Bookmark, Check, CircleCheck, TrashBin } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
 import { AlertDialog, Button, Card, Chip, Tabs, Tooltip, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
@@ -207,7 +206,7 @@ export function NotificationCenterPage() {
           <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <Bell aria-hidden="true" />
+                <Icon icon="gravity-ui:bell" aria-hidden="true" />
               </EmptyState.Media>
               <EmptyState.Title>Your notifications</EmptyState.Title>
               <EmptyState.Description>
@@ -229,7 +228,7 @@ export function NotificationCenterPage() {
         <header className="flex flex-wrap items-end justify-between gap-5">
           <div className="max-w-2xl">
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <Bell aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:bell" aria-hidden="true" className="size-4" />
               Activity inbox
             </div>
             <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
@@ -254,11 +253,11 @@ export function NotificationCenterPage() {
               variant="secondary"
               onPress={handleMarkAllRead}
             >
-              <Check aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" />
               Mark all read
             </Button>
             <Button size="sm" variant="ghost" onPress={() => setIsClearReadOpen(true)}>
-              <TrashBin aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
               Clear read
             </Button>
           </div>
@@ -368,7 +367,7 @@ export function NotificationCenterPage() {
                         variant="ghost"
                         onPress={() => handleSaveNotification(notification)}
                       >
-                        <Bookmark aria-hidden="true" className="size-4" />
+                        <Icon icon="gravity-ui:bookmark" aria-hidden="true" className="size-4" />
                       </Button>
                       <Tooltip.Content>
                         {notification.saved ? "Remove from saved" : "Save for later"}
@@ -384,7 +383,7 @@ export function NotificationCenterPage() {
                           variant="ghost"
                           onPress={() => handleCompleteNotification(notification.id)}
                         >
-                          <CircleCheck aria-hidden="true" className="size-4" />
+                          <Icon icon="gravity-ui:circle-check" aria-hidden="true" className="size-4" />
                         </Button>
                         <Tooltip.Content>Mark done</Tooltip.Content>
                       </Tooltip>
@@ -398,7 +397,7 @@ export function NotificationCenterPage() {
                           variant="ghost"
                           onPress={() => handleReopenNotification(notification.id)}
                         >
-                          <ArrowRotateLeft aria-hidden="true" className="size-4" />
+                          <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />
                         </Button>
                         <Tooltip.Content>Return to inbox</Tooltip.Content>
                       </Tooltip>
@@ -413,7 +412,7 @@ export function NotificationCenterPage() {
                         variant="ghost"
                         onPress={() => handleDeleteNotification(notification.id)}
                       >
-                        <TrashBin aria-hidden="true" className="size-4" />
+                        <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
                       </Button>
                       <Tooltip.Content>Delete notification</Tooltip.Content>
                     </Tooltip>

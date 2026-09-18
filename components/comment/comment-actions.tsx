@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  ArrowShapeTurnUpLeft,
-  Ellipsis,
-  Flag,
-  Heart,
-  HeartFill,
-  Link,
-  Pencil,
-  TrashBin,
-} from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Button, Dropdown, Tooltip } from "@heroui/react";
 import { MotionButton } from "@/components/ui";
 import { useCommentContext } from "./context/comment-context";
@@ -57,7 +49,7 @@ export function CommentActions({
         whileTap={{ scale: 0.92 }}
         onPress={onLikeToggle}
       >
-        {comment.likedByCurrentUser ? <HeartFill className="text-danger" /> : <Heart />}
+        {comment.likedByCurrentUser ? <Icon icon="gravity-ui:heart-fill" className="text-danger" /> : <Icon icon="gravity-ui:heart" />}
         <span className="tabular-nums">{comment.likesCount}</span>
       </MotionButton>
 
@@ -69,7 +61,7 @@ export function CommentActions({
           whileTap={{ scale: 0.96 }}
           onPress={onReplyToggle}
         >
-          <ArrowShapeTurnUpLeft aria-hidden="true" />
+          <Icon icon="gravity-ui:arrow-shape-turn-up-left" aria-hidden="true" />
           {isReplying ? "Cancel" : "Reply"}
         </MotionButton>
       )}
@@ -83,7 +75,7 @@ export function CommentActions({
               aria-label="More comment actions"
               isDisabled={isUnavailable}
             >
-              <Ellipsis aria-hidden="true" />
+              <Icon icon="gravity-ui:ellipsis" aria-hidden="true" />
             </Button>
           </Tooltip.Trigger>
           <Tooltip.Content>
@@ -100,23 +92,23 @@ export function CommentActions({
             }}
           >
             <Dropdown.Item id="copy" textValue="Copy link">
-              <Link />
+              <Icon icon="gravity-ui:link" />
               Copy link
             </Dropdown.Item>
             {isAuthor ? (
               <>
                 <Dropdown.Item id="edit" textValue="Edit comment">
-                  <Pencil />
+                  <Icon icon="gravity-ui:pencil" />
                   Edit
                 </Dropdown.Item>
                 <Dropdown.Item id="delete" textValue="Delete comment" variant="danger">
-                  <TrashBin />
+                  <Icon icon="gravity-ui:trash-bin" />
                   Delete
                 </Dropdown.Item>
               </>
             ) : (
               <Dropdown.Item id="report" textValue="Report comment" variant="danger">
-                <Flag />
+                <Icon icon="gravity-ui:flag" />
                 Report
               </Dropdown.Item>
             )}

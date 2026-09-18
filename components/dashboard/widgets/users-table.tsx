@@ -1,6 +1,7 @@
 "use client";
 
-import { Copy, Sliders } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Avatar, Button, Chip, SearchField, toast } from "@heroui/react";
 import type { DataGridColumn, DataGridSortDescriptor } from "@heroui-pro/react";
 import { DataGrid } from "@heroui-pro/react";
@@ -66,7 +67,7 @@ export function UsersTable() {
               variant="ghost"
               onPress={() => void handleCopyId(item.id)}
             >
-              <Copy className="text-muted size-3.5" />
+              <Icon icon="gravity-ui:copy" className="text-muted size-3.5" />
             </Button>
           </div>
         ),
@@ -162,7 +163,7 @@ export function UsersTable() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" variant="tertiary">
-              <Sliders className="size-4" />
+              <Icon icon="gravity-ui:sliders" className="size-4" />
               Filter
             </Button>
           </div>

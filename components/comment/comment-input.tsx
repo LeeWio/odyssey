@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowUp, Xmark } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import {
   Button,
   Description,
@@ -192,7 +193,7 @@ export function CommentInput({
                 aria-label="Send comment"
                 status={isSubmitting ? "submitted" : "ready"}
               >
-                <ArrowUp aria-hidden="true" className="size-4" />
+                <Icon icon="gravity-ui:arrow-up" aria-hidden="true" className="size-4" />
               </PromptInput.Send>
             </PromptInput.ToolbarEnd>
           </PromptInput.Toolbar>
@@ -235,7 +236,7 @@ export function CommentInput({
             aria-label="Cancel reply"
             onPress={() => onOpenChange?.(false)}
           >
-            <Xmark aria-hidden="true" />
+            <Icon icon="gravity-ui:xmark" aria-hidden="true" />
           </Button>
         </div>
 

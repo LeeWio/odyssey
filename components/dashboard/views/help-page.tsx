@@ -1,17 +1,17 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 // TODO: Wire these link cards to your real documentation, community and
 // support URLs. Replace the FAQ entries with real content or fetch them
 // from your CMS.
 
-import { ArrowRightFromSquare, Book, Comment, LifeRing } from "@gravity-ui/icons";
 import { Accordion, Card, Link } from "@heroui/react";
-import type { ComponentType } from "react";
 
 type HelpLink = {
   description: string;
   href: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: string;
   title: string;
 };
 
@@ -19,19 +19,19 @@ const HELP_LINKS: readonly HelpLink[] = [
   {
     description: "Read the docs, guides, and API reference to get up and running.",
     href: "#",
-    icon: Book,
+    icon: "gravity-ui:book",
     title: "Documentation",
   },
   {
     description: "Join the community to ask questions, share tips, and connect with other users.",
     href: "#",
-    icon: Comment,
+    icon: "gravity-ui:comment",
     title: "Community",
   },
   {
     description: "Get help from our support team. We reply within one business day.",
     href: "#",
-    icon: LifeRing,
+    icon: "gravity-ui:life-ring",
     title: "Contact support",
   },
 ];
@@ -105,13 +105,11 @@ export function HelpPage() {
 }
 
 function HelpLinkCard({ link }: { link: HelpLink }) {
-  const Icon = link.icon;
-
   return (
     <Card className="rounded-2xl">
       <Card.Header>
         <div className="bg-accent-soft text-accent flex size-10 items-center justify-center rounded-xl">
-          <Icon className="size-5" />
+          <Icon icon={link.icon} className="size-5" />
         </div>
         <Card.Title className="text-base">{link.title}</Card.Title>
         <Card.Description>{link.description}</Card.Description>
@@ -119,7 +117,7 @@ function HelpLinkCard({ link }: { link: HelpLink }) {
       <Card.Footer>
         <Link className="text-accent inline-flex items-center gap-1 text-sm" href={link.href}>
           Open
-          <ArrowRightFromSquare className="size-3.5" />
+          <Icon icon="gravity-ui:arrow-right-from-square" className="size-3.5" />
         </Link>
       </Card.Footer>
     </Card>

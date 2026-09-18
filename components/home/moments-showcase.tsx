@@ -1,7 +1,8 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import dynamic from "next/dynamic";
-import { ArrowUpRight } from "@gravity-ui/icons";
 import { Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useGetPublicMomentsQuery } from "@/lib/features/moment";
@@ -77,7 +78,7 @@ export function MomentsShowcase() {
           <Link className="mt-2 text-sm no-underline" href="/moments">
             See all moments
             <Link.Icon aria-hidden="true">
-              <ArrowUpRight />
+              <Icon icon="gravity-ui:arrow-up-right" />
             </Link.Icon>
           </Link>
         </motion.div>

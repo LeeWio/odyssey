@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  CirclePlus,
-  CodeCommits,
-  CodePullRequest,
-  CodePullRequestCheck,
-  Eye,
-} from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Card, Chip, Link } from "@heroui/react";
 import { Timeline } from "@heroui-pro/react";
 
@@ -30,7 +25,7 @@ export function RepositoryActivity({ activity }: { activity: GitHubActivityRespo
   const repositoryActivity = [
     {
       actor: activity.actor,
-      icon: CodeCommits,
+      icon: "gravity-ui:code-commits",
       repositories: mapRepositories(activity.commitRepositories, "commits"),
       status: "success" as const,
       title: `Committed across ${activity.commitRepositories.length} product workspaces`,
@@ -40,7 +35,7 @@ export function RepositoryActivity({ activity }: { activity: GitHubActivityRespo
           {
             actor: activity.actor,
             date: formatDate(activity.latestMergedPullRequest.mergedAt),
-            icon: CodePullRequest,
+            icon: "gravity-ui:code-pull-request",
             pullRequest: {
               additions: activity.latestMergedPullRequest.additions,
               comments: `${activity.latestMergedPullRequest.commentCount} comments`,
@@ -55,7 +50,7 @@ export function RepositoryActivity({ activity }: { activity: GitHubActivityRespo
       : []),
     {
       actor: activity.actor,
-      icon: CirclePlus,
+      icon: "gravity-ui:circle-plus",
       issueSummary: {
         closed: activity.closedIssues,
         open: activity.openIssues,
@@ -68,7 +63,7 @@ export function RepositoryActivity({ activity }: { activity: GitHubActivityRespo
     {
       actor: activity.actor,
       date: formatDate(activity.latestReviewAt),
-      icon: Eye,
+      icon: "gravity-ui:eye",
       repositories: mapRepositories(activity.reviewRepositories, "reviews"),
       status: "default" as const,
       title: `Reviewed ${activity.totalReviews} pull requests in ${activity.reviewRepositories.length} workspaces`,
@@ -86,12 +81,10 @@ export function RepositoryActivity({ activity }: { activity: GitHubActivityRespo
 
       <Timeline size="sm">
         {repositoryActivity.map((event) => {
-          const Icon = event.icon;
-
           return (
             <Timeline.Item key={event.title} status={event.status}>
               <Timeline.Marker aria-hidden="true">
-                <Icon />
+                <Icon icon={event.icon} />
               </Timeline.Marker>
               <Timeline.Content className="gap-2.5">
                 <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
@@ -125,7 +118,7 @@ export function RepositoryActivity({ activity }: { activity: GitHubActivityRespo
                 {"pullRequest" in event ? (
                   <Card className="w-full min-w-0 p-3">
                     <Card.Header className="gap-2.5 p-0">
-                      <CodePullRequestCheck className="text-accent size-4 shrink-0" />
+                      <Icon icon="gravity-ui:code-pull-request-check" className="text-accent size-4 shrink-0" />
                       <div className="min-w-0">
                         <Card.Title className="text-sm leading-5">
                           {event.pullRequest.title}

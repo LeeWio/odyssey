@@ -1,6 +1,5 @@
 "use client";
 
-import { CirclePlus, Pencil, BookOpen, Eye, Heart, Play, TrashBin } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
 import {
   AlertDialog,
@@ -185,7 +184,7 @@ function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
             </Typography>
             <span className="text-accent inline-flex shrink-0 items-center gap-1.5 text-sm font-medium">
               Continue
-              <Play aria-hidden="true" className="size-3.5" />
+              <Icon icon="gravity-ui:play" aria-hidden="true" className="size-3.5" />
             </span>
           </div>
         </Card.Footer>
@@ -210,7 +209,7 @@ function FavoriteCard({ entry }: { entry: FavoritePostResponse }) {
             ) : (
               <span />
             )}
-            <Heart aria-hidden="true" className="text-danger size-4 shrink-0" />
+            <Icon icon="gravity-ui:heart" aria-hidden="true" className="text-danger size-4 shrink-0" />
           </div>
           <Card.Title className="line-clamp-2 text-lg">{post.title}</Card.Title>
           {post.summary ? (
@@ -253,7 +252,7 @@ function FollowingCard({ post }: { post: PostDigestResponse }) {
             type="body-xs"
             className="flex shrink-0 items-center gap-1.5 tabular-nums"
           >
-            <Eye aria-hidden="true" className="size-3.5" />
+            <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
             {post.views.toLocaleString("en-US")}
           </Typography>
         </Card.Footer>
@@ -327,7 +326,7 @@ function CollectionCard({
                 variant="ghost"
                 onPress={() => onEdit(collection)}
               >
-                <Pencil aria-hidden="true" className="size-3.5" />
+                <Icon icon="gravity-ui:pencil" aria-hidden="true" className="size-3.5" />
               </Button>
               <Tooltip.Content>Edit collection</Tooltip.Content>
             </Tooltip>
@@ -339,7 +338,7 @@ function CollectionCard({
                 variant="ghost"
                 onPress={() => onDelete(collection)}
               >
-                <TrashBin aria-hidden="true" className="size-3.5" />
+                <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-3.5" />
               </Button>
               <Tooltip.Content>Delete collection</Tooltip.Content>
             </Tooltip>
@@ -566,7 +565,7 @@ export function LibraryPage() {
           <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
-                <BookOpen aria-hidden="true" />
+                <Icon icon="gravity-ui:book-open" aria-hidden="true" />
               </EmptyState.Media>
               <EmptyState.Title>Your reading library</EmptyState.Title>
               <EmptyState.Description>
@@ -590,7 +589,7 @@ export function LibraryPage() {
       <div className="mx-auto w-full max-w-6xl">
         <header className="max-w-3xl">
           <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-            <BookOpen aria-hidden="true" className="size-4" />
+            <Icon icon="gravity-ui:book-open" aria-hidden="true" className="size-4" />
             Personal library
           </div>
           <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
@@ -757,7 +756,7 @@ export function LibraryPage() {
               </Typography>
             </div>
             <Button size="sm" onPress={openCreateCollection}>
-              <CirclePlus aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:circle-plus" aria-hidden="true" className="size-4" />
               New collection
             </Button>
           </div>
@@ -848,7 +847,7 @@ export function LibraryPage() {
                           variant="ghost"
                           onPress={() => handleRemoveCollectionPost(post.id)}
                         >
-                          <TrashBin aria-hidden="true" className="size-4" />
+                          <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
                         </Button>
                         <Tooltip.Content>Remove from collection</Tooltip.Content>
                       </Tooltip>
@@ -991,7 +990,7 @@ export function LibraryPage() {
             </div>
             {historyEntries.length > 0 ? (
               <Button size="sm" variant="danger" onPress={() => setIsClearHistoryOpen(true)}>
-                <TrashBin aria-hidden="true" className="size-4" />
+                <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
                 Clear history
               </Button>
             ) : null}
@@ -1037,7 +1036,7 @@ export function LibraryPage() {
                             variant="ghost"
                             onPress={() => handleRemoveHistoryEntry(entry.post.id)}
                           >
-                            <TrashBin aria-hidden="true" className="size-4" />
+                            <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
                           </Button>
                           <Tooltip.Content>Remove from history</Tooltip.Content>
                         </Tooltip>

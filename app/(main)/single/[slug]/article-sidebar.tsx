@@ -1,11 +1,12 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import {
   type PostDigestResponse,
   useGetFeaturedPostsQuery,
   useGetRelatedPostsQuery,
 } from "@/lib/features/post";
-import { Book, Flame, Sparkles } from "@gravity-ui/icons";
 import { EmptyState } from "@heroui-pro/react";
 import {
   Card,
@@ -67,7 +68,7 @@ function ArticleListEmpty({ type }: { type: TabId }) {
     <EmptyState size="sm" className="py-10">
       <EmptyState.Header>
         <EmptyState.Media variant="icon">
-          {isRelated ? <Sparkles aria-hidden="true" /> : <Flame aria-hidden="true" />}
+          {isRelated ? <Icon icon="gravity-ui:sparkles" aria-hidden="true" /> : <Icon icon="gravity-ui:flame" aria-hidden="true" />}
         </EmptyState.Media>
         <EmptyState.Title>
           {isRelated ? "No related articles yet" : "No featured articles yet"}
@@ -158,7 +159,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
   return (
     <aside className="sticky top-24 hidden h-fit min-w-0 lg:block">
       <Card variant="secondary" className="gap-5 p-5">
-        <Book aria-hidden="true" className="text-muted size-5" />
+        <Icon icon="gravity-ui:book" aria-hidden="true" className="text-muted size-5" />
         <Card.Header>
           <Card.Title>Continue Reading</Card.Title>
           <Card.Description>

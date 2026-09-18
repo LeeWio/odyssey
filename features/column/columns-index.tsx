@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRotateRight } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import {
   Button,
   Card,
@@ -128,7 +129,7 @@ export function ColumnsIndex() {
             </Card.Header>
             <Card.Footer>
               <Button size="sm" variant="secondary" onPress={() => refetch()}>
-                <ArrowRotateRight aria-hidden="true" className="size-4" />
+                <Icon icon="gravity-ui:arrow-rotate-right" aria-hidden="true" className="size-4" />
                 Retry
               </Button>
             </Card.Footer>

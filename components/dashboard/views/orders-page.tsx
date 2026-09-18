@@ -1,10 +1,11 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 // TODO: Replace the mock `ORDERS` data (src/data/orders.ts) with a real data
 // source (e.g. your own API, a database query, etc.) and wire up the filter
 // dropdowns to filter the data.
 
-import { Calendar, Funnel } from "@gravity-ui/icons";
 import { Avatar, Button, Chip, Dropdown, Label, SearchField } from "@heroui/react";
 import type { DataGridColumn } from "@heroui-pro/react";
 import { DataGrid, NumberValue } from "@heroui-pro/react";
@@ -121,7 +122,7 @@ export function OrdersPage() {
 
         <Dropdown>
           <Button size="sm" variant="secondary">
-            <Funnel className="size-4" />
+            <Icon icon="gravity-ui:funnel" className="size-4" />
             Status
           </Button>
           <Dropdown.Popover>
@@ -147,7 +148,7 @@ export function OrdersPage() {
 
         <Dropdown>
           <Button size="sm" variant="secondary">
-            <Calendar className="size-4" />
+            <Icon icon="gravity-ui:calendar" className="size-4" />
             Date range
           </Button>
           <Dropdown.Popover>

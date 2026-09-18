@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowDownToLine, CirclePlay, Eye, Funnel, TrashBin, Xmark } from "@gravity-ui/icons";
 import {
   Avatar,
   Button,
@@ -109,9 +108,9 @@ function UsersRowActions({ user }: { user: UserResponse }) {
             {isStatusUpdating ? (
               <Spinner size="sm" />
             ) : isActive ? (
-              <TrashBin className="text-danger size-4" />
+              <Icon icon="gravity-ui:trash-bin" className="text-danger size-4" />
             ) : (
-              <CirclePlay className="text-success size-4" />
+              <Icon icon="gravity-ui:circle-play" className="text-success size-4" />
             )}
           </Button>
         </Tooltip.Trigger>
@@ -143,7 +142,7 @@ function UsersRowActions({ user }: { user: UserResponse }) {
                 textValue="View details"
                 onAction={() => toast.success(`User: ${user.username} (${user.email})`)}
               >
-                <Eye className="size-4" />
+                <Icon icon="gravity-ui:eye" className="size-4" />
                 <Label>View Details</Label>
               </Dropdown.Item>
             </Dropdown.Section>
@@ -414,7 +413,7 @@ export function UsersPage() {
         <div className="flex flex-wrap items-center gap-2">
           <Dropdown>
             <Button size="sm" variant="secondary">
-              <Funnel className="size-4" />
+              <Icon icon="gravity-ui:funnel" className="size-4" />
               Status
             </Button>
             <Dropdown.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
@@ -518,7 +517,7 @@ export function UsersPage() {
             variant="ghost"
             onPress={() => void handleBulkStatusChange("ACTIVE")}
           >
-            <CirclePlay className="size-4" />
+            <Icon icon="gravity-ui:circle-play" className="size-4" />
             <span className="action-bar__label">Activate</span>
           </Button>
           <Button
@@ -528,7 +527,7 @@ export function UsersPage() {
             variant="ghost"
             onPress={() => void handleBulkStatusChange("INACTIVE")}
           >
-            <TrashBin className="size-4" />
+            <Icon icon="gravity-ui:trash-bin" className="size-4" />
             <span className="action-bar__label">Deactivate</span>
           </Button>
           <Button
@@ -537,7 +536,7 @@ export function UsersPage() {
             variant="ghost"
             onPress={handleExportSelected}
           >
-            <ArrowDownToLine className="size-4" />
+            <Icon icon="gravity-ui:arrow-down-to-line" className="size-4" />
             <span className="action-bar__label">Export</span>
           </Button>
         </ActionBar.Content>
@@ -552,7 +551,7 @@ export function UsersPage() {
                 variant="ghost"
                 onPress={() => setSelectedKeys(new Set())}
               >
-                <Xmark className="size-4" />
+                <Icon icon="gravity-ui:xmark" className="size-4" />
               </Button>
             </Tooltip.Trigger>
             <Tooltip.Content>Clear selection</Tooltip.Content>

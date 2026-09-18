@@ -1,6 +1,5 @@
 "use client";
 
-import { LogoGithub, LogoGitlab, Receipt } from "@gravity-ui/icons";
 import { Button, Card, ProgressBar, Separator, Surface, Tooltip, Typography } from "@heroui/react";
 import { ItemCard, ItemCardGroup } from "@heroui-pro/react";
 import { Carousel } from "@heroui-pro/react/carousel";
@@ -642,7 +641,7 @@ export function MusicDashboard() {
           </ItemCardGroup.Header>
           <ItemCard>
             <ItemCard.Icon>
-              <Receipt />
+              <Icon icon="gravity-ui:receipt" />
             </ItemCard.Icon>
             <ItemCard.Content>
               <ItemCard.Title>Billing</ItemCard.Title>
@@ -671,7 +670,7 @@ export function MusicDashboard() {
           <ItemCardGroup className="overflow-hidden">
             <ItemCard>
               <ItemCard.Icon>
-                <LogoGithub />
+                <Icon icon="gravity-ui:logo-github" />
               </ItemCard.Icon>
               <ItemCard.Content>
                 <ItemCard.Title>GitHub</ItemCard.Title>
@@ -683,7 +682,7 @@ export function MusicDashboard() {
             <Separator />
             <ItemCard>
               <ItemCard.Icon>
-                <LogoGitlab />
+                <Icon icon="gravity-ui:logo-gitlab" />
               </ItemCard.Icon>
               <ItemCard.Content>
                 <ItemCard.Title>GitLab</ItemCard.Title>

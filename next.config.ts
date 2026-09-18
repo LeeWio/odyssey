@@ -15,7 +15,6 @@ const nextConfig: NextConfig = {
       "@heroui/react",
       "@heroui-pro/react",
       "@iconify/react",
-      "@gravity-ui/icons",
       "motion",
     ],
   },

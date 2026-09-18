@@ -1,6 +1,7 @@
 "use client";
 
-import { Check } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Button, Chip, TextArea, TextField, Typography } from "@heroui/react";
 import { useEffect, useState } from "react";
 
@@ -53,7 +54,7 @@ export function CommentContent({
             isDisabled={!editedText.trim() || editedText.trim() === content}
             onPress={() => onEditSave(editedText.trim())}
           >
-            <Check />
+            <Icon icon="gravity-ui:check" />
             Save
           </Button>
         </div>

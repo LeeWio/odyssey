@@ -1,8 +1,9 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import dynamic from "next/dynamic";
 import { Card, Chip, Typography } from "@heroui/react";
-import { ArrowRight, Book } from "@gravity-ui/icons";
 import Image from "next/image";
 import Link from "next/link";
 import type { ColumnResponse } from "@/lib/features/column";
@@ -52,7 +53,7 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
   ) : (
     <div className="relative h-full w-full">
       <Grainient {...getGrainientProps(column.name)} className="absolute inset-0" />
-      <Book aria-hidden="true" className="absolute right-6 bottom-5 z-10 size-16 text-white/28" />
+      <Icon icon="gravity-ui:book" aria-hidden="true" className="absolute right-6 bottom-5 z-10 size-16 text-white/28" />
     </div>
   );
 
@@ -77,10 +78,9 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
           <Typography color="muted" type="body-xs">
             Curated reading path
           </Typography>
-          <ArrowRight
+          <Icon icon="gravity-ui:arrow-right"
             aria-hidden="true"
-            className="text-muted size-4 transition-transform duration-200 group-hover:translate-x-1"
-          />
+            className="text-muted size-4 transition-transform duration-200 group-hover:translate-x-1" />
         </Card.Footer>
       </Card>
     </Link>

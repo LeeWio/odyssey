@@ -1,8 +1,9 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import { Skeleton } from "@heroui/react";
 import { KPI } from "@heroui-pro/react/kpi";
-import { Comment, Eye, FileText, Person } from "@gravity-ui/icons";
 import { useGetDashboardStatsQuery } from "@/lib/features/dashboard";
 
 export function KpiRow() {
@@ -13,25 +14,25 @@ export function KpiRow() {
       label: "Total Users",
       value: stats?.totalUsers ?? 0,
       status: "success" as const,
-      icon: Person,
+      icon: "gravity-ui:person",
     },
     {
       label: "Total Posts",
       value: stats?.totalPosts ?? 0,
       status: "success" as const,
-      icon: FileText,
+      icon: "gravity-ui:file-text",
     },
     {
       label: "Total Comments",
       value: stats?.totalComments ?? 0,
       status: "success" as const,
-      icon: Comment,
+      icon: "gravity-ui:comment",
     },
     {
       label: "Total Views",
       value: stats?.totalViews ?? 0,
       status: "warning" as const,
-      icon: Eye,
+      icon: "gravity-ui:eye",
     },
   ];
 
@@ -42,7 +43,7 @@ export function KpiRow() {
           <KPI.Header className="flex-row items-center justify-between">
             <KPI.Title className="text-muted text-xs font-medium">{stat.label}</KPI.Title>
             <KPI.Icon status={stat.status} aria-hidden="true">
-              <stat.icon />
+              <Icon icon={stat.icon} />
             </KPI.Icon>
           </KPI.Header>
           <KPI.Content>

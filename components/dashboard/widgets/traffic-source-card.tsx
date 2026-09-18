@@ -1,6 +1,7 @@
 "use client";
 
-import { EllipsisVertical } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Card } from "@heroui/react";
 import { LineChart } from "@heroui-pro/react/line-chart";
 import { TRAFFIC_DATA } from "../data/traffic";
@@ -23,7 +24,7 @@ export function TrafficSourceCard() {
             <LegendDot color="var(--chart-4)" label="Paid Ads" />
           </div>
           <IconButton label="More options" size="sm" variant="tertiary">
-            <EllipsisVertical className="size-4" />
+            <Icon icon="gravity-ui:ellipsis-vertical" className="size-4" />
           </IconButton>
         </div>
       </Card.Header>

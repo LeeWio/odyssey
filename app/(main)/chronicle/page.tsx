@@ -1,12 +1,13 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Tabs, Card, Chip, Skeleton, Typography } from "@heroui/react";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye } from "@gravity-ui/icons";
 
 // Sub-components from our modular features
 import BlogFeed from "@/features/blog/feed/blog-feed";
@@ -240,7 +241,7 @@ export default function ChroniclePage() {
                                 {formatDate(post.createdAt)}
                               </span>
                               <span className="text-muted flex items-center gap-1.5 font-mono text-[10px] tabular-nums">
-                                <Eye className="size-3" />
+                                <Icon icon="gravity-ui:eye" className="size-3" />
                                 {post.views.toLocaleString()}
                               </span>
                             </Card.Footer>

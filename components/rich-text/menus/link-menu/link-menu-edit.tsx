@@ -1,4 +1,3 @@
-import { Globe } from "@gravity-ui/icons";
 import { Button, ButtonGroup, InputGroup, Label, TextField, toast } from "@heroui/react";
 import { CellSwitch } from "@heroui-pro/react";
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
@@ -94,7 +93,7 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
         <Label>Link URL</Label>
         <InputGroup variant="secondary">
           <InputGroup.Prefix>
-            <Globe className="text-muted size-4" aria-hidden="true" />
+            <Icon icon="gravity-ui:globe" className="text-muted size-4" aria-hidden="true" />
           </InputGroup.Prefix>
           <InputGroup.Input
             autoFocus

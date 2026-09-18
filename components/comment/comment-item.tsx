@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowDown, ArrowRotateRight, ArrowUp } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { Button, Chip, Typography, cn, toast } from "@heroui/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useNow } from "next-intl";
@@ -137,9 +138,9 @@ export function CommentItem(props: CommentItemProps) {
               }}
             >
               {isExpanded ? (
-                <ArrowUp aria-hidden="true" className="size-3.5" />
+                <Icon icon="gravity-ui:arrow-up" aria-hidden="true" className="size-3.5" />
               ) : (
-                <ArrowDown aria-hidden="true" className="size-3.5" />
+                <Icon icon="gravity-ui:arrow-down" aria-hidden="true" className="size-3.5" />
               )}
               {props.loadingReplyIds.has(comment.id)
                 ? "Loading replies..."
@@ -335,7 +336,7 @@ function CommentRow({
             variant="secondary"
             onPress={() => onRetry(comment.id, comment.content, comment.parentId ?? null)}
           >
-            <ArrowRotateRight aria-hidden="true" />
+            <Icon icon="gravity-ui:arrow-rotate-right" aria-hidden="true" />
             Retry
           </Button>
         )}

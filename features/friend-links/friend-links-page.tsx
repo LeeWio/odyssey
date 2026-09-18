@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRotateLeft, ArrowUpRight, CircleLink, Globe, PaperPlane } from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { EmptyState } from "@heroui-pro/react";
 import {
   Avatar,
@@ -113,10 +114,9 @@ function FriendLinkCard({ link }: { link: FriendLinkResponse }) {
               {new URL(url).hostname}
             </Typography>
           </div>
-          <ArrowUpRight
+          <Icon icon="gravity-ui:arrow-up-right"
             aria-hidden="true"
-            className="text-muted size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-          />
+            className="text-muted size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </Card.Header>
         <Card.Content>
           <Typography color="muted" type="body-sm" className="line-clamp-3 leading-6">
@@ -209,7 +209,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-end">
             <div className="max-w-3xl">
               <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-                <Globe aria-hidden="true" className="size-4" />
+                <Icon icon="gravity-ui:globe" aria-hidden="true" className="size-4" />
                 The blogroll
               </div>
               <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
@@ -260,7 +260,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
             <EmptyState size="lg">
               <EmptyState.Header>
                 <EmptyState.Media variant="icon">
-                  <CircleLink aria-hidden="true" />
+                  <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
                 </EmptyState.Media>
                 <EmptyState.Title>Links are unavailable</EmptyState.Title>
                 <EmptyState.Description>
@@ -269,7 +269,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               </EmptyState.Header>
               <EmptyState.Content>
                 <Button variant="outline" onPress={() => refetch()}>
-                  <ArrowRotateLeft aria-hidden="true" />
+                  <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
                   Try again
                 </Button>
               </EmptyState.Content>
@@ -281,7 +281,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               <EmptyState size="lg">
                 <EmptyState.Header>
                   <EmptyState.Media variant="icon">
-                    <CircleLink aria-hidden="true" />
+                    <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
                   </EmptyState.Media>
                   <EmptyState.Title>No links published yet</EmptyState.Title>
                   <EmptyState.Description>
@@ -298,7 +298,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               <EmptyState size="md">
                 <EmptyState.Header>
                   <EmptyState.Media variant="icon">
-                    <CircleLink aria-hidden="true" />
+                    <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
                   </EmptyState.Media>
                   <EmptyState.Title>No places match your search</EmptyState.Title>
                   <EmptyState.Description>
@@ -328,7 +328,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
         >
           <div className="max-w-xl">
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <CircleLink aria-hidden="true" className="size-4" />
+              <Icon icon="gravity-ui:circle-link" aria-hidden="true" className="size-4" />
               Link exchange
             </div>
             <Typography type="h2" weight="semibold" className="mt-4 text-balance">
@@ -424,7 +424,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               </TextField>
 
               <Button isPending={isApplying} type="submit">
-                <PaperPlane aria-hidden="true" className="size-4" />
+                <Icon icon="gravity-ui:paper-plane" aria-hidden="true" className="size-4" />
                 Submit for review
               </Button>
             </Form>

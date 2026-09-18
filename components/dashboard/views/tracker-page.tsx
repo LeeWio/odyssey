@@ -1,16 +1,7 @@
 "use client";
 
-import {
-  ArrowRight,
-  ArrowRotateLeft,
-  Calendar,
-  Copy,
-  Ellipsis,
-  Pencil,
-  Plus,
-  ThunderboltFill,
-  TrashBin,
-} from "@gravity-ui/icons";
+import { Icon } from "@iconify/react";
+
 import { EmptyState } from "@heroui-pro/react";
 import { Avatar, Button, Chip, Header, Label, ProgressBar, Skeleton, toast } from "@heroui/react";
 import type { UseKanbanReturn } from "@heroui-pro/react";
@@ -282,7 +273,7 @@ function TrackerColumn({
               variant="ghost"
               onPress={onAdd}
             >
-              <Plus />
+              <Icon icon="gravity-ui:plus" />
             </IconButton>
             <IconButton
               label={`More ${column} options`}
@@ -290,7 +281,7 @@ function TrackerColumn({
               size="sm"
               variant="ghost"
             >
-              <Ellipsis />
+              <Icon icon="gravity-ui:ellipsis" />
             </IconButton>
           </Kanban.ColumnActions>
         </Kanban.ColumnHeader>
@@ -321,7 +312,7 @@ function TrackerColumn({
         </Kanban.CardList>
         <div className="p-2 pt-0">
           <Button fullWidth className={meta.btnStyle} variant="outline" onPress={onAdd}>
-            <Plus />
+            <Icon icon="gravity-ui:plus" />
             New task
           </Button>
         </div>
@@ -363,11 +354,11 @@ function TrackerCardContextMenu({
           <ContextMenu.Section>
             <Header>Actions</Header>
             <ContextMenu.Item textValue="Edit" onAction={() => onEdit(taskId)}>
-              <Pencil />
+              <Icon icon="gravity-ui:pencil" />
               <Label>Edit</Label>
             </ContextMenu.Item>
             <ContextMenu.Item textValue="Duplicate" onAction={() => void onDuplicate(taskId)}>
-              <Copy />
+              <Icon icon="gravity-ui:copy" />
               <Label>Duplicate</Label>
             </ContextMenu.Item>
           </ContextMenu.Section>
@@ -380,7 +371,7 @@ function TrackerCardContextMenu({
                 textValue={`Move to ${col}`}
                 onAction={() => void onMove(taskId, col)}
               >
-                <ArrowRight />
+                <Icon icon="gravity-ui:arrow-right" />
                 <Label>{col}</Label>
               </ContextMenu.Item>
             ))}
@@ -388,7 +379,7 @@ function TrackerCardContextMenu({
           <ContextMenu.Separator />
           <ContextMenu.Section>
             <ContextMenu.Item textValue="Delete" onAction={() => void onDelete(taskId)}>
-              <TrashBin />
+              <Icon icon="gravity-ui:trash-bin" />
               <Label className="text-danger">Delete</Label>
             </ContextMenu.Item>
           </ContextMenu.Section>
@@ -454,12 +445,12 @@ function TrackerCardContent({ task }: { task: TrackerTask }) {
 
       <div className="text-muted flex items-center justify-between gap-2 text-xs">
         <span className="flex min-w-0 items-center gap-1">
-          <ThunderboltFill className="text-warning size-3 shrink-0" />
+          <Icon icon="gravity-ui:thunderbolt-fill" className="text-warning size-3 shrink-0" />
           <span className="truncate">{task.epic}</span>
         </span>
         {task.dueDate ? (
           <span className="flex shrink-0 items-center gap-1 tabular-nums">
-            <Calendar className="size-3" />
+            <Icon icon="gravity-ui:calendar" className="size-3" />
             {task.dueDate}
           </span>
         ) : null}
@@ -538,7 +529,7 @@ function TrackerError({ onRetry }: { onRetry: () => void }) {
         </EmptyState.Header>
         <EmptyState.Content>
           <Button variant="outline" onPress={onRetry}>
-            <ArrowRotateLeft aria-hidden="true" className="size-4" /> Refresh
+            <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" /> Refresh
           </Button>
         </EmptyState.Content>
       </EmptyState>
@@ -558,7 +549,7 @@ function TrackerEmpty({ onRetry }: { onRetry: () => void }) {
         </EmptyState.Header>
         <EmptyState.Content>
           <Button variant="outline" onPress={onRetry}>
-            <ArrowRotateLeft aria-hidden="true" className="size-4" /> Refresh board
+            <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" /> Refresh board
           </Button>
         </EmptyState.Content>
       </EmptyState>

@@ -1,7 +1,8 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+
 import dynamic from "next/dynamic";
-import { ArrowUpRight, Calendar } from "@gravity-ui/icons";
 import { Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
 import { Carousel } from "@heroui-pro/react/carousel";
@@ -83,7 +84,7 @@ function FeaturedArticle({
               variant="soft"
               className="bg-background/35 backdrop-blur-md"
             >
-              <Calendar aria-hidden="true" className="size-3" />
+              <Icon icon="gravity-ui:calendar" aria-hidden="true" className="size-3" />
               {formatDate(publishedAt)}
             </Chip>
           </div>
@@ -98,7 +99,7 @@ function FeaturedArticle({
           <Link href={`/single/${slug}`} className="text-sm no-underline">
             Read the essay
             <Link.Icon aria-hidden="true">
-              <ArrowUpRight />
+              <Icon icon="gravity-ui:arrow-up-right" />
             </Link.Icon>
           </Link>
         </Card.Footer>
@@ -160,7 +161,7 @@ export function FeaturedWriting() {
           <Link className="mt-2 text-sm no-underline" href="/blog">
             Browse all writing
             <Link.Icon aria-hidden="true">
-              <ArrowUpRight />
+              <Icon icon="gravity-ui:arrow-up-right" />
             </Link.Icon>
           </Link>
         </motion.div>
