@@ -1,3 +1,10 @@
+## [1.158.3](https://github.com/LeeWio/odyssey/compare/v1.158.2...v1.158.3) (2026-09-18)
+
+
+### Bug Fixes
+
+* **e2e:** stabilize article entrance reduced-motion reload ([9331c92](https://github.com/LeeWio/odyssey/commit/9331c921c3846b2220ad25bed9440aa1501e188a))
+
 ## [1.158.2](https://github.com/LeeWio/odyssey/compare/v1.158.1...v1.158.2) (2026-09-18)
 
 
