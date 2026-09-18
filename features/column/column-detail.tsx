@@ -161,9 +161,11 @@ export function ColumnDetail({ slug }: { slug: string }) {
                       </span>
                     </div>
                   </div>
-                  <Icon icon="gravity-ui:arrow-right"
+                  <Icon
+                    icon="gravity-ui:arrow-right"
                     aria-hidden="true"
-                    className="text-muted mt-1 size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+                    className="text-muted mt-1 size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                  />
                 </Link>
               ))}
             </div>

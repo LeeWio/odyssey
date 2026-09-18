@@ -383,7 +383,11 @@ export function NotificationCenterPage() {
                           variant="ghost"
                           onPress={() => handleCompleteNotification(notification.id)}
                         >
-                          <Icon icon="gravity-ui:circle-check" aria-hidden="true" className="size-4" />
+                          <Icon
+                            icon="gravity-ui:circle-check"
+                            aria-hidden="true"
+                            className="size-4"
+                          />
                         </Button>
                         <Tooltip.Content>Mark done</Tooltip.Content>
                       </Tooltip>
@@ -397,7 +401,11 @@ export function NotificationCenterPage() {
                           variant="ghost"
                           onPress={() => handleReopenNotification(notification.id)}
                         >
-                          <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />
+                          <Icon
+                            icon="gravity-ui:arrow-rotate-left"
+                            aria-hidden="true"
+                            className="size-4"
+                          />
                         </Button>
                         <Tooltip.Content>Return to inbox</Tooltip.Content>
                       </Tooltip>

@@ -114,9 +114,11 @@ function FriendLinkCard({ link }: { link: FriendLinkResponse }) {
               {new URL(url).hostname}
             </Typography>
           </div>
-          <Icon icon="gravity-ui:arrow-up-right"
+          <Icon
+            icon="gravity-ui:arrow-up-right"
             aria-hidden="true"
-            className="text-muted size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            className="text-muted size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          />
         </Card.Header>
         <Card.Content>
           <Typography color="muted" type="body-sm" className="line-clamp-3 leading-6">

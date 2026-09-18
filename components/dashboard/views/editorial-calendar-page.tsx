@@ -209,7 +209,10 @@ export function EditorialCalendarPage() {
                               }).format(new Date(entry.timestamp))}
                             </Card.Description>
                           </div>
-                          <Icon icon="gravity-ui:arrow-right" className="text-muted mt-1 size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                          <Icon
+                            icon="gravity-ui:arrow-right"
+                            className="text-muted mt-1 size-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+                          />
                         </Card.Header>
                       </Card>
                     </Link>

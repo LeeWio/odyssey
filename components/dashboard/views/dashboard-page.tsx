@@ -111,9 +111,24 @@ function SummaryWidget({
       icon: "gravity-ui:file-text",
       status: "success" as const,
     },
-    { label: "Drafts", value: data?.drafts ?? 0, icon: "gravity-ui:clock", status: "warning" as const },
-    { label: "Scheduled", value: data?.scheduled ?? 0, icon: "gravity-ui:calendar", status: "success" as const },
-    { label: "Moments", value: data?.moments ?? 0, icon: "gravity-ui:sparkles", status: "warning" as const },
+    {
+      label: "Drafts",
+      value: data?.drafts ?? 0,
+      icon: "gravity-ui:clock",
+      status: "warning" as const,
+    },
+    {
+      label: "Scheduled",
+      value: data?.scheduled ?? 0,
+      icon: "gravity-ui:calendar",
+      status: "success" as const,
+    },
+    {
+      label: "Moments",
+      value: data?.moments ?? 0,
+      icon: "gravity-ui:sparkles",
+      status: "warning" as const,
+    },
     {
       label: "Needs attention",
       value: (data?.pendingComments ?? 0) + (data?.pendingReview ?? 0),
@@ -383,7 +398,11 @@ function ActivityWidget({
             {items.map((item) => (
               <Timeline.Item key={item.id} status={item.type === "MOMENT" ? "current" : "success"}>
                 <Timeline.Marker aria-hidden="true">
-                  {item.type === "MOMENT" ? <Icon icon="gravity-ui:sparkles" /> : <Icon icon="gravity-ui:file-text" />}
+                  {item.type === "MOMENT" ? (
+                    <Icon icon="gravity-ui:sparkles" />
+                  ) : (
+                    <Icon icon="gravity-ui:file-text" />
+                  )}
                 </Timeline.Marker>
                 <Timeline.Content className="gap-1">
                   <Link className="text-sm no-underline" href={item.href}>

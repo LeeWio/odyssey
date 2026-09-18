@@ -142,7 +142,11 @@ export const MiniPlayer: React.FC = () => {
                   className="text-muted"
                   onPress={() => setSaved(!saved)}
                 >
-                  {saved ? <Icon icon="gravity-ui:star-fill" aria-hidden="true" /> : <Icon icon="gravity-ui:star" aria-hidden="true" />}
+                  {saved ? (
+                    <Icon icon="gravity-ui:star-fill" aria-hidden="true" />
+                  ) : (
+                    <Icon icon="gravity-ui:star" aria-hidden="true" />
+                  )}
                 </Control>
                 <Control label="Previous track" className="" onPress={() => setPosition(0)}>
                   <Icon icon="gravity-ui:play-fill" />
@@ -153,7 +157,11 @@ export const MiniPlayer: React.FC = () => {
                   variant="primary"
                   onPress={() => setPlaying(!playing)}
                 >
-                  {playing ? <Icon icon="gravity-ui:pause-fill" aria-hidden="true" /> : <Icon icon="gravity-ui:play-fill" aria-hidden="true" />}
+                  {playing ? (
+                    <Icon icon="gravity-ui:pause-fill" aria-hidden="true" />
+                  ) : (
+                    <Icon icon="gravity-ui:play-fill" aria-hidden="true" />
+                  )}
                 </Control>
                 <Control label="Next track" className="" onPress={() => setPosition(0)}>
                   <Icon icon="gravity-ui:play-fill" />

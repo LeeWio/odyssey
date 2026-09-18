@@ -20,7 +20,9 @@ export function TasteTimelineScene({ compact = false }: SceneProps) {
         <div
           className={cn(
             "flex gap-3 overflow-x-auto pb-2",
-            compact ? "snap-x snap-mandatory" : "sm:grid sm:grid-cols-6 sm:gap-4 sm:overflow-visible"
+            compact
+              ? "snap-x snap-mandatory"
+              : "sm:grid sm:grid-cols-6 sm:gap-4 sm:overflow-visible"
           )}
         >
           {tasteBeads.map((bead) => (
@@ -30,12 +32,18 @@ export function TasteTimelineScene({ compact = false }: SceneProps) {
                 className="border-separator/50 flex h-full flex-col items-center gap-4 rounded-3xl border px-4 py-6"
               >
                 <div
-                  className={cn("size-3 rounded-full", bead.id === "now" ? "bg-accent" : "bg-foreground/35")}
+                  className={cn(
+                    "size-3 rounded-full",
+                    bead.id === "now" ? "bg-accent" : "bg-foreground/35"
+                  )}
                 />
                 <Typography
                   type="body-sm"
                   weight="semibold"
-                  className={cn("tracking-wide", bead.id === "now" ? "text-accent" : "text-foreground")}
+                  className={cn(
+                    "tracking-wide",
+                    bead.id === "now" ? "text-accent" : "text-foreground"
+                  )}
                 >
                   {bead.label}
                 </Typography>

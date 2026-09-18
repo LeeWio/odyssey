@@ -22,7 +22,12 @@ export function PlayHubBeat({ compact = false }: BeatProps) {
 
       <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
         {playTitles.map((game, index) => (
-          <Chip key={game.id} size="lg" variant="soft" color={index % 2 === 0 ? "accent" : "default"}>
+          <Chip
+            key={game.id}
+            size="lg"
+            variant="soft"
+            color={index % 2 === 0 ? "accent" : "default"}
+          >
             {game.label}
           </Chip>
         ))}

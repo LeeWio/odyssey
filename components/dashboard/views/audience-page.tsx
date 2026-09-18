@@ -326,7 +326,8 @@ export function AudiencePage() {
             </EmptyState.Header>
             <EmptyState.Content>
               <Button variant="outline" onPress={() => subscribers.refetch()}>
-                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" /> Refresh
+                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />{" "}
+                Refresh
               </Button>
             </EmptyState.Content>
           </EmptyState>

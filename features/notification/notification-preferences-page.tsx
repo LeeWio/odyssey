@@ -208,7 +208,8 @@ export function NotificationPreferencesPage() {
               </Card.Content>
               <Card.Footer className="justify-between gap-4">
                 <div className="text-muted flex items-center gap-2 text-xs">
-                  <Icon icon="gravity-ui:envelope" aria-hidden="true" className="size-4" /> Email delivery is opt-in.
+                  <Icon icon="gravity-ui:envelope" aria-hidden="true" className="size-4" /> Email
+                  delivery is opt-in.
                 </div>
                 <Button isDisabled={!isDirty} isPending={isSaving} onPress={handleSave}>
                   Save preferences

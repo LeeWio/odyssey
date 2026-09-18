@@ -21,7 +21,7 @@ export function CraftSpineBeat({ compact = false }: BeatProps) {
       </Typography>
 
       <div className="relative mx-auto max-w-lg px-4 pb-4">
-        <div className="text-muted mb-4 flex flex-wrap justify-center gap-2 text-xs opacity-35 line-through">
+        <div className="text-muted mb-4 flex flex-wrap justify-center gap-2 text-xs line-through opacity-35">
           {["Glow", "Badge", "Toggle", "Extra", "Skin", "Widget"].map((label) => (
             <span key={label} className="bg-foreground/10 rounded-full px-2.5 py-1">
               {label}

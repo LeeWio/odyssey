@@ -21,7 +21,10 @@ export function CokeAsideBeat({ compact = false }: BeatProps) {
       </Typography>
 
       <div className="relative mx-auto flex h-28 max-w-sm items-center justify-center gap-10">
-        <div className="relative flex h-24 w-12 flex-col items-center" style={{ transform: "rotate(-4deg)" }}>
+        <div
+          className="relative flex h-24 w-12 flex-col items-center"
+          style={{ transform: "rotate(-4deg)" }}
+        >
           <div className="bg-accent h-full w-full rounded-full shadow-[inset_0_0_0_2px_color-mix(in_oklab,var(--foreground)_18%,transparent)]" />
           <div className="bg-background absolute top-3 h-3 w-8 rounded-sm opacity-90" />
         </div>

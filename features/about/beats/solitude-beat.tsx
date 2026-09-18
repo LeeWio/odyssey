@@ -24,7 +24,11 @@ export function SolitudeBeat({ compact = false }: BeatProps) {
         compact ? "min-h-[220px]" : "min-h-[280px]"
       )}
     >
-      <Typography type="body-sm" weight="semibold" className="text-muted relative z-20 mb-6 tracking-wide">
+      <Typography
+        type="body-sm"
+        weight="semibold"
+        className="text-muted relative z-20 mb-6 tracking-wide"
+      >
         {aboutCaptions.solitude}
       </Typography>
 

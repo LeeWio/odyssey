@@ -209,7 +209,11 @@ function FavoriteCard({ entry }: { entry: FavoritePostResponse }) {
             ) : (
               <span />
             )}
-            <Icon icon="gravity-ui:heart" aria-hidden="true" className="text-danger size-4 shrink-0" />
+            <Icon
+              icon="gravity-ui:heart"
+              aria-hidden="true"
+              className="text-danger size-4 shrink-0"
+            />
           </div>
           <Card.Title className="line-clamp-2 text-lg">{post.title}</Card.Title>
           {post.summary ? (
@@ -1036,7 +1040,11 @@ export function LibraryPage() {
                             variant="ghost"
                             onPress={() => handleRemoveHistoryEntry(entry.post.id)}
                           >
-                            <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
+                            <Icon
+                              icon="gravity-ui:trash-bin"
+                              aria-hidden="true"
+                              className="size-4"
+                            />
                           </Button>
                           <Tooltip.Content>Remove from history</Tooltip.Content>
                         </Tooltip>

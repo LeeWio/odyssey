@@ -13,10 +13,7 @@ interface AboutPageProps {
 
 export function AboutPage({ compact = false }: AboutPageProps) {
   return (
-    <Surface
-      variant="transparent"
-      className={cn("w-full", compact ? "pb-8" : "pb-16 sm:pb-24")}
-    >
+    <Surface variant="transparent" className={cn("w-full", compact ? "pb-8" : "pb-16 sm:pb-24")}>
       <ManifestoScene compact={compact} />
       <PersonScene compact={compact} />
       <ProductScene compact={compact} />

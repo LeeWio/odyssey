@@ -21,7 +21,12 @@ export function MusicOnlyBeat({ compact = false }: BeatProps) {
         {aboutCaptions.music}
       </Typography>
 
-      <div className={cn("relative mx-auto flex max-w-lg flex-col items-center justify-end gap-4", compact ? "h-28" : "h-36")}>
+      <div
+        className={cn(
+          "relative mx-auto flex max-w-lg flex-col items-center justify-end gap-4",
+          compact ? "h-28" : "h-36"
+        )}
+      >
         <div className="text-muted flex gap-2 text-xs opacity-40">
           <span className="bg-foreground/10 rounded-full px-3 py-1 line-through">Other A</span>
           <span className="bg-foreground/10 rounded-full px-3 py-1 line-through">Other B</span>

@@ -107,7 +107,11 @@ function ProjectVisual({ project }: { project: ProjectResponse }) {
       seed={`project-${project.slug}`}
       tone={getSmartColorTone({ categoryName: project.techStack, title: project.name })}
     >
-      <Icon icon="gravity-ui:code" aria-hidden="true" className="absolute right-6 bottom-5 size-16 text-white/28" />
+      <Icon
+        icon="gravity-ui:code"
+        aria-hidden="true"
+        className="absolute right-6 bottom-5 size-16 text-white/28"
+      />
     </SmartColorSurface>
   );
 }

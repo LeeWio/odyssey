@@ -68,7 +68,11 @@ function ArticleListEmpty({ type }: { type: TabId }) {
     <EmptyState size="sm" className="py-10">
       <EmptyState.Header>
         <EmptyState.Media variant="icon">
-          {isRelated ? <Icon icon="gravity-ui:sparkles" aria-hidden="true" /> : <Icon icon="gravity-ui:flame" aria-hidden="true" />}
+          {isRelated ? (
+            <Icon icon="gravity-ui:sparkles" aria-hidden="true" />
+          ) : (
+            <Icon icon="gravity-ui:flame" aria-hidden="true" />
+          )}
         </EmptyState.Media>
         <EmptyState.Title>
           {isRelated ? "No related articles yet" : "No featured articles yet"}

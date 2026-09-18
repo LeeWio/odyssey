@@ -529,7 +529,8 @@ function TrackerError({ onRetry }: { onRetry: () => void }) {
         </EmptyState.Header>
         <EmptyState.Content>
           <Button variant="outline" onPress={onRetry}>
-            <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" /> Refresh
+            <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />{" "}
+            Refresh
           </Button>
         </EmptyState.Content>
       </EmptyState>
@@ -549,7 +550,8 @@ function TrackerEmpty({ onRetry }: { onRetry: () => void }) {
         </EmptyState.Header>
         <EmptyState.Content>
           <Button variant="outline" onPress={onRetry}>
-            <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" /> Refresh board
+            <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />{" "}
+            Refresh board
           </Button>
         </EmptyState.Content>
       </EmptyState>

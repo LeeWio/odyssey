@@ -304,7 +304,11 @@ export function FindReplacePopover() {
                         {example.pattern}
                       </code>
                     </span>
-                    <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4 shrink-0" />
+                    <Icon
+                      icon="gravity-ui:arrow-right"
+                      aria-hidden="true"
+                      className="size-4 shrink-0"
+                    />
                   </Button>
                 ))}
               </Surface>

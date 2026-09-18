@@ -53,7 +53,11 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
   ) : (
     <div className="relative h-full w-full">
       <Grainient {...getGrainientProps(column.name)} className="absolute inset-0" />
-      <Icon icon="gravity-ui:book" aria-hidden="true" className="absolute right-6 bottom-5 z-10 size-16 text-white/28" />
+      <Icon
+        icon="gravity-ui:book"
+        aria-hidden="true"
+        className="absolute right-6 bottom-5 z-10 size-16 text-white/28"
+      />
     </div>
   );
 
@@ -78,9 +82,11 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
           <Typography color="muted" type="body-xs">
             Curated reading path
           </Typography>
-          <Icon icon="gravity-ui:arrow-right"
+          <Icon
+            icon="gravity-ui:arrow-right"
             aria-hidden="true"
-            className="text-muted size-4 transition-transform duration-200 group-hover:translate-x-1" />
+            className="text-muted size-4 transition-transform duration-200 group-hover:translate-x-1"
+          />
         </Card.Footer>
       </Card>
     </Link>

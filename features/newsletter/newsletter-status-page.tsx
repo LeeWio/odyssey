@@ -53,7 +53,11 @@ export function NewsletterStatusPage({ action }: { action: NewsletterAction }) {
           <Card.Content>
             {!token ? (
               <div className="text-muted flex items-center gap-3 text-sm">
-                <Icon icon="gravity-ui:xmark" aria-hidden="true" className="text-danger size-5 shrink-0" />
+                <Icon
+                  icon="gravity-ui:xmark"
+                  aria-hidden="true"
+                  className="text-danger size-5 shrink-0"
+                />
                 This link is incomplete. Please use the link from your email.
               </div>
             ) : request.isLoading ? (
@@ -63,12 +67,20 @@ export function NewsletterStatusPage({ action }: { action: NewsletterAction }) {
               </div>
             ) : request.isError ? (
               <div className="text-muted flex items-center gap-3 text-sm">
-                <Icon icon="gravity-ui:xmark" aria-hidden="true" className="text-danger size-5 shrink-0" />
+                <Icon
+                  icon="gravity-ui:xmark"
+                  aria-hidden="true"
+                  className="text-danger size-5 shrink-0"
+                />
                 This link is no longer valid. You can request a fresh subscription email below.
               </div>
             ) : isSuccessful ? (
               <div className="text-muted flex items-center gap-3 text-sm">
-                <Icon icon="gravity-ui:check" aria-hidden="true" className="text-success size-5 shrink-0" />
+                <Icon
+                  icon="gravity-ui:check"
+                  aria-hidden="true"
+                  className="text-success size-5 shrink-0"
+                />
                 Your preference has been saved.
               </div>
             ) : null}

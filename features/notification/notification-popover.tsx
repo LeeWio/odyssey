@@ -262,7 +262,11 @@ export function NotificationPopover() {
                     <div className="flex flex-col items-center gap-4 px-6 py-8 text-center">
                       <p className="text-muted text-sm">Notifications could not be loaded.</p>
                       <Button size="sm" variant="ghost" onPress={() => notifications.refetch()}>
-                        <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />
+                        <Icon
+                          icon="gravity-ui:arrow-rotate-left"
+                          aria-hidden="true"
+                          className="size-4"
+                        />
                         Try again
                       </Button>
                     </div>

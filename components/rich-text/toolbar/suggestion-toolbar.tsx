@@ -61,7 +61,11 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
           : "Small section heading",
     group: "text",
     icon: icon(
-      level === 1 ? "gravity-ui:heading-1" : level === 2 ? "gravity-ui:heading-2" : "gravity-ui:heading-3"
+      level === 1
+        ? "gravity-ui:heading-1"
+        : level === 2
+          ? "gravity-ui:heading-2"
+          : "gravity-ui:heading-3"
     ),
     id: `heading-${level}`,
     keywords: [`h${level}`, "heading", "section", "title"],
@@ -351,7 +355,9 @@ function SuggestionMenuContent({
                     </span>
                     <ListBox.ItemIndicator className="text-accent ms-auto">
                       {({ isSelected }) =>
-                        isSelected ? <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" /> : null
+                        isSelected ? (
+                          <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" />
+                        ) : null
                       }
                     </ListBox.ItemIndicator>
                   </ListBox.Item>

@@ -22,7 +22,7 @@ export function TrashCan({ className, showLid = true }: TrashCanProps) {
       <g data-trash-body>
         <path
           d="M22 22h36l-3.5 58a6 6 0 0 1-6 5.5H31.5a6 6 0 0 1-6-5.5L22 22Z"
-          className="fill-current opacity-25 stroke-current"
+          className="fill-current stroke-current opacity-25"
           strokeWidth="2"
         />
         <path
