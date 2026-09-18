@@ -2,143 +2,90 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  useGetGuestbookRootsQuery,
-  useGetHotGuestbookRootsQuery,
-  useGetGuestbookRootsCursorQuery,
-  useGetHotPostCommentRootsQuery,
-  useGetPostCommentRootsQuery,
-  useGetPostCommentRootsCursorQuery,
-  useLazyGetGuestbookRootsCursorQuery,
-  useLazyGetGuestbookRootsQuery,
-  useLazyGetHotGuestbookRootsQuery,
-  useLazyGetHotPostCommentRootsQuery,
-  useLazyGetPostCommentRootsQuery,
-  useLazyGetPostCommentRootsCursorQuery,
-  useLazyGetCommentRepliesCursorQuery,
+  applyInteractionOverrides,
+  nextLikePatch,
+  type CommentAnchorContextResponse,
+  type CommentLikePatch,
   type CommentPublishResponse,
-  type CommentResponse,
 } from "@/lib/features/comment";
+import { commentDebug } from "@/lib/comment-debug";
 import { useCommentContext, useCommentSortContext } from "../context/comment-context";
 import type { EnhancedComment } from "../types";
-import { commentDebug } from "@/lib/comment-debug";
+import {
+  findRootIndexForComment,
+  mergePendingIntoRoots,
+  nextCursorFromCommentIds,
+  normalizeCommentTree,
+  pageResultHasMore,
+} from "../utils/thread";
+import { useCommentFreshness } from "./use-comment-freshness";
+import { useCommentReplies } from "./use-comment-replies";
+import { useCommentRoots } from "./use-comment-roots";
 
-const PAGE_SIZE = 20;
-const PAGE_SIZE_STEP = 5;
-
-interface ReplyPage {
-  comments: CommentResponse[];
-  nextCursor: number | null;
-  hasMore: boolean;
-}
+const EMPTY_PENDING: EnhancedComment[] = [];
+const EMPTY_LIKES: Record<number, CommentLikePatch> = {};
 
 export function useComments() {
-  const { isGuestbook, postId, highlightedCommentId } = useCommentContext();
+  const { isGuestbook, isMoment, postId, momentId, highlightedCommentId } = useCommentContext();
   const { sortOrder } = useCommentSortContext();
+  const threadKey = isGuestbook ? "guestbook" : isMoment ? `moment:${momentId}` : `post:${postId}`;
 
-  const queryKey = `${isGuestbook ? "guestbook" : "post"}:${postId}:${sortOrder}`;
-  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
-  const [additionalRoots, setAdditionalRoots] = useState<Record<string, CommentResponse[]>>({});
-  const [cursorStates, setCursorStates] = useState<
-    Record<string, { cursor?: number; hasMore: boolean }>
+  const {
+    queryKey,
+    rawCommentsList,
+    baseCount,
+    newestSeenId,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+    remoteTotal,
+    hasMore,
+    loadMore,
+    prependRoots,
+    ensureRoot,
+  } = useCommentRoots({ isGuestbook, isMoment, postId, momentId, sortOrder });
+
+  const {
+    replyPages,
+    loadingReplyIds,
+    loadReplies,
+    hasMoreReplies,
+    seedReplies,
+    patchReply,
+    removeReply,
+  } = useCommentReplies({ threadKey });
+
+  const [pendingByThread, setPendingByThread] = useState<Record<string, EnhancedComment[]>>({});
+  const [likeOverridesByThread, setLikeOverridesByThread] = useState<
+    Record<string, Record<number, CommentLikePatch>>
   >({});
-  const [pagedStates, setPagedStates] = useState<
-    Record<string, { page: number; hasMore: boolean }>
-  >({});
-  const [replyPages, setReplyPages] = useState<Record<number, ReplyPage>>({});
-  const [loadingReplyIds, setLoadingReplyIds] = useState<Set<number>>(new Set());
 
-  const useCursorRoots = sortOrder === "newest";
-  const postCommentsResult = useGetPostCommentRootsCursorQuery(
-    { postId, size: PAGE_SIZE },
-    { skip: isGuestbook || !useCursorRoots || postId <= 0 }
+  const pendingComments = useMemo(
+    () => pendingByThread[threadKey] ?? EMPTY_PENDING,
+    [pendingByThread, threadKey]
   );
-  const guestbookRootsResult = useGetGuestbookRootsCursorQuery(
-    { size: PAGE_SIZE },
-    { skip: !isGuestbook || !useCursorRoots }
+  const likeOverrides = useMemo(
+    () => likeOverridesByThread[threadKey] ?? EMPTY_LIKES,
+    [likeOverridesByThread, threadKey]
   );
-  const postRootsResult = useGetPostCommentRootsQuery(
-    {
-      postId,
-      page: 0,
-      size: PAGE_SIZE,
-      sort: sortOrder === "oldest" ? ["createdAt,asc"] : undefined,
-    },
-    { skip: isGuestbook || useCursorRoots || sortOrder === "likes" || postId <= 0 }
-  );
-  const postHotRootsResult = useGetHotPostCommentRootsQuery(
-    { postId, page: 0, size: PAGE_SIZE },
-    { skip: isGuestbook || useCursorRoots || sortOrder !== "likes" || postId <= 0 }
-  );
-  const guestbookPagedRootsResult = useGetGuestbookRootsQuery(
-    {
-      page: 0,
-      size: PAGE_SIZE,
-      sort: sortOrder === "oldest" ? ["createdAt,asc"] : undefined,
-    },
-    { skip: !isGuestbook || useCursorRoots || sortOrder === "likes" }
-  );
-  const guestbookHotRootsResult = useGetHotGuestbookRootsQuery(
-    { page: 0, size: PAGE_SIZE },
-    { skip: !isGuestbook || useCursorRoots || sortOrder !== "likes" }
-  );
-  const [loadPostRoots] = useLazyGetPostCommentRootsCursorQuery();
-  const [loadGuestbookRoots] = useLazyGetGuestbookRootsCursorQuery();
-  const [loadPostPagedRoots] = useLazyGetPostCommentRootsQuery();
-  const [loadPostHotRoots] = useLazyGetHotPostCommentRootsQuery();
-  const [loadGuestbookPagedRoots] = useLazyGetGuestbookRootsQuery();
-  const [loadGuestbookHotRoots] = useLazyGetHotGuestbookRootsQuery();
-  const [loadRepliesQuery] = useLazyGetCommentRepliesCursorQuery();
 
-  const cursorRootsResult = isGuestbook ? guestbookRootsResult : postCommentsResult;
-  const pagedRootsResult = isGuestbook
-    ? sortOrder === "likes"
-      ? guestbookHotRootsResult
-      : guestbookPagedRootsResult
-    : sortOrder === "likes"
-      ? postHotRootsResult
-      : postRootsResult;
-  const activeRootsResult = useCursorRoots ? cursorRootsResult : pagedRootsResult;
-  const isLoading = activeRootsResult.isLoading;
-  const isFetching = activeRootsResult.isFetching;
-  const error = activeRootsResult.error;
-  const refetch = activeRootsResult.refetch;
-  const baseComments = useMemo(
-    () => (useCursorRoots ? cursorRootsResult.data?.list : pagedRootsResult.data?.list) ?? [],
-    [cursorRootsResult.data?.list, pagedRootsResult.data?.list, useCursorRoots]
-  );
-  const rawCommentsList = useMemo(() => {
-    const existingIds = new Set(baseComments.map((comment) => comment.id));
-    const appendedComments = additionalRoots[queryKey] ?? [];
-    return [...baseComments, ...appendedComments.filter((comment) => !existingIds.has(comment.id))];
-  }, [additionalRoots, baseComments, queryKey]);
-  const cursorState = cursorStates[queryKey];
-  const rootCursor = cursorState?.cursor ?? cursorRootsResult.data?.nextCursor ?? undefined;
-  const rootHasMore = cursorState?.hasMore ?? Boolean(cursorRootsResult.data?.hasMore);
-  const pagedState = pagedStates[queryKey];
-  const pagedPage = pagedState?.page ?? 0;
-  const pagedHasMore =
-    pagedState?.hasMore ?? Boolean(pagedRootsResult.data && pagedRootsResult.data.totalPages > 1);
-  const requestedVisibleCount = visibleCounts[queryKey] ?? PAGE_SIZE_STEP;
-  const increaseVisibleCount = useCallback(
-    () =>
-      setVisibleCounts((previous) => ({
+  const updatePending = useCallback(
+    (updater: (previous: EnhancedComment[]) => EnhancedComment[]) => {
+      setPendingByThread((previous) => ({
         ...previous,
-        [queryKey]: (previous[queryKey] ?? PAGE_SIZE_STEP) + PAGE_SIZE_STEP,
-      })),
-    [queryKey]
+        [threadKey]: updater(previous[threadKey] ?? []),
+      }));
+    },
+    [threadKey]
   );
 
-  // Local state for pending comments (optimistic UI that haven't been synced to DB yet)
-  const [pendingComments, setPendingComments] = useState<EnhancedComment[]>([]);
-
-  // Function to add a pending comment locally
   const addPendingComment = (comment: EnhancedComment) => {
-    setPendingComments((prev) => [comment, ...prev]);
+    updatePending((prev) => [comment, ...prev]);
   };
 
-  // Function to mark a pending comment as failed
   const markPendingCommentFailed = (id: number) => {
-    setPendingComments((prev) =>
+    updatePending((prev) =>
       prev.map((c) => (c.id === id ? { ...c, isFailed: true, isPending: false } : c))
     );
   };
@@ -147,300 +94,111 @@ export function useComments() {
     tempId: number,
     submission: CommentPublishResponse | null
   ) => {
-    setPendingComments((prev) =>
-      prev.map((comment) =>
-        comment.id === tempId
-          ? {
-              ...comment,
-              id: submission?.id ?? comment.id,
-              isFailed: false,
-              isPending: false,
-              status: submission?.status ?? "PENDING",
-            }
-          : comment
-      )
+    updatePending((prev) =>
+      prev.map((comment) => {
+        if (comment.id !== tempId) return comment;
+        // Idempotent/empty publish payloads must not freeze a temp row as
+        // "Awaiting review" beside the real server comment after refetch.
+        if (!submission?.id) {
+          return {
+            ...comment,
+            isFailed: false,
+            isPending: false,
+            status: comment.status ?? "PENDING",
+          };
+        }
+        return {
+          ...comment,
+          id: submission.id,
+          isFailed: false,
+          isPending: false,
+          status: submission.status ?? "PENDING",
+        };
+      })
     );
   };
 
   const markPendingCommentRetrying = (id: number) => {
-    setPendingComments((prev) =>
+    updatePending((prev) =>
       prev.map((comment) =>
         comment.id === id ? { ...comment, isFailed: false, isPending: true } : comment
       )
     );
   };
 
-  // Enrich & Transform raw comments from RTK query
-  const enrichedComments = useMemo(() => {
-    const rawComments = rawCommentsList || [];
-
-    function processNode(node: CommentResponse): EnhancedComment | null {
-      const processedChildren: EnhancedComment[] = [];
-      if (node.children && Array.isArray(node.children)) {
-        for (const child of node.children) {
-          const processedChild = processNode(child);
-          if (processedChild) {
-            processedChildren.push(processedChild);
-          }
-        }
-      }
-
-      const loadedReplies = replyPages[node.id]?.comments ?? [];
-      for (const child of loadedReplies) {
-        const processedChild = processNode(child);
-        if (
-          processedChild &&
-          !processedChildren.some((existing) => existing.id === processedChild.id)
-        ) {
-          processedChildren.push(processedChild);
-        }
-      }
-
-      processedChildren.sort(
-        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-
-      return {
-        id: node.id,
-        parentId: node.parentId || null,
-        content: node.content,
-        username: node.username || "Anonymous",
-        nickname: node.nickname || node.username || "Anonymous",
-        avatar: node.avatar || "",
-        status: (node.status as EnhancedComment["status"]) || "APPROVED",
-        postId: node.postId || postId,
-        postTitle: node.postTitle || "",
-        createdAt: node.createdAt,
-        editedAt: node.editedAt || null,
-        likesCount: node.likesCount || 0,
-        reportsCount: node.reportsCount || 0,
-        replyCount: node.replyCount || 0,
-        likedByCurrentUser: node.likedByCurrentUser || false,
-        pinned: node.pinned || false,
-        featured: node.featured || false,
-        deletedPlaceholder: node.deletedPlaceholder || false,
-        children: processedChildren,
-      };
-    }
-
-    const processedRoots: EnhancedComment[] = [];
-    for (const raw of rawComments) {
-      const processed = processNode(raw);
-      if (processed) {
-        processedRoots.push(processed);
-      }
-    }
-
-    // Merge in local pending comments that belong to root (parentId === null)
-    const rootPending = pendingComments.filter((c) => c.parentId === null);
-    const rawIds = new Set(processedRoots.map((c) => c.id));
-    const filteredPending = rootPending.filter(
-      (c) => c.isPending || c.isFailed || !rawIds.has(c.id)
-    );
-
-    const allRoots = [...filteredPending, ...processedRoots];
-
-    // Keep optimistic replies visible until the canonical tree is refetched.
-    const inlineReplies = pendingComments.filter((c) => c.parentId !== null);
-    const injectReplies = (nodes: EnhancedComment[]): EnhancedComment[] =>
-      nodes.map((node) => {
-        const repliesForThisNode = inlineReplies.filter((reply) => reply.parentId === node.id);
-        const existingIds = new Set(node.children.map((child) => child.id));
-        const uniqueReplies = repliesForThisNode.filter((reply) => !existingIds.has(reply.id));
-
-        return {
-          ...node,
-          children: injectReplies([...node.children, ...uniqueReplies]),
-        };
-      });
-
-    const rootsWithPendingReplies = inlineReplies.length > 0 ? injectReplies(allRoots) : allRoots;
-
-    // Apply Sorting to Top-Level Roots
-    rootsWithPendingReplies.sort((a, b) => {
-      if (sortOrder === "newest") {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      } else if (sortOrder === "oldest") {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      } else if (sortOrder === "likes") {
-        if (Boolean(b.pinned) !== Boolean(a.pinned)) return b.pinned ? -1 : 1;
-        if (Boolean(b.featured) !== Boolean(a.featured)) return b.featured ? -1 : 1;
-        return (b.likesCount || 0) - (a.likesCount || 0);
-      }
-      return 0;
-    });
-
-    return rootsWithPendingReplies;
-  }, [rawCommentsList, pendingComments, replyPages, sortOrder, postId]);
-
-  const highlightedRootIndex = highlightedCommentId
-    ? enrichedComments.findIndex((comment) => {
-        if (comment.id === highlightedCommentId) return true;
-        const findInTree = (node: EnhancedComment): boolean =>
-          node.id === highlightedCommentId || node.children.some(findInTree);
-        return findInTree(comment);
-      })
-    : -1;
-  const visibleCount = Math.max(
-    requestedVisibleCount,
-    highlightedRootIndex >= requestedVisibleCount
-      ? Math.ceil((highlightedRootIndex + 1) / PAGE_SIZE_STEP) * PAGE_SIZE_STEP
-      : 0
-  );
-
-  const loadMore = useCallback(async () => {
-    if (enrichedComments.length > visibleCount) {
-      increaseVisibleCount();
-      return;
-    }
-
-    if (!useCursorRoots && !pagedHasMore) {
-      increaseVisibleCount();
-      return;
-    }
-
-    if (!useCursorRoots) {
-      const nextPage = pagedPage + 1;
-      const result = isGuestbook
-        ? sortOrder === "likes"
-          ? await loadGuestbookHotRoots({ page: nextPage, size: PAGE_SIZE }).unwrap()
-          : await loadGuestbookPagedRoots({
-              page: nextPage,
-              size: PAGE_SIZE,
-              sort: ["createdAt,asc"],
-            }).unwrap()
-        : sortOrder === "likes"
-          ? await loadPostHotRoots({ postId, page: nextPage, size: PAGE_SIZE }).unwrap()
-          : await loadPostPagedRoots({
-              postId,
-              page: nextPage,
-              size: PAGE_SIZE,
-              sort: ["createdAt,asc"],
-            }).unwrap();
-      setAdditionalRoots((previous) => {
-        const existing = new Set((previous[queryKey] ?? []).map((comment) => comment.id));
-        return {
-          ...previous,
-          [queryKey]: [
-            ...(previous[queryKey] ?? []),
-            ...result.list.filter((comment) => !existing.has(comment.id)),
-          ],
-        };
-      });
-      setPagedStates((previous) => ({
+  const applyLikeOverride = useCallback(
+    (id: number, currentLiked: boolean, currentCount: number, liked: boolean) => {
+      const patch = nextLikePatch(currentLiked, currentCount, liked);
+      setLikeOverridesByThread((previous) => ({
         ...previous,
-        [queryKey]: { page: nextPage, hasMore: result.page < result.totalPages },
+        [threadKey]: { ...(previous[threadKey] ?? {}), [id]: patch },
       }));
-      increaseVisibleCount();
-      return;
-    }
-
-    if (!rootHasMore || !rootCursor) {
-      increaseVisibleCount();
-      return;
-    }
-
-    const result = isGuestbook
-      ? await loadGuestbookRoots({ cursor: rootCursor, size: PAGE_SIZE }).unwrap()
-      : await loadPostRoots({ postId, cursor: rootCursor, size: PAGE_SIZE }).unwrap();
-    setAdditionalRoots((previous) => {
-      const existingIds = new Set((previous[queryKey] ?? []).map((comment) => comment.id));
-      return {
-        ...previous,
-        [queryKey]: [
-          ...(previous[queryKey] ?? []),
-          ...result.list.filter((comment) => !existingIds.has(comment.id)),
-        ],
-      };
-    });
-    setCursorStates((previous) => ({
-      ...previous,
-      [queryKey]: { cursor: result.nextCursor ?? undefined, hasMore: result.hasMore },
-    }));
-    increaseVisibleCount();
-  }, [
-    isGuestbook,
-    loadGuestbookHotRoots,
-    loadGuestbookPagedRoots,
-    loadGuestbookRoots,
-    loadPostHotRoots,
-    loadPostPagedRoots,
-    loadPostRoots,
-    increaseVisibleCount,
-    enrichedComments.length,
-    pagedHasMore,
-    pagedPage,
-    postId,
-    queryKey,
-    rootCursor,
-    rootHasMore,
-    sortOrder,
-    useCursorRoots,
-    visibleCount,
-  ]);
-
-  const loadReplies = useCallback(
-    async (parentId: number) => {
-      if (loadingReplyIds.has(parentId)) return;
-      const current = replyPages[parentId];
-      if (current && !current.hasMore) return;
-
-      setLoadingReplyIds((previous) => new Set(previous).add(parentId));
-      try {
-        const result = await loadRepliesQuery({
-          parentId,
-          cursor: current?.nextCursor ?? undefined,
-          size: PAGE_SIZE,
-        }).unwrap();
-        setReplyPages((previous) => {
-          const existing = previous[parentId];
-          const existingIds = new Set(existing?.comments.map((comment) => comment.id) ?? []);
-          return {
-            ...previous,
-            [parentId]: {
-              comments: [
-                ...(existing?.comments ?? []),
-                ...result.list.filter((comment) => !existingIds.has(comment.id)),
-              ],
-              nextCursor: result.nextCursor,
-              hasMore: result.hasMore,
-            },
-          };
-        });
-      } finally {
-        setLoadingReplyIds((previous) => {
-          const next = new Set(previous);
-          next.delete(parentId);
-          return next;
-        });
-      }
+      return patch;
     },
-    [loadRepliesQuery, loadingReplyIds, replyPages]
+    [threadKey]
   );
 
-  // Load More logic
-  const paginatedComments = useMemo(() => {
-    return enrichedComments.slice(0, visibleCount);
-  }, [enrichedComments, visibleCount]);
-
-  const hasMore = useCursorRoots
-    ? rootHasMore
-    : enrichedComments.length > visibleCount || pagedHasMore;
-
-  const resetVisible = useCallback(
-    () => setVisibleCounts((previous) => ({ ...previous, [queryKey]: PAGE_SIZE_STEP })),
-    [queryKey]
+  const revertLikeOverride = useCallback(
+    (id: number, snapshot: CommentLikePatch) => {
+      setLikeOverridesByThread((previous) => ({
+        ...previous,
+        [threadKey]: { ...(previous[threadKey] ?? {}), [id]: snapshot },
+      }));
+    },
+    [threadKey]
   );
 
-  const totalComments = enrichedComments.length;
-  const remoteTotal = useCursorRoots ? cursorRootsResult.data?.total : pagedRootsResult.data?.total;
-  // Chromium may paint the sheet title before the first roots response arrives.
-  // Do not expose that fabricated zero as a visible count.
+  const enrichedComments = useMemo(() => {
+    const processedRoots = rawCommentsList.map((raw) => {
+      const normalized = normalizeCommentTree(raw, { postId, replyPages });
+      return applyInteractionOverrides(normalized, likeOverrides) as EnhancedComment;
+    });
+    const merged = mergePendingIntoRoots(processedRoots, pendingComments, sortOrder);
+    return merged.map((root) => applyInteractionOverrides(root, likeOverrides) as EnhancedComment);
+  }, [rawCommentsList, pendingComments, replyPages, sortOrder, postId, likeOverrides]);
+
+  const hasComment = useCallback(
+    (commentId: number) => findRootIndexForComment(enrichedComments, commentId) >= 0,
+    [enrichedComments]
+  );
+
+  const applyAnchorContext = useCallback(
+    (context: CommentAnchorContextResponse) => {
+      ensureRoot(context.rootComment);
+
+      const seeded = [...context.repliesWindow.list];
+      if (
+        context.targetComment.id !== context.rootCommentId &&
+        !seeded.some((comment) => comment.id === context.targetComment.id)
+      ) {
+        seeded.push(context.targetComment);
+      }
+
+      const hasMoreRepliesWindow = pageResultHasMore(
+        context.repliesWindow.page,
+        context.repliesWindow.totalPages
+      );
+      seedReplies(context.rootCommentId, seeded, {
+        replace: true,
+        hasMore: hasMoreRepliesWindow,
+        nextCursor: hasMoreRepliesWindow ? nextCursorFromCommentIds(seeded) : null,
+      });
+    },
+    [ensureRoot, seedReplies]
+  );
+
+  const { newCount, isLoadingNew, loadNewComments } = useCommentFreshness({
+    isGuestbook,
+    isMoment,
+    postId,
+    momentId,
+    sortOrder,
+    newestSeenId,
+    onPrefetchRoots: prependRoots,
+  });
+
   const isInitialCountLoading = isLoading && remoteTotal === undefined;
-  // During a publish, RTK Query can briefly expose the previous server total while
-  // the locally submitted root is already rendered. Never let that stale total
-  // make the header count move backwards or flicker.
-  const canonicalCommentsCount = Math.max(0, remoteTotal ?? 0, totalComments);
+  const canonicalCommentsCount = Math.max(0, remoteTotal ?? 0, enrichedComments.length);
 
   useEffect(() => {
     commentDebug("query:state", {
@@ -448,26 +206,30 @@ export function useComments() {
       isLoading,
       isFetching,
       error: Boolean(error),
-      baseCount: baseComments.length,
+      baseCount,
       enrichedCount: enrichedComments.length,
       pendingCount: pendingComments.length,
       totalCount: canonicalCommentsCount,
       isInitialCountLoading,
+      newCount,
+      highlightedCommentId,
     });
   }, [
-    baseComments.length,
+    baseCount,
     canonicalCommentsCount,
     enrichedComments.length,
     error,
+    highlightedCommentId,
     isFetching,
     isLoading,
     isInitialCountLoading,
+    newCount,
     pendingComments.length,
     queryKey,
   ]);
 
   return {
-    comments: paginatedComments,
+    comments: enrichedComments,
     allCommentsCount: enrichedComments.length,
     totalCount: canonicalCommentsCount,
     isInitialCountLoading,
@@ -477,7 +239,6 @@ export function useComments() {
     hasMore,
     loadMore,
     refetch,
-    resetVisible,
     addPendingComment,
     markPendingCommentSubmitted,
     markPendingCommentRetrying,
@@ -485,6 +246,15 @@ export function useComments() {
     pendingComments,
     loadReplies,
     loadingReplyIds,
-    hasMoreReplies: (parentId: number) => replyPages[parentId]?.hasMore ?? false,
+    hasMoreReplies,
+    applyLikeOverride,
+    revertLikeOverride,
+    patchReply,
+    removeReply,
+    hasComment,
+    applyAnchorContext,
+    newCount,
+    isLoadingNew,
+    loadNewComments,
   };
 }

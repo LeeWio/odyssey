@@ -7,6 +7,7 @@ interface CardFooterProps {
   isLiked: boolean;
   isLiking: boolean;
   likesCount: number;
+  commentsCount?: number;
   onLikeToggle: () => void;
   isCommentsOpen?: boolean;
   onCommentToggle?: () => void;
@@ -18,6 +19,7 @@ export const CardFooter = ({
   isLiked,
   isLiking,
   likesCount,
+  commentsCount = 0,
   onLikeToggle,
   isCommentsOpen = false,
   onCommentToggle,
@@ -27,7 +29,6 @@ export const CardFooter = ({
   return (
     <div className="flex w-full flex-row items-center justify-between">
       <div className="flex flex-row items-center gap-1">
-        {/* Like Button */}
         <Button
           size="sm"
           variant={isLiked ? "danger" : "ghost"}
@@ -40,26 +41,24 @@ export const CardFooter = ({
             icon={isLiked ? "gravity-ui:heart-fill" : "gravity-ui:heart"}
             className={`size-4.5 transition-transform duration-200 ${isLiked ? "text-danger scale-110" : ""}`}
           />
-          <span className="text-xs tabular-nums">{likesCount}</span>
+          {likesCount > 0 ? <span className="text-xs tabular-nums">{likesCount}</span> : null}
         </Button>
 
-        {/* Comment Toggle Button */}
         <Button
           size="sm"
           variant={isCommentsOpen ? "secondary" : "ghost"}
           onPress={onCommentToggle}
-          aria-label="Toggle Comments"
+          aria-label={commentsCount === 1 ? "Toggle 1 comment" : `Toggle ${commentsCount} comments`}
           className="gap-1.5 transition-all active:scale-95"
         >
           <Icon
             icon={isCommentsOpen ? "gravity-ui:comment-text-fill" : "gravity-ui:comment"}
             className={`size-4.5 ${isCommentsOpen ? "text-primary" : ""}`}
           />
-          <span className="text-xs">Comment</span>
+          {commentsCount > 0 ? <span className="text-xs tabular-nums">{commentsCount}</span> : null}
         </Button>
       </div>
 
-      {/* Bookmark Star Button */}
       <Button
         size="sm"
         variant={isBookmarked ? "secondary" : "ghost"}

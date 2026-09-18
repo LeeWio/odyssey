@@ -1,8 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-
-import { Button, Chip, TextArea, TextField, Typography } from "@heroui/react";
+import { Button, TextArea, TextField, Typography } from "@heroui/react";
 import { useEffect, useState } from "react";
 
 interface CommentContentProps {
@@ -26,7 +24,6 @@ export function CommentContent({
 
   useEffect(() => {
     const timer = setTimeout(() => setEditedText(content), 0);
-
     return () => clearTimeout(timer);
   }, [content]);
 
@@ -54,7 +51,6 @@ export function CommentContent({
             isDisabled={!editedText.trim() || editedText.trim() === content}
             onPress={() => onEditSave(editedText.trim())}
           >
-            <Icon icon="gravity-ui:check" />
             Save
           </Button>
         </div>
@@ -64,20 +60,21 @@ export function CommentContent({
 
   if (isDeleted) {
     return (
-      <Chip size="sm" variant="soft">
-        Comment deleted
-      </Chip>
+      <Typography color="muted" type="body-sm" className="italic">
+        This comment was deleted.
+      </Typography>
     );
   }
 
   return (
-    <Typography type="body" className="[overflow-wrap:anywhere] whitespace-pre-wrap">
+    <Typography
+      type="body-sm"
+      className="text-foreground/90 leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap"
+    >
       {content}
-      {isEdited && (
-        <Chip size="sm" variant="soft" className="ml-2 inline-flex align-middle">
-          Edited
-        </Chip>
-      )}
+      {isEdited ? (
+        <span className="text-muted ml-1.5 text-xs font-normal not-italic">(edited)</span>
+      ) : null}
     </Typography>
   );
 }

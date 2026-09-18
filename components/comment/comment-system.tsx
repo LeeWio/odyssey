@@ -12,6 +12,7 @@ import { useComments } from "./hooks/use-comments";
 
 interface CommentSystemProps {
   postId?: number;
+  momentId?: number;
   isGuestbook?: boolean;
   onRequestClose?: () => void;
   children?: (parts: CommentSystemRenderParts) => React.ReactNode;
@@ -20,6 +21,9 @@ interface CommentSystemProps {
 export interface CommentSystemRenderParts {
   totalCount: number;
   isInitialCountLoading: boolean;
+  newCount: number;
+  isLoadingNew: boolean;
+  onLoadNew: () => void;
   commentList: React.ReactNode;
   commentInput: React.ReactNode;
 }
@@ -45,6 +49,15 @@ function CommentSystemContent({
     loadReplies,
     loadingReplyIds,
     hasMoreReplies,
+    applyLikeOverride,
+    revertLikeOverride,
+    patchReply,
+    removeReply,
+    hasComment,
+    applyAnchorContext,
+    newCount,
+    isLoadingNew,
+    loadNewComments,
   } = useComments();
   const {
     publishComment,
@@ -58,9 +71,16 @@ function CommentSystemContent({
     markPendingCommentSubmitted,
     markPendingCommentFailed,
     markPendingCommentRetrying,
+    applyLikeOverride,
+    revertLikeOverride,
+    patchReply,
+    removeReply,
   });
 
-  useCommentHighlight();
+  useCommentHighlight({
+    hasComment,
+    onAnchorContext: applyAnchorContext,
+  });
 
   const commentList = (
     <CommentList
@@ -92,39 +112,54 @@ function CommentSystemContent({
   );
 
   if (children) {
-    return children({ totalCount, isInitialCountLoading, commentList, commentInput });
+    return children({
+      totalCount,
+      isInitialCountLoading,
+      newCount,
+      isLoadingNew,
+      onLoadNew: loadNewComments,
+      commentList,
+      commentInput,
+    });
   }
 
   return (
     <section
       aria-label="Comments"
-      className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col"
+      className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col"
     >
-      <div className="shrink-0 pb-4">
-        <CommentHeader isCountLoading={isInitialCountLoading} totalCount={totalCount} />
+      <div className="shrink-0 pb-3">
+        <CommentHeader
+          isCountLoading={isInitialCountLoading}
+          totalCount={totalCount}
+          newCount={newCount}
+          isLoadingNew={isLoadingNew}
+          onLoadNew={loadNewComments}
+        />
       </div>
       <ScrollShadow
         hideScrollBar
         className="min-h-0 flex-1 overflow-y-auto"
         orientation="vertical"
-        size={32}
+        size={24}
       >
         {commentList}
       </ScrollShadow>
 
-      <div className="shrink-0 pt-4">{commentInput}</div>
+      <div className="border-border/60 shrink-0 border-t pt-3">{commentInput}</div>
     </section>
   );
 }
 
 export function CommentSystem({
   postId = 0,
+  momentId = 0,
   isGuestbook = false,
   onRequestClose,
   children,
 }: CommentSystemProps) {
   return (
-    <CommentProvider postId={postId} isGuestbook={isGuestbook}>
+    <CommentProvider postId={postId} momentId={momentId} isGuestbook={isGuestbook}>
       <CommentSystemContent onRequestClose={onRequestClose}>{children}</CommentSystemContent>
     </CommentProvider>
   );

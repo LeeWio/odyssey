@@ -4,11 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 
 const DRAFT_PREFIX = "odyssey:comment-draft";
 
-export function useCommentDraft(postId: number, replyId: number | null) {
+/** `threadKey` should match comment hooks: guestbook | moment:{id} | post:{id} */
+export function useCommentDraft(threadKey: string, replyId: number | null) {
   const getStorageKey = useCallback(() => {
     const replyPart = replyId === null ? "root" : `reply-${replyId}`;
-    return `${DRAFT_PREFIX}:${postId}:${replyPart}`;
-  }, [postId, replyId]);
+    return `${DRAFT_PREFIX}:${threadKey}:${replyPart}`;
+  }, [threadKey, replyId]);
 
   const [draft, _setDraft] = useState<string>("");
   const [isHydrated, setIsHydrated] = useState(false);

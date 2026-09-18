@@ -101,7 +101,6 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
   const [activeImageIndex, setActiveIndex] = useState<number | null>(null);
   const [hasOpenedCarousel, setHasOpenedCarousel] = useState(false);
 
-  // Expanded comments system state
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
 
   if (activeImageIndex !== null && !hasOpenedCarousel) {
@@ -213,6 +212,7 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
         isLiked={isLiked}
         isLiking={isLiking}
         likesCount={likesCount}
+        commentsCount={moment?.commentsCount ?? 0}
         onLikeToggle={toggleLike}
         isCommentsOpen={isCommentsOpen}
         onCommentToggle={() => setIsCommentsOpen(!isCommentsOpen)}
@@ -220,9 +220,8 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
         onBookmarkToggle={handleBookmarkToggle}
       />
 
-      {/* 4. Expanded Comments Section */}
       <AnimatePresence>
-        {isCommentsOpen && moment?.id && (
+        {isCommentsOpen && moment?.id ? (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -230,12 +229,12 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="border-default-100/60 mt-3 overflow-hidden border-t px-1 pt-4"
           >
-            <CommentSystem postId={moment.id} />
+            <CommentSystem momentId={moment.id} />
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
 
-      {/* 5. Shared Photo Carousel Modal — load only after first open */}
+      {/* Shared Photo Carousel Modal — load only after first open */}
       {hasOpenedCarousel && carouselImages.length > 0 ? (
         <CarouselModal
           images={carouselImages}

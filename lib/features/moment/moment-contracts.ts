@@ -22,6 +22,7 @@ export const MomentResponseSchema = z.object({
   content: z.string(),
   stockSymbol: z.string().nullable().optional(),
   likesCount: z.number(),
+  commentsCount: z.number().nullable().optional().default(0),
   visibility: z.enum(["public", "followers", "private"]),
   createdAt: z.string(),
   updatedAt: z.string(),

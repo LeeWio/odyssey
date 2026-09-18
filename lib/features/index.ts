@@ -11,7 +11,8 @@ export * from "./locale";
 export * from "./market";
 export * from "./moment";
 export * from "./notification";
-export * from "./openapi";
+// OpenAPI catch-all client is imported from `@/lib/features/openapi` directly
+// to avoid clashing with domain feature hooks (e.g. comment governance).
 export * from "./permission";
 export * from "./post";
 export * from "./project";

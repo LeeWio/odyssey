@@ -1,10 +1,38 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import {
+  useLazyGetCommentAnchorContextQuery,
+  type CommentAnchorContextResponse,
+} from "@/lib/features/comment";
 import { useCommentContext } from "../context/comment-context";
 
-export function useCommentHighlight() {
+interface UseCommentHighlightArgs {
+  hasComment: (commentId: number) => boolean;
+  onAnchorContext: (context: CommentAnchorContextResponse) => void;
+}
+
+export function useCommentHighlight({ hasComment, onAnchorContext }: UseCommentHighlightArgs) {
   const { setHighlightedCommentId } = useCommentContext();
+  const [fetchAnchorContext] = useLazyGetCommentAnchorContextQuery();
+  const requestedIds = useRef(new Set<number>());
+
+  const resolveAnchor = useCallback(
+    async (id: number) => {
+      setHighlightedCommentId(id);
+      if (hasComment(id) || requestedIds.current.has(id)) return;
+
+      requestedIds.current.add(id);
+      try {
+        const context = await fetchAnchorContext({ commentId: id }).unwrap();
+        onAnchorContext(context);
+      } catch (error) {
+        console.error("Failed to load comment permalink context:", error);
+        requestedIds.current.delete(id);
+      }
+    },
+    [fetchAnchorContext, hasComment, onAnchorContext, setHighlightedCommentId]
+  );
 
   const handleHashChange = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -14,11 +42,9 @@ export function useCommentHighlight() {
       return;
     }
 
-    const id = Number(match[1]);
-    setHighlightedCommentId(id);
-  }, [setHighlightedCommentId]);
+    void resolveAnchor(Number(match[1]));
+  }, [resolveAnchor, setHighlightedCommentId]);
 
-  // Monitor initial mount and hash changes
   useEffect(() => {
     handleHashChange();
     window.addEventListener("hashchange", handleHashChange);

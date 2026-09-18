@@ -32,6 +32,7 @@ export default defineConfig({
     include: [
       "components/rich-text/**/*.test.ts",
       "components/auth/**/*.test.ts",
+      "components/comment/**/*.test.ts",
       "lib/features/**/*.test.ts",
       "lib/utils/**/*.test.ts",
       "i18n/**/*.test.ts",

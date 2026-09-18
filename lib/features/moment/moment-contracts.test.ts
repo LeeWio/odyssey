@@ -38,4 +38,9 @@ describe("MomentResponseSchema", () => {
     expect(MomentResponseSchema.parse(baseMoment).images).toEqual([]);
     expect(MomentResponseSchema.parse(baseMoment).topics).toEqual([]);
   });
+
+  it("defaults missing commentsCount to zero", () => {
+    expect(MomentResponseSchema.parse(baseMoment).commentsCount).toBe(0);
+    expect(MomentResponseSchema.parse({ ...baseMoment, commentsCount: 4 }).commentsCount).toBe(4);
+  });
 });

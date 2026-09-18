@@ -15,3 +15,4 @@ Use this directory for architecture decision records.
 - [ADR-0003: Module Lifecycle](./ADR-0003-module-lifecycle.md)
 - [ADR-0004: Animation Standard](./ADR-0004-animation-standard.md)
 - [ADR-0005: HeroUI Baseline](./ADR-0005-heroui-baseline.md)
+- [ADR-0006: Comment Thread Model](./ADR-0006-comment-thread-model.md)

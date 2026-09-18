@@ -837,18 +837,7 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
-    repairCommentCounters: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseInteger"]>,
-      void
-    >({
-      query: () => ({ url: `/api/v1/admin/comments/repair-counters`, method: "POST" }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
+    // Comment governance endpoints live in lib/features/comment (avoid injectEndpoints clashes).
 
     resolvePostReport: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
@@ -883,40 +872,6 @@ export const openapiApi = baseApi.injectEndpoints({
         url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist/${arg.checklistItemId}/completion`,
         method: "PATCH",
         body: arg.body,
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
-    pinComment: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
-      { id: number; pinned: boolean }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/comments/${arg.id}/pin`,
-        method: "PATCH",
-        params: { pinned: arg.pinned },
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
-    featureComment: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
-      { id: number; featured: boolean }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/comments/${arg.id}/feature`,
-        method: "PATCH",
-        params: { featured: arg.featured },
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
@@ -1356,75 +1311,6 @@ export const openapiApi = baseApi.injectEndpoints({
       providesTags: ["OpenApi"],
     }),
 
-    getCommentReports: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePageResultCommentReportResponse"]>,
-      {
-        status?: "OPEN" | "ACTIONED" | "DISMISSED";
-        commentId?: number;
-        reporterUsername?: string;
-        pageable: OpenApiComponents["schemas"]["Pageable"];
-      }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/comments/reports`,
-        params: {
-          status: arg.status,
-          commentId: arg.commentId,
-          reporterUsername: arg.reporterUsername,
-          pageable: arg.pageable,
-        },
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
-    getCommentGovernanceOverview: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseCommentGovernanceOverviewResponse"]>,
-      void
-    >({
-      query: () => ({ url: `/api/v1/admin/comments/overview` }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
-    getCommentModerationLogs: builder.query<
-      OpenApiData<
-        OpenApiComponents["schemas"]["ApiResponsePageResultCommentModerationLogResponse"]
-      >,
-      {
-        commentId?: number;
-        action?: "SUBMITTED" | "EDITED" | "STATUS_CHANGED" | "AUTO_FLAGGED" | "DELETED";
-        pageable: OpenApiComponents["schemas"]["Pageable"];
-      }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/comments/moderation-logs`,
-        params: { commentId: arg.commentId, action: arg.action, pageable: arg.pageable },
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
-    getHighRiskComments: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePageResultCommentRiskResponse"]>,
-      { minOpenReports?: number; pageable: OpenApiComponents["schemas"]["Pageable"] }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/comments/high-risk`,
-        params: { minOpenReports: arg.minOpenReports, pageable: arg.pageable },
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
     getTrending1: builder.query<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseListPostResponse"]>,
       { limit?: number }
@@ -1537,11 +1423,8 @@ export const {
   useTriggerSyncMutation,
   useGetAllConfigsQuery,
   useCreateConfigMutation,
-  useRepairCommentCountersMutation,
   useResolvePostReportMutation,
   useCompleteChecklistItemMutation,
-  usePinCommentMutation,
-  useFeatureCommentMutation,
   useGetLikedPostsQuery,
   useGetPublicStatisticsQuery,
   useGetTrendingQuery,
@@ -1576,10 +1459,6 @@ export const {
   useRetrieveBoardQuery,
   useGetStorageInventoryQuery,
   useVerifyStorageIntegrityQuery,
-  useGetCommentReportsQuery,
-  useGetCommentGovernanceOverviewQuery,
-  useGetCommentModerationLogsQuery,
-  useGetHighRiskCommentsQuery,
   useGetTrending1Query,
   useGetContentFunnelQuery,
   useClearLogsMutation,

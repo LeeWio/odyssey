@@ -11,17 +11,34 @@ import {
 } from "@/lib/api";
 import {
   CommentAnchorContextResponseSchema,
+  CommentGovernanceOverviewResponseSchema,
+  CommentModerationLogResponseSchema,
   CommentPublishResponseSchema,
+  CommentReportResponseSchema,
   CommentResponseSchema,
+  CommentInteractionResponseSchema,
+  CommentRiskResponseSchema,
+  type AdminCommentListParams,
   type CommentAnchorContextResponse,
+  type CommentGovernanceOverviewResponse,
+  type CommentInteractionResponse,
+  type CommentModerationAction,
+  type CommentModerationLogResponse,
   type CommentPublishOptions,
   type CommentPublishResponse,
+  type CommentReportResolutionRequest,
+  type CommentReportResponse,
+  type CommentReportStatus,
   type CommentRequest,
   type CommentResponse,
+  type CommentRiskResponse,
   type CommentStatus,
   type GuestbookRequest,
+  type MomentCommentRequest,
 } from "./comment-contracts";
+import { applyLikeToCommentList, applyLikeToCommentTree } from "./comment-cache";
 import { commentDebug } from "@/lib/comment-debug";
+import { notifyMutation } from "@/lib/toast";
 
 type CommentTag = { type: "Comment"; id: string | number };
 
@@ -36,6 +53,25 @@ export function publishedCommentTags(postId: number, parentId?: number): Comment
     commentTag(`POST_${postId}_HOT_ROOTS`),
     commentTag(`POST_${postId}_NEW`),
     commentTag(`POST_${postId}_NEW_COUNT`),
+  ];
+  if (parentId) tags.push(commentTag(`REPLIES_${parentId}`));
+  return tags;
+}
+
+export function publishedMomentCommentTags(
+  momentId: number,
+  parentId?: number
+): Array<CommentTag | { type: "Moment"; id: string | number }> {
+  const tags: Array<CommentTag | { type: "Moment"; id: string | number }> = [
+    commentTag("ADMIN_LIST"),
+    commentTag("MY_COMMENTS"),
+    commentTag(`MOMENT_${momentId}`),
+    commentTag(`MOMENT_${momentId}_ROOTS`),
+    commentTag(`MOMENT_${momentId}_HOT_ROOTS`),
+    commentTag(`MOMENT_${momentId}_NEW`),
+    commentTag(`MOMENT_${momentId}_NEW_COUNT`),
+    { type: "Moment", id: momentId },
+    { type: "Moment", id: "LIST" },
   ];
   if (parentId) tags.push(commentTag(`REPLIES_${parentId}`));
   return tags;
@@ -80,10 +116,153 @@ function cursorResultCommentTags(
   return commentResultTags(collectionId, result?.list);
 }
 
+const COMMENT_LIST_ENDPOINTS = [
+  "getPostCommentRoots",
+  "getHotPostCommentRoots",
+  "getPostCommentRootsCursor",
+  "getNewPostCommentRoots",
+  "getCommentReplies",
+  "getCommentRepliesCursor",
+  "getGuestbookRoots",
+  "getHotGuestbookRoots",
+  "getGuestbookRootsCursor",
+  "getNewGuestbookRoots",
+  "getAdminComments",
+  "getPendingComments",
+  "getMyComments",
+] as const;
+
+const COMMENT_TREE_ENDPOINTS = ["getPostComments", "getGuestbookEntries"] as const;
+
+function patchCachedCommentLikes(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dispatch: (action: any) => { undo: () => void },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getState: () => any,
+  commentId: number,
+  liked: boolean
+) {
+  const patches: Array<{ undo: () => void }> = [];
+
+  for (const endpoint of COMMENT_LIST_ENDPOINTS) {
+    for (const args of commentApi.util.selectCachedArgsForQuery(getState(), endpoint)) {
+      patches.push(
+        dispatch(
+          commentApi.util.updateQueryData(endpoint, args, (draft) => {
+            applyLikeToCommentList(draft.list, commentId, liked);
+          })
+        )
+      );
+    }
+  }
+
+  for (const endpoint of COMMENT_TREE_ENDPOINTS) {
+    for (const args of commentApi.util.selectCachedArgsForQuery(getState(), endpoint)) {
+      patches.push(
+        dispatch(
+          commentApi.util.updateQueryData(endpoint, args, (draft) => {
+            applyLikeToCommentList(draft, commentId, liked);
+          })
+        )
+      );
+    }
+  }
+
+  for (const args of commentApi.util.selectCachedArgsForQuery(
+    getState(),
+    "getCommentAnchorContext"
+  )) {
+    patches.push(
+      dispatch(
+        commentApi.util.updateQueryData("getCommentAnchorContext", args, (draft) => {
+          applyLikeToCommentTree(draft.rootComment, commentId, liked);
+          applyLikeToCommentTree(draft.targetComment, commentId, liked);
+          applyLikeToCommentList(draft.repliesWindow.list, commentId, liked);
+        })
+      )
+    );
+  }
+
+  return patches;
+}
+
+function applyLikeSnapshotToCommentTree(
+  comment: CommentResponse,
+  commentId: number,
+  liked: boolean,
+  likesCount: number
+): boolean {
+  if (comment.id === commentId) {
+    comment.likedByCurrentUser = liked;
+    comment.likesCount = likesCount;
+    return true;
+  }
+  for (const child of comment.children ?? []) {
+    if (applyLikeSnapshotToCommentTree(child, commentId, liked, likesCount)) return true;
+  }
+  return false;
+}
+
+function applyLikeSnapshotToCommentList(
+  list: CommentResponse[] | undefined,
+  commentId: number,
+  liked: boolean,
+  likesCount: number
+) {
+  if (!list) return;
+  for (const comment of list) {
+    applyLikeSnapshotToCommentTree(comment, commentId, liked, likesCount);
+  }
+}
+
+function patchCachedCommentLikeSnapshot(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dispatch: (action: any) => unknown,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getState: () => any,
+  commentId: number,
+  liked: boolean,
+  likesCount: number
+) {
+  for (const endpoint of COMMENT_LIST_ENDPOINTS) {
+    for (const args of commentApi.util.selectCachedArgsForQuery(getState(), endpoint)) {
+      dispatch(
+        commentApi.util.updateQueryData(endpoint, args, (draft) => {
+          applyLikeSnapshotToCommentList(draft.list, commentId, liked, likesCount);
+        })
+      );
+    }
+  }
+
+  for (const endpoint of COMMENT_TREE_ENDPOINTS) {
+    for (const args of commentApi.util.selectCachedArgsForQuery(getState(), endpoint)) {
+      dispatch(
+        commentApi.util.updateQueryData(endpoint, args, (draft) => {
+          applyLikeSnapshotToCommentList(draft, commentId, liked, likesCount);
+        })
+      );
+    }
+  }
+
+  for (const args of commentApi.util.selectCachedArgsForQuery(
+    getState(),
+    "getCommentAnchorContext"
+  )) {
+    dispatch(
+      commentApi.util.updateQueryData("getCommentAnchorContext", args, (draft) => {
+        applyLikeSnapshotToCommentTree(draft.rootComment, commentId, liked, likesCount);
+        applyLikeSnapshotToCommentTree(draft.targetComment, commentId, liked, likesCount);
+        applyLikeSnapshotToCommentList(draft.repliesWindow.list, commentId, liked, likesCount);
+      })
+    );
+  }
+}
+
 export const commentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     /**
-     * Public: Retrieve hierarchical comments for a post
+     * Public: Retrieve hierarchical comments for a post.
+     * @deprecated Prefer roots + replies cursor endpoints used by CommentSystem.
      */
     getPostComments: builder.query<CommentResponse[], { postId: number } & Pageable>({
       query: ({ postId, page = 0, size = 10 }) => ({
@@ -171,6 +350,102 @@ export const commentApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, { postId }) => [commentTag(`POST_${postId}_NEW_COUNT`)],
     }),
 
+    getMomentCommentRoots: builder.query<
+      PageResult<CommentResponse>,
+      { momentId: number } & Pageable
+    >({
+      query: ({ momentId, page = 0, size = 20, sort }) => ({
+        url: `/api/v1/public/comments/moment/${momentId}/roots`,
+        params: { page, size, sort },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (result, _error, { momentId }) =>
+        pageResultCommentTags(`MOMENT_${momentId}_ROOTS`, result),
+    }),
+
+    getHotMomentCommentRoots: builder.query<
+      PageResult<CommentResponse>,
+      { momentId: number } & Pageable
+    >({
+      query: ({ momentId, page = 0, size = 20, sort }) => ({
+        url: `/api/v1/public/comments/moment/${momentId}/roots/hot`,
+        params: { page, size, sort },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (result, _error, { momentId }) =>
+        pageResultCommentTags(`MOMENT_${momentId}_HOT_ROOTS`, result),
+    }),
+
+    getMomentCommentRootsCursor: builder.query<
+      CursorPageResult<CommentResponse>,
+      { momentId: number; cursor?: number; size?: number }
+    >({
+      query: ({ momentId, cursor, size = 20 }) => ({
+        url: `/api/v1/public/comments/moment/${momentId}/roots/cursor`,
+        params: { cursor, size },
+      }),
+      rawResponseSchema: apiResponseSchema(cursorPageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<CursorPageResult<CommentResponse>>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (result, _error, { momentId }) =>
+        cursorResultCommentTags(`MOMENT_${momentId}_ROOTS`, result),
+    }),
+
+    getNewMomentCommentRoots: builder.query<
+      CursorPageResult<CommentResponse>,
+      { momentId: number; afterId?: number; size?: number }
+    >({
+      query: ({ momentId, afterId, size = 20 }) => ({
+        url: `/api/v1/public/comments/moment/${momentId}/new`,
+        params: { afterId, size },
+      }),
+      rawResponseSchema: apiResponseSchema(cursorPageResultSchema(CommentResponseSchema)),
+      transformResponse: (response: ApiResponse<CursorPageResult<CommentResponse>>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (result, _error, { momentId }) =>
+        cursorResultCommentTags(`MOMENT_${momentId}_NEW`, result),
+    }),
+
+    getNewMomentCommentRootsCount: builder.query<number, { momentId: number; afterId?: number }>({
+      query: ({ momentId, afterId }) => ({
+        url: `/api/v1/public/comments/moment/${momentId}/new-count`,
+        params: { afterId },
+      }),
+      rawResponseSchema: apiResponseSchema(z.number()),
+      transformResponse: (response: ApiResponse<number>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, { momentId }) => [commentTag(`MOMENT_${momentId}_NEW_COUNT`)],
+    }),
+
+    publishMomentComment: builder.mutation<
+      CommentPublishResponse | null,
+      MomentCommentRequest & CommentPublishOptions
+    >({
+      query: ({ idempotencyKey, deferInvalidation, ...body }) => {
+        void deferInvalidation;
+        return {
+          url: "/api/v1/public/comments/moment",
+          method: "POST",
+          headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+          body,
+        };
+      },
+      rawResponseSchema: apiResponseSchema(CommentPublishResponseSchema.nullable()),
+      transformResponse: (response: ApiResponse<CommentPublishResponse | null>) => response.data,
+      transformErrorResponse: transformApiError,
+      invalidatesTags: (_result, error, { momentId, parentId, deferInvalidation }) => {
+        if (error || deferInvalidation) return [];
+        return publishedMomentCommentTags(momentId, parentId);
+      },
+    }),
+
+    /** @deprecated Prefer `getCommentRepliesCursor` (used by CommentSystem). */
     getCommentReplies: builder.query<PageResult<CommentResponse>, { parentId: number } & Pageable>({
       query: ({ parentId, page = 0, size = 20, sort }) => ({
         url: `/api/v1/public/comments/${parentId}/replies`,
@@ -249,7 +524,10 @@ export const commentApi = baseApi.injectEndpoints({
       },
       invalidatesTags: (_result, error, { postId, parentId, deferInvalidation }) => {
         if (error || deferInvalidation) return [];
-        const tags = publishedCommentTags(postId, parentId);
+        const tags = [
+          ...publishedCommentTags(postId, parentId),
+          { type: "Post" as const, id: postId },
+        ];
         commentDebug("api:publish-invalidates", { postId, parentId, tags });
         return tags;
       },
@@ -258,22 +536,33 @@ export const commentApi = baseApi.injectEndpoints({
     /**
      * Admin: Search all comments (Management)
      */
-    getAdminComments: builder.query<PageResult<CommentResponse>, Pageable>({
-      query: ({ page = 0, size = 10 }) => ({
-        url: "/api/v1/admin/comments",
-        params: { page, size },
-      }),
-      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
-      transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
-      transformErrorResponse: transformApiError,
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.list.map(({ id }) => ({ type: "Comment" as const, id })),
-              { type: "Comment", id: "ADMIN_LIST" },
-            ]
-          : [{ type: "Comment", id: "ADMIN_LIST" }],
-    }),
+    getAdminComments: builder.query<PageResult<CommentResponse>, Pageable & AdminCommentListParams>(
+      {
+        query: ({
+          page = 0,
+          size = 10,
+          sort,
+          status,
+          postId,
+          featuredOnly,
+          username,
+          keyword,
+        }) => ({
+          url: "/api/v1/admin/comments",
+          params: { page, size, sort, status, postId, featuredOnly, username, keyword },
+        }),
+        rawResponseSchema: apiResponseSchema(pageResultSchema(CommentResponseSchema)),
+        transformResponse: (response: ApiResponse<PageResult<CommentResponse>>) => response.data,
+        transformErrorResponse: transformApiError,
+        providesTags: (result) =>
+          result
+            ? [
+                ...result.list.map(({ id }) => ({ type: "Comment" as const, id })),
+                { type: "Comment", id: "ADMIN_LIST" },
+              ]
+            : [{ type: "Comment", id: "ADMIN_LIST" }],
+      }
+    ),
 
     /**
      * Admin: Retrieve pending comments awaiting moderator approval
@@ -424,7 +713,16 @@ export const commentApi = baseApi.injectEndpoints({
         }
       },
       invalidatesTags: (_result, error, { id }) =>
-        error ? [] : [commentTag(id), commentTag("ADMIN_LIST"), "Comment"],
+        error
+          ? []
+          : [
+              commentTag(id),
+              commentTag("ADMIN_LIST"),
+              commentTag("ADMIN_OVERVIEW"),
+              commentTag("ADMIN_LOGS"),
+              commentTag("ADMIN_HIGH_RISK"),
+              "Comment",
+            ],
     }),
 
     /**
@@ -445,7 +743,16 @@ export const commentApi = baseApi.injectEndpoints({
         }
       },
       invalidatesTags: (_result, error, id) =>
-        error ? [] : [commentTag(id), commentTag("ADMIN_LIST"), "Comment"],
+        error
+          ? []
+          : [
+              commentTag(id),
+              commentTag("ADMIN_LIST"),
+              commentTag("ADMIN_OVERVIEW"),
+              commentTag("ADMIN_LOGS"),
+              commentTag("ADMIN_HIGH_RISK"),
+              "Comment",
+            ],
     }),
 
     getMyComments: builder.query<
@@ -508,25 +815,57 @@ export const commentApi = baseApi.injectEndpoints({
     /**
      * Public: Like a comment
      */
-    likeComment: builder.mutation<void, number>({
+    likeComment: builder.mutation<CommentInteractionResponse, number>({
       query: (commentId) => ({
         url: `/api/v1/public/interactions/comments/${commentId}/like`,
         method: "POST",
       }),
+      rawResponseSchema: apiResponseSchema(CommentInteractionResponseSchema),
+      transformResponse: (response: ApiResponse<CommentInteractionResponse>) => response.data,
       transformErrorResponse: transformApiError,
-      invalidatesTags: (_result, error, commentId) => (error ? [] : [commentTag(commentId)]),
+      async onQueryStarted(commentId, { dispatch, getState, queryFulfilled }) {
+        const patches = patchCachedCommentLikes(dispatch, getState, commentId, true);
+        try {
+          const { data } = await queryFulfilled;
+          patchCachedCommentLikeSnapshot(
+            dispatch,
+            getState,
+            data.commentId,
+            data.liked,
+            data.likesCount
+          );
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
     }),
 
     /**
      * Public: Unlike a comment
      */
-    unlikeComment: builder.mutation<void, number>({
+    unlikeComment: builder.mutation<CommentInteractionResponse, number>({
       query: (commentId) => ({
         url: `/api/v1/public/interactions/comments/${commentId}/unlike`,
         method: "POST",
       }),
+      rawResponseSchema: apiResponseSchema(CommentInteractionResponseSchema),
+      transformResponse: (response: ApiResponse<CommentInteractionResponse>) => response.data,
       transformErrorResponse: transformApiError,
-      invalidatesTags: (_result, error, commentId) => (error ? [] : [commentTag(commentId)]),
+      async onQueryStarted(commentId, { dispatch, getState, queryFulfilled }) {
+        const patches = patchCachedCommentLikes(dispatch, getState, commentId, false);
+        try {
+          const { data } = await queryFulfilled;
+          patchCachedCommentLikeSnapshot(
+            dispatch,
+            getState,
+            data.commentId,
+            data.liked,
+            data.likesCount
+          );
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
     }),
 
     /**
@@ -548,7 +887,15 @@ export const commentApi = baseApi.injectEndpoints({
         }
       },
       invalidatesTags: (_result, error, { id }) =>
-        error ? [] : [commentTag(id), commentTag("ADMIN_LIST")],
+        error
+          ? []
+          : [
+              commentTag(id),
+              commentTag("ADMIN_LIST"),
+              commentTag("ADMIN_REPORTS"),
+              commentTag("ADMIN_HIGH_RISK"),
+              commentTag("ADMIN_OVERVIEW"),
+            ],
     }),
 
     /**
@@ -560,6 +907,8 @@ export const commentApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      rawResponseSchema: apiResponseSchema(z.number()),
+      transformResponse: (response: ApiResponse<number>) => response.data,
       transformErrorResponse: transformApiError,
       async onQueryStarted({ status }, { queryFulfilled }) {
         try {
@@ -569,7 +918,151 @@ export const commentApi = baseApi.injectEndpoints({
           toast.danger(getApiErrorMessage(error, "Batch moderation failed"));
         }
       },
-      invalidatesTags: (_result, error) => (error ? [] : ["Comment", commentTag("ADMIN_LIST")]),
+      invalidatesTags: (_result, error) =>
+        error
+          ? []
+          : [
+              "Comment",
+              commentTag("ADMIN_LIST"),
+              commentTag("ADMIN_OVERVIEW"),
+              commentTag("ADMIN_REPORTS"),
+              commentTag("ADMIN_HIGH_RISK"),
+              commentTag("ADMIN_LOGS"),
+            ],
+    }),
+
+    pinComment: builder.mutation<void, { id: number; pinned: boolean }>({
+      query: ({ id, pinned }) => ({
+        url: `/api/v1/admin/comments/${id}/pin`,
+        method: "PATCH",
+        params: { pinned },
+      }),
+      transformErrorResponse: transformApiError,
+      async onQueryStarted({ pinned }, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          success: pinned ? "Comment pinned" : "Comment unpinned",
+          error: "Failed to update pin state",
+        });
+      },
+      invalidatesTags: (_result, error, { id }) =>
+        error ? [] : [commentTag(id), commentTag("ADMIN_LIST"), "Comment"],
+    }),
+
+    featureComment: builder.mutation<void, { id: number; featured: boolean }>({
+      query: ({ id, featured }) => ({
+        url: `/api/v1/admin/comments/${id}/feature`,
+        method: "PATCH",
+        params: { featured },
+      }),
+      transformErrorResponse: transformApiError,
+      async onQueryStarted({ featured }, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          success: featured ? "Comment featured" : "Comment unfeatured",
+          error: "Failed to update featured state",
+        });
+      },
+      invalidatesTags: (_result, error, { id }) =>
+        error ? [] : [commentTag(id), commentTag("ADMIN_LIST"), "Comment"],
+    }),
+
+    repairCommentCounters: builder.mutation<number, void>({
+      query: () => ({
+        url: "/api/v1/admin/comments/repair-counters",
+        method: "POST",
+      }),
+      rawResponseSchema: apiResponseSchema(z.number()),
+      transformResponse: (response: ApiResponse<number>) => response.data,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data: count } = await queryFulfilled;
+          toast.success(`Repaired ${count} comment counters`);
+        } catch (error: unknown) {
+          toast.danger(getApiErrorMessage(error, "Failed to repair comment counters"));
+        }
+      },
+      invalidatesTags: (_result, error) =>
+        error ? [] : ["Comment", commentTag("ADMIN_LIST"), commentTag("ADMIN_OVERVIEW")],
+    }),
+
+    getCommentGovernanceOverview: builder.query<CommentGovernanceOverviewResponse, void>({
+      query: () => "/api/v1/admin/comments/overview",
+      rawResponseSchema: apiResponseSchema(CommentGovernanceOverviewResponseSchema),
+      transformResponse: (response: ApiResponse<CommentGovernanceOverviewResponse>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [commentTag("ADMIN_OVERVIEW")],
+    }),
+
+    getCommentReports: builder.query<
+      PageResult<CommentReportResponse>,
+      Pageable & { status?: CommentReportStatus; commentId?: number }
+    >({
+      query: ({ page = 0, size = 20, sort, status, commentId }) => ({
+        url: "/api/v1/admin/comments/reports",
+        params: { page, size, sort, status, commentId },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentReportResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentReportResponse>>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [commentTag("ADMIN_REPORTS")],
+    }),
+
+    getCommentModerationLogs: builder.query<
+      PageResult<CommentModerationLogResponse>,
+      Pageable & { commentId?: number; action?: CommentModerationAction }
+    >({
+      query: ({ page = 0, size = 20, sort, commentId, action }) => ({
+        url: "/api/v1/admin/comments/moderation-logs",
+        params: { page, size, sort, commentId, action },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentModerationLogResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentModerationLogResponse>>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [commentTag("ADMIN_LOGS")],
+    }),
+
+    getHighRiskComments: builder.query<
+      PageResult<CommentRiskResponse>,
+      Pageable & { minOpenReports?: number }
+    >({
+      query: ({ page = 0, size = 20, sort, minOpenReports }) => ({
+        url: "/api/v1/admin/comments/high-risk",
+        params: { page, size, sort, minOpenReports },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(CommentRiskResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<CommentRiskResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [commentTag("ADMIN_HIGH_RISK")],
+    }),
+
+    resolveCommentReport: builder.mutation<
+      void,
+      { commentId: number; reporterId: number } & CommentReportResolutionRequest
+    >({
+      query: ({ commentId, reporterId, status, resolutionNote }) => ({
+        url: `/api/v1/admin/comments/reports/${commentId}/${reporterId}`,
+        method: "PATCH",
+        body: { status, resolutionNote },
+      }),
+      transformErrorResponse: transformApiError,
+      async onQueryStarted({ status }, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          success: status === "DISMISSED" ? "Report dismissed" : "Report marked actioned",
+          error: "Failed to resolve comment report",
+        });
+      },
+      invalidatesTags: (_result, error) =>
+        error
+          ? []
+          : [
+              commentTag("ADMIN_REPORTS"),
+              commentTag("ADMIN_HIGH_RISK"),
+              commentTag("ADMIN_OVERVIEW"),
+              commentTag("ADMIN_LIST"),
+            ],
     }),
   }),
   overrideExisting: false,
@@ -589,6 +1082,19 @@ export const {
   useGetCommentRepliesCursorQuery,
   useLazyGetCommentRepliesCursorQuery,
   useGetCommentAnchorContextQuery,
+  useLazyGetCommentAnchorContextQuery,
+  useLazyGetNewPostCommentRootsQuery,
+  useLazyGetNewGuestbookRootsQuery,
+  useGetMomentCommentRootsQuery,
+  useLazyGetMomentCommentRootsQuery,
+  useGetHotMomentCommentRootsQuery,
+  useLazyGetHotMomentCommentRootsQuery,
+  useGetMomentCommentRootsCursorQuery,
+  useLazyGetMomentCommentRootsCursorQuery,
+  useGetNewMomentCommentRootsQuery,
+  useLazyGetNewMomentCommentRootsQuery,
+  useGetNewMomentCommentRootsCountQuery,
+  usePublishMomentCommentMutation,
   usePublishCommentMutation,
   useGetAdminCommentsQuery,
   useGetPendingCommentsQuery,
@@ -611,4 +1117,12 @@ export const {
   useUnlikeCommentMutation,
   useReportCommentMutation,
   useBatchModerateCommentsMutation,
+  usePinCommentMutation,
+  useFeatureCommentMutation,
+  useRepairCommentCountersMutation,
+  useGetCommentGovernanceOverviewQuery,
+  useGetCommentReportsQuery,
+  useGetCommentModerationLogsQuery,
+  useGetHighRiskCommentsQuery,
+  useResolveCommentReportMutation,
 } = commentApi;

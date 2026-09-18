@@ -704,21 +704,29 @@ export interface OpenApiComponents {
       id?: number;
       parentId?: number;
       content?: string;
+      authorUserId?: number;
       username?: string;
       nickname?: string;
       avatar?: string;
       status?: "PENDING" | "APPROVED" | "REJECTED" | "SPAM";
       postId?: number;
       postTitle?: string;
+      momentId?: number;
       likesCount?: number;
       reportsCount?: number;
       replyCount?: number;
       likedByCurrentUser?: boolean;
+      viewerCanEdit?: boolean;
+      viewerCanDelete?: boolean;
       pinned?: boolean;
       featured?: boolean;
       deletedPlaceholder?: boolean;
       createdAt?: string;
       editedAt?: string;
+    };
+    CommentReportResolutionRequest: {
+      status: "OPEN" | "ACTIONED" | "DISMISSED";
+      resolutionNote?: string;
     };
     PageResultCommentResponse: {
       list?: Array<OpenApiComponents["schemas"]["CommentResponse"]>;

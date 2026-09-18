@@ -28,6 +28,7 @@ const original: MomentResponse = {
   visibility: "followers",
   stockSymbol: "AAPL",
   likesCount: 7,
+  commentsCount: 0,
   createdAt: "2026-09-16",
   updatedAt: "2026-09-16",
   topics: [{ id: 1, slug: "research" }],

@@ -44,13 +44,23 @@ export function CommentSheet({ postId, isOpen, onOpenChange }: CommentSheetProps
 function CommentSheetContent({
   totalCount,
   isInitialCountLoading,
+  newCount,
+  isLoadingNew,
+  onLoadNew,
   commentList,
   commentInput,
 }: CommentSystemRenderParts) {
   return (
     <>
       <Sheet.Header>
-        <CommentHeader inSheet isCountLoading={isInitialCountLoading} totalCount={totalCount} />
+        <CommentHeader
+          inSheet
+          isCountLoading={isInitialCountLoading}
+          totalCount={totalCount}
+          newCount={newCount}
+          isLoadingNew={isLoadingNew}
+          onLoadNew={onLoadNew}
+        />
       </Sheet.Header>
       <Sheet.Body className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <ScrollShadow

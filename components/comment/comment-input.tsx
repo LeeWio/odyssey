@@ -10,7 +10,6 @@ import {
   Modal,
   TextArea,
   TextField,
-  Surface,
   Typography,
 } from "@heroui/react";
 import { PromptInput, PromptSuggestion } from "@heroui-pro/react";
@@ -55,12 +54,18 @@ export function CommentInput({
   placeholder = "Share your thoughts...",
   submitButtonText = "Post comment",
 }: CommentInputProps) {
-  const { postId, isAuthenticated, currentUser } = useCommentContext();
+  const { postId, momentId, isGuestbook, isMoment, isAuthenticated, currentUser } =
+    useCommentContext();
   const email = useAppSelector(selectUserEmail);
   const { data: currentUserProfile } = useGetCurrentUserQuery(undefined, {
     skip: !isAuthenticated,
   });
-  const [draft, setDraft, clearDraft, isDraftHydrated] = useCommentDraft(postId, replyId);
+  const draftThreadKey = isGuestbook
+    ? "guestbook"
+    : isMoment
+      ? `moment:${momentId}`
+      : `post:${postId}`;
+  const [draft, setDraft, clearDraft, isDraftHydrated] = useCommentDraft(draftThreadKey, replyId);
   const [content, setContent] = useState("");
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,7 +79,7 @@ export function CommentInput({
 
   useEffect(() => {
     didHydrateDraft.current = false;
-  }, [postId, replyId]);
+  }, [draftThreadKey, replyId]);
 
   useEffect(() => {
     if (!isDraftHydrated || didHydrateDraft.current) return;
@@ -161,20 +166,20 @@ export function CommentInput({
     return (
       <PromptInput
         layout="inline"
-        maxHeight={160}
-        size="lg"
+        maxHeight={140}
+        size="md"
         value={content}
         variant="secondary"
         onSubmit={() => void submitComment()}
         onValueChange={handleValueChange}
       >
-        <PromptInput.Shell>
+        <PromptInput.Shell className="border-border/80 rounded-xl">
           <PromptInput.Content>
             <PromptInput.TextArea
               ref={textareaRef}
               aria-label="Add a comment"
               maxLength={1000}
-              placeholder="Add a comment"
+              placeholder="Write a comment…"
             />
           </PromptInput.Content>
           <PromptInput.Toolbar>
@@ -209,38 +214,24 @@ export function CommentInput({
 
   if (isReply && hideTrigger) {
     return (
-      <Surface variant="secondary" className="mt-4 flex flex-col gap-3 p-3 sm:p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <UserAvatar
-              size="sm"
-              variant="soft"
-              className="shrink-0"
-              name={composerName}
-              avatar={currentUserProfile?.avatar}
-              email={email}
-            />
-            <div className="min-w-0">
-              <Typography type="body-sm" weight="semibold" truncate>
-                Replying to {replyTo}
-              </Typography>
-              <Typography color="muted" type="body-xs">
-                Keep the thread moving.
-              </Typography>
-            </div>
-          </div>
+      <div className="border-border/80 bg-surface/40 mt-3 rounded-xl border p-3">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <Typography color="muted" type="body-xs">
+            Replying to <span className="text-foreground font-medium">{replyTo}</span>
+          </Typography>
           <Button
             isIconOnly
             size="sm"
             variant="ghost"
+            className="text-muted size-7"
             aria-label="Cancel reply"
             onPress={() => onOpenChange?.(false)}
           >
-            <Icon icon="gravity-ui:xmark" aria-hidden="true" />
+            <Icon icon="gravity-ui:xmark" aria-hidden="true" className="size-3.5" />
           </Button>
         </div>
 
-        <Form id={formId} className="flex flex-col gap-3" onSubmit={handleFormSubmit}>
+        <Form id={formId} className="flex flex-col gap-2.5" onSubmit={handleFormSubmit}>
           <TextField isRequired fullWidth name="reply">
             <Label className="sr-only">Reply content</Label>
             <TextArea
@@ -249,35 +240,39 @@ export function CommentInput({
               fullWidth
               maxLength={1000}
               placeholder={placeholder}
-              rows={4}
+              rows={3}
               ref={textareaRef}
               value={content}
               variant="secondary"
               onChange={handleChange}
             />
-            <Description className="text-right">{content.length}/1000</Description>
           </TextField>
-          <div className="flex items-center justify-end gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              isDisabled={isSubmitting}
-              onPress={() => onOpenChange?.(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              variant="primary"
-              type="submit"
-              isDisabled={!content.trim() || isSubmitting}
-              isPending={isSubmitting}
-            >
-              {submitButtonText}
-            </Button>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted text-[11px] tabular-nums">{content.length}/1000</span>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8"
+                isDisabled={isSubmitting}
+                onPress={() => onOpenChange?.(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                className="h-8"
+                type="submit"
+                isDisabled={!content.trim() || isSubmitting}
+                isPending={isSubmitting}
+              >
+                {submitButtonText}
+              </Button>
+            </div>
           </div>
         </Form>
-      </Surface>
+      </div>
     );
   }
 

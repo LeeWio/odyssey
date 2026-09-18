@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react";
 import { Alert, Button, Skeleton } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { CommentItem } from "./comment-item";
+import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./types";
 
 interface CommentListProps {
@@ -16,12 +17,12 @@ interface CommentListProps {
   loadMore: () => void;
   refetch: () => Promise<unknown>;
   totalCount: number;
-  onLikeToggle: (id: number, isLiked: boolean) => void;
+  onLikeToggle: (id: number, isLiked: boolean, likesCount: number) => void;
   onAuthenticationRequired?: () => void;
   onReplySubmit: (content: string, parentId: number) => Promise<boolean>;
   onEditSave: (id: number, content: string) => Promise<boolean>;
   onDelete: (id: number) => Promise<boolean>;
-  onReport: (id: number) => Promise<boolean>;
+  onReport: (id: number, reason: string) => Promise<boolean>;
   onRetry: (tempId: number, content: string, parentId: number | null) => Promise<boolean>;
   onLoadReplies: (parentId: number) => Promise<void>;
   loadingReplyIds: Set<number>;
@@ -48,31 +49,46 @@ export function CommentList({
   loadingReplyIds,
   hasMoreReplies,
 }: CommentListProps) {
+  const { isGuestbook, isMoment } = useCommentContext();
+  const emptyTitle = isGuestbook ? "No entries yet" : "No comments yet";
+  const emptyDescription = isGuestbook
+    ? "Leave the first note in the guestbook."
+    : isMoment
+      ? "Be the first to reply to this moment."
+      : "Be the first to start the discussion.";
+  const unit = isGuestbook
+    ? totalCount === 1
+      ? "entry"
+      : "entries"
+    : totalCount === 1
+      ? "comment"
+      : "comments";
+
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col">
       <p className="sr-only" aria-live="polite">
-        {totalCount} {totalCount === 1 ? "comment" : "comments"}
+        {totalCount} {unit}
         {isFetching && !isLoading ? ", updating" : ""}
       </p>
 
       {isLoading ? (
-        <div className="flex flex-col gap-6" aria-label="Loading comments">
+        <div className="divide-border/70 flex flex-col divide-y" aria-label="Loading comments">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="flex gap-3 py-5 first:pt-1">
-              <Skeleton className="size-10 shrink-0 rounded-full" />
-              <div className="flex flex-1 flex-col gap-3 pt-1">
-                <Skeleton className="h-3.5 w-36 rounded-md" />
-                <Skeleton className="h-4 w-full rounded-md" />
-                <Skeleton className="h-4 w-4/5 rounded-md" />
+            <div key={index} className="flex gap-3 py-5">
+              <Skeleton className="size-8 shrink-0 rounded-full" />
+              <div className="flex flex-1 flex-col gap-2.5 pt-0.5">
+                <Skeleton className="h-3 w-28 rounded-md" />
+                <Skeleton className="h-3.5 w-full rounded-md" />
+                <Skeleton className="h-3.5 w-4/5 rounded-md" />
               </div>
             </div>
           ))}
         </div>
       ) : error ? (
-        <Alert status="danger">
+        <Alert status="danger" className="my-4">
           <Alert.Indicator />
           <Alert.Content>
-            <Alert.Title>Comments could not be loaded</Alert.Title>
+            <Alert.Title>Couldn’t load comments</Alert.Title>
             <Alert.Description>Check your connection and try again.</Alert.Description>
           </Alert.Content>
           <Button size="sm" variant="outline" onPress={() => refetch()}>
@@ -80,15 +96,13 @@ export function CommentList({
           </Button>
         </Alert>
       ) : comments.length === 0 ? (
-        <EmptyState size="sm" className="py-12">
+        <EmptyState size="sm" className="py-10">
           <EmptyState.Header>
             <EmptyState.Media variant="icon">
               <Icon icon="gravity-ui:comments" />
             </EmptyState.Media>
-            <EmptyState.Title>No comments yet</EmptyState.Title>
-            <EmptyState.Description>
-              Start the discussion with a thoughtful response.
-            </EmptyState.Description>
+            <EmptyState.Title>{emptyTitle}</EmptyState.Title>
+            <EmptyState.Description>{emptyDescription}</EmptyState.Description>
           </EmptyState.Header>
         </EmptyState>
       ) : (
@@ -110,11 +124,19 @@ export function CommentList({
             />
           ))}
 
-          {hasMore && (
-            <Button size="sm" variant="secondary" className="mt-6 self-center" onPress={loadMore}>
-              Load more comments
-            </Button>
-          )}
+          {hasMore ? (
+            <div className="flex justify-center py-4">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-muted hover:text-foreground h-8 text-xs"
+                isPending={isFetching}
+                onPress={loadMore}
+              >
+                Load more
+              </Button>
+            </div>
+          ) : null}
         </div>
       )}
     </div>

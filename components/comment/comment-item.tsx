@@ -2,28 +2,28 @@
 
 import { Icon } from "@iconify/react";
 
-import { Button, Chip, Typography, cn, toast } from "@heroui/react";
+import { Button, Typography, cn, toast } from "@heroui/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useNow } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { UserAvatar } from "@/components/user-avatar";
-import { MotionSurface } from "@/components/ui";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
+import { useRelativeTime } from "@/lib/relative-time";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
 import { CommentInput } from "./comment-input";
 import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./types";
+import { flattenReplies, getCommentDisplayName } from "./utils/thread";
 
 interface CommentItemProps {
   comment: EnhancedComment;
-  onLikeToggle: (id: number, isLiked: boolean) => void;
+  onLikeToggle: (id: number, isLiked: boolean, likesCount: number) => void;
   onAuthenticationRequired?: () => void;
   onReplySubmit: (content: string, parentId: number) => Promise<boolean>;
   onEditSave: (id: number, content: string) => Promise<boolean>;
   onDelete: (id: number) => Promise<boolean>;
-  onReport: (id: number) => Promise<boolean>;
+  onReport: (id: number, reason: string) => Promise<boolean>;
   onRetry: (tempId: number, content: string, parentId: number | null) => Promise<boolean>;
   onLoadReplies: (parentId: number) => Promise<void>;
   loadingReplyIds: Set<number>;
@@ -34,7 +34,6 @@ interface ReplyRowProps extends Omit<CommentItemProps, "comment"> {
   comment: EnhancedComment;
   replyTo: string;
   replyToId: number;
-  index: number;
 }
 
 const commentDateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -43,53 +42,29 @@ const commentDateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 function formatCommentTimestamp(value: string) {
-  const timestamp = new Date(value).getTime();
-  return Number.isFinite(timestamp) ? commentDateFormatter.format(new Date(timestamp)) : undefined;
-}
-
-function parseCommentDate(value: string) {
   const dateStr =
     value.includes("T") && !value.endsWith("Z") && !value.includes("+") ? `${value}Z` : value;
   const timestamp = new Date(dateStr).getTime();
-  return Number.isFinite(timestamp) ? timestamp : null;
+  return Number.isFinite(timestamp) ? commentDateFormatter.format(new Date(timestamp)) : undefined;
 }
 
-function formatCompactCommentTime(value: string, now: Date) {
-  const timestamp = parseCommentDate(value);
-  if (timestamp === null) return "now";
-
-  const elapsedSeconds = Math.max(0, Math.floor((now.getTime() - timestamp) / 1000));
-  if (elapsedSeconds < 10) return "now";
-  if (elapsedSeconds < 60) return `${elapsedSeconds}s`;
-
-  const elapsedMinutes = Math.floor(elapsedSeconds / 60);
-  if (elapsedMinutes < 60) return `${elapsedMinutes}m`;
-
-  const elapsedHours = Math.floor(elapsedMinutes / 60);
-  if (elapsedHours < 24) return `${elapsedHours}h`;
-
-  const elapsedDays = Math.floor(elapsedHours / 24);
-  if (elapsedDays < 7) return `${elapsedDays}d`;
-
-  return new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short" }).format(
-    new Date(timestamp)
-  );
-}
-
-function getDisplayName(comment: EnhancedComment) {
-  return comment.nickname || comment.username || "Anonymous";
-}
-
-function flattenReplies(root: EnhancedComment) {
-  const rows: Array<{ comment: EnhancedComment; replyTo: string; replyToId: number }> = [];
-  const visit = (parent: EnhancedComment, children: EnhancedComment[]) => {
-    for (const child of children) {
-      rows.push({ comment: child, replyTo: getDisplayName(parent), replyToId: parent.id });
-      visit(child, child.children ?? []);
-    }
-  };
-  visit(root, root.children ?? []);
-  return rows;
+function StatusHint({ comment }: { comment: EnhancedComment }) {
+  if (comment.isFailed) {
+    return <span className="text-danger text-xs font-medium">Failed to send</span>;
+  }
+  if (comment.isPending) {
+    return <span className="text-muted text-xs">Sending…</span>;
+  }
+  if (comment.status === "PENDING") {
+    return <span className="text-warning text-xs font-medium">Awaiting review</span>;
+  }
+  if (comment.pinned) {
+    return <span className="text-muted text-xs">Pinned</span>;
+  }
+  if (comment.featured) {
+    return <span className="text-muted text-xs">Featured</span>;
+  }
+  return null;
 }
 
 export function CommentItem(props: CommentItemProps) {
@@ -98,12 +73,12 @@ export function CommentItem(props: CommentItemProps) {
   const replies = useMemo(() => flattenReplies(comment), [comment]);
   const replyTotal = Math.max(comment.replyCount ?? 0, replies.length);
   const shouldReduceMotion = useReducedMotion();
-  const shouldAnimateEntry = !comment.isPending && !shouldReduceMotion;
   const hasHighlightedReply = replies.some(
     ({ comment: reply }) => reply.id === highlightedCommentId
   );
   const [isExpanded, setIsExpanded] = useState(hasHighlightedReply);
   const repliesId = `comment-replies-${comment.id}`;
+  const isHighlighted = highlightedCommentId === comment.id;
 
   useEffect(() => {
     if (!hasHighlightedReply) return;
@@ -112,97 +87,97 @@ export function CommentItem(props: CommentItemProps) {
   }, [hasHighlightedReply]);
 
   return (
-    <MotionSurface
-      className="group scroll-mt-24 px-1 py-6 first:pt-2 sm:px-2"
-      variant={highlightedCommentId === comment.id ? "secondary" : "transparent"}
-      initial={shouldAnimateEntry ? { opacity: 0, y: 10 } : false}
-      animate={{ opacity: 1, y: 0 }}
-      exit={shouldAnimateEntry ? { opacity: 0, y: -8 } : undefined}
-      transition={shouldAnimateEntry ? { duration: 0.22, ease: "easeOut" } : { duration: 0 }}
+    <article
+      id={`comment-${comment.id}`}
+      data-comment-card={comment.id}
+      className={cn(
+        "border-border/70 scroll-mt-24 border-b py-5 last:border-b-0",
+        isHighlighted &&
+          "bg-accent/5 ring-accent/20 -mx-2 rounded-xl border-b-transparent px-2 ring-1"
+      )}
     >
-      <article id={`comment-card-${comment.id}`}>
-        <CommentRow {...props} comment={comment} depth={1} />
+      <CommentRow {...props} comment={comment} depth={1} />
 
-        {(replies.length > 0 || replyTotal > 0) && (
-          <div className="mt-5 ml-5 pl-4 sm:ml-12 sm:pl-5">
-            <Button
-              size="sm"
-              variant="ghost"
-              aria-controls={repliesId}
-              aria-expanded={isExpanded}
-              onPress={async () => {
-                if (!isExpanded && replies.length === 0 && replyTotal > 0) {
-                  await props.onLoadReplies(comment.id);
-                }
-                setIsExpanded((expanded) => !expanded);
-              }}
-            >
-              {isExpanded ? (
-                <Icon icon="gravity-ui:arrow-up" aria-hidden="true" className="size-3.5" />
-              ) : (
-                <Icon icon="gravity-ui:arrow-down" aria-hidden="true" className="size-3.5" />
-              )}
-              {props.loadingReplyIds.has(comment.id)
-                ? "Loading replies..."
-                : `${isExpanded ? "Hide" : "View"} ${replyTotal} ${replyTotal === 1 ? "reply" : "replies"}`}
-            </Button>
+      {(replies.length > 0 || replyTotal > 0) && (
+        <div className="mt-3 ml-10 sm:ml-12">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-muted hover:text-foreground h-7 px-2 text-xs"
+            aria-controls={repliesId}
+            aria-expanded={isExpanded}
+            onPress={async () => {
+              if (!isExpanded && replies.length === 0 && replyTotal > 0) {
+                await props.onLoadReplies(comment.id);
+              }
+              setIsExpanded((expanded) => !expanded);
+            }}
+          >
+            <Icon
+              icon={isExpanded ? "gravity-ui:chevron-up" : "gravity-ui:chevron-down"}
+              aria-hidden="true"
+              className="size-3.5"
+            />
+            {props.loadingReplyIds.has(comment.id)
+              ? "Loading replies…"
+              : `${isExpanded ? "Hide" : "Show"} ${replyTotal} ${replyTotal === 1 ? "reply" : "replies"}`}
+          </Button>
 
-            <AnimatePresence initial={false}>
-              {isExpanded && (
-                <motion.div
-                  id={repliesId}
-                  initial={shouldReduceMotion ? false : { height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={shouldReduceMotion ? undefined : { height: 0, opacity: 0 }}
-                  transition={{ duration: 0.24, ease: "easeOut" }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-4 flex flex-col gap-5">
-                    {replies.map(({ comment: reply, replyTo, replyToId }, index) => (
-                      <ReplyRow
-                        key={reply.id}
-                        {...props}
-                        comment={reply}
-                        index={index}
-                        replyTo={replyTo}
-                        replyToId={replyToId}
-                      />
-                    ))}
-                  </div>
-                  {isExpanded && props.hasMoreReplies(comment.id) && (
+          <AnimatePresence initial={false}>
+            {isExpanded ? (
+              <motion.div
+                id={repliesId}
+                initial={shouldReduceMotion ? false : { height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={shouldReduceMotion ? undefined : { height: 0, opacity: 0 }}
+                transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="border-border/80 mt-3 space-y-4 border-l pl-4 sm:pl-5">
+                  {replies.map(({ comment: reply, replyTo, replyToId }) => (
+                    <ReplyRow
+                      key={reply.id}
+                      {...props}
+                      comment={reply}
+                      replyTo={replyTo}
+                      replyToId={replyToId}
+                    />
+                  ))}
+                  {props.hasMoreReplies(comment.id) ? (
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="mt-3 ml-1 self-start"
+                      className="text-muted h-7 px-0 text-xs"
                       onPress={() => props.onLoadReplies(comment.id)}
                       isDisabled={props.loadingReplyIds.has(comment.id)}
                     >
                       Load more replies
                     </Button>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-      </article>
-    </MotionSurface>
+                  ) : null}
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
+      )}
+    </article>
   );
 }
 
-function ReplyRow({ comment, replyTo, replyToId, index, ...props }: ReplyRowProps) {
-  const shouldReduceMotion = useReducedMotion();
+function ReplyRow({ comment, replyTo, replyToId, ...props }: ReplyRowProps) {
+  const { highlightedCommentId } = useCommentContext();
+  const isHighlighted = highlightedCommentId === comment.id;
 
   return (
-    <motion.article
-      id={`comment-card-${comment.id}`}
-      className="scroll-mt-24"
-      initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: shouldReduceMotion ? 0 : index * 0.05, ease: "easeOut" }}
+    <article
+      id={`comment-${comment.id}`}
+      className={cn(
+        "scroll-mt-24",
+        isHighlighted && "bg-accent/5 ring-accent/20 -ml-4 rounded-lg px-4 py-2 ring-1 sm:-ml-5"
+      )}
     >
       <CommentRow {...props} comment={comment} depth={2} replyTo={replyTo} replyToId={replyToId} />
-    </motion.article>
+    </article>
   );
 }
 
@@ -219,7 +194,7 @@ function CommentRow({
   onRetry,
   replyToId,
 }: CommentItemProps & { depth: number; replyTo?: string; replyToId?: number }) {
-  const now = useNow();
+  const formatRelativeTime = useRelativeTime();
   const {
     activeReplyId,
     setActiveReplyId,
@@ -232,18 +207,19 @@ function CommentRow({
   const isReplying = activeReplyId === comment.id;
   const isHighlighted = highlightedCommentId === comment.id;
   const isDeleted = comment.deletedPlaceholder === true;
-  const displayName = getDisplayName(comment);
+  const displayName = getCommentDisplayName(comment);
+  const timeLabel = formatRelativeTime(comment.createdAt);
 
   useEffect(() => {
     if (!isHighlighted) return;
     const timer = window.setTimeout(
       () =>
         document
-          .getElementById(`comment-card-${comment.id}`)
+          .getElementById(`comment-${comment.id}`)
           ?.scrollIntoView({ behavior: "smooth", block: "center" }),
       0
     );
-    const clearHighlightTimer = window.setTimeout(() => setHighlightedCommentId(null), 420);
+    const clearHighlightTimer = window.setTimeout(() => setHighlightedCommentId(null), 2500);
     return () => {
       window.clearTimeout(timer);
       window.clearTimeout(clearHighlightTimer);
@@ -262,61 +238,54 @@ function CommentRow({
   };
 
   return (
-    <div className={cn("group flex gap-3", depth === 1 ? "sm:gap-4" : "sm:gap-3")}>
+    <div className="flex gap-3">
       <UserAvatar
-        size={depth === 1 ? "md" : "sm"}
+        size="sm"
         variant="soft"
-        className="shrink-0"
+        className="mt-0.5 shrink-0"
         name={displayName}
         avatar={comment.avatar}
       />
 
       <div className="min-w-0 flex-1">
-        <header className="flex flex-wrap items-center gap-x-2 gap-y-1.5 leading-tight">
-          <Typography truncate type="body-sm" weight="semibold">
+        <header className="flex min-w-0 flex-col gap-0.5">
+          <Typography
+            className="leading-none"
+            truncate
+            align="start"
+            type="body-sm"
+            weight="semibold"
+          >
             {displayName}
           </Typography>
-          {replyTo && replyToId !== undefined && (
-            <Button
-              size="sm"
-              variant="ghost"
-              aria-label={`Reply to ${replyTo}`}
-              onPress={() => setHighlightedCommentId(replyToId)}
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+            <Typography
+              truncate
+              align="start"
+              type="body-xs"
+              color="muted"
+              className="tabular-nums"
             >
-              → {replyTo}
-            </Button>
-          )}
-          <Typography color="muted" type="body-xs" className="tabular-nums">
-            <time dateTime={comment.createdAt} title={formatCommentTimestamp(comment.createdAt)}>
-              · {formatCompactCommentTime(comment.createdAt, now)}
-            </time>
-          </Typography>
-          {comment.pinned && (
-            <Chip size="sm" variant="soft" color="accent">
-              Pinned
-            </Chip>
-          )}
-          {comment.featured && (
-            <Chip size="sm" variant="soft" color="warning">
-              Featured
-            </Chip>
-          )}
-          {comment.isFailed ? (
-            <Chip size="sm" color="danger" variant="soft">
-              Not sent
-            </Chip>
-          ) : comment.isPending ? (
-            <Chip size="sm" variant="soft">
-              Sending
-            </Chip>
-          ) : comment.status === "PENDING" ? (
-            <Chip size="sm" color="warning" variant="soft">
-              In review
-            </Chip>
-          ) : null}
+              <time dateTime={comment.createdAt} title={formatCommentTimestamp(comment.createdAt)}>
+                {timeLabel}
+              </time>
+            </Typography>
+            {replyTo && replyToId !== undefined ? (
+              <button
+                type="button"
+                className="text-muted hover:text-foreground inline-flex max-w-[12rem] items-center gap-1 truncate text-xs transition-colors"
+                aria-label={`Jump to comment by ${replyTo}`}
+                onClick={() => setHighlightedCommentId(replyToId)}
+              >
+                <span aria-hidden="true">replied to</span>
+                <span className="font-medium">{replyTo}</span>
+              </button>
+            ) : null}
+            <StatusHint comment={comment} />
+          </div>
         </header>
 
-        <div className="mt-2 max-w-[68ch]">
+        <div className="mt-1.5 max-w-[68ch]">
           <CommentContent
             content={comment.content}
             isEdited={Boolean(comment.editedAt)}
@@ -329,9 +298,9 @@ function CommentRow({
           />
         </div>
 
-        {!isDeleted && !isEditing && comment.isFailed && (
+        {!isDeleted && !isEditing && comment.isFailed ? (
           <Button
-            className="mt-3"
+            className="mt-2"
             size="sm"
             variant="secondary"
             onPress={() => onRetry(comment.id, comment.content, comment.parentId ?? null)}
@@ -339,48 +308,46 @@ function CommentRow({
             <Icon icon="gravity-ui:arrow-rotate-right" aria-hidden="true" />
             Retry
           </Button>
-        )}
+        ) : null}
 
-        {!isDeleted &&
-          !isEditing &&
-          !comment.isFailed &&
-          !comment.isPending &&
-          comment.status !== "PENDING" && (
-            <CommentActions
-              comment={comment}
-              depth={depth}
-              isReplying={isReplying}
-              onCopyLink={copyCommentLink}
-              onDelete={() => onDelete(comment.id)}
-              onEditStart={() => setIsEditing(true)}
-              onLikeToggle={() => onLikeToggle(comment.id, Boolean(comment.likedByCurrentUser))}
-              onReplyToggle={() => {
-                if (!isAuthenticated) {
-                  onAuthenticationRequired?.();
-                  dispatch(setLoginOpen(true));
-                  return;
-                }
-                setActiveReplyId(isReplying ? null : comment.id);
-              }}
-              onReport={() => onReport(comment.id)}
-            />
-          )}
+        {!isDeleted && !isEditing && !comment.isFailed && !comment.isPending ? (
+          <CommentActions
+            comment={comment}
+            depth={depth}
+            isReplying={isReplying}
+            onCopyLink={copyCommentLink}
+            onDelete={() => onDelete(comment.id)}
+            onEditStart={() => setIsEditing(true)}
+            onLikeToggle={() =>
+              onLikeToggle(comment.id, Boolean(comment.likedByCurrentUser), comment.likesCount ?? 0)
+            }
+            onReplyToggle={() => {
+              if (!isAuthenticated) {
+                onAuthenticationRequired?.();
+                dispatch(setLoginOpen(true));
+                return;
+              }
+              setActiveReplyId(isReplying ? null : comment.id);
+            }}
+            onReport={(reason) => onReport(comment.id, reason)}
+          />
+        ) : null}
 
-        {isReplying && (
+        {isReplying ? (
           <CommentInput
             hideTrigger
             isOpen
             replyId={comment.id}
             replyTo={displayName}
             onAuthenticationRequired={onAuthenticationRequired}
-            placeholder={`Reply to ${displayName}...`}
-            submitButtonText="Post reply"
+            placeholder={`Reply to ${displayName}…`}
+            submitButtonText="Reply"
             onOpenChange={(open) => {
               if (!open) setActiveReplyId(null);
             }}
             onSubmit={(content) => onReplySubmit(content, comment.id)}
           />
-        )}
+        ) : null}
       </div>
     </div>
   );
