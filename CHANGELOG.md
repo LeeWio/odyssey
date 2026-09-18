@@ -1,3 +1,10 @@
+## [1.158.1](https://github.com/LeeWio/odyssey/compare/v1.158.0...v1.158.1) (2026-09-18)
+
+
+### Bug Fixes
+
+* **e2e:** align guestbook comment assertions with thread titles ([36b888f](https://github.com/LeeWio/odyssey/commit/36b888ffeb4f426cbf6f386d9024037bb40bc95f))
+
 # [1.158.0](https://github.com/LeeWio/odyssey/compare/v1.157.0...v1.158.0) (2026-09-18)
 
 
