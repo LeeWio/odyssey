@@ -1,27 +1,42 @@
-export const aboutCaptions = {
-  manifesto: "Not a resume.",
-  person: "My defaults.",
-  dock: "One stack.",
-  refuse: "No thank you.",
-  solitude: "Quiet is a tool.",
-  play: "I play anyway.",
-  music: "This library only.",
-  coke: "The honest can.",
-  craft: "Less pile. More spine.",
-  product: "A landscape, not drawers.",
-  timeline: "Taste trail.",
-  outro: "Still becoming.",
+export const aboutPerson = {
+  name: "Lee",
+  handle: "LeeWio",
+  role: "Engineer, Maker, Observer",
+  initials: "L",
 } as const;
 
 export const aboutMarkers = ["INTP", "Capricorn", "Apple"] as const;
 
-export const tasteBeads = [
-  { id: "early", label: "Early" },
-  { id: "habit", label: "Habit" },
-  { id: "play", label: "Play" },
-  { id: "wire", label: "Wire" },
-  { id: "build", label: "Build" },
-  { id: "now", label: "Now" },
+export const aboutIntro = {
+  lead: "Not a resume.",
+  body: "A short page of defaults: the stack I keep, the noise I drop, and the games I still play.",
+} as const;
+
+export const aboutDefaults = [
+  {
+    id: "stack",
+    title: "One stack",
+    description: "Apple is the whole desk. One machine family, fewer adapters, less drift.",
+    chips: ["Mac", "iPhone", "AirPods"],
+  },
+  {
+    id: "refuse",
+    title: "No thank you",
+    description: "Android and Windows stay off the desk. Not a debate. A closed list.",
+    chips: ["No Android", "No Windows"],
+  },
+  {
+    id: "quiet",
+    title: "Quiet is a tool",
+    description: "Chat noise waits. A closed door is how the work gets finished.",
+    chips: ["Solitude"],
+  },
+  {
+    id: "music",
+    title: "This library only",
+    description: "Other music apps come and go. Apple Music is the one that stays.",
+    chips: ["Apple Music"],
+  },
 ] as const;
 
 export const playTitles = [
@@ -32,23 +47,74 @@ export const playTitles = [
   { id: "hok", label: "Honor of Kings" },
 ] as const;
 
-export const aboutPerson = {
-  name: "Lee",
-  handle: "LeeWio",
-  role: "Engineer · Maker · Observer",
+export const playPlatforms = ["PS5", "Switch", "Mobile"] as const;
+
+export const aboutPlay = {
+  title: "Play",
+  description: "Games are rest, and a way to feel a system from the inside.",
 } as const;
 
-/** Longer descriptions for assistive tech — not shown on screen */
-export const aboutAria = {
-  manifesto: "About page opens with the line: not a resume. This is a personality reel.",
-  dock: "Apple devices magnetically snap into one aligned stack.",
-  refuse: "Stylized Android and Windows marks are thrown into a trash can.",
-  solitude: "Chat noise fades and a door closes. Quiet is treated as a tool.",
-  play: "Game badges appear for Zelda, Elden Ring, Mario, League, and Honor of Kings.",
-  music: "Other music services slide away. Only Apple Music remains.",
-  coke: "A Coke can tips in. A Pepsi mark is swept aside.",
-  craft: "Messy feature chips collapse into a single clean spine.",
-  product: "File drawers rearrange into a connected landscape.",
-  timeline: "Taste timeline beads labeled Early, Habit, Play, Wire, Build, and Now.",
-  outro: "The reel ends on the line: still becoming. No links.",
+export const aboutCraft = {
+  title: "Less pile. More spine.",
+  description: "Features get cut until the line holds. One honest can on the desk: Coke.",
+  chips: ["Coke"],
+} as const;
+
+export const aboutProduct = {
+  title: "A landscape, not drawers.",
+  description:
+    "Odyssey is meant to be walked, not filed. Pages connect instead of stacking into folders.",
+  href: "/universe",
+  cta: "Open universe",
+} as const;
+
+export const tasteTrail = [
+  {
+    id: "early",
+    label: "Early",
+    description: "First, collapse the tools into one stack. Variety can wait.",
+    icon: "gravity-ui:layout-cells-large",
+    status: "default",
+  },
+  {
+    id: "habit",
+    label: "Habit",
+    description: "Fewer meetings. Finish one thing alone, then talk.",
+    icon: "gravity-ui:file-text",
+    status: "default",
+  },
+  {
+    id: "play",
+    label: "Play",
+    description: "Play is rest, and a way to keep intuition for systems.",
+    icon: "gravity-ui:sparkles",
+    status: "default",
+  },
+  {
+    id: "wire",
+    label: "Wire",
+    description: "Fewer lines. A harder spine.",
+    icon: "gravity-ui:compass",
+    status: "default",
+  },
+  {
+    id: "build",
+    label: "Build",
+    description: "This site is the experiment, not a brochure for one.",
+    icon: "gravity-ui:thunderbolt",
+    status: "default",
+  },
+  {
+    id: "now",
+    label: "Now",
+    description: "Still becoming.",
+    icon: "gravity-ui:circle-check",
+    status: "current",
+  },
+] as const;
+
+export const aboutClose = {
+  title: "Still becoming.",
+  primary: { href: "/chronicle", label: "Read writing" },
+  secondary: { href: "/uses", label: "See tools" },
 } as const;
