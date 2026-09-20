@@ -2,7 +2,7 @@
 
 import { Icon } from "@iconify/react";
 
-import { Card, Link } from "@heroui/react";
+import { Button, Card, Link } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
@@ -11,10 +11,31 @@ import { useUnsubscribeQuery, useVerifyQuery } from "@/lib/features/openapi";
 type NewsletterAction = "verify" | "unsubscribe";
 
 export function NewsletterStatusPage({ action }: { action: NewsletterAction }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token")?.trim() ?? "";
-  const isComplete = searchParams.get("status") === action;
+
+  return (
+    <NewsletterStatusContent
+      key={`${action}:${token}`}
+      action={action}
+      token={token}
+      isComplete={!token && searchParams.get("status") === action}
+    />
+  );
+}
+
+// Isolate query state when another email link is opened in the same mounted page.
+// A previous token's success must never complete a different token's request.
+function NewsletterStatusContent({
+  action,
+  token,
+  isComplete,
+}: {
+  action: NewsletterAction;
+  token: string;
+  isComplete: boolean;
+}) {
+  const router = useRouter();
   const verification = useVerifyQuery(
     { token },
     { skip: action !== "verify" || token.length === 0 || isComplete }
@@ -25,17 +46,39 @@ export function NewsletterStatusPage({ action }: { action: NewsletterAction }) {
   );
   const request = action === "verify" ? verification : unsubscription;
   const isVerification = action === "verify";
-  const isSuccessful = isComplete || request.isSuccess;
-  const title = isVerification ? "You’re on the list." : "You’ve been unsubscribed.";
-  const description = isVerification
+  const state = isComplete
+    ? "success"
+    : !token
+      ? "missing"
+      : request.isFetching || request.isUninitialized
+        ? "pending"
+        : request.isError
+          ? "error"
+          : request.isSuccess
+            ? "success"
+            : "pending";
+  const successTitle = isVerification ? "You’re on the list." : "You’ve been unsubscribed.";
+  const successDescription = isVerification
     ? "Your subscription is confirmed. Expect an occasional note when there is something worth sharing."
     : "You will no longer receive the weekly note. You can always come back when the timing feels right.";
+  const title = {
+    success: successTitle,
+    pending: isVerification ? "Confirming your subscription…" : "Updating your subscription…",
+    missing: "A link is needed.",
+    error: "We couldn’t confirm your choice.",
+  }[state];
+  const description = {
+    success: successDescription,
+    pending: "Please wait while we process your request.",
+    missing: "Open the complete newsletter link from your email to continue.",
+    error: "Try again, or use the latest newsletter link from your email.",
+  }[state];
 
   useEffect(() => {
-    if (request.isSuccess && !isComplete) {
+    if (state === "success" && token) {
       router.replace(`/newsletter/${action}?status=${action}`);
     }
-  }, [action, isComplete, request.isSuccess, router]);
+  }, [action, state, token, router]);
 
   return (
     <main className="bg-background flex min-h-[100dvh] items-center px-6 py-24 sm:px-10">
@@ -51,8 +94,8 @@ export function NewsletterStatusPage({ action }: { action: NewsletterAction }) {
             </Card.Description>
           </Card.Header>
           <Card.Content>
-            {!token ? (
-              <div className="text-muted flex items-center gap-3 text-sm">
+            {state === "missing" ? (
+              <div role="alert" className="text-muted flex items-center gap-3 text-sm">
                 <Icon
                   icon="gravity-ui:xmark"
                   aria-hidden="true"
@@ -60,22 +103,27 @@ export function NewsletterStatusPage({ action }: { action: NewsletterAction }) {
                 />
                 This link is incomplete. Please use the link from your email.
               </div>
-            ) : request.isLoading ? (
-              <div className="text-muted flex items-center gap-3 text-sm">
+            ) : state === "pending" ? (
+              <div role="status" className="text-muted flex items-center gap-3 text-sm">
                 <span aria-hidden="true" className="bg-accent size-2 animate-pulse rounded-full" />
                 Confirming your choice…
               </div>
-            ) : request.isError ? (
-              <div className="text-muted flex items-center gap-3 text-sm">
-                <Icon
-                  icon="gravity-ui:xmark"
-                  aria-hidden="true"
-                  className="text-danger size-5 shrink-0"
-                />
-                This link is no longer valid. You can request a fresh subscription email below.
+            ) : state === "error" ? (
+              <div className="flex flex-col items-start gap-4">
+                <div role="alert" className="text-muted flex items-center gap-3 text-sm">
+                  <Icon
+                    icon="gravity-ui:xmark"
+                    aria-hidden="true"
+                    className="text-danger size-5 shrink-0"
+                  />
+                  We couldn’t process this link.
+                </div>
+                <Button variant="secondary" onPress={() => void request.refetch()}>
+                  Try again
+                </Button>
               </div>
-            ) : isSuccessful ? (
-              <div className="text-muted flex items-center gap-3 text-sm">
+            ) : state === "success" ? (
+              <div role="status" className="text-muted flex items-center gap-3 text-sm">
                 <Icon
                   icon="gravity-ui:check"
                   aria-hidden="true"
