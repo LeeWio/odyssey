@@ -65,12 +65,13 @@ export function CommentInput({
     : isMoment
       ? `moment:${momentId}`
       : `post:${postId}`;
-  const [draft, setDraft, clearDraft, isDraftHydrated] = useCommentDraft(draftThreadKey, replyId);
-  const [content, setContent] = useState("");
+  const [content, setDraft, clearDraft] = useCommentDraft(draftThreadKey, replyId);
+  const draftScope = `${draftThreadKey}:${replyId ?? "root"}`;
   const [internalOpen, setInternalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingSubmission, setPendingSubmission] = useState<{ scope: string } | null>(null);
+  const activeSubmission = useRef<{ scope: string } | null>(null);
+  const isSubmitting = pendingSubmission?.scope === draftScope;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const didHydrateDraft = useRef(false);
   const dispatch = useAppDispatch();
   const formId = useId();
   const modalIsOpen = isOpen ?? internalOpen;
@@ -78,14 +79,11 @@ export function CommentInput({
   const composerName = currentUser || "Anonymous";
 
   useEffect(() => {
-    didHydrateDraft.current = false;
-  }, [draftThreadKey, replyId]);
-
-  useEffect(() => {
-    if (!isDraftHydrated || didHydrateDraft.current) return;
-    didHydrateDraft.current = true;
-    setContent(draft);
-  }, [draft, isDraftHydrated]);
+    return () => {
+      // A previous thread's request may finish, but must not close this composer.
+      activeSubmission.current = null;
+    };
+  }, [draftScope]);
 
   const setModalOpen = (nextIsOpen: boolean) => {
     if (isOpen === undefined) setInternalOpen(nextIsOpen);
@@ -97,7 +95,6 @@ export function CommentInput({
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(event.target.value);
     setDraft(event.target.value);
   };
 
@@ -116,9 +113,11 @@ export function CommentInput({
       return;
     }
 
-    if (!content.trim() || isSubmitting) return;
+    if (!content.trim() || isSubmitting || activeSubmission.current?.scope === draftScope) return;
 
-    setIsSubmitting(true);
+    const submission = { scope: draftScope };
+    activeSubmission.current = submission;
+    setPendingSubmission(submission);
     commentDebug("input:submit-start", { replyId, contentLength: content.trim().length });
     try {
       const submitted = await onSubmit(content.trim());
@@ -127,9 +126,9 @@ export function CommentInput({
         return;
       }
       commentDebug("input:submit-resolved", { replyId });
-      setContent("");
-      clearDraft();
-      setModalOpen(false);
+      if (clearDraft(content) && activeSubmission.current === submission) {
+        setModalOpen(false);
+      }
     } catch (error) {
       commentDebug("input:submit-rejected", {
         replyId,
@@ -137,7 +136,8 @@ export function CommentInput({
       });
       console.error("Comment submission failed:", error);
     } finally {
-      setIsSubmitting(false);
+      if (activeSubmission.current === submission) activeSubmission.current = null;
+      setPendingSubmission((current) => (current === submission ? null : current));
       commentDebug("input:submit-finally", { replyId });
     }
   };
@@ -148,7 +148,6 @@ export function CommentInput({
   };
 
   const handleValueChange = (value: string) => {
-    setContent(value);
     setDraft(value);
   };
 

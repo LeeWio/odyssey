@@ -3,6 +3,10 @@
 import { useCallback, useMemo, useState } from "react";
 import { useLazyGetCommentRepliesCursorQuery, type CommentResponse } from "@/lib/features/comment";
 
+import { useCommentLoader } from "./use-comment-loader";
+import { reconcileCommentDeletion } from "../utils/deletion";
+import { reconcileCommentEdit } from "../utils/editing";
+
 const PAGE_SIZE = 20;
 
 export interface ReplyPage {
@@ -12,7 +16,6 @@ export interface ReplyPage {
 }
 
 const EMPTY_REPLY_PAGES: Record<number, ReplyPage> = {};
-const EMPTY_LOADING_IDS = new Set<number>();
 
 export type SeedRepliesOptions = {
   hasMore?: boolean;
@@ -29,9 +32,7 @@ export function useCommentReplies({ threadKey }: UseCommentRepliesArgs) {
   const [replyPagesByThread, setReplyPagesByThread] = useState<
     Record<string, Record<number, ReplyPage>>
   >({});
-  const [loadingReplyIdsByThread, setLoadingReplyIdsByThread] = useState<
-    Record<string, Set<number>>
-  >({});
+  const { pendingKeys, run } = useCommentLoader();
   const [loadRepliesQuery] = useLazyGetCommentRepliesCursorQuery();
 
   const replyPages = useMemo(
@@ -39,55 +40,52 @@ export function useCommentReplies({ threadKey }: UseCommentRepliesArgs) {
     [replyPagesByThread, threadKey]
   );
   const loadingReplyIds = useMemo(
-    () => loadingReplyIdsByThread[threadKey] ?? EMPTY_LOADING_IDS,
-    [loadingReplyIdsByThread, threadKey]
+    () =>
+      new Set(
+        [...pendingKeys]
+          .filter((key) => key.startsWith(`${threadKey}:`))
+          .map((key) => Number(key.slice(threadKey.length + 1)))
+      ),
+    [pendingKeys, threadKey]
   );
 
   const loadReplies = useCallback(
     async (parentId: number) => {
-      if (loadingReplyIds.has(parentId)) return;
       const current = replyPages[parentId];
-      if (current && !current.hasMore) return;
+      if (current && !current.hasMore) return true;
 
-      setLoadingReplyIdsByThread((previous) => {
-        const next = new Set(previous[threadKey] ?? []);
-        next.add(parentId);
-        return { ...previous, [threadKey]: next };
-      });
-      try {
-        const result = await loadRepliesQuery({
-          parentId,
-          cursor: current?.nextCursor ?? undefined,
-          size: PAGE_SIZE,
-        }).unwrap();
-        setReplyPagesByThread((previous) => {
-          const threadPages = previous[threadKey] ?? {};
-          const existing = threadPages[parentId];
-          const existingIds = new Set(existing?.comments.map((comment) => comment.id) ?? []);
-          return {
-            ...previous,
-            [threadKey]: {
-              ...threadPages,
-              [parentId]: {
-                comments: [
-                  ...(existing?.comments ?? []),
-                  ...result.list.filter((comment) => !existingIds.has(comment.id)),
-                ],
-                nextCursor: result.nextCursor,
-                hasMore: result.hasMore,
+      return run(
+        `${threadKey}:${parentId}`,
+        async () => {
+          const result = await loadRepliesQuery({
+            parentId,
+            cursor: current?.nextCursor ?? undefined,
+            size: PAGE_SIZE,
+          }).unwrap();
+          setReplyPagesByThread((previous) => {
+            const threadPages = previous[threadKey] ?? {};
+            const existing = threadPages[parentId];
+            const existingIds = new Set(existing?.comments.map((comment) => comment.id) ?? []);
+            return {
+              ...previous,
+              [threadKey]: {
+                ...threadPages,
+                [parentId]: {
+                  comments: [
+                    ...(existing?.comments ?? []),
+                    ...result.list.filter((comment) => !existingIds.has(comment.id)),
+                  ],
+                  nextCursor: result.nextCursor,
+                  hasMore: result.hasMore,
+                },
               },
-            },
-          };
-        });
-      } finally {
-        setLoadingReplyIdsByThread((previous) => {
-          const next = new Set(previous[threadKey] ?? []);
-          next.delete(parentId);
-          return { ...previous, [threadKey]: next };
-        });
-      }
+            };
+          });
+        },
+        "Couldn’t load replies. Please try again."
+      );
     },
-    [loadRepliesQuery, loadingReplyIds, replyPages, threadKey]
+    [loadRepliesQuery, run, replyPages, threadKey]
   );
 
   const hasMoreReplies = useCallback(
@@ -131,18 +129,15 @@ export function useCommentReplies({ threadKey }: UseCommentRepliesArgs) {
   );
 
   const patchReply = useCallback(
-    (commentId: number, content: string) => {
+    (commentId: number, content: string, editedAt: string) => {
       setReplyPagesByThread((previous) => {
         const threadPages = previous[threadKey];
         if (!threadPages) return previous;
         let changed = false;
         const next: Record<number, ReplyPage> = {};
         for (const [parentId, page] of Object.entries(threadPages)) {
-          const comments = page.comments.map((comment) => {
-            if (comment.id !== commentId) return comment;
-            changed = true;
-            return { ...comment, content, editedAt: new Date().toISOString() };
-          });
+          const comments = reconcileCommentEdit(page.comments, commentId, content, editedAt);
+          if (comments !== page.comments) changed = true;
           next[Number(parentId)] = { ...page, comments };
         }
         return changed ? { ...previous, [threadKey]: next } : previous;
@@ -159,8 +154,8 @@ export function useCommentReplies({ threadKey }: UseCommentRepliesArgs) {
         let changed = false;
         const next: Record<number, ReplyPage> = {};
         for (const [parentId, page] of Object.entries(threadPages)) {
-          const comments = page.comments.filter((comment) => comment.id !== commentId);
-          if (comments.length !== page.comments.length) changed = true;
+          const comments = reconcileCommentDeletion(page.comments, commentId);
+          if (comments !== page.comments) changed = true;
           next[Number(parentId)] = { ...page, comments };
         }
         return changed ? { ...previous, [threadKey]: next } : previous;

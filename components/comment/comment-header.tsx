@@ -119,6 +119,7 @@ export const CommentHeader = memo(function CommentHeader({
             variant="secondary"
             className="h-8 rounded-full px-3 text-xs shadow-sm"
             isPending={isLoadingNew}
+            isDisabled={isLoadingNew}
             aria-live="polite"
             onPress={onLoadNew}
           >

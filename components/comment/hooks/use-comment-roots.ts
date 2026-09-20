@@ -24,6 +24,10 @@ import {
 } from "@/lib/features/comment";
 import type { SortOrder } from "../context/comment-context";
 
+import { useCommentLoader } from "./use-comment-loader";
+import { reconcileCommentDeletion } from "../utils/deletion";
+import { reconcileCommentEdit } from "../utils/editing";
+
 const PAGE_SIZE = 20;
 
 interface UseCommentRootsArgs {
@@ -45,6 +49,7 @@ export function useCommentRoots({
   const queryKey = `${targetKey}:${sortOrder}`;
   const useCursorRoots = sortOrder === "newest";
   const usePost = !isGuestbook && !isMoment;
+  const { pendingKeys, run } = useCommentLoader();
 
   const [prependedRoots, setPrependedRoots] = useState<Record<string, CommentResponse[]>>({});
   const [additionalRoots, setAdditionalRoots] = useState<Record<string, CommentResponse[]>>({});
@@ -135,8 +140,10 @@ export function useCommentRoots({
   const activeRootsResult = useCursorRoots ? cursorRootsResult : pagedRootsResult;
 
   const baseComments = useMemo(
-    () => (useCursorRoots ? cursorRootsResult.data?.list : pagedRootsResult.data?.list) ?? [],
-    [cursorRootsResult.data?.list, pagedRootsResult.data?.list, useCursorRoots]
+    () =>
+      (useCursorRoots ? cursorRootsResult.currentData?.list : pagedRootsResult.currentData?.list) ??
+      [],
+    [cursorRootsResult.currentData?.list, pagedRootsResult.currentData?.list, useCursorRoots]
   );
 
   const rawCommentsList = useMemo(() => {
@@ -163,12 +170,13 @@ export function useCommentRoots({
   }, [rawCommentsList]);
 
   const cursorState = cursorStates[queryKey];
-  const rootCursor = cursorState?.cursor ?? cursorRootsResult.data?.nextCursor ?? undefined;
-  const rootHasMore = cursorState?.hasMore ?? Boolean(cursorRootsResult.data?.hasMore);
+  const rootCursor = cursorState?.cursor ?? cursorRootsResult.currentData?.nextCursor ?? undefined;
+  const rootHasMore = cursorState?.hasMore ?? Boolean(cursorRootsResult.currentData?.hasMore);
   const pagedState = pagedStates[queryKey];
   const pagedPage = pagedState?.page ?? 0;
   const pagedHasMore =
-    pagedState?.hasMore ?? Boolean(pagedRootsResult.data && pagedRootsResult.data.totalPages > 1);
+    pagedState?.hasMore ??
+    Boolean(pagedRootsResult.currentData && pagedRootsResult.currentData.totalPages > 1);
 
   const appendRoots = useCallback(
     (list: CommentResponse[]) => {
@@ -212,56 +220,63 @@ export function useCommentRoots({
   );
 
   const loadMore = useCallback(async () => {
-    if (!useCursorRoots) {
-      if (!pagedHasMore) return;
-      const nextPage = pagedPage + 1;
-      const result = isGuestbook
-        ? sortOrder === "likes"
-          ? await loadGuestbookHot({ page: nextPage, size: PAGE_SIZE }).unwrap()
-          : await loadGuestbookOldest({
-              page: nextPage,
-              size: PAGE_SIZE,
-              sort: ["createdAt,asc"],
-            }).unwrap()
-        : isMoment
-          ? sortOrder === "likes"
-            ? await loadMomentHot({ momentId, page: nextPage, size: PAGE_SIZE }).unwrap()
-            : await loadMomentOldest({
-                momentId,
-                page: nextPage,
-                size: PAGE_SIZE,
-                sort: ["createdAt,asc"],
-              }).unwrap()
-          : sortOrder === "likes"
-            ? await loadPostHot({ postId, page: nextPage, size: PAGE_SIZE }).unwrap()
-            : await loadPostOldest({
-                postId,
-                page: nextPage,
-                size: PAGE_SIZE,
-                sort: ["createdAt,asc"],
-              }).unwrap();
-      appendRoots(result.list);
-      setPagedStates((previous) => ({
-        ...previous,
-        // page is 0-based; hasMore when another page index still exists
-        [queryKey]: { page: nextPage, hasMore: nextPage + 1 < result.totalPages },
-      }));
-      return;
-    }
+    return run(
+      queryKey,
+      async () => {
+        if (!useCursorRoots) {
+          if (!pagedHasMore) return;
+          const nextPage = pagedPage + 1;
+          const result = isGuestbook
+            ? sortOrder === "likes"
+              ? await loadGuestbookHot({ page: nextPage, size: PAGE_SIZE }).unwrap()
+              : await loadGuestbookOldest({
+                  page: nextPage,
+                  size: PAGE_SIZE,
+                  sort: ["createdAt,asc"],
+                }).unwrap()
+            : isMoment
+              ? sortOrder === "likes"
+                ? await loadMomentHot({ momentId, page: nextPage, size: PAGE_SIZE }).unwrap()
+                : await loadMomentOldest({
+                    momentId,
+                    page: nextPage,
+                    size: PAGE_SIZE,
+                    sort: ["createdAt,asc"],
+                  }).unwrap()
+              : sortOrder === "likes"
+                ? await loadPostHot({ postId, page: nextPage, size: PAGE_SIZE }).unwrap()
+                : await loadPostOldest({
+                    postId,
+                    page: nextPage,
+                    size: PAGE_SIZE,
+                    sort: ["createdAt,asc"],
+                  }).unwrap();
+          appendRoots(result.list);
+          setPagedStates((previous) => ({
+            ...previous,
+            // page is 0-based; hasMore when another page index still exists
+            [queryKey]: { page: nextPage, hasMore: nextPage + 1 < result.totalPages },
+          }));
+          return;
+        }
 
-    if (!rootHasMore || rootCursor == null) return;
+        if (!rootHasMore || rootCursor == null) return;
 
-    const result = isGuestbook
-      ? await loadGuestbookCursor({ cursor: rootCursor, size: PAGE_SIZE }).unwrap()
-      : isMoment
-        ? await loadMomentCursor({ momentId, cursor: rootCursor, size: PAGE_SIZE }).unwrap()
-        : await loadPostCursor({ postId, cursor: rootCursor, size: PAGE_SIZE }).unwrap();
-    appendRoots(result.list);
-    setCursorStates((previous) => ({
-      ...previous,
-      [queryKey]: { cursor: result.nextCursor ?? undefined, hasMore: result.hasMore },
-    }));
+        const result = isGuestbook
+          ? await loadGuestbookCursor({ cursor: rootCursor, size: PAGE_SIZE }).unwrap()
+          : isMoment
+            ? await loadMomentCursor({ momentId, cursor: rootCursor, size: PAGE_SIZE }).unwrap()
+            : await loadPostCursor({ postId, cursor: rootCursor, size: PAGE_SIZE }).unwrap();
+        appendRoots(result.list);
+        setCursorStates((previous) => ({
+          ...previous,
+          [queryKey]: { cursor: result.nextCursor ?? undefined, hasMore: result.hasMore },
+        }));
+      },
+      "Couldn’t load more comments. Please try again."
+    );
   }, [
+    run,
     appendRoots,
     isMoment,
     loadMomentCursor,
@@ -285,7 +300,39 @@ export function useCommentRoots({
     useCursorRoots,
   ]);
 
-  const remoteTotal = useCursorRoots ? cursorRootsResult.data?.total : pagedRootsResult.data?.total;
+  const updateStoredComments = useCallback(
+    (update: (comments: CommentResponse[]) => CommentResponse[]) => {
+      const reconcile = (previous: Record<string, CommentResponse[]>) => {
+        const next = { ...previous };
+        let changed = false;
+        for (const key of Object.keys(previous)) {
+          if (key.startsWith(`${targetKey}:`)) {
+            next[key] = update(previous[key]);
+            if (next[key] !== previous[key]) changed = true;
+          }
+        }
+        return changed ? next : previous;
+      };
+      setPrependedRoots(reconcile);
+      setAdditionalRoots(reconcile);
+    },
+    [targetKey]
+  );
+
+  const removeStoredComment = useCallback(
+    (id: number) => updateStoredComments((comments) => reconcileCommentDeletion(comments, id)),
+    [updateStoredComments]
+  );
+
+  const editStoredComment = useCallback(
+    (id: number, content: string, editedAt: string) =>
+      updateStoredComments((comments) => reconcileCommentEdit(comments, id, content, editedAt)),
+    [updateStoredComments]
+  );
+
+  const remoteTotal = useCursorRoots
+    ? cursorRootsResult.currentData?.total
+    : pagedRootsResult.currentData?.total;
   const hasMore = useCursorRoots ? rootHasMore : pagedHasMore;
 
   return {
@@ -293,7 +340,10 @@ export function useCommentRoots({
     rawCommentsList,
     baseCount: baseComments.length,
     newestSeenId,
-    isLoading: activeRootsResult.isLoading,
+    isLoading:
+      activeRootsResult.isLoading ||
+      (activeRootsResult.isFetching && !activeRootsResult.currentData),
+    isLoadingMore: pendingKeys.has(queryKey),
     isFetching: activeRootsResult.isFetching,
     error: activeRootsResult.error,
     refetch: activeRootsResult.refetch,
@@ -302,5 +352,7 @@ export function useCommentRoots({
     loadMore,
     prependRoots,
     ensureRoot,
+    removeStoredComment,
+    editStoredComment,
   };
 }

@@ -38,6 +38,7 @@ function CommentSystemContent({
     isInitialCountLoading,
     isLoading,
     isFetching,
+    isLoadingMore,
     error,
     hasMore,
     loadMore,
@@ -51,8 +52,8 @@ function CommentSystemContent({
     hasMoreReplies,
     applyLikeOverride,
     revertLikeOverride,
-    patchReply,
-    removeReply,
+    reconcileEditedComment,
+    reconcileDeletedComment,
     hasComment,
     applyAnchorContext,
     newCount,
@@ -63,6 +64,7 @@ function CommentSystemContent({
     publishComment,
     retryPublishComment,
     toggleLike,
+    pendingLikeIds,
     editComment,
     deleteComment,
     reportComment,
@@ -73,8 +75,8 @@ function CommentSystemContent({
     markPendingCommentRetrying,
     applyLikeOverride,
     revertLikeOverride,
-    patchReply,
-    removeReply,
+    reconcileEditedComment,
+    reconcileDeletedComment,
   });
 
   useCommentHighlight({
@@ -88,6 +90,7 @@ function CommentSystemContent({
       error={error}
       hasMore={hasMore}
       isFetching={isFetching}
+      isLoadingMore={isLoadingMore}
       isLoading={isLoading}
       loadMore={loadMore}
       refetch={refetch}
@@ -95,6 +98,7 @@ function CommentSystemContent({
       onDelete={deleteComment}
       onEditSave={editComment}
       onLikeToggle={toggleLike}
+      pendingLikeIds={pendingLikeIds}
       onAuthenticationRequired={onRequestClose}
       onReplySubmit={(content, parentId) => publishComment(content, parentId)}
       onReport={reportComment}

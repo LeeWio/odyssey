@@ -18,6 +18,8 @@ import {
   normalizeCommentTree,
   pageResultHasMore,
 } from "../utils/thread";
+import { reconcileCommentDeletion } from "../utils/deletion";
+import { reconcileCommentEdit } from "../utils/editing";
 import { useCommentFreshness } from "./use-comment-freshness";
 import { useCommentReplies } from "./use-comment-replies";
 import { useCommentRoots } from "./use-comment-roots";
@@ -37,6 +39,7 @@ export function useComments() {
     newestSeenId,
     isLoading,
     isFetching,
+    isLoadingMore,
     error,
     refetch,
     remoteTotal,
@@ -44,6 +47,8 @@ export function useComments() {
     loadMore,
     prependRoots,
     ensureRoot,
+    removeStoredComment,
+    editStoredComment,
   } = useCommentRoots({ isGuestbook, isMoment, postId, momentId, sortOrder });
 
   const {
@@ -117,6 +122,25 @@ export function useComments() {
       })
     );
   };
+
+  const reconcileDeletedComment = useCallback(
+    (id: number) => {
+      removeStoredComment(id);
+      removeReply(id);
+      updatePending((previous) => reconcileCommentDeletion(previous, id));
+    },
+    [removeStoredComment, removeReply, updatePending]
+  );
+
+  const reconcileEditedComment = useCallback(
+    (id: number, content: string) => {
+      const editedAt = new Date().toISOString();
+      editStoredComment(id, content, editedAt);
+      patchReply(id, content, editedAt);
+      updatePending((previous) => reconcileCommentEdit(previous, id, content, editedAt));
+    },
+    [editStoredComment, patchReply, updatePending]
+  );
 
   const markPendingCommentRetrying = (id: number) => {
     updatePending((prev) =>
@@ -235,6 +259,7 @@ export function useComments() {
     isInitialCountLoading,
     isLoading,
     isFetching,
+    isLoadingMore,
     error,
     hasMore,
     loadMore,
@@ -249,8 +274,8 @@ export function useComments() {
     hasMoreReplies,
     applyLikeOverride,
     revertLikeOverride,
-    patchReply,
-    removeReply,
+    reconcileEditedComment,
+    reconcileDeletedComment,
     hasComment,
     applyAnchorContext,
     newCount,

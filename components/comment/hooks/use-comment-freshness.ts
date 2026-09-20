@@ -12,6 +12,8 @@ import {
 } from "@/lib/features/comment";
 import type { SortOrder } from "../context/comment-context";
 
+import { useCommentLoader } from "./use-comment-loader";
+
 const POLL_MS = 60_000;
 
 interface UseCommentFreshnessArgs {
@@ -36,7 +38,7 @@ export function useCommentFreshness({
   const enabled = sortOrder === "newest" && (isGuestbook || (isMoment ? momentId > 0 : postId > 0));
   const baselineKey = `${isGuestbook ? "guestbook" : isMoment ? `moment:${momentId}` : `post:${postId}`}:${sortOrder}`;
   const [baselineByKey, setBaselineByKey] = useState<Record<string, number | undefined>>({});
-  const [isLoadingNew, setIsLoadingNew] = useState(false);
+  const { pendingKeys, run } = useCommentLoader();
 
   const afterId = useMemo(() => {
     const stored = baselineByKey[baselineKey];
@@ -77,32 +79,34 @@ export function useCommentFreshness({
   const newCount = Math.max(
     0,
     (isGuestbook
-      ? guestbookCountResult.data
+      ? guestbookCountResult.currentData
       : isMoment
-        ? momentCountResult.data
-        : postCountResult.data) ?? 0
+        ? momentCountResult.currentData
+        : postCountResult.currentData) ?? 0
   );
 
   const loadNewComments = useCallback(async () => {
     if (!enabled || afterId == null || newCount <= 0) return;
-    setIsLoadingNew(true);
-    try {
-      const size = Math.min(50, Math.max(newCount, 20));
-      const result = isGuestbook
-        ? await loadGuestbookNew({ afterId, size }).unwrap()
-        : isMoment
-          ? await loadMomentNew({ momentId, afterId, size }).unwrap()
-          : await loadPostNew({ postId, afterId, size }).unwrap();
-      onPrefetchRoots(result.list);
-      const maxIncoming = result.list.reduce(
-        (maxId, comment) => (comment.id > maxId ? comment.id : maxId),
-        afterId
-      );
-      setBaselineByKey((previous) => ({ ...previous, [baselineKey]: maxIncoming }));
-    } finally {
-      setIsLoadingNew(false);
-    }
+    return run(
+      baselineKey,
+      async () => {
+        const size = Math.min(50, Math.max(newCount, 20));
+        const result = isGuestbook
+          ? await loadGuestbookNew({ afterId, size }).unwrap()
+          : isMoment
+            ? await loadMomentNew({ momentId, afterId, size }).unwrap()
+            : await loadPostNew({ postId, afterId, size }).unwrap();
+        onPrefetchRoots(result.list);
+        const maxIncoming = result.list.reduce(
+          (maxId, comment) => (comment.id > maxId ? comment.id : maxId),
+          afterId
+        );
+        setBaselineByKey((previous) => ({ ...previous, [baselineKey]: maxIncoming }));
+      },
+      "Couldn’t load new comments. Please try again."
+    );
   }, [
+    run,
     afterId,
     baselineKey,
     enabled,
@@ -119,7 +123,7 @@ export function useCommentFreshness({
 
   return {
     newCount: enabled ? newCount : 0,
-    isLoadingNew,
+    isLoadingNew: pendingKeys.has(baselineKey),
     loadNewComments,
   };
 }

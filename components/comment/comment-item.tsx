@@ -19,13 +19,14 @@ import { flattenReplies, getCommentDisplayName } from "./utils/thread";
 interface CommentItemProps {
   comment: EnhancedComment;
   onLikeToggle: (id: number, isLiked: boolean, likesCount: number) => void;
+  pendingLikeIds: ReadonlySet<number>;
   onAuthenticationRequired?: () => void;
   onReplySubmit: (content: string, parentId: number) => Promise<boolean>;
   onEditSave: (id: number, content: string) => Promise<boolean>;
   onDelete: (id: number) => Promise<boolean>;
   onReport: (id: number, reason: string) => Promise<boolean>;
   onRetry: (tempId: number, content: string, parentId: number | null) => Promise<boolean>;
-  onLoadReplies: (parentId: number) => Promise<void>;
+  onLoadReplies: (parentId: number) => Promise<boolean>;
   loadingReplyIds: Set<number>;
   hasMoreReplies: (parentId: number) => boolean;
 }
@@ -104,11 +105,12 @@ export function CommentItem(props: CommentItemProps) {
             size="sm"
             variant="ghost"
             className="text-muted hover:text-foreground h-7 px-2 text-xs"
+            isDisabled={props.loadingReplyIds.has(comment.id)}
             aria-controls={repliesId}
             aria-expanded={isExpanded}
             onPress={async () => {
               if (!isExpanded && replies.length === 0 && replyTotal > 0) {
-                await props.onLoadReplies(comment.id);
+                if (!(await props.onLoadReplies(comment.id))) return;
               }
               setIsExpanded((expanded) => !expanded);
             }}
@@ -186,6 +188,7 @@ function CommentRow({
   depth,
   replyTo,
   onLikeToggle,
+  pendingLikeIds,
   onAuthenticationRequired,
   onReplySubmit,
   onEditSave,
@@ -292,9 +295,7 @@ function CommentRow({
             isEditing={isEditing}
             isDeleted={isDeleted}
             onEditCancel={() => setIsEditing(false)}
-            onEditSave={async (content) => {
-              if (await onEditSave(comment.id, content)) setIsEditing(false);
-            }}
+            onEditSave={(content) => onEditSave(comment.id, content)}
           />
         </div>
 
@@ -313,6 +314,7 @@ function CommentRow({
         {!isDeleted && !isEditing && !comment.isFailed && !comment.isPending ? (
           <CommentActions
             comment={comment}
+            isLiking={pendingLikeIds.has(comment.id)}
             depth={depth}
             isReplying={isReplying}
             onCopyLink={copyCommentLink}

@@ -1,9 +1,19 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
-import { AlertDialog, Button, Dropdown, Header, Label, Spinner, Tooltip, cn } from "@heroui/react";
+import {
+  AlertDialog,
+  Button,
+  Dropdown,
+  Header,
+  Label,
+  Spinner,
+  Tooltip,
+  cn,
+  toast,
+} from "@heroui/react";
 import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./types";
 import { resolveCommentCapabilities } from "./utils/permissions";
@@ -21,6 +31,7 @@ export type CommentReportReason = (typeof COMMENT_REPORT_REASONS)[number]["id"];
 interface CommentActionsProps {
   comment: EnhancedComment;
   onLikeToggle: () => void;
+  isLiking: boolean;
   onReplyToggle: () => void;
   onEditStart: () => void;
   onDelete: () => Promise<boolean> | boolean | void;
@@ -37,6 +48,7 @@ function isReportReason(value: string): value is CommentReportReason {
 export function CommentActions({
   comment,
   onLikeToggle,
+  isLiking,
   onReplyToggle,
   onEditStart,
   onDelete,
@@ -55,14 +67,26 @@ export function CommentActions({
   const isUnapproved = comment.status === "PENDING" || comment.id < 0;
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const deleting = useRef(false);
   const liked = Boolean(comment.likedByCurrentUser);
 
+  const changeDeleteOpen = (open: boolean) => {
+    if (!deleting.current) setDeleteOpen(open);
+  };
+
   const handleDeleteConfirm = async () => {
+    if (deleting.current) return;
+    deleting.current = true;
     setIsDeleting(true);
     try {
       const deleted = await onDelete();
       if (deleted !== false) setDeleteOpen(false);
+    } catch {
+      // The mutation normally reports API errors and returns false. Keep the
+      // dialog usable even if a caller unexpectedly rejects instead.
+      toast.danger("Couldn't delete the comment. Please try again.");
     } finally {
+      deleting.current = false;
       setIsDeleting(false);
     }
   };
@@ -82,7 +106,9 @@ export function CommentActions({
             liked ? "text-danger hover:text-danger" : "text-muted hover:text-foreground"
           )}
           aria-label={liked ? "Unlike comment" : "Like comment"}
-          isDisabled={isUnavailable || isUnapproved}
+          aria-pressed={liked}
+          isPending={isLiking}
+          isDisabled={isUnavailable || isUnapproved || isLiking}
           onPress={onLikeToggle}
         >
           <Icon
@@ -127,7 +153,7 @@ export function CommentActions({
                 const action = String(key);
                 if (action === "copy") onCopyLink();
                 if (action === "edit") onEditStart();
-                if (action === "delete") setDeleteOpen(true);
+                if (action === "delete") changeDeleteOpen(true);
                 if (action.startsWith("report:")) {
                   const reason = action.slice("report:".length);
                   if (isReportReason(reason)) onReport(reason);
@@ -174,10 +200,15 @@ export function CommentActions({
       </div>
 
       <AlertDialog>
-        <AlertDialog.Backdrop isOpen={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialog.Backdrop
+          isOpen={deleteOpen}
+          onOpenChange={changeDeleteOpen}
+          isDismissable={false}
+          isKeyboardDismissDisabled
+        >
           <AlertDialog.Container>
             <AlertDialog.Dialog className="sm:max-w-md" aria-label="Delete comment">
-              <AlertDialog.CloseTrigger />
+              <AlertDialog.CloseTrigger isDisabled={isDeleting} />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
                 <AlertDialog.Heading>Delete this comment?</AlertDialog.Heading>
@@ -185,17 +216,30 @@ export function CommentActions({
               <AlertDialog.Body>
                 This removes your comment from the public thread. If others already replied, it may
                 remain as a placeholder so the conversation stays readable.
+                {isDeleting ? (
+                  <p role="status" className="text-muted mt-2 text-sm">
+                    Deleting comment…
+                  </p>
+                ) : null}
               </AlertDialog.Body>
               <AlertDialog.Footer>
-                <Button variant="ghost" onPress={() => setDeleteOpen(false)}>
+                <Button
+                  variant="ghost"
+                  isDisabled={isDeleting}
+                  onPress={() => changeDeleteOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button
                   variant="danger"
+                  isPending={isDeleting}
                   isDisabled={isDeleting}
                   onPress={() => void handleDeleteConfirm()}
                 >
-                  {isDeleting ? <Spinner size="sm" className="text-white" /> : "Delete"}
+                  {isDeleting ? (
+                    <Spinner size="sm" className="text-white" aria-hidden="true" />
+                  ) : null}
+                  Delete
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

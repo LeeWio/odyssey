@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "@heroui/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   commentApi,
   publishedCommentTags,
@@ -37,8 +37,8 @@ interface MutationHookProps {
     liked: boolean
   ) => CommentLikePatch;
   revertLikeOverride: (id: number, snapshot: CommentLikePatch) => void;
-  patchReply: (commentId: number, content: string) => void;
-  removeReply: (commentId: number) => void;
+  reconcileEditedComment: (commentId: number, content: string) => void;
+  reconcileDeletedComment: (commentId: number) => void;
 }
 
 export function useCommentMutations({
@@ -48,8 +48,8 @@ export function useCommentMutations({
   markPendingCommentRetrying,
   applyLikeOverride,
   revertLikeOverride,
-  patchReply,
-  removeReply,
+  reconcileEditedComment,
+  reconcileDeletedComment,
 }: MutationHookProps) {
   const dispatch = useAppDispatch();
   const { isGuestbook, isMoment, postId, momentId, currentUser, currentUserId, isAuthenticated } =
@@ -64,6 +64,8 @@ export function useCommentMutations({
   const [reportCommentApi] = useReportCommentMutation();
   const idempotencyKeys = useRef(new Map<number, string>());
   const tempIdSequence = useRef(0);
+  const pendingLikes = useRef(new Set<number>());
+  const [pendingLikeIds, setPendingLikeIds] = useState<ReadonlySet<number>>(new Set());
 
   const invalidateAfterReconciliation = (parentId: number | null) => {
     const invalidate = () => {
@@ -222,14 +224,19 @@ export function useCommentMutations({
       return;
     }
 
+    // Claim before rendering the optimistic change so rapid opposite actions
+    // cannot race and roll back or overwrite one another.
+    if (pendingLikes.current.has(id)) return;
+    pendingLikes.current.add(id);
+    setPendingLikeIds(new Set(pendingLikes.current));
+
     const nextLiked = !currentIsLiked;
     const previous: CommentLikePatch = {
       likedByCurrentUser: currentIsLiked,
       likesCount: Math.max(0, currentLikesCount),
     };
-    applyLikeOverride(id, currentIsLiked, currentLikesCount, nextLiked);
-
     try {
+      applyLikeOverride(id, currentIsLiked, currentLikesCount, nextLiked);
       const snapshot = nextLiked
         ? await likeCommentApi(id).unwrap()
         : await unlikeCommentApi(id).unwrap();
@@ -241,13 +248,16 @@ export function useCommentMutations({
       revertLikeOverride(id, previous);
       console.error("Failed to sync comment like state:", err);
       toast.danger("Couldn't update comment reaction.");
+    } finally {
+      pendingLikes.current.delete(id);
+      setPendingLikeIds(new Set(pendingLikes.current));
     }
   };
 
   const editComment = async (id: number, newContent: string) => {
     try {
       await editMyCommentApi({ id, content: newContent }).unwrap();
-      patchReply(id, newContent);
+      reconcileEditedComment(id, newContent);
       return true;
     } catch (err) {
       console.error("Failed to sync comment edit:", err);
@@ -259,7 +269,7 @@ export function useCommentMutations({
   const deleteComment = async (id: number) => {
     try {
       await deleteMyCommentApi(id).unwrap();
-      removeReply(id);
+      reconcileDeletedComment(id);
       const tags = isGuestbook
         ? publishedGuestbookCommentTags
         : isMoment
@@ -296,6 +306,7 @@ export function useCommentMutations({
     publishComment,
     retryPublishComment,
     toggleLike,
+    pendingLikeIds,
     editComment,
     deleteComment,
     reportComment,

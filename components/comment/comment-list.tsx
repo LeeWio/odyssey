@@ -12,19 +12,21 @@ interface CommentListProps {
   comments: EnhancedComment[];
   isLoading: boolean;
   isFetching: boolean;
+  isLoadingMore: boolean;
   error: unknown;
   hasMore: boolean;
   loadMore: () => void;
   refetch: () => Promise<unknown>;
   totalCount: number;
   onLikeToggle: (id: number, isLiked: boolean, likesCount: number) => void;
+  pendingLikeIds: ReadonlySet<number>;
   onAuthenticationRequired?: () => void;
   onReplySubmit: (content: string, parentId: number) => Promise<boolean>;
   onEditSave: (id: number, content: string) => Promise<boolean>;
   onDelete: (id: number) => Promise<boolean>;
   onReport: (id: number, reason: string) => Promise<boolean>;
   onRetry: (tempId: number, content: string, parentId: number | null) => Promise<boolean>;
-  onLoadReplies: (parentId: number) => Promise<void>;
+  onLoadReplies: (parentId: number) => Promise<boolean>;
   loadingReplyIds: Set<number>;
   hasMoreReplies: (parentId: number) => boolean;
 }
@@ -33,12 +35,14 @@ export function CommentList({
   comments,
   isLoading,
   isFetching,
+  isLoadingMore,
   error,
   hasMore,
   loadMore,
   refetch,
   totalCount,
   onLikeToggle,
+  pendingLikeIds,
   onAuthenticationRequired,
   onReplySubmit,
   onEditSave,
@@ -114,6 +118,7 @@ export function CommentList({
               onDelete={onDelete}
               onEditSave={onEditSave}
               onLikeToggle={onLikeToggle}
+              pendingLikeIds={pendingLikeIds}
               onAuthenticationRequired={onAuthenticationRequired}
               onReplySubmit={onReplySubmit}
               onReport={onReport}
@@ -130,7 +135,8 @@ export function CommentList({
                 size="sm"
                 variant="ghost"
                 className="text-muted hover:text-foreground h-8 text-xs"
-                isPending={isFetching}
+                isPending={isLoadingMore}
+                isDisabled={isLoadingMore}
                 onPress={loadMore}
               >
                 Load more
