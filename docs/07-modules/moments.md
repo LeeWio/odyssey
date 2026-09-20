@@ -60,7 +60,6 @@ formatting marks and lists, link safety, legacy text, empty notes, and malformed
 content. Browser coverage exercises ordinary cards, stacked image cards, and
 home cards against mocked APIs, without publishing content.
 
-The browser regressions use the default motion preference. An additional run
-with reduced motion exposed an existing hydration mismatch in the home page's
-`HelloApple` SVG (`animate` children differ between server and client). It is
-outside the Moment rendering path and remains a separate issue.
+The original reduced-motion hydration mismatch in the home page's Hello SVG is
+covered by the visitor-home regressions. See [Home](home.md) for the shared motion
+preference behavior and loading-error recovery.

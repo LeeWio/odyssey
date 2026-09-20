@@ -1,5 +1,7 @@
 "use client";
 
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
+
 import {
   Button,
   Card,
@@ -14,7 +16,7 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useHotkeys, useMounted, useOs } from "@mantine/hooks";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -690,7 +692,7 @@ export const Navbar = () => {
   const { resolvedTheme, setTheme } = useTheme();
   const mounted = useMounted();
   const os = useOs();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionPreference();
   const dispatch = useAppDispatch();
   const [logout] = useLogoutMutation();
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

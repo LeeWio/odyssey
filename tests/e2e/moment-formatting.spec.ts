@@ -62,7 +62,8 @@ for (const scenario of [
     );
     await page.goto(scenario.path);
     const contentView = page.locator('[data-slot="moment-content"]').first();
-    await expect(contentView).toBeVisible();
+    // The home showcase and masonry are loaded as separate dynamic chunks.
+    await expect(contentView).toBeVisible({ timeout: 15_000 });
     await expect(contentView.locator("p")).toHaveCount(7);
     await expect(contentView.locator("br")).toHaveCount(9);
     expect(await contentView.locator("p").nth(1).innerText()).toBe(

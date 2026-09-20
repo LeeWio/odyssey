@@ -1,7 +1,9 @@
 "use client";
 
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
+
 import { Card, Link, Skeleton, toast } from "@heroui/react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
@@ -103,7 +105,7 @@ const identityLinks: Record<string, string> = {
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
 export function Footer() {
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotionPreference();
 
   const reveal = (delay = 0) => ({
     initial: shouldReduceMotion ? false : { opacity: 0, y: 14 },

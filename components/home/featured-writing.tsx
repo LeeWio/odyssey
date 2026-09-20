@@ -3,6 +3,7 @@
 import { Icon } from "@iconify/react";
 
 import dynamic from "next/dynamic";
+import { SectionLoadError } from "./section-load-error";
 import { Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
 import { Carousel } from "@heroui-pro/react/carousel";
@@ -121,14 +122,20 @@ export function FeaturedWriting() {
     },
   });
 
-  const { data: featuredPosts, isLoading } = useGetFeaturedPostsQuery({
+  const {
+    data: featuredPosts,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetFeaturedPostsQuery({
     page: 0,
     size: 6,
   });
 
   const posts = featuredPosts?.list.slice(0, 6) ?? [];
 
-  if (!isLoading && posts.length === 0) return null;
+  if (!isLoading && !isFetching && !isError && posts.length === 0) return null;
 
   return (
     <section
@@ -168,6 +175,14 @@ export function FeaturedWriting() {
       </header>
 
       <motion.div className="mt-12" {...revealInView(0.2, 20)}>
+        {(isError || (isFetching && !isLoading && posts.length === 0)) && (
+          <SectionLoadError
+            subject="writing"
+            isRetrying={isFetching}
+            hasContent={posts.length > 0}
+            onRetry={() => void refetch()}
+          />
+        )}
         {isLoading && posts.length === 0 ? (
           <div className="grid gap-4 sm:grid-cols-3">
             {Array.from({ length: 3 }, (_, index) => (
@@ -178,7 +193,7 @@ export function FeaturedWriting() {
               </Card>
             ))}
           </div>
-        ) : (
+        ) : posts.length > 0 ? (
           <Carousel opts={{ align: "start", loop: posts.length > 3 }}>
             <Carousel.Content className="-ml-4 items-stretch">
               {posts.map((post, index) => (
@@ -212,7 +227,7 @@ export function FeaturedWriting() {
               <Carousel.Next />
             </div>
           </Carousel>
-        )}
+        ) : null}
       </motion.div>
     </section>
   );

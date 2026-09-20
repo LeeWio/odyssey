@@ -1,5 +1,7 @@
 "use client";
 
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
+
 import { HelloApple } from "@/components/home/hello-apple";
 import { MotionChip, MotionSurface, MotionTypography } from "@/components/ui";
 import { useState } from "react";
@@ -16,7 +18,7 @@ import {
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
@@ -137,7 +139,7 @@ const faqItems = [
 
 export default function Home() {
   const mounted = useMounted();
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotionPreference();
   const [isGuestbookPopoverOpen, setIsGuestbookPopoverOpen] = useState(false);
 
   const dispatch = useAppDispatch();

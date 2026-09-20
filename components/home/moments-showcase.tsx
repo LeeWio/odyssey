@@ -3,6 +3,7 @@
 import { Icon } from "@iconify/react";
 
 import dynamic from "next/dynamic";
+import { SectionLoadError } from "./section-load-error";
 import { Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useGetPublicMomentsQuery } from "@/lib/features/moment";
@@ -39,13 +40,19 @@ export function MomentsShowcase() {
     },
   });
 
-  const { data: moments, isLoading } = useGetPublicMomentsQuery({
+  const {
+    data: moments,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetPublicMomentsQuery({
     page: 0,
     size: MOMENTS_SHOWCASE_LIMIT,
   });
 
   const recentMoments = moments?.list.slice(0, MOMENTS_SHOWCASE_LIMIT) ?? [];
-  if (!isLoading && recentMoments.length === 0) return null;
+  if (!isLoading && !isFetching && !isError && recentMoments.length === 0) return null;
 
   return (
     <section
@@ -85,15 +92,23 @@ export function MomentsShowcase() {
       </header>
 
       <motion.div className="mt-12" {...revealInView(0.2, 20)}>
+        {(isError || (isFetching && !isLoading && recentMoments.length === 0)) && (
+          <SectionLoadError
+            subject="moments"
+            isRetrying={isFetching}
+            hasContent={recentMoments.length > 0}
+            onRetry={() => void refetch()}
+          />
+        )}
         {isLoading && recentMoments.length === 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: MOMENTS_SHOWCASE_LIMIT }, (_, index) => (
               <Skeleton key={index} className="h-44 w-full rounded-2xl" />
             ))}
           </div>
-        ) : (
+        ) : recentMoments.length > 0 ? (
           <MomentsMasonry moments={recentMoments} />
-        )}
+        ) : null}
       </motion.div>
     </section>
   );
