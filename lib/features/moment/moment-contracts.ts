@@ -17,6 +17,18 @@ export const MomentTopicResponseSchema = z.object({
   slug: z.string(),
 });
 
+export const MomentXSyncResponseSchema = z
+  .object({
+    status: z.enum(["PENDING", "POSTED", "FAILED", "SKIPPED"]),
+    xPostId: z.string().nullable().optional(),
+    url: z.string().nullable().optional(),
+    error: z.string().nullable().optional(),
+    attempts: z.number().nullable().optional(),
+    postedAt: z.string().nullable().optional(),
+  })
+  .nullable()
+  .optional();
+
 export const MomentResponseSchema = z.object({
   id: z.number(),
   content: z.string(),
@@ -30,10 +42,12 @@ export const MomentResponseSchema = z.object({
   topics: z.array(MomentTopicResponseSchema).default([]),
   authorName: z.string().nullable().optional(),
   authorAvatar: z.string().nullable().optional(),
+  xSync: MomentXSyncResponseSchema,
 });
 
 export type MomentImageResponse = z.infer<typeof MomentImageResponseSchema>;
 export type MomentTopicResponse = z.infer<typeof MomentTopicResponseSchema>;
+export type MomentXSyncResponse = NonNullable<z.infer<typeof MomentXSyncResponseSchema>>;
 export type MomentResponse = z.infer<typeof MomentResponseSchema>;
 
 export interface MomentImageRequest {
@@ -47,4 +61,6 @@ export interface MomentRequest {
   images: MomentImageRequest[];
   topicSlugs: string[];
   stockSymbol?: string | null;
+  /** Create-only: queue a post to the site-owner X account when public. */
+  shareToX?: boolean;
 }

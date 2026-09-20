@@ -62,6 +62,8 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
     removeTopic,
     visibility,
     setVisibility,
+    shareToX,
+    setShareToX,
     isSubmitting,
     handleSelectFiles,
     handleDrop,
@@ -89,8 +91,10 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
                 isEditing={!!initialMoment}
                 visibility={visibility}
                 onVisibilityChange={(value) => {
-                  if (value === "public" || value === "followers" || value === "private")
+                  if (value === "public" || value === "followers" || value === "private") {
                     setVisibility(value);
+                    if (value !== "public") setShareToX(false);
+                  }
                 }}
                 user={userProfile}
               />
@@ -132,6 +136,9 @@ export const MomentPublisher = ({ isOpen, onOpenChange, initialMoment }: MomentP
                   onRemoveTopic={removeTopic}
                   onAttachStock={setAttachedStockSymbol}
                   attachedStockSymbol={attachedStockSymbol}
+                  visibility={visibility}
+                  shareToX={shareToX}
+                  onShareToXChange={setShareToX}
                 />
               </Modal.Body>
 

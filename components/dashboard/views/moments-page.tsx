@@ -106,6 +106,36 @@ function TimelineItem({ moment }: TimelineItemProps) {
                 ${moment.stockSymbol}
               </Chip>
             ) : null}
+            {moment.xSync?.status === "POSTED" && moment.xSync.url ? (
+              <a
+                href={moment.xSync.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex"
+                aria-label="Open post on X"
+              >
+                <Chip size="sm" variant="soft" color="accent">
+                  Posted to X
+                </Chip>
+              </a>
+            ) : null}
+            {moment.xSync?.status === "PENDING" ? (
+              <Chip size="sm" variant="soft" color="warning">
+                X sync pending
+              </Chip>
+            ) : null}
+            {moment.xSync?.status === "FAILED" ? (
+              <Tooltip>
+                <span className="inline-flex">
+                  <Chip size="sm" variant="soft" color="danger">
+                    X sync failed
+                  </Chip>
+                </span>
+                <Tooltip.Content>
+                  {moment.xSync.error || "Could not post this moment to X."}
+                </Tooltip.Content>
+              </Tooltip>
+            ) : null}
           </div>
           <span className="text-muted shrink-0 text-xs tabular-nums">
             {new Date(moment.createdAt).toLocaleString()}

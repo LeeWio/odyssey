@@ -133,7 +133,30 @@ describe("moment publishing", () => {
         images: [{ fileId: 90, altText: "A photo" }],
       }),
     });
+    expect(api.update.mock.calls[0][0].body.shareToX).toBeUndefined();
     expect(success).toHaveBeenCalledOnce();
+  });
+
+  it("includes shareToX only when creating a public moment with the toggle on", async () => {
+    api.create.mockReturnValue({ unwrap: () => Promise.resolve({ id: 99 }) });
+    setup();
+    act(() => {
+      state.setEditorValue({
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text: "Hello X" }] }],
+      });
+      state.setCharCount(7);
+      state.setIsEmpty(false);
+      state.setShareToX(true);
+    });
+    await act(async () => state.publishMoment());
+    expect(api.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        visibility: "public",
+        shareToX: true,
+      })
+    );
+    expect(toast.success).toHaveBeenCalledWith("Moment shared. X sync queued.");
   });
 
   it("removes only the selected existing image without uploading it again", async () => {
