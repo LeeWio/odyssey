@@ -1,3 +1,10 @@
+## [1.159.2](https://github.com/LeeWio/odyssey/compare/v1.159.1...v1.159.2) (2026-09-20)
+
+
+### Bug Fixes
+
+* **home:** recover visitor content and respect motion preferences ([8a4fa2f](https://github.com/LeeWio/odyssey/commit/8a4fa2f3e962fb33469c6dd2e9fae92d131dff34))
+
 ## [1.159.1](https://github.com/LeeWio/odyssey/compare/v1.159.0...v1.159.1) (2026-09-20)
 
 
