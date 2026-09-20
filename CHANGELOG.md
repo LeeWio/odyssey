@@ -1,3 +1,10 @@
+# [1.160.0](https://github.com/LeeWio/odyssey/compare/v1.159.2...v1.160.0) (2026-09-20)
+
+
+### Features
+
+* **moment:** add opt-in share-to-X controls and sync status ([3b545c7](https://github.com/LeeWio/odyssey/commit/3b545c71da9c2fed600cd9527b13da2142cd1dd8))
+
 ## [1.159.2](https://github.com/LeeWio/odyssey/compare/v1.159.1...v1.159.2) (2026-09-20)
 
 
