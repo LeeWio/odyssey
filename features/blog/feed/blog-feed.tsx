@@ -507,13 +507,28 @@ export default function BlogFeed() {
   const [searchValue, setSearchValue] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<number>();
   const scrollAnimationRef = useRef<{ stop: () => void } | null>(null);
-  const keyword = useDeferredValue(searchValue.trim());
-  const { data, isLoading, isFetching, isError, refetch } = useGetPublicPostsQuery({
-    categoryId: selectedCategoryId,
-    keyword: keyword || undefined,
-    page,
-    size: PAGE_SIZE,
-  });
+  const normalizedKeyword = searchValue.trim();
+  const keyword = useDeferredValue(normalizedKeyword);
+  const isDeferringKeyword = keyword !== normalizedKeyword;
+  const { currentData, isLoading, isFetching, isError, isSuccess, refetch } =
+    useGetPublicPostsQuery(
+      {
+        categoryId: selectedCategoryId,
+        keyword: keyword || undefined,
+        page,
+        size: PAGE_SIZE,
+      },
+      { skip: isDeferringKeyword, refetchOnMountOrArgChange: true }
+    );
+  const lastPage = Math.max(0, (currentData?.totalPages ?? 1) - 1);
+  const isAdjustingPage =
+    !isDeferringKeyword && isSuccess && !isFetching && !!currentData && page > lastPage;
+  if (isAdjustingPage) setPage(lastPage);
+  const data = isDeferringKeyword || isAdjustingPage ? undefined : currentData;
+  const isLoadingPage = isDeferringKeyword || isAdjustingPage || isLoading || (isFetching && !data);
+  const isUpdating = isDeferringKeyword || isAdjustingPage || isFetching;
+  // A new selection must also remove exiting, still-clickable cards from the old selection.
+  const selectionKey = JSON.stringify([normalizedKeyword, selectedCategoryId, page]);
   const { data: featuredData } = useGetFeaturedPostsQuery({ page: 0, size: 1 });
   const { data: libraryOverview } = useGetLibraryOverviewQuery(undefined, {
     skip: !isAuthenticated,
@@ -703,7 +718,7 @@ export default function BlogFeed() {
         <div className="mt-12 grid gap-10 xl:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)] xl:items-start">
           <div className="min-w-0">
             <AnimatePresence initial={false} mode="wait">
-              {!keyword && !selectedCategoryId && featuredPost ? (
+              {!normalizedKeyword && !selectedCategoryId && featuredPost ? (
                 <motion.section
                   key="featured-writing"
                   aria-labelledby="featured-writing-title"
@@ -731,21 +746,23 @@ export default function BlogFeed() {
 
             <section
               id="all-writing"
-              aria-busy={isFetching}
+              aria-busy={isUpdating}
               aria-labelledby="all-writing-title"
               className="scroll-mt-28 pt-16 sm:pt-20"
             >
               <div className="mb-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <Typography id="all-writing-title" type="h2" weight="semibold">
-                    {keyword ? "Search results" : selectedCategory?.name || "All writing"}
+                    {normalizedKeyword ? "Search results" : selectedCategory?.name || "All writing"}
                   </Typography>
                   <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
-                    {data ? `${data.total.toLocaleString("en-US")} articles` : "Browse the archive"}
+                    {data
+                      ? `${data.total.toLocaleString("en-US")} ${data.total === 1 ? "article" : "articles"}`
+                      : "Browse the archive"}
                   </Typography>
                 </div>
                 <AnimatePresence initial={false} mode="wait">
-                  {isFetching && !isLoading ? (
+                  {isFetching && !isLoadingPage ? (
                     <motion.div
                       key="updating-results"
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
@@ -768,8 +785,8 @@ export default function BlogFeed() {
                 </AnimatePresence>
               </div>
 
-              <AnimatePresence initial={false} mode="wait">
-                {isLoading ? (
+              <AnimatePresence key={`results-${selectionKey}`} initial={false} mode="wait">
+                {isLoadingPage ? (
                   <motion.div
                     key="loading"
                     initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
@@ -815,7 +832,7 @@ export default function BlogFeed() {
                   </motion.div>
                 ) : posts.length === 0 ? (
                   <motion.div
-                    key={`empty-${keyword || "all"}-${selectedCategoryId ?? "all"}`}
+                    key={`empty-${normalizedKeyword || "all"}-${selectedCategoryId ?? "all"}`}
                     initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={
@@ -831,18 +848,33 @@ export default function BlogFeed() {
                           <Icon icon="gravity-ui:book-open" aria-hidden="true" />
                         </EmptyState.Media>
                         <EmptyState.Title>
-                          {keyword ? "No matching articles" : "No articles yet"}
+                          {normalizedKeyword
+                            ? "No matching articles"
+                            : selectedCategoryId
+                              ? "No articles in this topic"
+                              : "No articles yet"}
                         </EmptyState.Title>
                         <EmptyState.Description>
-                          {keyword
+                          {normalizedKeyword
                             ? "Try a different title, topic, or phrase."
-                            : "Published writing will appear here when it is ready."}
+                            : selectedCategoryId
+                              ? "Choose another topic or return to all writing."
+                              : "Published writing will appear here when it is ready."}
                         </EmptyState.Description>
                       </EmptyState.Header>
-                      {keyword ? (
+                      {normalizedKeyword ? (
                         <EmptyState.Content>
                           <Button variant="outline" onPress={() => handleSearchChange("")}>
                             Clear search
+                          </Button>
+                        </EmptyState.Content>
+                      ) : selectedCategoryId ? (
+                        <EmptyState.Content>
+                          <Button
+                            variant="outline"
+                            onPress={() => handleCategoryChange(new Set(["all"]))}
+                          >
+                            View all topics
                           </Button>
                         </EmptyState.Content>
                       ) : null}
@@ -866,8 +898,8 @@ export default function BlogFeed() {
                 )}
               </AnimatePresence>
 
-              <AnimatePresence initial={false} mode="wait">
-                {!isLoading && !isError && totalPages > 1 ? (
+              <AnimatePresence key={`pagination-${selectionKey}`} initial={false} mode="wait">
+                {!isAdjustingPage && (page > 0 || totalPages > 1) ? (
                   <motion.div
                     key={`pagination-${totalPages}`}
                     layout={!shouldReduceMotion}
@@ -888,12 +920,14 @@ export default function BlogFeed() {
                       size="sm"
                     >
                       <Pagination.Summary>
-                        Showing {startItem}-{endItem} of {data?.total ?? 0}
+                        {data
+                          ? `Showing ${startItem}-${endItem} of ${data.total}`
+                          : `Page ${page + 1}`}
                       </Pagination.Summary>
                       <Pagination.Content>
                         <Pagination.Item>
                           <Pagination.Previous
-                            isDisabled={page === 0}
+                            isDisabled={page === 0 || isUpdating}
                             onPress={() => handlePageChange(page - 1)}
                           >
                             <Pagination.PreviousIcon />
@@ -905,6 +939,7 @@ export default function BlogFeed() {
                             <Pagination.Item key={value}>
                               <Pagination.Link
                                 isActive={value === page + 1}
+                                isDisabled={isUpdating}
                                 onPress={() => handlePageChange(value - 1)}
                               >
                                 {value}
@@ -918,7 +953,7 @@ export default function BlogFeed() {
                         )}
                         <Pagination.Item>
                           <Pagination.Next
-                            isDisabled={page >= totalPages - 1}
+                            isDisabled={isUpdating || !data || page >= totalPages - 1}
                             onPress={() => handlePageChange(page + 1)}
                           >
                             <span>Next</span>
@@ -948,13 +983,14 @@ export default function BlogFeed() {
               }}
             >
               <ArchiveRail
+                key={selectionKey}
                 categories={categories}
                 posts={posts}
                 publishedTotal={facets?.totalPublishedCount ?? data?.total ?? 0}
               />
             </motion.div>
             <AnimatePresence initial={false} mode="wait">
-              {!keyword && !selectedCategoryId && continueReading.length > 0 ? (
+              {!normalizedKeyword && !selectedCategoryId && continueReading.length > 0 ? (
                 <motion.div
                   key="continue-reading"
                   layout={!shouldReduceMotion}

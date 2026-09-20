@@ -47,15 +47,20 @@ export interface PostSearchCommandState {
 }
 
 export function usePostSearchCommands(query: string, isOpen: boolean): PostSearchCommandState {
-  const [debouncedQuery] = useDebouncedValue(query.trim(), 250);
-  const hasRemoteQuery = debouncedQuery.length > 0;
+  const normalizedQuery = query.trim();
+  const [debouncedQuery] = useDebouncedValue(normalizedQuery, 250);
+  const hasRemoteQuery = isOpen && normalizedQuery.length > 0;
+  const isDebouncing = normalizedQuery !== debouncedQuery;
+  const canShowResults = hasRemoteQuery && !isDebouncing;
 
-  const { data, isFetching, isError } = useUnifiedSearchQuery(
-    hasRemoteQuery ? { keyword: debouncedQuery } : {},
-    { skip: !isOpen || !hasRemoteQuery }
+  const { currentData, isFetching, isError } = useUnifiedSearchQuery(
+    { keyword: debouncedQuery },
+    { skip: !canShowResults }
   );
 
-  const groupsData = data?.groups;
+  // Hide stale commands immediately, including during the debounce interval.
+  // The executable command list must follow the same rule as visible results.
+  const groupsData = canShowResults ? currentData?.groups : undefined;
 
   const { dynamicGroups, allCommands, total } = useMemo(() => {
     if (!groupsData) {
@@ -118,9 +123,9 @@ export function usePostSearchCommands(query: string, isOpen: boolean): PostSearc
   return {
     dynamicGroups,
     allCommands,
-    isLoading: isFetching,
+    isLoading: hasRemoteQuery && (isDebouncing || isFetching),
     hasRemoteQuery,
     total,
-    isError,
+    isError: canShowResults && isError,
   };
 }

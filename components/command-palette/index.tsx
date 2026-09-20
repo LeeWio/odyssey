@@ -63,17 +63,21 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   // Clear input value and reset search scope when the command palette is closed (manually or programmatically)
   useEffect(() => {
     if (!isOpen) {
-      setTimeout(() => {
+      const reset = setTimeout(() => {
         setInputValue("");
         setActiveSource(null);
       }, 0);
+      return () => clearTimeout(reset);
     }
   }, [isOpen]);
 
   const themeCommands = useThemeCommands();
   const systemCommands = useSystemCommands();
   const adminCommands = useAdminCommands();
-  const searchState = usePostSearchCommands(inputValue, isOpen);
+  const searchState = usePostSearchCommands(
+    inputValue,
+    isOpen && (activeSource === null || activeSource === "search")
+  );
 
   const baseCommands = useMemo(
     () => [...STATIC_COMMANDS, ...themeCommands, ...systemCommands, ...adminCommands],
@@ -244,23 +248,27 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
 
             <Command.List
               onAction={handleAction}
-              renderEmptyState={() => (
-                <EmptyState size="sm">
-                  <EmptyState.Header>
-                    <EmptyState.Media variant="icon">
-                      <MagnifierIcon />
-                    </EmptyState.Media>
-                    <EmptyState.Title>
-                      {isSearching ? "No matching results" : "Start with a shortcut or search term"}
-                    </EmptyState.Title>
-                    <EmptyState.Description>
-                      {isSearching
-                        ? "Try a broader keyword or switch scope."
-                        : "Search posts, categories, tags, themes, and workspace actions in one place."}
-                    </EmptyState.Description>
-                  </EmptyState.Header>
-                </EmptyState>
-              )}
+              renderEmptyState={() =>
+                searchState.isLoading || searchState.isError ? null : (
+                  <EmptyState size="sm">
+                    <EmptyState.Header>
+                      <EmptyState.Media variant="icon">
+                        <MagnifierIcon />
+                      </EmptyState.Media>
+                      <EmptyState.Title>
+                        {isSearching
+                          ? "No matching results"
+                          : "Start with a shortcut or search term"}
+                      </EmptyState.Title>
+                      <EmptyState.Description>
+                        {isSearching
+                          ? "Try a broader keyword or switch scope."
+                          : "Search posts, categories, tags, themes, and workspace actions in one place."}
+                      </EmptyState.Description>
+                    </EmptyState.Header>
+                  </EmptyState>
+                )
+              }
             >
               {visibleGroups.map((group) => (
                 <Command.Group
@@ -352,20 +360,23 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                     })}
                 </Command.Group>
               ))}
-
-              {isSearching && searchState.isLoading ? (
-                <div className="text-muted-foreground flex items-center justify-center p-6">
-                  <div className="mr-3 size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  <span className="text-sm">Searching across your workspace...</span>
-                </div>
-              ) : null}
-
-              {isSearching && searchState.isError ? (
-                <div className="text-danger px-3 py-2 text-sm">
-                  Search is temporarily unavailable. Check the quick search API response.
-                </div>
-              ) : null}
             </Command.List>
+
+            {isSearching && searchState.isLoading ? (
+              <div
+                role="status"
+                className="text-muted-foreground flex items-center justify-center p-6"
+              >
+                <div className="mr-3 size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <span className="text-sm">Searching across your workspace...</span>
+              </div>
+            ) : null}
+
+            {isSearching && searchState.isError ? (
+              <div role="alert" className="text-danger px-3 py-2 text-sm">
+                Search is temporarily unavailable. Please try again shortly.
+              </div>
+            ) : null}
 
             <Command.Footer className="justify-between [&_kbd]:h-5 [&_kbd]:text-xs">
               <div className="flex items-center gap-3">

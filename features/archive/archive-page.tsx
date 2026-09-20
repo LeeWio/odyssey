@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
+import { useEffect } from "react";
 
 import { useRetrieveArchiveQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 
@@ -244,12 +245,32 @@ export function ArchivePage() {
   const months = archiveFacets
     .filter((facet) => facet.year === selectedYear)
     .sort((left, right) => right.month - left.month);
-  const posts = normalizePosts(archiveQuery.data?.list);
-  const total = archiveQuery.data?.total ?? 0;
-  const totalPages = archiveQuery.data?.totalPages ?? 0;
-  const resultSize = archiveQuery.data?.size ?? PAGE_SIZE;
-  const startItem = archiveQuery.data && total > 0 ? page * resultSize + 1 : 0;
-  const endItem = archiveQuery.data ? Math.min((page + 1) * resultSize, total) : 0;
+  const currentPage = archiveQuery.currentData;
+  const lastPage = Math.max(0, (currentPage?.totalPages ?? 1) - 1);
+  const isAdjustingPage =
+    archiveQuery.isSuccess &&
+    !archiveQuery.isFetching &&
+    currentPage?.totalPages !== undefined &&
+    page > lastPage;
+  const isLoadingPage =
+    isAdjustingPage || archiveQuery.isLoading || (archiveQuery.isFetching && !currentPage);
+
+  // Correct obsolete bookmarked pages only after a successful response for this period.
+  useEffect(() => {
+    if (!isAdjustingPage) return;
+    const next = new URLSearchParams(searchParams.toString());
+    if (lastPage === 0) next.delete("page");
+    else next.set("page", String(lastPage + 1));
+    const query = next.toString();
+    router.replace(query ? `/archive?${query}` : "/archive", { scroll: false });
+  }, [isAdjustingPage, lastPage, router, searchParams]);
+
+  const posts = normalizePosts(currentPage?.list);
+  const total = currentPage?.total ?? 0;
+  const totalPages = currentPage?.totalPages ?? 0;
+  const resultSize = currentPage?.size ?? PAGE_SIZE;
+  const startItem = currentPage && total > 0 ? page * resultSize + 1 : 0;
+  const endItem = currentPage ? Math.min((page + 1) * resultSize, total) : 0;
   const updateSearch = (changes: Record<string, string | undefined>) => {
     const next = new URLSearchParams(searchParams.toString());
 
@@ -274,7 +295,7 @@ export function ArchivePage() {
     if (keys === "all") return;
 
     const [key] = Array.from(keys);
-    const month = String(key) === "all" ? undefined : String(key).replace("month-", "");
+    const month = key == null || key === "all" ? undefined : String(key).replace("month-", "");
     updateSearch({ month, page: undefined });
   };
 
@@ -282,7 +303,7 @@ export function ArchivePage() {
     updateSearch({ page: String(nextPage + 1) });
     document
       .getElementById("archive-results")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      ?.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth", block: "start" });
   };
 
   const clearPeriod = () => updateSearch({ month: undefined, page: undefined, year: undefined });
@@ -421,7 +442,7 @@ export function ArchivePage() {
 
       <motion.section
         id="archive-results"
-        aria-busy={archiveQuery.isFetching}
+        aria-busy={archiveQuery.isFetching || isAdjustingPage}
         aria-labelledby="archive-results-title"
         className="scroll-mt-28 pt-14"
         {...revealInView(0.22, 20)}
@@ -432,7 +453,7 @@ export function ArchivePage() {
               {periodTitle}
             </Typography>
             <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
-              {archiveQuery.data
+              {currentPage && !isAdjustingPage
                 ? `${total.toLocaleString("en-US")} articles found`
                 : periodDescription}
             </Typography>
@@ -444,9 +465,9 @@ export function ArchivePage() {
           ) : null}
         </div>
 
-        {archiveQuery.isLoading ? <ArchiveSkeleton /> : null}
+        {isLoadingPage ? <ArchiveSkeleton /> : null}
 
-        {!archiveQuery.isLoading && archiveQuery.isError ? (
+        {!isLoadingPage && archiveQuery.isError ? (
           <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
@@ -466,7 +487,7 @@ export function ArchivePage() {
           </EmptyState>
         ) : null}
 
-        {!archiveQuery.isLoading && !archiveQuery.isError && posts.length === 0 ? (
+        {!isLoadingPage && !archiveQuery.isError && posts.length === 0 ? (
           <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
@@ -487,7 +508,7 @@ export function ArchivePage() {
           </EmptyState>
         ) : null}
 
-        {!archiveQuery.isLoading && !archiveQuery.isError && posts.length > 0 ? (
+        {!isLoadingPage && !archiveQuery.isError && posts.length > 0 ? (
           <div className="divide-default-200 divide-y border-y">
             {posts.map((post) => (
               <ArchivePostItem key={post.id} post={post} />
@@ -495,15 +516,15 @@ export function ArchivePage() {
           </div>
         ) : null}
 
-        {!archiveQuery.isLoading && !archiveQuery.isError && totalPages > 1 ? (
+        {!isAdjustingPage && (page > 0 || totalPages > 1) ? (
           <Pagination className="mt-12 w-full" size="sm">
             <Pagination.Summary>
-              Showing {startItem}-{endItem} of {total}
+              {currentPage ? `Showing ${startItem}-${endItem} of ${total}` : `Page ${page + 1}`}
             </Pagination.Summary>
             <Pagination.Content>
               <Pagination.Item>
                 <Pagination.Previous
-                  isDisabled={page === 0}
+                  isDisabled={page === 0 || archiveQuery.isFetching}
                   onPress={() => handlePageChange(page - 1)}
                 >
                   <Pagination.PreviousIcon />
@@ -515,6 +536,7 @@ export function ArchivePage() {
                   <Pagination.Item key={value}>
                     <Pagination.Link
                       isActive={value === page + 1}
+                      isDisabled={archiveQuery.isFetching}
                       onPress={() => handlePageChange(value - 1)}
                     >
                       {value}
@@ -528,7 +550,7 @@ export function ArchivePage() {
               )}
               <Pagination.Item>
                 <Pagination.Next
-                  isDisabled={page >= totalPages - 1}
+                  isDisabled={archiveQuery.isFetching || !currentPage || page >= totalPages - 1}
                   onPress={() => handlePageChange(page + 1)}
                 >
                   <span>Next</span>
