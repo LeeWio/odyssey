@@ -9,7 +9,7 @@ import * as React from "react";
 import { Provider as ReduxProvider } from "react-redux";
 import { selectThemeVariant, setThemeVariant } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { makeStore } from "@/lib/store";
+import { getServerState, makeStore } from "@/lib/store";
 import { MediaProvider } from "@/features/media/context/media-provider";
 import {
   coerceResolvedThemeMode,
@@ -123,6 +123,7 @@ export interface ProvidersProps {
 
 export function Providers({ children, lang, messages, themeProps }: ProvidersProps) {
   const [store] = React.useState(() => makeStore());
+  const [serverState] = React.useState(getServerState);
 
   React.useEffect(() => {
     return setupListeners(store.dispatch);
@@ -131,7 +132,7 @@ export function Providers({ children, lang, messages, themeProps }: ProvidersPro
   return (
     <I18nProvider locale={lang}>
       <NextIntlClientProvider locale={lang} messages={messages} timeZone="UTC">
-        <ReduxProvider store={store}>
+        <ReduxProvider store={store} serverState={serverState}>
           <NextThemesProvider
             attribute="class"
             defaultTheme={DEFAULT_THEME_MODE}

@@ -10,6 +10,10 @@ const rootReducer = combineSlices(localeSlice, authSlice, uiSlice, baseApi);
 // Infer the `RootState` type from the root reducer
 export type RootState = ReturnType<typeof rootReducer>;
 
+// SSR has no browser storage. Hydration must use the same initial snapshot
+// before selectors switch to the client's persisted session and preferences.
+export const getServerState = (): RootState => rootReducer(undefined, { type: "@@INIT" });
+
 // `makeStore` encapsulates the store configuration to allow
 // creating unique store instances, which is particularly important for
 // server-side rendering (SSR) scenarios. In SSR, separate store instances

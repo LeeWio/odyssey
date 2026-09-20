@@ -68,7 +68,20 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-let refreshPromise: Promise<Awaited<ReturnType<typeof rawBaseQuery>>> | null = null;
+type Credentials = AuthState["auth"];
+type QueryResult = Awaited<ReturnType<typeof rawBaseQuery>>;
+
+interface RefreshAttempt {
+  credentials: Credentials;
+  promise: Promise<QueryResult>;
+}
+
+// getState is stable per store. Retain the latest successful attempt so a late
+// 401 from the same expired token can reuse it without rotating tokens again.
+const refreshAttempts = new WeakMap<() => unknown, RefreshAttempt>();
+
+const hasSameCredentials = (left: Credentials, right: Credentials) =>
+  left.accessToken === right.accessToken && left.refreshToken === right.refreshToken;
 
 const isRefreshPayload = (value: unknown): value is RefreshPayload => {
   if (!value || typeof value !== "object") return false;
@@ -78,7 +91,8 @@ const isRefreshPayload = (value: unknown): value is RefreshPayload => {
     typeof payload.refreshToken === "string" &&
     typeof payload.tokenType === "string" &&
     typeof payload.username === "string" &&
-    Array.isArray(payload.roles)
+    Array.isArray(payload.roles) &&
+    payload.roles.every((role) => typeof role === "string")
   );
 };
 
@@ -87,44 +101,80 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   api,
   extraOptions
 ) => {
-  let result = await rawBaseQuery(args, api, extraOptions);
+  const requestCredentials = (api.getState() as AuthState).auth;
+  const result = await rawBaseQuery(args, api, extraOptions);
   if (result.error?.status !== 401) return result;
 
-  const auth = (api.getState() as AuthState).auth;
   const requestUrl = typeof args === "string" ? args : args.url;
-  const canRefresh = Boolean(auth.refreshToken) && requestUrl !== "/api/v1/auth/refresh";
+  const currentCredentials = () => (api.getState() as AuthState).auth;
+  const clearRequestSession = () => {
+    if (!hasSameCredentials(currentCredentials(), requestCredentials)) return;
+    const hadSession = Boolean(requestCredentials.accessToken || requestCredentials.refreshToken);
+    api.dispatch({ type: "auth/removeCredentials" });
+    if (hadSession) api.dispatch(baseApi.util.resetApiState());
+  };
 
-  if (canRefresh) {
-    const activeRefresh =
-      refreshPromise ??
-      Promise.resolve(
-        rawBaseQuery(
-          {
-            url: "/api/v1/auth/refresh",
-            method: "POST",
-            body: { refreshToken: auth.refreshToken },
-          },
-          api,
-          extraOptions
-        )
-      ).finally(() => {
-        refreshPromise = null;
-      });
-    refreshPromise = activeRefresh;
+  if (requestCredentials.refreshToken && requestUrl !== "/api/v1/auth/refresh") {
+    let attempt = refreshAttempts.get(api.getState);
+    if (!attempt || !hasSameCredentials(attempt.credentials, requestCredentials)) {
+      // An old session's response must not refresh or clear a new session.
+      if (!hasSameCredentials(currentCredentials(), requestCredentials)) return result;
 
-    const refreshResult = await activeRefresh;
+      const newAttempt: RefreshAttempt = {
+        credentials: requestCredentials,
+        promise: Promise.resolve(
+          rawBaseQuery(
+            {
+              url: "/api/v1/auth/refresh",
+              method: "POST",
+              body: { refreshToken: requestCredentials.refreshToken },
+            },
+            api,
+            extraOptions
+          )
+        ).then((refreshResult) => {
+          const credentials = (refreshResult.data as RefreshEnvelope | undefined)?.data;
+          if (isRefreshPayload(credentials)) {
+            if (hasSameCredentials(currentCredentials(), requestCredentials)) {
+              api.dispatch({ type: "auth/setCredentials", payload: credentials });
+            }
+          } else {
+            if (refreshAttempts.get(api.getState) === newAttempt) {
+              refreshAttempts.delete(api.getState);
+            }
+            // Temporary transport/server failures should allow a later retry.
+            if (
+              !refreshResult.error ||
+              refreshResult.error.status === 401 ||
+              refreshResult.error.status === 403
+            ) {
+              clearRequestSession();
+            }
+          }
+          return refreshResult;
+        }),
+      };
+      refreshAttempts.set(api.getState, newAttempt);
+      attempt = newAttempt;
+    }
+
+    const refreshResult = await attempt.promise;
     const refreshedCredentials = (refreshResult.data as RefreshEnvelope | undefined)?.data;
 
     if (isRefreshPayload(refreshedCredentials)) {
-      api.dispatch({ type: "auth/setCredentials", payload: refreshedCredentials });
-      result = await rawBaseQuery(args, api, extraOptions);
-      return result;
+      if (hasSameCredentials(currentCredentials(), refreshedCredentials) && !api.signal.aborted) {
+        return rawBaseQuery(args, api, extraOptions);
+      }
+    } else if (
+      refreshResult.error &&
+      hasSameCredentials(currentCredentials(), requestCredentials)
+    ) {
+      return refreshResult;
     }
+    return result;
   }
 
-  const hadSession = Boolean(auth.accessToken || auth.refreshToken);
-  api.dispatch({ type: "auth/removeCredentials" });
-  if (hadSession) api.dispatch(baseApi.util.resetApiState());
+  clearRequestSession();
   return result;
 };
 
