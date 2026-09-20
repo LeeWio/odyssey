@@ -5,14 +5,8 @@ import {
   BreadcrumbsItem,
   Button,
   Chip,
-  FieldError,
-  Form,
-  Input,
-  Label,
-  Modal,
   Popover,
   ProgressCircle,
-  TextField,
   Tooltip,
   Skeleton,
   toast,
@@ -28,7 +22,7 @@ import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type FormEvent, use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { CommentSheet } from "@/components/comment";
 import { ArticleTypography } from "@/features/blog/reader/typography";
 import {
@@ -40,10 +34,9 @@ import {
 } from "@/lib/features/post";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
 import { ReadingSession } from "@/components/reading/reading-session";
-import { selectIsAuthenticated } from "@/lib/features/auth";
+import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useAddPostToCollectionMutation,
-  useCreatePostCollectionMutation,
   useGetPostCollectionsQuery,
   useRecordReadingProgressMutation,
 } from "@/lib/features/library";
@@ -51,6 +44,7 @@ import { getReadingPositionId } from "@/lib/reading-position";
 import { commentDebug } from "@/lib/comment-debug";
 import { useAppSelector } from "@/lib/hooks";
 import { ArticleSidebar } from "./article-sidebar";
+import { CreateCollectionDialog } from "@/features/library/create-collection-dialog";
 
 const ArticleBodyReader = dynamic(
   () =>
@@ -106,6 +100,7 @@ export default function SinglePage({ params }: SinglePageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const username = useAppSelector(selectCurrentUser);
   const { slug } = use(params);
   const [isActionBarOpen, setIsActionBarOpen] = useState(false);
   const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(
@@ -114,9 +109,11 @@ export default function SinglePage({ params }: SinglePageProps) {
   const [readingProgress, setReadingProgress] = useState(0);
   const [readingProgressPostId, setReadingProgressPostId] = useState<number | null>(null);
   const [collectionPendingId, setCollectionPendingId] = useState<number | null>(null);
-  const [isCreateCollectionOpen, setIsCreateCollectionOpen] = useState(false);
-  const [collectionName, setCollectionName] = useState("");
-  const [collectionDescription, setCollectionDescription] = useState("");
+  const [collectionTarget, setCollectionTarget] = useState<{
+    postId: number;
+    slug: string;
+    username: string | null;
+  } | null>(null);
   const [optimisticLike, setOptimisticLike] = useState<OptimisticLikeState | null>(null);
   const [optimisticFavorite, setOptimisticFavorite] = useState<OptimisticFavoriteState | null>(
     null
@@ -130,7 +127,8 @@ export default function SinglePage({ params }: SinglePageProps) {
   }, [router, searchParams, slug]);
 
   const { scrollY, scrollYProgress } = useScroll();
-  const { data: serverArticle, isLoading: queryIsLoading } = useGetPublicPostBySlugQuery(slug);
+  const { currentData: serverArticle, isFetching: queryIsLoading } =
+    useGetPublicPostBySlugQuery(slug);
 
   const article = serverArticle;
 
@@ -145,8 +143,6 @@ export default function SinglePage({ params }: SinglePageProps) {
     { skip: !isAuthenticated }
   );
   const [addPostToCollection] = useAddPostToCollectionMutation();
-  const [createPostCollection, { isLoading: isCreatingCollection }] =
-    useCreatePostCollectionMutation();
   const postId = article?.id;
   const serverIsLiked = article?.isLiked || false;
   const serverLikesCount = article?.likesCount || 0;
@@ -329,37 +325,7 @@ export default function SinglePage({ params }: SinglePageProps) {
   };
 
   const openCreateCollection = () => {
-    setCollectionName("");
-    setCollectionDescription("");
-    setIsCreateCollectionOpen(true);
-  };
-
-  const handleCreateCollection = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!postId) return;
-
-    const name = collectionName.trim();
-    if (!name) {
-      toast.danger("Enter a collection name.");
-      return;
-    }
-
-    try {
-      const collection = await createPostCollection({
-        name,
-        description: collectionDescription.trim() || undefined,
-      }).unwrap();
-      setIsCreateCollectionOpen(false);
-      setCollectionPendingId(collection.id);
-
-      try {
-        await addPostToCollection({ collectionId: collection.id, postId }).unwrap();
-      } finally {
-        setCollectionPendingId(null);
-      }
-    } catch {
-      // The mutations display their own failure toast.
-    }
+    if (postId && isAuthenticated) setCollectionTarget({ postId, slug, username });
   };
 
   return (
@@ -747,55 +713,17 @@ export default function SinglePage({ params }: SinglePageProps) {
           </ActionBar.Suffix>
         </ActionBar>
 
-        <Modal>
-          <Modal.Backdrop
-            isOpen={isCreateCollectionOpen}
-            onOpenChange={setIsCreateCollectionOpen}
-            variant="blur"
-          >
-            <Modal.Container size="sm">
-              <Modal.Dialog className="sm:max-w-md">
-                <Modal.CloseTrigger />
-                <Form onSubmit={handleCreateCollection}>
-                  <Modal.Header>
-                    <Modal.Heading>Create collection</Modal.Heading>
-                  </Modal.Header>
-                  <Modal.Body className="flex flex-col gap-4 py-4">
-                    <p className="text-muted text-sm">Save this article to a new collection.</p>
-                    <TextField isRequired name="collection-name">
-                      <Label>Name</Label>
-                      <Input
-                        autoFocus
-                        maxLength={80}
-                        placeholder="e.g. Design references"
-                        value={collectionName}
-                        onChange={(event) => setCollectionName(event.target.value)}
-                      />
-                      <FieldError />
-                    </TextField>
-                    <TextField name="collection-description">
-                      <Label>Description</Label>
-                      <Input
-                        maxLength={300}
-                        placeholder="What belongs in this collection?"
-                        value={collectionDescription}
-                        onChange={(event) => setCollectionDescription(event.target.value)}
-                      />
-                    </TextField>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button slot="close" size="sm" variant="tertiary">
-                      Cancel
-                    </Button>
-                    <Button isPending={isCreatingCollection} size="sm" type="submit">
-                      Create and save
-                    </Button>
-                  </Modal.Footer>
-                </Form>
-              </Modal.Dialog>
-            </Modal.Container>
-          </Modal.Backdrop>
-        </Modal>
+        {collectionTarget &&
+        isAuthenticated &&
+        collectionTarget.slug === slug &&
+        collectionTarget.postId === postId &&
+        collectionTarget.username === username ? (
+          <CreateCollectionDialog
+            key={`${slug}:${postId}:${username}`}
+            postId={collectionTarget.postId}
+            onClose={() => setCollectionTarget(null)}
+          />
+        ) : null}
 
         {postId ? (
           <CommentSheet

@@ -7,22 +7,15 @@ import {
   Card,
   Checkbox,
   Chip,
-  FieldError,
-  Form,
-  Input,
-  Label,
   Link,
-  Modal,
   ProgressBar,
   ScrollShadow,
   Skeleton,
-  TextArea,
-  TextField,
   Tooltip,
   Typography,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { type FormEvent, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import { selectIsAuthenticated } from "@/lib/features/auth";
@@ -32,10 +25,8 @@ import {
   type PostCollectionResponse,
   type RecommendedPostResponse,
   type ReadingHistoryResponse,
-  useCreatePostCollectionMutation,
   useClearReadingHistoryMutation,
   useClearHiddenRecommendationsMutation,
-  useDeletePostCollectionMutation,
   useDeleteReadingHistoryMutation,
   useGetCollectionPostsQuery,
   useGetContentPreferencesQuery,
@@ -48,13 +39,14 @@ import {
   useFollowCategoryMutation,
   useRemovePostFromCollectionMutation,
   useUnfollowCategoryMutation,
-  useUpdatePostCollectionMutation,
 } from "@/lib/features/library";
 import type { PostDigestResponse } from "@/lib/features/post";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+
+import { CollectionFormDialog, DeleteCollectionDialog } from "./collection-management-dialogs";
 
 const HISTORY_PAGE_SIZE = 10;
 const FOLLOWING_PAGE_SIZE = 6;
@@ -355,6 +347,8 @@ function CollectionCard({
       </Card.Header>
       <Card.Footer className="mt-auto justify-end p-0">
         <Button
+          aria-label={`View collection: ${collection.name}`}
+          aria-pressed={isSelected}
           size="sm"
           variant={isSelected ? "secondary" : "ghost"}
           onPress={() => onSelect(collection.id)}
@@ -366,30 +360,381 @@ function CollectionCard({
   );
 }
 
-export function LibraryPage() {
+function ReadingHistorySection() {
   const formatRelativeTime = useRelativeTime();
+  const [page, setPage] = useState(0);
+  const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
+  const [clearError, setClearError] = useState<string | null>(null);
+  const [isClearing, setIsClearing] = useState(false);
+  const [pendingRemovals, setPendingRemovals] = useState<ReadonlySet<number>>(new Set());
+  const inFlight = useRef(new Set<number>());
+  const clearing = useRef(false);
+  const active = useRef(true);
+  const [deleteReadingHistory] = useDeleteReadingHistoryMutation();
+  const [clearReadingHistory] = useClearReadingHistoryMutation();
+  const history = useGetReadingHistoryQuery(
+    { page, size: HISTORY_PAGE_SIZE, sort: ["lastReadAt,desc"] },
+    { refetchOnMountOrArgChange: true }
+  );
+  const data = history.currentData;
+  const historyEntries = data?.list ?? [];
+  const lastPage = Math.max(0, (data?.totalPages ?? 1) - 1);
+  const isAdjustingPage = history.isSuccess && !history.isFetching && !!data && page > lastPage;
+  if (isAdjustingPage) setPage(lastPage);
+  const isLoading = isAdjustingPage || history.isLoading || (history.isFetching && !data);
+
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
+
+  const handleRemoveHistoryEntry = async (postId: number) => {
+    if (!active.current || clearing.current || inFlight.current.has(postId)) return;
+    inFlight.current.add(postId);
+    setPendingRemovals(new Set(inFlight.current));
+    try {
+      await deleteReadingHistory(postId).unwrap();
+    } catch {
+      // The mutation displays its own error toast; the record remains available for retry.
+    } finally {
+      inFlight.current.delete(postId);
+      if (active.current) setPendingRemovals(new Set(inFlight.current));
+    }
+  };
+
+  const handleClearHistory = async () => {
+    if (!active.current || clearing.current || inFlight.current.size) return;
+    clearing.current = true;
+    setIsClearing(true);
+    setClearError(null);
+    try {
+      await clearReadingHistory().unwrap();
+      if (active.current) {
+        setPage(0);
+        setIsClearHistoryOpen(false);
+      }
+    } catch {
+      if (active.current) setClearError("Reading history could not be cleared. Please try again.");
+    } finally {
+      clearing.current = false;
+      if (active.current) setIsClearing(false);
+    }
+  };
+
+  return (
+    <section
+      aria-labelledby="reading-history-title"
+      aria-busy={history.isFetching || isAdjustingPage}
+      className="mt-20"
+    >
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <Typography id="reading-history-title" type="h2" weight="semibold">
+            Reading history
+          </Typography>
+          <Typography color="muted" type="body-sm" className="mt-1">
+            {data
+              ? `${data.total.toLocaleString("en-US")} articles visited`
+              : "Your recent reading"}
+          </Typography>
+        </div>
+        {(data?.total ?? 0) > 0 ? (
+          <Button
+            size="sm"
+            variant="danger"
+            isDisabled={
+              pendingRemovals.size > 0 || isClearing || history.isFetching || history.isError
+            }
+            onPress={() => {
+              if (inFlight.current.size || clearing.current) return;
+              setClearError(null);
+              setIsClearHistoryOpen(true);
+            }}
+          >
+            <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
+            Clear history
+          </Button>
+        ) : null}
+      </div>
+
+      {isLoading ? (
+        <LibrarySkeleton count={4} />
+      ) : history.isError ? (
+        <Card variant="secondary">
+          <Card.Header>
+            <Card.Title>Reading history is unavailable</Card.Title>
+            <Card.Description>Please try loading this page again.</Card.Description>
+          </Card.Header>
+          <Card.Footer>
+            <Button size="sm" variant="secondary" onPress={() => history.refetch()}>
+              Try again
+            </Button>
+          </Card.Footer>
+        </Card>
+      ) : historyEntries.length === 0 ? (
+        <EmptyLibrarySection
+          title="No reading history yet"
+          description="Articles you open will appear here as you read."
+        />
+      ) : (
+        <div className="divide-default-200 border-default-200 divide-y border-y">
+          {historyEntries.map((entry) => {
+            const href = getReadingPositionHref(entry.post.slug, entry.positionAnchor);
+            const status =
+              entry.progressPercent >= 100 ? "Finished" : `${entry.progressPercent}% read`;
+
+            return (
+              <article key={entry.post.id} className="flex gap-4 py-5 sm:items-center">
+                <div className="hidden w-28 shrink-0 overflow-hidden sm:block">
+                  <LibraryPostVisual post={entry.post} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <Link className="min-w-0 no-underline" href={href}>
+                      <Typography className="line-clamp-2 text-base font-semibold" type="h3">
+                        {entry.post.title}
+                      </Typography>
+                    </Link>
+                    <Tooltip>
+                      <Button
+                        isIconOnly
+                        aria-label={`Remove ${entry.post.title} from reading history`}
+                        isDisabled={isClearing || pendingRemovals.has(entry.post.id)}
+                        isPending={pendingRemovals.has(entry.post.id)}
+                        size="sm"
+                        variant="ghost"
+                        onPress={() => handleRemoveHistoryEntry(entry.post.id)}
+                      >
+                        <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
+                      </Button>
+                      <Tooltip.Content>Remove from history</Tooltip.Content>
+                    </Tooltip>
+                  </div>
+                  <div className="text-muted mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                    <time dateTime={entry.lastReadAt}>
+                      Read {formatRelativeTime(entry.lastReadAt)}
+                    </time>
+                    <span>{status}</span>
+                    {entry.post.category?.name ? <span>{entry.post.category.name}</span> : null}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      {!isAdjustingPage && (page > 0 || (data?.totalPages ?? 0) > 1) ? (
+        <div className="mt-6 flex items-center justify-between gap-4">
+          <Typography color="muted" type="body-xs">
+            {data ? `Page ${page + 1} of ${data.totalPages}` : `Page ${page + 1}`}
+          </Typography>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              isDisabled={page === 0 || history.isFetching || isClearing}
+              onPress={() => setPage((page) => Math.max(0, page - 1))}
+            >
+              Previous
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              isDisabled={history.isFetching || isClearing || !data || page >= lastPage}
+              onPress={() => setPage((page) => page + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      <AlertDialog>
+        <AlertDialog.Backdrop
+          isOpen={isClearHistoryOpen}
+          isDismissable={false}
+          isKeyboardDismissDisabled={isClearing}
+          onOpenChange={(open) => {
+            if (!clearing.current) setIsClearHistoryOpen(open);
+          }}
+          variant="blur"
+        >
+          <AlertDialog.Container>
+            <AlertDialog.Dialog className="sm:max-w-md">
+              <AlertDialog.CloseTrigger isDisabled={isClearing} />
+              <AlertDialog.Header>
+                <AlertDialog.Icon status="danger" />
+                <AlertDialog.Heading>Clear reading history?</AlertDialog.Heading>
+              </AlertDialog.Header>
+              <AlertDialog.Body>
+                <p className="text-sm">
+                  This removes all saved reading activity. This action cannot be undone.
+                </p>
+                {clearError ? (
+                  <p role="alert" className="text-danger mt-3 text-sm">
+                    {clearError}
+                  </p>
+                ) : null}
+                {isClearing ? (
+                  <p role="status" className="text-muted mt-3 text-sm">
+                    Clearing reading history…
+                  </p>
+                ) : null}
+              </AlertDialog.Body>
+              <AlertDialog.Footer>
+                <Button isDisabled={isClearing} slot="close" size="sm" variant="tertiary">
+                  Cancel
+                </Button>
+                <Button
+                  isDisabled={pendingRemovals.size > 0}
+                  isPending={isClearing}
+                  size="sm"
+                  variant="danger"
+                  onPress={handleClearHistory}
+                >
+                  Clear history
+                </Button>
+              </AlertDialog.Footer>
+            </AlertDialog.Dialog>
+          </AlertDialog.Container>
+        </AlertDialog.Backdrop>
+      </AlertDialog>
+    </section>
+  );
+}
+
+/** A new collection starts on page one with its own query and pending removals. */
+function CollectionContents({ collection }: { collection: PostCollectionResponse }) {
+  const [page, setPage] = useState(0);
+  const inFlight = useRef(new Set<number>());
+  const [pendingRemovals, setPendingRemovals] = useState<ReadonlySet<number>>(new Set());
+  const [removePost] = useRemovePostFromCollectionMutation();
+  const query = useGetCollectionPostsQuery(
+    { collectionId: collection.id, page, size: 20, sort: ["addedAt,desc"] },
+    { refetchOnMountOrArgChange: true }
+  );
+  const data = query.currentData;
+  const lastPage = Math.max(0, (data?.totalPages ?? 1) - 1);
+  const isAdjustingPage = query.isSuccess && !query.isFetching && !!data && page > lastPage;
+  if (isAdjustingPage) setPage(lastPage);
+  const isLoading = isAdjustingPage || query.isLoading || (query.isFetching && !data);
+
+  const handleRemove = async (postId: number) => {
+    if (inFlight.current.has(postId)) return;
+    inFlight.current.add(postId);
+    setPendingRemovals(new Set(inFlight.current));
+    try {
+      await removePost({ collectionId: collection.id, postId }).unwrap();
+    } catch {
+      // The mutation displays its own failure toast; the entry remains available for retry.
+    } finally {
+      inFlight.current.delete(postId);
+      setPendingRemovals(new Set(inFlight.current));
+    }
+  };
+
+  return (
+    <div aria-busy={query.isFetching || isAdjustingPage}>
+      {isLoading ? (
+        <LibrarySkeleton count={2} />
+      ) : query.isError ? (
+        <Card variant="secondary">
+          <Card.Header>
+            <Card.Title>Collection articles are unavailable</Card.Title>
+            <Card.Description>Please try loading this page again.</Card.Description>
+          </Card.Header>
+          <Card.Footer>
+            <Button size="sm" variant="secondary" onPress={() => query.refetch()}>
+              Try again
+            </Button>
+          </Card.Footer>
+        </Card>
+      ) : !data?.list.length ? (
+        <EmptyLibrarySection
+          title="This collection is empty"
+          description="Open an article and use the collection action to add it here."
+        />
+      ) : (
+        <div className="divide-default-200 border-default-200 divide-y border-y">
+          {data.list.map(({ addedAt, post }) => (
+            <article key={post.id} className="flex gap-4 py-5 sm:items-center">
+              <div className="hidden w-28 shrink-0 overflow-hidden sm:block">
+                <LibraryPostVisual post={post} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <Link className="no-underline" href={`/single/${post.slug}`}>
+                  <Typography className="line-clamp-2 text-base font-semibold" type="h4">
+                    {post.title}
+                  </Typography>
+                </Link>
+                <Typography color="muted" type="body-xs" className="mt-2">
+                  Added {formatDate(addedAt)}
+                </Typography>
+              </div>
+              <Tooltip>
+                <Button
+                  isIconOnly
+                  aria-label={`Remove ${post.title} from ${collection.name}`}
+                  isPending={pendingRemovals.has(post.id)}
+                  isDisabled={pendingRemovals.has(post.id)}
+                  size="sm"
+                  variant="ghost"
+                  onPress={() => handleRemove(post.id)}
+                >
+                  <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
+                </Button>
+                <Tooltip.Content>Remove from collection</Tooltip.Content>
+              </Tooltip>
+            </article>
+          ))}
+        </div>
+      )}
+      {!isAdjustingPage && (page > 0 || (data?.totalPages ?? 0) > 1) ? (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <Typography color="muted" type="body-sm">
+            {data
+              ? `Page ${page + 1} of ${data.totalPages} · ${data.total} articles`
+              : `Page ${page + 1}`}
+          </Typography>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              isDisabled={page === 0 || query.isFetching}
+              onPress={() => setPage((current) => Math.max(0, current - 1))}
+            >
+              Previous
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              isDisabled={query.isFetching || !data || page >= lastPage}
+              onPress={() => setPage((current) => current + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export function LibraryPage() {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const [historyPage, setHistoryPage] = useState(0);
   const [followingPage, setFollowingPage] = useState(0);
-  const [entryPendingRemoval, setEntryPendingRemoval] = useState<number | null>(null);
   const [recommendationPendingRemoval, setRecommendationPendingRemoval] = useState<number | null>(
     null
   );
-  const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
-  const [isCollectionFormOpen, setIsCollectionFormOpen] = useState(false);
-  const [isCollectionDeleteOpen, setIsCollectionDeleteOpen] = useState(false);
+  const [collectionForm, setCollectionForm] = useState<{
+    collection: PostCollectionResponse | null;
+  } | null>(null);
   const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null);
   const [collectionPendingDeletion, setCollectionPendingDeletion] =
     useState<PostCollectionResponse | null>(null);
-  const [collectionBeingEdited, setCollectionBeingEdited] = useState<PostCollectionResponse | null>(
-    null
-  );
-  const [collectionName, setCollectionName] = useState("");
-  const [collectionDescription, setCollectionDescription] = useState("");
-  const [collectionPostPendingRemoval, setCollectionPostPendingRemoval] = useState<number | null>(
-    null
-  );
   const [categoryPendingId, setCategoryPendingId] = useState<number | null>(null);
 
   const overview = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
@@ -404,40 +749,21 @@ export function LibraryPage() {
     { page: followingPage, size: FOLLOWING_PAGE_SIZE, sort: ["publishedAt,desc"] },
     { skip: !isAuthenticated || preferences.isLoading || followedCategories.length === 0 }
   );
-  const history = useGetReadingHistoryQuery(
-    { page: historyPage, size: HISTORY_PAGE_SIZE, sort: ["lastReadAt,desc"] },
-    { skip: !isAuthenticated }
-  );
   const collections = useGetPostCollectionsQuery(undefined, { skip: !isAuthenticated });
   const selectedCollection = collections.data?.find(
     (collection) => collection.id === selectedCollectionId
   );
-  const collectionPosts = useGetCollectionPostsQuery(
-    { collectionId: selectedCollection?.id ?? 0, page: 0, size: 20, sort: ["addedAt,desc"] },
-    { skip: !isAuthenticated || !selectedCollection }
-  );
-  const [createPostCollection, { isLoading: isCreatingCollection }] =
-    useCreatePostCollectionMutation();
-  const [updatePostCollection, { isLoading: isUpdatingCollection }] =
-    useUpdatePostCollectionMutation();
-  const [deletePostCollection, { isLoading: isDeletingCollection }] =
-    useDeletePostCollectionMutation();
-  const [removePostFromCollection] = useRemovePostFromCollectionMutation();
-  const [deleteReadingHistory] = useDeleteReadingHistoryMutation();
   const [hideRecommendation] = useHideRecommendationMutation();
   const [followCategory] = useFollowCategoryMutation();
   const [unfollowCategory] = useUnfollowCategoryMutation();
   const [clearHiddenRecommendations, { isLoading: isClearingHiddenRecommendations }] =
     useClearHiddenRecommendationsMutation();
-  const [clearReadingHistory, { isLoading: isClearingHistory }] = useClearReadingHistoryMutation();
 
   const continueReading = (overview.data?.continueReading ?? []).filter(
     (entry) => entry.progressPercent < 100
   );
-  const historyEntries = history.data?.list ?? [];
   const recommendations = overview.data?.recommendations ?? [];
   const followingPosts = following.data?.list ?? [];
-  const selectedCollectionPosts = collectionPosts.data?.list ?? [];
   const followedCategoryIds = new Set(followedCategories.map((category) => category.id));
   const preferenceCategories = (facets?.categories ?? [])
     .flatMap((category) =>
@@ -446,27 +772,6 @@ export function LibraryPage() {
         : []
     )
     .slice(0, 12);
-
-  const handleRemoveHistoryEntry = async (postId: number) => {
-    setEntryPendingRemoval(postId);
-    try {
-      await deleteReadingHistory(postId).unwrap();
-    } catch {
-      // The mutation displays its own failure toast.
-    } finally {
-      setEntryPendingRemoval(null);
-    }
-  };
-
-  const handleClearHistory = async () => {
-    try {
-      await clearReadingHistory().unwrap();
-      setHistoryPage(0);
-      setIsClearHistoryOpen(false);
-    } catch {
-      // The mutation displays its own failure toast.
-    }
-  };
 
   const handleHideRecommendation = async (postId: number) => {
     setRecommendationPendingRemoval(postId);
@@ -500,65 +805,6 @@ export function LibraryPage() {
       await clearHiddenRecommendations().unwrap();
     } catch {
       // The mutation displays its own failure toast.
-    }
-  };
-
-  const openCreateCollection = () => {
-    setCollectionBeingEdited(null);
-    setCollectionName("");
-    setCollectionDescription("");
-    setIsCollectionFormOpen(true);
-  };
-
-  const openEditCollection = (collection: PostCollectionResponse) => {
-    setCollectionBeingEdited(collection);
-    setCollectionName(collection.name);
-    setCollectionDescription(collection.description || "");
-    setIsCollectionFormOpen(true);
-  };
-
-  const handleCollectionSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const body = {
-      name: collectionName.trim(),
-      description: collectionDescription.trim() || undefined,
-    };
-
-    try {
-      const collection = collectionBeingEdited
-        ? await updatePostCollection({ collectionId: collectionBeingEdited.id, body }).unwrap()
-        : await createPostCollection(body).unwrap();
-
-      setSelectedCollectionId(collection.id);
-      setIsCollectionFormOpen(false);
-    } catch {
-      // The mutations display their own failure toast.
-    }
-  };
-
-  const handleDeleteCollection = async () => {
-    if (!collectionPendingDeletion) return;
-
-    try {
-      await deletePostCollection(collectionPendingDeletion.id).unwrap();
-      if (selectedCollectionId === collectionPendingDeletion.id) setSelectedCollectionId(null);
-      setIsCollectionDeleteOpen(false);
-      setCollectionPendingDeletion(null);
-    } catch {
-      // The mutation displays its own failure toast.
-    }
-  };
-
-  const handleRemoveCollectionPost = async (postId: number) => {
-    if (!selectedCollectionId) return;
-
-    setCollectionPostPendingRemoval(postId);
-    try {
-      await removePostFromCollection({ collectionId: selectedCollectionId, postId }).unwrap();
-    } catch {
-      // The mutation displays its own failure toast.
-    } finally {
-      setCollectionPostPendingRemoval(null);
     }
   };
 
@@ -759,7 +1005,7 @@ export function LibraryPage() {
                 Group the writing you want to keep together.
               </Typography>
             </div>
-            <Button size="sm" onPress={openCreateCollection}>
+            <Button size="sm" onPress={() => setCollectionForm({ collection: null })}>
               <Icon icon="gravity-ui:circle-plus" aria-hidden="true" className="size-4" />
               New collection
             </Button>
@@ -779,11 +1025,8 @@ export function LibraryPage() {
                   key={collection.id}
                   collection={collection}
                   isSelected={collection.id === selectedCollectionId}
-                  onDelete={(nextCollection) => {
-                    setCollectionPendingDeletion(nextCollection);
-                    setIsCollectionDeleteOpen(true);
-                  }}
-                  onEdit={openEditCollection}
+                  onDelete={setCollectionPendingDeletion}
+                  onEdit={(collection) => setCollectionForm({ collection })}
                   onSelect={setSelectedCollectionId}
                 />
               ))}
@@ -796,7 +1039,11 @@ export function LibraryPage() {
           )}
 
           {selectedCollection ? (
-            <div className="border-default-200 mt-8 border-t pt-8">
+            <div
+              role="region"
+              aria-label={`Articles in ${selectedCollection.name}`}
+              className="border-default-200 mt-8 border-t pt-8"
+            >
               <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <Typography type="h3" weight="semibold">
@@ -813,52 +1060,7 @@ export function LibraryPage() {
                 </Button>
               </div>
 
-              {collectionPosts.isLoading ? (
-                <LibrarySkeleton count={2} />
-              ) : collectionPosts.isError ? (
-                <EmptyLibrarySection
-                  title="Collection articles are unavailable"
-                  description="Try opening this collection again in a moment."
-                />
-              ) : selectedCollectionPosts.length === 0 ? (
-                <EmptyLibrarySection
-                  title="This collection is empty"
-                  description="Open an article and use the collection action to add it here."
-                />
-              ) : (
-                <div className="divide-default-200 border-default-200 divide-y border-y">
-                  {selectedCollectionPosts.map(({ addedAt, post }) => (
-                    <article key={post.id} className="flex gap-4 py-5 sm:items-center">
-                      <div className="hidden w-28 shrink-0 overflow-hidden sm:block">
-                        <LibraryPostVisual post={post} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <Link className="no-underline" href={`/single/${post.slug}`}>
-                          <Typography className="line-clamp-2 text-base font-semibold" type="h4">
-                            {post.title}
-                          </Typography>
-                        </Link>
-                        <Typography color="muted" type="body-xs" className="mt-2">
-                          Added {formatDate(addedAt)}
-                        </Typography>
-                      </div>
-                      <Tooltip>
-                        <Button
-                          isIconOnly
-                          aria-label={`Remove ${post.title} from ${selectedCollection.name}`}
-                          isPending={collectionPostPendingRemoval === post.id}
-                          size="sm"
-                          variant="ghost"
-                          onPress={() => handleRemoveCollectionPost(post.id)}
-                        >
-                          <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
-                        </Button>
-                        <Tooltip.Content>Remove from collection</Tooltip.Content>
-                      </Tooltip>
-                    </article>
-                  ))}
-                </div>
-              )}
+              <CollectionContents key={selectedCollection.id} collection={selectedCollection} />
             </div>
           ) : null}
         </section>
@@ -980,246 +1182,31 @@ export function LibraryPage() {
           </section>
         ) : null}
 
-        <section aria-labelledby="reading-history-title" className="mt-20">
-          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <Typography id="reading-history-title" type="h2" weight="semibold">
-                Reading history
-              </Typography>
-              <Typography color="muted" type="body-sm" className="mt-1">
-                {history.data
-                  ? `${history.data.total.toLocaleString("en-US")} articles visited`
-                  : "Your recent reading"}
-              </Typography>
-            </div>
-            {historyEntries.length > 0 ? (
-              <Button size="sm" variant="danger" onPress={() => setIsClearHistoryOpen(true)}>
-                <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
-                Clear history
-              </Button>
-            ) : null}
-          </div>
-
-          {history.isLoading ? (
-            <LibrarySkeleton count={4} />
-          ) : history.isError ? (
-            <EmptyLibrarySection
-              title="Reading history is unavailable"
-              description="Try loading this page again in a moment."
-            />
-          ) : historyEntries.length === 0 ? (
-            <EmptyLibrarySection
-              title="No reading history yet"
-              description="Articles you open will appear here as you read."
-            />
-          ) : (
-            <div className="divide-default-200 border-default-200 divide-y border-y">
-              {historyEntries.map((entry) => {
-                const href = getReadingPositionHref(entry.post.slug, entry.positionAnchor);
-                const status =
-                  entry.progressPercent >= 100 ? "Finished" : `${entry.progressPercent}% read`;
-
-                return (
-                  <article key={entry.post.id} className="flex gap-4 py-5 sm:items-center">
-                    <div className="hidden w-28 shrink-0 overflow-hidden sm:block">
-                      <LibraryPostVisual post={entry.post} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <Link className="min-w-0 no-underline" href={href}>
-                          <Typography className="line-clamp-2 text-base font-semibold" type="h3">
-                            {entry.post.title}
-                          </Typography>
-                        </Link>
-                        <Tooltip>
-                          <Button
-                            isIconOnly
-                            aria-label={`Remove ${entry.post.title} from reading history`}
-                            isDisabled={entryPendingRemoval === entry.post.id}
-                            size="sm"
-                            variant="ghost"
-                            onPress={() => handleRemoveHistoryEntry(entry.post.id)}
-                          >
-                            <Icon
-                              icon="gravity-ui:trash-bin"
-                              aria-hidden="true"
-                              className="size-4"
-                            />
-                          </Button>
-                          <Tooltip.Content>Remove from history</Tooltip.Content>
-                        </Tooltip>
-                      </div>
-                      <div className="text-muted mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-                        <time dateTime={entry.lastReadAt}>
-                          Read {formatRelativeTime(entry.lastReadAt)}
-                        </time>
-                        <span>{status}</span>
-                        {entry.post.category?.name ? <span>{entry.post.category.name}</span> : null}
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-
-          {history.data && history.data.totalPages > 1 ? (
-            <div className="mt-6 flex items-center justify-between gap-4">
-              <Typography color="muted" type="body-xs">
-                Page {historyPage + 1} of {history.data.totalPages}
-              </Typography>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  isDisabled={historyPage === 0}
-                  onPress={() => setHistoryPage((page) => Math.max(0, page - 1))}
-                >
-                  Previous
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  isDisabled={historyPage >= history.data.totalPages - 1}
-                  onPress={() => setHistoryPage((page) => page + 1)}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          ) : null}
-        </section>
+        <ReadingHistorySection />
       </div>
 
-      <AlertDialog>
-        <AlertDialog.Backdrop
-          isOpen={isClearHistoryOpen}
-          onOpenChange={setIsClearHistoryOpen}
-          variant="blur"
-        >
-          <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md">
-              <AlertDialog.CloseTrigger />
-              <AlertDialog.Header>
-                <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Clear reading history?</AlertDialog.Heading>
-              </AlertDialog.Header>
-              <AlertDialog.Body>
-                <p className="text-sm">
-                  This removes all saved reading activity. This action cannot be undone.
-                </p>
-              </AlertDialog.Body>
-              <AlertDialog.Footer>
-                <Button slot="close" size="sm" variant="tertiary">
-                  Cancel
-                </Button>
-                <Button
-                  isDisabled={isClearingHistory}
-                  size="sm"
-                  variant="danger"
-                  onPress={handleClearHistory}
-                >
-                  Clear history
-                </Button>
-              </AlertDialog.Footer>
-            </AlertDialog.Dialog>
-          </AlertDialog.Container>
-        </AlertDialog.Backdrop>
-      </AlertDialog>
-
-      <Modal>
-        <Modal.Backdrop
-          isOpen={isCollectionFormOpen}
-          onOpenChange={setIsCollectionFormOpen}
-          variant="blur"
-        >
-          <Modal.Container size="sm">
-            <Modal.Dialog className="sm:max-w-md">
-              <Modal.CloseTrigger />
-              <Form onSubmit={handleCollectionSubmit}>
-                <Modal.Header>
-                  <Modal.Heading>
-                    {collectionBeingEdited ? "Edit collection" : "Create collection"}
-                  </Modal.Heading>
-                </Modal.Header>
-                <Modal.Body className="flex flex-col gap-4 py-4">
-                  <TextField isRequired name="collection-name">
-                    <Label>Name</Label>
-                    <Input
-                      maxLength={80}
-                      placeholder="e.g. Design references"
-                      value={collectionName}
-                      onChange={(event) => setCollectionName(event.target.value)}
-                    />
-                    <FieldError />
-                  </TextField>
-                  <TextField name="collection-description">
-                    <Label>Description</Label>
-                    <TextArea
-                      maxLength={300}
-                      placeholder="What belongs in this collection?"
-                      rows={3}
-                      value={collectionDescription}
-                      onChange={(event) => setCollectionDescription(event.target.value)}
-                    />
-                  </TextField>
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button slot="close" size="sm" variant="tertiary">
-                    Cancel
-                  </Button>
-                  <Button
-                    isPending={isCreatingCollection || isUpdatingCollection}
-                    size="sm"
-                    type="submit"
-                  >
-                    {collectionBeingEdited ? "Save changes" : "Create collection"}
-                  </Button>
-                </Modal.Footer>
-              </Form>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
-
-      <AlertDialog>
-        <AlertDialog.Backdrop
-          isOpen={isCollectionDeleteOpen}
-          onOpenChange={setIsCollectionDeleteOpen}
-          variant="blur"
-        >
-          <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md">
-              <AlertDialog.CloseTrigger />
-              <AlertDialog.Header>
-                <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Delete collection?</AlertDialog.Heading>
-              </AlertDialog.Header>
-              <AlertDialog.Body>
-                <p className="text-sm">
-                  Delete{" "}
-                  <strong className="text-foreground">{collectionPendingDeletion?.name}</strong>?
-                  The articles will remain in your library, but this collection cannot be restored.
-                </p>
-              </AlertDialog.Body>
-              <AlertDialog.Footer>
-                <Button slot="close" size="sm" variant="tertiary">
-                  Cancel
-                </Button>
-                <Button
-                  isDisabled={!collectionPendingDeletion}
-                  isPending={isDeletingCollection}
-                  size="sm"
-                  variant="danger"
-                  onPress={handleDeleteCollection}
-                >
-                  Delete collection
-                </Button>
-              </AlertDialog.Footer>
-            </AlertDialog.Dialog>
-          </AlertDialog.Container>
-        </AlertDialog.Backdrop>
-      </AlertDialog>
+      {collectionForm ? (
+        <CollectionFormDialog
+          key={collectionForm.collection?.id ?? "new"}
+          collection={collectionForm.collection}
+          onClose={() => setCollectionForm(null)}
+          onSaved={(collection) => {
+            setSelectedCollectionId(collection.id);
+            setCollectionForm(null);
+          }}
+        />
+      ) : null}
+      {collectionPendingDeletion ? (
+        <DeleteCollectionDialog
+          key={collectionPendingDeletion.id}
+          collection={collectionPendingDeletion}
+          onClose={() => setCollectionPendingDeletion(null)}
+          onDeleted={(collectionId) => {
+            setSelectedCollectionId((current) => (current === collectionId ? null : current));
+            setCollectionPendingDeletion(null);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
