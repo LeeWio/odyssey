@@ -6,11 +6,8 @@ import { useMediaQuery } from "@mantine/hooks";
 import { motion } from "motion/react";
 import { useRelativeTime } from "@/lib/relative-time";
 import type { MomentResponse } from "@/lib/features/moment";
-import {
-  isDocumentEmpty,
-  jsonContentToPlainText,
-  parseMomentContent,
-} from "@/features/moment/utils/content-parser";
+import { isDocumentEmpty, parseMomentContent } from "@/features/moment/utils/content-parser";
+import { MomentContent } from "@/features/moment/components/moment-content";
 import ScrollingBanner from "@/components/corners/scrolling-banner";
 
 type MomentBoardEntry = {
@@ -84,13 +81,7 @@ function MomentBoardCard({ entry, index }: { entry: MomentBoardEntry; index: num
               A quiet note from lately.
             </Typography>
           ) : (
-            <Typography
-              color="muted"
-              type="body-sm"
-              className="line-clamp-5 break-all whitespace-pre-wrap"
-            >
-              {jsonContentToPlainText(parsedContent)}
-            </Typography>
+            <MomentContent content={parsedContent} className="text-muted line-clamp-5" />
           )}
         </Card.Content>
       </Card>

@@ -12,6 +12,7 @@ import { useUploadFileMutation } from "@/lib/features/file/file-api";
 import { MOMENT_CHARACTER_LIMIT } from "../utils/character-count";
 import { MOMENT_TOPIC_LIMIT } from "../utils/topic-slug";
 import { parseMomentContent, isDocumentEmpty } from "../utils/content-parser";
+import { momentContentSchema } from "../utils/content-schema";
 import {
   MOMENT_MAX_IMAGES,
   defaultMomentAltText,
@@ -64,15 +65,17 @@ function createLocalId() {
 
 export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentResponse) => {
   const initialContent = initialMoment ? parseMomentContent(initialMoment.content) : undefined;
-  const countText = (node: JSONContent): number =>
-    (node.text?.length ?? 0) +
-    (node.content?.reduce((sum, child) => sum + countText(child), 0) ?? 0);
   const [mediaItems, setMediaItems] = useState<PublisherMediaItem[]>(
     () => initialMoment?.images.map(toExistingMedia) ?? []
   );
 
   const [editorValue, setEditorValue] = useState<JSONContent | undefined>(initialContent);
-  const [charCount, setCharCount] = useState(initialContent ? countText(initialContent) : 0);
+  const [charCount, setCharCount] = useState(() => {
+    if (!initialContent) return 0;
+    const doc = momentContentSchema.nodeFromJSON(initialContent);
+    // Match Tiptap CharacterCount's default textSize mode, including leaf separators.
+    return doc.textBetween(0, doc.content.size, undefined, " ").length;
+  });
   const [isEmpty, setIsEmpty] = useState(isDocumentEmpty(initialContent));
   const [topics, setTopics] = useState<string[]>(
     initialMoment?.topics.map((topic) => topic.slug) ?? []

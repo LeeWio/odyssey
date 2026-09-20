@@ -97,6 +97,27 @@ afterEach(() => {
 });
 
 describe("moment publishing", () => {
+  it("counts hard breaks consistently with Tiptap CharacterCount when opening an edit", () => {
+    setup({
+      ...original,
+      content: JSON.stringify({
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              { type: "text", text: "A" },
+              { type: "hardBreak" },
+              { type: "text", text: "B" },
+            ],
+          },
+        ],
+      }),
+    });
+    expect(state.charCount).toBe(3);
+    expect(state.isEmpty).toBe(false);
+  });
+
   it("edits the selected ID and preserves attachments, topics, visibility and stock", async () => {
     api.update.mockReturnValue({ unwrap: () => Promise.resolve() });
     const success = setup(original);

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { getTransformStyles } from "@/features/moment/utils/transform-styles";
-import { extractMomentPlainText, parseMomentContent } from "@/features/moment/utils/content-parser";
+import {
+  extractMomentPlainText,
+  parseMomentContent,
+  isDocumentEmpty,
+} from "@/features/moment/utils/content-parser";
 
 describe("Moment Card Utility Helpers", () => {
   describe("getTransformStyles", () => {
@@ -135,7 +139,79 @@ describe("Moment Card Utility Helpers", () => {
         ],
       });
 
-      expect(extractMomentPlainText(content)).toBe("First line\nSecond line");
+      expect(extractMomentPlainText(content)).toBe("First line\n\nSecond line");
+    });
+
+    it("preserves inline hard breaks and blank lines between paragraphs", () => {
+      const content = JSON.stringify({
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "这世上很难找到一个无亲无故的人。" }],
+          },
+          {
+            type: "paragraph",
+            content: [
+              { type: "text", text: "有牵挂，就会有期待；" },
+              { type: "hardBreak" },
+              { type: "text", text: "有期待，就难免有评价。" },
+            ],
+          },
+          { type: "paragraph", content: [{ type: "text", text: "就已经很好了。" }] },
+        ],
+      });
+      expect(extractMomentPlainText(content)).toBe(
+        "这世上很难找到一个无亲无故的人。\n\n有牵挂，就会有期待；\n有期待，就难免有评价。\n\n就已经很好了。"
+      );
+    });
+
+    it("retains consecutive and trailing hard breaks inside a paragraph", () => {
+      expect(
+        extractMomentPlainText(
+          JSON.stringify({
+            type: "doc",
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  { type: "text", text: "One" },
+                  { type: "hardBreak" },
+                  { type: "hardBreak" },
+                  { type: "text", text: "Two" },
+                  { type: "hardBreak" },
+                ],
+              },
+              { type: "paragraph", content: [{ type: "text", text: "Three" }] },
+            ],
+          })
+        )
+      ).toBe("One\n\nTwo\n\n\nThree");
+    });
+
+    it("preserves empty interior paragraphs but treats break-only documents as empty", () => {
+      expect(
+        extractMomentPlainText(
+          JSON.stringify({
+            type: "doc",
+            content: [
+              { type: "paragraph", content: [{ type: "text", text: "Before" }] },
+              { type: "paragraph" },
+              { type: "paragraph", content: [{ type: "text", text: "After" }] },
+            ],
+          })
+        )
+      ).toBe("Before\n\n\n\nAfter");
+      expect(
+        isDocumentEmpty({
+          type: "doc",
+          content: [{ type: "paragraph", content: [{ type: "hardBreak" }] }],
+        })
+      ).toBe(true);
+    });
+
+    it("preserves legacy multiline text without adding paragraph separators", () => {
+      expect(extractMomentPlainText("First\nSecond\n\nThird")).toBe("First\nSecond\n\nThird");
     });
 
     it("returns legacy plain text unchanged", () => {

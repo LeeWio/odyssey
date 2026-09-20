@@ -8,7 +8,8 @@ import type { MomentTopicResponse } from "@/lib/features/moment";
 import type { JSONContent } from "@tiptap/core";
 import { getTransformStyles } from "../../utils/transform-styles";
 import { useMemo } from "react";
-import { isDocumentEmpty, jsonContentToPlainText } from "../../utils/content-parser";
+import { isDocumentEmpty } from "../../utils/content-parser";
+import { MomentContent } from "../moment-content";
 
 const BounceCards = dynamic(() => import("@/components/ui/bounce-cards"), {
   ssr: false,
@@ -47,15 +48,6 @@ const getDynamicContainerHeight = (count: number) => {
   if (count === 4) return 110;
   return 108;
 };
-
-function MomentPlainText({ content }: { content: JSONContent }) {
-  if (isDocumentEmpty(content)) return null;
-  return (
-    <div className="text-foreground text-sm leading-relaxed break-all whitespace-pre-wrap">
-      {jsonContentToPlainText(content)}
-    </div>
-  );
-}
 
 export const CardContent = ({
   parsedContent,
@@ -125,7 +117,7 @@ export const CardContent = ({
     return (
       <div className="flex w-full flex-row items-start justify-between gap-4">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <MomentPlainText content={parsedContent} />
+          <MomentContent content={parsedContent} />
 
           {topics.length > 0 && (
             <TagGroup aria-label="Topics" size="sm" selectionMode="none">
@@ -157,7 +149,7 @@ export const CardContent = ({
 
   return (
     <div className="flex w-full flex-col gap-3">
-      <MomentPlainText content={parsedContent} />
+      <MomentContent content={parsedContent} />
 
       {topics.length > 0 && (
         <TagGroup aria-label="Topics" size="sm" selectionMode="none">
