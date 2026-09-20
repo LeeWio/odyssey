@@ -1,3 +1,10 @@
+## [1.159.1](https://github.com/LeeWio/odyssey/compare/v1.159.0...v1.159.1) (2026-09-20)
+
+
+### Bug Fixes
+
+* **moment:** preserve rich text with native Tiptap rendering ([32eb49b](https://github.com/LeeWio/odyssey/commit/32eb49b01cf9251dfe6b463c38cbaa2980d6e18a))
+
 # [1.159.0](https://github.com/LeeWio/odyssey/compare/v1.158.3...v1.159.0) (2026-09-20)
 
 
