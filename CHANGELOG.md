@@ -1,3 +1,19 @@
+# [1.159.0](https://github.com/LeeWio/odyssey/compare/v1.158.3...v1.159.0) (2026-09-20)
+
+
+### Bug Fixes
+
+* **auth:** isolate session refresh and hydration state ([2bdede8](https://github.com/LeeWio/odyssey/commit/2bdede87822c43393e3a669af972ac306bf4c7aa))
+* **comments:** preserve drafts and coordinate async operations ([5c5a8a2](https://github.com/LeeWio/odyssey/commit/5c5a8a2935406d2a6c7a2558af81c37b3874b538))
+* **newsletter:** preserve drafts and handle subscription retries ([5e6261e](https://github.com/LeeWio/odyssey/commit/5e6261e04bf3375e971b8dbe49c2d3153187b1c1))
+* **notifications:** isolate list state and serialize conflicting actions ([269c1cc](https://github.com/LeeWio/odyssey/commit/269c1cc286903a61ce23b978e18e1d3dab0ec079))
+* **search:** isolate query results and recover invalid pages ([8fa6bad](https://github.com/LeeWio/odyssey/commit/8fa6bad3d4a9712109f6c49f88c945a8deed241c))
+
+
+### Features
+
+* **library:** add collection pagination and resilient management ([5e0da6e](https://github.com/LeeWio/odyssey/commit/5e0da6eea8b62338f20fd651dc632aa55343f398))
+
 ## [1.158.3](https://github.com/LeeWio/odyssey/compare/v1.158.2...v1.158.3) (2026-09-18)
 
 
