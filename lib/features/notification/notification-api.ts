@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
 import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
 import { notifyMutation } from "@/lib/toast";
+import type { RootState } from "@/lib/store";
 import {
   NotificationPreferenceSchema,
   NotificationResponseSchema,
@@ -57,13 +58,36 @@ export const notificationApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(NotificationPreferenceSchema),
       transformResponse: (response: ApiResponse<NotificationPreference>) => response.data,
       transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
+      async onQueryStarted(_arg, { dispatch, getState, queryFulfilled }) {
+        const session = (getState() as RootState).auth;
+        try {
+          const { data } = await queryFulfilled;
+          // Keep the confirmed values available even if the background refresh
+          // fails. A response from an old session must not patch a new session.
+          const currentSession = (getState() as RootState).auth;
+          if (
+            currentSession.accessToken === session.accessToken &&
+            currentSession.username === session.username &&
+            currentSession.isAuthenticated === session.isAuthenticated
+          ) {
+            dispatch(
+              notificationApi.util.updateQueryData(
+                "getMyNotificationPreferences",
+                undefined,
+                () => data
+              )
+            );
+          }
+        } catch {
+          // notifyMutation below owns error feedback; failed saves keep the cache.
+        }
         await notifyMutation(queryFulfilled, {
           error: "Failed to save notification preferences.",
           success: "Notification preferences saved.",
         });
       },
-      invalidatesTags: [{ type: "Notification", id: "PREFERENCES" }],
+      invalidatesTags: (_result, error) =>
+        error ? [] : [{ type: "Notification", id: "PREFERENCES" }],
     }),
 
     markNotificationAsRead: builder.mutation<void, number>({

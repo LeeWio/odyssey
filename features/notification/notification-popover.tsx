@@ -25,6 +25,7 @@ import {
 } from "@/lib/features/notification";
 import { getNotificationIcon, getNotificationTypeLabel } from "@/lib/notification-presentation";
 import { useRelativeTime } from "@/lib/relative-time";
+import { useNotificationActions } from "./use-notification-actions";
 
 const POPOVER_PAGE_SIZE = 8;
 
@@ -76,10 +77,12 @@ function NotificationPopoverEmptyState({ unreadOnly }: { unreadOnly: boolean }) 
 
 function NotificationItem({
   isPending,
+  isDisabled,
   notification,
   onPress,
 }: {
   isPending: boolean;
+  isDisabled: boolean;
   notification: NotificationResponse;
   onPress: (notification: NotificationResponse) => void;
 }) {
@@ -91,6 +94,7 @@ function NotificationItem({
         fullWidth
         className="h-auto items-start justify-start gap-3 rounded-none px-4 py-3 text-left"
         isPending={isPending}
+        isDisabled={isDisabled}
         variant="ghost"
         onPress={() => onPress(notification)}
       >
@@ -134,7 +138,7 @@ export function NotificationPopover() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<NotificationView>("all");
-  const [pendingNotificationId, setPendingNotificationId] = useState<number | null>(null);
+  const { pendingActions, pendingBulkAction, run, runBulk } = useNotificationActions();
   const { data: unreadCount = 0 } = useGetUnreadNotificationCountQuery(undefined, {
     pollingInterval: 60_000,
   });
@@ -143,9 +147,10 @@ export function NotificationPopover() {
     { skip: !isOpen }
   );
   const [markNotificationAsRead] = useMarkNotificationAsReadMutation();
-  const [markAllNotificationsAsRead, { isLoading: isMarkingAllRead }] =
-    useMarkAllNotificationsAsReadMutation();
-  const notificationEntries = notifications.data?.list ?? [];
+  const [markAllNotificationsAsRead] = useMarkAllNotificationsAsReadMutation();
+  const currentPage = notifications.currentData;
+  const notificationEntries = currentPage?.list ?? [];
+  const isLoadingList = notifications.isLoading || (notifications.isFetching && !currentPage);
 
   const navigateToNotification = (notification: NotificationResponse) => {
     const link = notification.link?.trim();
@@ -160,28 +165,14 @@ export function NotificationPopover() {
   };
 
   const handleNotificationPress = async (notification: NotificationResponse) => {
-    if (!notification.read) {
-      setPendingNotificationId(notification.id);
-      try {
-        await markNotificationAsRead(notification.id).unwrap();
-      } catch {
-        return;
-      } finally {
-        setPendingNotificationId(null);
-      }
-    }
-
-    setIsOpen(false);
-    navigateToNotification(notification);
+    await run(notification.id, "read", async () => {
+      if (!notification.read) await markNotificationAsRead(notification.id).unwrap();
+      setIsOpen(false);
+      navigateToNotification(notification);
+    });
   };
 
-  const handleMarkAllRead = async () => {
-    try {
-      await markAllNotificationsAsRead().unwrap();
-    } catch {
-      // The mutation displays its own failure toast.
-    }
-  };
+  const handleMarkAllRead = () => runBulk("read-all", () => markAllNotificationsAsRead().unwrap());
 
   return (
     <Badge.Anchor>
@@ -220,8 +211,10 @@ export function NotificationPopover() {
                   <Button
                     isIconOnly
                     aria-label="Mark all notifications as read"
-                    isDisabled={unreadCount === 0}
-                    isPending={isMarkingAllRead}
+                    isDisabled={
+                      unreadCount === 0 || pendingBulkAction !== null || pendingActions.size > 0
+                    }
+                    isPending={pendingBulkAction === "read-all"}
                     size="sm"
                     variant="ghost"
                     onPress={handleMarkAllRead}
@@ -257,8 +250,8 @@ export function NotificationPopover() {
 
               <Card.Content>
                 <ScrollShadow className="max-h-96" hideScrollBar>
-                  {notifications.isLoading ? <NotificationPopoverSkeleton /> : null}
-                  {!notifications.isLoading && notifications.isError ? (
+                  {isLoadingList ? <NotificationPopoverSkeleton /> : null}
+                  {!isLoadingList && notifications.isError ? (
                     <div className="flex flex-col items-center gap-4 px-6 py-8 text-center">
                       <p className="text-muted text-sm">Notifications could not be loaded.</p>
                       <Button size="sm" variant="ghost" onPress={() => notifications.refetch()}>
@@ -271,19 +264,18 @@ export function NotificationPopover() {
                       </Button>
                     </div>
                   ) : null}
-                  {!notifications.isLoading &&
-                  !notifications.isError &&
-                  notificationEntries.length === 0 ? (
+                  {!isLoadingList && !notifications.isError && notificationEntries.length === 0 ? (
                     <NotificationPopoverEmptyState unreadOnly={view === "unread"} />
                   ) : null}
-                  {!notifications.isLoading &&
-                  !notifications.isError &&
-                  notificationEntries.length > 0 ? (
+                  {!isLoadingList && !notifications.isError && notificationEntries.length > 0 ? (
                     <ul aria-live="polite" className="divide-default-200 divide-y">
                       {notificationEntries.map((notification) => (
                         <NotificationItem
                           key={notification.id}
-                          isPending={pendingNotificationId === notification.id}
+                          isPending={pendingActions.has(notification.id)}
+                          isDisabled={
+                            pendingBulkAction !== null || pendingActions.has(notification.id)
+                          }
                           notification={notification}
                           onPress={handleNotificationPress}
                         />
@@ -295,8 +287,8 @@ export function NotificationPopover() {
 
               <Card.Footer className="items-center justify-between gap-3">
                 <span className="text-muted text-xs">
-                  {notifications.data?.total
-                    ? `${notifications.data.total.toLocaleString("en-US")} total updates`
+                  {currentPage?.total
+                    ? `${currentPage.total.toLocaleString("en-US")} total updates`
                     : "Your activity inbox"}
                 </span>
                 <Button

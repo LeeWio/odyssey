@@ -28,6 +28,7 @@ import {
 import { useRelativeTime } from "@/lib/relative-time";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useNotificationActions } from "./use-notification-actions";
 
 const NOTIFICATIONS_PAGE_SIZE = 20;
 
@@ -49,20 +50,26 @@ function NotificationSkeleton() {
   );
 }
 
-function NotificationEmptyState({ unreadOnly }: { unreadOnly: boolean }) {
+function NotificationEmptyState({ view }: { view: NotificationView }) {
+  const title = {
+    inbox: "No notifications yet",
+    saved: "No saved notifications",
+    done: "No completed notifications",
+  }[view];
+  const description = {
+    inbox: "Updates about your account and writing will appear here.",
+    saved: "Save a notification to keep it here for later.",
+    done: "Notifications you mark done will appear here.",
+  }[view];
   return (
     <EmptyState size="md">
       <EmptyState.Header>
         <EmptyState.Media variant="icon">
           <Icon className="text-default-400" icon="solar:bell-off-linear" width={40} />
         </EmptyState.Media>
-        <EmptyState.Title>
-          {unreadOnly ? "You are all caught up" : "No notifications yet"}
-        </EmptyState.Title>
+        <EmptyState.Title>{title}</EmptyState.Title>
         <EmptyState.Description className="max-w-xs text-pretty">
-          {unreadOnly
-            ? "New activity will appear here when it needs your attention."
-            : "Updates about your account and writing will appear here."}
+          {description}
         </EmptyState.Description>
       </EmptyState.Header>
     </EmptyState>
@@ -76,11 +83,11 @@ export function NotificationCenterPage() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [view, setView] = useState<NotificationView>("inbox");
   const [page, setPage] = useState(0);
-  const [notificationPendingRead, setNotificationPendingRead] = useState<number | null>(null);
-  const [notificationPendingDeletion, setNotificationPendingDeletion] = useState<number | null>(
-    null
-  );
-  const [notificationPendingAction, setNotificationPendingAction] = useState<number | null>(null);
+  const { pendingActions, pendingBulkAction, run, runBulk, isBulkRunning } =
+    useNotificationActions();
+  const isClearingRead = pendingBulkAction === "clear-read";
+  const isMarkingAllRead = pendingBulkAction === "read-all";
+  const isBulkDisabled = pendingBulkAction !== null || pendingActions.size > 0;
   const [isClearReadOpen, setIsClearReadOpen] = useState(false);
   const { data: unreadNotificationCount = 0 } = useGetUnreadNotificationCountQuery(undefined, {
     skip: !isAuthenticated,
@@ -96,16 +103,23 @@ export function NotificationCenterPage() {
     { skip: !isAuthenticated }
   );
   const [markNotificationAsRead] = useMarkNotificationAsReadMutation();
-  const [markAllNotificationsAsRead, { isLoading: isMarkingAllRead }] =
-    useMarkAllNotificationsAsReadMutation();
+  const [markAllNotificationsAsRead] = useMarkAllNotificationsAsReadMutation();
   const [deleteNotification] = useDeleteNotificationMutation();
   const [markNotificationAsDone] = useMarkNotificationAsDoneMutation();
   const [reopenNotification] = useReopenNotificationMutation();
   const [setNotificationSaved] = useSetNotificationSavedMutation();
-  const [clearReadNotifications, { isLoading: isClearingRead }] =
-    useClearReadNotificationsMutation();
+  const [clearReadNotifications] = useClearReadNotificationsMutation();
 
-  const notificationEntries = notifications.data?.list ?? [];
+  const currentPage = notifications.currentData;
+  const notificationEntries = currentPage?.list ?? [];
+  const lastPage = Math.max(0, (currentPage?.totalPages ?? 1) - 1);
+  const isAdjustingPage =
+    notifications.isSuccess && !notifications.isFetching && !!currentPage && page > lastPage;
+  // Removing the last row can shrink the collection below the current page.
+  // Adjust only after a successful response for these exact query arguments.
+  if (isAdjustingPage) setPage(lastPage);
+  const isLoadingPage =
+    isAdjustingPage || notifications.isLoading || (notifications.isFetching && !currentPage);
 
   const navigateToNotification = (notification: NotificationResponse) => {
     const link = notification.link?.trim();
@@ -122,82 +136,34 @@ export function NotificationCenterPage() {
   };
 
   const handleNotificationPress = async (notification: NotificationResponse) => {
-    if (!notification.read) {
-      setNotificationPendingRead(notification.id);
-      try {
-        await markNotificationAsRead(notification.id).unwrap();
-      } catch {
-        // The mutation displays its own failure toast.
-        return;
-      } finally {
-        setNotificationPendingRead(null);
-      }
-    }
-
-    navigateToNotification(notification);
+    await run(notification.id, "read", async () => {
+      if (!notification.read) await markNotificationAsRead(notification.id).unwrap();
+      navigateToNotification(notification);
+    });
   };
 
-  const handleMarkAllRead = async () => {
-    try {
-      await markAllNotificationsAsRead().unwrap();
-    } catch {
-      // The mutation displays its own failure toast.
-    }
-  };
+  const handleMarkAllRead = () => runBulk("read-all", () => markAllNotificationsAsRead().unwrap());
 
-  const handleDeleteNotification = async (notificationId: number) => {
-    setNotificationPendingDeletion(notificationId);
-    try {
-      await deleteNotification(notificationId).unwrap();
-    } catch {
-      // The mutation displays its own failure toast.
-    } finally {
-      setNotificationPendingDeletion(null);
-    }
-  };
+  const handleDeleteNotification = (id: number) =>
+    run(id, "delete", () => deleteNotification(id).unwrap());
 
-  const handleSaveNotification = async (notification: NotificationResponse) => {
-    setNotificationPendingAction(notification.id);
-    try {
-      await setNotificationSaved({ id: notification.id, saved: !notification.saved }).unwrap();
-    } catch {
-      // The mutation displays its own failure toast.
-    } finally {
-      setNotificationPendingAction(null);
-    }
-  };
+  const handleSaveNotification = (notification: NotificationResponse) =>
+    run(notification.id, "save", () =>
+      setNotificationSaved({ id: notification.id, saved: !notification.saved }).unwrap()
+    );
 
-  const handleCompleteNotification = async (notificationId: number) => {
-    setNotificationPendingAction(notificationId);
-    try {
-      await markNotificationAsDone(notificationId).unwrap();
-    } catch {
-      // The mutation displays its own failure toast.
-    } finally {
-      setNotificationPendingAction(null);
-    }
-  };
+  const handleCompleteNotification = (id: number) =>
+    run(id, "complete", () => markNotificationAsDone(id).unwrap());
 
-  const handleReopenNotification = async (notificationId: number) => {
-    setNotificationPendingAction(notificationId);
-    try {
-      await reopenNotification(notificationId).unwrap();
-    } catch {
-      // The mutation displays its own failure toast.
-    } finally {
-      setNotificationPendingAction(null);
-    }
-  };
+  const handleReopenNotification = (id: number) =>
+    run(id, "reopen", () => reopenNotification(id).unwrap());
 
-  const handleClearReadNotifications = async () => {
-    try {
+  const handleClearReadNotifications = () =>
+    runBulk("clear-read", async () => {
       await clearReadNotifications().unwrap();
       setPage(0);
       setIsClearReadOpen(false);
-    } catch {
-      // The mutation displays its own failure toast.
-    }
-  };
+    });
 
   if (!isAuthenticated) {
     return (
@@ -247,7 +213,7 @@ export function NotificationCenterPage() {
               Preferences
             </Button>
             <Button
-              isDisabled={unreadNotificationCount === 0}
+              isDisabled={unreadNotificationCount === 0 || isBulkDisabled}
               isPending={isMarkingAllRead}
               size="sm"
               variant="secondary"
@@ -256,7 +222,12 @@ export function NotificationCenterPage() {
               <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" />
               Mark all read
             </Button>
-            <Button size="sm" variant="ghost" onPress={() => setIsClearReadOpen(true)}>
+            <Button
+              isDisabled={isBulkDisabled}
+              size="sm"
+              variant="ghost"
+              onPress={() => setIsClearReadOpen(true)}
+            >
               <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
               Clear read
             </Button>
@@ -291,7 +262,7 @@ export function NotificationCenterPage() {
         </div>
 
         <section aria-live="polite" className="mt-6">
-          {notifications.isLoading ? (
+          {isLoadingPage ? (
             <NotificationSkeleton />
           ) : notifications.isError ? (
             <Card variant="secondary">
@@ -306,7 +277,7 @@ export function NotificationCenterPage() {
               </Card.Footer>
             </Card>
           ) : notificationEntries.length === 0 ? (
-            <NotificationEmptyState unreadOnly={false} />
+            <NotificationEmptyState view={view} />
           ) : (
             <div className="divide-default-200 border-default-200 divide-y border-y">
               {notificationEntries.map((notification) => (
@@ -326,7 +297,8 @@ export function NotificationCenterPage() {
                   <Button
                     fullWidth
                     className="h-auto min-w-0 flex-1 items-start justify-start p-0 text-left"
-                    isPending={notificationPendingRead === notification.id}
+                    isPending={pendingActions.get(notification.id) === "read"}
+                    isDisabled={pendingBulkAction !== null || pendingActions.has(notification.id)}
                     variant="ghost"
                     onPress={() => handleNotificationPress(notification)}
                   >
@@ -362,7 +334,10 @@ export function NotificationCenterPage() {
                       <Button
                         isIconOnly
                         aria-label={notification.saved ? "Remove from saved" : "Save notification"}
-                        isPending={notificationPendingAction === notification.id}
+                        isPending={pendingActions.get(notification.id) === "save"}
+                        isDisabled={
+                          pendingBulkAction !== null || pendingActions.has(notification.id)
+                        }
                         size="sm"
                         variant="ghost"
                         onPress={() => handleSaveNotification(notification)}
@@ -378,7 +353,10 @@ export function NotificationCenterPage() {
                         <Button
                           isIconOnly
                           aria-label={`Complete notification: ${notification.title}`}
-                          isPending={notificationPendingAction === notification.id}
+                          isPending={pendingActions.get(notification.id) === "complete"}
+                          isDisabled={
+                            pendingBulkAction !== null || pendingActions.has(notification.id)
+                          }
                           size="sm"
                           variant="ghost"
                           onPress={() => handleCompleteNotification(notification.id)}
@@ -396,7 +374,10 @@ export function NotificationCenterPage() {
                         <Button
                           isIconOnly
                           aria-label={`Reopen notification: ${notification.title}`}
-                          isPending={notificationPendingAction === notification.id}
+                          isPending={pendingActions.get(notification.id) === "reopen"}
+                          isDisabled={
+                            pendingBulkAction !== null || pendingActions.has(notification.id)
+                          }
                           size="sm"
                           variant="ghost"
                           onPress={() => handleReopenNotification(notification.id)}
@@ -415,7 +396,10 @@ export function NotificationCenterPage() {
                         isIconOnly
                         aria-label={`Delete notification: ${notification.title}`}
                         className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                        isPending={notificationPendingDeletion === notification.id}
+                        isPending={pendingActions.get(notification.id) === "delete"}
+                        isDisabled={
+                          pendingBulkAction !== null || pendingActions.has(notification.id)
+                        }
                         size="sm"
                         variant="ghost"
                         onPress={() => handleDeleteNotification(notification.id)}
@@ -431,14 +415,14 @@ export function NotificationCenterPage() {
           )}
         </section>
 
-        {notifications.data && notifications.data.totalPages > 1 ? (
+        {page > 0 || (currentPage && currentPage.totalPages > 1) ? (
           <div className="mt-6 flex items-center justify-between gap-4">
             <Typography color="muted" type="body-xs">
-              Page {page + 1} of {notifications.data.totalPages}
+              {currentPage ? `Page ${page + 1} of ${currentPage.totalPages}` : `Page ${page + 1}`}
             </Typography>
             <div className="flex gap-2">
               <Button
-                isDisabled={page === 0}
+                isDisabled={page === 0 || notifications.isFetching}
                 size="sm"
                 variant="secondary"
                 onPress={() => setPage((current) => Math.max(0, current - 1))}
@@ -446,7 +430,7 @@ export function NotificationCenterPage() {
                 Previous
               </Button>
               <Button
-                isDisabled={page >= notifications.data.totalPages - 1}
+                isDisabled={notifications.isFetching || !currentPage || page >= lastPage}
                 size="sm"
                 variant="secondary"
                 onPress={() => setPage((current) => current + 1)}
@@ -461,12 +445,16 @@ export function NotificationCenterPage() {
       <AlertDialog>
         <AlertDialog.Backdrop
           isOpen={isClearReadOpen}
-          onOpenChange={setIsClearReadOpen}
+          isDismissable={false}
+          isKeyboardDismissDisabled={isClearingRead}
+          onOpenChange={(open) => {
+            if (!isBulkRunning()) setIsClearReadOpen(open);
+          }}
           variant="blur"
         >
           <AlertDialog.Container>
             <AlertDialog.Dialog className="sm:max-w-md">
-              <AlertDialog.CloseTrigger />
+              <AlertDialog.CloseTrigger isDisabled={isClearingRead} />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
                 <AlertDialog.Heading>Clear read notifications?</AlertDialog.Heading>
@@ -478,11 +466,12 @@ export function NotificationCenterPage() {
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>
-                <Button slot="close" size="sm" variant="tertiary">
+                <Button isDisabled={isClearingRead} slot="close" size="sm" variant="tertiary">
                   Cancel
                 </Button>
                 <Button
                   isPending={isClearingRead}
+                  isDisabled={isBulkDisabled}
                   size="sm"
                   variant="danger"
                   onPress={handleClearReadNotifications}

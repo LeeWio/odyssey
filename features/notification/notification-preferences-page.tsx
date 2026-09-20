@@ -4,7 +4,7 @@ import { Icon } from "@iconify/react";
 
 import { EmptyState } from "@heroui-pro/react";
 import { Button, Card, Skeleton, Switch, Typography } from "@heroui/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
@@ -38,7 +38,8 @@ const PREFERENCE_ROWS = [
 
 function NotificationPreferencesSkeleton() {
   return (
-    <Card variant="secondary">
+    <Card variant="secondary" role="status" aria-label="Loading notification preferences">
+      <span className="sr-only">Loading notification preferences…</span>
       <Card.Header>
         <Skeleton className="h-5 w-40 rounded-lg" />
         <Skeleton className="h-4 w-72 rounded-lg" />
@@ -87,6 +88,7 @@ export function NotificationPreferencesPage() {
   const preferences = useGetMyNotificationPreferencesQuery(undefined, { skip: !isAuthenticated });
   const [updatePreferences, { isLoading: isSaving }] = useUpdateMyNotificationPreferencesMutation();
   const [draft, setDraft] = useState<NotificationPreference | null>(null);
+  const saving = useRef(false);
 
   if (!isAuthenticated) {
     return (
@@ -116,18 +118,36 @@ export function NotificationPreferencesPage() {
     value: NotificationPreference[Key]
   ) => {
     setDraft((current) => {
-      const base = current ?? preferences.data;
+      const base = current ?? preferences.currentData;
       return base ? { ...base, [key]: value } : current;
     });
   };
 
   const handleSave = async () => {
-    if (!currentPreferences) return;
-    await updatePreferences(currentPreferences).unwrap();
-    setDraft(null);
+    if (saving.current || !currentPreferences || !isDirty) return;
+    saving.current = true;
+    const submitted = currentPreferences;
+    try {
+      const saved = await updatePreferences(submitted).unwrap();
+      setDraft((current) => {
+        if (!current || current === submitted) return null;
+        // Adopt the server result, retaining only edits made after submission.
+        const remaining = { ...saved };
+        for (const key of Object.keys(current) as (keyof NotificationPreference)[]) {
+          if (current[key] !== submitted[key]) remaining[key] = current[key];
+        }
+        return remaining;
+      });
+    } catch {
+      // The mutation reports the API error. Preserve the draft for retry.
+    } finally {
+      saving.current = false;
+    }
   };
 
-  const savedPreferences = preferences.data;
+  // `data` may retain the last successful query snapshot after a failed
+  // refresh; currentData includes the confirmed mutation's cache update.
+  const savedPreferences = preferences.currentData;
   const currentPreferences = draft ?? savedPreferences;
   const isDirty =
     draft !== null &&
@@ -154,10 +174,10 @@ export function NotificationPreferencesPage() {
         </header>
 
         <section className="mt-12" aria-label="Notification delivery preferences">
-          {preferences.isLoading || !currentPreferences ? (
+          {!currentPreferences && (preferences.isLoading || preferences.isFetching) ? (
             <NotificationPreferencesSkeleton />
           ) : null}
-          {preferences.isError ? (
+          {preferences.isError && !preferences.isFetching ? (
             <Card variant="secondary">
               <Card.Header>
                 <Card.Title>Preferences are unavailable</Card.Title>
@@ -211,7 +231,7 @@ export function NotificationPreferencesPage() {
                   <Icon icon="gravity-ui:envelope" aria-hidden="true" className="size-4" /> Email
                   delivery is opt-in.
                 </div>
-                <Button isDisabled={!isDirty} isPending={isSaving} onPress={handleSave}>
+                <Button isDisabled={!isDirty || isSaving} isPending={isSaving} onPress={handleSave}>
                   Save preferences
                 </Button>
               </Card.Footer>
