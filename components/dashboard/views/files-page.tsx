@@ -3,6 +3,7 @@
 import { AlertDialog, Button, Spinner, Tooltip, toast } from "@heroui/react";
 import { DropZone, useDropZonePickerContext } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
+import { useClipboard, useTimeout } from "@mantine/hooks";
 import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
 
 import { useDeleteFileMutation, useUploadFileMutation } from "@/lib/features/file";
@@ -71,24 +72,25 @@ export function FilesPage() {
 
   const [uploadFile] = useUploadFileMutation();
   const [deleteFile, { isLoading: isDeleting }] = useDeleteFileMutation();
+  const clipboard = useClipboard({ timeout: 2000 });
 
   const timersRef = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
 
   // Initialize uploaded assets from localStorage for persistence in admin panel
-  useEffect(() => {
-    const saved = localStorage.getItem("odyssey_dashboard_files");
-    if (saved) {
+  useTimeout(
+    () => {
+      const saved = localStorage.getItem("odyssey_dashboard_files");
+      if (!saved) return;
+
       try {
-        const parsed = JSON.parse(saved);
-        // Use setTimeout to avoid calling setState synchronously during mount/effect execution
-        setTimeout(() => {
-          setFiles(parsed);
-        }, 0);
+        setFiles(JSON.parse(saved));
       } catch {
-        // Ignore parsing errors
+        // Ignore malformed local dashboard data.
       }
-    }
-  }, []);
+    },
+    0,
+    { autoInvoke: true }
+  );
 
   useEffect(() => {
     const ref = timersRef.current;
@@ -97,6 +99,16 @@ export function FilesPage() {
       ref.clear();
     };
   }, []);
+
+  useEffect(() => {
+    if (clipboard.error) {
+      toast.danger("Couldn't copy the file link.");
+    }
+  }, [clipboard.error]);
+
+  useEffect(() => {
+    if (clipboard.copied && copiedFileName) toast.success("File link copied.");
+  }, [clipboard.copied, copiedFileName]);
 
   const saveFilesToLocal = useCallback((updatedFiles: UploadFile[]) => {
     setFiles(updatedFiles);
@@ -225,17 +237,11 @@ export function FilesPage() {
   };
 
   // Copy URL link
-  const handleCopyLink = async (file: UploadFile) => {
+  const handleCopyLink = (file: UploadFile) => {
     if (!file.url) return;
 
-    try {
-      await navigator.clipboard.writeText(file.url);
-      setCopiedFileName(file.name);
-      setTimeout(() => setCopiedFileName(null), 2000);
-      toast.success("File link copied.");
-    } catch {
-      toast.danger("Couldn't copy the file link.");
-    }
+    setCopiedFileName(file.name);
+    clipboard.copy(file.url);
   };
 
   return (
@@ -268,7 +274,7 @@ export function FilesPage() {
           <DropZone.FileList>
             {files.map((file) => {
               const ext = getExtension(file.name).toUpperCase();
-              const isCopied = copiedFileName === file.name;
+              const isCopied = clipboard.copied && copiedFileName === file.name;
 
               return (
                 <DropZone.FileItem key={file.id} status={file.status}>

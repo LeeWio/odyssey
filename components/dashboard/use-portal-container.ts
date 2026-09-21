@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { useTimeout } from "@mantine/hooks";
+import { useState } from "react";
 
 /**
  * Custom hook to grab the dashboard sheet DOM container.
@@ -8,13 +11,9 @@ import { useEffect, useState } from "react";
 export function usePortalContainer() {
   const [container, setContainer] = useState<HTMLElement | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setTimeout(() => {
-        setContainer(document.getElementById("dashboard-sheet-container"));
-      }, 0);
-    }
-  }, []);
+  useTimeout(() => setContainer(document.getElementById("dashboard-sheet-container")), 0, {
+    autoInvoke: true,
+  });
 
   return container;
 }
