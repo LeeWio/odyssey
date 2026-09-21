@@ -1,3 +1,10 @@
+## [1.162.1](https://github.com/LeeWio/odyssey/compare/v1.162.0...v1.162.1) (2026-09-21)
+
+
+### Bug Fixes
+
+* **e2e:** disambiguate home footprints place assertions ([8ed3428](https://github.com/LeeWio/odyssey/commit/8ed34284df7152fbd9d7aa3dfd7e877b5c418c7c))
+
 # [1.162.0](https://github.com/LeeWio/odyssey/compare/v1.161.0...v1.162.0) (2026-09-21)
 
 
