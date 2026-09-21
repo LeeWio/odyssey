@@ -17,7 +17,6 @@
 
 ## Engineering Backlog
 
-- Optional: further extract library preference/following panels from `library-page.tsx`
 - Optional: further extract navbar shell hooks/actions from `components/navbar/navbar.tsx`
 - Optional: add OpenAPI `api:contract` to CI once a stable docs URL is available in GitHub Actions
 - Optional: axe or Lighthouse a11y checks beyond `/`
