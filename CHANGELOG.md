@@ -1,3 +1,10 @@
+# [1.163.0](https://github.com/LeeWio/odyssey/compare/v1.162.1...v1.163.0) (2026-09-21)
+
+
+### Features
+
+* **footprints:** attach real visit years across China stops ([b0ce260](https://github.com/LeeWio/odyssey/commit/b0ce2602e07edb54f313fadb63559a72f6799170))
+
 ## [1.162.1](https://github.com/LeeWio/odyssey/compare/v1.162.0...v1.162.1) (2026-09-21)
 
 
