@@ -18,7 +18,9 @@ import { Card, Chip, Skeleton, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 const RepositoryActivityPanel = dynamic(
   () =>
@@ -46,7 +48,7 @@ const mapSparkline = (data?: number[]) => {
 
 export function LatelySection() {
   const mounted = useMounted();
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotionPreference();
   const { data: nasdaqData, isLoading: isNasdaqLoading } = useGetMarketIndexBySymbolQuery(
     { symbol: ".ixic", period: "1D" },
     { pollingInterval: 300000, refetchOnFocus: true }

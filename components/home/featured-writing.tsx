@@ -5,7 +5,8 @@ import { Icon } from "@iconify/react";
 import dynamic from "next/dynamic";
 import { SectionLoadError } from "./section-load-error";
 import { Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { Carousel } from "@heroui-pro/react/carousel";
 import { useGetFeaturedPostsQuery } from "@/lib/features/post";
 
@@ -110,7 +111,7 @@ function FeaturedArticle({
 }
 
 export function FeaturedWriting() {
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotionPreference();
   const revealInView = (delay = 0, distance = 20) => ({
     initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
     whileInView: { opacity: 1, y: 0 },

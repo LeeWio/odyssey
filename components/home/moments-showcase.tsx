@@ -5,7 +5,8 @@ import { Icon } from "@iconify/react";
 import dynamic from "next/dynamic";
 import { SectionLoadError } from "./section-load-error";
 import { Chip, Link, Skeleton, Typography } from "@heroui/react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { useGetPublicMomentsQuery } from "@/lib/features/moment";
 
 const MomentsMasonry = dynamic(
@@ -28,7 +29,7 @@ const MomentsMasonry = dynamic(
 const MOMENTS_SHOWCASE_LIMIT = 18;
 
 export function MomentsShowcase() {
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotionPreference();
   const revealInView = (delay = 0, distance = 20) => ({
     initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
     whileInView: { opacity: 1, y: 0 },

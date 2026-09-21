@@ -57,7 +57,8 @@ for (const width of [390, 1440]) {
       )
     ).toBeVisible();
     await expect(section.getByText("Footprints")).toBeVisible();
-    await expect(section.getByText("Hubei")).toBeVisible();
+    await expect(section.getByTestId("footprints-map-frame").getByText("Hubei")).toBeVisible();
+    await expect(section.locator(".bg-overlay").getByText("Hubei", { exact: true })).toBeVisible();
     await expect(section.getByRole("link", { name: /Open the atlas/i })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true

@@ -3,7 +3,7 @@
 import { useElementSize } from "@mantine/hooks";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
-import { useReducedMotion } from "motion/react";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MomentCard } from "@/features/moment/components/card";
@@ -57,7 +57,7 @@ function getColumns(width: number) {
 }
 
 export function MomentsMasonry({ moments }: MomentsMasonryProps) {
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotionPreference();
   const scopeRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef(new Map<number, HTMLDivElement>());
   const previousPositions = useRef(new Map<number, Pick<GridItem, "x" | "y">>());

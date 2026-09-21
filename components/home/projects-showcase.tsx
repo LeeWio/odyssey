@@ -14,7 +14,8 @@ import {
   cn,
 } from "@heroui/react";
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { type ProjectResponse, useGetPublicProjectsQuery } from "@/lib/features/project";
 
@@ -160,7 +161,7 @@ function ProjectCard({
 }
 
 export function ProjectsShowcase() {
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotionPreference();
   const {
     data: projects = [],
     error,

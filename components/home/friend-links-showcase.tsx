@@ -2,7 +2,8 @@
 
 import { Avatar, Button, Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { useGetPublicFriendLinksQuery, type FriendLinkResponse } from "@/lib/features/friend-link";
 
 const SHOWCASE_LIMIT = 4;
@@ -88,7 +89,7 @@ function LinkPreviewCard({
 }
 
 export function FriendLinksShowcase() {
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotionPreference();
   const { data: friendLinks = [], error, isLoading, refetch } = useGetPublicFriendLinksQuery();
   const visibleLinks = friendLinks
     .filter((link) => Boolean(toSafeExternalUrl(link.url)))

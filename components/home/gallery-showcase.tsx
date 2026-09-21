@@ -3,7 +3,8 @@
 import { Icon } from "@iconify/react";
 import { Card, Chip, Link, Typography } from "@heroui/react";
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 const GALLERY_PREVIEW = [
   {
@@ -27,7 +28,7 @@ const GALLERY_PREVIEW = [
 ] as const;
 
 export function GalleryShowcase() {
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotionPreference();
 
   return (
     <section
