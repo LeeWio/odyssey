@@ -85,7 +85,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
   const activePhoto = GALLERY_ITEMS[currentIndex] || GALLERY_ITEMS[0];
 
   return (
-    <main className={compact ? "w-full" : "mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32"}>
+    <div className={compact ? "w-full" : "mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32"}>
       {!compact ? (
         <motion.header
           initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
@@ -115,7 +115,12 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.65, ease: easeOut, delay: shouldReduceMotion ? 0 : 0.08 }}
-        className={`${compact ? "" : "mt-12"}grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]`}
+        className={[
+          compact ? null : "mt-12",
+          "grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]",
+        ]
+          .filter(Boolean)
+          .join(" ")}
       >
         <Carousel setApi={setApi} opts={{ loop: true }} type="in-place" className="w-full">
           <Carousel.Content>
@@ -265,6 +270,6 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>
-    </main>
+    </div>
   );
 }

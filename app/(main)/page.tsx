@@ -14,12 +14,14 @@ import {
   TextArea,
   Description,
   Accordion,
+  toast,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
 import Image from "next/image";
 import { motion } from "motion/react";
 
+import { getApiErrorMessage } from "@/lib/api/errors";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
 import { setLoginOpen } from "@/lib/features/ui";
@@ -165,12 +167,6 @@ const easeOut = [0.22, 1, 0.36, 1] as const;
 
 const faqItems = [
   {
-    content: "Stay informed about your account activity with real-time notifications.",
-    iconUrl: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/3dicons/bell-small.png",
-    subtitle: "Receive account activity updates",
-    title: "Set Up Notifications",
-  },
-  {
     title: "Is This Website Finished?",
     subtitle: "Probably never — and that’s the point",
     content:
@@ -192,18 +188,18 @@ const faqItems = [
     iconUrl: "https://img.icons8.com/3d-fluency/94/adobe-animate.png",
   },
   {
-    content: "Enhance your browsing experience by installing our official browser extension",
-    iconUrl: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/3dicons/compass-small.png",
-    subtitle: "Connect your browser to your account",
-    title: "Set up Browser Extension",
+    title: "What’s on the Desk?",
+    subtitle: "One stack, fewer adapters",
+    content:
+      "Apple is the whole desk — Mac, iPhone, AirPods. Quiet is a tool. Chat noise waits; a closed door is how the work gets finished.",
+    iconUrl: "https://img.icons8.com/3d-fluency/94/imac.png",
   },
   {
+    title: "How Do I Leave a Trace?",
+    subtitle: "Sign the guestbook",
     content:
-      "Begin your journey into the world of digital collectibles by creating your first NFT. ",
-    iconUrl:
-      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/3dicons/mint-collective-small.png",
-    subtitle: "Create your first collectible",
-    title: "Mint Collectible",
+      "Reading is open to everyone. If you want to mark your visit, sign in and leave a short note on the guestbook wall — I read every message.",
+    iconUrl: "/icons/mail.png",
   },
 ];
 
@@ -471,7 +467,9 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
       setContent("");
       onClose();
     } catch (err) {
-      console.error("Failed to post entry:", err);
+      toast.danger(
+        getApiErrorMessage(err, "Unable to post your guestbook entry. Please try again.")
+      );
     }
   };
 

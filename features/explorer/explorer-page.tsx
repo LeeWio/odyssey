@@ -131,7 +131,7 @@ export function ExplorerPage() {
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
             <Icon icon="gravity-ui:grip-horizontal" className="text-accent size-3" />
-            Repository Explorer
+            Demo · Sample tree
           </Chip>
           <Typography
             type="h1"
@@ -141,8 +141,8 @@ export function ExplorerPage() {
             Odyssey Codebase Map
           </Typography>
           <Typography color="muted" type="body" className="mt-4 max-w-xl leading-relaxed">
-            Interactively browse the directory tree of Odyssey. Select any file node to inspect its
-            architectural purpose and technical composition.
+            A curated sample tree for exploring Odyssey&apos;s shape. Select a node to read its
+            purpose — this is not a live repository mirror.
           </Typography>
         </motion.header>
 

@@ -49,7 +49,7 @@ const INITIAL_MESSAGES: Message[] = [
   {
     id: "init-1",
     role: "assistant",
-    text: "Hi there! I'm the **Odyssey AI Copilot** — your spatial guide to this creative notebook. Ask me about my design philosophy, the physical equipment I use, low-level RTOS engineering, or how to navigate the 3D Constellations world!",
+    text: "Hi — I'm the **Odyssey Copilot demo**: a local guide with scripted answers, not a live model. Ask about design philosophy, hardware setup, low-level systems work, or how to navigate the Constellations map.",
   },
 ];
 
@@ -172,13 +172,16 @@ The **Constellations View** (\`/constellations\`) is a customized spatial map de
       q.includes("social") ||
       q.includes("connect")
     ) {
-      return `### 📬 Connect & Collaborate
+      return `### Connect & Collaborate
 
-I am always excited to discuss high-fidelity interfaces, RTOS kernel hacking, or analog gear:
+I'm glad you want to reach out. A few real paths:
 
-- **Email**: [support@example.com](mailto:support@example.com) — reach out for active inquiries or collabs.
-- **GitHub**: [github.com/heroui-inc/heroui](https://github.com/heroui-inc/heroui) — browse my open-source projects.
-- **Command Palette**: Press \`Cmd+K\` anywhere on the platform to jump across pages using keyboard-shortcuts.`;
+- **GitHub**: [github.com/LeeWio](https://github.com/LeeWio) — projects and experiments live here.
+- **Guestbook**: leave a short note on the site wall — I read every message.
+- **About**: visit \`/about\` for the longer personal defaults.
+- **Command Palette**: press \`Cmd+K\` anywhere to jump across pages.
+
+This Copilot is a local guide with scripted answers, not a live inbox. Prefer the guestbook when you want a reply.`;
     }
 
     return `I am here to guide you through Odyssey! You can ask me questions about:
@@ -237,14 +240,13 @@ Feel free to pick one of the suggestions below, or type your own question!`;
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
             <Icon icon="gravity-ui:sparkles" className="text-accent size-3" />
-            Odyssey AI Assistant
+            Demo · Scripted guide
           </Chip>
           <Typography type="h2" weight="bold" className="mt-3 tracking-tight">
             Ask Odyssey Copilot
           </Typography>
           <Typography color="muted" type="body-sm" className="mt-1">
-            An interactive assistant designed with HeroUI Pro AI components to guide your
-            exploration.
+            Keyword replies for navigating the site. Not connected to a live language model yet.
           </Typography>
         </motion.div>
 

@@ -262,7 +262,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
             <Icon icon="gravity-ui:person-check" className="text-accent size-3" />
-            Recruiter Assessment Sandbox
+            Demo · Recruiter sandbox
           </Chip>
           <Typography
             type="h1"

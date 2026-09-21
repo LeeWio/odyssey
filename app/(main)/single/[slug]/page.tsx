@@ -15,7 +15,7 @@ import {
   Avatar,
   Card,
 } from "@heroui/react";
-import { ActionBar } from "@heroui-pro/react";
+import { ActionBar, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
@@ -127,12 +127,15 @@ export default function SinglePage({ params }: SinglePageProps) {
   }, [router, searchParams, slug]);
 
   const { scrollY, scrollYProgress } = useScroll();
-  const { currentData: serverArticle, isFetching: queryIsLoading } =
-    useGetPublicPostBySlugQuery(slug);
+  const {
+    currentData: serverArticle,
+    isFetching,
+    isUninitialized,
+  } = useGetPublicPostBySlugQuery(slug);
 
   const article = serverArticle;
-
-  const isLoading = queryIsLoading && !article;
+  const isLoading = (isFetching || isUninitialized) && !article;
+  const isUnavailable = !isLoading && !article;
 
   const [likePost, { isLoading: isLiking }] = useLikePostMutation();
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation();
@@ -327,6 +330,31 @@ export default function SinglePage({ params }: SinglePageProps) {
   const openCreateCollection = () => {
     if (postId && isAuthenticated) setCollectionTarget({ postId, slug, username });
   };
+
+  if (isUnavailable) {
+    return (
+      <div className="bg-background flex min-h-screen items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <EmptyState className="border-border rounded-2xl border border-dashed p-6">
+            <EmptyState.Header>
+              <EmptyState.Media variant="icon">
+                <Icon icon="lucide:book-x" className="text-muted size-6" />
+              </EmptyState.Media>
+              <EmptyState.Title>Article not found</EmptyState.Title>
+              <EmptyState.Description>
+                This post could not be found, or it has not been published yet.
+              </EmptyState.Description>
+            </EmptyState.Header>
+            <EmptyState.Content>
+              <Button size="sm" variant="secondary" onPress={() => router.push("/blog")}>
+                Back to Journal
+              </Button>
+            </EmptyState.Content>
+          </EmptyState>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -8,8 +8,6 @@ import {
   MotionKPI,
   MotionTypography,
 } from "@/components/ui";
-import { MediaPlayButton } from "@/features/media/components/media-play-button";
-import type { MediaItem } from "@/features/media/types";
 import { useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
 import { useGetGitHubActivityQuery } from "@/lib/features/github";
 import { useMemo } from "react";
@@ -44,22 +42,6 @@ const mapSparkline = (data?: number[]) => {
   return data.map((value) => ({
     value: range === 0 ? 50 : ((value - min) / range) * 100,
   }));
-};
-
-const mockSong: MediaItem = {
-  id: "1",
-  title: "老歌",
-  description: "安泊猜想",
-  cover: "/IMG_5332.JPG",
-  type: "track",
-  tracks: [
-    {
-      id: "track-1",
-      title: "老歌",
-      artist: "安泊猜想",
-      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    },
-  ],
 };
 
 export function LatelySection() {
@@ -110,7 +92,7 @@ export function LatelySection() {
           className="mt-3"
           {...revealInView(0.12, 14)}
         >
-          Listening, investing, building, and training.
+          A favorite track, a live market signal, and recent GitHub work.
         </MotionTypography>
       </header>
 
@@ -134,7 +116,7 @@ export function LatelySection() {
 
           <Card.Header className="relative flex-row items-start justify-between">
             <Chip size="sm" variant="soft">
-              Listening
+              Favorite
             </Chip>
             <Typography
               aria-hidden="true"
@@ -142,7 +124,7 @@ export function LatelySection() {
               type="body-xs"
               className="font-mono tracking-[0.14em]"
             >
-              SIDE A · 01
+              KEPT CLOSE
             </Typography>
           </Card.Header>
 
@@ -154,13 +136,12 @@ export function LatelySection() {
               transition={{ duration: 1.2, ease: easeOut }}
             >
               <Image
-                alt="Album cover for 老歌 by 安泊猜想"
+                alt="Cover art for 老歌 by 安泊猜想"
                 className="object-cover"
                 fill
                 sizes="288px"
                 src="/IMG_5332.JPG"
               />
-              {/* Subtle transparent boundary border layer */}
               <div className="pointer-events-none absolute inset-0 rounded-[1.75rem] border border-black/10 dark:border-white/10" />
             </motion.div>
 
@@ -169,7 +150,8 @@ export function LatelySection() {
                 One song, kept close.
               </Typography>
               <Typography color="muted" type="body-sm" className="mt-2 leading-6">
-                Music that stayed after the rest of the queue moved on.
+                A favorite on the shelf — artwork and title only, until a real listening source is
+                wired in.
               </Typography>
             </div>
           </Card.Content>
@@ -181,7 +163,9 @@ export function LatelySection() {
                 <ItemCard.Description>安泊猜想</ItemCard.Description>
               </ItemCard.Content>
               <ItemCard.Action>
-                <MediaPlayButton media={mockSong} shuffle size="sm" variant="tertiary" />
+                <Chip size="sm" variant="soft">
+                  Not streaming here
+                </Chip>
               </ItemCard.Action>
             </MotionItemCard>
           </Card.Footer>
@@ -291,8 +275,8 @@ export function LatelySection() {
                 Practice is part of the archive.
               </Card.Title>
               <Card.Description className="mt-2 max-w-sm text-sm leading-relaxed">
-                Real-time indicators documenting personal progress, deep focus blocks, and active
-                code commitments.
+                Public GitHub activity for the current reporting window — commits, repositories, and
+                reviews.
               </Card.Description>
             </div>
             <span className="bg-default-100/50 my-1 h-px w-24" />
@@ -301,76 +285,103 @@ export function LatelySection() {
               color="muted"
               className="max-w-md text-sm leading-relaxed italic"
             >
-              “The unfinished work matters: systems shipped, miles logged, and questions carried
-              forward.”
+              “The unfinished work matters: systems shipped, questions carried forward, and the next
+              commit still waiting.”
             </Typography>
           </div>
 
-          {/* Right side: Live Telemetry KPIs */}
           <div className="relative grid gap-4 p-6 sm:grid-cols-3 lg:p-0">
-            {/* KPI 1: Deep Work focus */}
-            <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
-              <KPI.Header>
-                <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
-                  Today&apos;s Focus
-                </KPI.Title>
-              </KPI.Header>
-              <KPI.Content className="mt-2.5 items-end gap-1">
-                <KPI.Value
-                  className="text-foreground font-mono text-2xl leading-none font-black tabular-nums"
-                  value={4.8}
-                  style="decimal"
-                  maximumFractionDigits={1}
-                />
-                <div className="text-muted/60 mt-1 font-mono text-[10px] font-medium">hours</div>
-              </KPI.Content>
-              <KPI.Progress className="mt-4" value={90} status="success" />
-            </KPI>
-
-            {/* KPI 2: Written Chronicles size */}
-            <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
-              <KPI.Header>
-                <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
-                  Written Essays
-                </KPI.Title>
-              </KPI.Header>
-              <KPI.Content className="mt-2.5 items-end gap-1">
-                <KPI.Value
-                  className="text-foreground font-mono text-2xl leading-none font-black tabular-nums"
-                  value={18.4}
-                  style="decimal"
-                  maximumFractionDigits={1}
-                />
-                <div className="text-muted/60 mt-1 font-mono text-[10px] font-medium">k words</div>
-              </KPI.Content>
-              <KPI.Progress className="mt-4" value={85} status="success" />
-            </KPI>
-
-            {/* KPI 3: Repository Commits */}
-            <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
-              <KPI.Header>
-                <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
-                  Active Commits
-                </KPI.Title>
-              </KPI.Header>
-              <KPI.Content className="mt-2.5 items-end">
-                <div className="flex w-full flex-col gap-1">
-                  <KPI.Value
-                    className="text-foreground font-mono text-2xl leading-none font-black tabular-nums"
-                    value={452}
-                    style="decimal"
-                    maximumFractionDigits={0}
-                  />
-                  <div className="mt-1 flex items-center gap-1">
-                    <TrendChip trend="up" variant="tertiary" className="px-1 py-0.5 text-[10px]">
-                      12%
-                      <TrendChip.Suffix className="ml-0.5 text-[8px]">MoM</TrendChip.Suffix>
-                    </TrendChip>
+            {!mounted || (isGitHubActivityLoading && !githubActivity) ? (
+              <>
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div
+                    key={index}
+                    aria-hidden="true"
+                    className="bg-background/40 rounded-2xl p-5 shadow-sm"
+                  >
+                    <Skeleton className="h-3 w-20 rounded-md" />
+                    <Skeleton className="mt-4 h-8 w-16 rounded-lg" />
+                    <Skeleton className="mt-4 h-2 w-full rounded-full" />
                   </div>
+                ))}
+              </>
+            ) : githubActivity?.available ? (
+              <>
+                <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
+                  <KPI.Header>
+                    <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
+                      Commits
+                    </KPI.Title>
+                  </KPI.Header>
+                  <KPI.Content className="mt-2.5 items-end gap-1">
+                    <KPI.Value
+                      className="text-foreground font-mono text-2xl leading-none font-black tabular-nums"
+                      value={githubActivity.totalCommits}
+                      style="decimal"
+                      maximumFractionDigits={0}
+                    />
+                    <div className="text-muted/60 mt-1 font-mono text-[10px] font-medium">
+                      {githubActivity.periodLabel || "this period"}
+                    </div>
+                  </KPI.Content>
+                </KPI>
+
+                <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
+                  <KPI.Header>
+                    <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
+                      Repositories
+                    </KPI.Title>
+                  </KPI.Header>
+                  <KPI.Content className="mt-2.5 items-end gap-1">
+                    <KPI.Value
+                      className="text-foreground font-mono text-2xl leading-none font-black tabular-nums"
+                      value={githubActivity.commitRepositories.length}
+                      style="decimal"
+                      maximumFractionDigits={0}
+                    />
+                    <div className="text-muted/60 mt-1 font-mono text-[10px] font-medium">
+                      with commits
+                    </div>
+                  </KPI.Content>
+                </KPI>
+
+                <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
+                  <KPI.Header>
+                    <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
+                      Reviews
+                    </KPI.Title>
+                  </KPI.Header>
+                  <KPI.Content className="mt-2.5 items-end gap-1">
+                    <KPI.Value
+                      className="text-foreground font-mono text-2xl leading-none font-black tabular-nums"
+                      value={githubActivity.totalReviews}
+                      style="decimal"
+                      maximumFractionDigits={0}
+                    />
+                    <div className="text-muted/60 mt-1 font-mono text-[10px] font-medium">
+                      code reviews
+                    </div>
+                  </KPI.Content>
+                </KPI>
+              </>
+            ) : (
+              <div
+                className="bg-background/40 col-span-full flex min-h-28 items-center gap-3 rounded-2xl p-5 shadow-sm"
+                role="status"
+              >
+                <span className="bg-default-100 text-muted flex size-10 shrink-0 items-center justify-center rounded-full">
+                  <Icon aria-hidden="true" icon="gravity-ui:code-commits" />
+                </span>
+                <div>
+                  <Typography type="body-sm" weight="semibold">
+                    GitHub telemetry unavailable
+                  </Typography>
+                  <Typography color="muted" type="body-xs">
+                    Commit and review counts could not be loaded right now.
+                  </Typography>
                 </div>
-              </KPI.Content>
-              <KPI.Progress className="mt-4.5" value={95} status="success" />
-            </KPI>
+              </div>
+            )}
           </div>
         </MotionCard>
       </div>

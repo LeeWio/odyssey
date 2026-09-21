@@ -85,18 +85,18 @@ export function FootprintsPage() {
         <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <Chip color="accent" size="sm" variant="soft">
-              Footprints · Sample journeys
+              Footprints · China
             </Chip>
             <Typography
               type="h1"
               weight="bold"
               className="mt-5 text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.96] tracking-[-0.06em] text-balance"
             >
-              Places that changed the shape of a year.
+              Places I have actually been.
             </Typography>
             <Typography color="muted" type="body" className="mt-5 max-w-xl leading-7">
-              A small atlas of weather, cities, coastlines, and the memories that stayed after the
-              journey ended.
+              A living atlas of provinces and cities across China. Years and longer notes will fill
+              in as the record grows.
             </Typography>
           </div>
           <Link href="/gallery" className="shrink-0 text-sm no-underline">

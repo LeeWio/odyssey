@@ -134,7 +134,7 @@ export function SchedulePage() {
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
             <Icon icon="gravity-ui:calendar" className="text-accent size-3" />
-            Interactive Scheduler
+            Demo · Seed calendar
           </Chip>
           <Typography
             type="h1"
@@ -144,8 +144,8 @@ export function SchedulePage() {
             Daily Focus & Agenda
           </Typography>
           <Typography color="muted" type="body" className="mt-4 max-w-xl leading-relaxed">
-            Drag to create, move, or resize schedule blocks. Coordinate your visual engineering
-            timelines dynamically.
+            A local demo agenda with seed events. Drag to explore the UI — nothing here is synced to
+            a real calendar yet.
           </Typography>
         </motion.header>
 

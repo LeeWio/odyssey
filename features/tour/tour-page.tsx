@@ -68,9 +68,9 @@ export function TourPage() {
           transition={{ duration: 0.6, ease: easeOut }}
           className="border-default-200/50 mb-16 flex flex-col items-center border-b pb-8 text-center"
         >
-          <Chip color="accent" size="sm" variant="soft">
+          <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
             <Icon icon="gravity-ui:compass" className="text-accent size-3" />
-            Interactive Onboarding
+            Demo · Guided tour
           </Chip>
           <Typography
             type="h1"
@@ -80,8 +80,8 @@ export function TourPage() {
             Odyssey Workspace Tour
           </Typography>
           <Typography color="muted" type="body" className="mt-4 max-w-xl leading-relaxed">
-            A step-by-step guided journey detailing how Odyssey connects systems, design, and
-            physical tools.
+            A curated walkthrough of how Odyssey connects systems, design, and physical tools —
+            illustrative, not a live product tour backend.
           </Typography>
         </motion.header>
 

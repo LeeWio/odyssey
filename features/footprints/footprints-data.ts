@@ -23,80 +23,95 @@ export type FootprintArc = {
   width: number;
 };
 
-// Illustrative seed content, not verified personal travel history.
+/**
+ * Personal places visited in China.
+ * Coordinates use a representative city for each province/region.
+ * Years are placeholders until the exact visit dates are filled in.
+ */
 export const FOOTPRINTS: readonly Footprint[] = [
   {
-    id: "mount-rainier",
-    title: "Weather as architecture",
-    place: "Mount Rainier",
-    country: "United States",
-    year: 2025,
-    visitedAt: "September 2025",
-    latitude: 46.8523,
-    longitude: -121.7603,
-    memory:
-      "Clouds moved across the glaciers like a second landscape, making stillness feel temporary.",
-    image: "/IMG_4958.WEBP",
-    tags: ["mountains", "weather"],
+    id: "hubei",
+    title: "Middle of the river country",
+    place: "Hubei",
+    country: "China",
+    year: 2024,
+    latitude: 30.5928,
+    longitude: 114.3055,
+    memory: "A stop that stayed on the map. Year and notes still being filled in.",
+    tags: ["china", "central"],
     order: 1,
   },
   {
-    id: "shinjuku",
-    title: "Lines after dark",
-    place: "Shinjuku, Tokyo",
-    country: "Japan",
+    id: "shaanxi",
+    title: "Longer clocks",
+    place: "Shaanxi",
+    country: "China",
     year: 2024,
-    visitedAt: "November 2024",
-    latitude: 35.6938,
-    longitude: 139.7034,
-    memory:
-      "A city of quiet systems: crossings, elevators, signs, and the small choreography between them.",
-    image: "/IMG_5332.JPG",
-    tags: ["city", "geometry"],
+    latitude: 34.3416,
+    longitude: 108.9398,
+    memory: "A stop that stayed on the map. Year and notes still being filled in.",
+    tags: ["china", "northwest"],
     order: 2,
   },
   {
-    id: "redwoods",
-    title: "A deeper kind of green",
-    place: "Redwoods National Park",
-    country: "United States",
-    year: 2023,
-    visitedAt: "July 2023",
-    latitude: 41.2132,
-    longitude: -124.0046,
-    memory:
-      "The forest made distance feel physical: every step opened another layer of shadow and scale.",
-    image: "/IMG_2232.JPG",
-    tags: ["forest", "slow light"],
+    id: "henan",
+    title: "Plains crossing",
+    place: "Henan",
+    country: "China",
+    year: 2024,
+    latitude: 34.7466,
+    longitude: 113.6253,
+    memory: "A stop that stayed on the map. Year and notes still being filled in.",
+    tags: ["china", "central"],
     order: 3,
   },
   {
-    id: "cannon-beach",
-    title: "Where weather meets stone",
-    place: "Cannon Beach",
-    country: "United States",
-    year: 2022,
-    visitedAt: "October 2022",
-    latitude: 45.8918,
-    longitude: -123.9615,
-    memory:
-      "Fog softened the coastline until the sea stacks felt less like landmarks and more like witnesses.",
-    image: "/IMG_2260.JPG",
-    tags: ["coast", "fog"],
+    id: "guangdong",
+    title: "Southern density",
+    place: "Guangdong",
+    country: "China",
+    year: 2024,
+    latitude: 23.1291,
+    longitude: 113.2644,
+    memory: "A stop that stayed on the map. Year and notes still being filled in.",
+    tags: ["china", "south"],
     order: 4,
   },
   {
-    id: "iceland",
-    title: "A country made of edges",
-    place: "South Coast, Iceland",
-    country: "Iceland",
-    year: 2021,
-    visitedAt: "June 2021",
-    latitude: 63.6158,
-    longitude: -19.9886,
-    memory: "Black sand, bright water, and a horizon that kept refusing to stay still.",
-    tags: ["shoreline", "open sky"],
+    id: "shenzhen",
+    title: "A city rewriting itself",
+    place: "Shenzhen",
+    country: "China",
+    year: 2024,
+    latitude: 22.5431,
+    longitude: 114.0579,
+    memory: "A stop that stayed on the map. Year and notes still being filled in.",
+    tags: ["china", "city"],
     order: 5,
+  },
+  {
+    id: "anhui",
+    title: "Between louder destinations",
+    place: "Anhui",
+    country: "China",
+    year: 2024,
+    latitude: 31.8206,
+    longitude: 117.2272,
+    memory: "A stop that stayed on the map. Year and notes still being filled in.",
+    tags: ["china", "east"],
+    order: 6,
+  },
+  {
+    id: "sichuan",
+    title: "Basin weather",
+    place: "Sichuan",
+    country: "China",
+    year: 2024,
+    latitude: 30.5728,
+    longitude: 104.0668,
+    memory: "A stop that stayed on the map. Year and notes still being filled in.",
+    tags: ["china", "southwest"],
+    order: 7,
   },
 ];
 
@@ -137,4 +152,23 @@ export function getFootprintArcs(footprints: readonly Footprint[] = FOOTPRINTS):
 
 export function getFeaturedFootprints(limit = 3, footprints: readonly Footprint[] = FOOTPRINTS) {
   return getSortedFootprints(footprints).slice(0, Math.max(0, limit));
+}
+
+export function getFootprintsMapView(footprints: readonly Footprint[] = FOOTPRINTS) {
+  if (footprints.length === 0) {
+    return { center: [108, 33] as [number, number], zoom: 3.2 };
+  }
+
+  const longitudes = footprints.map((footprint) => footprint.longitude);
+  const latitudes = footprints.map((footprint) => footprint.latitude);
+  const minLng = Math.min(...longitudes);
+  const maxLng = Math.max(...longitudes);
+  const minLat = Math.min(...latitudes);
+  const maxLat = Math.max(...latitudes);
+  const span = Math.max(maxLng - minLng, maxLat - minLat);
+
+  return {
+    center: [(minLng + maxLng) / 2, (minLat + maxLat) / 2] as [number, number],
+    zoom: span > 40 ? 2.2 : span > 15 ? 3.4 : span > 8 ? 4.2 : 5,
+  };
 }

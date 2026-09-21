@@ -4,7 +4,7 @@ import { Card, Chip, Typography } from "@heroui/react";
 import { Map } from "@heroui-pro/react/map";
 import { useState } from "react";
 
-import { getFootprintArcs, type Footprint } from "./footprints-data";
+import { getFootprintArcs, getFootprintsMapView, type Footprint } from "./footprints-data";
 import { footprintMapStyles, footprintMapWorkerUrl } from "./map-styles";
 
 export type FootprintsMapProps = {
@@ -28,6 +28,7 @@ export function FootprintsMap({
     : (footprints.find((footprint) => footprint.id === selectedId) ?? null);
   const arcs = getFootprintArcs(footprints);
   const selectedArc = arcs.find((arc) => arc.id === hoveredArcId);
+  const mapView = getFootprintsMapView(footprints);
 
   return (
     <div
@@ -36,11 +37,11 @@ export function FootprintsMap({
     >
       <Map
         aria-label="Personal travel footprints map"
-        center={[24, 28]}
+        center={mapView.center}
         projection={{ type: "globe" }}
         styles={footprintMapStyles}
         workerUrl={footprintMapWorkerUrl}
-        zoom={1.9}
+        zoom={mapView.zoom}
       >
         <Map.Arc
           curvature={0.34}
@@ -120,8 +121,8 @@ export function FootprintsMap({
       {!compact ? (
         <Card className="bg-overlay shadow-overlay absolute top-3 left-3 z-10 w-[260px] gap-3 p-4">
           <Card.Header>
-            <Card.Title className="text-sm">Travel operations</Card.Title>
-            <Card.Description>Years in motion</Card.Description>
+            <Card.Title className="text-sm">Footprints</Card.Title>
+            <Card.Description>Places kept on the map</Card.Description>
           </Card.Header>
           <Card.Content className="gap-3">
             <div className="grid grid-cols-3 gap-3 text-xs">
