@@ -1,3 +1,10 @@
+# [1.162.0](https://github.com/LeeWio/odyssey/compare/v1.161.0...v1.162.0) (2026-09-21)
+
+
+### Features
+
+* **site:** replace demos with honest production surfaces ([47cd16c](https://github.com/LeeWio/odyssey/commit/47cd16c7f103eeaa04f9041d7ed8474aa0cfcf91))
+
 # [1.161.0](https://github.com/LeeWio/odyssey/compare/v1.160.0...v1.161.0) (2026-09-21)
 
 
