@@ -17,7 +17,8 @@
 
 ## Engineering Backlog
 
-- Split oversized surfaces (`components/navbar.tsx`, `features/library/library-page.tsx`) when next touching those areas
+- Split oversized `features/library/library-page.tsx` when next touching that area
+- Optional: further extract navbar shell hooks/actions from `components/navbar/navbar.tsx`
 - Optional: migrate remaining micro-interaction easings (`media-play-button`, rich-text modal) onto `pageEaseOut`
 - Optional: add OpenAPI `api:contract` to CI once a stable docs URL is available in GitHub Actions
 - Optional: axe or Lighthouse a11y checks beyond `/`

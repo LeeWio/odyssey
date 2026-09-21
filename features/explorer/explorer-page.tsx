@@ -75,7 +75,7 @@ const WORKSPACE_METADATA: Record<string, FileMetadata> = {
   },
   "comp-navbar": {
     id: "comp-navbar",
-    name: "components/navbar.tsx",
+    name: "components/navbar/navbar.tsx",
     purpose:
       "Advanced mega-menu header navigation with keyboard traps, blur reveals, and responsive mobile drawers.",
     stack: ["TailwindCSS", "Framer Motion", "React Aria Components"],
