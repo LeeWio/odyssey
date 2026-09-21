@@ -3,10 +3,16 @@
 import { Card, Link, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 
-import { FootprintsMap, FOOTPRINTS, getFootprintArcs } from "@/features/footprints";
+import {
+  FootprintsMap,
+  FOOTPRINTS,
+  getFeaturedFootprints,
+  getFootprintArcs,
+} from "@/features/footprints";
 
 export function FootprintsShowcase() {
   const arcs = getFootprintArcs(FOOTPRINTS);
+  const previewPlaces = getFeaturedFootprints(3, FOOTPRINTS);
 
   return (
     <section
@@ -52,13 +58,13 @@ export function FootprintsShowcase() {
               </span>
             </div>
             <div className="space-y-1">
-              {FOOTPRINTS.slice(0, 3).map((footprint) => (
+              {previewPlaces.map((footprint) => (
                 <div key={footprint.id} className="flex items-center justify-between text-xs">
                   <span className="flex items-center gap-2">
                     <span className="bg-accent h-0.5 w-4 rounded-full" />
                     {footprint.place}
                   </span>
-                  <span className="text-muted">{footprint.country}</span>
+                  <span className="text-muted">{footprint.year}</span>
                 </div>
               ))}
             </div>

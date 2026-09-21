@@ -9,24 +9,26 @@ import {
 } from "./footprints-data";
 
 describe("footprint chronology", () => {
-  it("keeps source order within the same year and leaves the source untouched", () => {
+  it("orders by year descending then keeps source order within a year", () => {
     const source = Object.freeze([...FOOTPRINTS].reverse());
     const snapshot = [...source];
     expect(getSortedFootprints(source).map((item) => item.id)).toEqual([
+      "henan",
+      "anhui",
+      "chongqing",
+      "shenzhen",
+      "guangzhou",
       "hubei",
       "shaanxi",
-      "henan",
-      "guangdong",
-      "shenzhen",
-      "anhui",
-      "sichuan",
     ]);
-    expect(getFeaturedFootprints(2, source).map((item) => item.id)).toEqual(["hubei", "shaanxi"]);
+    expect(getFeaturedFootprints(2, source).map((item) => item.id)).toEqual(["henan", "anhui"]);
     expect(source).toEqual(snapshot);
   });
 
   it("deduplicates years and handles an empty collection", () => {
-    expect(getFootprintYears([...FOOTPRINTS, FOOTPRINTS[0]])).toEqual([2024]);
+    expect(getFootprintYears([...FOOTPRINTS, FOOTPRINTS[0]])).toEqual([
+      2026, 2025, 2024, 2023, 2020, 2019,
+    ]);
     expect(getSortedFootprints([])).toEqual([]);
     expect(getFootprintYears([])).toEqual([]);
     expect(getFootprintArcs([])).toEqual([]);
@@ -43,6 +45,11 @@ describe("footprint chronology", () => {
       from: [114.3055, 30.5928],
       to: [108.9398, 34.3416],
       route: "Hubei → Shaanxi",
+    });
+    expect(arcs.at(-1)).toMatchObject({
+      id: "anhui-henan",
+      toId: "henan",
+      route: "Anhui → Henan",
     });
   });
 

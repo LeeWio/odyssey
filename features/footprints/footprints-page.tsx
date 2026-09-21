@@ -95,8 +95,8 @@ export function FootprintsPage() {
               Places I have actually been.
             </Typography>
             <Typography color="muted" type="body" className="mt-5 max-w-xl leading-7">
-              A living atlas of provinces and cities across China. Years and longer notes will fill
-              in as the record grows.
+              From Hubei hometown through Shaanxi, Guangzhou, Shenzhen, Chongqing, Anhui, and Henan
+              — a living atlas with years attached.
             </Typography>
           </div>
           <Link href="/gallery" className="shrink-0 text-sm no-underline">

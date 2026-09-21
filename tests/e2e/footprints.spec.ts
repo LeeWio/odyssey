@@ -58,7 +58,7 @@ for (const width of [390, 1440]) {
     ).toBeVisible();
     await expect(section.getByText("Footprints")).toBeVisible();
     await expect(section.getByTestId("footprints-map-frame").getByText("Hubei")).toBeVisible();
-    await expect(section.locator(".bg-overlay").getByText("Hubei", { exact: true })).toBeVisible();
+    await expect(section.locator(".bg-overlay").getByText("Henan", { exact: true })).toBeVisible();
     await expect(section.getByRole("link", { name: /Open the atlas/i })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true
@@ -81,5 +81,8 @@ test("timeline, popup and year selection stay in sync", async ({ page }) => {
   await expect(page.locator('[data-slot="map-popup"]')).toHaveCount(0);
   await expect(entry).toHaveAttribute("aria-pressed", "false");
   await page.getByRole("tab", { name: "2024", exact: true }).click();
+  await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Read memory from Chongqing" })).toBeVisible();
+  await page.getByRole("tab", { name: "All years", exact: true }).click();
   await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(7);
 });
