@@ -7,6 +7,7 @@ import {
   PersonsIcon,
   SparklesIcon,
 } from "@/components/icons";
+import { toast } from "@heroui/react";
 import { createActionCommand, createNavigationCommand } from "./command-model";
 import { CommandIntent, type CommandItem } from "./types";
 
@@ -242,7 +243,12 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     order: 1,
     keywords: ["weekly progress", "summary", "weekly", "progress report"],
     intent: CommandIntent.EXECUTE,
-    payload: { action: () => console.log("AI: Summarize week"), closeOnExecute: true },
+    payload: {
+      action: () => {
+        toast.info("Weekly progress summaries are coming soon.");
+      },
+      closeOnExecute: true,
+    },
     defaultVisible: true,
   }),
   createActionCommand({
@@ -255,7 +261,12 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     order: 2,
     keywords: ["task", "todo", "assign", "team task"],
     intent: CommandIntent.EXECUTE,
-    payload: { action: () => console.log("AI: Create task"), closeOnExecute: true },
+    payload: {
+      action: () => {
+        toast.info("Task creation is coming soon. Try the Focus Schedule instead.");
+      },
+      closeOnExecute: true,
+    },
     defaultVisible: true,
   }),
   createActionCommand({
@@ -268,7 +279,12 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     order: 3,
     keywords: ["brief", "spec", "outline", "project brief"],
     intent: CommandIntent.EXECUTE,
-    payload: { action: () => console.log("AI: Draft brief"), closeOnExecute: true },
+    payload: {
+      action: () => {
+        toast.info("AI project briefs are coming soon.");
+      },
+      closeOnExecute: true,
+    },
     defaultVisible: true,
   }),
   createActionCommand({
@@ -281,7 +297,12 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     order: 4,
     keywords: ["meeting", "sync", "standup", "schedule", "daily sync"],
     intent: CommandIntent.EXECUTE,
-    payload: { action: () => console.log("AI: Schedule standup"), closeOnExecute: true },
+    payload: {
+      action: () => {
+        toast.info("Standup scheduling is coming soon.");
+      },
+      closeOnExecute: true,
+    },
     defaultVisible: true,
   }),
 
@@ -296,7 +317,12 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     order: 10,
     keywords: ["activity", "history", "updates", "recent activity"],
     intent: CommandIntent.EXECUTE,
-    payload: { action: () => console.log("System: View activity"), closeOnExecute: true },
+    payload: {
+      action: () => {
+        toast.info("Activity history is coming soon.");
+      },
+      closeOnExecute: true,
+    },
     defaultVisible: true,
   }),
   createActionCommand({
@@ -309,7 +335,12 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     order: 11,
     keywords: ["roadmap", "plan", "timeline", "roadmap view"],
     intent: CommandIntent.EXECUTE,
-    payload: { action: () => console.log("System: Open roadmap"), closeOnExecute: true },
+    payload: {
+      action: () => {
+        toast.info("Project roadmap is coming soon.");
+      },
+      closeOnExecute: true,
+    },
     defaultVisible: true,
   }),
   createActionCommand({
@@ -322,7 +353,12 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     order: 12,
     keywords: ["people", "members", "coworkers", "team members"],
     intent: CommandIntent.EXECUTE,
-    payload: { action: () => console.log("System: Browse team"), closeOnExecute: true },
+    payload: {
+      action: () => {
+        toast.info("The team directory is coming soon.");
+      },
+      closeOnExecute: true,
+    },
     defaultVisible: true,
   }),
   createNavigationCommand({

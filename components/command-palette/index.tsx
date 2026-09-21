@@ -157,7 +157,14 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   };
 
   const handleAction = (key: Key) => {
-    const allCommands = [...baseCommands, ...searchState.allCommands];
+    // Include commands created for the current view (for example, the contextual
+    // AI suggestion). These commands are intentionally ephemeral and therefore
+    // do not live in either the static or remote command collections.
+    const allCommands = [
+      ...baseCommands,
+      ...searchState.allCommands,
+      ...visibleGroups.flatMap((group) => group.commands),
+    ];
     const command = allCommands.find((item) => item.id === String(key));
 
     if (!command) return;
@@ -186,7 +193,9 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
     }
 
     if (actionResult instanceof Promise) {
-      void actionResult.catch(() => undefined);
+      void actionResult.catch(() => {
+        toast.danger("That action could not be completed. Please try again.");
+      });
     }
   };
 
