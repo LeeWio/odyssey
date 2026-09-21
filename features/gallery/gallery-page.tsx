@@ -5,7 +5,8 @@ import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import type { EmblaCarouselType } from "embla-carousel";
 import { Carousel } from "@heroui-pro/react/carousel";
-import { Card, Chip, Typography } from "@heroui/react";
+import { Button, Card, Chip, Modal, Typography } from "@heroui/react";
+import { Icon } from "@iconify/react";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -60,6 +61,7 @@ interface GalleryPageProps {
 export function GalleryPage({ compact = false }: GalleryPageProps) {
   const [api, setApi] = useState<EmblaCarouselType>();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
   // Sync state with Embla programmatic selection
@@ -120,7 +122,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
             {GALLERY_ITEMS.map((item) => (
               <Carousel.Item key={item.src}>
                 <Card className="overflow-hidden p-0" variant="transparent">
-                  <div className="relative aspect-[4/3]">
+                  <div className="group relative aspect-[4/3]">
                     <Image
                       fill
                       alt={item.alt}
@@ -129,6 +131,16 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
                       sizes="(min-width: 1024px) 720px, 100vw"
                       src={item.src}
                     />
+                    <Button
+                      isIconOnly
+                      aria-label={`View ${item.title} full screen`}
+                      className="absolute right-4 bottom-4 bg-black/55 text-white opacity-0 shadow-lg backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                      size="sm"
+                      variant="ghost"
+                      onPress={() => setIsLightboxOpen(true)}
+                    >
+                      <Icon aria-hidden="true" icon="lucide:expand" className="size-4" />
+                    </Button>
                   </div>
                 </Card>
               </Carousel.Item>
@@ -187,6 +199,72 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
           </Card.Footer>
         </Card>
       </motion.section>
+
+      <Modal>
+        <Modal.Backdrop isOpen={isLightboxOpen} onOpenChange={setIsLightboxOpen} variant="blur">
+          <Modal.Container size="cover">
+            <Modal.Dialog aria-label={`${activePhoto.title} full screen viewer`}>
+              <Modal.CloseTrigger className="z-20" />
+              <Modal.Body className="grid min-h-0 gap-6 overflow-y-auto p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
+                <div className="relative min-h-[55vh] overflow-hidden rounded-2xl bg-black/30 lg:min-h-[70vh]">
+                  <Image
+                    fill
+                    alt={activePhoto.alt}
+                    className="object-contain select-none"
+                    draggable={false}
+                    sizes="(max-width: 1024px) 100vw, calc(100vw - 24rem)"
+                    src={activePhoto.src}
+                  />
+                </div>
+                <div className="flex flex-col gap-5 px-2 pb-2 lg:px-0">
+                  <div>
+                    <Typography
+                      color="muted"
+                      type="body-xs"
+                      className="font-mono tracking-wide uppercase"
+                    >
+                      Frame {String(currentIndex + 1).padStart(2, "0")} /{" "}
+                      {String(GALLERY_ITEMS.length).padStart(2, "0")}
+                    </Typography>
+                    <Typography type="h2" weight="semibold" className="mt-2 text-balance">
+                      {activePhoto.title}
+                    </Typography>
+                  </div>
+                  <Typography color="muted" type="body-sm" className="leading-6">
+                    {activePhoto.description}
+                  </Typography>
+                  <dl className="border-default-200 grid grid-cols-2 gap-4 border-t pt-5">
+                    <div>
+                      <dt>
+                        <Typography color="muted" type="body-xs">
+                          Location
+                        </Typography>
+                      </dt>
+                      <dd className="mt-1">
+                        <Typography type="body-sm" weight="medium">
+                          {activePhoto.location}
+                        </Typography>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>
+                        <Typography color="muted" type="body-xs">
+                          Film
+                        </Typography>
+                      </dt>
+                      <dd className="mt-1">
+                        <Typography type="body-sm" weight="medium">
+                          {activePhoto.film}
+                        </Typography>
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
     </main>
   );
 }
