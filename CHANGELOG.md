@@ -1,3 +1,18 @@
+# [1.161.0](https://github.com/LeeWio/odyssey/compare/v1.160.0...v1.161.0) (2026-09-21)
+
+
+### Bug Fixes
+
+* **command-palette:** replace placeholder actions with toasts ([6b022b8](https://github.com/LeeWio/odyssey/commit/6b022b8881d764b16817332adae1d33304210c14))
+* **time:** harden relative timestamps and dashboard clock updates ([4c6a53d](https://github.com/LeeWio/odyssey/commit/4c6a53dcc8d638a12bc47b27e65d67aba436b887))
+
+
+### Features
+
+* **footprints:** add travel map feature with Flight Paths globe ([2044a95](https://github.com/LeeWio/odyssey/commit/2044a958f39362cd6ee4de646f77302faf5204a0))
+* **gallery:** add full-screen lightbox for carousel photos ([53e60e4](https://github.com/LeeWio/odyssey/commit/53e60e4e62b1ad33a26e603f63bbda4e7088f351))
+* **home:** surface projects, gallery, footprints, and friend links ([0aaea64](https://github.com/LeeWio/odyssey/commit/0aaea64b0da47ea3f873ef8af4887aa1784d1916))
+
 # [1.160.0](https://github.com/LeeWio/odyssey/compare/v1.159.2...v1.160.0) (2026-09-20)
 
 
