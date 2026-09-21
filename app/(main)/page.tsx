@@ -71,6 +71,76 @@ const MomentsShowcase = dynamic(
   }
 );
 
+const ProjectsShowcase = dynamic(
+  () => import("@/components/home/projects-showcase").then((mod) => mod.ProjectsShowcase),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+        <Skeleton className="h-10 w-40 rounded-full" />
+        <Skeleton className="mt-6 h-12 w-full max-w-xl rounded-2xl" />
+        <div className="mt-10 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+          <Skeleton className="min-h-[29rem] rounded-3xl" />
+          <div className="grid gap-4">
+            <Skeleton className="min-h-56 rounded-3xl" />
+            <Skeleton className="min-h-56 rounded-3xl" />
+          </div>
+        </div>
+      </div>
+    ),
+  }
+);
+
+const GalleryShowcase = dynamic(
+  () => import("@/components/home/gallery-showcase").then((mod) => mod.GalleryShowcase),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mx-auto w-full max-w-7xl px-6 py-24 sm:px-10 sm:py-32">
+        <Skeleton className="h-10 w-28 rounded-full" />
+        <Skeleton className="mt-6 h-12 w-full max-w-xl rounded-2xl" />
+        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={index} className="aspect-[4/3] w-full rounded-3xl" />
+          ))}
+        </div>
+      </div>
+    ),
+  }
+);
+
+const FriendLinksShowcase = dynamic(
+  () => import("@/components/home/friend-links-showcase").then((mod) => mod.FriendLinksShowcase),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+        <Skeleton className="h-10 w-36 rounded-full" />
+        <Skeleton className="mt-6 h-12 w-full max-w-xl rounded-2xl" />
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="min-h-44 rounded-3xl" />
+          ))}
+        </div>
+      </div>
+    ),
+  }
+);
+
+const FootprintsShowcase = dynamic(
+  () => import("@/components/home/footprints-showcase").then((mod) => mod.FootprintsShowcase),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full py-24 sm:py-32">
+        <Skeleton className="mx-6 h-12 w-72 rounded-2xl sm:mx-10" />
+        <Skeleton className="mx-6 mt-3 h-6 w-full max-w-xl rounded-xl sm:mx-10" />
+        <Skeleton className="mt-10 h-[clamp(28rem,60svh,44rem)] w-full rounded-lg" />
+      </div>
+    ),
+  }
+);
+
 const LatelySection = dynamic(
   () => import("@/components/home/lately-section").then((mod) => mod.LatelySection),
   {
@@ -216,7 +286,11 @@ export default function Home() {
       <LatelySection />
 
       <FeaturedWriting />
+      <ProjectsShowcase />
+      <GalleryShowcase />
+      <FootprintsShowcase />
       <MomentsShowcase />
+      <FriendLinksShowcase />
 
       <section
         id="guestbook"
