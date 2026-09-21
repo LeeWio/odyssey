@@ -1,11 +1,7 @@
 import { useState, useCallback, useEffect, useRef, type ReactNode } from "react";
-import {
-  motion,
-  useMotionValue,
-  useAnimationFrame,
-  useTransform,
-  useReducedMotion,
-} from "motion/react";
+import { motion, useMotionValue, useAnimationFrame, useTransform } from "motion/react";
+
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 interface GradientTextProps {
   children: ReactNode;
@@ -28,7 +24,7 @@ export default function GradientText({
   pauseOnHover = false,
   yoyo = true,
 }: GradientTextProps) {
-  const shouldReduceMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotionPreference();
   const [isHoveredPaused, setIsHoveredPaused] = useState(false);
   const [isInView, setIsInView] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);

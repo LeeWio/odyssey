@@ -1,5 +1,6 @@
 export {
   createPageReveal,
+  microEaseOut,
   pageEaseOut,
   pageReveal,
   pageRevealInView,

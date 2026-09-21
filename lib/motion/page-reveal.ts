@@ -2,6 +2,9 @@
 
 export const pageEaseOut = [0.22, 1, 0.36, 1] as const;
 
+/** Alias for short icon/button transitions that share the same curve. */
+export const microEaseOut = pageEaseOut;
+
 export type PageRevealInViewOptions = {
   duration?: number;
   amount?: number;

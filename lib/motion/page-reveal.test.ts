@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { createPageReveal, pageEaseOut, pageReveal, pageRevealInView } from "./page-reveal";
+import {
+  createPageReveal,
+  microEaseOut,
+  pageEaseOut,
+  pageReveal,
+  pageRevealInView,
+} from "./page-reveal";
 
 describe("page reveal presets", () => {
   it("exports the shared ease curve", () => {
     expect(pageEaseOut).toEqual([0.22, 1, 0.36, 1]);
+    expect(microEaseOut).toBe(pageEaseOut);
   });
 
   it("disables travel when reduced motion is on", () => {

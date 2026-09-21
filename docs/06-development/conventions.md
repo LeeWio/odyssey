@@ -51,6 +51,7 @@ Animation decisions must follow [Animation Design Specification](../04-design/an
 - use GSAP only when a timeline, scroll linkage, or complex orchestration is genuinely required
 - do not add a second animation system to a module without updating the module docs or an ADR
 - for page and section entrances, reuse `lib/motion` (`pageEaseOut`, `createPageReveal`, `pageReveal`, `pageRevealInView`) instead of copying local `easeOut` / `revealInView` helpers
+- for short icon/button transitions, reuse `microEaseOut` (same curve as `pageEaseOut`)
 - prefer `hooks/use-reduced-motion-preference` on hydration-sensitive surfaces so SSR defaults to reduced motion
 
 ### Code Review Checks

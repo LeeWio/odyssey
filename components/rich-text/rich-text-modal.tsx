@@ -13,6 +13,7 @@ import { RichTextForm } from "@/components/rich-text/rich-text-form";
 import { MotionButton } from "@/components/ui";
 import { closeRichText, selectRichTextState } from "@/lib/features";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { microEaseOut } from "@/lib/motion";
 import {
   clearRichTextDraft,
   type RichTextDraft,
@@ -431,7 +432,7 @@ export function RichTextModal() {
                     }}
                     transition={{
                       duration: 0.35,
-                      ease: [0.22, 1, 0.36, 1],
+                      ease: microEaseOut,
                     }}
                   >
                     <Icon

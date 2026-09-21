@@ -1,23 +1,18 @@
 "use client";
 
-import {
-  type MotionValue,
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useSpring,
-  useTransform,
-} from "motion/react";
+import { type MotionValue, motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useEffect } from "react";
+
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { useResolvedThemeMode } from "@/hooks/use-resolved-theme-mode";
+import { pageEaseOut } from "@/lib/motion";
 
 type FluidBackdropProps = {
   scrollYProgress: MotionValue<number>;
 };
 
 export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
-  const shouldReduceMotion = useReducedMotion();
-  const reducedMotion = Boolean(shouldReduceMotion);
+  const reducedMotion = useReducedMotionPreference();
   const { mode } = useResolvedThemeMode();
 
   // Initialize mouse coordinates as MotionValues (performance-optimized, avoids React re-renders)
@@ -148,7 +143,7 @@ export function FluidBackdrop({ scrollYProgress }: FluidBackdropProps) {
       aria-hidden="true"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 1.8, ease: [0.23, 1, 0.32, 1], delay: 0.1 }}
+      transition={{ duration: 1.8, ease: pageEaseOut, delay: 0.1 }}
       className="bg-background pointer-events-none fixed inset-0 z-0 h-[100dvh] w-screen overflow-hidden transition-colors duration-1000"
     >
       {/* Dynamic CSS Keyframe Injection for Organic wobble animations (GPU accelerated) */}

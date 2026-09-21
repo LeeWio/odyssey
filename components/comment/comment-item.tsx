@@ -3,11 +3,14 @@
 import { Icon } from "@iconify/react";
 
 import { Button, Typography, cn, toast } from "@heroui/react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
+
 import { UserAvatar } from "@/components/user-avatar";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch } from "@/lib/hooks";
+import { microEaseOut } from "@/lib/motion";
 import { useRelativeTime } from "@/lib/relative-time";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
@@ -73,7 +76,7 @@ export function CommentItem(props: CommentItemProps) {
   const { highlightedCommentId } = useCommentContext();
   const replies = useMemo(() => flattenReplies(comment), [comment]);
   const replyTotal = Math.max(comment.replyCount ?? 0, replies.length);
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useReducedMotionPreference();
   const hasHighlightedReply = replies.some(
     ({ comment: reply }) => reply.id === highlightedCommentId
   );
@@ -132,7 +135,7 @@ export function CommentItem(props: CommentItemProps) {
                 initial={shouldReduceMotion ? false : { height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={shouldReduceMotion ? undefined : { height: 0, opacity: 0 }}
-                transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                transition={{ duration: 0.18, ease: microEaseOut }}
                 className="overflow-hidden"
               >
                 <div className="border-border/80 mt-3 space-y-4 border-l pl-4 sm:pl-5">

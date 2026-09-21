@@ -3,10 +3,11 @@
 import { useMemo } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@heroui/react";
+import { Icon } from "@iconify/react";
 
 import { useMediaPlayer } from "@/features/media/hooks/use-media-player";
 import type { MediaItem } from "@/features/media/types";
-import { Icon } from "@iconify/react";
+import { microEaseOut } from "@/lib/motion";
 
 interface MediaPlayButtonProps extends React.ComponentProps<typeof Button> {
   media: MediaItem;
@@ -91,7 +92,7 @@ export const MediaPlayButton: React.FC<MediaPlayButtonProps> = ({
               }}
               transition={{
                 duration: 0.22,
-                ease: [0.22, 1, 0.36, 1],
+                ease: microEaseOut,
               }}
             >
               <Icon icon="gravity-ui:pause-fill" />
@@ -116,7 +117,7 @@ export const MediaPlayButton: React.FC<MediaPlayButtonProps> = ({
               }}
               transition={{
                 duration: 0.22,
-                ease: [0.22, 1, 0.36, 1],
+                ease: microEaseOut,
               }}
             >
               <Icon icon="gravity-ui:play-fill" />
