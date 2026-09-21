@@ -11,6 +11,12 @@
 - `components/` owns reusable UI and feature assemblies.
 - `lib/features/` owns domain state, data access, and business logic.
 
+## Hooks
+
+- Prefer existing library hooks for timers, browser events, media queries, and other common behavior. This project already uses `@mantine/hooks`.
+- Keep custom hooks focused on domain behavior or formatting; compose library hooks for lifecycle and cleanup.
+- Check existing dependencies before adding a hooks library. Add another library only when the installed libraries cannot meet the requirement.
+
 ## UI Baseline
 
 HeroUI is the default UI system for this repository.

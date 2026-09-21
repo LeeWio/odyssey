@@ -1,26 +1,27 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { useInterval, useTimeout } from "@mantine/hooks";
+import { useCallback, useState } from "react";
 
 /**
  * A hook that returns the current time and date formatted for the dashboard widget.
  * Updates every minute.
  */
 export function useRealTime() {
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState(() => new Date());
+  const [initialDelay] = useState(() => 60000 - (time.getTime() % 60000));
+  const update = useCallback(() => setTime(new Date()), []);
+  const { start } = useInterval(update, 60000);
 
-  useEffect(() => {
-    // Update every minute (on the minute)
-    const update = () => setTime(new Date());
-
-    // Initial delay to sync with the next minute start
-    const delay = 60000 - (Date.now() % 60000);
-    const timeout = setTimeout(() => {
+  // Align the first tick to the next minute; Mantine cleans up both timers on unmount.
+  useTimeout(
+    () => {
       update();
-      const interval = setInterval(update, 60000);
-      return () => clearInterval(interval);
-    }, delay);
-
-    return () => clearTimeout(timeout);
-  }, []);
+      start();
+    },
+    initialDelay,
+    { autoInvoke: true }
+  );
 
   // Format: "Sat, 5/23"
   const formattedDate = time.toLocaleDateString("en-US", {
