@@ -2,34 +2,7 @@
 
 import { Button, Chip, Tooltip, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useEffect, useMemo, useState } from "react";
-
-const STORAGE_KEY = "odyssey-reading-session";
-
-type ReadingSessionSnapshot = {
-  articleId: number;
-  articleTitle: string;
-  elapsedSeconds: number;
-  isRunning: boolean;
-  lastResumedAt: number | null;
-  targetSeconds: number;
-  version: 1;
-};
-
-type ReadingSessionProps = {
-  articleId: number;
-  articleTitle: string;
-  estimatedMinutes: number;
-};
-
-function getElapsedSeconds(snapshot: ReadingSessionSnapshot, now = Date.now()) {
-  if (!snapshot.isRunning || !snapshot.lastResumedAt) return snapshot.elapsedSeconds;
-
-  return Math.min(
-    snapshot.targetSeconds,
-    snapshot.elapsedSeconds + Math.floor((now - snapshot.lastResumedAt) / 1000)
-  );
-}
+import { useReadingSession, type ReadingSessionProps } from "./use-reading-session";
 
 function formatDuration(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -38,120 +11,18 @@ function formatDuration(seconds: number) {
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 }
 
-function readSession(articleId: number) {
-  try {
-    const rawSession = window.localStorage.getItem(STORAGE_KEY);
-    if (!rawSession) return null;
-
-    const parsed = JSON.parse(rawSession) as Partial<ReadingSessionSnapshot>;
-    if (
-      parsed.version !== 1 ||
-      parsed.articleId !== articleId ||
-      typeof parsed.targetSeconds !== "number" ||
-      typeof parsed.elapsedSeconds !== "number" ||
-      typeof parsed.isRunning !== "boolean"
-    ) {
-      return null;
-    }
-
-    return parsed as ReadingSessionSnapshot;
-  } catch {
-    return null;
-  }
-}
-
 export function ReadingSession({ articleId, articleTitle, estimatedMinutes }: ReadingSessionProps) {
-  const [session, setSession] = useState<ReadingSessionSnapshot | null>(null);
-  const [now, setNow] = useState(() => Date.now());
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setSession(readSession(articleId));
-      setIsHydrated(true);
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [articleId]);
-
-  useEffect(() => {
-    if (!session?.isRunning) return;
-
-    const timer = window.setInterval(() => {
-      const currentTime = Date.now();
-      const currentElapsedSeconds = getElapsedSeconds(session, currentTime);
-
-      if (currentElapsedSeconds < session.targetSeconds) {
-        setNow(currentTime);
-        return;
-      }
-
-      const completedSession = {
-        ...session,
-        elapsedSeconds: session.targetSeconds,
-        isRunning: false,
-        lastResumedAt: null,
-      };
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(completedSession));
-      setSession(completedSession);
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [session]);
-
-  const elapsedSeconds = useMemo(
-    () => (session ? getElapsedSeconds(session, now) : 0),
-    [now, session]
-  );
-  const targetSeconds = session?.targetSeconds ?? estimatedMinutes * 60;
-  const progress =
-    targetSeconds > 0 ? Math.min(100, Math.round((elapsedSeconds / targetSeconds) * 100)) : 0;
-  const isComplete = session !== null && elapsedSeconds >= targetSeconds;
-
-  const saveSession = (nextSession: ReadingSessionSnapshot | null) => {
-    if (nextSession) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextSession));
-    } else {
-      window.localStorage.removeItem(STORAGE_KEY);
-    }
-    setSession(nextSession);
-    setNow(Date.now());
-  };
-
-  const startSession = () => {
-    const startedAt = Date.now();
-    saveSession({
-      articleId,
-      articleTitle,
-      elapsedSeconds: 0,
-      isRunning: true,
-      lastResumedAt: startedAt,
-      targetSeconds: estimatedMinutes * 60,
-      version: 1,
-    });
-  };
-
-  const toggleSession = () => {
-    if (!session) return;
-
-    const resumedAt = Date.now();
-    saveSession(
-      session.isRunning
-        ? {
-            ...session,
-            elapsedSeconds: getElapsedSeconds(session, resumedAt),
-            isRunning: false,
-            lastResumedAt: null,
-          }
-        : {
-            ...session,
-            isRunning: true,
-            lastResumedAt: resumedAt,
-          }
-    );
-  };
-
-  const resetSession = () => saveSession(null);
+  const {
+    session,
+    elapsedSeconds,
+    targetSeconds,
+    progress,
+    isComplete,
+    isHydrated,
+    startSession,
+    toggleSession,
+    resetSession,
+  } = useReadingSession({ articleId, articleTitle, estimatedMinutes });
 
   if (!isHydrated) return null;
 
