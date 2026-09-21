@@ -45,10 +45,10 @@
 未来计划：
 
 - Research
-- Gallery
-- Timeline
-- Collection
+- Timeline（产品级时间线，非足迹页）
+- Collection 深化
 - Reading List
+- Footprints 年份与记忆文案补全
 
 ---
 

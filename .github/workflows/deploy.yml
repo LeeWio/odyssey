@@ -34,11 +34,13 @@ jobs:
       - name: Setup Project Environment
         uses: ./.github/actions/setup-project
 
-      # 2. Run static validation to ensure bad builds never go to production
+      # 2. Match local `preflight` gates so type-broken or failing unit tests never ship
       - name: Verify Code Quality
         run: |
           bun x prettier --check .
           bun run lint
+          bun run typecheck
+          bun run test:unit
 
       # 3. Restore Next.js cache and compile standalone build on the host runner
       - name: Cache Next.js Build

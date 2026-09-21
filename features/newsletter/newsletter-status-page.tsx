@@ -81,7 +81,7 @@ function NewsletterStatusContent({
   }, [action, state, token, router]);
 
   return (
-    <main className="bg-background flex min-h-[100dvh] items-center px-6 py-24 sm:px-10">
+    <div className="bg-background flex min-h-[100dvh] items-center px-6 py-24 sm:px-10">
       <div className="mx-auto w-full max-w-xl">
         <Card>
           <Card.Header>
@@ -147,6 +147,6 @@ function NewsletterStatusContent({
           </Card.Footer>
         </Card>
       </div>
-    </main>
+    </div>
   );
 }

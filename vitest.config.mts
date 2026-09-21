@@ -38,7 +38,7 @@ export default defineConfig({
       "components/command-palette/**/*.test.ts",
       "lib/**/*.test.ts",
       "i18n/**/*.test.ts",
-      "features/moment/__tests__/**/*.test.ts",
+      "features/moment/**/*.test.ts",
       "features/notification/**/*.test.ts",
       "features/footprints/**/*.test.ts",
     ],

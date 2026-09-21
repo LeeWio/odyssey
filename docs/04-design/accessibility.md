@@ -16,6 +16,16 @@
 - 使用合理的语义化结构组织页面内容。
 - 为动画提供「减少动态效果（Reduced Motion）」支持。
 - 不依赖颜色作为唯一的信息表达方式。
+- 主布局提供「Skip to content」跳过链接，目标为 `#main-content`。
+
+## Skip link
+
+`app/(main)/layout.tsx` 在导航之前放置 Skip to content 链接。链接默认 `sr-only`，在键盘聚焦时可见，并跳转到带 `id="main-content"` 的主内容区域。页面内不要再嵌套第二个 `<main>`。
+
+## Reduced motion hooks
+
+- 首页、导航、页脚等 hydration 敏感表面使用 `hooks/use-reduced-motion-preference`（SSR 默认 reduce）。
+- 其它已用 `motion/react` 的 `useReducedMotion` 的局部动画，新增代码优先沿用 SSR-safe hook，避免首屏闪烁。
 
 ---
 

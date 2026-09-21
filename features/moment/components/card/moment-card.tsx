@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import { Icon } from "@iconify/react";
 
+import { getApiErrorMessage } from "@/lib/api/errors";
 import { useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
 import { useGetCurrentUserQuery } from "@/lib/features/user/user-api";
@@ -149,7 +150,7 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
       toast.success("Moment deleted successfully.");
       setIsDeleteDialogOpen(false);
     } catch (err) {
-      console.error("Failed to delete moment:", err);
+      toast.danger(getApiErrorMessage(err, "Unable to delete this moment. Please try again."));
     } finally {
       setIsDeleting(false);
     }

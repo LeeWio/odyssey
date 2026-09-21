@@ -10,3 +10,6 @@ CHANGELOG.md
 playwright-report
 test-results
 styles/themes/heroui-pro-themes.scoped.css
+a.yaml
+trivy-image-report.json
+11/

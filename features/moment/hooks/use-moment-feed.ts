@@ -1,4 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
+import { toast } from "@heroui/react";
+
+import { getApiErrorMessage } from "@/lib/api/errors";
 import {
   useGetPublicMomentsQuery,
   useLazyGetPublicMomentsQuery,
@@ -32,10 +35,9 @@ export const useMomentFeed = (pageSize: number = 12) => {
       });
       setNextPage((current) => current + 1);
     } catch (err) {
-      console.error("Failed to load more moments:", err);
+      toast.danger(getApiErrorMessage(err, "Unable to load more moments. Please try again."));
     }
   }, [loadPage, nextPage, pageSize]);
-
   const hasMore = data ? nextPage < data.totalPages : false;
 
   return {

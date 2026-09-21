@@ -600,7 +600,7 @@ export default function BlogFeed() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-6 py-24 sm:px-10 sm:py-32">
+    <div className="mx-auto w-full max-w-7xl px-6 py-24 sm:px-10 sm:py-32">
       <div className="w-full">
         <header className="flex w-full flex-col items-center text-center">
           <MotionChip
@@ -1013,6 +1013,6 @@ export default function BlogFeed() {
           </aside>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

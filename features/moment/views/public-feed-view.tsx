@@ -20,7 +20,7 @@ export const PublicFeedView = () => {
           </Typography>
         </header>
 
-        <main className="flex w-full flex-col items-center gap-6">
+        <div className="flex w-full flex-col items-center gap-6">
           {isLoading && moments.length === 0 ? (
             Array.from({ length: 3 }).map((_, i) => <MomentCardSkeleton key={i} />)
           ) : isError ? (
@@ -47,7 +47,7 @@ export const PublicFeedView = () => {
           ) : (
             <div className="text-muted py-12 text-sm">No moments published yet.</div>
           )}
-        </main>
+        </div>
       </div>
     </div>
   );

@@ -46,8 +46,8 @@ jobs:
       - name: Run Unit Tests
         run: bun run test:unit
 
-  rich-text-browser-smoke:
-    name: Rich Text Browser Smoke
+  browser-e2e:
+    name: Browser E2E Tests
     runs-on: ubuntu-latest
     env:
       HEROUI_AUTH_TOKEN: ${{ secrets.HEROUI_AUTH_TOKEN }}
@@ -61,7 +61,7 @@ jobs:
       - name: Install Chromium
         run: bunx playwright install --with-deps chromium
 
-      - name: Run Rich Text Browser Smoke Tests
+      - name: Run Playwright E2E Suite
         run: bun run test:e2e
 
   build-and-audit:

@@ -84,7 +84,7 @@ export function ColumnsIndex() {
   });
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+    <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
       <header className="flex flex-col items-center text-center">
         <motion.div {...revealInView(0, 10)}>
           <Chip color="default" size="sm" variant="secondary">
@@ -269,6 +269,6 @@ export function ColumnsIndex() {
           </>
         )}
       </motion.section>
-    </main>
+    </div>
   );
 }

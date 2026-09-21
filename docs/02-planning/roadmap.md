@@ -2,16 +2,15 @@
 
 ## Now
 
-- Maintain the homepage experience and content modules already in production use.
-- Keep the blog listing and single-article experience aligned with the current design direction.
-- Consolidate design and architecture notes into this docs tree.
-- Document the future direction so feature work can be evaluated against a shared product model.
+- Keep production surfaces honest: real footprints, real GitHub telemetry, Demo labels on experimental pages.
+- Maintain homepage, blog, comments, and reading experiences already in production use.
+- Hold deploy gates to the same bar as local `preflight` (format, lint, typecheck, unit tests).
 
 ## Next
 
-- Expand module documentation for comments, music, stock, profile, and editor flows.
-- Add decision records for major design and architecture choices.
-- Add a release and testing guide that matches the actual workflow.
+- Complete Footprints visit years and memory notes.
+- Expand remaining stub module docs (`stock`, `timeline`, `profile`, `editor`).
+- Split oversized navbar / library surfaces when those areas are next edited.
 - Define the first wave of future-facing modules such as notes, bookmarks, reading lists, or knowledge capture.
 
 ## Later
