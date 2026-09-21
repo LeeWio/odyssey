@@ -1,5 +1,7 @@
 "use client";
 
+import { createPageReveal } from "@/lib/motion";
+
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Tabs } from "@heroui/react";
@@ -29,17 +31,11 @@ const FriendLinksPage = dynamic(
   { ssr: false }
 );
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
-
 export default function UniversePage() {
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const [activeTab, setActiveTab] = useState<string>("mesh");
 
-  const reveal = (delay = 0, distance = 18) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
-  });
+  const { reveal } = createPageReveal(shouldReduceMotion);
+  const [activeTab, setActiveTab] = useState<string>("mesh");
 
   return (
     <div className="min-h-[100dvh] w-full bg-black px-6 pt-28 pb-24 text-white sm:px-10 lg:pt-32">

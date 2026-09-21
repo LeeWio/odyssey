@@ -1,12 +1,12 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { useState, useMemo } from "react";
 import { motion } from "motion/react";
 import { Card, Chip, Typography, Button } from "@heroui/react";
 import { HoverCard, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 type ParamType = {
   name: string;
@@ -187,7 +187,7 @@ export function ApiConsolePage() {
         <motion.header
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: easeOut }}
+          transition={{ duration: 0.6, ease: pageEaseOut }}
           className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
         >
           <Chip color="accent" size="sm" variant="soft">

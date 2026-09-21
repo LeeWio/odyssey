@@ -1,13 +1,13 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button, Card, Chip, Typography, buttonVariants, cn } from "@heroui/react";
 import { Stepper } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 const TOUR_STEPS = [
   {
@@ -65,7 +65,7 @@ export function TourPage() {
         <motion.header
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: easeOut }}
+          transition={{ duration: 0.6, ease: pageEaseOut }}
           className="border-default-200/50 mb-16 flex flex-col items-center border-b pb-8 text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
@@ -134,7 +134,7 @@ export function TourPage() {
                 initial={{ opacity: 0, x: 10, filter: "blur(4px)" }}
                 animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
                 exit={{ opacity: 0, x: -10, filter: "blur(4px)" }}
-                transition={{ duration: 0.35, ease: easeOut }}
+                transition={{ duration: 0.35, ease: pageEaseOut }}
                 className="flex flex-col gap-6"
               >
                 {/* Badge & Step indicator */}

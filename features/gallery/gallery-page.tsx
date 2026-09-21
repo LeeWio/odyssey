@@ -1,14 +1,16 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { useState, useEffect } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import Image from "next/image";
 import type { EmblaCarouselType } from "embla-carousel";
 import { Carousel } from "@heroui-pro/react/carousel";
 import { Button, Card, Chip, Modal, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 // Real artist portfolio assets mapping
 const GALLERY_ITEMS = [
@@ -62,7 +64,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
   const [api, setApi] = useState<EmblaCarouselType>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useReducedMotionPreference();
 
   // Sync state with Embla programmatic selection
   useEffect(() => {
@@ -90,7 +92,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
         <motion.header
           initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: easeOut }}
+          transition={{ duration: 0.65, ease: pageEaseOut }}
           className="flex flex-col items-center text-center"
         >
           <Chip color="accent" size="sm" variant="soft">
@@ -114,7 +116,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
         initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.65, ease: easeOut, delay: shouldReduceMotion ? 0 : 0.08 }}
+        transition={{ duration: 0.65, ease: pageEaseOut, delay: shouldReduceMotion ? 0 : 0.08 }}
         className={[
           compact ? null : "mt-12",
           "grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]",

@@ -1,5 +1,7 @@
 "use client";
 
+import { createPageReveal, pageEaseOut } from "@/lib/motion";
+
 import { useMemo, useState } from "react";
 import { Button, Chip, Tabs, Typography } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
@@ -8,8 +10,6 @@ import { useNow } from "next-intl";
 
 import { MomentCard, MomentCardSkeleton } from "@/features/moment/components/card";
 import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 const timeframes = [
   { id: "all", label: "All notes" },
@@ -35,16 +35,7 @@ export default function MomentsPage() {
   const { moments, isLoading, isError, isFetchingMore, hasMore, loadMore, refetch } =
     useMomentFeed(12);
 
-  const revealInView = (delay = 0, distance = 20) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.3 },
-    transition: {
-      duration: shouldReduceMotion ? 0 : 0.65,
-      delay,
-      ease: easeOut,
-    },
-  });
+  const { revealInView } = createPageReveal(shouldReduceMotion);
 
   const filteredMoments = useMemo(() => {
     if (activeTab === "all") return moments;
@@ -159,7 +150,7 @@ export default function MomentsPage() {
                 transition={{
                   duration: shouldReduceMotion ? 0 : 0.65,
                   delay: Math.min(index, 5) * 0.05,
-                  ease: easeOut,
+                  ease: pageEaseOut,
                 }}
               >
                 <MomentCard moment={moment} />

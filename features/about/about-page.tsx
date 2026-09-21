@@ -1,6 +1,9 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { createPageReveal } from "@/lib/motion";
+
+import { motion } from "motion/react";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { Card, Chip, Link, Separator, Surface, Typography, cn } from "@heroui/react";
 import { AboutDefaults } from "./about-defaults";
 import { AboutHeader } from "./about-header";
@@ -14,19 +17,15 @@ import {
   playTitles,
 } from "./about-content";
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
-
 interface AboutPageProps {
   compact?: boolean;
 }
 
 export function AboutPage({ compact = false }: AboutPageProps) {
-  const shouldReduceMotion = useReducedMotion() ?? false;
-  const reveal = (delay = 0, distance = 12) => ({
-    initial: shouldReduceMotion ? false : { opacity: 1, y: distance },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.2 },
-    transition: { duration: shouldReduceMotion ? 0 : 0.45, delay, ease: easeOut },
+  const shouldReduceMotion = useReducedMotionPreference();
+  const { revealInView: reveal } = createPageReveal(shouldReduceMotion, {
+    duration: 0.45,
+    amount: 0.2,
   });
 
   return (

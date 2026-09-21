@@ -1,5 +1,7 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { Avatar, Button, Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
@@ -50,7 +52,7 @@ function LinkPreviewCard({
       transition={{
         duration: reducedMotion ? 0 : 0.55,
         delay: reducedMotion ? 0 : index * 0.05,
-        ease: [0.22, 1, 0.36, 1],
+        ease: pageEaseOut,
       }}
     >
       <a

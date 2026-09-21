@@ -1,5 +1,7 @@
 "use client";
 
+import { createPageReveal } from "@/lib/motion";
+
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { HelloApple } from "@/components/home/hello-apple";
@@ -163,8 +165,6 @@ const LatelySection = dynamic(
 
 const MotionAccordion = motion.create(Accordion);
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
-
 const faqItems = [
   {
     title: "Is This Website Finished?",
@@ -211,18 +211,7 @@ export default function Home() {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  const reveal = (delay = 0, distance = 18) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
-  });
-
-  const revealInView = (delay = 0, distance = 20) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.3 },
-    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
-  });
+  const { reveal, revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
     <div className="bg-background w-full overflow-x-clip">

@@ -1,5 +1,7 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { Icon } from "@iconify/react";
 import { Card, Chip, Link, Typography } from "@heroui/react";
 import Image from "next/image";
@@ -70,7 +72,7 @@ export function GalleryShowcase() {
             transition={{
               duration: shouldReduceMotion ? 0 : 0.6,
               delay: shouldReduceMotion ? 0 : index * 0.07,
-              ease: [0.22, 1, 0.36, 1],
+              ease: pageEaseOut,
             }}
           >
             <Card className="group h-full overflow-hidden p-0" variant="secondary">

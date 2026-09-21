@@ -1,13 +1,13 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { useState, useMemo } from "react";
 import { motion } from "motion/react";
 import { Button, Card, Chip, Label, SearchField, Typography } from "@heroui/react";
 import { KPI } from "@heroui-pro/react/kpi";
 import { DataGrid, type DataGridColumn } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 // Experience item structure for recruiters
 type ExperienceItem = {
@@ -257,7 +257,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
         <motion.header
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: easeOut }}
+          transition={{ duration: 0.6, ease: pageEaseOut }}
           className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">

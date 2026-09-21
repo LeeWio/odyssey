@@ -1,5 +1,7 @@
 "use client";
 
+import { createPageReveal, pageEaseOut } from "@/lib/motion";
+
 import { Icon } from "@iconify/react";
 
 import dynamic from "next/dynamic";
@@ -112,16 +114,7 @@ function FeaturedArticle({
 
 export function FeaturedWriting() {
   const shouldReduceMotion = useReducedMotionPreference();
-  const revealInView = (delay = 0, distance = 20) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.3 },
-    transition: {
-      duration: shouldReduceMotion ? 0 : 0.65,
-      delay,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  });
+  const { revealInView } = createPageReveal(shouldReduceMotion);
 
   const {
     data: featuredPosts,
@@ -206,7 +199,7 @@ export function FeaturedWriting() {
                     transition={{
                       duration: shouldReduceMotion ? 0 : 0.65,
                       delay: index * 0.06,
-                      ease: [0.22, 1, 0.36, 1] as const,
+                      ease: pageEaseOut,
                     }}
                     className="aspect-[16/10] w-full"
                   >

@@ -1,5 +1,7 @@
 "use client";
 
+import { createPageReveal } from "@/lib/motion";
+
 import { Icon } from "@iconify/react";
 
 import dynamic from "next/dynamic";
@@ -30,16 +32,7 @@ const MOMENTS_SHOWCASE_LIMIT = 18;
 
 export function MomentsShowcase() {
   const shouldReduceMotion = useReducedMotionPreference();
-  const revealInView = (delay = 0, distance = 20) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.3 },
-    transition: {
-      duration: shouldReduceMotion ? 0 : 0.65,
-      delay,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  });
+  const { revealInView } = createPageReveal(shouldReduceMotion);
 
   const {
     data: moments,

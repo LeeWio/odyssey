@@ -1,5 +1,7 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { Icon } from "@iconify/react";
 import {
   Button,
@@ -90,7 +92,7 @@ function ProjectCard({
       transition={{
         duration: reducedMotion ? 0 : 0.55,
         delay: reducedMotion ? 0 : index * 0.06,
-        ease: [0.22, 1, 0.36, 1],
+        ease: pageEaseOut,
       }}
       className="h-full"
     >

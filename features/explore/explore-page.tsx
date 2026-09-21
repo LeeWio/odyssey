@@ -1,5 +1,7 @@
 "use client";
 
+import { createPageReveal, pageEaseOut } from "@/lib/motion";
+
 import { Icon } from "@iconify/react";
 
 import { EmptyState } from "@heroui-pro/react";
@@ -265,16 +267,7 @@ export function ExplorePage() {
     ? `Results for “${normalizedQuery}”`
     : selectedCategory?.name || selectedTag?.name || "All writing";
 
-  const revealInView = (delay = 0, distance = 20) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.3 },
-    transition: {
-      duration: shouldReduceMotion ? 0 : 0.65,
-      delay,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  });
+  const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
@@ -493,7 +486,7 @@ export function ExplorePage() {
                 transition={{
                   duration: shouldReduceMotion ? 0 : 0.65,
                   delay: Math.min(index, 5) * 0.05,
-                  ease: [0.22, 1, 0.36, 1] as const,
+                  ease: pageEaseOut,
                 }}
               >
                 <ExplorePostCard post={post} />

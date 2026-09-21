@@ -1,5 +1,7 @@
 "use client";
 
+import { pageRevealInView } from "@/lib/motion";
+
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { Card, Link, Skeleton, toast } from "@heroui/react";
@@ -102,17 +104,11 @@ const identityLinks: Record<string, string> = {
   x: "https://x.com/lwi1817612?s=11",
 };
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
-
 export function Footer() {
   const shouldReduceMotion = useReducedMotionPreference();
 
-  const reveal = (delay = 0) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: 14 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, margin: "-40px" },
-    transition: { duration: shouldReduceMotion ? 0 : 0.6, delay, ease: easeOut },
-  });
+  const reveal = (delay = 0) =>
+    pageRevealInView(shouldReduceMotion, delay, 14, { duration: 0.6, margin: "-40px" });
 
   const handleCopy = async (card: CarouselCard) => {
     const value = card.id === "rss" ? `${window.location.origin}/rss.xml` : card.value;

@@ -18,6 +18,6 @@
 ## Engineering Backlog
 
 - Split oversized surfaces (`components/navbar.tsx`, `features/library/library-page.tsx`) when next touching those areas
-- Deduplicate remaining `easeOut` / page-reveal helpers into a shared motion util
+- Optional: migrate remaining micro-interaction easings (`media-play-button`, rich-text modal) onto `pageEaseOut`
 - Optional: add OpenAPI `api:contract` to CI once a stable docs URL is available in GitHub Actions
 - Optional: axe or Lighthouse a11y checks beyond `/`

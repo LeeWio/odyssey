@@ -1,5 +1,7 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Chip, Typography } from "@heroui/react";
@@ -13,8 +15,6 @@ import {
 } from "@heroui-pro/react";
 import { Markdown } from "@heroui-pro/react/markdown";
 import { Icon } from "@iconify/react";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 type Message = {
   id: string;
@@ -235,7 +235,7 @@ Feel free to pick one of the suggestions below, or type your own question!`;
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: easeOut }}
+          transition={{ duration: 0.5, ease: pageEaseOut }}
           className="mb-6 flex flex-col items-center text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">

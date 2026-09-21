@@ -1,5 +1,7 @@
 "use client";
 
+import { createPageReveal } from "@/lib/motion";
+
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "motion/react";
@@ -16,17 +18,11 @@ const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-boar
   loading: () => <Skeleton className="min-h-64 w-full rounded-3xl" />,
 });
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
-
 export default function PersonaPage() {
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const [activeTab, setActiveTab] = useState<string>("about");
 
-  const reveal = (delay = 0, distance = 18) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
-  });
+  const { reveal } = createPageReveal(shouldReduceMotion);
+  const [activeTab, setActiveTab] = useState<string>("about");
 
   return (
     <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">

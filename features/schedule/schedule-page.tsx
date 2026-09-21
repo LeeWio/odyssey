@@ -1,13 +1,13 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { useState, useCallback, useMemo } from "react";
 import { motion } from "motion/react";
 import { CalendarDateTime } from "@internationalized/date";
 import { Chip, Typography } from "@heroui/react";
 import { Agenda, useAgenda, type AgendaEventType } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 function generateSeedEvents(): AgendaEventType[] {
   const now = new Date();
@@ -129,7 +129,7 @@ export function SchedulePage() {
         <motion.header
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: easeOut }}
+          transition={{ duration: 0.6, ease: pageEaseOut }}
           className="border-default-200/50 mb-10 flex flex-col items-center border-b pb-8 text-center"
         >
           <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
@@ -153,7 +153,7 @@ export function SchedulePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15, ease: easeOut }}
+          transition={{ duration: 0.7, delay: 0.15, ease: pageEaseOut }}
           className="border-default-200 bg-surface-secondary/40 overflow-hidden rounded-3xl border p-4 shadow-sm md:p-6"
           style={{ height: 680, width: "100%" }}
         >

@@ -40,7 +40,7 @@ Any non-HeroUI UI primitive must be justified in a module note, ADR, or explicit
 
 ## Animation
 
-Animation decisions must follow [Animation Design Specification](../04-design/animation-design-specification.md).
+Animation decisions must follow [Animation Design Specification](../04-design/animation.md).
 
 ### Hard Rules
 
@@ -50,6 +50,8 @@ Animation decisions must follow [Animation Design Specification](../04-design/an
 - default to CSS for local decorative effects, loading states, and micro-feedback
 - use GSAP only when a timeline, scroll linkage, or complex orchestration is genuinely required
 - do not add a second animation system to a module without updating the module docs or an ADR
+- for page and section entrances, reuse `lib/motion` (`pageEaseOut`, `createPageReveal`, `pageReveal`, `pageRevealInView`) instead of copying local `easeOut` / `revealInView` helpers
+- prefer `hooks/use-reduced-motion-preference` on hydration-sensitive surfaces so SSR defaults to reduced motion
 
 ### Code Review Checks
 

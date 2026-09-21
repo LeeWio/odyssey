@@ -1,12 +1,12 @@
 "use client";
 
+import { createPageReveal } from "@/lib/motion";
+
 import { motion, useReducedMotion } from "motion/react";
 import { Card, Chip, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 
 import { usesData } from "./uses-data";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 interface UsesPageProps {
   compact?: boolean;
@@ -14,12 +14,7 @@ interface UsesPageProps {
 
 export function UsesPage({ compact = false }: UsesPageProps) {
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const reveal = (delay = 0, distance = 20) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.25 },
-    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
-  });
+  const { reveal } = createPageReveal(shouldReduceMotion);
 
   return (
     <section

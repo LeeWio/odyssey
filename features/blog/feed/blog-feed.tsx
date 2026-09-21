@@ -1,5 +1,7 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { Icon } from "@iconify/react";
 
 import Link from "next/link";
@@ -31,7 +33,6 @@ import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
 
 const PAGE_SIZE = 8;
-const easeOut = [0.22, 1, 0.36, 1] as const;
 const easeIn = [0.4, 0, 1, 1] as const;
 const motionDuration = {
   interaction: 0.22,
@@ -81,13 +82,13 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
         whileHover={
           shouldReduceMotion
             ? undefined
-            : { y: -2, transition: { duration: motionDuration.interaction, ease: easeOut } }
+            : { y: -2, transition: { duration: motionDuration.interaction, ease: pageEaseOut } }
         }
         viewport={{ once: true, amount: 0.2 }}
         transition={{
           delay: shouldReduceMotion ? 0 : Math.min(index, 3) * 0.04,
           duration: shouldReduceMotion ? 0 : 0.65,
-          ease: easeOut,
+          ease: pageEaseOut,
         }}
       >
         <Card.Header className="gap-4">
@@ -146,11 +147,11 @@ function FeaturedPost({ post }: { post: PostDigestResponse }) {
         whileHover={
           shouldReduceMotion
             ? undefined
-            : { y: -2, transition: { duration: motionDuration.interaction, ease: easeOut } }
+            : { y: -2, transition: { duration: motionDuration.interaction, ease: pageEaseOut } }
         }
         transition={{
           duration: shouldReduceMotion ? 0 : 0.65,
-          ease: easeOut,
+          ease: pageEaseOut,
         }}
       >
         <Card.Header>
@@ -245,7 +246,7 @@ function ContinueReading({
               transition={{
                 delay: shouldReduceMotion ? 0 : index * 0.04,
                 duration: shouldReduceMotion ? 0 : motionDuration.reveal,
-                ease: easeOut,
+                ease: pageEaseOut,
               }}
             >
               <Card variant="secondary" className={compact ? "gap-3 p-4" : "gap-4 p-5"}>
@@ -285,7 +286,7 @@ function ContinueReading({
                     whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
                     transition={{
                       duration: shouldReduceMotion ? 0 : motionDuration.interaction,
-                      ease: easeOut,
+                      ease: pageEaseOut,
                     }}
                   >
                     Continue
@@ -376,7 +377,7 @@ function ArchiveRail({
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
             transition={{
               duration: shouldReduceMotion ? 0 : motionDuration.interaction,
-              ease: easeOut,
+              ease: pageEaseOut,
             }}
           >
             Browse columns
@@ -452,7 +453,7 @@ function ArchiveRail({
             }}
             transition={{
               duration: shouldReduceMotion ? 0 : motionDuration.reveal,
-              ease: easeOut,
+              ease: pageEaseOut,
             }}
           >
             <Card variant="secondary" className="gap-4 p-5 sm:p-6">
@@ -549,7 +550,7 @@ export default function BlogFeed() {
     : `page-${page}`;
   const revealTransition = {
     duration: shouldReduceMotion ? 0 : motionDuration.reveal,
-    ease: easeOut,
+    ease: pageEaseOut,
   };
   const exitTransition = {
     duration: shouldReduceMotion ? 0 : motionDuration.exit,
@@ -557,7 +558,7 @@ export default function BlogFeed() {
   };
   const stateTransition = {
     duration: shouldReduceMotion ? 0 : motionDuration.interaction,
-    ease: easeOut,
+    ease: pageEaseOut,
   };
 
   const handleSearchChange = (value: string) => {
@@ -594,7 +595,7 @@ export default function BlogFeed() {
 
     scrollAnimationRef.current = animateMotion(window.scrollY, targetTop, {
       duration: motionDuration.reveal,
-      ease: easeOut,
+      ease: pageEaseOut,
       onUpdate: (value) => window.scrollTo(0, value),
     });
   };
@@ -609,7 +610,10 @@ export default function BlogFeed() {
             variant="soft"
             initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : motionDuration.reveal, ease: easeOut }}
+            transition={{
+              duration: shouldReduceMotion ? 0 : motionDuration.reveal,
+              ease: pageEaseOut,
+            }}
           >
             Chronicle
           </MotionChip>
@@ -622,7 +626,7 @@ export default function BlogFeed() {
             transition={{
               duration: shouldReduceMotion ? 0 : motionDuration.reveal,
               delay: shouldReduceMotion ? 0 : 0.06,
-              ease: easeOut,
+              ease: pageEaseOut,
             }}
           >
             Writing worth returning to.
@@ -636,7 +640,7 @@ export default function BlogFeed() {
             transition={{
               duration: shouldReduceMotion ? 0 : motionDuration.reveal,
               delay: shouldReduceMotion ? 0 : 0.12,
-              ease: easeOut,
+              ease: pageEaseOut,
             }}
           >
             Essays on software, design, markets, and the questions that remain useful over time.
@@ -648,7 +652,7 @@ export default function BlogFeed() {
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
             transition={{
               duration: shouldReduceMotion ? 0 : motionDuration.interaction,
-              ease: easeOut,
+              ease: pageEaseOut,
             }}
           >
             Browse columns
@@ -774,7 +778,7 @@ export default function BlogFeed() {
                       }
                       transition={{
                         duration: shouldReduceMotion ? 0 : motionDuration.interaction,
-                        ease: easeOut,
+                        ease: pageEaseOut,
                       }}
                     >
                       <Typography aria-live="polite" color="muted" type="body-xs">
@@ -912,7 +916,7 @@ export default function BlogFeed() {
                     }
                     transition={{
                       duration: shouldReduceMotion ? 0 : motionDuration.interaction,
-                      ease: easeOut,
+                      ease: pageEaseOut,
                     }}
                   >
                     <Pagination
@@ -979,7 +983,7 @@ export default function BlogFeed() {
               transition={{
                 delay: shouldReduceMotion ? 0 : 0.16,
                 duration: shouldReduceMotion ? 0 : motionDuration.reveal,
-                ease: easeOut,
+                ease: pageEaseOut,
               }}
             >
               <ArchiveRail
@@ -1003,7 +1007,7 @@ export default function BlogFeed() {
                   }
                   transition={{
                     duration: shouldReduceMotion ? 0 : motionDuration.reveal,
-                    ease: easeOut,
+                    ease: pageEaseOut,
                   }}
                 >
                   <ContinueReading compact entries={continueReading} />

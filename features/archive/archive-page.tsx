@@ -1,5 +1,7 @@
 "use client";
 
+import { createPageReveal } from "@/lib/motion";
+
 import { Icon } from "@iconify/react";
 
 import { EmptyState } from "@heroui-pro/react";
@@ -319,16 +321,7 @@ export function ArchivePage() {
       : `Every article published in ${selectedYear}.`
     : "A chronological view of the full notebook.";
 
-  const revealInView = (delay = 0, distance = 20) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.3 },
-    transition: {
-      duration: shouldReduceMotion ? 0 : 0.65,
-      delay,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  });
+  const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">

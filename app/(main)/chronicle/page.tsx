@@ -1,5 +1,7 @@
 "use client";
 
+import { createPageReveal } from "@/lib/motion";
+
 import { Icon } from "@iconify/react";
 
 import { useState } from "react";
@@ -18,8 +20,6 @@ import { ExplorePage } from "@/features/explore";
 // API hooks to fetch fresh content for the featured tab
 import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
-
 function formatDate(value?: string | null) {
   if (!value) return "Recently published";
   return new Intl.DateTimeFormat("en-US", {
@@ -31,6 +31,8 @@ function formatDate(value?: string | null) {
 
 export default function ChroniclePage() {
   const shouldReduceMotion = useReducedMotion() ?? false;
+
+  const { reveal } = createPageReveal(shouldReduceMotion);
   const [activeTab, setActiveTab] = useState<string>("featured");
 
   const { data: featuredData, isLoading: isFeaturedLoading } = useGetFeaturedPostsQuery({
@@ -44,12 +46,6 @@ export default function ChroniclePage() {
 
   const featuredPost = featuredData?.list?.[0];
   const recentPosts = recentData?.list ?? [];
-
-  const reveal = (delay = 0, distance = 18) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
-  });
 
   return (
     <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">

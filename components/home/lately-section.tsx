@@ -1,5 +1,7 @@
 "use client";
 
+import { createPageReveal, pageEaseOut } from "@/lib/motion";
+
 import { ArrowDownIcon, ArrowUpIcon } from "@/components/icons";
 import {
   MotionCard,
@@ -33,8 +35,6 @@ const RepositoryActivityPanel = dynamic(
   }
 );
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
-
 const mapSparkline = (data?: number[]) => {
   if (!data || data.length === 0) return [];
   const min = Math.min(...data);
@@ -60,12 +60,7 @@ export function LatelySection() {
     { pollingInterval: 3600000, refetchOnFocus: true }
   );
 
-  const revealInView = (delay = 0, distance = 20) => ({
-    initial: shouldReduceMotion ? false : { opacity: 0, y: distance },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.3 },
-    transition: { duration: shouldReduceMotion ? 0 : 0.65, delay, ease: easeOut },
-  });
+  const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
     <section
@@ -135,7 +130,7 @@ export function LatelySection() {
               className="relative aspect-square w-full max-w-64 overflow-hidden rounded-[1.75rem] shadow-2xl shadow-black/30 sm:max-w-72"
               whileInView={shouldReduceMotion ? undefined : { rotate: [-1.5, 0] }}
               viewport={{ once: true, amount: 0.5 }}
-              transition={{ duration: 1.2, ease: easeOut }}
+              transition={{ duration: 1.2, ease: pageEaseOut }}
             >
               <Image
                 alt="Cover art for 老歌 by 安泊猜想"

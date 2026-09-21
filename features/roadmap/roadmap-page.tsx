@@ -1,11 +1,11 @@
 "use client";
 
+import { pageEaseOut } from "@/lib/motion";
+
 import { motion } from "motion/react";
 import { Card, Chip, Typography } from "@heroui/react";
 import { Timeline, TrendChip } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 const roadmapEvents = [
   {
@@ -76,7 +76,7 @@ export function RoadmapPage() {
         <motion.header
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: easeOut }}
+          transition={{ duration: 0.6, ease: pageEaseOut }}
           className="border-default-200/50 mb-16 flex flex-col items-center border-b pb-10 text-center"
         >
           <Chip color="accent" size="sm" variant="soft">
