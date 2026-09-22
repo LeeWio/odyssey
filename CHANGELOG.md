@@ -1,3 +1,10 @@
+# [1.165.0](https://github.com/LeeWio/odyssey/compare/v1.164.0...v1.165.0) (2026-09-22)
+
+
+### Features
+
+* **dashboard:** rebuild the admin sheet with the dashboard template ([9c15213](https://github.com/LeeWio/odyssey/commit/9c152133dc9da58b9d1b43b2c2a49eba01e2a066))
+
 # [1.164.0](https://github.com/LeeWio/odyssey/compare/v1.163.0...v1.164.0) (2026-09-22)
 
 
