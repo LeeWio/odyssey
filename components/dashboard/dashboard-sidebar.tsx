@@ -1,9 +1,12 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-import { Avatar, Chip } from "@heroui/react";
-import { Sidebar } from "@heroui-pro/react";
 import type { NavItem } from "./nav-items";
+
+import { LayoutSideContentLeft } from "@gravity-ui/icons";
+import { Chip } from "@heroui/react";
+import { Sidebar, useSidebar } from "@heroui-pro/react";
+
+import { IconButton } from "./icon-button";
 
 import { FOOTER_ITEMS, NAV_GROUPS } from "./nav-items";
 
@@ -20,71 +23,21 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   return (
     <>
-      <Sidebar>
-        <Sidebar.Header>
-          <div className="flex items-center gap-3 px-1 py-2">
-            <Avatar color="accent" variant="soft" size="sm">
-              <Avatar.Fallback className="font-semibold">O</Avatar.Fallback>
-            </Avatar>
-            <div className="min-w-0" data-sidebar="label">
-              <p className="text-foreground truncate text-sm font-semibold">Odyssey</p>
-              <p className="text-muted truncate text-xs">Personal workspace</p>
-            </div>
-          </div>
-        </Sidebar.Header>
+      <Sidebar className="bg-overlay">
         <SidebarContents
           basePath={basePath}
           disableNavigation={disableNavigation}
           pathname={pathname}
         />
-        <Sidebar.Footer>
-          <Sidebar.Menu aria-label="Workspace actions">
-            {FOOTER_ITEMS.map((item) => (
-              <SidebarNavItem
-                key={item.href}
-                basePath={basePath}
-                disableNavigation={disableNavigation}
-                idPrefix="footer-"
-                item={item}
-                pathname={pathname}
-              />
-            ))}
-          </Sidebar.Menu>
-        </Sidebar.Footer>
         <Sidebar.Rail />
       </Sidebar>
-      <Sidebar.Mobile>
-        <Sidebar.Header>
-          <div className="flex items-center gap-3 px-1 py-2">
-            <Avatar color="accent" variant="soft" size="sm">
-              <Avatar.Fallback className="font-semibold">O</Avatar.Fallback>
-            </Avatar>
-            <div className="min-w-0">
-              <p className="text-foreground truncate text-sm font-semibold">Odyssey</p>
-              <p className="text-muted truncate text-xs">Personal workspace</p>
-            </div>
-          </div>
-        </Sidebar.Header>
+      <Sidebar.Mobile className="bg-overlay">
         <SidebarContents
           basePath={basePath}
           disableNavigation={disableNavigation}
           idPrefix="mobile-"
           pathname={pathname}
         />
-        <Sidebar.Footer>
-          <Sidebar.Menu aria-label="Workspace actions">
-            {FOOTER_ITEMS.map((item) => (
-              <SidebarNavItem
-                key={item.href}
-                basePath={basePath}
-                disableNavigation={disableNavigation}
-                idPrefix="mobile-footer-"
-                item={item}
-                pathname={pathname}
-              />
-            ))}
-          </Sidebar.Menu>
-        </Sidebar.Footer>
       </Sidebar.Mobile>
     </>
   );
@@ -103,8 +56,22 @@ function SidebarContents({
   idPrefix = "",
   pathname,
 }: SidebarContentsProps) {
+  const { isOpen, toggleSidebar } = useSidebar();
+
   return (
     <>
+      <Sidebar.Header>
+        <div className="flex items-center px-1 py-1">
+          <IconButton
+            label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
+            size="sm"
+            variant="tertiary"
+            onPress={toggleSidebar}
+          >
+            <LayoutSideContentLeft className="size-4" />
+          </IconButton>
+        </div>
+      </Sidebar.Header>
       <Sidebar.Content>
         {NAV_GROUPS.map((group) => (
           <Sidebar.Group key={group.label}>
@@ -124,6 +91,20 @@ function SidebarContents({
           </Sidebar.Group>
         ))}
       </Sidebar.Content>
+      <Sidebar.Footer>
+        <Sidebar.Menu aria-label="Account">
+          {FOOTER_ITEMS.map((item) => (
+            <SidebarNavItem
+              key={item.href}
+              basePath={basePath}
+              disableNavigation={disableNavigation}
+              idPrefix={idPrefix}
+              item={item}
+              pathname={pathname}
+            />
+          ))}
+        </Sidebar.Menu>
+      </Sidebar.Footer>
     </>
   );
 }
@@ -143,6 +124,7 @@ function SidebarNavItem({
   item,
   pathname,
 }: SidebarNavItemProps) {
+  const Icon = item.icon;
   const fullHref = basePath + item.href;
   const isCurrent =
     item.href === "/"
@@ -155,10 +137,9 @@ function SidebarNavItem({
       id={`${idPrefix}${item.href}`}
       isCurrent={isCurrent}
       textValue={item.label}
-      tooltip={item.label}
     >
       <Sidebar.MenuIcon>
-        <Icon icon={item.icon} className="size-4" />
+        <Icon className="size-4" />
       </Sidebar.MenuIcon>
       <Sidebar.MenuLabel>{item.label}</Sidebar.MenuLabel>
       {item.badge ? (

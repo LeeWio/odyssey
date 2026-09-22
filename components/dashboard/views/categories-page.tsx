@@ -1,7 +1,14 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-
+import {
+  BarsDescendingAlignCenter,
+  CirclePlus,
+  Copy,
+  LayoutColumns3,
+  Pencil,
+  Sliders,
+  TrashBin,
+} from "@gravity-ui/icons";
 import {
   AlertDialog,
   Button,
@@ -15,7 +22,6 @@ import {
   Spinner,
   TextArea,
   TextField,
-  Tooltip,
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { type FormEvent, useCallback, useMemo, useState } from "react";
@@ -29,6 +35,7 @@ import {
   useUpdateCategoryMutation,
 } from "@/lib/features/category";
 import { toUrlSlug, validateUrlSlug } from "@/lib/utils/slug";
+import { IconButton } from "../icon-button";
 import { usePortalContainer } from "../use-portal-container";
 
 export function CategoriesPage() {
@@ -175,7 +182,20 @@ export function CategoriesPage() {
       {
         accessorKey: "id",
         allowsSorting: true,
-        cell: (item) => <span className="font-medium tabular-nums">{item.id}</span>,
+        cell: (item) => (
+          <div className="flex items-center gap-2">
+            <span className="font-medium tabular-nums">{item.id}</span>
+            <Button
+              isIconOnly
+              aria-label="Copy ID"
+              size="sm"
+              variant="ghost"
+              onPress={() => void navigator.clipboard.writeText(String(item.id))}
+            >
+              <Copy className="text-muted size-3.5" />
+            </Button>
+          </div>
+        ),
         header: "ID",
         id: "id",
         isRowHeader: true,
@@ -184,7 +204,7 @@ export function CategoriesPage() {
       {
         accessorKey: "name",
         allowsSorting: true,
-        cell: (item) => <span className="text-sm font-semibold">{item.name}</span>,
+        cell: (item) => <span className="text-xs font-medium">{item.name}</span>,
         header: "Name",
         id: "name",
         minWidth: 160,
@@ -192,11 +212,7 @@ export function CategoriesPage() {
       {
         accessorKey: "slug",
         allowsSorting: true,
-        cell: (item) => (
-          <code className="bg-muted border-border rounded border px-1.5 py-0.5 font-mono text-xs">
-            {item.slug}
-          </code>
-        ),
+        cell: (item) => item.slug,
         header: "Slug",
         id: "slug",
         minWidth: 160,
@@ -204,7 +220,7 @@ export function CategoriesPage() {
       {
         accessorKey: "description",
         allowsSorting: false,
-        cell: (item) => <span className="text-muted text-sm">{item.description || "-"}</span>,
+        cell: (item) => <span className="text-muted text-xs">{item.description || "-"}</span>,
         header: "Description",
         id: "description",
         minWidth: 260,
@@ -213,8 +229,12 @@ export function CategoriesPage() {
         accessorKey: "createdAt",
         allowsSorting: true,
         cell: (item) => (
-          <span className="text-muted text-sm tabular-nums">
-            {new Date(item.createdAt).toLocaleDateString()}
+          <span className="text-muted text-xs tabular-nums">
+            {new Date(item.createdAt).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
           </span>
         ),
         header: "Created At",
@@ -224,32 +244,23 @@ export function CategoriesPage() {
       {
         align: "end",
         cell: (item) => (
-          <div className="flex items-center justify-end gap-2">
-            <Tooltip delay={0}>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="tertiary"
-                onPress={() => handleEditClick(item)}
-                aria-label="Edit Category"
-              >
-                <Icon icon="gravity-ui:pencil" className="size-4" />
-              </Button>
-              <Tooltip.Content>Edit Category</Tooltip.Content>
-            </Tooltip>
-
-            <Tooltip delay={0}>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="danger-soft"
-                onPress={() => handleDeleteClick(item)}
-                aria-label="Delete Category"
-              >
-                <Icon icon="gravity-ui:trash-bin" className="size-4" />
-              </Button>
-              <Tooltip.Content>Delete Category</Tooltip.Content>
-            </Tooltip>
+          <div className="flex items-center justify-end gap-0.5">
+            <IconButton
+              label="Edit Category"
+              size="sm"
+              variant="tertiary"
+              onPress={() => handleEditClick(item)}
+            >
+              <Pencil className="size-4" />
+            </IconButton>
+            <IconButton
+              label="Delete Category"
+              size="sm"
+              variant="danger-soft"
+              onPress={() => handleDeleteClick(item)}
+            >
+              <TrashBin className="size-4" />
+            </IconButton>
           </div>
         ),
         header: "Actions",
@@ -261,37 +272,48 @@ export function CategoriesPage() {
   );
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <h2 className="text-foreground text-base font-semibold">Category Management</h2>
-          {!isLoading && (
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-foreground text-base font-semibold">All Categories</span>
             <Chip size="sm" variant="soft">
               {categories.length}
             </Chip>
-          )}
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="sm" variant="tertiary">
+                <Sliders className="size-4" />
+                Filter
+              </Button>
+              <Button size="sm" variant="tertiary">
+                <BarsDescendingAlignCenter className="size-4" />
+                Sort
+              </Button>
+              <Button size="sm" variant="tertiary">
+                <LayoutColumns3 className="size-4" />
+                Columns
+              </Button>
+              <Button size="sm" onPress={handleCreateOpen}>
+                <CirclePlus className="size-4" />
+                Add Category
+              </Button>
+            </div>
+            <SearchField
+              className="w-full sm:w-[220px]"
+              name="category-search"
+              value={search}
+              onChange={handleSearchChange}
+            >
+              <SearchField.Group>
+                <SearchField.SearchIcon />
+                <SearchField.Input placeholder="Search..." />
+                <SearchField.ClearButton />
+              </SearchField.Group>
+            </SearchField>
+          </div>
         </div>
-        <p className="text-muted text-sm">Manage blog categories to group related content.</p>
-      </div>
-
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <Button size="sm" onPress={handleCreateOpen}>
-          <Icon icon="gravity-ui:circle-plus" className="size-4" />
-          Add Category
-        </Button>
-
-        <SearchField
-          className="w-full sm:w-[240px]"
-          name="category-search"
-          onChange={handleSearchChange}
-          value={search}
-        >
-          <SearchField.Group>
-            <SearchField.SearchIcon />
-            <SearchField.Input placeholder="Search categories..." />
-            <SearchField.ClearButton />
-          </SearchField.Group>
-        </SearchField>
       </div>
 
       {error ? (
@@ -302,7 +324,7 @@ export function CategoriesPage() {
         <DataGrid
           aria-label="Categories"
           columns={columns}
-          contentClassName="min-w-[800px]"
+          contentClassName="min-w-[700px]"
           data={sortedCategories}
           getRowId={(item) => item.id}
           isLoadingMore={isLoading}

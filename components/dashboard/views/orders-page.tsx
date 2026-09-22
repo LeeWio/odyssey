@@ -1,18 +1,19 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-
 // TODO: Replace the mock `ORDERS` data (src/data/orders.ts) with a real data
 // source (e.g. your own API, a database query, etc.) and wire up the filter
 // dropdowns to filter the data.
 
-import { Avatar, Button, Chip, Dropdown, Label, SearchField } from "@heroui/react";
+import type { Order } from "../data/orders";
 import type { DataGridColumn } from "@heroui-pro/react";
+
+import { Calendar, Funnel } from "@gravity-ui/icons";
+import { Avatar, Button, Chip, Dropdown, Label, SearchField } from "@heroui/react";
 import { DataGrid, NumberValue } from "@heroui-pro/react";
 import { useMemo } from "react";
-import type { Order } from "../data/orders";
 
 import { ORDERS, STATUS_COLORS } from "../data/orders";
+import { useSheetPortal } from "../use-sheet-portal";
 import { OrdersRowActions } from "../widgets/orders-row-actions";
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
@@ -26,6 +27,7 @@ function formatDate(iso: string): string {
 }
 
 export function OrdersPage() {
+  const portalContainer = useSheetPortal();
   const columns = useMemo<DataGridColumn<Order>[]>(
     () => [
       {
@@ -108,7 +110,7 @@ export function OrdersPage() {
   );
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
       <p className="text-muted text-sm">Manage and track customer orders.</p>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -122,10 +124,10 @@ export function OrdersPage() {
 
         <Dropdown>
           <Button size="sm" variant="secondary">
-            <Icon icon="gravity-ui:funnel" className="size-4" />
+            <Funnel className="size-4" />
             Status
           </Button>
-          <Dropdown.Popover>
+          <Dropdown.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
             <Dropdown.Menu>
               <Dropdown.Item id="all" textValue="All">
                 <Label>All</Label>
@@ -148,10 +150,10 @@ export function OrdersPage() {
 
         <Dropdown>
           <Button size="sm" variant="secondary">
-            <Icon icon="gravity-ui:calendar" className="size-4" />
+            <Calendar className="size-4" />
             Date range
           </Button>
-          <Dropdown.Popover>
+          <Dropdown.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
             <Dropdown.Menu>
               <Dropdown.Item id="7d" textValue="Last 7 days">
                 <Label>Last 7 days</Label>

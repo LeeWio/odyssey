@@ -1,7 +1,14 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-
+import {
+  BarsDescendingAlignCenter,
+  CirclePlus,
+  Copy,
+  LayoutColumns3,
+  Pencil,
+  Sliders,
+  TrashBin,
+} from "@gravity-ui/icons";
 import {
   AlertDialog,
   Button,
@@ -15,7 +22,6 @@ import {
   Spinner,
   TextArea,
   TextField,
-  Tooltip,
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { type FormEvent, useCallback, useMemo, useState } from "react";
@@ -28,6 +34,7 @@ import {
   useGetAllRolesQuery,
   useUpdateRoleMutation,
 } from "@/lib/features/role";
+import { IconButton } from "../icon-button";
 import { usePortalContainer } from "../use-portal-container";
 
 export function RolesPage() {
@@ -173,7 +180,20 @@ export function RolesPage() {
       {
         accessorKey: "id",
         allowsSorting: true,
-        cell: (item) => <span className="font-medium tabular-nums">{item.id}</span>,
+        cell: (item) => (
+          <div className="flex items-center gap-2">
+            <span className="font-medium tabular-nums">{item.id}</span>
+            <Button
+              isIconOnly
+              aria-label="Copy ID"
+              size="sm"
+              variant="ghost"
+              onPress={() => void navigator.clipboard.writeText(String(item.id))}
+            >
+              <Copy className="text-muted size-3.5" />
+            </Button>
+          </div>
+        ),
         header: "ID",
         id: "id",
         isRowHeader: true,
@@ -182,7 +202,7 @@ export function RolesPage() {
       {
         accessorKey: "name",
         allowsSorting: true,
-        cell: (item) => <span className="text-sm font-semibold">{item.name}</span>,
+        cell: (item) => <span className="text-xs font-medium">{item.name}</span>,
         header: "Name",
         id: "name",
         minWidth: 160,
@@ -190,11 +210,7 @@ export function RolesPage() {
       {
         accessorKey: "code",
         allowsSorting: true,
-        cell: (item) => (
-          <code className="bg-muted border-border text-accent rounded border px-1.5 py-0.5 font-mono text-xs">
-            {item.code}
-          </code>
-        ),
+        cell: (item) => item.code,
         header: "Security Code",
         id: "code",
         minWidth: 180,
@@ -202,7 +218,7 @@ export function RolesPage() {
       {
         accessorKey: "description",
         allowsSorting: false,
-        cell: (item) => <span className="text-muted text-sm">{item.description || "-"}</span>,
+        cell: (item) => <span className="text-muted text-xs">{item.description || "-"}</span>,
         header: "Description",
         id: "description",
         minWidth: 260,
@@ -213,35 +229,24 @@ export function RolesPage() {
           // System roles such as ROLE_ADMIN or ROLE_USER should not be deleted to prevent locking out
           const isSystemRole = item.code === "ROLE_ADMIN" || item.code === "ROLE_USER";
           return (
-            <div className="flex items-center justify-end gap-2">
-              <Tooltip delay={0}>
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="tertiary"
-                  onPress={() => handleEditClick(item)}
-                  aria-label="Edit Role"
-                >
-                  <Icon icon="gravity-ui:pencil" className="size-4" />
-                </Button>
-                <Tooltip.Content>Edit Role</Tooltip.Content>
-              </Tooltip>
-
-              <Tooltip delay={0}>
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="danger-soft"
-                  onPress={() => handleDeleteClick(item)}
-                  isDisabled={isSystemRole}
-                  aria-label="Delete Role"
-                >
-                  <Icon icon="gravity-ui:trash-bin" className="size-4" />
-                </Button>
-                <Tooltip.Content>
-                  {isSystemRole ? "System protected role" : "Delete Role"}
-                </Tooltip.Content>
-              </Tooltip>
+            <div className="flex items-center justify-end gap-0.5">
+              <IconButton
+                label="Edit Role"
+                size="sm"
+                variant="tertiary"
+                onPress={() => handleEditClick(item)}
+              >
+                <Pencil className="size-4" />
+              </IconButton>
+              <IconButton
+                isDisabled={isSystemRole}
+                label={isSystemRole ? "System protected role" : "Delete Role"}
+                size="sm"
+                variant="danger-soft"
+                onPress={() => handleDeleteClick(item)}
+              >
+                <TrashBin className="size-4" />
+              </IconButton>
             </div>
           );
         },
@@ -254,39 +259,48 @@ export function RolesPage() {
   );
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <h2 className="text-foreground text-base font-semibold">Security Role Management</h2>
-          {!isLoading && (
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-foreground text-base font-semibold">All Roles</span>
             <Chip size="sm" variant="soft">
               {roles.length}
             </Chip>
-          )}
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="sm" variant="tertiary">
+                <Sliders className="size-4" />
+                Filter
+              </Button>
+              <Button size="sm" variant="tertiary">
+                <BarsDescendingAlignCenter className="size-4" />
+                Sort
+              </Button>
+              <Button size="sm" variant="tertiary">
+                <LayoutColumns3 className="size-4" />
+                Columns
+              </Button>
+              <Button size="sm" onPress={handleCreateOpen}>
+                <CirclePlus className="size-4" />
+                Add Role
+              </Button>
+            </div>
+            <SearchField
+              className="w-full sm:w-[220px]"
+              name="role-search"
+              value={search}
+              onChange={handleSearchChange}
+            >
+              <SearchField.Group>
+                <SearchField.SearchIcon />
+                <SearchField.Input placeholder="Search..." />
+                <SearchField.ClearButton />
+              </SearchField.Group>
+            </SearchField>
+          </div>
         </div>
-        <p className="text-muted text-sm">
-          Configure security roles to define organizational responsibilities.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <Button size="sm" onPress={handleCreateOpen}>
-          <Icon icon="gravity-ui:circle-plus" className="size-4" />
-          Add Role
-        </Button>
-
-        <SearchField
-          className="w-full sm:w-[240px]"
-          name="role-search"
-          onChange={handleSearchChange}
-          value={search}
-        >
-          <SearchField.Group>
-            <SearchField.SearchIcon />
-            <SearchField.Input placeholder="Search roles..." />
-            <SearchField.ClearButton />
-          </SearchField.Group>
-        </SearchField>
       </div>
 
       {error ? (
@@ -297,7 +311,7 @@ export function RolesPage() {
         <DataGrid
           aria-label="Roles"
           columns={columns}
-          contentClassName="min-w-[800px]"
+          contentClassName="min-w-[700px]"
           data={sortedRoles}
           getRowId={(item) => item.id}
           isLoadingMore={isLoading}

@@ -1,21 +1,38 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-
+import { EllipsisVertical } from "@gravity-ui/icons";
 import { Card } from "@heroui/react";
 import { LineChart } from "@heroui-pro/react/line-chart";
-import { TRAFFIC_DATA } from "../data/traffic";
-import { IconButton } from "../icon-button";
 
-const Y_TICKS = [0, 5000, 10000, 20000];
+import { useMemo } from "react";
+import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
+
+import { IconButton } from "../icon-button";
 
 function formatYTick(value: number): string {
   return value >= 1000 ? `${(value / 1000).toFixed(0)}k` : `${value}`;
 }
 
 export function TrafficSourceCard() {
+  const { data } = useGetTrafficAnalyticsQuery(365);
+  const chartData = useMemo(() => {
+    const buckets = new Map<string, { month: string; organic: number; paidAds: number }>();
+
+    for (const point of data?.timeSeries ?? []) {
+      const month = new Date(point.date).toLocaleDateString("en-US", { month: "short" });
+      const bucket = buckets.get(month) ?? { month, organic: 0, paidAds: 0 };
+
+      bucket.organic += point.sessions;
+      bucket.paidAds += point.users;
+      buckets.set(month, bucket);
+    }
+
+    return [...buckets.values()];
+  }, [data]);
+  const total = data?.summary.sessions.numericValue ?? 0;
+
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <Card.Header className="flex-row items-center justify-between">
         <Card.Title className="text-base">Traffic Source</Card.Title>
         <div className="flex items-center gap-4">
@@ -24,19 +41,21 @@ export function TrafficSourceCard() {
             <LegendDot color="var(--chart-4)" label="Paid Ads" />
           </div>
           <IconButton label="More options" size="sm" variant="tertiary">
-            <Icon icon="gravity-ui:ellipsis-vertical" className="size-4" />
+            <EllipsisVertical className="size-4" />
           </IconButton>
         </div>
       </Card.Header>
       <Card.Content className="flex flex-col gap-4">
         <div className="flex flex-col">
-          <span className="text-foreground text-lg font-semibold tabular-nums">231,856</span>
+          <span className="text-foreground text-lg font-semibold tabular-nums">
+            {total.toLocaleString("en-US")}
+          </span>
           <span className="text-muted text-xs">Sessions</span>
         </div>
-        <LineChart data={[...TRAFFIC_DATA]} height={180}>
+        <LineChart data={chartData} height={180}>
           <LineChart.Grid vertical={false} />
           <LineChart.XAxis dataKey="month" tickMargin={8} />
-          <LineChart.YAxis tickFormatter={formatYTick} ticks={Y_TICKS} width={30} />
+          <LineChart.YAxis tickFormatter={formatYTick} width={30} />
           <LineChart.Line
             dataKey="organic"
             dot={false}

@@ -4,7 +4,7 @@ import { Sheet } from "@heroui-pro/react";
 import { Spinner } from "@heroui/react";
 import { useMounted } from "@mantine/hooks";
 import { lazy, Suspense, useState } from "react";
-import { selectIsAdmin } from "@/lib/features/auth";
+import { selectIsAdmin, useLogoutMutation } from "@/lib/features/auth";
 import { selectIsDashboardOpen, toggleDashboard } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
@@ -84,11 +84,21 @@ export function DashboardSheet() {
   const isOpen = useAppSelector(selectIsDashboardOpen);
   const isAdmin = useAppSelector(selectIsAdmin);
   const dispatch = useAppDispatch();
-
+  const [logout] = useLogoutMutation();
   const [currentPath, setCurrentPath] = useState("/");
 
   const handleOpenChange = () => {
     dispatch(toggleDashboard());
+  };
+
+  const handleNavigate = (href: string) => {
+    if (href === "/logout") {
+      void logout();
+      dispatch(toggleDashboard());
+      return;
+    }
+
+    setCurrentPath(href);
   };
 
   if (!isMounted || !isAdmin) {
@@ -174,7 +184,7 @@ export function DashboardSheet() {
         <Sheet.Content>
           <Sheet.Dialog id="dashboard-sheet-container" aria-label="Dashboard Overlay">
             <Sheet.Handle />
-            <AppShell pathname={currentPath} onNavigate={setCurrentPath}>
+            <AppShell pathname={currentPath} onNavigate={handleNavigate}>
               <Suspense fallback={<ViewFallback />}>{renderContent()}</Suspense>
             </AppShell>
           </Sheet.Dialog>

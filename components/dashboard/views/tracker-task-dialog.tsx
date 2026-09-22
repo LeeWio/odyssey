@@ -24,7 +24,7 @@ import {
   useGetKanbanChecklistQuery,
   useUpdateKanbanChecklistItemMutation,
 } from "@/lib/features/kanban";
-import type { TrackerTask } from "./tracker-page";
+import type { LiveTrackerTask as TrackerTask } from "./tracker-page";
 
 interface TrackerTaskDialogProps {
   columns: KanbanColumn[];

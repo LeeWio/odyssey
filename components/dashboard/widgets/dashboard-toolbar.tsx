@@ -1,12 +1,14 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-
+import { ArrowsRotateLeft, Calendar, ChevronDown } from "@gravity-ui/icons";
 import { Button, ButtonGroup, Dropdown, Label, Tabs } from "@heroui/react";
 
+import { useSheetPortal } from "../use-sheet-portal";
 import { IconButton } from "../icon-button";
 
 export function DashboardToolbar() {
+  const portalContainer = useSheetPortal();
+
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <Tabs defaultSelectedKey="overview">
@@ -29,18 +31,21 @@ export function DashboardToolbar() {
       </Tabs>
       <div className="flex flex-wrap items-center gap-2">
         <IconButton label="Refresh" size="sm" variant="tertiary">
-          <Icon icon="gravity-ui:arrows-rotate-left" className="size-4" />
+          <ArrowsRotateLeft className="size-4" />
         </IconButton>
         <ButtonGroup size="sm" variant="tertiary">
           <Button>
-            <Icon icon="gravity-ui:calendar" className="size-4" />
+            <Calendar className="size-4" />
             Monthly
           </Button>
           <Dropdown>
             <Button isIconOnly aria-label="Change period" size="sm" variant="tertiary">
-              <Icon icon="gravity-ui:chevron-down" className="size-4" />
+              <ChevronDown className="size-4" />
             </Button>
-            <Dropdown.Popover placement="bottom end">
+            <Dropdown.Popover
+              UNSTABLE_portalContainer={portalContainer || undefined}
+              placement="bottom end"
+            >
               <Dropdown.Menu>
                 <Dropdown.Item id="daily" textValue="Daily">
                   <Label>Daily</Label>
@@ -58,9 +63,7 @@ export function DashboardToolbar() {
             </Dropdown.Popover>
           </Dropdown>
         </ButtonGroup>
-        <Button size="sm" variant="secondary">
-          Download
-        </Button>
+        <Button size="sm">Download</Button>
       </div>
     </div>
   );

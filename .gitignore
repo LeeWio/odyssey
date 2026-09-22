@@ -45,3 +45,4 @@ bun.lockb
 
 # local reference repositories
 .reference/
+demo/

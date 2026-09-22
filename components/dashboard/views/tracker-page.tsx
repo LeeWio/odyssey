@@ -1,12 +1,36 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+// TODO: Replace the static `TRACKER_TASKS` (src/data/tracker.ts) with a live
+// task store (InstantDB, Drizzle, your own API, etc.). `useKanban` drives
+// optimistic DnD locally — persist the reordered column in your
+// `onReorder`/`onInsert` handlers once you're wired up to a backend.
 
-import { EmptyState } from "@heroui-pro/react";
-import { Avatar, Button, Chip, Header, Label, ProgressBar, Skeleton, toast } from "@heroui/react";
 import type { UseKanbanReturn } from "@heroui-pro/react";
-import { ContextMenu, Kanban, useKanban, useKanbanCardPlaceholder } from "@heroui-pro/react";
-import { useState } from "react";
+import type { ComponentType } from "react";
+
+import {
+  ArrowRight,
+  ArrowsRotateLeft,
+  CircleCheck,
+  CircleDashed,
+  CirclePlay,
+  Copy,
+  Pencil,
+  Plus,
+  Stopwatch,
+  TrashBin,
+} from "@gravity-ui/icons";
+import { Avatar, Button, Chip, Header, Label, ProgressBar, Skeleton, toast } from "@heroui/react";
+import {
+  ContextMenu,
+  EmptyState,
+  KPIGroup,
+  Kanban,
+  useKanban,
+  useKanbanCardPlaceholder,
+} from "@heroui-pro/react";
+import { KPI } from "@heroui-pro/react/kpi";
+import { Fragment, useMemo, useState } from "react";
 import type { KanbanColumn, KanbanTask } from "@/lib/features/kanban";
 import {
   useCreateKanbanTaskMutation,
@@ -16,64 +40,78 @@ import {
   useRelocateKanbanTaskMutation,
   useUpdateKanbanTaskMutation,
 } from "@/lib/features/kanban";
+
 import { IconButton } from "../icon-button";
 import { usePersistentKanbanColumn } from "../use-persistent-kanban-column";
+import { useSheetPortal } from "../use-sheet-portal";
+import { TRACKER_COLUMNS, type TrackerStatus, type TrackerTask } from "../data/tracker";
 import { TrackerTaskDialog } from "./tracker-task-dialog";
 
-type TrackerStatus = string;
-export type TrackerTask = {
-  id: string;
-  title: string;
-  status: TrackerStatus;
-  categories: string[];
-  epic: string;
-  priority: { color: "accent" | "success" | "warning" | "danger"; label: string };
-  size: "S" | "M" | "L" | "XL";
-  assignees: Array<{ avatar: string; name: string }>;
-  dueDate?: string;
-  subtasks?: { completed: number; total: number };
-  source: KanbanTask;
+export type { TrackerTask };
+
+const COLUMN_META: Record<
+  TrackerStatus,
+  { indicator: string; icon: ComponentType<{ className?: string }> }
+> = {
+  Done: { icon: CircleCheck, indicator: "bg-success" },
+  "In Progress": { icon: CirclePlay, indicator: "bg-warning" },
+  "To Do": { icon: CircleDashed, indicator: "bg-accent" },
 };
 
-interface ColumnMeta {
-  bodyBg: string;
-  btnStyle: string;
-  countColor: string;
-  indicator: string;
-  pillBg: string;
-}
-
-const COLUMN_META_STYLES: Record<string, ColumnMeta> = {
-  Done: {
-    bodyBg: "bg-success/8",
-    btnStyle: "text-success border-success/30 hover:bg-success/10",
-    countColor: "text-success",
-    indicator: "bg-success",
-    pillBg: "bg-success/15",
-  },
-  "In Progress": {
-    bodyBg: "bg-warning/8",
-    btnStyle: "text-warning border-warning/30 hover:bg-warning/10",
-    countColor: "text-warning",
-    indicator: "bg-warning",
-    pillBg: "bg-warning/15",
-  },
-  "To Do": {
-    bodyBg: "bg-accent/8",
-    btnStyle: "text-accent border-accent/30 hover:bg-accent/10",
-    countColor: "text-accent",
-    indicator: "bg-accent",
-    pillBg: "bg-accent/15",
-  },
+const KPI_META: Record<
+  TrackerStatus,
+  {
+    icon: ComponentType<{ className?: string }>;
+    label: string;
+    status: "success" | "warning" | "danger";
+  }
+> = {
+  Done: { icon: CircleCheck, label: "Completed", status: "success" },
+  "In Progress": { icon: CirclePlay, label: "In Progress", status: "warning" },
+  "To Do": { icon: CircleDashed, label: "To Do", status: "danger" },
 };
 
-function getTaskColumn(task: TrackerTask) {
+function getTaskColumn(task: LiveTrackerTask): string {
   return task.status;
 }
 
-function setTaskColumn(task: TrackerTask, column: string) {
-  return { ...task, status: column };
+function setTaskColumn(task: LiveTrackerTask, column: string): LiveTrackerTask {
+  return { ...task, status: column as TrackerStatus };
 }
+
+const PRIORITY_COLOR = {
+  HIGH: "danger",
+  LOW: "success",
+  MEDIUM: "warning",
+} as const;
+
+function toTrackerTask(task: KanbanTask, status: string): LiveTrackerTask {
+  const completed = task.checklistItems.filter((item) => item.completed).length;
+
+  return {
+    assignees: task.assignees.map((assignee) => ({
+      avatar: assignee.avatar ?? "",
+      name: assignee.nickname || assignee.username,
+    })),
+    description: task.content ?? "",
+    dueDate: task.reminderAt
+      ? new Date(task.reminderAt).toLocaleDateString("en-US", { day: "numeric", month: "short" })
+      : undefined,
+    id: String(task.id),
+    source: task,
+    status: TRACKER_COLUMNS.find((column) => column === status) ?? "To Do",
+    subtasks: task.checklistItems.length
+      ? { completed, total: task.checklistItems.length }
+      : undefined,
+    tag: {
+      color: PRIORITY_COLOR[task.priority],
+      label: task.tags[0]?.name ?? task.epic,
+    },
+    title: task.title,
+  };
+}
+
+export type LiveTrackerTask = TrackerTask & { source: KanbanTask };
 
 export function TrackerPage() {
   const board = useGetKanbanBoardQuery();
@@ -93,11 +131,11 @@ export function TrackerPage() {
 }
 
 function LiveTrackerBoard({ board, onRefresh }: { board: KanbanColumn[]; onRefresh: () => void }) {
-  const columns = board.map((column) => column.name);
-  const tasks = board.flatMap((column) =>
-    column.items.map((task) => toTrackerTask(task, column.name))
+  const tasks = useMemo(
+    () => board.flatMap((column) => column.items.map((task) => toTrackerTask(task, column.name))),
+    [board]
   );
-  const kanban = useKanban<TrackerTask>({
+  const kanban = useKanban<LiveTrackerTask>({
     getColumn: getTaskColumn,
     initialItems: tasks,
     setColumn: setTaskColumn,
@@ -144,26 +182,55 @@ function LiveTrackerBoard({ board, onRefresh }: { board: KanbanColumn[]; onRefre
 
   const selectedTask = selectedTaskId ? (kanban.list.getItem(selectedTaskId) ?? null) : null;
 
+  // Counts derived from the live kanban list so KPIs update as cards are
+  // dragged (`rerender-derived-state-no-effect`).
+  const counts = useMemo(() => {
+    const base: Record<TrackerStatus, number> = { Done: 0, "In Progress": 0, "To Do": 0 };
+
+    for (const item of kanban.list.items) {
+      base[item.status] += 1;
+    }
+
+    return base;
+  }, [kanban.list.items]);
+
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
       <p className="text-muted text-sm">Track work across your team.</p>
 
-      <Kanban hideScrollBar className="items-start overflow-visible">
-        {columns.map((column) => (
+      <KPIGroup>
+        {TRACKER_COLUMNS.map((column, index) => {
+          const meta = KPI_META[column];
+          const Icon = meta.icon;
+
+          return (
+            <Fragment key={column}>
+              {index > 0 ? <KPIGroup.Separator /> : null}
+              <KPI>
+                <KPI.Header>
+                  <KPI.Icon status={meta.status}>
+                    <Icon />
+                  </KPI.Icon>
+                  <KPI.Title>{meta.label}</KPI.Title>
+                </KPI.Header>
+                <KPI.Content>
+                  <KPI.Value maximumFractionDigits={0} value={counts[column]} />
+                </KPI.Content>
+              </KPI>
+            </Fragment>
+          );
+        })}
+      </KPIGroup>
+
+      <Kanban>
+        {TRACKER_COLUMNS.map((column) => (
           <TrackerColumn
             key={column}
             column={column}
             kanban={kanban}
-            onMove={moveTask}
-            onPersist={persistDraggedTasks}
-            onDuplicate={async (id) => {
-              try {
-                await duplicateTask(Number(id)).unwrap();
-                toast.success("Task duplicated.");
-                onRefresh();
-              } catch {
-                toast.danger("Couldn't duplicate this task.");
-              }
+            onAdd={() => {
+              const targetColumn = board.find((item) => item.name === column);
+              if (targetColumn) setNewTaskColumnId(targetColumn.id);
             }}
             onDelete={async (id) => {
               kanban.removeItem(id);
@@ -174,11 +241,18 @@ function LiveTrackerBoard({ board, onRefresh }: { board: KanbanColumn[]; onRefre
                 onRefresh();
               }
             }}
-            onEdit={(id) => setSelectedTaskId(id)}
-            onAdd={() => {
-              const targetColumn = board.find((item) => item.name === column);
-              if (targetColumn) setNewTaskColumnId(targetColumn.id);
+            onDuplicate={async (id) => {
+              try {
+                await duplicateTask(Number(id)).unwrap();
+                toast.success("Task duplicated.");
+                onRefresh();
+              } catch {
+                toast.danger("Couldn't duplicate this task.");
+              }
             }}
+            onEdit={(id) => setSelectedTaskId(id)}
+            onMove={moveTask}
+            onPersist={persistDraggedTasks}
           />
         ))}
       </Kanban>
@@ -202,14 +276,14 @@ function LiveTrackerBoard({ board, onRefresh }: { board: KanbanColumn[]; onRefre
         initialColumnId={newTaskColumnId}
         isOpen={newTaskColumnId !== null}
         task={null}
-        onOpenChange={(open) => {
-          if (!open) setNewTaskColumnId(null);
-        }}
         onCreate={async (body) => {
           await createTask(body).unwrap();
           setNewTaskColumnId(null);
           onRefresh();
           toast.success("Task created.");
+        }}
+        onOpenChange={(open) => {
+          if (!open) setNewTaskColumnId(null);
         }}
         onSave={async () => undefined}
       />
@@ -218,25 +292,25 @@ function LiveTrackerBoard({ board, onRefresh }: { board: KanbanColumn[]; onRefre
 }
 
 interface TrackerColumnProps {
-  column: string;
-  kanban: UseKanbanReturn<TrackerTask>;
+  column: TrackerStatus;
+  kanban: UseKanbanReturn<LiveTrackerTask>;
+  onAdd: () => void;
+  onDelete: (taskId: string) => Promise<void>;
+  onDuplicate: (taskId: string) => Promise<void>;
+  onEdit: (taskId: string) => void;
   onMove: (taskId: string, targetColumn: string) => Promise<void>;
   onPersist: (taskIds: string[]) => void;
-  onDuplicate: (taskId: string) => Promise<void>;
-  onDelete: (taskId: string) => Promise<void>;
-  onEdit: (taskId: string) => void;
-  onAdd: () => void;
 }
 
 function TrackerColumn({
   column,
   kanban,
+  onAdd,
+  onDelete,
+  onDuplicate,
+  onEdit,
   onMove,
   onPersist,
-  onDuplicate,
-  onDelete,
-  onEdit,
-  onAdd,
 }: TrackerColumnProps) {
   const { renderDropIndicator } = useKanbanCardPlaceholder({
     renderIndicator: (target) => <Kanban.DropIndicator target={target} />,
@@ -244,55 +318,26 @@ function TrackerColumn({
   const { dragAndDropHooks, items } = usePersistentKanbanColumn(kanban, column, onPersist, {
     renderDropIndicator,
   });
-  const meta = COLUMN_META_STYLES[column] ?? {
-    bodyBg: "bg-default/8",
-    btnStyle: "text-muted border-default/30 hover:bg-default/10",
-    countColor: "text-muted",
-    indicator: "bg-default",
-    pillBg: "bg-default/15",
-  };
+  const meta = COLUMN_META[column];
 
   return (
-    <Kanban.Column className="gap-0">
-      <div className="sticky top-0 z-10 pt-2">
-        <Kanban.ColumnHeader
-          className={`rounded-t-[calc(var(--radius-2xl)+var(--radius-sm))] px-3 py-2.5 ${meta.bodyBg}`}
-        >
-          <span
-            className={`flex items-center gap-2 rounded-[calc(var(--radius)*infinity)] px-3 py-1 ${meta.pillBg}`}
-          >
-            <Kanban.ColumnIndicator className={meta.indicator} />
-            <Kanban.ColumnTitle>{column}</Kanban.ColumnTitle>
-          </span>
-          <Kanban.ColumnCount className={meta.countColor}>{items.length}</Kanban.ColumnCount>
-          <Kanban.ColumnActions>
-            <IconButton
-              label={`Add ${column} task`}
-              className={meta.countColor}
-              size="sm"
-              variant="ghost"
-              onPress={onAdd}
-            >
-              <Icon icon="gravity-ui:plus" />
-            </IconButton>
-            <IconButton
-              label={`More ${column} options`}
-              className={meta.countColor}
-              size="sm"
-              variant="ghost"
-            >
-              <Icon icon="gravity-ui:ellipsis" />
-            </IconButton>
-          </Kanban.ColumnActions>
-        </Kanban.ColumnHeader>
-      </div>
-      <Kanban.ColumnBody className={`rounded-t-none ${meta.bodyBg}`}>
+    <Kanban.Column>
+      <Kanban.ColumnHeader>
+        <Kanban.ColumnIndicator className={meta.indicator} />
+        <Kanban.ColumnTitle>{column}</Kanban.ColumnTitle>
+        <Kanban.ColumnCount>{items.length}</Kanban.ColumnCount>
+        <Kanban.ColumnActions>
+          <IconButton label={`Add ${column} task`} size="sm" variant="ghost" onPress={onAdd}>
+            <Plus className="size-4" />
+          </IconButton>
+        </Kanban.ColumnActions>
+      </Kanban.ColumnHeader>
+      <Kanban.ColumnBody>
         <Kanban.CardList
           aria-label={column}
-          className="pt-0 pb-2"
           dragAndDropHooks={dragAndDropHooks}
           items={items}
-          renderEmptyState={() => "No tasks yet."}
+          renderEmptyState={() => <span className="text-muted text-xs">Drop tasks here</span>}
         >
           {(task) => (
             <Kanban.Card textValue={task.title}>
@@ -300,22 +345,16 @@ function TrackerColumn({
                 column={column}
                 kanban={kanban}
                 taskId={task.id}
-                onMove={onMove}
-                onDuplicate={onDuplicate}
                 onDelete={onDelete}
+                onDuplicate={onDuplicate}
                 onEdit={onEdit}
+                onMove={onMove}
               >
                 <TrackerCardContent task={task} />
               </TrackerCardContextMenu>
             </Kanban.Card>
           )}
         </Kanban.CardList>
-        <div className="p-2 pt-0">
-          <Button fullWidth className={meta.btnStyle} variant="outline" onPress={onAdd}>
-            <Icon icon="gravity-ui:plus" />
-            New task
-          </Button>
-        </div>
       </Kanban.ColumnBody>
     </Kanban.Column>
   );
@@ -323,42 +362,40 @@ function TrackerColumn({
 
 interface TrackerCardContextMenuProps {
   children: React.ReactNode;
-  column: string;
-  kanban: UseKanbanReturn<TrackerTask>;
-  onMove: (taskId: string, targetColumn: string) => Promise<void>;
-  onDuplicate: (taskId: string) => Promise<void>;
-  onDelete: (taskId: string) => Promise<void>;
-  onEdit: (taskId: string) => void;
+  column: TrackerStatus;
+  kanban: UseKanbanReturn<LiveTrackerTask>;
   taskId: string;
+  onDelete: (taskId: string) => Promise<void>;
+  onDuplicate: (taskId: string) => Promise<void>;
+  onEdit: (taskId: string) => void;
+  onMove: (taskId: string, targetColumn: string) => Promise<void>;
 }
 
 function TrackerCardContextMenu({
   children,
   column,
-  kanban,
-  taskId,
-  onMove,
-  onDuplicate,
   onDelete,
+  onDuplicate,
   onEdit,
+  onMove,
+  taskId,
 }: TrackerCardContextMenuProps) {
-  const otherColumns = Array.from(new Set(kanban.list.items.map((item) => item.status))).filter(
-    (status) => status !== column
-  );
+  const portalContainer = useSheetPortal();
+  const otherColumns = TRACKER_COLUMNS.filter((c) => c !== column);
 
   return (
     <ContextMenu>
       <ContextMenu.Trigger className="flex flex-col gap-[inherit]">{children}</ContextMenu.Trigger>
-      <ContextMenu.Popover>
+      <ContextMenu.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
         <ContextMenu.Menu>
           <ContextMenu.Section>
             <Header>Actions</Header>
             <ContextMenu.Item textValue="Edit" onAction={() => onEdit(taskId)}>
-              <Icon icon="gravity-ui:pencil" />
+              <Pencil />
               <Label>Edit</Label>
             </ContextMenu.Item>
             <ContextMenu.Item textValue="Duplicate" onAction={() => void onDuplicate(taskId)}>
-              <Icon icon="gravity-ui:copy" />
+              <Copy />
               <Label>Duplicate</Label>
             </ContextMenu.Item>
           </ContextMenu.Section>
@@ -371,7 +408,7 @@ function TrackerCardContextMenu({
                 textValue={`Move to ${col}`}
                 onAction={() => void onMove(taskId, col)}
               >
-                <Icon icon="gravity-ui:arrow-right" />
+                <ArrowRight />
                 <Label>{col}</Label>
               </ContextMenu.Item>
             ))}
@@ -379,7 +416,7 @@ function TrackerCardContextMenu({
           <ContextMenu.Separator />
           <ContextMenu.Section>
             <ContextMenu.Item textValue="Delete" onAction={() => void onDelete(taskId)}>
-              <Icon icon="gravity-ui:trash-bin" />
+              <TrashBin />
               <Label className="text-danger">Delete</Label>
             </ContextMenu.Item>
           </ContextMenu.Section>
@@ -389,40 +426,90 @@ function TrackerCardContextMenu({
   );
 }
 
-function TrackerCardContent({ task }: { task: TrackerTask }) {
-  const isDone = task.status === "Done";
-  const priorityDot = {
-    danger: "bg-danger",
-    warning: "bg-warning",
-    success: "bg-success",
-    accent: "bg-accent",
-  }[task.priority.color];
-
+function TrackerLoading() {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-start gap-2">
-        <span className={`mt-1 size-2.5 shrink-0 rounded-sm ${priorityDot}`} />
-        <span
-          className={`text-foreground leading-snug font-semibold ${isDone ? "line-through opacity-60" : ""}`}
-        >
-          {task.title}
-        </span>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-1.5">
-        <Chip color={task.priority.color} size="sm" variant="soft">
-          {task.priority.label}
-        </Chip>
-        <Chip size="sm" variant="secondary">
-          {task.size}
-        </Chip>
-        {task.assignees.slice(0, 3).map((assignee) => (
-          <Avatar key={assignee.name} className="ring-background size-5 ring-2" size="sm">
-            <Avatar.Image alt={assignee.name} src={assignee.avatar} />
-            <Avatar.Fallback>{assignee.name[0]}</Avatar.Fallback>
-          </Avatar>
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
+      <Skeleton className="h-5 w-52 rounded" />
+      <div className="grid grid-cols-3 gap-4">
+        {Array.from({ length: 3 }, (_, index) => (
+          <Skeleton key={index} className="h-28 rounded-2xl" />
         ))}
       </div>
+      <div className="grid grid-cols-3 gap-4">
+        {Array.from({ length: 3 }, (_, index) => (
+          <Skeleton key={index} className="h-80 rounded-2xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TrackerError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="mx-auto flex max-w-7xl px-5 pt-4 pb-10">
+      <EmptyState className="bg-surface-secondary w-full rounded-2xl">
+        <EmptyState.Header>
+          <EmptyState.Title>Tracker is unavailable</EmptyState.Title>
+          <EmptyState.Description>Try loading the board again in a moment.</EmptyState.Description>
+        </EmptyState.Header>
+        <EmptyState.Content>
+          <Button variant="outline" onPress={onRetry}>
+            <ArrowsRotateLeft aria-hidden="true" className="size-4" /> Refresh
+          </Button>
+        </EmptyState.Content>
+      </EmptyState>
+    </div>
+  );
+}
+
+function TrackerEmpty({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="mx-auto flex max-w-7xl px-5 pt-4 pb-10">
+      <EmptyState className="bg-surface-secondary w-full rounded-2xl">
+        <EmptyState.Header>
+          <EmptyState.Title>Your tracker is ready for its first task</EmptyState.Title>
+          <EmptyState.Description>
+            Default columns will appear after the workspace finishes initializing.
+          </EmptyState.Description>
+        </EmptyState.Header>
+        <EmptyState.Content>
+          <Button variant="outline" onPress={onRetry}>
+            <ArrowsRotateLeft aria-hidden="true" className="size-4" /> Refresh board
+          </Button>
+        </EmptyState.Content>
+      </EmptyState>
+    </div>
+  );
+}
+
+function TrackerCardContent({ task }: { task: LiveTrackerTask }) {
+  const isDone = task.status === "Done";
+
+  return (
+    <div className="flex flex-col gap-2 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <Chip color={task.tag.color} size="sm" variant="soft">
+          {task.tag.label}
+        </Chip>
+        {task.dueDate ? (
+          <span className="text-muted inline-flex items-center gap-1 text-xs tabular-nums">
+            <Stopwatch className="size-3" />
+            {task.dueDate}
+          </span>
+        ) : null}
+      </div>
+
+      <span
+        className={`text-foreground text-sm leading-snug font-medium ${
+          isDone ? "line-through opacity-60" : ""
+        }`}
+      >
+        {task.title}
+      </span>
+
+      {task.description ? (
+        <span className="text-muted text-xs leading-snug">{task.description}</span>
+      ) : null}
 
       {task.subtasks ? (
         <div className="flex items-center gap-2">
@@ -443,118 +530,24 @@ function TrackerCardContent({ task }: { task: TrackerTask }) {
         </div>
       ) : null}
 
-      <div className="text-muted flex items-center justify-between gap-2 text-xs">
-        <span className="flex min-w-0 items-center gap-1">
-          <Icon icon="gravity-ui:thunderbolt-fill" className="text-warning size-3 shrink-0" />
-          <span className="truncate">{task.epic}</span>
-        </span>
-        {task.dueDate ? (
-          <span className="flex shrink-0 items-center gap-1 tabular-nums">
-            <Icon icon="gravity-ui:calendar" className="size-3" />
-            {task.dueDate}
-          </span>
+      <div className="mt-0.5 flex -space-x-2">
+        {task.assignees.slice(0, 3).map((assignee) => (
+          <Avatar key={assignee.name} className="ring-background size-5 ring-2" size="sm">
+            <Avatar.Image alt={assignee.name} src={assignee.avatar} />
+            <Avatar.Fallback>
+              {assignee.name
+                .split(" ")
+                .map((part) => part[0])
+                .join("")}
+            </Avatar.Fallback>
+          </Avatar>
+        ))}
+        {task.assignees.length > 3 ? (
+          <Avatar className="ring-background size-5 ring-2" size="sm">
+            <Avatar.Fallback className="text-xs">+{task.assignees.length - 3}</Avatar.Fallback>
+          </Avatar>
         ) : null}
       </div>
-
-      {task.categories.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
-          {task.categories.slice(0, 3).map((category) => (
-            <Chip key={category} size="sm" variant="secondary">
-              {category}
-            </Chip>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function toTrackerTask(task: KanbanTask, status: string): TrackerTask {
-  const priorityTag = {
-    HIGH: { color: "danger" as const, label: "High" },
-    LOW: { color: "success" as const, label: "Low" },
-    MEDIUM: { color: "warning" as const, label: "Medium" },
-  }[task.priority];
-  const completed = task.checklistItems.filter((item) => item.completed).length;
-
-  return {
-    assignees: task.assignees.map((assignee) => ({
-      avatar: assignee.avatar ?? "",
-      name: assignee.nickname || assignee.username,
-    })),
-    dueDate: task.reminderAt
-      ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(
-          new Date(task.reminderAt)
-        )
-      : undefined,
-    id: String(task.id),
-    status,
-    subtasks: task.checklistItems.length
-      ? { completed, total: task.checklistItems.length }
-      : undefined,
-    categories: task.tags.map((tag) => tag.name),
-    epic: task.epic,
-    priority: priorityTag,
-    size: task.size,
-    title: task.title,
-    source: task,
-  };
-}
-
-function TrackerLoading() {
-  return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
-      <Skeleton className="h-5 w-52 rounded" />
-      <div className="grid grid-cols-3 gap-4">
-        {Array.from({ length: 3 }, (_, index) => (
-          <Skeleton key={index} className="h-28 rounded-2xl" />
-        ))}
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        {Array.from({ length: 3 }, (_, index) => (
-          <Skeleton key={index} className="h-80 rounded-2xl" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function TrackerError({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="mx-auto flex max-w-7xl px-5 pt-8 pb-10">
-      <EmptyState className="bg-surface-secondary w-full rounded-2xl">
-        <EmptyState.Header>
-          <EmptyState.Title>Tracker is unavailable</EmptyState.Title>
-          <EmptyState.Description>Try loading the board again in a moment.</EmptyState.Description>
-        </EmptyState.Header>
-        <EmptyState.Content>
-          <Button variant="outline" onPress={onRetry}>
-            <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />{" "}
-            Refresh
-          </Button>
-        </EmptyState.Content>
-      </EmptyState>
-    </div>
-  );
-}
-
-function TrackerEmpty({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="mx-auto flex max-w-7xl px-5 pt-8 pb-10">
-      <EmptyState className="bg-surface-secondary w-full rounded-2xl">
-        <EmptyState.Header>
-          <EmptyState.Title>Your tracker is ready for its first task</EmptyState.Title>
-          <EmptyState.Description>
-            Default columns will appear after the workspace finishes initializing.
-          </EmptyState.Description>
-        </EmptyState.Header>
-        <EmptyState.Content>
-          <Button variant="outline" onPress={onRetry}>
-            <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />{" "}
-            Refresh board
-          </Button>
-        </EmptyState.Content>
-      </EmptyState>
     </div>
   );
 }

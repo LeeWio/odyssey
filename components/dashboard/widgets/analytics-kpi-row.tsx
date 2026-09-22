@@ -1,161 +1,121 @@
 "use client";
 
-import { Skeleton } from "@heroui/react";
+import type { ComponentProps } from "react";
+
 import { KPI } from "@heroui-pro/react/kpi";
 import { useMemo } from "react";
-
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
-import { BOUNCE_SPARKLINE, DURATION_SPARKLINE } from "../data/analytics";
 
-export function AnalyticsKpiRow({ days }: { days?: number }) {
-  const { data, isLoading } = useGetTrafficAnalyticsQuery(days);
+type TrendDir = ComponentProps<typeof KPI.Trend>["trend"];
 
-  const sessionsSparkline = useMemo(() => {
-    return data?.timeSeries?.map((p) => ({ value: p.sessions })) ?? [];
-  }, [data]);
+/**
+ * Seconds → human-friendly "3m 42s" helper used below.
+ * Hoisted so it's a module-level pure function (`js-cache-function-results`).
+ */
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
 
-  const usersSparkline = useMemo(() => {
-    return data?.timeSeries?.map((p) => ({ value: p.users })) ?? [];
-  }, [data]);
+  return `${m}m ${s.toString().padStart(2, "0")}s`;
+}
 
+function trendOf(value: number): TrendDir {
+  return value >= 0 ? "up" : "down";
+}
+
+function formatTrend(value: number): string {
+  return `${Math.abs(value).toFixed(1)}%`;
+}
+
+export function AnalyticsKpiRow() {
+  const { data } = useGetTrafficAnalyticsQuery(30);
   const summary = data?.summary;
+  const sessions = useMemo(
+    () => data?.timeSeries.map((point) => ({ value: point.sessions })) ?? [],
+    [data]
+  );
+  const users = useMemo(
+    () => data?.timeSeries.map((point) => ({ value: point.users })) ?? [],
+    [data]
+  );
+  const analyticsKpis = [
+    {
+      chartColor: "var(--color-accent)",
+      chartData: sessions,
+      label: "Sessions",
+      numberProps: { maximumFractionDigits: 0, value: summary?.sessions.numericValue ?? 0 },
+      trend: trendOf(summary?.sessions.growthRate ?? 0),
+      trendValue: formatTrend(summary?.sessions.growthRate ?? 0),
+    },
+    {
+      chartColor: "var(--color-success)",
+      chartData: users,
+      label: "Unique users",
+      numberProps: { maximumFractionDigits: 0, value: summary?.users.numericValue ?? 0 },
+      trend: trendOf(summary?.users.growthRate ?? 0),
+      trendValue: formatTrend(summary?.users.growthRate ?? 0),
+    },
+    {
+      chartColor: "var(--color-muted)",
+      chartData: sessions,
+      label: "Bounce rate",
+      numberProps: {
+        maximumFractionDigits: 1,
+        style: "percent" as const,
+        value: (summary?.bounceRate.numericValue ?? 0) / 100,
+      },
+      trend: "neutral" as const,
+      trendValue: formatTrend(summary?.bounceRate.growthRate ?? 0),
+    },
+  ];
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {/* Sessions */}
-      <KPI>
-        <KPI.Header>
-          <KPI.Title>Sessions</KPI.Title>
-        </KPI.Header>
-        <KPI.Content>
-          {isLoading ? (
-            <>
-              <Skeleton className="h-8 w-24 rounded-lg" />
-              <Skeleton className="h-5 w-12 rounded-full" />
-            </>
-          ) : (
-            <>
-              <KPI.Value maximumFractionDigits={0} value={summary?.sessions.numericValue ?? 0} />
-              <KPI.Trend trend={(summary?.sessions.growthRate ?? 0) >= 0 ? "up" : "down"}>
-                {Math.abs(summary?.sessions.growthRate ?? 0).toFixed(1)}%
-              </KPI.Trend>
-            </>
-          )}
-        </KPI.Content>
-        {isLoading ? (
-          <Skeleton className="mt-2 h-[60px] w-full rounded-xl" />
-        ) : (
+      {analyticsKpis.map((kpi) => (
+        <KPI key={kpi.label}>
+          <KPI.Header>
+            <KPI.Title>{kpi.label}</KPI.Title>
+          </KPI.Header>
+          <KPI.Content>
+            <KPI.Value {...kpi.numberProps} />
+            <KPI.Trend trend={kpi.trend}>{kpi.trendValue}</KPI.Trend>
+          </KPI.Content>
           <KPI.Chart
-            color="var(--color-accent)"
-            data={sessionsSparkline}
+            color={kpi.chartColor}
+            data={[...kpi.chartData]}
             height={60}
             strokeWidth={1.5}
           />
-        )}
-      </KPI>
-
-      {/* Unique Users */}
-      <KPI>
-        <KPI.Header>
-          <KPI.Title>Unique users</KPI.Title>
-        </KPI.Header>
-        <KPI.Content>
-          {isLoading ? (
-            <>
-              <Skeleton className="h-8 w-24 rounded-lg" />
-              <Skeleton className="h-5 w-12 rounded-full" />
-            </>
-          ) : (
-            <>
-              <KPI.Value maximumFractionDigits={0} value={summary?.users.numericValue ?? 0} />
-              <KPI.Trend trend={(summary?.users.growthRate ?? 0) >= 0 ? "up" : "down"}>
-                {Math.abs(summary?.users.growthRate ?? 0).toFixed(1)}%
-              </KPI.Trend>
-            </>
-          )}
-        </KPI.Content>
-        {isLoading ? (
-          <Skeleton className="mt-2 h-[60px] w-full rounded-xl" />
-        ) : (
-          <KPI.Chart
-            color="var(--color-success)"
-            data={usersSparkline}
-            height={60}
-            strokeWidth={1.5}
-          />
-        )}
-      </KPI>
-
-      {/* Bounce Rate */}
-      <KPI>
-        <KPI.Header>
-          <KPI.Title>Bounce rate</KPI.Title>
-        </KPI.Header>
-        <KPI.Content>
-          {isLoading ? (
-            <>
-              <Skeleton className="h-8 w-24 rounded-lg" />
-              <Skeleton className="h-5 w-12 rounded-full" />
-            </>
-          ) : (
-            <>
-              <KPI.Value
-                maximumFractionDigits={1}
-                style="percent"
-                value={(summary?.bounceRate.numericValue ?? 0) / 100}
-              />
-              <KPI.Trend trend="neutral">
-                {(summary?.bounceRate.growthRate ?? 0) >= 0 ? "+" : "−"}
-                {Math.abs(summary?.bounceRate.growthRate ?? 0).toFixed(1)}%
-              </KPI.Trend>
-            </>
-          )}
-        </KPI.Content>
-        {isLoading ? (
-          <Skeleton className="mt-2 h-[60px] w-full rounded-xl" />
-        ) : (
-          <KPI.Chart
-            color="var(--color-muted)"
-            data={[...BOUNCE_SPARKLINE]}
-            height={60}
-            strokeWidth={1.5}
-          />
-        )}
-      </KPI>
-
-      {/* Avg Session */}
-      <KPI>
-        <KPI.Header>
-          <KPI.Title>Avg. session</KPI.Title>
-        </KPI.Header>
-        <KPI.Content>
-          {isLoading ? (
-            <>
-              <Skeleton className="h-8 w-24 rounded-lg" />
-              <Skeleton className="h-5 w-12 rounded-full" />
-            </>
-          ) : (
-            <>
-              <span className="text-foreground text-2xl font-semibold tabular-nums">
-                {summary?.avgSession.value}
-              </span>
-              <KPI.Trend trend={(summary?.avgSession.growthRate ?? 0) >= 0 ? "up" : "down"}>
-                {Math.abs(summary?.avgSession.growthRate ?? 0).toFixed(1)}%
-              </KPI.Trend>
-            </>
-          )}
-        </KPI.Content>
-        {isLoading ? (
-          <Skeleton className="mt-2 h-[60px] w-full rounded-xl" />
-        ) : (
-          <KPI.Chart
-            color="var(--color-warning)"
-            data={[...DURATION_SPARKLINE]}
-            height={60}
-            strokeWidth={1.5}
-          />
-        )}
-      </KPI>
+        </KPI>
+      ))}
+      <DurationKpi />
     </div>
+  );
+}
+
+/**
+ * Duration KPI is split out because it formats its value with a custom
+ * render prop (minutes + seconds), which `KPI.Value` doesn't express
+ * cleanly as a plain number.
+ */
+function DurationKpi() {
+  const { data } = useGetTrafficAnalyticsQuery(30);
+  const avgSeconds = data?.summary.avgSession.numericValue ?? 0;
+  const growth = data?.summary.avgSession.growthRate ?? 0;
+  const sparkline = data?.timeSeries.map((point) => ({ value: point.sessions })) ?? [];
+
+  return (
+    <KPI>
+      <KPI.Header>
+        <KPI.Title>Avg. session</KPI.Title>
+      </KPI.Header>
+      <KPI.Content>
+        <span className="text-foreground text-2xl font-semibold tabular-nums">
+          {formatDuration(avgSeconds)}
+        </span>
+        <KPI.Trend trend={growth >= 0 ? "up" : "down"}>{formatTrend(growth)}</KPI.Trend>
+      </KPI.Content>
+      <KPI.Chart color="var(--color-warning)" data={sparkline} height={60} strokeWidth={1.5} />
+    </KPI>
   );
 }

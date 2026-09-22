@@ -1,7 +1,8 @@
 "use client";
 
-import { Button, Tooltip } from "@heroui/react";
 import type { ComponentPropsWithRef, ReactNode } from "react";
+
+import { Button, Tooltip } from "@heroui/react";
 
 type ButtonProps = ComponentPropsWithRef<typeof Button>;
 

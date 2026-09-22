@@ -72,6 +72,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     ".heroui-docs/**",
     ".reference/**",
+    "demo/**",
     "components/icons.tsx",
   ]),
 ]);

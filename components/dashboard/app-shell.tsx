@@ -1,14 +1,11 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-
-import { Breadcrumbs, Tooltip } from "@heroui/react";
-import { AppLayout, Navbar, Sidebar } from "@heroui-pro/react";
 import type { ReactNode } from "react";
+
+import { AppLayout } from "@heroui-pro/react";
 import { useCallback } from "react";
 
 import { DashboardSidebar } from "./dashboard-sidebar";
-import { NAV_GROUPS } from "./nav-items";
 
 export interface AppShellProps {
   children: ReactNode;
@@ -16,40 +13,17 @@ export interface AppShellProps {
   onNavigate: (href: string) => void;
 }
 
-export function AppShell({ children, pathname, onNavigate }: AppShellProps) {
+export function AppShell({ children, onNavigate, pathname }: AppShellProps) {
   const navigate = useCallback((href: string) => onNavigate(href), [onNavigate]);
-  const pageLabel =
-    NAV_GROUPS.flatMap((group) => group.items).find((item) => item.href === pathname)?.label ??
-    "Dashboard";
 
   return (
     <AppLayout
-      scrollMode="content"
-      sidebarCollapsible="icon"
-      sidebarVariant="floating"
+      className="h-full min-h-0"
       navigate={navigate}
-      navbar={
-        <Navbar maxWidth="full">
-          <Navbar.Header>
-            <AppLayout.MenuToggle aria-label="Open navigation" tooltip="Open navigation" />
-            <Tooltip delay={0}>
-              <Tooltip.Trigger aria-label="Toggle sidebar">
-                <Sidebar.Trigger aria-label="Toggle sidebar" />
-              </Tooltip.Trigger>
-              <Tooltip.Content>Toggle sidebar</Tooltip.Content>
-            </Tooltip>
-            <Breadcrumbs aria-label="Current location" className="min-w-0">
-              <Breadcrumbs.Item className="min-w-0 font-semibold">
-                <span className="flex min-w-0 items-center gap-2 overflow-hidden">
-                  <Icon icon="gravity-ui:house" aria-hidden="true" className="size-4 shrink-0" />
-                  <span className="truncate">{pageLabel}</span>
-                </span>
-              </Breadcrumbs.Item>
-            </Breadcrumbs>
-          </Navbar.Header>
-        </Navbar>
-      }
+      scrollMode="content"
       sidebar={<DashboardSidebar basePath="" pathname={pathname} />}
+      sidebarCollapsible="icon"
+      sidebarVariant="sidebar"
     >
       {children}
     </AppLayout>

@@ -1,17 +1,18 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-
 // TODO: Wire these link cards to your real documentation, community and
 // support URLs. Replace the FAQ entries with real content or fetch them
 // from your CMS.
 
+import type { ComponentType } from "react";
+
+import { ArrowRightFromSquare, Book, Comment, LifeRing } from "@gravity-ui/icons";
 import { Accordion, Card, Link } from "@heroui/react";
 
 type HelpLink = {
   description: string;
   href: string;
-  icon: string;
+  icon: ComponentType<{ className?: string }>;
   title: string;
 };
 
@@ -19,19 +20,19 @@ const HELP_LINKS: readonly HelpLink[] = [
   {
     description: "Read the docs, guides, and API reference to get up and running.",
     href: "#",
-    icon: "gravity-ui:book",
+    icon: Book,
     title: "Documentation",
   },
   {
     description: "Join the community to ask questions, share tips, and connect with other users.",
     href: "#",
-    icon: "gravity-ui:comment",
+    icon: Comment,
     title: "Community",
   },
   {
     description: "Get help from our support team. We reply within one business day.",
     href: "#",
-    icon: "gravity-ui:life-ring",
+    icon: LifeRing,
     title: "Contact support",
   },
 ];
@@ -66,7 +67,7 @@ const FAQS: readonly FaqItem[] = [
 
 export function HelpPage() {
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 pt-8 pb-10">
+    <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 pt-4 pb-10">
       <p className="text-muted text-sm">Find answers, contact support, or dig into the docs.</p>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -105,11 +106,13 @@ export function HelpPage() {
 }
 
 function HelpLinkCard({ link }: { link: HelpLink }) {
+  const Icon = link.icon;
+
   return (
     <Card className="rounded-2xl">
       <Card.Header>
         <div className="bg-accent-soft text-accent flex size-10 items-center justify-center rounded-xl">
-          <Icon icon={link.icon} className="size-5" />
+          <Icon className="size-5" />
         </div>
         <Card.Title className="text-base">{link.title}</Card.Title>
         <Card.Description>{link.description}</Card.Description>
@@ -117,7 +120,7 @@ function HelpLinkCard({ link }: { link: HelpLink }) {
       <Card.Footer>
         <Link className="text-accent inline-flex items-center gap-1 text-sm" href={link.href}>
           Open
-          <Icon icon="gravity-ui:arrow-right-from-square" className="size-3.5" />
+          <ArrowRightFromSquare className="size-3.5" />
         </Link>
       </Card.Footer>
     </Card>

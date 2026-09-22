@@ -1,9 +1,10 @@
 "use client";
 
-import { Card, Skeleton } from "@heroui/react";
+import type { ReactNode } from "react";
+
+import { Card } from "@heroui/react";
 import { ChartTooltip } from "@heroui-pro/react";
 import { PieChart } from "@heroui-pro/react/pie-chart";
-import type { ReactNode } from "react";
 
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
 
@@ -38,75 +39,49 @@ function DeviceTooltip({ active, payload }: DeviceTooltipProps) {
   );
 }
 
-export function DeviceBreakdownCard({ days }: { days?: number }) {
-  const { data: trafficData, isLoading } = useGetTrafficAnalyticsQuery(days);
-
-  const total = trafficData?.summary.sessions.numericValue ?? 0;
-
-  // Ensure we always have the 3 main device categories to preserve the chart colors and structure
-  // even if the backend returns an empty array or missing categories when views are 0.
-  const rawDevices = trafficData?.devices ?? [];
-  const devices = [
-    rawDevices.find((d) => d.name === "Mobile") ?? { name: "Mobile", views: 0, percentage: 0 },
-    rawDevices.find((d) => d.name === "Desktop") ?? { name: "Desktop", views: 0, percentage: 0 },
-    rawDevices.find((d) => d.name === "Tablet") ?? { name: "Tablet", views: 0, percentage: 0 },
-  ];
-
+export function DeviceBreakdownCard() {
+  const { data } = useGetTrafficAnalyticsQuery(30);
+  const devices = (data?.devices ?? []).map((device) => ({
+    name: device.name,
+    value: device.views,
+  }));
+  const total = devices.reduce((sum, device) => sum + device.value, 0);
   const formattedTotal = formatCount(total);
 
   return (
-    <Card className="h-full">
+    <Card className="h-full rounded-2xl">
       <Card.Header>
         <Card.Title className="text-base">Traffic by device</Card.Title>
         <Card.Description>How visitors are reaching your site.</Card.Description>
       </Card.Header>
       <Card.Content className="flex flex-1 flex-col items-center justify-center gap-6">
         <div className="relative">
-          {isLoading ? (
-            <Skeleton className="size-[240px] rounded-full" />
-          ) : (
-            <PieChart height={240} width={240}>
-              <PieChart.Pie
-                cornerRadius={8}
-                cx="50%"
-                cy="50%"
-                data={devices}
-                dataKey="views"
-                innerRadius="68%"
-                nameKey="name"
-                paddingAngle={-12}
-                strokeWidth={0}
-              >
-                {devices.map((_, idx) => (
-                  <PieChart.Cell key={idx} fill={DEVICE_COLORS[idx % DEVICE_COLORS.length]} />
-                ))}
-              </PieChart.Pie>
-              <PieChart.Tooltip content={<DeviceTooltip />} />
-            </PieChart>
-          )}
+          <PieChart height={240} width={240}>
+            <PieChart.Pie
+              cornerRadius={8}
+              cx="50%"
+              cy="50%"
+              data={devices}
+              dataKey="value"
+              innerRadius="68%"
+              nameKey="name"
+              paddingAngle={-12}
+              strokeWidth={0}
+            >
+              {devices.map((_, idx) => (
+                <PieChart.Cell key={idx} fill={DEVICE_COLORS[idx % DEVICE_COLORS.length]} />
+              ))}
+            </PieChart.Pie>
+            <PieChart.Tooltip content={<DeviceTooltip />} />
+          </PieChart>
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            {isLoading ? (
-              <Skeleton className="h-8 w-16 rounded" />
-            ) : (
-              <>
-                <span className="text-foreground text-2xl font-semibold tabular-nums">
-                  {formattedTotal}
-                </span>
-                <span className="text-muted text-xs">Sessions</span>
-              </>
-            )}
+            <span className="text-foreground text-2xl font-semibold tabular-nums">
+              {formattedTotal}
+            </span>
+            <span className="text-muted text-xs">Sessions</span>
           </div>
         </div>
-
-        {isLoading ? (
-          <div className="flex w-full max-w-[240px] flex-col gap-3">
-            <Skeleton className="h-4 w-full rounded" />
-            <Skeleton className="h-4 w-full rounded" />
-            <Skeleton className="h-4 w-full rounded" />
-          </div>
-        ) : (
-          <DeviceLegend devices={devices} />
-        )}
+        <DeviceLegend devices={devices} total={total} />
       </Card.Content>
     </Card>
   );
@@ -114,12 +89,16 @@ export function DeviceBreakdownCard({ days }: { days?: number }) {
 
 function DeviceLegend({
   devices,
+  total,
 }: {
-  devices: Array<{ name: string; views: number; percentage: number }>;
+  devices: ReadonlyArray<{ name: string; value: number }>;
+  total: number;
 }): ReactNode {
   return (
     <div className="flex w-full max-w-[240px] flex-col gap-2">
       {devices.map((entry, idx) => {
+        const pct = total > 0 ? ((entry.value / total) * 100).toFixed(0) : "0";
+
         return (
           <div key={entry.name} className="flex items-center gap-3">
             <span
@@ -128,11 +107,9 @@ function DeviceLegend({
             />
             <span className="text-foreground flex-1 text-sm">{entry.name}</span>
             <span className="text-foreground text-sm font-semibold tabular-nums">
-              {formatCount(entry.views)}
+              {formatCount(entry.value)}
             </span>
-            <span className="text-muted w-12 text-right text-xs tabular-nums">
-              {entry.percentage.toFixed(1)}%
-            </span>
+            <span className="text-muted w-10 text-right text-xs tabular-nums">{pct}%</span>
           </div>
         );
       })}

@@ -1,18 +1,43 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-
-import { Avatar, Button, Chip, SearchField } from "@heroui/react";
 import type { DataGridColumn, DataGridSortDescriptor } from "@heroui-pro/react";
+
+import { BarsDescendingAlignCenter, Copy, LayoutColumns3, Sliders } from "@gravity-ui/icons";
+import { Avatar, Button, Chip, SearchField } from "@heroui/react";
 import { DataGrid } from "@heroui-pro/react";
 import { useCallback, useMemo, useState } from "react";
-import type { Employee } from "../data/employees";
 
-import { EMPLOYEES } from "../data/employees";
+import { useGetAllUsersQuery, type UserResponse } from "@/lib/features/user";
 
 import { RowActions } from "./employees-table-row-actions";
 
+type MemberRow = {
+  avatar: string;
+  email: string;
+  id: string;
+  name: string;
+  role: string;
+  user: UserResponse;
+  workerId: string;
+  workerType: string;
+};
+
 export function EmployeesTable() {
+  const { data: users = [] } = useGetAllUsersQuery();
+  const members = useMemo<MemberRow[]>(
+    () =>
+      users.map((user) => ({
+        avatar: user.avatar ?? "",
+        email: user.email,
+        id: String(user.id),
+        name: user.nickname || user.username,
+        role: user.roles[0] ?? "Member",
+        user,
+        workerId: `#${user.id}`,
+        workerType: user.status,
+      })),
+    [users]
+  );
   const [search, setSearch] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState<DataGridSortDescriptor>({
     column: "name",
@@ -20,21 +45,21 @@ export function EmployeesTable() {
   });
 
   // Derived during render — no useState + useEffect mirror.
-  const filteredEmployees = useMemo<Employee[]>(() => {
-    if (!search) return [...EMPLOYEES];
+  const filteredEmployees = useMemo<MemberRow[]>(() => {
+    if (!search) return members;
     const q = search.toLowerCase();
 
-    return EMPLOYEES.filter(
+    return members.filter(
       (employee) =>
         employee.name.toLowerCase().includes(q) ||
         employee.email.toLowerCase().includes(q) ||
         employee.workerId.toLowerCase().includes(q)
     );
-  }, [search]);
+  }, [members, search]);
 
-  const sortedEmployees = useMemo<Employee[]>(() => {
+  const sortedEmployees = useMemo<MemberRow[]>(() => {
     if (!sortDescriptor.column) return filteredEmployees;
-    const column = sortDescriptor.column as keyof Employee;
+    const column = sortDescriptor.column as keyof MemberRow;
 
     return [...filteredEmployees].sort((a, b) => {
       const first = String(a[column] ?? "");
@@ -49,7 +74,7 @@ export function EmployeesTable() {
     setSearch(value);
   }, []);
 
-  const columns = useMemo<DataGridColumn<Employee>[]>(
+  const columns = useMemo<DataGridColumn<MemberRow>[]>(
     () => [
       {
         accessorKey: "workerId",
@@ -58,7 +83,7 @@ export function EmployeesTable() {
           <div className="flex items-center gap-2">
             <span className="font-medium tabular-nums">{item.workerId}</span>
             <Button isIconOnly aria-label="Copy ID" size="sm" variant="ghost">
-              <Icon icon="gravity-ui:copy" className="text-muted size-3.5" />
+              <Copy className="text-muted size-3.5" />
             </Button>
           </div>
         ),
@@ -107,7 +132,7 @@ export function EmployeesTable() {
       },
       {
         align: "end",
-        cell: (item) => <RowActions employeeId={item.id} />,
+        cell: (item) => <RowActions user={item.user} />,
         header: "Actions",
         id: "actions",
         minWidth: 140,
@@ -122,21 +147,21 @@ export function EmployeesTable() {
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-foreground text-base font-semibold">All Employees</span>
           <Chip size="sm" variant="soft">
-            32
+            {members.length}
           </Chip>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" variant="tertiary">
-              <Icon icon="gravity-ui:sliders" className="size-4" />
+              <Sliders className="size-4" />
               Filter
             </Button>
             <Button size="sm" variant="tertiary">
-              <Icon icon="gravity-ui:bars-descending-align-center" className="size-4" />
+              <BarsDescendingAlignCenter className="size-4" />
               Sort
             </Button>
             <Button size="sm" variant="tertiary">
-              <Icon icon="gravity-ui:layout-columns-3" className="size-4" />
+              <LayoutColumns3 className="size-4" />
               Columns
             </Button>
           </div>
