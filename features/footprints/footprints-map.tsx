@@ -4,14 +4,20 @@ import { Card, Chip, Typography } from "@heroui/react";
 import { Map } from "@heroui-pro/react/map";
 import { useState } from "react";
 
-import { getFootprintArcs, getFootprintsMapView, type Footprint } from "./footprints-data";
+import {
+  getFootprintArcs,
+  getFootprintMetaLabel,
+  getFootprintsMapView,
+  type Footprint,
+} from "./footprints-data";
 import { footprintMapStyles, footprintMapWorkerUrl } from "./map-styles";
 
 export type FootprintsMapProps = {
   footprints: readonly Footprint[];
   selectedId?: string | null;
   onSelect?: (footprint: Footprint) => void;
-  onClearSelection?: () => void;
+  /** Closes the map popup only; does not clear the selected memory. */
+  onPopupClose?: () => void;
   compact?: boolean;
 };
 
@@ -19,7 +25,7 @@ export function FootprintsMap({
   footprints,
   selectedId,
   onSelect,
-  onClearSelection,
+  onPopupClose,
   compact = false,
 }: FootprintsMapProps) {
   const [hoveredArcId, setHoveredArcId] = useState<string | null>(null);
@@ -99,14 +105,21 @@ export function FootprintsMap({
             latitude={selectedFootprint.latitude}
             longitude={selectedFootprint.longitude}
             offset={18}
-            onClose={onClearSelection}
+            onClose={onPopupClose}
           >
-            <div className="w-56 space-y-2 pr-4 text-xs">
-              <p className="font-medium">{selectedFootprint.place}</p>
-              <p className="text-muted">
-                {selectedFootprint.year} · {selectedFootprint.country}
-              </p>
-              <p className="text-muted leading-5">{selectedFootprint.memory}</p>
+            <div className="flex w-56 flex-col gap-2 pr-4">
+              <Chip size="sm" variant="soft" className="w-fit">
+                {getFootprintMetaLabel(selectedFootprint)}
+              </Chip>
+              <Typography weight="semibold" className="text-sm leading-5 text-balance">
+                {selectedFootprint.title}
+              </Typography>
+              <Typography color="muted" type="body-xs">
+                {selectedFootprint.place}
+              </Typography>
+              <Typography color="muted" type="body-xs" className="leading-5">
+                {selectedFootprint.memory}
+              </Typography>
             </div>
           </Map.Popup>
         ) : null}
@@ -136,7 +149,7 @@ export function FootprintsMap({
               </span>
               <span>
                 <strong className="text-foreground block text-base">
-                  {footprints.length ? Math.max(...footprints.map((item) => item.year)) : "—"}
+                  {footprints.length ? Math.max(...footprints.map((item) => item.year)) : "-"}
                 </strong>
                 Latest
               </span>

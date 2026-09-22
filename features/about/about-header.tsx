@@ -11,14 +11,24 @@ export function AboutHeader({ compact = false }: AboutHeaderProps) {
   return (
     <header className="flex flex-col gap-6">
       {!compact ? (
-        <Breadcrumbs>
-          <Breadcrumbs.Item href="/">Home</Breadcrumbs.Item>
-          <Breadcrumbs.Item>About</Breadcrumbs.Item>
-        </Breadcrumbs>
+        <>
+          <Breadcrumbs>
+            <Breadcrumbs.Item href="/">Home</Breadcrumbs.Item>
+            <Breadcrumbs.Item>About</Breadcrumbs.Item>
+          </Breadcrumbs>
+          <Chip size="sm" variant="secondary" className="w-fit">
+            About
+          </Chip>
+        </>
       ) : null}
 
       <div className="flex items-center gap-4 sm:gap-5">
-        <Avatar aria-label={aboutPerson.name} className="size-16 shrink-0 sm:size-20" size="lg">
+        <Avatar
+          aria-label={aboutPerson.name}
+          className="size-16 shrink-0 sm:size-20"
+          size="lg"
+          variant="soft"
+        >
           <Avatar.Fallback>{aboutPerson.initials}</Avatar.Fallback>
         </Avatar>
         <div className="min-w-0">

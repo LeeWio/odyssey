@@ -11,9 +11,10 @@
 
 - Refine Footprints memory copy when longer notes are ready
 - Wire a real listening source into Lately / media when available
-- Improve onboarding for first-time visitors
+- Refine first-visit orientation copy after real visitor feedback
 - Clarify content taxonomy across blog and dashboard surfaces
 - Keep experimental modules labeled Demo until they graduate
+- Keep `/uses` honest as tools change; avoid affiliate padding
 
 ## Engineering Backlog
 

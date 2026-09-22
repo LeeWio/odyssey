@@ -12,6 +12,8 @@ import {
   Skeleton,
   Typography,
   Button,
+  Card,
+  Link,
   Popover,
   TextArea,
   Description,
@@ -163,6 +165,11 @@ const LatelySection = dynamic(
   }
 );
 
+const HomeOrientation = dynamic(
+  () => import("@/components/home/home-orientation").then((mod) => mod.HomeOrientation),
+  { ssr: false }
+);
+
 const MotionAccordion = motion.create(Accordion);
 
 const faqItems = [
@@ -268,6 +275,8 @@ export default function Home() {
         </MotionSurface>
       </section>
 
+      <HomeOrientation />
+
       <LatelySection />
 
       <FeaturedWriting />
@@ -305,9 +314,16 @@ export default function Home() {
             </Popover.Content>
           </Popover>
 
-          <MotionChip size="sm" color="accent" variant="soft" {...revealInView(0, 10)}>
+          <MotionChip size="sm" variant="secondary" {...revealInView(0, 10)}>
             Guestbook
           </MotionChip>
+
+          <motion.div className="mt-3" {...revealInView(0.04, 8)}>
+            <Link href="/guestbook" className="text-sm no-underline">
+              Open the guestbook
+              <Link.Icon aria-hidden="true" />
+            </Link>
+          </motion.div>
 
           <MotionTypography
             id="guestbook-title"
@@ -318,7 +334,7 @@ export default function Home() {
             {...revealInView(0.06)}
           >
             <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
-              Since you’re here,
+              {"Since you're here,"}
             </GradientText>
           </MotionTypography>
 
@@ -329,39 +345,31 @@ export default function Home() {
             {...revealInView(0.06)}
           >
             <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
-              tell me what’s on your mind.
+              {"tell me what's on your mind."}
             </GradientText>
           </MotionTypography>
         </header>
 
-        {/* Beautiful Guestbook Testimonials Board */}
         <motion.div className="mt-6 w-full" {...revealInView(0.12, 20)}>
           <GuestbookBoard />
         </motion.div>
 
-        {/* Constrained Comments & Feedback Content */}
-        <div className="mx-auto mt-16 flex w-full max-w-3xl flex-col gap-10">
+        <div className="mx-auto mt-16 flex w-full max-w-3xl flex-col gap-10 px-6 sm:px-10">
           {mounted && !isAuthenticated ? (
             <motion.div className="w-full" {...revealInView(0.2, 16)}>
-              <div className="bg-surface-secondary/30 flex flex-col gap-4 rounded-2xl p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                <div>
-                  <Typography type="body-sm" weight="semibold">
-                    Sign in to add an entry
-                  </Typography>
-                  <Typography color="muted" type="body-xs" className="mt-1">
+              <Card variant="secondary">
+                <Card.Header>
+                  <Card.Title className="text-base">Sign in to add an entry</Card.Title>
+                  <Card.Description>
                     Reading is open to everyone. Sign in to leave a note or reply.
-                  </Typography>
-                </div>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="shrink-0 font-medium"
-                  onPress={() => dispatch(setLoginOpen(true))}
-                >
-                  <Icon icon="gravity-ui:pencil-to-square" aria-hidden="true" className="size-4" />
-                  Sign in to write
-                </Button>
-              </div>
+                  </Card.Description>
+                </Card.Header>
+                <Card.Footer>
+                  <Button size="sm" onPress={() => dispatch(setLoginOpen(true))}>
+                    Sign in to write
+                  </Button>
+                </Card.Footer>
+              </Card>
             </motion.div>
           ) : null}
         </div>

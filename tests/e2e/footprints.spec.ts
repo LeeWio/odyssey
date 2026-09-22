@@ -53,13 +53,18 @@ for (const width of [390, 1440]) {
     await expect(section.getByRole("heading", { name: "Places I've Been" })).toBeVisible();
     await expect(
       section.getByText(
-        "A record of provinces and cities across China — the stops that stayed on the map."
+        "A record of provinces and cities across China. The stops that stayed on the map."
       )
     ).toBeVisible();
-    await expect(section.getByText("Footprints")).toBeVisible();
+    await expect(section.getByText("Footprints", { exact: true }).first()).toBeVisible();
+    await expect(section.getByRole("link", { name: "Open the atlas" })).toBeVisible();
+    await expect(section.getByRole("link", { name: "Open the atlas" })).toHaveCount(1);
     await expect(section.getByTestId("footprints-map-frame").getByText("Hubei")).toBeVisible();
-    await expect(section.locator(".bg-overlay").getByText("Henan", { exact: true })).toBeVisible();
-    await expect(section.getByRole("link", { name: /Open the atlas/i })).toBeVisible();
+    const overlay = section.locator(".bg-overlay");
+    await expect(overlay.getByText("Places kept on the map")).toBeVisible();
+    await expect(overlay.getByText("Latest")).toBeVisible();
+    await expect(overlay.getByText("Plains this year")).toBeVisible();
+    await expect(overlay.getByText("Henan · 2026")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true
     );
@@ -76,10 +81,16 @@ test("timeline, popup and year selection stay in sync", async ({ page }) => {
   await entry.click();
   await expect(entry).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByLabel("Selected travel memory")).toContainText("Shenzhen");
-  await expect(page.locator('[data-slot="map-popup"]')).toContainText("Shenzhen");
+  const popup = page.locator('[data-slot="map-popup"]');
+  await expect(popup).toContainText("A city rewriting itself");
+  await expect(popup).toContainText("Shenzhen");
+  await expect(popup).toContainText(
+    "Glass, pace, and a skyline that keeps changing between visits."
+  );
   await page.getByRole("button", { name: "Close popup" }).click();
   await expect(page.locator('[data-slot="map-popup"]')).toHaveCount(0);
-  await expect(entry).toHaveAttribute("aria-pressed", "false");
+  await expect(entry).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByLabel("Selected travel memory")).toContainText("A city rewriting itself");
   await page.getByRole("tab", { name: "2024", exact: true }).click();
   await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Read memory from Chongqing" })).toBeVisible();

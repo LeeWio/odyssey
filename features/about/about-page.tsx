@@ -50,11 +50,14 @@ export function AboutPage({ compact = false }: AboutPageProps) {
           {...reveal(0.06, 16)}
         >
           <div className="max-w-2xl">
+            <Chip size="sm" variant="secondary" className="w-fit">
+              Play
+            </Chip>
             <Typography
               id="about-play-title"
               type="h2"
               weight="bold"
-              className="tracking-[-0.03em]"
+              className="mt-3 tracking-[-0.03em]"
             >
               {aboutPlay.title}
             </Typography>
@@ -121,8 +124,14 @@ export function AboutPage({ compact = false }: AboutPageProps) {
           </Typography>
           <Separator />
           <div className="flex flex-wrap gap-4">
-            <Link href={aboutClose.primary.href}>{aboutClose.primary.label}</Link>
-            <Link href={aboutClose.secondary.href}>{aboutClose.secondary.label}</Link>
+            <Link href={aboutClose.primary.href}>
+              {aboutClose.primary.label}
+              <Link.Icon aria-hidden="true" />
+            </Link>
+            <Link href={aboutClose.secondary.href}>
+              {aboutClose.secondary.label}
+              <Link.Icon aria-hidden="true" />
+            </Link>
           </div>
         </motion.section>
       </div>

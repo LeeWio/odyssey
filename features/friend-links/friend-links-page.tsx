@@ -1,5 +1,9 @@
 "use client";
 
+import { createPageReveal } from "@/lib/motion";
+
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
+
 import { Icon } from "@iconify/react";
 
 import { EmptyState } from "@heroui-pro/react";
@@ -13,12 +17,16 @@ import {
   Input,
   Label,
   SearchField,
+  Separator,
   Skeleton,
+  Surface,
   TextArea,
   TextField,
   Typography,
+  cn,
   toast,
 } from "@heroui/react";
+import { motion } from "motion/react";
 import { useDeferredValue, useState, type FormEvent } from "react";
 
 import {
@@ -147,6 +155,8 @@ interface FriendLinksPageProps {
 }
 
 export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
+  const shouldReduceMotion = useReducedMotionPreference();
+  const { reveal } = createPageReveal(shouldReduceMotion);
   const { data: friendLinks = [], error, isLoading, refetch } = useGetPublicFriendLinksQuery();
   const [applyFriendLink, { isLoading: isApplying }] = useApplyFriendLinkMutation();
   const [application, setApplication] = useState<FriendLinkApplication>(EMPTY_APPLICATION);
@@ -201,38 +211,51 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
   };
 
   return (
-    <div
-      className={
-        compact ? "w-full" : "bg-background min-h-[100dvh] w-full px-6 py-24 sm:px-10 sm:py-32"
-      }
+    <Surface
+      variant="transparent"
+      className={cn(
+        "w-full",
+        compact ? undefined : "bg-background min-h-[100dvh] px-6 py-24 sm:px-10 sm:py-32"
+      )}
     >
-      <div className={compact ? "w-full" : "mx-auto w-full max-w-6xl"}>
+      <div className={cn("w-full", compact ? undefined : "mx-auto max-w-6xl")}>
         {!compact ? (
-          <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-end">
-            <div className="max-w-3xl">
-              <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-                <Icon icon="gravity-ui:globe" aria-hidden="true" className="size-4" />
-                The blogroll
+          <>
+            <header className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+              <div className="max-w-3xl">
+                <motion.div {...reveal(0, 10)}>
+                  <Chip size="sm" variant="secondary">
+                    Blogroll
+                  </Chip>
+                </motion.div>
+                <motion.div {...reveal(0.06)}>
+                  <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
+                    Good places lead to better ideas.
+                  </Typography>
+                </motion.div>
+                <motion.div {...reveal(0.12, 14)}>
+                  <Typography color="muted" type="body" className="mt-5 max-w-xl">
+                    A small collection of people and projects making thoughtful work on the open
+                    web.
+                  </Typography>
+                </motion.div>
               </div>
-              <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-                Good places lead to better ideas.
-              </Typography>
-              <Typography color="muted" type="body" className="mt-5 max-w-xl">
-                A small collection of people and projects making thoughtful work on the open web.
-              </Typography>
-            </div>
-            <div className="border-default-200 border-l pl-5 sm:pl-6">
-              <Typography className="font-mono text-3xl tabular-nums" type="body">
-                {validLinks.length.toLocaleString("en-US")}
-              </Typography>
-              <Typography color="muted" type="body-sm" className="mt-1">
-                places to visit
-              </Typography>
-            </div>
-          </header>
+              <motion.div {...reveal(0.1, 12)}>
+                <Surface variant="secondary" className="rounded-2xl px-5 py-4">
+                  <Typography className="font-mono text-3xl tabular-nums" type="body">
+                    {validLinks.length.toLocaleString("en-US")}
+                  </Typography>
+                  <Typography color="muted" type="body-sm" className="mt-1">
+                    places to visit
+                  </Typography>
+                </Surface>
+              </motion.div>
+            </header>
+            <Separator className="mt-10" />
+          </>
         ) : null}
 
-        <section aria-label="Friend links" className={compact ? "" : "mt-14"}>
+        <section aria-label="Friend links" className={compact ? undefined : "mt-10"}>
           {!isLoading && !error && validLinks.length > 0 ? (
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <SearchField
@@ -259,7 +282,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           {isLoading ? <FriendLinkSkeleton /> : null}
 
           {!isLoading && error ? (
-            <EmptyState size="lg">
+            <EmptyState className="bg-surface-secondary rounded-2xl" size="lg">
               <EmptyState.Header>
                 <EmptyState.Media variant="icon">
                   <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
@@ -279,41 +302,36 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           ) : null}
 
           {!isLoading && !error && validLinks.length === 0 ? (
-            <Card variant="secondary" className="p-0">
-              <EmptyState size="lg">
-                <EmptyState.Header>
-                  <EmptyState.Media variant="icon">
-                    <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
-                  </EmptyState.Media>
-                  <EmptyState.Title>No links published yet</EmptyState.Title>
-                  <EmptyState.Description>
-                    The first places on this list are being curated now. You can suggest yours
-                    below.
-                  </EmptyState.Description>
-                </EmptyState.Header>
-              </EmptyState>
-            </Card>
+            <EmptyState className="bg-surface-secondary rounded-2xl" size="lg">
+              <EmptyState.Header>
+                <EmptyState.Media variant="icon">
+                  <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
+                </EmptyState.Media>
+                <EmptyState.Title>No links published yet</EmptyState.Title>
+                <EmptyState.Description>
+                  The first places on this list are being curated now. You can suggest yours below.
+                </EmptyState.Description>
+              </EmptyState.Header>
+            </EmptyState>
           ) : null}
 
           {!isLoading && !error && validLinks.length > 0 && visibleLinks.length === 0 ? (
-            <Card variant="secondary" className="p-0">
-              <EmptyState size="md">
-                <EmptyState.Header>
-                  <EmptyState.Media variant="icon">
-                    <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
-                  </EmptyState.Media>
-                  <EmptyState.Title>No places match your search</EmptyState.Title>
-                  <EmptyState.Description>
-                    Try a site name, a topic from its introduction, or a domain.
-                  </EmptyState.Description>
-                </EmptyState.Header>
-                <EmptyState.Content>
-                  <Button variant="secondary" onPress={() => setSearchValue("")}>
-                    Clear search
-                  </Button>
-                </EmptyState.Content>
-              </EmptyState>
-            </Card>
+            <EmptyState className="bg-surface-secondary rounded-2xl" size="md">
+              <EmptyState.Header>
+                <EmptyState.Media variant="icon">
+                  <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
+                </EmptyState.Media>
+                <EmptyState.Title>No places match your search</EmptyState.Title>
+                <EmptyState.Description>
+                  Try a site name, a topic from its introduction, or a domain.
+                </EmptyState.Description>
+              </EmptyState.Header>
+              <EmptyState.Content>
+                <Button variant="secondary" onPress={() => setSearchValue("")}>
+                  Clear search
+                </Button>
+              </EmptyState.Content>
+            </EmptyState>
           ) : null}
 
           {!isLoading && !error && visibleLinks.length > 0 ? (
@@ -325,15 +343,22 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           ) : null}
         </section>
 
+        <Separator className={compact ? "mt-16" : "mt-20"} />
+
         <section
-          className={`border-default-200 grid gap-10 border-t pt-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(23rem,0.7fr)] lg:gap-16 ${compact ? "mt-16" : "mt-20"}`}
+          aria-labelledby="friend-link-exchange-title"
+          className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(23rem,0.7fr)] lg:gap-16"
         >
           <div className="max-w-xl">
-            <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <Icon icon="gravity-ui:circle-link" aria-hidden="true" className="size-4" />
+            <Chip size="sm" variant="secondary" className="w-fit">
               Link exchange
-            </div>
-            <Typography type="h2" weight="semibold" className="mt-4 text-balance">
+            </Chip>
+            <Typography
+              id="friend-link-exchange-title"
+              type="h2"
+              weight="semibold"
+              className="mt-4 text-balance"
+            >
               Add your corner of the web.
             </Typography>
             <Typography color="muted" type="body" className="mt-4 leading-7">
@@ -433,6 +458,6 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           </Card>
         </section>
       </div>
-    </div>
+    </Surface>
   );
 }

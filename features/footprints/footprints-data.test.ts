@@ -3,6 +3,7 @@ import {
   FOOTPRINTS,
   getFeaturedFootprints,
   getFootprintArcs,
+  getFootprintMetaLabel,
   getFootprintYears,
   getFootprintsMapView,
   getSortedFootprints,
@@ -60,5 +61,21 @@ describe("footprint chronology", () => {
     expect(view.center[1]).toBeGreaterThan(20);
     expect(view.center[1]).toBeLessThan(40);
     expect(view.zoom).toBeGreaterThan(2);
+  });
+
+  it("keeps memory titles and avoids em-dashes in visitor copy", () => {
+    for (const footprint of FOOTPRINTS) {
+      expect(footprint.title.trim().length).toBeGreaterThan(0);
+      expect(footprint.memory).not.toMatch(/[—–]/);
+    }
+  });
+
+  it("formats detail and popup meta labels from visit context", () => {
+    const hometown = FOOTPRINTS.find((item) => item.id === "hubei");
+    const trip = FOOTPRINTS.find((item) => item.id === "shenzhen");
+    expect(hometown).toBeDefined();
+    expect(trip).toBeDefined();
+    expect(getFootprintMetaLabel(hometown!)).toBe("2019 · Hometown");
+    expect(getFootprintMetaLabel(trip!)).toBe("2023 · China");
   });
 });

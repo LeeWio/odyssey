@@ -11,6 +11,21 @@ available. A successful retry replaces the error with the returned content.
 The shared error UI contains visitor-facing language only. Transport errors and
 backend details are not displayed. Tests mock all API traffic and never publish data.
 
+## Guestbook section chrome
+
+The home guestbook block uses a secondary `Chip`, a Link to `/guestbook`, and (for guests) the same
+secondary invite `Card` as the full guestbook page. `GuestbookBoard` remains the visual centerpiece.
+
+## First-visit orientation
+
+Between the hero and Lately, first-time visitors may see a dismissible HeroUI Card
+(`HomeOrientation`) that points to three production surfaces: Chronicle, Footprints,
+and Uses. The card is client-only, hidden until mount, and suppressed after dismiss
+via `localStorage` key `odyssey_home_orientation_dismissed`. Following a destination
+link also dismisses it. Returning visitors must not flash the card on first paint.
+Alert remains reserved for section load failures; orientation uses Card + Chip +
+Link + CloseButton only.
+
 ## Motion preferences and hydration
 
 The home page, navigation, footer, and Hello illustration use

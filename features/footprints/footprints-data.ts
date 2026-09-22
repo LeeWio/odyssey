@@ -51,7 +51,7 @@ export const FOOTPRINTS: readonly Footprint[] = [
     visitedAt: "2019",
     latitude: 34.3416,
     longitude: 108.9398,
-    memory: "The first recorded trip away — walls, dust, and a longer sense of time.",
+    memory: "The first recorded trip away: walls, dust, and a longer sense of time.",
     tags: ["china", "northwest"],
     order: 2,
   },
@@ -121,6 +121,14 @@ export const FOOTPRINTS: readonly Footprint[] = [
     order: 7,
   },
 ];
+
+export function getFootprintMetaLabel(footprint: Footprint) {
+  if (footprint.visitedAt && footprint.visitedAt !== String(footprint.year)) {
+    return `${footprint.year} · ${footprint.visitedAt}`;
+  }
+
+  return `${footprint.year} · ${footprint.country}`;
+}
 
 export function getSortedFootprints(footprints: readonly Footprint[] = FOOTPRINTS) {
   return [...footprints].sort(
