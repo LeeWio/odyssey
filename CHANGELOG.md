@@ -1,3 +1,10 @@
+# [1.164.0](https://github.com/LeeWio/odyssey/compare/v1.163.0...v1.164.0) (2026-09-22)
+
+
+### Features
+
+* **site:** polish HeroUI chrome and visitor orientation ([0843a7a](https://github.com/LeeWio/odyssey/commit/0843a7a342ea4a4d263b3b5274051ff6b9bf1d05))
+
 # [1.163.0](https://github.com/LeeWio/odyssey/compare/v1.162.1...v1.163.0) (2026-09-21)
 
 
