@@ -26,8 +26,23 @@ const escapeXml = (value: string) =>
     return entities[character];
   });
 
+const getCanonicalOrigin = (request: Request) => {
+  const configuredOrigin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  if (configuredOrigin) return configuredOrigin;
+
+  // Proxies can expose their internal host through request.url. Use the public
+  // site URL by default so feed consumers never receive container addresses.
+  return siteConfig.url || new URL(request.url).origin;
+};
+
+const toPublishedDate = (value?: string | null) => {
+  if (!value) return undefined;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date.toUTCString();
+};
+
 export async function GET(request: Request) {
-  const origin = new URL(request.url).origin;
+  const origin = getCanonicalOrigin(request);
   const apiOrigin =
     process.env.API_URL?.replace(/\/$/, "") ||
     process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
@@ -49,8 +64,8 @@ export async function GET(request: Request) {
 
   const items = posts
     .map((post) => {
-      const url = `${origin}/single/${encodeURIComponent(post.slug)}`;
-      const publishedAt = post.publishedAt ? new Date(post.publishedAt).toUTCString() : undefined;
+      const url = new URL(`/single/${encodeURIComponent(post.slug)}`, `${origin}/`).toString();
+      const publishedAt = toPublishedDate(post.publishedAt);
 
       return [
         "<item>",
@@ -67,12 +82,15 @@ export async function GET(request: Request) {
     .join("");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${escapeXml(siteConfig.name)}</title>
     <link>${escapeXml(origin)}</link>
     <description>${escapeXml(siteConfig.description)}</description>
     <language>en</language>
+    <atom:link href="${escapeXml(`${origin}/rss.xml`)}" rel="self" type="application/rss+xml" />
+    <generator>Odyssey RSS</generator>
+    <ttl>60</ttl>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     ${items}
   </channel>

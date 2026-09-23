@@ -3,6 +3,7 @@ export type SiteConfig = typeof siteConfig;
 export const siteConfig = {
   name: "Still Becoming",
   description: "Get busy living, or get busy dying.",
+  url: "https://easylove.top",
   navItems: [
     {
       label: "Home",
