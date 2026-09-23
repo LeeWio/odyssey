@@ -1,3 +1,10 @@
+## [1.168.1](https://github.com/LeeWio/odyssey/compare/v1.168.0...v1.168.1) (2026-09-23)
+
+
+### Reverts
+
+* Revert "feat(blog): reshape the journal as a reading atlas" ([a0c9868](https://github.com/LeeWio/odyssey/commit/a0c98684b44b4e8d9bd0db38e184e12addb4d77c))
+
 # [1.168.0](https://github.com/LeeWio/odyssey/compare/v1.167.0...v1.168.0) (2026-09-23)
 
 
