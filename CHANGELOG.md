@@ -1,3 +1,10 @@
+# [1.167.0](https://github.com/LeeWio/odyssey/compare/v1.166.1...v1.167.0) (2026-09-23)
+
+
+### Features
+
+* **blog:** refine the editorial content index ([b01520e](https://github.com/LeeWio/odyssey/commit/b01520e5b1882cd507aef0a47153e65daa6d5fa4))
+
 ## [1.166.1](https://github.com/LeeWio/odyssey/compare/v1.166.0...v1.166.1) (2026-09-23)
 
 
