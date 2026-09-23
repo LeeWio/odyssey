@@ -200,6 +200,52 @@ function StoryList({
   );
 }
 
+function ArchiveStoryList({ posts }: { posts: PostDigest[] }) {
+  return (
+    <ListView aria-label="Archive results" variant="secondary">
+      {posts.map((post, index) => (
+        <ListView.Item
+          key={post.id ?? `${post.slug}-${index}`}
+          href={post.slug ? `/single/${post.slug}` : "/single"}
+          id={`archive-${post.id ?? `${post.slug}-${index}`}`}
+          textValue={post.title || "Untitled story"}
+          className="py-2"
+        >
+          <ListView.ItemContent className="grid min-w-0 flex-1 items-start gap-3 sm:grid-cols-[112px_minmax(0,1fr)] sm:gap-6">
+            <Typography className="pt-0.5 tabular-nums" color="muted" type="body-xs">
+              {formatDate(post.publishedAt)}
+            </Typography>
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <Typography color="muted" type="body-xs">
+                {post.category?.name || "Journal"}
+              </Typography>
+              <ListView.Title className="line-clamp-2 text-base leading-6 whitespace-normal">
+                {post.title || "Untitled story"}
+              </ListView.Title>
+              {post.summary ? (
+                <ListView.Description className="line-clamp-2 max-w-2xl leading-5 whitespace-normal">
+                  {post.summary}
+                </ListView.Description>
+              ) : null}
+            </div>
+          </ListView.ItemContent>
+          <ListView.ItemAction className="hidden items-center gap-5 sm:flex">
+            <Typography
+              className="flex items-center gap-1.5 tabular-nums"
+              color="muted"
+              type="body-xs"
+            >
+              <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
+              {(post.views ?? 0).toLocaleString("en-US")}
+            </Typography>
+            <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="text-muted size-4" />
+          </ListView.ItemAction>
+        </ListView.Item>
+      ))}
+    </ListView>
+  );
+}
+
 function LeadStoryCard({ post }: { post: PostDigest }) {
   return (
     <Card variant="tertiary" className="h-full min-h-80">
@@ -716,108 +762,107 @@ export default function SingleIndexPage() {
         >
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <SectionHeading
-              description="Search compact article data and narrow it by topic or publishing format."
+              description="Search every published story and narrow the index by subject or format."
               id="archive-title"
               title="Browse the Archive"
             />
-            <Typography className="tabular-nums" color="muted" type="body-sm">
+            <Chip className="self-start lg:self-auto" size="sm" variant="soft">
               {(facetsQuery.data?.totalPublishedCount ?? totalResults).toLocaleString("en-US")}{" "}
-              published
-            </Typography>
+              articles
+            </Chip>
           </div>
 
-          <Card variant="secondary">
-            <Card.Content className="grid gap-4 p-0 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_220px_180px]">
-              <SearchField
-                fullWidth
-                aria-label="Search published stories"
-                name="story-search"
-                value={searchValue}
-                variant="secondary"
-                onChange={(value) => {
-                  setSearchValue(value);
-                  setPage(0);
-                }}
-              >
-                <Label className="sr-only">Search published stories</Label>
-                <SearchField.Group>
-                  <SearchField.SearchIcon />
-                  <SearchField.Input placeholder="Search titles and summaries" />
-                  <SearchField.ClearButton aria-label="Clear search" />
-                </SearchField.Group>
-              </SearchField>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-[minmax(0,1fr)_220px_180px]">
+            <SearchField
+              fullWidth
+              aria-label="Search published stories"
+              className="col-span-2 lg:col-span-1"
+              name="story-search"
+              value={searchValue}
+              variant="secondary"
+              onChange={(value) => {
+                setSearchValue(value);
+                setPage(0);
+              }}
+            >
+              <Label className="sr-only">Search published stories</Label>
+              <SearchField.Group>
+                <SearchField.SearchIcon />
+                <SearchField.Input placeholder="Search titles and summaries" />
+                <SearchField.ClearButton aria-label="Clear search" />
+              </SearchField.Group>
+            </SearchField>
 
-              <Select
-                fullWidth
-                placeholder="All topics"
-                value={categoryKey}
-                variant="secondary"
-                onChange={(value) => handleSelect(value, setCategoryKey)}
-              >
-                <Label className="sr-only">Filter by topic</Label>
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    <ListBox.Item id="all" textValue="All topics">
-                      All topics
+            <Select
+              fullWidth
+              placeholder="All topics"
+              value={categoryKey}
+              variant="secondary"
+              onChange={(value) => handleSelect(value, setCategoryKey)}
+            >
+              <Label className="sr-only">Filter by topic</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="all" textValue="All topics">
+                    All topics
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  {categories.map((category) => (
+                    <ListBox.Item
+                      key={category.id}
+                      id={String(category.id)}
+                      textValue={category.name || "Topic"}
+                    >
+                      {category.name}
+                      <Typography className="ms-auto tabular-nums" color="muted" type="body-xs">
+                        {category.count ?? 0}
+                      </Typography>
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
-                    {categories.map((category) => (
-                      <ListBox.Item
-                        key={category.id}
-                        id={String(category.id)}
-                        textValue={category.name || "Topic"}
-                      >
-                        {category.name}
-                        <Typography className="ms-auto tabular-nums" color="muted" type="body-xs">
-                          {category.count ?? 0}
-                        </Typography>
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
 
-              <Select
-                fullWidth
-                placeholder="All formats"
-                value={contentTypeKey}
-                variant="secondary"
-                onChange={(value) => handleSelect(value, setContentTypeKey)}
-              >
-                <Label className="sr-only">Filter by format</Label>
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    <ListBox.Item id="all" textValue="All formats">
-                      All formats
+            <Select
+              fullWidth
+              placeholder="All formats"
+              value={contentTypeKey}
+              variant="secondary"
+              onChange={(value) => handleSelect(value, setContentTypeKey)}
+            >
+              <Label className="sr-only">Filter by format</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="all" textValue="All formats">
+                    All formats
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  {contentTypes.map((item) => (
+                    <ListBox.Item
+                      key={item.contentType}
+                      id={item.contentType}
+                      textValue={item.contentType || "Format"}
+                    >
+                      {item.contentType}
+                      <Typography className="ms-auto tabular-nums" color="muted" type="body-xs">
+                        {item.count ?? 0}
+                      </Typography>
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
-                    {contentTypes.map((item) => (
-                      <ListBox.Item
-                        key={item.contentType}
-                        id={item.contentType}
-                        textValue={item.contentType || "Format"}
-                      >
-                        {item.contentType}
-                        <Typography className="ms-auto tabular-nums" color="muted" type="body-xs">
-                          {item.count ?? 0}
-                        </Typography>
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-            </Card.Content>
-          </Card>
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
+          </div>
 
           <div aria-live="polite">
             {searchQuery.isLoading ? (
@@ -835,11 +880,7 @@ export default function SingleIndexPage() {
                 </Button>
               </Alert>
             ) : searchPosts.length > 0 ? (
-              <StoryList
-                label="Archive results"
-                posts={searchPosts}
-                startAt={page * PAGE_SIZE + 1}
-              />
+              <ArchiveStoryList posts={searchPosts} />
             ) : (
               <EmptyState size="lg">
                 <EmptyState.Header>
