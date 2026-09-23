@@ -8,29 +8,6 @@ Handles long-form content and article presentation.
 - support reading-oriented layout and typography
 - integrate with content metadata and related modules
 
-## Reading session
-
-`components/reading/use-reading-session.ts` owns the article timer and composes
-Mantine `useLocalStorage`, `useInterval`, and `useMounted`. The presentation stays
-in `reading-session.tsx`.
-
-- The existing `odyssey-reading-session` version 1 snapshot remains compatible:
-  one session is kept per browser storage, and starting another replaces it.
-  Only the matching article can display or tick that session.
-- Restored snapshots are validated with Zod. Malformed data and inconsistent
-  durations or running timestamps fall back to an empty session.
-- Elapsed time uses timestamps so delayed timer callbacks catch up. Progress is
-  clamped to the target, including when the system clock moves backward. Pausing,
-  completion, navigation to another article, and unmounting stop the timer.
-- Mantine handles storage events and timer cleanup. Pauses, replacements, and
-  resets synchronize between tabs. When storage is unavailable, controls continue
-  working in memory; those changes cannot survive a reload.
-- Server rendering and the first hydration render omit the widget until mounted.
-
-`components/reading/use-reading-session.test.ts` verifies the lifecycle under
-Strict Mode, storage recovery, invalid snapshots, article isolation, timer delays,
-clock changes, and cross-tab updates.
-
 ## Create a collection while reading
 
 The article actions menu opens `features/library/create-collection-dialog.tsx`.

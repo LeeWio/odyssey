@@ -161,7 +161,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
   };
 
   return (
-    <aside className="sticky top-24 hidden h-fit min-w-0 lg:block">
+    <aside className="order-2 h-fit min-w-0 lg:sticky lg:top-24 lg:order-none">
       <Card variant="secondary" className="gap-5 p-5">
         <Icon icon="gravity-ui:book" aria-hidden="true" className="text-muted size-5" />
         <Card.Header>

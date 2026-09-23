@@ -5,7 +5,9 @@ import {
   BreadcrumbsItem,
   Button,
   Chip,
+  Link,
   Popover,
+  ProgressBar,
   ProgressCircle,
   Tooltip,
   Skeleton,
@@ -19,7 +21,6 @@ import { ActionBar, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useRef, useState } from "react";
@@ -33,7 +34,6 @@ import {
   useUnlikePostMutation,
 } from "@/lib/features/post";
 import { FluidBackdrop } from "@/components/background/fluid-backdrop";
-import { ReadingSession } from "@/components/reading/reading-session";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useAddPostToCollectionMutation,
@@ -94,6 +94,27 @@ function getReadingPositionAnchor(postId: number) {
   }
 
   return anchor ? `#${anchor}` : `article-${postId}`;
+}
+
+function formatArticleDate(value?: string | null) {
+  if (!value) return "Recently published";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Recently published";
+
+  return new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function getAuthorInitials(value?: string | null) {
+  return (value?.trim() || "Odyssey")
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 }
 
 export default function SinglePage({ params }: SinglePageProps) {
@@ -360,104 +381,174 @@ export default function SinglePage({ params }: SinglePageProps) {
     <>
       <FluidBackdrop scrollYProgress={scrollYProgress} />
 
-      <header className="relative w-full px-6 pt-28 pb-10 md:px-12 lg:px-24">
-        <div className="mx-auto w-full max-w-5xl">
+      <ProgressBar
+        aria-label="Article reading progress"
+        className="fixed inset-x-0 top-0 z-[70]"
+        color="accent"
+        maxValue={100}
+        size="sm"
+        value={readingProgress}
+      >
+        <ProgressBar.Track className="rounded-none">
+          <ProgressBar.Fill />
+        </ProgressBar.Track>
+      </ProgressBar>
+
+      <header className="relative w-full px-5 pt-28 pb-12 sm:px-8 sm:pt-32 lg:px-12 lg:pb-16">
+        <div className="mx-auto w-full max-w-6xl">
           {isLoading || !article ? (
-            <div className="space-y-5 rounded-3xl bg-transparent p-8">
-              <Skeleton className="h-4 w-32 rounded-lg" />
-              <div className="space-y-3">
-                <Skeleton className="h-12 w-3/5 rounded-lg" />
-                <Skeleton className="h-12 w-4/5 rounded-lg" />
-                <Skeleton className="h-12 w-2/5 rounded-lg" />
-              </div>
-            </div>
-          ) : (
-            <Card variant="tertiary" className="overflow-hidden rounded-4xl p-0">
-              <div className="flex min-h-[430px] flex-col justify-end gap-6 p-7 sm:p-10 lg:p-14">
-                <Breadcrumbs className="text-muted text-xs font-medium">
-                  <BreadcrumbsItem className="text-muted" href="/blog">
-                    <span className="text-muted">Chronicle</span>
-                  </BreadcrumbsItem>
-                  {article.series ? (
-                    <BreadcrumbsItem
-                      className="text-muted"
-                      href={`/columns/${article.series.slug}`}
-                    >
-                      <span className="text-muted">{article.series.name}</span>
-                    </BreadcrumbsItem>
-                  ) : null}
-                  <BreadcrumbsItem className="text-muted">
-                    <span className="text-muted">
-                      {article.category ? article.category.name : "Uncategorized"}
-                    </span>
-                  </BreadcrumbsItem>
-                  <BreadcrumbsItem className="text-muted">
-                    <span className="text-muted flex items-center gap-1.5">
-                      <Icon aria-hidden="true" icon="lucide:clock" className="size-3.5" />
-                      {getEstimatedReadingMinutes(article)} min read
-                    </span>
-                  </BreadcrumbsItem>
-                </Breadcrumbs>
-
-                <Typography
-                  type="h1"
-                  className="text-foreground max-w-4xl leading-[1.02] font-bold text-balance"
-                >
-                  {article.title}
-                </Typography>
-
-                {article.summary && (
-                  <Typography
-                    type="body"
-                    className="text-muted max-w-2xl text-lg leading-relaxed font-normal text-balance"
-                  >
-                    {article.summary}
-                  </Typography>
-                )}
-
-                <div className="border-default/50 flex flex-col items-start justify-between gap-6 border-t pt-6 sm:flex-row sm:items-center">
-                  <div className="flex items-center gap-3 select-none">
-                    <Avatar size="sm" className="bg-surface-secondary text-foreground">
-                      <Avatar.Fallback>
-                        {(article.authorName || "Anonymous").slice(0, 2).toUpperCase()}
-                      </Avatar.Fallback>
-                    </Avatar>
-
-                    <div className="flex flex-col text-left">
-                      <Typography type="body-sm" weight="semibold" className="text-foreground">
-                        {article.authorName || "Anonymous"}
-                      </Typography>
-                      <Typography type="body-xs" className="text-muted">
-                        {new Date(article.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {article.tags?.map((tag) => (
-                      <Chip
-                        key={tag.id}
-                        size="sm"
-                        variant="soft"
-                        className="bg-surface-secondary text-foreground"
-                      >
-                        {tag.name}
-                      </Chip>
-                    ))}
-                  </div>
+            <Card variant="transparent" className="gap-8 p-0">
+              <Card.Header className="gap-6 p-0">
+                <Skeleton className="h-5 w-48 rounded-lg" />
+                <div className="flex w-full flex-col gap-3">
+                  <Skeleton className="h-14 w-11/12 rounded-xl" />
+                  <Skeleton className="h-14 w-4/5 rounded-xl" />
                 </div>
-              </div>
+                <Skeleton className="h-5 w-full max-w-2xl rounded-lg" />
+                <Skeleton className="h-5 w-4/5 max-w-xl rounded-lg" />
+              </Card.Header>
+              <Card.Footer className="flex items-center gap-3 p-0">
+                <Skeleton className="size-10 rounded-full" />
+                <Skeleton className="h-9 w-40 rounded-lg" />
+              </Card.Footer>
             </Card>
+          ) : (
+            <div className="flex flex-col gap-8">
+              <Breadcrumbs className="text-muted text-xs font-medium">
+                <BreadcrumbsItem className="text-muted" href="/single">
+                  <span className="text-muted">Journal</span>
+                </BreadcrumbsItem>
+                {article.series ? (
+                  <BreadcrumbsItem className="text-muted" href={`/columns/${article.series.slug}`}>
+                    <span className="text-muted">{article.series.name}</span>
+                  </BreadcrumbsItem>
+                ) : null}
+                <BreadcrumbsItem className="text-muted">
+                  <span className="text-muted">{article.category?.name || "Uncategorized"}</span>
+                </BreadcrumbsItem>
+              </Breadcrumbs>
+
+              <div className="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-16">
+                <div className="flex min-w-0 flex-col items-start gap-6">
+                  <div className="flex flex-wrap gap-2">
+                    <Chip color="accent" size="sm" variant="soft">
+                      {article.category?.name || "Journal"}
+                    </Chip>
+                    <Chip size="sm" variant="tertiary">
+                      <Icon aria-hidden="true" icon="lucide:clock-3" className="size-3.5" />
+                      {getEstimatedReadingMinutes(article)} min read
+                    </Chip>
+                    {article.seriesOrder != null ? (
+                      <Chip size="sm" variant="tertiary">
+                        Essay {article.seriesOrder + 1}
+                      </Chip>
+                    ) : null}
+                  </div>
+
+                  <Typography
+                    type="h1"
+                    className="text-foreground max-w-4xl text-[clamp(2.75rem,7vw,5.5rem)] leading-[0.98] font-bold text-balance"
+                  >
+                    {article.title}
+                  </Typography>
+
+                  {article.summary ? (
+                    <Typography
+                      type="body"
+                      className="text-muted max-w-2xl text-lg leading-8 font-normal text-balance sm:text-xl"
+                    >
+                      {article.summary}
+                    </Typography>
+                  ) : null}
+                </div>
+
+                <Card variant="secondary" className="gap-5 p-5">
+                  <Card.Header className="flex-row items-center gap-3 p-0">
+                    <Avatar size="md" variant="soft">
+                      {article.authorAvatar ? (
+                        <Avatar.Image
+                          alt={article.authorName || "Odyssey"}
+                          src={article.authorAvatar}
+                        />
+                      ) : null}
+                      <Avatar.Fallback>{getAuthorInitials(article.authorName)}</Avatar.Fallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <Card.Title className="truncate text-sm">
+                        {article.authorName || "Odyssey"}
+                      </Card.Title>
+                      <Card.Description className="text-xs tabular-nums">
+                        {formatArticleDate(article.createdAt)}
+                      </Card.Description>
+                    </div>
+                  </Card.Header>
+                  <Card.Content className="flex flex-wrap gap-x-4 gap-y-2 p-0">
+                    <Typography
+                      className="flex items-center gap-1.5 tabular-nums"
+                      color="muted"
+                      type="body-xs"
+                    >
+                      <Icon aria-hidden="true" icon="gravity-ui:eye" className="size-3.5" />
+                      {article.views.toLocaleString("en-US")}
+                    </Typography>
+                    <Typography
+                      className="flex items-center gap-1.5 tabular-nums"
+                      color="muted"
+                      type="body-xs"
+                    >
+                      <Icon aria-hidden="true" icon="gravity-ui:heart" className="size-3.5" />
+                      {likesCount.toLocaleString("en-US")}
+                    </Typography>
+                    <Typography
+                      className="flex items-center gap-1.5 tabular-nums"
+                      color="muted"
+                      type="body-xs"
+                    >
+                      <Icon aria-hidden="true" icon="lucide:bookmark" className="size-3.5" />
+                      {favoritesCount.toLocaleString("en-US")}
+                    </Typography>
+                  </Card.Content>
+                  <Card.Footer className="gap-2 p-0">
+                    <Button
+                      size="sm"
+                      variant={isFavorited ? "secondary" : "outline"}
+                      isDisabled={!postId || isFavorited}
+                      isPending={isFavoriting}
+                      onPress={handleFavorite}
+                    >
+                      <Icon
+                        aria-hidden="true"
+                        icon={isFavorited ? "lucide:bookmark-check" : "lucide:bookmark"}
+                        className="size-4"
+                      />
+                      {isFavorited ? "Saved" : "Save"}
+                    </Button>
+                    <Button size="sm" variant="ghost" onPress={handleShare}>
+                      <Icon aria-hidden="true" icon="lucide:share-2" className="size-4" />
+                      Share
+                    </Button>
+                  </Card.Footer>
+                </Card>
+              </div>
+
+              {article.tags?.length ? (
+                <div className="flex flex-wrap gap-2">
+                  {article.tags.map((tag) => (
+                    <Chip key={tag.id} size="sm" variant="soft">
+                      {tag.name}
+                    </Chip>
+                  ))}
+                </div>
+              ) : null}
+
+              <Separator />
+            </div>
           )}
         </div>
       </header>
 
       {/* Main Grid Body */}
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1400px] grid-cols-1 justify-center gap-8 px-4 py-12 md:px-6 lg:grid-cols-[260px_minmax(0,760px)] lg:px-8 xl:grid-cols-[280px_minmax(0,760px)] xl:gap-12 2xl:gap-16 2xl:px-12">
+      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1400px] grid-cols-1 content-start justify-center gap-8 px-4 py-12 md:px-6 lg:grid-cols-[260px_minmax(0,760px)] lg:px-8 xl:grid-cols-[280px_minmax(0,760px)] xl:gap-12 2xl:gap-16 2xl:px-12">
         <ArticleSidebar slug={slug} />
 
         <article
@@ -467,52 +558,34 @@ export default function SinglePage({ params }: SinglePageProps) {
         >
           <section className="mx-auto max-w-190 py-0">
             {isLoading || !article ? (
-              <>
-                <div className="space-y-8">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <div key={index} className="animate-pulse space-y-3">
-                      <div className="h-4 w-full rounded bg-neutral-900" />
-                      <div className="h-4 w-full rounded bg-neutral-900" />
-                      <div className="h-4 w-5/6 rounded bg-neutral-900" />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="my-12 h-px bg-neutral-800" />
-
-                <div className="animate-pulse space-y-4">
-                  <div className="h-8 w-1/2 rounded bg-neutral-900" />
-                  <div className="h-4 w-full rounded bg-neutral-900" />
-                  <div className="h-4 w-4/5 rounded bg-neutral-900" />
-                </div>
-              </>
+              <Card aria-label="Loading article" variant="transparent" className="gap-8 p-0">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <Card.Content key={index} className="flex flex-col gap-3 p-0">
+                    <Skeleton className="h-4 w-full rounded-lg" />
+                    <Skeleton className="h-4 w-11/12 rounded-lg" />
+                    <Skeleton className="h-4 w-4/5 rounded-lg" />
+                  </Card.Content>
+                ))}
+              </Card>
             ) : (
-              <>
-                <ReadingSession
-                  key={article.id}
-                  articleId={article.id}
-                  articleTitle={article.title}
-                  estimatedMinutes={getEstimatedReadingMinutes(article)}
+              <ArticleTypography>
+                <ArticleBodyReader
+                  content={article.content}
+                  contentType={article.contentType}
+                  contentKey={article.content}
                 />
-                <ArticleTypography>
-                  <ArticleBodyReader
-                    content={article.content}
-                    contentType={article.contentType}
-                    contentKey={article.content}
-                  />
-                </ArticleTypography>
-              </>
+              </ArticleTypography>
             )}
           </section>
 
           {article?.series ? (
-            <nav
-              aria-label={`${article.series.name} column navigation`}
-              className="border-default-200 mt-14 border-t pt-8"
-            >
+            <nav aria-label={`${article.series.name} column navigation`} className="mt-16">
+              <Separator className="mb-8" />
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-muted text-xs font-medium">Continue this column</p>
+                  <Typography color="muted" type="body-xs" weight="medium">
+                    Continue this column
+                  </Typography>
                   <Link
                     className="text-foreground mt-1 inline-flex items-center gap-2 text-lg font-semibold no-underline"
                     href={`/columns/${article.series.slug}`}
@@ -522,9 +595,9 @@ export default function SinglePage({ params }: SinglePageProps) {
                   </Link>
                 </div>
                 {article.seriesOrder != null ? (
-                  <span className="text-muted font-mono text-xs tabular-nums">
+                  <Typography className="font-mono tabular-nums" color="muted" type="body-xs">
                     Essay {article.seriesOrder + 1}
-                  </span>
+                  </Typography>
                 ) : null}
               </div>
 
@@ -532,32 +605,48 @@ export default function SinglePage({ params }: SinglePageProps) {
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                   {article.navigation.prev ? (
                     <Link
-                      className="border-default-200 hover:border-accent/50 hover:bg-default group flex min-h-24 flex-col gap-2 border p-4 no-underline transition-colors"
+                      className="h-full no-underline"
                       href={`/single/${article.navigation.prev.slug}`}
                     >
-                      <span className="text-muted flex items-center gap-1.5 text-xs font-medium">
-                        <Icon aria-hidden="true" icon="lucide:arrow-left" className="size-3.5" />
-                        Previous essay
-                      </span>
-                      <span className="text-foreground line-clamp-2 text-sm font-semibold">
-                        {article.navigation.prev.title}
-                      </span>
+                      <Card variant="secondary" className="h-full min-h-28">
+                        <Card.Header className="gap-2">
+                          <Card.Description className="flex items-center gap-1.5 text-xs">
+                            <Icon
+                              aria-hidden="true"
+                              icon="lucide:arrow-left"
+                              className="size-3.5"
+                            />
+                            Previous essay
+                          </Card.Description>
+                          <Card.Title className="line-clamp-2 text-sm">
+                            {article.navigation.prev.title}
+                          </Card.Title>
+                        </Card.Header>
+                      </Card>
                     </Link>
                   ) : (
                     <div aria-hidden="true" className="hidden sm:block" />
                   )}
                   {article.navigation.next ? (
                     <Link
-                      className="border-default-200 hover:border-accent/50 hover:bg-default group flex min-h-24 flex-col items-start gap-2 border p-4 no-underline transition-colors sm:items-end sm:text-right"
+                      className="h-full no-underline"
                       href={`/single/${article.navigation.next.slug}`}
                     >
-                      <span className="text-muted flex items-center gap-1.5 text-xs font-medium">
-                        Next essay
-                        <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-3.5" />
-                      </span>
-                      <span className="text-foreground line-clamp-2 text-sm font-semibold">
-                        {article.navigation.next.title}
-                      </span>
+                      <Card variant="secondary" className="h-full min-h-28">
+                        <Card.Header className="items-end gap-2 text-right">
+                          <Card.Description className="flex items-center gap-1.5 text-xs">
+                            Next essay
+                            <Icon
+                              aria-hidden="true"
+                              icon="lucide:arrow-right"
+                              className="size-3.5"
+                            />
+                          </Card.Description>
+                          <Card.Title className="line-clamp-2 text-sm">
+                            {article.navigation.next.title}
+                          </Card.Title>
+                        </Card.Header>
+                      </Card>
                     </Link>
                   ) : null}
                 </div>
@@ -649,12 +738,19 @@ export default function SinglePage({ params }: SinglePageProps) {
                     </Button>
                     {isAuthenticated ? (
                       <>
-                        <div className="border-separator my-1 border-t" />
-                        <p className="text-muted px-2 pt-1 text-xs font-medium">
+                        <Separator className="my-1" />
+                        <Typography
+                          className="px-2 pt-1"
+                          color="muted"
+                          type="body-xs"
+                          weight="medium"
+                        >
                           Save to collection
-                        </p>
+                        </Typography>
                         {isLoadingCollections ? (
-                          <p className="text-muted px-2 py-2 text-sm">Loading collections...</p>
+                          <Typography className="px-2 py-2" color="muted" type="body-sm">
+                            Loading collections...
+                          </Typography>
                         ) : collections.length > 0 ? (
                           <>
                             <Button fullWidth variant="ghost" onPress={openCreateCollection}>
