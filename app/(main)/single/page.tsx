@@ -3,8 +3,6 @@
 import { Icon } from "@iconify/react";
 
 import { EmptyState, ListView } from "@heroui-pro/react";
-import { Carousel } from "@heroui-pro/react/carousel";
-import { useMediaQuery } from "@mantine/hooks";
 import {
   Alert,
   Avatar,
@@ -15,45 +13,42 @@ import {
   Link,
   ListBox,
   Pagination,
+  ProgressBar,
   SearchField,
   Select,
   Skeleton,
+  Tag,
+  TagGroup,
   Tabs,
   Typography,
 } from "@heroui/react";
 import type { Key } from "react";
 import { useMemo, useState } from "react";
-import dynamic from "next/dynamic";
 import { useDebounce } from "use-debounce";
 
-import { ArticleEngagementCard } from "@/features/blog/cards/article-engagement-card";
+import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useGetFeaturedPostsQuery } from "@/lib/features/post";
 import { useGetPublicColumnsQuery } from "@/lib/features/column";
+import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
 import {
-  useRetrieveArchiveQuery,
   useRetrieveDiscoveryQuery,
   useRetrieveFacetsQuery,
   useRetrievePublicSeriesQuery,
   useSearchPostDigestsQuery,
 } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
-
-import { ArchiveTimelineSkeleton } from "./archive-timeline";
-import { RemoteMedia } from "@/components/ui/remote-media";
-
-const ArchiveTimeline = dynamic(
-  () => import("./archive-timeline").then((mod) => ({ default: mod.ArchiveTimeline })),
-  { ssr: false, loading: () => <ArchiveTimelineSkeleton /> }
-);
+import { useAppSelector } from "@/lib/hooks";
+import { getReadingPositionHref } from "@/lib/reading-position";
+import { useRelativeTime } from "@/lib/relative-time";
 
 const PAGE_SIZE = 6;
 
-type DiscoveryGroup = OpenApiComponents["schemas"]["CategoryGroup"];
+type CategoryFacet = OpenApiComponents["schemas"]["CategoryFacet"];
+type TagFacet = OpenApiComponents["schemas"]["TagFacet"];
 type PostDigest = {
   id?: number;
   title?: string | null;
   slug?: string | null;
-  coverImage?: string | null;
   summary?: string | null;
   authorName?: string | null;
   authorAvatar?: string | null;
@@ -67,7 +62,6 @@ type Collection = {
   name?: string | null;
   slug?: string | null;
   description?: string | null;
-  coverImage?: string | null;
   postsCount?: number;
   createdAt?: string;
   href: string;
@@ -143,60 +137,19 @@ function SectionHeading({
   );
 }
 
-function PostCard({ post }: { post: PostDigest }) {
-  return <ArticleEngagementCard post={post} />;
-}
-
-function PostGrid({ posts }: { posts: PostDigest[] }) {
-  if (posts.length === 0) {
-    return (
-      <EmptyState size="lg">
-        <EmptyState.Header>
-          <EmptyState.Media variant="icon">
-            <Icon icon="gravity-ui:book-open" aria-hidden="true" />
-          </EmptyState.Media>
-          <EmptyState.Title>No stories in this view</EmptyState.Title>
-          <EmptyState.Description>
-            Published stories will appear here as the collection grows.
-          </EmptyState.Description>
-        </EmptyState.Header>
-      </EmptyState>
-    );
-  }
-
+function StoryListSkeleton({ count = 5 }: { count?: number }) {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {posts.map((post, index) => (
-        <PostCard key={post.id ?? `${post.slug}-${index}`} post={post} />
-      ))}
-    </div>
-  );
-}
-
-function PostGridSkeleton({ count = 4 }: { count?: number }) {
-  return (
-    <div
-      aria-busy="true"
-      aria-label="Loading stories"
-      className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-      role="status"
-    >
+    <Card aria-busy="true" aria-label="Loading stories" variant="secondary" role="status">
       {Array.from({ length: count }, (_, index) => (
-        <Card key={index} variant="secondary" className="overflow-hidden p-0">
-          <Skeleton className="aspect-[16/9] w-full rounded-none" />
-          <Card.Header className="gap-3">
-            <Skeleton className="h-5 w-20 rounded-lg" />
-            <Skeleton className="h-6 w-4/5 rounded-lg" />
-            <Skeleton className="h-4 w-full rounded-lg" />
-            <Skeleton className="h-4 w-2/3 rounded-lg" />
-          </Card.Header>
-          <Card.Footer className="gap-3">
-            <Skeleton className="size-8 rounded-full" />
-            <Skeleton className="h-4 w-28 rounded-lg" />
-          </Card.Footer>
-        </Card>
+        <Card.Content key={index} className="flex items-center gap-4 py-3">
+          <Skeleton className="size-10 shrink-0 rounded-lg" />
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <Skeleton className="h-4 w-4/5 rounded-md" />
+            <Skeleton className="h-3 w-2/5 rounded-md" />
+          </div>
+        </Card.Content>
       ))}
-    </div>
+    </Card>
   );
 }
 
@@ -219,19 +172,9 @@ function StoryList({
           textValue={post.title || "Untitled story"}
         >
           <ListView.ItemContent className="items-center gap-3">
-            {post.coverImage ? (
-              <div className="relative size-14 shrink-0 overflow-hidden rounded-xl">
-                <RemoteMedia alt="" className="h-full w-full object-cover" src={post.coverImage} />
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 border border-black/5 dark:border-white/10"
-                />
-              </div>
-            ) : (
-              <div className="bg-surface-secondary text-muted flex size-14 shrink-0 items-center justify-center rounded-xl text-xs tabular-nums">
-                {String(index + startAt).padStart(2, "0")}
-              </div>
-            )}
+            <div className="bg-surface-secondary text-muted flex size-14 shrink-0 items-center justify-center rounded-xl text-xs tabular-nums">
+              {String(index + startAt).padStart(2, "0")}
+            </div>
             <div className="flex min-w-0 flex-col gap-1">
               <ListView.Title className="line-clamp-2 text-sm leading-5 whitespace-normal">
                 {post.title || "Untitled story"}
@@ -259,16 +202,7 @@ function StoryList({
 
 function LeadStoryCard({ post }: { post: PostDigest }) {
   return (
-    <Card variant="tertiary" className="h-full overflow-hidden p-0">
-      {post.coverImage ? (
-        <div className="relative aspect-[16/9] overflow-hidden">
-          <RemoteMedia alt="" className="h-full w-full object-cover" src={post.coverImage} />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 border border-black/5 dark:border-white/10"
-          />
-        </div>
-      ) : null}
+    <Card variant="tertiary" className="h-full min-h-80">
       <Card.Header className="gap-3 p-6 sm:p-8">
         {post.category?.name ? (
           <Chip className="self-start" color="accent" size="sm" variant="soft">
@@ -301,13 +235,85 @@ function LeadStoryCard({ post }: { post: PostDigest }) {
 }
 
 function EditorialFeed({ label, posts }: { label: string; posts: PostDigest[] }) {
-  if (posts.length === 0) return <PostGrid posts={posts} />;
+  if (posts.length === 0) {
+    return (
+      <EmptyState>
+        <EmptyState.Header>
+          <EmptyState.Title>No stories in this view</EmptyState.Title>
+          <EmptyState.Description>Published stories will appear here.</EmptyState.Description>
+        </EmptyState.Header>
+      </EmptyState>
+    );
+  }
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
       <LeadStoryCard post={posts[0]} />
       <StoryList label={`${label} supporting stories`} posts={posts.slice(1, 5)} startAt={2} />
     </div>
+  );
+}
+
+function ContinueReadingSection({ entries }: { entries: ReadingHistoryResponse[] }) {
+  const formatRelativeTime = useRelativeTime();
+  if (entries.length === 0) return null;
+
+  return (
+    <section aria-labelledby="continue-reading-title" className="flex flex-col gap-5">
+      <div className="flex items-end justify-between gap-4">
+        <SectionHeading
+          description="Return to the exact place you stopped."
+          id="continue-reading-title"
+          title="Continue Reading"
+        />
+        <Link className="hidden shrink-0 no-underline sm:inline-flex" href="/library">
+          Open library
+          <Link.Icon />
+        </Link>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {entries.slice(0, 3).map(({ lastReadAt, post, positionAnchor, progressPercent }) => (
+          <Card key={post.id} variant="secondary" className="h-full gap-4">
+            <Card.Header className="gap-3">
+              <div className="flex items-center justify-between gap-3">
+                <Chip size="sm" variant="soft">
+                  {post.category?.name || "Journal"}
+                </Chip>
+                <Typography className="tabular-nums" color="muted" type="body-xs">
+                  {progressPercent}%
+                </Typography>
+              </div>
+              <Card.Title className="line-clamp-2 text-base leading-6">{post.title}</Card.Title>
+            </Card.Header>
+            <Card.Content>
+              <ProgressBar
+                aria-label={`${post.title} reading progress`}
+                color="accent"
+                size="sm"
+                value={progressPercent}
+              >
+                <ProgressBar.Track>
+                  <ProgressBar.Fill />
+                </ProgressBar.Track>
+              </ProgressBar>
+            </Card.Content>
+            <Card.Footer className="mt-auto justify-between gap-3">
+              <Typography className="line-clamp-1" color="muted" type="body-xs">
+                Read {formatRelativeTime(lastReadAt)}
+              </Typography>
+              <Link
+                className="shrink-0 no-underline"
+                href={getReadingPositionHref(post.slug, positionAnchor)}
+              >
+                Continue
+                <Link.Icon />
+              </Link>
+            </Card.Footer>
+          </Card>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -321,17 +327,7 @@ function SpotlightSkeleton() {
 
 function SpotlightCard({ post }: { post: PostDigest }) {
   return (
-    <Card variant="tertiary" className="h-full overflow-hidden p-0">
-      {post.coverImage ? (
-        <div className="bg-surface-secondary relative aspect-[16/9] overflow-hidden">
-          <RemoteMedia alt="" className="h-full w-full object-cover" src={post.coverImage} />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 border border-black/5 dark:border-white/10"
-          />
-        </div>
-      ) : null}
-
+    <Card variant="tertiary" className="h-full min-h-96">
       <Card.Header className="gap-4 p-6 sm:p-8">
         <div className="flex flex-wrap gap-2">
           <Chip color="accent" size="sm" variant="soft">
@@ -380,167 +376,155 @@ function SpotlightCard({ post }: { post: PostDigest }) {
   );
 }
 
-function TopicGroups({ groups }: { groups: DiscoveryGroup[] }) {
-  const visibleGroups = groups.filter((group) => group.category?.name).slice(0, 3);
-  if (visibleGroups.length === 0) return null;
-
-  return (
-    <section aria-labelledby="topic-paths-title" className="flex flex-col gap-6">
-      <SectionHeading
-        description="Editorial paths assembled from category depth, freshness, and reader interest."
-        id="topic-paths-title"
-        title="Topic Paths"
-      />
-      <div className="grid gap-5 md:grid-cols-3">
-        {visibleGroups.map((group, index) => {
-          const leadPost = group.heroPost ?? group.posts?.[0];
-
-          return (
-            <Card key={group.category?.id ?? index} variant="secondary" className="h-full">
-              <Card.Header className="gap-3">
-                <div className="flex items-center justify-between gap-3">
-                  <Chip size="sm" variant="soft">
-                    {group.category?.name}
-                  </Chip>
-                  <Typography className="tabular-nums" color="muted" type="body-xs">
-                    {group.totalPublishedCount ?? group.posts?.length ?? 0} stories
-                  </Typography>
-                </div>
-                <Card.Title className="line-clamp-2 text-lg">
-                  {leadPost?.title || `Explore ${group.category?.name}`}
-                </Card.Title>
-                {leadPost?.summary ? (
-                  <Card.Description className="line-clamp-2">{leadPost.summary}</Card.Description>
-                ) : null}
-              </Card.Header>
-              <Card.Footer className="mt-auto">
-                <Link
-                  className="no-underline"
-                  href={leadPost?.slug ? `/single/${leadPost.slug}` : "/explore"}
-                >
-                  Open path
-                  <Link.Icon />
-                </Link>
-              </Card.Footer>
-            </Card>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function CollectionCard({ collection }: { collection: Collection }) {
-  return (
-    <Link className="block h-full no-underline" href={collection.href}>
-      <Card variant="secondary" className="h-full min-h-56">
-        <Card.Header className="gap-3">
-          <div className="flex items-center justify-between gap-3">
-            <Chip size="sm" variant="soft">
-              {collection.sourceLabel}
-            </Chip>
-            <Typography className="tabular-nums" color="muted" type="body-xs">
-              {collection.postsCount ?? 0} stories
-            </Typography>
-          </div>
-          <Card.Title>{collection.name || "Untitled collection"}</Card.Title>
-          {collection.description ? (
-            <Card.Description className="line-clamp-3">{collection.description}</Card.Description>
-          ) : null}
-        </Card.Header>
-        <Card.Footer className="mt-auto">
-          <Typography color="muted" type="body-xs">
-            Curated reading path
-          </Typography>
-        </Card.Footer>
-      </Card>
-    </Link>
-  );
-}
-
-function CollectionsSection({
+function ContentIndex({
+  categories,
   collections,
   isLoading,
+  tags,
 }: {
+  categories: CategoryFacet[];
   collections: Collection[];
   isLoading: boolean;
+  tags: TagFacet[];
 }) {
-  if (!isLoading && collections.length === 0) return null;
+  const visibleCategories = categories.slice(0, 6);
+  const visibleTags = tags.slice(0, 8);
 
   return (
-    <section aria-labelledby="collections-title" className="flex flex-col gap-6">
+    <section
+      aria-labelledby="content-index-title"
+      className="border-separator flex flex-col gap-8 border-t pt-12 sm:pt-16"
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <SectionHeading
-          description="Follow a subject in sequence through editorial columns and long-form series."
-          id="collections-title"
-          title="Collections"
+          description="Browse subjects, recurring ideas, and sequential collections."
+          id="content-index-title"
+          title="Content Index"
         />
-        <Link className="shrink-0 no-underline" href="/columns">
-          Browse all
+        <Link className="shrink-0 no-underline" href="/explore">
+          Explore
           <Link.Icon />
         </Link>
       </div>
 
-      {isLoading ? (
-        <PostGridSkeleton />
-      ) : collections.length > 0 ? (
-        <Carousel opts={{ align: "start", loop: collections.length > 4 }} className="w-full">
-          <Carousel.Content>
-            {collections.map((collection, index) => (
-              <Carousel.Item
-                key={`${collection.sourceLabel}-${collection.id ?? collection.slug ?? index}`}
-                className="basis-full p-1.5 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
-              >
-                <CollectionCard collection={collection} />
-              </Carousel.Item>
-            ))}
-          </Carousel.Content>
-          {collections.length > 4 ? <Carousel.Previous aria-label="Previous collections" /> : null}
-          {collections.length > 4 ? <Carousel.Next aria-label="Next collections" /> : null}
-          {collections.length > 4 ? <Carousel.Dots className="mt-5" /> : null}
-        </Carousel>
-      ) : (
-        <EmptyState>
-          <EmptyState.Header>
-            <EmptyState.Media variant="icon">
-              <Icon icon="gravity-ui:book-open" aria-hidden="true" />
-            </EmptyState.Media>
-            <EmptyState.Title>No published collections yet</EmptyState.Title>
-            <EmptyState.Description>
-              Columns and series will appear here as soon as they are published.
-            </EmptyState.Description>
-          </EmptyState.Header>
-          <EmptyState.Content>
-            <Link href="/columns">
-              Visit collections
+      <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.72fr)]">
+        <div className="flex min-w-0 flex-col gap-7">
+          {visibleCategories.length > 0 ? (
+            <ListView aria-label="Categories" variant="secondary">
+              {visibleCategories.map((category) => (
+                <ListView.Item
+                  key={category.id}
+                  href={`/explore?category=${category.id}`}
+                  id={`category-${category.id}`}
+                  textValue={category.name || "Category"}
+                >
+                  <ListView.ItemContent>
+                    <ListView.Title>{category.name}</ListView.Title>
+                  </ListView.ItemContent>
+                  <ListView.ItemAction>
+                    <Typography className="tabular-nums" color="muted" type="body-xs">
+                      {category.count ?? 0}
+                    </Typography>
+                  </ListView.ItemAction>
+                </ListView.Item>
+              ))}
+            </ListView>
+          ) : null}
+
+          {visibleTags.length > 0 ? (
+            <div className="min-w-0">
+              <Typography className="mb-3" type="body-sm" weight="semibold">
+                Tags
+              </Typography>
+              <TagGroup aria-label="Browse tags" selectionMode="none" size="sm" variant="surface">
+                <TagGroup.List className="flex-wrap">
+                  {visibleTags.map((tag) => (
+                    <Tag
+                      key={tag.id}
+                      href={`/explore?tag=${tag.id}`}
+                      id={`tag-${tag.id}`}
+                      textValue={tag.name}
+                    >
+                      #{tag.name}
+                    </Tag>
+                  ))}
+                </TagGroup.List>
+              </TagGroup>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <Typography type="body-sm" weight="semibold">
+              Columns &amp; Series
+            </Typography>
+            <Link className="no-underline" href="/columns">
+              View all
               <Link.Icon />
             </Link>
-          </EmptyState.Content>
-        </EmptyState>
-      )}
+          </div>
+          {isLoading ? (
+            <StoryListSkeleton count={3} />
+          ) : collections.length > 0 ? (
+            <ListView aria-label="Columns and series" variant="secondary">
+              {collections.slice(0, 5).map((collection, index) => (
+                <ListView.Item
+                  key={`${collection.sourceLabel}-${collection.id ?? collection.slug ?? index}`}
+                  href={collection.href}
+                  id={`${collection.sourceLabel}-${collection.id ?? collection.slug ?? index}`}
+                  textValue={collection.name || "Untitled collection"}
+                >
+                  <ListView.ItemContent>
+                    <ListView.Title>{collection.name || "Untitled collection"}</ListView.Title>
+                    <ListView.Description>{collection.sourceLabel}</ListView.Description>
+                  </ListView.ItemContent>
+                  <ListView.ItemAction>
+                    <Typography className="tabular-nums" color="muted" type="body-xs">
+                      {collection.postsCount ?? 0}
+                    </Typography>
+                  </ListView.ItemAction>
+                </ListView.Item>
+              ))}
+            </ListView>
+          ) : (
+            <Card variant="secondary">
+              <Card.Header className="gap-2">
+                <Card.Title className="text-base">Browse long-form collections</Card.Title>
+                <Card.Description>Follow columns and series in reading order.</Card.Description>
+              </Card.Header>
+              <Card.Footer>
+                <Link className="no-underline" href="/columns">
+                  Open collections
+                  <Link.Icon />
+                </Link>
+              </Card.Footer>
+            </Card>
+          )}
+        </div>
+      </div>
     </section>
   );
 }
 
 export default function SingleIndexPage() {
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [searchValue, setSearchValue] = useState("");
   const [keyword] = useDebounce(searchValue.trim(), 350);
   const [categoryKey, setCategoryKey] = useState("all");
   const [contentTypeKey, setContentTypeKey] = useState("all");
   const [page, setPage] = useState(0);
-  const isArchiveTablet = useMediaQuery("(max-width: 1023px)");
-  const isArchiveMobile = useMediaQuery("(max-width: 639px)");
 
   const discoveryQuery = useRetrieveDiscoveryQuery();
   const facetsQuery = useRetrieveFacetsQuery();
   const featuredQuery = useGetFeaturedPostsQuery({ page: 0, size: 6 });
   const columnsQuery = useGetPublicColumnsQuery();
   const seriesQuery = useRetrievePublicSeriesQuery();
+  const libraryQuery = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
 
   const categoryId = categoryKey === "all" ? undefined : Number(categoryKey);
   const contentType =
     contentTypeKey === "JSON" || contentTypeKey === "MDX" ? contentTypeKey : undefined;
-  const archivePageSize = isArchiveMobile ? 4 : isArchiveTablet ? 6 : 8;
 
   const searchQuery = useSearchPostDigestsQuery({
     categoryId,
@@ -548,15 +532,13 @@ export default function SingleIndexPage() {
     keyword: keyword || undefined,
     pageable: { page, size: PAGE_SIZE, sort: ["publishedAt,desc"] },
   });
-  const archiveQuery = useRetrieveArchiveQuery({
-    pageable: { page: 0, size: archivePageSize, sort: ["publishedAt,desc"] },
-  });
-
   const discovery = discoveryQuery.data;
   const spotlight = discovery?.spotlight ?? featuredQuery.data?.list[0];
-  const featuredPosts = featuredQuery.data?.list ?? [];
   const categories = (facetsQuery.data?.categories ?? []).filter(
     (category) => category.id != null && category.name && (category.count ?? 0) > 0
+  );
+  const tags = (facetsQuery.data?.tags ?? []).filter(
+    (tag) => tag.id != null && tag.name && (tag.count ?? 0) > 0
   );
   const contentTypes = (facetsQuery.data?.contentTypes ?? []).filter(
     (item) => item.contentType && (item.count ?? 0) > 0
@@ -606,7 +588,7 @@ export default function SingleIndexPage() {
 
   return (
     <div className="bg-background min-h-[100dvh] px-4 pt-24 pb-24 sm:px-6 sm:pt-28 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-20">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-16 sm:gap-20">
         <section
           aria-label="Journal introduction and featured story"
           className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12"
@@ -671,25 +653,28 @@ export default function SingleIndexPage() {
           </div>
         </section>
 
-        <section aria-labelledby="discover-title" className="flex flex-col gap-6">
+        <ContinueReadingSection entries={libraryQuery.data?.continueReading ?? []} />
+
+        <section
+          aria-labelledby="discover-title"
+          className="border-separator flex flex-col gap-6 border-t pt-12 sm:pt-16"
+        >
           <SectionHeading
-            description="Switch between editorial selection, current momentum, new work, and long-term reader interest."
+            description="A focused selection from the editorial desk and the newest work in the archive."
             id="discover-title"
-            title="Discover"
+            title="Selected Reading"
           />
 
           {discoveryQuery.isLoading && featuredQuery.isLoading ? (
-            <PostGridSkeleton />
+            <StoryListSkeleton />
           ) : (
             <Tabs defaultSelectedKey="curated">
               <Tabs.ListContainer>
                 <Tabs.List aria-label="Discovery views">
                   {[
                     ["curated", "Curated"],
-                    ["trending", "Trending"],
                     ["latest", "Latest"],
-                    ["most-read", "Most Read"],
-                    ["featured", "Featured"],
+                    ["popular", "Popular"],
                   ].map(([id, label]) => (
                     <Tabs.Tab key={id} id={id}>
                       {label}
@@ -701,30 +686,34 @@ export default function SingleIndexPage() {
               <Tabs.Panel className="pt-6" id="curated">
                 <EditorialFeed label="Curated" posts={discovery?.curated ?? []} />
               </Tabs.Panel>
-              <Tabs.Panel className="pt-6" id="trending">
-                <EditorialFeed label="Trending" posts={discovery?.trending ?? []} />
-              </Tabs.Panel>
               <Tabs.Panel className="pt-6" id="latest">
                 <EditorialFeed label="Latest" posts={discovery?.latest ?? []} />
               </Tabs.Panel>
-              <Tabs.Panel className="pt-6" id="most-read">
-                <EditorialFeed label="Most read" posts={discovery?.mostRead ?? []} />
-              </Tabs.Panel>
-              <Tabs.Panel className="pt-6" id="featured">
-                <EditorialFeed label="Featured" posts={featuredPosts} />
+              <Tabs.Panel className="pt-6" id="popular">
+                <EditorialFeed
+                  label="Popular"
+                  posts={
+                    (discovery?.trending ?? []).length
+                      ? (discovery?.trending ?? [])
+                      : (discovery?.mostRead ?? [])
+                  }
+                />
               </Tabs.Panel>
             </Tabs>
           )}
         </section>
 
-        <TopicGroups groups={discovery?.categoryGroups ?? []} />
-
-        <CollectionsSection
+        <ContentIndex
+          categories={categories}
           collections={collections}
           isLoading={columnsQuery.isLoading || seriesQuery.isLoading}
+          tags={tags}
         />
 
-        <section aria-labelledby="archive-title" className="flex flex-col gap-7">
+        <section
+          aria-labelledby="archive-title"
+          className="border-separator flex flex-col gap-7 border-t pt-12 sm:pt-16"
+        >
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <SectionHeading
               description="Search compact article data and narrow it by topic or publishing format."
@@ -832,7 +821,7 @@ export default function SingleIndexPage() {
 
           <div aria-live="polite">
             {searchQuery.isLoading ? (
-              <PostGridSkeleton />
+              <StoryListSkeleton count={PAGE_SIZE} />
             ) : searchQuery.isError ? (
               <Alert status="danger">
                 <Alert.Indicator />
@@ -846,7 +835,11 @@ export default function SingleIndexPage() {
                 </Button>
               </Alert>
             ) : searchPosts.length > 0 ? (
-              <PostGrid posts={searchPosts} />
+              <StoryList
+                label="Archive results"
+                posts={searchPosts}
+                startAt={page * PAGE_SIZE + 1}
+              />
             ) : (
               <EmptyState size="lg">
                 <EmptyState.Header>
@@ -918,52 +911,6 @@ export default function SingleIndexPage() {
               </Pagination.Content>
             </Pagination>
           ) : null}
-        </section>
-
-        <section aria-labelledby="time-capsule-title" className="flex flex-col gap-10">
-          <header className="flex max-w-2xl flex-col gap-5 py-2 sm:py-4">
-            <div className="flex items-center gap-3">
-              <div aria-hidden="true" className="bg-separator h-px w-8" />
-              <Typography color="muted" type="body-xs" weight="medium">
-                Archive
-              </Typography>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Typography
-                id="time-capsule-title"
-                className="text-5xl leading-none tracking-tight sm:text-6xl"
-                type="h2"
-                weight="semibold"
-              >
-                <span className="text-muted">Then</span> &amp; Now
-              </Typography>
-              <Typography className="max-w-md text-base leading-7" color="muted">
-                Scroll back through time, one story at a time.
-              </Typography>
-            </div>
-          </header>
-
-          <div className="min-w-0">
-            {archiveQuery.isLoading ? (
-              <ArchiveTimelineSkeleton count={archivePageSize} />
-            ) : archiveQuery.isError ? (
-              <Alert status="danger">
-                <Alert.Indicator />
-                <Alert.Content>
-                  <Alert.Title>The time capsule is unavailable</Alert.Title>
-                  <Alert.Description>Archived stories could not be loaded.</Alert.Description>
-                </Alert.Content>
-                <Button variant="outline" onPress={() => void archiveQuery.refetch()}>
-                  <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                  Try again
-                </Button>
-              </Alert>
-            ) : (archiveQuery.data?.list ?? []).length > 0 ? (
-              <ArchiveTimeline posts={archiveQuery.data?.list ?? []} />
-            ) : (
-              <ArchiveTimeline posts={[]} />
-            )}
-          </div>
         </section>
       </div>
     </div>
