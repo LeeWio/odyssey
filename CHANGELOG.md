@@ -1,3 +1,10 @@
+## [1.166.1](https://github.com/LeeWio/odyssey/compare/v1.166.0...v1.166.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* **rss:** use canonical site URLs ([a5d642e](https://github.com/LeeWio/odyssey/commit/a5d642edd958f787172b075dabcd8ff565890c6b))
+
 # [1.166.0](https://github.com/LeeWio/odyssey/compare/v1.165.0...v1.166.0) (2026-09-23)
 
 
