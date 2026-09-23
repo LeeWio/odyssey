@@ -1,3 +1,10 @@
+# [1.166.0](https://github.com/LeeWio/odyssey/compare/v1.165.0...v1.166.0) (2026-09-23)
+
+
+### Features
+
+* **navbar:** add Travellings link ([6a4f9c5](https://github.com/LeeWio/odyssey/commit/6a4f9c52827aa80b32640f968e22c57b0d2cd465))
+
 # [1.165.0](https://github.com/LeeWio/odyssey/compare/v1.164.0...v1.165.0) (2026-09-22)
 
 
