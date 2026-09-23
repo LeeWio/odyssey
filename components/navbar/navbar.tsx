@@ -2,7 +2,7 @@
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
-import { Button, Dropdown, Kbd, Label, Tooltip } from "@heroui/react";
+import { Button, Dropdown, Kbd, Label, Link as HeroLink, Tooltip } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useHotkeys, useMounted, useOs } from "@mantine/hooks";
 import { AnimatePresence, motion } from "motion/react";
@@ -613,6 +613,17 @@ export const Navbar = () => {
                 </span>
               </Button>
             </div>
+
+            <HeroLink
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl px-3 text-sm no-underline"
+              href="https://www.travellings.cn/go.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="开往-友链接力（在新窗口打开）"
+            >
+              <Icon aria-hidden="true" icon="lucide:train-front" className="size-4" />
+              <span>开往</span>
+            </HeroLink>
           </motion.div>
 
           <motion.div
@@ -933,6 +944,30 @@ export const Navbar = () => {
                           </Button>
                         </motion.div>
                       </div>
+
+                      <HeroLink
+                        className="mt-3 flex items-center justify-between rounded-xl px-2 py-3 text-left no-underline"
+                        href="https://www.travellings.cn/go.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="开往-友链接力（在新窗口打开）"
+                        onPress={closeNavigation}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Icon
+                            aria-hidden="true"
+                            icon="lucide:train-front"
+                            className="text-accent size-4"
+                          />
+                          <span>
+                            <span className="block text-base font-semibold">开往</span>
+                            <span className="text-muted mt-0.5 block text-xs font-normal">
+                              友链接力
+                            </span>
+                          </span>
+                        </span>
+                        <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
+                      </HeroLink>
 
                       {mounted && !isAuthenticated && (
                         <div className="mt-5 grid grid-cols-2 gap-2">
