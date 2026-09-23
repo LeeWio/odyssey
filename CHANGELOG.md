@@ -1,3 +1,10 @@
+# [1.168.0](https://github.com/LeeWio/odyssey/compare/v1.167.0...v1.168.0) (2026-09-23)
+
+
+### Features
+
+* **blog:** reshape the journal as a reading atlas ([9b36a01](https://github.com/LeeWio/odyssey/commit/9b36a014a9f192707745798b84ff72619fab2c4b))
+
 # [1.167.0](https://github.com/LeeWio/odyssey/compare/v1.166.1...v1.167.0) (2026-09-23)
 
 
