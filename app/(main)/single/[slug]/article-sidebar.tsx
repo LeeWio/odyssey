@@ -1,59 +1,44 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { EmptyState } from "@heroui-pro/react";
+import { Card, Link, Skeleton, Typography } from "@heroui/react";
 
 import {
   type PostDigestResponse,
   useGetFeaturedPostsQuery,
   useGetRelatedPostsQuery,
 } from "@/lib/features/post";
-import { EmptyState } from "@heroui-pro/react";
-import {
-  Card,
-  Chip,
-  Description,
-  Label,
-  ListBox,
-  ScrollShadow,
-  Skeleton,
-  Tabs,
-} from "@heroui/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
-type TabId = "related" | "featured";
 
 export interface ArticleSidebarProps {
   slug?: string;
 }
 
-function isTabId(value: string | null): value is TabId {
-  return value === "related" || value === "featured";
-}
-
 function formatPostDate(value?: string | null) {
   if (!value) return "Recently published";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Recently published";
 
   return new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
-  }).format(new Date(value));
-}
-
-function getEstimatedReadingMinutes(post: PostDigestResponse) {
-  const source = `${post.title} ${post.summary ?? ""}`.trim();
-  return Math.max(2, Math.ceil(source.length / 180));
+  }).format(date);
 }
 
 function ArticleListSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading article suggestions" role="status">
+    <div
+      aria-busy="true"
+      aria-label="Loading related stories"
+      className="flex flex-col gap-3"
+      role="status"
+    >
       {Array.from({ length: 4 }, (_, index) => (
-        <Card key={index} variant="transparent" className="flex-row items-center gap-3 p-3">
-          <Skeleton className="size-10 shrink-0 rounded-xl" />
-          <Card.Content className="min-w-0 flex-1 gap-2 p-0">
-            <Skeleton className="h-4 w-4/5 rounded-lg" />
-            <Skeleton className="h-3 w-2/3 rounded-lg" />
+        <Card key={index} variant="secondary">
+          <Card.Content className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-4/5 rounded-md" />
+            <Skeleton className="h-3 w-1/2 rounded-md" />
           </Card.Content>
         </Card>
       ))}
@@ -61,85 +46,31 @@ function ArticleListSkeleton() {
   );
 }
 
-function ArticleListEmpty({ type }: { type: TabId }) {
-  const isRelated = type === "related";
-
+function StoryList({ posts }: { posts: PostDigestResponse[] }) {
   return (
-    <EmptyState size="sm" className="py-10">
-      <EmptyState.Header>
-        <EmptyState.Media variant="icon">
-          {isRelated ? (
-            <Icon icon="gravity-ui:sparkles" aria-hidden="true" />
-          ) : (
-            <Icon icon="gravity-ui:flame" aria-hidden="true" />
-          )}
-        </EmptyState.Media>
-        <EmptyState.Title>
-          {isRelated ? "No related articles yet" : "No featured articles yet"}
-        </EmptyState.Title>
-        <EmptyState.Description>
-          {isRelated
-            ? "More connected writing will appear as the archive grows."
-            : "Editor selections will appear here when they are ready."}
-        </EmptyState.Description>
-      </EmptyState.Header>
-    </EmptyState>
-  );
-}
-
-function ArticleList({
-  ariaLabel,
-  currentSlug,
-  posts,
-}: {
-  ariaLabel: string;
-  currentSlug?: string;
-  posts: PostDigestResponse[];
-}) {
-  const router = useRouter();
-
-  return (
-    <ScrollShadow hideScrollBar className="max-h-[420px]">
-      <ListBox
-        aria-label={ariaLabel}
-        selectionMode="none"
-        onAction={(key) => router.push(`/single/${String(key)}`)}
-      >
-        {posts.map((post) => {
-          const isCurrent = post.slug === currentSlug;
-          const description = [post.category?.name, formatPostDate(post.publishedAt)]
-            .filter(Boolean)
-            .join(", ");
-
-          return (
-            <ListBox.Item
-              key={post.id}
-              id={post.slug}
-              textValue={post.title}
-              aria-current={isCurrent ? "page" : undefined}
-            >
-              <div className="min-w-0 flex-1">
-                <Label className="line-clamp-2 leading-5">{post.title}</Label>
-                <Description className="line-clamp-1">{description}</Description>
-              </div>
-
-              <Chip size="sm" variant={isCurrent ? "soft" : "tertiary"}>
-                {getEstimatedReadingMinutes(post)} min
-              </Chip>
-            </ListBox.Item>
-          );
-        })}
-      </ListBox>
-    </ScrollShadow>
+    <div className="flex flex-col gap-3">
+      {posts.map((post) => (
+        <Card key={post.id} variant="secondary">
+          <Card.Header>
+            <Card.Title className="text-sm leading-5">
+              <Link
+                className="text-foreground line-clamp-2 no-underline"
+                href={`/single/${post.slug}`}
+              >
+                {post.title}
+              </Link>
+            </Card.Title>
+            <Card.Description>
+              {[post.category?.name, formatPostDate(post.publishedAt)].filter(Boolean).join(" / ")}
+            </Card.Description>
+          </Card.Header>
+        </Card>
+      ))}
+    </div>
   );
 }
 
 export function ArticleSidebar({ slug }: ArticleSidebarProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const requestedTab = searchParams.get("tab");
-  const selectedTab: TabId = isTabId(requestedTab) ? requestedTab : "related";
   const { data: relatedData = [], isLoading: isRelatedLoading } = useGetRelatedPostsQuery(
     slug || "",
     { skip: !slug }
@@ -149,69 +80,31 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
     size: 5,
   });
   const relatedPosts = relatedData.filter((post) => post.slug !== slug).slice(0, 5);
-  const featuredPosts = (featuredData?.list ?? []).filter((post) => post.slug !== slug).slice(0, 5);
-
-  const handleSelectionChange = (key: React.Key) => {
-    const nextTab = String(key);
-    if (!isTabId(nextTab)) return;
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", nextTab);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  };
+  const featuredPosts = (featuredData?.list ?? [])
+    .filter((post) => post.slug !== slug && !relatedPosts.some((related) => related.id === post.id))
+    .slice(0, 4);
+  const isLoading = isRelatedLoading || (relatedPosts.length === 0 && isFeaturedLoading);
+  const posts = relatedPosts.length > 0 ? relatedPosts : featuredPosts;
 
   return (
-    <aside className="order-2 h-fit min-w-0 lg:sticky lg:top-24 lg:order-none">
-      <Card variant="secondary" className="gap-5 p-5">
-        <Icon icon="gravity-ui:book" aria-hidden="true" className="text-muted size-5" />
-        <Card.Header>
-          <Card.Title>Continue Reading</Card.Title>
-          <Card.Description>
-            Connected essays and editor selections from the archive.
-          </Card.Description>
-        </Card.Header>
-
-        <Card.Content className="p-0">
-          <Tabs selectedKey={selectedTab} onSelectionChange={handleSelectionChange}>
-            <Tabs.ListContainer>
-              <Tabs.List aria-label="Article suggestions">
-                <Tabs.Tab id="related">
-                  Related
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-                <Tabs.Tab id="featured">
-                  Featured
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-              </Tabs.List>
-            </Tabs.ListContainer>
-
-            <Tabs.Panel id="related" className="pt-3">
-              {isRelatedLoading ? (
-                <ArticleListSkeleton />
-              ) : relatedPosts.length > 0 ? (
-                <ArticleList ariaLabel="Related articles" currentSlug={slug} posts={relatedPosts} />
-              ) : (
-                <ArticleListEmpty type="related" />
-              )}
-            </Tabs.Panel>
-
-            <Tabs.Panel id="featured" className="pt-3">
-              {isFeaturedLoading ? (
-                <ArticleListSkeleton />
-              ) : featuredPosts.length > 0 ? (
-                <ArticleList
-                  ariaLabel="Featured articles"
-                  currentSlug={slug}
-                  posts={featuredPosts}
-                />
-              ) : (
-                <ArticleListEmpty type="featured" />
-              )}
-            </Tabs.Panel>
-          </Tabs>
-        </Card.Content>
-      </Card>
+    <aside className="flex flex-col gap-4 lg:sticky lg:top-28">
+      <Typography type="body-sm" weight="semibold">
+        More to read
+      </Typography>
+      {isLoading ? (
+        <ArticleListSkeleton />
+      ) : posts.length > 0 ? (
+        <StoryList posts={posts} />
+      ) : (
+        <EmptyState size="sm">
+          <EmptyState.Header>
+            <EmptyState.Title>Nothing nearby yet</EmptyState.Title>
+            <EmptyState.Description>
+              Related stories will show up as the archive grows.
+            </EmptyState.Description>
+          </EmptyState.Header>
+        </EmptyState>
+      )}
     </aside>
   );
 }

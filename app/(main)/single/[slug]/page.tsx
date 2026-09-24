@@ -1,31 +1,37 @@
 "use client";
 
+import { ActionBar, EmptyState } from "@heroui-pro/react";
 import {
+  Avatar,
   Breadcrumbs,
   BreadcrumbsItem,
   Button,
-  Chip,
   Link,
   Popover,
   ProgressBar,
   ProgressCircle,
-  Tooltip,
+  Separator,
   Skeleton,
   toast,
+  Tooltip,
   Typography,
-  Separator,
-  Avatar,
-  Card,
 } from "@heroui/react";
-import { ActionBar, EmptyState } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useRef, useState } from "react";
+
 import { CommentSheet } from "@/components/comment";
 import { ArticleTypography } from "@/features/blog/reader/typography";
+import { CreateCollectionDialog } from "@/features/library/create-collection-dialog";
+import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
+import {
+  useAddPostToCollectionMutation,
+  useGetPostCollectionsQuery,
+  useRecordReadingProgressMutation,
+} from "@/lib/features/library";
 import {
   type PostResponse,
   useFavoritePostMutation,
@@ -33,18 +39,11 @@ import {
   useLikePostMutation,
   useUnlikePostMutation,
 } from "@/lib/features/post";
-import { FluidBackdrop } from "@/components/background/fluid-backdrop";
-import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
-import {
-  useAddPostToCollectionMutation,
-  useGetPostCollectionsQuery,
-  useRecordReadingProgressMutation,
-} from "@/lib/features/library";
-import { getReadingPositionId } from "@/lib/reading-position";
-import { commentDebug } from "@/lib/comment-debug";
 import { useAppSelector } from "@/lib/hooks";
+import { commentDebug } from "@/lib/comment-debug";
+import { getReadingPositionId } from "@/lib/reading-position";
+
 import { ArticleSidebar } from "./article-sidebar";
-import { CreateCollectionDialog } from "@/features/library/create-collection-dialog";
 
 const ArticleBodyReader = dynamic(
   () =>
@@ -54,7 +53,7 @@ const ArticleBodyReader = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="space-y-3 py-6" aria-hidden>
+      <div className="flex flex-col gap-3 py-6" aria-hidden>
         <Skeleton className="h-4 w-11/12 rounded" />
         <Skeleton className="h-4 w-10/12 rounded" />
         <Skeleton className="h-4 w-9/12 rounded" />
@@ -117,6 +116,16 @@ function getAuthorInitials(value?: string | null) {
     .toUpperCase();
 }
 
+function getEstimatedReadingMinutes(article?: PostResponse) {
+  const source = `${article?.content ?? ""} ${article?.summary ?? ""}`.trim();
+  if (!source) return 4;
+
+  const wordCount = source.split(/\s+/).filter(Boolean).length;
+  const approximateCount = wordCount > 20 ? wordCount : Math.ceil(source.length / 700);
+
+  return Math.max(1, Math.ceil(approximateCount / 225));
+}
+
 export default function SinglePage({ params }: SinglePageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -148,13 +157,8 @@ export default function SinglePage({ params }: SinglePageProps) {
   }, [router, searchParams, slug]);
 
   const { scrollY, scrollYProgress } = useScroll();
-  const {
-    currentData: serverArticle,
-    isFetching,
-    isUninitialized,
-  } = useGetPublicPostBySlugQuery(slug);
+  const { currentData: article, isFetching, isUninitialized } = useGetPublicPostBySlugQuery(slug);
 
-  const article = serverArticle;
   const isLoading = (isFetching || isUninitialized) && !article;
   const isUnavailable = !isLoading && !article;
 
@@ -216,10 +220,10 @@ export default function SinglePage({ params }: SinglePageProps) {
       if (timer !== null) window.clearTimeout(timer);
     };
   }, [article?.content, postId]);
+
   const isLiked = currentOptimisticLike?.isLiked ?? serverIsLiked;
   const likesCount = currentOptimisticLike?.likesCount ?? serverLikesCount;
   const isFavorited = currentOptimisticFavorite?.isFavorited ?? serverIsFavorited;
-  const favoritesCount = currentOptimisticFavorite?.favoritesCount ?? serverFavoritesCount;
 
   const revealWhenScrollSettles = useDebouncedCallback((latestScrollY: number) => {
     setIsActionBarOpen(latestScrollY > 160);
@@ -314,23 +318,13 @@ export default function SinglePage({ params }: SinglePageProps) {
   const handleFavorite = async () => {
     if (!postId || isFavorited) return;
 
-    const previousFavoritesCount = favoritesCount;
-
-    setOptimisticFavorite({
-      postId,
-      isFavorited: true,
-      favoritesCount: previousFavoritesCount + 1,
-    });
+    setOptimisticFavorite({ postId, isFavorited: true, favoritesCount: 0 });
 
     try {
       await favoritePost(postId).unwrap();
       toast.success("Saved for later.");
     } catch {
-      setOptimisticFavorite({
-        postId,
-        isFavorited: false,
-        favoritesCount: previousFavoritesCount,
-      });
+      setOptimisticFavorite({ postId, isFavorited: false, favoritesCount: 0 });
       toast.danger("Please log in to save this article.");
     }
   };
@@ -354,33 +348,26 @@ export default function SinglePage({ params }: SinglePageProps) {
 
   if (isUnavailable) {
     return (
-      <div className="bg-background flex min-h-screen items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <EmptyState className="border-border rounded-2xl border border-dashed p-6">
-            <EmptyState.Header>
-              <EmptyState.Media variant="icon">
-                <Icon icon="lucide:book-x" className="text-muted size-6" />
-              </EmptyState.Media>
-              <EmptyState.Title>Article not found</EmptyState.Title>
-              <EmptyState.Description>
-                This post could not be found, or it has not been published yet.
-              </EmptyState.Description>
-            </EmptyState.Header>
-            <EmptyState.Content>
-              <Button size="sm" variant="secondary" onPress={() => router.push("/blog")}>
-                Back to Journal
-              </Button>
-            </EmptyState.Content>
-          </EmptyState>
-        </div>
+      <div className="flex min-h-[70dvh] items-center justify-center px-6">
+        <EmptyState className="max-w-md">
+          <EmptyState.Header>
+            <EmptyState.Title>Article not found</EmptyState.Title>
+            <EmptyState.Description>
+              This post could not be found, or it has not been published yet.
+            </EmptyState.Description>
+          </EmptyState.Header>
+          <EmptyState.Content>
+            <Button size="sm" variant="secondary" onPress={() => router.push("/single")}>
+              Back to journal
+            </Button>
+          </EmptyState.Content>
+        </EmptyState>
       </div>
     );
   }
 
   return (
     <>
-      <FluidBackdrop scrollYProgress={scrollYProgress} />
-
       <ProgressBar
         aria-label="Article reading progress"
         className="fixed inset-x-0 top-0 z-[70]"
@@ -394,77 +381,54 @@ export default function SinglePage({ params }: SinglePageProps) {
         </ProgressBar.Track>
       </ProgressBar>
 
-      <header className="relative w-full px-5 pt-28 pb-12 sm:px-8 sm:pt-32 lg:px-12 lg:pb-16">
-        <div className="mx-auto w-full max-w-6xl">
+      <div className="grid w-full grid-cols-1 items-start gap-12 px-6 pt-28 pb-28 sm:px-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16 lg:px-14 xl:px-20">
+        <article
+          id={postId ? `article-${postId}` : undefined}
+          className="w-full min-w-0"
+          data-reading-content
+        >
           {isLoading || !article ? (
-            <Card variant="transparent" className="gap-8 p-0">
-              <Card.Header className="gap-6 p-0">
-                <Skeleton className="h-5 w-48 rounded-lg" />
-                <div className="flex w-full flex-col gap-3">
-                  <Skeleton className="h-14 w-11/12 rounded-xl" />
-                  <Skeleton className="h-14 w-4/5 rounded-xl" />
-                </div>
-                <Skeleton className="h-5 w-full max-w-2xl rounded-lg" />
-                <Skeleton className="h-5 w-4/5 max-w-xl rounded-lg" />
-              </Card.Header>
-              <Card.Footer className="flex items-center gap-3 p-0">
-                <Skeleton className="size-10 rounded-full" />
-                <Skeleton className="h-9 w-40 rounded-lg" />
-              </Card.Footer>
-            </Card>
+            <div aria-busy="true" aria-label="Loading article" className="flex flex-col gap-6">
+              <Skeleton className="h-4 w-40 rounded-md" />
+              <Skeleton className="h-14 w-11/12 rounded-lg" />
+              <Skeleton className="h-14 w-3/4 rounded-lg" />
+              <Skeleton className="h-5 w-full rounded-md" />
+              <div className="flex flex-col gap-3 pt-8">
+                <Skeleton className="h-4 w-full rounded-md" />
+                <Skeleton className="h-4 w-11/12 rounded-md" />
+                <Skeleton className="h-4 w-4/5 rounded-md" />
+              </div>
+            </div>
           ) : (
-            <div className="flex flex-col gap-8">
-              <Breadcrumbs className="text-muted text-xs font-medium">
-                <BreadcrumbsItem className="text-muted" href="/single">
-                  <span className="text-muted">Journal</span>
-                </BreadcrumbsItem>
-                {article.series ? (
-                  <BreadcrumbsItem className="text-muted" href={`/columns/${article.series.slug}`}>
-                    <span className="text-muted">{article.series.name}</span>
-                  </BreadcrumbsItem>
-                ) : null}
-                <BreadcrumbsItem className="text-muted">
-                  <span className="text-muted">{article.category?.name || "Uncategorized"}</span>
-                </BreadcrumbsItem>
-              </Breadcrumbs>
-
-              <div className="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-16">
-                <div className="flex min-w-0 flex-col items-start gap-6">
-                  <div className="flex flex-wrap gap-2">
-                    <Chip color="accent" size="sm" variant="soft">
-                      {article.category?.name || "Journal"}
-                    </Chip>
-                    <Chip size="sm" variant="tertiary">
-                      <Icon aria-hidden="true" icon="lucide:clock-3" className="size-3.5" />
-                      {getEstimatedReadingMinutes(article)} min read
-                    </Chip>
-                    {article.seriesOrder != null ? (
-                      <Chip size="sm" variant="tertiary">
-                        Essay {article.seriesOrder + 1}
-                      </Chip>
-                    ) : null}
-                  </div>
-
-                  <Typography
-                    type="h1"
-                    className="text-foreground max-w-4xl text-[clamp(2.75rem,7vw,5.5rem)] leading-[0.98] font-bold text-balance"
-                  >
-                    {article.title}
-                  </Typography>
-
-                  {article.summary ? (
-                    <Typography
-                      type="body"
-                      className="text-muted max-w-2xl text-lg leading-8 font-normal text-balance sm:text-xl"
-                    >
-                      {article.summary}
-                    </Typography>
+            <>
+              <header className="flex flex-col gap-6 pb-10">
+                <Breadcrumbs>
+                  <BreadcrumbsItem href="/single">Journal</BreadcrumbsItem>
+                  {article.series ? (
+                    <BreadcrumbsItem href={`/columns/${article.series.slug}`}>
+                      {article.series.name}
+                    </BreadcrumbsItem>
                   ) : null}
-                </div>
+                  <BreadcrumbsItem>{article.category?.name || "Essay"}</BreadcrumbsItem>
+                </Breadcrumbs>
 
-                <Card variant="secondary" className="gap-5 p-5">
-                  <Card.Header className="flex-row items-center gap-3 p-0">
-                    <Avatar size="md" variant="soft">
+                <Typography
+                  className="text-4xl leading-[1.08] text-balance sm:text-5xl"
+                  type="h1"
+                  weight="semibold"
+                >
+                  {article.title}
+                </Typography>
+
+                {article.summary ? (
+                  <Typography className="text-lg leading-8 text-balance" color="muted">
+                    {article.summary}
+                  </Typography>
+                ) : null}
+
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <Avatar size="sm">
                       {article.authorAvatar ? (
                         <Avatar.Image
                           alt={article.authorName || "Odyssey"}
@@ -473,199 +437,95 @@ export default function SinglePage({ params }: SinglePageProps) {
                       ) : null}
                       <Avatar.Fallback>{getAuthorInitials(article.authorName)}</Avatar.Fallback>
                     </Avatar>
-                    <div className="min-w-0">
-                      <Card.Title className="truncate text-sm">
-                        {article.authorName || "Odyssey"}
-                      </Card.Title>
-                      <Card.Description className="text-xs tabular-nums">
-                        {formatArticleDate(article.createdAt)}
-                      </Card.Description>
-                    </div>
-                  </Card.Header>
-                  <Card.Content className="flex flex-wrap gap-x-4 gap-y-2 p-0">
-                    <Typography
-                      className="flex items-center gap-1.5 tabular-nums"
-                      color="muted"
-                      type="body-xs"
-                    >
-                      <Icon aria-hidden="true" icon="gravity-ui:eye" className="size-3.5" />
-                      {article.views.toLocaleString("en-US")}
+                    <Typography type="body-sm" weight="medium">
+                      {article.authorName || "Odyssey"}
                     </Typography>
-                    <Typography
-                      className="flex items-center gap-1.5 tabular-nums"
-                      color="muted"
-                      type="body-xs"
-                    >
-                      <Icon aria-hidden="true" icon="gravity-ui:heart" className="size-3.5" />
-                      {likesCount.toLocaleString("en-US")}
-                    </Typography>
-                    <Typography
-                      className="flex items-center gap-1.5 tabular-nums"
-                      color="muted"
-                      type="body-xs"
-                    >
-                      <Icon aria-hidden="true" icon="lucide:bookmark" className="size-3.5" />
-                      {favoritesCount.toLocaleString("en-US")}
-                    </Typography>
-                  </Card.Content>
-                  <Card.Footer className="gap-2 p-0">
-                    <Button
-                      size="sm"
-                      variant={isFavorited ? "secondary" : "outline"}
-                      isDisabled={!postId || isFavorited}
-                      isPending={isFavoriting}
-                      onPress={handleFavorite}
-                    >
-                      <Icon
-                        aria-hidden="true"
-                        icon={isFavorited ? "lucide:bookmark-check" : "lucide:bookmark"}
-                        className="size-4"
-                      />
-                      {isFavorited ? "Saved" : "Save"}
-                    </Button>
-                    <Button size="sm" variant="ghost" onPress={handleShare}>
-                      <Icon aria-hidden="true" icon="lucide:share-2" className="size-4" />
-                      Share
-                    </Button>
-                  </Card.Footer>
-                </Card>
-              </div>
-
-              {article.tags?.length ? (
-                <div className="flex flex-wrap gap-2">
-                  {article.tags.map((tag) => (
-                    <Chip key={tag.id} size="sm" variant="soft">
-                      {tag.name}
-                    </Chip>
-                  ))}
+                  </div>
+                  <Typography color="muted" type="body-sm">
+                    {formatArticleDate(article.createdAt)}
+                  </Typography>
+                  <Typography className="tabular-nums" color="muted" type="body-sm">
+                    {getEstimatedReadingMinutes(article)} min read
+                  </Typography>
                 </div>
-              ) : null}
+              </header>
 
-              <Separator />
-            </div>
-          )}
-        </div>
-      </header>
-
-      {/* Main Grid Body */}
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1400px] grid-cols-1 content-start justify-center gap-8 px-4 py-12 md:px-6 lg:grid-cols-[260px_minmax(0,760px)] lg:px-8 xl:grid-cols-[280px_minmax(0,760px)] xl:gap-12 2xl:gap-16 2xl:px-12">
-        <ArticleSidebar slug={slug} />
-
-        <article
-          id={postId ? `article-${postId}` : undefined}
-          data-reading-content
-          className="mx-auto w-full max-w-[760px] min-w-0"
-        >
-          <section className="mx-auto max-w-190 py-0">
-            {isLoading || !article ? (
-              <Card aria-label="Loading article" variant="transparent" className="gap-8 p-0">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Card.Content key={index} className="flex flex-col gap-3 p-0">
-                    <Skeleton className="h-4 w-full rounded-lg" />
-                    <Skeleton className="h-4 w-11/12 rounded-lg" />
-                    <Skeleton className="h-4 w-4/5 rounded-lg" />
-                  </Card.Content>
-                ))}
-              </Card>
-            ) : (
               <ArticleTypography>
                 <ArticleBodyReader
                   content={article.content}
-                  contentType={article.contentType}
                   contentKey={article.content}
+                  contentType={article.contentType}
                 />
               </ArticleTypography>
-            )}
-          </section>
 
-          {article?.series ? (
-            <nav aria-label={`${article.series.name} column navigation`} className="mt-16">
-              <Separator className="mb-8" />
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <Typography color="muted" type="body-xs" weight="medium">
-                    Continue this column
-                  </Typography>
-                  <Link
-                    className="text-foreground mt-1 inline-flex items-center gap-2 text-lg font-semibold no-underline"
-                    href={`/columns/${article.series.slug}`}
-                  >
-                    {article.series.name}
-                    <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
-                  </Link>
-                </div>
-                {article.seriesOrder != null ? (
-                  <Typography className="font-mono tabular-nums" color="muted" type="body-xs">
-                    Essay {article.seriesOrder + 1}
-                  </Typography>
-                ) : null}
-              </div>
-
-              {article.navigation?.prev || article.navigation?.next ? (
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  {article.navigation.prev ? (
-                    <Link
-                      className="h-full no-underline"
-                      href={`/single/${article.navigation.prev.slug}`}
-                    >
-                      <Card variant="secondary" className="h-full min-h-28">
-                        <Card.Header className="gap-2">
-                          <Card.Description className="flex items-center gap-1.5 text-xs">
-                            <Icon
-                              aria-hidden="true"
-                              icon="lucide:arrow-left"
-                              className="size-3.5"
-                            />
-                            Previous essay
-                          </Card.Description>
-                          <Card.Title className="line-clamp-2 text-sm">
-                            {article.navigation.prev.title}
-                          </Card.Title>
-                        </Card.Header>
-                      </Card>
-                    </Link>
-                  ) : (
-                    <div aria-hidden="true" className="hidden sm:block" />
-                  )}
-                  {article.navigation.next ? (
-                    <Link
-                      className="h-full no-underline"
-                      href={`/single/${article.navigation.next.slug}`}
-                    >
-                      <Card variant="secondary" className="h-full min-h-28">
-                        <Card.Header className="items-end gap-2 text-right">
-                          <Card.Description className="flex items-center gap-1.5 text-xs">
-                            Next essay
-                            <Icon
-                              aria-hidden="true"
-                              icon="lucide:arrow-right"
-                              className="size-3.5"
-                            />
-                          </Card.Description>
-                          <Card.Title className="line-clamp-2 text-sm">
-                            {article.navigation.next.title}
-                          </Card.Title>
-                        </Card.Header>
-                      </Card>
-                    </Link>
-                  ) : null}
-                </div>
+              {article.tags?.length ? (
+                <ul className="mt-10 flex flex-wrap gap-x-4 gap-y-2">
+                  {article.tags.map((tag) => (
+                    <li key={tag.id}>
+                      <Link
+                        className="text-muted text-sm no-underline"
+                        href={`/explore?tag=${tag.id}`}
+                      >
+                        {tag.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               ) : null}
-            </nav>
-          ) : null}
+
+              {article.series && (article.navigation?.prev || article.navigation?.next) ? (
+                <nav aria-label={`${article.series.name} column navigation`} className="mt-16">
+                  <Separator className="mb-8" />
+                  <Typography color="muted" type="body-sm">
+                    {article.series.name}
+                  </Typography>
+                  <div className="mt-4 grid gap-6 sm:grid-cols-2">
+                    {article.navigation.prev ? (
+                      <Link
+                        className="flex flex-col gap-1 no-underline"
+                        href={`/single/${article.navigation.prev.slug}`}
+                      >
+                        <span className="text-muted text-xs">Previous</span>
+                        <span className="text-foreground line-clamp-2 leading-6">
+                          {article.navigation.prev.title}
+                        </span>
+                      </Link>
+                    ) : (
+                      <span />
+                    )}
+                    {article.navigation.next ? (
+                      <Link
+                        className="flex flex-col gap-1 no-underline sm:items-end sm:text-right"
+                        href={`/single/${article.navigation.next.slug}`}
+                      >
+                        <span className="text-muted text-xs">Next</span>
+                        <span className="text-foreground line-clamp-2 leading-6">
+                          {article.navigation.next.title}
+                        </span>
+                      </Link>
+                    ) : null}
+                  </div>
+                </nav>
+              ) : null}
+            </>
+          )}
         </article>
+
+        <div className="hidden lg:block">
+          <ArticleSidebar slug={slug} />
+        </div>
 
         <ActionBar isOpen={isActionBarOpen} aria-label="Article controls">
           <ActionBar.Prefix>
             <Tooltip delay={100}>
               <Button
                 isIconOnly
+                aria-label="Back"
                 size="sm"
                 variant="ghost"
-                aria-label="Back"
                 onPress={() => router.back()}
               >
-                <Icon icon="lucide:arrow-left" className="size-4" />
+                <Icon className="size-4" icon="gravity-ui:arrow-left" />
               </Button>
               <Tooltip.Content>Back</Tooltip.Content>
             </Tooltip>
@@ -675,28 +535,28 @@ export default function SinglePage({ params }: SinglePageProps) {
 
           <ActionBar.Content>
             <Button
-              size="sm"
-              variant={isLiked ? "danger" : "ghost"}
               aria-label={isLiked ? "Unlike article" : "Like article"}
               isDisabled={!postId}
               isPending={isLiking || isUnliking}
+              size="sm"
+              variant={isLiked ? "danger-soft" : "ghost"}
               onPress={handleLike}
             >
-              <Icon icon="gravity-ui:heart-fill" />
-              <span>{likesCount}</span>
+              <Icon icon={isLiked ? "gravity-ui:heart-fill" : "gravity-ui:heart"} />
+              <span className="tabular-nums">{likesCount}</span>
             </Button>
 
             <Tooltip delay={100}>
               <Button
                 isIconOnly
-                size="sm"
-                variant={isFavorited ? "secondary" : "ghost"}
                 aria-label={isFavorited ? "Saved for later" : "Save for later"}
                 isDisabled={!postId || isFavorited}
                 isPending={isFavoriting}
+                size="sm"
+                variant={isFavorited ? "secondary" : "ghost"}
                 onPress={handleFavorite}
               >
-                <Icon icon={isFavorited ? "lucide:bookmark-check" : "lucide:bookmark"} />
+                <Icon icon={isFavorited ? "gravity-ui:bookmark-fill" : "gravity-ui:bookmark"} />
               </Button>
               <Tooltip.Content>{isFavorited ? "Saved" : "Save for later"}</Tooltip.Content>
             </Tooltip>
@@ -704,58 +564,42 @@ export default function SinglePage({ params }: SinglePageProps) {
             <Tooltip delay={100}>
               <Button
                 isIconOnly
-                size="sm"
-                variant="ghost"
                 aria-label="Open comments"
                 isDisabled={!postId}
+                size="sm"
+                variant="ghost"
                 onPress={() => setIsCommentSheetOpen(true)}
               >
-                <Icon icon="gravity-ui:comments" />
+                <Icon icon="gravity-ui:comment" />
               </Button>
               <Tooltip.Content>Comments</Tooltip.Content>
             </Tooltip>
 
             <Popover>
-              <Button size="sm" variant="ghost" aria-label="More article actions">
-                <Icon icon="lucide:ellipsis" className="size-4" />
+              <Button aria-label="More article actions" size="sm" variant="ghost">
+                <Icon className="size-4" icon="gravity-ui:ellipsis" />
               </Button>
               <Popover.Content placement="top">
                 <Popover.Dialog>
-                  <Popover.Heading>More Actions</Popover.Heading>
-                  <div className="mt-3 flex flex-col gap-2">
+                  <Popover.Heading>More actions</Popover.Heading>
+                  <div className="mt-3 flex flex-col gap-1">
                     <Button fullWidth variant="ghost" onPress={handleShare}>
-                      <Icon icon="lucide:share-2" className="size-4" />
-                      Share
-                    </Button>
-                    <Button
-                      fullWidth
-                      variant="ghost"
-                      isDisabled={!postId}
-                      onPress={() => setIsCommentSheetOpen(true)}
-                    >
-                      <Icon icon="lucide:message-square" className="size-4" />
-                      Comments
+                      Copy link
                     </Button>
                     {isAuthenticated ? (
                       <>
                         <Separator className="my-1" />
-                        <Typography
-                          className="px-2 pt-1"
-                          color="muted"
-                          type="body-xs"
-                          weight="medium"
-                        >
+                        <Typography className="px-2 py-1" color="muted" type="body-xs">
                           Save to collection
                         </Typography>
                         {isLoadingCollections ? (
                           <Typography className="px-2 py-2" color="muted" type="body-sm">
-                            Loading collections...
+                            Loading collections
                           </Typography>
-                        ) : collections.length > 0 ? (
+                        ) : (
                           <>
                             <Button fullWidth variant="ghost" onPress={openCreateCollection}>
-                              <Icon icon="lucide:folder-plus" className="size-4" />
-                              New collection
+                              {collections.length > 0 ? "New collection" : "Create collection"}
                             </Button>
                             {collections.slice(0, 5).map((collection) => (
                               <Button
@@ -765,7 +609,6 @@ export default function SinglePage({ params }: SinglePageProps) {
                                 variant="ghost"
                                 onPress={() => handleAddToCollection(collection.id)}
                               >
-                                <Icon icon="lucide:folder-plus" className="size-4" />
                                 <span className="min-w-0 flex-1 truncate text-left">
                                   {collection.name}
                                 </span>
@@ -774,31 +617,10 @@ export default function SinglePage({ params }: SinglePageProps) {
                                 </span>
                               </Button>
                             ))}
-                            <Button
-                              fullWidth
-                              variant="ghost"
-                              onPress={() => router.push("/library")}
-                            >
-                              <Icon icon="lucide:folders" className="size-4" />
-                              Manage collections
-                            </Button>
                           </>
-                        ) : (
-                          <Button fullWidth variant="ghost" onPress={openCreateCollection}>
-                            <Icon icon="lucide:folder-plus" className="size-4" />
-                            Create collection
-                          </Button>
                         )}
                       </>
                     ) : null}
-                    <Button
-                      fullWidth
-                      variant="ghost"
-                      onPress={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                    >
-                      <Icon icon="lucide:arrow-up" className="size-4" />
-                      Back to Top
-                    </Button>
                   </div>
                 </Popover.Dialog>
               </Popover.Content>
@@ -809,30 +631,35 @@ export default function SinglePage({ params }: SinglePageProps) {
 
           <ActionBar.Suffix>
             <Tooltip delay={100}>
-              <Tooltip.Trigger className="flex flex-row">
-                <Button
-                  isIconOnly
-                  variant="ghost"
+              <Button
+                isIconOnly
+                aria-label={`Reading progress ${readingProgress} percent. Scroll to top`}
+                size="sm"
+                variant="ghost"
+                onPress={() =>
+                  window.scrollTo({
+                    top: 0,
+                    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                      ? "auto"
+                      : "smooth",
+                  })
+                }
+              >
+                <ProgressCircle
+                  aria-hidden="true"
+                  className="pointer-events-none"
+                  color="default"
+                  maxValue={100}
                   size="sm"
-                  aria-label={`Reading progress ${readingProgress}%. Scroll to top`}
-                  onPress={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                  value={readingProgress}
                 >
-                  <ProgressCircle
-                    className="pointer-events-none"
-                    color="default"
-                    maxValue={100}
-                    size="sm"
-                    value={readingProgress}
-                    aria-hidden="true"
-                  >
-                    <ProgressCircle.Track>
-                      <ProgressCircle.TrackCircle />
-                      <ProgressCircle.FillCircle />
-                    </ProgressCircle.Track>
-                  </ProgressCircle>
-                </Button>
-              </Tooltip.Trigger>
-              <Tooltip.Content>{readingProgress}% , back to top</Tooltip.Content>
+                  <ProgressCircle.Track>
+                    <ProgressCircle.TrackCircle />
+                    <ProgressCircle.FillCircle />
+                  </ProgressCircle.Track>
+                </ProgressCircle>
+              </Button>
+              <Tooltip.Content>{readingProgress}% read</Tooltip.Content>
             </Tooltip>
           </ActionBar.Suffix>
         </ActionBar>
@@ -860,15 +687,4 @@ export default function SinglePage({ params }: SinglePageProps) {
       </div>
     </>
   );
-}
-
-function getEstimatedReadingMinutes(article?: PostResponse) {
-  const source = `${article?.content ?? ""} ${article?.summary ?? ""}`.trim();
-
-  if (!source) return 4;
-
-  const wordCount = source.split(/\s+/).filter(Boolean).length;
-  const approximateCount = wordCount > 20 ? wordCount : Math.ceil(source.length / 700);
-
-  return Math.max(1, Math.ceil(approximateCount / 225));
 }
