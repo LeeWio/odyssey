@@ -1,3 +1,10 @@
+# [1.169.0](https://github.com/LeeWio/odyssey/compare/v1.168.1...v1.169.0) (2026-09-24)
+
+
+### Features
+
+* **blog:** give the journal a dedicated reading layout ([8c9c971](https://github.com/LeeWio/odyssey/commit/8c9c97152361987555f16226ce93c905a3fb1191))
+
 ## [1.168.1](https://github.com/LeeWio/odyssey/compare/v1.168.0...v1.168.1) (2026-09-23)
 
 
