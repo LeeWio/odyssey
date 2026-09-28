@@ -1,3 +1,10 @@
+# [1.183.0](https://github.com/LeeWio/odyssey/compare/v1.182.0...v1.183.0) (2026-09-28)
+
+
+### Features
+
+* **moments:** show the whole image in the viewer ([f260524](https://github.com/LeeWio/odyssey/commit/f260524c2a7daca2b8e362d48535a3bdbd073802))
+
 # [1.182.0](https://github.com/LeeWio/odyssey/compare/v1.181.0...v1.182.0) (2026-09-28)
 
 
