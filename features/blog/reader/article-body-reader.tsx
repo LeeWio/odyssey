@@ -1,10 +1,11 @@
 "use client";
 
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
 import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
+import { ArticleOutline } from "@/features/blog/reader/article-outline";
 import {
   normalizeRichTextDocument,
   parseJSONContent,
@@ -20,6 +21,10 @@ export interface ArticleBodyReaderProps {
   /** Entrance animation delay in seconds. */
   motionDelay?: number;
   showTableOfContents?: boolean;
+  /** Persistent heading list. The floating contents control stays off when this is set. */
+  outlineLabel?: string;
+  /** Desktop rail rendered in the editor context, so it can read heading storage. */
+  outlineRail?: ReactNode;
 }
 
 /**
@@ -32,6 +37,8 @@ export function ArticleBodyReader({
   contentKey,
   shellClassName = "border-none bg-transparent p-0",
   motionDelay = 0,
+  outlineLabel,
+  outlineRail,
   showTableOfContents = true,
 }: ArticleBodyReaderProps) {
   const parsedContent = useMemo(() => {
@@ -62,9 +69,13 @@ export function ArticleBodyReader({
       transition={{ duration: 0.8, ease: "easeOut", delay: motionDelay }}
       style={{ willChange: "opacity" }}
     >
+      {outlineRail}
       <RichTextEditor.Shell className={shellClassName}>
+        {outlineLabel ? <ArticleOutline label={outlineLabel} /> : null}
         <AnimatedRichTextContent />
-        {showTableOfContents ? <RichTextTableOfContents placement="right" /> : null}
+        {showTableOfContents && !outlineLabel ? (
+          <RichTextTableOfContents placement="right" />
+        ) : null}
       </RichTextEditor.Shell>
     </MotionRichTextEditor>
   );

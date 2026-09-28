@@ -156,7 +156,7 @@
     "readingProgress": "{title} reading progress",
     "featuredStories": "Featured stories",
     "latest": "Latest",
-    "mostRead": "Most read",
+    "mostRead": "Popular",
     "columns": "Columns",
     "all": "All",
     "untitledStory": "Untitled story",
@@ -175,7 +175,11 @@
     "tryAgain": "Try again",
     "emptyTitle": "No published stories yet",
     "emptyDescription": "New essays will appear here once they are published.",
-    "loadingStories": "Loading stories"
+    "loadingStories": "Loading stories",
+    "tags": "Tags",
+    "trending": "Trending",
+    "yourReading": "Your reading",
+    "attention": "Stories people are reading"
   },
   "Article": {
     "journal": "Journal",
@@ -216,7 +220,25 @@
     "moreToRead": "More to read",
     "loadingRelated": "Loading related stories",
     "nothingNearby": "Nothing nearby yet",
-    "nothingNearbyHint": "Related stories will show up as the archive grows."
+    "nothingNearbyHint": "Related stories will show up as the archive grows.",
+    "onThisPage": "On this page",
+    "views": "{count} views",
+    "likes": "{count} likes",
+    "saves": "{count} saves",
+    "updated": "Updated {date}",
+    "partOfColumn": "Part of {name}",
+    "installment": "Part {order} of {count}",
+    "aboutThisPiece": "About this piece",
+    "readColumn": "Read the column",
+    "category": "Category",
+    "tags": "Tags",
+    "yourReading": "Your reading",
+    "readProgress": "{progress}% read",
+    "trending": "Trending",
+    "featured": "Featured",
+    "mostRead": "Most read",
+    "related": "Related",
+    "aroundTheArchive": "Around the archive"
   },
   "Library": {
     "signInTitle": "Your reading library",

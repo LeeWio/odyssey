@@ -25,6 +25,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { use, useEffect, useRef, useState } from "react";
 
 import { CommentSheet } from "@/components/comment";
+import { ArticleOutline } from "@/features/blog/reader/article-outline";
 import { ArticleTypography } from "@/features/blog/reader/typography";
 import { CreateCollectionDialog } from "@/features/library/create-collection-dialog";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
@@ -44,7 +45,7 @@ import { useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
 import { getReadingPositionId } from "@/lib/reading-position";
 
-import { ArticleSidebar } from "./article-sidebar";
+import { ArticleContext } from "./article-sidebar";
 
 const ArticleBodyReader = dynamic(
   () =>
@@ -381,10 +382,12 @@ export default function SinglePage({ params }: SinglePageProps) {
         </ProgressBar.Track>
       </ProgressBar>
 
-      <div className="grid w-full grid-cols-1 items-start gap-12 px-6 pt-28 pb-28 sm:px-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16 lg:px-14 xl:px-20">
+      <div className="grid w-full grid-cols-1 items-start gap-x-10 gap-y-12 px-6 pt-28 pb-28 sm:px-8 lg:grid-cols-[minmax(0,1fr)_16rem] lg:px-8 xl:grid-cols-[14rem_minmax(0,1fr)_18rem] xl:px-10 2xl:px-14">
+        <div className="sticky top-28 hidden self-start xl:block" id="article-outline-rail" />
+
         <article
           id={postId ? `article-${postId}` : undefined}
-          className="w-full min-w-0"
+          className="order-1 w-full min-w-0 xl:order-none xl:max-w-[42rem]"
           data-reading-content
         >
           {isLoading || !article ? (
@@ -411,6 +414,16 @@ export default function SinglePage({ params }: SinglePageProps) {
                   ) : null}
                   <BreadcrumbsItem>{article.category?.name || t("essay")}</BreadcrumbsItem>
                 </Breadcrumbs>
+
+                {article.coverImage?.trim() ? (
+                  // Cover hosts are not in next/image remotePatterns.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    alt=""
+                    className="aspect-[16/9] w-full rounded-2xl object-cover"
+                    src={article.coverImage.trim()}
+                  />
+                ) : null}
 
                 <Typography
                   className="text-4xl leading-[1.08] text-balance sm:text-5xl"
@@ -444,8 +457,18 @@ export default function SinglePage({ params }: SinglePageProps) {
                   <Typography color="muted" type="body-sm">
                     {formatArticleDate(article.createdAt, locale, t("recentlyPublished"))}
                   </Typography>
+                  {article.updatedAt && article.updatedAt !== article.createdAt ? (
+                    <Typography color="muted" type="body-sm">
+                      {t("updated", {
+                        date: formatArticleDate(article.updatedAt, locale, t("recentlyPublished")),
+                      })}
+                    </Typography>
+                  ) : null}
                   <Typography className="tabular-nums" color="muted" type="body-sm">
                     {t("minRead", { count: getEstimatedReadingMinutes(article) })}
+                  </Typography>
+                  <Typography className="tabular-nums" color="muted" type="body-sm">
+                    {t("views", { count: article.views.toLocaleString(locale) })}
                   </Typography>
                 </div>
               </header>
@@ -455,23 +478,11 @@ export default function SinglePage({ params }: SinglePageProps) {
                   content={article.content}
                   contentKey={article.content}
                   contentType={article.contentType}
+                  outlineLabel={t("onThisPage")}
+                  outlineRail={<ArticleOutline label={t("onThisPage")} variant="rail" />}
+                  showTableOfContents={false}
                 />
               </ArticleTypography>
-
-              {article.tags?.length ? (
-                <ul className="mt-10 flex flex-wrap gap-x-4 gap-y-2">
-                  {article.tags.map((tag) => (
-                    <li key={tag.id}>
-                      <Link
-                        className="text-muted text-sm no-underline"
-                        href={`/explore?tag=${tag.id}`}
-                      >
-                        {tag.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
 
               {article.series && (article.navigation?.prev || article.navigation?.next) ? (
                 <nav
@@ -479,9 +490,25 @@ export default function SinglePage({ params }: SinglePageProps) {
                   className="mt-16"
                 >
                   <Separator className="mb-8" />
-                  <Typography color="muted" type="body-sm">
-                    {article.series.name}
-                  </Typography>
+                  <Link
+                    className="text-foreground text-sm font-medium no-underline"
+                    href={`/columns/${article.series.slug}`}
+                  >
+                    {t("partOfColumn", { name: article.series.name })}
+                  </Link>
+                  {article.series.description ? (
+                    <Typography className="mt-2 max-w-xl" color="muted" type="body-sm">
+                      {article.series.description}
+                    </Typography>
+                  ) : null}
+                  {article.seriesOrder ? (
+                    <Typography className="mt-2" color="muted" type="body-xs">
+                      {t("installment", {
+                        count: article.series.postsCount,
+                        order: article.seriesOrder,
+                      })}
+                    </Typography>
+                  ) : null}
                   <div className="mt-4 grid gap-6 sm:grid-cols-2">
                     {article.navigation.prev ? (
                       <Link
@@ -514,9 +541,15 @@ export default function SinglePage({ params }: SinglePageProps) {
           )}
         </article>
 
-        <div className="hidden lg:block">
-          <ArticleSidebar slug={slug} />
-        </div>
+        {!isLoading && article ? (
+          <ArticleContext
+            article={article}
+            readingMinutes={getEstimatedReadingMinutes(article)}
+            slug={slug}
+          />
+        ) : (
+          <div className="hidden lg:block" />
+        )}
 
         <ActionBar isOpen={isActionBarOpen} aria-label={t("controls")}>
           <ActionBar.Prefix>

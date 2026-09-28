@@ -175,7 +175,11 @@
     "tryAgain": "重试",
     "emptyTitle": "还没有已发布的文章",
     "emptyDescription": "新文章发布后会出现在这里。",
-    "loadingStories": "正在加载文章"
+    "loadingStories": "正在加载文章",
+    "tags": "标签",
+    "trending": "近期热门",
+    "yourReading": "你正在读",
+    "attention": "正在被阅读的文章"
   },
   "Article": {
     "journal": "日志",
@@ -216,7 +220,25 @@
     "moreToRead": "继续阅读",
     "loadingRelated": "正在加载相关文章",
     "nothingNearby": "附近还没有文章",
-    "nothingNearbyHint": "归档增加后，相关文章会出现在这里。"
+    "nothingNearbyHint": "归档增加后，相关文章会出现在这里。",
+    "onThisPage": "本页目录",
+    "views": "{count} 次浏览",
+    "likes": "{count} 次喜欢",
+    "saves": "{count} 次保存",
+    "updated": "更新于 {date}",
+    "partOfColumn": "收录于 {name}",
+    "installment": "第 {order} 篇，共 {count} 篇",
+    "aboutThisPiece": "关于这篇",
+    "readColumn": "阅读这个专栏",
+    "category": "分类",
+    "tags": "标签",
+    "yourReading": "你正在读",
+    "readProgress": "已读 {progress}%",
+    "trending": "近期热门",
+    "featured": "精选",
+    "mostRead": "最多阅读",
+    "related": "相关",
+    "aroundTheArchive": "归档四周"
   },
   "Library": {
     "signInTitle": "你的阅读书架",
