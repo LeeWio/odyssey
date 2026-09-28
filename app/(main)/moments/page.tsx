@@ -92,6 +92,9 @@ export default function MomentsPage() {
             <Link className="text-sm no-underline" href="/moments/topics">
               {t("topicsTitle")}
             </Link>
+            <Link className="text-sm no-underline" href="/moments/liked">
+              {t("liked")}
+            </Link>
             <Link className="text-sm no-underline" href="/moments/saved">
               {t("saved")}
             </Link>

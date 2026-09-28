@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useLikeMomentMutation,
   useUnlikeMomentMutation,
   useGetLikedMomentIdsQuery,
 } from "@/lib/features/moment";
-import { toast } from "@heroui/react";
+import { setLoginOpen } from "@/lib/features/ui";
 
 export const useMomentLike = (momentId?: number, initialLikesCount: number = 0) => {
+  const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [likeMoment] = useLikeMomentMutation();
   const [unlikeMoment] = useUnlikeMomentMutation();
@@ -36,7 +37,7 @@ export const useMomentLike = (momentId?: number, initialLikesCount: number = 0) 
   const toggleLike = async () => {
     if (!momentId) return;
     if (!isAuthenticated) {
-      toast.warning("Sign in to like moments.");
+      dispatch(setLoginOpen(true));
       return;
     }
     if (isLiking) return;
