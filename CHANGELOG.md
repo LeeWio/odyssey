@@ -1,3 +1,10 @@
+# [1.172.0](https://github.com/LeeWio/odyssey/compare/v1.171.0...v1.172.0) (2026-09-28)
+
+
+### Features
+
+* **journal:** open the reading index and article layout ([d35dd2f](https://github.com/LeeWio/odyssey/commit/d35dd2f7e72f51a8b478c9387d30f02d60247de2))
+
 # [1.171.0](https://github.com/LeeWio/odyssey/compare/v1.170.0...v1.171.0) (2026-09-28)
 
 
