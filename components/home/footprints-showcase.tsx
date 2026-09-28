@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, Chip, Link, Typography } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { Icon } from "@iconify/react";
 
 import {
@@ -11,6 +12,7 @@ import {
 } from "@/features/footprints";
 
 export function FootprintsShowcase() {
+  const t = useTranslations("Home");
   const arcs = getFootprintArcs(FOOTPRINTS);
   const previewPlaces = getFeaturedFootprints(3, FOOTPRINTS);
   const latestYear = Math.max(...FOOTPRINTS.map((footprint) => footprint.year));
@@ -24,7 +26,7 @@ export function FootprintsShowcase() {
       <header className="flex w-full flex-col gap-6 px-6 sm:flex-row sm:items-end sm:justify-between sm:px-10">
         <div className="max-w-xl">
           <Chip size="sm" variant="secondary">
-            Footprints
+            {t("footprints.eyebrow")}
           </Chip>
           <Typography
             id="footprints-showcase-title"
@@ -32,14 +34,14 @@ export function FootprintsShowcase() {
             weight="bold"
             className="mt-4 text-[clamp(2rem,4vw,3.5rem)] leading-[1.04] tracking-[-0.045em]"
           >
-            Places I&apos;ve Been
+            {t("footprints.title")}
           </Typography>
           <Typography color="muted" type="body" className="mt-3 max-w-lg leading-7">
-            A record of provinces and cities across China. The stops that stayed on the map.
+            {t("footprints.description")}
           </Typography>
         </div>
         <Link href="/footprints" className="shrink-0 text-sm no-underline">
-          Open the atlas
+          {t("footprints.openAtlas")}
           <Link.Icon aria-hidden="true">
             <Icon icon="gravity-ui:arrow-up-right" />
           </Link.Icon>
@@ -51,8 +53,8 @@ export function FootprintsShowcase() {
 
         <Card className="bg-overlay shadow-overlay absolute top-3 left-3 z-10 w-[260px] gap-3 p-4">
           <Card.Header>
-            <Card.Title className="text-sm">Footprints</Card.Title>
-            <Card.Description>Places kept on the map</Card.Description>
+            <Card.Title className="text-sm">{t("footprints.cardTitle")}</Card.Title>
+            <Card.Description>{t("footprints.cardDescription")}</Card.Description>
           </Card.Header>
           <Card.Content className="gap-3">
             <div className="grid grid-cols-3 gap-3 text-xs">
@@ -60,19 +62,19 @@ export function FootprintsShowcase() {
                 <strong className="text-foreground block text-base tabular-nums">
                   {FOOTPRINTS.length}
                 </strong>
-                Places
+                {t("footprints.places")}
               </span>
               <span>
                 <strong className="text-foreground block text-base tabular-nums">
                   {arcs.length}
                 </strong>
-                Paths
+                {t("footprints.paths")}
               </span>
               <span>
                 <strong className="text-foreground block text-base tabular-nums">
                   {latestYear}
                 </strong>
-                Latest
+                {t("footprints.latest")}
               </span>
             </div>
             <div className="flex flex-col gap-2">

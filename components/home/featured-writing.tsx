@@ -11,16 +11,17 @@ import { motion } from "motion/react";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { Carousel } from "@heroui-pro/react/carousel";
 import { useGetFeaturedPostsQuery } from "@/lib/features/post";
+import { useLocale, useTranslations } from "next-intl";
 
 const Grainient = dynamic(() => import("@/components/background/grainient"), {
   ssr: false,
   loading: () => <div className="bg-surface-secondary absolute inset-0" aria-hidden />,
 });
 
-const formatDate = (date?: string | null) => {
-  if (!date) return "Recently";
+const formatDate = (date: string | null | undefined, locale: string, fallback: string) => {
+  if (!date) return fallback;
 
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -63,6 +64,9 @@ function FeaturedArticle({
   publishedAt?: string | null;
   index: number;
 }) {
+  const t = useTranslations("Home");
+  const locale = useLocale();
+
   return (
     <Card className="group relative h-full overflow-hidden" variant="transparent">
       <Grainient
@@ -89,7 +93,7 @@ function FeaturedArticle({
               className="bg-background/35 backdrop-blur-md"
             >
               <Icon icon="gravity-ui:calendar" aria-hidden="true" className="size-3" />
-              {formatDate(publishedAt)}
+              {formatDate(publishedAt, locale, t("writing.recently"))}
             </Chip>
           </div>
         </Card.Header>
@@ -101,7 +105,7 @@ function FeaturedArticle({
         </Card.Content>
         <Card.Footer className="mt-auto">
           <Link href={`/single/${slug}`} className="text-sm no-underline">
-            Read the essay
+            {t("writing.readEssay")}
             <Link.Icon aria-hidden="true">
               <Icon icon="gravity-ui:arrow-up-right" />
             </Link.Icon>
@@ -113,6 +117,7 @@ function FeaturedArticle({
 }
 
 export function FeaturedWriting() {
+  const t = useTranslations("Home");
   const shouldReduceMotion = useReducedMotionPreference();
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
@@ -140,7 +145,7 @@ export function FeaturedWriting() {
       <header className="flex flex-col items-center text-center">
         <motion.div {...revealInView(0, 10)}>
           <Chip color="accent" size="sm" variant="soft">
-            Writing
+            {t("writing.eyebrow")}
           </Chip>
         </motion.div>
         <motion.div {...revealInView(0.06)}>
@@ -150,17 +155,17 @@ export function FeaturedWriting() {
             weight="bold"
             className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
           >
-            Wondering, still.
+            {t("writing.title")}
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.12, 14)}>
           <Typography color="muted" type="body" className="mt-3 max-w-xl leading-6">
-            Learning, questioning, and writing along the way.
+            {t("writing.description")}
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.16, 14)}>
           <Link className="mt-2 text-sm no-underline" href="/blog">
-            Browse all writing
+            {t("writing.browseAll")}
             <Link.Icon aria-hidden="true">
               <Icon icon="gravity-ui:arrow-up-right" />
             </Link.Icon>
@@ -205,9 +210,9 @@ export function FeaturedWriting() {
                   >
                     <FeaturedArticle
                       title={post.title}
-                      summary={post.summary || "A note from the archive."}
+                      summary={post.summary || t("writing.fallbackSummary")}
                       slug={post.slug}
-                      category={post.category?.name ?? "Essay"}
+                      category={post.category?.name ?? t("writing.fallbackCategory")}
                       publishedAt={post.publishedAt}
                       index={index}
                     />

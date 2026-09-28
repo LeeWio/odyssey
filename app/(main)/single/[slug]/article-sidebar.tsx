@@ -2,6 +2,7 @@
 
 import { EmptyState } from "@heroui-pro/react";
 import { Card, Link, Skeleton, Typography } from "@heroui/react";
+import { useLocale, useTranslations } from "next-intl";
 
 import {
   type PostDigestResponse,
@@ -13,13 +14,13 @@ export interface ArticleSidebarProps {
   slug?: string;
 }
 
-function formatPostDate(value?: string | null) {
-  if (!value) return "Recently published";
+function formatPostDate(value: string | null | undefined, locale: string, fallback: string) {
+  if (!value) return fallback;
 
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Recently published";
+  if (Number.isNaN(date.getTime())) return fallback;
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -27,10 +28,12 @@ function formatPostDate(value?: string | null) {
 }
 
 function ArticleListSkeleton() {
+  const t = useTranslations("Article");
+
   return (
     <div
       aria-busy="true"
-      aria-label="Loading related stories"
+      aria-label={t("loadingRelated")}
       className="flex flex-col gap-3"
       role="status"
     >
@@ -47,6 +50,9 @@ function ArticleListSkeleton() {
 }
 
 function StoryList({ posts }: { posts: PostDigestResponse[] }) {
+  const t = useTranslations("Article");
+  const locale = useLocale();
+
   return (
     <div className="flex flex-col gap-3">
       {posts.map((post) => (
@@ -61,7 +67,12 @@ function StoryList({ posts }: { posts: PostDigestResponse[] }) {
               </Link>
             </Card.Title>
             <Card.Description>
-              {[post.category?.name, formatPostDate(post.publishedAt)].filter(Boolean).join(" / ")}
+              {[
+                post.category?.name,
+                formatPostDate(post.publishedAt, locale, t("recentlyPublished")),
+              ]
+                .filter(Boolean)
+                .join(" / ")}
             </Card.Description>
           </Card.Header>
         </Card>
@@ -71,6 +82,7 @@ function StoryList({ posts }: { posts: PostDigestResponse[] }) {
 }
 
 export function ArticleSidebar({ slug }: ArticleSidebarProps) {
+  const t = useTranslations("Article");
   const { data: relatedData = [], isLoading: isRelatedLoading } = useGetRelatedPostsQuery(
     slug || "",
     { skip: !slug }
@@ -89,7 +101,7 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
   return (
     <aside className="flex flex-col gap-4 lg:sticky lg:top-28">
       <Typography type="body-sm" weight="semibold">
-        More to read
+        {t("moreToRead")}
       </Typography>
       {isLoading ? (
         <ArticleListSkeleton />
@@ -98,10 +110,8 @@ export function ArticleSidebar({ slug }: ArticleSidebarProps) {
       ) : (
         <EmptyState size="sm">
           <EmptyState.Header>
-            <EmptyState.Title>Nothing nearby yet</EmptyState.Title>
-            <EmptyState.Description>
-              Related stories will show up as the archive grows.
-            </EmptyState.Description>
+            <EmptyState.Title>{t("nothingNearby")}</EmptyState.Title>
+            <EmptyState.Description>{t("nothingNearbyHint")}</EmptyState.Description>
           </EmptyState.Header>
         </EmptyState>
       )}

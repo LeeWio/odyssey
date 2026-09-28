@@ -5,10 +5,13 @@ import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import Image from "next/image";
 
+import { useTranslations } from "next-intl";
+
 import { contentEntrance, enterEase } from "./motion";
 import type { MegaPanelContentProps } from "./types";
 
 export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelContentProps) {
+  const t = useTranslations("Nav");
   const reveal = (index: number) => ({
     variants: reduceMotion ? undefined : contentEntrance,
     initial: reduceMotion ? false : "hidden",
@@ -29,7 +32,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
               >
                 <Image
                   fill
-                  alt="Notebook and pencil on a quiet writing desk"
+                  alt={t("mega.chronicle.imageAlt")}
                   className="object-cover"
                   sizes="(max-width: 767px) 90vw, 38vw"
                   src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=86"
@@ -47,10 +50,10 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
             <Card.Content />
             <Card.Footer>
               <Chip size="sm" color="accent" variant="soft">
-                Featured essay
+                {t("mega.chronicle.featured")}
               </Chip>
               <Button size="sm" variant="ghost" onPress={() => onNavigate("/chronicle")}>
-                Read story
+                {t("mega.chronicle.readStory")}
               </Button>
             </Card.Footer>
           </Card>
@@ -58,12 +61,12 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
         <motion.div {...reveal(1)} className="md:col-span-2">
           <Card className="h-full" variant="transparent">
             <Card.Header>
-              <Card.Title>Latest notes</Card.Title>
-              <Card.Description>Recent additions to the writing archive.</Card.Description>
+              <Card.Title>{t("mega.chronicle.latestNotes")}</Card.Title>
+              <Card.Description>{t("mega.chronicle.latestNotesDescription")}</Card.Description>
             </Card.Header>
             <Card.Content>
               <ListBox
-                aria-label="Latest Chronicle notes"
+                aria-label={t("mega.chronicle.latestNotesLabel")}
                 selectionMode="none"
                 onAction={() => {
                   onNavigate("/chronicle");
@@ -81,13 +84,13 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
                   <Label>The quiet work of accessibility</Label>
                   <Description>Engineering · 8 min read</Description>
                 </ListBox.Item>
-                <ListBox.Item id="columns" textValue="Browse columns">
-                  <Label>Browse columns</Label>
-                  <Description>Focused reading paths</Description>
+                <ListBox.Item id="columns" textValue={t("mega.chronicle.browseColumns")}>
+                  <Label>{t("mega.chronicle.browseColumns")}</Label>
+                  <Description>{t("mega.chronicle.browseColumnsHint")}</Description>
                 </ListBox.Item>
-                <ListBox.Item id="explore" textValue="Explore by topic">
-                  <Label>Explore by topic</Label>
-                  <Description>Tags and subjects across the archive</Description>
+                <ListBox.Item id="explore" textValue={t("mega.chronicle.exploreTopics")}>
+                  <Label>{t("mega.chronicle.exploreTopics")}</Label>
+                  <Description>{t("mega.chronicle.exploreTopicsHint")}</Description>
                 </ListBox.Item>
               </ListBox>
             </Card.Content>
@@ -116,23 +119,23 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                 </span>
-                <span className="text-muted tracking-wide">Now playing</span>
+                <span className="text-muted tracking-wide">{t("mega.orbit.nowPlaying")}</span>
               </div>
             </Card.Header>
             <Card.Content className="pt-2">
               <Card.Title className="group-hover:text-accent text-sm font-semibold transition-colors duration-200">
-                Soul Soothe
+                {t("mega.orbit.soulSoothe")}
               </Card.Title>
               <Card.Description className="mt-1 text-xs leading-5">
-                Ambient works & analog vinyl rooms compiled for focused flow.
+                {t("mega.orbit.soulSootheDescription")}
               </Card.Description>
               <div className="mt-4 flex flex-col gap-1.5">
                 <div className="text-muted flex items-center justify-between text-[10px] font-medium">
-                  <span>Track: In Ambient Rooms</span>
-                  <span>65% completed</span>
+                  <span>{t("mega.orbit.track")}</span>
+                  <span>{t("mega.orbit.completed")}</span>
                 </div>
                 <ProgressBar
-                  aria-label="Soul Soothe track duration progress"
+                  aria-label={t("mega.orbit.trackProgress")}
                   value={65}
                   size="sm"
                   color="success"
@@ -149,7 +152,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
                 size="sm"
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
-                aria-label="Open Soul Soothe"
+                aria-label={t("mega.orbit.openSoulSoothe")}
                 onPress={() => onNavigate("/persona")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
@@ -173,15 +176,15 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-zinc-400 opacity-75"></span>
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-zinc-500"></span>
                 </span>
-                <span className="text-muted tracking-wide">Market closed</span>
+                <span className="text-muted tracking-wide">{t("mega.orbit.marketClosed")}</span>
               </div>
             </Card.Header>
             <Card.Content className="pt-2">
               <Card.Title className="group-hover:text-accent text-sm font-semibold transition-colors duration-200">
-                Patience & Wait
+                {t("mega.orbit.patience")}
               </Card.Title>
               <Card.Description className="mt-1 text-xs leading-5">
-                Macro-theses, asset allocations, and financial decision logs.
+                {t("mega.orbit.patienceDescription")}
               </Card.Description>
               <div className="mt-4 grid grid-cols-3 gap-2 font-mono text-[10px]">
                 <div className="bg-default/40 border-default/20 flex flex-col rounded-md border px-2 py-1.5">
@@ -201,14 +204,14 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
             <Card.Footer className="border-default/30 mt-4 flex items-center justify-between border-t pt-3">
               <span className="text-muted flex items-center gap-1.5 text-[11px] font-medium tracking-tight">
                 <Icon icon="lucide:arrow-right" className="size-3 opacity-60" />
-                Long posture active
+                {t("mega.orbit.longPosture")}
               </span>
               <Button
                 isIconOnly
                 size="sm"
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
-                aria-label="Open Patience & Wait"
+                aria-label={t("mega.orbit.openPatience")}
                 onPress={() => onNavigate("/persona")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
@@ -232,15 +235,15 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-500"></span>
                 </span>
-                <span className="text-muted tracking-wide">Calibrating</span>
+                <span className="text-muted tracking-wide">{t("mega.orbit.calibrating")}</span>
               </div>
             </Card.Header>
             <Card.Content className="pt-2">
               <Card.Title className="group-hover:text-accent text-sm font-semibold transition-colors duration-200">
-                Sweat It Out
+                {t("mega.orbit.sweat")}
               </Card.Title>
               <Card.Description className="mt-1 text-xs leading-5">
-                Biomechanical sets, power tracking, and active recovery logs.
+                {t("mega.orbit.sweatDescription")}
               </Card.Description>
               <div className="bg-default/30 border-default/20 mt-4 flex items-center justify-between gap-1 rounded-xl border px-3.5 py-2">
                 <div className="flex flex-col items-center gap-1.5">
@@ -284,14 +287,14 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
             <Card.Footer className="border-default/30 mt-4 flex items-center justify-between border-t pt-3">
               <span className="text-muted flex items-center gap-1.5 text-[11px] font-medium tracking-tight">
                 <Icon icon="lucide:arrow-right" className="size-3 opacity-60" />
-                Cold plunge recovery
+                {t("mega.orbit.coldPlunge")}
               </span>
               <Button
                 isIconOnly
                 size="sm"
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
-                aria-label="Open Sweat It Out"
+                aria-label={t("mega.orbit.openSweat")}
                 onPress={() => onNavigate("/persona")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
@@ -315,37 +318,37 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                 </span>
-                <span className="text-muted tracking-wide">Compiling</span>
+                <span className="text-muted tracking-wide">{t("mega.orbit.compiling")}</span>
               </div>
             </Card.Header>
             <Card.Content className="pt-2">
               <Card.Title className="group-hover:text-accent text-sm font-semibold transition-colors duration-200">
-                Code & Build
+                {t("mega.orbit.code")}
               </Card.Title>
               <Card.Description className="mt-1 text-xs leading-5">
-                Translating abstract logic into functional, accessible systems.
+                {t("mega.orbit.codeDescription")}
               </Card.Description>
               <div className="border-default/20 mt-4 rounded-xl border bg-zinc-950/90 p-2.5 font-mono text-[10px] leading-relaxed text-zinc-400 shadow-inner dark:bg-black/40">
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-emerald-500">✓</span>
-                  <span className="font-semibold text-zinc-200">compile successful</span>
+                  <span className="font-semibold text-zinc-200">
+                    {t("mega.orbit.compileSuccess")}
+                  </span>
                 </div>
-                <div className="mt-0.5 text-[9px] text-zinc-500">
-                  Compiled in 42ms · 165 modules
-                </div>
+                <div className="mt-0.5 text-[9px] text-zinc-500">{t("mega.orbit.compiledIn")}</div>
               </div>
             </Card.Content>
             <Card.Footer className="border-default/30 mt-4 flex items-center justify-between border-t pt-3">
               <span className="text-muted flex items-center gap-1.5 text-[11px] font-medium tracking-tight">
                 <Icon icon="lucide:arrow-right" className="size-3 opacity-60" />
-                Next.js hydration audits
+                {t("mega.orbit.hydrationAudits")}
               </span>
               <Button
                 isIconOnly
                 size="sm"
                 variant="ghost"
                 className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
-                aria-label="Open Code & Build"
+                aria-label={t("mega.orbit.openCode")}
                 onPress={() => onNavigate("/persona")}
               >
                 <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-3.5" />
@@ -371,7 +374,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
               >
                 <Image
                   fill
-                  alt="Iceland travel study"
+                  alt={t("mega.travelogue.icelandAlt")}
                   className="object-cover"
                   sizes="(max-width: 767px) 90vw, 25vw"
                   src="https://images.unsplash.com/photo-1504829857797-ddff29c27927?auto=format&fit=crop&w=800&q=86"
@@ -380,9 +383,9 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
             </div>
             <Card.Header className="p-4 pt-3">
               <Card.Title className="transition-transform duration-200 ease-out group-hover:translate-x-1">
-                North Atlantic Studies
+                {t("mega.travelogue.icelandTitle")}
               </Card.Title>
-              <Card.Description>Iceland · 64°08′N</Card.Description>
+              <Card.Description>{t("mega.travelogue.icelandMeta")}</Card.Description>
             </Card.Header>
           </Card>
         </motion.div>
@@ -398,7 +401,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
               >
                 <Image
                   fill
-                  alt="Copenhagen travel study"
+                  alt={t("mega.travelogue.copenhagenAlt")}
                   className="object-cover"
                   sizes="(max-width: 767px) 90vw, 25vw"
                   src="https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?auto=format&fit=crop&w=800&q=86"
@@ -407,9 +410,9 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
             </div>
             <Card.Header className="p-4 pt-3">
               <Card.Title className="transition-transform duration-200 ease-out group-hover:translate-x-1">
-                Nordic Geometry
+                {t("mega.travelogue.copenhagenTitle")}
               </Card.Title>
-              <Card.Description>Copenhagen · 55°40′N</Card.Description>
+              <Card.Description>{t("mega.travelogue.copenhagenMeta")}</Card.Description>
             </Card.Header>
           </Card>
         </motion.div>
@@ -425,7 +428,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
               >
                 <Image
                   fill
-                  alt="Kyoto travel study"
+                  alt={t("mega.travelogue.kyotoAlt")}
                   className="object-cover"
                   sizes="(max-width: 767px) 90vw, 25vw"
                   src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=86"
@@ -434,9 +437,9 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
             </div>
             <Card.Header className="p-4 pt-3">
               <Card.Title className="transition-transform duration-200 ease-out group-hover:translate-x-1">
-                Silent Afternoons
+                {t("mega.travelogue.kyotoTitle")}
               </Card.Title>
-              <Card.Description>Kyoto · 35°01′N</Card.Description>
+              <Card.Description>{t("mega.travelogue.kyotoMeta")}</Card.Description>
             </Card.Header>
           </Card>
         </motion.div>
@@ -454,17 +457,15 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:notebook-pen" className="size-5" />
               </div>
-              <Card.Title>Moments</Card.Title>
-              <Card.Description>
-                Short observations, work-in-progress notes, and things worth keeping close.
-              </Card.Description>
+              <Card.Title>{t("mega.archive.moments")}</Card.Title>
+              <Card.Description>{t("mega.archive.momentsDescription")}</Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
               <Chip size="sm" variant="soft" color="accent">
-                Notes
+                {t("mega.archive.notes")}
               </Chip>
               <Button size="sm" variant="ghost" onPress={() => onNavigate("/moments")}>
-                Browse notes
+                {t("mega.archive.browseNotes")}
               </Button>
             </Card.Footer>
           </Card>
@@ -477,17 +478,15 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:blocks" className="size-5" />
               </div>
-              <Card.Title>Columns</Card.Title>
-              <Card.Description>
-                Longer-running threads that follow one idea beyond a single essay.
-              </Card.Description>
+              <Card.Title>{t("mega.archive.columns")}</Card.Title>
+              <Card.Description>{t("mega.archive.columnsDescription")}</Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
               <Chip size="sm" variant="soft">
-                Series
+                {t("mega.archive.series")}
               </Chip>
               <Button size="sm" variant="ghost" onPress={() => onNavigate("/columns")}>
-                Browse columns
+                {t("mega.chronicle.browseColumns")}
               </Button>
             </Card.Footer>
           </Card>
@@ -500,17 +499,15 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:calendar-range" className="size-5" />
               </div>
-              <Card.Title>Read by Date</Card.Title>
-              <Card.Description>
-                Return to the work published in a particular month or year.
-              </Card.Description>
+              <Card.Title>{t("mega.archive.readByDate")}</Card.Title>
+              <Card.Description>{t("mega.archive.readByDateDescription")}</Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
               <Chip size="sm" variant="soft" color="accent">
-                Timeline
+                {t("mega.archive.timeline")}
               </Chip>
               <Button size="sm" variant="ghost" onPress={() => onNavigate("/archive")}>
-                Browse archive
+                {t("items.archive.cta")}
               </Button>
             </Card.Footer>
           </Card>
@@ -523,17 +520,15 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
               <div className="bg-default mb-4 flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:briefcase" className="size-5" />
               </div>
-              <Card.Title>Uses</Card.Title>
-              <Card.Description>
-                The physical hardware, tools, and visual setup behind my daily workflows.
-              </Card.Description>
+              <Card.Title>{t("mega.archive.uses")}</Card.Title>
+              <Card.Description>{t("mega.archive.usesDescription")}</Card.Description>
             </Card.Header>
             <Card.Footer className="mt-auto justify-between">
               <Chip size="sm" variant="soft">
-                Tools
+                {t("mega.archive.tools")}
               </Chip>
               <Button size="sm" variant="ghost" onPress={() => onNavigate("/uses")}>
-                Browse tools
+                {t("mega.archive.browseTools")}
               </Button>
             </Card.Footer>
           </Card>

@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
   selectCurrentUser,
@@ -47,6 +48,7 @@ const NotificationPopover = dynamic(
 );
 
 export const Navbar = () => {
+  const t = useTranslations("Nav");
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
   const mounted = useMounted();
@@ -89,7 +91,7 @@ export const Navbar = () => {
     pollingInterval: 60_000,
     skip: !isAuthenticated,
   });
-  const activeItem = getNavigationItem(activeNavigation);
+  const activeItem = getNavigationItem(activeNavigation, t);
   const platformKey = mounted && (os === "macos" || os === "ios") ? "⌘" : "Ctrl";
 
   if (isSearchOpen && !hasOpenedSearch) setHasOpenedSearch(true);
@@ -398,7 +400,7 @@ export const Navbar = () => {
             key="navigation-backdrop"
             type="button"
             tabIndex={-1}
-            aria-label="Close navigation"
+            aria-label={t("closeNavigation")}
             className="fixed inset-0 z-40 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -417,7 +419,7 @@ export const Navbar = () => {
         data-compact={isCompact}
         role={isLocked || isMobileMenuOpen ? "dialog" : undefined}
         aria-modal={isLocked || isMobileMenuOpen ? true : undefined}
-        aria-label={isLocked || isMobileMenuOpen ? "Odyssey navigation" : undefined}
+        aria-label={isLocked || isMobileMenuOpen ? t("dialogLabel") : undefined}
         className="fixed inset-x-0 top-0 z-50 mx-auto w-full max-w-7xl overflow-hidden rounded-2xl border"
         initial={reduceMotion ? false : { opacity: 0 }}
         animate={{
@@ -447,7 +449,7 @@ export const Navbar = () => {
       >
         <motion.nav
           ref={navigationRef}
-          aria-label="Primary navigation"
+          aria-label={t("primary")}
           className="mx-auto grid w-full max-w-7xl grid-cols-[auto_auto_auto] items-center justify-between gap-3 px-2.5 py-0.5"
         >
           <motion.div
@@ -455,7 +457,7 @@ export const Navbar = () => {
             className="justify-self-start"
             whileTap={reduceMotion ? undefined : { scale: 0.97 }}
           >
-            <Link href="/" onClick={closeNavigation} aria-label="Odyssey home">
+            <Link href="/" onClick={closeNavigation} aria-label={t("home")}>
               <Logo size={30} />
             </Link>
           </motion.div>
@@ -492,7 +494,7 @@ export const Navbar = () => {
                 onPress={() => toggleNavigation("chronicle")}
               >
                 <span className="relative z-10 flex items-center gap-1.5">
-                  Chronicle
+                  {t("items.chronicle.label")}
                   {activeNavigation === "chronicle" && isLocked && (
                     <span className="bg-accent size-1 rounded-full" aria-hidden="true" />
                   )}
@@ -530,7 +532,7 @@ export const Navbar = () => {
                 onPress={() => toggleNavigation("daily")}
               >
                 <span className="relative z-10 flex items-center gap-1.5">
-                  Orbit
+                  {t("items.orbit.label")}
                   {activeNavigation === "daily" && isLocked && (
                     <span className="bg-accent size-1 rounded-full" aria-hidden="true" />
                   )}
@@ -568,7 +570,7 @@ export const Navbar = () => {
                 onPress={() => toggleNavigation("travelogue")}
               >
                 <span className="relative z-10 flex items-center gap-1.5">
-                  Travelogue
+                  {t("items.travelogue.label")}
                   {activeNavigation === "travelogue" && isLocked && (
                     <span className="bg-accent size-1 rounded-full" aria-hidden="true" />
                   )}
@@ -606,7 +608,7 @@ export const Navbar = () => {
                 onPress={() => toggleNavigation("more")}
               >
                 <span className="relative z-10 flex items-center gap-1.5">
-                  Archive
+                  {t("items.archive.label")}
                   {activeNavigation === "more" && isLocked && (
                     <span className="bg-accent size-1 rounded-full" aria-hidden="true" />
                   )}
@@ -619,10 +621,10 @@ export const Navbar = () => {
               href="https://www.travellings.cn/go.html"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="开往-友链接力（在新窗口打开）"
+              aria-label={t("travellingsAria")}
             >
               <Icon aria-hidden="true" icon="lucide:train-front" className="size-4" />
-              <span>开往</span>
+              <span>{t("travellings")}</span>
             </HeroLink>
           </motion.div>
 
@@ -635,13 +637,13 @@ export const Navbar = () => {
                 isIconOnly
                 variant="ghost"
                 className="size-10 rounded-xl lg:hidden"
-                aria-label="Search"
+                aria-label={t("search")}
                 onPress={() => setIsSearchOpen(true)}
               >
                 <SearchIcon aria-hidden="true" size={16} />
               </Button>
               <Tooltip.Content placement="bottom" offset={8}>
-                Search
+                {t("search")}
               </Tooltip.Content>
             </Tooltip>
 
@@ -649,11 +651,11 @@ export const Navbar = () => {
               <Button
                 variant="ghost"
                 className="h-9 min-w-0 gap-2 rounded-xl px-3"
-                aria-label={`Search, keyboard shortcut ${platformKey} K`}
+                aria-label={t("searchShortcut", { key: platformKey })}
                 onPress={() => setIsSearchOpen(true)}
               >
                 <SearchIcon aria-hidden="true" size={14} />
-                <span className="text-xs font-medium">Search</span>
+                <span className="text-xs font-medium">{t("search")}</span>
                 <Kbd variant="light" aria-hidden="true">
                   <Kbd.Abbr keyValue={platformKey === "⌘" ? "command" : "ctrl"} />
                   <Kbd.Content>K</Kbd.Content>
@@ -670,9 +672,9 @@ export const Navbar = () => {
                   aria-label={
                     mounted
                       ? resolvedTheme === "dark"
-                        ? "Switch to light theme"
-                        : "Switch to dark theme"
-                      : "Toggle theme"
+                        ? t("switchToLight")
+                        : t("switchToDark")
+                      : t("toggleTheme")
                   }
                   onPress={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                 >
@@ -702,7 +704,11 @@ export const Navbar = () => {
                   </AnimatePresence>
                 </Button>
                 <Tooltip.Content placement="bottom" offset={8}>
-                  {mounted ? (resolvedTheme === "dark" ? "Light theme" : "Dark theme") : "Theme"}
+                  {mounted
+                    ? resolvedTheme === "dark"
+                      ? t("lightTheme")
+                      : t("darkTheme")
+                    : t("theme")}
                 </Tooltip.Content>
               </Tooltip>
             </div>
@@ -712,26 +718,26 @@ export const Navbar = () => {
             {mounted && isAuthenticated ? (
               <Dropdown>
                 <Tooltip delay={500} closeDelay={100}>
-                  <Dropdown.Trigger aria-label="Open account menu" className="rounded-xl p-1.5">
+                  <Dropdown.Trigger aria-label={t("openAccount")} className="rounded-xl p-1.5">
                     <UserAvatar
                       size="sm"
                       className="size-8"
-                      name={username || "User"}
+                      name={username || t("user")}
                       avatar={currentUser?.avatar}
                       email={email}
                     />
                   </Dropdown.Trigger>
                   <Tooltip.Content placement="bottom" offset={8}>
-                    Account
+                    {t("account")}
                   </Tooltip.Content>
                 </Tooltip>
                 <Dropdown.Popover className="min-w-[250px]">
                   <div className="px-3 pt-3 pb-2">
-                    <p className="truncate text-sm font-semibold">{username || "User"}</p>
-                    <p className="text-muted truncate text-xs">{email || "Owner account"}</p>
+                    <p className="truncate text-sm font-semibold">{username || t("user")}</p>
+                    <p className="text-muted truncate text-xs">{email || t("ownerAccount")}</p>
                   </div>
                   <Dropdown.Menu
-                    aria-label="Account actions"
+                    aria-label={t("accountActions")}
                     onAction={(key) => {
                       if (key === "dashboard") dispatch(toggleDashboard());
                       if (key === "library") router.push("/library");
@@ -739,20 +745,20 @@ export const Navbar = () => {
                       if (key === "logout") handleLogout();
                     }}
                   >
-                    <Dropdown.Item id="dashboard" textValue="Dashboard">
-                      <Label>Dashboard</Label>
+                    <Dropdown.Item id="dashboard" textValue={t("dashboard")}>
+                      <Label>{t("dashboard")}</Label>
                     </Dropdown.Item>
-                    <Dropdown.Item id="library" textValue="Reading library">
-                      <Label>Reading library</Label>
+                    <Dropdown.Item id="library" textValue={t("readingLibrary")}>
+                      <Label>{t("readingLibrary")}</Label>
                     </Dropdown.Item>
-                    <Dropdown.Item id="notifications" textValue="Notifications">
+                    <Dropdown.Item id="notifications" textValue={t("notifications")}>
                       <Label>
-                        Notifications
+                        {t("notifications")}
                         {unreadNotificationCount > 0 ? ` (${unreadNotificationCount})` : ""}
                       </Label>
                     </Dropdown.Item>
-                    <Dropdown.Item id="logout" textValue="Log out" variant="danger">
-                      <Label>Log out</Label>
+                    <Dropdown.Item id="logout" textValue={t("logOut")} variant="danger">
+                      <Label>{t("logOut")}</Label>
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown.Popover>
@@ -764,7 +770,7 @@ export const Navbar = () => {
                 className="hidden h-9 rounded-xl px-3.5 font-semibold sm:flex"
                 onPress={() => dispatch(setAuthMode("login"))}
               >
-                Sign in
+                {t("signIn")}
               </Button>
             )}
 
@@ -774,7 +780,7 @@ export const Navbar = () => {
                   isIconOnly
                   variant="ghost"
                   className="size-10 rounded-xl"
-                  aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                  aria-label={isMobileMenuOpen ? t("closeMenu") : t("openMenu")}
                   aria-haspopup="dialog"
                   aria-expanded={isMobileMenuOpen}
                   aria-controls="odyssey-mega-navigation"
@@ -814,7 +820,7 @@ export const Navbar = () => {
                   </AnimatePresence>
                 </Button>
                 <Tooltip.Content placement="bottom" offset={8}>
-                  {isMobileMenuOpen ? "Close menu" : "Open menu"}
+                  {isMobileMenuOpen ? t("closeMenu") : t("openMenu")}
                 </Tooltip.Content>
               </Tooltip>
             </div>
@@ -827,7 +833,9 @@ export const Navbar = () => {
               ref={navigationContentRef}
               key="mega-navigation-content"
               id="odyssey-mega-navigation"
-              aria-label={activeItem ? `${activeItem.label} overview` : "Navigation sections"}
+              aria-label={
+                activeItem ? t("sectionOverview", { name: activeItem.label }) : t("sections")
+              }
               className="max-h-[calc(100dvh-5.5rem)]"
               style={{ overflow: "hidden" }}
               initial={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
@@ -851,7 +859,7 @@ export const Navbar = () => {
                       className="pb-3"
                     >
                       <p className="text-muted mb-2 text-xs font-semibold tracking-[0.14em] uppercase">
-                        Explore Odyssey
+                        {t("explore")}
                       </p>
 
                       {/* Static unrolled mobile menu index triggers */}
@@ -869,9 +877,11 @@ export const Navbar = () => {
                             onPress={() => setActiveNavigation("chronicle")}
                           >
                             <span>
-                              <span className="block text-base font-semibold">Chronicle</span>
+                              <span className="block text-base font-semibold">
+                                {t("items.chronicle.label")}
+                              </span>
                               <span className="text-muted mt-0.5 block text-xs font-normal">
-                                Writing & systems
+                                {t("items.chronicle.eyebrow")}
                               </span>
                             </span>
                             <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-4" />
@@ -891,9 +901,11 @@ export const Navbar = () => {
                             onPress={() => setActiveNavigation("daily")}
                           >
                             <span>
-                              <span className="block text-base font-semibold">Orbit</span>
+                              <span className="block text-base font-semibold">
+                                {t("items.orbit.label")}
+                              </span>
                               <span className="text-muted mt-0.5 block text-xs font-normal">
-                                Daily practices
+                                {t("items.orbit.eyebrow")}
                               </span>
                             </span>
                             <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-4" />
@@ -913,9 +925,11 @@ export const Navbar = () => {
                             onPress={() => setActiveNavigation("travelogue")}
                           >
                             <span>
-                              <span className="block text-base font-semibold">Travelogue</span>
+                              <span className="block text-base font-semibold">
+                                {t("items.travelogue.label")}
+                              </span>
                               <span className="text-muted mt-0.5 block text-xs font-normal">
-                                Places & photography
+                                {t("items.travelogue.eyebrow")}
                               </span>
                             </span>
                             <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-4" />
@@ -935,9 +949,11 @@ export const Navbar = () => {
                             onPress={() => setActiveNavigation("more")}
                           >
                             <span>
-                              <span className="block text-base font-semibold">Archive</span>
+                              <span className="block text-base font-semibold">
+                                {t("items.archive.label")}
+                              </span>
                               <span className="text-muted mt-0.5 block text-xs font-normal">
-                                Essays & notes
+                                {t("items.archive.mobileEyebrow")}
                               </span>
                             </span>
                             <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-4" />
@@ -950,7 +966,7 @@ export const Navbar = () => {
                         href="https://www.travellings.cn/go.html"
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label="开往-友链接力（在新窗口打开）"
+                        aria-label={t("travellingsAria")}
                         onPress={closeNavigation}
                       >
                         <span className="flex items-center gap-2">
@@ -960,9 +976,11 @@ export const Navbar = () => {
                             className="text-accent size-4"
                           />
                           <span>
-                            <span className="block text-base font-semibold">开往</span>
+                            <span className="block text-base font-semibold">
+                              {t("travellings")}
+                            </span>
                             <span className="text-muted mt-0.5 block text-xs font-normal">
-                              友链接力
+                              {t("travellingsHint")}
                             </span>
                           </span>
                         </span>
@@ -976,10 +994,10 @@ export const Navbar = () => {
                             variant="secondary"
                             onPress={() => openAuthFromMobileMenu("login")}
                           >
-                            Sign in
+                            {t("signIn")}
                           </Button>
                           <Button fullWidth onPress={() => openAuthFromMobileMenu("signup")}>
-                            Create account
+                            {t("createAccount")}
                           </Button>
                         </div>
                       )}
@@ -992,7 +1010,7 @@ export const Navbar = () => {
                       onPress={() => setActiveNavigation(null)}
                     >
                       <Icon aria-hidden="true" icon="lucide:arrow-left" className="size-4" />
-                      All sections
+                      {t("allSections")}
                     </Button>
                   )}
                 </div>

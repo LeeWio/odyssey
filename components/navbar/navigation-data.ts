@@ -2,54 +2,58 @@
 
 import type { NavigationId } from "./types";
 
-export const getNavigationItem = (id: NavigationId | null) => {
+type NavigationTranslator = (key: string) => string;
+
+const NAVIGATION_COPY: Record<
+  NavigationId,
+  { href: string; label: string; eyebrow: string; title: string; description: string; cta: string }
+> = {
+  chronicle: {
+    href: "/chronicle",
+    label: "items.chronicle.label",
+    eyebrow: "items.chronicle.eyebrow",
+    title: "items.chronicle.title",
+    description: "items.chronicle.description",
+    cta: "items.chronicle.cta",
+  },
+  daily: {
+    href: "/persona",
+    label: "items.orbit.label",
+    eyebrow: "items.orbit.eyebrow",
+    title: "items.orbit.title",
+    description: "items.orbit.description",
+    cta: "items.orbit.cta",
+  },
+  travelogue: {
+    href: "/gallery",
+    label: "items.travelogue.label",
+    eyebrow: "items.travelogue.eyebrow",
+    title: "items.travelogue.title",
+    description: "items.travelogue.description",
+    cta: "items.travelogue.cta",
+  },
+  more: {
+    href: "/archive",
+    label: "items.archive.label",
+    eyebrow: "items.archive.eyebrow",
+    title: "items.archive.title",
+    description: "items.archive.description",
+    cta: "items.archive.cta",
+  },
+};
+
+export const getNavigationItem = (id: NavigationId | null, t: NavigationTranslator) => {
   if (!id) return null;
-  switch (id) {
-    case "chronicle":
-      return {
-        id: "chronicle" as const,
-        label: "Chronicle",
-        eyebrow: "Writing & systems",
-        title: "Words that survive the build.",
-        description:
-          "Field notes on design systems, accessible engineering, and structural decisions that resist contact with the real world.",
-        href: "/chronicle",
-        cta: "Explore chronicle",
-      };
-    case "daily":
-      return {
-        id: "daily" as const,
-        label: "Orbit", // Changed from Rituals to Orbit (representing your daily trajectory)
-        eyebrow: "Daily practices",
-        title: "How I spend the hours.",
-        description:
-          "Four pillars of focus, patience, biomechanics, and compiled logic that shape the rhythm of each day.",
-        href: "/persona",
-        cta: "Open persona",
-      };
-    case "travelogue":
-      return {
-        id: "travelogue" as const,
-        label: "Travelogue",
-        eyebrow: "Places & photography",
-        title: "Moments framed in flow.",
-        description:
-          "Brutalist structures, wild coastlines, and silent weather studies collected across slow journeys in Iceland, Europe, and Asia.",
-        href: "/gallery",
-        cta: "View gallery",
-      };
-    case "more":
-      return {
-        id: "more" as const,
-        label: "Archive",
-        eyebrow: "Writing, in sequence",
-        title: "The work, in context.",
-        description:
-          "A chronological path through essays, notes, and the threads that connect them over time.",
-        href: "/archive",
-        cta: "Browse archive",
-      };
-    default:
-      return null;
-  }
+  const copy = NAVIGATION_COPY[id];
+  if (!copy) return null;
+
+  return {
+    id,
+    href: copy.href,
+    label: t(copy.label),
+    eyebrow: t(copy.eyebrow),
+    title: t(copy.title),
+    description: t(copy.description),
+    cta: t(copy.cta),
+  };
 };

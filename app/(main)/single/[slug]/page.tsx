@@ -21,6 +21,7 @@ import { useDebouncedCallback } from "@mantine/hooks";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { use, useEffect, useRef, useState } from "react";
 
 import { CommentSheet } from "@/components/comment";
@@ -95,12 +96,12 @@ function getReadingPositionAnchor(postId: number) {
   return anchor ? `#${anchor}` : `article-${postId}`;
 }
 
-function formatArticleDate(value?: string | null) {
-  if (!value) return "Recently published";
+function formatArticleDate(value: string | null | undefined, locale: string, fallback: string) {
+  if (!value) return fallback;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Recently published";
+  if (Number.isNaN(date.getTime())) return fallback;
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -127,6 +128,8 @@ function getEstimatedReadingMinutes(article?: PostResponse) {
 }
 
 export default function SinglePage({ params }: SinglePageProps) {
+  const t = useTranslations("Article");
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -175,7 +178,6 @@ export default function SinglePage({ params }: SinglePageProps) {
   const serverIsLiked = article?.isLiked || false;
   const serverLikesCount = article?.likesCount || 0;
   const serverIsFavorited = article?.isFavorited || false;
-  const serverFavoritesCount = article?.favoritesCount || 0;
   const currentOptimisticLike = optimisticLike?.postId === postId ? optimisticLike : null;
   const currentOptimisticFavorite =
     optimisticFavorite?.postId === postId ? optimisticFavorite : null;
@@ -287,9 +289,9 @@ export default function SinglePage({ params }: SinglePageProps) {
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      toast.success("Article link copied.");
+      toast.success(t("linkCopied"));
     } catch {
-      toast.danger("Unable to copy article link.");
+      toast.danger(t("linkCopyFailed"));
     }
   };
 
@@ -311,7 +313,7 @@ export default function SinglePage({ params }: SinglePageProps) {
       }
     } catch {
       setOptimisticLike({ postId, isLiked: wasLiked, likesCount: previousLikesCount });
-      toast.danger("Please log in to like this article.");
+      toast.danger(t("loginToLike"));
     }
   };
 
@@ -322,10 +324,10 @@ export default function SinglePage({ params }: SinglePageProps) {
 
     try {
       await favoritePost(postId).unwrap();
-      toast.success("Saved for later.");
+      toast.success(t("savedToast"));
     } catch {
       setOptimisticFavorite({ postId, isFavorited: false, favoritesCount: 0 });
-      toast.danger("Please log in to save this article.");
+      toast.danger(t("loginToSave"));
     }
   };
 
@@ -351,14 +353,12 @@ export default function SinglePage({ params }: SinglePageProps) {
       <div className="flex min-h-[70dvh] items-center justify-center px-6">
         <EmptyState className="max-w-md">
           <EmptyState.Header>
-            <EmptyState.Title>Article not found</EmptyState.Title>
-            <EmptyState.Description>
-              This post could not be found, or it has not been published yet.
-            </EmptyState.Description>
+            <EmptyState.Title>{t("notFoundTitle")}</EmptyState.Title>
+            <EmptyState.Description>{t("notFoundDescription")}</EmptyState.Description>
           </EmptyState.Header>
           <EmptyState.Content>
             <Button size="sm" variant="secondary" onPress={() => router.push("/single")}>
-              Back to journal
+              {t("backToJournal")}
             </Button>
           </EmptyState.Content>
         </EmptyState>
@@ -369,7 +369,7 @@ export default function SinglePage({ params }: SinglePageProps) {
   return (
     <>
       <ProgressBar
-        aria-label="Article reading progress"
+        aria-label={t("readingProgress")}
         className="fixed inset-x-0 top-0 z-[70]"
         color="accent"
         maxValue={100}
@@ -388,7 +388,7 @@ export default function SinglePage({ params }: SinglePageProps) {
           data-reading-content
         >
           {isLoading || !article ? (
-            <div aria-busy="true" aria-label="Loading article" className="flex flex-col gap-6">
+            <div aria-busy="true" aria-label={t("loading")} className="flex flex-col gap-6">
               <Skeleton className="h-4 w-40 rounded-md" />
               <Skeleton className="h-14 w-11/12 rounded-lg" />
               <Skeleton className="h-14 w-3/4 rounded-lg" />
@@ -403,13 +403,13 @@ export default function SinglePage({ params }: SinglePageProps) {
             <>
               <header className="flex flex-col gap-6 pb-10">
                 <Breadcrumbs>
-                  <BreadcrumbsItem href="/single">Journal</BreadcrumbsItem>
+                  <BreadcrumbsItem href="/single">{t("journal")}</BreadcrumbsItem>
                   {article.series ? (
                     <BreadcrumbsItem href={`/columns/${article.series.slug}`}>
                       {article.series.name}
                     </BreadcrumbsItem>
                   ) : null}
-                  <BreadcrumbsItem>{article.category?.name || "Essay"}</BreadcrumbsItem>
+                  <BreadcrumbsItem>{article.category?.name || t("essay")}</BreadcrumbsItem>
                 </Breadcrumbs>
 
                 <Typography
@@ -442,10 +442,10 @@ export default function SinglePage({ params }: SinglePageProps) {
                     </Typography>
                   </div>
                   <Typography color="muted" type="body-sm">
-                    {formatArticleDate(article.createdAt)}
+                    {formatArticleDate(article.createdAt, locale, t("recentlyPublished"))}
                   </Typography>
                   <Typography className="tabular-nums" color="muted" type="body-sm">
-                    {getEstimatedReadingMinutes(article)} min read
+                    {t("minRead", { count: getEstimatedReadingMinutes(article) })}
                   </Typography>
                 </div>
               </header>
@@ -474,7 +474,10 @@ export default function SinglePage({ params }: SinglePageProps) {
               ) : null}
 
               {article.series && (article.navigation?.prev || article.navigation?.next) ? (
-                <nav aria-label={`${article.series.name} column navigation`} className="mt-16">
+                <nav
+                  aria-label={t("columnNavigation", { name: article.series.name })}
+                  className="mt-16"
+                >
                   <Separator className="mb-8" />
                   <Typography color="muted" type="body-sm">
                     {article.series.name}
@@ -485,7 +488,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                         className="flex flex-col gap-1 no-underline"
                         href={`/single/${article.navigation.prev.slug}`}
                       >
-                        <span className="text-muted text-xs">Previous</span>
+                        <span className="text-muted text-xs">{t("previous")}</span>
                         <span className="text-foreground line-clamp-2 leading-6">
                           {article.navigation.prev.title}
                         </span>
@@ -498,7 +501,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                         className="flex flex-col gap-1 no-underline sm:items-end sm:text-right"
                         href={`/single/${article.navigation.next.slug}`}
                       >
-                        <span className="text-muted text-xs">Next</span>
+                        <span className="text-muted text-xs">{t("next")}</span>
                         <span className="text-foreground line-clamp-2 leading-6">
                           {article.navigation.next.title}
                         </span>
@@ -515,19 +518,19 @@ export default function SinglePage({ params }: SinglePageProps) {
           <ArticleSidebar slug={slug} />
         </div>
 
-        <ActionBar isOpen={isActionBarOpen} aria-label="Article controls">
+        <ActionBar isOpen={isActionBarOpen} aria-label={t("controls")}>
           <ActionBar.Prefix>
             <Tooltip delay={100}>
               <Button
                 isIconOnly
-                aria-label="Back"
+                aria-label={t("back")}
                 size="sm"
                 variant="ghost"
                 onPress={() => router.back()}
               >
                 <Icon className="size-4" icon="gravity-ui:arrow-left" />
               </Button>
-              <Tooltip.Content>Back</Tooltip.Content>
+              <Tooltip.Content>{t("back")}</Tooltip.Content>
             </Tooltip>
           </ActionBar.Prefix>
 
@@ -535,7 +538,7 @@ export default function SinglePage({ params }: SinglePageProps) {
 
           <ActionBar.Content>
             <Button
-              aria-label={isLiked ? "Unlike article" : "Like article"}
+              aria-label={isLiked ? t("unlike") : t("like")}
               isDisabled={!postId}
               isPending={isLiking || isUnliking}
               size="sm"
@@ -549,7 +552,7 @@ export default function SinglePage({ params }: SinglePageProps) {
             <Tooltip delay={100}>
               <Button
                 isIconOnly
-                aria-label={isFavorited ? "Saved for later" : "Save for later"}
+                aria-label={isFavorited ? t("savedForLater") : t("saveForLater")}
                 isDisabled={!postId || isFavorited}
                 isPending={isFavoriting}
                 size="sm"
@@ -558,13 +561,13 @@ export default function SinglePage({ params }: SinglePageProps) {
               >
                 <Icon icon={isFavorited ? "gravity-ui:bookmark-fill" : "gravity-ui:bookmark"} />
               </Button>
-              <Tooltip.Content>{isFavorited ? "Saved" : "Save for later"}</Tooltip.Content>
+              <Tooltip.Content>{isFavorited ? t("saved") : t("saveForLater")}</Tooltip.Content>
             </Tooltip>
 
             <Tooltip delay={100}>
               <Button
                 isIconOnly
-                aria-label="Open comments"
+                aria-label={t("openComments")}
                 isDisabled={!postId}
                 size="sm"
                 variant="ghost"
@@ -572,34 +575,34 @@ export default function SinglePage({ params }: SinglePageProps) {
               >
                 <Icon icon="gravity-ui:comment" />
               </Button>
-              <Tooltip.Content>Comments</Tooltip.Content>
+              <Tooltip.Content>{t("comments")}</Tooltip.Content>
             </Tooltip>
 
             <Popover>
-              <Button aria-label="More article actions" size="sm" variant="ghost">
+              <Button aria-label={t("moreActions")} size="sm" variant="ghost">
                 <Icon className="size-4" icon="gravity-ui:ellipsis" />
               </Button>
               <Popover.Content placement="top">
                 <Popover.Dialog>
-                  <Popover.Heading>More actions</Popover.Heading>
+                  <Popover.Heading>{t("moreActionsTitle")}</Popover.Heading>
                   <div className="mt-3 flex flex-col gap-1">
                     <Button fullWidth variant="ghost" onPress={handleShare}>
-                      Copy link
+                      {t("copyLink")}
                     </Button>
                     {isAuthenticated ? (
                       <>
                         <Separator className="my-1" />
                         <Typography className="px-2 py-1" color="muted" type="body-xs">
-                          Save to collection
+                          {t("saveToCollection")}
                         </Typography>
                         {isLoadingCollections ? (
                           <Typography className="px-2 py-2" color="muted" type="body-sm">
-                            Loading collections
+                            {t("loadingCollections")}
                           </Typography>
                         ) : (
                           <>
                             <Button fullWidth variant="ghost" onPress={openCreateCollection}>
-                              {collections.length > 0 ? "New collection" : "Create collection"}
+                              {collections.length > 0 ? t("newCollection") : t("createCollection")}
                             </Button>
                             {collections.slice(0, 5).map((collection) => (
                               <Button
@@ -633,7 +636,7 @@ export default function SinglePage({ params }: SinglePageProps) {
             <Tooltip delay={100}>
               <Button
                 isIconOnly
-                aria-label={`Reading progress ${readingProgress} percent. Scroll to top`}
+                aria-label={t("scrollToTop", { progress: readingProgress })}
                 size="sm"
                 variant="ghost"
                 onPress={() =>
@@ -659,7 +662,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                   </ProgressCircle.Track>
                 </ProgressCircle>
               </Button>
-              <Tooltip.Content>{readingProgress}% read</Tooltip.Content>
+              <Tooltip.Content>{t("percentRead", { progress: readingProgress })}</Tooltip.Content>
             </Tooltip>
           </ActionBar.Suffix>
         </ActionBar>

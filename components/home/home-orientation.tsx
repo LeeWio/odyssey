@@ -7,17 +7,16 @@ import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preferenc
 import { Card, Chip, CloseButton, Link } from "@heroui/react";
 import { useMounted } from "@mantine/hooks";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 
 import { dismissHomeOrientation, isHomeOrientationDismissed } from "./home-orientation-storage";
 
-const DESTINATIONS = [
-  { href: "/chronicle", label: "Read writing" },
-  { href: "/footprints", label: "Open footprints" },
-  { href: "/uses", label: "See tools" },
-] as const;
+const DESTINATION_HREFS = ["/chronicle", "/footprints", "/uses"] as const;
+const DESTINATION_KEYS = ["writing", "footprints", "tools"] as const;
 
 export function HomeOrientation() {
+  const t = useTranslations("Home");
   const mounted = useMounted();
   const shouldReduceMotion = useReducedMotionPreference();
   const { reveal } = createPageReveal(shouldReduceMotion);
@@ -35,29 +34,29 @@ export function HomeOrientation() {
 
   return (
     <motion.section
-      aria-label="Site orientation"
+      aria-label={t("orientation.regionLabel")}
       className="mx-auto w-full max-w-6xl px-6 pb-8 sm:px-10"
       {...reveal(0.05, 12)}
     >
       <Card variant="secondary" className="relative">
         <Card.Header className="gap-3 pe-12">
           <Chip size="sm" variant="secondary">
-            Start here
+            {t("orientation.eyebrow")}
           </Chip>
           <CloseButton
-            aria-label="Dismiss orientation"
+            aria-label={t("orientation.dismiss")}
             className="absolute end-3 top-3"
             onPress={dismiss}
           />
-          <Card.Title>Three honest doors</Card.Title>
+          <Card.Title>{t("orientation.title")}</Card.Title>
           <Card.Description className="max-w-xl leading-6">
-            Writing, places kept on the map, and the tools behind the work. Skip anytime.
+            {t("orientation.description")}
           </Card.Description>
         </Card.Header>
         <Card.Footer className="flex flex-wrap gap-3">
-          {DESTINATIONS.map((destination) => (
-            <Link key={destination.href} href={destination.href} onPress={dismiss}>
-              {destination.label}
+          {DESTINATION_HREFS.map((href, index) => (
+            <Link key={href} href={href} onPress={dismiss}>
+              {t(`orientation.${DESTINATION_KEYS[index]}`)}
               <Link.Icon aria-hidden="true" />
             </Link>
           ))}

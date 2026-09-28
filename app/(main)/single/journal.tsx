@@ -6,22 +6,14 @@ import {
   Alert,
   Avatar,
   Button,
-  Card,
-  Chip,
-  Header,
-  Label,
   Link,
-  ListBox,
   Popover,
   ProgressBar,
-  ScrollShadow,
   Skeleton,
-  Surface,
   Typography,
 } from "@heroui/react";
-import { motion, useReducedMotion } from "motion/react";
-import { useRouter } from "next/navigation";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useGetPublicColumnsQuery } from "@/lib/features/column";
@@ -61,13 +53,13 @@ type Collection = {
   href: string;
 };
 
-function formatDate(value?: string | null) {
-  if (!value) return "Recently published";
+function formatDate(value: string | null | undefined, locale: string, fallback: string) {
+  if (!value) return fallback;
 
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Recently published";
+  if (Number.isNaN(date.getTime())) return fallback;
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -84,6 +76,8 @@ function storyHref(post: Story) {
 }
 
 function AuthorPopover({ name, avatar }: { name: string; avatar?: string | null }) {
+  const t = useTranslations("Journal");
+  const locale = useLocale();
   const [isFollowing, setIsFollowing] = useState(false);
   const photo = avatar?.trim() || "https://img.heroui.chat/image/avatar?w=400&h=400&u=1";
   const initials = name
@@ -95,7 +89,7 @@ function AuthorPopover({ name, avatar }: { name: string; avatar?: string | null 
 
   return (
     <Popover>
-      <Popover.Trigger aria-label="User profile">
+      <Popover.Trigger aria-label={t("userProfile")}>
         <div className="flex items-center gap-2">
           <Avatar size="sm">
             <Avatar.Image alt={name} src={photo} />
@@ -127,21 +121,21 @@ function AuthorPopover({ name, avatar }: { name: string; avatar?: string | null 
                 variant={isFollowing ? "tertiary" : "primary"}
                 onPress={() => setIsFollowing(!isFollowing)}
               >
-                {isFollowing ? "Following" : "Follow"}
+                {isFollowing ? t("following") : t("follow")}
               </Button>
             </div>
           </Popover.Heading>
-          <p className="text-muted mt-3 text-sm">
-            Product designer and creative director. Building beautiful experiences that matter.
-          </p>
+          <p className="text-muted mt-3 text-sm">{t("authorBio")}</p>
           <div className="mt-3 flex gap-4">
             <div>
-              <span className="font-semibold">892</span>
-              <span className="text-muted ms-1 text-sm">Following</span>
+              <span className="font-semibold">{(892).toLocaleString(locale)}</span>
+              <span className="text-muted ms-1 text-sm">{t("following")}</span>
             </div>
             <div>
-              <span className="font-semibold">12.5K</span>
-              <span className="text-muted ms-1 text-sm">Followers</span>
+              <span className="font-semibold">
+                {(12500).toLocaleString(locale, { notation: "compact" })}
+              </span>
+              <span className="text-muted ms-1 text-sm">{t("followers")}</span>
             </div>
           </div>
         </Popover.Dialog>
@@ -150,136 +144,197 @@ function AuthorPopover({ name, avatar }: { name: string; avatar?: string | null 
   );
 }
 
-function storyMeta(post: Story) {
-  return [post.category?.name, formatDate(storyDate(post))].filter(Boolean).join(" · ");
-}
+const coverHover =
+  "transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100";
 
-function MostReadLead({ post }: { post: Story }) {
-  const cover = post.coverImage?.trim();
+function Cover({ cover, ratio }: { cover?: string; ratio: string }) {
+  if (!cover) return <span className={`${ratio} bg-default/40 block w-full`} />;
 
   return (
-    <article className="grid items-end gap-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(16rem,0.75fr)] lg:gap-12">
-      <Link
-        className="group/cover bg-surface-secondary block overflow-hidden rounded-3xl no-underline"
-        href={storyHref(post)}
-      >
-        {cover ? (
-          // Cover hosts are not in next/image remotePatterns.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            alt=""
-            className="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/cover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover/cover:scale-100"
-            src={cover}
-          />
-        ) : (
-          <div className="aspect-[4/3] w-full" />
-        )}
+    // Cover hosts are not in next/image remotePatterns.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img alt="" className={`${ratio} w-full object-cover ${coverHover}`} src={cover} />
+  );
+}
+
+function StoryMeta({ post }: { post: Story }) {
+  const t = useTranslations("Journal");
+  const locale = useLocale();
+  const meta = [post.category?.name, formatDate(storyDate(post), locale, t("recentlyPublished"))]
+    .filter(Boolean)
+    .join(" · ");
+  if (!meta) return null;
+  return <span className="text-muted text-sm">{meta}</span>;
+}
+
+function FeatureMosaic({ lead, companions }: { lead: Story; companions: Story[] }) {
+  const t = useTranslations("Journal");
+  const locale = useLocale();
+  const author = lead.authorName?.trim();
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-5">
+      <article className="bg-surface-secondary overflow-hidden rounded-3xl lg:col-span-3">
+        <Link className="group block overflow-hidden no-underline" href={storyHref(lead)}>
+          <Cover cover={lead.coverImage?.trim()} ratio="aspect-[16/10]" />
+        </Link>
+        <div className="flex flex-col gap-3 p-6 sm:p-8">
+          <StoryMeta post={lead} />
+          <Typography
+            className="text-3xl leading-tight tracking-tight sm:text-4xl"
+            type="h2"
+            weight="semibold"
+          >
+            <Link className="text-foreground no-underline" href={storyHref(lead)}>
+              {lead.title || t("untitledStory")}
+            </Link>
+          </Typography>
+          {lead.summary ? (
+            <Typography className="line-clamp-2 max-w-[52ch]" color="muted">
+              {lead.summary}
+            </Typography>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+            {author ? <AuthorPopover avatar={lead.authorAvatar} name={author} /> : null}
+            <Typography className="tabular-nums" color="muted" type="body-sm">
+              {t("views", { count: (lead.views ?? 0).toLocaleString(locale) })}
+            </Typography>
+          </div>
+        </div>
+      </article>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-1">
+        {companions.map((post) => (
+          <article
+            key={post.id ?? post.slug}
+            className="bg-surface-secondary overflow-hidden rounded-3xl"
+          >
+            <Link
+              className="group grid no-underline sm:grid-cols-[8.5rem_minmax(0,1fr)] lg:grid-cols-1"
+              href={storyHref(post)}
+            >
+              <span className="block overflow-hidden">
+                <Cover
+                  cover={post.coverImage?.trim()}
+                  ratio="aspect-[16/10] sm:aspect-square lg:aspect-[16/9]"
+                />
+              </span>
+              <span className="flex flex-col justify-center gap-2 p-5">
+                <StoryMeta post={post} />
+                <span className="text-foreground line-clamp-2 text-lg leading-6 font-semibold tracking-tight">
+                  {post.title || t("untitledStory")}
+                </span>
+              </span>
+            </Link>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StoryTile({ post }: { post: Story }) {
+  const t = useTranslations("Journal");
+
+  return (
+    <article className="bg-surface-secondary flex h-full flex-col overflow-hidden rounded-3xl">
+      <Link className="group block overflow-hidden no-underline" href={storyHref(post)}>
+        <Cover cover={post.coverImage?.trim()} ratio="aspect-[16/10]" />
       </Link>
-      <div className="flex flex-col gap-5">
-        <Typography className="tabular-nums" color="muted" type="body-sm">
-          01
-        </Typography>
-        <Typography
-          className="font-display text-[clamp(2rem,3.4vw,3.25rem)] leading-[1.02] tracking-[-0.035em]"
-          type="h3"
-        >
-          <Link className="text-foreground no-underline" href={storyHref(post)}>
-            {post.title || "Untitled story"}
+      <div className="flex flex-1 flex-col gap-2 p-5">
+        <StoryMeta post={post} />
+        <Typography type="h3" weight="semibold">
+          <Link className="text-foreground line-clamp-2 no-underline" href={storyHref(post)}>
+            {post.title || t("untitledStory")}
           </Link>
         </Typography>
         {post.summary ? (
-          <Typography className="line-clamp-3 max-w-[36ch]" color="muted">
+          <Typography className="line-clamp-2" color="muted" type="body-sm">
             {post.summary}
           </Typography>
         ) : null}
-        <div className="flex items-center justify-between gap-4 pt-2">
-          <AuthorPopover
-            avatar={post.authorAvatar}
-            name={post.authorName?.trim() || "Sarah Johnson"}
-          />
-          <Typography className="shrink-0 tabular-nums" color="muted" type="body-xs">
-            {(post.views ?? 0).toLocaleString("en-US")} views
-          </Typography>
-        </div>
       </div>
     </article>
   );
 }
 
-function MostReadEntry({ post, rank }: { post: Story; rank: number }) {
+function MostReadRail({ posts }: { posts: Story[] }) {
+  const t = useTranslations("Journal");
+  const locale = useLocale();
+
   return (
-    <article className="border-separator grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-4 border-b py-6 last:border-b-0">
-      <Typography className="pt-1 tabular-nums" color="muted" type="body-sm">
-        {String(rank).padStart(2, "0")}
+    <section
+      aria-labelledby="popular-title"
+      className="bg-surface-secondary flex flex-col gap-1 rounded-3xl p-5"
+    >
+      <Typography id="popular-title" className="px-2 pt-1 pb-3" type="h3" weight="semibold">
+        {t("mostRead")}
       </Typography>
-      <div className="flex min-w-0 flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <Typography
-            className="font-display text-[clamp(1.35rem,2vw,1.75rem)] leading-tight tracking-[-0.03em]"
-            type="h3"
-          >
-            <Link className="text-foreground no-underline" href={storyHref(post)}>
-              {post.title || "Untitled story"}
+      <ol>
+        {posts.slice(0, 4).map((post, index) => (
+          <li key={post.id ?? post.slug}>
+            <Link
+              className="hover:bg-default/60 grid grid-cols-[1.75rem_minmax(0,1fr)] items-baseline gap-3 rounded-2xl px-2 py-3 no-underline transition-colors duration-150"
+              href={storyHref(post)}
+            >
+              <span className="text-muted text-sm tabular-nums">{index + 1}</span>
+              <span className="flex min-w-0 flex-col gap-1">
+                <span className="text-foreground line-clamp-2 text-sm leading-5 font-medium">
+                  {post.title || t("untitledStory")}
+                </span>
+                <span className="text-muted text-xs tabular-nums">
+                  {t("views", { count: (post.views ?? 0).toLocaleString(locale) })}
+                </span>
+              </span>
             </Link>
-          </Typography>
-          <Typography color="muted" type="body-sm">
-            {storyMeta(post)}
-          </Typography>
-        </div>
-        <div className="flex items-center justify-between gap-4">
-          <AuthorPopover
-            avatar={post.authorAvatar}
-            name={post.authorName?.trim() || "Sarah Johnson"}
-          />
-          <Typography className="shrink-0 tabular-nums" color="muted" type="body-xs">
-            {(post.views ?? 0).toLocaleString("en-US")} views
-          </Typography>
-        </div>
-      </div>
-    </article>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 
-function StoryCard({ post }: { post: Story }) {
-  const cover = post.coverImage?.trim();
+function ColumnRail({ collections }: { collections: Collection[] }) {
+  const t = useTranslations("Journal");
+  const locale = useLocale();
+  if (collections.length === 0) return null;
 
   return (
-    <Card className="h-full" variant="secondary">
-      {cover ? (
-        // Cover hosts are not in next/image remotePatterns.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img alt="" className="aspect-[16/9] w-full object-cover" src={cover} />
-      ) : null}
-      <Card.Header>
-        <div className="flex flex-wrap items-center gap-2">
-          {post.category?.name ? (
-            <Chip size="sm" variant="soft">
-              {post.category.name}
-            </Chip>
-          ) : null}
-          <Typography className="tabular-nums" color="muted" type="body-xs">
-            {formatDate(storyDate(post))}
-          </Typography>
-        </div>
-        <Card.Title className="line-clamp-2 text-xl leading-7">
-          <Link className="text-foreground no-underline" href={storyHref(post)}>
-            {post.title || "Untitled story"}
-          </Link>
-        </Card.Title>
-        {post.summary ? (
-          <Card.Description className="line-clamp-3">{post.summary}</Card.Description>
-        ) : null}
-      </Card.Header>
-      <Card.Footer className="mt-auto items-center">
-        <AuthorPopover
-          avatar={post.authorAvatar}
-          name={post.authorName?.trim() || "Sarah Johnson"}
-        />
-        <Typography className="ms-auto shrink-0 tabular-nums" color="muted" type="body-xs">
-          {(post.views ?? 0).toLocaleString("en-US")} views
+    <section
+      aria-labelledby="columns-title"
+      className="bg-surface-secondary flex flex-col gap-1 rounded-3xl p-5"
+    >
+      <div className="flex items-center justify-between px-2 pt-1 pb-3">
+        <Typography id="columns-title" type="h3" weight="semibold">
+          {t("columns")}
         </Typography>
-      </Card.Footer>
-    </Card>
+        <Link className="text-sm no-underline" href="/columns">
+          {t("all")}
+          <Link.Icon />
+        </Link>
+      </div>
+      {collections.map((collection) => (
+        <Link
+          key={collection.slug ?? collection.id}
+          className="hover:bg-default/60 flex flex-col gap-1 rounded-2xl px-2 py-3 no-underline transition-colors duration-150"
+          href={collection.href}
+        >
+          <span className="flex items-baseline justify-between gap-3">
+            <span className="text-foreground truncate text-sm font-medium">
+              {collection.name || t("untitledColumn")}
+            </span>
+            <span className="text-muted shrink-0 text-xs tabular-nums">
+              {(collection.postsCount ?? 0).toLocaleString(locale)}
+            </span>
+          </span>
+          {collection.description ? (
+            <span className="text-muted line-clamp-2 text-xs leading-5">
+              {collection.description}
+            </span>
+          ) : null}
+        </Link>
+      ))}
+    </section>
   );
 }
 
@@ -290,143 +345,139 @@ function JournalMasthead({
   categories: Array<CategoryFacet & { id: number; name: string }>;
   essayCount: number;
 }) {
-  const today = new Intl.DateTimeFormat("en-US", {
+  const t = useTranslations("Journal");
+  const locale = useLocale();
+  const today = new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "long",
     weekday: "long",
     year: "numeric",
   }).format(new Date());
-  const leadTopics = categories.slice(0, 4);
+  const leadTopics = categories.slice(0, 6);
 
   return (
-    <header className="border-separator flex flex-col gap-6 border-y py-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Typography className="tabular-nums" color="muted" type="body-sm">
-          Vol. 01
-        </Typography>
-        <Typography color="muted" type="body-sm">
-          {today}
-        </Typography>
-        <Typography className="tabular-nums" color="muted" type="body-sm">
-          {essayCount.toLocaleString("en-US")} essays
-        </Typography>
-      </div>
-
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex flex-col gap-3">
-          <Typography
-            className="font-display text-[clamp(4.5rem,12vw,9rem)] leading-[0.82] tracking-[-0.045em]"
-            type="h1"
-          >
-            Journal
+    <header className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex max-w-xl flex-col gap-2">
+          <Typography className="text-3xl tracking-tight sm:text-4xl" type="h1" weight="semibold">
+            {t("title")}
           </Typography>
-          <Typography
-            className="font-display text-2xl leading-snug italic sm:text-3xl"
-            color="muted"
-          >
-            Notes on software, design, and the systems behind the work.
-          </Typography>
+          <Typography color="muted">{t("description")}</Typography>
         </div>
-        <div className="flex flex-col items-start gap-3 lg:items-end">
-          <div className="flex flex-wrap gap-2 lg:justify-end">
-            {leadTopics.map((category) => (
-              <Chip key={category.id} size="sm" variant="soft">
-                <Link className="no-underline" href={`/explore?category=${category.id}`}>
-                  {category.name}
-                </Link>
-              </Chip>
-            ))}
-          </div>
-          <Link className="font-medium no-underline" href="/archive">
-            Browse by date
-            <Link.Icon />
+        <div className="text-muted flex items-center gap-3 text-sm">
+          <span>{today}</span>
+          <span aria-hidden="true">·</span>
+          <span className="tabular-nums">
+            {t("essays", { count: essayCount.toLocaleString(locale) })}
+          </span>
+        </div>
+      </div>
+      <nav aria-label={t("topics")} className="flex gap-2 overflow-x-auto pb-1">
+        {leadTopics.map((category) => (
+          <Link
+            key={category.id}
+            className="bg-surface-secondary text-foreground shrink-0 rounded-full px-3 py-1.5 text-sm no-underline"
+            href={`/explore?category=${category.id}`}
+          >
+            {category.name}
+            <span className="text-muted ms-1.5 tabular-nums">
+              {(category.count ?? 0).toLocaleString(locale)}
+            </span>
           </Link>
-        </div>
-      </div>
+        ))}
+        <Link
+          className="bg-surface-secondary text-foreground shrink-0 rounded-full px-3 py-1.5 text-sm no-underline"
+          href="/archive"
+        >
+          {t("archive")}
+        </Link>
+      </nav>
     </header>
   );
 }
 
 function ContinueReading({ entries }: { entries: ReadingHistoryResponse[] }) {
+  const t = useTranslations("Journal");
   const formatRelativeTime = useRelativeTime();
   if (entries.length === 0) return null;
 
   return (
-    <section aria-labelledby="continue-reading-title" className="flex flex-col gap-8">
+    <section aria-labelledby="continue-reading-title" className="flex flex-col gap-4">
       <div className="flex items-end justify-between gap-4">
         <Typography id="continue-reading-title" type="h2" weight="semibold">
-          Continue reading
+          {t("continueReading")}
         </Typography>
-        <Link className="shrink-0 no-underline" href="/library">
-          Library
+        <Link className="shrink-0 text-sm no-underline" href="/library">
+          {t("library")}
           <Link.Icon />
         </Link>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         {entries.slice(0, 3).map(({ lastReadAt, post, positionAnchor, progressPercent }) => (
-          <Card key={post.id} variant="secondary">
-            <Card.Header>
-              <Card.Title className="line-clamp-2 text-lg leading-7">
-                <Link
-                  className="text-foreground no-underline"
-                  href={getReadingPositionHref(post.slug, positionAnchor)}
-                >
-                  {post.title}
-                </Link>
-              </Card.Title>
-            </Card.Header>
-            <Card.Content>
-              <ProgressBar
-                aria-label={`${post.title} reading progress`}
-                color="accent"
-                size="sm"
-                value={progressPercent}
+          <div key={post.id} className="bg-surface-secondary flex flex-col gap-3 rounded-3xl p-5">
+            <div className="flex items-baseline justify-between gap-4">
+              <Link
+                className="text-foreground min-w-0 truncate text-lg no-underline"
+                href={getReadingPositionHref(post.slug, positionAnchor)}
               >
-                <ProgressBar.Track>
-                  <ProgressBar.Fill />
-                </ProgressBar.Track>
-              </ProgressBar>
-            </Card.Content>
-            <Card.Footer>
-              <Typography color="muted" type="body-xs">
-                {progressPercent}% read {formatRelativeTime(lastReadAt)}
+                {post.title}
+              </Link>
+              <Typography className="shrink-0 tabular-nums" color="muted" type="body-xs">
+                {progressPercent}% · {formatRelativeTime(lastReadAt)}
               </Typography>
-            </Card.Footer>
-          </Card>
+            </div>
+            <ProgressBar
+              aria-label={t("readingProgress", { title: post.title })}
+              className="mt-3"
+              color="accent"
+              size="sm"
+              value={progressPercent}
+            >
+              <ProgressBar.Track>
+                <ProgressBar.Fill />
+              </ProgressBar.Track>
+            </ProgressBar>
+          </div>
         ))}
       </div>
     </section>
   );
 }
 
-function StorySkeleton({ count = 4 }: { count?: number }) {
+function JournalSkeleton() {
+  const t = useTranslations("Journal");
+
   return (
     <div
       aria-busy="true"
-      aria-label="Loading stories"
-      className="grid gap-4 lg:grid-cols-2"
+      aria-label={t("loadingStories")}
+      className="grid gap-4 lg:grid-cols-5"
       role="status"
     >
-      {Array.from({ length: count }, (_, index) => (
-        <Card key={index} variant="secondary">
-          <Card.Content className="flex flex-col gap-3">
-            <Skeleton className="h-3 w-28 rounded-md" />
-            <Skeleton className="h-7 w-4/5 rounded-md" />
-            <Skeleton className="h-4 w-full rounded-md" />
-            <Skeleton className="h-4 w-2/3 rounded-md" />
-          </Card.Content>
-        </Card>
-      ))}
+      <div className="bg-surface-secondary overflow-hidden rounded-3xl lg:col-span-3">
+        <Skeleton className="aspect-[16/10] w-full rounded-none" />
+        <div className="flex flex-col gap-3 p-6">
+          <Skeleton className="h-3 w-24 rounded-md" />
+          <Skeleton className="h-10 w-4/5 rounded-md" />
+          <Skeleton className="h-4 w-full rounded-md" />
+        </div>
+      </div>
+      <div className="grid gap-4 lg:col-span-2">
+        {Array.from({ length: 2 }, (_, index) => (
+          <Skeleton key={index} className="h-full min-h-40 rounded-3xl" />
+        ))}
+      </div>
+      <div className="flex flex-col gap-4">
+        {Array.from({ length: 5 }, (_, index) => (
+          <Skeleton key={index} className="h-12 w-full rounded-md" />
+        ))}
+      </div>
     </div>
   );
 }
 
 export function JournalPage() {
-  const router = useRouter();
-  const [topicsExpanded, setTopicsExpanded] = useState(false);
-  const topicsContentRef = useRef<HTMLDivElement>(null);
-  const [topicsHeight, setTopicsHeight] = useState(0);
-  const reduceMotion = useReducedMotion();
+  const t = useTranslations("Journal");
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const discoveryQuery = useRetrieveDiscoveryQuery();
   const facetsQuery = useRetrieveFacetsQuery();
@@ -438,27 +489,12 @@ export function JournalPage() {
 
   const discovery = discoveryQuery.data;
   const featuredPosts = featuredQuery.data?.list ?? [];
-  const latestPosts = (latestQuery.data?.list ?? []).slice(0, 6);
+  const latestPool = latestQuery.data?.list ?? [];
   const categories = (facetsQuery.data?.categories ?? []).filter(
     (category): category is CategoryFacet & { id: number; name: string } =>
       category.id != null && Boolean(category.name) && (category.count ?? 0) > 0
   );
   const essayCount = facetsQuery.data?.totalPublishedCount ?? latestQuery.data?.total ?? 0;
-  const topicsOverflow = categories.length > 5;
-  const topicsCollapsedHeight = 320;
-
-  useLayoutEffect(() => {
-    const node = topicsContentRef.current;
-    if (!node) return;
-
-    const measure = () => setTopicsHeight(node.offsetHeight);
-    measure();
-
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-
-    return () => observer.disconnect();
-  }, [categories.length]);
 
   const collections = useMemo(() => {
     const values = new Map<string, Collection>();
@@ -492,207 +528,97 @@ export function JournalPage() {
   }, [columnsQuery.data, discovery?.series, seriesQuery.data]);
 
   const popular = (discovery?.trending?.length ? discovery.trending : discovery?.mostRead) ?? [];
+  const openingSource = featuredPosts.length > 0 ? featuredPosts : latestPool;
+  const lead = openingSource[0];
+  const companions = openingSource.slice(1, 3);
+  const shownSlugs = new Set(
+    [lead, ...companions].flatMap((post) => (post?.slug ? [post.slug] : []))
+  );
+  const latestPosts = latestPool
+    .filter((post) => !post.slug || !shownSlugs.has(post.slug))
+    .slice(0, 6);
+  const openingLoading =
+    featuredQuery.isLoading || (featuredPosts.length === 0 && latestQuery.isLoading);
+  const archiveEmpty =
+    !openingLoading && !latestQuery.isLoading && !lead && latestPosts.length === 0;
 
   return (
     <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:px-14 xl:px-20">
-      <div className="flex w-full flex-col gap-24">
+      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-16">
         <JournalMasthead categories={categories} essayCount={essayCount} />
 
         {discoveryQuery.isError && featuredQuery.isError ? (
           <Alert status="danger">
             <Alert.Indicator />
             <Alert.Content>
-              <Alert.Title>Featured stories unavailable</Alert.Title>
-              <Alert.Description>Latest writing below is still available.</Alert.Description>
+              <Alert.Title>{t("featuredUnavailable")}</Alert.Title>
+              <Alert.Description>{t("featuredUnavailableHint")}</Alert.Description>
             </Alert.Content>
             <Button variant="outline" onPress={() => void featuredQuery.refetch()}>
-              Try again
+              {t("tryAgain")}
             </Button>
           </Alert>
         ) : null}
 
-        <ContinueReading entries={libraryQuery.data?.continueReading ?? []} />
+        <div className="grid items-start gap-16 xl:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="flex min-w-0 flex-col gap-14">
+            {openingLoading ? <JournalSkeleton /> : null}
 
-        <div className="grid items-start gap-16 xl:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="flex min-w-0 flex-col gap-20">
-            <section aria-labelledby="featured-title" className="flex flex-col gap-6">
-              <Typography id="featured-title" type="h2" weight="semibold">
-                Featured
-              </Typography>
-              {featuredQuery.isLoading ? (
-                <StorySkeleton count={3} />
-              ) : featuredPosts.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {featuredPosts.slice(0, 3).map((post) => (
-                    <StoryCard key={post.id} post={post} />
+            {!openingLoading && lead ? (
+              <section aria-label={t("featuredStories")}>
+                <FeatureMosaic companions={companions} lead={lead} />
+              </section>
+            ) : null}
+
+            <ContinueReading entries={libraryQuery.data?.continueReading ?? []} />
+
+            <section aria-labelledby="latest-title" className="flex flex-col gap-2">
+              <div className="flex items-baseline justify-between gap-4">
+                <Typography id="latest-title" type="h3" weight="semibold">
+                  {t("latest")}
+                </Typography>
+              </div>
+              {latestQuery.isLoading && !openingLoading ? (
+                <div className="flex flex-col gap-4">
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <Skeleton key={index} className="h-12 w-full rounded-md" />
                   ))}
                 </div>
-              ) : null}
-            </section>
-
-            <section aria-labelledby="latest-title" className="flex flex-col gap-8">
-              <Typography id="latest-title" type="h2" weight="semibold">
-                Latest
-              </Typography>
-              {latestQuery.isLoading ? (
-                <StorySkeleton />
               ) : latestQuery.isError ? (
                 <Alert status="danger">
                   <Alert.Indicator />
                   <Alert.Content>
-                    <Alert.Title>Latest stories could not be loaded</Alert.Title>
-                    <Alert.Description>Try the request again in a moment.</Alert.Description>
+                    <Alert.Title>{t("latestFailed")}</Alert.Title>
+                    <Alert.Description>{t("latestFailedHint")}</Alert.Description>
                   </Alert.Content>
                   <Button variant="outline" onPress={() => void latestQuery.refetch()}>
                     <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                    Try again
+                    {t("tryAgain")}
                   </Button>
                 </Alert>
               ) : latestPosts.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                   {latestPosts.map((post) => (
-                    <StoryCard key={post.id} post={post} />
+                    <StoryTile key={post.id ?? post.slug} post={post} />
                   ))}
                 </div>
-              ) : (
+              ) : archiveEmpty ? (
                 <EmptyState>
                   <EmptyState.Header>
-                    <EmptyState.Title>No published stories yet</EmptyState.Title>
-                    <EmptyState.Description>
-                      New essays will appear here once they are published.
-                    </EmptyState.Description>
+                    <EmptyState.Title>{t("emptyTitle")}</EmptyState.Title>
+                    <EmptyState.Description>{t("emptyDescription")}</EmptyState.Description>
                   </EmptyState.Header>
                 </EmptyState>
-              )}
+              ) : null}
             </section>
-
-            {popular.length > 0 ? (
-              <section aria-labelledby="popular-title" className="flex flex-col gap-10">
-                <Typography id="popular-title" type="h2" weight="semibold">
-                  Most read
-                </Typography>
-                <MostReadLead post={popular[0]} />
-                {popular.length > 1 ? (
-                  <div className="border-separator border-t">
-                    {popular.slice(1, 4).map((post, index) => (
-                      <MostReadEntry key={post.id ?? post.slug} post={post} rank={index + 2} />
-                    ))}
-                  </div>
-                ) : null}
-              </section>
-            ) : null}
           </div>
 
-          <aside className="flex flex-col gap-14 xl:sticky xl:top-28">
-            {categories.length > 0 ? (
-              <Surface className="flex flex-col gap-3 rounded-3xl p-2" variant="secondary">
-                <div className="flex items-baseline justify-between px-2">
-                  <Header id="topics-title" className="text-base">
-                    Topics
-                  </Header>
-                  <span className="text-muted text-sm tabular-nums">{categories.length}</span>
-                </div>
-                <motion.div
-                  animate={{
-                    height: topicsOverflow
-                      ? topicsExpanded
-                        ? topicsHeight || topicsCollapsedHeight
-                        : Math.min(topicsHeight || topicsCollapsedHeight, topicsCollapsedHeight)
-                      : "auto",
-                  }}
-                  className="overflow-hidden"
-                  initial={false}
-                  transition={
-                    reduceMotion ? { duration: 0 } : { duration: 0.38, ease: [0.22, 1, 0.36, 1] }
-                  }
-                >
-                  <ScrollShadow className="h-full" orientation="vertical" size={48}>
-                    <div ref={topicsContentRef}>
-                      <ListBox
-                        aria-labelledby="topics-title"
-                        className="w-full"
-                        selectionMode="none"
-                        onAction={(key) => {
-                          router.push(`/explore?category=${key}`);
-                        }}
-                      >
-                        {categories.map((category) => {
-                          const count = category.count ?? 0;
-
-                          return (
-                            <ListBox.Item
-                              key={category.id}
-                              id={category.id}
-                              className="items-center px-3 py-2.5"
-                              textValue={`${category.name}, ${count} essays`}
-                            >
-                              <Label className="min-w-0 flex-1 truncate text-sm">
-                                {category.name}
-                              </Label>
-                              <Chip
-                                className="ms-auto shrink-0 tabular-nums"
-                                size="sm"
-                                variant="soft"
-                              >
-                                {count}
-                              </Chip>
-                            </ListBox.Item>
-                          );
-                        })}
-                      </ListBox>
-                    </div>
-                  </ScrollShadow>
-                </motion.div>
-                {topicsOverflow ? (
-                  <Button
-                    fullWidth
-                    variant="tertiary"
-                    onPress={() => setTopicsExpanded((open) => !open)}
-                  >
-                    {topicsExpanded ? "Show less" : "Show all"}
-                  </Button>
-                ) : null}
-              </Surface>
-            ) : null}
-
-            {collections.length > 0 ? (
-              <section aria-labelledby="columns-title" className="flex flex-col gap-4">
-                <div className="flex items-baseline justify-between gap-4">
-                  <Typography id="columns-title" type="h3" weight="semibold">
-                    Columns
-                  </Typography>
-                  <Link className="text-sm no-underline" href="/columns">
-                    All
-                    <Link.Icon />
-                  </Link>
-                </div>
-                <div className="grid gap-3">
-                  {collections.map((collection) => (
-                    <Card key={collection.slug ?? collection.id} variant="secondary">
-                      <Card.Header>
-                        <Card.Title className="flex items-baseline justify-between gap-3 text-base">
-                          <Link
-                            className="text-foreground truncate no-underline"
-                            href={collection.href}
-                          >
-                            {collection.name || "Untitled column"}
-                          </Link>
-                          <span className="text-muted shrink-0 text-sm tabular-nums">
-                            {collection.postsCount ?? 0}
-                          </span>
-                        </Card.Title>
-                        {collection.description ? (
-                          <Card.Description className="line-clamp-2">
-                            {collection.description}
-                          </Card.Description>
-                        ) : null}
-                      </Card.Header>
-                    </Card>
-                  ))}
-                </div>
-              </section>
-            ) : null}
-          </aside>
+          {popular.length > 0 || collections.length > 0 ? (
+            <aside className="flex flex-col gap-4 xl:sticky xl:top-28">
+              {popular.length > 0 ? <MostReadRail posts={popular} /> : null}
+              <ColumnRail collections={collections} />
+            </aside>
+          ) : null}
         </div>
       </div>
     </div>

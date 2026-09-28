@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { ChartColumnIcon, FileTextIcon } from "@/components/icons";
 import { selectIsAdmin } from "@/lib/features/auth";
@@ -9,6 +10,7 @@ import { createActionCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 
 export const useAdminCommands = (): CommandItem[] => {
+  const t = useTranslations("Search");
   const isAdmin = useAppSelector(selectIsAdmin);
   const dispatch = useAppDispatch();
 
@@ -20,8 +22,8 @@ export const useAdminCommands = (): CommandItem[] => {
     return [
       createActionCommand({
         id: "admin-dashboard",
-        title: "Open Admin Dashboard",
-        description: "View site-wide analytics and statistics",
+        title: t("commands.adminDashboard"),
+        description: t("commands.adminDashboardHint"),
         icon: ChartColumnIcon,
         category: "Analytics",
         source: "system",
@@ -49,8 +51,8 @@ export const useAdminCommands = (): CommandItem[] => {
       }),
       createActionCommand({
         id: "admin-rich-text",
-        title: "Open Post Editor",
-        description: "Create or edit a blog post with rich text",
+        title: t("commands.postEditor"),
+        description: t("commands.postEditorHint"),
         icon: FileTextIcon,
         category: "Management",
         source: "system",
@@ -77,5 +79,5 @@ export const useAdminCommands = (): CommandItem[] => {
         defaultVisible: true,
       }),
     ];
-  }, [isAdmin, dispatch]);
+  }, [dispatch, isAdmin, t]);
 };

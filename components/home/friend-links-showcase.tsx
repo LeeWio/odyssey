@@ -7,6 +7,7 @@ import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { useGetPublicFriendLinksQuery, type FriendLinkResponse } from "@/lib/features/friend-link";
+import { useTranslations } from "next-intl";
 
 const SHOWCASE_LIMIT = 4;
 
@@ -40,6 +41,7 @@ function LinkPreviewCard({
   index: number;
   reducedMotion: boolean;
 }) {
+  const t = useTranslations("Home");
   const url = toSafeExternalUrl(link.url);
   const avatar = toSafeExternalUrl(link.avatar);
   if (!url) return null;
@@ -81,7 +83,7 @@ function LinkPreviewCard({
           </Card.Header>
           <Card.Content className="mt-auto">
             <Typography color="muted" type="body-sm" className="line-clamp-2 leading-6">
-              {link.description || "A fellow traveler worth visiting."}
+              {link.description || t("links.fallback")}
             </Typography>
           </Card.Content>
         </Card>
@@ -91,6 +93,7 @@ function LinkPreviewCard({
 }
 
 export function FriendLinksShowcase() {
+  const t = useTranslations("Home");
   const shouldReduceMotion = useReducedMotionPreference();
   const { data: friendLinks = [], error, isLoading, refetch } = useGetPublicFriendLinksQuery();
   const visibleLinks = friendLinks
@@ -107,7 +110,7 @@ export function FriendLinksShowcase() {
       <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-xl">
           <Chip color="default" size="sm" variant="secondary">
-            The blogroll
+            {t("links.eyebrow")}
           </Chip>
           <Typography
             id="friend-links-showcase-title"
@@ -115,14 +118,14 @@ export function FriendLinksShowcase() {
             weight="bold"
             className="mt-4 text-[clamp(2rem,4vw,3.5rem)] leading-[1.04] tracking-[-0.045em]"
           >
-            Good places lead to better ideas.
+            {t("links.title")}
           </Typography>
           <Typography color="muted" type="body" className="mt-3 max-w-lg leading-7">
-            A few people and projects making thoughtful work on the open web.
+            {t("links.description")}
           </Typography>
         </div>
         <Link href="/links" className="shrink-0 text-sm no-underline">
-          Visit the full blogroll
+          {t("links.visitAll")}
           <Link.Icon aria-hidden="true">
             <Icon icon="lucide:arrow-up-right" />
           </Link.Icon>
@@ -133,7 +136,7 @@ export function FriendLinksShowcase() {
         {isLoading ? (
           <div
             aria-busy="true"
-            aria-label="Loading blogroll"
+            aria-label={t("links.loading")}
             className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
             role="status"
           >

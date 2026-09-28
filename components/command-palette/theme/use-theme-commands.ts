@@ -2,6 +2,7 @@
 
 import { useTheme } from "next-themes";
 import type React from "react";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import {
   DisplayFillIcon,
@@ -83,6 +84,7 @@ const THEME_VARIANTS: readonly ThemeVariantDefinition[] = [
 ];
 
 export const useThemeCommands = (): CommandItem[] => {
+  const t = useTranslations("Search");
   const dispatch = useAppDispatch();
   const themeVariant = useAppSelector(selectThemeVariant);
   const { theme, setTheme } = useTheme();
@@ -91,13 +93,13 @@ export const useThemeCommands = (): CommandItem[] => {
     const modeCommands = THEME_MODES.map((mode, index) =>
       createActionCommand({
         id: `theme-mode-${mode.id}`,
-        title: `Switch to ${mode.title} Mode`,
+        title: t("commands.switchMode", { mode: t(`commands.modes.${mode.id}`) }),
         description:
           theme === mode.theme
-            ? "Current color mode"
+            ? t("commands.currentMode")
             : mode.theme === "system"
-              ? "Match the device appearance"
-              : `Use a ${mode.theme} interface`,
+              ? t("commands.matchDevice")
+              : t("commands.useMode", { mode: t(`commands.modes.${mode.id}`) }),
         icon: mode.icon,
         category: "System",
         source: "theme",
@@ -116,8 +118,11 @@ export const useThemeCommands = (): CommandItem[] => {
     const variantCommands = THEME_VARIANTS.map((variant, index) =>
       createActionCommand({
         id: `theme-variant-${variant.variant}`,
-        title: `Use ${variant.title} Theme`,
-        description: themeVariant === variant.variant ? "Current theme style" : variant.description,
+        title: t("commands.useTheme", { theme: t(`commands.variants.${variant.variant}`) }),
+        description:
+          themeVariant === variant.variant
+            ? t("commands.currentTheme")
+            : t(`commands.variantHints.${variant.variant}`),
         icon: variant.icon,
         category: "System",
         source: "theme",
@@ -137,8 +142,8 @@ export const useThemeCommands = (): CommandItem[] => {
 
     const systemSettingsCommand = createNavigationCommand({
       id: "system-workspace-settings",
-      title: "Open workspace settings",
-      description: "Manage system preferences",
+      title: t("commands.workspaceSettings"),
+      description: t("commands.workspaceSettingsHint"),
       icon: GearIcon,
       category: "System",
       source: "system",
@@ -150,5 +155,5 @@ export const useThemeCommands = (): CommandItem[] => {
     });
 
     return [...modeCommands, ...variantCommands, systemSettingsCommand];
-  }, [dispatch, setTheme, theme, themeVariant]);
+  }, [dispatch, setTheme, t, theme, themeVariant]);
 };

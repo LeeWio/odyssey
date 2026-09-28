@@ -4,6 +4,7 @@ import { Chip, Kbd, ToggleButton, ToggleButtonGroup, toast, type Key } from "@he
 import { Command, EmptyState } from "@heroui-pro/react";
 import { useOs } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { HighlightedText } from "@/components/highlighted-text";
 import { MagnifierIcon, SparklesIcon } from "@/components/icons";
@@ -15,19 +16,21 @@ import { STATIC_COMMANDS } from "./static-commands";
 import { useThemeCommands } from "./theme/use-theme-commands";
 import { useSystemCommands } from "./system/use-system-commands";
 import {
-  COMMAND_CATEGORY_METADATA,
   COMMAND_CATEGORY_ORDER,
   CommandIntent,
   type CommandItem,
   type CommandSource,
 } from "./types";
 
-const COMMAND_SCOPES: readonly { label: string; source: CommandSource | null }[] = [
-  { label: "All", source: null },
-  { label: "Search", source: "search" },
-  { label: "AI", source: "ai" },
-  { label: "Themes", source: "theme" },
-  { label: "System", source: "system" },
+const COMMAND_SCOPES: readonly {
+  id: "all" | "search" | "ai" | "themes" | "system";
+  source: CommandSource | null;
+}[] = [
+  { id: "all", source: null },
+  { id: "search", source: "search" },
+  { id: "ai", source: "ai" },
+  { id: "themes", source: "theme" },
+  { id: "system", source: "system" },
 ];
 
 export interface CommandPaletteProps {
@@ -55,6 +58,7 @@ function isSafeInternalHref(href: string) {
 }
 
 export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
+  const t = useTranslations("Search");
   const router = useRouter();
   const os = useOs();
   const [inputValue, setInputValue] = useState("");
@@ -114,7 +118,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
       if (commands && commands.length > 0) {
         groups.push({
           id: `group-${category.toLowerCase()}`,
-          heading: COMMAND_CATEGORY_METADATA[category].label,
+          heading: t(`categories.${category}`),
           commands,
         });
       }
@@ -124,13 +128,13 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
     if (isSearching && (activeSource === null || activeSource === "ai")) {
       groups.unshift({
         id: "group-ai-suggestions",
-        heading: "AI Predictions",
-        badge: "Experimental",
+        heading: t("aiPredictions"),
+        badge: t("experimental"),
         commands: [
           {
             id: "ai-suggest-1",
-            title: `Draft a new article about "${inputValue}"`,
-            description: "AI will generate an outline and key points for you.",
+            title: t("draftArticle", { query: inputValue }),
+            description: t("draftArticleHint"),
             icon: SparklesIcon,
             keywords: ["ai", "draft", "article", "generate"],
             category: "AI",
@@ -138,7 +142,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
             intent: CommandIntent.EXECUTE,
             payload: {
               action: () => {
-                toast.success("AI Outline drafting initiated...");
+                toast.success(t("draftStarted"));
               },
               closeOnExecute: true,
             },
@@ -148,7 +152,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
     }
 
     return groups;
-  }, [activeSource, baseCommands, inputValue, isSearching, searchState.dynamicGroups]);
+  }, [activeSource, baseCommands, inputValue, isSearching, searchState.dynamicGroups, t]);
 
   const closePalette = () => {
     setIsOpen(false);
@@ -194,7 +198,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
 
     if (actionResult instanceof Promise) {
       void actionResult.catch(() => {
-        toast.danger("That action could not be completed. Please try again.");
+        toast.danger(t("actionFailed"));
       });
     }
   };
@@ -217,7 +221,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
           <Command.Dialog filter={() => true} inputValue={inputValue} onInputChange={setInputValue}>
             <Command.Header className="flex items-start gap-2 px-4">
               <ToggleButtonGroup
-                aria-label="Search scope"
+                aria-label={t("scope")}
                 className="flex-wrap"
                 disallowEmptySelection={false}
                 isDetached
@@ -234,8 +238,8 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                 }}
               >
                 {COMMAND_SCOPES.map((scope) => (
-                  <ToggleButton key={scope.label} id={scope.source ?? "all"} className="text-xs">
-                    {scope.label}
+                  <ToggleButton key={scope.id} id={scope.source ?? "all"} className="text-xs">
+                    {t(`scopes.${scope.id}`)}
                   </ToggleButton>
                 ))}
               </ToggleButtonGroup>
@@ -245,7 +249,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
               <Command.InputGroup.Prefix>
                 <MagnifierIcon />
               </Command.InputGroup.Prefix>
-              <Command.InputGroup.Input placeholder="Search or jump to" />
+              <Command.InputGroup.Input placeholder={t("placeholder")} />
               <Command.InputGroup.ClearButton />
               <Command.InputGroup.Suffix>
                 <Kbd className="text-xs">
@@ -265,14 +269,10 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                         <MagnifierIcon />
                       </EmptyState.Media>
                       <EmptyState.Title>
-                        {isSearching
-                          ? "No matching results"
-                          : "Start with a shortcut or search term"}
+                        {isSearching ? t("emptyTitle") : t("startTitle")}
                       </EmptyState.Title>
                       <EmptyState.Description>
-                        {isSearching
-                          ? "Try a broader keyword or switch scope."
-                          : "Search posts, categories, tags, themes, and workspace actions in one place."}
+                        {isSearching ? t("emptyHint") : t("startHint")}
                       </EmptyState.Description>
                     </EmptyState.Header>
                   </EmptyState>

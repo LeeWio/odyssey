@@ -1,9 +1,11 @@
 "use client";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
+import { useTranslations } from "next-intl";
 import { useId } from "react";
 
 export function HelloApple() {
+  const t = useTranslations("Home");
   const shouldReduceMotion = useReducedMotionPreference();
   const gradientId = useId();
   const dValue =
@@ -18,7 +20,7 @@ export function HelloApple() {
           fill="none"
           height="100%"
           width="100%"
-          aria-label="Hello"
+          aria-label={t("hero.helloLabel")}
           role="img"
           viewBox="0 145 500 210"
           xmlnsXlink="http://www.w3.org/1999/xlink"

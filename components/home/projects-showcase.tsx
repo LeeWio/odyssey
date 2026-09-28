@@ -20,6 +20,7 @@ import { motion } from "motion/react";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { type ProjectResponse, useGetPublicProjectsQuery } from "@/lib/features/project";
+import { useTranslations } from "next-intl";
 
 const SHOWCASE_LIMIT = 3;
 
@@ -43,13 +44,14 @@ function getTechnologyLabels(value?: string | null) {
 }
 
 function ProjectMedia({ project }: { project: ProjectResponse }) {
+  const t = useTranslations("Home");
   const coverImage = toSafeExternalUrl(project.coverImage);
 
   if (coverImage) {
     return (
       <Image
         unoptimized
-        alt={`${project.name} project cover`}
+        alt={t("projects.coverAlt", { name: project.name })}
         className="object-cover"
         fill
         sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
@@ -80,6 +82,7 @@ function ProjectCard({
   index: number;
   reducedMotion: boolean;
 }) {
+  const t = useTranslations("Home");
   const previewUrl = toSafeExternalUrl(project.previewUrl);
   const githubUrl = toSafeExternalUrl(project.githubUrl);
   const technologies = getTechnologyLabels(project.techStack);
@@ -118,7 +121,7 @@ function ProjectCard({
         <Card.Header className="gap-3">
           <Card.Title className="text-xl tracking-[-0.03em]">{project.name}</Card.Title>
           <Card.Description className="line-clamp-3 leading-6">
-            {project.description || "A practical experiment, released into the open."}
+            {project.description || t("projects.fallbackDescription")}
           </Card.Description>
           {technologies.length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -140,7 +143,7 @@ function ProjectCard({
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                Open project
+                {t("projects.openProject")}
                 <Icon aria-hidden="true" className="size-4" icon="gravity-ui:arrow-up-right" />
               </a>
             ) : null}
@@ -152,7 +155,7 @@ function ProjectCard({
                 target="_blank"
               >
                 <Icon aria-hidden="true" className="size-4" icon="gravity-ui:logo-github" />
-                Source
+                {t("projects.source")}
               </a>
             ) : null}
           </Card.Footer>
@@ -163,6 +166,7 @@ function ProjectCard({
 }
 
 export function ProjectsShowcase() {
+  const t = useTranslations("Home");
   const shouldReduceMotion = useReducedMotionPreference();
   const {
     data: projects = [],
@@ -184,7 +188,7 @@ export function ProjectsShowcase() {
       <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-xl">
           <Chip color="accent" size="sm" variant="soft">
-            Built in public
+            {t("projects.eyebrow")}
           </Chip>
           <Typography
             id="projects-showcase-title"
@@ -192,14 +196,14 @@ export function ProjectsShowcase() {
             weight="bold"
             className="mt-4 text-[clamp(2rem,4vw,3.5rem)] leading-[1.04] tracking-[-0.045em]"
           >
-            Projects in the open.
+            {t("projects.title")}
           </Typography>
           <Typography color="muted" type="body" className="mt-3 max-w-lg leading-7">
-            Tools, experiments, and systems shaped through practical work.
+            {t("projects.description")}
           </Typography>
         </div>
         <Link href="/projects" className="shrink-0 text-sm no-underline">
-          Explore all projects
+          {t("projects.exploreAll")}
           <Link.Icon aria-hidden="true">
             <Icon icon="gravity-ui:arrow-up-right" />
           </Link.Icon>
@@ -212,7 +216,7 @@ export function ProjectsShowcase() {
         {isLoading ? (
           <div
             aria-busy="true"
-            aria-label="Loading projects"
+            aria-label={t("projects.loading")}
             className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
             role="status"
           >
@@ -230,8 +234,8 @@ export function ProjectsShowcase() {
         ) : error ? (
           <Card className="flex flex-col items-start gap-4 p-6" variant="secondary">
             <Card.Header className="p-0">
-              <Card.Title>Projects are taking a quiet moment.</Card.Title>
-              <Card.Description>They could not be loaded right now.</Card.Description>
+              <Card.Title>{t("projects.errorTitle")}</Card.Title>
+              <Card.Description>{t("projects.errorDescription")}</Card.Description>
             </Card.Header>
             <Button
               size="sm"
@@ -240,7 +244,7 @@ export function ProjectsShowcase() {
               isPending={isFetching}
               onPress={() => void refetch()}
             >
-              Try again
+              {t("projects.retry")}
             </Button>
           </Card>
         ) : (

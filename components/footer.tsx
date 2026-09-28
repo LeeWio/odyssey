@@ -8,6 +8,7 @@ import { Card, Link, Skeleton, toast } from "@heroui/react";
 import { motion } from "motion/react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Icon } from "@iconify/react";
 import type { CarouselCard } from "@/components/card/minimal-carousel";
 import { ModeSwitch } from "./theme-switch";
@@ -32,10 +33,10 @@ const NewsletterSubscribeForm = dynamic(
 );
 
 const footerLinks = [
-  { href: "/chronicle", label: "Chronicle" },
-  { href: "/universe", label: "Universe" },
-  { href: "/guestbook", label: "Guestbook" },
-];
+  { href: "/chronicle", labelKey: "chronicle" },
+  { href: "/universe", labelKey: "universe" },
+  { href: "/guestbook", labelKey: "guestbook" },
+] as const;
 
 interface IdentityIconProps {
   size?: number | string;
@@ -64,17 +65,25 @@ const XIcon = ({ size, className }: IdentityIconProps) => (
   <Icon aria-hidden="true" icon="simple-icons:x" width={size} height={size} className={className} />
 );
 
-const identityCards: CarouselCard[] = [
+const identityCards: Array<
+  Omit<CarouselCard, "title" | "value" | "compactValue"> & {
+    titleKey: "github" | "email" | "rss" | "x";
+    value?: string;
+    valueKey?: "rssValue";
+    compactValue?: string;
+    compactValueKey?: "rssCompact";
+  }
+> = [
   {
     id: "github",
-    title: "GitHub",
+    titleKey: "github",
     value: "LeeWio",
     color: "success",
     icon: GitHubIcon,
   },
   {
     id: "email",
-    title: "Email",
+    titleKey: "email",
     value: "just.vireo@gmail.com",
     compactValue: "just.vireo",
     color: "accent",
@@ -82,15 +91,15 @@ const identityCards: CarouselCard[] = [
   },
   {
     id: "rss",
-    title: "RSS",
-    value: "The Chronicle",
-    compactValue: "Chronicle",
+    titleKey: "rss",
+    valueKey: "rssValue",
+    compactValueKey: "rssCompact",
     color: "warning",
     icon: RssIcon,
   },
   {
     id: "x",
-    title: "X",
+    titleKey: "x",
     value: "wei.li",
     color: "danger",
     icon: XIcon,
@@ -105,19 +114,27 @@ const identityLinks: Record<string, string> = {
 };
 
 export function Footer() {
+  const t = useTranslations("Footer");
   const shouldReduceMotion = useReducedMotionPreference();
 
   const reveal = (delay = 0) =>
     pageRevealInView(shouldReduceMotion, delay, 14, { duration: 0.6, margin: "-40px" });
+
+  const cards: CarouselCard[] = identityCards.map((card) => ({
+    ...card,
+    title: t(card.titleKey),
+    value: card.valueKey ? t(card.valueKey) : (card.value ?? ""),
+    compactValue: card.compactValueKey ? t(card.compactValueKey) : card.compactValue,
+  }));
 
   const handleCopy = async (card: CarouselCard) => {
     const value = card.id === "rss" ? `${window.location.origin}/rss.xml` : card.value;
 
     try {
       await navigator.clipboard.writeText(value);
-      toast.success(`${card.title} copied.`);
+      toast.success(t("copied", { name: card.title }));
     } catch {
-      toast.danger(`Couldn't copy ${card.title}.`);
+      toast.danger(t("copyFailed", { name: card.title }));
     }
   };
 
@@ -139,11 +156,9 @@ export function Footer() {
           <Card variant="secondary" className="gap-6 p-6 sm:p-8">
             <Card.Header className="max-w-xl gap-2 p-0">
               <Card.Title className="text-2xl tracking-[-0.03em]">
-                Keep the thread going.
+                {t("newsletterTitle")}
               </Card.Title>
-              <Card.Description>
-                Occasional notes on software, markets, music, and the work behind the work.
-              </Card.Description>
+              <Card.Description>{t("newsletterDescription")}</Card.Description>
             </Card.Header>
             <Card.Content className="p-0">
               <div className="max-w-lg">
@@ -155,9 +170,9 @@ export function Footer() {
 
         <motion.div {...reveal(0.08)} className="mx-auto w-full max-w-105">
           <MinimalCarousel
-            cards={identityCards}
-            copyLabel="Copy"
-            actionLabel="Visit"
+            cards={cards}
+            copyLabel={t("copy")}
+            actionLabel={t("visit")}
             onCopyClick={handleCopy}
             onCustomizeClick={handleVisit}
           />
@@ -169,20 +184,18 @@ export function Footer() {
         >
           <div className="max-w-sm">
             <p className="text-foreground text-sm font-semibold">Odyssey</p>
-            <p className="text-muted mt-2 text-sm leading-6">
-              A living notebook for ideas, systems, and the quiet momentum between them.
-            </p>
+            <p className="text-muted mt-2 text-sm leading-6">{t("tagline")}</p>
           </div>
-          <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-5 gap-y-2">
+          <nav aria-label={t("navigation")} className="flex flex-wrap gap-x-5 gap-y-2">
             {footerLinks.map((item) => (
               <Link
-                key={item.label}
+                key={item.labelKey}
                 className="text-sm"
                 href={item.href}
                 rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
                 target={item.href.startsWith("http") ? "_blank" : undefined}
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             ))}
           </nav>

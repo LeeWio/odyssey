@@ -1,10 +1,13 @@
 "use client";
 
 import { Button } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { RouteLinkButton, RouteState } from "@/components/system/route-state";
 
 export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+  const t = useTranslations("Errors");
+
   useEffect(() => {
     // Log the error to an error reporting service
 
@@ -14,13 +17,13 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
   return (
     <RouteState
       kind="error"
-      title="Something went wrong."
-      description="The page could not finish loading. Try again, or return home if the problem continues."
+      title={t("errorTitle")}
+      description={t("errorDescription")}
       actions={
         <>
-          <Button onPress={reset}>Try again</Button>
+          <Button onPress={reset}>{t("tryAgain")}</Button>
           <RouteLinkButton href="/" variant="secondary">
-            Back home
+            {t("backHome")}
           </RouteLinkButton>
         </>
       }

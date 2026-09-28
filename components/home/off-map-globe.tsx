@@ -2,6 +2,7 @@
 
 import { Avatar } from "@heroui/react";
 import { Map } from "@heroui-pro/react/map";
+import { useTranslations } from "next-intl";
 
 const demoMapStyles = {
   dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
@@ -152,6 +153,7 @@ type OffMapGlobeProps = {
 };
 
 export function OffMapGlobe({ variant = "card" }: OffMapGlobeProps) {
+  const t = useTranslations("Home");
   const isPanel = variant === "panel";
 
   return (
@@ -164,7 +166,7 @@ export function OffMapGlobe({ variant = "card" }: OffMapGlobeProps) {
         }
       >
         <Map
-          aria-label="Places and people around the world"
+          aria-label={t("globe.label")}
           center={[18, 34]}
           projection={{ type: "globe" }}
           styles={demoMapStyles}
@@ -184,7 +186,7 @@ export function OffMapGlobe({ variant = "card" }: OffMapGlobeProps) {
               </Map.MarkerContent>
               <Map.MarkerTooltip>
                 <span className="font-medium">{visitor.city}</span>
-                <span className="text-background/70 ml-1">Active now</span>
+                <span className="text-background/70 ml-1">{t("globe.activeNow")}</span>
               </Map.MarkerTooltip>
             </Map.Marker>
           ))}

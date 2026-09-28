@@ -24,6 +24,7 @@ import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
 import Image from "next/image";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { selectIsAuthenticated } from "@/lib/features/auth";
@@ -172,45 +173,17 @@ const HomeOrientation = dynamic(
 
 const MotionAccordion = motion.create(Accordion);
 
-const faqItems = [
-  {
-    title: "Is This Website Finished?",
-    subtitle: "Probably never — and that’s the point",
-    content:
-      "This site is an ongoing experiment. I’m constantly refining interactions, adding new ideas, and occasionally breaking things while trying something new.",
-    iconUrl: "/icons/rocket.png",
-  },
-  {
-    title: "How Fast Do You Reply?",
-    subtitle: "Usually within a few days",
-    content:
-      "I read every message myself. Replies may take a little time, but I’ll usually get back to you within a few days.",
-    iconUrl: "/icons/mail.png",
-  },
-  {
-    title: "What Do You Like Building?",
-    subtitle: "Design, technology, and everything in between",
-    content:
-      "I’m drawn to digital experiences where thoughtful design, technology, and storytelling come together — especially ideas that leave room for experimentation.",
-    iconUrl: "https://img.icons8.com/3d-fluency/94/adobe-animate.png",
-  },
-  {
-    title: "What’s on the Desk?",
-    subtitle: "One stack, fewer adapters",
-    content:
-      "Apple is the whole desk — Mac, iPhone, AirPods. Quiet is a tool. Chat noise waits; a closed door is how the work gets finished.",
-    iconUrl: "https://img.icons8.com/3d-fluency/94/imac.png",
-  },
-  {
-    title: "How Do I Leave a Trace?",
-    subtitle: "Sign the guestbook",
-    content:
-      "Reading is open to everyone. If you want to mark your visit, sign in and leave a short note on the guestbook wall — I read every message.",
-    iconUrl: "/icons/mail.png",
-  },
+const faqKeys = ["finished", "reply", "building", "desk", "trace"] as const;
+const faqIcons = [
+  "/icons/rocket.png",
+  "/icons/mail.png",
+  "https://img.icons8.com/3d-fluency/94/adobe-animate.png",
+  "https://img.icons8.com/3d-fluency/94/imac.png",
+  "/icons/mail.png",
 ];
 
 export default function Home() {
+  const t = useTranslations("Home");
   const mounted = useMounted();
   const shouldReduceMotion = useReducedMotionPreference();
   const [isGuestbookPopoverOpen, setIsGuestbookPopoverOpen] = useState(false);
@@ -227,7 +200,7 @@ export default function Home() {
         className="mx-auto flex min-h-[100dvh] w-full flex-col items-center justify-center px-6 pt-24 pb-16 text-center sm:px-10"
       >
         <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
-          A personal field journal
+          {t("page.eyebrow")}
         </MotionChip>
 
         <div className="mt-1 w-full max-w-3xl" aria-hidden="true">
@@ -241,11 +214,11 @@ export default function Home() {
           className="max-w-3xl text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.055em]"
           {...reveal(0.18)}
         >
-          A living notebook, kept in motion.
+          {t("page.title")}
         </MotionTypography>
 
         <MotionTypography color="muted" type="body" className="mt-4 max-w-xl" {...reveal(0.26, 14)}>
-          Software, markets, music, and the habits that shape the work.
+          {t("page.subtitle")}
         </MotionTypography>
 
         <MotionSurface
@@ -259,12 +232,11 @@ export default function Home() {
             color="muted"
             type="body-xs"
           >
-            Prologue · 01
+            {t("page.prologue")}
           </Typography>
           <span className="bg-separator my-4 h-12 w-px" aria-hidden="true" />
           <Typography align="center" color="muted" type="body-sm" className="max-w-md italic">
-            Begin with what is close at hand. A song still playing, a market moving, a thought not
-            yet finished.
+            {t("page.prologueBody")}
           </Typography>
           <motion.span
             aria-hidden="true"
@@ -295,7 +267,7 @@ export default function Home() {
           <Popover isOpen={isGuestbookPopoverOpen} onOpenChange={setIsGuestbookPopoverOpen}>
             <Popover.Trigger className="absolute -top-8 -right-20">
               <Image
-                alt="Guestbook decorative animation"
+                alt={t("guestbook.decorationAlt")}
                 aria-hidden="true"
                 height={112}
                 src="/Animation.svg"
@@ -315,12 +287,12 @@ export default function Home() {
           </Popover>
 
           <MotionChip size="sm" variant="secondary" {...revealInView(0, 10)}>
-            Guestbook
+            {t("guestbook.eyebrow")}
           </MotionChip>
 
           <motion.div className="mt-3" {...revealInView(0.04, 8)}>
             <Link href="/guestbook" className="text-sm no-underline">
-              Open the guestbook
+              {t("guestbook.open")}
               <Link.Icon aria-hidden="true" />
             </Link>
           </motion.div>
@@ -334,7 +306,7 @@ export default function Home() {
             {...revealInView(0.06)}
           >
             <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
-              {"Since you're here,"}
+              {t("guestbook.lineOne")}
             </GradientText>
           </MotionTypography>
 
@@ -345,7 +317,7 @@ export default function Home() {
             {...revealInView(0.06)}
           >
             <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
-              {"tell me what's on your mind."}
+              {t("guestbook.lineTwo")}
             </GradientText>
           </MotionTypography>
         </header>
@@ -359,14 +331,12 @@ export default function Home() {
             <motion.div className="w-full" {...revealInView(0.2, 16)}>
               <Card variant="secondary">
                 <Card.Header>
-                  <Card.Title className="text-base">Sign in to add an entry</Card.Title>
-                  <Card.Description>
-                    Reading is open to everyone. Sign in to leave a note or reply.
-                  </Card.Description>
+                  <Card.Title className="text-base">{t("guestbook.signInTitle")}</Card.Title>
+                  <Card.Description>{t("guestbook.signInDescription")}</Card.Description>
                 </Card.Header>
                 <Card.Footer>
                   <Button size="sm" onPress={() => dispatch(setLoginOpen(true))}>
-                    Sign in to write
+                    {t("guestbook.signInToWrite")}
                   </Button>
                 </Card.Footer>
               </Card>
@@ -382,7 +352,7 @@ export default function Home() {
       >
         <header className="flex flex-col items-center text-center">
           <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
-            FAQ
+            {t("faq.eyebrow")}
           </MotionChip>
           <MotionTypography
             id="faq-title"
@@ -392,7 +362,7 @@ export default function Home() {
             className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
             {...revealInView(0.06)}
           >
-            Questions, answered.
+            {t("faq.title")}
           </MotionTypography>
           <MotionTypography
             align="center"
@@ -401,7 +371,7 @@ export default function Home() {
             className="mt-3 max-w-xl text-balance"
             {...revealInView(0.12, 14)}
           >
-            Some answers to questions that tend to come up.
+            {t("faq.description")}
           </MotionTypography>
         </header>
 
@@ -410,25 +380,27 @@ export default function Home() {
           variant="surface"
           {...revealInView(0.18, 20)}
         >
-          {faqItems.map((item, index) => (
+          {faqKeys.map((key, index) => (
             <Accordion.Item
-              key={index}
+              key={key}
               className="group/item first:**:data-[slot=accordion-trigger]:rounded-t-2xl last:[&:not(:has([data-slot=accordion-trigger][aria-expanded='true']))_[data-slot=accordion-trigger]]:rounded-b-2xl"
             >
               <Accordion.Heading>
                 <Accordion.Trigger className="group hover:bg-surface flex items-center gap-2 transition-none">
-                  {item.iconUrl ? (
+                  {faqIcons[index] ? (
                     <Image
-                      alt={item.title}
+                      alt={t(`faq.${key}.title`)}
                       className="h-11 w-11 transition-[scale,rotate] duration-300 ease-out group-hover/item:scale-120 group-hover/item:-rotate-10 group-hover/item:drop-shadow-lg"
-                      src={item.iconUrl}
+                      src={faqIcons[index]}
                       width={44}
                       height={44}
                     />
                   ) : null}
                   <div className="flex flex-col gap-0 text-start">
-                    <span className="leading-5 font-medium">{item.title}</span>
-                    <span className="text-muted/80 leading-6 font-normal">{item.subtitle}</span>
+                    <span className="leading-5 font-medium">{t(`faq.${key}.title`)}</span>
+                    <span className="text-muted/80 leading-6 font-normal">
+                      {t(`faq.${key}.subtitle`)}
+                    </span>
                   </div>
                   <Accordion.Indicator className="text-muted/50 [&>svg]:size-4">
                     <Icon icon="gravity-ui:chevron-down" />
@@ -436,7 +408,9 @@ export default function Home() {
                 </Accordion.Trigger>
               </Accordion.Heading>
               <Accordion.Panel>
-                <Accordion.Body className="text-muted/80 text-start">{item.content}</Accordion.Body>
+                <Accordion.Body className="text-muted/80 text-start">
+                  {t(`faq.${key}.content`)}
+                </Accordion.Body>
               </Accordion.Panel>
             </Accordion.Item>
           ))}
@@ -451,6 +425,7 @@ interface GuestbookQuickFormProps {
 }
 
 function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
+  const t = useTranslations("Home");
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [content, setContent] = useState("");
@@ -464,9 +439,7 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
       setContent("");
       onClose();
     } catch (err) {
-      toast.danger(
-        getApiErrorMessage(err, "Unable to post your guestbook entry. Please try again.")
-      );
+      toast.danger(getApiErrorMessage(err, t("guestbook.postFailed")));
     }
   };
 
@@ -476,13 +449,10 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
         <div className="flex items-center gap-2">
           <span className="text-accent text-base">✨</span>
           <Popover.Heading className="text-foreground text-sm font-semibold tracking-tight">
-            Sign the Guestbook
+            {t("guestbook.signTitle")}
           </Popover.Heading>
         </div>
-        <p className="text-muted/80 text-[11px] leading-relaxed">
-          Leave a message on our wall to mark your visit. Reading is open to everyone, but writing
-          requires a quick sign-in.
-        </p>
+        <p className="text-muted/80 text-[11px] leading-relaxed">{t("guestbook.signHint")}</p>
         <div className="mt-1 flex items-center justify-between gap-3">
           <Button
             size="sm"
@@ -494,7 +464,7 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
             }}
           >
             <Icon icon="lucide:pencil-line" className="size-3.5" />
-            Sign in to write
+            {t("guestbook.signInToWrite")}
           </Button>
           <Button
             size="sm"
@@ -502,7 +472,7 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
             className="text-muted/80 h-8 px-3 text-xs font-medium"
             onPress={onClose}
           >
-            Close
+            {t("guestbook.close")}
           </Button>
         </div>
       </div>
@@ -514,14 +484,14 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
       <div className="flex items-center gap-2">
         <span className="text-accent text-base">✨</span>
         <Popover.Heading className="text-foreground text-sm font-semibold tracking-tight">
-          Before You Go
+          {t("guestbook.beforeYouGo")}
         </Popover.Heading>
       </div>
 
       <div className="flex w-full flex-col gap-2">
         <TextArea
-          aria-label="Guestbook message"
-          placeholder="Write something for the next explorer..."
+          aria-label={t("guestbook.messageLabel")}
+          placeholder={t("guestbook.placeholder")}
           rows={3}
           maxLength={280}
           value={content}
@@ -529,13 +499,13 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
           disabled={isLoading}
         />
         <Description id="textarea-controlled-description">
-          Characters: {content.length} / 280
+          {t("guestbook.characters", { count: content.length })}
         </Description>
       </div>
 
       <div className="flex items-center justify-between gap-4">
         <Button size="sm" fullWidth variant="ghost" onPress={onClose} isDisabled={isLoading}>
-          Cancel
+          {t("guestbook.cancel")}
         </Button>
         <Button
           type="submit"
@@ -547,12 +517,12 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
           {isLoading ? (
             <>
               <Icon icon="lucide:loader-2" className="size-3.5 animate-spin" />
-              Posting...
+              {t("guestbook.posting")}
             </>
           ) : (
             <>
               <Icon icon="lucide:send" className="size-3.5" />
-              Submit
+              {t("guestbook.submit")}
             </>
           )}
         </Button>

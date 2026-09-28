@@ -13,12 +13,13 @@ import {
   THEME_VARIANTS,
   type ThemeVariant,
 } from "@/lib/theme";
+import { useTranslations } from "next-intl";
 import { Icon } from "@iconify/react";
 
-const THEME_VARIANT_LABELS: Record<ThemeVariant, string> = {
-  brutalism: "Brutal",
-  glass: "Glass",
-  mouve: "Mouve",
+const THEME_VARIANT_KEYS: Record<ThemeVariant, "brutal" | "glass" | "mouve"> = {
+  brutalism: "brutal",
+  glass: "glass",
+  mouve: "mouve",
 };
 
 interface ModeSwitchProps {
@@ -27,6 +28,7 @@ interface ModeSwitchProps {
 }
 
 export const ModeSwitch = ({ size = "sm", variant = "ghost" }: ModeSwitchProps) => {
+  const t = useTranslations("Theme");
   const { theme, setTheme } = useTheme();
   const mounted = useMounted();
 
@@ -36,21 +38,21 @@ export const ModeSwitch = ({ size = "sm", variant = "ghost" }: ModeSwitchProps) 
 
   return (
     <Segment
-      aria-label="Color mode"
+      aria-label={t("colorMode")}
       selectedKey={coerceThemeMode(theme) || DEFAULT_THEME_MODE}
       onSelectionChange={(key) => setTheme(coerceThemeMode(String(key)))}
       size={size}
       variant={variant}
     >
-      <Segment.Item aria-label="Light" id="light">
+      <Segment.Item aria-label={t("light")} id="light">
         <Segment.Separator />
         <Icon icon="gravity-ui:sun" aria-hidden="true" />
       </Segment.Item>
-      <Segment.Item aria-label="Dark" id="dark">
+      <Segment.Item aria-label={t("dark")} id="dark">
         <Segment.Separator />
         <Icon icon="gravity-ui:moon" aria-hidden="true" />
       </Segment.Item>
-      <Segment.Item aria-label="System" id="system">
+      <Segment.Item aria-label={t("system")} id="system">
         <Segment.Separator />
         <Icon icon="gravity-ui:display" aria-hidden="true" />
       </Segment.Item>
@@ -59,6 +61,7 @@ export const ModeSwitch = ({ size = "sm", variant = "ghost" }: ModeSwitchProps) 
 };
 
 export const VariantSwitch = () => {
+  const t = useTranslations("Theme");
   const dispatch = useAppDispatch();
   const selectedVariant = useAppSelector(selectThemeVariant) ?? DEFAULT_THEME_VARIANT;
   const mounted = useMounted();
@@ -69,7 +72,7 @@ export const VariantSwitch = () => {
 
   return (
     <Segment
-      aria-label="Theme variant"
+      aria-label={t("variant")}
       selectedKey={selectedVariant}
       onSelectionChange={(key) => dispatch(setThemeVariant(String(key) as ThemeVariant))}
       size="sm"
@@ -77,7 +80,7 @@ export const VariantSwitch = () => {
     >
       {THEME_VARIANTS.map((variant) => (
         <Segment.Item key={variant} id={variant}>
-          {THEME_VARIANT_LABELS[variant]}
+          {t(THEME_VARIANT_KEYS[variant])}
         </Segment.Item>
       ))}
     </Segment>

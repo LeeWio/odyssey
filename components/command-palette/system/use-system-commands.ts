@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { PlayFillIcon, TargetIcon } from "@/components/icons";
 import { selectIsMiniPlayerOpen, setMiniPlayerOpen, setSheetOpen } from "@/lib/features/ui";
@@ -8,6 +9,7 @@ import { createActionCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 
 export function useSystemCommands(): CommandItem[] {
+  const t = useTranslations("Search");
   const dispatch = useAppDispatch();
   const isMiniPlayerOpen = useAppSelector(selectIsMiniPlayerOpen);
 
@@ -15,8 +17,8 @@ export function useSystemCommands(): CommandItem[] {
     () => [
       createActionCommand({
         id: "system-open-control-center",
-        title: "Open control center",
-        description: "View markets, time, music, and appearance controls",
+        title: t("commands.controlCenter"),
+        description: t("commands.controlCenterHint"),
         icon: TargetIcon,
         category: "System",
         source: "system",
@@ -42,8 +44,8 @@ export function useSystemCommands(): CommandItem[] {
       }),
       createActionCommand({
         id: "system-toggle-mini-player",
-        title: isMiniPlayerOpen ? "Close MiniPlayer" : "Open MiniPlayer",
-        description: isMiniPlayerOpen ? "Hide the mini player" : "Show the mini player",
+        title: isMiniPlayerOpen ? t("commands.closePlayer") : t("commands.openPlayer"),
+        description: isMiniPlayerOpen ? t("commands.hidePlayer") : t("commands.showPlayer"),
         icon: PlayFillIcon,
         category: "System",
         source: "system",
@@ -59,6 +61,6 @@ export function useSystemCommands(): CommandItem[] {
         },
       }),
     ],
-    [dispatch, isMiniPlayerOpen]
+    [dispatch, isMiniPlayerOpen, t]
   );
 }

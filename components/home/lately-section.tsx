@@ -23,6 +23,7 @@ import Image from "next/image";
 import { motion } from "motion/react";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
+import { useTranslations } from "next-intl";
 
 const RepositoryActivityPanel = dynamic(
   () =>
@@ -47,6 +48,7 @@ const mapSparkline = (data?: number[]) => {
 };
 
 export function LatelySection() {
+  const t = useTranslations("Home");
   const mounted = useMounted();
   const shouldReduceMotion = useReducedMotionPreference();
   const { data: nasdaqData, isLoading: isNasdaqLoading } = useGetMarketIndexBySymbolQuery(
@@ -175,20 +177,20 @@ export function LatelySection() {
         >
           <Card.Header className="p-0">
             <Typography color="muted" type="body-xs" className="font-mono tracking-[0.14em]">
-              FIELD SIGNAL · LIVE
+              {t("lately.fieldSignal")}
             </Typography>
             <Card.Title className="mt-6 text-2xl tracking-[-0.03em]">
-              Watching without rushing.
+              {t("lately.marketTitle")}
             </Card.Title>
             <Card.Description className="mt-2 max-w-sm leading-6">
-              A small market signal, observed in context rather than isolation.
+              {t("lately.marketDescription")}
             </Card.Description>
           </Card.Header>
 
           <Card.Content className="mt-auto p-0 pt-12">
             {!mounted || (isNasdaqLoading && !nasdaqData) ? (
               <div
-                aria-label="Loading NASDAQ market data"
+                aria-label={t("lately.loadingMarket")}
                 aria-live="polite"
                 className="grid min-h-28 grid-cols-2 items-end gap-6"
               >
@@ -219,7 +221,7 @@ export function LatelySection() {
                       <span className="font-mono font-semibold tabular-nums">
                         {Math.abs(nasdaqData.changePct).toFixed(2)}%
                       </span>
-                      <TrendChip.Suffix>today</TrendChip.Suffix>
+                      <TrendChip.Suffix>{t("lately.today")}</TrendChip.Suffix>
                     </TrendChip>
                   </div>
                   <KPI.Chart
@@ -402,18 +404,17 @@ export function LatelySection() {
             weight="bold"
             className="mt-4 text-[clamp(2rem,4vw,3.5rem)] leading-[1.02] tracking-[-0.045em]"
           >
-            What&apos;s Being Built
+            {t("lately.buildTitle")}
           </Typography>
           <Typography color="muted" type="body" className="mt-5 max-w-sm leading-relaxed italic">
-            A closer look at the work behind the site: new features, fixes, experiments, and
-            everything slowly taking shape.
+            {t("lately.buildDescription")}
           </Typography>
         </div>
 
         <div className="flex w-full min-w-0 lg:justify-end">
           {!mounted || (isGitHubActivityLoading && !githubActivity) ? (
             <div
-              aria-label="Loading GitHub repository activity"
+              aria-label={t("lately.loadingGithub")}
               aria-live="polite"
               className="w-full max-w-[620px] min-w-0"
             >
@@ -428,9 +429,9 @@ export function LatelySection() {
             <RepositoryActivityPanel activity={githubActivity} />
           ) : (
             <Card className="w-full max-w-[620px] min-w-0 p-5" variant="secondary">
-              <Card.Title className="text-sm">GitHub activity is unavailable</Card.Title>
+              <Card.Title className="text-sm">{t("lately.githubUnavailable")}</Card.Title>
               <Card.Description className="mt-1 text-xs">
-                The public activity feed could not be loaded right now.
+                {t("lately.githubUnavailableHint")}
               </Card.Description>
             </Card>
           )}
