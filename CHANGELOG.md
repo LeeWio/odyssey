@@ -1,3 +1,10 @@
+# [1.181.0](https://github.com/LeeWio/odyssey/compare/v1.180.0...v1.181.0) (2026-09-28)
+
+
+### Features
+
+* **journal:** open the full this-week and most-read lists ([bd1291d](https://github.com/LeeWio/odyssey/commit/bd1291dbd1f70476042d2176380cd444e825cf31))
+
 # [1.180.0](https://github.com/LeeWio/odyssey/compare/v1.179.0...v1.180.0) (2026-09-28)
 
 
