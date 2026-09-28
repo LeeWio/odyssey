@@ -193,7 +193,20 @@
     "previous": "上一页",
     "next": "下一页",
     "pageOf": "{page} / {pages}",
-    "likes": "{count} 次喜欢"
+    "likes": "{count} 次喜欢",
+    "fromTheArchive": "按分类阅读",
+    "categoryEssays": "{count} 篇",
+    "browseCategory": "浏览{name}",
+    "authors": "作者",
+    "authorEssays": "{count} 篇",
+    "authorsTitle": "作者",
+    "authorsDescription": "在日志里发表过文章的人。",
+    "allAuthors": "全部作者",
+    "latestEssay": "最近一篇",
+    "writesAbout": "写作主题",
+    "otherAuthors": "其他作者",
+    "authorMissing": "这位作者还没有已发布的文章。",
+    "backToAuthors": "全部作者"
   },
   "Article": {
     "journal": "日志",
@@ -254,7 +267,12 @@
     "related": "相关",
     "aroundTheArchive": "归档四周",
     "inThisColumn": "本专栏",
-    "youAreHere": "正在读这篇"
+    "youAreHere": "正在读这篇",
+    "continueInColumn": "继续这篇专栏",
+    "readNext": "下一篇推荐",
+    "keepReading": "接着读",
+    "moreInCategory": "{name} 里的其他文章",
+    "moreFromAuthor": "{name} 的其他文章"
   },
   "Library": {
     "signInTitle": "你的阅读书架",

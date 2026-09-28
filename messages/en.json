@@ -193,7 +193,20 @@
     "previous": "Previous",
     "next": "Next",
     "pageOf": "{page} / {pages}",
-    "likes": "{count} likes"
+    "likes": "{count} likes",
+    "fromTheArchive": "From the archive",
+    "categoryEssays": "{count} essays",
+    "browseCategory": "Browse {name}",
+    "authors": "Authors",
+    "authorEssays": "{count} essays",
+    "authorsTitle": "Authors",
+    "authorsDescription": "Everyone with published writing in the journal.",
+    "allAuthors": "All authors",
+    "latestEssay": "Latest",
+    "writesAbout": "Writes about",
+    "otherAuthors": "Other authors",
+    "authorMissing": "This author has no published essays.",
+    "backToAuthors": "All authors"
   },
   "Article": {
     "journal": "Journal",
@@ -254,7 +267,12 @@
     "related": "Related",
     "aroundTheArchive": "Around the archive",
     "inThisColumn": "In this column",
-    "youAreHere": "You are here"
+    "youAreHere": "You are here",
+    "continueInColumn": "Continue in this column",
+    "readNext": "Read next",
+    "keepReading": "Keep reading",
+    "moreInCategory": "More in {name}",
+    "moreFromAuthor": "More from {name}"
   },
   "Library": {
     "signInTitle": "Your reading library",
