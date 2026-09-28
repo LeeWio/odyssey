@@ -1,3 +1,11 @@
+# [1.174.0](https://github.com/LeeWio/odyssey/compare/v1.173.2...v1.174.0) (2026-09-28)
+
+
+### Features
+
+* **journal:** paginate the latest list with heroui ([8c6804f](https://github.com/LeeWio/odyssey/commit/8c6804f9a92b1aa8035796cd9668541c6838f5e2))
+* **journal:** show the rest of the column on the article ([74084fe](https://github.com/LeeWio/odyssey/commit/74084fee166bde4b220f35e94a2b34ed5e70404c))
+
 ## [1.173.2](https://github.com/LeeWio/odyssey/compare/v1.173.1...v1.173.2) (2026-09-28)
 
 
