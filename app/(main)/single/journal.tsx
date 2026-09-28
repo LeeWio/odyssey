@@ -14,6 +14,7 @@ import {
   Link,
   ListBox,
   Meter,
+  Pagination,
   ScrollShadow,
   Separator,
   Skeleton,
@@ -162,6 +163,84 @@ function FeatureMosaic({ lead, companions }: { lead: Story; companions: Story[] 
       {companions.map((post, index) => (
         <FeatureCard key={post.id ?? post.slug} delay={0.06 * (index + 1)} post={post} />
       ))}
+    </div>
+  );
+}
+
+function pageNumbers(page: number, totalPages: number) {
+  const pages: (number | "ellipsis")[] = [];
+
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    pages.push(1);
+
+    if (page > 3) {
+      pages.push("ellipsis");
+    }
+
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (page < totalPages - 2) {
+      pages.push("ellipsis");
+    }
+
+    pages.push(totalPages);
+  }
+
+  return pages;
+}
+
+function LatestPagination({
+  onPageChange,
+  page,
+  pages,
+}: {
+  onPageChange: (page: number) => void;
+  page: number;
+  pages: number;
+}) {
+  const t = useTranslations("Journal");
+  if (pages <= 1) return null;
+
+  return (
+    <div className="w-full overflow-x-auto">
+      <Pagination className="justify-center" size="sm">
+        <Pagination.Content>
+          <Pagination.Item>
+            <Pagination.Previous isDisabled={page === 1} onPress={() => onPageChange(page - 1)}>
+              <Pagination.PreviousIcon />
+              <span>{t("previous")}</span>
+            </Pagination.Previous>
+          </Pagination.Item>
+          {pageNumbers(page, pages).map((item, index) =>
+            item === "ellipsis" ? (
+              <Pagination.Item key={`ellipsis-${index}`}>
+                <Pagination.Ellipsis />
+              </Pagination.Item>
+            ) : (
+              <Pagination.Item key={item}>
+                <Pagination.Link isActive={item === page} onPress={() => onPageChange(item)}>
+                  {item}
+                </Pagination.Link>
+              </Pagination.Item>
+            )
+          )}
+          <Pagination.Item>
+            <Pagination.Next isDisabled={page === pages} onPress={() => onPageChange(page + 1)}>
+              <span>{t("next")}</span>
+              <Pagination.NextIcon />
+            </Pagination.Next>
+          </Pagination.Item>
+        </Pagination.Content>
+      </Pagination>
     </div>
   );
 }
@@ -650,30 +729,11 @@ export function JournalPage() {
                       <StoryRow post={post} />
                     </div>
                   ))}
-                  <div className="flex items-center justify-between gap-4 pt-2">
-                    <Button
-                      isDisabled={latestPage === 0}
-                      size="sm"
-                      variant="outline"
-                      onPress={() => setLatestPage((page) => Math.max(0, page - 1))}
-                    >
-                      {t("previous")}
-                    </Button>
-                    <span className="text-muted text-xs tabular-nums">
-                      {t("pageOf", {
-                        page: latestPage + 1,
-                        pages: Math.max(1, latestQuery.data?.totalPages ?? 1),
-                      })}
-                    </span>
-                    <Button
-                      isDisabled={latestPage + 1 >= (latestQuery.data?.totalPages ?? 1)}
-                      size="sm"
-                      variant="outline"
-                      onPress={() => setLatestPage((page) => page + 1)}
-                    >
-                      {t("next")}
-                    </Button>
-                  </div>
+                  <LatestPagination
+                    page={latestPage + 1}
+                    pages={Math.max(1, latestQuery.data?.totalPages ?? 1)}
+                    onPageChange={(page) => setLatestPage(page - 1)}
+                  />
                 </div>
               ) : archiveEmpty ? (
                 <EmptyState>
