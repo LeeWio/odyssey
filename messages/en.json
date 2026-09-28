@@ -748,6 +748,13 @@
     "deleteFailed": "This moment could not be deleted.",
     "recently": "Recently",
     "imageAlt": "Moment image",
+    "viewerSize": "Viewer size",
+    "viewerSizeXs": "Extra small",
+    "viewerSizeSm": "Small",
+    "viewerSizeMd": "Medium",
+    "viewerSizeLg": "Large",
+    "viewerSizeCover": "Cover",
+    "viewerSizeFull": "Full",
     "topics": "Topics"
   },
   "Links": {

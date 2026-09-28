@@ -748,6 +748,13 @@
     "deleteFailed": "这条动态没有删除成功。",
     "recently": "刚刚",
     "imageAlt": "动态图片",
+    "viewerSize": "查看尺寸",
+    "viewerSizeXs": "极小",
+    "viewerSizeSm": "小",
+    "viewerSizeMd": "中",
+    "viewerSizeLg": "大",
+    "viewerSizeCover": "覆盖",
+    "viewerSizeFull": "全屏",
     "topics": "话题"
   },
   "Links": {
