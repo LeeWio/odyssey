@@ -1,3 +1,10 @@
+# [1.171.0](https://github.com/LeeWio/odyssey/compare/v1.170.0...v1.171.0) (2026-09-28)
+
+
+### Features
+
+* **i18n:** localize remaining public pages ([9a6319e](https://github.com/LeeWio/odyssey/commit/9a6319ea80f3c6ce45e2663f92c9ca144b53c01d))
+
 # [1.170.0](https://github.com/LeeWio/odyssey/compare/v1.169.0...v1.170.0) (2026-09-28)
 
 
