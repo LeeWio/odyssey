@@ -221,7 +221,12 @@
     "yearEssays": "{count} essays in {year}",
     "yearMissing": "This year has no published essays.",
     "monthEssays": "{count} essays",
-    "monthMissing": "This month has no published essays."
+    "monthMissing": "This month has no published essays.",
+    "readingWeek": "This week",
+    "readingWeekDescription": "Essays people opened this week.",
+    "readingMost": "Most read",
+    "readingMostDescription": "Essays with the most reads.",
+    "readingEmpty": "Nothing is on this list yet."
   },
   "Article": {
     "journal": "Journal",

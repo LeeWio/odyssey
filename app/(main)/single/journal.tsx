@@ -817,7 +817,7 @@ function AttentionCard({ mostRead, trending }: { mostRead: Story[]; trending: St
 
   return (
     <Card variant="secondary">
-      <Card.Header>
+      <Card.Header className="flex-row items-center justify-between gap-3">
         <Segment
           aria-label={t("attention")}
           selectedKey={selected}
@@ -827,6 +827,12 @@ function AttentionCard({ mostRead, trending }: { mostRead: Story[]; trending: St
           {trending.length > 0 ? <Segment.Item id="trending">{t("trending")}</Segment.Item> : null}
           {mostRead.length > 0 ? <Segment.Item id="most-read">{t("mostRead")}</Segment.Item> : null}
         </Segment>
+        <Link
+          className="shrink-0 text-xs no-underline"
+          href={active.id === "most-read" ? "/single/reading/most" : "/single/reading/week"}
+        >
+          {t("all")}
+        </Link>
       </Card.Header>
       <Card.Content className="p-1 pt-0">
         <ListBox

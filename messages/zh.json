@@ -221,7 +221,12 @@
     "yearEssays": "{year} 年 {count} 篇",
     "yearMissing": "这一年还没有已发布的文章。",
     "monthEssays": "{count} 篇",
-    "monthMissing": "这个月还没有已发布的文章。"
+    "monthMissing": "这个月还没有已发布的文章。",
+    "readingWeek": "本周",
+    "readingWeekDescription": "这一周被打开过的文章。",
+    "readingMost": "最多阅读",
+    "readingMostDescription": "阅读次数最多的文章。",
+    "readingEmpty": "这份列表里还没有文章。"
   },
   "Article": {
     "journal": "日志",
