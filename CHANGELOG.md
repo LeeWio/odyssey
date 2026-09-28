@@ -1,3 +1,10 @@
+## [1.173.1](https://github.com/LeeWio/odyssey/compare/v1.173.0...v1.173.1) (2026-09-28)
+
+
+### Bug Fixes
+
+* **journal:** read columns from the public api ([509b92c](https://github.com/LeeWio/odyssey/commit/509b92c82df6444894af4789bfaa2ee34d12e1be))
+
 # [1.173.0](https://github.com/LeeWio/odyssey/compare/v1.172.0...v1.173.0) (2026-09-28)
 
 
