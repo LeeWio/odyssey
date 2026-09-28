@@ -3,7 +3,7 @@
 import { createPageReveal, pageEaseOut } from "@/lib/motion";
 
 import { useMemo, useState } from "react";
-import { Button, Chip, Tabs, Typography } from "@heroui/react";
+import { Button, Chip, Link, Tabs, Typography } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useNow, useTranslations } from "next-intl";
@@ -86,6 +86,11 @@ export default function MomentsPage() {
           <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
             {t("headlineDescription")}
           </Typography>
+        </motion.div>
+        <motion.div {...revealInView(0.16, 14)}>
+          <Link className="mt-4 text-sm no-underline" href="/moments/saved">
+            {t("saved")}
+          </Link>
         </motion.div>
       </header>
 

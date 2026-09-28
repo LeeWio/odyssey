@@ -7,8 +7,10 @@ import dynamic from "next/dynamic";
 import { Icon } from "@iconify/react";
 
 import { getApiErrorMessage } from "@/lib/api/errors";
-import { useAppSelector } from "@/lib/hooks";
-import { selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { selectCurrentUser, selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
+import { readMomentBookmarks, toggleMomentBookmark } from "@/lib/features/moment";
+import { setLoginOpen } from "@/lib/features/ui";
 import { useGetCurrentUserQuery } from "@/lib/features/user/user-api";
 import {
   type MomentResponse,
@@ -16,6 +18,7 @@ import {
   useDeleteMomentMutation,
 } from "@/lib/features/moment";
 import { useRelativeTime } from "@/lib/relative-time";
+import { useTranslations } from "next-intl";
 
 import { parseMomentContent } from "../../utils/content-parser";
 import { useMomentLike } from "../../hooks/use-moment-like";
@@ -60,7 +63,10 @@ export const MomentCard = ({
   enableComments = true,
 }: MomentCardProps) => {
   const formatRelativeTime = useRelativeTime();
+  const t = useTranslations("Moments");
+  const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const username = useAppSelector(selectCurrentUser);
   const isAdmin = useAppSelector(selectIsAdmin);
 
   // If no propMoment is passed, fetch the latest public moment (Self-fetching mode)
@@ -122,27 +128,18 @@ export const MomentCard = ({
 
   useEffect(() => {
     if (!moment?.id) return;
-    const bookmarks = JSON.parse(localStorage.getItem("moments_bookmarks") || "[]");
+    const bookmarks = readMomentBookmarks(isAuthenticated ? username : null);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsBookmarked(bookmarks.includes(moment.id));
-  }, [moment?.id]);
+  }, [isAuthenticated, moment?.id, username]);
 
   const handleBookmarkToggle = () => {
     if (!moment?.id) return;
-    const bookmarks = JSON.parse(localStorage.getItem("moments_bookmarks") || "[]");
-    let updated;
-    if (bookmarks.includes(moment.id)) {
-      updated = bookmarks.filter((id: number) => id !== moment.id);
-      setIsBookmarked(false);
-      toast.success("Removed from bookmarks");
-    } else {
-      updated = [...bookmarks, moment.id];
-      setIsBookmarked(true);
-      toast.success("Saved to bookmarks");
+    if (!isAuthenticated || !username) {
+      dispatch(setLoginOpen(true));
+      return;
     }
-    localStorage.setItem("moments_bookmarks", JSON.stringify(updated));
-    // Dispatch custom event to notify MomentsPage of bookmark list updates
-    window.dispatchEvent(new Event("moments_bookmarks_changed"));
+    setIsBookmarked(toggleMomentBookmark(username, moment.id));
   };
 
   const handleDeleteConfirm = async () => {
@@ -150,10 +147,10 @@ export const MomentCard = ({
     setIsDeleting(true);
     try {
       await deleteMoment(moment.id).unwrap();
-      toast.success("Moment deleted successfully.");
+      toast.success(t("deleted"));
       setIsDeleteDialogOpen(false);
     } catch (err) {
-      toast.danger(getApiErrorMessage(err, "Unable to delete this moment. Please try again."));
+      toast.danger(getApiErrorMessage(err, t("deleteFailed")));
     } finally {
       setIsDeleting(false);
     }
@@ -177,16 +174,16 @@ export const MomentCard = ({
     return (
       moment?.images?.slice(0, 8).map((img) => ({
         src: img.fileUrl,
-        alt: img.altText || "Moment Image",
+        alt: img.altText || t("imageAlt"),
       })) || []
     );
-  }, [moment]);
+  }, [moment, t]);
 
   if (isLoading) {
     return <MomentCardSkeleton />;
   }
 
-  const timeLabel = moment ? formatRelativeTime(moment.createdAt) : "Recently";
+  const timeLabel = moment ? formatRelativeTime(moment.createdAt) : t("recently");
 
   return (
     <Card className="w-full" variant="default">
@@ -260,13 +257,11 @@ export const MomentCard = ({
               </AlertDialog.Header>
               <AlertDialog.Body className="mt-6 flex flex-col gap-2">
                 <Typography type="h5" align="center" weight="bold">
-                  Delete Moment
+                  {t("deleteTitle")}
                 </Typography>
 
                 <Typography type="body-sm" color="muted" align="center">
-                  Are you sure you want to delete this moment?
-                  <br />
-                  All information associated with this moment will be immediately deleted
+                  {t("deleteDescription")}
                 </Typography>
               </AlertDialog.Body>
               <AlertDialog.Footer className="flex justify-end gap-2">
@@ -276,10 +271,10 @@ export const MomentCard = ({
                   onPress={handleDeleteConfirm}
                   isPending={isDeleting}
                 >
-                  Delete
+                  {t("delete")}
                 </Button>
                 <Button fullWidth variant="secondary" onPress={() => setIsDeleteDialogOpen(false)}>
-                  Cancel
+                  {t("cancel")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

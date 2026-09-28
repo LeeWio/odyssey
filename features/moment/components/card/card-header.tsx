@@ -2,6 +2,7 @@
 
 import { Avatar, Button, Dropdown, Spinner, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useTranslations } from "next-intl";
 
 interface CardHeaderProps {
   authorName: string;
@@ -22,6 +23,8 @@ export const CardHeader = ({
   isDeleting,
   onDelete,
 }: CardHeaderProps) => {
+  const t = useTranslations("Moments");
+
   return (
     <div className="flex w-full flex-row items-center justify-between">
       <div className="flex min-w-0 flex-row items-center gap-2">
@@ -46,7 +49,7 @@ export const CardHeader = ({
             size="sm"
             isIconOnly
             variant="ghost"
-            aria-label="More options"
+            aria-label={t("moreOptions")}
             isDisabled={isDeleting}
           >
             {isDeleting ? (
@@ -59,20 +62,20 @@ export const CardHeader = ({
             <Dropdown.Menu>
               <Dropdown.Item
                 id="delete"
-                textValue="Delete Moment"
+                textValue={t("deleteMoment")}
                 className="text-danger"
                 onPress={onDelete}
               >
                 <div className="flex flex-row items-center gap-2">
                   <Icon icon="gravity-ui:trash-bin" className="size-4" />
-                  <span>Delete Moment</span>
+                  <span>{t("deleteMoment")}</span>
                 </div>
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown.Popover>
         </Dropdown>
       ) : (
-        <Button size="sm" isIconOnly variant="ghost" aria-label="More options">
+        <Button size="sm" isIconOnly variant="ghost" aria-label={t("moreOptions")}>
           <Icon icon="gravity-ui:ellipsis" className="size-4.5" />
         </Button>
       )}

@@ -2,6 +2,7 @@
 
 import { Button } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useTranslations } from "next-intl";
 
 interface CardFooterProps {
   isLiked: boolean;
@@ -26,6 +27,8 @@ export const CardFooter = ({
   isBookmarked = false,
   onBookmarkToggle,
 }: CardFooterProps) => {
+  const t = useTranslations("Moments");
+
   return (
     <div className="flex w-full flex-row items-center justify-between">
       <div className="flex flex-row items-center gap-1">
@@ -34,7 +37,7 @@ export const CardFooter = ({
           variant={isLiked ? "danger" : "ghost"}
           onPress={onLikeToggle}
           isPending={isLiking}
-          aria-label={isLiked ? "Unlike moment" : "Like moment"}
+          aria-label={isLiked ? t("unlike") : t("like")}
           className="gap-1.5 transition-all active:scale-95"
         >
           <Icon
@@ -49,7 +52,7 @@ export const CardFooter = ({
             size="sm"
             variant={isCommentsOpen ? "secondary" : "ghost"}
             onPress={onCommentToggle}
-            aria-label={commentsCount === 1 ? "Open 1 comment" : `Open ${commentsCount} comments`}
+            aria-label={t("openComments", { count: commentsCount })}
             className="gap-1.5 transition-all active:scale-95"
           >
             <Icon icon="gravity-ui:comment" className="size-4.5" />
@@ -65,7 +68,7 @@ export const CardFooter = ({
         variant={isBookmarked ? "secondary" : "ghost"}
         onPress={onBookmarkToggle}
         isIconOnly
-        aria-label={isBookmarked ? "Remove Bookmark" : "Bookmark Moment"}
+        aria-label={isBookmarked ? t("unsaveMoment") : t("saveMoment")}
         className="transition-all active:scale-95"
       >
         <Icon

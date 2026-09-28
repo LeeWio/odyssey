@@ -10,6 +10,7 @@ import { getTransformStyles } from "../../utils/transform-styles";
 import { useMemo } from "react";
 import { isDocumentEmpty } from "../../utils/content-parser";
 import { MomentContent } from "../moment-content";
+import { useTranslations } from "next-intl";
 
 const BounceCards = dynamic(() => import("@/components/ui/bounce-cards"), {
   ssr: false,
@@ -56,6 +57,7 @@ export const CardContent = ({
   onCardClick,
   stockSymbol,
 }: CardContentProps) => {
+  const t = useTranslations("Moments");
   const count = imageUrls.length;
   const cardSize = getDynamicCardSize(count);
   const containerHeight = getDynamicContainerHeight(count);
@@ -94,7 +96,7 @@ export const CardContent = ({
           </div>
 
           {topics.length > 0 && (
-            <TagGroup aria-label="Topics" size="sm" selectionMode="none">
+            <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
               <TagGroup.List className="flex flex-wrap justify-center gap-1.5">
                 {topics.map((topic) => (
                   <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
@@ -120,7 +122,7 @@ export const CardContent = ({
           <MomentContent content={parsedContent} />
 
           {topics.length > 0 && (
-            <TagGroup aria-label="Topics" size="sm" selectionMode="none">
+            <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
               <TagGroup.List className="flex flex-wrap gap-1.5">
                 {topics.map((topic) => (
                   <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
@@ -152,7 +154,7 @@ export const CardContent = ({
       <MomentContent content={parsedContent} />
 
       {topics.length > 0 && (
-        <TagGroup aria-label="Topics" size="sm" selectionMode="none">
+        <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
           <TagGroup.List className="flex flex-wrap gap-1.5">
             {topics.map((topic) => (
               <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
