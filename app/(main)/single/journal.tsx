@@ -1,33 +1,38 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { EmptyState, NumberValue, Segment } from "@heroui-pro/react";
+import { Carousel } from "@heroui-pro/react/carousel";
+import Autoplay from "embla-carousel-autoplay";
+import { EmptyState, HoverCard, ItemCard, NumberValue, Segment } from "@heroui-pro/react";
 import {
   Alert,
   Button,
   Card,
+  Chip,
   Description,
   Label,
   Link,
   ListBox,
-  ProgressBar,
+  Meter,
   ScrollShadow,
+  Separator,
   Skeleton,
+  Tag,
+  TagGroup,
   Typography,
 } from "@heroui/react";
 import type { Key } from "react-aria-components/Breadcrumbs";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
+gsap.registerPlugin(useGSAP);
+import { useLocale, useTranslations } from "next-intl";
+import { useRef, useState } from "react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
-import { useGetPublicColumnsQuery } from "@/lib/features/column";
+import { useGetPublicColumnsQuery, type ColumnResponse } from "@/lib/features/column";
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
-import {
-  useRetrieveDiscoveryQuery,
-  useRetrieveFacetsQuery,
-  useRetrievePublicSeriesQuery,
-} from "@/lib/features/openapi";
+import { useRetrieveDiscoveryQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
 import { useAppSelector } from "@/lib/hooks";
@@ -35,6 +40,7 @@ import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
 
 type CategoryFacet = OpenApiComponents["schemas"]["CategoryFacet"];
+type TagFacet = OpenApiComponents["schemas"]["TagFacet"];
 type Story = {
   id?: number;
   title?: string | null;
@@ -45,17 +51,10 @@ type Story = {
   authorAvatar?: string | null;
   category?: { name?: string | null } | null;
   views?: number;
+  likesCount?: number;
+  commentsCount?: number;
   publishedAt?: string | null;
   createdAt?: string | null;
-};
-
-type Collection = {
-  id?: number;
-  name?: string | null;
-  slug?: string | null;
-  description?: string | null;
-  postsCount?: number;
-  href: string;
 };
 
 function formatDate(value: string | null | undefined, locale: string, fallback: string) {
@@ -97,36 +96,57 @@ function Cover({ cover, ratio }: { cover?: string; ratio: string }) {
   );
 }
 
-function StoryMeta({ post }: { post: Story }) {
+function FeatureCard({
+  delay = 0,
+  featured = false,
+  post,
+}: {
+  delay?: number;
+  featured?: boolean;
+  post: Story;
+}) {
   const t = useTranslations("Journal");
   const locale = useLocale();
   const meta = [post.category?.name, formatDate(storyDate(post), locale, t("recentlyPublished"))]
     .filter(Boolean)
     .join(" · ");
-  if (!meta) return null;
-  return <span className="text-muted text-sm">{meta}</span>;
-}
-
-function FeatureCard({ post, featured = false }: { post: Story; featured?: boolean }) {
-  const t = useTranslations("Journal");
-  const locale = useLocale();
-  const meta = [post.category?.name, formatDate(storyDate(post), locale, t("recentlyPublished"))]
-    .filter(Boolean)
-    .join(" · ");
+  const title = post.title || t("untitledStory");
 
   return (
-    <article className="bg-surface-secondary overflow-hidden rounded-2xl">
-      <Link className="group relative block overflow-hidden no-underline" href={storyHref(post)}>
-        <Cover cover={post.coverImage?.trim()} ratio="aspect-[16/9]" />
-        <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pt-12 pb-3.5">
-          {meta ? <span className="text-xs text-white/75">{meta}</span> : null}
-          <span
-            className={`line-clamp-2 font-semibold tracking-tight text-white ${featured ? "text-lg leading-6" : "text-base leading-5"}`}
+    <article
+      data-journal-reveal=""
+      data-journal-order={delay > 0 ? "2" : "1"}
+      className="bg-surface-secondary hover:bg-surface-tertiary overflow-hidden rounded-2xl transition-colors duration-150 motion-reduce:transition-none"
+    >
+      <HoverCard>
+        <HoverCard.Trigger>
+          <Link
+            className="group relative block overflow-hidden no-underline"
+            href={storyHref(post)}
           >
-            {post.title || t("untitledStory")}
-          </span>
-        </span>
-      </Link>
+            <Cover cover={post.coverImage?.trim()} ratio="aspect-[16/9]" />
+            <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pt-12 pb-3.5">
+              {meta ? <span className="text-xs text-white/75">{meta}</span> : null}
+              <span
+                className={`line-clamp-2 font-semibold tracking-tight text-white ${featured ? "text-2xl leading-8" : "text-xl leading-7"}`}
+              >
+                {title}
+              </span>
+            </span>
+          </Link>
+        </HoverCard.Trigger>
+        {post.summary ? (
+          <HoverCard.Content aria-label={title}>
+            <HoverCard.Arrow />
+            <p className="text-sm leading-5">{post.summary}</p>
+            <p className="text-muted mt-2 text-xs tabular-nums">
+              <NumberValue locale={locale} notation="compact" value={post.views ?? 0}>
+                {(formatted) => t("views", { count: formatted })}
+              </NumberValue>
+            </p>
+          </HoverCard.Content>
+        ) : null}
+      </HoverCard>
     </article>
   );
 }
@@ -135,108 +155,359 @@ function FeatureMosaic({ lead, companions }: { lead: Story; companions: Story[] 
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       <FeatureCard featured post={lead} />
-      {companions.map((post) => (
-        <FeatureCard key={post.id ?? post.slug} post={post} />
+      {companions.map((post, index) => (
+        <FeatureCard key={post.id ?? post.slug} delay={0.06 * (index + 1)} post={post} />
       ))}
     </div>
   );
 }
 
-function StoryTile({ post }: { post: Story }) {
+function StoryRow({ post }: { post: Story }) {
   const t = useTranslations("Journal");
+  const locale = useLocale();
+  const title = post.title || t("untitledStory");
+  const cover = post.coverImage?.trim();
+  const author = post.authorName?.trim();
 
   return (
-    <article className="bg-surface-secondary flex h-full flex-col overflow-hidden rounded-3xl">
-      <Link className="group block overflow-hidden no-underline" href={storyHref(post)}>
-        <Cover cover={post.coverImage?.trim()} ratio="aspect-[16/10]" />
-      </Link>
-      <div className="flex flex-1 flex-col gap-2 p-5">
-        <StoryMeta post={post} />
-        <Typography type="h3" weight="semibold">
+    <ItemCard className="items-start p-3" variant="secondary">
+      {cover ? (
+        <ItemCard.Icon className="size-20 overflow-hidden rounded-xl">
+          <Cover cover={cover} ratio="size-20" />
+        </ItemCard.Icon>
+      ) : null}
+      <ItemCard.Content className="gap-1.5">
+        <ItemCard.Title className="text-base leading-6 font-semibold">
           <Link className="text-foreground line-clamp-2 no-underline" href={storyHref(post)}>
-            {post.title || t("untitledStory")}
+            {title}
           </Link>
-        </Typography>
+        </ItemCard.Title>
+        <p className="text-muted text-xs">
+          {[
+            author,
+            post.category?.name,
+            formatDate(storyDate(post), locale, t("recentlyPublished")),
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
         {post.summary ? (
-          <Typography className="line-clamp-2" color="muted" type="body-sm">
-            {post.summary}
-          </Typography>
+          <p className="text-muted line-clamp-3 text-sm leading-5">{post.summary}</p>
         ) : null}
+        <p className="text-muted text-xs tabular-nums">
+          <NumberValue locale={locale} notation="compact" value={post.views ?? 0}>
+            {(formatted) => t("views", { count: formatted })}
+          </NumberValue>
+          {" · "}
+          <NumberValue locale={locale} notation="compact" value={post.likesCount ?? 0}>
+            {(formatted) => t("likes", { count: formatted })}
+          </NumberValue>
+        </p>
+      </ItemCard.Content>
+    </ItemCard>
+  );
+}
+
+function columnUpdatedAt(column: ColumnResponse) {
+  const stamps = column.posts
+    .map((post) => post.publishedAt)
+    .filter((value): value is string => Boolean(value));
+  if (stamps.length === 0) return column.createdAt || null;
+  return stamps.reduce((latest, value) => (value > latest ? value : latest));
+}
+
+function columnCadence(column: ColumnResponse, t: (key: string) => string) {
+  const stamps = column.posts
+    .map((post) => (post.publishedAt ? new Date(post.publishedAt).getTime() : Number.NaN))
+    .filter((value) => !Number.isNaN(value))
+    .sort((a, b) => a - b);
+  if (stamps.length < 2) return t("occasional");
+  const spanDays = (stamps[stamps.length - 1] - stamps[0]) / 86_400_000;
+  const gap = spanDays / (stamps.length - 1);
+  if (gap <= 10) return t("weekly");
+  if (gap <= 40) return t("monthly");
+  return t("occasional");
+}
+
+function ColumnDeck({ column }: { column: ColumnResponse }) {
+  const t = useTranslations("Journal");
+  const name = column.name || t("untitledColumn");
+  const [autoplay] = useState(() => Autoplay({ delay: 2000, stopOnInteraction: true }));
+  const locale = useLocale();
+  const slides = column.posts.flatMap((post) => {
+    const image = post.coverImage?.trim();
+    if (!image) return [];
+    return [
+      {
+        alt: post.title,
+        detail: post.summary?.trim() || undefined,
+        image,
+        meta: [
+          post.authorName,
+          post.publishedAt ? formatDate(post.publishedAt, locale, "") : null,
+          post.views ? t("views", { count: post.views.toLocaleString(locale) }) : null,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        slug: post.slug,
+        title: post.title,
+      },
+    ];
+  });
+  if (slides.length === 0) return null;
+
+  const updated = columnUpdatedAt(column);
+
+  return (
+    <article className="flex min-w-0 flex-col gap-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <Typography type="h3" weight="semibold">
+          {name}
+        </Typography>
+        <Link className="text-sm no-underline" href={`/columns/${column.slug}`}>
+          {t("viewColumn")}
+          <Link.Icon />
+        </Link>
+      </div>
+      {column.description ? (
+        <Typography className="line-clamp-2" color="muted" type="body-sm">
+          {column.description}
+        </Typography>
+      ) : null}
+      <p className="text-muted text-xs">
+        {[
+          t("essays", { count: column.postsCount.toLocaleString(locale) }),
+          columnCadence(column, t),
+          updated ? t("updated", { date: formatDate(updated, locale, "") }) : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+      </p>
+      <div className="w-full max-w-xs">
+        <Carousel opts={{ loop: true }} plugins={[autoplay]}>
+          <Carousel.Content>
+            {slides.map((slide) => (
+              <Carousel.Item key={slide.slug}>
+                <div className="p-1">
+                  <Card className="overflow-hidden select-none">
+                    <Link className="block no-underline" href={`/single/${slide.slug}`}>
+                      {/* Remote cover hosts are not in next/image remotePatterns. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        alt={slide.alt}
+                        className="aspect-square w-full object-cover"
+                        draggable={false}
+                        src={slide.image}
+                      />
+                      <Card.Footer className="flex flex-col items-start gap-1">
+                        {slide.meta ? (
+                          <span className="text-muted text-xs">{slide.meta}</span>
+                        ) : null}
+                        <Card.Title className="line-clamp-2">{slide.title}</Card.Title>
+                        {slide.detail ? (
+                          <Card.Description className="line-clamp-2">
+                            {slide.detail}
+                          </Card.Description>
+                        ) : null}
+                      </Card.Footer>
+                    </Link>
+                  </Card>
+                </div>
+              </Carousel.Item>
+            ))}
+          </Carousel.Content>
+          <Carousel.Previous />
+          <Carousel.Next />
+          <Carousel.Dots />
+        </Carousel>
       </div>
     </article>
   );
 }
 
-function ColumnRail({ collections }: { collections: Collection[] }) {
+const PREVIEW_COLUMNS: ColumnResponse[] = [
+  {
+    id: -1,
+    name: "Product surfaces",
+    slug: "preview-product-surfaces",
+    description: "How editorial picks, ranking, and recommendations show up on the page.",
+    coverImage: "",
+    isPublished: true,
+    postsCount: 3,
+    posts: [
+      {
+        id: -11,
+        title: "Designing a Recommendation Surface",
+        slug: "designing-recommendation-surface",
+        coverImage:
+          "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1400&q=80",
+        summary: "A practical model for editorial picks and personalized suggestions.",
+        authorName: "wei.li",
+        views: 1873,
+        likesCount: 24,
+        publishedAt: "2026-08-24",
+      },
+      {
+        id: -12,
+        title: "A Field Guide to Read Next Ranking",
+        slug: "field-guide-read-next-ranking",
+        coverImage:
+          "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1400&q=80",
+        summary: "Notes from the column.",
+        authorName: "wei.li",
+        views: 980,
+        likesCount: 0,
+        publishedAt: "2026-08-11",
+      },
+      {
+        id: -13,
+        title: "Caching Strategy for Blog Discovery",
+        slug: "caching-strategy-blog-discovery-apis",
+        coverImage:
+          "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1400&q=80",
+        summary: "Notes from the column.",
+        authorName: "wei.li",
+        views: 760,
+        likesCount: 0,
+        publishedAt: "2026-08-05",
+      },
+    ],
+    createdAt: "",
+  },
+  {
+    id: -2,
+    name: "Systems notes",
+    slug: "preview-systems-notes",
+    description: "API boundaries, indexes, and the pieces behind a content platform.",
+    coverImage: "",
+    isPublished: true,
+    postsCount: 2,
+    posts: [
+      {
+        id: -21,
+        title: "Spring Boot API Boundaries",
+        slug: "spring-boot-api-boundaries-content-products",
+        coverImage:
+          "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80",
+        summary: "Notes from the column.",
+        authorName: "wei.li",
+        views: 640,
+        likesCount: 0,
+        publishedAt: "2026-08-23",
+      },
+      {
+        id: -22,
+        title: "Database Indexes for Public Feeds",
+        slug: "ai-assisted-editorial-review-human-control",
+        coverImage:
+          "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1400&q=80",
+        summary: "Notes from the column.",
+        authorName: "wei.li",
+        views: 510,
+        likesCount: 0,
+        publishedAt: "2026-07-18",
+      },
+    ],
+    createdAt: "",
+  },
+  {
+    id: -3,
+    name: "Design systems",
+    slug: "preview-design-systems",
+    description: "Tokens and density that survive a real product screen.",
+    coverImage: "",
+    isPublished: true,
+    postsCount: 2,
+    posts: [
+      {
+        id: -31,
+        title: "Design Tokens That Survive Screens",
+        slug: "design-tokens-real-product-screens",
+        coverImage:
+          "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1400&q=80",
+        summary: "Notes from the column.",
+        authorName: "wei.li",
+        views: 420,
+        likesCount: 0,
+        publishedAt: "2026-08-17",
+      },
+      {
+        id: -32,
+        title: "Article Card Density",
+        slug: "designing-recommendation-surface",
+        coverImage:
+          "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1400&q=80",
+        summary: "Notes from the column.",
+        authorName: "wei.li",
+        views: 390,
+        likesCount: 0,
+        publishedAt: "2026-07-02",
+      },
+    ],
+    createdAt: "",
+  },
+];
+
+function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
-  if (collections.length === 0) return null;
+  const live = columns.filter((column) =>
+    column.posts.some((post) => Boolean(post.coverImage?.trim()))
+  );
+  const decks = live.length > 0 ? live : PREVIEW_COLUMNS;
+  const [selected, setSelected] = useState(decks[0]?.slug ?? "");
+  const active = decks.find((column) => column.slug === selected) ?? decks[0];
+  const rest = decks.filter((column) => column.slug !== active?.slug);
+  if (!active) return null;
 
   return (
-    <section
-      aria-labelledby="columns-title"
-      className="bg-surface-secondary flex flex-col gap-1 rounded-3xl p-5"
-    >
-      <div className="flex items-center justify-between px-2 pt-1 pb-3">
-        <Typography id="columns-title" type="h3" weight="semibold">
+    <section aria-labelledby="columns-title" className="flex flex-col gap-6">
+      <div className="flex items-baseline justify-between gap-4">
+        <Typography id="columns-title" type="h2" weight="semibold">
           {t("columns")}
         </Typography>
         <Link className="text-sm no-underline" href="/columns">
-          {t("all")}
+          {t("viewAllColumns")}
           <Link.Icon />
         </Link>
       </div>
-      {collections.map((collection) => (
-        <Link
-          key={collection.slug ?? collection.id}
-          className="hover:bg-default/60 flex flex-col gap-1 rounded-2xl px-2 py-3 no-underline transition-colors duration-150"
-          href={collection.href}
-        >
-          <span className="flex items-baseline justify-between gap-3">
-            <span className="text-foreground truncate text-sm font-medium">
-              {collection.name || t("untitledColumn")}
-            </span>
-            <span className="text-muted shrink-0 text-xs tabular-nums">
-              {(collection.postsCount ?? 0).toLocaleString(locale)}
-            </span>
-          </span>
-          {collection.description ? (
-            <span className="text-muted line-clamp-2 text-xs leading-5">
-              {collection.description}
-            </span>
-          ) : null}
-        </Link>
-      ))}
+      <div className="flex flex-wrap items-start gap-8">
+        <ColumnDeck column={active} />
+        {rest.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            <Typography type="body-sm" weight="semibold">
+              {t("nextColumn")}
+            </Typography>
+            {rest.map((column) => {
+              const updated = columnUpdatedAt(column);
+              return (
+                <button
+                  key={column.slug}
+                  className="bg-surface-secondary hover:bg-surface-tertiary flex flex-col gap-1 rounded-2xl p-4 text-start transition-colors duration-150 motion-reduce:transition-none"
+                  type="button"
+                  onClick={() => setSelected(column.slug)}
+                >
+                  <span className="text-sm font-semibold">{column.name}</span>
+                  <span className="text-muted line-clamp-2 text-xs">{column.description}</span>
+                  <span className="text-muted text-xs">
+                    {[
+                      t("essays", { count: column.postsCount.toLocaleString(locale) }),
+                      updated ? t("updated", { date: formatDate(updated, locale, "") }) : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                </button>
+              );
+            })}
+            <Link className="px-1 text-sm no-underline" href={`/columns/${active.slug}`}>
+              {t("followColumn")}
+              <Link.Icon />
+            </Link>
+          </div>
+        ) : null}
+      </div>
     </section>
-  );
-}
-
-function JournalMasthead({ essayCount }: { essayCount: number }) {
-  const t = useTranslations("Journal");
-  const locale = useLocale();
-  const today = new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "long",
-    weekday: "long",
-    year: "numeric",
-  }).format(new Date());
-
-  return (
-    <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div className="flex flex-col gap-2">
-        <Typography className="text-3xl tracking-tight sm:text-4xl" type="h1" weight="semibold">
-          {t("title")}
-        </Typography>
-        <Typography color="muted">{t("description")}</Typography>
-      </div>
-      <div className="text-muted flex items-center gap-3 text-sm">
-        <span>{today}</span>
-        <span aria-hidden="true">·</span>
-        <span className="tabular-nums">
-          {t("essays", { count: essayCount.toLocaleString(locale) })}
-        </span>
-      </div>
-    </header>
   );
 }
 
@@ -253,7 +524,10 @@ function CategoryList({
   return (
     <Card variant="secondary">
       <Card.Header className="flex-row items-center justify-between">
-        <Card.Title className="text-sm">{t("topics")}</Card.Title>
+        <div className="flex flex-col">
+          <Card.Title className="text-sm">{t("topics")}</Card.Title>
+          <Card.Description>{t("topicsHint")}</Card.Description>
+        </div>
         <Link className="text-xs no-underline" href="/archive">
           {t("archive")}
         </Link>
@@ -269,9 +543,9 @@ function CategoryList({
             {categories.map((category) => (
               <ListBox.Item key={category.id} id={String(category.id)} textValue={category.name}>
                 <Label className="truncate">{category.name}</Label>
-                <Description className="ms-auto shrink-0 tabular-nums">
+                <Chip className="ms-auto shrink-0" size="sm" variant="soft">
                   {(category.count ?? 0).toLocaleString(locale)}
-                </Description>
+                </Chip>
               </ListBox.Item>
             ))}
           </ListBox>
@@ -297,32 +571,32 @@ function ContinueReading({ entries }: { entries: ReadingHistoryResponse[] }) {
           <Link.Icon />
         </Link>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="flex flex-col gap-2">
         {entries.slice(0, 4).map(({ lastReadAt, post, positionAnchor, progressPercent }) => (
-          <div key={post.id} className="bg-surface-secondary flex flex-col gap-3 rounded-3xl p-5">
-            <div className="flex items-baseline justify-between gap-4">
-              <Link
-                className="text-foreground min-w-0 truncate text-lg no-underline"
-                href={getReadingPositionHref(post.slug, positionAnchor)}
+          <ItemCard key={post.id} variant="transparent">
+            <ItemCard.Content>
+              <ItemCard.Title>
+                <Link
+                  className="text-foreground line-clamp-1 no-underline"
+                  href={getReadingPositionHref(post.slug, positionAnchor)}
+                >
+                  {post.title}
+                </Link>
+              </ItemCard.Title>
+              <ItemCard.Description>{formatRelativeTime(lastReadAt)}</ItemCard.Description>
+            </ItemCard.Content>
+            <ItemCard.Action className="w-28">
+              <Meter
+                aria-label={t("readingProgress", { title: post.title })}
+                size="sm"
+                value={progressPercent}
               >
-                {post.title}
-              </Link>
-              <Typography className="shrink-0 tabular-nums" color="muted" type="body-xs">
-                {progressPercent}% · {formatRelativeTime(lastReadAt)}
-              </Typography>
-            </div>
-            <ProgressBar
-              aria-label={t("readingProgress", { title: post.title })}
-              className="mt-3"
-              color="accent"
-              size="sm"
-              value={progressPercent}
-            >
-              <ProgressBar.Track>
-                <ProgressBar.Fill />
-              </ProgressBar.Track>
-            </ProgressBar>
-          </div>
+                <Meter.Track>
+                  <Meter.Fill />
+                </Meter.Track>
+              </Meter>
+            </ItemCard.Action>
+          </ItemCard>
         ))}
       </div>
     </section>
@@ -348,13 +622,14 @@ function JournalSkeleton() {
 
 export function JournalPage() {
   const t = useTranslations("Journal");
+  const locale = useLocale();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const discoveryQuery = useRetrieveDiscoveryQuery();
   const facetsQuery = useRetrieveFacetsQuery();
   const featuredQuery = useGetFeaturedPostsQuery({ page: 0, size: 8 });
-  const latestQuery = useGetPublicPostsQuery({ page: 0, size: 8 });
+  const [latestPage, setLatestPage] = useState(0);
+  const latestQuery = useGetPublicPostsQuery({ page: latestPage, size: 6 });
   const columnsQuery = useGetPublicColumnsQuery();
-  const seriesQuery = useRetrievePublicSeriesQuery();
   const libraryQuery = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
 
   const discovery = discoveryQuery.data;
@@ -364,38 +639,33 @@ export function JournalPage() {
     (category): category is CategoryFacet & { id: number; name: string } =>
       category.id != null && Boolean(category.name) && (category.count ?? 0) > 0
   );
+  const tags = (facetsQuery.data?.tags ?? []).filter(
+    (tag): tag is TagFacet & { id: number; name: string } =>
+      tag.id != null && Boolean(tag.name) && (tag.count ?? 0) > 0
+  );
   const essayCount = facetsQuery.data?.totalPublishedCount ?? latestQuery.data?.total ?? 0;
+  const pageRef = useRef<HTMLDivElement>(null);
+  const contentReady = !discoveryQuery.isLoading && !featuredQuery.isLoading;
 
-  const collections = useMemo(() => {
-    const values = new Map<string, Collection>();
-
-    for (const column of columnsQuery.data ?? []) {
-      values.set(column.slug, {
-        description: column.description,
-        href: `/columns/${column.slug}`,
-        id: column.id,
-        name: column.name,
-        postsCount: column.postsCount,
-        slug: column.slug,
+  useGSAP(
+    () => {
+      const root = pageRef.current;
+      if (!root || !contentReady) return;
+      const pieces = root.querySelectorAll<HTMLElement>("[data-journal-reveal]");
+      const motion = gsap.matchMedia();
+      motion.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.from(pieces, {
+          autoAlpha: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          stagger: 0.08,
+          y: 28,
+        });
       });
-    }
-
-    const fallbackSeries = seriesQuery.data?.length ? seriesQuery.data : (discovery?.series ?? []);
-    for (const series of fallbackSeries) {
-      const slug = series.slug ?? String(series.id ?? "");
-      if (!slug || values.has(slug)) continue;
-      values.set(slug, {
-        description: series.description,
-        href: series.slug ? `/columns/${series.slug}` : "/columns",
-        id: series.id,
-        name: series.name,
-        postsCount: series.postsCount,
-        slug,
-      });
-    }
-
-    return Array.from(values.values());
-  }, [columnsQuery.data, discovery?.series, seriesQuery.data]);
+      return () => motion.revert();
+    },
+    { dependencies: [contentReady], scope: pageRef }
+  );
 
   const trending = discovery?.trending ?? [];
   const mostRead = discovery?.mostRead ?? [];
@@ -414,9 +684,12 @@ export function JournalPage() {
     !openingLoading && !latestQuery.isLoading && !lead && latestPosts.length === 0;
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-8 xl:px-10 2xl:px-14">
+    <div
+      ref={pageRef}
+      className="bg-background min-h-[100dvh] w-full px-8 pt-28 pb-24 md:px-12 xl:px-16"
+    >
       <div className="flex w-full flex-col gap-16">
-        <JournalMasthead essayCount={essayCount} />
+        <h1 className="sr-only">{t("title")}</h1>
 
         {discoveryQuery.isError && featuredQuery.isError ? (
           <Alert status="danger">
@@ -431,7 +704,7 @@ export function JournalPage() {
           </Alert>
         ) : null}
 
-        <div className="grid items-start gap-x-10 gap-y-14 xl:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="grid items-start gap-x-16 gap-y-14 xl:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="flex min-w-0 flex-col gap-14">
             {openingLoading ? <JournalSkeleton /> : null}
 
@@ -441,18 +714,33 @@ export function JournalPage() {
               </section>
             ) : null}
 
-            <ContinueReading entries={libraryQuery.data?.continueReading ?? []} />
+            <div data-journal-reveal="">
+              <ContinueReading entries={libraryQuery.data?.continueReading ?? []} />
+            </div>
 
-            <section aria-labelledby="latest-title" className="flex flex-col gap-2">
+            <Separator />
+
+            <div data-journal-reveal="">
+              <ColumnDecks
+                columns={(columnsQuery.data ?? []).filter((column) => column.isPublished)}
+              />
+            </div>
+
+            <section aria-labelledby="latest-title" className="flex flex-col gap-4">
               <div className="flex items-baseline justify-between gap-4">
                 <Typography id="latest-title" type="h3" weight="semibold">
                   {t("latest")}
                 </Typography>
+                <span className="text-muted text-xs tabular-nums">
+                  <NumberValue locale={locale} value={essayCount}>
+                    {(formatted) => t("essays", { count: formatted })}
+                  </NumberValue>
+                </span>
               </div>
               {latestQuery.isLoading && !openingLoading ? (
                 <div className="flex flex-col gap-4">
                   {Array.from({ length: 5 }, (_, index) => (
-                    <Skeleton key={index} className="h-12 w-full rounded-md" />
+                    <Skeleton key={index} className="h-24 w-full rounded-2xl" />
                   ))}
                 </div>
               ) : latestQuery.isError ? (
@@ -468,10 +756,36 @@ export function JournalPage() {
                   </Button>
                 </Alert>
               ) : latestPosts.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="flex flex-col gap-4">
                   {latestPosts.map((post) => (
-                    <StoryTile key={post.id ?? post.slug} post={post} />
+                    <div key={post.id ?? post.slug} data-journal-reveal="">
+                      <StoryRow post={post} />
+                    </div>
                   ))}
+                  <div className="flex items-center justify-between gap-4 pt-2">
+                    <Button
+                      isDisabled={latestPage === 0}
+                      size="sm"
+                      variant="outline"
+                      onPress={() => setLatestPage((page) => Math.max(0, page - 1))}
+                    >
+                      {t("previous")}
+                    </Button>
+                    <span className="text-muted text-xs tabular-nums">
+                      {t("pageOf", {
+                        page: latestPage + 1,
+                        pages: Math.max(1, latestQuery.data?.totalPages ?? 1),
+                      })}
+                    </span>
+                    <Button
+                      isDisabled={latestPage + 1 >= (latestQuery.data?.totalPages ?? 1)}
+                      size="sm"
+                      variant="outline"
+                      onPress={() => setLatestPage((page) => page + 1)}
+                    >
+                      {t("next")}
+                    </Button>
+                  </div>
                 </div>
               ) : archiveEmpty ? (
                 <EmptyState>
@@ -484,24 +798,28 @@ export function JournalPage() {
             </section>
           </div>
 
-          <aside className="flex flex-col gap-4 xl:sticky xl:top-28 xl:self-start">
-            <CategoryList categories={categories} />
-            <AttentionCard mostRead={mostRead} trending={trending} />
-            <ColumnRail collections={collections} />
+          <aside className="flex flex-col gap-8 xl:sticky xl:top-28 xl:self-start">
+            <div data-journal-reveal="">
+              <CategoryList categories={categories} />
+            </div>
+            <div data-journal-reveal="">
+              <TagList tags={tags} />
+            </div>
+            <div data-journal-reveal="">
+              <AttentionCard mostRead={mostRead} trending={trending} />
+            </div>
           </aside>
         </div>
 
-        {featuredPosts.length > 0 ? (
-          <section aria-labelledby="featured-band-title" className="flex flex-col gap-4">
-            <Typography id="featured-band-title" type="h2" weight="semibold">
-              {t("featuredStories")}
-            </Typography>
-            <div className="grid gap-x-8 sm:grid-cols-2 xl:grid-cols-4">
-              {featuredPosts.slice(0, 8).map((post) => (
-                <IndexLine key={post.id ?? post.slug} post={post} />
-              ))}
+        {featuredPosts.some((post) => post.slug && !shownSlugs.has(post.slug)) ? (
+          <>
+            <Separator />
+            <div data-journal-reveal="">
+              <FeaturedCarousel
+                posts={featuredPosts.filter((post) => !post.slug || !shownSlugs.has(post.slug))}
+              />
             </div>
-          </section>
+          </>
         ) : null}
       </div>
     </div>
@@ -575,19 +893,67 @@ function AttentionCard({ mostRead, trending }: { mostRead: Story[]; trending: St
   );
 }
 
-function IndexLine({ post }: { post: Story }) {
+function TagList({ tags }: { tags: Array<TagFacet & { id: number; name: string }> }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
+  const router = useRouter();
+  if (tags.length === 0) return null;
 
   return (
-    <article className="flex flex-col gap-1 border-t py-4">
-      <StoryMeta post={post} />
-      <Link className="text-foreground text-sm leading-5 no-underline" href={storyHref(post)}>
-        {post.title || t("untitledStory")}
-      </Link>
-      <span className="text-muted text-xs tabular-nums">
-        {t("views", { count: (post.views ?? 0).toLocaleString(locale) })}
-      </span>
-    </article>
+    <Card variant="secondary">
+      <Card.Header>
+        <Card.Title className="text-sm">{t("tags")}</Card.Title>
+        <Card.Description>{t("tagsHint")}</Card.Description>
+      </Card.Header>
+      <Card.Content>
+        <TagGroup
+          aria-label={t("tags")}
+          selectionMode="single"
+          size="sm"
+          onSelectionChange={(keys) => {
+            if (keys === "all") return;
+            const key = [...keys][0];
+            if (key != null) router.push(`/explore?tag=${key}`);
+          }}
+        >
+          <TagGroup.List className="flex-wrap">
+            {tags.map((tag) => (
+              <Tag key={tag.id} id={String(tag.id)} textValue={tag.name}>
+                {tag.name}
+                <span className="text-muted text-xs tabular-nums">
+                  {(tag.count ?? 0).toLocaleString(locale)}
+                </span>
+              </Tag>
+            ))}
+          </TagGroup.List>
+        </TagGroup>
+      </Card.Content>
+    </Card>
+  );
+}
+
+function FeaturedCarousel({ posts }: { posts: Story[] }) {
+  const t = useTranslations("Journal");
+  if (posts.length === 0) return null;
+
+  return (
+    <section aria-labelledby="featured-band-title" className="flex flex-col gap-4">
+      <Typography id="featured-band-title" type="h2" weight="semibold">
+        {t("featuredStories")}
+      </Typography>
+      <Carousel opts={{ align: "start" }}>
+        <Carousel.Content>
+          {posts.slice(0, 8).map((post) => (
+            <Carousel.Item key={storyKey(post)} className="basis-full sm:basis-1/2 xl:basis-1/3">
+              <div className="pe-3">
+                <FeatureCard post={post} />
+              </div>
+            </Carousel.Item>
+          ))}
+        </Carousel.Content>
+        <Carousel.Previous />
+        <Carousel.Next />
+      </Carousel>
+    </section>
   );
 }
