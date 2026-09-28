@@ -1,3 +1,15 @@
+# [1.175.0](https://github.com/LeeWio/odyssey/compare/v1.174.0...v1.175.0) (2026-09-28)
+
+
+### Bug Fixes
+
+* **journal:** tighten the reading index layout ([3d602c8](https://github.com/LeeWio/odyssey/commit/3d602c84b0a0954afd7cbc86ba1514fbd8b7bf3a))
+
+
+### Features
+
+* **journal:** add pages for authors and their essays ([e92c996](https://github.com/LeeWio/odyssey/commit/e92c99634ccbdf42b7478029e15ca4e9373d0e29))
+
 # [1.174.0](https://github.com/LeeWio/odyssey/compare/v1.173.2...v1.174.0) (2026-09-28)
 
 
