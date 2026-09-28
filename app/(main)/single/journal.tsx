@@ -45,6 +45,7 @@ import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
 
 type CategoryFacet = OpenApiComponents["schemas"]["CategoryFacet"];
+type CategoryGroup = OpenApiComponents["schemas"]["CategoryGroup"];
 type TagFacet = OpenApiComponents["schemas"]["TagFacet"];
 type Story = {
   id?: number;
@@ -92,7 +93,7 @@ const coverHover =
   "transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100";
 
 function Cover({ cover, ratio }: { cover?: string; ratio: string }) {
-  if (!cover) return <span className={`${ratio} bg-default/40 block w-full`} />;
+  if (!cover) return <span className={`${ratio} bg-default/40 block`} />;
 
   return (
     // Cover hosts are not in next/image remotePatterns.
@@ -124,16 +125,16 @@ function FeatureCard({
       className="bg-surface-secondary hover:bg-surface-tertiary overflow-hidden rounded-2xl transition-colors duration-150 motion-reduce:transition-none"
     >
       <HoverCard>
-        <HoverCard.Trigger>
+        <HoverCard.Trigger className="block w-full">
           <Link
-            className="group relative block overflow-hidden no-underline"
+            className="group relative block w-full overflow-hidden no-underline"
             href={storyHref(post)}
           >
-            <Cover cover={post.coverImage?.trim()} ratio="aspect-[16/9]" />
+            <Cover cover={post.coverImage?.trim()} ratio="aspect-[16/9] w-full" />
             <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pt-12 pb-3.5">
               {meta ? <span className="text-xs text-white/75">{meta}</span> : null}
               <span
-                className={`line-clamp-2 font-semibold tracking-tight text-white ${featured ? "text-2xl leading-8" : "text-xl leading-7"}`}
+                className={`line-clamp-2 font-semibold tracking-tight text-white ${featured ? "text-xl leading-7" : "text-base leading-6"}`}
               >
                 {title}
               </span>
@@ -253,19 +254,24 @@ function StoryRow({ post }: { post: Story }) {
   const author = post.authorName?.trim();
 
   return (
-    <ItemCard className="items-start p-3" variant="secondary">
-      {cover ? (
-        <ItemCard.Icon className="size-20 overflow-hidden rounded-xl">
-          <Cover cover={cover} ratio="size-20" />
-        </ItemCard.Icon>
-      ) : null}
-      <ItemCard.Content className="gap-1.5">
-        <ItemCard.Title className="text-base leading-6 font-semibold">
-          <Link className="text-foreground line-clamp-2 no-underline" href={storyHref(post)}>
-            {title}
-          </Link>
-        </ItemCard.Title>
-        <p className="text-muted text-xs">
+    <Card className="h-full">
+      <Card.Header>
+        <div className="flex items-start gap-3">
+          <Card.Title className="line-clamp-2 min-w-0 flex-1 text-base leading-6">
+            <Link className="text-foreground no-underline" href={storyHref(post)}>
+              {title}
+            </Link>
+          </Card.Title>
+          {cover ? (
+            <Link
+              className="block size-12 shrink-0 overflow-hidden rounded-lg no-underline"
+              href={storyHref(post)}
+            >
+              <Cover cover={cover} ratio="size-12" />
+            </Link>
+          ) : null}
+        </div>
+        <Card.Description>
           {[
             author,
             post.category?.name,
@@ -273,11 +279,15 @@ function StoryRow({ post }: { post: Story }) {
           ]
             .filter(Boolean)
             .join(" · ")}
-        </p>
-        {post.summary ? (
-          <p className="text-muted line-clamp-3 text-sm leading-5">{post.summary}</p>
-        ) : null}
-        <p className="text-muted text-xs tabular-nums">
+        </Card.Description>
+      </Card.Header>
+      {post.summary ? (
+        <Card.Content>
+          <p className="text-muted line-clamp-2 text-sm leading-5">{post.summary}</p>
+        </Card.Content>
+      ) : null}
+      <Card.Footer className="mt-auto">
+        <span className="text-muted text-xs tabular-nums">
           <NumberValue locale={locale} notation="compact" value={post.views ?? 0}>
             {(formatted) => t("views", { count: formatted })}
           </NumberValue>
@@ -285,9 +295,9 @@ function StoryRow({ post }: { post: Story }) {
           <NumberValue locale={locale} notation="compact" value={post.likesCount ?? 0}>
             {(formatted) => t("likes", { count: formatted })}
           </NumberValue>
-        </p>
-      </ItemCard.Content>
-    </ItemCard>
+        </span>
+      </Card.Footer>
+    </Card>
   );
 }
 
@@ -493,7 +503,6 @@ function CategoryList({
       <Card.Header className="flex-row items-center justify-between">
         <div className="flex flex-col">
           <Card.Title className="text-sm">{t("topics")}</Card.Title>
-          <Card.Description>{t("topicsHint")}</Card.Description>
         </div>
         <Link className="text-xs no-underline" href="/archive">
           {t("archive")}
@@ -723,7 +732,7 @@ export function JournalPage() {
                   </Button>
                 </Alert>
               ) : latestPosts.length > 0 ? (
-                <div className="flex flex-col gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   {latestPosts.map((post) => (
                     <div key={post.id ?? post.slug} data-journal-reveal="">
                       <StoryRow post={post} />
@@ -744,6 +753,10 @@ export function JournalPage() {
                 </EmptyState>
               ) : null}
             </section>
+
+            <div data-journal-reveal="">
+              <CategoryShelves groups={discovery?.categoryGroups ?? []} />
+            </div>
           </div>
 
           <aside className="flex flex-col gap-8 xl:sticky xl:top-28 xl:self-start">
@@ -851,7 +864,6 @@ function TagList({ tags }: { tags: Array<TagFacet & { id: number; name: string }
     <Card variant="secondary">
       <Card.Header>
         <Card.Title className="text-sm">{t("tags")}</Card.Title>
-        <Card.Description>{t("tagsHint")}</Card.Description>
       </Card.Header>
       <Card.Content>
         <TagGroup
@@ -880,19 +892,83 @@ function TagList({ tags }: { tags: Array<TagFacet & { id: number; name: string }
   );
 }
 
+function CategoryShelf({ group }: { group: CategoryGroup }) {
+  const t = useTranslations("Journal");
+  const locale = useLocale();
+  const category = group.category;
+  const name = category?.name;
+  if (!name) return null;
+  const posts = [group.heroPost, ...(group.supportingPosts ?? group.posts ?? [])].filter(
+    (post): post is NonNullable<typeof post> => Boolean(post?.slug)
+  );
+  const unique = posts.filter(
+    (post, index) => posts.findIndex((item) => item.slug === post.slug) === index
+  );
+  if (unique.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-baseline gap-3">
+        <Typography type="body-sm" weight="semibold">
+          {name}
+        </Typography>
+        <span className="text-muted text-xs tabular-nums">
+          <NumberValue locale={locale} value={group.totalPublishedCount ?? unique.length}>
+            {(formatted) => t("categoryEssays", { count: formatted })}
+          </NumberValue>
+        </span>
+        <Link
+          className="text-sm no-underline"
+          href={category?.id ? `/explore?category=${category.id}` : "/explore"}
+        >
+          {t("archive")}
+          <Link.Icon />
+        </Link>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {unique.slice(0, 4).map((post) => (
+          <StoryRow key={post.id ?? post.slug} post={post} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CategoryShelves({ groups }: { groups: CategoryGroup[] }) {
+  const t = useTranslations("Journal");
+  const ready = groups.filter(
+    (group) => group.category?.name && (group.heroPost || group.posts?.length)
+  );
+  if (ready.length === 0) return null;
+
+  return (
+    <section aria-labelledby="archive-shelves-title" className="flex flex-col gap-4">
+      <Typography id="archive-shelves-title" type="h3" weight="semibold">
+        {t("fromTheArchive")}
+      </Typography>
+      {ready.slice(0, 4).map((group) => (
+        <CategoryShelf key={group.category?.id ?? group.category?.slug} group={group} />
+      ))}
+    </section>
+  );
+}
+
 function FeaturedCarousel({ posts }: { posts: Story[] }) {
   const t = useTranslations("Journal");
   if (posts.length === 0) return null;
 
   return (
-    <section aria-labelledby="featured-band-title" className="flex flex-col gap-4">
+    <section aria-labelledby="featured-band-title" className="@container flex flex-col gap-4">
       <Typography id="featured-band-title" type="h2" weight="semibold">
         {t("featuredStories")}
       </Typography>
       <Carousel opts={{ align: "start" }}>
         <Carousel.Content>
-          {posts.slice(0, 8).map((post) => (
-            <Carousel.Item key={storyKey(post)} className="basis-full sm:basis-1/2 xl:basis-1/3">
+          {posts.slice(0, 12).map((post) => (
+            <Carousel.Item
+              key={storyKey(post)}
+              className="basis-full @min-[36rem]:basis-1/2 @min-[52rem]:basis-1/3 @min-[68rem]:basis-1/4 @min-[84rem]:basis-1/5"
+            >
               <div className="pe-3">
                 <FeatureCard post={post} />
               </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { Link, ProgressBar, Skeleton, Typography } from "@heroui/react";
+import { Card, Link, ProgressBar, Skeleton, Tag, TagGroup, Typography } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
 import { useGetPublicColumnBySlugQuery } from "@/lib/features/column";
@@ -10,6 +11,7 @@ import { useRetrieveDiscoveryQuery } from "@/lib/features/openapi";
 import {
   type PostResponse,
   useGetFeaturedPostsQuery,
+  useGetPublicPostsQuery,
   useGetRelatedPostsQuery,
 } from "@/lib/features/post";
 import { useAppSelector } from "@/lib/hooks";
@@ -33,6 +35,7 @@ function formatPostDate(value: string | null | undefined, locale: string, fallba
 
 type StoryRef = {
   category?: { name?: string | null } | null;
+  createdAt?: string | null;
   id?: number;
   publishedAt?: string | null;
   slug?: string | null;
@@ -76,39 +79,48 @@ function StoryBand({
   if (!loading && posts.length === 0) return null;
 
   return (
-    <section aria-labelledby={id} className="flex min-w-0 flex-col gap-3">
-      <Typography id={id} type="body-sm" weight="semibold">
-        {title}
-      </Typography>
-      {loading ? (
-        <div
-          aria-busy="true"
-          aria-label={t("loadingRelated")}
-          className="flex flex-col gap-3"
-          role="status"
-        >
-          {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton key={index} className="h-10 w-full rounded-md" />
-          ))}
-        </div>
-      ) : (
-        <ol>
-          {posts.map((post) => (
-            <StoryLine
-              key={post.id}
-              meta={[
-                post.category?.name,
-                formatPostDate(post.publishedAt, locale, t("recentlyPublished")),
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              post={post}
-            />
-          ))}
-        </ol>
-      )}
-    </section>
+    <Card variant="secondary">
+      <Card.Header>
+        <Card.Title className="text-sm" id={id}>
+          {title}
+        </Card.Title>
+      </Card.Header>
+      <Card.Content className="flex min-w-0 flex-col gap-3">
+        {loading ? (
+          <div
+            aria-busy="true"
+            aria-label={t("loadingRelated")}
+            className="flex flex-col gap-3"
+            role="status"
+          >
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-10 w-full rounded-md" />
+            ))}
+          </div>
+        ) : (
+          <ol>
+            {posts.map((post) => (
+              <StoryLine
+                key={post.id}
+                meta={[
+                  post.category?.name,
+                  formatPostDate(post.publishedAt, locale, t("recentlyPublished")),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                post={post}
+              />
+            ))}
+          </ol>
+        )}
+      </Card.Content>
+    </Card>
   );
+}
+
+export function columnOrder(posts: StoryRef[], slug?: string) {
+  const index = posts.findIndex((post) => post.slug === slug);
+  return index >= 0 ? index + 1 : null;
 }
 
 function excludeCurrent(posts: StoryRef[], slug?: string) {
@@ -126,6 +138,7 @@ export function ArticleContext({
 }) {
   const t = useTranslations("Article");
   const locale = useLocale();
+  const router = useRouter();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const discovery = useRetrieveDiscoveryQuery();
   const featured = useGetFeaturedPostsQuery({ page: 0, size: 6 });
@@ -135,6 +148,12 @@ export function ArticleContext({
   const column = useGetPublicColumnBySlugQuery(series?.slug ?? "", { skip: !series?.slug });
   const columnPosts = column.data?.posts ?? [];
   const category = article.category;
+  const authorName = article.authorName?.trim();
+  const authorDirectory = useGetPublicPostsQuery({ page: 0, size: 40 }, { skip: !authorName });
+  const sameCategory = useGetPublicPostsQuery(
+    { categoryId: category?.id, page: 0, size: 5 },
+    { skip: !category?.id }
+  );
   const tags = article.tags ?? [];
   const reading = (library.data?.continueReading ?? [])
     .filter((entry) => entry.post.slug !== slug)
@@ -142,13 +161,27 @@ export function ArticleContext({
   const trending = excludeCurrent(
     discovery.data?.trending ?? discovery.data?.mostRead ?? [],
     slug
-  ).slice(0, 6);
+  ).slice(0, 4);
   const featuredPosts = excludeCurrent(
     featured.data?.list ?? discovery.data?.curated ?? [],
     slug
-  ).slice(0, 6);
-  const mostRead = excludeCurrent(discovery.data?.mostRead ?? [], slug).slice(0, 6);
-  const relatedPosts = excludeCurrent(related.data ?? [], slug).slice(0, 6);
+  ).slice(0, 4);
+  const relatedPosts = excludeCurrent(related.data ?? [], slug).slice(0, 4);
+  const authorPosts = excludeCurrent(
+    (authorDirectory.data?.list ?? []).filter((post) => post.authorName?.trim() === authorName),
+    slug
+  )
+    .slice(0, 4)
+    .map((post) => ({
+      ...post,
+      publishedAt: "publishedAt" in post && post.publishedAt ? post.publishedAt : post.createdAt,
+    }));
+  const categoryPosts = excludeCurrent(sameCategory.data?.list ?? [], slug)
+    .slice(0, 4)
+    .map((post) => ({
+      ...post,
+      publishedAt: "publishedAt" in post && post.publishedAt ? post.publishedAt : post.createdAt,
+    }));
 
   return (
     <>
@@ -174,55 +207,48 @@ export function ArticleContext({
         </section>
 
         {category?.name ? (
-          <section aria-label={t("category")} className="flex flex-col gap-2">
-            <Typography type="body-sm" weight="semibold">
-              {t("category")}
-            </Typography>
-            <Link
-              className="text-foreground text-sm no-underline"
-              href={category.id ? `/explore?category=${category.id}` : "/explore"}
-            >
-              {category.name}
-            </Link>
-          </section>
+          <Card variant="secondary">
+            <Card.Header>
+              <Card.Title className="text-sm">{t("category")}</Card.Title>
+            </Card.Header>
+            <Card.Content>
+              <Link
+                className="text-foreground text-sm no-underline"
+                href={category.id ? `/explore?category=${category.id}` : "/explore"}
+              >
+                {category.name}
+                <Link.Icon />
+              </Link>
+            </Card.Content>
+          </Card>
         ) : null}
 
         {tags.length > 0 ? (
-          <section aria-label={t("tags")} className="flex flex-col gap-2">
-            <Typography type="body-sm" weight="semibold">
-              {t("tags")}
-            </Typography>
-            <ul className="flex flex-col gap-1">
-              {tags.map((tag) => (
-                <li key={tag.id}>
-                  <Link className="text-muted text-sm no-underline" href={`/explore?tag=${tag.id}`}>
-                    {tag.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-
-        {series ? (
-          <section aria-label={series.name} className="flex flex-col gap-2">
-            <Link
-              className="text-foreground text-sm font-medium no-underline"
-              href={`/columns/${series.slug}`}
-            >
-              {t("partOfColumn", { name: series.name })}
-            </Link>
-            {series.description ? (
-              <Typography className="line-clamp-4" color="muted" type="body-sm">
-                {series.description}
-              </Typography>
-            ) : null}
-            {article.seriesOrder ? (
-              <Typography color="muted" type="body-xs">
-                {t("installment", { count: series.postsCount, order: article.seriesOrder })}
-              </Typography>
-            ) : null}
-          </section>
+          <Card variant="secondary">
+            <Card.Header>
+              <Card.Title className="text-sm">{t("tags")}</Card.Title>
+            </Card.Header>
+            <Card.Content>
+              <TagGroup
+                aria-label={t("tags")}
+                selectionMode="single"
+                size="sm"
+                onSelectionChange={(keys) => {
+                  if (keys === "all") return;
+                  const key = [...keys][0];
+                  if (key != null) router.push(`/explore?tag=${key}`);
+                }}
+              >
+                <TagGroup.List className="flex-wrap">
+                  {tags.map((tag) => (
+                    <Tag key={tag.id} id={String(tag.id)} textValue={tag.name}>
+                      {tag.name}
+                    </Tag>
+                  ))}
+                </TagGroup.List>
+              </TagGroup>
+            </Card.Content>
+          </Card>
         ) : null}
 
         {isAuthenticated && reading.length > 0 ? (
@@ -245,61 +271,105 @@ export function ArticleContext({
       </aside>
 
       <section
-        aria-label={t("aroundTheArchive")}
-        className="order-3 col-span-full grid gap-10 border-t pt-10 md:grid-cols-2 xl:order-none xl:grid-cols-4"
+        aria-labelledby="keep-reading-title"
+        className="order-3 col-span-full flex flex-col gap-4 border-t pt-10 xl:order-none"
       >
-        {series && columnPosts.length > 0 ? (
-          <section aria-labelledby="column-stories-title" className="flex min-w-0 flex-col gap-3">
-            <div className="flex items-baseline justify-between gap-3">
-              <Typography id="column-stories-title" type="body-sm" weight="semibold">
-                {t("inThisColumn")}
-              </Typography>
-              <Link className="text-xs no-underline" href={`/columns/${series.slug}`}>
-                {series.name}
-              </Link>
-            </div>
-            <ol>
-              {columnPosts.map((post, index) => {
-                const current = post.slug === slug;
-                return (
-                  <StoryLine
-                    key={post.id}
-                    meta={
-                      current
-                        ? t("youAreHere")
-                        : t("installment", { count: columnPosts.length, order: index + 1 })
-                    }
-                    post={post}
-                  />
-                );
-              })}
-            </ol>
-          </section>
-        ) : null}
-        <StoryBand
-          id="related-stories-title"
-          loading={related.isLoading}
-          posts={relatedPosts}
-          title={t("related")}
-        />
-        <StoryBand
-          id="trending-stories-title"
-          loading={discovery.isLoading}
-          posts={trending}
-          title={t("trending")}
-        />
-        <StoryBand
-          id="featured-stories-title"
-          loading={featured.isLoading && featuredPosts.length === 0}
-          posts={featuredPosts}
-          title={t("featured")}
-        />
-        <StoryBand
-          id="most-read-stories-title"
-          loading={discovery.isLoading}
-          posts={mostRead}
-          title={t("mostRead")}
-        />
+        <Typography id="keep-reading-title" type="h3" weight="semibold">
+          {t("keepReading")}
+        </Typography>
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          {series && columnPosts.length > 0 ? (
+            <Card variant="secondary">
+              <Card.Header>
+                <Card.Title className="text-sm">{t("inThisColumn")}</Card.Title>
+                <Card.Description>
+                  <Link className="no-underline" href={`/columns/${series.slug}`}>
+                    {series.name}
+                    <Link.Icon />
+                  </Link>
+                </Card.Description>
+              </Card.Header>
+              <Card.Content>
+                <ol>
+                  {columnPosts.map((post, index) => {
+                    const current = post.slug === slug;
+                    return (
+                      <StoryLine
+                        key={post.id}
+                        meta={
+                          current
+                            ? t("youAreHere")
+                            : t("installment", { count: columnPosts.length, order: index + 1 })
+                        }
+                        post={post}
+                      />
+                    );
+                  })}
+                </ol>
+              </Card.Content>
+            </Card>
+          ) : null}
+          {authorName && authorPosts.length > 0 ? (
+            <Card variant="secondary">
+              <Card.Header>
+                <Card.Title className="text-sm" id="author-stories-title">
+                  {t("moreFromAuthor", { name: authorName })}
+                </Card.Title>
+                <Card.Description>
+                  <Link
+                    className="no-underline"
+                    href={`/single/authors/${encodeURIComponent(authorName)}`}
+                  >
+                    {authorName}
+                    <Link.Icon />
+                  </Link>
+                </Card.Description>
+              </Card.Header>
+              <Card.Content>
+                <ol>
+                  {authorPosts.map((post) => (
+                    <StoryLine
+                      key={post.id}
+                      meta={[
+                        post.category?.name,
+                        formatPostDate(post.publishedAt, locale, t("recentlyPublished")),
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                      post={post}
+                    />
+                  ))}
+                </ol>
+              </Card.Content>
+            </Card>
+          ) : null}
+          {category?.id && category.name ? (
+            <StoryBand
+              id="category-stories-title"
+              loading={sameCategory.isLoading}
+              posts={categoryPosts}
+              title={t("moreInCategory", { name: category.name })}
+            />
+          ) : null}
+          <StoryBand
+            id="related-stories-title"
+            loading={related.isLoading}
+            posts={relatedPosts}
+            title={t("related")}
+          />
+          <StoryBand
+            id="trending-stories-title"
+            loading={discovery.isLoading}
+            posts={trending}
+            title={t("trending")}
+          />
+          <StoryBand
+            id="featured-stories-title"
+            loading={featured.isLoading && featuredPosts.length === 0}
+            posts={featuredPosts}
+            title={t("featured")}
+          />
+        </div>
       </section>
     </>
   );

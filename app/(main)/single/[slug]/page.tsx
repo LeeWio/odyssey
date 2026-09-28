@@ -6,6 +6,7 @@ import {
   Breadcrumbs,
   BreadcrumbsItem,
   Button,
+  Card,
   Link,
   Popover,
   ProgressBar,
@@ -34,10 +35,12 @@ import {
   useGetPostCollectionsQuery,
   useRecordReadingProgressMutation,
 } from "@/lib/features/library";
+import { useGetPublicColumnBySlugQuery } from "@/lib/features/column";
 import {
   type PostResponse,
   useFavoritePostMutation,
   useGetPublicPostBySlugQuery,
+  useGetRelatedPostsQuery,
   useLikePostMutation,
   useUnlikePostMutation,
 } from "@/lib/features/post";
@@ -45,7 +48,7 @@ import { useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
 import { getReadingPositionId } from "@/lib/reading-position";
 
-import { ArticleContext } from "./article-sidebar";
+import { ArticleContext, columnOrder } from "./article-sidebar";
 
 const ArticleBodyReader = dynamic(
   () =>
@@ -116,6 +119,54 @@ function getAuthorInitials(value?: string | null) {
     .map((part) => part[0])
     .join("")
     .toUpperCase();
+}
+
+function ReadNext({ article }: { article: PostResponse }) {
+  const t = useTranslations("Article");
+  const related = useGetRelatedPostsQuery(article.slug);
+  const next = (related.data ?? []).find((post) => post.slug && post.slug !== article.slug);
+  if (!next?.slug) return null;
+
+  return (
+    <nav aria-label={t("readNext")} className="mt-16 flex flex-col gap-4">
+      <Separator />
+      <Card>
+        <Card.Header>
+          <Card.Description>{t("readNext")}</Card.Description>
+          <Card.Title>
+            <Link
+              className="text-foreground line-clamp-2 no-underline"
+              href={`/single/${next.slug}`}
+            >
+              {next.title}
+            </Link>
+          </Card.Title>
+          {next.summary ? (
+            <Card.Description className="line-clamp-3">{next.summary}</Card.Description>
+          ) : null}
+        </Card.Header>
+      </Card>
+    </nav>
+  );
+}
+
+function ColumnInstallment({
+  series,
+  slug,
+}: {
+  series: NonNullable<PostResponse["series"]>;
+  slug: string;
+}) {
+  const t = useTranslations("Article");
+  const column = useGetPublicColumnBySlugQuery(series.slug);
+  const order = columnOrder(column.data?.posts ?? [], slug) ?? undefined;
+  if (!order) return null;
+
+  return (
+    <Typography color="muted" type="body-xs">
+      {t("installment", { count: series.postsCount, order })}
+    </Typography>
+  );
 }
 
 function getEstimatedReadingMinutes(article?: PostResponse) {
@@ -450,9 +501,18 @@ export default function SinglePage({ params }: SinglePageProps) {
                       ) : null}
                       <Avatar.Fallback>{getAuthorInitials(article.authorName)}</Avatar.Fallback>
                     </Avatar>
-                    <Typography type="body-sm" weight="medium">
-                      {article.authorName || "Odyssey"}
-                    </Typography>
+                    {article.authorName?.trim() ? (
+                      <Link
+                        className="text-foreground text-sm font-medium no-underline"
+                        href={`/single/authors/${encodeURIComponent(article.authorName.trim())}`}
+                      >
+                        {article.authorName.trim()}
+                      </Link>
+                    ) : (
+                      <Typography type="body-sm" weight="medium">
+                        Odyssey
+                      </Typography>
+                    )}
                   </div>
                   <Typography color="muted" type="body-sm">
                     {formatArticleDate(article.createdAt, locale, t("recentlyPublished"))}
@@ -487,56 +547,57 @@ export default function SinglePage({ params }: SinglePageProps) {
               {article.series && (article.navigation?.prev || article.navigation?.next) ? (
                 <nav
                   aria-label={t("columnNavigation", { name: article.series.name })}
-                  className="mt-16"
+                  className="mt-16 flex flex-col gap-4"
                 >
-                  <Separator className="mb-8" />
-                  <Link
-                    className="text-foreground text-sm font-medium no-underline"
-                    href={`/columns/${article.series.slug}`}
-                  >
-                    {t("partOfColumn", { name: article.series.name })}
-                  </Link>
-                  {article.series.description ? (
-                    <Typography className="mt-2 max-w-xl" color="muted" type="body-sm">
-                      {article.series.description}
+                  <Separator />
+                  <div className="flex flex-col gap-1">
+                    <Typography type="body-sm" weight="semibold">
+                      {t("continueInColumn")}
                     </Typography>
-                  ) : null}
-                  {article.seriesOrder ? (
-                    <Typography className="mt-2" color="muted" type="body-xs">
-                      {t("installment", {
-                        count: article.series.postsCount,
-                        order: article.seriesOrder,
-                      })}
-                    </Typography>
-                  ) : null}
-                  <div className="mt-4 grid gap-6 sm:grid-cols-2">
+                    <Link className="text-sm no-underline" href={`/columns/${article.series.slug}`}>
+                      {article.series.name}
+                      <Link.Icon />
+                    </Link>
+                    <ColumnInstallment series={article.series} slug={article.slug} />
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
                     {article.navigation.prev ? (
-                      <Link
-                        className="flex flex-col gap-1 no-underline"
-                        href={`/single/${article.navigation.prev.slug}`}
-                      >
-                        <span className="text-muted text-xs">{t("previous")}</span>
-                        <span className="text-foreground line-clamp-2 leading-6">
-                          {article.navigation.prev.title}
-                        </span>
-                      </Link>
+                      <Card>
+                        <Card.Header>
+                          <Card.Description>{t("previous")}</Card.Description>
+                          <Card.Title>
+                            <Link
+                              className="text-foreground line-clamp-2 no-underline"
+                              href={`/single/${article.navigation.prev.slug}`}
+                            >
+                              {article.navigation.prev.title}
+                            </Link>
+                          </Card.Title>
+                        </Card.Header>
+                      </Card>
                     ) : (
                       <span />
                     )}
                     {article.navigation.next ? (
-                      <Link
-                        className="flex flex-col gap-1 no-underline sm:items-end sm:text-right"
-                        href={`/single/${article.navigation.next.slug}`}
-                      >
-                        <span className="text-muted text-xs">{t("next")}</span>
-                        <span className="text-foreground line-clamp-2 leading-6">
-                          {article.navigation.next.title}
-                        </span>
-                      </Link>
+                      <Card>
+                        <Card.Header className="sm:items-end sm:text-end">
+                          <Card.Description>{t("next")}</Card.Description>
+                          <Card.Title>
+                            <Link
+                              className="text-foreground line-clamp-2 no-underline"
+                              href={`/single/${article.navigation.next.slug}`}
+                            >
+                              {article.navigation.next.title}
+                            </Link>
+                          </Card.Title>
+                        </Card.Header>
+                      </Card>
                     ) : null}
                   </div>
                 </nav>
-              ) : null}
+              ) : (
+                <ReadNext article={article} />
+              )}
             </>
           )}
         </article>
