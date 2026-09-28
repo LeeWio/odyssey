@@ -30,7 +30,11 @@ gsap.registerPlugin(useGSAP);
 import { useLocale, useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
-import { useGetPublicColumnsQuery, type ColumnResponse } from "@/lib/features/column";
+import {
+  useGetPublicColumnBySlugQuery,
+  useGetPublicColumnsQuery,
+  type ColumnResponse,
+} from "@/lib/features/column";
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { useRetrieveDiscoveryQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
@@ -326,10 +330,19 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
   );
 }
 
+function ColumnDeckPreview({ column }: { column: ColumnResponse }) {
+  const detail = useGetPublicColumnBySlugQuery(column.slug);
+  const resolved = detail.data ?? column;
+  if (detail.isLoading && resolved.posts.length === 0) {
+    return <Skeleton className="h-80 w-full max-w-xs rounded-2xl" />;
+  }
+  return <ColumnDeck column={resolved} />;
+}
+
 function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const decks = columns.filter((column) => column.posts.length > 0);
+  const decks = columns.filter((column) => column.postsCount > 0 || column.posts.length > 0);
   const [selected, setSelected] = useState(decks[0]?.slug ?? "");
   const active = decks.find((column) => column.slug === selected) ?? decks[0];
   const rest = decks.filter((column) => column.slug !== active?.slug);
@@ -347,7 +360,7 @@ function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
         </Link>
       </div>
       <div className="flex flex-wrap items-start gap-8">
-        <ColumnDeck column={active} />
+        <ColumnDeckPreview column={active} />
         {rest.length > 0 ? (
           <div className="flex flex-col gap-3">
             <Typography type="body-sm" weight="semibold">
