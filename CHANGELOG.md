@@ -1,3 +1,10 @@
+## [1.173.2](https://github.com/LeeWio/odyssey/compare/v1.173.1...v1.173.2) (2026-09-28)
+
+
+### Bug Fixes
+
+* **journal:** load column essays from the detail endpoint ([f2c0abb](https://github.com/LeeWio/odyssey/commit/f2c0abbf93c08595e6e84b698ac21ebcf2098c1c))
+
 ## [1.173.1](https://github.com/LeeWio/odyssey/compare/v1.173.0...v1.173.1) (2026-09-28)
 
 
