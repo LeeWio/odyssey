@@ -179,7 +179,11 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
                     <li key={category.id}>
                       <Link
                         className="text-foreground text-sm no-underline"
-                        href={`/explore?category=${category.id}`}
+                        href={
+                          category.slug
+                            ? `/single/categories/${encodeURIComponent(category.slug)}`
+                            : "/single/categories"
+                        }
                       >
                         {category.name}
                         <Link.Icon />

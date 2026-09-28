@@ -215,7 +215,11 @@ export function ArticleContext({
             <Card.Content>
               <Link
                 className="text-foreground text-sm no-underline"
-                href={category.id ? `/explore?category=${category.id}` : "/explore"}
+                href={
+                  category.slug
+                    ? `/single/categories/${encodeURIComponent(category.slug)}`
+                    : "/single/categories"
+                }
               >
                 {category.name}
                 <Link.Icon />
@@ -237,7 +241,9 @@ export function ArticleContext({
                 onSelectionChange={(keys) => {
                   if (keys === "all") return;
                   const key = [...keys][0];
-                  if (key != null) router.push(`/explore?tag=${key}`);
+                  if (key == null) return;
+                  const tag = tags.find((item) => String(item.id) === String(key));
+                  if (tag?.slug) router.push(`/single/tags/${encodeURIComponent(tag.slug)}`);
                 }}
               >
                 <TagGroup.List className="flex-wrap">

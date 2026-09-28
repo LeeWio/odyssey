@@ -207,7 +207,17 @@
     "writesAbout": "写作主题",
     "otherAuthors": "其他作者",
     "authorMissing": "这位作者还没有已发布的文章。",
-    "backToAuthors": "全部作者"
+    "backToAuthors": "全部作者",
+    "categoriesTitle": "分类",
+    "categoriesDescription": "日志里发表过文章的主题。",
+    "allCategories": "全部分类",
+    "categoryMissing": "这个分类还没有已发布的文章。",
+    "tagTitle": "标签",
+    "allTags": "全部标签",
+    "tagMissing": "这个标签还没有已发布的文章。",
+    "years": "年份",
+    "yearEssays": "{year} 年 {count} 篇",
+    "yearMissing": "这一年还没有已发布的文章。"
   },
   "Article": {
     "journal": "日志",

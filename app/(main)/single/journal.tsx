@@ -44,6 +44,7 @@ import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
 
+type ArchiveFacet = OpenApiComponents["schemas"]["ArchiveFacet"];
 type CategoryFacet = OpenApiComponents["schemas"]["CategoryFacet"];
 type CategoryGroup = OpenApiComponents["schemas"]["CategoryGroup"];
 type TagFacet = OpenApiComponents["schemas"]["TagFacet"];
@@ -508,8 +509,8 @@ function CategoryList({
         <div className="flex flex-col">
           <Card.Title className="text-sm">{t("topics")}</Card.Title>
         </div>
-        <Link className="text-xs no-underline" href="/archive">
-          {t("archive")}
+        <Link className="text-xs no-underline" href="/single/categories">
+          {t("allCategories")}
         </Link>
       </Card.Header>
       <Card.Content className="p-0">
@@ -518,7 +519,11 @@ function CategoryList({
             aria-label={t("topics")}
             className="w-full p-1"
             selectionMode="none"
-            onAction={(key) => router.push(`/explore?category=${key}`)}
+            onAction={(key) => {
+              const category = categories.find((item) => String(item.id) === String(key));
+              if (category?.slug)
+                router.push(`/single/categories/${encodeURIComponent(category.slug)}`);
+            }}
           >
             {categories.map((category) => (
               <ListBox.Item key={category.id} id={String(category.id)} textValue={category.name}>
@@ -622,6 +627,10 @@ export function JournalPage() {
   const tags = (facetsQuery.data?.tags ?? []).filter(
     (tag): tag is TagFacet & { id: number; name: string } =>
       tag.id != null && Boolean(tag.name) && (tag.count ?? 0) > 0
+  );
+  const archives = (facetsQuery.data?.archives ?? []).filter(
+    (facet): facet is ArchiveFacet & { year: number } =>
+      typeof facet.year === "number" && (facet.count ?? 0) > 0
   );
   const essayCount = facetsQuery.data?.totalPublishedCount ?? latestQuery.data?.total ?? 0;
   const pageRef = useRef<HTMLDivElement>(null);
@@ -771,6 +780,9 @@ export function JournalPage() {
               <TagList tags={tags} />
             </div>
             <div data-journal-reveal="">
+              <YearList archives={archives} />
+            </div>
+            <div data-journal-reveal="">
               <AttentionCard mostRead={mostRead} trending={trending} />
             </div>
           </aside>
@@ -858,6 +870,49 @@ function AttentionCard({ mostRead, trending }: { mostRead: Story[]; trending: St
   );
 }
 
+function YearList({ archives }: { archives: Array<ArchiveFacet & { year: number }> }) {
+  const t = useTranslations("Journal");
+  const locale = useLocale();
+  const router = useRouter();
+  const years = [
+    ...archives
+      .reduce((totals, facet) => {
+        totals.set(facet.year, (totals.get(facet.year) ?? 0) + (facet.count ?? 0));
+        return totals;
+      }, new Map<number, number>())
+      .entries(),
+  ]
+    .filter(([, count]) => count > 0)
+    .sort(([left], [right]) => right - left);
+
+  if (years.length === 0) return null;
+
+  return (
+    <Card variant="secondary">
+      <Card.Header>
+        <Card.Title className="text-sm">{t("years")}</Card.Title>
+      </Card.Header>
+      <Card.Content className="p-0">
+        <ListBox
+          aria-label={t("years")}
+          className="w-full p-1"
+          selectionMode="none"
+          onAction={(key) => router.push(`/single/years/${key}`)}
+        >
+          {years.map(([year, count]) => (
+            <ListBox.Item key={year} id={String(year)} textValue={String(year)}>
+              <Label>{year}</Label>
+              <Chip className="ms-auto shrink-0" size="sm" variant="soft">
+                {count.toLocaleString(locale)}
+              </Chip>
+            </ListBox.Item>
+          ))}
+        </ListBox>
+      </Card.Content>
+    </Card>
+  );
+}
+
 function TagList({ tags }: { tags: Array<TagFacet & { id: number; name: string }> }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
@@ -877,7 +932,9 @@ function TagList({ tags }: { tags: Array<TagFacet & { id: number; name: string }
           onSelectionChange={(keys) => {
             if (keys === "all") return;
             const key = [...keys][0];
-            if (key != null) router.push(`/explore?tag=${key}`);
+            if (key == null) return;
+            const tag = tags.find((item) => String(item.id) === String(key));
+            if (tag?.slug) router.push(`/single/tags/${encodeURIComponent(tag.slug)}`);
           }}
         >
           <TagGroup.List className="flex-wrap">
@@ -923,7 +980,11 @@ function CategoryShelf({ group }: { group: CategoryGroup }) {
         </span>
         <Link
           className="text-sm no-underline"
-          href={category?.id ? `/explore?category=${category.id}` : "/explore"}
+          href={
+            category?.slug
+              ? `/single/categories/${encodeURIComponent(category.slug)}`
+              : "/single/categories"
+          }
         >
           {t("archive")}
           <Link.Icon />

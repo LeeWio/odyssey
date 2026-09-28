@@ -207,7 +207,17 @@
     "writesAbout": "Writes about",
     "otherAuthors": "Other authors",
     "authorMissing": "This author has no published essays.",
-    "backToAuthors": "All authors"
+    "backToAuthors": "All authors",
+    "categoriesTitle": "Categories",
+    "categoriesDescription": "Every subject the journal publishes under.",
+    "allCategories": "All categories",
+    "categoryMissing": "This category has no published essays.",
+    "tagTitle": "Tag",
+    "allTags": "All tags",
+    "tagMissing": "This tag has no published essays.",
+    "years": "Years",
+    "yearEssays": "{count} essays in {year}",
+    "yearMissing": "This year has no published essays."
   },
   "Article": {
     "journal": "Journal",
