@@ -20,6 +20,7 @@ import {
 } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useDeferredValue, useMemo, useState } from "react";
 
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
@@ -60,10 +61,11 @@ function matchesProject(project: ProjectResponse, query: string) {
 }
 
 function ProjectSkeleton() {
+  const t = useTranslations("Projects");
   return (
     <div
       aria-busy="true"
-      aria-label="Loading projects"
+      aria-label={t("loading")}
       className="grid gap-5 lg:grid-cols-2"
       role="status"
     >
@@ -86,13 +88,14 @@ function ProjectSkeleton() {
 }
 
 function ProjectVisual({ project }: { project: ProjectResponse }) {
+  const t = useTranslations("Projects");
   const coverImage = toSafeExternalUrl(project.coverImage);
 
   if (coverImage) {
     return (
       <Image
         unoptimized
-        alt={`${project.name} project cover`}
+        alt={t("coverAlt", { name: project.name })}
         className="object-cover transition-transform duration-500 group-hover:scale-105"
         fill
         sizes="(max-width: 1023px) 100vw, 50vw"
@@ -117,6 +120,8 @@ function ProjectVisual({ project }: { project: ProjectResponse }) {
 }
 
 function ProjectCard({ project }: { project: ProjectResponse }) {
+  const t = useTranslations("Projects");
+  const locale = useLocale();
   const githubUrl = toSafeExternalUrl(project.githubUrl);
   const previewUrl = toSafeExternalUrl(project.previewUrl);
   const technologies = getTechnologyLabels(project.techStack);
@@ -146,13 +151,13 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
               {starsCount > 0 ? (
                 <span className="flex items-center gap-1">
                   <Icon icon="gravity-ui:star" aria-hidden="true" className="size-3.5" />
-                  {starsCount.toLocaleString("en-US")}
+                  {starsCount.toLocaleString(locale)}
                 </span>
               ) : null}
               {forksCount > 0 ? (
                 <span className="flex items-center gap-1">
                   <Icon icon="gravity-ui:code-fork" aria-hidden="true" className="size-3.5" />
-                  {forksCount.toLocaleString("en-US")}
+                  {forksCount.toLocaleString(locale)}
                 </span>
               ) : null}
             </div>
@@ -178,7 +183,7 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
               rel="noopener noreferrer"
               target="_blank"
             >
-              Open project
+              {t("openProject")}
               <Icon icon="gravity-ui:arrow-up-right" aria-hidden="true" className="size-4" />
             </a>
           ) : null}
@@ -190,7 +195,7 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
               target="_blank"
             >
               <Icon icon="gravity-ui:logo-github" aria-hidden="true" className="size-4" />
-              Source
+              {t("source")}
             </a>
           ) : null}
         </Card.Footer>
@@ -200,6 +205,8 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
 }
 
 export function ProjectShowcasePage() {
+  const t = useTranslations("Projects");
+  const locale = useLocale();
   const { data: projects = [], error, isLoading, refetch } = useGetPublicProjectsQuery();
   const [search, setSearch] = useState("");
   const [availability, setAvailability] = useState<ProjectAvailability>("all");
@@ -259,27 +266,26 @@ export function ProjectShowcasePage() {
           <div className="max-w-3xl">
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
               <Icon icon="gravity-ui:code" aria-hidden="true" className="size-4" />
-              Built in public
+              {t("eyebrow")}
             </div>
             <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-              Things made to be used.
+              {t("title")}
             </Typography>
             <Typography color="muted" type="body" className="mt-5 max-w-xl">
-              Tools, experiments, and systems shaped through practical work and released into the
-              open.
+              {t("description")}
             </Typography>
           </div>
           <div className="border-default-200 border-l pl-5 sm:pl-6">
             <Typography className="font-mono text-3xl tabular-nums" type="body">
-              {projects.length.toLocaleString("en-US")}
+              {projects.length.toLocaleString(locale)}
             </Typography>
             <Typography color="muted" type="body-sm" className="mt-1">
-              published projects
+              {t("publishedCount")}
             </Typography>
           </div>
         </header>
 
-        <section aria-label="Published projects" className="mt-14">
+        <section aria-label={t("section")} className="mt-14">
           {isLoading ? <ProjectSkeleton /> : null}
 
           {!isLoading && error ? (
@@ -288,15 +294,13 @@ export function ProjectShowcasePage() {
                 <EmptyState.Media variant="icon">
                   <Icon icon="gravity-ui:code" aria-hidden="true" />
                 </EmptyState.Media>
-                <EmptyState.Title>Projects are unavailable</EmptyState.Title>
-                <EmptyState.Description>
-                  The project showcase could not be loaded. Please try again in a moment.
-                </EmptyState.Description>
+                <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
+                <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
               </EmptyState.Header>
               <EmptyState.Content>
                 <Button variant="outline" onPress={() => refetch()}>
                   <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                  Try again
+                  {t("tryAgain")}
                 </Button>
               </EmptyState.Content>
             </EmptyState>
@@ -309,10 +313,8 @@ export function ProjectShowcasePage() {
                   <EmptyState.Media variant="icon">
                     <Icon icon="gravity-ui:code" aria-hidden="true" />
                   </EmptyState.Media>
-                  <EmptyState.Title>No projects published yet</EmptyState.Title>
-                  <EmptyState.Description>
-                    Work in progress will appear here when it is ready to share.
-                  </EmptyState.Description>
+                  <EmptyState.Title>{t("empty")}</EmptyState.Title>
+                  <EmptyState.Description>{t("emptyHint")}</EmptyState.Description>
                 </EmptyState.Header>
               </EmptyState>
             </Card>
@@ -323,15 +325,15 @@ export function ProjectShowcasePage() {
               <div className="border-default-200 grid gap-5 border-y py-6 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-end">
                 <div className="min-w-0">
                   <SearchField fullWidth name="project-search" value={search} onChange={setSearch}>
-                    <Label className="sr-only">Search projects</Label>
+                    <Label className="sr-only">{t("searchLabel")}</Label>
                     <SearchField.Group>
                       <SearchField.SearchIcon />
-                      <SearchField.Input placeholder="Search projects, tools, or technology" />
-                      <SearchField.ClearButton aria-label="Clear project search" />
+                      <SearchField.Input placeholder={t("searchPlaceholder")} />
+                      <SearchField.ClearButton aria-label={t("clearSearch")} />
                     </SearchField.Group>
                   </SearchField>
                   <TagGroup
-                    aria-label="Filter projects by availability"
+                    aria-label={t("filterAvailability")}
                     selectedKeys={new Set([availability])}
                     selectionMode="single"
                     size="sm"
@@ -340,16 +342,16 @@ export function ProjectShowcasePage() {
                     onSelectionChange={handleAvailabilityChange}
                   >
                     <TagGroup.List className="flex-wrap">
-                      <Tag id="all" textValue="All projects">
-                        All projects
+                      <Tag id="all" textValue={t("allProjects")}>
+                        {t("allProjects")}
                         <span className="text-muted text-xs tabular-nums">{projects.length}</span>
                       </Tag>
-                      <Tag id="preview" textValue="Live preview available">
-                        Live preview
+                      <Tag id="preview" textValue={t("livePreviewValue")}>
+                        {t("livePreview")}
                         <span className="text-muted text-xs tabular-nums">{previewCount}</span>
                       </Tag>
-                      <Tag id="source" textValue="Source available">
-                        Source available
+                      <Tag id="source" textValue={t("sourceAvailable")}>
+                        {t("sourceAvailable")}
                         <span className="text-muted text-xs tabular-nums">{sourceCount}</span>
                       </Tag>
                     </TagGroup.List>
@@ -369,23 +371,23 @@ export function ProjectShowcasePage() {
                     }
                   }}
                 >
-                  <Label>Sort projects</Label>
+                  <Label>{t("sortLabel")}</Label>
                   <Select.Trigger>
                     <Select.Value />
                     <Select.Indicator />
                   </Select.Trigger>
                   <Select.Popover>
                     <ListBox>
-                      <ListBox.Item id="featured" textValue="Featured first">
-                        Featured first
+                      <ListBox.Item id="featured" textValue={t("featuredFirst")}>
+                        {t("featuredFirst")}
                         <ListBox.ItemIndicator />
                       </ListBox.Item>
-                      <ListBox.Item id="most-starred" textValue="Most starred">
-                        Most starred
+                      <ListBox.Item id="most-starred" textValue={t("mostStarred")}>
+                        {t("mostStarred")}
                         <ListBox.ItemIndicator />
                       </ListBox.Item>
-                      <ListBox.Item id="alphabetical" textValue="Alphabetical">
-                        Alphabetical
+                      <ListBox.Item id="alphabetical" textValue={t("alphabetical")}>
+                        {t("alphabetical")}
                         <ListBox.ItemIndicator />
                       </ListBox.Item>
                     </ListBox>
@@ -395,12 +397,11 @@ export function ProjectShowcasePage() {
 
               <div className="mt-7 flex items-center justify-between gap-4">
                 <Typography color="muted" type="body-sm">
-                  {visibleProjects.length} {visibleProjects.length === 1 ? "project" : "projects"}{" "}
-                  to explore
+                  {t("toExplore", { count: visibleProjects.length })}
                 </Typography>
                 {search || availability !== "all" ? (
                   <Button size="sm" variant="tertiary" onPress={clearFilters}>
-                    Clear filters
+                    {t("clearFilters")}
                   </Button>
                 ) : null}
               </div>
@@ -415,15 +416,13 @@ export function ProjectShowcasePage() {
                 <Card variant="secondary" className="mt-6 items-start gap-4 p-7">
                   <Card.Header>
                     <Chip size="sm" variant="soft">
-                      No matches
+                      {t("noMatches")}
                     </Chip>
-                    <Card.Title>No projects match these filters</Card.Title>
-                    <Card.Description>
-                      Try a project name, technology, or a different availability filter.
-                    </Card.Description>
+                    <Card.Title>{t("noMatchTitle")}</Card.Title>
+                    <Card.Description>{t("noMatchHint")}</Card.Description>
                   </Card.Header>
                   <Button size="sm" variant="secondary" onPress={clearFilters}>
-                    Show all projects
+                    {t("showAll")}
                   </Button>
                 </Card>
               )}
@@ -433,13 +432,13 @@ export function ProjectShowcasePage() {
 
         <div className="border-default-200 mt-16 flex flex-col gap-3 border-t pt-7 sm:flex-row sm:items-center sm:justify-between">
           <Typography color="muted" type="body-sm">
-            Looking for the decisions behind the work? Read the notes and essays alongside it.
+            {t("lookingForNotes")}
           </Typography>
           <Link
             className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
             href="/explore"
           >
-            Explore writing
+            {t("exploreWriting")}
             <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
           </Link>
         </div>

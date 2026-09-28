@@ -2,6 +2,7 @@
 
 import { pageEaseOut } from "@/lib/motion";
 
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 
@@ -61,6 +62,7 @@ interface GalleryPageProps {
 }
 
 export function GalleryPage({ compact = false }: GalleryPageProps) {
+  const t = useTranslations("Gallery");
   const [api, setApi] = useState<EmblaCarouselType>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -96,18 +98,17 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
           className="flex flex-col items-center text-center"
         >
           <Chip color="accent" size="sm" variant="soft">
-            Gallery
+            {t("eyebrow")}
           </Chip>
           <Typography
             type="h1"
             weight="bold"
             className="mt-4 max-w-3xl text-4xl leading-tight tracking-tight text-balance sm:text-5xl"
           >
-            Analog Observances
+            {t("title")}
           </Typography>
           <Typography color="muted" type="body" className="mt-4 max-w-xl text-balance">
-            Slow, deliberate framing of landscapes and quiet geometry captured on medium-format
-            film.
+            {t("description")}
           </Typography>
         </motion.header>
       ) : null}
@@ -140,7 +141,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
                     />
                     <Button
                       isIconOnly
-                      aria-label={`View ${item.title} full screen`}
+                      aria-label={t("viewFull", { title: item.title })}
                       className="absolute right-4 bottom-4 bg-black/55 text-white opacity-0 shadow-lg backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                       size="sm"
                       variant="ghost"
@@ -166,7 +167,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
         <Card className="flex h-full flex-col" variant="secondary">
           <Card.Header>
             <Typography color="muted" type="body-xs" className="font-mono tracking-wide">
-              From the frame
+              {t("fromTheFrame")}
             </Typography>
             <Card.Title className="mt-2 text-balance">{activePhoto.title}</Card.Title>
             <Card.Description className="mt-3 line-clamp-3 leading-relaxed">
@@ -176,9 +177,9 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
           <Card.Content>
             <dl className="flex flex-col gap-5">
               {[
-                ["Location", activePhoto.location],
-                ["Camera", activePhoto.camera],
-                ["Film", activePhoto.film],
+                [t("location"), activePhoto.location],
+                [t("camera"), activePhoto.camera],
+                [t("film"), activePhoto.film],
               ].map(([label, value]) => (
                 <div key={label} className="flex flex-col gap-1">
                   <dt>
@@ -197,7 +198,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
           </Card.Content>
           <Card.Footer className="mt-auto flex items-center justify-between">
             <Typography color="muted" type="body-xs" className="font-mono tracking-wide">
-              Frame
+              {t("frame")}
             </Typography>
             <Typography type="body-sm" weight="medium" className="tabular-nums">
               {String(currentIndex + 1).padStart(2, "0")} /{" "}
@@ -210,7 +211,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
       <Modal>
         <Modal.Backdrop isOpen={isLightboxOpen} onOpenChange={setIsLightboxOpen} variant="blur">
           <Modal.Container size="cover">
-            <Modal.Dialog aria-label={`${activePhoto.title} full screen viewer`}>
+            <Modal.Dialog aria-label={t("viewer", { title: activePhoto.title })}>
               <Modal.CloseTrigger className="z-20" />
               <Modal.Body className="grid min-h-0 gap-6 overflow-y-auto p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
                 <div className="relative min-h-[55vh] overflow-hidden rounded-2xl bg-black/30 lg:min-h-[70vh]">
@@ -230,8 +231,10 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
                       type="body-xs"
                       className="font-mono tracking-wide uppercase"
                     >
-                      Frame {String(currentIndex + 1).padStart(2, "0")} /{" "}
-                      {String(GALLERY_ITEMS.length).padStart(2, "0")}
+                      {t("frameCount", {
+                        current: String(currentIndex + 1).padStart(2, "0"),
+                        total: String(GALLERY_ITEMS.length).padStart(2, "0"),
+                      })}
                     </Typography>
                     <Typography type="h2" weight="semibold" className="mt-2 text-balance">
                       {activePhoto.title}
@@ -244,7 +247,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
                     <div>
                       <dt>
                         <Typography color="muted" type="body-xs">
-                          Location
+                          {t("location")}
                         </Typography>
                       </dt>
                       <dd className="mt-1">
@@ -256,7 +259,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
                     <div>
                       <dt>
                         <Typography color="muted" type="body-xs">
-                          Film
+                          {t("film")}
                         </Typography>
                       </dt>
                       <dd className="mt-1">

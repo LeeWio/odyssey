@@ -9,11 +9,14 @@ import {
   useGetCollectionPostsQuery,
   useRemovePostFromCollectionMutation,
 } from "@/lib/features/library";
+import { useLocale, useTranslations } from "next-intl";
 
 import { EmptyLibrarySection, LibraryPostVisual, LibrarySkeleton } from "./library-cards";
 import { formatDate } from "./library-format";
 
 export function CollectionContents({ collection }: { collection: PostCollectionResponse }) {
+  const t = useTranslations("Library");
+  const locale = useLocale();
   const [page, setPage] = useState(0);
   const inFlight = useRef(new Set<number>());
   const [pendingRemovals, setPendingRemovals] = useState<ReadonlySet<number>>(new Set());
@@ -49,20 +52,17 @@ export function CollectionContents({ collection }: { collection: PostCollectionR
       ) : query.isError ? (
         <Card variant="secondary">
           <Card.Header>
-            <Card.Title>Collection articles are unavailable</Card.Title>
-            <Card.Description>Please try loading this page again.</Card.Description>
+            <Card.Title>{t("collectionArticlesUnavailable")}</Card.Title>
+            <Card.Description>{t("tryLoadAgain")}</Card.Description>
           </Card.Header>
           <Card.Footer>
             <Button size="sm" variant="secondary" onPress={() => query.refetch()}>
-              Try again
+              {t("tryAgain")}
             </Button>
           </Card.Footer>
         </Card>
       ) : !data?.list.length ? (
-        <EmptyLibrarySection
-          title="This collection is empty"
-          description="Open an article and use the collection action to add it here."
-        />
+        <EmptyLibrarySection title={t("collectionEmpty")} description={t("collectionEmptyHint")} />
       ) : (
         <div className="divide-default-200 border-default-200 divide-y border-y">
           {data.list.map(({ addedAt, post }) => (
@@ -77,13 +77,13 @@ export function CollectionContents({ collection }: { collection: PostCollectionR
                   </Typography>
                 </Link>
                 <Typography color="muted" type="body-xs" className="mt-2">
-                  Added {formatDate(addedAt)}
+                  {t("addedAt", { date: formatDate(addedAt, locale, t("recently")) })}
                 </Typography>
               </div>
               <Tooltip>
                 <Button
                   isIconOnly
-                  aria-label={`Remove ${post.title} from ${collection.name}`}
+                  aria-label={t("removeFromNamed", { title: post.title, name: collection.name })}
                   isPending={pendingRemovals.has(post.id)}
                   isDisabled={pendingRemovals.has(post.id)}
                   size="sm"
@@ -92,7 +92,7 @@ export function CollectionContents({ collection }: { collection: PostCollectionR
                 >
                   <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
                 </Button>
-                <Tooltip.Content>Remove from collection</Tooltip.Content>
+                <Tooltip.Content>{t("removeFromCollection")}</Tooltip.Content>
               </Tooltip>
             </article>
           ))}
@@ -102,8 +102,12 @@ export function CollectionContents({ collection }: { collection: PostCollectionR
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
           <Typography color="muted" type="body-sm">
             {data
-              ? `Page ${page + 1} of ${data.totalPages} · ${data.total} articles`
-              : `Page ${page + 1}`}
+              ? t("pageOfArticles", {
+                  page: (page + 1).toLocaleString(locale),
+                  pages: data.totalPages.toLocaleString(locale),
+                  count: data.total.toLocaleString(locale),
+                })
+              : t("pageNumber", { page: (page + 1).toLocaleString(locale) })}
           </Typography>
           <div className="flex gap-2">
             <Button
@@ -112,7 +116,7 @@ export function CollectionContents({ collection }: { collection: PostCollectionR
               isDisabled={page === 0 || query.isFetching}
               onPress={() => setPage((current) => Math.max(0, current - 1))}
             >
-              Previous
+              {t("previous")}
             </Button>
             <Button
               size="sm"
@@ -120,7 +124,7 @@ export function CollectionContents({ collection }: { collection: PostCollectionR
               isDisabled={query.isFetching || !data || page >= lastPage}
               onPress={() => setPage((current) => current + 1)}
             >
-              Next
+              {t("next")}
             </Button>
           </div>
         </div>

@@ -5,12 +5,14 @@ import { Icon } from "@iconify/react";
 import { useState } from "react";
 
 import { type PostCollectionResponse, useGetPostCollectionsQuery } from "@/lib/features/library";
+import { useTranslations } from "next-intl";
 
 import { CollectionFormDialog, DeleteCollectionDialog } from "./collection-management-dialogs";
 import { CollectionContents } from "./collection-contents";
 import { CollectionCard, EmptyLibrarySection, LibrarySkeleton } from "./library-cards";
 
 export function CollectionsSection() {
+  const t = useTranslations("Library");
   const [collectionForm, setCollectionForm] = useState<{
     collection: PostCollectionResponse | null;
   } | null>(null);
@@ -28,15 +30,15 @@ export function CollectionsSection() {
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <Typography id="collections-title" type="h2" weight="semibold">
-              Collections
+              {t("collectionsTitle")}
             </Typography>
             <Typography color="muted" type="body-sm" className="mt-1">
-              Group the writing you want to keep together.
+              {t("collectionsDescription")}
             </Typography>
           </div>
           <Button size="sm" onPress={() => setCollectionForm({ collection: null })}>
             <Icon icon="gravity-ui:circle-plus" aria-hidden="true" className="size-4" />
-            New collection
+            {t("newCollection")}
           </Button>
         </div>
 
@@ -44,8 +46,8 @@ export function CollectionsSection() {
           <LibrarySkeleton />
         ) : collections.isError ? (
           <EmptyLibrarySection
-            title="Collections are unavailable"
-            description="Try loading this page again in a moment."
+            title={t("collectionsUnavailable")}
+            description={t("tryAgainHint")}
           />
         ) : (collections.data?.length ?? 0) > 0 ? (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -62,15 +64,15 @@ export function CollectionsSection() {
           </div>
         ) : (
           <EmptyLibrarySection
-            title="Start your first collection"
-            description="Create a collection from an article to gather related reading in one place."
+            title={t("startCollection")}
+            description={t("startCollectionHint")}
           />
         )}
 
         {selectedCollection ? (
           <div
             role="region"
-            aria-label={`Articles in ${selectedCollection.name}`}
+            aria-label={t("articlesIn", { name: selectedCollection.name })}
             className="border-default-200 mt-8 border-t pt-8"
           >
             <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
@@ -85,7 +87,7 @@ export function CollectionsSection() {
                 ) : null}
               </div>
               <Button size="sm" variant="ghost" onPress={() => setSelectedCollectionId(null)}>
-                Close
+                {t("close")}
               </Button>
             </div>
 

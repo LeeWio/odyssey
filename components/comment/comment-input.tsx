@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@heroui/react";
 import { PromptInput, PromptSuggestion } from "@heroui-pro/react";
+import { useTranslations } from "next-intl";
 import type React from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import { UserAvatar } from "@/components/user-avatar";
@@ -36,11 +37,11 @@ interface CommentInputProps {
   submitButtonText?: string;
 }
 
-const COMMENT_SUGGESTIONS = [
-  "Share a highlight ✦",
-  "Ask a question 👋",
-  "Add another angle ↗",
-  "Leave a practical note ✓",
+const COMMENT_SUGGESTION_KEYS = [
+  "suggestionHighlight",
+  "suggestionQuestion",
+  "suggestionAngle",
+  "suggestionNote",
 ] as const;
 
 export function CommentInput({
@@ -51,9 +52,12 @@ export function CommentInput({
   onOpenChange,
   onAuthenticationRequired,
   onSubmit,
-  placeholder = "Share your thoughts...",
-  submitButtonText = "Post comment",
+  placeholder,
+  submitButtonText,
 }: CommentInputProps) {
+  const t = useTranslations("Comments");
+  const resolvedPlaceholder = placeholder ?? t("shareThoughts");
+  const resolvedSubmit = submitButtonText ?? t("postComment");
   const { postId, momentId, isGuestbook, isMoment, isAuthenticated, currentUser } =
     useCommentContext();
   const email = useAppSelector(selectUserEmail);
@@ -76,7 +80,7 @@ export function CommentInput({
   const formId = useId();
   const modalIsOpen = isOpen ?? internalOpen;
   const isReply = replyId !== null;
-  const composerName = currentUser || "Anonymous";
+  const composerName = currentUser || t("anonymous");
 
   useEffect(() => {
     return () => {
@@ -156,10 +160,8 @@ export function CommentInput({
     requestAnimationFrame(() => textareaRef.current?.focus());
   };
 
-  const heading = isReply && replyTo ? `Reply to ${replyTo}` : "Write a comment";
-  const description = isReply
-    ? "Continue the conversation with a clear and respectful reply."
-    : "Add a thoughtful response to the discussion.";
+  const heading = isReply && replyTo ? t("replyTo", { name: replyTo }) : t("writeComment");
+  const description = isReply ? t("replyDescription") : t("writeDescription");
 
   if (!isReply && !hideTrigger) {
     return (
@@ -176,9 +178,9 @@ export function CommentInput({
           <PromptInput.Content>
             <PromptInput.TextArea
               ref={textareaRef}
-              aria-label="Add a comment"
+              aria-label={t("addComment")}
               maxLength={1000}
-              placeholder="Write a comment…"
+              placeholder={t("writePlaceholder")}
             />
           </PromptInput.Content>
           <PromptInput.Toolbar>
@@ -194,7 +196,7 @@ export function CommentInput({
             </PromptInput.ToolbarStart>
             <PromptInput.ToolbarEnd>
               <PromptInput.Send
-                aria-label="Send comment"
+                aria-label={t("sendComment")}
                 status={isSubmitting ? "submitted" : "ready"}
               >
                 <Icon icon="gravity-ui:arrow-up" aria-hidden="true" className="size-4" />
@@ -203,9 +205,7 @@ export function CommentInput({
           </PromptInput.Toolbar>
         </PromptInput.Shell>
         <PromptInput.Footer className="sr-only" aria-live="polite">
-          {content.length > 0
-            ? `${content.length} of 1000 characters`
-            : "Press Enter to send. Press Shift and Enter for a new line."}
+          {content.length > 0 ? t("characterCount", { count: content.length }) : t("sendHint")}
         </PromptInput.Footer>
       </PromptInput>
     );
@@ -216,14 +216,14 @@ export function CommentInput({
       <div className="border-border/80 bg-surface/40 mt-3 rounded-xl border p-3">
         <div className="mb-2 flex items-center justify-between gap-2">
           <Typography color="muted" type="body-xs">
-            Replying to <span className="text-foreground font-medium">{replyTo}</span>
+            {t("replyingTo")} <span className="text-foreground font-medium">{replyTo}</span>
           </Typography>
           <Button
             isIconOnly
             size="sm"
             variant="ghost"
             className="text-muted size-7"
-            aria-label="Cancel reply"
+            aria-label={t("cancelReply")}
             onPress={() => onOpenChange?.(false)}
           >
             <Icon icon="gravity-ui:xmark" aria-hidden="true" className="size-3.5" />
@@ -232,13 +232,13 @@ export function CommentInput({
 
         <Form id={formId} className="flex flex-col gap-2.5" onSubmit={handleFormSubmit}>
           <TextField isRequired fullWidth name="reply">
-            <Label className="sr-only">Reply content</Label>
+            <Label className="sr-only">{t("replyContent")}</Label>
             <TextArea
               autoFocus
               aria-label={heading}
               fullWidth
               maxLength={1000}
-              placeholder={placeholder}
+              placeholder={resolvedPlaceholder}
               rows={3}
               ref={textareaRef}
               value={content}
@@ -256,7 +256,7 @@ export function CommentInput({
                 isDisabled={isSubmitting}
                 onPress={() => onOpenChange?.(false)}
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 size="sm"
@@ -266,7 +266,7 @@ export function CommentInput({
                 isDisabled={!content.trim() || isSubmitting}
                 isPending={isSubmitting}
               >
-                {submitButtonText}
+                {resolvedSubmit}
               </Button>
             </div>
           </div>
@@ -288,7 +288,7 @@ export function CommentInput({
             email={email}
           />
           <Typography color="muted" type="body-sm" align="start">
-            Write a comment...
+            {t("writeCommentTrigger")}
           </Typography>
         </Button>
       )}
@@ -310,7 +310,7 @@ export function CommentInput({
                     aria-label={heading}
                     fullWidth
                     maxLength={1000}
-                    placeholder={placeholder}
+                    placeholder={resolvedPlaceholder}
                     rows={7}
                     ref={textareaRef}
                     value={content}
@@ -323,15 +323,12 @@ export function CommentInput({
 
               <PromptSuggestion className="gap-3">
                 <PromptSuggestion.Header>
-                  <PromptSuggestion.Description>Suggestions</PromptSuggestion.Description>
+                  <PromptSuggestion.Description>{t("suggestions")}</PromptSuggestion.Description>
                 </PromptSuggestion.Header>
                 <PromptSuggestion.Items className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {COMMENT_SUGGESTIONS.map((suggestion) => (
-                    <PromptSuggestion.Item
-                      key={suggestion}
-                      onPress={() => applySuggestion(suggestion)}
-                    >
-                      {suggestion}
+                  {COMMENT_SUGGESTION_KEYS.map((key) => (
+                    <PromptSuggestion.Item key={key} onPress={() => applySuggestion(t(key))}>
+                      {t(key)}
                     </PromptSuggestion.Item>
                   ))}
                 </PromptSuggestion.Items>
@@ -343,7 +340,7 @@ export function CommentInput({
                 isDisabled={isSubmitting}
                 onPress={() => setModalOpen(false)}
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 form={formId}
@@ -352,7 +349,7 @@ export function CommentInput({
                 isDisabled={!content.trim() || isSubmitting}
                 isPending={isSubmitting}
               >
-                {submitButtonText}
+                {resolvedSubmit}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Moments | Odyssey",
-  description: "Short field notes, captured fragments, and everyday design/architectural notices.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Blog");
+
+  return {
+    title: t("metaMomentsTitle"),
+    description: t("metaMomentsDescription"),
+  };
+}
 
 export default function MomentsLayout({
   children,

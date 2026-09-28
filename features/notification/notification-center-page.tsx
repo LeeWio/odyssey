@@ -4,6 +4,7 @@ import { EmptyState } from "@heroui-pro/react";
 import { AlertDialog, Button, Card, Chip, Tabs, Tooltip, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
@@ -33,8 +34,9 @@ import { useNotificationActions } from "./use-notification-actions";
 const NOTIFICATIONS_PAGE_SIZE = 20;
 
 function NotificationSkeleton() {
+  const t = useTranslations("Notifications");
   return (
-    <div aria-busy="true" aria-label="Loading notifications" className="space-y-3" role="status">
+    <div aria-busy="true" aria-label={t("loading")} className="space-y-3" role="status">
       {Array.from({ length: 5 }, (_, index) => (
         <Card key={index} variant="secondary">
           <Card.Header>
@@ -51,15 +53,16 @@ function NotificationSkeleton() {
 }
 
 function NotificationEmptyState({ view }: { view: NotificationView }) {
+  const t = useTranslations("Notifications");
   const title = {
-    inbox: "No notifications yet",
-    saved: "No saved notifications",
-    done: "No completed notifications",
+    inbox: t("emptyInboxTitle"),
+    saved: t("emptySavedTitle"),
+    done: t("emptyDoneTitle"),
   }[view];
   const description = {
-    inbox: "Updates about your account and writing will appear here.",
-    saved: "Save a notification to keep it here for later.",
-    done: "Notifications you mark done will appear here.",
+    inbox: t("emptyInboxDescription"),
+    saved: t("emptySavedDescription"),
+    done: t("emptyDoneDescription"),
   }[view];
   return (
     <EmptyState size="md">
@@ -77,6 +80,8 @@ function NotificationEmptyState({ view }: { view: NotificationView }) {
 }
 
 export function NotificationCenterPage() {
+  const t = useTranslations("Notifications");
+  const locale = useLocale();
   const formatRelativeTime = useRelativeTime();
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -174,13 +179,11 @@ export function NotificationCenterPage() {
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:bell" aria-hidden="true" />
               </EmptyState.Media>
-              <EmptyState.Title>Your notifications</EmptyState.Title>
-              <EmptyState.Description>
-                Sign in to keep up with activity around your writing and account.
-              </EmptyState.Description>
+              <EmptyState.Title>{t("signInTitle")}</EmptyState.Title>
+              <EmptyState.Description>{t("signInDescription")}</EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
-              <Button onPress={() => dispatch(setLoginOpen(true))}>Sign in</Button>
+              <Button onPress={() => dispatch(setLoginOpen(true))}>{t("signIn")}</Button>
             </EmptyState.Content>
           </EmptyState>
         </div>
@@ -195,13 +198,13 @@ export function NotificationCenterPage() {
           <div className="max-w-2xl">
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
               <Icon icon="gravity-ui:bell" aria-hidden="true" className="size-4" />
-              Activity inbox
+              {t("eyebrow")}
             </div>
             <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-              Notifications
+              {t("title")}
             </Typography>
             <Typography color="muted" type="body" className="mt-5">
-              Updates that need your attention, all in one place.
+              {t("description")}
             </Typography>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -210,7 +213,7 @@ export function NotificationCenterPage() {
               variant="ghost"
               onPress={() => router.push("/notifications/settings")}
             >
-              Preferences
+              {t("preferences")}
             </Button>
             <Button
               isDisabled={unreadNotificationCount === 0 || isBulkDisabled}
@@ -220,7 +223,7 @@ export function NotificationCenterPage() {
               onPress={handleMarkAllRead}
             >
               <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" />
-              Mark all read
+              {t("markAllRead")}
             </Button>
             <Button
               isDisabled={isBulkDisabled}
@@ -229,7 +232,7 @@ export function NotificationCenterPage() {
               onPress={() => setIsClearReadOpen(true)}
             >
               <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
-              Clear read
+              {t("clearRead")}
             </Button>
           </div>
         </header>
@@ -243,17 +246,17 @@ export function NotificationCenterPage() {
             }}
           >
             <Tabs.ListContainer>
-              <Tabs.List aria-label="Notification views">
+              <Tabs.List aria-label={t("views")}>
                 <Tabs.Tab id="inbox">
-                  Inbox
+                  {t("inbox")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="saved">
-                  Saved
+                  {t("saved")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="done">
-                  Done
+                  {t("done")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
               </Tabs.List>
@@ -267,12 +270,12 @@ export function NotificationCenterPage() {
           ) : notifications.isError ? (
             <Card variant="secondary">
               <Card.Header>
-                <Card.Title>Notifications are unavailable</Card.Title>
-                <Card.Description>Try loading this page again in a moment.</Card.Description>
+                <Card.Title>{t("unavailable")}</Card.Title>
+                <Card.Description>{t("tryAgainHint")}</Card.Description>
               </Card.Header>
               <Card.Footer>
                 <Button size="sm" variant="secondary" onPress={() => notifications.refetch()}>
-                  Try again
+                  {t("tryAgain")}
                 </Button>
               </Card.Footer>
             </Card>
@@ -309,12 +312,12 @@ export function NotificationCenterPage() {
                         </span>
                         {!notification.read ? (
                           <span
-                            aria-label="Unread notification"
+                            aria-label={t("unread")}
                             className="bg-accent size-2 rounded-full"
                           />
                         ) : null}
                         <Chip size="sm" variant="soft">
-                          {getNotificationTypeLabel(notification.type)}
+                          {getNotificationTypeLabel(notification.type, t("typeFallback"))}
                         </Chip>
                       </span>
                       <span className="text-muted mt-1.5 block text-sm leading-6 whitespace-pre-wrap">
@@ -323,7 +326,7 @@ export function NotificationCenterPage() {
                       <time
                         className="text-muted mt-2 block text-xs"
                         dateTime={notification.createdAt}
-                        title={formatNotificationDate(notification.createdAt)}
+                        title={formatNotificationDate(notification.createdAt, locale)}
                       >
                         {formatRelativeTime(notification.createdAt)}
                       </time>
@@ -333,7 +336,7 @@ export function NotificationCenterPage() {
                     <Tooltip>
                       <Button
                         isIconOnly
-                        aria-label={notification.saved ? "Remove from saved" : "Save notification"}
+                        aria-label={notification.saved ? t("removeSaved") : t("saveNotification")}
                         isPending={pendingActions.get(notification.id) === "save"}
                         isDisabled={
                           pendingBulkAction !== null || pendingActions.has(notification.id)
@@ -345,14 +348,14 @@ export function NotificationCenterPage() {
                         <Icon icon="gravity-ui:bookmark" aria-hidden="true" className="size-4" />
                       </Button>
                       <Tooltip.Content>
-                        {notification.saved ? "Remove from saved" : "Save for later"}
+                        {notification.saved ? t("removeSaved") : t("saveForLater")}
                       </Tooltip.Content>
                     </Tooltip>
                     {view !== "done" ? (
                       <Tooltip>
                         <Button
                           isIconOnly
-                          aria-label={`Complete notification: ${notification.title}`}
+                          aria-label={t("completeNamed", { title: notification.title })}
                           isPending={pendingActions.get(notification.id) === "complete"}
                           isDisabled={
                             pendingBulkAction !== null || pendingActions.has(notification.id)
@@ -367,13 +370,13 @@ export function NotificationCenterPage() {
                             className="size-4"
                           />
                         </Button>
-                        <Tooltip.Content>Mark done</Tooltip.Content>
+                        <Tooltip.Content>{t("markDone")}</Tooltip.Content>
                       </Tooltip>
                     ) : (
                       <Tooltip>
                         <Button
                           isIconOnly
-                          aria-label={`Reopen notification: ${notification.title}`}
+                          aria-label={t("reopenNamed", { title: notification.title })}
                           isPending={pendingActions.get(notification.id) === "reopen"}
                           isDisabled={
                             pendingBulkAction !== null || pendingActions.has(notification.id)
@@ -388,13 +391,13 @@ export function NotificationCenterPage() {
                             className="size-4"
                           />
                         </Button>
-                        <Tooltip.Content>Return to inbox</Tooltip.Content>
+                        <Tooltip.Content>{t("returnToInbox")}</Tooltip.Content>
                       </Tooltip>
                     )}
                     <Tooltip>
                       <Button
                         isIconOnly
-                        aria-label={`Delete notification: ${notification.title}`}
+                        aria-label={t("deleteNamed", { title: notification.title })}
                         className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                         isPending={pendingActions.get(notification.id) === "delete"}
                         isDisabled={
@@ -406,7 +409,7 @@ export function NotificationCenterPage() {
                       >
                         <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
                       </Button>
-                      <Tooltip.Content>Delete notification</Tooltip.Content>
+                      <Tooltip.Content>{t("deleteNotification")}</Tooltip.Content>
                     </Tooltip>
                   </div>
                 </article>
@@ -418,7 +421,9 @@ export function NotificationCenterPage() {
         {page > 0 || (currentPage && currentPage.totalPages > 1) ? (
           <div className="mt-6 flex items-center justify-between gap-4">
             <Typography color="muted" type="body-xs">
-              {currentPage ? `Page ${page + 1} of ${currentPage.totalPages}` : `Page ${page + 1}`}
+              {currentPage
+                ? t("pageOf", { page: page + 1, pages: currentPage.totalPages })
+                : t("pageNumber", { page: page + 1 })}
             </Typography>
             <div className="flex gap-2">
               <Button
@@ -427,7 +432,7 @@ export function NotificationCenterPage() {
                 variant="secondary"
                 onPress={() => setPage((current) => Math.max(0, current - 1))}
               >
-                Previous
+                {t("previous")}
               </Button>
               <Button
                 isDisabled={notifications.isFetching || !currentPage || page >= lastPage}
@@ -435,7 +440,7 @@ export function NotificationCenterPage() {
                 variant="secondary"
                 onPress={() => setPage((current) => current + 1)}
               >
-                Next
+                {t("next")}
               </Button>
             </div>
           </div>
@@ -457,17 +462,14 @@ export function NotificationCenterPage() {
               <AlertDialog.CloseTrigger isDisabled={isClearingRead} />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Clear read notifications?</AlertDialog.Heading>
+                <AlertDialog.Heading>{t("clearTitle")}</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                <p className="text-sm">
-                  This removes read, unsaved notifications from your active inbox. Saved and
-                  completed history will remain.
-                </p>
+                <p className="text-sm">{t("clearHint")}</p>
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button isDisabled={isClearingRead} slot="close" size="sm" variant="tertiary">
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button
                   isPending={isClearingRead}
@@ -476,7 +478,7 @@ export function NotificationCenterPage() {
                   variant="danger"
                   onPress={handleClearReadNotifications}
                 >
-                  Clear read notifications
+                  {t("clearConfirm")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

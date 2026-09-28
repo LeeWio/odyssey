@@ -11,11 +11,14 @@ import {
 } from "@/lib/features/library";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
+import { useLocale, useTranslations } from "next-intl";
 
 import { HISTORY_PAGE_SIZE } from "./library-constants";
 import { EmptyLibrarySection, LibraryPostVisual, LibrarySkeleton } from "./library-cards";
 
 export function ReadingHistorySection() {
+  const t = useTranslations("Library");
+  const locale = useLocale();
   const formatRelativeTime = useRelativeTime();
   const [page, setPage] = useState(0);
   const [isClearHistoryOpen, setIsClearHistoryOpen] = useState(false);
@@ -71,7 +74,7 @@ export function ReadingHistorySection() {
         setIsClearHistoryOpen(false);
       }
     } catch {
-      if (active.current) setClearError("Reading history could not be cleared. Please try again.");
+      if (active.current) setClearError(t("clearFailed"));
     } finally {
       clearing.current = false;
       if (active.current) setIsClearing(false);
@@ -87,12 +90,12 @@ export function ReadingHistorySection() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <Typography id="reading-history-title" type="h2" weight="semibold">
-            Reading history
+            {t("historyTitle")}
           </Typography>
           <Typography color="muted" type="body-sm" className="mt-1">
             {data
-              ? `${data.total.toLocaleString("en-US")} articles visited`
-              : "Your recent reading"}
+              ? t("articlesVisited", { count: data.total.toLocaleString(locale) })
+              : t("recentReading")}
           </Typography>
         </div>
         {(data?.total ?? 0) > 0 ? (
@@ -109,7 +112,7 @@ export function ReadingHistorySection() {
             }}
           >
             <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
-            Clear history
+            {t("clearHistory")}
           </Button>
         ) : null}
       </div>
@@ -119,26 +122,25 @@ export function ReadingHistorySection() {
       ) : history.isError ? (
         <Card variant="secondary">
           <Card.Header>
-            <Card.Title>Reading history is unavailable</Card.Title>
-            <Card.Description>Please try loading this page again.</Card.Description>
+            <Card.Title>{t("historyUnavailable")}</Card.Title>
+            <Card.Description>{t("tryLoadAgain")}</Card.Description>
           </Card.Header>
           <Card.Footer>
             <Button size="sm" variant="secondary" onPress={() => history.refetch()}>
-              Try again
+              {t("tryAgain")}
             </Button>
           </Card.Footer>
         </Card>
       ) : historyEntries.length === 0 ? (
-        <EmptyLibrarySection
-          title="No reading history yet"
-          description="Articles you open will appear here as you read."
-        />
+        <EmptyLibrarySection title={t("noHistory")} description={t("noHistoryHint")} />
       ) : (
         <div className="divide-default-200 border-default-200 divide-y border-y">
           {historyEntries.map((entry) => {
             const href = getReadingPositionHref(entry.post.slug, entry.positionAnchor);
             const status =
-              entry.progressPercent >= 100 ? "Finished" : `${entry.progressPercent}% read`;
+              entry.progressPercent >= 100
+                ? t("finished")
+                : t("percentRead", { progress: entry.progressPercent });
 
             return (
               <article key={entry.post.id} className="flex gap-4 py-5 sm:items-center">
@@ -155,7 +157,7 @@ export function ReadingHistorySection() {
                     <Tooltip>
                       <Button
                         isIconOnly
-                        aria-label={`Remove ${entry.post.title} from reading history`}
+                        aria-label={t("removeHistory", { title: entry.post.title })}
                         isDisabled={isClearing || pendingRemovals.has(entry.post.id)}
                         isPending={pendingRemovals.has(entry.post.id)}
                         size="sm"
@@ -164,12 +166,12 @@ export function ReadingHistorySection() {
                       >
                         <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
                       </Button>
-                      <Tooltip.Content>Remove from history</Tooltip.Content>
+                      <Tooltip.Content>{t("removeFromHistory")}</Tooltip.Content>
                     </Tooltip>
                   </div>
                   <div className="text-muted mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
                     <time dateTime={entry.lastReadAt}>
-                      Read {formatRelativeTime(entry.lastReadAt)}
+                      {t("readAt", { time: formatRelativeTime(entry.lastReadAt) })}
                     </time>
                     <span>{status}</span>
                     {entry.post.category?.name ? <span>{entry.post.category.name}</span> : null}
@@ -184,7 +186,12 @@ export function ReadingHistorySection() {
       {!isAdjustingPage && (page > 0 || (data?.totalPages ?? 0) > 1) ? (
         <div className="mt-6 flex items-center justify-between gap-4">
           <Typography color="muted" type="body-xs">
-            {data ? `Page ${page + 1} of ${data.totalPages}` : `Page ${page + 1}`}
+            {data
+              ? t("pageOf", {
+                  page: (page + 1).toLocaleString(locale),
+                  pages: data.totalPages.toLocaleString(locale),
+                })
+              : t("pageNumber", { page: (page + 1).toLocaleString(locale) })}
           </Typography>
           <div className="flex gap-2">
             <Button
@@ -193,7 +200,7 @@ export function ReadingHistorySection() {
               isDisabled={page === 0 || history.isFetching || isClearing}
               onPress={() => setPage((page) => Math.max(0, page - 1))}
             >
-              Previous
+              {t("previous")}
             </Button>
             <Button
               size="sm"
@@ -201,7 +208,7 @@ export function ReadingHistorySection() {
               isDisabled={history.isFetching || isClearing || !data || page >= lastPage}
               onPress={() => setPage((page) => page + 1)}
             >
-              Next
+              {t("next")}
             </Button>
           </div>
         </div>
@@ -221,12 +228,10 @@ export function ReadingHistorySection() {
               <AlertDialog.CloseTrigger isDisabled={isClearing} />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Clear reading history?</AlertDialog.Heading>
+                <AlertDialog.Heading>{t("clearHistoryTitle")}</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                <p className="text-sm">
-                  This removes all saved reading activity. This action cannot be undone.
-                </p>
+                <p className="text-sm">{t("clearHistoryHint")}</p>
                 {clearError ? (
                   <p role="alert" className="text-danger mt-3 text-sm">
                     {clearError}
@@ -234,13 +239,13 @@ export function ReadingHistorySection() {
                 ) : null}
                 {isClearing ? (
                   <p role="status" className="text-muted mt-3 text-sm">
-                    Clearing reading history…
+                    {t("clearingHistory")}
                   </p>
                 ) : null}
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button isDisabled={isClearing} slot="close" size="sm" variant="tertiary">
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button
                   isDisabled={pendingRemovals.size > 0}
@@ -249,7 +254,7 @@ export function ReadingHistorySection() {
                   variant="danger"
                   onPress={handleClearHistory}
                 >
-                  Clear history
+                  {t("clearHistory")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

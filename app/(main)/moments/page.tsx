@@ -6,17 +6,17 @@ import { useMemo, useState } from "react";
 import { Button, Chip, Tabs, Typography } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { motion, useReducedMotion } from "motion/react";
-import { useNow } from "next-intl";
+import { useNow, useTranslations } from "next-intl";
 
 import { MomentCard, MomentCardSkeleton } from "@/features/moment/components/card";
 import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
 
 const timeframes = [
-  { id: "all", label: "All notes" },
-  { id: "today", label: "Today" },
-  { id: "yesterday", label: "Yesterday" },
-  { id: "week", label: "This week" },
-  { id: "month", label: "This month" },
+  { id: "all", labelKey: "allNotes" },
+  { id: "today", labelKey: "today" },
+  { id: "yesterday", labelKey: "yesterday" },
+  { id: "week", labelKey: "thisWeek" },
+  { id: "month", labelKey: "thisMonth" },
 ] as const;
 
 type Timeframe = (typeof timeframes)[number]["id"];
@@ -29,6 +29,7 @@ function getMomentTimestamp(value: string) {
 }
 
 export default function MomentsPage() {
+  const t = useTranslations("Moments");
   const now = useNow();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const [activeTab, setActiveTab] = useState<Timeframe>("all");
@@ -69,7 +70,7 @@ export default function MomentsPage() {
       <header className="flex flex-col items-center text-center">
         <motion.div {...revealInView(0, 10)}>
           <Chip color="default" size="sm" variant="secondary">
-            Moments
+            {t("eyebrow")}
           </Chip>
         </motion.div>
         <motion.div {...revealInView(0.06)}>
@@ -78,12 +79,12 @@ export default function MomentsPage() {
             weight="bold"
             className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] tracking-[-0.05em]"
           >
-            This &amp; That
+            {t("headline")}
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.12, 14)}>
           <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
-            Small observations, passing fascinations, and things worth keeping close.
+            {t("headlineDescription")}
           </Typography>
         </motion.div>
       </header>
@@ -91,10 +92,10 @@ export default function MomentsPage() {
       <motion.div className="mx-auto mt-12 w-full max-w-2xl" {...revealInView(0.18, 16)}>
         <Tabs selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(key as Timeframe)}>
           <Tabs.ListContainer>
-            <Tabs.List aria-label="Filter moments by date">
+            <Tabs.List aria-label={t("filterByDate")}>
               {timeframes.map((timeframe) => (
                 <Tabs.Tab key={timeframe.id} id={timeframe.id}>
-                  {timeframe.label}
+                  {t(timeframe.labelKey)}
                   <Tabs.Indicator />
                 </Tabs.Tab>
               ))}
@@ -103,7 +104,7 @@ export default function MomentsPage() {
         </Tabs>
       </motion.div>
 
-      <section aria-label="Moments feed" className="mx-auto mt-12 w-full max-w-3xl">
+      <section aria-label={t("feed")} className="mx-auto mt-12 w-full max-w-3xl">
         {isLoading ? (
           <div className="flex flex-col gap-6" aria-busy="true" aria-live="polite">
             {Array.from({ length: 3 }, (_, index) => (
@@ -113,29 +114,29 @@ export default function MomentsPage() {
         ) : isError ? (
           <EmptyState className="bg-surface-secondary rounded-2xl">
             <EmptyState.Header>
-              <EmptyState.Title>Moments are taking a moment</EmptyState.Title>
+              <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
               <EmptyState.Description className="max-w-sm text-pretty">
-                The feed could not be loaded right now. Please try again.
+                {t("unavailableHint")}
               </EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
               <Button size="sm" variant="secondary" onPress={() => refetch()}>
-                Try again
+                {t("tryAgain")}
               </Button>
             </EmptyState.Content>
           </EmptyState>
         ) : filteredMoments.length === 0 ? (
           <EmptyState className="bg-surface-secondary rounded-2xl">
             <EmptyState.Header>
-              <EmptyState.Title>Nothing in this stretch of time</EmptyState.Title>
+              <EmptyState.Title>{t("emptyWindow")}</EmptyState.Title>
               <EmptyState.Description className="max-w-sm text-pretty">
-                Try a wider window to see more notes from the archive.
+                {t("emptyWindowHint")}
               </EmptyState.Description>
             </EmptyState.Header>
             {activeTab !== "all" ? (
               <EmptyState.Content>
                 <Button size="sm" variant="secondary" onPress={() => setActiveTab("all")}>
-                  Show all notes
+                  {t("showAll")}
                 </Button>
               </EmptyState.Content>
             ) : null}
@@ -160,7 +161,7 @@ export default function MomentsPage() {
             {hasMore ? (
               <div className="flex justify-center pt-2">
                 <Button isPending={isFetchingMore} size="sm" variant="secondary" onPress={loadMore}>
-                  Load more notes
+                  {t("loadMoreNotes")}
                 </Button>
               </div>
             ) : null}

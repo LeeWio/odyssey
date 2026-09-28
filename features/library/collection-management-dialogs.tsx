@@ -19,6 +19,7 @@ import {
   useDeletePostCollectionMutation,
   useUpdatePostCollectionMutation,
 } from "@/lib/features/library";
+import { useTranslations } from "next-intl";
 
 /** Mount a fresh form for each explicit create/edit action. */
 export function CollectionFormDialog({
@@ -30,6 +31,7 @@ export function CollectionFormDialog({
   onClose: () => void;
   onSaved: (collection: PostCollectionResponse) => void;
 }) {
+  const t = useTranslations("Library");
   const [name, setName] = useState(collection?.name ?? "");
   const [description, setDescription] = useState(collection?.description ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -60,9 +62,7 @@ export function CollectionFormDialog({
       if (active.current) onSaved(saved);
     } catch {
       if (active.current) {
-        setError(
-          "The collection could not be saved. Your details are still here; please try again."
-        );
+        setError(t("saveFailed"));
       }
     } finally {
       pending.current = false;
@@ -87,7 +87,7 @@ export function CollectionFormDialog({
             <Form onSubmit={handleSubmit}>
               <Modal.Header>
                 <Modal.Heading>
-                  {collection ? "Edit collection" : "Create collection"}
+                  {collection ? t("editCollection") : t("createCollection")}
                 </Modal.Heading>
               </Modal.Header>
               <Modal.Body className="flex flex-col gap-4 py-4">
@@ -97,10 +97,10 @@ export function CollectionFormDialog({
                   name="collection-name"
                   value={name}
                   onChange={setName}
-                  validate={(value) => (value.trim() ? null : "Enter a collection name.")}
+                  validate={(value) => (value.trim() ? null : t("nameRequired"))}
                 >
-                  <Label>Name</Label>
-                  <Input autoFocus maxLength={80} placeholder="e.g. Design references" />
+                  <Label>{t("name")}</Label>
+                  <Input autoFocus maxLength={80} placeholder={t("namePlaceholder")} />
                   <FieldError />
                 </TextField>
                 <TextField
@@ -109,12 +109,8 @@ export function CollectionFormDialog({
                   value={description}
                   onChange={setDescription}
                 >
-                  <Label>Description</Label>
-                  <TextArea
-                    maxLength={300}
-                    placeholder="What belongs in this collection?"
-                    rows={3}
-                  />
+                  <Label>{t("descriptionLabel")}</Label>
+                  <TextArea maxLength={300} placeholder={t("descriptionPlaceholder")} rows={3} />
                 </TextField>
                 {error ? (
                   <p role="alert" className="text-danger text-sm">
@@ -123,16 +119,16 @@ export function CollectionFormDialog({
                 ) : null}
                 {isPending ? (
                   <p role="status" className="text-muted text-sm">
-                    Saving collection…
+                    {t("savingCollection")}
                   </p>
                 ) : null}
               </Modal.Body>
               <Modal.Footer>
                 <Button isDisabled={isPending} slot="close" size="sm" variant="tertiary">
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button isPending={isPending} isDisabled={isPending} size="sm" type="submit">
-                  {collection ? "Save changes" : "Create collection"}
+                  {collection ? t("saveChanges") : t("createCollection")}
                 </Button>
               </Modal.Footer>
             </Form>
@@ -152,6 +148,7 @@ export function DeleteCollectionDialog({
   onClose: () => void;
   onDeleted: (collectionId: number) => void;
 }) {
+  const t = useTranslations("Library");
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const pending = useRef(false);
@@ -174,7 +171,7 @@ export function DeleteCollectionDialog({
       await deleteCollection(collection.id).unwrap();
       if (active.current) onDeleted(collection.id);
     } catch {
-      if (active.current) setError("The collection could not be deleted. Please try again.");
+      if (active.current) setError(t("deleteFailed"));
     } finally {
       pending.current = false;
       if (active.current) setIsPending(false);
@@ -197,13 +194,10 @@ export function DeleteCollectionDialog({
             <AlertDialog.CloseTrigger isDisabled={isPending} />
             <AlertDialog.Header>
               <AlertDialog.Icon status="danger" />
-              <AlertDialog.Heading>Delete collection?</AlertDialog.Heading>
+              <AlertDialog.Heading>{t("deleteTitle")}</AlertDialog.Heading>
             </AlertDialog.Header>
             <AlertDialog.Body>
-              <p className="text-sm">
-                Delete <strong className="text-foreground">{collection.name}</strong>? The articles
-                will remain in your library, but this collection cannot be restored.
-              </p>
+              <p className="text-sm">{t("deleteHint", { name: collection.name })}</p>
               {error ? (
                 <p role="alert" className="text-danger mt-3 text-sm">
                   {error}
@@ -211,13 +205,13 @@ export function DeleteCollectionDialog({
               ) : null}
               {isPending ? (
                 <p role="status" className="text-muted mt-3 text-sm">
-                  Deleting collection…
+                  {t("deletingCollection")}
                 </p>
               ) : null}
             </AlertDialog.Body>
             <AlertDialog.Footer>
               <Button isDisabled={isPending} slot="close" size="sm" variant="tertiary">
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 isDisabled={isPending}
@@ -226,7 +220,7 @@ export function DeleteCollectionDialog({
                 variant="danger"
                 onPress={handleDelete}
               >
-                Delete collection
+                {t("deleteCollection")}
               </Button>
             </AlertDialog.Footer>
           </AlertDialog.Dialog>

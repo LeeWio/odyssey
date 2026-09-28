@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, TextArea, TextField, Typography, toast } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
 interface CommentContentProps {
@@ -19,6 +20,7 @@ function CommentEditor({
   onEditSave,
   onEditCancel,
 }: Pick<CommentContentProps, "content" | "onEditSave" | "onEditCancel">) {
+  const t = useTranslations("Comments");
   const [editedText, setEditedText] = useState(content);
   const [isSaving, setIsSaving] = useState(false);
   const saving = useRef(false);
@@ -34,7 +36,7 @@ function CommentEditor({
     } catch {
       // The normal mutation path handles API errors and returns false. Keep
       // the draft even if a caller unexpectedly rejects instead.
-      toast.danger("Couldn't update the comment. Please try again.");
+      toast.danger(t("updateFailed"));
     } finally {
       saving.current = false;
       setIsSaving(false);
@@ -47,12 +49,12 @@ function CommentEditor({
         isRequired
         fullWidth
         name="edit-comment"
-        aria-label="Edit comment"
+        aria-label={t("editComment")}
         isReadOnly={isSaving}
       >
         <TextArea
           autoFocus
-          aria-label="Edit comment"
+          aria-label={t("editComment")}
           fullWidth
           maxLength={1000}
           rows={3}
@@ -63,7 +65,7 @@ function CommentEditor({
       </TextField>
       <div className="flex justify-end gap-2">
         <Button size="sm" variant="ghost" isDisabled={isSaving} onPress={onEditCancel}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button
           size="sm"
@@ -72,7 +74,7 @@ function CommentEditor({
           isDisabled={isSaving || !trimmedText || unchanged}
           onPress={() => void save()}
         >
-          Save
+          {t("save")}
         </Button>
       </div>
     </div>
@@ -87,10 +89,11 @@ export function CommentContent({
   isEdited = false,
   isDeleted = false,
 }: CommentContentProps) {
+  const t = useTranslations("Comments");
   if (isDeleted) {
     return (
       <Typography color="muted" type="body-sm" className="italic">
-        This comment was deleted.
+        {t("deleted")}
       </Typography>
     );
   }
@@ -106,7 +109,7 @@ export function CommentContent({
     >
       {content}
       {isEdited ? (
-        <span className="text-muted ml-1.5 text-xs font-normal not-italic">(edited)</span>
+        <span className="text-muted ml-1.5 text-xs font-normal not-italic">{t("edited")}</span>
       ) : null}
     </Typography>
   );

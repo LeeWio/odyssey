@@ -27,6 +27,7 @@ import {
   toast,
 } from "@heroui/react";
 import { motion } from "motion/react";
+import { useLocale, useTranslations } from "next-intl";
 import { useDeferredValue, useState, type FormEvent } from "react";
 
 import {
@@ -70,10 +71,11 @@ function getInitials(value: string) {
 }
 
 function FriendLinkSkeleton() {
+  const t = useTranslations("Links");
   return (
     <div
       aria-busy="true"
-      aria-label="Loading links"
+      aria-label={t("loading")}
       className="grid gap-4 sm:grid-cols-2"
       role="status"
     >
@@ -95,6 +97,7 @@ function FriendLinkSkeleton() {
 }
 
 function FriendLinkCard({ link }: { link: FriendLinkResponse }) {
+  const t = useTranslations("Links");
   const url = toSafeExternalUrl(link.url);
   const avatar = toSafeExternalUrl(link.avatar);
 
@@ -113,7 +116,9 @@ function FriendLinkCard({ link }: { link: FriendLinkResponse }) {
       >
         <Card.Header className="flex-row items-center gap-3">
           <Avatar className="border-default-200 shrink-0 border" size="md" variant="soft">
-            {avatar ? <Avatar.Image alt={`${link.name} avatar`} src={avatar} /> : null}
+            {avatar ? (
+              <Avatar.Image alt={t("avatarAlt", { name: link.name })} src={avatar} />
+            ) : null}
             <Avatar.Fallback>{getInitials(link.name) || "L"}</Avatar.Fallback>
           </Avatar>
           <div className="min-w-0 grow">
@@ -130,7 +135,7 @@ function FriendLinkCard({ link }: { link: FriendLinkResponse }) {
         </Card.Header>
         <Card.Content>
           <Typography color="muted" type="body-sm" className="line-clamp-3 leading-6">
-            {link.description || "A fellow traveler worth visiting."}
+            {link.description || t("fallbackDescription")}
           </Typography>
         </Card.Content>
       </Card>
@@ -155,6 +160,8 @@ interface FriendLinksPageProps {
 }
 
 export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
+  const t = useTranslations("Links");
+  const locale = useLocale();
   const shouldReduceMotion = useReducedMotionPreference();
   const { reveal } = createPageReveal(shouldReduceMotion);
   const { data: friendLinks = [], error, isLoading, refetch } = useGetPublicFriendLinksQuery();
@@ -182,17 +189,17 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
     const description = application.description.trim();
 
     if (!name || !url || !email) {
-      toast.warning("Add your site name, a valid URL, and a contact email.");
+      toast.warning(t("missingFields"));
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.warning("Enter a valid contact email.");
+      toast.warning(t("invalidEmail"));
       return;
     }
 
     if (avatar && !toSafeExternalUrl(avatar)) {
-      toast.warning("Avatar URLs must start with http:// or https://.");
+      toast.warning(t("invalidAvatar"));
       return;
     }
 
@@ -225,28 +232,27 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               <div className="max-w-3xl">
                 <motion.div {...reveal(0, 10)}>
                   <Chip size="sm" variant="secondary">
-                    Blogroll
+                    {t("eyebrow")}
                   </Chip>
                 </motion.div>
                 <motion.div {...reveal(0.06)}>
                   <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-                    Good places lead to better ideas.
+                    {t("title")}
                   </Typography>
                 </motion.div>
                 <motion.div {...reveal(0.12, 14)}>
                   <Typography color="muted" type="body" className="mt-5 max-w-xl">
-                    A small collection of people and projects making thoughtful work on the open
-                    web.
+                    {t("description")}
                   </Typography>
                 </motion.div>
               </div>
               <motion.div {...reveal(0.1, 12)}>
                 <Surface variant="secondary" className="rounded-2xl px-5 py-4">
                   <Typography className="font-mono text-3xl tabular-nums" type="body">
-                    {validLinks.length.toLocaleString("en-US")}
+                    {validLinks.length.toLocaleString(locale)}
                   </Typography>
                   <Typography color="muted" type="body-sm" className="mt-1">
-                    places to visit
+                    {t("placesToVisit")}
                   </Typography>
                 </Surface>
               </motion.div>
@@ -255,7 +261,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           </>
         ) : null}
 
-        <section aria-label="Friend links" className={compact ? undefined : "mt-10"}>
+        <section aria-label={t("section")} className={compact ? undefined : "mt-10"}>
           {!isLoading && !error && validLinks.length > 0 ? (
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <SearchField
@@ -264,17 +270,17 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                 value={searchValue}
                 onChange={setSearchValue}
               >
-                <Label className="sr-only">Search places to visit</Label>
+                <Label className="sr-only">{t("searchLabel")}</Label>
                 <SearchField.Group>
                   <SearchField.SearchIcon />
-                  <SearchField.Input placeholder="Search the blogroll" />
-                  <SearchField.ClearButton aria-label="Clear link search" />
+                  <SearchField.Input placeholder={t("searchPlaceholder")} />
+                  <SearchField.ClearButton aria-label={t("clearSearch")} />
                 </SearchField.Group>
               </SearchField>
               <Typography aria-live="polite" color="muted" type="body-xs">
                 {searchQuery
-                  ? `${visibleLinks.length.toLocaleString("en-US")} matches`
-                  : "Browse the blogroll"}
+                  ? t("matches", { count: visibleLinks.length.toLocaleString(locale) })
+                  : t("browse")}
               </Typography>
             </div>
           ) : null}
@@ -287,15 +293,13 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                 <EmptyState.Media variant="icon">
                   <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
                 </EmptyState.Media>
-                <EmptyState.Title>Links are unavailable</EmptyState.Title>
-                <EmptyState.Description>
-                  The blogroll could not be loaded. Please try again in a moment.
-                </EmptyState.Description>
+                <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
+                <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
               </EmptyState.Header>
               <EmptyState.Content>
                 <Button variant="outline" onPress={() => refetch()}>
                   <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                  Try again
+                  {t("tryAgain")}
                 </Button>
               </EmptyState.Content>
             </EmptyState>
@@ -307,10 +311,8 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                 <EmptyState.Media variant="icon">
                   <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
                 </EmptyState.Media>
-                <EmptyState.Title>No links published yet</EmptyState.Title>
-                <EmptyState.Description>
-                  The first places on this list are being curated now. You can suggest yours below.
-                </EmptyState.Description>
+                <EmptyState.Title>{t("empty")}</EmptyState.Title>
+                <EmptyState.Description>{t("emptyHint")}</EmptyState.Description>
               </EmptyState.Header>
             </EmptyState>
           ) : null}
@@ -321,14 +323,12 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                 <EmptyState.Media variant="icon">
                   <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
                 </EmptyState.Media>
-                <EmptyState.Title>No places match your search</EmptyState.Title>
-                <EmptyState.Description>
-                  Try a site name, a topic from its introduction, or a domain.
-                </EmptyState.Description>
+                <EmptyState.Title>{t("noMatches")}</EmptyState.Title>
+                <EmptyState.Description>{t("noMatchesHint")}</EmptyState.Description>
               </EmptyState.Header>
               <EmptyState.Content>
                 <Button variant="secondary" onPress={() => setSearchValue("")}>
-                  Clear search
+                  {t("clearSearch")}
                 </Button>
               </EmptyState.Content>
             </EmptyState>
@@ -351,7 +351,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
         >
           <div className="max-w-xl">
             <Chip size="sm" variant="secondary" className="w-fit">
-              Link exchange
+              {t("exchange")}
             </Chip>
             <Typography
               id="friend-link-exchange-title"
@@ -359,14 +359,13 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               weight="semibold"
               className="mt-4 text-balance"
             >
-              Add your corner of the web.
+              {t("exchangeTitle")}
             </Typography>
             <Typography color="muted" type="body" className="mt-4 leading-7">
-              Send a short introduction and a way to reach you. Each suggestion is reviewed before
-              it appears here.
+              {t("exchangeDescription")}
             </Typography>
             <Chip className="mt-6" size="sm" variant="soft">
-              Reviewed before publishing
+              {t("reviewed")}
             </Chip>
           </div>
 
@@ -379,12 +378,8 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                 value={application.name}
                 onChange={(value) => updateApplication("name", value)}
               >
-                <Label>Site name</Label>
-                <Input
-                  maxLength={100}
-                  placeholder="Your publication or project"
-                  variant="secondary"
-                />
+                <Label>{t("siteName")}</Label>
+                <Input maxLength={100} placeholder={t("siteNamePlaceholder")} variant="secondary" />
                 <FieldError />
               </TextField>
 
@@ -396,7 +391,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                 value={application.url}
                 onChange={(value) => updateApplication("url", value)}
               >
-                <Label>Site URL</Label>
+                <Label>{t("siteUrl")}</Label>
                 <Input maxLength={255} placeholder="https://example.com" variant="secondary" />
                 <FieldError />
               </TextField>
@@ -409,7 +404,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                 value={application.email}
                 onChange={(value) => updateApplication("email", value)}
               >
-                <Label>Contact email</Label>
+                <Label>{t("contactEmail")}</Label>
                 <Input maxLength={100} placeholder="hello@example.com" variant="secondary" />
                 <FieldError />
               </TextField>
@@ -422,7 +417,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                 onChange={(value) => updateApplication("avatar", value)}
               >
                 <Label>
-                  Avatar URL <span className="text-muted font-normal">(optional)</span>
+                  {t("avatarUrl")} <span className="text-muted font-normal">{t("optional")}</span>
                 </Label>
                 <Input
                   maxLength={255}
@@ -439,11 +434,12 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                 onChange={(value) => updateApplication("description", value)}
               >
                 <Label>
-                  Short introduction <span className="text-muted font-normal">(optional)</span>
+                  {t("introduction")}{" "}
+                  <span className="text-muted font-normal">{t("optional")}</span>
                 </Label>
                 <TextArea
                   maxLength={500}
-                  placeholder="What do you make or write about?"
+                  placeholder={t("introductionPlaceholder")}
                   rows={3}
                   variant="secondary"
                 />
@@ -452,7 +448,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
 
               <Button isPending={isApplying} type="submit">
                 <Icon icon="gravity-ui:paper-plane" aria-hidden="true" className="size-4" />
-                Submit for review
+                {t("submit")}
               </Button>
             </Form>
           </Card>

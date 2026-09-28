@@ -14,16 +14,17 @@ import {
   cn,
   toast,
 } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./types";
 import { resolveCommentCapabilities } from "./utils/permissions";
 
 export const COMMENT_REPORT_REASONS = [
-  { id: "spam", label: "Spam" },
-  { id: "harassment", label: "Harassment" },
-  { id: "inappropriate", label: "Inappropriate" },
-  { id: "misinformation", label: "Misinformation" },
-  { id: "other", label: "Other" },
+  { id: "spam", labelKey: "spam" },
+  { id: "harassment", labelKey: "harassment" },
+  { id: "inappropriate", labelKey: "inappropriate" },
+  { id: "misinformation", labelKey: "misinformation" },
+  { id: "other", labelKey: "other" },
 ] as const;
 
 export type CommentReportReason = (typeof COMMENT_REPORT_REASONS)[number]["id"];
@@ -57,6 +58,7 @@ export function CommentActions({
   isReplying,
   depth,
 }: CommentActionsProps) {
+  const t = useTranslations("Comments");
   const { currentUser, currentUserId, isAuthenticated } = useCommentContext();
   const { canEdit, canDelete } = resolveCommentCapabilities(comment, {
     isAuthenticated,
@@ -84,7 +86,7 @@ export function CommentActions({
     } catch {
       // The mutation normally reports API errors and returns false. Keep the
       // dialog usable even if a caller unexpectedly rejects instead.
-      toast.danger("Couldn't delete the comment. Please try again.");
+      toast.danger(t("deleteFailed"));
     } finally {
       deleting.current = false;
       setIsDeleting(false);
@@ -95,7 +97,7 @@ export function CommentActions({
     <>
       <div
         role="group"
-        aria-label="Comment actions"
+        aria-label={t("actions")}
         className="text-muted mt-2 flex items-center gap-0.5"
       >
         <Button
@@ -105,7 +107,7 @@ export function CommentActions({
             "h-7 gap-1.5 px-2 text-xs",
             liked ? "text-danger hover:text-danger" : "text-muted hover:text-foreground"
           )}
-          aria-label={liked ? "Unlike comment" : "Like comment"}
+          aria-label={liked ? t("unlike") : t("like")}
           aria-pressed={liked}
           isPending={isLiking}
           isDisabled={isUnavailable || isUnapproved || isLiking}
@@ -127,7 +129,7 @@ export function CommentActions({
             isDisabled={isUnavailable || isUnapproved}
             onPress={onReplyToggle}
           >
-            {isReplying ? "Cancel" : "Reply"}
+            {isReplying ? t("cancel") : t("reply")}
           </Button>
         ) : null}
 
@@ -138,13 +140,13 @@ export function CommentActions({
               size="sm"
               variant="ghost"
               className="text-muted hover:text-foreground size-7"
-              aria-label="More comment actions"
+              aria-label={t("moreActions")}
               isDisabled={isUnavailable}
             >
               <Icon icon="gravity-ui:ellipsis" aria-hidden="true" className="size-3.5" />
             </Button>
             <Tooltip.Content>
-              <p>More</p>
+              <p>{t("more")}</p>
             </Tooltip.Content>
           </Tooltip>
           <Dropdown.Popover>
@@ -160,38 +162,41 @@ export function CommentActions({
                 }
               }}
             >
-              <Dropdown.Item id="copy" textValue="Copy link">
+              <Dropdown.Item id="copy" textValue={t("copyLink")}>
                 <Icon icon="gravity-ui:link" />
-                Copy link
+                {t("copyLink")}
               </Dropdown.Item>
               {canEdit || canDelete ? (
                 <>
                   {canEdit ? (
-                    <Dropdown.Item id="edit" textValue="Edit comment">
+                    <Dropdown.Item id="edit" textValue={t("editComment")}>
                       <Icon icon="gravity-ui:pencil" />
-                      Edit
+                      {t("edit")}
                     </Dropdown.Item>
                   ) : null}
                   {canDelete ? (
-                    <Dropdown.Item id="delete" textValue="Delete comment" variant="danger">
+                    <Dropdown.Item id="delete" textValue={t("deleteComment")} variant="danger">
                       <Icon icon="gravity-ui:trash-bin" />
-                      Delete
+                      {t("delete")}
                     </Dropdown.Item>
                   ) : null}
                 </>
               ) : (
                 <Dropdown.Section>
-                  <Header>Report</Header>
-                  {COMMENT_REPORT_REASONS.map((reason) => (
-                    <Dropdown.Item
-                      key={reason.id}
-                      id={`report:${reason.id}`}
-                      textValue={`Report as ${reason.label}`}
-                      variant="danger"
-                    >
-                      <Label>{reason.label}</Label>
-                    </Dropdown.Item>
-                  ))}
+                  <Header>{t("report")}</Header>
+                  {COMMENT_REPORT_REASONS.map((reason) => {
+                    const label = t(reason.labelKey);
+                    return (
+                      <Dropdown.Item
+                        key={reason.id}
+                        id={`report:${reason.id}`}
+                        textValue={t("reportAs", { reason: label })}
+                        variant="danger"
+                      >
+                        <Label>{label}</Label>
+                      </Dropdown.Item>
+                    );
+                  })}
                 </Dropdown.Section>
               )}
             </Dropdown.Menu>
@@ -207,18 +212,17 @@ export function CommentActions({
           isKeyboardDismissDisabled
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md" aria-label="Delete comment">
+            <AlertDialog.Dialog className="sm:max-w-md" aria-label={t("deleteComment")}>
               <AlertDialog.CloseTrigger isDisabled={isDeleting} />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Delete this comment?</AlertDialog.Heading>
+                <AlertDialog.Heading>{t("deleteTitle")}</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                This removes your comment from the public thread. If others already replied, it may
-                remain as a placeholder so the conversation stays readable.
+                {t("deleteHint")}
                 {isDeleting ? (
                   <p role="status" className="text-muted mt-2 text-sm">
-                    Deleting comment…
+                    {t("deleting")}
                   </p>
                 ) : null}
               </AlertDialog.Body>
@@ -228,7 +232,7 @@ export function CommentActions({
                   isDisabled={isDeleting}
                   onPress={() => changeDeleteOpen(false)}
                 >
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button
                   variant="danger"
@@ -239,7 +243,7 @@ export function CommentActions({
                   {isDeleting ? (
                     <Spinner size="sm" className="text-white" aria-hidden="true" />
                   ) : null}
-                  Delete
+                  {t("delete")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

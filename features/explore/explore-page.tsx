@@ -19,6 +19,7 @@ import {
 } from "@heroui/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { motion, useReducedMotion } from "motion/react";
@@ -43,12 +44,14 @@ function parsePositiveInteger(value: string | null) {
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
+function formatDate(value: string, locale: string, fallback: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return fallback;
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
-  }).format(new Date(value));
+  }).format(date);
 }
 
 function getPageNumbers(page: number, totalPages: number) {
@@ -81,6 +84,8 @@ function normalizeFacets(
 }
 
 function ExplorePostCard({ post }: { post: PostResponse }) {
+  const t = useTranslations("Explore");
+  const locale = useLocale();
   return (
     <Link className="group block h-full no-underline" href={`/single/${post.slug}`}>
       <Card
@@ -113,7 +118,7 @@ function ExplorePostCard({ post }: { post: PostResponse }) {
         </Card.Header>
         <Card.Footer className="mt-auto justify-between gap-3">
           <Typography color="muted" type="body-xs">
-            {formatDate(post.createdAt)}
+            {formatDate(post.createdAt, locale, t("recently"))}
           </Typography>
           <Typography
             color="muted"
@@ -121,7 +126,7 @@ function ExplorePostCard({ post }: { post: PostResponse }) {
             className="flex shrink-0 items-center gap-1.5 tabular-nums"
           >
             <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
-            {post.views.toLocaleString("en-US")}
+            {post.views.toLocaleString(locale)}
           </Typography>
         </Card.Footer>
       </Card>
@@ -130,10 +135,11 @@ function ExplorePostCard({ post }: { post: PostResponse }) {
 }
 
 function ExploreSkeleton() {
+  const t = useTranslations("Explore");
   return (
     <div
       aria-busy="true"
-      aria-label="Loading articles"
+      aria-label={t("loading")}
       className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
       role="status"
     >
@@ -158,6 +164,7 @@ function ExploreSearchField({
   initialQuery: string;
   onQueryChange: (query: string) => void;
 }) {
+  const t = useTranslations("Explore");
   const [query, setQuery] = useState(initialQuery);
   const updateUrl = useDebouncedCallback(onQueryChange, 300);
 
@@ -174,17 +181,19 @@ function ExploreSearchField({
         updateUrl(value.trim());
       }}
     >
-      <Label className="sr-only">Search the archive</Label>
+      <Label className="sr-only">{t("searchLabel")}</Label>
       <SearchField.Group>
         <SearchField.SearchIcon />
-        <SearchField.Input placeholder="Search titles and summaries" />
-        <SearchField.ClearButton aria-label="Clear search" />
+        <SearchField.Input placeholder={t("searchPlaceholder")} />
+        <SearchField.ClearButton aria-label={t("clearSearch")} />
       </SearchField.Group>
     </SearchField>
   );
 }
 
 export function ExplorePage() {
+  const t = useTranslations("Explore");
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -264,8 +273,8 @@ export function ExplorePage() {
   };
 
   const resultsTitle = normalizedQuery
-    ? `Results for “${normalizedQuery}”`
-    : selectedCategory?.name || selectedTag?.name || "All writing";
+    ? t("resultsFor", { query: normalizedQuery })
+    : selectedCategory?.name || selectedTag?.name || t("allWriting");
 
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
@@ -274,7 +283,7 @@ export function ExplorePage() {
       <header className="flex flex-col items-center text-center">
         <motion.div {...revealInView(0, 10)}>
           <Chip color="default" size="sm" variant="secondary">
-            Explore
+            {t("eyebrow")}
           </Chip>
         </motion.div>
         <motion.div {...revealInView(0.06)}>
@@ -283,19 +292,18 @@ export function ExplorePage() {
             weight="bold"
             className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[1.02] tracking-[-0.05em] text-balance"
           >
-            Find the thread to follow.
+            {t("title")}
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.12, 14)}>
           <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
-            Browse writing by subject, follow the tags that recur, or search for the question you
-            have in mind.
+            {t("description")}
           </Typography>
         </motion.div>
       </header>
 
       <motion.section
-        aria-label="Explore filters"
+        aria-label={t("filters")}
         className="border-default-200 mt-12 border-y py-7"
         {...revealInView(0.18, 16)}
       >
@@ -310,7 +318,7 @@ export function ExplorePage() {
             <div className="mb-3 flex items-center gap-2">
               <Icon icon="gravity-ui:book-open" aria-hidden="true" className="text-muted size-4" />
               <Typography type="body-sm" weight="semibold">
-                Topics
+                {t("topics")}
               </Typography>
             </div>
             {facetsQuery.isLoading ? (
@@ -321,7 +329,7 @@ export function ExplorePage() {
               </div>
             ) : categories.length > 0 ? (
               <TagGroup
-                aria-label="Filter writing by topic"
+                aria-label={t("filterTopics")}
                 selectedKeys={
                   new Set([selectedCategoryId ? `category-${selectedCategoryId}` : "all"])
                 }
@@ -331,8 +339,8 @@ export function ExplorePage() {
                 onSelectionChange={handleCategoryChange}
               >
                 <TagGroup.List className="flex-wrap">
-                  <Tag id="all" textValue="All topics">
-                    All topics
+                  <Tag id="all" textValue={t("allTopics")}>
+                    {t("allTopics")}
                     <span className="text-muted text-xs tabular-nums">
                       {facetsQuery.data?.totalPublishedCount ?? 0}
                     </span>
@@ -348,7 +356,7 @@ export function ExplorePage() {
             ) : facetsQuery.isError ? (
               <Button size="sm" variant="secondary" onPress={() => facetsQuery.refetch()}>
                 <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />
-                Reload topics
+                {t("reloadTopics")}
               </Button>
             ) : null}
           </div>
@@ -357,7 +365,7 @@ export function ExplorePage() {
             <div className="mb-3 flex items-center gap-2">
               <Icon icon="gravity-ui:hashtag" aria-hidden="true" className="text-muted size-4" />
               <Typography type="body-sm" weight="semibold">
-                Tags
+                {t("tags")}
               </Typography>
             </div>
             {facetsQuery.isLoading ? (
@@ -368,7 +376,7 @@ export function ExplorePage() {
               </div>
             ) : tags.length > 0 ? (
               <TagGroup
-                aria-label="Filter writing by tag"
+                aria-label={t("filterTags")}
                 selectedKeys={new Set([selectedTagId ? `tag-${selectedTagId}` : "all"])}
                 selectionMode="single"
                 size="sm"
@@ -376,8 +384,8 @@ export function ExplorePage() {
                 onSelectionChange={handleTagChange}
               >
                 <TagGroup.List className="flex-wrap">
-                  <Tag id="all" textValue="All tags">
-                    All tags
+                  <Tag id="all" textValue={t("allTags")}>
+                    {t("allTags")}
                   </Tag>
                   {tags.map((tag) => (
                     <Tag key={tag.id} id={`tag-${tag.id}`} textValue={tag.name}>
@@ -393,13 +401,13 @@ export function ExplorePage() {
           <div className="border-default-200 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-muted flex items-center gap-2 text-sm">
               <Icon icon="gravity-ui:calendar" aria-hidden="true" className="size-4" />
-              Prefer to browse the notebook by when it was published?
+              {t("preferDate")}
             </div>
             <Link
               className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
               href="/archive"
             >
-              Browse by date
+              {t("browseByDate")}
               <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
             </Link>
           </div>
@@ -420,14 +428,14 @@ export function ExplorePage() {
             </Typography>
             <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
               {postsQuery.data
-                ? `${postsQuery.data.total.toLocaleString("en-US")} articles found`
-                : "Searching the archive"}
+                ? t("articlesFound", { count: postsQuery.data.total.toLocaleString(locale) })
+                : t("searching")}
             </Typography>
           </div>
           {hasActiveFilters ? (
             <Button size="sm" variant="ghost" onPress={clearFilters}>
               <Icon icon="gravity-ui:xmark" aria-hidden="true" className="size-4" />
-              Clear filters
+              {t("clearFilters")}
             </Button>
           ) : null}
         </div>
@@ -440,15 +448,13 @@ export function ExplorePage() {
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:book-open" aria-hidden="true" />
               </EmptyState.Media>
-              <EmptyState.Title>The archive is unavailable</EmptyState.Title>
-              <EmptyState.Description>
-                The selected writing could not be loaded. Please try again in a moment.
-              </EmptyState.Description>
+              <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
+              <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
               <Button variant="outline" onPress={() => postsQuery.refetch()}>
                 <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                Try again
+                {t("tryAgain")}
               </Button>
             </EmptyState.Content>
           </EmptyState>
@@ -460,15 +466,13 @@ export function ExplorePage() {
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:book-open" aria-hidden="true" />
               </EmptyState.Media>
-              <EmptyState.Title>No writing matches these filters</EmptyState.Title>
-              <EmptyState.Description>
-                Try another phrase or widen the topics and tags you are browsing.
-              </EmptyState.Description>
+              <EmptyState.Title>{t("emptyTitle")}</EmptyState.Title>
+              <EmptyState.Description>{t("emptyHint")}</EmptyState.Description>
             </EmptyState.Header>
             {hasActiveFilters ? (
               <EmptyState.Content>
                 <Button variant="outline" onPress={clearFilters}>
-                  Clear filters
+                  {t("clearFilters")}
                 </Button>
               </EmptyState.Content>
             ) : null}
@@ -498,7 +502,11 @@ export function ExplorePage() {
         {!postsQuery.isLoading && !postsQuery.isError && totalPages > 1 ? (
           <Pagination className="mt-12 w-full" size="sm">
             <Pagination.Summary>
-              Showing {startItem}-{endItem} of {postsQuery.data?.total ?? 0}
+              {t("showing", {
+                start: startItem,
+                end: endItem,
+                total: postsQuery.data?.total ?? 0,
+              })}
             </Pagination.Summary>
             <Pagination.Content>
               <Pagination.Item>
@@ -507,7 +515,7 @@ export function ExplorePage() {
                   onPress={() => handlePageChange(page - 1)}
                 >
                   <Pagination.PreviousIcon />
-                  <span>Previous</span>
+                  <span>{t("previous")}</span>
                 </Pagination.Previous>
               </Pagination.Item>
               {getPageNumbers(page, totalPages).map((value) =>
@@ -531,7 +539,7 @@ export function ExplorePage() {
                   isDisabled={page >= totalPages - 1}
                   onPress={() => handlePageChange(page + 1)}
                 >
-                  <span>Next</span>
+                  <span>{t("next")}</span>
                   <Pagination.NextIcon />
                 </Pagination.Next>
               </Pagination.Item>
@@ -542,13 +550,13 @@ export function ExplorePage() {
 
       <div className="border-default-200 mt-16 flex flex-col gap-3 border-t pt-7 sm:flex-row sm:items-center sm:justify-between">
         <Typography color="muted" type="body-sm">
-          Prefer a guided sequence? Follow a column from beginning to end.
+          {t("preferColumn")}
         </Typography>
         <Link
           className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
           href="/columns"
         >
-          Browse columns
+          {t("browseColumns")}
           <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
         </Link>
       </div>

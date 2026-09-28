@@ -2,6 +2,7 @@
 
 import { Card, Chip, Typography } from "@heroui/react";
 import { Map } from "@heroui-pro/react/map";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import {
@@ -28,6 +29,7 @@ export function FootprintsMap({
   onPopupClose,
   compact = false,
 }: FootprintsMapProps) {
+  const t = useTranslations("Footprints");
   const [hoveredArcId, setHoveredArcId] = useState<string | null>(null);
   const selectedFootprint = compact
     ? null
@@ -42,7 +44,7 @@ export function FootprintsMap({
       className={`relative w-full overflow-hidden ${compact ? "h-[clamp(28rem,60svh,44rem)]" : "h-[min(70vh,42rem)] min-h-[32rem] rounded-3xl"}`}
     >
       <Map
-        aria-label="Personal travel footprints map"
+        aria-label={t("mapLabel")}
         center={mapView.center}
         projection={{ type: "globe" }}
         styles={footprintMapStyles}
@@ -134,24 +136,24 @@ export function FootprintsMap({
       {!compact ? (
         <Card className="bg-overlay shadow-overlay absolute top-3 left-3 z-10 w-[260px] gap-3 p-4">
           <Card.Header>
-            <Card.Title className="text-sm">Footprints</Card.Title>
-            <Card.Description>Places kept on the map</Card.Description>
+            <Card.Title className="text-sm">{t("mapTitle")}</Card.Title>
+            <Card.Description>{t("mapDescription")}</Card.Description>
           </Card.Header>
           <Card.Content className="gap-3">
             <div className="grid grid-cols-3 gap-3 text-xs">
               <span>
                 <strong className="text-foreground block text-base">{footprints.length}</strong>
-                Places
+                {t("places")}
               </span>
               <span>
                 <strong className="text-foreground block text-base">{arcs.length}</strong>
-                Paths
+                {t("paths")}
               </span>
               <span>
                 <strong className="text-foreground block text-base">
                   {footprints.length ? Math.max(...footprints.map((item) => item.year)) : "-"}
                 </strong>
-                Latest
+                {t("latest")}
               </span>
             </div>
             {selectedArc ? (
@@ -166,7 +168,7 @@ export function FootprintsMap({
               </div>
             ) : (
               <Chip size="sm" variant="soft" className="w-fit">
-                Hover a path to trace the route
+                {t("hoverPath")}
               </Chip>
             )}
           </Card.Content>

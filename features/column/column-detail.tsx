@@ -13,13 +13,14 @@ import {
 } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
 import { useGetPublicColumnBySlugQuery } from "@/lib/features/column";
 
-function formatDate(value: string) {
-  if (!value) return "Recently published";
+function formatDate(value: string, locale: string, fallback: string) {
+  if (!value) return fallback;
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -27,6 +28,8 @@ function formatDate(value: string) {
 }
 
 export function ColumnDetail({ slug }: { slug: string }) {
+  const t = useTranslations("Columns");
+  const locale = useLocale();
   const { data: column, error, isLoading } = useGetPublicColumnBySlugQuery(slug);
 
   if (isLoading) {
@@ -50,17 +53,15 @@ export function ColumnDetail({ slug }: { slug: string }) {
       <div className="bg-background flex min-h-[100dvh] items-center justify-center px-6">
         <Card variant="secondary" className="max-w-md items-start gap-5 p-7">
           <Card.Header>
-            <Card.Title>Column not found</Card.Title>
-            <Card.Description>
-              The reading path may be unpublished or its address has changed.
-            </Card.Description>
+            <Card.Title>{t("notFound")}</Card.Title>
+            <Card.Description>{t("notFoundHint")}</Card.Description>
           </Card.Header>
           <HeroLink
             className={cn(buttonVariants({ size: "sm", variant: "secondary" }), "no-underline")}
             href="/columns"
           >
             <Icon icon="gravity-ui:arrow-left" aria-hidden="true" className="size-4" />
-            All columns
+            {t("allColumnsLink")}
           </HeroLink>
         </Card>
       </div>
@@ -69,7 +70,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
 
   const cover = column.coverImage ? (
     <Image
-      alt={`${column.name} cover`}
+      alt={t("coverAlt", { name: column.name })}
       className="object-cover"
       fill
       priority
@@ -92,7 +93,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
           href="/columns"
         >
           <Icon icon="gravity-ui:arrow-left" aria-hidden="true" className="size-4" />
-          All columns
+          {t("allColumnsLink")}
         </HeroLink>
 
         <header className="relative isolate min-h-[360px] overflow-hidden rounded-2xl text-white sm:min-h-[420px]">
@@ -100,7 +101,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(10_14_24/0.1),rgb(10_14_24/0.82))]" />
           <div className="relative flex min-h-[360px] max-w-3xl flex-col justify-end gap-5 p-7 sm:min-h-[420px] sm:p-10 lg:p-14">
             <Chip className="w-fit bg-white/14 text-white" size="sm" variant="soft">
-              Editorial column
+              {t("editorial")}
             </Chip>
             <Typography type="h1" weight="bold" className="leading-[1.02] text-balance text-white">
               {column.name}
@@ -112,22 +113,20 @@ export function ColumnDetail({ slug }: { slug: string }) {
             ) : null}
             <div className="flex items-center gap-2 text-sm text-white/72">
               <Icon icon="gravity-ui:book-open" aria-hidden="true" className="size-4" />
-              {column.postsCount} {column.postsCount === 1 ? "essay" : "essays"}
+              {t("essays", { count: column.postsCount })}
             </div>
           </div>
         </header>
 
         <section aria-labelledby="column-essays" className="mt-14 max-w-4xl">
           <Typography id="column-essays" type="h2" weight="semibold">
-            In this column
+            {t("inThisColumn")}
           </Typography>
           {column.posts.length === 0 ? (
             <Card variant="secondary" className="mt-6 items-start gap-2 p-6">
               <Card.Header>
-                <Card.Title>No essays published yet</Card.Title>
-                <Card.Description>
-                  This column is ready for its first published essay.
-                </Card.Description>
+                <Card.Title>{t("noEssays")}</Card.Title>
+                <Card.Description>{t("noEssaysHint")}</Card.Description>
               </Card.Header>
             </Card>
           ) : (
@@ -154,10 +153,10 @@ export function ColumnDetail({ slug }: { slug: string }) {
                       </Typography>
                     ) : null}
                     <div className="text-muted mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-                      <span>{formatDate(post.publishedAt || "")}</span>
+                      <span>{formatDate(post.publishedAt || "", locale, t("recently"))}</span>
                       <span className="flex items-center gap-1">
                         <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
-                        {post.views.toLocaleString("en-US")}
+                        {post.views.toLocaleString(locale)}
                       </span>
                     </div>
                   </div>

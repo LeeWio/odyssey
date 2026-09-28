@@ -19,6 +19,7 @@ import {
 } from "@heroui/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect } from "react";
 
@@ -63,16 +64,16 @@ function parsePositiveInteger(value: string | null) {
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-function formatMonth(value: number, format: "long" | "short" = "long") {
-  return new Intl.DateTimeFormat("en-US", { month: format, timeZone: "UTC" }).format(
+function formatMonth(value: number, locale: string, format: "long" | "short" = "long") {
+  return new Intl.DateTimeFormat(locale, { month: format, timeZone: "UTC" }).format(
     new Date(Date.UTC(2026, value - 1, 1))
   );
 }
 
-function formatDate(value?: string) {
-  if (!value) return "Recently published";
+function formatDate(value: string | undefined, locale: string, fallback: string) {
+  if (!value) return fallback;
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -156,10 +157,11 @@ function normalizePosts(
 }
 
 function ArchiveSkeleton() {
+  const t = useTranslations("Archive");
   return (
     <div
       aria-busy="true"
-      aria-label="Loading archived articles"
+      aria-label={t("loading")}
       className="divide-default-200 divide-y"
       role="status"
     >
@@ -180,13 +182,15 @@ function ArchiveSkeleton() {
 }
 
 function ArchivePostItem({ post }: { post: ArchivePost }) {
+  const t = useTranslations("Archive");
+  const locale = useLocale();
   return (
     <article className="group grid gap-4 py-6 sm:grid-cols-[5rem_minmax(0,1fr)] sm:gap-7">
       <time
         className="text-muted hidden pt-1 font-mono text-sm sm:block"
         dateTime={post.publishedAt}
       >
-        {formatDate(post.publishedAt)}
+        {formatDate(post.publishedAt, locale, t("recently"))}
       </time>
       <Link className="block min-w-0 no-underline" href={`/single/${post.slug}`} prefetch={false}>
         <div className="flex flex-wrap items-center gap-2">
@@ -196,7 +200,7 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
             </Chip>
           ) : null}
           <time className="text-muted font-mono text-xs sm:hidden" dateTime={post.publishedAt}>
-            {formatDate(post.publishedAt)}
+            {formatDate(post.publishedAt, locale, t("recently"))}
           </time>
         </div>
         <Typography
@@ -217,7 +221,7 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
           className="mt-4 flex items-center gap-1.5 tabular-nums"
         >
           <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
-          {post.views.toLocaleString("en-US")} views
+          {t("views", { count: post.views.toLocaleString(locale) })}
         </Typography>
       </Link>
     </article>
@@ -225,6 +229,8 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
 }
 
 export function ArchivePage() {
+  const t = useTranslations("Archive");
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -312,14 +318,14 @@ export function ArchivePage() {
 
   const periodTitle = selectedYear
     ? selectedMonth
-      ? `${formatMonth(selectedMonth)} ${selectedYear}`
+      ? `${formatMonth(selectedMonth, locale)} ${selectedYear}`
       : String(selectedYear)
-    : "All writing";
+    : t("allWriting");
   const periodDescription = selectedYear
     ? selectedMonth
-      ? `Every article published in ${formatMonth(selectedMonth)} ${selectedYear}.`
-      : `Every article published in ${selectedYear}.`
-    : "A chronological view of the full notebook.";
+      ? t("periodMonth", { month: formatMonth(selectedMonth, locale), year: selectedYear })
+      : t("periodYear", { year: selectedYear })
+    : t("fullNotebook");
 
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
@@ -328,7 +334,7 @@ export function ArchivePage() {
       <header className="flex flex-col items-center text-center">
         <motion.div {...revealInView(0, 10)}>
           <Chip color="default" size="sm" variant="secondary">
-            Archive
+            {t("eyebrow")}
           </Chip>
         </motion.div>
         <motion.div {...revealInView(0.06)}>
@@ -337,39 +343,38 @@ export function ArchivePage() {
             weight="bold"
             className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[1.02] tracking-[-0.05em] text-balance"
           >
-            Read the work in sequence.
+            {t("title")}
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.12, 14)}>
           <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
-            Return to a month, follow the years, and find the writing that belongs to a particular
-            moment.
+            {t("description")}
           </Typography>
         </motion.div>
       </header>
 
       <motion.section
-        aria-label="Archive period selector"
+        aria-label={t("periodSelector")}
         className="border-default-200 mt-12 border-y py-7"
         {...revealInView(0.18, 16)}
       >
         <div className="grid gap-7 lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start">
           <Select
             fullWidth
-            placeholder="All years"
+            placeholder={t("allYears")}
             value={selectedYear ? String(selectedYear) : "all"}
             variant="secondary"
             onChange={handleYearChange}
           >
-            <Label>Year</Label>
+            <Label>{t("year")}</Label>
             <Select.Trigger>
               <Select.Value />
               <Select.Indicator />
             </Select.Trigger>
             <Select.Popover>
               <ListBox>
-                <ListBox.Item id="all" textValue="All years">
-                  All years
+                <ListBox.Item id="all" textValue={t("allYears")}>
+                  {t("allYears")}
                   <ListBox.ItemIndicator />
                 </ListBox.Item>
                 {years.map((year) => (
@@ -386,7 +391,7 @@ export function ArchivePage() {
             <div className="mb-3 flex items-center gap-2">
               <Icon icon="gravity-ui:calendar" aria-hidden="true" className="text-muted size-4" />
               <Typography type="body-sm" weight="semibold">
-                {selectedYear ? "Month" : "Choose a year to narrow to a month"}
+                {selectedYear ? t("month") : t("chooseYear")}
               </Typography>
             </div>
             {facetsQuery.isLoading ? (
@@ -397,7 +402,7 @@ export function ArchivePage() {
               </div>
             ) : selectedYear && months.length > 0 ? (
               <TagGroup
-                aria-label={`Filter ${selectedYear} by month`}
+                aria-label={t("filterYear", { year: selectedYear })}
                 selectedKeys={new Set([selectedMonth ? `month-${selectedMonth}` : "all"])}
                 selectionMode="single"
                 size="sm"
@@ -405,16 +410,16 @@ export function ArchivePage() {
                 onSelectionChange={handleMonthChange}
               >
                 <TagGroup.List className="flex-wrap">
-                  <Tag id="all" textValue={`All of ${selectedYear}`}>
-                    All of {selectedYear}
+                  <Tag id="all" textValue={t("allOfYear", { year: selectedYear })}>
+                    {t("allOfYear", { year: selectedYear })}
                   </Tag>
                   {months.map((facet) => (
                     <Tag
                       key={facet.month}
                       id={`month-${facet.month}`}
-                      textValue={formatMonth(facet.month)}
+                      textValue={formatMonth(facet.month, locale)}
                     >
-                      {formatMonth(facet.month, "short")}
+                      {formatMonth(facet.month, locale, "short")}
                       <span className="text-muted text-xs tabular-nums">{facet.count}</span>
                     </Tag>
                   ))}
@@ -422,11 +427,11 @@ export function ArchivePage() {
               </TagGroup>
             ) : selectedYear ? (
               <Typography color="muted" type="body-sm">
-                No published months are recorded for this year.
+                {t("noMonths")}
               </Typography>
             ) : (
               <Typography color="muted" type="body-sm">
-                The complete timeline remains visible until you choose a year.
+                {t("timelineHint")}
               </Typography>
             )}
           </div>
@@ -447,13 +452,13 @@ export function ArchivePage() {
             </Typography>
             <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
               {currentPage && !isAdjustingPage
-                ? `${total.toLocaleString("en-US")} articles found`
+                ? t("articlesFound", { count: total.toLocaleString(locale) })
                 : periodDescription}
             </Typography>
           </div>
           {selectedYear ? (
             <Button size="sm" variant="ghost" onPress={clearPeriod}>
-              View all years
+              {t("viewAllYears")}
             </Button>
           ) : null}
         </div>
@@ -466,15 +471,13 @@ export function ArchivePage() {
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:book-open" aria-hidden="true" />
               </EmptyState.Media>
-              <EmptyState.Title>The archive is unavailable</EmptyState.Title>
-              <EmptyState.Description>
-                The selected period could not be loaded. Please try again in a moment.
-              </EmptyState.Description>
+              <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
+              <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
               <Button variant="outline" onPress={() => archiveQuery.refetch()}>
                 <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                Try again
+                {t("tryAgain")}
               </Button>
             </EmptyState.Content>
           </EmptyState>
@@ -486,15 +489,13 @@ export function ArchivePage() {
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:calendar" aria-hidden="true" />
               </EmptyState.Media>
-              <EmptyState.Title>No writing from this period</EmptyState.Title>
-              <EmptyState.Description>
-                Try another month, choose a different year, or return to the full timeline.
-              </EmptyState.Description>
+              <EmptyState.Title>{t("emptyTitle")}</EmptyState.Title>
+              <EmptyState.Description>{t("emptyHint")}</EmptyState.Description>
             </EmptyState.Header>
             {selectedYear ? (
               <EmptyState.Content>
                 <Button variant="outline" onPress={clearPeriod}>
-                  View all years
+                  {t("viewAllYears")}
                 </Button>
               </EmptyState.Content>
             ) : null}
@@ -512,7 +513,9 @@ export function ArchivePage() {
         {!isAdjustingPage && (page > 0 || totalPages > 1) ? (
           <Pagination className="mt-12 w-full" size="sm">
             <Pagination.Summary>
-              {currentPage ? `Showing ${startItem}-${endItem} of ${total}` : `Page ${page + 1}`}
+              {currentPage
+                ? t("showing", { start: startItem, end: endItem, total })
+                : t("pageNumber", { page: page + 1 })}
             </Pagination.Summary>
             <Pagination.Content>
               <Pagination.Item>
@@ -521,7 +524,7 @@ export function ArchivePage() {
                   onPress={() => handlePageChange(page - 1)}
                 >
                   <Pagination.PreviousIcon />
-                  <span>Previous</span>
+                  <span>{t("previous")}</span>
                 </Pagination.Previous>
               </Pagination.Item>
               {getPageNumbers(page, totalPages).map((value) =>
@@ -546,7 +549,7 @@ export function ArchivePage() {
                   isDisabled={archiveQuery.isFetching || !currentPage || page >= totalPages - 1}
                   onPress={() => handlePageChange(page + 1)}
                 >
-                  <span>Next</span>
+                  <span>{t("next")}</span>
                   <Pagination.NextIcon />
                 </Pagination.Next>
               </Pagination.Item>
@@ -560,13 +563,13 @@ export function ArchivePage() {
         {...revealInView(0.26, 14)}
       >
         <Typography color="muted" type="body-sm">
-          Looking for an idea rather than a date? Search by subject and recurring tag.
+          {t("lookingForIdea")}
         </Typography>
         <Link
           className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
           href="/explore"
         >
-          Explore writing
+          {t("exploreWriting")}
           <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
         </Link>
       </motion.div>

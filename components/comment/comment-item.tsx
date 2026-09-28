@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 
 import { Button, Typography, cn, toast } from "@heroui/react";
 import { AnimatePresence, motion } from "motion/react";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
 import { UserAvatar } from "@/components/user-avatar";
@@ -40,38 +41,43 @@ interface ReplyRowProps extends Omit<CommentItemProps, "comment"> {
   replyToId: number;
 }
 
-const commentDateFormatter = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
+const commentDateFormatters = new Map<string, Intl.DateTimeFormat>();
 
-function formatCommentTimestamp(value: string) {
+function formatCommentTimestamp(value: string, locale: string) {
   const dateStr =
     value.includes("T") && !value.endsWith("Z") && !value.includes("+") ? `${value}Z` : value;
   const timestamp = new Date(dateStr).getTime();
-  return Number.isFinite(timestamp) ? commentDateFormatter.format(new Date(timestamp)) : undefined;
+  if (!Number.isFinite(timestamp)) return undefined;
+  let formatter = commentDateFormatters.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
+    commentDateFormatters.set(locale, formatter);
+  }
+  return formatter.format(new Date(timestamp));
 }
 
 function StatusHint({ comment }: { comment: EnhancedComment }) {
+  const t = useTranslations("Comments");
   if (comment.isFailed) {
-    return <span className="text-danger text-xs font-medium">Failed to send</span>;
+    return <span className="text-danger text-xs font-medium">{t("failedToSend")}</span>;
   }
   if (comment.isPending) {
-    return <span className="text-muted text-xs">Sending…</span>;
+    return <span className="text-muted text-xs">{t("sending")}</span>;
   }
   if (comment.status === "PENDING") {
-    return <span className="text-warning text-xs font-medium">Awaiting review</span>;
+    return <span className="text-warning text-xs font-medium">{t("awaitingReview")}</span>;
   }
   if (comment.pinned) {
-    return <span className="text-muted text-xs">Pinned</span>;
+    return <span className="text-muted text-xs">{t("pinned")}</span>;
   }
   if (comment.featured) {
-    return <span className="text-muted text-xs">Featured</span>;
+    return <span className="text-muted text-xs">{t("featured")}</span>;
   }
   return null;
 }
 
 export function CommentItem(props: CommentItemProps) {
+  const t = useTranslations("Comments");
   const { comment } = props;
   const { highlightedCommentId } = useCommentContext();
   const replies = useMemo(() => flattenReplies(comment), [comment]);
@@ -124,8 +130,10 @@ export function CommentItem(props: CommentItemProps) {
               className="size-3.5"
             />
             {props.loadingReplyIds.has(comment.id)
-              ? "Loading replies…"
-              : `${isExpanded ? "Hide" : "Show"} ${replyTotal} ${replyTotal === 1 ? "reply" : "replies"}`}
+              ? t("loadingReplies")
+              : isExpanded
+                ? t("hideReplies", { count: replyTotal })
+                : t("showReplies", { count: replyTotal })}
           </Button>
 
           <AnimatePresence initial={false}>
@@ -156,7 +164,7 @@ export function CommentItem(props: CommentItemProps) {
                       onPress={() => props.onLoadReplies(comment.id)}
                       isDisabled={props.loadingReplyIds.has(comment.id)}
                     >
-                      Load more replies
+                      {t("loadMoreReplies")}
                     </Button>
                   ) : null}
                 </div>
@@ -200,6 +208,8 @@ function CommentRow({
   onRetry,
   replyToId,
 }: CommentItemProps & { depth: number; replyTo?: string; replyToId?: number }) {
+  const t = useTranslations("Comments");
+  const locale = useLocale();
   const formatRelativeTime = useRelativeTime();
   const {
     activeReplyId,
@@ -237,9 +247,9 @@ function CommentRow({
       const url = new URL(window.location.href);
       url.hash = `comment-${comment.id}`;
       await navigator.clipboard.writeText(url.toString());
-      toast.success("Comment link copied.");
+      toast.success(t("linkCopied"));
     } catch {
-      toast.warning("Could not copy the comment link.");
+      toast.warning(t("linkCopyFailed"));
     }
   };
 
@@ -272,7 +282,10 @@ function CommentRow({
               color="muted"
               className="tabular-nums"
             >
-              <time dateTime={comment.createdAt} title={formatCommentTimestamp(comment.createdAt)}>
+              <time
+                dateTime={comment.createdAt}
+                title={formatCommentTimestamp(comment.createdAt, locale)}
+              >
                 {timeLabel}
               </time>
             </Typography>
@@ -280,10 +293,10 @@ function CommentRow({
               <button
                 type="button"
                 className="text-muted hover:text-foreground inline-flex max-w-[12rem] items-center gap-1 truncate text-xs transition-colors"
-                aria-label={`Jump to comment by ${replyTo}`}
+                aria-label={t("jumpTo", { name: replyTo })}
                 onClick={() => setHighlightedCommentId(replyToId)}
               >
-                <span aria-hidden="true">replied to</span>
+                <span aria-hidden="true">{t("repliedTo")}</span>
                 <span className="font-medium">{replyTo}</span>
               </button>
             ) : null}
@@ -310,7 +323,7 @@ function CommentRow({
             onPress={() => onRetry(comment.id, comment.content, comment.parentId ?? null)}
           >
             <Icon icon="gravity-ui:arrow-rotate-right" aria-hidden="true" />
-            Retry
+            {t("retry")}
           </Button>
         ) : null}
 
@@ -345,8 +358,8 @@ function CommentRow({
             replyId={comment.id}
             replyTo={displayName}
             onAuthenticationRequired={onAuthenticationRequired}
-            placeholder={`Reply to ${displayName}…`}
-            submitButtonText="Reply"
+            placeholder={t("replyPlaceholder", { name: displayName })}
+            submitButtonText={t("reply")}
             onOpenChange={(open) => {
               if (!open) setActiveReplyId(null);
             }}

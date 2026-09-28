@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { Card, Chip, Typography } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { ColumnResponse } from "@/lib/features/column";
 
 const Grainient = dynamic(() => import("@/components/background/grainient"), {
@@ -41,10 +42,11 @@ function getGrainientProps(seed: string) {
 }
 
 export function ColumnCard({ column }: { column: ColumnResponse }) {
-  const essaysLabel = `${column.postsCount} ${column.postsCount === 1 ? "essay" : "essays"}`;
+  const t = useTranslations("Columns");
+  const essaysLabel = t("essays", { count: column.postsCount });
   const visual = column.coverImage ? (
     <Image
-      alt={`${column.name} cover`}
+      alt={t("coverAlt", { name: column.name })}
       className="object-cover transition-transform duration-500 group-hover:scale-105"
       fill
       sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
@@ -71,7 +73,7 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
         <Card.Header className="gap-3">
           <div className="flex items-center justify-between gap-3">
             <Chip size="sm" variant="soft">
-              Column
+              {t("column")}
             </Chip>
             <span className="text-muted text-xs tabular-nums">{essaysLabel}</span>
           </div>
@@ -80,7 +82,7 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
         </Card.Header>
         <Card.Footer className="mt-auto justify-between">
           <Typography color="muted" type="body-xs">
-            Curated reading path
+            {t("curatedPath")}
           </Typography>
           <Icon
             icon="gravity-ui:arrow-right"

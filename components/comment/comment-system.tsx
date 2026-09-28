@@ -1,6 +1,7 @@
 "use client";
 
 import { ScrollShadow } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import type React from "react";
 import { CommentInput } from "./comment-input";
 import { CommentHeader } from "./comment-header";
@@ -32,6 +33,7 @@ function CommentSystemContent({
   onRequestClose,
   children,
 }: Pick<CommentSystemProps, "onRequestClose" | "children">) {
+  const t = useTranslations("Comments");
   const {
     comments,
     totalCount,
@@ -129,7 +131,7 @@ function CommentSystemContent({
 
   return (
     <section
-      aria-label="Comments"
+      aria-label={t("section")}
       className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col"
     >
       <div className="shrink-0 pb-3">

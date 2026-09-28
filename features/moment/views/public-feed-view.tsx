@@ -1,10 +1,12 @@
 "use client";
 
 import { Button, Typography } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { MomentCard, MomentCardSkeleton } from "../components/card";
 import { useMomentFeed } from "../hooks/use-moment-feed";
 
 export const PublicFeedView = () => {
+  const t = useTranslations("Moments");
   const { moments, isLoading, isError, isFetchingMore, hasMore, loadMore, refetch } =
     useMomentFeed();
 
@@ -13,10 +15,10 @@ export const PublicFeedView = () => {
       <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8">
         <header className="flex w-full max-w-xl flex-col gap-3 text-center">
           <Typography type="h1" weight="bold">
-            Moments
+            {t("title")}
           </Typography>
           <Typography color="muted" type="body">
-            Short field notes and captured fragments from everyday notices.
+            {t("description")}
           </Typography>
         </header>
 
@@ -25,9 +27,9 @@ export const PublicFeedView = () => {
             Array.from({ length: 3 }).map((_, i) => <MomentCardSkeleton key={i} />)
           ) : isError ? (
             <div className="text-danger flex flex-col items-center gap-3 py-12 text-sm">
-              <span>Failed to load moments. Please try again.</span>
+              <span>{t("loadFailed")}</span>
               <Button size="sm" variant="secondary" onPress={() => refetch()}>
-                Retry
+                {t("retry")}
               </Button>
             </div>
           ) : moments.length > 0 ? (
@@ -39,13 +41,13 @@ export const PublicFeedView = () => {
               {hasMore && (
                 <div className="mt-8 flex w-full justify-center">
                   <Button isPending={isFetchingMore} variant="secondary" onPress={loadMore}>
-                    Load more moments
+                    {t("loadMore")}
                   </Button>
                 </div>
               )}
             </>
           ) : (
-            <div className="text-muted py-12 text-sm">No moments published yet.</div>
+            <div className="text-muted py-12 text-sm">{t("empty")}</div>
           )}
         </div>
       </div>

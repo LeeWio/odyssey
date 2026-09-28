@@ -4,10 +4,12 @@ import { Typography } from "@heroui/react";
 import { useState } from "react";
 
 import { useGetLibraryOverviewQuery, useHideRecommendationMutation } from "@/lib/features/library";
+import { useTranslations } from "next-intl";
 
 import { RecommendedCard } from "./library-cards";
 
 export function RecommendationsSection() {
+  const t = useTranslations("Library");
   const overview = useGetLibraryOverviewQuery();
   const recommendations = overview.data?.recommendations ?? [];
   const [recommendationPendingRemoval, setRecommendationPendingRemoval] = useState<number | null>(
@@ -34,10 +36,10 @@ export function RecommendationsSection() {
     <section aria-labelledby="recommendations-title" className="mt-20">
       <div className="mb-6">
         <Typography id="recommendations-title" type="h2" weight="semibold">
-          Recommended for you
+          {t("recommendedTitle")}
         </Typography>
         <Typography color="muted" type="body-sm" className="mt-1">
-          Suggestions shaped by the writing you have saved and read.
+          {t("recommendedDescription")}
         </Typography>
       </div>
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">

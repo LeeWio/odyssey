@@ -25,6 +25,7 @@ import {
   Typography,
 } from "@heroui/react";
 import { AnimatePresence, animate as animateMotion, motion, useReducedMotion } from "motion/react";
+import { useLocale, useTranslations } from "next-intl";
 import { useDeferredValue, useRef, useState } from "react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
@@ -41,10 +42,10 @@ const motionDuration = {
 } as const;
 const MotionLink = motion.create(Link);
 
-function formatDate(value?: string | null) {
-  if (!value) return "Recently published";
+function formatDate(value: string | null | undefined, locale: string, fallback: string) {
+  if (!value) return fallback;
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -64,6 +65,8 @@ function getEstimatedReadingMinutes(post: Pick<PostResponse, "title" | "summary"
 }
 
 function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
+  const t = useTranslations("Blog");
+  const locale = useLocale();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const category = post.category?.name;
   const series = post.series?.name;
@@ -118,11 +121,11 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
         <Card.Footer className="text-muted mt-auto flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
             <span className="truncate">{getDisplayAuthor(post.authorName)}</span>
-            <span>{formatDate(post.createdAt)}</span>
+            <span>{formatDate(post.createdAt, locale, t("recentlyPublished"))}</span>
           </div>
           <span className="flex shrink-0 items-center gap-1.5 tabular-nums">
             <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
-            {post.views.toLocaleString("en-US")}
+            {post.views.toLocaleString(locale)}
           </span>
         </Card.Footer>
       </MotionCard>
@@ -131,6 +134,8 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
 }
 
 function FeaturedPost({ post }: { post: PostDigestResponse }) {
+  const t = useTranslations("Blog");
+  const locale = useLocale();
   const shouldReduceMotion = useReducedMotion() ?? false;
 
   return (
@@ -156,7 +161,7 @@ function FeaturedPost({ post }: { post: PostDigestResponse }) {
       >
         <Card.Header>
           <Chip color="accent" size="sm" variant="soft">
-            Featured
+            {t("featured")}
           </Chip>
           <Card.Title className="text-3xl leading-tight tracking-normal sm:text-4xl lg:text-5xl">
             {post.title}
@@ -170,7 +175,7 @@ function FeaturedPost({ post }: { post: PostDigestResponse }) {
             {getDisplayAuthor(post.authorName)}
           </Typography>
           <Typography color="muted" type="body-xs">
-            {formatDate(post.publishedAt)}
+            {formatDate(post.publishedAt, locale, t("recentlyPublished"))}
           </Typography>
         </Card.Footer>
       </MotionCard>
@@ -179,10 +184,12 @@ function FeaturedPost({ post }: { post: PostDigestResponse }) {
 }
 
 function FeedSkeleton() {
+  const t = useTranslations("Blog");
+
   return (
     <div
       aria-busy="true"
-      aria-label="Loading articles"
+      aria-label={t("loadingArticles")}
       aria-live="polite"
       role="status"
       className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
@@ -212,6 +219,7 @@ function ContinueReading({
   compact?: boolean;
   entries: ReadingHistoryResponse[];
 }) {
+  const t = useTranslations("Blog");
   const formatRelativeTime = useRelativeTime();
   const shouldReduceMotion = useReducedMotion() ?? false;
 
@@ -220,10 +228,10 @@ function ContinueReading({
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
           <Typography id="continue-reading-title" type="h2" weight="semibold">
-            Continue reading
+            {t("continueReading")}
           </Typography>
           <Typography color="muted" type="body-sm" className="mt-1">
-            Pick up where you left off.
+            {t("continueHint")}
           </Typography>
         </div>
       </div>
@@ -266,7 +274,7 @@ function ContinueReading({
                   <Card.Title className="line-clamp-2 text-base">{post.title}</Card.Title>
                 </Card.Header>
                 <ProgressBar
-                  aria-label={`${post.title} reading progress`}
+                  aria-label={t("readingProgress", { title: post.title })}
                   color="accent"
                   size="sm"
                   value={progressPercent}
@@ -277,7 +285,7 @@ function ContinueReading({
                 </ProgressBar>
                 <Card.Footer className="justify-between gap-3 p-0">
                   <Typography color="muted" type="body-xs" className="line-clamp-1">
-                    Read {formatRelativeTime(lastReadAt)}
+                    {t("readRelative", { time: formatRelativeTime(lastReadAt) })}
                   </Typography>
                   <MotionLink
                     className="text-accent inline-flex items-center gap-1.5 text-sm font-medium no-underline"
@@ -289,7 +297,7 @@ function ContinueReading({
                       ease: pageEaseOut,
                     }}
                   >
-                    Continue
+                    {t("continue")}
                     <Icon icon="gravity-ui:play" aria-hidden="true" className="size-3.5" />
                   </MotionLink>
                 </Card.Footer>
@@ -316,6 +324,8 @@ function ArchiveRail({
   posts: PostResponse[];
   publishedTotal: number;
 }) {
+  const t = useTranslations("Blog");
+  const locale = useLocale();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const popularCategories = [...categories]
     .sort((first, second) => (second.count ?? 0) - (first.count ?? 0))
@@ -346,22 +356,20 @@ function ArchiveRail({
     <div className="flex flex-col gap-4">
       <Card variant="tertiary" className="gap-5 p-5 sm:p-6">
         <Card.Header className="gap-2 p-0">
-          <Card.Title>Archive at a glance</Card.Title>
-          <Card.Description>
-            A quick view of what is published and where the archive is growing.
-          </Card.Description>
+          <Card.Title>{t("glanceTitle")}</Card.Title>
+          <Card.Description>{t("glanceDescription")}</Card.Description>
         </Card.Header>
 
         <Card.Content className="p-0">
           <dl className="grid grid-cols-2 gap-3">
             <div className="border-default/40 rounded-xl border p-3">
-              <dt className="text-muted text-xs">Published</dt>
+              <dt className="text-muted text-xs">{t("published")}</dt>
               <dd className="text-foreground mt-1 font-mono text-2xl tabular-nums">
-                {publishedTotal.toLocaleString("en-US")}
+                {publishedTotal.toLocaleString(locale)}
               </dd>
             </div>
             <div className="border-default/40 rounded-xl border p-3">
-              <dt className="text-muted text-xs">Topics</dt>
+              <dt className="text-muted text-xs">{t("topics")}</dt>
               <dd className="text-foreground mt-1 font-mono text-2xl tabular-nums">
                 {categories.length}
               </dd>
@@ -380,7 +388,7 @@ function ArchiveRail({
               ease: pageEaseOut,
             }}
           >
-            Browse columns
+            {t("browseColumns")}
             <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
           </MotionLink>
         </Card.Footer>
@@ -389,8 +397,8 @@ function ArchiveRail({
       {popularCategories.length > 0 ? (
         <Card variant="secondary" className="gap-4 p-5 sm:p-6">
           <Card.Header className="gap-1 p-0">
-            <Card.Title className="text-base">Popular topics</Card.Title>
-            <Card.Description>Start with the subjects readers return to most.</Card.Description>
+            <Card.Title className="text-base">{t("popularTopics")}</Card.Title>
+            <Card.Description>{t("popularTopicsHint")}</Card.Description>
           </Card.Header>
           <Card.Content className="p-0">
             <ul className="flex flex-col gap-3">
@@ -409,27 +417,29 @@ function ArchiveRail({
 
       <Card variant="secondary" className="gap-4 p-5 sm:p-6">
         <Card.Header className="gap-1 p-0">
-          <Card.Title className="text-base">Reading signals</Card.Title>
-          <Card.Description>A small pulse from the current results.</Card.Description>
+          <Card.Title className="text-base">{t("readingSignals")}</Card.Title>
+          <Card.Description>{t("readingSignalsHint")}</Card.Description>
         </Card.Header>
         <Card.Content className="p-0">
           <dl className="flex flex-col gap-3 text-sm">
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-muted">Average views</dt>
+              <dt className="text-muted">{t("averageViews")}</dt>
               <dd className="text-foreground font-mono tabular-nums">
-                {averageViews.toLocaleString("en-US")}
+                {averageViews.toLocaleString(locale)}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-muted">Estimated read</dt>
+              <dt className="text-muted">{t("estimatedRead")}</dt>
               <dd className="text-foreground font-mono tabular-nums">
-                {averageReadingMinutes ? `${averageReadingMinutes} min` : "—"}
+                {averageReadingMinutes ? t("minutes", { count: averageReadingMinutes }) : "—"}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-muted">Latest entry</dt>
+              <dt className="text-muted">{t("latestEntry")}</dt>
               <dd className="text-foreground text-right text-xs">
-                {latestDate ? formatDate(latestDate) : "No entries"}
+                {latestDate
+                  ? formatDate(latestDate, locale, t("recentlyPublished"))
+                  : t("noEntries")}
               </dd>
             </div>
           </dl>
@@ -458,8 +468,8 @@ function ArchiveRail({
           >
             <Card variant="secondary" className="gap-4 p-5 sm:p-6">
               <Card.Header className="gap-1 p-0">
-                <Card.Title className="text-base">Columns in view</Card.Title>
-                <Card.Description>Series represented in this page.</Card.Description>
+                <Card.Title className="text-base">{t("columnsInView")}</Card.Title>
+                <Card.Description>{t("columnsInViewHint")}</Card.Description>
               </Card.Header>
               <Card.Content className="p-0">
                 <ul className="flex flex-col gap-3">
@@ -502,6 +512,7 @@ function getPageNumbers(page: number, totalPages: number) {
 }
 
 export default function BlogFeed() {
+  const t = useTranslations("Blog");
   const shouldReduceMotion = useReducedMotion() ?? false;
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [page, setPage] = useState(0);
@@ -615,7 +626,7 @@ export default function BlogFeed() {
               ease: pageEaseOut,
             }}
           >
-            Chronicle
+            {t("eyebrow")}
           </MotionChip>
           <MotionTypography
             type="h1"
@@ -629,7 +640,7 @@ export default function BlogFeed() {
               ease: pageEaseOut,
             }}
           >
-            Writing worth returning to.
+            {t("title")}
           </MotionTypography>
           <MotionTypography
             color="muted"
@@ -643,7 +654,7 @@ export default function BlogFeed() {
               ease: pageEaseOut,
             }}
           >
-            Essays on software, design, markets, and the questions that remain useful over time.
+            {t("description")}
           </MotionTypography>
           <MotionLink
             className="text-accent mt-2 inline-flex cursor-[var(--cursor-interactive)] items-center gap-2 text-sm font-medium no-underline"
@@ -655,13 +666,13 @@ export default function BlogFeed() {
               ease: pageEaseOut,
             }}
           >
-            Browse columns
+            {t("browseColumns")}
             <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
           </MotionLink>
         </header>
 
         <section
-          aria-label="Browse the archive"
+          aria-label={t("browseArchive")}
           className="bg-surface-secondary mx-auto mt-12 flex w-full max-w-6xl flex-col gap-4 rounded-2xl p-3 sm:p-4"
         >
           <SearchField
@@ -671,17 +682,17 @@ export default function BlogFeed() {
             onChange={handleSearchChange}
             className="w-full"
           >
-            <Label className="sr-only">Search articles</Label>
+            <Label className="sr-only">{t("searchArticles")}</Label>
             <SearchField.Group>
               <SearchField.SearchIcon />
-              <SearchField.Input placeholder="Search the chronicle" />
-              <SearchField.ClearButton aria-label="Clear search" />
+              <SearchField.Input placeholder={t("searchPlaceholder")} />
+              <SearchField.ClearButton aria-label={t("clearSearch")} />
             </SearchField.Group>
           </SearchField>
 
           <div className="min-w-0">
             {isFacetsLoading ? (
-              <div aria-label="Loading topics" className="flex gap-2" role="status">
+              <div aria-label={t("loadingTopics")} className="flex gap-2" role="status">
                 {["w-20", "w-28", "w-24", "w-36"].map((width) => (
                   <Skeleton key={width} className={`h-8 ${width} rounded-full`} />
                 ))}
@@ -689,7 +700,7 @@ export default function BlogFeed() {
             ) : categories.length > 0 ? (
               <ScrollShadow hideScrollBar orientation="horizontal" className="-mx-1 px-1">
                 <TagGroup
-                  aria-label="Filter articles by topic"
+                  aria-label={t("filterTopics")}
                   selectedKeys={new Set([selectedCategoryId ? String(selectedCategoryId) : "all"])}
                   selectionMode="single"
                   size="sm"
@@ -698,8 +709,8 @@ export default function BlogFeed() {
                   onSelectionChange={handleCategoryChange}
                 >
                   <TagGroup.List className="flex-nowrap pr-8">
-                    <Tag id="all" textValue="All topics">
-                      All topics
+                    <Tag id="all" textValue={t("allTopics")}>
+                      {t("allTopics")}
                       <span className="text-muted text-xs tabular-nums">
                         {facets?.totalPublishedCount ?? 0}
                       </span>
@@ -741,7 +752,7 @@ export default function BlogFeed() {
                     weight="semibold"
                     className="mb-5"
                   >
-                    Featured writing
+                    {t("featuredWriting")}
                   </Typography>
                   <FeaturedPost post={featuredPost} />
                 </motion.section>
@@ -757,12 +768,12 @@ export default function BlogFeed() {
               <div className="mb-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <Typography id="all-writing-title" type="h2" weight="semibold">
-                    {normalizedKeyword ? "Search results" : selectedCategory?.name || "All writing"}
+                    {normalizedKeyword
+                      ? t("searchResults")
+                      : selectedCategory?.name || t("allWriting")}
                   </Typography>
                   <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
-                    {data
-                      ? `${data.total.toLocaleString("en-US")} ${data.total === 1 ? "article" : "articles"}`
-                      : "Browse the archive"}
+                    {data ? t("articleCount", { count: data.total }) : t("browseArchive")}
                   </Typography>
                 </div>
                 <AnimatePresence initial={false} mode="wait">
@@ -782,7 +793,7 @@ export default function BlogFeed() {
                       }}
                     >
                       <Typography aria-live="polite" color="muted" type="body-xs">
-                        Updating results
+                        {t("updating")}
                       </Typography>
                     </motion.div>
                   ) : null}
@@ -821,15 +832,13 @@ export default function BlogFeed() {
                         <EmptyState.Media variant="icon">
                           <Icon icon="gravity-ui:book-open" aria-hidden="true" />
                         </EmptyState.Media>
-                        <EmptyState.Title>The chronicle is unavailable</EmptyState.Title>
-                        <EmptyState.Description>
-                          The archive could not be loaded. Please try again in a moment.
-                        </EmptyState.Description>
+                        <EmptyState.Title>{t("unavailableTitle")}</EmptyState.Title>
+                        <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
                       </EmptyState.Header>
                       <EmptyState.Content>
                         <Button variant="outline" onPress={() => refetch()}>
                           <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                          Try again
+                          {t("tryAgain")}
                         </Button>
                       </EmptyState.Content>
                     </EmptyState>
@@ -853,23 +862,23 @@ export default function BlogFeed() {
                         </EmptyState.Media>
                         <EmptyState.Title>
                           {normalizedKeyword
-                            ? "No matching articles"
+                            ? t("noMatches")
                             : selectedCategoryId
-                              ? "No articles in this topic"
-                              : "No articles yet"}
+                              ? t("noTopic")
+                              : t("empty")}
                         </EmptyState.Title>
                         <EmptyState.Description>
                           {normalizedKeyword
-                            ? "Try a different title, topic, or phrase."
+                            ? t("noMatchesHint")
                             : selectedCategoryId
-                              ? "Choose another topic or return to all writing."
-                              : "Published writing will appear here when it is ready."}
+                              ? t("noTopicHint")
+                              : t("emptyHint")}
                         </EmptyState.Description>
                       </EmptyState.Header>
                       {normalizedKeyword ? (
                         <EmptyState.Content>
                           <Button variant="outline" onPress={() => handleSearchChange("")}>
-                            Clear search
+                            {t("clearSearch")}
                           </Button>
                         </EmptyState.Content>
                       ) : selectedCategoryId ? (
@@ -878,7 +887,7 @@ export default function BlogFeed() {
                             variant="outline"
                             onPress={() => handleCategoryChange(new Set(["all"]))}
                           >
-                            View all topics
+                            {t("viewAllTopics")}
                           </Button>
                         </EmptyState.Content>
                       ) : null}
@@ -925,8 +934,8 @@ export default function BlogFeed() {
                     >
                       <Pagination.Summary>
                         {data
-                          ? `Showing ${startItem}-${endItem} of ${data.total}`
-                          : `Page ${page + 1}`}
+                          ? t("showing", { start: startItem, end: endItem, total: data.total })
+                          : t("pageNumber", { page: page + 1 })}
                       </Pagination.Summary>
                       <Pagination.Content>
                         <Pagination.Item>
@@ -935,7 +944,7 @@ export default function BlogFeed() {
                             onPress={() => handlePageChange(page - 1)}
                           >
                             <Pagination.PreviousIcon />
-                            <span>Previous</span>
+                            <span>{t("previous")}</span>
                           </Pagination.Previous>
                         </Pagination.Item>
                         {getPageNumbers(page, totalPages).map((value) =>
@@ -960,7 +969,7 @@ export default function BlogFeed() {
                             isDisabled={isUpdating || !data || page >= totalPages - 1}
                             onPress={() => handlePageChange(page + 1)}
                           >
-                            <span>Next</span>
+                            <span>{t("next")}</span>
                             <Pagination.NextIcon />
                           </Pagination.Next>
                         </Pagination.Item>
@@ -973,7 +982,7 @@ export default function BlogFeed() {
           </div>
 
           <aside
-            aria-label="Archive overview"
+            aria-label={t("overview")}
             className="flex min-w-0 flex-col gap-6 xl:sticky xl:top-24"
           >
             <motion.div

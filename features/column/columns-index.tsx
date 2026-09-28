@@ -17,6 +17,7 @@ import {
   TagGroup,
   Typography,
 } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useDeferredValue, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useGetPublicColumnsQuery } from "@/lib/features/column";
@@ -31,6 +32,7 @@ function getCreatedAtTime(value: string) {
 }
 
 export function ColumnsIndex() {
+  const t = useTranslations("Columns");
   const { data: columns = [], error, isLoading, refetch } = useGetPublicColumnsQuery();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const [search, setSearch] = useState("");
@@ -81,7 +83,7 @@ export function ColumnsIndex() {
       <header className="flex flex-col items-center text-center">
         <motion.div {...revealInView(0, 10)}>
           <Chip color="default" size="sm" variant="secondary">
-            Columns
+            {t("eyebrow")}
           </Chip>
         </motion.div>
         <motion.div {...revealInView(0.06)}>
@@ -90,17 +92,17 @@ export function ColumnsIndex() {
             weight="bold"
             className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[1.02] tracking-[-0.05em] text-balance"
           >
-            Follow an idea beyond one essay.
+            {t("title")}
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.12, 14)}>
           <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
-            Focused reading paths collecting the work, context, and questions that belong together.
+            {t("description")}
           </Typography>
         </motion.div>
       </header>
 
-      <motion.section aria-label="Published columns" className="mt-12" {...revealInView(0.18, 16)}>
+      <motion.section aria-label={t("published")} className="mt-12" {...revealInView(0.18, 16)}>
         {isLoading ? (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }, (_, index) => (
@@ -117,23 +119,21 @@ export function ColumnsIndex() {
         ) : error ? (
           <Card variant="secondary">
             <Card.Header>
-              <Card.Title>Columns are unavailable</Card.Title>
-              <Card.Description>Try loading this page again in a moment.</Card.Description>
+              <Card.Title>{t("unavailable")}</Card.Title>
+              <Card.Description>{t("tryAgainHint")}</Card.Description>
             </Card.Header>
             <Card.Footer>
               <Button size="sm" variant="secondary" onPress={() => refetch()}>
                 <Icon icon="gravity-ui:arrow-rotate-right" aria-hidden="true" className="size-4" />
-                Retry
+                {t("retry")}
               </Button>
             </Card.Footer>
           </Card>
         ) : columns.length === 0 ? (
           <Card variant="secondary">
             <Card.Header>
-              <Card.Title>No columns published yet</Card.Title>
-              <Card.Description>
-                New reading paths will appear here when they are ready.
-              </Card.Description>
+              <Card.Title>{t("nonePublished")}</Card.Title>
+              <Card.Description>{t("nonePublishedHint")}</Card.Description>
             </Card.Header>
           </Card>
         ) : (
@@ -141,15 +141,15 @@ export function ColumnsIndex() {
             <div className="border-default-200 grid gap-5 border-y py-6 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-end">
               <div className="min-w-0">
                 <SearchField fullWidth name="column-search" value={search} onChange={setSearch}>
-                  <Label className="sr-only">Search columns</Label>
+                  <Label className="sr-only">{t("searchLabel")}</Label>
                   <SearchField.Group>
                     <SearchField.SearchIcon />
-                    <SearchField.Input placeholder="Search reading paths" />
-                    <SearchField.ClearButton aria-label="Clear column search" />
+                    <SearchField.Input placeholder={t("searchPlaceholder")} />
+                    <SearchField.ClearButton aria-label={t("clearSearch")} />
                   </SearchField.Group>
                 </SearchField>
                 <TagGroup
-                  aria-label="Filter columns by reading availability"
+                  aria-label={t("filterAvailability")}
                   selectedKeys={new Set([availability])}
                   selectionMode="single"
                   size="sm"
@@ -158,18 +158,18 @@ export function ColumnsIndex() {
                   onSelectionChange={handleAvailabilityChange}
                 >
                   <TagGroup.List className="flex-wrap">
-                    <Tag id="all" textValue="All columns">
-                      All paths
+                    <Tag id="all" textValue={t("allColumns")}>
+                      {t("allPaths")}
                       <span className="text-muted text-xs tabular-nums">{columns.length}</span>
                     </Tag>
-                    <Tag id="ready" textValue="Ready to read">
-                      Ready to read
+                    <Tag id="ready" textValue={t("readyToRead")}>
+                      {t("readyToRead")}
                       <span className="text-muted text-xs tabular-nums">
                         {columns.filter((column) => column.postsCount > 0).length}
                       </span>
                     </Tag>
-                    <Tag id="starting" textValue="Starting soon">
-                      Starting soon
+                    <Tag id="starting" textValue={t("startingSoon")}>
+                      {t("startingSoon")}
                       <span className="text-muted text-xs tabular-nums">
                         {columns.filter((column) => column.postsCount === 0).length}
                       </span>
@@ -178,7 +178,7 @@ export function ColumnsIndex() {
                 </TagGroup>
               </div>
               <Select
-                aria-label="Sort reading paths"
+                aria-label={t("sortLabel")}
                 className="w-full lg:w-52 lg:justify-self-end"
                 value={sort}
                 variant="secondary"
@@ -188,23 +188,23 @@ export function ColumnsIndex() {
                   }
                 }}
               >
-                <Label>Sort paths</Label>
+                <Label>{t("sortPaths")}</Label>
                 <Select.Trigger>
                   <Select.Value />
                   <Select.Indicator />
                 </Select.Trigger>
                 <Select.Popover>
                   <ListBox>
-                    <ListBox.Item id="newest" textValue="Newest first">
-                      Newest first
+                    <ListBox.Item id="newest" textValue={t("newestFirst")}>
+                      {t("newestFirst")}
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
-                    <ListBox.Item id="most-essays" textValue="Most essays">
-                      Most essays
+                    <ListBox.Item id="most-essays" textValue={t("mostEssays")}>
+                      {t("mostEssays")}
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
-                    <ListBox.Item id="alphabetical" textValue="Alphabetical">
-                      Alphabetical
+                    <ListBox.Item id="alphabetical" textValue={t("alphabetical")}>
+                      {t("alphabetical")}
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
                   </ListBox>
@@ -214,11 +214,11 @@ export function ColumnsIndex() {
 
             <div className="mt-7 flex items-center justify-between gap-4">
               <Typography color="muted" type="body-sm">
-                {visibleColumns.length} {visibleColumns.length === 1 ? "path" : "paths"} to explore
+                {t("pathsToExplore", { count: visibleColumns.length })}
               </Typography>
               {search || availability !== "all" ? (
                 <Button size="sm" variant="tertiary" onPress={clearFilters}>
-                  Clear filters
+                  {t("clearFilters")}
                 </Button>
               ) : null}
             </div>
@@ -245,16 +245,14 @@ export function ColumnsIndex() {
               <Card variant="secondary" className="mt-6">
                 <Card.Header>
                   <Chip size="sm" variant="soft">
-                    No matches
+                    {t("noMatches")}
                   </Chip>
-                  <Card.Title>No reading paths match these filters</Card.Title>
-                  <Card.Description>
-                    Try a different title, topic, or availability filter.
-                  </Card.Description>
+                  <Card.Title>{t("noMatchTitle")}</Card.Title>
+                  <Card.Description>{t("noMatchHint")}</Card.Description>
                 </Card.Header>
                 <Card.Footer>
                   <Button size="sm" variant="secondary" onPress={clearFilters}>
-                    Show all columns
+                    {t("showAll")}
                   </Button>
                 </Card.Footer>
               </Card>

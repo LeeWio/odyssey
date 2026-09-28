@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 
 import { Button, Dropdown, Label, Typography, type Key } from "@heroui/react";
 import { Sheet } from "@heroui-pro/react";
+import { useTranslations } from "next-intl";
 import { memo } from "react";
 import {
   type SortOrder,
@@ -20,27 +21,10 @@ interface CommentHeaderProps {
   onLoadNew?: () => void;
 }
 
-const SORT_LABELS: Record<SortOrder, string> = {
-  newest: "Newest",
-  oldest: "Oldest",
-  likes: "Top",
-};
+const SORT_ORDERS: SortOrder[] = ["newest", "oldest", "likes"];
 
 function isSortOrder(value: Key | undefined): value is SortOrder {
   return value === "newest" || value === "oldest" || value === "likes";
-}
-
-function threadTitle(isGuestbook: boolean, isMoment: boolean) {
-  if (isGuestbook) return "Guestbook";
-  if (isMoment) return "Comments";
-  return "Comments";
-}
-
-function newCommentsLabel(count: number, isGuestbook: boolean) {
-  if (isGuestbook) {
-    return count === 1 ? "1 new entry" : `${count} new entries`;
-  }
-  return count === 1 ? "1 new comment" : `${count} new comments`;
 }
 
 export const CommentHeader = memo(function CommentHeader({
@@ -51,9 +35,15 @@ export const CommentHeader = memo(function CommentHeader({
   isLoadingNew = false,
   onLoadNew,
 }: CommentHeaderProps) {
+  const t = useTranslations("Comments");
   const { sortOrder, setSortOrder } = useCommentSortContext();
-  const { isGuestbook, isMoment } = useCommentContext();
-  const title = threadTitle(isGuestbook, isMoment);
+  const { isGuestbook } = useCommentContext();
+  const title = isGuestbook ? t("guestbook") : t("section");
+  const sortLabels: Record<SortOrder, string> = {
+    newest: t("newest"),
+    oldest: t("oldest"),
+    likes: t("top"),
+  };
 
   const heading = (
     <span className="inline-flex items-baseline gap-2">
@@ -88,9 +78,9 @@ export const CommentHeader = memo(function CommentHeader({
             size="sm"
             variant="ghost"
             className="text-muted hover:text-foreground h-8 gap-1 px-2 text-xs"
-            aria-label="Choose comment sort"
+            aria-label={t("chooseSort")}
           >
-            {SORT_LABELS[sortOrder]}
+            {sortLabels[sortOrder]}
             <Icon icon="gravity-ui:chevron-down" aria-hidden="true" className="size-3.5" />
           </Button>
           <Dropdown.Popover placement="bottom end">
@@ -101,12 +91,15 @@ export const CommentHeader = memo(function CommentHeader({
                 if (isSortOrder(key)) setSortOrder(key);
               }}
             >
-              {(Object.entries(SORT_LABELS) as [SortOrder, string][]).map(([key, label]) => (
-                <Dropdown.Item key={key} id={key} textValue={label}>
-                  <Label>{label}</Label>
-                  <Dropdown.ItemIndicator />
-                </Dropdown.Item>
-              ))}
+              {SORT_ORDERS.map((key) => {
+                const label = sortLabels[key];
+                return (
+                  <Dropdown.Item key={key} id={key} textValue={label}>
+                    <Label>{label}</Label>
+                    <Dropdown.ItemIndicator />
+                  </Dropdown.Item>
+                );
+              })}
             </Dropdown.Menu>
           </Dropdown.Popover>
         </Dropdown>
@@ -124,7 +117,9 @@ export const CommentHeader = memo(function CommentHeader({
             onPress={onLoadNew}
           >
             <Icon icon="gravity-ui:arrow-up" aria-hidden="true" className="size-3.5" />
-            {newCommentsLabel(newCount, isGuestbook)}
+            {isGuestbook
+              ? t("newEntries", { count: newCount })
+              : t("newComments", { count: newCount })}
           </Button>
         </div>
       ) : null}

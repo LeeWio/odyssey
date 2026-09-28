@@ -7,6 +7,7 @@ import { Icon } from "@iconify/react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useTranslations } from "next-intl";
 
 import { CollectionsSection } from "./collections-section";
 import { ContinueReadingSection } from "./continue-reading-section";
@@ -17,6 +18,7 @@ import { ReadingPreferencesSection } from "./reading-preferences-section";
 import { RecommendationsSection } from "./recommendations-section";
 
 export function LibraryPage() {
+  const t = useTranslations("Library");
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
@@ -29,15 +31,13 @@ export function LibraryPage() {
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:book-open" aria-hidden="true" />
               </EmptyState.Media>
-              <EmptyState.Title>Your reading library</EmptyState.Title>
-              <EmptyState.Description>
-                Sign in to keep your place, revisit saved articles, and manage your reading history.
-              </EmptyState.Description>
+              <EmptyState.Title>{t("signInTitle")}</EmptyState.Title>
+              <EmptyState.Description>{t("signInDescription")}</EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
-              <Button onPress={() => dispatch(setLoginOpen(true))}>Sign in</Button>
+              <Button onPress={() => dispatch(setLoginOpen(true))}>{t("signIn")}</Button>
               <Link className="no-underline" href="/blog">
-                Browse articles
+                {t("browseArticles")}
               </Link>
             </EmptyState.Content>
           </EmptyState>
@@ -52,13 +52,13 @@ export function LibraryPage() {
         <header className="max-w-3xl">
           <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
             <Icon icon="gravity-ui:book-open" aria-hidden="true" className="size-4" />
-            Personal library
+            {t("eyebrow")}
           </div>
           <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-            Keep the ideas you want to return to.
+            {t("title")}
           </Typography>
           <Typography color="muted" type="body" className="mt-5 max-w-xl">
-            Your reading progress, saved writing, and recent history in one place.
+            {t("description")}
           </Typography>
         </header>
 

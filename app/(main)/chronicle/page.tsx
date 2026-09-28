@@ -4,6 +4,7 @@ import { createPageReveal } from "@/lib/motion";
 
 import { Icon } from "@iconify/react";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Tabs, Card, Chip, Skeleton, Typography } from "@heroui/react";
@@ -20,9 +21,9 @@ import { ExplorePage } from "@/features/explore";
 // API hooks to fetch fresh content for the featured tab
 import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
 
-function formatDate(value?: string | null) {
-  if (!value) return "Recently published";
-  return new Intl.DateTimeFormat("en-US", {
+function formatDate(value: string | null | undefined, locale: string, fallback: string) {
+  if (!value) return fallback;
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -30,6 +31,8 @@ function formatDate(value?: string | null) {
 }
 
 export default function ChroniclePage() {
+  const t = useTranslations("Blog");
+  const locale = useLocale();
   const shouldReduceMotion = useReducedMotion() ?? false;
 
   const { reveal } = createPageReveal(shouldReduceMotion);
@@ -53,7 +56,7 @@ export default function ChroniclePage() {
         {/* Cinematic Header matching Homepage */}
         <header className="flex flex-col items-center text-center">
           <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
-            The Chronicle
+            {t("chronicleEyebrow")}
           </MotionChip>
           <MotionTypography
             type="h1"
@@ -61,7 +64,7 @@ export default function ChroniclePage() {
             className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.055em]"
             {...reveal(0.12)}
           >
-            Writing, structured & free.
+            {t("chronicleTitle")}
           </MotionTypography>
           <MotionTypography
             color="muted"
@@ -69,8 +72,7 @@ export default function ChroniclePage() {
             className="mt-4 max-w-xl leading-relaxed text-balance"
             {...reveal(0.2, 12)}
           >
-            Field notes on design systems, accessible systems engineering, and the architectural
-            logs of a technical odyssey.
+            {t("chronicleDescription")}
           </MotionTypography>
         </header>
 
@@ -82,25 +84,25 @@ export default function ChroniclePage() {
             className="w-full max-w-4xl"
           >
             <Tabs.ListContainer className="border-default-100 border-b bg-transparent p-0">
-              <Tabs.List aria-label="Chronicle sections" className="gap-6 sm:gap-8">
+              <Tabs.List aria-label={t("sections")} className="gap-6 sm:gap-8">
                 <Tabs.Tab id="featured" className="h-12 px-1 text-sm font-medium">
-                  Featured
+                  {t("featured")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="explore" className="h-12 px-1 text-sm font-medium">
-                  Explore & Filters
+                  {t("exploreFilters")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="orbit" className="h-12 px-1 text-sm font-medium">
-                  Orbit Feed
+                  {t("orbitFeed")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="columns" className="h-12 px-1 text-sm font-medium">
-                  Columns
+                  {t("columns")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="archive" className="h-12 px-1 text-sm font-medium">
-                  Timeline Archive
+                  {t("timelineArchive")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
               </Tabs.List>
@@ -138,7 +140,7 @@ export default function ChroniclePage() {
                             {/* Accent Visual */}
                             <div className="absolute inset-0 flex items-center justify-center">
                               <span className="text-foreground/5 font-mono text-7xl font-black italic select-none">
-                                FEATURED
+                                {t("featured")}
                               </span>
                             </div>
                           </div>
@@ -146,7 +148,7 @@ export default function ChroniclePage() {
                           {/* Detail Content Column */}
                           <div className="flex flex-col justify-center p-8 sm:p-10 lg:col-span-5">
                             <Chip color="accent" size="sm" variant="soft" className="w-fit">
-                              Highlight
+                              {t("highlight")}
                             </Chip>
                             <Card.Header className="mt-4 p-0">
                               <Card.Title className="group-hover:text-accent text-3xl leading-tight font-bold tracking-[-0.03em] transition-colors sm:text-4xl">
@@ -160,7 +162,13 @@ export default function ChroniclePage() {
                             </Card.Header>
 
                             <Typography color="muted" type="body-xs" className="mt-6 tabular-nums">
-                              Published {formatDate(featuredPost.publishedAt)}
+                              {t("publishedOn", {
+                                date: formatDate(
+                                  featuredPost.publishedAt,
+                                  locale,
+                                  t("recentlyPublished")
+                                ),
+                              })}
                             </Typography>
                           </div>
                         </div>
@@ -174,10 +182,10 @@ export default function ChroniclePage() {
                   <div className="mb-6 flex items-end justify-between">
                     <div>
                       <Typography type="h3" weight="bold" className="tracking-tight">
-                        Recent Logs
+                        {t("recentLogs")}
                       </Typography>
                       <Typography color="muted" type="body-sm" className="mt-1">
-                        Latest updates and field notes from the orbital logger.
+                        {t("recentLogsHint")}
                       </Typography>
                     </div>
                   </div>
@@ -234,11 +242,11 @@ export default function ChroniclePage() {
 
                             <Card.Footer className="border-default-100/50 mt-auto flex items-center justify-between border-t p-5 pt-4">
                               <span className="text-muted/80 text-[10px] font-medium tracking-wide uppercase">
-                                {formatDate(post.createdAt)}
+                                {formatDate(post.createdAt, locale, t("recentlyPublished"))}
                               </span>
                               <span className="text-muted flex items-center gap-1.5 font-mono text-[10px] tabular-nums">
                                 <Icon icon="gravity-ui:eye" className="size-3" />
-                                {post.views.toLocaleString()}
+                                {post.views.toLocaleString(locale)}
                               </span>
                             </Card.Footer>
                           </Card>

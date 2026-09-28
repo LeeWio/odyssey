@@ -22,6 +22,7 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
+import { useLocale, useTranslations } from "next-intl";
 import { useDeferredValue, useMemo, useState } from "react";
 
 import {
@@ -46,6 +47,7 @@ function hostnameFrom(url: string) {
 }
 
 function UsesItemCard({ item }: { item: UsesItem }) {
+  const t = useTranslations("Uses");
   const url = toSafeExternalUrl(item.link);
 
   return (
@@ -69,7 +71,7 @@ function UsesItemCard({ item }: { item: UsesItem }) {
         </div>
         {url ? (
           <Link
-            aria-label={`Open ${item.name}`}
+            aria-label={t("openNamed", { name: item.name })}
             className="text-sm"
             href={url}
             rel="noopener noreferrer"
@@ -93,6 +95,7 @@ function CategorySection({
   index: number;
   reveal: ReturnType<typeof createPageReveal>["reveal"];
 }) {
+  const t = useTranslations("Uses");
   return (
     <motion.section
       key={category.name}
@@ -117,7 +120,7 @@ function CategorySection({
               {category.name}
             </Typography>
             <Typography color="muted" type="body-xs" className="mt-1 tabular-nums">
-              {category.items.length} {category.items.length === 1 ? "tool" : "tools"}
+              {t("toolCount", { count: category.items.length })}
             </Typography>
           </div>
         </div>
@@ -136,6 +139,8 @@ function CategorySection({
 }
 
 export function UsesPage({ compact = false }: UsesPageProps) {
+  const t = useTranslations("Uses");
+  const locale = useLocale();
   const shouldReduceMotion = useReducedMotionPreference();
   const { reveal } = createPageReveal(shouldReduceMotion);
   const [searchValue, setSearchValue] = useState("");
@@ -180,7 +185,7 @@ export function UsesPage({ compact = false }: UsesPageProps) {
             <div className="max-w-3xl">
               <motion.div {...reveal(0, 10)}>
                 <Chip size="sm" variant="secondary">
-                  Uses
+                  {t("eyebrow")}
                 </Chip>
               </motion.div>
               <motion.div {...reveal(0.06)}>
@@ -189,23 +194,22 @@ export function UsesPage({ compact = false }: UsesPageProps) {
                   weight="bold"
                   className="mt-5 text-[clamp(2.25rem,5vw,4.25rem)] leading-[1.02] tracking-[-0.05em] text-balance"
                 >
-                  The tools behind the work.
+                  {t("title")}
                 </Typography>
               </motion.div>
               <motion.div {...reveal(0.12, 14)}>
                 <Typography color="muted" type="body" className="mt-4 max-w-xl text-balance">
-                  A small, evolving set of hardware and software that makes space for writing,
-                  building, and paying attention.
+                  {t("description")}
                 </Typography>
               </motion.div>
             </div>
             <motion.div {...reveal(0.1, 12)}>
               <Surface variant="secondary" className="rounded-2xl px-5 py-4">
                 <Typography className="font-mono text-3xl tabular-nums" type="body">
-                  {totalCount.toLocaleString("en-US")}
+                  {totalCount.toLocaleString(locale)}
                 </Typography>
                 <Typography color="muted" type="body-sm" className="mt-1">
-                  tools on the desk
+                  {t("onTheDesk")}
                 </Typography>
               </Surface>
             </motion.div>
@@ -222,22 +226,22 @@ export function UsesPage({ compact = false }: UsesPageProps) {
               value={searchValue}
               onChange={setSearchValue}
             >
-              <Label className="sr-only">Search tools</Label>
+              <Label className="sr-only">{t("searchLabel")}</Label>
               <SearchField.Group>
                 <SearchField.SearchIcon />
-                <SearchField.Input placeholder="Search tools, tags, or notes" />
-                <SearchField.ClearButton aria-label="Clear tool search" />
+                <SearchField.Input placeholder={t("searchPlaceholder")} />
+                <SearchField.ClearButton aria-label={t("clearSearch")} />
               </SearchField.Group>
             </SearchField>
             <Typography aria-live="polite" color="muted" type="body-xs">
               {deferredSearch || categoryFilter !== "all"
-                ? `${visibleCount.toLocaleString("en-US")} matches`
-                : "Browse the toolkit"}
+                ? t("matches", { count: visibleCount.toLocaleString(locale) })
+                : t("browse")}
             </Typography>
           </div>
 
           <TagGroup
-            aria-label="Filter tools by category"
+            aria-label={t("filterCategory")}
             selectedKeys={new Set([categoryFilter])}
             selectionMode="single"
             size="sm"
@@ -245,8 +249,8 @@ export function UsesPage({ compact = false }: UsesPageProps) {
             onSelectionChange={handleCategoryChange}
           >
             <TagGroup.List className="flex-wrap">
-              <Tag id="all" textValue="All tools">
-                All
+              <Tag id="all" textValue={t("allTools")}>
+                {t("all")}
                 <span className="text-muted text-xs tabular-nums">{totalCount}</span>
               </Tag>
               {usesData.map((category) => (
@@ -265,14 +269,12 @@ export function UsesPage({ compact = false }: UsesPageProps) {
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:magnifier" aria-hidden="true" />
               </EmptyState.Media>
-              <EmptyState.Title>No tools match</EmptyState.Title>
-              <EmptyState.Description>
-                Try another search term or clear the category filter.
-              </EmptyState.Description>
+              <EmptyState.Title>{t("noMatchTitle")}</EmptyState.Title>
+              <EmptyState.Description>{t("noMatchHint")}</EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
               <Button variant="outline" onPress={clearFilters}>
-                Clear filters
+                {t("clearFilters")}
               </Button>
             </EmptyState.Content>
           </EmptyState>

@@ -7,6 +7,7 @@ import {
   useAddPostToCollectionMutation,
   useCreatePostCollectionMutation,
 } from "@/lib/features/library";
+import { useTranslations } from "next-intl";
 
 /** Mount a fresh dialog for each article and each explicit create action. */
 export function CreateCollectionDialog({
@@ -16,6 +17,7 @@ export function CreateCollectionDialog({
   postId: number;
   onClose: () => void;
 }) {
+  const t = useTranslations("Library");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [createdCollection, setCreatedCollection] = useState<PostCollectionResponse | null>(null);
@@ -56,11 +58,7 @@ export function CreateCollectionDialog({
       if (active.current) onClose();
     } catch {
       if (active.current) {
-        setError(
-          collection
-            ? `“${collection.name}” was created, but the article could not be saved. Retry saving to this collection.`
-            : "The collection could not be created. Your details are still here; please try again."
-        );
+        setError(collection ? t("saveRetry", { name: collection.name }) : t("createFailed"));
       }
     } finally {
       pending.current = false;
@@ -82,22 +80,22 @@ export function CreateCollectionDialog({
         <Modal.Container size="sm">
           <Modal.Dialog className="sm:max-w-md">
             <Modal.CloseTrigger isDisabled={isPending} />
-            <Form aria-label="Create collection and save article" onSubmit={handleSubmit}>
+            <Form aria-label={t("createAndSaveLabel")} onSubmit={handleSubmit}>
               <Modal.Header>
-                <Modal.Heading>Create collection</Modal.Heading>
+                <Modal.Heading>{t("createCollection")}</Modal.Heading>
               </Modal.Header>
               <Modal.Body className="flex flex-col gap-4 py-4">
-                <p className="text-muted text-sm">Save this article to a new collection.</p>
+                <p className="text-muted text-sm">{t("saveToNew")}</p>
                 <TextField
                   isRequired
                   isReadOnly={isPending || !!createdCollection}
                   name="collection-name"
                   value={name}
                   onChange={setName}
-                  validate={(value) => (value.trim() ? null : "Enter a collection name.")}
+                  validate={(value) => (value.trim() ? null : t("nameRequired"))}
                 >
-                  <Label>Name</Label>
-                  <Input autoFocus maxLength={80} placeholder="e.g. Design references" />
+                  <Label>{t("name")}</Label>
+                  <Input autoFocus maxLength={80} placeholder={t("namePlaceholder")} />
                   <FieldError />
                 </TextField>
                 <TextField
@@ -106,8 +104,8 @@ export function CreateCollectionDialog({
                   value={description}
                   onChange={setDescription}
                 >
-                  <Label>Description</Label>
-                  <Input maxLength={300} placeholder="What belongs in this collection?" />
+                  <Label>{t("descriptionLabel")}</Label>
+                  <Input maxLength={300} placeholder={t("descriptionPlaceholder")} />
                 </TextField>
                 {error ? (
                   <p role="alert" className="text-danger text-sm">
@@ -116,20 +114,20 @@ export function CreateCollectionDialog({
                 ) : null}
                 {isPending ? (
                   <p role="status" className="text-muted text-sm">
-                    {createdCollection ? "Saving article…" : "Creating collection…"}
+                    {createdCollection ? t("savingArticle") : t("creatingCollection")}
                   </p>
                 ) : null}
               </Modal.Body>
               <Modal.Footer>
                 <Button isDisabled={isPending} slot="close" size="sm" variant="tertiary">
-                  {createdCollection ? "Close" : "Cancel"}
+                  {createdCollection ? t("close") : t("cancel")}
                 </Button>
                 <Button isPending={isPending} size="sm" type="submit">
                   {createdCollection
                     ? isPending
-                      ? "Saving article…"
-                      : "Retry saving article"
-                    : "Create and save"}
+                      ? t("savingArticle")
+                      : t("retrySaving")
+                    : t("createAndSave")}
                 </Button>
               </Modal.Footer>
             </Form>

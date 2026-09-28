@@ -11,6 +11,7 @@ import {
   cn,
   toast,
 } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
 
 import { useSubscribeMutation } from "@/lib/features/openapi";
@@ -20,6 +21,7 @@ type NewsletterSubscribeFormProps = {
 };
 
 export function NewsletterSubscribeForm({ variant = "stacked" }: NewsletterSubscribeFormProps) {
+  const t = useTranslations("Newsletter");
   const [email, setEmail] = useState("");
   const [feedback, setFeedback] = useState<{
     kind: "success" | "error";
@@ -45,7 +47,7 @@ export function NewsletterSubscribeForm({ variant = "stacked" }: NewsletterSubsc
       // Only clear the submitted draft; edits made while waiting belong to the reader.
       if (draftRevision.current === submittedRevision) setEmail("");
       setFeedback({ kind: "success", email: normalizedEmail });
-      toast.success(`Check ${normalizedEmail} to confirm your subscription.`);
+      toast.success(t("checkInbox", { email: normalizedEmail }));
     } catch {
       // The generated mutation reports API failures through the shared toast helper.
       setFeedback({ kind: "error", email: normalizedEmail });
@@ -57,7 +59,7 @@ export function NewsletterSubscribeForm({ variant = "stacked" }: NewsletterSubsc
   return (
     <div className="flex w-full flex-col gap-3">
       <Form
-        aria-label="Newsletter subscription"
+        aria-label={t("formLabel")}
         className={cn(
           "flex w-full gap-3",
           variant === "inline" ? "flex-col sm:flex-row sm:items-start" : "flex-col"
@@ -77,10 +79,10 @@ export function NewsletterSubscribeForm({ variant = "stacked" }: NewsletterSubsc
             setFeedback(null);
           }}
           validate={(value) =>
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) ? null : "Enter a valid email address."
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) ? null : t("invalidEmail")
           }
         >
-          <Label className="sr-only">Email address</Label>
+          <Label className="sr-only">{t("email")}</Label>
           <Input autoComplete="email" placeholder="you@example.com" variant="secondary" />
           <FieldError />
         </TextField>
@@ -92,7 +94,7 @@ export function NewsletterSubscribeForm({ variant = "stacked" }: NewsletterSubsc
           {({ isPending }) => (
             <>
               {isPending ? <Spinner color="current" size="sm" /> : null}
-              Subscribe
+              {t("subscribe")}
             </>
           )}
         </Button>
@@ -106,8 +108,8 @@ export function NewsletterSubscribeForm({ variant = "stacked" }: NewsletterSubsc
           )}
         >
           {feedback.kind === "success"
-            ? `Check ${feedback.email} to confirm your subscription.`
-            : `We couldn’t request a confirmation email for ${feedback.email}. Please try again.`}
+            ? t("checkInbox", { email: feedback.email })
+            : t("requestFailed", { email: feedback.email })}
         </p>
       ) : null}
     </div>

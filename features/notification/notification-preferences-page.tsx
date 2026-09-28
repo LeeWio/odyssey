@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 
 import { EmptyState } from "@heroui-pro/react";
 import { Button, Card, Skeleton, Switch, Typography } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
@@ -17,29 +18,30 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 const PREFERENCE_ROWS = [
   {
-    description: "Replies, approvals, and moderation changes that involve you.",
+    descriptionKey: "commentsDescription",
     emailKey: "commentEmailNotificationsEnabled",
     inboxKey: "commentNotificationsEnabled",
-    title: "Comments & replies",
+    titleKey: "commentsTitle",
   },
   {
-    description: "New writing published in categories you follow.",
+    descriptionKey: "followsDescription",
     emailKey: "categoryPostEmailNotificationsEnabled",
     inboxKey: "categoryPostNotificationsEnabled",
-    title: "Writing from your follows",
+    titleKey: "followsTitle",
   },
   {
-    description: "Account, security, and operational updates that may need attention.",
+    descriptionKey: "systemDescription",
     emailKey: "systemEmailNotificationsEnabled",
     inboxKey: "systemNotificationsEnabled",
-    title: "System updates",
+    titleKey: "systemTitle",
   },
 ] as const;
 
 function NotificationPreferencesSkeleton() {
+  const t = useTranslations("Notifications");
   return (
-    <Card variant="secondary" role="status" aria-label="Loading notification preferences">
-      <span className="sr-only">Loading notification preferences…</span>
+    <Card variant="secondary" role="status" aria-label={t("loadingPreferences")}>
+      <span className="sr-only">{t("loadingPreferencesStatus")}</span>
       <Card.Header>
         <Skeleton className="h-5 w-40 rounded-lg" />
         <Skeleton className="h-4 w-72 rounded-lg" />
@@ -83,6 +85,7 @@ function PreferenceSwitch({
 }
 
 export function NotificationPreferencesPage() {
+  const t = useTranslations("Notifications");
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const preferences = useGetMyNotificationPreferencesQuery(undefined, { skip: !isAuthenticated });
@@ -99,13 +102,11 @@ export function NotificationPreferencesPage() {
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:bell" aria-hidden="true" />
               </EmptyState.Media>
-              <EmptyState.Title>Notification preferences</EmptyState.Title>
-              <EmptyState.Description>
-                Sign in to choose how activity reaches you.
-              </EmptyState.Description>
+              <EmptyState.Title>{t("preferencesSignInTitle")}</EmptyState.Title>
+              <EmptyState.Description>{t("preferencesSignInDescription")}</EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
-              <Button onPress={() => dispatch(setLoginOpen(true))}>Sign in</Button>
+              <Button onPress={() => dispatch(setLoginOpen(true))}>{t("signIn")}</Button>
             </EmptyState.Content>
           </EmptyState>
         </div>
@@ -163,29 +164,30 @@ export function NotificationPreferencesPage() {
       <div className="mx-auto w-full max-w-3xl">
         <header className="max-w-2xl">
           <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-            <Icon icon="gravity-ui:gear" aria-hidden="true" className="size-4" /> Delivery controls
+            <Icon icon="gravity-ui:gear" aria-hidden="true" className="size-4" />{" "}
+            {t("deliveryControls")}
           </div>
           <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-            Notifications
+            {t("title")}
           </Typography>
           <Typography color="muted" type="body" className="mt-5">
-            Choose the updates that deserve a place in your inbox, your email, or both.
+            {t("preferencesDescription")}
           </Typography>
         </header>
 
-        <section className="mt-12" aria-label="Notification delivery preferences">
+        <section className="mt-12" aria-label={t("deliveryPreferences")}>
           {!currentPreferences && (preferences.isLoading || preferences.isFetching) ? (
             <NotificationPreferencesSkeleton />
           ) : null}
           {preferences.isError && !preferences.isFetching ? (
             <Card variant="secondary">
               <Card.Header>
-                <Card.Title>Preferences are unavailable</Card.Title>
-                <Card.Description>Try loading this page again in a moment.</Card.Description>
+                <Card.Title>{t("preferencesUnavailable")}</Card.Title>
+                <Card.Description>{t("tryAgainHint")}</Card.Description>
               </Card.Header>
               <Card.Footer>
                 <Button variant="ghost" onPress={() => preferences.refetch()}>
-                  Try again
+                  {t("tryAgain")}
                 </Button>
               </Card.Footer>
             </Card>
@@ -193,46 +195,47 @@ export function NotificationPreferencesPage() {
           {currentPreferences ? (
             <Card>
               <Card.Header>
-                <Card.Title>What reaches you</Card.Title>
-                <Card.Description>
-                  In-app is your archive. Email is reserved for the updates you do not want to miss.
-                </Card.Description>
+                <Card.Title>{t("whatReachesYou")}</Card.Title>
+                <Card.Description>{t("whatReachesYouHint")}</Card.Description>
               </Card.Header>
               <Card.Content className="gap-6">
                 <div className="text-muted grid grid-cols-[1fr_auto_auto] items-center gap-x-5 text-xs font-medium">
-                  <span>Activity</span>
-                  <span>In-app</span>
-                  <span>Email</span>
+                  <span>{t("activity")}</span>
+                  <span>{t("inApp")}</span>
+                  <span>{t("email")}</span>
                 </div>
-                {PREFERENCE_ROWS.map((row) => (
-                  <div
-                    key={row.inboxKey}
-                    className="grid grid-cols-[1fr_auto_auto] items-center gap-x-5"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold">{row.title}</p>
-                      <p className="text-muted mt-1 text-sm leading-5">{row.description}</p>
+                {PREFERENCE_ROWS.map((row) => {
+                  const title = t(row.titleKey);
+                  return (
+                    <div
+                      key={row.inboxKey}
+                      className="grid grid-cols-[1fr_auto_auto] items-center gap-x-5"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold">{title}</p>
+                        <p className="text-muted mt-1 text-sm leading-5">{t(row.descriptionKey)}</p>
+                      </div>
+                      <PreferenceSwitch
+                        isSelected={currentPreferences[row.inboxKey]}
+                        label={t("inAppNamed", { title })}
+                        onChange={(value) => updateDraft(row.inboxKey, value)}
+                      />
+                      <PreferenceSwitch
+                        isSelected={currentPreferences[row.emailKey]}
+                        label={t("emailNamed", { title })}
+                        onChange={(value) => updateDraft(row.emailKey, value)}
+                      />
                     </div>
-                    <PreferenceSwitch
-                      isSelected={currentPreferences[row.inboxKey]}
-                      label={`${row.title} in-app`}
-                      onChange={(value) => updateDraft(row.inboxKey, value)}
-                    />
-                    <PreferenceSwitch
-                      isSelected={currentPreferences[row.emailKey]}
-                      label={`${row.title} email`}
-                      onChange={(value) => updateDraft(row.emailKey, value)}
-                    />
-                  </div>
-                ))}
+                  );
+                })}
               </Card.Content>
               <Card.Footer className="justify-between gap-4">
                 <div className="text-muted flex items-center gap-2 text-xs">
-                  <Icon icon="gravity-ui:envelope" aria-hidden="true" className="size-4" /> Email
-                  delivery is opt-in.
+                  <Icon icon="gravity-ui:envelope" aria-hidden="true" className="size-4" />{" "}
+                  {t("emailOptIn")}
                 </div>
                 <Button isDisabled={!isDirty || isSaving} isPending={isSaving} onPress={handleSave}>
-                  Save preferences
+                  {t("savePreferences")}
                 </Button>
               </Card.Footer>
             </Card>

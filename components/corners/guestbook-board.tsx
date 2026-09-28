@@ -5,6 +5,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { Card, Skeleton } from "@heroui/react";
 
 import { useGetGuestbookEntriesQuery } from "@/lib/features/comment";
+import { useTranslations } from "next-intl";
 import { useRelativeTime } from "@/lib/relative-time";
 import ScrollingBanner from "./scrolling-banner";
 import GuestbookCard from "./guestbook-card";
@@ -107,6 +108,7 @@ function GuestbookSkeletonCard() {
 }
 
 export default function GuestbookBoard() {
+  const t = useTranslations("Guestbook");
   const formatRelativeTime = useRelativeTime();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { data: rawEntries = [], isLoading } = useGetGuestbookEntriesQuery();
@@ -114,14 +116,14 @@ export default function GuestbookBoard() {
   const mappedEntries = React.useMemo(() => {
     const live = (rawEntries || []).map((comment) => ({
       avatar: comment.avatar || null,
-      name: comment.nickname || comment.username || "Anonymous",
-      role: `Explorer · ${formatRelativeTime(comment.createdAt)}`,
+      name: comment.nickname || comment.username || t("anonymous"),
+      role: t("explorer", { time: formatRelativeTime(comment.createdAt) }),
       content: comment.content,
     }));
 
     // Prepend live entries to the default entries to ensure scroll banner has enough items
     return [...live, ...defaultEntries];
-  }, [rawEntries, formatRelativeTime]);
+  }, [rawEntries, formatRelativeTime, t]);
 
   const columns = React.useMemo(() => {
     const cols: GuestbookEntry[][] = [[], [], [], []];
@@ -136,7 +138,7 @@ export default function GuestbookBoard() {
       <div
         className="mx-auto w-full max-w-7xl px-6 py-10"
         aria-busy="true"
-        aria-label="Loading guestbook entries"
+        aria-label={t("loading")}
       >
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }, (_, index) => (

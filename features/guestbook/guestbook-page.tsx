@@ -6,6 +6,7 @@ import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preferenc
 
 import { Button, Card, Chip, Separator, Surface, Typography } from "@heroui/react";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 
 import { CommentSystem } from "@/components/comment/comment-system";
 import { selectIsAuthenticated } from "@/lib/features/auth";
@@ -13,6 +14,7 @@ import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 export function GuestbookPage() {
+  const t = useTranslations("Guestbook");
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const shouldReduceMotion = useReducedMotionPreference();
@@ -24,21 +26,20 @@ export function GuestbookPage() {
         <header className="max-w-2xl">
           <motion.div className="flex flex-wrap gap-2" {...reveal(0, 10)}>
             <Chip size="sm" variant="secondary">
-              Guestbook
+              {t("eyebrow")}
             </Chip>
             <Chip size="sm" variant="soft">
-              Moderated conversation
+              {t("moderated")}
             </Chip>
           </motion.div>
           <motion.div {...reveal(0.06)}>
             <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-              Leave a note before you go.
+              {t("title")}
             </Typography>
           </motion.div>
           <motion.div {...reveal(0.12, 14)}>
             <Typography color="muted" type="body" className="mt-5 max-w-xl leading-7">
-              Questions, small observations, and useful links are welcome. Every entry is reviewed
-              before it becomes part of this public record.
+              {t("description")}
             </Typography>
           </motion.div>
         </header>
@@ -48,20 +49,18 @@ export function GuestbookPage() {
         {!isAuthenticated ? (
           <Card variant="secondary" className="mt-8">
             <Card.Header>
-              <Card.Title className="text-base">Sign in to add an entry</Card.Title>
-              <Card.Description>
-                Reading is open to everyone. Sign in to leave a note or reply.
-              </Card.Description>
+              <Card.Title className="text-base">{t("signInTitle")}</Card.Title>
+              <Card.Description>{t("signInDescription")}</Card.Description>
             </Card.Header>
             <Card.Footer>
               <Button size="sm" onPress={() => dispatch(setLoginOpen(true))}>
-                Sign in to write
+                {t("signInToWrite")}
               </Button>
             </Card.Footer>
           </Card>
         ) : null}
 
-        <section aria-label="Guestbook entries" className="mt-10">
+        <section aria-label={t("entries")} className="mt-10">
           <CommentSystem isGuestbook />
         </section>
       </div>

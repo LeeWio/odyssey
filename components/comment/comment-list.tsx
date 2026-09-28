@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 
 import { Alert, Button, Skeleton } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
+import { useTranslations } from "next-intl";
 import { CommentItem } from "./comment-item";
 import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./types";
@@ -53,30 +54,27 @@ export function CommentList({
   loadingReplyIds,
   hasMoreReplies,
 }: CommentListProps) {
+  const t = useTranslations("Comments");
   const { isGuestbook, isMoment } = useCommentContext();
-  const emptyTitle = isGuestbook ? "No entries yet" : "No comments yet";
+  const emptyTitle = isGuestbook ? t("emptyEntries") : t("emptyComments");
   const emptyDescription = isGuestbook
-    ? "Leave the first note in the guestbook."
+    ? t("emptyGuestbookHint")
     : isMoment
-      ? "Be the first to reply to this moment."
-      : "Be the first to start the discussion.";
-  const unit = isGuestbook
-    ? totalCount === 1
-      ? "entry"
-      : "entries"
-    : totalCount === 1
-      ? "comment"
-      : "comments";
+      ? t("emptyMomentHint")
+      : t("emptyDiscussionHint");
+  const countLabel = isGuestbook
+    ? t("countEntries", { count: totalCount })
+    : t("countComments", { count: totalCount });
 
   return (
     <div className="flex flex-col">
       <p className="sr-only" aria-live="polite">
-        {totalCount} {unit}
-        {isFetching && !isLoading ? ", updating" : ""}
+        {countLabel}
+        {isFetching && !isLoading ? t("updating") : ""}
       </p>
 
       {isLoading ? (
-        <div className="divide-border/70 flex flex-col divide-y" aria-label="Loading comments">
+        <div className="divide-border/70 flex flex-col divide-y" aria-label={t("loading")}>
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="flex gap-3 py-5">
               <Skeleton className="size-8 shrink-0 rounded-full" />
@@ -92,11 +90,11 @@ export function CommentList({
         <Alert status="danger" className="my-4">
           <Alert.Indicator />
           <Alert.Content>
-            <Alert.Title>Couldn’t load comments</Alert.Title>
-            <Alert.Description>Check your connection and try again.</Alert.Description>
+            <Alert.Title>{t("loadFailed")}</Alert.Title>
+            <Alert.Description>{t("loadFailedHint")}</Alert.Description>
           </Alert.Content>
           <Button size="sm" variant="outline" onPress={() => refetch()}>
-            Retry
+            {t("retry")}
           </Button>
         </Alert>
       ) : comments.length === 0 ? (
@@ -139,7 +137,7 @@ export function CommentList({
                 isDisabled={isLoadingMore}
                 onPress={loadMore}
               >
-                Load more
+                {t("loadMore")}
               </Button>
             </div>
           ) : null}

@@ -14,6 +14,7 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 import {
@@ -32,13 +33,9 @@ const POPOVER_PAGE_SIZE = 8;
 type NotificationView = "all" | "unread";
 
 function NotificationPopoverSkeleton() {
+  const t = useTranslations("Notifications");
   return (
-    <div
-      aria-busy="true"
-      aria-label="Loading notifications"
-      className="space-y-1 p-2"
-      role="status"
-    >
+    <div aria-busy="true" aria-label={t("loading")} className="space-y-1 p-2" role="status">
       {Array.from({ length: 4 }, (_, index) => (
         <div key={index} className="flex gap-3 rounded-xl p-3">
           <Skeleton className="size-9 shrink-0 rounded-lg" />
@@ -54,6 +51,7 @@ function NotificationPopoverSkeleton() {
 }
 
 function NotificationPopoverEmptyState({ unreadOnly }: { unreadOnly: boolean }) {
+  const t = useTranslations("Notifications");
   return (
     <div className="px-6 py-10">
       <EmptyState size="sm">
@@ -61,13 +59,9 @@ function NotificationPopoverEmptyState({ unreadOnly }: { unreadOnly: boolean }) 
           <EmptyState.Media variant="icon">
             <Icon icon="gravity-ui:bell" aria-hidden="true" />
           </EmptyState.Media>
-          <EmptyState.Title>
-            {unreadOnly ? "You are all caught up" : "No notifications yet"}
-          </EmptyState.Title>
+          <EmptyState.Title>{unreadOnly ? t("caughtUp") : t("emptyInboxTitle")}</EmptyState.Title>
           <EmptyState.Description>
-            {unreadOnly
-              ? "New activity will appear here when it needs your attention."
-              : "Updates about your writing and account will appear here."}
+            {unreadOnly ? t("caughtUpHint") : t("popoverEmptyHint")}
           </EmptyState.Description>
         </EmptyState.Header>
       </EmptyState>
@@ -86,6 +80,7 @@ function NotificationItem({
   notification: NotificationResponse;
   onPress: (notification: NotificationResponse) => void;
 }) {
+  const t = useTranslations("Notifications");
   const formatRelativeTime = useRelativeTime();
 
   return (
@@ -111,10 +106,7 @@ function NotificationItem({
               {notification.title}
             </span>
             {!notification.read ? (
-              <span
-                aria-label="Unread notification"
-                className="bg-accent size-2 shrink-0 rounded-full"
-              />
+              <span aria-label={t("unread")} className="bg-accent size-2 shrink-0 rounded-full" />
             ) : null}
           </span>
           <span className="text-muted mt-1 line-clamp-2 block text-sm leading-5 whitespace-pre-wrap">
@@ -125,7 +117,7 @@ function NotificationItem({
               {formatRelativeTime(notification.createdAt)}
             </time>
             <Chip size="sm" variant="soft">
-              {getNotificationTypeLabel(notification.type)}
+              {getNotificationTypeLabel(notification.type, t("typeFallback"))}
             </Chip>
           </span>
         </span>
@@ -135,6 +127,8 @@ function NotificationItem({
 }
 
 export function NotificationPopover() {
+  const t = useTranslations("Notifications");
+  const locale = useLocale();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<NotificationView>("all");
@@ -180,14 +174,14 @@ export function NotificationPopover() {
         <Tooltip delay={500} closeDelay={100}>
           <Button
             isIconOnly
-            aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : "Notifications"}
+            aria-label={unreadCount > 0 ? t("unreadCount", { count: unreadCount }) : t("title")}
             size="sm"
             variant="ghost"
           >
             <Icon icon="gravity-ui:bell" aria-hidden="true" className="size-4" />
           </Button>
           <Tooltip.Content placement="bottom" offset={8}>
-            Notifications
+            {t("title")}
           </Tooltip.Content>
         </Tooltip>
 
@@ -201,16 +195,14 @@ export function NotificationPopover() {
               <Card.Header className="flex-row items-center justify-between gap-3">
                 <div className="min-w-0">
                   <Popover.Heading className="text-base font-semibold">
-                    Notifications
+                    {t("title")}
                   </Popover.Heading>
-                  <p className="text-muted mt-1 text-xs">
-                    Activity around your writing and account.
-                  </p>
+                  <p className="text-muted mt-1 text-xs">{t("popoverSubtitle")}</p>
                 </div>
                 <Tooltip>
                   <Button
                     isIconOnly
-                    aria-label="Mark all notifications as read"
+                    aria-label={t("markAllAria")}
                     isDisabled={
                       unreadCount === 0 || pendingBulkAction !== null || pendingActions.size > 0
                     }
@@ -221,7 +213,7 @@ export function NotificationPopover() {
                   >
                     <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" />
                   </Button>
-                  <Tooltip.Content>Mark all read</Tooltip.Content>
+                  <Tooltip.Content>{t("markAllRead")}</Tooltip.Content>
                 </Tooltip>
               </Card.Header>
 
@@ -230,13 +222,13 @@ export function NotificationPopover() {
                 onSelectionChange={(key) => setView(key === "unread" ? "unread" : "all")}
               >
                 <Tabs.ListContainer className="px-4">
-                  <Tabs.List aria-label="Notification views">
+                  <Tabs.List aria-label={t("views")}>
                     <Tabs.Tab id="all">
-                      All
+                      {t("all")}
                       <Tabs.Indicator />
                     </Tabs.Tab>
                     <Tabs.Tab id="unread">
-                      Unread
+                      {t("unreadTab")}
                       {unreadCount > 0 ? (
                         <Chip color="accent" size="sm" variant="soft">
                           {unreadCount > 99 ? "99+" : unreadCount}
@@ -253,14 +245,14 @@ export function NotificationPopover() {
                   {isLoadingList ? <NotificationPopoverSkeleton /> : null}
                   {!isLoadingList && notifications.isError ? (
                     <div className="flex flex-col items-center gap-4 px-6 py-8 text-center">
-                      <p className="text-muted text-sm">Notifications could not be loaded.</p>
+                      <p className="text-muted text-sm">{t("loadFailed")}</p>
                       <Button size="sm" variant="ghost" onPress={() => notifications.refetch()}>
                         <Icon
                           icon="gravity-ui:arrow-rotate-left"
                           aria-hidden="true"
                           className="size-4"
                         />
-                        Try again
+                        {t("tryAgain")}
                       </Button>
                     </div>
                   ) : null}
@@ -288,8 +280,8 @@ export function NotificationPopover() {
               <Card.Footer className="items-center justify-between gap-3">
                 <span className="text-muted text-xs">
                   {currentPage?.total
-                    ? `${currentPage.total.toLocaleString("en-US")} total updates`
-                    : "Your activity inbox"}
+                    ? t("totalUpdates", { count: currentPage.total.toLocaleString(locale) })
+                    : t("activityInbox")}
                 </span>
                 <Button
                   size="sm"
@@ -300,7 +292,7 @@ export function NotificationPopover() {
                   }}
                 >
                   <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-4" />
-                  View all
+                  {t("viewAll")}
                 </Button>
               </Card.Footer>
             </Card>

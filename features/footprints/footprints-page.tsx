@@ -9,6 +9,7 @@ import { Button, Card, Chip, Link, Separator, Surface, Tabs, Typography } from "
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { FootprintsMap } from "./footprints-map";
@@ -22,6 +23,7 @@ import {
 const ALL_YEARS = "all";
 
 function FootprintDetail({ footprint }: { footprint: Footprint | null }) {
+  const t = useTranslations("Footprints");
   if (!footprint) {
     return (
       <EmptyState className="bg-surface-secondary min-h-56 rounded-2xl" size="lg">
@@ -29,23 +31,21 @@ function FootprintDetail({ footprint }: { footprint: Footprint | null }) {
           <EmptyState.Media variant="icon">
             <Icon icon="gravity-ui:location-pin" aria-hidden="true" />
           </EmptyState.Media>
-          <EmptyState.Title>No places in this year</EmptyState.Title>
-          <EmptyState.Description>
-            Pick another year tab to keep following the route.
-          </EmptyState.Description>
+          <EmptyState.Title>{t("noPlaces")}</EmptyState.Title>
+          <EmptyState.Description>{t("noPlacesHint")}</EmptyState.Description>
         </EmptyState.Header>
       </EmptyState>
     );
   }
 
   return (
-    <Card aria-label="Selected travel memory" className="overflow-hidden" variant="secondary">
+    <Card aria-label={t("selectedMemory")} className="overflow-hidden" variant="secondary">
       {footprint.image ? (
         <Card.Content className="p-0">
           <div className="relative aspect-[16/9] w-full">
             <Image
               fill
-              alt={`${footprint.place} travel memory`}
+              alt={t("memoryAlt", { place: footprint.place })}
               className="object-cover"
               sizes="(max-width: 1023px) 100vw, 32vw"
               src={footprint.image}
@@ -77,6 +77,7 @@ function FootprintDetail({ footprint }: { footprint: Footprint | null }) {
 }
 
 export function FootprintsPage() {
+  const t = useTranslations("Footprints");
   const shouldReduceMotion = useReducedMotionPreference();
   const { reveal } = createPageReveal(shouldReduceMotion);
   const years = getFootprintYears();
@@ -106,7 +107,7 @@ export function FootprintsPage() {
           <div className="max-w-2xl">
             <motion.div {...reveal(0, 10)}>
               <Chip color="accent" size="sm" variant="soft">
-                Footprints · China
+                {t("eyebrow")}
               </Chip>
             </motion.div>
             <motion.div {...reveal(0.06)}>
@@ -115,19 +116,18 @@ export function FootprintsPage() {
                 weight="bold"
                 className="mt-5 text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.96] tracking-[-0.06em] text-balance"
               >
-                Places I have actually been.
+                {t("title")}
               </Typography>
             </motion.div>
             <motion.div {...reveal(0.12, 14)}>
               <Typography color="muted" type="body" className="mt-5 max-w-xl leading-7">
-                From Hubei hometown through Shaanxi, Guangzhou, Shenzhen, Chongqing, Anhui, and
-                Henan. A living atlas with years attached.
+                {t("description")}
               </Typography>
             </motion.div>
           </div>
           <motion.div {...reveal(0.1, 12)}>
             <Link href="/gallery" className="shrink-0 text-sm no-underline">
-              See the photographs
+              {t("seePhotos")}
               <Link.Icon aria-hidden="true">
                 <Icon icon="gravity-ui:arrow-up-right" />
               </Link.Icon>
@@ -150,7 +150,7 @@ export function FootprintsPage() {
           <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <Chip size="sm" variant="secondary">
-                Route notes
+                {t("routeNotes")}
               </Chip>
               <Typography
                 id="footprints-timeline-title"
@@ -158,12 +158,11 @@ export function FootprintsPage() {
                 weight="semibold"
                 className="mt-3 text-3xl tracking-[-0.04em]"
               >
-                A few years in motion.
+                {t("yearsInMotion")}
               </Typography>
             </div>
             <Typography color="muted" type="body-sm" className="tabular-nums">
-              {visibleFootprints.length} {visibleFootprints.length === 1 ? "place" : "places"} in
-              view
+              {t("placesInView", { count: visibleFootprints.length })}
             </Typography>
           </header>
 
@@ -177,11 +176,11 @@ export function FootprintsPage() {
           >
             <Tabs.ListContainer className="border-default-200 border-b bg-transparent p-0">
               <Tabs.List
-                aria-label="Filter footprints by year"
+                aria-label={t("filterYear")}
                 className="justify-start gap-5 overflow-x-auto"
               >
                 <Tabs.Tab id={ALL_YEARS} className="px-1">
-                  All years
+                  {t("allYears")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 {years.map((year) => (
@@ -198,10 +197,8 @@ export function FootprintsPage() {
             {visibleFootprints.length === 0 ? (
               <EmptyState className="bg-surface-secondary rounded-2xl" size="md">
                 <EmptyState.Header>
-                  <EmptyState.Title>No stops for this year</EmptyState.Title>
-                  <EmptyState.Description>
-                    Switch back to All years to see the full route.
-                  </EmptyState.Description>
+                  <EmptyState.Title>{t("noStops")}</EmptyState.Title>
+                  <EmptyState.Description>{t("noStopsHint")}</EmptyState.Description>
                 </EmptyState.Header>
               </EmptyState>
             ) : (
@@ -218,7 +215,7 @@ export function FootprintsPage() {
                         <Button
                           variant="ghost"
                           aria-pressed={isActive}
-                          aria-label={`Read memory from ${footprint.place}`}
+                          aria-label={t("readMemory", { place: footprint.place })}
                           className="h-auto w-full flex-col items-start gap-2 p-3 text-left whitespace-normal"
                           onPress={() => selectFootprint(footprint)}
                         >

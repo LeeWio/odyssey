@@ -22,6 +22,7 @@ import type {
 import type { PostDigestResponse } from "@/lib/features/post";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
+import { useLocale, useTranslations } from "next-intl";
 
 import { formatDate } from "./library-format";
 
@@ -46,6 +47,7 @@ export function RecommendedCard({
   isHiding: boolean;
   onHide: (postId: number) => void;
 }) {
+  const t = useTranslations("Library");
   const { post } = entry;
 
   return (
@@ -63,7 +65,7 @@ export function RecommendedCard({
           <Tooltip>
             <Button
               isIconOnly
-              aria-label={`Hide recommendation for ${post.title}`}
+              aria-label={t("hideRecommendation", { title: post.title })}
               isPending={isHiding}
               size="sm"
               variant="ghost"
@@ -71,7 +73,7 @@ export function RecommendedCard({
             >
               <Icon aria-hidden="true" className="size-4" icon="lucide:x" />
             </Button>
-            <Tooltip.Content>Not interested</Tooltip.Content>
+            <Tooltip.Content>{t("notInterested")}</Tooltip.Content>
           </Tooltip>
         </div>
         <Link className="no-underline" href={`/single/${post.slug}`}>
@@ -89,7 +91,7 @@ export function RecommendedCard({
           className="text-accent shrink-0 text-sm font-medium no-underline"
           href={`/single/${post.slug}`}
         >
-          Read
+          {t("read")}
         </Link>
       </Card.Footer>
     </Card>
@@ -97,6 +99,7 @@ export function RecommendedCard({
 }
 
 export function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
+  const t = useTranslations("Library");
   const formatRelativeTime = useRelativeTime();
   const { lastReadAt, post, positionAnchor, progressPercent } = entry;
   const href = getReadingPositionHref(post.slug, positionAnchor);
@@ -125,7 +128,7 @@ export function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
         </Card.Header>
         <Card.Footer className="mt-auto flex-col items-stretch gap-3">
           <ProgressBar
-            aria-label={`${post.title} reading progress`}
+            aria-label={t("readingProgress", { title: post.title })}
             color="accent"
             size="sm"
             value={progressPercent}
@@ -136,10 +139,10 @@ export function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
           </ProgressBar>
           <div className="flex items-center justify-between gap-3">
             <Typography color="muted" type="body-xs" className="line-clamp-1">
-              Read {formatRelativeTime(lastReadAt)}
+              {t("readAt", { time: formatRelativeTime(lastReadAt) })}
             </Typography>
             <span className="text-accent inline-flex shrink-0 items-center gap-1.5 text-sm font-medium">
-              Continue
+              {t("continue")}
               <Icon icon="gravity-ui:play" aria-hidden="true" className="size-3.5" />
             </span>
           </div>
@@ -150,6 +153,8 @@ export function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
 }
 
 export function FavoriteCard({ entry }: { entry: FavoritePostResponse }) {
+  const t = useTranslations("Library");
+  const locale = useLocale();
   const { post } = entry;
 
   return (
@@ -178,9 +183,9 @@ export function FavoriteCard({ entry }: { entry: FavoritePostResponse }) {
         </Card.Header>
         <Card.Footer className="mt-auto justify-between gap-3">
           <Typography color="muted" type="body-xs">
-            Saved {formatDate(entry.favoritedAt)}
+            {t("savedAt", { date: formatDate(entry.favoritedAt, locale, t("recently")) })}
           </Typography>
-          <span className="text-accent text-sm font-medium">Read</span>
+          <span className="text-accent text-sm font-medium">{t("read")}</span>
         </Card.Footer>
       </Card>
     </Link>
@@ -188,6 +193,9 @@ export function FavoriteCard({ entry }: { entry: FavoritePostResponse }) {
 }
 
 export function FollowingCard({ post }: { post: PostDigestResponse }) {
+  const t = useTranslations("Library");
+  const locale = useLocale();
+
   return (
     <Link className="block h-full no-underline" href={`/single/${post.slug}`}>
       <Card variant="secondary" className="h-full overflow-hidden p-0">
@@ -205,7 +213,7 @@ export function FollowingCard({ post }: { post: PostDigestResponse }) {
         </Card.Header>
         <Card.Footer className="mt-auto justify-between gap-3">
           <Typography color="muted" type="body-xs">
-            {formatDate(post.publishedAt)}
+            {formatDate(post.publishedAt, locale, t("recently"))}
           </Typography>
           <Typography
             color="muted"
@@ -213,7 +221,7 @@ export function FollowingCard({ post }: { post: PostDigestResponse }) {
             className="flex shrink-0 items-center gap-1.5 tabular-nums"
           >
             <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
-            {post.views.toLocaleString("en-US")}
+            {post.views.toLocaleString(locale)}
           </Typography>
         </Card.Footer>
       </Card>
@@ -222,10 +230,12 @@ export function FollowingCard({ post }: { post: PostDigestResponse }) {
 }
 
 export function LibrarySkeleton({ count = 3 }: { count?: number }) {
+  const t = useTranslations("Library");
+
   return (
     <div
       aria-busy="true"
-      aria-label="Loading library"
+      aria-label={t("loading")}
       className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
       role="status"
     >
@@ -273,6 +283,9 @@ export function CollectionCard({
   onEdit: (collection: PostCollectionResponse) => void;
   onSelect: (collectionId: number) => void;
 }) {
+  const t = useTranslations("Library");
+  const locale = useLocale();
+
   return (
     <Card
       variant={isSelected ? "tertiary" : "secondary"}
@@ -281,32 +294,32 @@ export function CollectionCard({
       <Card.Header className="gap-2 p-0">
         <div className="flex items-start justify-between gap-3">
           <Chip size="sm" variant="soft">
-            {collection.itemCount} {collection.itemCount === 1 ? "article" : "articles"}
+            {t("articleCount", { count: collection.itemCount.toLocaleString(locale) })}
           </Chip>
           <div className="flex shrink-0 gap-1">
             <Tooltip>
               <Button
                 isIconOnly
-                aria-label={`Edit ${collection.name}`}
+                aria-label={t("editNamed", { name: collection.name })}
                 size="sm"
                 variant="ghost"
                 onPress={() => onEdit(collection)}
               >
                 <Icon icon="gravity-ui:pencil" aria-hidden="true" className="size-3.5" />
               </Button>
-              <Tooltip.Content>Edit collection</Tooltip.Content>
+              <Tooltip.Content>{t("editCollection")}</Tooltip.Content>
             </Tooltip>
             <Tooltip>
               <Button
                 isIconOnly
-                aria-label={`Delete ${collection.name}`}
+                aria-label={t("deleteNamed", { name: collection.name })}
                 size="sm"
                 variant="ghost"
                 onPress={() => onDelete(collection)}
               >
                 <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-3.5" />
               </Button>
-              <Tooltip.Content>Delete collection</Tooltip.Content>
+              <Tooltip.Content>{t("deleteCollection")}</Tooltip.Content>
             </Tooltip>
           </div>
         </div>
@@ -317,13 +330,13 @@ export function CollectionCard({
       </Card.Header>
       <Card.Footer className="mt-auto justify-end p-0">
         <Button
-          aria-label={`View collection: ${collection.name}`}
+          aria-label={t("viewNamed", { name: collection.name })}
           aria-pressed={isSelected}
           size="sm"
           variant={isSelected ? "secondary" : "ghost"}
           onPress={() => onSelect(collection.id)}
         >
-          {isSelected ? "Viewing" : "View collection"}
+          {isSelected ? t("viewing") : t("viewCollection")}
         </Button>
       </Card.Footer>
     </Card>

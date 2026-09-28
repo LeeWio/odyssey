@@ -1,11 +1,15 @@
 import { GalleryPage } from "@/features/gallery";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Analog Photography Gallery | Odyssey",
-  description:
-    "Browse modular landscapes, geometric intersections, and cold coastal weather patterns framed on medium-format analog film.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Blog");
+
+  return {
+    title: t("metaGalleryTitle"),
+    description: t("metaGalleryDescription"),
+  };
+}
 
 export default function GalleryRoute() {
   return <GalleryPage />;

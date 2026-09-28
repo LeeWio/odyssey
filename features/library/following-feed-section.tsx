@@ -4,11 +4,14 @@ import { Button, Link, Typography } from "@heroui/react";
 import { useState } from "react";
 
 import { useGetContentPreferencesQuery, useGetFollowingFeedQuery } from "@/lib/features/library";
+import { useLocale, useTranslations } from "next-intl";
 
 import { FOLLOWING_PAGE_SIZE } from "./library-constants";
 import { EmptyLibrarySection, FollowingCard, LibrarySkeleton } from "./library-cards";
 
 export function FollowingFeedSection() {
+  const t = useTranslations("Library");
+  const locale = useLocale();
   const [followingPage, setFollowingPage] = useState(0);
   const preferences = useGetContentPreferencesQuery();
   const followedCategories = preferences.data?.followedCategories ?? [];
@@ -23,10 +26,10 @@ export function FollowingFeedSection() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <Typography id="following-title" type="h2" weight="semibold">
-            From topics you follow
+            {t("followingTitle")}
           </Typography>
           <Typography color="muted" type="body-sm" className="mt-1">
-            New writing from the subjects you asked to see more often.
+            {t("followingDescription")}
           </Typography>
         </div>
         {followedCategories.length > 0 ? (
@@ -34,7 +37,7 @@ export function FollowingFeedSection() {
             className="text-accent text-sm font-medium no-underline"
             href="#reading-preferences-title"
           >
-            Tune topics
+            {t("tuneTopics")}
           </Link>
         ) : null}
       </div>
@@ -42,22 +45,13 @@ export function FollowingFeedSection() {
       {preferences.isLoading ? (
         <LibrarySkeleton />
       ) : preferences.isError ? (
-        <EmptyLibrarySection
-          title="Followed topics are unavailable"
-          description="Try loading this page again in a moment."
-        />
+        <EmptyLibrarySection title={t("topicsUnavailable")} description={t("tryAgainHint")} />
       ) : followedCategories.length === 0 ? (
-        <EmptyLibrarySection
-          title="Follow a topic to build your feed"
-          description="Choose topics below and their latest articles will appear here."
-        />
+        <EmptyLibrarySection title={t("followToBuild")} description={t("followToBuildHint")} />
       ) : following.isLoading ? (
         <LibrarySkeleton />
       ) : following.isError ? (
-        <EmptyLibrarySection
-          title="Your followed feed is unavailable"
-          description="Try loading this page again in a moment."
-        />
+        <EmptyLibrarySection title={t("feedUnavailable")} description={t("tryAgainHint")} />
       ) : followingPosts.length > 0 ? (
         <>
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -68,7 +62,7 @@ export function FollowingFeedSection() {
           {following.data && following.data.totalPages > 1 ? (
             <div className="mt-6 flex items-center justify-between gap-4">
               <Typography color="muted" type="body-xs">
-                {following.data.total.toLocaleString("en-US")} articles from followed topics
+                {t("followedCount", { count: following.data.total.toLocaleString(locale) })}
               </Typography>
               <div className="flex gap-2">
                 <Button
@@ -77,7 +71,7 @@ export function FollowingFeedSection() {
                   isDisabled={followingPage === 0}
                   onPress={() => setFollowingPage((page) => Math.max(0, page - 1))}
                 >
-                  Previous
+                  {t("previous")}
                 </Button>
                 <Button
                   size="sm"
@@ -85,17 +79,14 @@ export function FollowingFeedSection() {
                   isDisabled={followingPage >= following.data.totalPages - 1}
                   onPress={() => setFollowingPage((page) => page + 1)}
                 >
-                  Next
+                  {t("next")}
                 </Button>
               </div>
             </div>
           ) : null}
         </>
       ) : (
-        <EmptyLibrarySection
-          title="Nothing new from followed topics"
-          description="When new articles are published in your selected topics, they will show up here."
-        />
+        <EmptyLibrarySection title={t("nothingNew")} description={t("nothingNewHint")} />
       )}
     </section>
   );

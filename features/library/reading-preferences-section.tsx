@@ -11,10 +11,13 @@ import {
   useUnfollowCategoryMutation,
 } from "@/lib/features/library";
 import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
+import { useLocale, useTranslations } from "next-intl";
 
 import { EmptyLibrarySection } from "./library-cards";
 
 export function ReadingPreferencesSection() {
+  const t = useTranslations("Library");
+  const locale = useLocale();
   const [categoryPendingId, setCategoryPendingId] = useState<number | null>(null);
   const preferences = useGetContentPreferencesQuery();
   const { data: facets } = useRetrieveFacetsQuery();
@@ -61,10 +64,10 @@ export function ReadingPreferencesSection() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <Typography id="reading-preferences-title" type="h2" weight="semibold">
-            Reading preferences
+            {t("preferencesTitle")}
           </Typography>
           <Typography color="muted" type="body-sm" className="mt-1">
-            Tune the topics that help shape your recommendations.
+            {t("preferencesDescription")}
           </Typography>
         </div>
         {preferences.data && preferences.data.hiddenPostCount > 0 ? (
@@ -75,7 +78,9 @@ export function ReadingPreferencesSection() {
             onPress={handleClearHiddenRecommendations}
           >
             <Icon aria-hidden="true" className="size-4" icon="lucide:rotate-ccw" />
-            Restore {preferences.data.hiddenPostCount} hidden
+            {t("restoreHidden", {
+              count: preferences.data.hiddenPostCount.toLocaleString(locale),
+            })}
           </Button>
         ) : null}
       </div>
@@ -90,17 +95,12 @@ export function ReadingPreferencesSection() {
           </div>
         </Card>
       ) : preferences.isError ? (
-        <EmptyLibrarySection
-          title="Preferences are unavailable"
-          description="Try loading this page again in a moment."
-        />
+        <EmptyLibrarySection title={t("preferencesUnavailable")} description={t("tryAgainHint")} />
       ) : preferenceCategories.length > 0 ? (
         <Card variant="secondary" className="gap-5 p-6">
           <Card.Header className="gap-1 p-0">
-            <Card.Title className="text-base">Topics to follow</Card.Title>
-            <Card.Description>
-              Follow the subjects you want to see more often in your library.
-            </Card.Description>
+            <Card.Title className="text-base">{t("topicsToFollow")}</Card.Title>
+            <Card.Description>{t("topicsToFollowHint")}</Card.Description>
           </Card.Header>
           <ScrollShadow hideScrollBar className="max-h-56" orientation="vertical">
             <div className="grid gap-2 sm:grid-cols-2">
@@ -121,7 +121,7 @@ export function ReadingPreferencesSection() {
                       <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
                         <span className="truncate text-sm font-medium">{category.name}</span>
                         <span className="text-muted shrink-0 text-xs tabular-nums">
-                          {category.count}
+                          {category.count.toLocaleString(locale)}
                         </span>
                       </span>
                     </Checkbox.Content>
@@ -133,7 +133,7 @@ export function ReadingPreferencesSection() {
           {(preferences.data?.followedCategories.length ?? 0) > 0 ? (
             <div className="border-separator flex flex-wrap items-center gap-2 border-t pt-4">
               <Typography color="muted" type="body-xs">
-                Following
+                {t("following")}
               </Typography>
               {preferences.data?.followedCategories.map((category) => (
                 <Chip key={category.id} size="sm" variant="soft">
@@ -144,10 +144,7 @@ export function ReadingPreferencesSection() {
           ) : null}
         </Card>
       ) : (
-        <EmptyLibrarySection
-          title="No topics available yet"
-          description="Published topics will appear here when there is more writing to follow."
-        />
+        <EmptyLibrarySection title={t("noTopics")} description={t("noTopicsHint")} />
       )}
     </section>
   );
