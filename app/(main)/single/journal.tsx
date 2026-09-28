@@ -234,25 +234,22 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
   const name = column.name || t("untitledColumn");
   const [autoplay] = useState(() => Autoplay({ delay: 2000, stopOnInteraction: true }));
   const locale = useLocale();
-  const slides = column.posts.flatMap((post) => {
+  const slides = column.posts.map((post) => {
     const image = post.coverImage?.trim();
-    if (!image) return [];
-    return [
-      {
-        alt: post.title,
-        detail: post.summary?.trim() || undefined,
-        image,
-        meta: [
-          post.authorName,
-          post.publishedAt ? formatDate(post.publishedAt, locale, "") : null,
-          post.views ? t("views", { count: post.views.toLocaleString(locale) }) : null,
-        ]
-          .filter(Boolean)
-          .join(" · "),
-        slug: post.slug,
-        title: post.title,
-      },
-    ];
+    return {
+      alt: post.title,
+      detail: post.summary?.trim() || undefined,
+      image,
+      meta: [
+        post.authorName,
+        post.publishedAt ? formatDate(post.publishedAt, locale, "") : null,
+        post.views ? t("views", { count: post.views.toLocaleString(locale) }) : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      slug: post.slug,
+      title: post.title,
+    };
   });
   if (slides.length === 0) return null;
 
@@ -291,14 +288,18 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
                 <div className="p-1">
                   <Card className="overflow-hidden select-none">
                     <Link className="block no-underline" href={`/single/${slide.slug}`}>
-                      {/* Remote cover hosts are not in next/image remotePatterns. */}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        alt={slide.alt}
-                        className="aspect-square w-full object-cover"
-                        draggable={false}
-                        src={slide.image}
-                      />
+                      {slide.image ? (
+                        <>
+                          {/* Remote cover hosts are not in next/image remotePatterns. */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            alt={slide.alt}
+                            className="aspect-square w-full object-cover"
+                            draggable={false}
+                            src={slide.image}
+                          />
+                        </>
+                      ) : null}
                       <Card.Footer className="flex flex-col items-start gap-1">
                         {slide.meta ? (
                           <span className="text-muted text-xs">{slide.meta}</span>
@@ -325,136 +326,10 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
   );
 }
 
-const PREVIEW_COLUMNS: ColumnResponse[] = [
-  {
-    id: -1,
-    name: "Product surfaces",
-    slug: "preview-product-surfaces",
-    description: "How editorial picks, ranking, and recommendations show up on the page.",
-    coverImage: "",
-    isPublished: true,
-    postsCount: 3,
-    posts: [
-      {
-        id: -11,
-        title: "Designing a Recommendation Surface",
-        slug: "designing-recommendation-surface",
-        coverImage:
-          "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1400&q=80",
-        summary: "A practical model for editorial picks and personalized suggestions.",
-        authorName: "wei.li",
-        views: 1873,
-        likesCount: 24,
-        publishedAt: "2026-08-24",
-      },
-      {
-        id: -12,
-        title: "A Field Guide to Read Next Ranking",
-        slug: "field-guide-read-next-ranking",
-        coverImage:
-          "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1400&q=80",
-        summary: "Notes from the column.",
-        authorName: "wei.li",
-        views: 980,
-        likesCount: 0,
-        publishedAt: "2026-08-11",
-      },
-      {
-        id: -13,
-        title: "Caching Strategy for Blog Discovery",
-        slug: "caching-strategy-blog-discovery-apis",
-        coverImage:
-          "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1400&q=80",
-        summary: "Notes from the column.",
-        authorName: "wei.li",
-        views: 760,
-        likesCount: 0,
-        publishedAt: "2026-08-05",
-      },
-    ],
-    createdAt: "",
-  },
-  {
-    id: -2,
-    name: "Systems notes",
-    slug: "preview-systems-notes",
-    description: "API boundaries, indexes, and the pieces behind a content platform.",
-    coverImage: "",
-    isPublished: true,
-    postsCount: 2,
-    posts: [
-      {
-        id: -21,
-        title: "Spring Boot API Boundaries",
-        slug: "spring-boot-api-boundaries-content-products",
-        coverImage:
-          "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80",
-        summary: "Notes from the column.",
-        authorName: "wei.li",
-        views: 640,
-        likesCount: 0,
-        publishedAt: "2026-08-23",
-      },
-      {
-        id: -22,
-        title: "Database Indexes for Public Feeds",
-        slug: "ai-assisted-editorial-review-human-control",
-        coverImage:
-          "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1400&q=80",
-        summary: "Notes from the column.",
-        authorName: "wei.li",
-        views: 510,
-        likesCount: 0,
-        publishedAt: "2026-07-18",
-      },
-    ],
-    createdAt: "",
-  },
-  {
-    id: -3,
-    name: "Design systems",
-    slug: "preview-design-systems",
-    description: "Tokens and density that survive a real product screen.",
-    coverImage: "",
-    isPublished: true,
-    postsCount: 2,
-    posts: [
-      {
-        id: -31,
-        title: "Design Tokens That Survive Screens",
-        slug: "design-tokens-real-product-screens",
-        coverImage:
-          "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1400&q=80",
-        summary: "Notes from the column.",
-        authorName: "wei.li",
-        views: 420,
-        likesCount: 0,
-        publishedAt: "2026-08-17",
-      },
-      {
-        id: -32,
-        title: "Article Card Density",
-        slug: "designing-recommendation-surface",
-        coverImage:
-          "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1400&q=80",
-        summary: "Notes from the column.",
-        authorName: "wei.li",
-        views: 390,
-        likesCount: 0,
-        publishedAt: "2026-07-02",
-      },
-    ],
-    createdAt: "",
-  },
-];
-
 function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const live = columns.filter((column) =>
-    column.posts.some((post) => Boolean(post.coverImage?.trim()))
-  );
-  const decks = live.length > 0 ? live : PREVIEW_COLUMNS;
+  const decks = columns.filter((column) => column.posts.length > 0);
   const [selected, setSelected] = useState(decks[0]?.slug ?? "");
   const active = decks.find((column) => column.slug === selected) ?? decks[0];
   const rest = decks.filter((column) => column.slug !== active?.slug);
