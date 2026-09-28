@@ -1,3 +1,10 @@
+# [1.180.0](https://github.com/LeeWio/odyssey/compare/v1.179.0...v1.180.0) (2026-09-28)
+
+
+### Features
+
+* **journal:** open a page for each month ([eb84fe9](https://github.com/LeeWio/odyssey/commit/eb84fe90dc481a3ec6373aef20287051dd798325))
+
 # [1.179.0](https://github.com/LeeWio/odyssey/compare/v1.178.0...v1.179.0) (2026-09-28)
 
 
