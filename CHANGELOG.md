@@ -1,3 +1,10 @@
+# [1.173.0](https://github.com/LeeWio/odyssey/compare/v1.172.0...v1.173.0) (2026-09-28)
+
+
+### Features
+
+* **journal:** reshape the reading index around columns ([0c23bf1](https://github.com/LeeWio/odyssey/commit/0c23bf1a13b40a68ff6fa0479f57478b294bfae4))
+
 # [1.172.0](https://github.com/LeeWio/odyssey/compare/v1.171.0...v1.172.0) (2026-09-28)
 
 
