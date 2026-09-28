@@ -88,9 +88,14 @@ export default function MomentsPage() {
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.16, 14)}>
-          <Link className="mt-4 text-sm no-underline" href="/moments/saved">
-            {t("saved")}
-          </Link>
+          <div className="mt-4 flex items-center justify-center gap-4">
+            <Link className="text-sm no-underline" href="/moments/topics">
+              {t("topicsTitle")}
+            </Link>
+            <Link className="text-sm no-underline" href="/moments/saved">
+              {t("saved")}
+            </Link>
+          </div>
         </motion.div>
       </header>
 

@@ -194,6 +194,7 @@
     "next": "Next",
     "pageOf": "{page} / {pages}",
     "likes": "{count} likes",
+    "comments": "{count} comments",
     "fromTheArchive": "From the archive",
     "categoryEssays": "{count} essays",
     "browseCategory": "Browse {name}",

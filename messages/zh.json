@@ -194,6 +194,7 @@
     "next": "下一页",
     "pageOf": "{page} / {pages}",
     "likes": "{count} 次喜欢",
+    "comments": "{count} 条评论",
     "fromTheArchive": "按分类阅读",
     "categoryEssays": "{count} 篇",
     "browseCategory": "浏览{name}",

@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Tag, TagGroup } from "@heroui/react";
+import { Link, Tag, TagGroup } from "@heroui/react";
 import { RemoteMedia } from "@/components/ui/remote-media";
 import Stack from "../gallery/stack";
 import type { MomentTopicResponse } from "@/lib/features/moment";
@@ -32,6 +32,19 @@ interface CardContentProps {
   topics: MomentTopicResponse[];
   onCardClick?: (index: number) => void;
   stockSymbol?: string;
+}
+
+function TopicTag({ id, slug }: { id: number; slug: string }) {
+  return (
+    <Tag id={id} textValue={slug}>
+      <Link
+        className="text-foreground no-underline"
+        href={`/moments/topics/${encodeURIComponent(slug)}`}
+      >
+        #{slug}
+      </Link>
+    </Tag>
+  );
 }
 
 const getDynamicCardSize = (count: number) => {
@@ -99,9 +112,7 @@ export const CardContent = ({
             <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
               <TagGroup.List className="flex flex-wrap justify-center gap-1.5">
                 {topics.map((topic) => (
-                  <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
-                    #{topic.slug}
-                  </Tag>
+                  <TopicTag key={topic.id} slug={topic.slug} id={topic.id} />
                 ))}
               </TagGroup.List>
             </TagGroup>
@@ -125,9 +136,7 @@ export const CardContent = ({
             <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
               <TagGroup.List className="flex flex-wrap gap-1.5">
                 {topics.map((topic) => (
-                  <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
-                    #{topic.slug}
-                  </Tag>
+                  <TopicTag key={topic.id} slug={topic.slug} id={topic.id} />
                 ))}
               </TagGroup.List>
             </TagGroup>
@@ -157,9 +166,7 @@ export const CardContent = ({
         <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
           <TagGroup.List className="flex flex-wrap gap-1.5">
             {topics.map((topic) => (
-              <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
-                #{topic.slug}
-              </Tag>
+              <TopicTag key={topic.id} id={topic.id} slug={topic.slug} />
             ))}
           </TagGroup.List>
         </TagGroup>
