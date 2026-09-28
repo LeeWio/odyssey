@@ -26,10 +26,26 @@ const sizeLabels = {
   xs: "viewerSizeXs",
 } as const;
 
+function ViewerImage({ alt, src }: { alt: string; src: string }) {
+  return (
+    <div className="relative h-[min(85dvh,52rem)] w-full overflow-hidden rounded-2xl">
+      <Image
+        alt={alt}
+        className="pointer-events-none object-contain select-none"
+        draggable={false}
+        fill
+        sizes="100vw"
+        src={src}
+        unoptimized
+      />
+    </div>
+  );
+}
+
 export const CarouselModal = ({ images, activeIndex, onClose }: CarouselModalProps) => {
   const t = useTranslations("Moments");
   const [carouselApi, setCarouselApi] = useState<EmblaCarouselType>();
-  const [size, setSize] = useState<ViewerSize>("lg");
+  const [size, setSize] = useState<ViewerSize>("cover");
 
   useEffect(() => {
     if (activeIndex !== null && carouselApi) {
@@ -57,51 +73,42 @@ export const CarouselModal = ({ images, activeIndex, onClose }: CarouselModalPro
             aria-label="Image viewer"
             className="transition-[max-width,height,border-radius,padding] duration-300 ease-out motion-reduce:transition-none"
           >
-            <div className="absolute top-4 right-4 z-50">
-              <Dropdown>
-                <Button aria-label={t("viewerSize")} size="sm" variant="secondary">
-                  {t(sizeLabels[size])}
-                </Button>
-                <Dropdown.Popover>
-                  <Dropdown.Menu
-                    selectedKeys={new Set([size])}
-                    selectionMode="single"
-                    onSelectionChange={selectSize}
-                  >
-                    <Dropdown.Section>
-                      <Header>{t("viewerSize")}</Header>
-                      {sizes.map((item) => (
-                        <Dropdown.Item key={item} id={item} textValue={t(sizeLabels[item])}>
-                          <Dropdown.ItemIndicator />
-                          <Label>{t(sizeLabels[item])}</Label>
-                        </Dropdown.Item>
-                      ))}
-                    </Dropdown.Section>
-                  </Dropdown.Menu>
-                </Dropdown.Popover>
-              </Dropdown>
-            </div>
             <Modal.Body>
               <Carousel opts={{ loop: true }} setApi={setCarouselApi}>
                 <Carousel.Content>
                   {images.map((image, i) => (
                     <Carousel.Item key={i}>
-                      <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
-                        <Image
-                          alt={image.alt}
-                          className="object-cover select-none"
-                          draggable={false}
-                          src={image.src}
-                          fill
-                          unoptimized
-                        />
-                      </div>
+                      <ViewerImage alt={image.alt} src={image.src} />
                     </Carousel.Item>
                   ))}
                 </Carousel.Content>
                 <Carousel.Previous />
                 <Carousel.Next />
                 <Carousel.Dots />
+                <div className="absolute top-4 right-4 z-50">
+                  <Dropdown>
+                    <Button aria-label={t("viewerSize")} size="sm" variant="secondary">
+                      {t(sizeLabels[size])}
+                    </Button>
+                    <Dropdown.Popover>
+                      <Dropdown.Menu
+                        selectedKeys={new Set([size])}
+                        selectionMode="single"
+                        onSelectionChange={selectSize}
+                      >
+                        <Dropdown.Section>
+                          <Header>{t("viewerSize")}</Header>
+                          {sizes.map((item) => (
+                            <Dropdown.Item key={item} id={item} textValue={t(sizeLabels[item])}>
+                              <Dropdown.ItemIndicator />
+                              <Label>{t(sizeLabels[item])}</Label>
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Section>
+                      </Dropdown.Menu>
+                    </Dropdown.Popover>
+                  </Dropdown>
+                </div>
                 <Carousel.Thumbnails>
                   {images.map((image, i) => (
                     <Carousel.Thumbnail key={i} alt={image.alt} index={i} src={image.src} />
