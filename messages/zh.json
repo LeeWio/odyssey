@@ -252,7 +252,9 @@
     "featured": "精选",
     "mostRead": "最多阅读",
     "related": "相关",
-    "aroundTheArchive": "归档四周"
+    "aroundTheArchive": "归档四周",
+    "inThisColumn": "本专栏",
+    "youAreHere": "正在读这篇"
   },
   "Library": {
     "signInTitle": "你的阅读书架",

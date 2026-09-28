@@ -3,6 +3,7 @@
 import { Link, ProgressBar, Skeleton, Typography } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { useGetPublicColumnBySlugQuery } from "@/lib/features/column";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { useRetrieveDiscoveryQuery } from "@/lib/features/openapi";
@@ -131,6 +132,8 @@ export function ArticleContext({
   const related = useGetRelatedPostsQuery(slug || "", { skip: !slug });
   const library = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
   const series = article.series;
+  const column = useGetPublicColumnBySlugQuery(series?.slug ?? "", { skip: !series?.slug });
+  const columnPosts = column.data?.posts ?? [];
   const category = article.category;
   const tags = article.tags ?? [];
   const reading = (library.data?.continueReading ?? [])
@@ -245,6 +248,34 @@ export function ArticleContext({
         aria-label={t("aroundTheArchive")}
         className="order-3 col-span-full grid gap-10 border-t pt-10 md:grid-cols-2 xl:order-none xl:grid-cols-4"
       >
+        {series && columnPosts.length > 0 ? (
+          <section aria-labelledby="column-stories-title" className="flex min-w-0 flex-col gap-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <Typography id="column-stories-title" type="body-sm" weight="semibold">
+                {t("inThisColumn")}
+              </Typography>
+              <Link className="text-xs no-underline" href={`/columns/${series.slug}`}>
+                {series.name}
+              </Link>
+            </div>
+            <ol>
+              {columnPosts.map((post, index) => {
+                const current = post.slug === slug;
+                return (
+                  <StoryLine
+                    key={post.id}
+                    meta={
+                      current
+                        ? t("youAreHere")
+                        : t("installment", { count: columnPosts.length, order: index + 1 })
+                    }
+                    post={post}
+                  />
+                );
+              })}
+            </ol>
+          </section>
+        ) : null}
         <StoryBand
           id="related-stories-title"
           loading={related.isLoading}

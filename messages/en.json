@@ -252,7 +252,9 @@
     "featured": "Featured",
     "mostRead": "Most read",
     "related": "Related",
-    "aroundTheArchive": "Around the archive"
+    "aroundTheArchive": "Around the archive",
+    "inThisColumn": "In this column",
+    "youAreHere": "You are here"
   },
   "Library": {
     "signInTitle": "Your reading library",
