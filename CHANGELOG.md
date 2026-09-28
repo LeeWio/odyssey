@@ -1,3 +1,10 @@
+# [1.170.0](https://github.com/LeeWio/odyssey/compare/v1.169.0...v1.170.0) (2026-09-28)
+
+
+### Features
+
+* **i18n:** localize shared interface chrome ([0593acd](https://github.com/LeeWio/odyssey/commit/0593acd855a14b9122aa5c8c15c885ceadabb602))
+
 # [1.169.0](https://github.com/LeeWio/odyssey/compare/v1.168.1...v1.169.0) (2026-09-24)
 
 
