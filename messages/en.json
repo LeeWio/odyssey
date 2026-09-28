@@ -213,11 +213,15 @@
     "allCategories": "All categories",
     "categoryMissing": "This category has no published essays.",
     "tagTitle": "Tag",
+    "tagsTitle": "Tags",
+    "tagsDescription": "Labels that cut across the journal.",
     "allTags": "All tags",
     "tagMissing": "This tag has no published essays.",
     "years": "Years",
     "yearEssays": "{count} essays in {year}",
-    "yearMissing": "This year has no published essays."
+    "yearMissing": "This year has no published essays.",
+    "monthEssays": "{count} essays",
+    "monthMissing": "This month has no published essays."
   },
   "Article": {
     "journal": "Journal",
@@ -722,6 +726,8 @@
     "topicNotes": "{count} notes",
     "allTopics": "All topics",
     "topicMissing": "This topic has no published moments.",
+    "monthNotes": "{count} notes",
+    "monthMissing": "This month has no published moments.",
     "like": "Like moment",
     "unlike": "Unlike moment",
     "openComments": "Open {count} comments",

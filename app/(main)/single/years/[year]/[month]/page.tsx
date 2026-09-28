@@ -5,7 +5,7 @@ import { Button, Card, Link, Pagination, Skeleton, Typography } from "@heroui/re
 import { useLocale, useTranslations } from "next-intl";
 import { use, useState } from "react";
 
-import { useRetrieveArchiveQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
+import { useRetrieveArchiveQuery } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 
 type Digest = OpenApiComponents["schemas"]["PostDigestResponse"];
@@ -37,8 +37,18 @@ function formatDate(value: string | null | undefined, locale: string, fallback: 
   }).format(date);
 }
 
+function monthName(year: string, month: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(
+    new Date(Date.UTC(Number(year), Number(month) - 1, 1))
+  );
+}
+
 function isYear(value: string) {
   return /^\d{4}$/.test(value);
+}
+
+function isMonth(value: string) {
+  return /^(?:[1-9]|1[0-2])$/.test(value);
 }
 
 function EssayCard({ post }: { post: Digest }) {
@@ -144,76 +154,46 @@ function EssayPagination({
   );
 }
 
-export default function YearPage({ params }: { params: Promise<{ year: string }> }) {
-  const { year: yearParam } = use(params);
+export default function MonthPage({
+  params,
+}: {
+  params: Promise<{ month: string; year: string }>;
+}) {
+  const { month: monthParam, year: yearParam } = use(params);
   const year = decodeURIComponent(yearParam);
-  const valid = isYear(year);
+  const month = decodeURIComponent(monthParam);
+  const valid = isYear(year) && isMonth(month);
   const t = useTranslations("Journal");
   const locale = useLocale();
   const [page, setPage] = useState(1);
-  const facets = useRetrieveFacetsQuery();
-  const months = (facets.data?.archives ?? [])
-    .filter(
-      (facet) =>
-        facet.year === Number(year) && typeof facet.month === "number" && (facet.count ?? 0) > 0
-    )
-    .sort((left, right) => (right.month ?? 0) - (left.month ?? 0));
   const archive = useRetrieveArchiveQuery(
     {
+      month: Number(month),
       pageable: { page: page - 1, size: PAGE_SIZE, sort: ["publishedAt,desc"] },
       year: Number(year),
     },
     { skip: !valid }
   );
   const posts = archive.data?.list ?? [];
-  const total = archive.data?.total ?? 0;
   const totalPages = archive.data?.totalPages ?? 0;
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-24 sm:px-10 sm:py-32">
       <header className="flex max-w-2xl flex-col gap-2">
-        <Link className="text-sm no-underline" href="/single">
-          {t("title")}
+        <Link className="text-sm no-underline" href={`/single/years/${year}`}>
+          {year}
         </Link>
         <Typography type="h1" weight="semibold">
-          {year}
+          {valid ? monthName(year, month, locale) : `${year}-${month}`}
         </Typography>
         {archive.data ? (
           <span className="text-muted text-sm tabular-nums">
-            <NumberValue locale={locale} value={total}>
-              {(formatted) => t("yearEssays", { count: formatted, year })}
+            <NumberValue locale={locale} value={archive.data.total ?? 0}>
+              {(formatted) => t("monthEssays", { count: formatted })}
             </NumberValue>
           </span>
         ) : null}
       </header>
-
-      {months.length > 0 ? (
-        <ul className="flex flex-wrap gap-3">
-          {months.map((facet) => (
-            <li key={facet.month}>
-              <Card>
-                <Card.Header>
-                  <Card.Title>
-                    <Link
-                      className="text-foreground no-underline"
-                      href={`/single/years/${year}/${facet.month}`}
-                    >
-                      {new Intl.DateTimeFormat(locale, { month: "long" }).format(
-                        new Date(Date.UTC(Number(year), (facet.month ?? 1) - 1, 1))
-                      )}
-                    </Link>
-                  </Card.Title>
-                  <Card.Description>
-                    <NumberValue locale={locale} value={facet.count ?? 0}>
-                      {(formatted) => t("monthEssays", { count: formatted })}
-                    </NumberValue>
-                  </Card.Description>
-                </Card.Header>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      ) : null}
 
       {valid && archive.isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -236,10 +216,10 @@ export default function YearPage({ params }: { params: Promise<{ year: string }>
       ) : !valid || posts.length === 0 ? (
         <EmptyState>
           <EmptyState.Header>
-            <EmptyState.Title>{t("yearMissing")}</EmptyState.Title>
+            <EmptyState.Title>{t("monthMissing")}</EmptyState.Title>
           </EmptyState.Header>
           <EmptyState.Content>
-            <Link href="/single">{t("title")}</Link>
+            <Link href={`/single/years/${year}`}>{year}</Link>
           </EmptyState.Content>
         </EmptyState>
       ) : (

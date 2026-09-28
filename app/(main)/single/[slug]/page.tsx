@@ -100,6 +100,31 @@ function getReadingPositionAnchor(postId: number) {
   return anchor ? `#${anchor}` : `article-${postId}`;
 }
 
+function ArticleDate({ value }: { value: string | null | undefined }) {
+  const t = useTranslations("Article");
+  const locale = useLocale();
+  const label = formatArticleDate(value, locale, t("recentlyPublished"));
+  const date = value ? new Date(value) : null;
+  const valid = date && !Number.isNaN(date.getTime());
+
+  if (!valid) {
+    return (
+      <Typography color="muted" type="body-sm">
+        {label}
+      </Typography>
+    );
+  }
+
+  return (
+    <Link
+      className="text-muted text-sm no-underline"
+      href={`/single/years/${date.getFullYear()}/${date.getMonth() + 1}`}
+    >
+      {label}
+    </Link>
+  );
+}
+
 function formatArticleDate(value: string | null | undefined, locale: string, fallback: string) {
   if (!value) return fallback;
   const date = new Date(value);
@@ -514,9 +539,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                       </Typography>
                     )}
                   </div>
-                  <Typography color="muted" type="body-sm">
-                    {formatArticleDate(article.createdAt, locale, t("recentlyPublished"))}
-                  </Typography>
+                  <ArticleDate value={article.createdAt} />
                   {article.updatedAt && article.updatedAt !== article.createdAt ? (
                     <Typography color="muted" type="body-sm">
                       {t("updated", {

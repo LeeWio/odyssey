@@ -6,10 +6,11 @@ import { useMemo, useState } from "react";
 import { Button, Chip, Link, Tabs, Typography } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { motion, useReducedMotion } from "motion/react";
-import { useNow, useTranslations } from "next-intl";
+import { useLocale, useNow, useTranslations } from "next-intl";
 
 import { MomentCard, MomentCardSkeleton } from "@/features/moment/components/card";
 import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
+import { usePublishedMoments } from "@/lib/features/moment";
 
 const timeframes = [
   { id: "all", labelKey: "allNotes" },
@@ -26,6 +27,48 @@ function getMomentTimestamp(value: string) {
     value.includes("T") && !value.endsWith("Z") && !value.includes("+") ? `${value}Z` : value;
 
   return new Date(date).getTime();
+}
+
+function momentMonth(value: string) {
+  const date = new Date(
+    value.includes("T") && !value.endsWith("Z") && !value.includes("+") ? `${value}Z` : value
+  );
+  if (Number.isNaN(date.getTime())) return null;
+  return { month: date.getUTCMonth() + 1, year: date.getUTCFullYear() };
+}
+
+function MomentMonths() {
+  const locale = useLocale();
+  const catalog = usePublishedMoments();
+  const months = [
+    ...catalog.moments.reduce((totals, moment) => {
+      const parts = momentMonth(moment.createdAt);
+      if (!parts) return totals;
+      const key = `${parts.year}-${parts.month}`;
+      totals.set(key, (totals.get(key) ?? 0) + 1);
+      return totals;
+    }, new Map<string, number>()),
+  ].sort(([left], [right]) => right.localeCompare(left, undefined, { numeric: true }));
+
+  if (months.length === 0) return null;
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+      {months.map(([key]) => {
+        const [year, month] = key.split("-");
+        const label = new Intl.DateTimeFormat(locale, {
+          month: "long",
+          timeZone: "UTC",
+          year: "numeric",
+        }).format(new Date(Date.UTC(Number(year), Number(month) - 1, 1)));
+        return (
+          <Link key={key} className="text-sm no-underline" href={`/moments/${year}/${month}`}>
+            {label}
+          </Link>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function MomentsPage() {
@@ -99,6 +142,7 @@ export default function MomentsPage() {
               {t("saved")}
             </Link>
           </div>
+          <MomentMonths />
         </motion.div>
       </header>
 

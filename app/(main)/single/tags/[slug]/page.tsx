@@ -153,8 +153,8 @@ export default function TagPage({ params }: { params: Promise<{ slug: string }> 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-24 sm:px-10 sm:py-32">
       <header className="flex max-w-2xl flex-col gap-2">
-        <Link className="text-sm no-underline" href="/single">
-          {t("title")}
+        <Link className="text-sm no-underline" href="/single/tags">
+          {t("allTags")}
         </Link>
         <Typography type="h1" weight="semibold">
           {tag?.name ?? decodeURIComponent(slug)}

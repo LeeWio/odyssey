@@ -213,11 +213,15 @@
     "allCategories": "全部分类",
     "categoryMissing": "这个分类还没有已发布的文章。",
     "tagTitle": "标签",
+    "tagsTitle": "标签",
+    "tagsDescription": "跨分类出现过的标签。",
     "allTags": "全部标签",
     "tagMissing": "这个标签还没有已发布的文章。",
     "years": "年份",
     "yearEssays": "{year} 年 {count} 篇",
-    "yearMissing": "这一年还没有已发布的文章。"
+    "yearMissing": "这一年还没有已发布的文章。",
+    "monthEssays": "{count} 篇",
+    "monthMissing": "这个月还没有已发布的文章。"
   },
   "Article": {
     "journal": "日志",
@@ -722,6 +726,8 @@
     "topicNotes": "{count} 条",
     "allTopics": "全部话题",
     "topicMissing": "这个话题还没有已发布的动态。",
+    "monthNotes": "{count} 条",
+    "monthMissing": "这个月还没有已发布的动态。",
     "like": "喜欢这条动态",
     "unlike": "取消喜欢",
     "openComments": "打开 {count} 条评论",

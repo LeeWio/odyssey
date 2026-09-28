@@ -921,8 +921,11 @@ function TagList({ tags }: { tags: Array<TagFacet & { id: number; name: string }
 
   return (
     <Card variant="secondary">
-      <Card.Header>
+      <Card.Header className="flex-row items-center justify-between">
         <Card.Title className="text-sm">{t("tags")}</Card.Title>
+        <Link className="text-xs no-underline" href="/single/tags">
+          {t("allTags")}
+        </Link>
       </Card.Header>
       <Card.Content>
         <TagGroup
