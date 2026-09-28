@@ -1,3 +1,10 @@
+# [1.179.0](https://github.com/LeeWio/odyssey/compare/v1.178.0...v1.179.0) (2026-09-28)
+
+
+### Features
+
+* **journal:** open pages for categories, tags, and years ([5b2354e](https://github.com/LeeWio/odyssey/commit/5b2354ef7f723b5c972030893db32c29348f13dc))
+
 # [1.178.0](https://github.com/LeeWio/odyssey/compare/v1.177.0...v1.178.0) (2026-09-28)
 
 
