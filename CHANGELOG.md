@@ -1,3 +1,11 @@
+# [1.177.0](https://github.com/LeeWio/odyssey/compare/v1.176.0...v1.177.0) (2026-09-28)
+
+
+### Features
+
+* **journal:** show comment counts on latest stories ([850aad6](https://github.com/LeeWio/odyssey/commit/850aad6af4a31e4b32adc8eacfa3543b5a76abf4))
+* **moments:** open a page for each topic ([d8a484f](https://github.com/LeeWio/odyssey/commit/d8a484f5d910368782dd52b728916eedd922edac))
+
 # [1.176.0](https://github.com/LeeWio/odyssey/compare/v1.175.1...v1.176.0) (2026-09-28)
 
 
