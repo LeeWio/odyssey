@@ -125,6 +125,23 @@ export const postApi = baseApi.injectEndpoints({
     /**
      * Public: Get published posts with filtering
      */
+    getPublicPostDigests: builder.query<PageResult<PostDigestResponse>, PostSearchQuery>({
+      query: ({ page = 0, size = 10, categoryId, tagId, keyword }) => ({
+        url: "/api/v1/public/blog/posts/digest",
+        params: { page, size, categoryId, tagId, keyword },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(PostDigestResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<PostDigestResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.list.map(({ id }) => ({ type: "Post" as const, id })),
+              { type: "Post", id: "DIGEST" },
+            ]
+          : [{ type: "Post", id: "DIGEST" }],
+    }),
+
     getPublicPosts: builder.query<PageResult<PostResponse>, PostSearchQuery>({
       query: ({ page = 0, size = 10, categoryId, tagId, keyword }) => ({
         url: "/api/v1/public/blog/posts",
@@ -430,6 +447,7 @@ export const {
   useCreatePostMutation,
   useUpdatePostMutation,
   useDeletePostMutation,
+  useGetPublicPostDigestsQuery,
   useGetPublicPostsQuery,
   useGetPublicPostBySlugQuery,
   useGetFeaturedPostsQuery,

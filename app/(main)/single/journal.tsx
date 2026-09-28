@@ -39,7 +39,7 @@ import {
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { useRetrieveDiscoveryQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
-import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
+import { useGetFeaturedPostsQuery, useGetPublicPostDigestsQuery } from "@/lib/features/post";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
@@ -294,6 +294,10 @@ function StoryRow({ post }: { post: Story }) {
           {" · "}
           <NumberValue locale={locale} notation="compact" value={post.likesCount ?? 0}>
             {(formatted) => t("likes", { count: formatted })}
+          </NumberValue>
+          {" · "}
+          <NumberValue locale={locale} notation="compact" value={post.commentsCount ?? 0}>
+            {(formatted) => t("comments", { count: formatted })}
           </NumberValue>
         </span>
       </Card.Footer>
@@ -604,7 +608,7 @@ export function JournalPage() {
   const facetsQuery = useRetrieveFacetsQuery();
   const featuredQuery = useGetFeaturedPostsQuery({ page: 0, size: 8 });
   const [latestPage, setLatestPage] = useState(0);
-  const latestQuery = useGetPublicPostsQuery({ page: latestPage, size: 6 });
+  const latestQuery = useGetPublicPostDigestsQuery({ page: latestPage, size: 6 });
   const columnsQuery = useGetPublicColumnsQuery();
   const libraryQuery = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
 
