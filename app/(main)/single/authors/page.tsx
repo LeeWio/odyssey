@@ -1,10 +1,10 @@
 "use client";
 
 import { EmptyState, NumberValue } from "@heroui-pro/react";
-import { Avatar, Card, Link, Skeleton, Typography } from "@heroui/react";
+import { Avatar, Button, Card, Link, Skeleton, Typography } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { type PostResponse, useGetPublicPostsQuery } from "@/lib/features/post";
+import { type PostResponse, usePublishedCatalog } from "@/lib/features/post";
 
 function initials(name: string) {
   return name
@@ -56,8 +56,8 @@ function collectAuthors(posts: PostResponse[]) {
 export default function AuthorsPage() {
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const posts = useGetPublicPostsQuery({ page: 0, size: 40 });
-  const list = collectAuthors(posts.data?.list ?? []);
+  const catalog = usePublishedCatalog();
+  const list = collectAuthors(catalog.posts);
 
   return (
     <div className="bg-background min-h-[100dvh] w-full px-8 pt-28 pb-24 md:px-12 xl:px-16">
@@ -72,12 +72,24 @@ export default function AuthorsPage() {
           <Typography color="muted">{t("authorsDescription")}</Typography>
         </header>
 
-        {posts.isLoading ? (
+        {catalog.isLoading ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 3 }, (_, index) => (
               <Skeleton key={index} className="h-64 w-full rounded-2xl" />
             ))}
           </div>
+        ) : catalog.isError ? (
+          <EmptyState>
+            <EmptyState.Header>
+              <EmptyState.Title>{t("latestFailed")}</EmptyState.Title>
+              <EmptyState.Description>{t("latestFailedHint")}</EmptyState.Description>
+            </EmptyState.Header>
+            <EmptyState.Content>
+              <Button size="sm" variant="secondary" onPress={catalog.retry}>
+                {t("tryAgain")}
+              </Button>
+            </EmptyState.Content>
+          </EmptyState>
         ) : list.length === 0 ? (
           <EmptyState>
             <EmptyState.Header>

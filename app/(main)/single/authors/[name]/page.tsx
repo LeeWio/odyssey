@@ -1,11 +1,11 @@
 "use client";
 
 import { EmptyState, ItemCard, NumberValue } from "@heroui-pro/react";
-import { Avatar, Card, Link, Separator, Skeleton, Typography } from "@heroui/react";
+import { Avatar, Button, Card, Link, Separator, Skeleton, Typography } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 
-import { type PostResponse, useGetPublicPostsQuery } from "@/lib/features/post";
+import { type PostResponse, usePublishedCatalog } from "@/lib/features/post";
 
 function initials(name: string) {
   return name
@@ -78,8 +78,8 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
   const author = decodeURIComponent(name);
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const posts = useGetPublicPostsQuery({ page: 0, size: 40 });
-  const all = posts.data?.list ?? [];
+  const catalog = usePublishedCatalog();
+  const all = catalog.posts;
   const written = all.filter((post) => post.authorName?.trim() === author);
   const avatar = written.find((post) => post.authorAvatar)?.authorAvatar;
   const views = written.reduce((sum, post) => sum + (post.views ?? 0), 0);
@@ -129,12 +129,24 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
             </div>
           </header>
 
-          {posts.isLoading ? (
+          {catalog.isLoading ? (
             <div className="flex flex-col gap-4">
               {Array.from({ length: 4 }, (_, index) => (
                 <Skeleton key={index} className="h-28 w-full rounded-2xl" />
               ))}
             </div>
+          ) : catalog.isError ? (
+            <EmptyState>
+              <EmptyState.Header>
+                <EmptyState.Title>{t("latestFailed")}</EmptyState.Title>
+                <EmptyState.Description>{t("latestFailedHint")}</EmptyState.Description>
+              </EmptyState.Header>
+              <EmptyState.Content>
+                <Button size="sm" variant="secondary" onPress={catalog.retry}>
+                  {t("tryAgain")}
+                </Button>
+              </EmptyState.Content>
+            </EmptyState>
           ) : written.length === 0 ? (
             <EmptyState>
               <EmptyState.Header>

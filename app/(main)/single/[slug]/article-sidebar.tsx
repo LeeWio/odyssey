@@ -13,6 +13,7 @@ import {
   useGetFeaturedPostsQuery,
   useGetPublicPostsQuery,
   useGetRelatedPostsQuery,
+  usePublishedCatalog,
 } from "@/lib/features/post";
 import { useAppSelector } from "@/lib/hooks";
 
@@ -149,7 +150,7 @@ export function ArticleContext({
   const columnPosts = column.data?.posts ?? [];
   const category = article.category;
   const authorName = article.authorName?.trim();
-  const authorDirectory = useGetPublicPostsQuery({ page: 0, size: 40 }, { skip: !authorName });
+  const authorCatalog = usePublishedCatalog();
   const sameCategory = useGetPublicPostsQuery(
     { categoryId: category?.id, page: 0, size: 5 },
     { skip: !category?.id }
@@ -168,7 +169,7 @@ export function ArticleContext({
   ).slice(0, 4);
   const relatedPosts = excludeCurrent(related.data ?? [], slug).slice(0, 4);
   const authorPosts = excludeCurrent(
-    (authorDirectory.data?.list ?? []).filter((post) => post.authorName?.trim() === authorName),
+    authorCatalog.posts.filter((post) => post.authorName?.trim() === authorName),
     slug
   )
     .slice(0, 4)
