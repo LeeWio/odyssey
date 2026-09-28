@@ -1,3 +1,10 @@
+## [1.175.1](https://github.com/LeeWio/odyssey/compare/v1.175.0...v1.175.1) (2026-09-28)
+
+
+### Bug Fixes
+
+* **moments:** open comments in a sheet ([10d98f6](https://github.com/LeeWio/odyssey/commit/10d98f63d5419ecec275d9967c8a2195b559da77))
+
 # [1.175.0](https://github.com/LeeWio/odyssey/compare/v1.174.0...v1.175.0) (2026-09-28)
 
 
