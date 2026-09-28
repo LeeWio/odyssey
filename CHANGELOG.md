@@ -1,3 +1,15 @@
+# [1.176.0](https://github.com/LeeWio/odyssey/compare/v1.175.1...v1.176.0) (2026-09-28)
+
+
+### Bug Fixes
+
+* **journal:** list every published essay on author pages ([b8ed4d2](https://github.com/LeeWio/odyssey/commit/b8ed4d2c4a60f5057848e27180d73fd22bee44b3))
+
+
+### Features
+
+* **moments:** keep saved moments for the signed-in account ([ea75fc2](https://github.com/LeeWio/odyssey/commit/ea75fc25ff5f586f6d9d0810b7d651fd4cc236b3))
+
 ## [1.175.1](https://github.com/LeeWio/odyssey/compare/v1.175.0...v1.175.1) (2026-09-28)
 
 
