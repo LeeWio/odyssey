@@ -44,7 +44,7 @@ const MeasuredMoment = memo(function MeasuredMoment({
 
   return (
     <div ref={ref} className="w-full min-w-0">
-      <MomentCard moment={moment} />
+      <MomentCard enableComments={false} moment={moment} />
     </div>
   );
 });

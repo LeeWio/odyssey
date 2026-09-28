@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Card, Skeleton, toast, AlertDialog, Button, Typography } from "@heroui/react";
 import type { JSONContent } from "@tiptap/core";
-import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import { Icon } from "@iconify/react";
 
@@ -24,10 +23,9 @@ import { CardHeader } from "./card-header";
 import { CardContent } from "./card-content";
 import { CardFooter } from "./card-footer";
 
-const CommentSystem = dynamic(
-  () => import("@/components/comment").then((mod) => mod.CommentSystem),
-  { ssr: false }
-);
+const CommentSheet = dynamic(() => import("@/components/comment").then((mod) => mod.CommentSheet), {
+  ssr: false,
+});
 
 const CarouselModal = dynamic(
   () => import("../gallery/carousel-modal").then((mod) => mod.CarouselModal),
@@ -53,9 +51,14 @@ const defaultContent: JSONContent = {
 interface MomentCardProps {
   moment?: MomentResponse;
   isLoading?: boolean;
+  enableComments?: boolean;
 }
 
-export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: MomentCardProps) => {
+export const MomentCard = ({
+  moment: propMoment,
+  isLoading: propIsLoading,
+  enableComments = true,
+}: MomentCardProps) => {
   const formatRelativeTime = useRelativeTime();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isAdmin = useAppSelector(selectIsAdmin);
@@ -213,27 +216,23 @@ export const MomentCard = ({ moment: propMoment, isLoading: propIsLoading }: Mom
         isLiked={isLiked}
         isLiking={isLiking}
         likesCount={likesCount}
-        commentsCount={moment?.commentsCount ?? 0}
+        commentsCount={enableComments ? (moment?.commentsCount ?? 0) : undefined}
         onLikeToggle={toggleLike}
         isCommentsOpen={isCommentsOpen}
-        onCommentToggle={() => setIsCommentsOpen(!isCommentsOpen)}
+        onCommentToggle={
+          enableComments && moment?.id ? () => setIsCommentsOpen((open) => !open) : undefined
+        }
         isBookmarked={isBookmarked}
         onBookmarkToggle={handleBookmarkToggle}
       />
 
-      <AnimatePresence>
-        {isCommentsOpen && moment?.id ? (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="border-default-100/60 mt-3 overflow-hidden border-t px-1 pt-4"
-          >
-            <CommentSystem momentId={moment.id} />
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {enableComments && isCommentsOpen && moment?.id ? (
+        <CommentSheet
+          isOpen={isCommentsOpen}
+          momentId={moment.id}
+          onOpenChange={setIsCommentsOpen}
+        />
+      ) : null}
 
       {/* Shared Photo Carousel Modal — load only after first open */}
       {hasOpenedCarousel && carouselImages.length > 0 ? (

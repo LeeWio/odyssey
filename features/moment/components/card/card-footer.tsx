@@ -44,19 +44,20 @@ export const CardFooter = ({
           {likesCount > 0 ? <span className="text-xs tabular-nums">{likesCount}</span> : null}
         </Button>
 
-        <Button
-          size="sm"
-          variant={isCommentsOpen ? "secondary" : "ghost"}
-          onPress={onCommentToggle}
-          aria-label={commentsCount === 1 ? "Toggle 1 comment" : `Toggle ${commentsCount} comments`}
-          className="gap-1.5 transition-all active:scale-95"
-        >
-          <Icon
-            icon={isCommentsOpen ? "gravity-ui:comment-text-fill" : "gravity-ui:comment"}
-            className={`size-4.5 ${isCommentsOpen ? "text-primary" : ""}`}
-          />
-          {commentsCount > 0 ? <span className="text-xs tabular-nums">{commentsCount}</span> : null}
-        </Button>
+        {onCommentToggle ? (
+          <Button
+            size="sm"
+            variant={isCommentsOpen ? "secondary" : "ghost"}
+            onPress={onCommentToggle}
+            aria-label={commentsCount === 1 ? "Open 1 comment" : `Open ${commentsCount} comments`}
+            className="gap-1.5 transition-all active:scale-95"
+          >
+            <Icon icon="gravity-ui:comment" className="size-4.5" />
+            {commentsCount > 0 ? (
+              <span className="text-xs tabular-nums">{commentsCount}</span>
+            ) : null}
+          </Button>
+        ) : null}
       </div>
 
       <Button

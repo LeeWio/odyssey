@@ -7,12 +7,13 @@ import { CommentHeader } from "./comment-header";
 import { CommentSystem, type CommentSystemRenderParts } from "./comment-system";
 
 interface CommentSheetProps {
-  postId: number;
+  postId?: number;
+  momentId?: number;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
 }
 
-export function CommentSheet({ postId, isOpen, onOpenChange }: CommentSheetProps) {
+export function CommentSheet({ postId, momentId, isOpen, onOpenChange }: CommentSheetProps) {
   const handleRequestClose = useCallback(() => onOpenChange(false), [onOpenChange]);
   const renderContent = useCallback(
     (parts: CommentSystemRenderParts) => <CommentSheetContent {...parts} />,
@@ -31,7 +32,7 @@ export function CommentSheet({ postId, isOpen, onOpenChange }: CommentSheetProps
         <Sheet.Content className="mx-auto w-[min(760px,calc(100vw-2rem))] max-w-none">
           <Sheet.Dialog className="h-[min(720px,calc(100dvh-1rem))] min-h-0">
             <Sheet.CloseTrigger />
-            <CommentSystem postId={postId} onRequestClose={handleRequestClose}>
+            <CommentSystem momentId={momentId} postId={postId} onRequestClose={handleRequestClose}>
               {renderContent}
             </CommentSystem>
           </Sheet.Dialog>
