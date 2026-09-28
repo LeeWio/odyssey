@@ -1,3 +1,10 @@
+# [1.178.0](https://github.com/LeeWio/odyssey/compare/v1.177.0...v1.178.0) (2026-09-28)
+
+
+### Features
+
+* **moments:** list moments the account has liked ([0cd2bf9](https://github.com/LeeWio/odyssey/commit/0cd2bf944ad0fbed844f315999fc6a8606386cbf))
+
 # [1.177.0](https://github.com/LeeWio/odyssey/compare/v1.176.0...v1.177.0) (2026-09-28)
 
 
