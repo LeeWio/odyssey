@@ -18,6 +18,7 @@ import { resolveAppLocale } from "@/i18n/locale";
 import { getInitialThemeState } from "@/lib/theme";
 import { getThemeInitScript } from "@/lib/theme-init-script";
 import { Providers } from "./providers";
+import WebVitals from "./web-vitals";
 
 export const metadata: Metadata = {
   title: {
@@ -85,6 +86,7 @@ export default async function RootLayout({
           strategy="beforeInteractive"
         />
         <Providers lang={lang} messages={messages}>
+          <WebVitals />
           {children}
         </Providers>
       </body>
