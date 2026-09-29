@@ -177,6 +177,7 @@ export interface PostSearchQuery extends Pageable {
   categoryId?: number;
   tagId?: number;
   keyword?: string;
+  authorName?: string;
 }
 
 export interface PostAutosaveRequest {

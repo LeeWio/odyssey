@@ -2,10 +2,15 @@
 
 import { EmptyState, ItemCard, NumberValue } from "@heroui-pro/react";
 import { Avatar, Button, Card, Link, Separator, Skeleton, Typography } from "@heroui/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 
-import { type PostResponse, usePublishedCatalog } from "@/lib/features/post";
+import { type PostResponse, useGetPublicPostsQuery } from "@/lib/features/post";
+import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
+
+import { EssayPagination } from "../../components/essay-pagination";
+import { parsePageParam } from "@/lib/utils/pagination";
 
 function initials(name: string) {
   return name
@@ -80,11 +85,13 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
   const author = decodeURIComponent(name);
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const catalog = usePublishedCatalog();
-  const all = catalog.posts;
-  const written = all.filter((post) => post.authorName?.trim() === author);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const page = parsePageParam(searchParams.get("page"));
+  const posts = useGetPublicPostsQuery({ authorName: author, page: page - 1, size: 8 });
+  useNormalizePageParam(page, posts.currentData ? (posts.currentData.totalPages ?? 0) : undefined);
+  const written = posts.data?.list ?? [];
   const avatar = written.find((post) => post.authorAvatar)?.authorAvatar;
-  const views = written.reduce((sum, post) => sum + (post.views ?? 0), 0);
   const categories = [
     ...new Map(
       written
@@ -92,15 +99,6 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
         .map((post) => [post.category!.id, post.category!] as const)
     ).values(),
   ];
-  const others = [
-    ...new Map(
-      all
-        .map((post) => post.authorName?.trim())
-        .filter((value): value is string => Boolean(value && value !== author))
-        .map((value) => [value, value] as const)
-    ).values(),
-  ];
-
   return (
     <div className="bg-background min-h-[100dvh] w-full px-8 pt-28 pb-24 md:px-12 xl:px-16">
       <div className="grid w-full items-start gap-x-16 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem]">
@@ -119,32 +117,28 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
                   {author}
                 </Typography>
                 <p className="text-muted text-sm tabular-nums">
-                  <NumberValue locale={locale} value={written.length}>
+                  <NumberValue locale={locale} value={posts.data?.total ?? 0}>
                     {(formatted) => t("authorEssays", { count: formatted })}
-                  </NumberValue>
-                  {" · "}
-                  <NumberValue locale={locale} notation="compact" value={views}>
-                    {(formatted) => t("views", { count: formatted })}
                   </NumberValue>
                 </p>
               </div>
             </div>
           </header>
 
-          {catalog.isLoading ? (
+          {posts.isLoading ? (
             <div className="flex flex-col gap-4">
               {Array.from({ length: 4 }, (_, index) => (
                 <Skeleton key={index} className="h-28 w-full rounded-2xl" />
               ))}
             </div>
-          ) : catalog.isError ? (
+          ) : posts.isError ? (
             <EmptyState>
               <EmptyState.Header>
                 <EmptyState.Title>{t("latestFailed")}</EmptyState.Title>
                 <EmptyState.Description>{t("latestFailedHint")}</EmptyState.Description>
               </EmptyState.Header>
               <EmptyState.Content>
-                <Button size="sm" variant="secondary" onPress={catalog.retry}>
+                <Button size="sm" variant="secondary" onPress={() => void posts.refetch()}>
                   {t("tryAgain")}
                 </Button>
               </EmptyState.Content>
@@ -159,13 +153,31 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
               </EmptyState.Content>
             </EmptyState>
           ) : (
-            <ul className="flex flex-col gap-4">
-              {written.map((post, index) => (
-                <li key={post.id}>
-                  <EssayRow lead={index === 0} post={post} />
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="flex flex-col gap-4">
+                {written.map((post, index) => (
+                  <li key={post.id}>
+                    <EssayRow lead={index === 0 && page === 1} post={post} />
+                  </li>
+                ))}
+              </ul>
+              <EssayPagination
+                onPageChange={(nextPage) => {
+                  const query = new URLSearchParams(searchParams.toString());
+                  if (nextPage <= 1) query.delete("page");
+                  else query.set("page", String(nextPage));
+                  const suffix = query.toString();
+                  router.replace(
+                    `/single/authors/${encodeURIComponent(author)}${suffix ? `?${suffix}` : ""}`,
+                    {
+                      scroll: true,
+                    }
+                  );
+                }}
+                page={page}
+                pages={posts.data?.totalPages ?? 0}
+              />
+            </>
           )}
         </div>
 
@@ -196,33 +208,17 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
               </Card.Content>
             </Card>
           ) : null}
-          {others.length > 0 ? (
-            <Card variant="secondary">
-              <Card.Header>
-                <Card.Title className="text-sm">{t("otherAuthors")}</Card.Title>
-              </Card.Header>
-              <Card.Content>
-                <ul className="flex flex-col gap-2">
-                  {others.map((other) => (
-                    <li key={other}>
-                      <Link
-                        className="text-foreground text-sm no-underline"
-                        href={`/single/authors/${encodeURIComponent(other)}`}
-                      >
-                        {other}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </Card.Content>
-              <Card.Footer>
-                <Link href="/single/authors">
-                  {t("allAuthors")}
-                  <Link.Icon />
-                </Link>
-              </Card.Footer>
-            </Card>
-          ) : null}
+          <Card variant="secondary">
+            <Card.Header>
+              <Card.Title className="text-sm">{t("otherAuthors")}</Card.Title>
+            </Card.Header>
+            <Card.Content>
+              <Link href="/single/authors">
+                {t("allAuthors")}
+                <Link.Icon />
+              </Link>
+            </Card.Content>
+          </Card>
           <Separator className="xl:hidden" />
         </aside>
       </div>

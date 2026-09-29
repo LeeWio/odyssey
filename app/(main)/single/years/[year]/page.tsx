@@ -7,8 +7,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 
 import { useRetrieveArchiveQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
-import { EssayCard } from "../../components/essay-card";
+import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
+import { EssayGrid } from "../../components/essay-grid";
 import { EssayPagination } from "../../components/essay-pagination";
+import { parsePageParam } from "@/lib/utils/pagination";
 
 const PAGE_SIZE = 8;
 
@@ -24,7 +26,7 @@ export default function YearPage({ params }: { params: Promise<{ year: string }>
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const page = Math.max(1, Number(searchParams.get("page")) || 1);
+  const page = parsePageParam(searchParams.get("page"));
   const facets = useRetrieveFacetsQuery();
   const months = (facets.data?.archives ?? [])
     .filter(
@@ -42,6 +44,10 @@ export default function YearPage({ params }: { params: Promise<{ year: string }>
   const posts = archive.data?.list ?? [];
   const total = archive.data?.total ?? 0;
   const totalPages = archive.data?.totalPages ?? 0;
+  useNormalizePageParam(
+    page,
+    archive.currentData ? (archive.currentData.totalPages ?? 0) : undefined
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-24 sm:px-10 sm:py-32">
@@ -118,13 +124,7 @@ export default function YearPage({ params }: { params: Promise<{ year: string }>
         </EmptyState>
       ) : (
         <>
-          <ul className="grid gap-4 sm:grid-cols-2">
-            {posts.map((post) => (
-              <li key={post.id ?? post.slug}>
-                <EssayCard post={post} />
-              </li>
-            ))}
-          </ul>
+          <EssayGrid posts={posts} />
           <EssayPagination
             onPageChange={(nextPage) => {
               const query = new URLSearchParams(searchParams.toString());

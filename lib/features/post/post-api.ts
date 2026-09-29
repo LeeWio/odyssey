@@ -126,9 +126,9 @@ export const postApi = baseApi.injectEndpoints({
      * Public: Get published posts with filtering
      */
     getPublicPostDigests: builder.query<PageResult<PostDigestResponse>, PostSearchQuery>({
-      query: ({ page = 0, size = 10, categoryId, tagId, keyword }) => ({
+      query: ({ page = 0, size = 10, categoryId, tagId, keyword, authorName }) => ({
         url: "/api/v1/public/blog/posts/digest",
-        params: { page, size, categoryId, tagId, keyword },
+        params: { page, size, categoryId, tagId, keyword, authorName },
       }),
       rawResponseSchema: apiResponseSchema(pageResultSchema(PostDigestResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<PostDigestResponse>>) => response.data,
@@ -143,9 +143,9 @@ export const postApi = baseApi.injectEndpoints({
     }),
 
     getPublicPosts: builder.query<PageResult<PostResponse>, PostSearchQuery>({
-      query: ({ page = 0, size = 10, categoryId, tagId, keyword }) => ({
+      query: ({ page = 0, size = 10, categoryId, tagId, keyword, authorName }) => ({
         url: "/api/v1/public/blog/posts",
-        params: { page, size, categoryId, tagId, keyword },
+        params: { page, size, categoryId, tagId, keyword, authorName },
       }),
       rawResponseSchema: apiResponseSchema(pageResultSchema(PostResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<PostResponse>>) => response.data,

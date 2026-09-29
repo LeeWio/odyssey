@@ -203,7 +203,10 @@ function ArticleStructuredData({ article, slug }: { article: PostResponse; slug:
   };
 
   return (
-    <script dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} type="application/ld+json" />
+    <script
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
+      type="application/ld+json"
+    />
   );
 }
 

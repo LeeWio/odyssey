@@ -8,9 +8,11 @@ import { use } from "react";
 
 import { useGetPublicPostsQuery } from "@/lib/features/post";
 import { useGetPublicTagsQuery } from "@/lib/features/tag";
+import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 
-import { EssayCard } from "../../components/essay-card";
+import { EssayGrid } from "../../components/essay-grid";
 import { EssayPagination } from "../../components/essay-pagination";
+import { parsePageParam } from "@/lib/utils/pagination";
 
 const PAGE_SIZE = 8;
 
@@ -20,7 +22,7 @@ export default function TagPage({ params }: { params: Promise<{ slug: string }> 
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const page = Math.max(1, Number(searchParams.get("page")) || 1);
+  const page = parsePageParam(searchParams.get("page"));
   const tags = useGetPublicTagsQuery();
   const tag = (tags.data ?? []).find((item) => item.slug === decodeURIComponent(slug));
   const posts = useGetPublicPostsQuery(
@@ -28,6 +30,7 @@ export default function TagPage({ params }: { params: Promise<{ slug: string }> 
     { skip: !tag }
   );
   const totalPages = posts.data?.totalPages ?? 0;
+  useNormalizePageParam(page, posts.currentData ? (posts.currentData.totalPages ?? 0) : undefined);
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-24 sm:px-10 sm:py-32">
@@ -84,13 +87,7 @@ export default function TagPage({ params }: { params: Promise<{ slug: string }> 
         </EmptyState>
       ) : (
         <>
-          <ul className="grid gap-4 sm:grid-cols-2">
-            {posts.data?.list.map((post) => (
-              <li key={post.id}>
-                <EssayCard post={post} />
-              </li>
-            ))}
-          </ul>
+          <EssayGrid posts={posts.data?.list ?? []} />
           <EssayPagination
             onPageChange={(nextPage) => {
               const query = new URLSearchParams(searchParams.toString());

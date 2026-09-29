@@ -40,9 +40,11 @@ import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/f
 import { useRetrieveDiscoveryQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 import { useGetFeaturedPostsQuery, useGetPublicPostDigestsQuery } from "@/lib/features/post";
+import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
+import { parsePageParam } from "@/lib/utils/pagination";
 
 type ArchiveFacet = OpenApiComponents["schemas"]["ArchiveFacet"];
 type CategoryFacet = OpenApiComponents["schemas"]["CategoryFacet"];
@@ -614,8 +616,13 @@ export function JournalPage() {
   const discoveryQuery = useRetrieveDiscoveryQuery();
   const facetsQuery = useRetrieveFacetsQuery();
   const featuredQuery = useGetFeaturedPostsQuery({ page: 0, size: 8 });
-  const latestPage = Math.max(0, (Number(searchParams.get("page")) || 1) - 1);
+  const requestedLatestPage = parsePageParam(searchParams.get("page"));
+  const latestPage = requestedLatestPage - 1;
   const latestQuery = useGetPublicPostDigestsQuery({ page: latestPage, size: 6 });
+  useNormalizePageParam(
+    requestedLatestPage,
+    latestQuery.currentData ? (latestQuery.currentData.totalPages ?? 0) : undefined
+  );
   const columnsQuery = useGetPublicColumnsQuery();
   const libraryQuery = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
 
