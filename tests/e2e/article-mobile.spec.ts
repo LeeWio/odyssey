@@ -102,3 +102,34 @@ test("keeps article reading usable on a narrow viewport", async ({ page }) => {
   await page.evaluate(() => window.scrollTo(0, 200));
   await expect(page.getByRole("button", { name: "More article actions" })).toBeVisible();
 });
+
+test("uses Web Share when the browser provides it", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: async (data: ShareData) => {
+        window.sessionStorage.setItem("shared-article", JSON.stringify(data));
+      },
+    });
+  });
+
+  await page.goto("/single/mobile-reading");
+  await expect(
+    page.getByRole("heading", { name: "Mobile reading article", exact: true })
+  ).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 500));
+  await page.evaluate(() => window.scrollTo(0, 200));
+  await page.getByRole("button", { name: "More article actions" }).click();
+  await page.getByRole("button", { name: "Share article" }).click();
+
+  await expect
+    .poll(() => page.evaluate(() => window.sessionStorage.getItem("shared-article")))
+    .toBe(
+      JSON.stringify({
+        title: "Mobile reading article",
+        text: "A compact article used for mobile reading regression coverage.",
+        url: "http://127.0.0.1:3100/single/mobile-reading",
+      })
+    );
+  await expect(page.getByText("Article shared.", { exact: true })).toBeVisible();
+});
