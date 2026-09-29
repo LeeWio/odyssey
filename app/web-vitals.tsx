@@ -11,7 +11,11 @@ import {
 
 const endpoint = process.env.NEXT_PUBLIC_WEB_VITALS_ENDPOINT;
 
-function observePaint(name: WebVitalName, onMetric: (metric: WebVitalMetric) => void) {
+function observePaint(
+  name: WebVitalName,
+  onMetric: (metric: WebVitalMetric) => void,
+  onObserver: (observer: PerformanceObserver) => void
+) {
   if (typeof PerformanceObserver === "undefined") return;
 
   try {
@@ -29,6 +33,7 @@ function observePaint(name: WebVitalName, onMetric: (metric: WebVitalMetric) => 
       );
     });
     observer.observe({ type: "paint", buffered: true });
+    onObserver(observer);
   } catch {
     // Older browsers may not support the PerformanceObserver options above.
   }
@@ -85,7 +90,7 @@ export default function WebVitals() {
       (entry) => (entry as PerformanceEntry & { value?: number }).value ?? 0
     );
     observe("navigation", "TTFB", (entry) => (entry as PerformanceNavigationTiming).responseStart);
-    observePaint("FCP", report);
+    observePaint("FCP", report, (observer) => observers.push(observer));
 
     const flush = () => {
       for (const [name, value] of latest) {
