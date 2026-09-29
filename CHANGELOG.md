@@ -1,3 +1,10 @@
+## [1.187.8](https://github.com/LeeWio/odyssey/compare/v1.187.7...v1.187.8) (2026-09-29)
+
+
+### Bug Fixes
+
+* **home:** make moments showcase full width ([d5293f7](https://github.com/LeeWio/odyssey/commit/d5293f71c835aa95972ed0094a454a1ff8063866))
+
 ## [1.187.7](https://github.com/LeeWio/odyssey/compare/v1.187.6...v1.187.7) (2026-09-29)
 
 
