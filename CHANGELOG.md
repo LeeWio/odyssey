@@ -1,3 +1,10 @@
+# [1.187.0](https://github.com/LeeWio/odyssey/compare/v1.186.2...v1.187.0) (2026-09-29)
+
+
+### Features
+
+* **performance:** add opt-in web vitals reporting ([67e33f3](https://github.com/LeeWio/odyssey/commit/67e33f311dd73dcfea4f9f5c3027a960dd0fe2f8))
+
 ## [1.186.2](https://github.com/LeeWio/odyssey/compare/v1.186.1...v1.186.2) (2026-09-29)
 
 
