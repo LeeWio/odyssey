@@ -148,6 +148,13 @@
   "Journal": {
     "title": "Journal",
     "description": "Notes on software, design, and the systems behind the work.",
+    "browseArchive": "Browse the archive",
+    "searchArticles": "Search articles",
+    "searchPlaceholder": "Search the chronicle",
+    "clearSearch": "Clear search",
+    "filterTopics": "Filter articles by topic",
+    "allTopics": "All topics",
+    "searchResults": "Search results",
     "essays": "{count} essays",
     "topics": "Topics",
     "archive": "Archive",

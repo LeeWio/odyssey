@@ -148,6 +148,13 @@
   "Journal": {
     "title": "日志",
     "description": "关于软件、设计，以及作品背后的系统。",
+    "browseArchive": "浏览归档",
+    "searchArticles": "搜索文章",
+    "searchPlaceholder": "搜索编年",
+    "clearSearch": "清除搜索",
+    "filterTopics": "按主题筛选文章",
+    "allTopics": "全部主题",
+    "searchResults": "搜索结果",
     "essays": "{count} 篇文章",
     "topics": "主题",
     "archive": "归档",

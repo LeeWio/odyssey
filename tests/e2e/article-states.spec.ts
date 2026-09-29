@@ -27,6 +27,9 @@ test("shows a recoverable not-found state for an unavailable article", async ({ 
       exact: true,
     })
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Back to journal", exact: true })).toBeVisible();
+  const backToJournal = page.getByRole("button", { name: "Back to journal", exact: true });
+  await expect(backToJournal).toBeVisible();
   await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
+  await backToJournal.click();
+  await expect(page).toHaveURL(/\/single$/);
 });
