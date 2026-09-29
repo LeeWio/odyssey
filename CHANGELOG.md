@@ -1,3 +1,10 @@
+## [1.185.1](https://github.com/LeeWio/odyssey/compare/v1.185.0...v1.185.1) (2026-09-29)
+
+
+### Bug Fixes
+
+* **single:** align article publication dates ([36315eb](https://github.com/LeeWio/odyssey/commit/36315ebc5b179284cf102e42279fa1af13c9876d))
+
 # [1.185.0](https://github.com/LeeWio/odyssey/compare/v1.184.0...v1.185.0) (2026-09-29)
 
 
