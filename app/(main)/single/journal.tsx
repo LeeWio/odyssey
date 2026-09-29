@@ -23,7 +23,7 @@ import {
   Typography,
 } from "@heroui/react";
 import type { Key } from "react-aria-components/Breadcrumbs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
@@ -608,11 +608,13 @@ function JournalSkeleton() {
 export function JournalPage() {
   const t = useTranslations("Journal");
   const locale = useLocale();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const discoveryQuery = useRetrieveDiscoveryQuery();
   const facetsQuery = useRetrieveFacetsQuery();
   const featuredQuery = useGetFeaturedPostsQuery({ page: 0, size: 8 });
-  const [latestPage, setLatestPage] = useState(0);
+  const latestPage = Math.max(0, (Number(searchParams.get("page")) || 1) - 1);
   const latestQuery = useGetPublicPostDigestsQuery({ page: latestPage, size: 6 });
   const columnsQuery = useGetPublicColumnsQuery();
   const libraryQuery = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
@@ -754,7 +756,13 @@ export function JournalPage() {
                   <LatestPagination
                     page={latestPage + 1}
                     pages={Math.max(1, latestQuery.data?.totalPages ?? 1)}
-                    onPageChange={(page) => setLatestPage(page - 1)}
+                    onPageChange={(page) => {
+                      if (page <= 1) {
+                        router.replace("/single", { scroll: true });
+                        return;
+                      }
+                      router.replace(`/single?page=${page}`, { scroll: true });
+                    }}
                   />
                 </div>
               ) : archiveEmpty ? (

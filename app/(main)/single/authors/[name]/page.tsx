@@ -52,7 +52,9 @@ function EssayRow({ lead = false, post }: { lead?: boolean; post: PostResponse }
           </Link>
         </ItemCard.Title>
         <p className="text-muted text-xs">
-          {[post.category?.name, formatDate(post.createdAt, locale)].filter(Boolean).join(" · ")}
+          {[post.category?.name, formatDate(post.publishedAt || post.createdAt, locale)]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
         {post.summary ? (
           <p className={`text-muted text-sm leading-5 ${lead ? "line-clamp-4" : "line-clamp-3"}`}>

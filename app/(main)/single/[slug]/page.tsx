@@ -26,6 +26,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { use, useEffect, useRef, useState } from "react";
 
 import { CommentSheet } from "@/components/comment";
+import { siteConfig } from "@/config/site";
 import { ArticleOutline } from "@/features/blog/reader/article-outline";
 import { ArticleTypography } from "@/features/blog/reader/typography";
 import { CreateCollectionDialog } from "@/features/library/create-collection-dialog";
@@ -144,6 +145,66 @@ function getAuthorInitials(value?: string | null) {
     .map((part) => part[0])
     .join("")
     .toUpperCase();
+}
+
+function ArticleStructuredData({ article, slug }: { article: PostResponse; slug: string }) {
+  const publishedAt = article.createdAt;
+  const articleUrl = `${siteConfig.url}/single/${encodeURIComponent(slug)}`;
+  const breadcrumbs = [
+    { name: "Journal", url: `${siteConfig.url}/single` },
+    article.category?.name
+      ? {
+          name: article.category.name,
+          url: article.category.slug
+            ? `${siteConfig.url}/single/categories/${encodeURIComponent(article.category.slug)}`
+            : `${siteConfig.url}/single/categories`,
+        }
+      : null,
+    { name: article.title, url: articleUrl },
+  ].filter((item): item is { name: string; url: string } => Boolean(item));
+  const data = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "@id": `${articleUrl}#article`,
+        headline: article.title,
+        description: article.summary || undefined,
+        image: article.coverImage || undefined,
+        datePublished: publishedAt,
+        dateModified: article.updatedAt || publishedAt,
+        mainEntityOfPage: articleUrl,
+        author: {
+          "@type": "Person",
+          name: article.authorName || "Odyssey",
+        },
+        publisher: {
+          "@type": "Organization",
+          name: siteConfig.name,
+          url: siteConfig.url,
+        },
+        articleSection: article.category?.name || undefined,
+        keywords:
+          article.tags
+            ?.map((tag) => tag.name)
+            .filter(Boolean)
+            .join(", ") || undefined,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: breadcrumbs.map((item, position) => ({
+          "@type": "ListItem",
+          position: position + 1,
+          name: item.name,
+          item: item.url,
+        })),
+      },
+    ],
+  };
+
+  return (
+    <script dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} type="application/ld+json" />
+  );
 }
 
 function ReadNext({ article }: { article: PostResponse }) {
@@ -539,7 +600,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                       </Typography>
                     )}
                   </div>
-                  <ArticleDate value={article.createdAt} />
+                  <ArticleDate value={article.publishedAt || article.createdAt} />
                   {article.updatedAt && article.updatedAt !== article.createdAt ? (
                     <Typography color="muted" type="body-sm">
                       {t("updated", {
@@ -555,6 +616,8 @@ export default function SinglePage({ params }: SinglePageProps) {
                   </Typography>
                 </div>
               </header>
+
+              <ArticleStructuredData article={article} slug={slug} />
 
               <ArticleTypography>
                 <ArticleBodyReader
