@@ -1,3 +1,10 @@
+## [1.187.2](https://github.com/LeeWio/odyssey/compare/v1.187.1...v1.187.2) (2026-09-29)
+
+
+### Bug Fixes
+
+* **performance:** clean up vitals observers ([6b340fe](https://github.com/LeeWio/odyssey/commit/6b340feebaca5c5d1438ca3552a08728bf304678))
+
 ## [1.187.1](https://github.com/LeeWio/odyssey/compare/v1.187.0...v1.187.1) (2026-09-29)
 
 
