@@ -1,3 +1,10 @@
+## [1.187.1](https://github.com/LeeWio/odyssey/compare/v1.187.0...v1.187.1) (2026-09-29)
+
+
+### Bug Fixes
+
+* **performance:** finalize web vitals metrics ([31177c3](https://github.com/LeeWio/odyssey/commit/31177c383735936a20346452887ee8fdd667d962))
+
 # [1.187.0](https://github.com/LeeWio/odyssey/compare/v1.186.2...v1.187.0) (2026-09-29)
 
 
