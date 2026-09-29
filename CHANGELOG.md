@@ -1,3 +1,10 @@
+## [1.187.7](https://github.com/LeeWio/odyssey/compare/v1.187.6...v1.187.7) (2026-09-29)
+
+
+### Bug Fixes
+
+* **home:** improve moments masonry rendering ([b2cada7](https://github.com/LeeWio/odyssey/commit/b2cada7ddc7b8f2bd418b53dd25db407a2b0257c))
+
 ## [1.187.6](https://github.com/LeeWio/odyssey/compare/v1.187.5...v1.187.6) (2026-09-29)
 
 
