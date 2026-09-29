@@ -1,3 +1,10 @@
+## [1.187.4](https://github.com/LeeWio/odyssey/compare/v1.187.3...v1.187.4) (2026-09-29)
+
+
+### Bug Fixes
+
+* **single:** improve image preview accessibility ([74e034a](https://github.com/LeeWio/odyssey/commit/74e034a40e39f0fb0d79f0713701b8d22e76dddd))
+
 ## [1.187.3](https://github.com/LeeWio/odyssey/compare/v1.187.2...v1.187.3) (2026-09-29)
 
 
