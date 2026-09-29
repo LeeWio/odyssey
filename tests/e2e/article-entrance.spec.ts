@@ -157,7 +157,7 @@ test("a block taller than the viewport still reveals on entry", async ({ page })
       content: [{ type: "text", text: "A very long code block\n".repeat(1500) }],
     },
   ]);
-  const block = page.locator(".ProseMirror > pre");
+  const block = page.locator(".ProseMirror .node-codeBlock").last();
   await expect(block).toHaveCSS("opacity", "0");
   await block.evaluate((element) => element.scrollIntoView({ block: "start" }));
   await expect(block).toHaveCSS("opacity", "1");
