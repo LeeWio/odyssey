@@ -1,3 +1,10 @@
+## [1.187.6](https://github.com/LeeWio/odyssey/compare/v1.187.5...v1.187.6) (2026-09-29)
+
+
+### Bug Fixes
+
+* **single:** complete journal translations ([e1dbbbc](https://github.com/LeeWio/odyssey/commit/e1dbbbc9a546b0b9ce648ef8ba1a8dbe90bfad09))
+
 ## [1.187.5](https://github.com/LeeWio/odyssey/compare/v1.187.4...v1.187.5) (2026-09-29)
 
 
