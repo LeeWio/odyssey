@@ -14,7 +14,7 @@ export function MomentsMasonry({ moments }: MomentsMasonryProps) {
   const shouldReduceMotion = useReducedMotionPreference();
 
   return (
-    <div className="columns-1 gap-5 min-[500px]:columns-2 min-[760px]:columns-3 min-[1100px]:columns-4">
+    <div data-testid="moments-masonry" className="[columns:20rem] gap-5">
       {moments.map((moment, index) => (
         <motion.div
           key={moment.id}

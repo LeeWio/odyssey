@@ -28,8 +28,9 @@ const moments = Array.from({ length: 12 }, (_, index) => ({
 
 for (const viewport of [
   { name: "mobile", width: 390, columns: 1 },
-  { name: "tablet", width: 820, columns: 3 },
+  { name: "tablet", width: 820, columns: 2 },
   { name: "desktop", width: 1440, columns: 4 },
+  { name: "wide desktop", width: 1920, columns: 5 },
 ]) {
   test(`This & That masonry renders without overlap on ${viewport.name}`, async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: 900 });
@@ -60,7 +61,8 @@ for (const viewport of [
     await page.goto("/");
     const showcase = page.locator("#moments-showcase");
     await expect(showcase.locator("#moments-showcase-title")).toBeVisible();
-    const cards = showcase.locator(".columns-1 > div");
+    const masonry = showcase.getByTestId("moments-masonry");
+    const cards = masonry.locator(":scope > div");
     await expect(cards).toHaveCount(moments.length, { timeout: 10_000 });
     await expect(cards.first().locator('[data-slot="moment-content"]')).toBeVisible();
 
@@ -73,6 +75,9 @@ for (const viewport of [
         getComputedStyle(elements[0]!.parentElement!).columnCount,
         10
       );
+      const showcaseWidth = document
+        .querySelector("#moments-showcase")!
+        .getBoundingClientRect().width;
       const overlaps = boxes.some((box, index) =>
         boxes.slice(index + 1).some((other) => {
           const overlapX = Math.min(box.right, other.right) - Math.max(box.left, other.left);
@@ -80,11 +85,12 @@ for (const viewport of [
           return overlapX > 1 && overlapY > 1;
         })
       );
-      return { columns, overlaps };
+      return { columns, overlaps, showcaseWidth };
     });
 
     expect(layout.columns).toBe(viewport.columns);
     expect(layout.overlaps).toBe(false);
+    expect(layout.showcaseWidth).toBeGreaterThan(viewport.width - 1);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true
     );

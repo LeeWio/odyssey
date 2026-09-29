@@ -65,12 +65,14 @@ const MomentsShowcase = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="mx-auto w-full max-w-7xl px-6 py-24 sm:py-32">
+      <div className="w-full px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
         <Skeleton className="mx-auto h-10 w-40 rounded-full" />
         <Skeleton className="mx-auto mt-6 h-12 w-64 rounded-2xl" />
-        <div className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3">
+        <div className="mt-12 [columns:20rem] gap-5">
           {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="aspect-[4/5] w-full rounded-2xl" />
+            <div key={index} className="mb-5 break-inside-avoid">
+              <Skeleton className="aspect-[4/5] w-full rounded-2xl" />
+            </div>
           ))}
         </div>
       </div>
