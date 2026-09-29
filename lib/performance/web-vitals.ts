@@ -27,6 +27,14 @@ export function getNavigationType(): string {
   return entry?.type || "unknown";
 }
 
+export function getNavigationTimingValue(
+  metric: "TTFB",
+  entry: Pick<PerformanceNavigationTiming, "responseStart" | "startTime">
+): number {
+  if (metric !== "TTFB") return 0;
+  return Math.max(0, entry.responseStart - entry.startTime);
+}
+
 export function reportMetric(endpoint: string, metric: WebVitalMetric): void {
   if (typeof window === "undefined" || !endpoint) return;
 

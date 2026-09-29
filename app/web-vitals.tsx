@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import {
   createMetricPayload,
+  getNavigationTimingValue,
   reportMetric,
   type WebVitalMetric,
   type WebVitalName,
@@ -89,7 +90,9 @@ export default function WebVitals() {
       "CLS",
       (entry) => (entry as PerformanceEntry & { value?: number }).value ?? 0
     );
-    observe("navigation", "TTFB", (entry) => (entry as PerformanceNavigationTiming).responseStart);
+    observe("navigation", "TTFB", (entry) =>
+      getNavigationTimingValue("TTFB", entry as PerformanceNavigationTiming)
+    );
     observePaint("FCP", report, (observer) => observers.push(observer));
 
     const flush = () => {

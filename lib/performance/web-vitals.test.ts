@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createMetricPayload, getNavigationType, reportMetric } from "./web-vitals";
+import {
+  createMetricPayload,
+  getNavigationTimingValue,
+  getNavigationType,
+  reportMetric,
+} from "./web-vitals";
 
 describe("web vitals helpers", () => {
   it("creates a stable payload for the current route", () => {
@@ -35,5 +40,10 @@ describe("web vitals helpers", () => {
   it("returns unknown when navigation timing is unavailable", () => {
     vi.stubGlobal("performance", { getEntriesByType: () => [] });
     expect(getNavigationType()).toBe("unknown");
+  });
+
+  it("calculates TTFB relative to navigation start", () => {
+    expect(getNavigationTimingValue("TTFB", { responseStart: 180, startTime: 20 })).toBe(160);
+    expect(getNavigationTimingValue("TTFB", { responseStart: 10, startTime: 20 })).toBe(0);
   });
 });
