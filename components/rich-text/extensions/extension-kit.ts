@@ -29,6 +29,7 @@ import StarterKit from "@tiptap/starter-kit";
 
 import { EmojiBase } from "./emoji/emoji-base";
 import { TaskItemNodeView } from "./task-list/task-item-node-view";
+import { ReaderCodeBlock } from "./code-block/code-block-reader";
 
 const HeroUITaskItem = TaskItem.extend({
   addNodeView() {
@@ -135,10 +136,12 @@ export const READER_EXTENSION_KIT_OPTIONS: ExtensionKitOptions = {
  * editor instances — TipTap extensions hold per-editor state.
  */
 export function createReaderExtensionKit(options: ExtensionKitOptions = {}) {
-  return createExtensionKit({
+  const extensions = createExtensionKit({
     ...READER_EXTENSION_KIT_OPTIONS,
     ...options,
   });
+
+  return [...extensions, ReaderCodeBlock];
 }
 
 /**

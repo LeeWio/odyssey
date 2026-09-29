@@ -15,6 +15,7 @@ import {
   ListBox,
   Meter,
   Pagination,
+  SearchField,
   ScrollShadow,
   Separator,
   Skeleton,
@@ -29,7 +30,8 @@ import gsap from "gsap";
 
 gsap.registerPlugin(useGSAP);
 import { useLocale, useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
+import { useEffect, useRef, useState } from "react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useGetPublicColumnBySlugQuery,
@@ -200,6 +202,12 @@ function pageNumbers(page: number, totalPages: number) {
   }
 
   return pages;
+}
+
+function parsePositiveInteger(value: string | null) {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 function LatestPagination({
@@ -613,12 +621,19 @@ export function JournalPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const normalizedQuery = (searchParams.get("q") ?? "").trim();
+  const selectedCategoryId = parsePositiveInteger(searchParams.get("category"));
   const discoveryQuery = useRetrieveDiscoveryQuery();
   const facetsQuery = useRetrieveFacetsQuery();
   const featuredQuery = useGetFeaturedPostsQuery({ page: 0, size: 8 });
   const requestedLatestPage = parsePageParam(searchParams.get("page"));
   const latestPage = requestedLatestPage - 1;
-  const latestQuery = useGetPublicPostDigestsQuery({ page: latestPage, size: 6 });
+  const latestQuery = useGetPublicPostDigestsQuery({
+    categoryId: selectedCategoryId,
+    keyword: normalizedQuery || undefined,
+    page: latestPage,
+    size: 6,
+  });
   useNormalizePageParam(
     requestedLatestPage,
     latestQuery.currentData ? (latestQuery.currentData.totalPages ?? 0) : undefined
@@ -626,9 +641,24 @@ export function JournalPage() {
   const columnsQuery = useGetPublicColumnsQuery();
   const libraryQuery = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
 
+  const updateArchiveSearch = (changes: Record<string, string | undefined>) => {
+    const query = new URLSearchParams(searchParams.toString());
+    Object.entries(changes).forEach(([key, value]) => {
+      if (value) query.set(key, value);
+      else query.delete(key);
+    });
+    const serialized = query.toString();
+    router.replace(serialized ? `/single?${serialized}` : "/single", { scroll: false });
+  };
+  const updateSearch = useDebouncedCallback((value: string) => {
+    updateArchiveSearch({ q: value.trim() || undefined, page: undefined });
+  }, 300);
+
+  useEffect(() => () => updateSearch.cancel(), [updateSearch]);
+
   const discovery = discoveryQuery.data;
   const featuredPosts = featuredQuery.data?.list ?? [];
-  const latestPool = latestQuery.data?.list ?? [];
+  const latestPool = latestQuery.currentData?.list ?? [];
   const categories = (facetsQuery.data?.categories ?? []).filter(
     (category): category is CategoryFacet & { id: number; name: string } =>
       category.id != null && Boolean(category.name) && (category.count ?? 0) > 0
@@ -641,7 +671,10 @@ export function JournalPage() {
     (facet): facet is ArchiveFacet & { year: number } =>
       typeof facet.year === "number" && (facet.count ?? 0) > 0
   );
-  const essayCount = facetsQuery.data?.totalPublishedCount ?? latestQuery.data?.total ?? 0;
+  const hasArchiveFilters = Boolean(normalizedQuery || selectedCategoryId);
+  const essayCount = hasArchiveFilters
+    ? (latestQuery.currentData?.total ?? 0)
+    : (facetsQuery.data?.totalPublishedCount ?? latestQuery.currentData?.total ?? 0);
   const pageRef = useRef<HTMLDivElement>(null);
   const contentReady = !discoveryQuery.isLoading && !featuredQuery.isLoading;
 
@@ -667,17 +700,22 @@ export function JournalPage() {
 
   const trending = discovery?.trending ?? [];
   const mostRead = discovery?.mostRead ?? [];
-  const openingSource = featuredPosts.length > 0 ? featuredPosts : latestPool;
+  const openingSource = hasArchiveFilters
+    ? []
+    : featuredPosts.length > 0
+      ? featuredPosts
+      : latestPool;
   const lead = openingSource[0];
   const companions = openingSource.slice(1, 3);
   const shownSlugs = new Set(
     [lead, ...companions].flatMap((post) => (post?.slug ? [post.slug] : []))
   );
-  const latestPosts = latestPool
-    .filter((post) => !post.slug || !shownSlugs.has(post.slug))
-    .slice(0, 6);
+  const latestPosts = hasArchiveFilters
+    ? latestPool
+    : latestPool.filter((post) => !post.slug || !shownSlugs.has(post.slug)).slice(0, 6);
   const openingLoading =
-    featuredQuery.isLoading || (featuredPosts.length === 0 && latestQuery.isLoading);
+    !hasArchiveFilters &&
+    (featuredQuery.isLoading || (featuredPosts.length === 0 && latestQuery.isLoading));
   const archiveEmpty =
     !openingLoading && !latestQuery.isLoading && !lead && latestPosts.length === 0;
 
@@ -688,6 +726,60 @@ export function JournalPage() {
     >
       <div className="flex w-full flex-col gap-16">
         <h1 className="sr-only">{t("title")}</h1>
+
+        <section
+          aria-label={t("browseArchive")}
+          className="bg-surface-secondary flex w-full max-w-3xl flex-col gap-3 rounded-2xl p-3 sm:p-4"
+        >
+          <SearchField
+            key={`article-search-${normalizedQuery}`}
+            fullWidth
+            name="article-search"
+            defaultValue={normalizedQuery}
+            onChange={(value) => {
+              updateSearch(value);
+            }}
+          >
+            <Label className="sr-only">{t("searchArticles")}</Label>
+            <SearchField.Group>
+              <SearchField.SearchIcon />
+              <SearchField.Input placeholder={t("searchPlaceholder")} />
+              <SearchField.ClearButton aria-label={t("clearSearch")} />
+            </SearchField.Group>
+          </SearchField>
+
+          {categories.length > 0 ? (
+            <ScrollShadow hideScrollBar orientation="horizontal" className="-mx-1 px-1">
+              <TagGroup
+                aria-label={t("filterTopics")}
+                className="w-max min-w-full"
+                selectedKeys={new Set([selectedCategoryId ? String(selectedCategoryId) : "all"])}
+                selectionMode="single"
+                size="sm"
+                onSelectionChange={(keys) => {
+                  if (keys === "all") return;
+                  const [key] = Array.from(keys);
+                  updateArchiveSearch({
+                    category: key && String(key) !== "all" ? String(key) : undefined,
+                    page: undefined,
+                  });
+                }}
+              >
+                <TagGroup.List className="flex-nowrap pr-8">
+                  <Tag id="all" textValue={t("allTopics")}>
+                    {t("allTopics")}
+                  </Tag>
+                  {categories.map((category) => (
+                    <Tag key={category.id} id={String(category.id)} textValue={category.name}>
+                      {category.name}
+                      <span className="text-muted text-xs tabular-nums">{category.count}</span>
+                    </Tag>
+                  ))}
+                </TagGroup.List>
+              </TagGroup>
+            </ScrollShadow>
+          ) : null}
+        </section>
 
         {discoveryQuery.isError && featuredQuery.isError ? (
           <Alert status="danger">
@@ -727,7 +819,12 @@ export function JournalPage() {
             <section aria-labelledby="latest-title" className="flex flex-col gap-4">
               <div className="flex items-baseline justify-between gap-4">
                 <Typography id="latest-title" type="h3" weight="semibold">
-                  {t("latest")}
+                  {normalizedQuery
+                    ? t("searchResults")
+                    : selectedCategoryId
+                      ? (categories.find((category) => category.id === selectedCategoryId)?.name ??
+                        t("latest"))
+                      : t("latest")}
                 </Typography>
                 <span className="text-muted text-xs tabular-nums">
                   <NumberValue locale={locale} value={essayCount}>
@@ -762,13 +859,15 @@ export function JournalPage() {
                   ))}
                   <LatestPagination
                     page={latestPage + 1}
-                    pages={Math.max(1, latestQuery.data?.totalPages ?? 1)}
+                    pages={Math.max(1, latestQuery.currentData?.totalPages ?? 1)}
                     onPageChange={(page) => {
-                      if (page <= 1) {
-                        router.replace("/single", { scroll: true });
-                        return;
-                      }
-                      router.replace(`/single?page=${page}`, { scroll: true });
+                      const query = new URLSearchParams(searchParams.toString());
+                      if (page <= 1) query.delete("page");
+                      else query.set("page", String(page));
+                      const serialized = query.toString();
+                      router.replace(serialized ? `/single?${serialized}` : "/single", {
+                        scroll: true,
+                      });
                     }}
                   />
                 </div>
@@ -803,7 +902,8 @@ export function JournalPage() {
           </aside>
         </div>
 
-        {featuredPosts.some((post) => post.slug && !shownSlugs.has(post.slug)) ? (
+        {!hasArchiveFilters &&
+        featuredPosts.some((post) => post.slug && !shownSlugs.has(post.slug)) ? (
           <>
             <Separator />
             <div data-journal-reveal="">

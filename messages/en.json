@@ -256,6 +256,8 @@
     "moreActions": "More article actions",
     "moreActionsTitle": "More actions",
     "copyLink": "Copy link",
+    "shareArticle": "Share article",
+    "shared": "Article shared.",
     "linkCopied": "Article link copied.",
     "linkCopyFailed": "Unable to copy article link.",
     "loginToLike": "Please log in to like this article.",
@@ -295,7 +297,11 @@
     "readNext": "Read next",
     "keepReading": "Keep reading",
     "moreInCategory": "More in {name}",
-    "moreFromAuthor": "More from {name}"
+    "moreFromAuthor": "More from {name}",
+    "code": "Code",
+    "copyCode": "Copy code",
+    "codeCopied": "Code copied.",
+    "codeCopyFailed": "Unable to copy code."
   },
   "Library": {
     "signInTitle": "Your reading library",

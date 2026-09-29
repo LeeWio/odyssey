@@ -256,6 +256,8 @@
     "moreActions": "更多文章操作",
     "moreActionsTitle": "更多操作",
     "copyLink": "复制链接",
+    "shareArticle": "分享文章",
+    "shared": "文章已分享。",
     "linkCopied": "文章链接已复制。",
     "linkCopyFailed": "无法复制文章链接。",
     "loginToLike": "请先登录后再喜欢这篇文章。",
@@ -295,7 +297,11 @@
     "readNext": "下一篇推荐",
     "keepReading": "接着读",
     "moreInCategory": "{name} 里的其他文章",
-    "moreFromAuthor": "{name} 的其他文章"
+    "moreFromAuthor": "{name} 的其他文章",
+    "code": "代码",
+    "copyCode": "复制代码",
+    "codeCopied": "代码已复制。",
+    "codeCopyFailed": "无法复制代码。"
   },
   "Library": {
     "signInTitle": "你的阅读书架",

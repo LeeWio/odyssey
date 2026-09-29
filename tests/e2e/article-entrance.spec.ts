@@ -162,3 +162,29 @@ test("a block taller than the viewport still reveals on entry", async ({ page })
   await block.evaluate((element) => element.scrollIntoView({ block: "start" }));
   await expect(block).toHaveCSS("opacity", "1");
 });
+
+test("code blocks expose a copy action", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value: string) => window.localStorage.setItem("copied-code", value),
+      },
+    });
+  });
+  await openArticle(page, [
+    {
+      type: "codeBlock",
+      attrs: { language: "typescript" },
+      content: [{ type: "text", text: "const answer = 42;" }],
+    },
+  ]);
+
+  const codeBlock = page.locator("[data-node-view-wrapper]");
+  await expect(codeBlock.getByRole("button", { name: "Copy code" })).toBeVisible();
+  await codeBlock.getByRole("button", { name: "Copy code" }).click();
+  await expect(page.getByText("Code copied.", { exact: true })).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => window.localStorage.getItem("copied-code")))
+    .toBe("const answer = 42;");
+});

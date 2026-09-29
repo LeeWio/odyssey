@@ -2,7 +2,8 @@
 
 import { Surface, Typography } from "@heroui/react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
-import NextImage from "next/image";
+
+import { MediumImageZoom } from "@/features/blog/reader/medium-image-zoom";
 
 import {
   IMAGE_ALIGNMENT_CLASS_NAMES,
@@ -54,15 +55,7 @@ export function ImageView({ editor, getPos, node }: NodeViewProps) {
     >
       <figure className="max-w-full flex-none" style={{ width: `${widthPercent}%` }}>
         <Surface variant="transparent" className="relative overflow-hidden rounded-2xl">
-          <NextImage
-            alt={alt}
-            className="h-auto w-full object-contain"
-            height={900}
-            sizes="(max-width: 768px) 100vw, 960px"
-            src={src}
-            unoptimized
-            width={1600}
-          />
+          <MediumImageZoom alt={alt} className="w-full" src={src} unoptimized />
         </Surface>
         {caption ? (
           <figcaption className="mt-2 text-center">

@@ -429,10 +429,22 @@ export default function SinglePage({ params }: SinglePageProps) {
   }, [isAuthenticated, postId, readingProgress, readingProgressPostId, recordReadingProgress]);
 
   const handleShare = async () => {
+    const shareData = {
+      title: article?.title || t("essay"),
+      text: article?.summary || undefined,
+      url: window.location.href,
+    };
+
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast.success(t("shared"));
+        return;
+      }
+      await navigator.clipboard.writeText(shareData.url);
       toast.success(t("linkCopied"));
-    } catch {
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
       toast.danger(t("linkCopyFailed"));
     }
   };
@@ -771,7 +783,8 @@ export default function SinglePage({ params }: SinglePageProps) {
                   <Popover.Heading>{t("moreActionsTitle")}</Popover.Heading>
                   <div className="mt-3 flex flex-col gap-1">
                     <Button fullWidth variant="ghost" onPress={handleShare}>
-                      {t("copyLink")}
+                      <Icon icon="gravity-ui:share" />
+                      {t("shareArticle")}
                     </Button>
                     {isAuthenticated ? (
                       <>
