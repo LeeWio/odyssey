@@ -103,6 +103,8 @@ test("keeps article reading usable on a narrow viewport", async ({ page }) => {
   await image.click();
   await expect(page.getByRole("dialog", { name: "Image preview" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Close image preview" })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Close image preview" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog", { name: "Image preview" })).toHaveCount(0);
   await expect(imageTrigger).toBeFocused();

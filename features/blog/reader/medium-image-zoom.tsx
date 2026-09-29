@@ -30,6 +30,10 @@ export function MediumImageZoom({ src, alt, className, unoptimized }: MediumImag
       document.body.style.overflow = "hidden";
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") closeZoom();
+        if (e.key === "Tab") {
+          e.preventDefault();
+          closeButtonRef.current?.focus();
+        }
       };
       window.addEventListener("keydown", handleKeyDown);
       closeButtonRef.current?.focus();
