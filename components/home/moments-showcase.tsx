@@ -19,9 +19,13 @@ const MomentsMasonry = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="[columns:20rem] gap-5">
         {Array.from({ length: 6 }).map((_, index) => (
-          <Skeleton key={index} className="aspect-[4/5] w-full rounded-2xl" />
+          <div key={index} className="mb-5 break-inside-avoid">
+            <Skeleton
+              className={`w-full rounded-2xl ${index % 3 === 0 ? "aspect-[4/5]" : index % 3 === 1 ? "aspect-[5/6]" : "aspect-square"}`}
+            />
+          </div>
         ))}
       </div>
     ),
@@ -95,9 +99,13 @@ export function MomentsShowcase() {
           />
         )}
         {isLoading && recentMoments.length === 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="[columns:20rem] gap-5" aria-busy="true" role="status">
             {Array.from({ length: MOMENTS_SHOWCASE_LIMIT }, (_, index) => (
-              <Skeleton key={index} className="h-44 w-full rounded-2xl" />
+              <div key={index} className="mb-5 break-inside-avoid">
+                <Skeleton
+                  className={`w-full rounded-2xl ${index % 4 === 0 ? "h-64" : index % 4 === 1 ? "h-44" : index % 4 === 2 ? "h-52" : "h-36"}`}
+                />
+              </div>
             ))}
           </div>
         ) : recentMoments.length > 0 ? (

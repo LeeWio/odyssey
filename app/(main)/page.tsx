@@ -32,6 +32,82 @@ import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
+function SkeletonSectionHeader({
+  centered = false,
+  eyebrow = "w-24",
+  title = "w-72",
+  description = "w-full max-w-xl",
+}: {
+  centered?: boolean;
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+}) {
+  return (
+    <div className={centered ? "flex flex-col items-center text-center" : "max-w-xl"}>
+      <Skeleton className={`h-5 rounded-full ${eyebrow}`} />
+      <Skeleton className={`mt-5 h-12 rounded-xl ${title}`} />
+      <Skeleton className={`mt-4 h-5 rounded-lg ${description}`} />
+    </div>
+  );
+}
+
+function SkeletonMetaLine({ className = "w-24" }: { className?: string }) {
+  return <Skeleton className={`h-4 rounded-md ${className}`} />;
+}
+
+function SkeletonArticleCard() {
+  return (
+    <div className="bg-surface-secondary/45 flex aspect-[16/10] flex-col justify-between rounded-3xl p-5">
+      <div className="flex items-center justify-between gap-3">
+        <Skeleton className="h-6 w-20 rounded-full" />
+        <Skeleton className="h-6 w-24 rounded-full" />
+      </div>
+      <div className="flex flex-col gap-3">
+        <Skeleton className="h-7 w-4/5 rounded-lg" />
+        <Skeleton className="h-4 w-full rounded-md" />
+        <Skeleton className="h-4 w-3/5 rounded-md" />
+      </div>
+    </div>
+  );
+}
+
+function SkeletonProjectCard() {
+  return (
+    <Card variant="secondary" className="overflow-hidden p-0">
+      <Skeleton className="aspect-[16/10] w-full rounded-none" />
+      <Card.Header className="gap-3">
+        <Skeleton className="h-6 w-36 rounded-lg" />
+        <Skeleton className="h-4 w-full rounded-md" />
+        <Skeleton className="h-4 w-4/5 rounded-md" />
+        <div className="flex gap-2">
+          <Skeleton className="h-6 w-20 rounded-full" />
+          <Skeleton className="h-6 w-24 rounded-full" />
+        </div>
+      </Card.Header>
+    </Card>
+  );
+}
+
+function SkeletonFriendLinkCard() {
+  return (
+    <Card variant="secondary" className="min-h-44 gap-4 p-5">
+      <div className="flex items-center gap-3">
+        <Skeleton className="size-11 rounded-full" />
+        <div className="flex flex-1 flex-col gap-2">
+          <Skeleton className="h-4 w-28 rounded-md" />
+          <Skeleton className="h-3 w-36 rounded-md" />
+        </div>
+        <Skeleton className="size-4 rounded-full" />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-4 w-full rounded-md" />
+        <Skeleton className="h-4 w-4/5 rounded-md" />
+      </div>
+    </Card>
+  );
+}
+
 const GradientText = dynamic(() => import("@/components/ui/gradient-text"), {
   ssr: false,
   loading: () => <span className="contents" />,
@@ -39,7 +115,25 @@ const GradientText = dynamic(() => import("@/components/ui/gradient-text"), {
 
 const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-board"), {
   ssr: false,
-  loading: () => <Skeleton className="min-h-64 w-full rounded-3xl" />,
+  loading: () => (
+    <div
+      aria-busy="true"
+      aria-label="Loading guestbook"
+      className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 px-6 py-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      role="status"
+    >
+      {Array.from({ length: 8 }, (_, index) => (
+        <Card key={index} variant="secondary" className="flex min-h-36 flex-col gap-3 p-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className="size-8 rounded-full" />
+            <SkeletonMetaLine className="w-24" />
+          </div>
+          <SkeletonMetaLine className="w-full" />
+          <SkeletonMetaLine className="w-5/6" />
+        </Card>
+      ))}
+    </div>
+  ),
 });
 
 const FeaturedWriting = dynamic(
@@ -48,11 +142,10 @@ const FeaturedWriting = dynamic(
     ssr: false,
     loading: () => (
       <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
-        <Skeleton className="mx-auto h-10 w-48 rounded-full" />
-        <Skeleton className="mx-auto mt-6 h-12 w-72 rounded-2xl" />
+        <SkeletonSectionHeader centered eyebrow="w-28" title="w-72" />
         <div className="mt-12 grid gap-4 sm:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} className="aspect-[16/10] w-full rounded-3xl" />
+            <SkeletonArticleCard key={index} />
           ))}
         </div>
       </div>
@@ -66,12 +159,13 @@ const MomentsShowcase = dynamic(
     ssr: false,
     loading: () => (
       <div className="w-full px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
-        <Skeleton className="mx-auto h-10 w-40 rounded-full" />
-        <Skeleton className="mx-auto mt-6 h-12 w-64 rounded-2xl" />
+        <SkeletonSectionHeader centered eyebrow="w-24" title="w-64" />
         <div className="mt-12 [columns:20rem] gap-5">
           {Array.from({ length: 6 }).map((_, index) => (
             <div key={index} className="mb-5 break-inside-avoid">
-              <Skeleton className="aspect-[4/5] w-full rounded-2xl" />
+              <Skeleton
+                className={`w-full rounded-2xl ${index % 3 === 0 ? "aspect-[4/5]" : index % 3 === 1 ? "aspect-[5/6]" : "aspect-[1/1]"}`}
+              />
             </div>
           ))}
         </div>
@@ -86,14 +180,12 @@ const ProjectsShowcase = dynamic(
     ssr: false,
     loading: () => (
       <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
-        <Skeleton className="h-10 w-40 rounded-full" />
-        <Skeleton className="mt-6 h-12 w-full max-w-xl rounded-2xl" />
-        <div className="mt-10 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <Skeleton className="min-h-[29rem] rounded-3xl" />
-          <div className="grid gap-4">
-            <Skeleton className="min-h-56 rounded-3xl" />
-            <Skeleton className="min-h-56 rounded-3xl" />
-          </div>
+        <SkeletonSectionHeader title="w-full max-w-xl" />
+        <div className="bg-separator mt-8 h-px w-full" />
+        <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <SkeletonProjectCard key={index} />
+          ))}
         </div>
       </div>
     ),
@@ -106,11 +198,16 @@ const GalleryShowcase = dynamic(
     ssr: false,
     loading: () => (
       <div className="mx-auto w-full max-w-7xl px-6 py-24 sm:px-10 sm:py-32">
-        <Skeleton className="h-10 w-28 rounded-full" />
-        <Skeleton className="mt-6 h-12 w-full max-w-xl rounded-2xl" />
+        <SkeletonSectionHeader title="w-full max-w-xl" />
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} className="aspect-[4/3] w-full rounded-3xl" />
+            <Card key={index} variant="secondary" className="overflow-hidden p-0">
+              <Skeleton className="aspect-[4/3] w-full rounded-none" />
+              <Card.Header className="gap-2">
+                <Skeleton className="h-6 w-2/3 rounded-lg" />
+                <Skeleton className="h-4 w-1/2 rounded-md" />
+              </Card.Header>
+            </Card>
           ))}
         </div>
       </div>
@@ -124,11 +221,10 @@ const FriendLinksShowcase = dynamic(
     ssr: false,
     loading: () => (
       <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
-        <Skeleton className="h-10 w-36 rounded-full" />
-        <Skeleton className="mt-6 h-12 w-full max-w-xl rounded-2xl" />
+        <SkeletonSectionHeader title="w-full max-w-xl" />
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="min-h-44 rounded-3xl" />
+          {Array.from({ length: 4 }, (_, index) => (
+            <SkeletonFriendLinkCard key={index} />
           ))}
         </div>
       </div>
@@ -142,8 +238,10 @@ const FootprintsShowcase = dynamic(
     ssr: false,
     loading: () => (
       <div className="w-full py-24 sm:py-32">
-        <Skeleton className="mx-6 h-12 w-72 rounded-2xl sm:mx-10" />
-        <Skeleton className="mx-6 mt-3 h-6 w-full max-w-xl rounded-xl sm:mx-10" />
+        <div className="flex flex-col gap-6 px-6 sm:flex-row sm:items-end sm:justify-between sm:px-10">
+          <SkeletonSectionHeader title="w-72" description="w-full max-w-xl" />
+          <Skeleton className="h-5 w-32 rounded-md" />
+        </div>
         <Skeleton className="mt-10 h-[clamp(28rem,60svh,44rem)] w-full rounded-lg" />
       </div>
     ),
@@ -156,8 +254,7 @@ const LatelySection = dynamic(
     ssr: false,
     loading: () => (
       <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
-        <Skeleton className="mx-auto h-10 w-32 rounded-full" />
-        <Skeleton className="mx-auto mt-6 h-12 w-80 rounded-2xl" />
+        <SkeletonSectionHeader centered eyebrow="w-20" title="w-80" description="w-96" />
         <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-12">
           <Skeleton className="min-h-[34rem] rounded-3xl lg:col-span-7" />
           <Skeleton className="min-h-[34rem] rounded-3xl lg:col-span-5" />

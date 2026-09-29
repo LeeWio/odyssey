@@ -185,10 +185,20 @@ export function FeaturedWriting() {
         {isLoading && posts.length === 0 ? (
           <div className="grid gap-4 sm:grid-cols-3">
             {Array.from({ length: 3 }, (_, index) => (
-              <Card key={index} variant="secondary">
-                <Skeleton className="h-4 w-16 rounded-md" />
-                <Skeleton className="mt-6 h-16 w-full rounded-md" />
-                <Skeleton className="mt-3 h-10 w-full rounded-md" />
+              <Card
+                key={index}
+                variant="secondary"
+                className="bg-surface-secondary/45 flex aspect-[16/10] flex-col justify-between overflow-hidden p-5"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                  <Skeleton className="h-6 w-24 rounded-full" />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Skeleton className="h-7 w-4/5 rounded-lg" />
+                  <Skeleton className="h-4 w-full rounded-md" />
+                  <Skeleton className="h-4 w-3/5 rounded-md" />
+                </div>
               </Card>
             ))}
           </div>
