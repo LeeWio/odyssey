@@ -1,3 +1,10 @@
+## [1.187.3](https://github.com/LeeWio/odyssey/compare/v1.187.2...v1.187.3) (2026-09-29)
+
+
+### Bug Fixes
+
+* **performance:** calculate ttfb from navigation start ([a78590f](https://github.com/LeeWio/odyssey/commit/a78590f39af7e57aef44bcc3de58787c0a8d8d48))
+
 ## [1.187.2](https://github.com/LeeWio/odyssey/compare/v1.187.1...v1.187.2) (2026-09-29)
 
 
