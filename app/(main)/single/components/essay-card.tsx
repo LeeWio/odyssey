@@ -4,6 +4,8 @@ import { NumberValue } from "@heroui-pro/react";
 import { Card, Link } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { getPostPublishedAt } from "@/lib/features/post/post-dates";
+
 export interface EssayCardPost {
   id?: number;
   title?: string | null;
@@ -36,7 +38,7 @@ export function EssayCard({ post }: { post: EssayCardPost }) {
   const title = post.title || t("untitledStory");
   const cover = post.coverImage?.trim();
   const slug = post.slug ?? "";
-  const date = post.publishedAt || post.createdAt;
+  const date = getPostPublishedAt(post);
 
   return (
     <Card className="h-full">

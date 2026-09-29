@@ -45,6 +45,7 @@ import {
   useLikePostMutation,
   useUnlikePostMutation,
 } from "@/lib/features/post";
+import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 import { useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
 import { getReadingPositionId } from "@/lib/reading-position";
@@ -148,7 +149,7 @@ function getAuthorInitials(value?: string | null) {
 }
 
 function ArticleStructuredData({ article, slug }: { article: PostResponse; slug: string }) {
-  const publishedAt = article.createdAt;
+  const publishedAt = getPostPublishedAt(article);
   const articleUrl = `${siteConfig.url}/single/${encodeURIComponent(slug)}`;
   const breadcrumbs = [
     { name: "Journal", url: `${siteConfig.url}/single` },
@@ -603,7 +604,7 @@ export default function SinglePage({ params }: SinglePageProps) {
                       </Typography>
                     )}
                   </div>
-                  <ArticleDate value={article.publishedAt || article.createdAt} />
+                  <ArticleDate value={getPostPublishedAt(article)} />
                   {article.updatedAt && article.updatedAt !== article.createdAt ? (
                     <Typography color="muted" type="body-sm">
                       {t("updated", {

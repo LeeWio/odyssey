@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 
 import { type PostResponse, useGetPublicPostsQuery } from "@/lib/features/post";
+import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 
 import { EssayPagination } from "../../components/essay-pagination";
@@ -57,7 +58,7 @@ function EssayRow({ lead = false, post }: { lead?: boolean; post: PostResponse }
           </Link>
         </ItemCard.Title>
         <p className="text-muted text-xs">
-          {[post.category?.name, formatDate(post.publishedAt || post.createdAt, locale)]
+          {[post.category?.name, formatDate(getPostPublishedAt(post), locale)]
             .filter(Boolean)
             .join(" · ")}
         </p>
