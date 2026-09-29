@@ -1,3 +1,10 @@
+## [1.187.9](https://github.com/LeeWio/odyssey/compare/v1.187.8...v1.187.9) (2026-09-29)
+
+
+### Bug Fixes
+
+* **home:** refine loading skeletons ([2c3a4af](https://github.com/LeeWio/odyssey/commit/2c3a4af46c58797c9682356388d9a315644c60dc))
+
 ## [1.187.8](https://github.com/LeeWio/odyssey/compare/v1.187.7...v1.187.8) (2026-09-29)
 
 
