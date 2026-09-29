@@ -1,3 +1,10 @@
+## [1.186.2](https://github.com/LeeWio/odyssey/compare/v1.186.1...v1.186.2) (2026-09-29)
+
+
+### Bug Fixes
+
+* **single:** improve mobile article reading ([00d3fa0](https://github.com/LeeWio/odyssey/commit/00d3fa05a8a71eb4dcee8bbe03dff7a946b9b276))
+
 ## [1.186.1](https://github.com/LeeWio/odyssey/compare/v1.186.0...v1.186.1) (2026-09-29)
 
 
