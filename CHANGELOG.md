@@ -1,3 +1,10 @@
+# [1.184.0](https://github.com/LeeWio/odyssey/compare/v1.183.0...v1.184.0) (2026-09-29)
+
+
+### Features
+
+* **single:** improve article discovery and metadata ([1e14ee8](https://github.com/LeeWio/odyssey/commit/1e14ee86c6b67f81aaede896ef64e59a4157e1bd))
+
 # [1.183.0](https://github.com/LeeWio/odyssey/compare/v1.182.0...v1.183.0) (2026-09-28)
 
 
