@@ -41,6 +41,7 @@ export default function WebVitals() {
     const report = (metric: WebVitalMetric) => reportMetric(endpoint, metric);
     const observers: PerformanceObserver[] = [];
     const latest = new Map<string, number>();
+    const flushed = new Set<string>();
 
     const observe = (
       type: string,
@@ -49,21 +50,27 @@ export default function WebVitals() {
     ) => {
       try {
         const observer = new PerformanceObserver((list) => {
-          const entry = list.getEntries().at(-1);
-          if (!entry) return;
-          const nextValue = value(entry);
-          if (name === "CLS" && nextValue === 0) return;
-          if (latest.get(name) === nextValue) return;
-          latest.set(name, nextValue);
-          report(
-            createMetricPayload({
-              id: `${name}-${Math.round(entry.startTime)}`,
-              name,
-              value: nextValue,
-            })
-          );
+          for (const entry of list.getEntries()) {
+            const entryValue = value(entry);
+            if (name === "CLS" && entryValue === 0) continue;
+            const previousValue = latest.get(name) ?? 0;
+            const nextValue =
+              name === "CLS" ? previousValue + entryValue : Math.max(previousValue, entryValue);
+            if (nextValue === previousValue) continue;
+            latest.set(name, nextValue);
+            flushed.delete(name);
+            const id = `${name}-${Math.round(entry.startTime)}`;
+            report(createMetricPayload({ id, name, value: nextValue }));
+          }
         });
-        observer.observe({ type, buffered: true });
+        const options =
+          type === "event"
+            ? ({ type: "event", buffered: true, durationThreshold: 40 } as PerformanceObserverInit)
+            : ({
+                type: type as "largest-contentful-paint",
+                buffered: true,
+              } as PerformanceObserverInit);
+        observer.observe(options);
         observers.push(observer);
       } catch {
         // Metric types are progressively enhanced by the browser.
@@ -80,7 +87,31 @@ export default function WebVitals() {
     observe("navigation", "TTFB", (entry) => (entry as PerformanceNavigationTiming).responseStart);
     observePaint("FCP", report);
 
-    return () => observers.forEach((observer) => observer.disconnect());
+    const flush = () => {
+      for (const [name, value] of latest) {
+        if (flushed.has(name)) continue;
+        flushed.add(name);
+        report(
+          createMetricPayload({
+            id: `${name}-final`,
+            name: name as WebVitalName,
+            value,
+          })
+        );
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", flush);
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", flush);
+    };
   }, []);
 
   return null;
