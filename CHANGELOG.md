@@ -1,3 +1,10 @@
+## [1.187.5](https://github.com/LeeWio/odyssey/compare/v1.187.4...v1.187.5) (2026-09-29)
+
+
+### Bug Fixes
+
+* **single:** trap focus in image preview ([aa56ab5](https://github.com/LeeWio/odyssey/commit/aa56ab5e2aa61327b1ea6ef39fa329914fb236b9))
+
 ## [1.187.4](https://github.com/LeeWio/odyssey/compare/v1.187.3...v1.187.4) (2026-09-29)
 
 
