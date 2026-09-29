@@ -10,7 +10,11 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
-      value: { writeText: async () => undefined },
+      value: {
+        writeText: async (value: string) => {
+          window.sessionStorage.setItem("copied-article-link", value);
+        },
+      },
     });
   });
   await page.route("**/api/v1/**", async (route) => {
@@ -132,4 +136,27 @@ test("uses Web Share when the browser provides it", async ({ page }) => {
       })
     );
   await expect(page.getByText("Article shared.", { exact: true })).toBeVisible();
+});
+
+test("copies the article link when Web Share is unavailable", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: undefined,
+    });
+  });
+
+  await page.goto("/single/mobile-reading");
+  await expect(
+    page.getByRole("heading", { name: "Mobile reading article", exact: true })
+  ).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 500));
+  await page.evaluate(() => window.scrollTo(0, 200));
+  await page.getByRole("button", { name: "More article actions" }).click();
+  await page.getByRole("button", { name: "Share article" }).click();
+
+  await expect
+    .poll(() => page.evaluate(() => window.sessionStorage.getItem("copied-article-link")))
+    .toBe("http://127.0.0.1:3100/single/mobile-reading");
+  await expect(page.getByText("Article link copied.", { exact: true })).toBeVisible();
 });
