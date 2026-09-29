@@ -1,3 +1,10 @@
+# [1.185.0](https://github.com/LeeWio/odyssey/compare/v1.184.0...v1.185.0) (2026-09-29)
+
+
+### Features
+
+* **single:** harden pagination and author listings ([9ec8560](https://github.com/LeeWio/odyssey/commit/9ec856013e81c0988bf9e31ca7dae50b209cca32))
+
 # [1.184.0](https://github.com/LeeWio/odyssey/compare/v1.183.0...v1.184.0) (2026-09-29)
 
 
