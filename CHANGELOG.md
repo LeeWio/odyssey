@@ -1,3 +1,10 @@
+# [1.186.0](https://github.com/LeeWio/odyssey/compare/v1.185.1...v1.186.0) (2026-09-29)
+
+
+### Features
+
+* **single:** enhance journal discovery and article reading ([f8831c6](https://github.com/LeeWio/odyssey/commit/f8831c6e873327b8f2f4c9353a1b2f48133af66a))
+
 ## [1.185.1](https://github.com/LeeWio/odyssey/compare/v1.185.0...v1.185.1) (2026-09-29)
 
 
