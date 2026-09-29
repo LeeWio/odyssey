@@ -1,3 +1,10 @@
+## [1.186.1](https://github.com/LeeWio/odyssey/compare/v1.186.0...v1.186.1) (2026-09-29)
+
+
+### Performance Improvements
+
+* **single:** pre-render article content ([e2b3481](https://github.com/LeeWio/odyssey/commit/e2b34810a656d680d970fdcea4cb7183ee2d8c78))
+
 # [1.186.0](https://github.com/LeeWio/odyssey/compare/v1.185.1...v1.186.0) (2026-09-29)
 
 
