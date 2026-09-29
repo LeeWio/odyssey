@@ -97,10 +97,15 @@ test("keeps article reading usable on a narrow viewport", async ({ page }) => {
   ).toBe(true);
 
   const image = page.getByRole("img", { name: "Reading detail" });
+  const imageTrigger = page.getByRole("button", {
+    name: "Open Reading detail in full-screen preview",
+  });
   await image.click();
-  await expect(page.locator(".fixed.z-\\[200\\] img")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Image preview" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Close image preview" })).toBeFocused();
   await page.keyboard.press("Escape");
-  await expect(page.locator(".fixed.z-\\[200\\]")).toHaveCount(0);
+  await expect(page.getByRole("dialog", { name: "Image preview" })).toHaveCount(0);
+  await expect(imageTrigger).toBeFocused();
 
   await page.evaluate(() => window.scrollTo(0, 500));
   await page.evaluate(() => window.scrollTo(0, 200));
