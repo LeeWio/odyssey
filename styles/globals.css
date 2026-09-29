@@ -24,6 +24,15 @@
   opacity: 0;
 }
 
+/* Read-only code nodes keep long lines scrollable on narrow screens. */
+.ProseMirror .node-codeBlock > [data-node-view-content-react] {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 1rem;
+  white-space: pre !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rich-text-block-enter,
   .rich-text-block-enter-pending {

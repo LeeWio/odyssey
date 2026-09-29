@@ -6,7 +6,7 @@ import { CodeBlockReaderView } from "./code-block-reader-view";
 export const ReaderCodeBlock = CodeBlock.extend({
   addNodeView() {
     return ReactNodeViewRenderer(CodeBlockReaderView, {
-      contentDOMElementTag: "code",
+      contentDOMElementTag: "pre",
     });
   },
 });

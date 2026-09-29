@@ -20,6 +20,11 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      name: "mobile-chromium",
+      testMatch: /article-mobile\.spec\.ts/,
+      use: { ...devices["Pixel 5"] },
+    },
   ],
   webServer: externalBaseUrl
     ? undefined
