@@ -1,3 +1,15 @@
+# [1.188.0](https://github.com/LeeWio/odyssey/compare/v1.187.9...v1.188.0) (2026-09-30)
+
+
+### Bug Fixes
+
+* **web:** prevent auth state leakage between accounts ([1e05719](https://github.com/LeeWio/odyssey/commit/1e05719c50346738c76f34e00cdd83eeab194ead))
+
+
+### Features
+
+* **web:** persist blog discovery filters in URL ([768c10d](https://github.com/LeeWio/odyssey/commit/768c10dce1aa733e6727e072b0bb75be278fa469))
+
 ## [1.187.9](https://github.com/LeeWio/odyssey/compare/v1.187.8...v1.187.9) (2026-09-29)
 
 
