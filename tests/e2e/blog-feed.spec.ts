@@ -125,6 +125,27 @@ test("topic selection resets pagination and an empty topic can return to all wri
   }
 });
 
+test("search filters and page are restored from the URL after reload", async ({ page }) => {
+  const requests: string[] = [];
+  await page.route(endpoint, async (route) => {
+    const params = new URL(route.request().url()).searchParams;
+    requests.push(`${params.get("keyword")}:${params.get("categoryId")}:${params.get("page")}`);
+    await route.fulfill({ json: result([post(2, "Systems article")], 1, 9) });
+  });
+
+  await page.goto("/blog?keyword=systems&categoryId=1&page=2");
+  const results = page.locator("#all-writing");
+  await expect(page.getByRole("searchbox", { name: "Search articles" })).toHaveValue("systems");
+  await expect(results.getByText("Systems article", { exact: true })).toBeVisible();
+  await expect.poll(() => requests.at(-1)).toBe("systems:1:1");
+
+  await page.reload();
+  await expect(page.getByRole("searchbox", { name: "Search articles" })).toHaveValue("systems");
+  await expect(results.getByText("Systems article", { exact: true })).toBeVisible();
+  await expect.poll(() => requests.length).toBeGreaterThanOrEqual(2);
+  expect(requests.at(-1)).toBe("systems:1:1");
+});
+
 test("a failed second page retains Previous without reusing the first page totals", async ({
   page,
 }) => {

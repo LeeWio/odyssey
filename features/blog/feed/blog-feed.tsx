@@ -26,7 +26,8 @@ import {
 } from "@heroui/react";
 import { AnimatePresence, animate as animateMotion, motion, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useDeferredValue, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { useAppSelector } from "@/lib/hooks";
@@ -511,14 +512,49 @@ function getPageNumbers(page: number, totalPages: number) {
   return values;
 }
 
+function parsePositiveInteger(value: string | null) {
+  if (!value) return undefined;
+
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
 export default function BlogFeed() {
   const t = useTranslations("Blog");
   const shouldReduceMotion = useReducedMotion() ?? false;
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const [page, setPage] = useState(0);
-  const [searchValue, setSearchValue] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number>();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const page = Math.max(0, (parsePositiveInteger(searchParams.get("page")) ?? 1) - 1);
+  const categoryId = parsePositiveInteger(searchParams.get("categoryId"));
+  const selectedCategoryId = categoryId;
+  const [searchValue, setSearchValue] = useState(() => searchParams.get("keyword") ?? "");
   const scrollAnimationRef = useRef<{ stop: () => void } | null>(null);
+  const updateSearch = useCallback(
+    (changes: Record<string, string | undefined>) => {
+      const next = new URLSearchParams(searchParams.toString());
+
+      Object.entries(changes).forEach(([key, value]) => {
+        if (value) next.set(key, value);
+        else next.delete(key);
+      });
+
+      const query = next.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+
+  useEffect(() => {
+    const syncKeywordFromHistory = () => {
+      setSearchValue(new URLSearchParams(window.location.search).get("keyword") ?? "");
+    };
+
+    window.addEventListener("popstate", syncKeywordFromHistory);
+    return () => window.removeEventListener("popstate", syncKeywordFromHistory);
+  }, []);
+
   const normalizedKeyword = searchValue.trim();
   const keyword = useDeferredValue(normalizedKeyword);
   const isDeferringKeyword = keyword !== normalizedKeyword;
@@ -535,7 +571,12 @@ export default function BlogFeed() {
   const lastPage = Math.max(0, (currentData?.totalPages ?? 1) - 1);
   const isAdjustingPage =
     !isDeferringKeyword && isSuccess && !isFetching && !!currentData && page > lastPage;
-  if (isAdjustingPage) setPage(lastPage);
+  useEffect(() => {
+    if (!isAdjustingPage) return;
+
+    updateSearch({ page: lastPage === 0 ? undefined : String(lastPage + 1) });
+  }, [isAdjustingPage, lastPage, updateSearch]);
+
   const data = isDeferringKeyword || isAdjustingPage ? undefined : currentData;
   const isLoadingPage = isDeferringKeyword || isAdjustingPage || isLoading || (isFetching && !data);
   const isUpdating = isDeferringKeyword || isAdjustingPage || isFetching;
@@ -574,7 +615,7 @@ export default function BlogFeed() {
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
-    setPage(0);
+    updateSearch({ keyword: value.trim() || undefined, page: undefined });
   };
 
   const handleCategoryChange = (keys: "all" | Set<React.Key>) => {
@@ -583,12 +624,14 @@ export default function BlogFeed() {
     const [key] = Array.from(keys);
     const nextCategoryId = key === "all" || key == null ? undefined : Number(key);
 
-    setSelectedCategoryId(Number.isFinite(nextCategoryId) ? nextCategoryId : undefined);
-    setPage(0);
+    updateSearch({
+      categoryId: Number.isFinite(nextCategoryId) ? String(nextCategoryId) : undefined,
+      page: undefined,
+    });
   };
 
   const handlePageChange = (nextPage: number) => {
-    setPage(nextPage);
+    updateSearch({ page: nextPage === 0 ? undefined : String(nextPage + 1) });
     const target = document.getElementById("all-writing");
     if (!target) return;
 
