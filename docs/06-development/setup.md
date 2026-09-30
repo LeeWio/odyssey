@@ -53,14 +53,25 @@ bun run build
 
 ## 后端依赖
 
-后端为 Nexus，当前工作区位于相邻目录 `../nexus`。其 `pom.xml` 声明 Java 21 和 Spring Boot 4.1.0；后端仓库未提供 README，因此启动参数以其配置为准，而不是假定默认值可直接连接生产服务。
+后端为 Nexus，当前工作区位于相邻目录 `../nexus`。其 `pom.xml` 声明 Java 21 和 Spring Boot 4.1.0；本地开发统一通过 Docker 使用 Nexus 的 Compose 配置，避免宿主机 Java、Maven 版本和依赖服务不一致。
 
-本地使用 JDK 21 和 Nexus 自带的 Maven Wrapper：
+启动基础设施并构建后端镜像：
 
 ```bash
 cd ../nexus
-# 按下表在当前终端设置开发环境变量后运行
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+docker compose up -d nexus-db nexus-redis nexus-rabbitmq nexus-mail
+docker build --target test -t nexus-api:test .
+docker build -t nexus-api:local .
+docker compose up -d --no-deps nexus-app
+```
+
+`--target test` 会在 Java 21 容器内运行完整 Maven 测试。日常修改后重新执行最后两条构建命令即可；`--no-deps` 会复用已运行的基础设施，不会删除数据卷。需要 Elasticsearch 搜索时，再执行完整的 `docker compose up -d`。
+
+验证后端：
+
+```bash
+curl --fail --max-time 15 http://127.0.0.1:8080/readyz
+curl --fail --max-time 15 http://127.0.0.1:8080/v3/api-docs -o /tmp/nexus-openapi.json
 ```
 
 | 服务          | 开发配置                                                                          | 说明                   |
@@ -73,7 +84,7 @@ cd ../nexus
 | OAuth         | `GITHUB_OAUTH_CLIENT_ID` / `GITHUB_OAUTH_CLIENT_SECRET` 或 Google 对应变量        | 第三方登录             |
 | 回调与来源    | `OAUTH2_REDIRECT_URI`、`CORS_ALLOWED_ORIGINS`、`APP_BASE_URL`                     | 对齐本地前端来源和回调 |
 
-Nexus 的 `docker-compose.yml` 还提供 MySQL、Redis、RabbitMQ、Elasticsearch、Mailpit 等服务定义。宿主机映射端口分别包含 MySQL 3307、Redis 6380、RabbitMQ 5672、Elasticsearch 9200 和 SMTP 1025。启动之前检查并设置数据库、消息服务和邮件配置；不要直接沿用其他环境的凭据。本次未启动这些基础设施，也未验证完整后端启动。
+Nexus 的 `docker-compose.yml` 还提供 MySQL、Redis、RabbitMQ、Elasticsearch、Mailpit 等服务定义。宿主机映射端口分别包含 MySQL 3307、Redis 6380、RabbitMQ 5672、Elasticsearch 9200 和 SMTP 1025。启动之前检查并设置数据库、消息服务和邮件配置；不要直接沿用其他环境的凭据。
 
 前端仓库不包含核心业务数据库和后端服务。要验证登录、评论、文章、文件上传、市场数据和后台管理，需要先启动兼容的 Odyssey API 服务，并确认：
 
