@@ -1,3 +1,10 @@
+# [1.189.0](https://github.com/LeeWio/odyssey/compare/v1.188.0...v1.189.0) (2026-09-30)
+
+
+### Features
+
+* **web:** add later-reading queue ([ae71dcd](https://github.com/LeeWio/odyssey/commit/ae71dcd9cb60929edfc1b668343a965e644b2c76))
+
 # [1.188.0](https://github.com/LeeWio/odyssey/compare/v1.187.9...v1.188.0) (2026-09-30)
 
 
