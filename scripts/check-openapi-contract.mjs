@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import { buildBackendOperations, normalizeApiPath } from "./openapi-contract-utils.mjs";
 
 const OPENAPI_URL = process.env.OPENAPI_URL ?? "http://localhost:8080/v3/api-docs";
 const INCLUDE_COVERAGE = process.argv.includes("--coverage");
@@ -17,12 +18,6 @@ const collectApiFiles = async (directory) => {
   );
   return files.flat();
 };
-
-const normalizePath = (value) =>
-  value
-    .replace(/\$\{([^}]+)\}/g, (_match, expression) => `{${expression.split(".").at(-1)}}`)
-    .split("?")[0]
-    .replace(/\/$/, "");
 
 const extractFrontendOperations = async () => {
   const files = (await Promise.all(API_ROOTS.map(collectApiFiles))).flat();
@@ -43,7 +38,7 @@ const extractFrontendOperations = async () => {
         endpoint: endpoint[1],
         file,
         method: methodMatch?.[1] ?? (endpoint[2] === "query" ? "GET" : "POST"),
-        path: normalizePath(pathMatch[0]),
+        path: normalizeApiPath(pathMatch[0]),
       });
     });
   }
@@ -68,18 +63,7 @@ if (!response.ok) {
 }
 
 const document = await response.json();
-const backendOperations = new Map();
-
-for (const [endpointPath, pathItem] of Object.entries(document.paths ?? {})) {
-  for (const method of ENDPOINT_METHODS) {
-    const operation = pathItem[method];
-    if (!operation) continue;
-    backendOperations.set(`${method.toUpperCase()} ${endpointPath}`, {
-      operationId: operation.operationId,
-      tags: operation.tags?.length ? operation.tags : ["Untagged"],
-    });
-  }
-}
+const backendOperations = buildBackendOperations(document.paths, ENDPOINT_METHODS);
 
 const frontendOperations = await extractFrontendOperations();
 const missing = frontendOperations.filter(

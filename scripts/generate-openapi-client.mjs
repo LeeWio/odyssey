@@ -1,5 +1,6 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { normalizeApiPath } from "./openapi-contract-utils.mjs";
 
 const OPENAPI_URL = process.env.OPENAPI_URL ?? "http://localhost:8080/v3/api-docs";
 const OUTPUT_DIRECTORY = "lib/features/openapi";
@@ -20,12 +21,6 @@ const collectApiFiles = async (directory) => {
   return files.flat();
 };
 
-const normalizePath = (value) =>
-  value
-    .replace(/\$\{([^}]+)\}/g, (_match, expression) => `{${expression.split(".").at(-1)}}`)
-    .split("?")[0]
-    .replace(/\/$/, "");
-
 const getExistingOperations = async () => {
   const files = (
     await Promise.all(["lib/features", "features"].map((root) => collectApiFiles(root)))
@@ -42,7 +37,7 @@ const getExistingOperations = async () => {
       if (!pathMatch) return;
       const methodMatch = block.match(/method:\s*["'](GET|POST|PUT|PATCH|DELETE)["']/);
       const method = methodMatch?.[1] ?? (endpoint[2] === "query" ? "GET" : "POST");
-      operations.add(`${method} ${normalizePath(pathMatch[0])}`);
+      operations.add(`${method} ${normalizeApiPath(pathMatch[0])}`);
     });
   }
   return operations;
@@ -181,7 +176,8 @@ const missing = [];
 for (const [endpointPath, pathItem] of Object.entries(document.paths ?? {})) {
   for (const method of METHODS) {
     const operation = pathItem[method];
-    if (!operation || existing.has(`${method.toUpperCase()} ${endpointPath}`)) continue;
+    if (!operation || existing.has(`${method.toUpperCase()} ${normalizeApiPath(endpointPath)}`))
+      continue;
     missing.push({ method, endpointPath, operation });
   }
 }
