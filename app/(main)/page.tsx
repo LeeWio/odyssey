@@ -5,6 +5,7 @@ import { createPageReveal } from "@/lib/motion";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { HelloApple } from "@/components/home/hello-apple";
+import { HomeSmoothScroll } from "@/components/home/home-smooth-scroll";
 import { MotionChip, MotionSurface, MotionTypography } from "@/components/ui";
 import { useState } from "react";
 import dynamic from "next/dynamic";
@@ -293,229 +294,239 @@ export default function Home() {
   const { reveal, revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
-    <div className="bg-background w-full overflow-x-clip">
-      <section
-        aria-labelledby="home-hero-title"
-        className="mx-auto flex min-h-[100dvh] w-full flex-col items-center justify-center px-6 pt-24 pb-16 text-center sm:px-10"
-      >
-        <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
-          {t("page.eyebrow")}
-        </MotionChip>
-
-        <div className="mt-1 w-full max-w-3xl" aria-hidden="true">
-          <HelloApple />
-        </div>
-
-        <MotionTypography
-          id="home-hero-title"
-          type="h1"
-          weight="bold"
-          className="max-w-3xl text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.055em]"
-          {...reveal(0.18)}
+    <>
+      <HomeSmoothScroll />
+      <div className="bg-background w-full overflow-x-clip">
+        <section
+          aria-labelledby="home-hero-title"
+          className="mx-auto flex min-h-[100dvh] w-full flex-col items-center justify-center px-6 pt-24 pb-16 text-center sm:px-10"
         >
-          {t("page.title")}
-        </MotionTypography>
-
-        <MotionTypography color="muted" type="body" className="mt-4 max-w-xl" {...reveal(0.26, 14)}>
-          {t("page.subtitle")}
-        </MotionTypography>
-
-        <MotionSurface
-          variant="transparent"
-          className="mt-9 flex max-w-lg flex-col items-center"
-          {...reveal(0.34, 12)}
-        >
-          <Typography
-            aria-hidden="true"
-            className="font-mono tracking-[0.18em] uppercase"
-            color="muted"
-            type="body-xs"
-          >
-            {t("page.prologue")}
-          </Typography>
-          <span className="bg-separator my-4 h-12 w-px" aria-hidden="true" />
-          <Typography align="center" color="muted" type="body-sm" className="max-w-md italic">
-            {t("page.prologueBody")}
-          </Typography>
-          <motion.span
-            aria-hidden="true"
-            className="bg-foreground/55 mt-6 block size-1.5 rounded-full"
-            animate={shouldReduceMotion ? undefined : { opacity: [0.28, 0.9, 0.28], y: [0, 5, 0] }}
-            transition={{ duration: 2.4, ease: "easeInOut", repeat: Infinity }}
-          />
-        </MotionSurface>
-      </section>
-
-      <HomeOrientation />
-
-      <LatelySection />
-
-      <FeaturedWriting />
-      <ProjectsShowcase />
-      <GalleryShowcase />
-      <FootprintsShowcase />
-      <MomentsShowcase />
-      <FriendLinksShowcase />
-
-      <section
-        id="guestbook"
-        aria-labelledby="guestbook-title"
-        className="mx-auto w-full scroll-mt-24 py-24 sm:py-32"
-      >
-        <header className="relative mx-auto flex flex-col items-center px-6 text-center sm:px-10">
-          <Popover isOpen={isGuestbookPopoverOpen} onOpenChange={setIsGuestbookPopoverOpen}>
-            <Popover.Trigger className="absolute -top-8 -right-20">
-              <Image
-                alt={t("guestbook.decorationAlt")}
-                aria-hidden="true"
-                height={112}
-                src="/Animation.svg"
-                unoptimized
-                width={112}
-              />
-            </Popover.Trigger>
-            <Popover.Content
-              className="border-default-200/50 bg-surface/90 w-80 border shadow-xl backdrop-blur-md"
-              placement="bottom end"
-            >
-              <Popover.Dialog className="p-4 outline-none">
-                <Popover.Arrow />
-                <GuestbookQuickForm onClose={() => setIsGuestbookPopoverOpen(false)} />
-              </Popover.Dialog>
-            </Popover.Content>
-          </Popover>
-
-          <MotionChip size="sm" variant="secondary" {...revealInView(0, 10)}>
-            {t("guestbook.eyebrow")}
+          <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
+            {t("page.eyebrow")}
           </MotionChip>
 
-          <motion.div className="mt-3" {...revealInView(0.04, 8)}>
-            <Link href="/guestbook" className="text-sm no-underline">
-              {t("guestbook.open")}
-              <Link.Icon aria-hidden="true" />
-            </Link>
+          <div className="mt-1 w-full max-w-3xl" aria-hidden="true">
+            <HelloApple />
+          </div>
+
+          <MotionTypography
+            id="home-hero-title"
+            type="h1"
+            weight="bold"
+            className="max-w-3xl text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.055em]"
+            {...reveal(0.18)}
+          >
+            {t("page.title")}
+          </MotionTypography>
+
+          <MotionTypography
+            color="muted"
+            type="body"
+            className="mt-4 max-w-xl"
+            {...reveal(0.26, 14)}
+          >
+            {t("page.subtitle")}
+          </MotionTypography>
+
+          <MotionSurface
+            variant="transparent"
+            className="mt-9 flex max-w-lg flex-col items-center"
+            {...reveal(0.34, 12)}
+          >
+            <Typography
+              aria-hidden="true"
+              className="font-mono tracking-[0.18em] uppercase"
+              color="muted"
+              type="body-xs"
+            >
+              {t("page.prologue")}
+            </Typography>
+            <span className="bg-separator my-4 h-12 w-px" aria-hidden="true" />
+            <Typography align="center" color="muted" type="body-sm" className="max-w-md italic">
+              {t("page.prologueBody")}
+            </Typography>
+            <motion.span
+              aria-hidden="true"
+              className="bg-foreground/55 mt-6 block size-1.5 rounded-full"
+              animate={
+                shouldReduceMotion ? undefined : { opacity: [0.28, 0.9, 0.28], y: [0, 5, 0] }
+              }
+              transition={{ duration: 2.4, ease: "easeInOut", repeat: Infinity }}
+            />
+          </MotionSurface>
+        </section>
+
+        <HomeOrientation />
+
+        <LatelySection />
+
+        <FeaturedWriting />
+        <ProjectsShowcase />
+        <GalleryShowcase />
+        <FootprintsShowcase />
+        <MomentsShowcase />
+        <FriendLinksShowcase />
+
+        <section
+          id="guestbook"
+          aria-labelledby="guestbook-title"
+          className="mx-auto w-full scroll-mt-24 py-24 sm:py-32"
+        >
+          <header className="relative mx-auto flex flex-col items-center px-6 text-center sm:px-10">
+            <Popover isOpen={isGuestbookPopoverOpen} onOpenChange={setIsGuestbookPopoverOpen}>
+              <Popover.Trigger className="absolute -top-8 -right-20">
+                <Image
+                  alt={t("guestbook.decorationAlt")}
+                  aria-hidden="true"
+                  height={112}
+                  src="/Animation.svg"
+                  unoptimized
+                  width={112}
+                />
+              </Popover.Trigger>
+              <Popover.Content
+                className="border-default-200/50 bg-surface/90 w-80 border shadow-xl backdrop-blur-md"
+                placement="bottom end"
+              >
+                <Popover.Dialog className="p-4 outline-none">
+                  <Popover.Arrow />
+                  <GuestbookQuickForm onClose={() => setIsGuestbookPopoverOpen(false)} />
+                </Popover.Dialog>
+              </Popover.Content>
+            </Popover>
+
+            <MotionChip size="sm" variant="secondary" {...revealInView(0, 10)}>
+              {t("guestbook.eyebrow")}
+            </MotionChip>
+
+            <motion.div className="mt-3" {...revealInView(0.04, 8)}>
+              <Link href="/guestbook" className="text-sm no-underline">
+                {t("guestbook.open")}
+                <Link.Icon aria-hidden="true" />
+              </Link>
+            </motion.div>
+
+            <MotionTypography
+              id="guestbook-title"
+              align="center"
+              type="h2"
+              weight="bold"
+              className="mt-4 text-center text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-[-0.04em] text-balance"
+              {...revealInView(0.06)}
+            >
+              <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
+                {t("guestbook.lineOne")}
+              </GradientText>
+            </MotionTypography>
+
+            <MotionTypography
+              align="center"
+              type="h3"
+              className="text-center text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-[-0.04em] text-balance"
+              {...revealInView(0.06)}
+            >
+              <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
+                {t("guestbook.lineTwo")}
+              </GradientText>
+            </MotionTypography>
+          </header>
+
+          <motion.div className="mt-6 w-full" {...revealInView(0.12, 20)}>
+            <GuestbookBoard />
           </motion.div>
 
-          <MotionTypography
-            id="guestbook-title"
-            align="center"
-            type="h2"
-            weight="bold"
-            className="mt-4 text-center text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-[-0.04em] text-balance"
-            {...revealInView(0.06)}
-          >
-            <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
-              {t("guestbook.lineOne")}
-            </GradientText>
-          </MotionTypography>
+          <div className="mx-auto mt-16 flex w-full max-w-3xl flex-col gap-10 px-6 sm:px-10">
+            {mounted && !isAuthenticated ? (
+              <motion.div className="w-full" {...revealInView(0.2, 16)}>
+                <Card variant="secondary">
+                  <Card.Header>
+                    <Card.Title className="text-base">{t("guestbook.signInTitle")}</Card.Title>
+                    <Card.Description>{t("guestbook.signInDescription")}</Card.Description>
+                  </Card.Header>
+                  <Card.Footer>
+                    <Button size="sm" onPress={() => dispatch(setLoginOpen(true))}>
+                      {t("guestbook.signInToWrite")}
+                    </Button>
+                  </Card.Footer>
+                </Card>
+              </motion.div>
+            ) : null}
+          </div>
+        </section>
 
-          <MotionTypography
-            align="center"
-            type="h3"
-            className="text-center text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-[-0.04em] text-balance"
-            {...revealInView(0.06)}
-          >
-            <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
-              {t("guestbook.lineTwo")}
-            </GradientText>
-          </MotionTypography>
-        </header>
-
-        <motion.div className="mt-6 w-full" {...revealInView(0.12, 20)}>
-          <GuestbookBoard />
-        </motion.div>
-
-        <div className="mx-auto mt-16 flex w-full max-w-3xl flex-col gap-10 px-6 sm:px-10">
-          {mounted && !isAuthenticated ? (
-            <motion.div className="w-full" {...revealInView(0.2, 16)}>
-              <Card variant="secondary">
-                <Card.Header>
-                  <Card.Title className="text-base">{t("guestbook.signInTitle")}</Card.Title>
-                  <Card.Description>{t("guestbook.signInDescription")}</Card.Description>
-                </Card.Header>
-                <Card.Footer>
-                  <Button size="sm" onPress={() => dispatch(setLoginOpen(true))}>
-                    {t("guestbook.signInToWrite")}
-                  </Button>
-                </Card.Footer>
-              </Card>
-            </motion.div>
-          ) : null}
-        </div>
-      </section>
-
-      <section
-        id="faq"
-        aria-labelledby="faq-title"
-        className="mx-auto flex w-full max-w-4xl scroll-mt-24 flex-col items-center px-6 py-24 text-center sm:px-10 sm:py-32"
-      >
-        <header className="flex flex-col items-center text-center">
-          <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
-            {t("faq.eyebrow")}
-          </MotionChip>
-          <MotionTypography
-            id="faq-title"
-            align="center"
-            type="h2"
-            weight="bold"
-            className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
-            {...revealInView(0.06)}
-          >
-            {t("faq.title")}
-          </MotionTypography>
-          <MotionTypography
-            align="center"
-            type="body"
-            color="muted"
-            className="mt-3 max-w-xl text-balance"
-            {...revealInView(0.12, 14)}
-          >
-            {t("faq.description")}
-          </MotionTypography>
-        </header>
-
-        <MotionAccordion
-          className="bg-surface-1/10 mt-12 w-full rounded-2xl"
-          variant="surface"
-          {...revealInView(0.18, 20)}
+        <section
+          id="faq"
+          aria-labelledby="faq-title"
+          className="mx-auto flex w-full max-w-4xl scroll-mt-24 flex-col items-center px-6 py-24 text-center sm:px-10 sm:py-32"
         >
-          {faqKeys.map((key, index) => (
-            <Accordion.Item
-              key={key}
-              className="group/item first:**:data-[slot=accordion-trigger]:rounded-t-2xl last:[&:not(:has([data-slot=accordion-trigger][aria-expanded='true']))_[data-slot=accordion-trigger]]:rounded-b-2xl"
+          <header className="flex flex-col items-center text-center">
+            <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
+              {t("faq.eyebrow")}
+            </MotionChip>
+            <MotionTypography
+              id="faq-title"
+              align="center"
+              type="h2"
+              weight="bold"
+              className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
+              {...revealInView(0.06)}
             >
-              <Accordion.Heading>
-                <Accordion.Trigger className="group hover:bg-surface flex items-center gap-2 transition-none">
-                  {faqIcons[index] ? (
-                    <Image
-                      alt={t(`faq.${key}.title`)}
-                      className="h-11 w-11 transition-[scale,rotate] duration-300 ease-out group-hover/item:scale-120 group-hover/item:-rotate-10 group-hover/item:drop-shadow-lg"
-                      src={faqIcons[index]}
-                      width={44}
-                      height={44}
-                    />
-                  ) : null}
-                  <div className="flex flex-col gap-0 text-start">
-                    <span className="leading-5 font-medium">{t(`faq.${key}.title`)}</span>
-                    <span className="text-muted/80 leading-6 font-normal">
-                      {t(`faq.${key}.subtitle`)}
-                    </span>
-                  </div>
-                  <Accordion.Indicator className="text-muted/50 [&>svg]:size-4">
-                    <Icon icon="gravity-ui:chevron-down" />
-                  </Accordion.Indicator>
-                </Accordion.Trigger>
-              </Accordion.Heading>
-              <Accordion.Panel>
-                <Accordion.Body className="text-muted/80 text-start">
-                  {t(`faq.${key}.content`)}
-                </Accordion.Body>
-              </Accordion.Panel>
-            </Accordion.Item>
-          ))}
-        </MotionAccordion>
-      </section>
-    </div>
+              {t("faq.title")}
+            </MotionTypography>
+            <MotionTypography
+              align="center"
+              type="body"
+              color="muted"
+              className="mt-3 max-w-xl text-balance"
+              {...revealInView(0.12, 14)}
+            >
+              {t("faq.description")}
+            </MotionTypography>
+          </header>
+
+          <MotionAccordion
+            className="bg-surface-1/10 mt-12 w-full rounded-2xl"
+            variant="surface"
+            {...revealInView(0.18, 20)}
+          >
+            {faqKeys.map((key, index) => (
+              <Accordion.Item
+                key={key}
+                className="group/item first:**:data-[slot=accordion-trigger]:rounded-t-2xl last:[&:not(:has([data-slot=accordion-trigger][aria-expanded='true']))_[data-slot=accordion-trigger]]:rounded-b-2xl"
+              >
+                <Accordion.Heading>
+                  <Accordion.Trigger className="group hover:bg-surface flex items-center gap-2 transition-none">
+                    {faqIcons[index] ? (
+                      <Image
+                        alt={t(`faq.${key}.title`)}
+                        className="h-11 w-11 transition-[scale,rotate] duration-300 ease-out group-hover/item:scale-120 group-hover/item:-rotate-10 group-hover/item:drop-shadow-lg"
+                        src={faqIcons[index]}
+                        width={44}
+                        height={44}
+                      />
+                    ) : null}
+                    <div className="flex flex-col gap-0 text-start">
+                      <span className="leading-5 font-medium">{t(`faq.${key}.title`)}</span>
+                      <span className="text-muted/80 leading-6 font-normal">
+                        {t(`faq.${key}.subtitle`)}
+                      </span>
+                    </div>
+                    <Accordion.Indicator className="text-muted/50 [&>svg]:size-4">
+                      <Icon icon="gravity-ui:chevron-down" />
+                    </Accordion.Indicator>
+                  </Accordion.Trigger>
+                </Accordion.Heading>
+                <Accordion.Panel>
+                  <Accordion.Body className="text-muted/80 text-start">
+                    {t(`faq.${key}.content`)}
+                  </Accordion.Body>
+                </Accordion.Panel>
+              </Accordion.Item>
+            ))}
+          </MotionAccordion>
+        </section>
+      </div>
+    </>
   );
 }
 
