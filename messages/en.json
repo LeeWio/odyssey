@@ -375,6 +375,15 @@
     "readAt": "Read {time}",
     "continue": "Continue",
     "savedAt": "Saved {date}",
+    "readingListTitle": "Read later",
+    "readingListDescription": "Articles you want to return to when the time is right.",
+    "readingListCount": "{count} articles waiting for you",
+    "readingListUnavailable": "Reading list is unavailable",
+    "readingListEmpty": "Your reading list is empty",
+    "readingListEmptyHint": "Use the bookmark action on an article to save it for later.",
+    "removeFromReadingList": "Remove {title} from reading list",
+    "removeFromReadingListLabel": "Remove from reading list",
+    "addedAt": "Added {date}",
     "recently": "Recently",
     "loading": "Loading library",
     "articleCount": "{count} articles",
@@ -993,7 +1002,11 @@
       "modes": { "light": "Light", "dark": "Dark", "system": "System" },
       "useTheme": "Use {theme} theme",
       "currentTheme": "Current theme style",
-      "variants": { "glass": "Glass", "mouve": "Mouve", "brutalism": "Brutalism" },
+      "variants": {
+        "glass": "Glass",
+        "mouve": "Mouve",
+        "brutalism": "Brutalism"
+      },
       "variantHints": {
         "glass": "Apply the glass theme",
         "mouve": "Apply the Mouve theme",

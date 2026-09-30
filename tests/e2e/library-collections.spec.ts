@@ -72,6 +72,7 @@ test.beforeEach(async ({ page }) => {
       data = { followedCategories: [], hiddenPostCount: 0 };
     else if (path.endsWith("/library/favorites") || path.endsWith("/library/history"))
       data = result([]);
+    else if (path.endsWith("/library/reading-list")) data = result([]);
     else if (path.endsWith("/blog/facets")) data = { categories: [] };
     else if (path.endsWith("/library/collections") && route.request().method() === "GET")
       data = collectionFixtures();

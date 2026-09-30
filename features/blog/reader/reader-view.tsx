@@ -13,6 +13,13 @@ import {
   useLikePostMutation,
   useUnlikePostMutation,
 } from "@/lib/features/post";
+import {
+  useAddToReadingListMutation,
+  useRemoveFromReadingListMutation,
+} from "@/lib/features/library";
+import { selectIsAuthenticated } from "@/lib/features/auth";
+import { setLoginOpen } from "@/lib/features/ui";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 const ReadingProgressBar = dynamic(
   () =>
@@ -52,14 +59,38 @@ interface LikeRipple {
 }
 
 const BACKGROUND_PRESETS = [
-  { name: "Sunset", colors: ["rgba(245, 158, 11, 0.08)", "rgba(244, 63, 94, 0.06)"] }, // Amber + Rose
-  { name: "Aurora", colors: ["rgba(16, 185, 129, 0.08)", "rgba(6, 182, 212, 0.08)"] }, // Emerald + Cyan
-  { name: "Cosmic", colors: ["rgba(139, 92, 246, 0.08)", "rgba(14, 165, 233, 0.08)"] }, // Violet + Sky Blue
-  { name: "Forest", colors: ["rgba(20, 184, 166, 0.08)", "rgba(245, 158, 11, 0.06)"] }, // Teal + Amber
-  { name: "Velvet", colors: ["rgba(217, 70, 239, 0.06)", "rgba(99, 102, 241, 0.08)"] }, // Fuchsia + Indigo
-  { name: "Abyss", colors: ["rgba(37, 99, 235, 0.08)", "rgba(20, 184, 166, 0.06)"] }, // Blue + Teal
-  { name: "Midas", colors: ["rgba(234, 179, 8, 0.08)", "rgba(115, 115, 115, 0.06)"] }, // Yellow + Neutral
-  { name: "Orchid", colors: ["rgba(236, 72, 153, 0.06)", "rgba(168, 85, 247, 0.08)"] }, // Pink + Purple
+  {
+    name: "Sunset",
+    colors: ["rgba(245, 158, 11, 0.08)", "rgba(244, 63, 94, 0.06)"],
+  }, // Amber + Rose
+  {
+    name: "Aurora",
+    colors: ["rgba(16, 185, 129, 0.08)", "rgba(6, 182, 212, 0.08)"],
+  }, // Emerald + Cyan
+  {
+    name: "Cosmic",
+    colors: ["rgba(139, 92, 246, 0.08)", "rgba(14, 165, 233, 0.08)"],
+  }, // Violet + Sky Blue
+  {
+    name: "Forest",
+    colors: ["rgba(20, 184, 166, 0.08)", "rgba(245, 158, 11, 0.06)"],
+  }, // Teal + Amber
+  {
+    name: "Velvet",
+    colors: ["rgba(217, 70, 239, 0.06)", "rgba(99, 102, 241, 0.08)"],
+  }, // Fuchsia + Indigo
+  {
+    name: "Abyss",
+    colors: ["rgba(37, 99, 235, 0.08)", "rgba(20, 184, 166, 0.06)"],
+  }, // Blue + Teal
+  {
+    name: "Midas",
+    colors: ["rgba(234, 179, 8, 0.08)", "rgba(115, 115, 115, 0.06)"],
+  }, // Yellow + Neutral
+  {
+    name: "Orchid",
+    colors: ["rgba(236, 72, 153, 0.06)", "rgba(168, 85, 247, 0.08)"],
+  }, // Pink + Purple
 ];
 
 const getArticleBackgroundPreset = (id: number | string) => {
@@ -83,6 +114,7 @@ const MOCK_POST_FALLBACK = {
   favoritesCount: 120,
   isLiked: false,
   isFavorited: false,
+  isInReadingList: false,
   authorName: "OdysseusFallback",
   category: {
     id: 1,
@@ -95,8 +127,18 @@ const MOCK_POST_FALLBACK = {
   series: null,
   seriesOrder: null,
   tags: [
-    { id: 1, name: "Design", slug: "design", createdAt: "2026-07-04T12:00:00.000Z" },
-    { id: 2, name: "HeroUI", slug: "heroui", createdAt: "2026-07-04T12:00:00.000Z" },
+    {
+      id: 1,
+      name: "Design",
+      slug: "design",
+      createdAt: "2026-07-04T12:00:00.000Z",
+    },
+    {
+      id: 2,
+      name: "HeroUI",
+      slug: "heroui",
+      createdAt: "2026-07-04T12:00:00.000Z",
+    },
   ],
   createdAt: "2026-07-04T12:00:00.000Z",
   updatedAt: "2026-07-04T12:00:00.000Z",
@@ -166,6 +208,8 @@ const MOCK_POST_FALLBACK = {
 
 export function ReaderView({ slug }: ReaderViewProps) {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   // RTK Query hook for fetching public blog details
   const { data: postData, isLoading } = useGetPublicPostBySlugQuery(slug);
@@ -179,8 +223,12 @@ export function ReaderView({ slug }: ReaderViewProps) {
 
   const [likePost, { isLoading: isLiking }] = useLikePostMutation();
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation();
+  const [addToReadingList, { isLoading: isAddingToReadingList }] = useAddToReadingListMutation();
+  const [removeFromReadingList, { isLoading: isRemovingFromReadingList }] =
+    useRemoveFromReadingListMutation();
 
   const [isLiked, setIsLiked] = useState(false);
+  const [isInReadingList, setIsInReadingList] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [showActionBar, setShowActionBar] = useState(false);
   const [ripples, setRipples] = useState<LikeRipple[]>([]);
@@ -190,6 +238,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
     if (article) {
       const timer = setTimeout(() => {
         setIsLiked(article.isLiked || false);
+        setIsInReadingList(article.isInReadingList || false);
         setLikesCount(article.likesCount || 0);
       }, 0);
       return () => clearTimeout(timer);
@@ -260,6 +309,25 @@ export function ReaderView({ slug }: ReaderViewProps) {
       setLikesCount((prev) => (wasLiked ? prev + 1 : Math.max(0, prev - 1)));
 
       toast.danger("Authentication required. Please log in to like this post!");
+    }
+  };
+
+  const handleReadingList = async () => {
+    if (!isAuthenticated) {
+      dispatch(setLoginOpen(true));
+      return;
+    }
+
+    const nextInReadingList = !isInReadingList;
+    setIsInReadingList(nextInReadingList);
+    try {
+      if (nextInReadingList) {
+        await addToReadingList(article.id).unwrap();
+      } else {
+        await removeFromReadingList(article.id).unwrap();
+      }
+    } catch {
+      setIsInReadingList(!nextInReadingList);
     }
   };
 
@@ -404,7 +472,11 @@ export function ReaderView({ slug }: ReaderViewProps) {
             <motion.span
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 0.9, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+              transition={{
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.2,
+              }}
               className="text-accent mb-4 block font-mono text-[9px] font-bold tracking-[0.18em] uppercase"
             >
               {article.category.name}
@@ -551,7 +623,11 @@ export function ReaderView({ slug }: ReaderViewProps) {
                         marginTop: -12,
                       }}
                       initial={{ scale: 0.5, opacity: 0.8, borderWidth: 3 }}
-                      animate={{ scale: ripple.maxScale, opacity: 0, borderWidth: 0 }}
+                      animate={{
+                        scale: ripple.maxScale,
+                        opacity: 0,
+                        borderWidth: 0,
+                      }}
                       transition={{
                         duration: 0.6,
                         ease: [0.1, 0.8, 0.3, 1], // Custom ultra-smooth cubic-bezier deceleration
@@ -586,7 +662,10 @@ export function ReaderView({ slug }: ReaderViewProps) {
                     <Spinner color="current" size="sm" className="mr-1.5" />
                   ) : (
                     <motion.span
-                      animate={{ scale: isLiked ? 1.25 : 1, rotate: isLiked ? -12 : 0 }}
+                      animate={{
+                        scale: isLiked ? 1.25 : 1,
+                        rotate: isLiked ? -12 : 0,
+                      }}
                       transition={{
                         type: "spring",
                         stiffness: 500,
@@ -610,6 +689,25 @@ export function ReaderView({ slug }: ReaderViewProps) {
               )}
             </Button>
           </motion.div>
+
+          <Tooltip delay={100}>
+            <Button
+              isIconOnly
+              size="sm"
+              variant={isInReadingList ? "secondary" : "ghost"}
+              onPress={handleReadingList}
+              isPending={isAddingToReadingList || isRemovingFromReadingList}
+              aria-label={isInReadingList ? "Remove from reading list" : "Add to reading list"}
+            >
+              <Icon
+                icon="lucide:bookmark"
+                className={cn("size-4", isInReadingList && "fill-current")}
+              />
+            </Button>
+            <Tooltip.Content>
+              {isInReadingList ? "Remove from reading list" : "Read later"}
+            </Tooltip.Content>
+          </Tooltip>
 
           <motion.div whileTap={{ scale: 0.95 }} className="inline-flex">
             <Button

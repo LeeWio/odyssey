@@ -18,6 +18,7 @@ import type {
   PostCollectionResponse,
   RecommendedPostResponse,
   ReadingHistoryResponse,
+  ReadingListPostResponse,
 } from "@/lib/features/library";
 import type { PostDigestResponse } from "@/lib/features/post";
 import { getReadingPositionHref } from "@/lib/reading-position";
@@ -31,7 +32,10 @@ export function LibraryPostVisual({ post }: { post: PostDigestResponse }) {
     <SmartColorSurface
       className="h-full"
       seed={`library-${post.slug}`}
-      tone={getSmartColorTone({ categoryName: post.category?.name, title: post.title })}
+      tone={getSmartColorTone({
+        categoryName: post.category?.name,
+        title: post.title,
+      })}
     >
       <div aria-hidden="true" className="aspect-[16/10] w-full" />
     </SmartColorSurface>
@@ -183,12 +187,78 @@ export function FavoriteCard({ entry }: { entry: FavoritePostResponse }) {
         </Card.Header>
         <Card.Footer className="mt-auto justify-between gap-3">
           <Typography color="muted" type="body-xs">
-            {t("savedAt", { date: formatDate(entry.favoritedAt, locale, t("recently")) })}
+            {t("savedAt", {
+              date: formatDate(entry.favoritedAt, locale, t("recently")),
+            })}
           </Typography>
           <span className="text-accent text-sm font-medium">{t("read")}</span>
         </Card.Footer>
       </Card>
     </Link>
+  );
+}
+
+export function ReadingListCard({
+  entry,
+  isRemoving,
+  onRemove,
+}: {
+  entry: ReadingListPostResponse;
+  isRemoving: boolean;
+  onRemove: (postId: number) => void;
+}) {
+  const t = useTranslations("Library");
+  const locale = useLocale();
+  const { post } = entry;
+
+  return (
+    <Card variant="secondary" className="h-full overflow-hidden p-0">
+      <LibraryPostVisual post={post} />
+      <Card.Header className="gap-3">
+        <div className="flex items-start justify-between gap-3">
+          {post.category?.name ? (
+            <Chip size="sm" variant="soft">
+              {post.category.name}
+            </Chip>
+          ) : (
+            <span />
+          )}
+          <Tooltip>
+            <Button
+              isIconOnly
+              aria-label={t("removeFromReadingList", { title: post.title })}
+              isDisabled={isRemoving}
+              isPending={isRemoving}
+              size="sm"
+              variant="ghost"
+              onPress={() => onRemove(post.id)}
+            >
+              <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
+            </Button>
+            <Tooltip.Content>{t("removeFromReadingListLabel")}</Tooltip.Content>
+          </Tooltip>
+        </div>
+        <Link className="no-underline" href={`/single/${post.slug}`}>
+          <Card.Title className="line-clamp-2 text-lg">{post.title}</Card.Title>
+        </Link>
+        {post.summary ? (
+          <Card.Description className="line-clamp-2">{post.summary}</Card.Description>
+        ) : null}
+      </Card.Header>
+      <Card.Footer className="mt-auto justify-between gap-3">
+        <Typography color="muted" type="body-xs">
+          {t("addedAt", {
+            date: formatDate(entry.addedAt, locale, t("recently")),
+          })}
+        </Typography>
+        <Link
+          className="text-accent shrink-0 text-sm font-medium no-underline"
+          href={`/single/${post.slug}`}
+        >
+          {t("read")}
+        </Link>
+      </Card.Footer>
+    </Card>
   );
 }
 
@@ -294,7 +364,9 @@ export function CollectionCard({
       <Card.Header className="gap-2 p-0">
         <div className="flex items-start justify-between gap-3">
           <Chip size="sm" variant="soft">
-            {t("articleCount", { count: collection.itemCount.toLocaleString(locale) })}
+            {t("articleCount", {
+              count: collection.itemCount.toLocaleString(locale),
+            })}
           </Chip>
           <div className="flex shrink-0 gap-1">
             <Tooltip>

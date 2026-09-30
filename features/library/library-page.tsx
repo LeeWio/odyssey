@@ -14,6 +14,7 @@ import { ContinueReadingSection } from "./continue-reading-section";
 import { FavoritesSection } from "./favorites-section";
 import { FollowingFeedSection } from "./following-feed-section";
 import { ReadingHistorySection } from "./reading-history-section";
+import { ReadingListSection } from "./reading-list-section";
 import { ReadingPreferencesSection } from "./reading-preferences-section";
 import { RecommendationsSection } from "./recommendations-section";
 
@@ -63,6 +64,7 @@ export function LibraryPage() {
         </header>
 
         <ContinueReadingSection />
+        <ReadingListSection />
         <FollowingFeedSection />
         <FavoritesSection />
         <CollectionsSection />

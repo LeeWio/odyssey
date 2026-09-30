@@ -1,6 +1,14 @@
 # Personal Library
 
-The `/library` page uses HeroUI cards, buttons, dialogs, and loading states for reading history, recommendations, followed categories, favorites, and collections.
+The `/library` page uses HeroUI cards, buttons, dialogs, and loading states for reading history, recommendations, followed categories, favorites, reading lists, and collections.
+
+## Reading list
+
+- The reading list is a separate later-reading queue. Favorites represent durable appreciation, collections represent user-defined groups, and the reading list represents articles the reader intends to revisit.
+- Articles are added and removed through `PUT` and `DELETE` `/api/v1/user/library/reading-list/{postId}`. Both commands are safe to repeat.
+- `GET /api/v1/user/library/reading-list` returns only the current user's published articles, ordered by `addedAt` descending. Unpublished articles disappear from the result without exposing another user's data.
+- The article Action Bar exposes the same add/remove state returned by the public post response. Guests are sent through the existing sign-in flow before a write is attempted.
+- The library section uses the current query result during pagination, keeps independent removal locks, retries failed reads, and corrects an obsolete page after the last item is removed.
 
 ## Collection contents
 

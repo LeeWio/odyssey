@@ -35,6 +35,11 @@ export const FavoritePostResponseSchema = z.object({
   favoritedAt: z.string(),
 });
 
+export const ReadingListPostResponseSchema = z.object({
+  post: PostDigestResponseSchema,
+  addedAt: z.string(),
+});
+
 export const CollectionPostResponseSchema = z.object({
   post: PostDigestResponseSchema,
   addedAt: z.string(),
@@ -62,6 +67,7 @@ export type ReadingHistoryResponse = z.infer<typeof ReadingHistoryResponseSchema
 export type PostCollectionRequest = z.infer<typeof PostCollectionRequestSchema>;
 export type PostCollectionResponse = z.infer<typeof PostCollectionResponseSchema>;
 export type FavoritePostResponse = z.infer<typeof FavoritePostResponseSchema>;
+export type ReadingListPostResponse = z.infer<typeof ReadingListPostResponseSchema>;
 export type CollectionPostResponse = z.infer<typeof CollectionPostResponseSchema>;
 export type RecommendedPostResponse = z.infer<typeof RecommendedPostResponseSchema>;
 export type ContentPreferenceResponse = z.infer<typeof ContentPreferenceResponseSchema>;

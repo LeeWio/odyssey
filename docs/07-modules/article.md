@@ -8,6 +8,14 @@ Handles long-form content and article presentation.
 - support reading-oriented layout and typography
 - integrate with content metadata and related modules
 
+## Read later
+
+The article Action Bar includes a bookmark action for the authenticated user's reading list.
+
+- The server returns `isInReadingList` with the public post response.
+- Adding and removing use the personal library endpoints and update the icon optimistically.
+- Guests are prompted to sign in. A failed request rolls the icon state back and leaves the article available for retry.
+
 ## Create a collection while reading
 
 The article actions menu opens `features/library/create-collection-dialog.tsx`.

@@ -11,6 +11,7 @@ import {
   PersonalLibraryOverviewResponseSchema,
   PostCollectionResponseSchema,
   ReadingHistoryResponseSchema,
+  ReadingListPostResponseSchema,
   type CollectionPostResponse,
   type ContentPreferenceResponse,
   type FavoritePostResponse,
@@ -18,6 +19,7 @@ import {
   type PostCollectionRequest,
   type PostCollectionResponse,
   type ReadingHistoryResponse,
+  type ReadingListPostResponse,
   type ReadingProgressRequest,
 } from "./library-contracts";
 
@@ -71,6 +73,17 @@ export const libraryApi = baseApi.injectEndpoints({
       transformErrorResponse: transformApiError,
       providesTags: [{ type: "Library", id: "FAVORITES" }],
     }),
+    getReadingList: builder.query<PageResult<ReadingListPostResponse>, Pageable>({
+      query: ({ page = 0, size = 20, sort }) => ({
+        url: "/api/v1/user/library/reading-list",
+        params: { page, size, sort },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(ReadingListPostResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<ReadingListPostResponse>>) =>
+        response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "Library", id: "READING_LIST" }],
+    }),
     getPostCollections: builder.query<PostCollectionResponse[], void>({
       query: () => "/api/v1/user/library/collections",
       rawResponseSchema: apiResponseSchema(z.array(PostCollectionResponseSchema)),
@@ -79,7 +92,10 @@ export const libraryApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Library" as const, id: `COLLECTION_${id}` })),
+              ...result.map(({ id }) => ({
+                type: "Library" as const,
+                id: `COLLECTION_${id}`,
+              })),
               { type: "Library", id: "COLLECTIONS" },
             ]
           : [{ type: "Library", id: "COLLECTIONS" }],
@@ -115,7 +131,11 @@ export const libraryApi = baseApi.injectEndpoints({
       invalidatesTags: [overviewTag, { type: "Library", id: "HISTORY" }],
     }),
     createPostCollection: builder.mutation<PostCollectionResponse, PostCollectionRequest>({
-      query: (body) => ({ url: "/api/v1/user/library/collections", method: "POST", body }),
+      query: (body) => ({
+        url: "/api/v1/user/library/collections",
+        method: "POST",
+        body,
+      }),
       rawResponseSchema: apiResponseSchema(PostCollectionResponseSchema),
       transformResponse: (response: ApiResponse<PostCollectionResponse>) => response.data,
       transformErrorResponse: transformApiError,
@@ -210,6 +230,38 @@ export const libraryApi = baseApi.injectEndpoints({
         { type: "Library", id: "COLLECTIONS" },
         { type: "Library", id: `COLLECTION_${collectionId}` },
       ],
+    }),
+    addToReadingList: builder.mutation<void, number>({
+      query: (postId) => ({
+        url: `/api/v1/user/library/reading-list/${postId}`,
+        method: "PUT",
+      }),
+      rawResponseSchema: emptySchema,
+      transformResponse: (response: ApiResponse<void>) => response.data,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to add article to reading list.",
+          success: "Article added to reading list.",
+        });
+      },
+      invalidatesTags: [overviewTag, { type: "Library", id: "READING_LIST" }],
+    }),
+    removeFromReadingList: builder.mutation<void, number>({
+      query: (postId) => ({
+        url: `/api/v1/user/library/reading-list/${postId}`,
+        method: "DELETE",
+      }),
+      rawResponseSchema: emptySchema,
+      transformResponse: (response: ApiResponse<void>) => response.data,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to remove article from reading list.",
+          success: "Article removed from reading list.",
+        });
+      },
+      invalidatesTags: [overviewTag, { type: "Library", id: "READING_LIST" }],
     }),
     followCategory: builder.mutation<void, number>({
       query: (categoryId) => ({
@@ -330,6 +382,7 @@ export const {
   useGetReadingHistoryQuery,
   useGetFollowingFeedQuery,
   useGetFavoritePostsQuery,
+  useGetReadingListQuery,
   useGetPostCollectionsQuery,
   useGetCollectionPostsQuery,
   useRecordReadingProgressMutation,
@@ -338,6 +391,8 @@ export const {
   useDeletePostCollectionMutation,
   useAddPostToCollectionMutation,
   useRemovePostFromCollectionMutation,
+  useAddToReadingListMutation,
+  useRemoveFromReadingListMutation,
   useFollowCategoryMutation,
   useUnfollowCategoryMutation,
   useHideRecommendationMutation,

@@ -68,6 +68,7 @@ test.beforeEach(async ({ page }) => {
     else if (path.endsWith("/library/preferences"))
       data = { followedCategories: [], hiddenPostCount: 0 };
     else if (path.endsWith("/library/favorites")) data = result([]);
+    else if (path.endsWith("/library/reading-list")) data = result([]);
     else if (path.endsWith("/blog/facets")) data = { categories: [] };
     else if (path.endsWith("/library/collections")) data = [];
     else return route.fulfill({ status: 503, json: { message: "Unmocked API request" } });
