@@ -35,16 +35,20 @@ export const authSlice = createSlice({
         permissions?: string[];
       }>
     ) => {
+      const previousUsername = state.username;
       const { accessToken, refreshToken, username, email, roles, permissions } = action.payload;
       state.accessToken = accessToken;
-      if (refreshToken !== undefined) state.refreshToken = refreshToken;
+      state.refreshToken = refreshToken ?? null;
       state.username = username;
-      if (email !== undefined) state.email = email;
+      if (previousUsername !== username) {
+        state.email = email ?? null;
+        state.permissions = permissions ?? [];
+      } else {
+        if (email !== undefined) state.email = email;
+        if (permissions !== undefined) state.permissions = permissions;
+      }
       state.roles = roles;
       state.isAuthenticated = true;
-      if (permissions) {
-        state.permissions = permissions;
-      }
     },
     setPermissions: (state, action: PayloadAction<string[]>) => {
       state.permissions = action.payload;
