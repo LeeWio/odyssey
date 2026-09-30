@@ -1,3 +1,10 @@
+# [1.190.0](https://github.com/LeeWio/odyssey/compare/v1.189.0...v1.190.0) (2026-09-30)
+
+
+### Features
+
+* **web:** smooth homepage wheel scrolling ([2f89663](https://github.com/LeeWio/odyssey/commit/2f8966338f586485f4d0a602bf76418ee45ca7f1))
+
 # [1.189.0](https://github.com/LeeWio/odyssey/compare/v1.188.0...v1.189.0) (2026-09-30)
 
 
