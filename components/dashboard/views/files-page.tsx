@@ -8,6 +8,8 @@ import { type ComponentProps, useCallback, useEffect, useRef, useState } from "r
 
 import { useDeleteFileMutation, useUploadFileMutation } from "@/lib/features/file";
 
+import { StorageHealth } from "./storage-health";
+
 interface UploadFile {
   id: string;
   name: string;
@@ -254,6 +256,8 @@ export function FilesPage() {
           as post covers and rich-text illustrations.
         </p>
       </div>
+
+      <StorageHealth />
 
       {/* Official DropZone UI */}
       <DropZone className="w-full">

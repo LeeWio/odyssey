@@ -1255,7 +1255,9 @@ export const openapiApi = baseApi.injectEndpoints({
           username: arg.username,
           operation: arg.operation,
           status: arg.status,
-          pageable: arg.pageable,
+          page: arg.pageable.page,
+          size: arg.pageable.size,
+          sort: arg.pageable.sort,
         },
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
@@ -1268,7 +1270,10 @@ export const openapiApi = baseApi.injectEndpoints({
       OpenApiData<OpenApiComponents["schemas"]["ApiResponsePageResultLinkCheckLog"]>,
       { pageable: OpenApiComponents["schemas"]["Pageable"] }
     >({
-      query: (arg) => ({ url: `/api/v1/admin/links/broken`, params: { pageable: arg.pageable } }),
+      query: (arg) => ({
+        url: `/api/v1/admin/links/broken`,
+        params: { page: arg.pageable.page, size: arg.pageable.size, sort: arg.pageable.sort },
+      }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
 
@@ -1303,7 +1308,7 @@ export const openapiApi = baseApi.injectEndpoints({
     >({
       query: (arg) => ({
         url: `/api/v1/admin/files/integrity`,
-        params: { pageable: arg.pageable },
+        params: { page: arg.pageable.page, size: arg.pageable.size, sort: arg.pageable.sort },
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,

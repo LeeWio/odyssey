@@ -12,8 +12,10 @@ import {
   Folder,
   Gear,
   House,
+  Thunderbolt,
   Key,
   Link as LinkIcon,
+  LinkSlash,
   ListCheck,
   Person,
   PersonGear,
@@ -45,7 +47,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { href: "/", icon: House, label: "Dashboard" },
       { badge: "New", href: "/tracker", icon: ListCheck, label: "Tracker" },
       { href: "/analytics", icon: ChartColumn, label: "Analytics" },
-      { href: "/schedule", icon: Calendar, label: "Schedule" },
+      { href: "/schedule", icon: Calendar, label: "Editorial calendar" },
     ],
   },
   {
@@ -64,6 +66,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { href: "/files", icon: Picture, label: "Materials" },
       { href: "/links", icon: LinkIcon, label: "Friend Links" },
+      { href: "/broken-links", icon: LinkSlash, label: "Broken Links" },
       { href: "/orders", icon: Receipt, label: "Orders" },
     ],
   },
@@ -82,7 +85,10 @@ export const NAV_GROUPS: readonly NavGroup[] = [
   },
   {
     label: "System",
-    items: [{ href: "/settings", icon: Gear, label: "Settings" }],
+    items: [
+      { href: "/settings", icon: Gear, label: "Settings" },
+      { href: "/webhooks", icon: Thunderbolt, label: "Webhooks" },
+    ],
   },
 ] as const;
 

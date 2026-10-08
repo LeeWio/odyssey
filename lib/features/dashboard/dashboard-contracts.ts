@@ -81,6 +81,23 @@ export type AnalyticsOverviewResponse = z.infer<typeof AnalyticsOverviewResponse
 export type TopPageResponse = z.infer<typeof TopPageSchema>;
 export type TrafficResponse = z.infer<typeof TrafficResponseSchema>;
 
+export const ContentFunnelResponseSchema = z.object({
+  impressions: z.number().default(0),
+  clicks: z.number().default(0),
+  readers25Percent: z.number().default(0),
+  readers50Percent: z.number().default(0),
+  readers75Percent: z.number().default(0),
+  completedReads: z.number().default(0),
+  likes: z.number().default(0),
+  favorites: z.number().default(0),
+  verifiedSubscriptions: z.number().default(0),
+  returningVisitors: z.number().default(0),
+  clickThroughRate: z.number().default(0),
+  completionRate: z.number().default(0),
+});
+
+export type ContentFunnelResponse = z.infer<typeof ContentFunnelResponseSchema>;
+
 export const ContentOperationsSummarySchema = z.object({
   publishedPosts: z.number().default(0),
   drafts: z.number().default(0),

@@ -24,9 +24,10 @@ export function AccessPlaceholderPage({ title, description }: AccessPlaceholderP
       <div className="bg-surface-secondary/40 mt-6 flex min-h-80 flex-1 items-center justify-center">
         <EmptyState className="w-full max-w-md">
           <EmptyState.Header>
-            <EmptyState.Title>{title} will appear here</EmptyState.Title>
+            <EmptyState.Title>Not connected yet</EmptyState.Title>
             <EmptyState.Description className="max-w-sm text-pretty">
-              This workspace is prepared for the next stage of your role-based access control.
+              {title} has no backend contract. Nothing on this screen is saved, and there are no
+              actions until the API exists.
             </EmptyState.Description>
           </EmptyState.Header>
         </EmptyState>

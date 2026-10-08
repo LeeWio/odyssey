@@ -4,7 +4,9 @@ import {
   DashboardStatsResponseSchema,
   TopPagesResponseSchema,
   TrafficResponseSchema,
+  ContentFunnelResponseSchema,
   ContentOperationsOverviewSchema,
+  type ContentFunnelResponse,
   type ContentOperationsOverview,
   EditorialCalendarResponseSchema,
   type EditorialCalendarResponse,
@@ -100,6 +102,17 @@ export const dashboardApi = baseApi.injectEndpoints({
     /**
      * Admin: Get traffic analytics (devices, sources, timeSeries)
      */
+    getContentFunnel: builder.query<ContentFunnelResponse, number | undefined>({
+      query: (days = 30) => ({
+        url: "/api/v1/admin/analytics/content-funnel",
+        params: { days },
+      }),
+      providesTags: ["Dashboard"],
+      rawResponseSchema: apiResponseSchema(ContentFunnelResponseSchema),
+      transformResponse: (response: { data: ContentFunnelResponse }) => response.data,
+      transformErrorResponse: transformApiError,
+    }),
+
     getTrafficAnalytics: builder.query<TrafficResponse, number | undefined>({
       query: (days) => ({
         url: "/api/v1/admin/analytics/traffic",
@@ -121,6 +134,7 @@ export const {
   useGetEditorialCalendarQuery,
   useGetContentWorkflowQuery,
   useGetAnalyticsOverviewQuery,
+  useGetContentFunnelQuery,
   useGetTopPagesQuery,
   useGetTrafficAnalyticsQuery,
 } = dashboardApi;

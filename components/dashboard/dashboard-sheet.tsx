@@ -30,6 +30,9 @@ const ColumnsPage = lazy(() =>
 const FriendLinksPage = lazy(() =>
   import("./views/friend-links-page").then((mod) => ({ default: mod.FriendLinksPage }))
 );
+const BrokenLinksPage = lazy(() =>
+  import("./views/broken-links-page").then((mod) => ({ default: mod.BrokenLinksPage }))
+);
 const CategoriesPage = lazy(() =>
   import("./views/categories-page").then((mod) => ({ default: mod.CategoriesPage }))
 );
@@ -71,6 +74,12 @@ const TrackerPage = lazy(() =>
 );
 const SettingsPage = lazy(() =>
   import("./views/settings-page").then((mod) => ({ default: mod.SettingsPage }))
+);
+const WebhooksPage = lazy(() =>
+  import("./views/webhooks-page").then((mod) => ({ default: mod.WebhooksPage }))
+);
+const AuditLogsPage = lazy(() =>
+  import("./views/audit-logs-page").then((mod) => ({ default: mod.AuditLogsPage }))
 );
 const HelpPage = lazy(() => import("./views/help-page").then((mod) => ({ default: mod.HelpPage })));
 const AccessPlaceholderPage = lazy(() =>
@@ -115,6 +124,8 @@ export function DashboardSheet() {
         return <ColumnsPage />;
       case "/links":
         return <FriendLinksPage />;
+      case "/broken-links":
+        return <BrokenLinksPage />;
       case "/categories":
         return <CategoriesPage />;
       case "/tags":
@@ -130,7 +141,7 @@ export function DashboardSheet() {
       case "/schedule":
         return <EditorialCalendarPage />;
       case "/orders":
-        return <OrdersPage />;
+        return <OrdersPage onOpenAudience={() => handleNavigate("/audience")} />;
       case "/users":
         return <UsersPage />;
       case "/audience":
@@ -161,16 +172,13 @@ export function DashboardSheet() {
           />
         );
       case "/audit-logs":
-        return (
-          <AccessPlaceholderPage
-            title="Audit Logs"
-            description="Review administrative activity, permission changes, and security events."
-          />
-        );
+        return <AuditLogsPage />;
       case "/tracker":
         return <TrackerPage />;
       case "/settings":
         return <SettingsPage />;
+      case "/webhooks":
+        return <WebhooksPage />;
       case "/help":
         return <HelpPage />;
       default:

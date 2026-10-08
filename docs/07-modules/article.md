@@ -23,11 +23,21 @@ affected Post tag so subscribed list and detail queries stay in sync.
 Regression coverage includes keyboard and pointer interaction, guest sign-in,
 failed-save retry, duplicate prevention, reload, and list/detail cache refresh.
 
-The article Action Bar includes a bookmark action for the authenticated user's reading list.
+The article Action Bar uses the same `ReadingListButton` as the journal cards.
 
 - The server returns `isInReadingList` with the public post response.
-- Adding and removing use the personal library endpoints and update the icon optimistically.
-- Guests are prompted to sign in. A failed request rolls the icon state back and leaves the article available for retry.
+- Adding and removing use the personal library endpoints. The button shows the server state, not the favorite flag.
+- Guests are prompted to sign in. A failed request keeps the previous server state and can be retried.
+- The Action Bar also links to `/library`.
+
+## Reading progress
+
+Authenticated reading reports progress in 10-point steps to `PUT /api/v1/user/library/posts/{postId}/progress`, with the heading anchor currently in view.
+
+- The checkpoint is written to session storage before the request.
+- Success clears that checkpoint. Failure leaves it and shows a retry toast.
+- Opening the same article again submits the stored checkpoint before newer scroll progress replaces it.
+- Library continue-reading and history links already return to `/single/{slug}#anchor`.
 
 ## Create a collection while reading
 

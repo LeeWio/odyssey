@@ -4,6 +4,7 @@ import { NumberValue } from "@heroui-pro/react";
 import { Card, Link } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { ReadingListButton } from "@/features/library/reading-list-button";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 
 export interface EssayCardPost {
@@ -17,6 +18,7 @@ export interface EssayCardPost {
   views?: number;
   likesCount?: number;
   commentsCount?: number;
+  isInReadingList?: boolean | null;
   publishedAt?: string | null;
   createdAt?: string | null;
 }
@@ -70,7 +72,7 @@ export function EssayCard({ post }: { post: EssayCardPost }) {
           <p className="text-muted line-clamp-2 text-sm leading-5">{post.summary}</p>
         </Card.Content>
       ) : null}
-      <Card.Footer className="mt-auto">
+      <Card.Footer className="mt-auto justify-between gap-3">
         <span className="text-muted text-xs tabular-nums">
           <NumberValue locale={locale} notation="compact" value={post.views ?? 0}>
             {(formatted) => t("views", { count: formatted })}
@@ -88,6 +90,9 @@ export function EssayCard({ post }: { post: EssayCardPost }) {
             </>
           ) : null}
         </span>
+        {post.id != null && typeof post.isInReadingList === "boolean" ? (
+          <ReadingListButton postId={post.id} isSaved={post.isInReadingList} />
+        ) : null}
       </Card.Footer>
     </Card>
   );

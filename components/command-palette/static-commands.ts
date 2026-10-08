@@ -274,7 +274,7 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     intent: CommandIntent.EXECUTE,
     payload: {
       action: () => {
-        toast.info("Task creation is coming soon. Try the Focus Schedule instead.");
+        toast.info("Task creation is not connected. The Focus Schedule demo stays on this device.");
       },
       closeOnExecute: true,
     },

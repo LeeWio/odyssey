@@ -1,9 +1,7 @@
 "use client";
 
-// TODO: Replace the static `TRACKER_TASKS` (src/data/tracker.ts) with a live
-// task store (InstantDB, Drizzle, your own API, etc.). `useKanban` drives
-// optimistic DnD locally — persist the reordered column in your
-// `onReorder`/`onInsert` handlers once you're wired up to a backend.
+// Board data comes from the kanban API. Dragging updates the local list first,
+// then `relocateTask` persists the column and order.
 
 import type { UseKanbanReturn } from "@heroui-pro/react";
 import type { ComponentType } from "react";

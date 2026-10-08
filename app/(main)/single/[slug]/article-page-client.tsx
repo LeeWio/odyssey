@@ -30,6 +30,7 @@ import { siteConfig } from "@/config/site";
 import { ArticleOutline } from "@/features/blog/reader/article-outline";
 import { ArticleTypography } from "@/features/blog/reader/typography";
 import { CreateCollectionDialog } from "@/features/library/create-collection-dialog";
+import { ReadingListButton } from "@/features/library/reading-list-button";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useAddPostToCollectionMutation,
@@ -39,7 +40,6 @@ import {
 import { useGetPublicColumnBySlugQuery } from "@/lib/features/column";
 import {
   type PostResponse,
-  useFavoritePostMutation,
   useGetPublicPostBySlugQuery,
   useGetRelatedPostsQuery,
   useLikePostMutation,
@@ -48,7 +48,12 @@ import {
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 import { useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
-import { getReadingPositionId } from "@/lib/reading-position";
+import {
+  clearPendingReadingProgress,
+  getReadingPositionId,
+  readPendingReadingProgress,
+  writePendingReadingProgress,
+} from "@/lib/reading-position";
 
 import { ArticleContext, columnOrder } from "./article-sidebar";
 
@@ -79,12 +84,6 @@ interface OptimisticLikeState {
   postId: number;
   isLiked: boolean;
   likesCount: number;
-}
-
-interface OptimisticFavoriteState {
-  postId: number;
-  isFavorited: boolean;
-  favoritesCount: number;
 }
 
 function getReadingPositionAnchor(postId: number) {
@@ -288,10 +287,9 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
     username: string | null;
   } | null>(null);
   const [optimisticLike, setOptimisticLike] = useState<OptimisticLikeState | null>(null);
-  const [optimisticFavorite, setOptimisticFavorite] = useState<OptimisticFavoriteState | null>(
-    null
-  );
   const readingProgressRef = useRef({ postId: null as number | null, progress: 0 });
+  const resumedProgressRef = useRef<number | null>(null);
+  const progressToastRef = useRef<string | null>(null);
   const restoredPositionRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -312,7 +310,6 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
 
   const [likePost, { isLoading: isLiking }] = useLikePostMutation();
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation();
-  const [favoritePost, { isLoading: isFavoriting }] = useFavoritePostMutation();
   const [recordReadingProgress] = useRecordReadingProgressMutation();
   const { data: collections = [], isLoading: isLoadingCollections } = useGetPostCollectionsQuery(
     undefined,
@@ -322,10 +319,7 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
   const postId = article?.id;
   const serverIsLiked = article?.isLiked || false;
   const serverLikesCount = article?.likesCount || 0;
-  const serverIsFavorited = article?.isFavorited || false;
   const currentOptimisticLike = optimisticLike?.postId === postId ? optimisticLike : null;
-  const currentOptimisticFavorite =
-    optimisticFavorite?.postId === postId ? optimisticFavorite : null;
 
   useEffect(() => {
     if (!article?.content || !postId) return;
@@ -370,7 +364,7 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
 
   const isLiked = currentOptimisticLike?.isLiked ?? serverIsLiked;
   const likesCount = currentOptimisticLike?.likesCount ?? serverLikesCount;
-  const isFavorited = currentOptimisticFavorite?.isFavorited ?? serverIsFavorited;
+  const isInReadingList = Boolean(article?.isInReadingList);
 
   const revealWhenScrollSettles = useDebouncedCallback((latestScrollY: number) => {
     setIsActionBarOpen(latestScrollY > 160);
@@ -407,29 +401,67 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
 
   useEffect(() => {
     if (readingProgressRef.current.postId === postId) return;
-    readingProgressRef.current = { postId: postId ?? null, progress: 0 };
+    const pending = postId ? readPendingReadingProgress(postId) : null;
+    readingProgressRef.current = {
+      postId: postId ?? null,
+      progress: pending?.progressPercent ?? 0,
+    };
     setReadingProgress(0);
     setReadingProgressPostId(postId ?? null);
+    resumedProgressRef.current = pending?.progressPercent ?? null;
   }, [postId]);
 
-  useEffect(() => {
-    if (!isAuthenticated || !postId || readingProgressPostId !== postId || readingProgress < 10)
-      return;
-
-    const progress = readingProgress === 100 ? 100 : Math.floor(readingProgress / 10) * 10;
-    if (progress <= readingProgressRef.current.progress) return;
-
-    readingProgressRef.current.progress = progress;
+  const saveReadingCheckpoint = (progress: number) => {
+    if (!postId) return;
+    const positionAnchor = getReadingPositionAnchor(postId);
+    writePendingReadingProgress({ postId, progressPercent: progress, positionAnchor });
     void recordReadingProgress({
       postId,
-      body: {
-        positionAnchor: getReadingPositionAnchor(postId),
-        progressPercent: progress,
-      },
+      body: { positionAnchor, progressPercent: progress },
     })
       .unwrap()
-      .catch(() => undefined);
-  }, [isAuthenticated, postId, readingProgress, readingProgressPostId, recordReadingProgress]);
+      .then(() => {
+        if (readingProgressRef.current.postId !== postId) return;
+        if (readingProgressRef.current.progress !== progress) return;
+        clearPendingReadingProgress(postId);
+        resumedProgressRef.current = null;
+        if (progressToastRef.current) {
+          toast.close(progressToastRef.current);
+          progressToastRef.current = null;
+        }
+      })
+      .catch(() => {
+        if (readingProgressRef.current.postId !== postId) return;
+        if (progressToastRef.current) toast.close(progressToastRef.current);
+        progressToastRef.current = toast.danger(t("progressSaveFailed"), {
+          actionProps: {
+            children: t("tryAgain"),
+            onPress: () => saveReadingCheckpoint(readingProgressRef.current.progress),
+          },
+        });
+      });
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated || !postId || readingProgressPostId !== postId) return;
+
+    const resumed = resumedProgressRef.current;
+    const progress =
+      readingProgress >= 10
+        ? readingProgress === 100
+          ? 100
+          : Math.floor(readingProgress / 10) * 10
+        : 0;
+    const checkpoint = resumed != null && resumed >= progress ? resumed : progress;
+    if (checkpoint < 10 || checkpoint < readingProgressRef.current.progress) return;
+    if (checkpoint === readingProgressRef.current.progress && resumed == null) return;
+
+    resumedProgressRef.current = null;
+    readingProgressRef.current.progress = checkpoint;
+    saveReadingCheckpoint(checkpoint);
+    // The checkpoint helper closes over the current article and mutation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, postId, readingProgress, readingProgressPostId]);
 
   const handleShare = async () => {
     const shareData = {
@@ -471,20 +503,6 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
     } catch {
       setOptimisticLike({ postId, isLiked: wasLiked, likesCount: previousLikesCount });
       toast.danger(t("loginToLike"));
-    }
-  };
-
-  const handleFavorite = async () => {
-    if (!postId || isFavorited) return;
-
-    setOptimisticFavorite({ postId, isFavorited: true, favoritesCount: 0 });
-
-    try {
-      await favoritePost(postId).unwrap();
-      toast.success(t("savedToast"));
-    } catch {
-      setOptimisticFavorite({ postId, isFavorited: false, favoritesCount: 0 });
-      toast.danger(t("loginToSave"));
     }
   };
 
@@ -748,19 +766,25 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
               <span className="tabular-nums">{likesCount}</span>
             </Button>
 
+            {postId != null ? (
+              <ReadingListButton
+                postId={postId}
+                isSaved={isInReadingList}
+                isRefreshing={isFetching}
+              />
+            ) : null}
+
             <Tooltip delay={100}>
               <Button
                 isIconOnly
-                aria-label={isFavorited ? t("savedForLater") : t("saveForLater")}
-                isDisabled={!postId || isFavorited}
-                isPending={isFavoriting}
+                aria-label={t("readingLibrary")}
                 size="sm"
-                variant={isFavorited ? "secondary" : "ghost"}
-                onPress={handleFavorite}
+                variant="ghost"
+                onPress={() => router.push("/library")}
               >
-                <Icon icon={isFavorited ? "gravity-ui:bookmark-fill" : "gravity-ui:bookmark"} />
+                <Icon icon="gravity-ui:book-open" />
               </Button>
-              <Tooltip.Content>{isFavorited ? t("saved") : t("saveForLater")}</Tooltip.Content>
+              <Tooltip.Content>{t("readingLibrary")}</Tooltip.Content>
             </Tooltip>
 
             <Tooltip delay={100}>

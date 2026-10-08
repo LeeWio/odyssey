@@ -1,182 +1,131 @@
 "use client";
 
-// TODO: Wire these form controls to your account/workspace store. The controls
-// are currently uncontrolled and don't persist changes.
+import type { FormEvent } from "react";
 
-import type { ReactNode } from "react";
+import { Button, Input, Label, Spinner, Switch, TextField } from "@heroui/react";
+import { EmptyState } from "@heroui-pro/react";
+import { useState } from "react";
 
-import {
-  Button,
-  Checkbox,
-  Input,
-  Label,
-  ListBox,
-  Select,
-  Separator,
-  TextArea,
-  TextField,
-} from "@heroui/react";
+import { useGetAllConfigsQuery, useUpdateConfigMutation } from "@/lib/features/openapi/openapi-api";
 
-import { useSheetPortal } from "../use-sheet-portal";
+type ConfigRecord = {
+  id?: number;
+  configKey?: string;
+  configValue?: string;
+  configName?: string;
+  description?: string;
+  isPublic?: boolean;
+};
 
-const PROVINCES = [
-  { id: "on", label: "Ontario" },
-  { id: "qc", label: "Quebec" },
-  { id: "bc", label: "British Columbia" },
-  { id: "ab", label: "Alberta" },
-] as const;
+type EditableConfig = ConfigRecord &
+  Required<Pick<ConfigRecord, "id" | "configKey" | "configName">>;
 
-const CURRENCIES = [
-  { id: "cad", label: "CAD - Canadian Dollar" },
-  { id: "usd", label: "USD - US Dollar" },
-  { id: "eur", label: "EUR - Euro" },
-  { id: "gbp", label: "GBP - British Pound" },
-  { id: "mxn", label: "MXN - Mexican Peso" },
-] as const;
+function isEditableConfig(config: ConfigRecord): config is EditableConfig {
+  return Boolean(config.id && config.configKey && config.configName);
+}
 
 export function SettingsPage() {
-  const portalContainer = useSheetPortal();
+  const { data, isError, isLoading, refetch } = useGetAllConfigsQuery();
+  const configs = (Array.isArray(data) ? data : []) as ConfigRecord[];
 
   return (
-    <form className="mx-auto flex max-w-5xl flex-col gap-4 px-5 pt-4 pb-10">
-      <p className="text-muted text-sm">Manage your organization profile and preferences.</p>
+    <div className="mx-auto flex max-w-5xl flex-col gap-4 px-5 pt-4 pb-10">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-foreground text-lg font-semibold">System config</h1>
+        <p className="text-muted text-sm">
+          Keys stored by the admin config API. Each row saves on its own.
+        </p>
+      </div>
 
-      <Separator />
-
-      <SettingsRow
-        description="This will be displayed on your public profile."
-        label="Organization Name"
-      >
-        <TextField name="org-name">
-          <Label className="sr-only">Organization Name</Label>
-          <Input fullWidth placeholder="Your organization" />
-        </TextField>
-      </SettingsRow>
-
-      <Separator />
-
-      <SettingsRow
-        description="This will be displayed on your public profile. Maximum 240 characters."
-        label="Organization Bio"
-      >
-        <TextField name="org-bio">
-          <Label className="sr-only">Organization Bio</Label>
-          <TextArea
-            fullWidth
-            className="min-h-24 resize-y"
-            maxLength={240}
-            placeholder="Tell customers about your organization"
-          />
-        </TextField>
-      </SettingsRow>
-
-      <Separator />
-
-      <SettingsRow
-        description="This is how customers can contact you for support."
-        label="Organization Email"
-      >
-        <TextField name="org-email">
-          <Label className="sr-only">Organization Email</Label>
-          <Input fullWidth placeholder="info@example.com" type="email" />
-        </TextField>
-        <Checkbox id="org-email-public" name="org-email-public">
-          <Checkbox.Content>
-            <Checkbox.Control>
-              <Checkbox.Indicator />
-            </Checkbox.Control>
-            Show email on public profile
-          </Checkbox.Content>
-        </Checkbox>
-      </SettingsRow>
-
-      <Separator />
-
-      <SettingsRow description="This is where your organization is registered." label="Address">
-        <TextField name="address-street">
-          <Label className="sr-only">Street address</Label>
-          <Input fullWidth placeholder="Street address" />
-        </TextField>
-        <TextField name="address-city">
-          <Label className="sr-only">City</Label>
-          <Input fullWidth placeholder="City" />
-        </TextField>
-        <div className="grid grid-cols-[1fr_160px] gap-3">
-          <Select name="address-province" placeholder="Province / State">
-            <Label className="sr-only">Province / State</Label>
-            <Select.Trigger>
-              <Select.Value />
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
-              <ListBox>
-                {PROVINCES.map((p) => (
-                  <ListBox.Item key={p.id} id={p.id} textValue={p.label}>
-                    {p.label}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                ))}
-              </ListBox>
-            </Select.Popover>
-          </Select>
-          <TextField name="address-postal">
-            <Label className="sr-only">Postal / ZIP</Label>
-            <Input fullWidth placeholder="Postal code" />
-          </TextField>
+      {isLoading ? (
+        <div className="flex min-h-40 items-center justify-center">
+          <Spinner />
         </div>
-      </SettingsRow>
-
-      <Separator />
-
-      <SettingsRow
-        description="The currency that your organization will be collecting."
-        label="Currency"
-      >
-        <Select name="currency" placeholder="Select currency">
-          <Label className="sr-only">Currency</Label>
-          <Select.Trigger>
-            <Select.Value />
-            <Select.Indicator />
-          </Select.Trigger>
-          <Select.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
-            <ListBox>
-              {CURRENCIES.map((c) => (
-                <ListBox.Item key={c.id} id={c.id} textValue={c.label}>
-                  {c.label}
-                  <ListBox.ItemIndicator />
-                </ListBox.Item>
-              ))}
-            </ListBox>
-          </Select.Popover>
-        </Select>
-      </SettingsRow>
-
-      <Separator />
-
-      <footer className="flex items-center justify-end gap-2 pt-2">
-        <Button type="reset" variant="ghost">
-          Reset
-        </Button>
-        <Button type="submit">Save changes</Button>
-      </footer>
-    </form>
+      ) : isError ? (
+        <EmptyState>
+          <EmptyState.Header>
+            <EmptyState.Title>Config is unavailable</EmptyState.Title>
+            <EmptyState.Description>The admin config list did not load.</EmptyState.Description>
+          </EmptyState.Header>
+          <EmptyState.Content>
+            <Button onPress={() => refetch()} variant="secondary">
+              Try again
+            </Button>
+          </EmptyState.Content>
+        </EmptyState>
+      ) : configs.length === 0 ? (
+        <EmptyState>
+          <EmptyState.Header>
+            <EmptyState.Title>No config keys yet</EmptyState.Title>
+            <EmptyState.Description>
+              The admin API returned an empty list. New keys are created from the API.
+            </EmptyState.Description>
+          </EmptyState.Header>
+        </EmptyState>
+      ) : (
+        <ul className="flex flex-col gap-4">
+          {configs.filter(isEditableConfig).map((config) => (
+            <li key={config.id}>
+              <ConfigRow config={config} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
-interface SettingsRowProps {
-  description: string;
-  label: string;
-  children: ReactNode;
-}
+function ConfigRow({ config }: { config: EditableConfig }) {
+  const [value, setValue] = useState(config.configValue ?? "");
+  const [isPublic, setIsPublic] = useState(Boolean(config.isPublic));
+  const [updateConfig, { isLoading }] = useUpdateConfigMutation();
+  const dirty = value !== (config.configValue ?? "") || isPublic !== Boolean(config.isPublic);
 
-function SettingsRow({ children, description, label }: SettingsRowProps) {
+  const save = (event: FormEvent) => {
+    event.preventDefault();
+    if (!dirty || isLoading) return;
+    void updateConfig({
+      id: config.id,
+      body: {
+        configKey: config.configKey,
+        configName: config.configName,
+        configValue: value,
+        description: config.description,
+        isPublic,
+      },
+    });
+  };
+
   return (
-    <div className="grid grid-cols-1 gap-4 py-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:gap-10">
+    <form className="border-separator flex flex-col gap-3 border-b pb-4" onSubmit={save}>
       <div className="flex flex-col gap-1">
-        <span className="text-foreground text-sm font-medium">{label}</span>
-        <p className="text-muted text-xs leading-snug">{description}</p>
+        <span className="text-foreground text-sm font-medium">{config.configName}</span>
+        <span className="text-muted font-mono text-xs">{config.configKey}</span>
+        {config.description ? <p className="text-muted text-xs">{config.description}</p> : null}
       </div>
-      <div className="flex flex-col gap-3">{children}</div>
-    </div>
+      <TextField name={config.configKey} value={value} onChange={setValue}>
+        <Label className="sr-only">{config.configName}</Label>
+        <Input fullWidth />
+      </TextField>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Switch
+            aria-label={`Show ${config.configKey} on the public config API`}
+            isSelected={isPublic}
+            onChange={setIsPublic}
+          >
+            <Switch.Content>
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch.Content>
+          </Switch>
+          <span className="text-muted text-xs">Public config API</span>
+        </div>
+        <Button isDisabled={!dirty} isPending={isLoading} type="submit" variant="secondary">
+          Save
+        </Button>
+      </div>
+    </form>
   );
 }

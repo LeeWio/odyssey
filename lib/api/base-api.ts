@@ -200,6 +200,7 @@ export const baseApi = createApi({
     "OpenApi",
     "Column",
     "Kanban",
+    "AuditLog",
   ],
   endpoints: () => ({}),
 });

@@ -2,10 +2,8 @@
 
 ## Documentation Backlog
 
-- Expand remaining stub modules: `stock`, `timeline`, `profile`, `editor`
 - Add screenshots or diagrams for critical flows
-- Write a release checklist
-- Add testing expectations for UI, content, and motion-heavy surfaces
+- Add testing expectations for motion-heavy surfaces
 
 ## Product Backlog
 
