@@ -81,6 +81,48 @@ export function getThemeName(variant: ThemeVariant, resolvedMode: ResolvedThemeM
   return `${variant}-${resolvedMode}`;
 }
 
+/** Element surface that carries the active theme. Structural so tests can pass a fake root. */
+export interface ThemeRootElement {
+  dataset: {
+    theme?: string;
+    themeVariant?: string;
+    themeMode?: string;
+    themeResolvedMode?: string;
+  };
+  classList: {
+    toggle(token: string, force?: boolean): void;
+  };
+  style: {
+    colorScheme: string;
+  };
+}
+
+/**
+ * Write the theme onto the document element immediately.
+ * next-themes and ThemeRootSync both apply it in useEffect, which is after a
+ * view-transition snapshot. Call this inside the transition callback so the
+ * new frame is already the next theme.
+ */
+export function applyThemeToElement(
+  root: ThemeRootElement,
+  variant: ThemeVariant,
+  mode: ThemeMode,
+  resolvedMode: ResolvedThemeMode
+) {
+  const safeVariant = coerceThemeVariant(variant);
+  const themeName = getThemeName(safeVariant, resolvedMode);
+
+  root.dataset.theme = themeName;
+  root.dataset.themeVariant = safeVariant;
+  root.dataset.themeMode = mode;
+  root.dataset.themeResolvedMode = resolvedMode;
+  root.classList.toggle("dark", resolvedMode === "dark");
+  root.classList.toggle("light", resolvedMode === "light");
+  root.style.colorScheme = resolvedMode;
+
+  return themeName;
+}
+
 function getCookieValue(cookieHeader: string | null | undefined, name: string): string | null {
   if (!cookieHeader) return null;
 

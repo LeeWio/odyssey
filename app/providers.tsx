@@ -17,7 +17,7 @@ import {
   coerceThemeVariant,
   DEFAULT_THEME_MODE,
   DEFAULT_THEME_VARIANT,
-  getThemeName,
+  applyThemeToElement,
   LEGACY_THEME_STORAGE_KEY,
   parseThemeName,
   type ResolvedThemeMode,
@@ -97,16 +97,12 @@ function ThemeRootSync() {
     const mode = coerceThemeMode(theme);
     const safeVariant = coerceThemeVariant(variant);
     const resolvedMode = resolveThemeMode(mode, coerceResolvedThemeMode(resolvedTheme));
-    const themeName = getThemeName(safeVariant, resolvedMode);
-    const root = document.documentElement;
-
-    root.dataset.theme = themeName;
-    root.dataset.themeVariant = safeVariant;
-    root.dataset.themeMode = mode;
-    root.dataset.themeResolvedMode = resolvedMode;
-    root.classList.toggle("dark", resolvedMode === "dark");
-    root.classList.toggle("light", resolvedMode === "light");
-    root.style.colorScheme = resolvedMode;
+    const themeName = applyThemeToElement(
+      document.documentElement,
+      safeVariant,
+      mode,
+      resolvedMode
+    );
 
     persistThemeState(safeVariant, mode, resolvedMode, themeName);
   }, [dispatch, resolvedTheme, setTheme, theme, variant]);
