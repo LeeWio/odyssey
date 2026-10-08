@@ -1,3 +1,10 @@
+# [1.194.0](https://github.com/LeeWio/odyssey/compare/v1.193.0...v1.194.0) (2026-10-08)
+
+
+### Features
+
+* **web:** redesign editorial journal and responsive layouts ([75e1319](https://github.com/LeeWio/odyssey/commit/75e13192c98485f2193951bb9cef3ba5118cc857))
+
 # [1.193.0](https://github.com/LeeWio/odyssey/compare/v1.192.0...v1.193.0) (2026-10-08)
 
 
