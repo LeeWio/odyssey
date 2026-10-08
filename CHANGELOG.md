@@ -1,3 +1,10 @@
+## [1.200.1](https://github.com/LeeWio/odyssey/compare/v1.200.0...v1.200.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* **web:** stop registering the content funnel endpoint twice ([b8469bc](https://github.com/LeeWio/odyssey/commit/b8469bcff256afbbf17d64fcb99630e2e85b108d))
+
 # [1.200.0](https://github.com/LeeWio/odyssey/compare/v1.199.0...v1.200.0) (2026-10-08)
 
 
