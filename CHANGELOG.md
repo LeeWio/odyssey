@@ -1,3 +1,10 @@
+# [1.198.0](https://github.com/LeeWio/odyssey/compare/v1.197.0...v1.198.0) (2026-10-08)
+
+
+### Features
+
+* **web:** use the compact prompt composer for comments ([94703bf](https://github.com/LeeWio/odyssey/commit/94703bfbe29101fb0c55f9fe4dce52105dd18205))
+
 # [1.197.0](https://github.com/LeeWio/odyssey/compare/v1.196.0...v1.197.0) (2026-10-08)
 
 
