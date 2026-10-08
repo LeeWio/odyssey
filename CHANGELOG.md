@@ -1,3 +1,10 @@
+# [1.196.0](https://github.com/LeeWio/odyssey/compare/v1.195.0...v1.196.0) (2026-10-08)
+
+
+### Features
+
+* **web:** refine discovery and taxonomy pages ([6997019](https://github.com/LeeWio/odyssey/commit/6997019168d987473e29d08d2cd7c513db9d4100))
+
 # [1.195.0](https://github.com/LeeWio/odyssey/compare/v1.194.0...v1.195.0) (2026-10-08)
 
 
