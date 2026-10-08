@@ -1,3 +1,10 @@
+## [1.201.1](https://github.com/LeeWio/odyssey/compare/v1.201.0...v1.201.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* **web:** remove unused notification popover bindings ([95821bf](https://github.com/LeeWio/odyssey/commit/95821bf5bee62e8a03558c4945490747dab09950))
+
 # [1.201.0](https://github.com/LeeWio/odyssey/compare/v1.200.1...v1.201.0) (2026-10-08)
 
 
