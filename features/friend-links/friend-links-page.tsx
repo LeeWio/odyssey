@@ -1,6 +1,7 @@
 "use client";
 
 import { createPageReveal } from "@/lib/motion";
+import { PageContainer } from "@/components/layout/page-container";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
@@ -49,6 +50,8 @@ const EMPTY_APPLICATION: FriendLinkApplication = {
   email: "",
 };
 
+const FRIEND_LINK_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-4";
+
 function toSafeExternalUrl(value?: string | null) {
   if (!value?.trim()) return undefined;
 
@@ -73,12 +76,7 @@ function getInitials(value: string) {
 function FriendLinkSkeleton() {
   const t = useTranslations("Links");
   return (
-    <div
-      aria-busy="true"
-      aria-label={t("loading")}
-      className="grid gap-4 sm:grid-cols-2"
-      role="status"
-    >
+    <div aria-busy="true" aria-label={t("loading")} className={FRIEND_LINK_GRID} role="status">
       {Array.from({ length: 6 }, (_, index) => (
         <Card key={index} variant="secondary" className="min-h-44 gap-4 p-5">
           <div className="flex items-center gap-3">
@@ -160,6 +158,7 @@ interface FriendLinksPageProps {
 }
 
 export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
+  const Container = compact ? "div" : PageContainer;
   const t = useTranslations("Links");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotionPreference();
@@ -220,12 +219,9 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
   return (
     <Surface
       variant="transparent"
-      className={cn(
-        "w-full",
-        compact ? undefined : "bg-background min-h-[100dvh] px-6 py-24 sm:px-10 sm:py-32"
-      )}
+      className={cn("w-full", compact ? undefined : "bg-background min-h-dvh pt-28 pb-24 lg:pt-32")}
     >
-      <div className={cn("w-full", compact ? undefined : "mx-auto max-w-6xl")}>
+      <Container className="w-full min-w-0">
         {!compact ? (
           <>
             <header className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
@@ -236,7 +232,11 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                   </Chip>
                 </motion.div>
                 <motion.div {...reveal(0.06)}>
-                  <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
+                  <Typography
+                    type="h1"
+                    weight="bold"
+                    className="mt-5 tracking-normal text-balance break-words"
+                  >
                     {t("title")}
                   </Typography>
                 </motion.div>
@@ -335,7 +335,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           ) : null}
 
           {!isLoading && !error && visibleLinks.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className={FRIEND_LINK_GRID} data-testid="friend-links-grid">
               {visibleLinks.map((link) => (
                 <FriendLinkCard key={link.id} link={link} />
               ))}
@@ -453,7 +453,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
             </Form>
           </Card>
         </section>
-      </div>
+      </Container>
     </Surface>
   );
 }

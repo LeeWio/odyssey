@@ -1,5 +1,7 @@
 "use client";
 
+import { Section } from "@/components/layout/section";
+
 import { createPageReveal } from "@/lib/motion";
 
 import { Icon } from "@iconify/react";
@@ -53,11 +55,7 @@ export function MomentsShowcase() {
   if (!isLoading && !isFetching && !isError && recentMoments.length === 0) return null;
 
   return (
-    <section
-      id="moments-showcase"
-      aria-labelledby="moments-showcase-title"
-      className="w-full scroll-mt-24 px-4 py-24 sm:px-6 sm:py-32 lg:px-8"
-    >
+    <Section id="moments-showcase" aria-labelledby="moments-showcase-title">
       <header className="flex flex-col items-center text-center">
         <motion.div {...revealInView(0, 10)}>
           <Chip color="default" size="sm" variant="secondary">
@@ -69,7 +67,7 @@ export function MomentsShowcase() {
             id="moments-showcase-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
+            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
           >
             This &amp; That
           </Typography>
@@ -112,6 +110,6 @@ export function MomentsShowcase() {
           <MomentsMasonry moments={recentMoments} />
         ) : null}
       </motion.div>
-    </section>
+    </Section>
   );
 }

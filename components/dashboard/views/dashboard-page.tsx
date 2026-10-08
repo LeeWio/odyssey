@@ -1,6 +1,7 @@
 "use client";
 
-import { Chip } from "@heroui/react";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 
 import { DashboardToolbar } from "../widgets/dashboard-toolbar";
 import { EmployeesTable } from "../widgets/employees-table";
@@ -11,16 +12,8 @@ import { SystemSnapshotCard } from "../widgets/system-snapshot-card";
 
 export function DashboardPage() {
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
-      <div className="flex flex-col gap-2">
-        <Chip className="w-fit" size="sm" variant="soft">
-          Admin overview
-        </Chip>
-        <p className="text-muted text-sm">
-          Counts, the editorial queue, and the process snapshot come from the admin dashboard and
-          observability APIs.
-        </p>
-      </div>
+    <PageContainer className="flex flex-col gap-6 pt-8 pb-10">
+      <PageHeader title="Admin overview" />
       <DashboardToolbar />
       <KpiRow />
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -29,6 +22,6 @@ export function DashboardPage() {
       </div>
       <ContentWorkflowCard />
       <EmployeesTable />
-    </div>
+    </PageContainer>
   );
 }

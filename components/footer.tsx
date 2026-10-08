@@ -151,7 +151,7 @@ export function Footer() {
 
   return (
     <footer className="w-full">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 pt-20 pb-8 sm:px-10 sm:pt-28">
+      <div className="flex w-full flex-col gap-10 px-4 pt-20 pb-8 sm:pt-28 md:px-6 xl:px-8">
         <motion.div {...reveal()}>
           <Card variant="secondary" className="gap-6 p-6 sm:p-8">
             <Card.Header className="max-w-xl gap-2 p-0">

@@ -1,12 +1,13 @@
 "use client";
 
 import { createPageReveal } from "@/lib/motion";
+import { PageContainer } from "@/components/layout/page-container";
+import { MotionCard } from "@/components/ui";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { Card, Chip, CloseButton, Link } from "@heroui/react";
 import { useMounted } from "@mantine/hooks";
-import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 
@@ -33,12 +34,8 @@ export function HomeOrientation() {
   }
 
   return (
-    <motion.section
-      aria-label={t("orientation.regionLabel")}
-      className="mx-auto w-full max-w-6xl px-6 pb-8 sm:px-10"
-      {...reveal(0.05, 12)}
-    >
-      <Card variant="secondary" className="relative">
+    <PageContainer as="section" aria-label={t("orientation.regionLabel")} className="pb-8">
+      <MotionCard variant="secondary" className="relative" {...reveal(0.05, 12)}>
         <Card.Header className="gap-3 pe-12">
           <Chip size="sm" variant="secondary">
             {t("orientation.eyebrow")}
@@ -61,7 +58,7 @@ export function HomeOrientation() {
             </Link>
           ))}
         </Card.Footer>
-      </Card>
-    </motion.section>
+      </MotionCard>
+    </PageContainer>
   );
 }

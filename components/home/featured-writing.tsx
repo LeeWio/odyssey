@@ -1,6 +1,8 @@
 "use client";
 
 import { createPageReveal, pageEaseOut } from "@/lib/motion";
+import { Section } from "@/components/layout/section";
+import { HOME_CAROUSEL_SLIDE, HOME_PREVIEW_GRID } from "./layout";
 
 import { Icon } from "@iconify/react";
 
@@ -98,7 +100,7 @@ function FeaturedArticle({
           </div>
         </Card.Header>
         <Card.Content className="flex-1">
-          <Card.Title className="group-hover:text-accent line-clamp-2 text-xl tracking-[-0.03em] transition-colors">
+          <Card.Title className="group-hover:text-accent line-clamp-2 text-xl tracking-normal transition-colors">
             {title}
           </Card.Title>
           <Card.Description className="line-clamp-2 leading-6">{summary}</Card.Description>
@@ -129,19 +131,15 @@ export function FeaturedWriting() {
     refetch,
   } = useGetFeaturedPostsQuery({
     page: 0,
-    size: 6,
+    size: 12,
   });
 
-  const posts = featuredPosts?.list.slice(0, 6) ?? [];
+  const posts = featuredPosts?.list.slice(0, 12) ?? [];
 
   if (!isLoading && !isFetching && !isError && posts.length === 0) return null;
 
   return (
-    <section
-      id="writing"
-      aria-labelledby="writing-title"
-      className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-24 sm:px-10 sm:py-32"
-    >
+    <Section id="writing" aria-labelledby="writing-title">
       <header className="flex flex-col items-center text-center">
         <motion.div {...revealInView(0, 10)}>
           <Chip color="accent" size="sm" variant="soft">
@@ -153,7 +151,7 @@ export function FeaturedWriting() {
             id="writing-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
+            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
           >
             {t("writing.title")}
           </Typography>
@@ -183,12 +181,12 @@ export function FeaturedWriting() {
           />
         )}
         {isLoading && posts.length === 0 ? (
-          <div className="grid gap-4 sm:grid-cols-3">
-            {Array.from({ length: 3 }, (_, index) => (
+          <div className={HOME_PREVIEW_GRID}>
+            {Array.from({ length: 12 }, (_, index) => (
               <Card
                 key={index}
                 variant="secondary"
-                className="bg-surface-secondary/45 flex aspect-[16/10] flex-col justify-between overflow-hidden p-5"
+                className="bg-surface-secondary/45 flex aspect-[16/10] min-h-64 flex-col justify-between overflow-hidden p-5"
               >
                 <div className="flex items-center justify-between gap-3">
                   <Skeleton className="h-6 w-20 rounded-full" />
@@ -203,20 +201,24 @@ export function FeaturedWriting() {
             ))}
           </div>
         ) : posts.length > 0 ? (
-          <Carousel opts={{ align: "start", loop: posts.length > 3 }}>
+          <Carousel opts={{ align: "start", loop: false }}>
             <Carousel.Content className="-ml-4 items-stretch">
               {posts.map((post, index) => (
-                <Carousel.Item key={post.id} className="basis-full pl-4 sm:basis-1/2 lg:basis-1/3">
+                <Carousel.Item
+                  key={post.id}
+                  className={HOME_CAROUSEL_SLIDE}
+                  data-testid="home-writing-slide"
+                >
                   <motion.div
-                    initial={{ opacity: 0, y: 24 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 24 }}
                     transition={{
-                      duration: shouldReduceMotion ? 0 : 0.65,
-                      delay: index * 0.06,
+                      duration: shouldReduceMotion ? 0 : 0.28,
+                      delay: shouldReduceMotion ? 0 : Math.min(index * 0.04, 0.2),
                       ease: pageEaseOut,
                     }}
-                    className="aspect-[16/10] w-full"
+                    className="aspect-[16/10] min-h-64 w-full"
                   >
                     <FeaturedArticle
                       title={post.title}
@@ -238,6 +240,6 @@ export function FeaturedWriting() {
           </Carousel>
         ) : null}
       </motion.div>
-    </section>
+    </Section>
   );
 }

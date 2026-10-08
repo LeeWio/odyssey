@@ -1,10 +1,11 @@
 import { EssayCard, type EssayCardPost } from "./essay-card";
+import { ESSAY_GRID } from "./grid-classes";
 
 export function EssayGrid({ posts }: { posts: EssayCardPost[] }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2">
+    <ul className={ESSAY_GRID} data-testid="essay-grid">
       {posts.map((post) => (
-        <li key={post.id ?? post.slug}>
+        <li key={post.id ?? post.slug} className="min-w-0">
           <EssayCard post={post} />
         </li>
       ))}

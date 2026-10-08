@@ -1,5 +1,8 @@
 "use client";
 
+import { Section } from "@/components/layout/section";
+import { HOME_PREVIEW_GRID } from "./layout";
+
 import { pageEaseOut } from "@/lib/motion";
 
 import { Icon } from "@iconify/react";
@@ -22,7 +25,7 @@ import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preferenc
 import { type ProjectResponse, useGetPublicProjectsQuery } from "@/lib/features/project";
 import { useTranslations } from "next-intl";
 
-const SHOWCASE_LIMIT = 3;
+const SHOWCASE_LIMIT = 12;
 
 function toSafeExternalUrl(value?: string | null) {
   if (!value?.trim()) return undefined;
@@ -54,7 +57,7 @@ function ProjectMedia({ project }: { project: ProjectResponse }) {
         alt={t("projects.coverAlt", { name: project.name })}
         className="object-cover"
         fill
-        sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
+        sizes="(max-width: 639px) 100vw, (max-width: 943px) 50vw, (max-width: 1247px) 33vw, (max-width: 1551px) 25vw, (max-width: 1855px) 20vw, 17vw"
         src={coverImage}
       />
     );
@@ -65,7 +68,7 @@ function ProjectMedia({ project }: { project: ProjectResponse }) {
       className="from-accent-500 via-accent-700 to-default-900 flex h-full items-end justify-between bg-linear-to-br p-5 text-white"
       variant="tertiary"
     >
-      <Typography className="max-w-[12ch] text-2xl font-semibold tracking-[-0.04em] text-white">
+      <Typography className="max-w-[12ch] text-2xl font-semibold tracking-normal text-white">
         {project.name}
       </Typography>
       <Icon aria-hidden="true" className="size-10 text-white/45" icon="gravity-ui:code" />
@@ -94,10 +97,10 @@ function ProjectCard({
       viewport={{ once: true, amount: 0.2 }}
       transition={{
         duration: reducedMotion ? 0 : 0.55,
-        delay: reducedMotion ? 0 : index * 0.06,
+        delay: reducedMotion ? 0 : Math.min(index * 0.04, 0.2),
         ease: pageEaseOut,
       }}
-      className="h-full"
+      className="h-full min-w-0"
     >
       <Card className="h-full" variant="secondary">
         <Card.Content className="p-0">
@@ -119,7 +122,7 @@ function ProjectCard({
         </Card.Content>
 
         <Card.Header className="gap-3">
-          <Card.Title className="text-xl tracking-[-0.03em]">{project.name}</Card.Title>
+          <Card.Title className="text-xl tracking-normal">{project.name}</Card.Title>
           <Card.Description className="line-clamp-3 leading-6">
             {project.description || t("projects.fallbackDescription")}
           </Card.Description>
@@ -180,11 +183,7 @@ export function ProjectsShowcase() {
   if (!isLoading && !error && visibleProjects.length === 0) return null;
 
   return (
-    <section
-      id="projects-showcase"
-      aria-labelledby="projects-showcase-title"
-      className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-24 sm:px-10 sm:py-32"
-    >
+    <Section id="projects-showcase" aria-labelledby="projects-showcase-title">
       <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-xl">
           <Chip color="accent" size="sm" variant="soft">
@@ -194,7 +193,7 @@ export function ProjectsShowcase() {
             id="projects-showcase-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-[clamp(2rem,4vw,3.5rem)] leading-[1.04] tracking-[-0.045em]"
+            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
           >
             {t("projects.title")}
           </Typography>
@@ -217,7 +216,7 @@ export function ProjectsShowcase() {
           <div
             aria-busy="true"
             aria-label={t("projects.loading")}
-            className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+            className={HOME_PREVIEW_GRID}
             role="status"
           >
             {Array.from({ length: SHOWCASE_LIMIT }, (_, index) => (
@@ -248,7 +247,7 @@ export function ProjectsShowcase() {
             </Button>
           </Card>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className={HOME_PREVIEW_GRID} data-testid="home-projects-grid">
             {visibleProjects.map((project, index) => (
               <ProjectCard
                 key={project.id}
@@ -260,6 +259,6 @@ export function ProjectsShowcase() {
           </div>
         )}
       </div>
-    </section>
+    </Section>
   );
 }

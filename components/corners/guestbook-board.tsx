@@ -135,11 +135,7 @@ export default function GuestbookBoard() {
 
   if (isLoading) {
     return (
-      <div
-        className="mx-auto w-full max-w-7xl px-6 py-10"
-        aria-busy="true"
-        aria-label={t("loading")}
-      >
+      <div className="w-full py-10" aria-busy="true" aria-label={t("loading")}>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }, (_, index) => (
             <GuestbookSkeletonCard key={index} />
@@ -155,7 +151,7 @@ export default function GuestbookBoard() {
   const fourthColumn = columns[3];
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-10">
+    <div className="w-full py-10">
       <div className="columns-1 gap-4 sm:columns-2 md:columns-3 lg:columns-4">
         <ScrollingBanner isVertical duration={isMobile ? 200 : 120} shouldPauseOnHover={true}>
           {firstColumn.map((testimonial, index) => (

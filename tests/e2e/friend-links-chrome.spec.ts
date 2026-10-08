@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import messages from "../../messages/en.json";
 
 const listPath = "/api/v1/public/friend-links";
 
@@ -62,7 +63,10 @@ test.describe("friend links page chrome", () => {
     await page.goto("/links");
     await page.getByRole("searchbox", { name: "Search places to visit" }).fill("zzzz-no-match");
     await expect(page.getByRole("heading", { name: "No places match your search" })).toBeVisible();
-    await page.getByRole("button", { name: "Clear search" }).click();
+    await page
+      .getByRole("button", { name: messages.Links.clearSearch, exact: true })
+      .filter({ hasText: messages.Links.clearSearch })
+      .click();
     await expect(page.getByRole("link", { name: /Quiet Studio/i })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true

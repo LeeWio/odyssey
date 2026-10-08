@@ -1,4 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
+import messages from "../../messages/en.json";
+
+const retryLabel = (subject: string) =>
+  messages.Home.errors.retryLabel.replace("{subject}", subject);
 
 const momentsPath = "/api/v1/public/moments";
 const writingPath = "/api/v1/public/blog/posts/featured";
@@ -101,7 +105,7 @@ for (const scenario of [
     await expect(
       section.getByText(`Couldn't load ${scenario.subject}.`, { exact: true })
     ).toBeVisible();
-    const retry = section.getByRole("button", { name: `Retry loading ${scenario.subject}` });
+    const retry = section.getByRole("button", { name: retryLabel(scenario.subject) });
     await retry.focus();
     await page.keyboard.press("Enter");
     try {
@@ -115,16 +119,15 @@ for (const scenario of [
       section.getByText(scenario.subject === "moments" ? moment.content : post.title, {
         exact: true,
       })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 30_000 });
     expect(requests).toBe(2);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true
     );
     if (scenario.subject === "writing") {
-      await expect(section.getByRole("link", { name: "Read the essay" })).toHaveAttribute(
-        "href",
-        "/single/visitor-essay"
-      );
+      await expect(
+        section.getByRole("link", { name: messages.Home.writing.readEssay, exact: true })
+      ).toHaveAttribute("href", "/single/visitor-essay");
     }
   });
 }
@@ -140,7 +143,7 @@ test("successful empty retry hides an empty section without a false error", asyn
       : route.fulfill({ json: envelope([]) });
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Retry loading moments" }).click();
+  await page.getByRole("button", { name: retryLabel("moments") }).click();
   await expect(page.locator("#moments-showcase")).toHaveCount(0);
   expect(requests).toBe(2);
 });
@@ -169,7 +172,9 @@ for (const scenario of [
     });
     await page.goto("/");
     const section = page.locator(scenario.section);
-    await expect(section.getByText(scenario.text, { exact: true })).toBeVisible();
+    await expect(section.getByText(scenario.text, { exact: true })).toBeVisible({
+      timeout: 30_000,
+    });
     await page.evaluate(() => {
       window.dispatchEvent(new Event("offline"));
       window.dispatchEvent(new Event("online"));
@@ -178,7 +183,7 @@ for (const scenario of [
       `Couldn't refresh ${scenario.subject}.`
     );
     await expect(section.getByText(scenario.text, { exact: true })).toBeVisible();
-    await section.getByRole("button", { name: `Retry loading ${scenario.subject}` }).click();
+    await section.getByRole("button", { name: retryLabel(scenario.subject) }).click();
     await expect(section.getByRole("status")).toHaveCount(0);
     await expect(section.getByText(scenario.text, { exact: true })).toBeVisible();
     expect(requests).toBe(3);

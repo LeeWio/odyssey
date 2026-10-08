@@ -1,5 +1,7 @@
 "use client";
 
+import { Section } from "@/components/layout/section";
+
 import { createPageReveal, pageEaseOut } from "@/lib/motion";
 
 import { ArrowDownIcon, ArrowUpIcon } from "@/components/icons";
@@ -65,11 +67,7 @@ export function LatelySection() {
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
-    <section
-      id="lately"
-      aria-labelledby="lately-title"
-      className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-24 sm:px-10 sm:py-32"
-    >
+    <Section id="lately" aria-labelledby="lately-title">
       <header className="flex flex-col items-center text-center">
         <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
           Lately
@@ -79,7 +77,7 @@ export function LatelySection() {
           align="center"
           type="h2"
           weight="bold"
-          className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
+          className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
           {...revealInView(0.06)}
         >
           What I&apos;ve been up to
@@ -121,7 +119,7 @@ export function LatelySection() {
               aria-hidden="true"
               color="muted"
               type="body-xs"
-              className="font-mono tracking-[0.14em]"
+              className="font-mono tracking-normal"
             >
               KEPT CLOSE
             </Typography>
@@ -145,7 +143,7 @@ export function LatelySection() {
             </motion.div>
 
             <div className="max-w-lg">
-              <Typography type="h3" weight="semibold" className="tracking-[-0.03em]">
+              <Typography type="h3" weight="semibold" className="tracking-normal">
                 One song, kept close.
               </Typography>
               <Typography color="muted" type="body-sm" className="mt-2 leading-6">
@@ -176,10 +174,10 @@ export function LatelySection() {
           {...revealInView(0.14, 28)}
         >
           <Card.Header className="p-0">
-            <Typography color="muted" type="body-xs" className="font-mono tracking-[0.14em]">
+            <Typography color="muted" type="body-xs" className="font-mono tracking-normal">
               {t("lately.fieldSignal")}
             </Typography>
-            <Card.Title className="mt-6 text-2xl tracking-[-0.03em]">
+            <Card.Title className="mt-6 text-2xl tracking-normal">
               {t("lately.marketTitle")}
             </Card.Title>
             <Card.Description className="mt-2 max-w-sm leading-6">
@@ -266,11 +264,11 @@ export function LatelySection() {
               <Typography
                 type="body-xs"
                 color="muted"
-                className="font-mono tracking-[0.14em] uppercase"
+                className="font-mono tracking-normal uppercase"
               >
                 Building & training
               </Typography>
-              <Card.Title className="mt-4 text-3xl font-bold tracking-[-0.03em]">
+              <Card.Title className="mt-4 text-3xl font-bold tracking-normal">
                 Practice is part of the archive.
               </Card.Title>
               <Card.Description className="mt-2 max-w-sm text-sm leading-relaxed">
@@ -308,7 +306,7 @@ export function LatelySection() {
               <>
                 <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
                   <KPI.Header>
-                    <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
+                    <KPI.Title className="text-muted font-mono text-xs font-bold tracking-normal uppercase">
                       Commits
                     </KPI.Title>
                   </KPI.Header>
@@ -327,7 +325,7 @@ export function LatelySection() {
 
                 <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
                   <KPI.Header>
-                    <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
+                    <KPI.Title className="text-muted font-mono text-xs font-bold tracking-normal uppercase">
                       Repositories
                     </KPI.Title>
                   </KPI.Header>
@@ -346,7 +344,7 @@ export function LatelySection() {
 
                 <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
                   <KPI.Header>
-                    <KPI.Title className="text-muted/60 font-mono text-[10px] font-bold tracking-wider uppercase">
+                    <KPI.Title className="text-muted font-mono text-xs font-bold tracking-normal uppercase">
                       Reviews
                     </KPI.Title>
                   </KPI.Header>
@@ -387,31 +385,31 @@ export function LatelySection() {
 
       <motion.section
         aria-labelledby="github-activity-title"
-        className="mt-20 grid w-full items-start gap-12 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-16"
+        className="mt-20 grid w-full min-w-0 gap-12 lg:gap-16"
         {...revealInView(0.2, 20)}
       >
-        <div className="max-w-md lg:sticky lg:top-28 lg:pt-1">
-          <Typography
-            color="muted"
-            type="body-xs"
-            className="font-mono tracking-[0.14em] uppercase"
-          >
+        <div className="flex w-full min-w-0 flex-col items-center text-center">
+          <Typography color="muted" type="body-xs" className="font-mono tracking-normal uppercase">
             Development log
           </Typography>
           <Typography
             id="github-activity-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-[clamp(2rem,4vw,3.5rem)] leading-[1.02] tracking-[-0.045em]"
+            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
           >
             {t("lately.buildTitle")}
           </Typography>
-          <Typography color="muted" type="body" className="mt-5 max-w-sm leading-relaxed italic">
+          <Typography
+            color="muted"
+            type="body"
+            className="mt-5 leading-relaxed text-balance italic"
+          >
             {t("lately.buildDescription")}
           </Typography>
         </div>
 
-        <div className="flex w-full min-w-0 lg:justify-end">
+        <div className="flex w-full min-w-0 justify-center">
           {!mounted || (isGitHubActivityLoading && !githubActivity) ? (
             <div
               aria-label={t("lately.loadingGithub")}
@@ -437,6 +435,6 @@ export function LatelySection() {
           )}
         </div>
       </motion.section>
-    </section>
+    </Section>
   );
 }

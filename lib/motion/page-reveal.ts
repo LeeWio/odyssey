@@ -5,6 +5,8 @@ export const pageEaseOut = [0.22, 1, 0.36, 1] as const;
 /** Alias for short icon/button transitions that share the same curve. */
 export const microEaseOut = pageEaseOut;
 
+export const sectionRevealDuration = 0.28;
+
 export type PageRevealInViewOptions = {
   duration?: number;
   amount?: number;
@@ -27,15 +29,15 @@ export type PageRevealMotion = {
 export function pageReveal(
   reducedMotion: boolean,
   delay = 0,
-  distance = 18,
-  duration = 0.65
+  distance = 12,
+  duration = sectionRevealDuration
 ): PageRevealMotion {
   return {
     initial: reducedMotion ? false : { opacity: 0, y: distance },
     animate: { opacity: 1, y: 0 },
     transition: {
       duration: reducedMotion ? 0 : duration,
-      delay,
+      delay: reducedMotion ? 0 : delay,
       ease: pageEaseOut,
     },
   };
@@ -45,10 +47,10 @@ export function pageReveal(
 export function pageRevealInView(
   reducedMotion: boolean,
   delay = 0,
-  distance = 20,
+  distance = 12,
   options: PageRevealInViewOptions = {}
 ): PageRevealMotion {
-  const { duration = 0.65, amount = 0.3, margin } = options;
+  const { duration = sectionRevealDuration, amount = 0.3, margin } = options;
 
   return {
     initial: reducedMotion ? false : { opacity: 0, y: distance },
@@ -56,7 +58,7 @@ export function pageRevealInView(
     viewport: margin ? { once: true, amount, margin } : { once: true, amount },
     transition: {
       duration: reducedMotion ? 0 : duration,
-      delay,
+      delay: reducedMotion ? 0 : delay,
       ease: pageEaseOut,
     },
   };
@@ -64,12 +66,12 @@ export function pageRevealInView(
 
 /** Bind reduced-motion once for a page or section. */
 export function createPageReveal(reducedMotion: boolean, defaults: PageRevealInViewOptions = {}) {
-  const defaultDuration = defaults.duration ?? 0.65;
+  const defaultDuration = defaults.duration ?? sectionRevealDuration;
 
   return {
-    reveal: (delay = 0, distance = 18, duration = defaultDuration) =>
+    reveal: (delay = 0, distance = 12, duration = defaultDuration) =>
       pageReveal(reducedMotion, delay, distance, duration),
-    revealInView: (delay = 0, distance = 20, options: PageRevealInViewOptions = {}) =>
+    revealInView: (delay = 0, distance = 12, options: PageRevealInViewOptions = {}) =>
       pageRevealInView(reducedMotion, delay, distance, { ...defaults, ...options }),
   };
 }

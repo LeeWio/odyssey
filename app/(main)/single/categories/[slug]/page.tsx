@@ -5,6 +5,8 @@ import { Button, Link, Skeleton, Typography } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
+import { PageContainer } from "@/components/layout/page-container";
+import { ESSAY_GRID } from "../../components/grid-classes";
 
 import { useGetPublicCategoriesQuery } from "@/lib/features/category";
 import { useGetPublicPostsQuery } from "@/lib/features/post";
@@ -33,12 +35,16 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   useNormalizePageParam(page, posts.currentData ? (posts.currentData.totalPages ?? 0) : undefined);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-24 sm:px-10 sm:py-32">
+    <PageContainer className="flex flex-col gap-8 pt-28 pb-24 lg:pt-32">
       <header className="flex max-w-2xl flex-col gap-2">
         <Link className="text-sm no-underline" href="/single/categories">
           {t("allCategories")}
         </Link>
-        <Typography type="h1" weight="semibold">
+        <Typography
+          type="h1"
+          weight="semibold"
+          className="tracking-normal text-balance break-words"
+        >
           {category?.name ?? decodeURIComponent(slug)}
         </Typography>
         {category?.description ? (
@@ -54,8 +60,8 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
       </header>
 
       {categories.isLoading || (category && posts.isLoading) ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {Array.from({ length: 4 }, (_, index) => (
+        <div className={ESSAY_GRID} aria-busy="true">
+          {Array.from({ length: PAGE_SIZE }, (_, index) => (
             <Skeleton key={index} className="h-36 w-full rounded-2xl" />
           ))}
         </div>
@@ -102,6 +108,6 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
           />
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }

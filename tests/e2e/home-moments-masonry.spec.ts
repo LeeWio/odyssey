@@ -71,10 +71,8 @@ for (const viewport of [
         const rect = element.getBoundingClientRect();
         return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
       });
-      const columns = Number.parseInt(
-        getComputedStyle(elements[0]!.parentElement!).columnCount,
-        10
-      );
+      // column-width layouts report column-count:auto; measure rendered columns instead.
+      const columns = new Set(boxes.map((box) => Math.round(box.left))).size;
       const showcaseWidth = document
         .querySelector("#moments-showcase")!
         .getBoundingClientRect().width;

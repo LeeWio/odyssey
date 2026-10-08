@@ -47,7 +47,10 @@ export function EssayCard({ post }: { post: EssayCardPost }) {
       <Card.Header>
         <div className="flex items-start gap-3">
           <Card.Title className="line-clamp-2 min-w-0 flex-1 text-base leading-6">
-            <Link className="text-foreground no-underline" href={`/single/${slug}`}>
+            <Link
+              className="text-foreground block max-w-full wrap-anywhere no-underline"
+              href={`/single/${slug}`}
+            >
               {title}
             </Link>
           </Card.Title>

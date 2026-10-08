@@ -1,5 +1,8 @@
 "use client";
 
+import { Section } from "@/components/layout/section";
+import { HOME_PREVIEW_GRID } from "./layout";
+
 import { pageEaseOut } from "@/lib/motion";
 
 import { Avatar, Button, Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
@@ -9,7 +12,7 @@ import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preferenc
 import { useGetPublicFriendLinksQuery, type FriendLinkResponse } from "@/lib/features/friend-link";
 import { useTranslations } from "next-intl";
 
-const SHOWCASE_LIMIT = 4;
+const SHOWCASE_LIMIT = 12;
 
 function toSafeExternalUrl(value?: string | null) {
   if (!value?.trim()) return undefined;
@@ -53,7 +56,7 @@ function LinkPreviewCard({
       viewport={{ once: true, amount: 0.25 }}
       transition={{
         duration: reducedMotion ? 0 : 0.55,
-        delay: reducedMotion ? 0 : index * 0.05,
+        delay: reducedMotion ? 0 : Math.min(index * 0.04, 0.2),
         ease: pageEaseOut,
       }}
     >
@@ -103,10 +106,7 @@ export function FriendLinksShowcase() {
   if (!isLoading && !error && visibleLinks.length === 0) return null;
 
   return (
-    <section
-      aria-labelledby="friend-links-showcase-title"
-      className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-24 sm:px-10 sm:py-32"
-    >
+    <Section aria-labelledby="friend-links-showcase-title">
       <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-xl">
           <Chip color="default" size="sm" variant="secondary">
@@ -116,7 +116,7 @@ export function FriendLinksShowcase() {
             id="friend-links-showcase-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-[clamp(2rem,4vw,3.5rem)] leading-[1.04] tracking-[-0.045em]"
+            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
           >
             {t("links.title")}
           </Typography>
@@ -137,7 +137,7 @@ export function FriendLinksShowcase() {
           <div
             aria-busy="true"
             aria-label={t("links.loading")}
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            className={HOME_PREVIEW_GRID}
             role="status"
           >
             {Array.from({ length: SHOWCASE_LIMIT }, (_, index) => (
@@ -167,7 +167,7 @@ export function FriendLinksShowcase() {
             </Button>
           </Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className={HOME_PREVIEW_GRID} data-testid="home-links-grid">
             {visibleLinks.map((link, index) => (
               <LinkPreviewCard
                 key={link.id}
@@ -179,6 +179,6 @@ export function FriendLinksShowcase() {
           </div>
         )}
       </div>
-    </section>
+    </Section>
   );
 }

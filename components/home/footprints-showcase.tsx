@@ -1,5 +1,7 @@
 "use client";
 
+import { Section } from "@/components/layout/section";
+
 import { Card, Chip, Link, Typography } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { Icon } from "@iconify/react";
@@ -18,12 +20,8 @@ export function FootprintsShowcase() {
   const latestYear = Math.max(...FOOTPRINTS.map((footprint) => footprint.year));
 
   return (
-    <section
-      id="footprints-showcase"
-      aria-labelledby="footprints-showcase-title"
-      className="w-full scroll-mt-24 py-24 sm:py-32"
-    >
-      <header className="flex w-full flex-col gap-6 px-6 sm:flex-row sm:items-end sm:justify-between sm:px-10">
+    <Section id="footprints-showcase" aria-labelledby="footprints-showcase-title">
+      <header className="flex w-full flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-xl">
           <Chip size="sm" variant="secondary">
             {t("footprints.eyebrow")}
@@ -32,7 +30,7 @@ export function FootprintsShowcase() {
             id="footprints-showcase-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-[clamp(2rem,4vw,3.5rem)] leading-[1.04] tracking-[-0.045em]"
+            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
           >
             {t("footprints.title")}
           </Typography>
@@ -92,6 +90,6 @@ export function FootprintsShowcase() {
           </Card.Content>
         </Card>
       </div>
-    </section>
+    </Section>
   );
 }

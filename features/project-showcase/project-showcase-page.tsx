@@ -24,10 +24,13 @@ import { useLocale, useTranslations } from "next-intl";
 import { useDeferredValue, useMemo, useState } from "react";
 
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
+import { PageContainer } from "@/components/layout/page-container";
 import { type ProjectResponse, useGetPublicProjectsQuery } from "@/lib/features/project";
 
 type ProjectAvailability = "all" | "preview" | "source";
 type ProjectSort = "featured" | "most-starred" | "alphabetical";
+
+const PROJECT_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-5";
 
 function toSafeExternalUrl(value?: string | null) {
   if (!value?.trim()) return undefined;
@@ -63,13 +66,8 @@ function matchesProject(project: ProjectResponse, query: string) {
 function ProjectSkeleton() {
   const t = useTranslations("Projects");
   return (
-    <div
-      aria-busy="true"
-      aria-label={t("loading")}
-      className="grid gap-5 lg:grid-cols-2"
-      role="status"
-    >
-      {Array.from({ length: 4 }, (_, index) => (
+    <div aria-busy="true" aria-label={t("loading")} className={PROJECT_GRID} role="status">
+      {Array.from({ length: 6 }, (_, index) => (
         <Card key={index} variant="secondary" className="overflow-hidden p-0">
           <Skeleton className="aspect-[16/9] w-full rounded-none" />
           <Card.Header className="gap-3">
@@ -98,7 +96,7 @@ function ProjectVisual({ project }: { project: ProjectResponse }) {
         alt={t("coverAlt", { name: project.name })}
         className="object-cover transition-transform duration-500 group-hover:scale-105"
         fill
-        sizes="(max-width: 1023px) 100vw, 50vw"
+        sizes="(min-width: 1920px) 20vw, (min-width: 1536px) 25vw, (min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
         src={coverImage}
       />
     );
@@ -145,7 +143,7 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
       </div>
       <Card.Header className="gap-3">
         <div className="flex items-start justify-between gap-4">
-          <Card.Title className="text-xl">{project.name}</Card.Title>
+          <Card.Title className="min-w-0 text-xl break-words">{project.name}</Card.Title>
           {hasMetrics ? (
             <div className="text-muted flex shrink-0 items-center gap-3 font-mono text-xs tabular-nums">
               {starsCount > 0 ? (
@@ -260,15 +258,19 @@ export function ProjectShowcasePage() {
   };
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-6xl">
+    <div className="bg-background min-h-dvh w-full pt-28 pb-24 lg:pt-32">
+      <PageContainer>
         <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-end">
           <div className="max-w-3xl">
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
               <Icon icon="gravity-ui:code" aria-hidden="true" className="size-4" />
               {t("eyebrow")}
             </div>
-            <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
+            <Typography
+              type="h1"
+              weight="bold"
+              className="mt-5 tracking-normal text-balance break-words"
+            >
               {t("title")}
             </Typography>
             <Typography color="muted" type="body" className="mt-5 max-w-xl">
@@ -407,7 +409,7 @@ export function ProjectShowcasePage() {
               </div>
 
               {visibleProjects.length > 0 ? (
-                <div className="mt-6 grid gap-5 lg:grid-cols-2">
+                <div className={cn(PROJECT_GRID, "mt-6")} data-testid="projects-grid">
                   {visibleProjects.map((project) => (
                     <ProjectCard key={project.id} project={project} />
                   ))}
@@ -442,7 +444,7 @@ export function ProjectShowcasePage() {
             <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
           </Link>
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 }

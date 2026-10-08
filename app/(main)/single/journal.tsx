@@ -3,7 +3,7 @@
 import { Icon } from "@iconify/react";
 import { Carousel } from "@heroui-pro/react/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { EmptyState, HoverCard, ItemCard, NumberValue, Segment } from "@heroui-pro/react";
+import { EmptyState, ItemCard, NumberValue, Segment } from "@heroui-pro/react";
 import {
   Alert,
   Button,
@@ -48,6 +48,12 @@ import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
 import { parsePageParam } from "@/lib/utils/pagination";
+import { PageContainer } from "@/components/layout/page-container";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
+
+const JOURNAL_STORY_GRID =
+  "grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-x-8 gap-y-0";
+const LATEST_PAGE_SIZE = 12;
 
 type ArchiveFacet = OpenApiComponents["schemas"]["ArchiveFacet"];
 type CategoryFacet = OpenApiComponents["schemas"]["CategoryFacet"];
@@ -99,13 +105,27 @@ function storyKey(post: Story) {
 const coverHover =
   "transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100";
 
-function Cover({ cover, ratio }: { cover?: string; ratio: string }) {
+function Cover({
+  cover,
+  ratio,
+  eager = false,
+}: {
+  cover?: string;
+  ratio: string;
+  eager?: boolean;
+}) {
   if (!cover) return <span className={`${ratio} bg-default/40 block`} />;
 
   return (
     // Cover hosts are not in next/image remotePatterns.
     // eslint-disable-next-line @next/next/no-img-element
-    <img alt="" className={`${ratio} w-full object-cover ${coverHover}`} src={cover} />
+    <img
+      alt=""
+      className={`${ratio} w-full object-cover ${coverHover}`}
+      src={cover}
+      loading={eager ? "eager" : "lazy"}
+      decoding="async"
+    />
   );
 }
 
@@ -124,53 +144,85 @@ function FeatureCard({
     .filter(Boolean)
     .join(" · ");
   const title = post.title || t("untitledStory");
+  const cover = post.coverImage?.trim();
 
   return (
     <article
       data-journal-reveal=""
       data-journal-order={delay > 0 ? "2" : "1"}
-      className="bg-surface-secondary hover:bg-surface-tertiary overflow-hidden rounded-2xl transition-colors duration-150 motion-reduce:transition-none"
+      className={
+        featured
+          ? "min-w-0"
+          : "border-separator min-w-0 border-t py-6 first:border-t-0 first:pt-0 last:pb-0"
+      }
+      data-testid={featured ? "journal-lead" : "journal-companion"}
     >
-      <HoverCard>
-        <HoverCard.Trigger className="block w-full">
-          <Link
-            className="group relative block w-full overflow-hidden no-underline"
-            href={storyHref(post)}
+      <Link
+        className={
+          featured
+            ? `group relative flex h-80 w-full flex-col justify-end overflow-hidden rounded-lg no-underline sm:h-96 2xl:h-112 ${cover ? "text-white" : "bg-surface-secondary text-foreground"}`
+            : "group text-foreground flex w-full items-start gap-5 no-underline"
+        }
+        href={storyHref(post)}
+      >
+        {featured && cover ? <Cover cover={cover} eager ratio="absolute inset-0 h-full" /> : null}
+        <div
+          className={
+            featured
+              ? `relative flex min-w-0 flex-col gap-3 p-6 sm:p-8 ${cover ? "bg-gradient-to-t from-black/90 via-black/65 to-transparent pt-20 sm:pt-24" : ""}`
+              : "flex min-w-0 flex-1 flex-col gap-3"
+          }
+        >
+          <span className={featured && cover ? "text-xs text-white/80" : "text-muted text-xs"}>
+            {meta}
+          </span>
+          <Typography
+            type="h3"
+            weight="semibold"
+            className={
+              featured
+                ? `line-clamp-3 text-2xl leading-tight tracking-normal wrap-anywhere sm:text-3xl 2xl:text-4xl ${cover ? "text-white" : "text-foreground"}`
+                : "group-hover:text-accent line-clamp-3 text-xl leading-snug tracking-normal wrap-anywhere"
+            }
           >
-            <Cover cover={post.coverImage?.trim()} ratio="aspect-[16/9] w-full" />
-            <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pt-12 pb-3.5">
-              {meta ? <span className="text-xs text-white/75">{meta}</span> : null}
-              <span
-                className={`line-clamp-2 font-semibold tracking-tight text-white ${featured ? "text-xl leading-7" : "text-base leading-6"}`}
-              >
-                {title}
-              </span>
-            </span>
-          </Link>
-        </HoverCard.Trigger>
-        {post.summary ? (
-          <HoverCard.Content aria-label={title}>
-            <HoverCard.Arrow />
-            <p className="text-sm leading-5">{post.summary}</p>
-            <p className="text-muted mt-2 text-xs tabular-nums">
-              <NumberValue locale={locale} notation="compact" value={post.views ?? 0}>
-                {(formatted) => t("views", { count: formatted })}
-              </NumberValue>
-            </p>
-          </HoverCard.Content>
+            {title}
+          </Typography>
+          {post.summary ? (
+            <Typography
+              type="body-sm"
+              className={`line-clamp-2 leading-6 ${featured && cover ? "text-white/85" : "text-muted"}`}
+            >
+              {post.summary}
+            </Typography>
+          ) : null}
+          <span className={`mt-1 text-xs ${featured && cover ? "text-white/75" : "text-muted"}`}>
+            {post.authorName || t("recentlyPublished")}
+          </span>
+        </div>
+        {!featured && cover ? (
+          <div className="w-24 shrink-0 overflow-hidden rounded-md sm:w-32">
+            <Cover cover={cover} ratio="aspect-[4/3]" />
+          </div>
         ) : null}
-      </HoverCard>
+      </Link>
     </article>
   );
 }
 
 function FeatureMosaic({ lead, companions }: { lead: Story; companions: Story[] }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <div
+      className={`grid min-w-0 gap-8 lg:gap-10 ${companions.length > 0 ? "lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]" : ""}`}
+      data-testid="journal-feature-layout"
+    >
       <FeatureCard featured post={lead} />
-      {companions.map((post, index) => (
-        <FeatureCard key={post.id ?? post.slug} delay={0.06 * (index + 1)} post={post} />
-      ))}
+      {companions.length > 0 ? (
+        <div className="flex min-w-0 flex-col justify-center">
+          {companions.map((post, index) => (
+            <FeatureCard key={post.id ?? post.slug} delay={0.06 * (index + 1)} post={post} />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -279,40 +331,42 @@ function StoryRow({ post, isRefreshing = false }: { post: Story; isRefreshing?: 
   const author = post.authorName?.trim();
 
   return (
-    <article aria-label={title} className="h-full">
-      <Card className="h-full">
-        <Card.Header>
-          <div className="flex items-start gap-3">
-            <Card.Title className="line-clamp-2 min-w-0 flex-1 text-base leading-6">
-              <Link className="text-foreground no-underline" href={storyHref(post)}>
+    <article aria-label={title} className="border-separator h-full min-w-0 border-t py-6">
+      <Card variant="transparent" className="h-full gap-4 rounded-none p-0">
+        <Card.Header className="gap-3">
+          <Typography color="muted" type="body-xs" className="flex flex-wrap gap-x-3 gap-y-1">
+            {post.category?.name ? (
+              <span className="text-accent font-medium">{post.category.name}</span>
+            ) : null}
+            <span>{formatDate(storyDate(post), locale, t("recentlyPublished"))}</span>
+          </Typography>
+          <div className="flex items-start gap-5">
+            <Card.Title className="line-clamp-3 min-w-0 flex-1 text-xl leading-7 tracking-normal">
+              <Link
+                className="text-foreground hover:text-accent block max-w-full wrap-anywhere no-underline"
+                href={storyHref(post)}
+              >
                 {title}
               </Link>
             </Card.Title>
             {cover ? (
               <Link
-                className="block size-12 shrink-0 overflow-hidden rounded-lg no-underline"
+                aria-label={title}
+                className="block w-20 shrink-0 overflow-hidden rounded-md no-underline sm:w-24"
                 href={storyHref(post)}
               >
-                <Cover cover={cover} ratio="size-12" />
+                <Cover cover={cover} ratio="aspect-[4/3]" />
               </Link>
             ) : null}
           </div>
-          <Card.Description>
-            {[
-              author,
-              post.category?.name,
-              formatDate(storyDate(post), locale, t("recentlyPublished")),
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </Card.Description>
+          {author ? <Card.Description className="text-xs">{author}</Card.Description> : null}
         </Card.Header>
         {post.summary ? (
           <Card.Content>
-            <p className="text-muted line-clamp-2 text-sm leading-5">{post.summary}</p>
+            <p className="text-muted line-clamp-3 text-sm leading-6">{post.summary}</p>
           </Card.Content>
         ) : null}
-        <Card.Footer className="mt-auto justify-between gap-3">
+        <Card.Footer className="mt-auto flex-wrap justify-between gap-3">
           <span className="text-muted text-xs tabular-nums">
             <NumberValue locale={locale} notation="compact" value={post.views ?? 0}>
               {(formatted) => t("views", { count: formatted })}
@@ -369,6 +423,7 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
   const name = column.name || t("untitledColumn");
   const [autoplay] = useState(() => Autoplay({ delay: 2000, stopOnInteraction: true }));
   const locale = useLocale();
+  const shouldReduceMotion = useReducedMotionPreference();
   const slides = column.posts.map((post) => {
     const image = post.coverImage?.trim();
     return {
@@ -415,8 +470,8 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
           .filter(Boolean)
           .join(" · ")}
       </p>
-      <div className="w-full max-w-xs">
-        <Carousel opts={{ loop: true }} plugins={[autoplay]}>
+      <div className="w-full min-w-0">
+        <Carousel opts={{ loop: true }} plugins={shouldReduceMotion ? [] : [autoplay]}>
           <Carousel.Content>
             {slides.map((slide) => (
               <Carousel.Item key={slide.slug}>
@@ -429,7 +484,7 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             alt={slide.alt}
-                            className="aspect-square w-full object-cover"
+                            className="aspect-[16/9] w-full object-cover"
                             draggable={false}
                             src={slide.image}
                           />
@@ -465,7 +520,7 @@ function ColumnDeckPreview({ column }: { column: ColumnResponse }) {
   const detail = useGetPublicColumnBySlugQuery(column.slug);
   const resolved = detail.data ?? column;
   if (detail.isLoading && resolved.posts.length === 0) {
-    return <Skeleton className="h-80 w-full max-w-xs rounded-2xl" />;
+    return <Skeleton className="h-80 w-full rounded-lg" />;
   }
   return <ColumnDeck column={resolved} />;
 }
@@ -490,7 +545,7 @@ function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
           <Link.Icon />
         </Link>
       </div>
-      <div className="flex flex-wrap items-start gap-8">
+      <div className="grid min-w-0 items-start gap-8 md:grid-cols-2">
         <ColumnDeckPreview column={active} />
         {rest.length > 0 ? (
           <div className="flex flex-col gap-3">
@@ -500,11 +555,11 @@ function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
             {rest.map((column) => {
               const updated = columnUpdatedAt(column);
               return (
-                <button
+                <Button
                   key={column.slug}
-                  className="bg-surface-secondary hover:bg-surface-tertiary flex flex-col gap-1 rounded-2xl p-4 text-start transition-colors duration-150 motion-reduce:transition-none"
-                  type="button"
-                  onClick={() => setSelected(column.slug)}
+                  variant="tertiary"
+                  className="border-separator h-auto w-full flex-col items-start gap-2 rounded-none border-b px-0 py-4 text-start whitespace-normal"
+                  onPress={() => setSelected(column.slug)}
                 >
                   <span className="text-sm font-semibold">{column.name}</span>
                   <span className="text-muted line-clamp-2 text-xs">{column.description}</span>
@@ -516,7 +571,7 @@ function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
                       .filter(Boolean)
                       .join(" · ")}
                   </span>
-                </button>
+                </Button>
               );
             })}
             <Link className="px-1 text-sm no-underline" href={`/columns/${active.slug}`}>
@@ -541,7 +596,7 @@ function CategoryList({
   if (categories.length === 0) return null;
 
   return (
-    <Card variant="secondary">
+    <Card variant="transparent" className="min-w-0 gap-4 rounded-none p-0">
       <Card.Header className="flex-row items-center justify-between">
         <div className="flex flex-col">
           <Card.Title className="text-sm">{t("topics")}</Card.Title>
@@ -632,12 +687,14 @@ function JournalSkeleton() {
     <div
       aria-busy="true"
       aria-label={t("loadingStories")}
-      className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
+      className="grid gap-8 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]"
       role="status"
     >
-      {Array.from({ length: 3 }, (_, index) => (
-        <Skeleton key={index} className="aspect-[16/9] w-full rounded-2xl" />
-      ))}
+      <Skeleton className="h-80 w-full rounded-lg sm:h-96 2xl:h-112" />
+      <div className="flex flex-col justify-center gap-6">
+        <Skeleton className="h-36 w-full rounded-lg" />
+        <Skeleton className="h-36 w-full rounded-lg" />
+      </div>
     </div>
   );
 }
@@ -669,7 +726,7 @@ export function JournalPage() {
       categoryId: selectedCategoryId,
       keyword: normalizedQuery || undefined,
       page: latestPage,
-      size: 6,
+      size: LATEST_PAGE_SIZE,
     },
     { skip: isDebouncingSearch, refetchOnMountOrArgChange: true }
   );
@@ -739,24 +796,27 @@ export function JournalPage() {
       motion.add("(prefers-reduced-motion: no-preference)", () => {
         gsap.from(pieces, {
           autoAlpha: 0,
-          duration: 0.7,
+          duration: 0.28,
           ease: "power3.out",
-          stagger: 0.08,
-          y: 28,
+          stagger: 0.04,
+          y: 12,
         });
       });
       return () => motion.revert();
     },
-    { dependencies: [contentReady], scope: pageRef }
+    { dependencies: [contentReady], scope: pageRef, revertOnUpdate: true }
   );
 
   const trending = discovery?.trending ?? [];
   const mostRead = discovery?.mostRead ?? [];
-  const openingSource = hasArchiveFilters
-    ? []
-    : featuredPosts.length > 0
-      ? featuredPosts
-      : latestPool;
+  const hasDiscoveryRail =
+    categories.length + tags.length + archives.length + trending.length + mostRead.length > 0;
+  const openingSource =
+    hasArchiveFilters || latestPage > 0
+      ? []
+      : featuredPosts.length > 0
+        ? featuredPosts
+        : latestPool;
   const lead = openingSource[0];
   const companions = openingSource.slice(1, 3);
   const shownSlugs = new Set(
@@ -764,47 +824,110 @@ export function JournalPage() {
   );
   const latestPosts = hasArchiveFilters
     ? latestPool
-    : latestPool.filter((post) => !post.slug || !shownSlugs.has(post.slug)).slice(0, 6);
+    : latestPool.filter((post) => !post.slug || !shownSlugs.has(post.slug));
   const openingLoading =
     !hasArchiveFilters &&
+    latestPage === 0 &&
     (featuredQuery.isLoading || (featuredPosts.length === 0 && latestLoading));
   const archiveEmpty =
     !openingLoading && !latestLoading && !latestQuery.isError && !lead && latestPosts.length === 0;
 
   return (
-    <div
-      ref={pageRef}
-      className="bg-background min-h-[100dvh] w-full px-8 pt-28 pb-24 md:px-12 xl:px-16"
-    >
-      <div className="flex w-full flex-col gap-16">
-        <h1 className="sr-only">{t("title")}</h1>
+    <div ref={pageRef} className="bg-background min-h-dvh w-full pt-28 pb-24 lg:pt-32">
+      <PageContainer className="flex flex-col gap-10 md:gap-12">
+        <header className="border-separator flex min-w-0 flex-col gap-6 border-b pb-8 md:flex-row md:items-end md:justify-between">
+          <div className="flex min-w-0 flex-col gap-4">
+            <Typography
+              type="h1"
+              weight="bold"
+              className="font-display text-4xl leading-none tracking-normal sm:text-5xl lg:text-6xl"
+            >
+              {t("title")}
+            </Typography>
+            <Typography color="muted" className="max-w-xl text-pretty">
+              {t("description")}
+            </Typography>
+          </div>
+          <nav
+            aria-label={t("browseArchive")}
+            className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm"
+          >
+            <Link className="text-foreground no-underline" href="/single/categories">
+              {t("topics")}
+              <Link.Icon />
+            </Link>
+            <Link className="text-foreground no-underline" href="/single/authors">
+              {t("authors")}
+              <Link.Icon />
+            </Link>
+            <Link className="text-foreground no-underline" href="/archive">
+              {t("archive")}
+              <Link.Icon />
+            </Link>
+          </nav>
+        </header>
+
+        {openingLoading ? <JournalSkeleton /> : null}
+        {!openingLoading && lead ? (
+          <section aria-labelledby="journal-featured-title" className="flex min-w-0 flex-col gap-5">
+            <Typography
+              id="journal-featured-title"
+              type="h2"
+              className="text-muted text-sm font-medium tracking-normal"
+            >
+              {t("featuredStories")}
+            </Typography>
+            <FeatureMosaic companions={companions} lead={lead} />
+          </section>
+        ) : null}
 
         <section
           aria-label={t("browseArchive")}
-          className="bg-surface-secondary flex w-full max-w-3xl flex-col gap-3 rounded-2xl p-3 sm:p-4"
+          className="border-separator flex w-full min-w-0 flex-col gap-5 border-y py-5"
         >
-          <SearchField
-            fullWidth
-            name="article-search"
-            value={searchValue}
-            onChange={(value) => {
-              setSearchDraft({ source: normalizedQuery, value });
-              updateSearch(value);
-            }}
-          >
-            <Label className="sr-only">{t("searchArticles")}</Label>
-            <SearchField.Group>
-              <SearchField.SearchIcon />
-              <SearchField.Input placeholder={t("searchPlaceholder")} />
-              <SearchField.ClearButton aria-label={t("clearSearch")} />
-            </SearchField.Group>
-          </SearchField>
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <SearchField
+              className="w-full sm:w-96"
+              name="article-search"
+              value={searchValue}
+              onChange={(value) => {
+                setSearchDraft({ source: normalizedQuery, value });
+                updateSearch(value);
+              }}
+            >
+              <Label className="sr-only">{t("searchArticles")}</Label>
+              <SearchField.Group>
+                <SearchField.SearchIcon />
+                <SearchField.Input placeholder={t("searchPlaceholder")} />
+                <SearchField.ClearButton aria-label={t("clearSearch")} />
+              </SearchField.Group>
+            </SearchField>
+            {hasArchiveFilters ? (
+              <Button
+                size="sm"
+                variant="tertiary"
+                onPress={() => {
+                  updateSearch.cancel();
+                  setSearchDraft({ source: normalizedQuery, value: "" });
+                  updateArchiveSearch({ q: undefined, category: undefined, page: undefined });
+                }}
+              >
+                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
+                {t("clearFilters")}
+              </Button>
+            ) : (
+              <Link className="w-fit shrink-0 text-sm no-underline" href="/library">
+                {t("library")}
+                <Link.Icon />
+              </Link>
+            )}
+          </div>
 
           {categories.length > 0 ? (
             <ScrollShadow hideScrollBar orientation="horizontal" className="-mx-1 px-1">
               <TagGroup
                 aria-label={t("filterTopics")}
-                className="w-max min-w-full"
+                className="w-max min-w-full xl:w-full"
                 selectedKeys={new Set([selectedCategoryId ? String(selectedCategoryId) : "all"])}
                 selectionMode="single"
                 size="sm"
@@ -819,7 +942,7 @@ export function JournalPage() {
                   });
                 }}
               >
-                <TagGroup.List className="flex-nowrap pr-8">
+                <TagGroup.List className="flex-nowrap pr-8 xl:flex-wrap xl:pr-0">
                   <Tag id="all" textValue={t("allTopics")}>
                     {t("allTopics")}
                   </Tag>
@@ -848,35 +971,22 @@ export function JournalPage() {
           </Alert>
         ) : null}
 
-        <div className="grid items-start gap-x-16 gap-y-14 xl:grid-cols-[minmax(0,1fr)_18rem]">
-          <div className="flex min-w-0 flex-col gap-14">
-            {openingLoading ? <JournalSkeleton /> : null}
-
-            {!openingLoading && lead ? (
-              <section aria-label={t("featuredStories")}>
-                <FeatureMosaic companions={companions} lead={lead} />
-              </section>
-            ) : null}
-
-            <div data-journal-reveal="">
-              <ContinueReading entries={libraryQuery.data?.continueReading ?? []} />
-            </div>
-
-            <Separator />
-
-            <div data-journal-reveal="">
-              <ColumnDecks
-                columns={(columnsQuery.data ?? []).filter((column) => column.isPublished)}
-              />
-            </div>
-
+        <div
+          className={`grid min-w-0 items-start gap-12 xl:gap-10 2xl:gap-16 ${hasDiscoveryRail ? "xl:grid-cols-[minmax(0,1fr)_17rem]" : ""}`}
+        >
+          <div className="flex min-w-0 flex-col gap-12">
             <section
               aria-labelledby="latest-title"
               aria-busy={latestLoading || latestQuery.isFetching}
-              className="flex flex-col gap-4"
+              className="flex min-w-0 flex-col gap-6"
             >
               <div className="flex items-baseline justify-between gap-4">
-                <Typography id="latest-title" type="h3" weight="semibold">
+                <Typography
+                  id="latest-title"
+                  type="h2"
+                  weight="semibold"
+                  className="min-w-0 text-2xl tracking-normal wrap-anywhere"
+                >
                   {normalizedQuery
                     ? t("searchResults")
                     : selectedCategoryId
@@ -891,9 +1001,9 @@ export function JournalPage() {
                 </span>
               </div>
               {latestLoading && !openingLoading ? (
-                <div role="status" aria-label={t("loadingStories")} className="flex flex-col gap-4">
-                  {Array.from({ length: 5 }, (_, index) => (
-                    <Skeleton key={index} className="h-24 w-full rounded-2xl" />
+                <div role="status" aria-label={t("loadingStories")} className={JOURNAL_STORY_GRID}>
+                  {Array.from({ length: LATEST_PAGE_SIZE }, (_, index) => (
+                    <Skeleton key={index} className="my-6 h-56 w-full rounded-lg" />
                   ))}
                 </div>
               ) : latestQuery.isError ? (
@@ -925,12 +1035,14 @@ export function JournalPage() {
                   ) : null}
                 </Alert>
               ) : latestPosts.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {latestPosts.map((post) => (
-                    <div key={post.id ?? post.slug} data-journal-reveal="">
-                      <StoryRow post={post} isRefreshing={latestQuery.isFetching} />
-                    </div>
-                  ))}
+                <div className="flex min-w-0 flex-col gap-6">
+                  <div className={JOURNAL_STORY_GRID} data-testid="journal-latest-grid">
+                    {latestPosts.map((post) => (
+                      <div key={post.id ?? post.slug} className="min-w-0" data-journal-reveal="">
+                        <StoryRow post={post} isRefreshing={latestQuery.isFetching} />
+                      </div>
+                    ))}
+                  </div>
                   <LatestPagination
                     page={latestPage + 1}
                     pages={Math.max(1, latestData?.totalPages ?? 1)}
@@ -949,32 +1061,64 @@ export function JournalPage() {
               ) : archiveEmpty ? (
                 <EmptyState>
                   <EmptyState.Header>
-                    <EmptyState.Title>{t("emptyTitle")}</EmptyState.Title>
-                    <EmptyState.Description>{t("emptyDescription")}</EmptyState.Description>
+                    <EmptyState.Title>
+                      {t(hasArchiveFilters ? "noResultsTitle" : "emptyTitle")}
+                    </EmptyState.Title>
+                    <EmptyState.Description>
+                      {t(hasArchiveFilters ? "noResultsDescription" : "emptyDescription")}
+                    </EmptyState.Description>
                   </EmptyState.Header>
                 </EmptyState>
               ) : null}
             </section>
 
-            <div data-journal-reveal="">
-              <CategoryShelves groups={discovery?.categoryGroups ?? []} />
-            </div>
+            <ContinueReading entries={libraryQuery.data?.continueReading ?? []} />
+
+            {!hasArchiveFilters ? (
+              <div data-journal-reveal="">
+                <ColumnDecks
+                  columns={(columnsQuery.data ?? []).filter((column) => column.isPublished)}
+                />
+              </div>
+            ) : null}
+
+            {!hasArchiveFilters ? (
+              <div data-journal-reveal="">
+                <CategoryShelves groups={discovery?.categoryGroups ?? []} />
+              </div>
+            ) : null}
           </div>
 
-          <aside className="flex flex-col gap-8 xl:sticky xl:top-28 xl:self-start">
-            <div data-journal-reveal="">
-              <CategoryList categories={categories} />
-            </div>
-            <div data-journal-reveal="">
-              <TagList tags={tags} />
-            </div>
-            <div data-journal-reveal="">
-              <YearList archives={archives} />
-            </div>
-            <div data-journal-reveal="">
-              <AttentionCard mostRead={mostRead} trending={trending} />
-            </div>
-          </aside>
+          {hasDiscoveryRail ? (
+            <aside
+              aria-label={t("exploreWriting")}
+              className="border-separator grid min-w-0 gap-8 border-t pt-8 sm:grid-cols-2 xl:grid-cols-1 xl:border-t-0 xl:border-l xl:pt-0 xl:pl-6"
+            >
+              <Typography type="h2" className="sr-only">
+                {t("exploreWriting")}
+              </Typography>
+              {mostRead.length + trending.length > 0 ? (
+                <div data-journal-reveal="">
+                  <AttentionCard mostRead={mostRead} trending={trending} />
+                </div>
+              ) : null}
+              {categories.length > 0 ? (
+                <div data-journal-reveal="">
+                  <CategoryList categories={categories} />
+                </div>
+              ) : null}
+              {tags.length > 0 ? (
+                <div data-journal-reveal="">
+                  <TagList tags={tags} />
+                </div>
+              ) : null}
+              {archives.length > 0 ? (
+                <div data-journal-reveal="">
+                  <YearList archives={archives} />
+                </div>
+              ) : null}
+            </aside>
+          ) : null}
         </div>
 
         {!hasArchiveFilters &&
@@ -988,7 +1132,7 @@ export function JournalPage() {
             </div>
           </>
         ) : null}
-      </div>
+      </PageContainer>
     </div>
   );
 }
@@ -1006,7 +1150,7 @@ function AttentionCard({ mostRead, trending }: { mostRead: Story[]; trending: St
   if (!active) return null;
 
   return (
-    <Card variant="secondary">
+    <Card variant="transparent" className="min-w-0 gap-4 rounded-none p-0">
       <Card.Header className="flex-row items-center justify-between gap-3">
         <Segment
           aria-label={t("attention")}
@@ -1084,7 +1228,7 @@ function YearList({ archives }: { archives: Array<ArchiveFacet & { year: number 
   if (years.length === 0) return null;
 
   return (
-    <Card variant="secondary">
+    <Card variant="transparent" className="min-w-0 gap-4 rounded-none p-0">
       <Card.Header>
         <Card.Title className="text-sm">{t("years")}</Card.Title>
       </Card.Header>
@@ -1116,7 +1260,7 @@ function TagList({ tags }: { tags: Array<TagFacet & { id: number; name: string }
   if (tags.length === 0) return null;
 
   return (
-    <Card variant="secondary">
+    <Card variant="transparent" className="min-w-0 gap-4 rounded-none p-0">
       <Card.Header className="flex-row items-center justify-between">
         <Card.Title className="text-sm">{t("tags")}</Card.Title>
         <Link className="text-xs no-underline" href="/single/tags">
@@ -1138,9 +1282,9 @@ function TagList({ tags }: { tags: Array<TagFacet & { id: number; name: string }
         >
           <TagGroup.List className="flex-wrap">
             {tags.map((tag) => (
-              <Tag key={tag.id} id={String(tag.id)} textValue={tag.name}>
-                {tag.name}
-                <span className="text-muted text-xs tabular-nums">
+              <Tag key={tag.id} id={String(tag.id)} textValue={tag.name} className="max-w-full">
+                <span className="truncate">{tag.name}</span>
+                <span className="text-muted shrink-0 text-xs tabular-nums">
                   {(tag.count ?? 0).toLocaleString(locale)}
                 </span>
               </Tag>
@@ -1189,7 +1333,7 @@ function CategoryShelf({ group }: { group: CategoryGroup }) {
           <Link.Icon />
         </Link>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className={JOURNAL_STORY_GRID}>
         {unique.slice(0, 4).map((post) => (
           <StoryRow key={post.id ?? post.slug} post={post} />
         ))}
@@ -1207,7 +1351,7 @@ function CategoryShelves({ groups }: { groups: CategoryGroup[] }) {
 
   return (
     <section aria-labelledby="archive-shelves-title" className="flex flex-col gap-4">
-      <Typography id="archive-shelves-title" type="h3" weight="semibold">
+      <Typography id="archive-shelves-title" type="h2" weight="semibold">
         {t("fromTheArchive")}
       </Typography>
       {ready.slice(0, 4).map((group) => (

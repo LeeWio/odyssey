@@ -262,14 +262,14 @@ export const Navbar = () => {
         Number.parseFloat(navigationStyle?.paddingRight ?? "0");
       const columnGap = Number.parseFloat(navigationStyle?.columnGap ?? "0");
       const viewportWidth = document.documentElement.clientWidth;
-      const panelWidth = Math.min(Math.max(viewportWidth - 32, 0), 1280);
+      const panelWidth = Math.max(viewportWidth - 32, 0);
       const compactWidth = Math.min(
         Math.ceil(
           brandWidth + navigationItemsWidth + actionsWidth + horizontalPadding + columnGap * 2
         ),
         panelWidth
       );
-      const expandedWidth = Math.min(viewportWidth, 1280);
+      const expandedWidth = viewportWidth;
 
       commentDebug("navbar:measure", { compactWidth, expandedWidth, panelWidth: panelWidth });
 
@@ -420,7 +420,7 @@ export const Navbar = () => {
         role={isLocked || isMobileMenuOpen ? "dialog" : undefined}
         aria-modal={isLocked || isMobileMenuOpen ? true : undefined}
         aria-label={isLocked || isMobileMenuOpen ? t("dialogLabel") : undefined}
-        className="fixed inset-x-0 top-0 z-50 mx-auto w-full max-w-7xl overflow-hidden rounded-2xl border"
+        className="fixed inset-x-0 top-0 z-50 mx-auto w-full overflow-hidden rounded-2xl border"
         initial={reduceMotion ? false : { opacity: 0 }}
         animate={{
           opacity: 1,
@@ -450,7 +450,7 @@ export const Navbar = () => {
         <motion.nav
           ref={navigationRef}
           aria-label={t("primary")}
-          className="mx-auto grid w-full max-w-7xl grid-cols-[auto_auto_auto] items-center justify-between gap-3 px-2.5 py-0.5"
+          className="grid w-full grid-cols-[auto_auto_auto] items-center justify-between gap-3 px-2.5 py-0.5"
         >
           <motion.div
             ref={brandRef}

@@ -26,6 +26,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 import { CommentSheet } from "@/components/comment";
+import { PageContainer } from "@/components/layout/page-container";
 import { siteConfig } from "@/config/site";
 import { ArticleOutline } from "@/features/blog/reader/article-outline";
 import { ArticleTypography } from "@/features/blog/reader/typography";
@@ -556,12 +557,12 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
         </ProgressBar.Track>
       </ProgressBar>
 
-      <div className="grid w-full grid-cols-1 items-start gap-x-10 gap-y-12 px-6 pt-28 pb-28 sm:px-8 lg:grid-cols-[minmax(0,1fr)_16rem] lg:px-8 xl:grid-cols-[14rem_minmax(0,1fr)_18rem] xl:px-10 2xl:px-14">
+      <PageContainer className="grid grid-cols-1 items-start gap-x-8 gap-y-12 pt-28 pb-24 lg:grid-cols-[minmax(0,1fr)_16rem] xl:grid-cols-[12rem_minmax(0,1fr)_16rem]">
         <div className="sticky top-28 hidden self-start xl:block" id="article-outline-rail" />
 
         <article
           id={postId ? `article-${postId}` : undefined}
-          className="order-1 w-full min-w-0 xl:order-none xl:max-w-[42rem]"
+          className="order-1 mx-auto w-full max-w-3xl min-w-0 xl:order-none"
           data-reading-content
         >
           {isLoading || !article ? (
@@ -600,7 +601,7 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
                 ) : null}
 
                 <Typography
-                  className="text-4xl leading-[1.08] text-balance sm:text-5xl"
+                  className="text-4xl leading-tight tracking-normal text-balance break-words sm:text-5xl"
                   type="h1"
                   weight="semibold"
                 >
@@ -911,7 +912,7 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
             onOpenChange={setIsCommentSheetOpen}
           />
         ) : null}
-      </div>
+      </PageContainer>
     </>
   );
 }

@@ -1,6 +1,9 @@
 "use client";
 
 import { createPageReveal } from "@/lib/motion";
+import { PageContainer } from "@/components/layout/page-container";
+import { Section } from "@/components/layout/section";
+import { HOME_PREVIEW_GRID } from "@/components/home/layout";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
@@ -46,9 +49,9 @@ function SkeletonSectionHeader({
 }) {
   return (
     <div className={centered ? "flex flex-col items-center text-center" : "max-w-xl"}>
-      <Skeleton className={`h-5 rounded-full ${eyebrow}`} />
-      <Skeleton className={`mt-5 h-12 rounded-xl ${title}`} />
-      <Skeleton className={`mt-4 h-5 rounded-lg ${description}`} />
+      <Skeleton className={`h-5 max-w-full rounded-full ${eyebrow}`} />
+      <Skeleton className={`mt-5 h-12 max-w-full rounded-xl ${title}`} />
+      <Skeleton className={`mt-4 h-5 max-w-full rounded-lg ${description}`} />
     </div>
   );
 }
@@ -59,7 +62,7 @@ function SkeletonMetaLine({ className = "w-24" }: { className?: string }) {
 
 function SkeletonArticleCard() {
   return (
-    <div className="bg-surface-secondary/45 flex aspect-[16/10] flex-col justify-between rounded-3xl p-5">
+    <div className="bg-surface-secondary/45 flex aspect-[16/10] min-h-64 flex-col justify-between rounded-3xl p-5">
       <div className="flex items-center justify-between gap-3">
         <Skeleton className="h-6 w-20 rounded-full" />
         <Skeleton className="h-6 w-24 rounded-full" />
@@ -120,7 +123,7 @@ const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-boar
     <div
       aria-busy="true"
       aria-label="Loading guestbook"
-      className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 px-6 py-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      className="grid w-full grid-cols-1 gap-4 py-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
       role="status"
     >
       {Array.from({ length: 8 }, (_, index) => (
@@ -142,14 +145,14 @@ const FeaturedWriting = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+      <Section aria-busy="true">
         <SkeletonSectionHeader centered eyebrow="w-28" title="w-72" />
-        <div className="mt-12 grid gap-4 sm:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, index) => (
+        <div className={`mt-12 ${HOME_PREVIEW_GRID}`}>
+          {Array.from({ length: 12 }).map((_, index) => (
             <SkeletonArticleCard key={index} />
           ))}
         </div>
-      </div>
+      </Section>
     ),
   }
 );
@@ -159,7 +162,7 @@ const MomentsShowcase = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
+      <Section aria-busy="true">
         <SkeletonSectionHeader centered eyebrow="w-24" title="w-64" />
         <div className="mt-12 [columns:20rem] gap-5">
           {Array.from({ length: 6 }).map((_, index) => (
@@ -170,7 +173,7 @@ const MomentsShowcase = dynamic(
             </div>
           ))}
         </div>
-      </div>
+      </Section>
     ),
   }
 );
@@ -180,15 +183,15 @@ const ProjectsShowcase = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+      <Section aria-busy="true">
         <SkeletonSectionHeader title="w-full max-w-xl" />
         <div className="bg-separator mt-8 h-px w-full" />
-        <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }, (_, index) => (
+        <div className={`mt-8 ${HOME_PREVIEW_GRID}`}>
+          {Array.from({ length: 12 }, (_, index) => (
             <SkeletonProjectCard key={index} />
           ))}
         </div>
-      </div>
+      </Section>
     ),
   }
 );
@@ -198,10 +201,10 @@ const GalleryShowcase = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="mx-auto w-full max-w-7xl px-6 py-24 sm:px-10 sm:py-32">
+      <Section aria-busy="true">
         <SkeletonSectionHeader title="w-full max-w-xl" />
-        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, index) => (
+        <div className={`mt-10 ${HOME_PREVIEW_GRID}`}>
+          {Array.from({ length: 4 }).map((_, index) => (
             <Card key={index} variant="secondary" className="overflow-hidden p-0">
               <Skeleton className="aspect-[4/3] w-full rounded-none" />
               <Card.Header className="gap-2">
@@ -211,7 +214,7 @@ const GalleryShowcase = dynamic(
             </Card>
           ))}
         </div>
-      </div>
+      </Section>
     ),
   }
 );
@@ -221,14 +224,14 @@ const FriendLinksShowcase = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+      <Section aria-busy="true">
         <SkeletonSectionHeader title="w-full max-w-xl" />
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }, (_, index) => (
+        <div className={`mt-10 ${HOME_PREVIEW_GRID}`}>
+          {Array.from({ length: 12 }, (_, index) => (
             <SkeletonFriendLinkCard key={index} />
           ))}
         </div>
-      </div>
+      </Section>
     ),
   }
 );
@@ -238,13 +241,13 @@ const FootprintsShowcase = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full py-24 sm:py-32">
-        <div className="flex flex-col gap-6 px-6 sm:flex-row sm:items-end sm:justify-between sm:px-10">
+      <Section aria-busy="true">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <SkeletonSectionHeader title="w-72" description="w-full max-w-xl" />
           <Skeleton className="h-5 w-32 rounded-md" />
         </div>
         <Skeleton className="mt-10 h-[clamp(28rem,60svh,44rem)] w-full rounded-lg" />
-      </div>
+      </Section>
     ),
   }
 );
@@ -254,14 +257,14 @@ const LatelySection = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+      <Section aria-busy="true">
         <SkeletonSectionHeader centered eyebrow="w-20" title="w-80" description="w-96" />
         <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-12">
           <Skeleton className="min-h-[34rem] rounded-3xl lg:col-span-7" />
           <Skeleton className="min-h-[34rem] rounded-3xl lg:col-span-5" />
           <Skeleton className="min-h-[20rem] rounded-3xl lg:col-span-12" />
         </div>
-      </div>
+      </Section>
     ),
   }
 );
@@ -302,9 +305,10 @@ export default function Home() {
     <>
       <HomeSmoothScroll />
       <div className="bg-background w-full overflow-x-clip">
-        <section
+        <PageContainer
+          as="section"
           aria-labelledby="home-hero-title"
-          className="mx-auto flex min-h-[100dvh] w-full flex-col items-center justify-center px-6 pt-24 pb-16 text-center sm:px-10"
+          className="flex min-h-[90dvh] flex-col items-center justify-center pt-24 pb-12 text-center"
         >
           <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
             {t("page.eyebrow")}
@@ -318,7 +322,7 @@ export default function Home() {
             id="home-hero-title"
             type="h1"
             weight="bold"
-            className="max-w-3xl text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.055em]"
+            className="max-w-3xl text-4xl leading-tight tracking-normal text-balance break-words sm:text-5xl lg:text-6xl"
             {...reveal(0.18)}
           >
             {t("page.title")}
@@ -340,7 +344,7 @@ export default function Home() {
           >
             <Typography
               aria-hidden="true"
-              className="font-mono tracking-[0.18em] uppercase"
+              className="font-mono tracking-normal uppercase"
               color="muted"
               type="body-xs"
             >
@@ -350,16 +354,8 @@ export default function Home() {
             <Typography align="center" color="muted" type="body-sm" className="max-w-md italic">
               {t("page.prologueBody")}
             </Typography>
-            <motion.span
-              aria-hidden="true"
-              className="bg-foreground/55 mt-6 block size-1.5 rounded-full"
-              animate={
-                shouldReduceMotion ? undefined : { opacity: [0.28, 0.9, 0.28], y: [0, 5, 0] }
-              }
-              transition={{ duration: 2.4, ease: "easeInOut", repeat: Infinity }}
-            />
           </MotionSurface>
-        </section>
+        </PageContainer>
 
         <HomeOrientation />
 
@@ -374,12 +370,8 @@ export default function Home() {
         <MomentsShowcase />
         <FriendLinksShowcase />
 
-        <section
-          id="guestbook"
-          aria-labelledby="guestbook-title"
-          className="mx-auto w-full scroll-mt-24 py-24 sm:py-32"
-        >
-          <header className="relative mx-auto flex flex-col items-center px-6 text-center sm:px-10">
+        <Section id="guestbook" aria-labelledby="guestbook-title">
+          <header className="relative mx-auto flex flex-col items-center text-center">
             <Popover isOpen={isGuestbookPopoverOpen} onOpenChange={setIsGuestbookPopoverOpen}>
               <Popover.Trigger className="absolute -top-8 -right-20">
                 <Image
@@ -418,7 +410,7 @@ export default function Home() {
               align="center"
               type="h2"
               weight="bold"
-              className="mt-4 text-center text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-[-0.04em] text-balance"
+              className="mt-4 text-center text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
               {...revealInView(0.06)}
             >
               <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
@@ -429,7 +421,7 @@ export default function Home() {
             <MotionTypography
               align="center"
               type="h3"
-              className="text-center text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-[-0.04em] text-balance"
+              className="text-center text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
               {...revealInView(0.06)}
             >
               <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
@@ -442,7 +434,7 @@ export default function Home() {
             <GuestbookBoard />
           </motion.div>
 
-          <div className="mx-auto mt-16 flex w-full max-w-3xl flex-col gap-10 px-6 sm:px-10">
+          <div className="mx-auto mt-12 flex w-full max-w-3xl flex-col gap-8">
             {mounted && !isAuthenticated ? (
               <motion.div className="w-full" {...revealInView(0.2, 16)}>
                 <Card variant="secondary">
@@ -459,12 +451,12 @@ export default function Home() {
               </motion.div>
             ) : null}
           </div>
-        </section>
+        </Section>
 
-        <section
+        <Section
           id="faq"
           aria-labelledby="faq-title"
-          className="mx-auto flex w-full max-w-4xl scroll-mt-24 flex-col items-center px-6 py-24 text-center sm:px-10 sm:py-32"
+          className="flex flex-col items-center text-center"
         >
           <header className="flex flex-col items-center text-center">
             <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
@@ -475,7 +467,7 @@ export default function Home() {
               align="center"
               type="h2"
               weight="bold"
-              className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
+              className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
               {...revealInView(0.06)}
             >
               {t("faq.title")}
@@ -492,7 +484,7 @@ export default function Home() {
           </header>
 
           <MotionAccordion
-            className="bg-surface-1/10 mt-12 w-full rounded-2xl"
+            className="mt-10 w-full max-w-3xl"
             variant="surface"
             {...revealInView(0.18, 20)}
           >
@@ -531,7 +523,7 @@ export default function Home() {
               </Accordion.Item>
             ))}
           </MotionAccordion>
-        </section>
+        </Section>
       </div>
     </>
   );
@@ -565,7 +557,7 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
       <div className="flex flex-col gap-3 text-start">
         <div className="flex items-center gap-2">
           <span className="text-accent text-base">✨</span>
-          <Popover.Heading className="text-foreground text-sm font-semibold tracking-tight">
+          <Popover.Heading className="text-foreground text-sm font-semibold tracking-normal">
             {t("guestbook.signTitle")}
           </Popover.Heading>
         </div>
@@ -600,7 +592,7 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 text-start">
       <div className="flex items-center gap-2">
         <span className="text-accent text-base">✨</span>
-        <Popover.Heading className="text-foreground text-sm font-semibold tracking-tight">
+        <Popover.Heading className="text-foreground text-sm font-semibold tracking-normal">
           {t("guestbook.beforeYouGo")}
         </Popover.Heading>
       </div>

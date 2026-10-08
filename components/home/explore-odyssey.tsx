@@ -1,5 +1,8 @@
 "use client";
 
+import { Section } from "@/components/layout/section";
+import { HOME_CONTENT_GRID } from "./layout";
+
 import { Icon } from "@iconify/react";
 import { Card, Chip, Link, Typography } from "@heroui/react";
 import { motion } from "motion/react";
@@ -23,10 +26,7 @@ export function ExploreOdyssey() {
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
-    <section
-      aria-labelledby="explore-odyssey-title"
-      className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-24 sm:px-10 sm:py-32"
-    >
+    <Section aria-labelledby="explore-odyssey-title">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <motion.div {...revealInView(0, 10)}>
           <Chip color="accent" size="sm" variant="soft">
@@ -36,7 +36,7 @@ export function ExploreOdyssey() {
             id="explore-odyssey-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-[clamp(2rem,4vw,3.75rem)] tracking-[-0.04em]"
+            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
           >
             {t("title")}
           </Typography>
@@ -54,7 +54,7 @@ export function ExploreOdyssey() {
         </motion.div>
       </header>
 
-      <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className={`mt-10 ${HOME_CONTENT_GRID}`} data-testid="home-explore-grid">
         {DESTINATIONS.map((destination, index) => (
           <motion.div key={destination.key} {...revealInView(0.1 + index * 0.04, 18)}>
             <Link
@@ -86,6 +86,6 @@ export function ExploreOdyssey() {
           </motion.div>
         ))}
       </div>
-    </section>
+    </Section>
   );
 }

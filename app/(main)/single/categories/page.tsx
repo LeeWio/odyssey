@@ -3,6 +3,8 @@
 import { EmptyState, NumberValue } from "@heroui-pro/react";
 import { Button, Card, Link, Skeleton, Typography } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
+import { PageContainer } from "@/components/layout/page-container";
+import { TAXONOMY_GRID } from "../components/grid-classes";
 
 import { useGetPublicCategoriesQuery } from "@/lib/features/category";
 import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
@@ -26,19 +28,23 @@ export default function CategoriesPage() {
   const isError = categories.isError || facets.isError;
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-24 sm:px-10 sm:py-32">
+    <PageContainer className="flex flex-col gap-8 pt-28 pb-24 lg:pt-32">
       <header className="flex max-w-2xl flex-col gap-2">
         <Link className="text-sm no-underline" href="/single">
           {t("title")}
         </Link>
-        <Typography type="h1" weight="semibold">
+        <Typography
+          type="h1"
+          weight="semibold"
+          className="tracking-normal text-balance break-words"
+        >
           {t("categoriesTitle")}
         </Typography>
         <Typography color="muted">{t("categoriesDescription")}</Typography>
       </header>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={TAXONOMY_GRID} aria-busy="true">
           {Array.from({ length: 6 }, (_, index) => (
             <Skeleton key={index} className="h-32 w-full rounded-2xl" />
           ))}
@@ -70,14 +76,14 @@ export default function CategoriesPage() {
           </EmptyState.Header>
         </EmptyState>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className={TAXONOMY_GRID} data-testid="taxonomy-grid">
           {list.map((category) => (
-            <li key={category.id}>
+            <li key={category.id} className="min-w-0">
               <Card className="h-full">
                 <Card.Header>
                   <Card.Title>
                     <Link
-                      className="text-foreground no-underline"
+                      className="text-foreground block max-w-full wrap-anywhere no-underline"
                       href={`/single/categories/${encodeURIComponent(category.slug)}`}
                     >
                       {category.name}
@@ -101,6 +107,6 @@ export default function CategoriesPage() {
           ))}
         </ul>
       )}
-    </div>
+    </PageContainer>
   );
 }

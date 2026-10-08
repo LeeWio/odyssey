@@ -1,5 +1,11 @@
 # Agent notes (Odyssey / web)
 
+## Styling
+
+- Follow `docs/04-design` for all UI work.
+- Use Tailwind utility classes for styling, including responsive layout and container queries.
+- Do not add or write styles in CSS files.
+
 ## Git workflow
 
 - Make commits and pushes on the **production server** only:
