@@ -69,3 +69,11 @@ The journal is an editorial index rather than a dashboard or a marketing landing
 - Featured media has stable responsive heights. Overlaid titles remain white in all themes, with a dark scrim for readability. Section entrances use 280ms, 12px movement and reduced-motion support; column autoplay is disabled for reduced motion.
 
 `tests/e2e/journal-redesign.spec.ts` covers hierarchy and media loading at 390, 820, 1440, 1920 and 2560px, text bounds, pagination placement, column switching, no-match recovery, later pages, all theme variants and text-only recommendations with standard motion. `tests/e2e/journal.spec.ts` retains the existing search, URL restoration, authentication and bookmark regression coverage. Screenshots are generated for desktop/mobile and theme states; geometry and computed-style assertions provide automated layout checks.
+
+## Archive Editorial Redesign
+
+Archive is intentionally a timeline directory rather than another article-card grid. The page header now establishes the sequence-reading purpose and surfaces the number of available years. HeroUI Select remains the year control, TagGroup remains the month control, Pagination remains the navigation primitive, and EmptyState owns loading failure and no-content recovery.
+
+The article list keeps a stable date column, readable title and summary column, and a compact views signal on wide screens. On small screens the date moves into the article metadata flow. The page uses the shared full-width PageContainer, with responsive padding and no page-level maximum width. Long titles wrap within their article link, while the timeline remains a single scan-friendly sequence.
+
+`tests/e2e/archive-redesign.spec.ts` checks the new hierarchy, HeroUI period controls, full-width boundaries, ten-item timeline, long-title containment, mobile overflow and keyboard period selection at 390, 820, 1440 and 2560px. Existing `tests/e2e/archive.spec.ts` continues to cover stale-page correction, delayed responses, period changes, failures and URL preservation.

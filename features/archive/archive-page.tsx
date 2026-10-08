@@ -24,6 +24,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useEffect } from "react";
 
 import { useRetrieveArchiveQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
+import { PageContainer } from "@/components/layout/page-container";
 
 const PAGE_SIZE = 10;
 
@@ -185,9 +186,9 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
   const t = useTranslations("Archive");
   const locale = useLocale();
   return (
-    <article className="group grid gap-4 py-6 sm:grid-cols-[5rem_minmax(0,1fr)] sm:gap-7">
+    <article className="group grid min-w-0 gap-4 py-7 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-8 lg:grid-cols-[9rem_minmax(0,1fr)_auto]">
       <time
-        className="text-muted hidden pt-1 font-mono text-sm sm:block"
+        className="text-muted hidden pt-1 font-mono text-sm tabular-nums sm:block"
         dateTime={post.publishedAt}
       >
         {formatDate(post.publishedAt, locale, t("recently"))}
@@ -206,24 +207,28 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
         <Typography
           type="h3"
           weight="semibold"
-          className="group-hover:text-accent mt-3 transition-colors"
+          className="group-hover:text-accent mt-3 tracking-normal wrap-anywhere transition-colors"
         >
           {post.title}
         </Typography>
         {post.summary ? (
-          <Typography color="muted" type="body-sm" className="mt-2 line-clamp-2 max-w-3xl">
+          <Typography
+            color="muted"
+            type="body-sm"
+            className="mt-2 line-clamp-2 max-w-3xl leading-6"
+          >
             {post.summary}
           </Typography>
         ) : null}
-        <Typography
-          color="muted"
-          type="body-xs"
-          className="mt-4 flex items-center gap-1.5 tabular-nums"
-        >
-          <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
-          {t("views", { count: post.views.toLocaleString(locale) })}
-        </Typography>
       </Link>
+      <Typography
+        color="muted"
+        type="body-xs"
+        className="flex items-center gap-1.5 tabular-nums lg:justify-self-end lg:pt-1"
+      >
+        <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
+        {t("views", { count: post.views.toLocaleString(locale) })}
+      </Typography>
     </article>
   );
 }
@@ -330,249 +335,269 @@ export function ArchivePage() {
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
-      <header className="flex flex-col items-center text-center">
-        <motion.div {...revealInView(0, 10)}>
-          <Chip color="default" size="sm" variant="secondary">
-            {t("eyebrow")}
-          </Chip>
-        </motion.div>
-        <motion.div {...revealInView(0.06)}>
-          <Typography
-            type="h1"
-            weight="bold"
-            className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[1.02] tracking-[-0.05em] text-balance"
-          >
-            {t("title")}
-          </Typography>
-        </motion.div>
-        <motion.div {...revealInView(0.12, 14)}>
-          <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
-            {t("description")}
-          </Typography>
-        </motion.div>
-      </header>
-
-      <motion.section
-        aria-label={t("periodSelector")}
-        className="border-default-200 mt-12 border-y py-7"
-        {...revealInView(0.18, 16)}
-      >
-        <div className="grid gap-7 lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start">
-          <Select
-            fullWidth
-            placeholder={t("allYears")}
-            value={selectedYear ? String(selectedYear) : "all"}
-            variant="secondary"
-            onChange={handleYearChange}
-          >
-            <Label>{t("year")}</Label>
-            <Select.Trigger>
-              <Select.Value />
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover>
-              <ListBox>
-                <ListBox.Item id="all" textValue={t("allYears")}>
-                  {t("allYears")}
-                  <ListBox.ItemIndicator />
-                </ListBox.Item>
-                {years.map((year) => (
-                  <ListBox.Item key={year} id={String(year)} textValue={String(year)}>
-                    {year}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                ))}
-              </ListBox>
-            </Select.Popover>
-          </Select>
-
+    <div className="bg-background min-h-dvh w-full pt-28 pb-24 lg:pt-32">
+      <PageContainer>
+        <header className="border-separator flex min-w-0 flex-col gap-8 border-b pb-10 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <div className="mb-3 flex items-center gap-2">
-              <Icon icon="gravity-ui:calendar" aria-hidden="true" className="text-muted size-4" />
+            <motion.div {...revealInView(0, 10)}>
+              <Chip color="default" size="sm" variant="secondary">
+                {t("eyebrow")}
+              </Chip>
+            </motion.div>
+            <motion.div {...revealInView(0.06)}>
+              <Typography
+                type="h1"
+                weight="bold"
+                className="mt-4 text-4xl leading-none tracking-normal text-balance wrap-anywhere sm:text-5xl lg:text-6xl"
+              >
+                {t("title")}
+              </Typography>
+            </motion.div>
+            <motion.div {...revealInView(0.12, 14)}>
+              <Typography color="muted" type="body" className="mt-4 max-w-2xl text-pretty">
+                {t("description")}
+              </Typography>
+            </motion.div>
+          </div>
+          <div className="flex shrink-0 items-center gap-3 lg:pb-1">
+            <Icon icon="gravity-ui:calendar" aria-hidden="true" className="text-muted size-5" />
+            <div>
               <Typography type="body-sm" weight="semibold">
-                {selectedYear ? t("month") : t("chooseYear")}
+                {years.length.toLocaleString(locale)}
+              </Typography>
+              <Typography color="muted" type="body-xs">
+                {t("year")}
               </Typography>
             </div>
-            {facetsQuery.isLoading ? (
-              <div className="flex gap-2">
-                {Array.from({ length: 4 }, (_, index) => (
-                  <Skeleton key={index} className="h-8 w-24 rounded-full" />
-                ))}
-              </div>
-            ) : selectedYear && months.length > 0 ? (
-              <TagGroup
-                aria-label={t("filterYear", { year: selectedYear })}
-                selectedKeys={new Set([selectedMonth ? `month-${selectedMonth}` : "all"])}
-                selectionMode="single"
-                size="sm"
-                variant="surface"
-                onSelectionChange={handleMonthChange}
-              >
-                <TagGroup.List className="flex-wrap">
-                  <Tag id="all" textValue={t("allOfYear", { year: selectedYear })}>
-                    {t("allOfYear", { year: selectedYear })}
-                  </Tag>
-                  {months.map((facet) => (
-                    <Tag
-                      key={facet.month}
-                      id={`month-${facet.month}`}
-                      textValue={formatMonth(facet.month, locale)}
-                    >
-                      {formatMonth(facet.month, locale, "short")}
-                      <span className="text-muted text-xs tabular-nums">{facet.count}</span>
-                    </Tag>
+          </div>
+        </header>
+
+        <motion.section
+          aria-label={t("periodSelector")}
+          className="border-separator mt-10 border-b pb-8"
+          {...revealInView(0.18, 16)}
+        >
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:items-end lg:gap-10">
+            <Select
+              fullWidth
+              placeholder={t("allYears")}
+              value={selectedYear ? String(selectedYear) : "all"}
+              variant="secondary"
+              onChange={handleYearChange}
+            >
+              <Label>{t("year")}</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="all" textValue={t("allYears")}>
+                    {t("allYears")}
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  {years.map((year) => (
+                    <ListBox.Item key={year} id={String(year)} textValue={String(year)}>
+                      {year}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
                   ))}
-                </TagGroup.List>
-              </TagGroup>
-            ) : selectedYear ? (
-              <Typography color="muted" type="body-sm">
-                {t("noMonths")}
-              </Typography>
-            ) : (
-              <Typography color="muted" type="body-sm">
-                {t("timelineHint")}
-              </Typography>
-            )}
+                </ListBox>
+              </Select.Popover>
+            </Select>
+
+            <div className="min-w-0">
+              <div className="mb-3 flex items-center gap-2">
+                <Icon icon="gravity-ui:calendar" aria-hidden="true" className="text-muted size-4" />
+                <Typography type="body-sm" weight="semibold">
+                  {selectedYear ? t("month") : t("chooseYear")}
+                </Typography>
+              </div>
+              {facetsQuery.isLoading ? (
+                <div className="flex gap-2">
+                  {Array.from({ length: 4 }, (_, index) => (
+                    <Skeleton key={index} className="h-8 w-24 rounded-full" />
+                  ))}
+                </div>
+              ) : selectedYear && months.length > 0 ? (
+                <TagGroup
+                  aria-label={t("filterYear", { year: selectedYear })}
+                  selectedKeys={new Set([selectedMonth ? `month-${selectedMonth}` : "all"])}
+                  selectionMode="single"
+                  size="sm"
+                  variant="surface"
+                  onSelectionChange={handleMonthChange}
+                >
+                  <TagGroup.List className="flex-wrap">
+                    <Tag id="all" textValue={t("allOfYear", { year: selectedYear })}>
+                      {t("allOfYear", { year: selectedYear })}
+                    </Tag>
+                    {months.map((facet) => (
+                      <Tag
+                        key={facet.month}
+                        id={`month-${facet.month}`}
+                        textValue={formatMonth(facet.month, locale)}
+                      >
+                        {formatMonth(facet.month, locale, "short")}
+                        <span className="text-muted text-xs tabular-nums">{facet.count}</span>
+                      </Tag>
+                    ))}
+                  </TagGroup.List>
+                </TagGroup>
+              ) : selectedYear ? (
+                <Typography color="muted" type="body-sm">
+                  {t("noMonths")}
+                </Typography>
+              ) : (
+                <Typography color="muted" type="body-sm">
+                  {t("timelineHint")}
+                </Typography>
+              )}
+            </div>
           </div>
-        </div>
-      </motion.section>
+        </motion.section>
 
-      <motion.section
-        id="archive-results"
-        aria-busy={archiveQuery.isFetching || isAdjustingPage}
-        aria-labelledby="archive-results-title"
-        className="scroll-mt-28 pt-14"
-        {...revealInView(0.22, 20)}
-      >
-        <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <Typography id="archive-results-title" type="h2" weight="semibold">
-              {periodTitle}
-            </Typography>
-            <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
-              {currentPage && !isAdjustingPage
-                ? t("articlesFound", { count: total.toLocaleString(locale) })
-                : periodDescription}
-            </Typography>
-          </div>
-          {selectedYear ? (
-            <Button size="sm" variant="ghost" onPress={clearPeriod}>
-              {t("viewAllYears")}
-            </Button>
-          ) : null}
-        </div>
-
-        {isLoadingPage ? <ArchiveSkeleton /> : null}
-
-        {!isLoadingPage && archiveQuery.isError ? (
-          <EmptyState size="lg">
-            <EmptyState.Header>
-              <EmptyState.Media variant="icon">
-                <Icon icon="gravity-ui:book-open" aria-hidden="true" />
-              </EmptyState.Media>
-              <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
-              <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
-            </EmptyState.Header>
-            <EmptyState.Content>
-              <Button variant="outline" onPress={() => archiveQuery.refetch()}>
-                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                {t("tryAgain")}
-              </Button>
-            </EmptyState.Content>
-          </EmptyState>
-        ) : null}
-
-        {!isLoadingPage && !archiveQuery.isError && posts.length === 0 ? (
-          <EmptyState size="lg">
-            <EmptyState.Header>
-              <EmptyState.Media variant="icon">
-                <Icon icon="gravity-ui:calendar" aria-hidden="true" />
-              </EmptyState.Media>
-              <EmptyState.Title>{t("emptyTitle")}</EmptyState.Title>
-              <EmptyState.Description>{t("emptyHint")}</EmptyState.Description>
-            </EmptyState.Header>
+        <motion.section
+          id="archive-results"
+          aria-busy={archiveQuery.isFetching || isAdjustingPage}
+          aria-labelledby="archive-results-title"
+          className="scroll-mt-28 pt-14"
+          {...revealInView(0.22, 20)}
+        >
+          <div className="border-separator mb-2 flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <Typography
+                id="archive-results-title"
+                type="h2"
+                weight="semibold"
+                className="tracking-normal"
+              >
+                {periodTitle}
+              </Typography>
+              <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
+                {currentPage && !isAdjustingPage
+                  ? t("articlesFound", { count: total.toLocaleString(locale) })
+                  : periodDescription}
+              </Typography>
+            </div>
             {selectedYear ? (
+              <Button size="sm" variant="ghost" onPress={clearPeriod}>
+                {t("viewAllYears")}
+              </Button>
+            ) : null}
+          </div>
+
+          {isLoadingPage ? <ArchiveSkeleton /> : null}
+
+          {!isLoadingPage && archiveQuery.isError ? (
+            <EmptyState size="lg">
+              <EmptyState.Header>
+                <EmptyState.Media variant="icon">
+                  <Icon icon="gravity-ui:book-open" aria-hidden="true" />
+                </EmptyState.Media>
+                <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
+                <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
+              </EmptyState.Header>
               <EmptyState.Content>
-                <Button variant="outline" onPress={clearPeriod}>
-                  {t("viewAllYears")}
+                <Button variant="outline" onPress={() => archiveQuery.refetch()}>
+                  <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
+                  {t("tryAgain")}
                 </Button>
               </EmptyState.Content>
-            ) : null}
-          </EmptyState>
-        ) : null}
+            </EmptyState>
+          ) : null}
 
-        {!isLoadingPage && !archiveQuery.isError && posts.length > 0 ? (
-          <div className="divide-default-200 divide-y border-y">
-            {posts.map((post) => (
-              <ArchivePostItem key={post.id} post={post} />
-            ))}
-          </div>
-        ) : null}
+          {!isLoadingPage && !archiveQuery.isError && posts.length === 0 ? (
+            <EmptyState size="lg">
+              <EmptyState.Header>
+                <EmptyState.Media variant="icon">
+                  <Icon icon="gravity-ui:calendar" aria-hidden="true" />
+                </EmptyState.Media>
+                <EmptyState.Title>{t("emptyTitle")}</EmptyState.Title>
+                <EmptyState.Description>{t("emptyHint")}</EmptyState.Description>
+              </EmptyState.Header>
+              {selectedYear ? (
+                <EmptyState.Content>
+                  <Button variant="outline" onPress={clearPeriod}>
+                    {t("viewAllYears")}
+                  </Button>
+                </EmptyState.Content>
+              ) : null}
+            </EmptyState>
+          ) : null}
 
-        {!isAdjustingPage && (page > 0 || totalPages > 1) ? (
-          <Pagination className="mt-12 w-full" size="sm">
-            <Pagination.Summary>
-              {currentPage
-                ? t("showing", { start: startItem, end: endItem, total })
-                : t("pageNumber", { page: page + 1 })}
-            </Pagination.Summary>
-            <Pagination.Content>
-              <Pagination.Item>
-                <Pagination.Previous
-                  isDisabled={page === 0 || archiveQuery.isFetching}
-                  onPress={() => handlePageChange(page - 1)}
-                >
-                  <Pagination.PreviousIcon />
-                  <span>{t("previous")}</span>
-                </Pagination.Previous>
-              </Pagination.Item>
-              {getPageNumbers(page, totalPages).map((value) =>
-                typeof value === "number" ? (
-                  <Pagination.Item key={value}>
-                    <Pagination.Link
-                      isActive={value === page + 1}
-                      isDisabled={archiveQuery.isFetching}
-                      onPress={() => handlePageChange(value - 1)}
-                    >
-                      {value}
-                    </Pagination.Link>
-                  </Pagination.Item>
-                ) : (
-                  <Pagination.Item key={value}>
-                    <Pagination.Ellipsis />
-                  </Pagination.Item>
-                )
-              )}
-              <Pagination.Item>
-                <Pagination.Next
-                  isDisabled={archiveQuery.isFetching || !currentPage || page >= totalPages - 1}
-                  onPress={() => handlePageChange(page + 1)}
-                >
-                  <span>{t("next")}</span>
-                  <Pagination.NextIcon />
-                </Pagination.Next>
-              </Pagination.Item>
-            </Pagination.Content>
-          </Pagination>
-        ) : null}
-      </motion.section>
+          {!isLoadingPage && !archiveQuery.isError && posts.length > 0 ? (
+            <div className="divide-separator divide-y border-y" data-testid="archive-results-list">
+              {posts.map((post) => (
+                <ArchivePostItem key={post.id} post={post} />
+              ))}
+            </div>
+          ) : null}
 
-      <motion.div
-        className="border-default-200 mt-16 flex flex-col gap-3 border-t pt-7 sm:flex-row sm:items-center sm:justify-between"
-        {...revealInView(0.26, 14)}
-      >
-        <Typography color="muted" type="body-sm">
-          {t("lookingForIdea")}
-        </Typography>
-        <Link
-          className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
-          href="/explore"
+          {!isAdjustingPage && (page > 0 || totalPages > 1) ? (
+            <Pagination className="mt-12 w-full" size="sm">
+              <Pagination.Summary>
+                {currentPage
+                  ? t("showing", { start: startItem, end: endItem, total })
+                  : t("pageNumber", { page: page + 1 })}
+              </Pagination.Summary>
+              <Pagination.Content>
+                <Pagination.Item>
+                  <Pagination.Previous
+                    isDisabled={page === 0 || archiveQuery.isFetching}
+                    onPress={() => handlePageChange(page - 1)}
+                  >
+                    <Pagination.PreviousIcon />
+                    <span>{t("previous")}</span>
+                  </Pagination.Previous>
+                </Pagination.Item>
+                {getPageNumbers(page, totalPages).map((value) =>
+                  typeof value === "number" ? (
+                    <Pagination.Item key={value}>
+                      <Pagination.Link
+                        isActive={value === page + 1}
+                        isDisabled={archiveQuery.isFetching}
+                        onPress={() => handlePageChange(value - 1)}
+                      >
+                        {value}
+                      </Pagination.Link>
+                    </Pagination.Item>
+                  ) : (
+                    <Pagination.Item key={value}>
+                      <Pagination.Ellipsis />
+                    </Pagination.Item>
+                  )
+                )}
+                <Pagination.Item>
+                  <Pagination.Next
+                    isDisabled={archiveQuery.isFetching || !currentPage || page >= totalPages - 1}
+                    onPress={() => handlePageChange(page + 1)}
+                  >
+                    <span>{t("next")}</span>
+                    <Pagination.NextIcon />
+                  </Pagination.Next>
+                </Pagination.Item>
+              </Pagination.Content>
+            </Pagination>
+          ) : null}
+        </motion.section>
+
+        <motion.div
+          className="border-default-200 mt-16 flex flex-col gap-3 border-t pt-7 sm:flex-row sm:items-center sm:justify-between"
+          {...revealInView(0.26, 14)}
         >
-          {t("exploreWriting")}
-          <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
-        </Link>
-      </motion.div>
+          <Typography color="muted" type="body-sm">
+            {t("lookingForIdea")}
+          </Typography>
+          <Link
+            className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
+            href="/explore"
+          >
+            {t("exploreWriting")}
+            <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
+          </Link>
+        </motion.div>
+      </PageContainer>
     </div>
   );
 }
