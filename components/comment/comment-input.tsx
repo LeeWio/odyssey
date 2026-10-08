@@ -3,11 +3,14 @@
 import { Icon } from "@iconify/react";
 
 import {
+  Accordion,
   Button,
   Description,
   Form,
+  Input,
   Label,
   Modal,
+  Switch,
   TextArea,
   TextField,
   Typography,
@@ -24,6 +27,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
 import { useCommentContext } from "./context/comment-context";
 import { useCommentDraft } from "./hooks/use-comment-draft";
+import type { GuestCommentIdentity } from "./hooks/use-comment-mutations";
 
 interface CommentInputProps {
   replyId?: number | null;
@@ -32,7 +36,7 @@ interface CommentInputProps {
   hideTrigger?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
   onAuthenticationRequired?: () => void;
-  onSubmit: (content: string) => Promise<boolean>;
+  onSubmit: (content: string, guest?: GuestCommentIdentity) => Promise<boolean>;
   placeholder?: string;
   submitButtonText?: string;
 }
@@ -43,6 +47,13 @@ const COMMENT_SUGGESTION_KEYS = [
   "suggestionAngle",
   "suggestionNote",
 ] as const;
+
+const GUEST_NAME_STORAGE_KEY = "odyssey:comment-guest-name";
+
+function readStoredGuestName() {
+  if (typeof window === "undefined") return "";
+  return window.localStorage.getItem(GUEST_NAME_STORAGE_KEY) ?? "";
+}
 
 export function CommentInput({
   replyId = null,
@@ -70,6 +81,9 @@ export function CommentInput({
       ? `moment:${momentId}`
       : `post:${postId}`;
   const [content, setDraft, clearDraft] = useCommentDraft(draftThreadKey, replyId);
+  const [postAsGuest, setPostAsGuest] = useState(false);
+  const [guestName, setGuestName] = useState(readStoredGuestName);
+  const [guestEmail, setGuestEmail] = useState("");
   const draftScope = `${draftThreadKey}:${replyId ?? "root"}`;
   const [internalOpen, setInternalOpen] = useState(false);
   const [pendingSubmission, setPendingSubmission] = useState<{ scope: string } | null>(null);
@@ -110,7 +124,10 @@ export function CommentInput({
       isSubmitting,
     });
 
-    if (!isAuthenticated) {
+    if (postAsGuest && !guestName.trim()) {
+      return;
+    }
+    if (!postAsGuest && !isAuthenticated) {
       setModalOpen(false);
       onAuthenticationRequired?.();
       dispatch(setLoginOpen(true));
@@ -124,7 +141,13 @@ export function CommentInput({
     setPendingSubmission(submission);
     commentDebug("input:submit-start", { replyId, contentLength: content.trim().length });
     try {
-      const submitted = await onSubmit(content.trim());
+      const guest = postAsGuest
+        ? { guestName: guestName.trim(), guestEmail: guestEmail.trim() || undefined }
+        : undefined;
+      if (guest) {
+        window.localStorage.setItem(GUEST_NAME_STORAGE_KEY, guest.guestName);
+      }
+      const submitted = await onSubmit(content.trim(), guest);
       if (!submitted) {
         commentDebug("input:submit-not-accepted", { replyId });
         return;
@@ -162,52 +185,115 @@ export function CommentInput({
 
   const heading = isReply && replyTo ? t("replyTo", { name: replyTo }) : t("writeComment");
   const description = isReply ? t("replyDescription") : t("writeDescription");
+  const canSubmit = Boolean(content.trim()) && (!postAsGuest || Boolean(guestName.trim()));
+
+  const guestSwitch = (
+    <Switch
+      aria-label={t("postAsGuest")}
+      isSelected={postAsGuest}
+      size="sm"
+      onChange={setPostAsGuest}
+    >
+      <Switch.Content>
+        <Label className="text-xs">{t("postAsGuest")}</Label>
+        <Switch.Control>
+          <Switch.Thumb />
+        </Switch.Control>
+      </Switch.Content>
+    </Switch>
+  );
+
+  const guestFields = (
+    <Accordion expandedKeys={postAsGuest ? ["guest"] : []}>
+      <Accordion.Item id="guest">
+        <Accordion.Heading className="sr-only">
+          <Accordion.Trigger>{t("postAsGuest")}</Accordion.Trigger>
+        </Accordion.Heading>
+        <Accordion.Panel>
+          <Accordion.Body className="flex flex-col gap-3 px-0">
+            <TextField isRequired name="guestName" value={guestName} onChange={setGuestName}>
+              <Label>{t("guestName")}</Label>
+              <Input maxLength={32} placeholder={t("guestNamePlaceholder")} variant="secondary" />
+            </TextField>
+            <TextField name="guestEmail" type="email" value={guestEmail} onChange={setGuestEmail}>
+              <Label>{t("guestEmail")}</Label>
+              <Input
+                maxLength={120}
+                placeholder={t("guestEmailPlaceholder")}
+                type="email"
+                variant="secondary"
+              />
+              <Description>{t("guestEmailHint")}</Description>
+            </TextField>
+          </Accordion.Body>
+        </Accordion.Panel>
+      </Accordion.Item>
+    </Accordion>
+  );
 
   if (!isReply && !hideTrigger) {
     return (
-      <PromptInput
-        layout="inline"
-        maxHeight={140}
-        size="md"
-        value={content}
-        variant="secondary"
-        onSubmit={() => void submitComment()}
-        onValueChange={handleValueChange}
-      >
-        <PromptInput.Shell className="border-border/80 rounded-xl">
-          <PromptInput.Content>
-            <PromptInput.TextArea
-              ref={textareaRef}
-              aria-label={t("addComment")}
-              maxLength={1000}
-              placeholder={t("writePlaceholder")}
-            />
-          </PromptInput.Content>
-          <PromptInput.Toolbar>
-            <PromptInput.ToolbarStart>
-              <UserAvatar
-                size="sm"
-                variant="soft"
-                className="shrink-0"
-                name={composerName}
-                avatar={currentUserProfile?.avatar}
-                email={email}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <Typography color="muted" type="body-sm">
+            {t("writeCommentTrigger")}
+          </Typography>
+          {guestSwitch}
+        </div>
+        {guestFields}
+        <PromptInput
+          layout="inline"
+          maxHeight={140}
+          size="md"
+          value={content}
+          variant="secondary"
+          onSubmit={() => {
+            if (!canSubmit) {
+              if (!postAsGuest && !isAuthenticated) {
+                onAuthenticationRequired?.();
+                dispatch(setLoginOpen(true));
+              }
+              return;
+            }
+            void submitComment();
+          }}
+          onValueChange={handleValueChange}
+        >
+          <PromptInput.Shell className="border-border/80 rounded-xl">
+            <PromptInput.Content>
+              <PromptInput.TextArea
+                ref={textareaRef}
+                aria-label={t("addComment")}
+                maxLength={1000}
+                placeholder={t("writePlaceholder")}
               />
-            </PromptInput.ToolbarStart>
-            <PromptInput.ToolbarEnd>
-              <PromptInput.Send
-                aria-label={t("sendComment")}
-                status={isSubmitting ? "submitted" : "ready"}
-              >
-                <Icon icon="gravity-ui:arrow-up" aria-hidden="true" className="size-4" />
-              </PromptInput.Send>
-            </PromptInput.ToolbarEnd>
-          </PromptInput.Toolbar>
-        </PromptInput.Shell>
-        <PromptInput.Footer className="sr-only" aria-live="polite">
-          {content.length > 0 ? t("characterCount", { count: content.length }) : t("sendHint")}
-        </PromptInput.Footer>
-      </PromptInput>
+            </PromptInput.Content>
+            <PromptInput.Toolbar>
+              <PromptInput.ToolbarStart>
+                <UserAvatar
+                  size="sm"
+                  variant="soft"
+                  className="shrink-0"
+                  name={composerName}
+                  avatar={currentUserProfile?.avatar}
+                  email={email}
+                />
+              </PromptInput.ToolbarStart>
+              <PromptInput.ToolbarEnd>
+                <PromptInput.Send
+                  aria-label={t("sendComment")}
+                  status={isSubmitting ? "submitted" : "ready"}
+                >
+                  <Icon icon="gravity-ui:arrow-up" aria-hidden="true" className="size-4" />
+                </PromptInput.Send>
+              </PromptInput.ToolbarEnd>
+            </PromptInput.Toolbar>
+          </PromptInput.Shell>
+          <PromptInput.Footer className="sr-only" aria-live="polite">
+            {content.length > 0 ? t("characterCount", { count: content.length }) : t("sendHint")}
+          </PromptInput.Footer>
+        </PromptInput>
+      </div>
     );
   }
 
@@ -231,6 +317,8 @@ export function CommentInput({
         </div>
 
         <Form id={formId} className="flex flex-col gap-2.5" onSubmit={handleFormSubmit}>
+          <div className="flex justify-end">{guestSwitch}</div>
+          {guestFields}
           <TextField isRequired fullWidth name="reply">
             <Label className="sr-only">{t("replyContent")}</Label>
             <TextArea
@@ -263,7 +351,7 @@ export function CommentInput({
                 variant="primary"
                 className="h-8"
                 type="submit"
-                isDisabled={!content.trim() || isSubmitting}
+                isDisabled={!canSubmit || isSubmitting}
                 isPending={isSubmitting}
               >
                 {resolvedSubmit}
@@ -278,19 +366,27 @@ export function CommentInput({
   return (
     <>
       {!hideTrigger && (
-        <Button fullWidth variant="secondary" onPress={openComposer}>
-          <UserAvatar
-            size="sm"
-            variant="soft"
-            className="shrink-0"
-            name={composerName}
-            avatar={currentUserProfile?.avatar}
-            email={email}
-          />
-          <Typography color="muted" type="body-sm" align="start">
-            {t("writeCommentTrigger")}
-          </Typography>
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            fullWidth
+            className="min-w-0 justify-start"
+            variant="secondary"
+            onPress={openComposer}
+          >
+            <UserAvatar
+              size="sm"
+              variant="soft"
+              className="shrink-0"
+              name={postAsGuest ? guestName || t("anonymous") : composerName}
+              avatar={postAsGuest ? undefined : currentUserProfile?.avatar}
+              email={postAsGuest ? undefined : email}
+            />
+            <Typography color="muted" type="body-sm" align="start" className="truncate">
+              {t("writeCommentTrigger")}
+            </Typography>
+          </Button>
+          {guestSwitch}
+        </div>
       )}
 
       <Modal.Backdrop isOpen={modalIsOpen} onOpenChange={setModalOpen}>
@@ -303,6 +399,7 @@ export function CommentInput({
 
             <Modal.Body>
               <Form id={formId} className="flex flex-col gap-4" onSubmit={handleFormSubmit}>
+                {guestFields}
                 <TextField isRequired fullWidth name={isReply ? "reply" : "comment"}>
                   <Label> {description}</Label>
                   <TextArea
@@ -346,7 +443,7 @@ export function CommentInput({
                 form={formId}
                 type="submit"
                 variant="primary"
-                isDisabled={!content.trim() || isSubmitting}
+                isDisabled={!canSubmit || isSubmitting}
                 isPending={isSubmitting}
               >
                 {resolvedSubmit}

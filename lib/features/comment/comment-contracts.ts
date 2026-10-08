@@ -10,6 +10,11 @@ const baseCommentFields = {
   username: z.string().nullable().default("Anonymous"),
   nickname: z.string().nullable().optional(),
   avatar: z.string().nullable().default(""),
+  anonymous: z
+    .boolean()
+    .nullable()
+    .optional()
+    .transform((value) => Boolean(value)),
   status: z.enum(["PENDING", "APPROVED", "REJECTED", "SPAM"]).optional(),
   postId: z.number().nullable().optional(),
   postTitle: z.string().nullable().optional(),
@@ -60,19 +65,24 @@ export const CommentAnchorContextResponseSchema = z.object({
 export type CommentAnchorContextResponse = z.infer<typeof CommentAnchorContextResponseSchema>;
 export type CommentStatus = "PENDING" | "APPROVED" | "REJECTED" | "SPAM";
 
-export interface CommentRequest {
+export interface GuestCommentFields {
+  guestName?: string;
+  guestEmail?: string;
+}
+
+export interface CommentRequest extends GuestCommentFields {
   content: string;
   postId: number;
   parentId?: number;
 }
 
-export interface MomentCommentRequest {
+export interface MomentCommentRequest extends GuestCommentFields {
   content: string;
   momentId: number;
   parentId?: number;
 }
 
-export interface GuestbookRequest {
+export interface GuestbookRequest extends GuestCommentFields {
   content: string;
   parentId?: number;
 }

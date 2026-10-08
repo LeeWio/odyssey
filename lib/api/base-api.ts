@@ -28,6 +28,7 @@ interface RefreshEnvelope {
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "",
+  credentials: "include",
   timeout: 15_000,
   paramsSerializer: (params) => {
     const searchParams = new URLSearchParams();

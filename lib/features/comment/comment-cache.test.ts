@@ -16,6 +16,7 @@ function comment(
     createdAt: "2026-01-01T00:00:00Z",
     username: "a",
     nickname: "A",
+    anonymous: false,
     avatar: "",
     likesCount: 0,
     reportsCount: 0,

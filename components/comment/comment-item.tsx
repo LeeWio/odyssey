@@ -9,14 +9,13 @@ import { useEffect, useMemo, useState } from "react";
 
 import { UserAvatar } from "@/components/user-avatar";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
-import { setLoginOpen } from "@/lib/features/ui";
-import { useAppDispatch } from "@/lib/hooks";
 import { microEaseOut } from "@/lib/motion";
 import { useRelativeTime } from "@/lib/relative-time";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
 import { CommentInput } from "./comment-input";
 import { useCommentContext } from "./context/comment-context";
+import type { GuestCommentIdentity } from "./hooks/use-comment-mutations";
 import type { EnhancedComment } from "./types";
 import { flattenReplies, getCommentDisplayName } from "./utils/thread";
 
@@ -25,11 +24,20 @@ interface CommentItemProps {
   onLikeToggle: (id: number, isLiked: boolean, likesCount: number) => void;
   pendingLikeIds: ReadonlySet<number>;
   onAuthenticationRequired?: () => void;
-  onReplySubmit: (content: string, parentId: number) => Promise<boolean>;
+  onReplySubmit: (
+    content: string,
+    parentId: number,
+    guest?: GuestCommentIdentity
+  ) => Promise<boolean>;
   onEditSave: (id: number, content: string) => Promise<boolean>;
   onDelete: (id: number) => Promise<boolean>;
   onReport: (id: number, reason: string) => Promise<boolean>;
-  onRetry: (tempId: number, content: string, parentId: number | null) => Promise<boolean>;
+  onRetry: (
+    tempId: number,
+    content: string,
+    parentId: number | null,
+    guest?: GuestCommentIdentity
+  ) => Promise<boolean>;
   onLoadReplies: (parentId: number) => Promise<boolean>;
   loadingReplyIds: Set<number>;
   hasMoreReplies: (parentId: number) => boolean;
@@ -211,15 +219,9 @@ function CommentRow({
   const t = useTranslations("Comments");
   const locale = useLocale();
   const formatRelativeTime = useRelativeTime();
-  const {
-    activeReplyId,
-    setActiveReplyId,
-    highlightedCommentId,
-    setHighlightedCommentId,
-    isAuthenticated,
-  } = useCommentContext();
+  const { activeReplyId, setActiveReplyId, highlightedCommentId, setHighlightedCommentId } =
+    useCommentContext();
   const [isEditing, setIsEditing] = useState(false);
-  const dispatch = useAppDispatch();
   const isReplying = activeReplyId === comment.id;
   const isHighlighted = highlightedCommentId === comment.id;
   const isDeleted = comment.deletedPlaceholder === true;
@@ -320,7 +322,14 @@ function CommentRow({
             className="mt-2"
             size="sm"
             variant="secondary"
-            onPress={() => onRetry(comment.id, comment.content, comment.parentId ?? null)}
+            onPress={() =>
+              onRetry(
+                comment.id,
+                comment.content,
+                comment.parentId ?? null,
+                comment.anonymous && comment.nickname ? { guestName: comment.nickname } : undefined
+              )
+            }
           >
             <Icon icon="gravity-ui:arrow-rotate-right" aria-hidden="true" />
             {t("retry")}
@@ -340,11 +349,6 @@ function CommentRow({
               onLikeToggle(comment.id, Boolean(comment.likedByCurrentUser), comment.likesCount ?? 0)
             }
             onReplyToggle={() => {
-              if (!isAuthenticated) {
-                onAuthenticationRequired?.();
-                dispatch(setLoginOpen(true));
-                return;
-              }
               setActiveReplyId(isReplying ? null : comment.id);
             }}
             onReport={(reason) => onReport(comment.id, reason)}
@@ -363,7 +367,7 @@ function CommentRow({
             onOpenChange={(open) => {
               if (!open) setActiveReplyId(null);
             }}
-            onSubmit={(content) => onReplySubmit(content, comment.id)}
+            onSubmit={(content, guest) => onReplySubmit(content, comment.id, guest)}
           />
         ) : null}
       </div>

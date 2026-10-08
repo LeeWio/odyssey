@@ -22,11 +22,20 @@ interface CommentListProps {
   onLikeToggle: (id: number, isLiked: boolean, likesCount: number) => void;
   pendingLikeIds: ReadonlySet<number>;
   onAuthenticationRequired?: () => void;
-  onReplySubmit: (content: string, parentId: number) => Promise<boolean>;
+  onReplySubmit: (
+    content: string,
+    parentId: number,
+    guest?: { guestName: string; guestEmail?: string }
+  ) => Promise<boolean>;
   onEditSave: (id: number, content: string) => Promise<boolean>;
   onDelete: (id: number) => Promise<boolean>;
   onReport: (id: number, reason: string) => Promise<boolean>;
-  onRetry: (tempId: number, content: string, parentId: number | null) => Promise<boolean>;
+  onRetry: (
+    tempId: number,
+    content: string,
+    parentId: number | null,
+    guest?: { guestName: string; guestEmail?: string }
+  ) => Promise<boolean>;
   onLoadReplies: (parentId: number) => Promise<boolean>;
   loadingReplyIds: Set<number>;
   hasMoreReplies: (parentId: number) => boolean;

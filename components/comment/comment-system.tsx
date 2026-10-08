@@ -102,7 +102,9 @@ function CommentSystemContent({
       onLikeToggle={toggleLike}
       pendingLikeIds={pendingLikeIds}
       onAuthenticationRequired={onRequestClose}
-      onReplySubmit={(content, parentId) => publishComment(content, parentId)}
+      onReplySubmit={(content, parentId, guest) =>
+        publishComment(content, parentId, undefined, guest)
+      }
       onReport={reportComment}
       onRetry={retryPublishComment}
       onLoadReplies={loadReplies}
@@ -113,7 +115,7 @@ function CommentSystemContent({
   const commentInput = (
     <CommentInput
       onAuthenticationRequired={onRequestClose}
-      onSubmit={(content) => publishComment(content, null)}
+      onSubmit={(content, guest) => publishComment(content, null, undefined, guest)}
     />
   );
 

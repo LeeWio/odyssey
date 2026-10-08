@@ -19,6 +19,7 @@ function makeComment(
   return {
     username: "alice",
     nickname: "Alice",
+    anonymous: false,
     avatar: "",
     likesCount: 0,
     reportsCount: 0,

@@ -44,6 +44,7 @@ export function normalizeCommentTree(
     username: node.username || "Anonymous",
     nickname: node.nickname || node.username || "Anonymous",
     avatar: node.avatar || "",
+    anonymous: Boolean(node.anonymous),
     status: node.status ?? "APPROVED",
     postId: node.postId || postId,
     postTitle: node.postTitle || "",

@@ -25,6 +25,11 @@ import { useCommentContext } from "../context/comment-context";
 import type { EnhancedComment } from "../types";
 import { commentDebug } from "@/lib/comment-debug";
 
+export interface GuestCommentIdentity {
+  guestName: string;
+  guestEmail?: string;
+}
+
 interface MutationHookProps {
   addPendingComment: (c: EnhancedComment) => void;
   markPendingCommentSubmitted: (id: number, submission: CommentPublishResponse | null) => void;
@@ -97,15 +102,18 @@ export function useCommentMutations({
   const createOptimisticComment = (
     tempId: number,
     content: string,
-    parentId: number | null
+    parentId: number | null,
+    guest?: GuestCommentIdentity
   ): EnhancedComment => {
+    const guestName = guest?.guestName.trim();
     return {
       id: tempId,
       parentId,
       content,
-      authorUserId: currentUserId,
-      username: currentUser || "Anonymous",
-      nickname: currentUser || "Anonymous",
+      authorUserId: guestName ? null : currentUserId,
+      username: guestName || currentUser || "Anonymous",
+      nickname: guestName || currentUser || "Anonymous",
+      anonymous: Boolean(guestName),
       avatar: "",
       status: "PENDING",
       postId: isMoment ? null : postId,
@@ -129,10 +137,13 @@ export function useCommentMutations({
   const publishComment = async (
     content: string,
     parentId: number | null = null,
-    existingTempId?: number
+    existingTempId?: number,
+    guest?: GuestCommentIdentity
   ): Promise<boolean> => {
-    if (!isAuthenticated) {
-      toast.warning("Please sign in to post a comment.");
+    const guestName = guest?.guestName.trim();
+    const guestEmail = guest?.guestEmail?.trim() || undefined;
+    if (!isAuthenticated && !guestName) {
+      toast.warning("Add a display name or sign in to post a comment.");
       return false;
     }
 
@@ -160,14 +171,17 @@ export function useCommentMutations({
     if (existingTempId) {
       markPendingCommentRetrying(tempId);
     } else {
-      addPendingComment(createOptimisticComment(tempId, content, parentId));
+      addPendingComment(createOptimisticComment(tempId, content, parentId, guest));
     }
+
+    const guestFields = guestName ? { guestName, guestEmail } : {};
 
     try {
       if (isGuestbook) {
         const submission = await postGuestbookEntryApi({
           content,
           parentId: parentId || undefined,
+          ...guestFields,
           idempotencyKey,
           deferInvalidation: true,
         }).unwrap();
@@ -177,6 +191,7 @@ export function useCommentMutations({
           content,
           momentId,
           parentId: parentId || undefined,
+          ...guestFields,
           idempotencyKey,
           deferInvalidation: true,
         }).unwrap();
@@ -186,6 +201,7 @@ export function useCommentMutations({
           content,
           postId,
           parentId: parentId || undefined,
+          ...guestFields,
           idempotencyKey,
           deferInvalidation: true,
         }).unwrap();
@@ -212,9 +228,10 @@ export function useCommentMutations({
   const retryPublishComment = async (
     tempId: number,
     content: string,
-    parentId: number | null
+    parentId: number | null,
+    guest?: GuestCommentIdentity
   ): Promise<boolean> => {
-    return publishComment(content, parentId, tempId);
+    return publishComment(content, parentId, tempId, guest);
   };
 
   const toggleLike = async (id: number, currentIsLiked: boolean, currentLikesCount = 0) => {
