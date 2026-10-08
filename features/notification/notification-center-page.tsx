@@ -71,9 +71,7 @@ function NotificationEmptyState({ view }: { view: NotificationView }) {
           <Icon className="text-default-400" icon="solar:bell-off-linear" width={40} />
         </EmptyState.Media>
         <EmptyState.Title>{title}</EmptyState.Title>
-        <EmptyState.Description className="max-w-xs text-pretty">
-          {description}
-        </EmptyState.Description>
+        <EmptyState.Description>{description}</EmptyState.Description>
       </EmptyState.Header>
     </EmptyState>
   );
@@ -237,32 +235,30 @@ export function NotificationCenterPage() {
           </div>
         </header>
 
-        <div className="mt-12">
-          <Tabs
-            selectedKey={view}
-            onSelectionChange={(key) => {
-              setView(key === "saved" || key === "done" ? key : "inbox");
-              setPage(0);
-            }}
-          >
-            <Tabs.ListContainer>
-              <Tabs.List aria-label={t("views")}>
-                <Tabs.Tab id="inbox">
-                  {t("inbox")}
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-                <Tabs.Tab id="saved">
-                  {t("saved")}
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-                <Tabs.Tab id="done">
-                  {t("done")}
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-              </Tabs.List>
-            </Tabs.ListContainer>
-          </Tabs>
-        </div>
+        <Tabs
+          selectedKey={view}
+          onSelectionChange={(key) => {
+            setView(key === "saved" || key === "done" ? key : "inbox");
+            setPage(0);
+          }}
+        >
+          <Tabs.ListContainer>
+            <Tabs.List aria-label={t("views")}>
+              <Tabs.Tab id="inbox">
+                {t("inbox")}
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="saved">
+                {t("saved")}
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="done">
+                {t("done")}
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            </Tabs.List>
+          </Tabs.ListContainer>
+        </Tabs>
 
         <section aria-live="polite" className="mt-6">
           {isLoadingPage ? (

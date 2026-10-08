@@ -1,16 +1,19 @@
 "use client";
 
-import { EmptyState } from "@heroui-pro/react";
+import { EmptyState, Segment } from "@heroui-pro/react";
 import {
   Badge,
   Button,
   Card,
   Chip,
+  Kbd,
   Popover,
   ScrollShadow,
   Skeleton,
+  Surface,
   Tabs,
   Tooltip,
+  Typography,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
@@ -31,6 +34,18 @@ import { useNotificationActions } from "./use-notification-actions";
 const POPOVER_PAGE_SIZE = 8;
 
 type NotificationView = "all" | "unread";
+import Archive from "@gravity-ui/icons/Archive";
+import Comment from "@gravity-ui/icons/Comment";
+import House from "@gravity-ui/icons/House";
+import Video from "@gravity-ui/icons/Video";
+import { Bell } from "@gravity-ui/icons";
+
+const tabs = [
+  { icon: <House />, id: "home", label: "Home" },
+  { icon: <Comment />, id: "chat", label: "Chat" },
+  { icon: <Video />, id: "meetings", label: "Meetings" },
+  { icon: <Archive />, id: "inbox", label: "Inbox" },
+];
 
 function NotificationPopoverSkeleton() {
   const t = useTranslations("Notifications");
@@ -53,19 +68,17 @@ function NotificationPopoverSkeleton() {
 function NotificationPopoverEmptyState({ unreadOnly }: { unreadOnly: boolean }) {
   const t = useTranslations("Notifications");
   return (
-    <div className="px-6 py-10">
-      <EmptyState size="sm">
-        <EmptyState.Header>
-          <EmptyState.Media variant="icon">
-            <Icon icon="gravity-ui:bell" aria-hidden="true" />
-          </EmptyState.Media>
-          <EmptyState.Title>{unreadOnly ? t("caughtUp") : t("emptyInboxTitle")}</EmptyState.Title>
-          <EmptyState.Description>
-            {unreadOnly ? t("caughtUpHint") : t("popoverEmptyHint")}
-          </EmptyState.Description>
-        </EmptyState.Header>
-      </EmptyState>
-    </div>
+    <EmptyState size="sm">
+      <EmptyState.Header>
+        <EmptyState.Media variant="icon">
+          <Icon icon="gravity-ui:bell" aria-hidden="true" />
+        </EmptyState.Media>
+        <EmptyState.Title>{unreadOnly ? t("caughtUp") : t("emptyInboxTitle")}</EmptyState.Title>
+        <EmptyState.Description>
+          {unreadOnly ? t("caughtUpHint") : t("popoverEmptyHint")}
+        </EmptyState.Description>
+      </EmptyState.Header>
+    </EmptyState>
   );
 }
 
@@ -187,41 +200,75 @@ export function NotificationPopover() {
 
         <Popover.Content
           isNonModal
-          className="w-[min(26rem,calc(100vw-1.5rem))] overflow-hidden p-0"
+          className="w-[min(26rem,calc(100vw-1.5rem))] overflow-hidden"
           placement="bottom end"
         >
-          <Popover.Dialog className="p-0 outline-none">
-            <Card variant="transparent">
-              <Card.Header className="flex-row items-center justify-between gap-3">
+          <Popover.Dialog className="flex max-h-[80dvh] flex-col gap-2 overflow-hidden">
+            <div className="flex flex-row items-center justify-between">
+              <Popover.Heading className="text-base font-semibold">{t("title")}</Popover.Heading>
+              <Tooltip>
+                <Button
+                  isIconOnly
+                  aria-label={t("markAllAria")}
+                  isDisabled={
+                    unreadCount === 0 || pendingBulkAction !== null || pendingActions.size > 0
+                  }
+                  isPending={pendingBulkAction === "read-all"}
+                  size="sm"
+                  variant="ghost"
+                  onPress={handleMarkAllRead}
+                >
+                  <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" />
+                </Button>
+                <Tooltip.Content>{t("markAllRead")}</Tooltip.Content>
+              </Tooltip>
+            </div>
+            <Segment defaultSelectedKey="meetings" size="sm">
+              {tabs.map((tab) => (
+                <Segment.Item key={tab.id} id={tab.id}>
+                  {tab.label}
+                </Segment.Item>
+              ))}
+            </Segment>
+
+            {/* <Tabs
+              selectedKey={view}
+              onSelectionChange={(key) => setView(key === "unread" ? "unread" : "all")}
+            >
+              <Tabs.ListContainer>
+                <Tabs.List aria-label={t("views")}>
+                  <Tabs.Tab id="all">
+                    {t("all")}
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                  <Tabs.Tab id="unread">
+                    {t("unreadTab")}
+                    {unreadCount > 0 ? (
+                      <Chip color="accent" size="sm" variant="soft">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </Chip>
+                    ) : null}
+                    <Tabs.Indicator />
+                  </Tabs.Tab>
+                </Tabs.List>
+              </Tabs.ListContainer>
+            </Tabs> */}
+            {/* <Card variant="transparent">
+              <Card.Header >
                 <div className="min-w-0">
                   <Popover.Heading className="text-base font-semibold">
                     {t("title")}
                   </Popover.Heading>
                   <p className="text-muted mt-1 text-xs">{t("popoverSubtitle")}</p>
                 </div>
-                <Tooltip>
-                  <Button
-                    isIconOnly
-                    aria-label={t("markAllAria")}
-                    isDisabled={
-                      unreadCount === 0 || pendingBulkAction !== null || pendingActions.size > 0
-                    }
-                    isPending={pendingBulkAction === "read-all"}
-                    size="sm"
-                    variant="ghost"
-                    onPress={handleMarkAllRead}
-                  >
-                    <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" />
-                  </Button>
-                  <Tooltip.Content>{t("markAllRead")}</Tooltip.Content>
-                </Tooltip>
+                
               </Card.Header>
 
               <Tabs
                 selectedKey={view}
                 onSelectionChange={(key) => setView(key === "unread" ? "unread" : "all")}
               >
-                <Tabs.ListContainer className="px-4">
+                <Tabs.ListContainer>
                   <Tabs.List aria-label={t("views")}>
                     <Tabs.Tab id="all">
                       {t("all")}
@@ -295,7 +342,75 @@ export function NotificationPopover() {
                   {t("viewAll")}
                 </Button>
               </Card.Footer>
-            </Card>
+            </Card> */}
+            <ScrollShadow className="max-h-96" hideScrollBar>
+              {isLoadingList ? <NotificationPopoverSkeleton /> : null}
+              {!isLoadingList && notifications.isError ? (
+                <EmptyState size="sm">
+                  <EmptyState.Header>
+                    <EmptyState.Media className="bg-surface-tertiary border" variant="icon">
+                      <Bell />
+                    </EmptyState.Media>
+                    <EmptyState.Title>{t("loadFailed")}</EmptyState.Title>
+                    <EmptyState.Description className="max-w-xs text-pretty">
+                      You&apos;re all caught up. New notifications will appear here.
+                    </EmptyState.Description>
+                  </EmptyState.Header>
+                  <EmptyState.Content>
+                    <Button onPress={() => notifications.refetch()} variant="outline">
+                      {t("tryAgain")}
+                    </Button>
+                  </EmptyState.Content>
+                </EmptyState>
+              ) : null}
+              {!isLoadingList && !notifications.isError && notificationEntries.length === 0 ? (
+                <NotificationPopoverEmptyState unreadOnly={view === "unread"} />
+              ) : null}
+              {!isLoadingList && !notifications.isError && notificationEntries.length > 0 ? (
+                <ul aria-live="polite" className="divide-default-200 divide-y">
+                  {notificationEntries.map((notification) => (
+                    <NotificationItem
+                      key={notification.id}
+                      isPending={pendingActions.has(notification.id)}
+                      isDisabled={pendingBulkAction !== null || pendingActions.has(notification.id)}
+                      notification={notification}
+                      onPress={handleNotificationPress}
+                    />
+                  ))}
+                </ul>
+              ) : null}
+            </ScrollShadow>
+            <Surface variant="transparent">
+              <div className="flex items-center justify-between">
+                <Typography type="body-sm" color="muted">
+                  All caught up
+                </Typography>
+                <span className="text-muted">
+                  <Kbd>
+                    <Kbd.Content>Esc</Kbd.Content>
+                  </Kbd>{" "}
+                  to close
+                </span>
+              </div>
+            </Surface>
+            {/* <div className="items-center justify-between gap-3">
+              <span className="text-muted text-xs">
+                {currentPage?.total
+                  ? t("totalUpdates", { count: currentPage.total.toLocaleString(locale) })
+                  : t("activityInbox")}
+              </span>
+              <Button
+                size="sm"
+                variant="ghost"
+                onPress={() => {
+                  setIsOpen(false);
+                  router.push("/notifications");
+                }}
+              >
+                <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-4" />
+                {t("viewAll")}
+              </Button>
+            </div> */}
           </Popover.Dialog>
         </Popover.Content>
       </Popover>
