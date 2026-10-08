@@ -719,6 +719,7 @@
     "browseByDate": "Browse by date",
     "resultsFor": "Results for “{query}”",
     "allWriting": "All writing",
+    "publishedArticles": "published articles",
     "articlesFound": "{count} articles found",
     "searching": "Searching the archive",
     "clearFilters": "Clear filters",

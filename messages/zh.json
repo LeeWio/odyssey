@@ -719,6 +719,7 @@
     "browseByDate": "按日期浏览",
     "resultsFor": "“{query}”的结果",
     "allWriting": "全部文章",
+    "publishedArticles": "已发布文章",
     "articlesFound": "找到 {count} 篇文章",
     "searching": "正在搜索归档",
     "clearFilters": "清除筛选",

@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { EmptyState, NumberValue } from "@heroui-pro/react";
 import { Button, Card, Link, Skeleton, Typography } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
@@ -77,26 +78,36 @@ export default function CategoriesPage() {
         </EmptyState>
       ) : (
         <ul className={TAXONOMY_GRID} data-testid="taxonomy-grid">
-          {list.map((category) => (
+          {list.map((category, index) => (
             <li key={category.id} className="min-w-0">
-              <Card className="h-full">
-                <Card.Header>
+              <Card className="group hover:bg-surface-secondary h-full transition-colors">
+                <Card.Header className="gap-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-muted font-mono text-xs tabular-nums">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <Icon
+                      icon="gravity-ui:arrow-up-right"
+                      aria-hidden="true"
+                      className="text-muted size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    />
+                  </div>
                   <Card.Title>
                     <Link
-                      className="text-foreground block max-w-full wrap-anywhere no-underline"
+                      className="text-foreground group-hover:text-accent block max-w-full text-xl wrap-anywhere no-underline transition-colors"
                       href={`/single/categories/${encodeURIComponent(category.slug)}`}
                     >
                       {category.name}
                     </Link>
                   </Card.Title>
-                  <Card.Description>
+                  <Card.Description className="font-mono text-xs tabular-nums">
                     <NumberValue locale={locale} value={counts.get(category.id) ?? 0}>
                       {(formatted) => t("categoryEssays", { count: formatted })}
                     </NumberValue>
                   </Card.Description>
                 </Card.Header>
                 {category.description ? (
-                  <Card.Content>
+                  <Card.Content className="pt-0">
                     <p className="text-muted line-clamp-3 text-sm leading-5">
                       {category.description}
                     </p>

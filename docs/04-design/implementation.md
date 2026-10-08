@@ -51,11 +51,15 @@ Project grids use a 22rem minimum track width; friend-link grids use 18rem. Both
 
 ## Article Taxonomy
 
+Category and tag indexes now use HeroUI Card, Typography, Link and NumberValue as editorial directory units rather than anonymous card tiles. Each unit exposes a stable ordinal, prominent linked name, article count and optional description, with a restrained hover cue that reinforces navigation without adding decorative chrome. The existing Tailwind auto-fill grid remains responsible for responsive density, so wide screens add columns while each entry keeps a readable internal measure.
+
 Category and tag directories and their detail routes use PageContainer with the same full-width boundaries and edge padding as the other migrated pages. Back links, article counts, filtering, eight-item pagination and API contracts are unchanged.
 
 `app/(main)/single/components/grid-classes.ts` defines Tailwind auto-fill grids for taxonomy entries (18rem minimum tracks) and essays (22rem). Loading placeholders reuse the corresponding grid. EssayGrid also serves existing year, month and reading-list routes, so it adapts to their available content width without changing their page containers. Sparse results keep normal card widths. Long taxonomy labels and essay titles wrap inside their links rather than overlapping adjacent cards.
 
 `tests/e2e/taxonomy-design.spec.ts` covers category and tag navigation, five viewport widths, long unbroken labels, sparse results, pagination, no resize-triggered refetch, loading, API failures and retry to an empty state.
+
+Explore now shares the full-width PageContainer and uses an editorial page header with a publication count, HeroUI SearchField and TagGroup filters, a date-navigation bridge, Card-based results, EmptyState recovery and Pagination. The result grid adds columns at wider breakpoints while preserving card proportions and the existing URL-driven search and filter contract.
 
 ## Journal Editorial Redesign
 

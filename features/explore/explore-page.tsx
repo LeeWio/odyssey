@@ -25,11 +25,13 @@ import { useDebouncedCallback } from "use-debounce";
 import { motion, useReducedMotion } from "motion/react";
 
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
+import { PageContainer } from "@/components/layout/page-container";
 import type { PostResponse } from "@/lib/features/post";
 import { useGetPublicPostsQuery } from "@/lib/features/post";
 import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
 
 const PAGE_SIZE = 9;
+const EXPLORE_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-5";
 
 type Facet = {
   id: number;
@@ -111,7 +113,7 @@ function ExplorePostCard({ post }: { post: PostResponse }) {
               </span>
             ))}
           </div>
-          <Card.Title className="line-clamp-2 text-lg">{post.title}</Card.Title>
+          <Card.Title className="line-clamp-2 text-lg wrap-anywhere">{post.title}</Card.Title>
           {post.summary ? (
             <Card.Description className="line-clamp-2">{post.summary}</Card.Description>
           ) : null}
@@ -137,12 +139,7 @@ function ExplorePostCard({ post }: { post: PostResponse }) {
 function ExploreSkeleton() {
   const t = useTranslations("Explore");
   return (
-    <div
-      aria-busy="true"
-      aria-label={t("loading")}
-      className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
-      role="status"
-    >
+    <div aria-busy="true" aria-label={t("loading")} className={EXPLORE_GRID} role="status">
       {Array.from({ length: 6 }, (_, index) => (
         <Card key={index} variant="secondary" className="overflow-hidden p-0">
           <Skeleton className="aspect-[16/9] w-full rounded-none" />
@@ -265,7 +262,7 @@ export function ExplorePage() {
     updateSearch({ page: String(nextPage + 1) });
     document
       .getElementById("explore-results")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      ?.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth", block: "start" });
   };
 
   const clearFilters = () => {
@@ -279,287 +276,310 @@ export function ExplorePage() {
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
-      <header className="flex flex-col items-center text-center">
-        <motion.div {...revealInView(0, 10)}>
-          <Chip color="default" size="sm" variant="secondary">
-            {t("eyebrow")}
-          </Chip>
-        </motion.div>
-        <motion.div {...revealInView(0.06)}>
-          <Typography
-            type="h1"
-            weight="bold"
-            className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[1.02] tracking-[-0.05em] text-balance"
-          >
-            {t("title")}
-          </Typography>
-        </motion.div>
-        <motion.div {...revealInView(0.12, 14)}>
-          <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
-            {t("description")}
-          </Typography>
-        </motion.div>
-      </header>
-
-      <motion.section
-        aria-label={t("filters")}
-        className="border-default-200 mt-12 border-y py-7"
-        {...revealInView(0.18, 16)}
-      >
-        <ExploreSearchField
-          key={queryFromUrl}
-          initialQuery={queryFromUrl}
-          onQueryChange={(query) => updateSearch({ page: undefined, q: query || undefined })}
-        />
-
-        <div className="mt-7 grid gap-7">
+    <div className="bg-background min-h-dvh w-full pt-28 pb-24 lg:pt-32">
+      <PageContainer>
+        <header className="border-separator grid gap-8 border-b pb-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="min-w-0">
-            <div className="mb-3 flex items-center gap-2">
-              <Icon icon="gravity-ui:book-open" aria-hidden="true" className="text-muted size-4" />
-              <Typography type="body-sm" weight="semibold">
-                {t("topics")}
+            <motion.div {...revealInView(0, 10)}>
+              <Chip color="default" size="sm" variant="secondary">
+                {t("eyebrow")}
+              </Chip>
+            </motion.div>
+            <motion.div {...revealInView(0.06)}>
+              <Typography
+                type="h1"
+                weight="bold"
+                className="mt-4 text-4xl leading-none tracking-normal text-balance wrap-anywhere sm:text-5xl lg:text-6xl"
+              >
+                {t("title")}
+              </Typography>
+            </motion.div>
+            <motion.div {...revealInView(0.12, 14)}>
+              <Typography color="muted" type="body" className="mt-3 max-w-xl text-balance">
+                {t("description")}
+              </Typography>
+            </motion.div>
+          </div>
+          <div className="flex items-center gap-3 lg:pb-1">
+            <Icon icon="gravity-ui:book-open" aria-hidden="true" className="text-muted size-5" />
+            <div>
+              <Typography className="font-mono text-3xl tabular-nums" type="body">
+                {(facetsQuery.data?.totalPublishedCount ?? 0).toLocaleString(locale)}
+              </Typography>
+              <Typography color="muted" type="body-xs">
+                {t("publishedArticles")}
               </Typography>
             </div>
-            {facetsQuery.isLoading ? (
-              <div className="flex gap-2">
-                {["w-20", "w-28", "w-24", "w-32"].map((width) => (
-                  <Skeleton key={width} className={`h-8 ${width} rounded-full`} />
-                ))}
-              </div>
-            ) : categories.length > 0 ? (
-              <TagGroup
-                aria-label={t("filterTopics")}
-                selectedKeys={
-                  new Set([selectedCategoryId ? `category-${selectedCategoryId}` : "all"])
-                }
-                selectionMode="single"
-                size="sm"
-                variant="surface"
-                onSelectionChange={handleCategoryChange}
-              >
-                <TagGroup.List className="flex-wrap">
-                  <Tag id="all" textValue={t("allTopics")}>
-                    {t("allTopics")}
-                    <span className="text-muted text-xs tabular-nums">
-                      {facetsQuery.data?.totalPublishedCount ?? 0}
-                    </span>
-                  </Tag>
-                  {categories.map((category) => (
-                    <Tag key={category.id} id={`category-${category.id}`} textValue={category.name}>
-                      {category.name}
-                      <span className="text-muted text-xs tabular-nums">{category.count}</span>
-                    </Tag>
-                  ))}
-                </TagGroup.List>
-              </TagGroup>
-            ) : facetsQuery.isError ? (
-              <Button size="sm" variant="secondary" onPress={() => facetsQuery.refetch()}>
-                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />
-                {t("reloadTopics")}
-              </Button>
-            ) : null}
           </div>
+        </header>
 
-          <div className="min-w-0">
-            <div className="mb-3 flex items-center gap-2">
-              <Icon icon="gravity-ui:hashtag" aria-hidden="true" className="text-muted size-4" />
-              <Typography type="body-sm" weight="semibold">
-                {t("tags")}
+        <motion.section
+          aria-label={t("filters")}
+          className="border-separator mt-10 border-b pb-8"
+          {...revealInView(0.18, 16)}
+        >
+          <ExploreSearchField
+            key={queryFromUrl}
+            initialQuery={queryFromUrl}
+            onQueryChange={(query) => updateSearch({ page: undefined, q: query || undefined })}
+          />
+
+          <div className="mt-7 grid gap-7">
+            <div className="min-w-0">
+              <div className="mb-3 flex items-center gap-2">
+                <Icon
+                  icon="gravity-ui:book-open"
+                  aria-hidden="true"
+                  className="text-muted size-4"
+                />
+                <Typography type="body-sm" weight="semibold">
+                  {t("topics")}
+                </Typography>
+              </div>
+              {facetsQuery.isLoading ? (
+                <div className="flex gap-2">
+                  {["w-20", "w-28", "w-24", "w-32"].map((width) => (
+                    <Skeleton key={width} className={`h-8 ${width} rounded-full`} />
+                  ))}
+                </div>
+              ) : categories.length > 0 ? (
+                <TagGroup
+                  aria-label={t("filterTopics")}
+                  selectedKeys={
+                    new Set([selectedCategoryId ? `category-${selectedCategoryId}` : "all"])
+                  }
+                  selectionMode="single"
+                  size="sm"
+                  variant="surface"
+                  onSelectionChange={handleCategoryChange}
+                >
+                  <TagGroup.List className="flex-wrap">
+                    <Tag id="all" textValue={t("allTopics")}>
+                      {t("allTopics")}
+                      <span className="text-muted text-xs tabular-nums">
+                        {facetsQuery.data?.totalPublishedCount ?? 0}
+                      </span>
+                    </Tag>
+                    {categories.map((category) => (
+                      <Tag
+                        key={category.id}
+                        id={`category-${category.id}`}
+                        textValue={category.name}
+                      >
+                        {category.name}
+                        <span className="text-muted text-xs tabular-nums">{category.count}</span>
+                      </Tag>
+                    ))}
+                  </TagGroup.List>
+                </TagGroup>
+              ) : facetsQuery.isError ? (
+                <Button size="sm" variant="secondary" onPress={() => facetsQuery.refetch()}>
+                  <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" className="size-4" />
+                  {t("reloadTopics")}
+                </Button>
+              ) : null}
+            </div>
+
+            <div className="min-w-0">
+              <div className="mb-3 flex items-center gap-2">
+                <Icon icon="gravity-ui:hashtag" aria-hidden="true" className="text-muted size-4" />
+                <Typography type="body-sm" weight="semibold">
+                  {t("tags")}
+                </Typography>
+              </div>
+              {facetsQuery.isLoading ? (
+                <div className="flex gap-2">
+                  {["w-16", "w-24", "w-20", "w-28", "w-20"].map((width, index) => (
+                    <Skeleton key={`${width}-${index}`} className={`h-8 ${width} rounded-full`} />
+                  ))}
+                </div>
+              ) : tags.length > 0 ? (
+                <TagGroup
+                  aria-label={t("filterTags")}
+                  selectedKeys={new Set([selectedTagId ? `tag-${selectedTagId}` : "all"])}
+                  selectionMode="single"
+                  size="sm"
+                  variant="surface"
+                  onSelectionChange={handleTagChange}
+                >
+                  <TagGroup.List className="flex-wrap">
+                    <Tag id="all" textValue={t("allTags")}>
+                      {t("allTags")}
+                    </Tag>
+                    {tags.map((tag) => (
+                      <Tag key={tag.id} id={`tag-${tag.id}`} textValue={tag.name}>
+                        #{tag.name}
+                        <span className="text-muted text-xs tabular-nums">{tag.count}</span>
+                      </Tag>
+                    ))}
+                  </TagGroup.List>
+                </TagGroup>
+              ) : null}
+            </div>
+
+            <div className="border-default-200 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-muted flex items-center gap-2 text-sm">
+                <Icon icon="gravity-ui:calendar" aria-hidden="true" className="size-4" />
+                {t("preferDate")}
+              </div>
+              <Link
+                className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
+                href="/archive"
+              >
+                {t("browseByDate")}
+                <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
+              </Link>
+            </div>
+          </div>
+        </motion.section>
+
+        <motion.section
+          id="explore-results"
+          aria-busy={postsQuery.isFetching}
+          aria-labelledby="explore-results-title"
+          className="scroll-mt-28 pt-14"
+          {...revealInView(0.22, 20)}
+        >
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <Typography id="explore-results-title" type="h2" weight="semibold">
+                {resultsTitle}
+              </Typography>
+              <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
+                {postsQuery.data
+                  ? t("articlesFound", { count: postsQuery.data.total.toLocaleString(locale) })
+                  : t("searching")}
               </Typography>
             </div>
-            {facetsQuery.isLoading ? (
-              <div className="flex gap-2">
-                {["w-16", "w-24", "w-20", "w-28", "w-20"].map((width, index) => (
-                  <Skeleton key={`${width}-${index}`} className={`h-8 ${width} rounded-full`} />
-                ))}
-              </div>
-            ) : tags.length > 0 ? (
-              <TagGroup
-                aria-label={t("filterTags")}
-                selectedKeys={new Set([selectedTagId ? `tag-${selectedTagId}` : "all"])}
-                selectionMode="single"
-                size="sm"
-                variant="surface"
-                onSelectionChange={handleTagChange}
-              >
-                <TagGroup.List className="flex-wrap">
-                  <Tag id="all" textValue={t("allTags")}>
-                    {t("allTags")}
-                  </Tag>
-                  {tags.map((tag) => (
-                    <Tag key={tag.id} id={`tag-${tag.id}`} textValue={tag.name}>
-                      #{tag.name}
-                      <span className="text-muted text-xs tabular-nums">{tag.count}</span>
-                    </Tag>
-                  ))}
-                </TagGroup.List>
-              </TagGroup>
-            ) : null}
-          </div>
-
-          <div className="border-default-200 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-muted flex items-center gap-2 text-sm">
-              <Icon icon="gravity-ui:calendar" aria-hidden="true" className="size-4" />
-              {t("preferDate")}
-            </div>
-            <Link
-              className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
-              href="/archive"
-            >
-              {t("browseByDate")}
-              <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
-            </Link>
-          </div>
-        </div>
-      </motion.section>
-
-      <motion.section
-        id="explore-results"
-        aria-busy={postsQuery.isFetching}
-        aria-labelledby="explore-results-title"
-        className="scroll-mt-28 pt-14"
-        {...revealInView(0.22, 20)}
-      >
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <Typography id="explore-results-title" type="h2" weight="semibold">
-              {resultsTitle}
-            </Typography>
-            <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
-              {postsQuery.data
-                ? t("articlesFound", { count: postsQuery.data.total.toLocaleString(locale) })
-                : t("searching")}
-            </Typography>
-          </div>
-          {hasActiveFilters ? (
-            <Button size="sm" variant="ghost" onPress={clearFilters}>
-              <Icon icon="gravity-ui:xmark" aria-hidden="true" className="size-4" />
-              {t("clearFilters")}
-            </Button>
-          ) : null}
-        </div>
-
-        {postsQuery.isLoading ? <ExploreSkeleton /> : null}
-
-        {!postsQuery.isLoading && postsQuery.isError ? (
-          <EmptyState size="lg">
-            <EmptyState.Header>
-              <EmptyState.Media variant="icon">
-                <Icon icon="gravity-ui:book-open" aria-hidden="true" />
-              </EmptyState.Media>
-              <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
-              <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
-            </EmptyState.Header>
-            <EmptyState.Content>
-              <Button variant="outline" onPress={() => postsQuery.refetch()}>
-                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                {t("tryAgain")}
-              </Button>
-            </EmptyState.Content>
-          </EmptyState>
-        ) : null}
-
-        {!postsQuery.isLoading && !postsQuery.isError && posts.length === 0 ? (
-          <EmptyState size="lg">
-            <EmptyState.Header>
-              <EmptyState.Media variant="icon">
-                <Icon icon="gravity-ui:book-open" aria-hidden="true" />
-              </EmptyState.Media>
-              <EmptyState.Title>{t("emptyTitle")}</EmptyState.Title>
-              <EmptyState.Description>{t("emptyHint")}</EmptyState.Description>
-            </EmptyState.Header>
             {hasActiveFilters ? (
+              <Button size="sm" variant="ghost" onPress={clearFilters}>
+                <Icon icon="gravity-ui:xmark" aria-hidden="true" className="size-4" />
+                {t("clearFilters")}
+              </Button>
+            ) : null}
+          </div>
+
+          {postsQuery.isLoading ? <ExploreSkeleton /> : null}
+
+          {!postsQuery.isLoading && postsQuery.isError ? (
+            <EmptyState size="lg">
+              <EmptyState.Header>
+                <EmptyState.Media variant="icon">
+                  <Icon icon="gravity-ui:book-open" aria-hidden="true" />
+                </EmptyState.Media>
+                <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
+                <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
+              </EmptyState.Header>
               <EmptyState.Content>
-                <Button variant="outline" onPress={clearFilters}>
-                  {t("clearFilters")}
+                <Button variant="outline" onPress={() => postsQuery.refetch()}>
+                  <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
+                  {t("tryAgain")}
                 </Button>
               </EmptyState.Content>
-            ) : null}
-          </EmptyState>
-        ) : null}
+            </EmptyState>
+          ) : null}
 
-        {!postsQuery.isLoading && !postsQuery.isError && posts.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post, index) => (
-              <motion.div
-                key={post.id}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{
-                  duration: shouldReduceMotion ? 0 : 0.65,
-                  delay: Math.min(index, 5) * 0.05,
-                  ease: pageEaseOut,
-                }}
-              >
-                <ExplorePostCard post={post} />
-              </motion.div>
-            ))}
-          </div>
-        ) : null}
+          {!postsQuery.isLoading && !postsQuery.isError && posts.length === 0 ? (
+            <EmptyState size="lg">
+              <EmptyState.Header>
+                <EmptyState.Media variant="icon">
+                  <Icon icon="gravity-ui:book-open" aria-hidden="true" />
+                </EmptyState.Media>
+                <EmptyState.Title>{t("emptyTitle")}</EmptyState.Title>
+                <EmptyState.Description>{t("emptyHint")}</EmptyState.Description>
+              </EmptyState.Header>
+              {hasActiveFilters ? (
+                <EmptyState.Content>
+                  <Button variant="outline" onPress={clearFilters}>
+                    {t("clearFilters")}
+                  </Button>
+                </EmptyState.Content>
+              ) : null}
+            </EmptyState>
+          ) : null}
 
-        {!postsQuery.isLoading && !postsQuery.isError && totalPages > 1 ? (
-          <Pagination className="mt-12 w-full" size="sm">
-            <Pagination.Summary>
-              {t("showing", {
-                start: startItem,
-                end: endItem,
-                total: postsQuery.data?.total ?? 0,
-              })}
-            </Pagination.Summary>
-            <Pagination.Content>
-              <Pagination.Item>
-                <Pagination.Previous
-                  isDisabled={page === 0}
-                  onPress={() => handlePageChange(page - 1)}
+          {!postsQuery.isLoading && !postsQuery.isError && posts.length > 0 ? (
+            <div className={EXPLORE_GRID} data-testid="explore-results-grid">
+              {posts.map((post, index) => (
+                <motion.div
+                  key={post.id}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 0.65,
+                    delay: Math.min(index, 5) * 0.05,
+                    ease: pageEaseOut,
+                  }}
                 >
-                  <Pagination.PreviousIcon />
-                  <span>{t("previous")}</span>
-                </Pagination.Previous>
-              </Pagination.Item>
-              {getPageNumbers(page, totalPages).map((value) =>
-                typeof value === "number" ? (
-                  <Pagination.Item key={value}>
-                    <Pagination.Link
-                      isActive={value === page + 1}
-                      onPress={() => handlePageChange(value - 1)}
-                    >
-                      {value}
-                    </Pagination.Link>
-                  </Pagination.Item>
-                ) : (
-                  <Pagination.Item key={value}>
-                    <Pagination.Ellipsis />
-                  </Pagination.Item>
-                )
-              )}
-              <Pagination.Item>
-                <Pagination.Next
-                  isDisabled={page >= totalPages - 1}
-                  onPress={() => handlePageChange(page + 1)}
-                >
-                  <span>{t("next")}</span>
-                  <Pagination.NextIcon />
-                </Pagination.Next>
-              </Pagination.Item>
-            </Pagination.Content>
-          </Pagination>
-        ) : null}
-      </motion.section>
+                  <ExplorePostCard post={post} />
+                </motion.div>
+              ))}
+            </div>
+          ) : null}
 
-      <div className="border-default-200 mt-16 flex flex-col gap-3 border-t pt-7 sm:flex-row sm:items-center sm:justify-between">
-        <Typography color="muted" type="body-sm">
-          {t("preferColumn")}
-        </Typography>
-        <Link
-          className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
-          href="/columns"
-        >
-          {t("browseColumns")}
-          <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
-        </Link>
-      </div>
+          {!postsQuery.isLoading && !postsQuery.isError && totalPages > 1 ? (
+            <Pagination className="mt-12 w-full" size="sm">
+              <Pagination.Summary>
+                {t("showing", {
+                  start: startItem,
+                  end: endItem,
+                  total: postsQuery.data?.total ?? 0,
+                })}
+              </Pagination.Summary>
+              <Pagination.Content>
+                <Pagination.Item>
+                  <Pagination.Previous
+                    isDisabled={page === 0}
+                    onPress={() => handlePageChange(page - 1)}
+                  >
+                    <Pagination.PreviousIcon />
+                    <span>{t("previous")}</span>
+                  </Pagination.Previous>
+                </Pagination.Item>
+                {getPageNumbers(page, totalPages).map((value) =>
+                  typeof value === "number" ? (
+                    <Pagination.Item key={value}>
+                      <Pagination.Link
+                        isActive={value === page + 1}
+                        onPress={() => handlePageChange(value - 1)}
+                      >
+                        {value}
+                      </Pagination.Link>
+                    </Pagination.Item>
+                  ) : (
+                    <Pagination.Item key={value}>
+                      <Pagination.Ellipsis />
+                    </Pagination.Item>
+                  )
+                )}
+                <Pagination.Item>
+                  <Pagination.Next
+                    isDisabled={page >= totalPages - 1}
+                    onPress={() => handlePageChange(page + 1)}
+                  >
+                    <span>{t("next")}</span>
+                    <Pagination.NextIcon />
+                  </Pagination.Next>
+                </Pagination.Item>
+              </Pagination.Content>
+            </Pagination>
+          ) : null}
+        </motion.section>
+
+        <div className="border-default-200 mt-16 flex flex-col gap-3 border-t pt-7 sm:flex-row sm:items-center sm:justify-between">
+          <Typography color="muted" type="body-sm">
+            {t("preferColumn")}
+          </Typography>
+          <Link
+            className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
+            href="/columns"
+          >
+            {t("browseColumns")}
+            <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
+          </Link>
+        </div>
+      </PageContainer>
     </div>
   );
 }
