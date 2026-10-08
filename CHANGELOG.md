@@ -1,3 +1,10 @@
+# [1.201.0](https://github.com/LeeWio/odyssey/compare/v1.200.1...v1.201.0) (2026-10-08)
+
+
+### Features
+
+* **web:** reshape the notification popover ([18746d2](https://github.com/LeeWio/odyssey/commit/18746d2b180428fce2d61d24784dd74dd6a829a5))
+
 ## [1.200.1](https://github.com/LeeWio/odyssey/compare/v1.200.0...v1.200.1) (2026-10-08)
 
 
