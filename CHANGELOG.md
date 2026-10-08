@@ -1,3 +1,10 @@
+# [1.191.0](https://github.com/LeeWio/odyssey/compare/v1.190.0...v1.191.0) (2026-10-08)
+
+
+### Features
+
+* **web:** open the chronicle on the journal ([5ad7b1b](https://github.com/LeeWio/odyssey/commit/5ad7b1bcc97693488bd27ae83db11222b9228dea))
+
 # [1.190.0](https://github.com/LeeWio/odyssey/compare/v1.189.0...v1.190.0) (2026-09-30)
 
 
