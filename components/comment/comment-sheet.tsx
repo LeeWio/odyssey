@@ -31,7 +31,6 @@ export function CommentSheet({ postId, momentId, isOpen, onOpenChange }: Comment
       <Sheet.Backdrop variant="blur">
         <Sheet.Content className="mx-auto w-[min(760px,calc(100vw-2rem))] max-w-none">
           <Sheet.Dialog className="h-[min(720px,calc(100dvh-1rem))] min-h-0">
-            <Sheet.CloseTrigger />
             <CommentSystem momentId={momentId} postId={postId} onRequestClose={handleRequestClose}>
               {renderContent}
             </CommentSystem>

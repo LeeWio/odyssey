@@ -109,7 +109,7 @@ export function CommentItem(props: CommentItemProps) {
       id={`comment-${comment.id}`}
       data-comment-card={comment.id}
       className={cn(
-        "border-border/70 scroll-mt-24 border-b py-5 last:border-b-0",
+        "scroll-mt-24 py-4",
         isHighlighted &&
           "bg-accent/5 ring-accent/20 -mx-2 rounded-xl border-b-transparent px-2 ring-1"
       )}
@@ -258,9 +258,9 @@ function CommentRow({
   return (
     <div className="flex gap-3">
       <UserAvatar
-        size="sm"
+        size="md"
         variant="soft"
-        className="mt-0.5 shrink-0"
+        className="shrink-0"
         name={displayName}
         avatar={comment.avatar}
       />

@@ -558,7 +558,6 @@ function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
                 <Button
                   key={column.slug}
                   variant="tertiary"
-                  className="border-separator h-auto w-full flex-col items-start gap-2 rounded-none border-b px-0 py-4 text-start whitespace-normal"
                   onPress={() => setSelected(column.slug)}
                 >
                   <span className="text-sm font-semibold">{column.name}</span>

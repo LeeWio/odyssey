@@ -76,8 +76,7 @@ export const CommentHeader = memo(function CommentHeader({
           <Button
             isDisabled={totalCount <= 1}
             size="sm"
-            variant="ghost"
-            className="text-muted hover:text-foreground h-8 gap-1 px-2 text-xs"
+            variant="tertiary"
             aria-label={t("chooseSort")}
           >
             {sortLabels[sortOrder]}
@@ -110,7 +109,6 @@ export const CommentHeader = memo(function CommentHeader({
           <Button
             size="sm"
             variant="secondary"
-            className="h-8 rounded-full px-3 text-xs shadow-sm"
             isPending={isLoadingNew}
             isDisabled={isLoadingNew}
             aria-live="polite"

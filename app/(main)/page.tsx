@@ -566,7 +566,6 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
           <Button
             size="sm"
             variant="primary"
-            className="bg-accent h-8 px-4 text-xs font-semibold text-white hover:brightness-105"
             onPress={() => {
               onClose();
               dispatch(setLoginOpen(true));
@@ -575,12 +574,7 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
             <Icon icon="lucide:pencil-line" className="size-3.5" />
             {t("guestbook.signInToWrite")}
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-muted/80 h-8 px-3 text-xs font-medium"
-            onPress={onClose}
-          >
+          <Button size="sm" variant="ghost" onPress={onClose}>
             {t("guestbook.close")}
           </Button>
         </div>
