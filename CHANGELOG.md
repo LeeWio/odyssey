@@ -1,3 +1,10 @@
+# [1.199.0](https://github.com/LeeWio/odyssey/compare/v1.198.0...v1.199.0) (2026-10-08)
+
+
+### Features
+
+* complete dotfiles migration including Kitty terminal configuration ([cf45a24](https://github.com/LeeWio/odyssey/commit/cf45a246abd11671ae0558ee8723a773412e0bf4))
+
 # [1.198.0](https://github.com/LeeWio/odyssey/compare/v1.197.0...v1.198.0) (2026-10-08)
 
 
