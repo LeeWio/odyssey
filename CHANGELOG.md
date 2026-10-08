@@ -1,3 +1,10 @@
+# [1.192.0](https://github.com/LeeWio/odyssey/compare/v1.191.0...v1.192.0) (2026-10-08)
+
+
+### Features
+
+* **web:** wire the admin desk to Nexus ([67e0e8f](https://github.com/LeeWio/odyssey/commit/67e0e8fbbac82a0752f9d623bf340a17270f69a2))
+
 # [1.191.0](https://github.com/LeeWio/odyssey/compare/v1.190.0...v1.191.0) (2026-10-08)
 
 
