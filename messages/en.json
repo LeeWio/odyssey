@@ -610,6 +610,8 @@
     "writeCommentTrigger": "Write a comment...",
     "postComment": "Post comment",
     "sendComment": "Send comment",
+    "attachFile": "Attach file",
+    "removeAttachment": "Remove attachment",
     "characterCount": "{count} of 1000 characters",
     "sendHint": "Press Enter to send. Press Shift and Enter for a new line.",
     "replyingTo": "Replying to",

@@ -610,6 +610,8 @@
     "writeCommentTrigger": "写一条评论...",
     "postComment": "发表评论",
     "sendComment": "发送评论",
+    "attachFile": "添加附件",
+    "removeAttachment": "移除附件",
     "characterCount": "{count} / 1000 个字符",
     "sendHint": "按 Enter 发送。按 Shift 和 Enter 换行。",
     "replyingTo": "正在回复",

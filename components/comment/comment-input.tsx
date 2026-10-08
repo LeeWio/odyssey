@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUp, Paperclip } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
 
 import {
@@ -15,7 +16,13 @@ import {
   TextField,
   Typography,
 } from "@heroui/react";
-import { PromptInput, PromptSuggestion } from "@heroui-pro/react";
+import {
+  ChatAttachment,
+  ChatAttachmentGroup,
+  ChatAttachmentInput,
+  PromptInput,
+  PromptSuggestion,
+} from "@heroui-pro/react";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useEffect, useId, useRef, useState } from "react";
@@ -50,9 +57,51 @@ const COMMENT_SUGGESTION_KEYS = [
 
 const GUEST_NAME_STORAGE_KEY = "odyssey:comment-guest-name";
 
+type PendingAttachment = {
+  id: string;
+  mimeType?: string;
+  name: string;
+  src?: string;
+};
+
 function readStoredGuestName() {
   if (typeof window === "undefined") return "";
   return window.localStorage.getItem(GUEST_NAME_STORAGE_KEY) ?? "";
+}
+
+function createAttachmentId(file: File) {
+  return `${file.name}-${file.lastModified}-${
+    globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
+  }`;
+}
+
+function revokeAttachmentUrl(attachment: PendingAttachment) {
+  if (attachment.src?.startsWith("blob:")) URL.revokeObjectURL(attachment.src);
+}
+
+function CommentAttachmentPreviews({
+  attachments,
+  onRemove,
+  removeLabel,
+}: {
+  attachments: PendingAttachment[];
+  onRemove: (id: string) => void;
+  removeLabel: string;
+}) {
+  if (!attachments.length) return null;
+
+  return (
+    <PromptInput.Attachments>
+      <ChatAttachmentGroup>
+        {attachments.map((file) => (
+          <ChatAttachment key={file.id} mimeType={file.mimeType} name={file.name} src={file.src}>
+            <ChatAttachment.Preview />
+            <ChatAttachment.Remove aria-label={removeLabel} onPress={() => onRemove(file.id)} />
+          </ChatAttachment>
+        ))}
+      </ChatAttachmentGroup>
+    </PromptInput.Attachments>
+  );
 }
 
 export function CommentInput({
@@ -81,6 +130,8 @@ export function CommentInput({
       ? `moment:${momentId}`
       : `post:${postId}`;
   const [content, setDraft, clearDraft] = useCommentDraft(draftThreadKey, replyId);
+  const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
+  const attachmentsRef = useRef<PendingAttachment[]>([]);
   const [postAsGuest, setPostAsGuest] = useState(false);
   const [guestName, setGuestName] = useState(readStoredGuestName);
   const [guestEmail, setGuestEmail] = useState("");
@@ -97,11 +148,46 @@ export function CommentInput({
   const composerName = currentUser || t("anonymous");
 
   useEffect(() => {
+    attachmentsRef.current = attachments;
+  }, [attachments]);
+
+  useEffect(() => {
     return () => {
       // A previous thread's request may finish, but must not close this composer.
       activeSubmission.current = null;
+      setAttachments((current) => {
+        current.forEach(revokeAttachmentUrl);
+        return [];
+      });
     };
   }, [draftScope]);
+
+  const clearAttachments = () => {
+    setAttachments((current) => {
+      current.forEach(revokeAttachmentUrl);
+      return [];
+    });
+  };
+
+  const handleFilesSelected = (files: File[]) => {
+    setAttachments((current) => [
+      ...current,
+      ...files.map((file) => ({
+        id: createAttachmentId(file),
+        mimeType: file.type,
+        name: file.name,
+        src: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+      })),
+    ]);
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments((current) => {
+      const removed = current.find((attachment) => attachment.id === id);
+      if (removed) revokeAttachmentUrl(removed);
+      return current.filter((attachment) => attachment.id !== id);
+    });
+  };
 
   const setModalOpen = (nextIsOpen: boolean) => {
     if (isOpen === undefined) setInternalOpen(nextIsOpen);
@@ -154,6 +240,7 @@ export function CommentInput({
       }
       commentDebug("input:submit-resolved", { replyId });
       if (clearDraft(content) && activeSubmission.current === submission) {
+        clearAttachments();
         setModalOpen(false);
       }
     } catch (error) {
@@ -242,11 +329,9 @@ export function CommentInput({
         </div>
         {guestFields}
         <PromptInput
-          layout="inline"
-          maxHeight={140}
-          size="md"
+          layout="compact"
+          status={isSubmitting ? "submitted" : "ready"}
           value={content}
-          variant="secondary"
           onSubmit={() => {
             if (!canSubmit) {
               if (!postAsGuest && !isAuthenticated) {
@@ -259,39 +344,51 @@ export function CommentInput({
           }}
           onValueChange={handleValueChange}
         >
-          <PromptInput.Shell className="border-border/80 rounded-xl">
-            <PromptInput.Content>
-              <PromptInput.TextArea
-                ref={textareaRef}
-                aria-label={t("addComment")}
-                maxLength={1000}
-                placeholder={t("writePlaceholder")}
-              />
-            </PromptInput.Content>
-            <PromptInput.Toolbar>
-              <PromptInput.ToolbarStart>
-                <UserAvatar
-                  size="sm"
-                  variant="soft"
-                  className="shrink-0"
-                  name={composerName}
-                  avatar={currentUserProfile?.avatar}
-                  email={email}
-                />
-              </PromptInput.ToolbarStart>
-              <PromptInput.ToolbarEnd>
-                <PromptInput.Send
-                  aria-label={t("sendComment")}
-                  status={isSubmitting ? "submitted" : "ready"}
-                >
-                  <Icon icon="gravity-ui:arrow-up" aria-hidden="true" className="size-4" />
-                </PromptInput.Send>
-              </PromptInput.ToolbarEnd>
-            </PromptInput.Toolbar>
-          </PromptInput.Shell>
-          <PromptInput.Footer className="sr-only" aria-live="polite">
+          <ChatAttachmentInput onFilesSelected={handleFilesSelected}>
+            <ChatAttachmentInput.Dropzone
+              render={(dropzoneProps) => (
+                <PromptInput.Shell {...dropzoneProps}>
+                  <PromptInput.Content>
+                    <CommentAttachmentPreviews
+                      attachments={attachments}
+                      removeLabel={t("removeAttachment")}
+                      onRemove={removeAttachment}
+                    />
+                    <PromptInput.TextArea
+                      ref={textareaRef}
+                      aria-label={t("addComment")}
+                      className="[backdrop-filter:none] [-webkit-backdrop-filter:none]"
+                      maxLength={1000}
+                      placeholder={t("writePlaceholder")}
+                    />
+                  </PromptInput.Content>
+                  <PromptInput.Toolbar>
+                    <PromptInput.ToolbarStart>
+                      <ChatAttachmentInput.Trigger
+                        render={(triggerProps) => (
+                          <PromptInput.Action
+                            {...triggerProps}
+                            aria-label={t("attachFile")}
+                            tooltip={t("attachFile")}
+                          >
+                            <Paperclip className="size-4" />
+                          </PromptInput.Action>
+                        )}
+                      />
+                    </PromptInput.ToolbarStart>
+                    <PromptInput.ToolbarEnd>
+                      <PromptInput.Send aria-label={t("sendComment")}>
+                        <ArrowUp className="size-4" />
+                      </PromptInput.Send>
+                    </PromptInput.ToolbarEnd>
+                  </PromptInput.Toolbar>
+                </PromptInput.Shell>
+              )}
+            />
+          </ChatAttachmentInput>
+          {/* <PromptInput.Footer>
             {content.length > 0 ? t("characterCount", { count: content.length }) : t("sendHint")}
-          </PromptInput.Footer>
+          </PromptInput.Footer> */}
         </PromptInput>
       </div>
     );
