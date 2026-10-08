@@ -4,20 +4,18 @@ import { EmptyState, Segment } from "@heroui-pro/react";
 import {
   Badge,
   Button,
-  Card,
   Chip,
   Kbd,
   Popover,
   ScrollShadow,
   Skeleton,
   Surface,
-  Tabs,
   Tooltip,
   Typography,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import {
@@ -141,10 +139,9 @@ function NotificationItem({
 
 export function NotificationPopover() {
   const t = useTranslations("Notifications");
-  const locale = useLocale();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [view, setView] = useState<NotificationView>("all");
+  const [view] = useState<NotificationView>("all");
   const { pendingActions, pendingBulkAction, run, runBulk } = useNotificationActions();
   const { data: unreadCount = 0 } = useGetUnreadNotificationCountQuery(undefined, {
     pollingInterval: 60_000,
