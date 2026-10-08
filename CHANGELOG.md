@@ -1,3 +1,10 @@
+# [1.193.0](https://github.com/LeeWio/odyssey/compare/v1.192.0...v1.193.0) (2026-10-08)
+
+
+### Features
+
+* **web:** post comments anonymously from a switch ([686407e](https://github.com/LeeWio/odyssey/commit/686407e80beb65e951c5fac9e0e1243dd0c08a9e))
+
 # [1.192.0](https://github.com/LeeWio/odyssey/compare/v1.191.0...v1.192.0) (2026-10-08)
 
 
