@@ -14,6 +14,12 @@ permissions:
   issues: write
   pull-requests: write
 
+# A second push while this job is cutting a release makes the version commit
+# a non-fast-forward. Queue releases instead of letting two of them push main.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     name: Semantic Release
@@ -25,6 +31,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Project
@@ -33,4 +40,22 @@ jobs:
       - name: Run Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bun x semantic-release
+        run: |
+          set -euo pipefail
+          log="$(mktemp)"
+          for attempt in 1 2 3; do
+            set +e
+            bun x semantic-release 2>&1 | tee "$log"
+            status="${PIPESTATUS[0]}"
+            set -e
+            if [ "$status" -eq 0 ]; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ] && grep -q "HEAD -> main (fetch first)" "$log"; then
+              echo "main moved while cutting the release; retrying from origin/main"
+              git fetch origin main --tags --prune --prune-tags --force
+              git checkout -B main origin/main
+              continue
+            fi
+            exit "$status"
+          done
