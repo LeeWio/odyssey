@@ -1,3 +1,10 @@
+# [1.197.0](https://github.com/LeeWio/odyssey/compare/v1.196.0...v1.197.0) (2026-10-08)
+
+
+### Features
+
+* **web:** redesign columns reading directory ([8d9f0c3](https://github.com/LeeWio/odyssey/commit/8d9f0c38173bc6e03187b37e8867106493c80986))
+
 # [1.196.0](https://github.com/LeeWio/odyssey/compare/v1.195.0...v1.196.0) (2026-10-08)
 
 
