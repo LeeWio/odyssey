@@ -359,7 +359,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
               </EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
-              <Button size="sm" variant="secondary" onPress={() => router.push("/blog")}>
+              <Button size="sm" variant="secondary" onPress={() => router.push("/single")}>
                 Back to Journal
               </Button>
             </EmptyState.Content>
@@ -456,7 +456,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
             variant="ghost"
             size="sm"
             className="hover:bg-default-100 gap-1.5 rounded-full"
-            onPress={() => router.push("/blog")}
+            onPress={() => router.push("/single")}
             aria-label="Back to blog"
           >
             <Icon icon="lucide:arrow-left" className="size-3.5" />
@@ -585,7 +585,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
               isIconOnly
               size="sm"
               variant="ghost"
-              onPress={() => router.push("/blog")}
+              onPress={() => router.push("/single")}
               aria-label="Back to blog"
             >
               <Icon icon="lucide:arrow-left" className="size-4" />

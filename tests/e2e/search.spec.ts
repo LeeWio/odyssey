@@ -18,7 +18,7 @@ const result = (title: string) => ({
       {
         type: "POST",
         label: "Articles",
-        items: [{ title, url: "/blog", subtitle: "Search result" }],
+        items: [{ title, url: "/single", subtitle: "Search result" }],
       },
     ],
   },

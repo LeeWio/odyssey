@@ -41,7 +41,8 @@ import {
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { useRetrieveDiscoveryQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
-import { useGetFeaturedPostsQuery, useGetPublicPostDigestsQuery } from "@/lib/features/post";
+import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
+import { ReadingListButton } from "@/features/library/reading-list-button";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
@@ -64,6 +65,7 @@ type Story = {
   views?: number;
   likesCount?: number;
   commentsCount?: number;
+  isInReadingList?: boolean | null;
   publishedAt?: string | null;
   createdAt?: string | null;
 };
@@ -214,10 +216,12 @@ function LatestPagination({
   onPageChange,
   page,
   pages,
+  isDisabled = false,
 }: {
   onPageChange: (page: number) => void;
   page: number;
   pages: number;
+  isDisabled?: boolean;
 }) {
   const t = useTranslations("Journal");
   if (pages <= 1) return null;
@@ -227,7 +231,10 @@ function LatestPagination({
       <Pagination className="justify-center" size="sm">
         <Pagination.Content>
           <Pagination.Item>
-            <Pagination.Previous isDisabled={page === 1} onPress={() => onPageChange(page - 1)}>
+            <Pagination.Previous
+              isDisabled={isDisabled || page === 1}
+              onPress={() => onPageChange(page - 1)}
+            >
               <Pagination.PreviousIcon />
               <span>{t("previous")}</span>
             </Pagination.Previous>
@@ -239,14 +246,21 @@ function LatestPagination({
               </Pagination.Item>
             ) : (
               <Pagination.Item key={item}>
-                <Pagination.Link isActive={item === page} onPress={() => onPageChange(item)}>
+                <Pagination.Link
+                  isDisabled={isDisabled}
+                  isActive={item === page}
+                  onPress={() => onPageChange(item)}
+                >
                   {item}
                 </Pagination.Link>
               </Pagination.Item>
             )
           )}
           <Pagination.Item>
-            <Pagination.Next isDisabled={page === pages} onPress={() => onPageChange(page + 1)}>
+            <Pagination.Next
+              isDisabled={isDisabled || page === pages}
+              onPress={() => onPageChange(page + 1)}
+            >
               <span>{t("next")}</span>
               <Pagination.NextIcon />
             </Pagination.Next>
@@ -257,7 +271,7 @@ function LatestPagination({
   );
 }
 
-function StoryRow({ post }: { post: Story }) {
+function StoryRow({ post, isRefreshing = false }: { post: Story; isRefreshing?: boolean }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
   const title = post.title || t("untitledStory");
@@ -265,54 +279,67 @@ function StoryRow({ post }: { post: Story }) {
   const author = post.authorName?.trim();
 
   return (
-    <Card className="h-full">
-      <Card.Header>
-        <div className="flex items-start gap-3">
-          <Card.Title className="line-clamp-2 min-w-0 flex-1 text-base leading-6">
-            <Link className="text-foreground no-underline" href={storyHref(post)}>
-              {title}
-            </Link>
-          </Card.Title>
-          {cover ? (
-            <Link
-              className="block size-12 shrink-0 overflow-hidden rounded-lg no-underline"
-              href={storyHref(post)}
-            >
-              <Cover cover={cover} ratio="size-12" />
-            </Link>
+    <article aria-label={title} className="h-full">
+      <Card className="h-full">
+        <Card.Header>
+          <div className="flex items-start gap-3">
+            <Card.Title className="line-clamp-2 min-w-0 flex-1 text-base leading-6">
+              <Link className="text-foreground no-underline" href={storyHref(post)}>
+                {title}
+              </Link>
+            </Card.Title>
+            {cover ? (
+              <Link
+                className="block size-12 shrink-0 overflow-hidden rounded-lg no-underline"
+                href={storyHref(post)}
+              >
+                <Cover cover={cover} ratio="size-12" />
+              </Link>
+            ) : null}
+          </div>
+          <Card.Description>
+            {[
+              author,
+              post.category?.name,
+              formatDate(storyDate(post), locale, t("recentlyPublished")),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </Card.Description>
+        </Card.Header>
+        {post.summary ? (
+          <Card.Content>
+            <p className="text-muted line-clamp-2 text-sm leading-5">{post.summary}</p>
+          </Card.Content>
+        ) : null}
+        <Card.Footer className="mt-auto justify-between gap-3">
+          <span className="text-muted text-xs tabular-nums">
+            <NumberValue locale={locale} notation="compact" value={post.views ?? 0}>
+              {(formatted) => t("views", { count: formatted })}
+            </NumberValue>
+            {" · "}
+            <NumberValue locale={locale} notation="compact" value={post.likesCount ?? 0}>
+              {(formatted) => t("likes", { count: formatted })}
+            </NumberValue>
+            {typeof post.commentsCount === "number" ? (
+              <>
+                {" · "}
+                <NumberValue locale={locale} notation="compact" value={post.commentsCount}>
+                  {(formatted) => t("comments", { count: formatted })}
+                </NumberValue>
+              </>
+            ) : null}
+          </span>
+          {post.id != null && typeof post.isInReadingList === "boolean" ? (
+            <ReadingListButton
+              postId={post.id}
+              isSaved={post.isInReadingList}
+              isRefreshing={isRefreshing}
+            />
           ) : null}
-        </div>
-        <Card.Description>
-          {[
-            author,
-            post.category?.name,
-            formatDate(storyDate(post), locale, t("recentlyPublished")),
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </Card.Description>
-      </Card.Header>
-      {post.summary ? (
-        <Card.Content>
-          <p className="text-muted line-clamp-2 text-sm leading-5">{post.summary}</p>
-        </Card.Content>
-      ) : null}
-      <Card.Footer className="mt-auto">
-        <span className="text-muted text-xs tabular-nums">
-          <NumberValue locale={locale} notation="compact" value={post.views ?? 0}>
-            {(formatted) => t("views", { count: formatted })}
-          </NumberValue>
-          {" · "}
-          <NumberValue locale={locale} notation="compact" value={post.likesCount ?? 0}>
-            {(formatted) => t("likes", { count: formatted })}
-          </NumberValue>
-          {" · "}
-          <NumberValue locale={locale} notation="compact" value={post.commentsCount ?? 0}>
-            {(formatted) => t("comments", { count: formatted })}
-          </NumberValue>
-        </span>
-      </Card.Footer>
-    </Card>
+        </Card.Footer>
+      </Card>
+    </article>
   );
 }
 
@@ -622,21 +649,46 @@ export function JournalPage() {
   const searchParams = useSearchParams();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const normalizedQuery = (searchParams.get("q") ?? "").trim();
+  const [searchDraft, setSearchDraft] = useState(() => ({
+    source: normalizedQuery,
+    value: normalizedQuery,
+  }));
+  if (searchDraft.source !== normalizedQuery) {
+    setSearchDraft({ source: normalizedQuery, value: normalizedQuery });
+  }
+  const searchValue = searchDraft.source === normalizedQuery ? searchDraft.value : normalizedQuery;
+  const isDebouncingSearch = searchValue.trim() !== normalizedQuery;
   const selectedCategoryId = parsePositiveInteger(searchParams.get("category"));
   const discoveryQuery = useRetrieveDiscoveryQuery();
   const facetsQuery = useRetrieveFacetsQuery();
   const featuredQuery = useGetFeaturedPostsQuery({ page: 0, size: 8 });
   const requestedLatestPage = parsePageParam(searchParams.get("page"));
   const latestPage = requestedLatestPage - 1;
-  const latestQuery = useGetPublicPostDigestsQuery({
-    categoryId: selectedCategoryId,
-    keyword: normalizedQuery || undefined,
-    page: latestPage,
-    size: 6,
-  });
+  const latestQuery = useGetPublicPostsQuery(
+    {
+      categoryId: selectedCategoryId,
+      keyword: normalizedQuery || undefined,
+      page: latestPage,
+      size: 6,
+    },
+    { skip: isDebouncingSearch, refetchOnMountOrArgChange: true }
+  );
+  const latestData = isDebouncingSearch ? undefined : latestQuery.currentData;
+  const isAdjustingPage =
+    latestQuery.isSuccess &&
+    !latestQuery.isFetching &&
+    !!latestData &&
+    requestedLatestPage > Math.max(1, latestData.totalPages);
+  const latestLoading =
+    isDebouncingSearch ||
+    isAdjustingPage ||
+    latestQuery.isLoading ||
+    (latestQuery.isFetching && !latestData);
   useNormalizePageParam(
     requestedLatestPage,
-    latestQuery.currentData ? (latestQuery.currentData.totalPages ?? 0) : undefined
+    latestData && !latestQuery.isFetching && latestQuery.isSuccess
+      ? latestData.totalPages
+      : undefined
   );
   const columnsQuery = useGetPublicColumnsQuery();
   const libraryQuery = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
@@ -654,11 +706,11 @@ export function JournalPage() {
     updateArchiveSearch({ q: value.trim() || undefined, page: undefined });
   }, 300);
 
-  useEffect(() => () => updateSearch.cancel(), [updateSearch]);
+  useEffect(() => () => updateSearch.cancel(), [normalizedQuery, updateSearch]);
 
   const discovery = discoveryQuery.data;
   const featuredPosts = featuredQuery.data?.list ?? [];
-  const latestPool = latestQuery.currentData?.list ?? [];
+  const latestPool = latestLoading ? [] : (latestData?.list ?? []);
   const categories = (facetsQuery.data?.categories ?? []).filter(
     (category): category is CategoryFacet & { id: number; name: string } =>
       category.id != null && Boolean(category.name) && (category.count ?? 0) > 0
@@ -671,10 +723,10 @@ export function JournalPage() {
     (facet): facet is ArchiveFacet & { year: number } =>
       typeof facet.year === "number" && (facet.count ?? 0) > 0
   );
-  const hasArchiveFilters = Boolean(normalizedQuery || selectedCategoryId);
+  const hasArchiveFilters = Boolean(normalizedQuery || selectedCategoryId || isDebouncingSearch);
   const essayCount = hasArchiveFilters
-    ? (latestQuery.currentData?.total ?? 0)
-    : (facetsQuery.data?.totalPublishedCount ?? latestQuery.currentData?.total ?? 0);
+    ? (latestData?.total ?? 0)
+    : (facetsQuery.data?.totalPublishedCount ?? latestData?.total ?? 0);
   const pageRef = useRef<HTMLDivElement>(null);
   const contentReady = !discoveryQuery.isLoading && !featuredQuery.isLoading;
 
@@ -715,9 +767,9 @@ export function JournalPage() {
     : latestPool.filter((post) => !post.slug || !shownSlugs.has(post.slug)).slice(0, 6);
   const openingLoading =
     !hasArchiveFilters &&
-    (featuredQuery.isLoading || (featuredPosts.length === 0 && latestQuery.isLoading));
+    (featuredQuery.isLoading || (featuredPosts.length === 0 && latestLoading));
   const archiveEmpty =
-    !openingLoading && !latestQuery.isLoading && !lead && latestPosts.length === 0;
+    !openingLoading && !latestLoading && !latestQuery.isError && !lead && latestPosts.length === 0;
 
   return (
     <div
@@ -732,11 +784,11 @@ export function JournalPage() {
           className="bg-surface-secondary flex w-full max-w-3xl flex-col gap-3 rounded-2xl p-3 sm:p-4"
         >
           <SearchField
-            key={`article-search-${normalizedQuery}`}
             fullWidth
             name="article-search"
-            defaultValue={normalizedQuery}
+            value={searchValue}
             onChange={(value) => {
+              setSearchDraft({ source: normalizedQuery, value });
               updateSearch(value);
             }}
           >
@@ -759,7 +811,9 @@ export function JournalPage() {
                 onSelectionChange={(keys) => {
                   if (keys === "all") return;
                   const [key] = Array.from(keys);
+                  updateSearch.cancel();
                   updateArchiveSearch({
+                    q: searchValue.trim() || undefined,
                     category: key && String(key) !== "all" ? String(key) : undefined,
                     page: undefined,
                   });
@@ -816,7 +870,11 @@ export function JournalPage() {
               />
             </div>
 
-            <section aria-labelledby="latest-title" className="flex flex-col gap-4">
+            <section
+              aria-labelledby="latest-title"
+              aria-busy={latestLoading || latestQuery.isFetching}
+              className="flex flex-col gap-4"
+            >
               <div className="flex items-baseline justify-between gap-4">
                 <Typography id="latest-title" type="h3" weight="semibold">
                   {normalizedQuery
@@ -832,8 +890,8 @@ export function JournalPage() {
                   </NumberValue>
                 </span>
               </div>
-              {latestQuery.isLoading && !openingLoading ? (
-                <div className="flex flex-col gap-4">
+              {latestLoading && !openingLoading ? (
+                <div role="status" aria-label={t("loadingStories")} className="flex flex-col gap-4">
                   {Array.from({ length: 5 }, (_, index) => (
                     <Skeleton key={index} className="h-24 w-full rounded-2xl" />
                   ))}
@@ -845,21 +903,38 @@ export function JournalPage() {
                     <Alert.Title>{t("latestFailed")}</Alert.Title>
                     <Alert.Description>{t("latestFailedHint")}</Alert.Description>
                   </Alert.Content>
-                  <Button variant="outline" onPress={() => void latestQuery.refetch()}>
+                  <Button
+                    isDisabled={latestQuery.isFetching}
+                    variant="outline"
+                    onPress={() => void latestQuery.refetch()}
+                  >
                     <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
                     {t("tryAgain")}
                   </Button>
+                  {latestPage > 0 ? (
+                    <Button
+                      variant="secondary"
+                      onPress={() =>
+                        updateArchiveSearch({
+                          page: latestPage === 1 ? undefined : String(latestPage),
+                        })
+                      }
+                    >
+                      {t("previous")}
+                    </Button>
+                  ) : null}
                 </Alert>
               ) : latestPosts.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {latestPosts.map((post) => (
                     <div key={post.id ?? post.slug} data-journal-reveal="">
-                      <StoryRow post={post} />
+                      <StoryRow post={post} isRefreshing={latestQuery.isFetching} />
                     </div>
                   ))}
                   <LatestPagination
                     page={latestPage + 1}
-                    pages={Math.max(1, latestQuery.currentData?.totalPages ?? 1)}
+                    pages={Math.max(1, latestData?.totalPages ?? 1)}
+                    isDisabled={latestQuery.isFetching}
                     onPageChange={(page) => {
                       const query = new URLSearchParams(searchParams.toString());
                       if (page <= 1) query.delete("page");

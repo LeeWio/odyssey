@@ -18,7 +18,7 @@ test("guestbook renders the shared comment system shell", async ({ page }) => {
 test("article comment sheet opens from the comments query flag when an article exists", async ({
   page,
 }) => {
-  await page.goto("/blog");
+  await page.goto("/single");
   const firstArticle = page.locator('a[href^="/single/"]').first();
   const articleVisible = await firstArticle
     .waitFor({ state: "visible", timeout: 15_000 })

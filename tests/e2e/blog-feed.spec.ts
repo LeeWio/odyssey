@@ -1,4 +1,4 @@
-import { expect, test as base } from "@playwright/test";
+import { expect, test as base, type Page } from "@playwright/test";
 
 const test = base.extend<{ browserErrors: string[] }>({
   browserErrors: [
@@ -21,6 +21,7 @@ const post = (id: number, title: string) => ({
   views: 10,
   likesCount: 0,
   favoritesCount: 0,
+  isInReadingList: false,
   category: null,
   series: null,
   seriesOrder: null,
@@ -36,6 +37,11 @@ const result = (list: unknown[], page = 0, total = list.length) =>
     totalPages: Math.ceil(total / 8),
   });
 const endpoint = "**/api/v1/public/blog/posts?**";
+
+async function openFeed(page: Page, query = "") {
+  await page.goto(`/chronicle${query}`);
+  await page.getByRole("tab", { name: "Orbit Feed", exact: true }).click();
+}
 
 test.use({ locale: "en-US" });
 test.beforeEach(async ({ page }) => {
@@ -55,6 +61,157 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
+test("saves an article from the feed without navigating away", async ({ page }, testInfo) => {
+  let saveCalls = 0;
+  let removeCalls = 0;
+  let saved = false;
+  await page.addInitScript(() =>
+    sessionStorage.setItem(
+      "odyssey_auth",
+      JSON.stringify({
+        accessToken: "blog-feed-reading-list-test",
+        username: "reader",
+        roles: ["ROLE_USER"],
+        permissions: [],
+        isAuthenticated: true,
+      })
+    )
+  );
+  await page.route("**/api/v1/user/me", (route) =>
+    route.fulfill({ json: envelope({ id: 1, username: "reader" }) })
+  );
+  await page.route("**/api/v1/user/library/reading-list/123", async (route) => {
+    if (route.request().method() === "PUT") {
+      saveCalls += 1;
+      saved = true;
+    }
+    if (route.request().method() === "DELETE") {
+      removeCalls += 1;
+      saved = false;
+    }
+    await route.fulfill({ json: envelope(null) });
+  });
+  await page.route(endpoint, (route) =>
+    route.fulfill({ json: result([{ ...post(123, "Saveable article"), isInReadingList: saved }]) })
+  );
+
+  await openFeed(page);
+  const articleCard = page.getByRole("article", { name: "Saveable article", exact: true });
+  const save = articleCard.getByRole("button", { name: "Save for later", exact: true });
+
+  await save.press("Enter");
+  await expect.poll(() => saveCalls).toBe(1);
+  await expect(page).toHaveURL(/\/chronicle(?:\?.*)?$/);
+  await expect(
+    articleCard.getByRole("button", { name: "Saved for later", exact: true })
+  ).toBeVisible();
+  await expect(
+    articleCard.getByRole("button", { name: "Saved for later", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    articleCard.getByRole("button", { name: "Saved for later", exact: true })
+  ).toBeEnabled();
+
+  await articleCard.getByRole("button", { name: "Saved for later", exact: true }).press("Enter");
+  await expect.poll(() => removeCalls).toBe(1);
+  await expect(
+    articleCard.getByRole("button", { name: "Save for later", exact: true })
+  ).toBeVisible();
+  await page.reload();
+  await page.getByRole("tab", { name: "Orbit Feed", exact: true }).click();
+  await expect(
+    articleCard.getByRole("button", { name: "Save for later", exact: true })
+  ).toBeVisible();
+  await articleCard.scrollIntoViewIfNeeded();
+  await articleCard.screenshot({ path: testInfo.outputPath("reading-list-desktop.png") });
+});
+
+test("a guest bookmark opens sign in without sending a mutation", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  let writes = 0;
+  await page.route(endpoint, (route) =>
+    route.fulfill({ json: result([post(123, "Guest article")]) })
+  );
+  await page.route("**/api/v1/user/library/reading-list/**", (route) => {
+    writes += 1;
+    return route.fulfill({ json: envelope(null) });
+  });
+  await openFeed(page);
+  const card = page.getByRole("article", { name: "Guest article", exact: true });
+  await expect(card).toBeVisible();
+  await expect(card.getByRole("link", { name: "Guest article", exact: true })).toHaveAttribute(
+    "href",
+    "/single/feed-123"
+  );
+  expect(await card.locator("a button").count()).toBe(0);
+  await card.scrollIntoViewIfNeeded();
+  await card.screenshot({ path: testInfo.outputPath("reading-list-mobile.png") });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(
+    false
+  );
+  const save = card.getByRole("button", { name: "Save for later", exact: true });
+  await expect(save).toBeEnabled();
+  await save.press("Enter");
+  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 15000 });
+  await expect(page).toHaveURL(/\/chronicle(?:\?.*)?$/);
+  expect(writes).toBe(0);
+});
+
+test("pending saves prevent duplicates, and failed saves can be retried", async ({ page }) => {
+  const response = Promise.withResolvers<void>();
+  let writes = 0;
+  let saved = false;
+  await page.addInitScript(() =>
+    sessionStorage.setItem(
+      "odyssey_auth",
+      JSON.stringify({
+        accessToken: "pending-reading-list-test",
+        username: "reader",
+        roles: ["ROLE_USER"],
+        permissions: [],
+        isAuthenticated: true,
+      })
+    )
+  );
+  await page.route("**/api/v1/user/me", (route) =>
+    route.fulfill({ json: envelope({ id: 1, username: "reader" }) })
+  );
+  await page.route(endpoint, (route) =>
+    route.fulfill({ json: result([{ ...post(123, "Retry article"), isInReadingList: saved }]) })
+  );
+  await page.route("**/api/v1/user/library/reading-list/123", async (route) => {
+    expect(route.request().method()).toBe("PUT");
+    writes += 1;
+    if (writes === 1) {
+      await response.promise;
+      return route.fulfill({ status: 503, json: { message: "Unavailable" } });
+    }
+    saved = true;
+    return route.fulfill({ json: envelope(null) });
+  });
+  try {
+    await openFeed(page);
+    const card = page.getByRole("article", { name: "Retry article", exact: true });
+    const button = card.getByRole("button", { name: "Save for later", exact: true });
+    await button.click();
+    await expect.poll(() => writes).toBe(1);
+    await expect(button).toBeDisabled();
+    await expect(button).toHaveAttribute("aria-pressed", "false");
+    await button.press("Enter");
+    expect(writes).toBe(1);
+    response.resolve();
+    await expect(button).toBeEnabled();
+    await button.press("Enter");
+    await expect.poll(() => writes).toBe(2);
+    await expect(
+      card.getByRole("button", { name: "Saved for later", exact: true })
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(page).toHaveURL(/\/chronicle(?:\?.*)?$/);
+  } finally {
+    response.resolve();
+  }
+});
+
 test("new search input removes old cards, counts, and pagination while waiting", async ({
   page,
 }) => {
@@ -69,7 +226,7 @@ test("new search input removes old cards, counts, and pagination while waiting",
     }
   });
   try {
-    await page.goto("/blog");
+    await openFeed(page);
     const results = page.locator("#all-writing");
     await expect(results.getByText("Original article", { exact: true })).toBeVisible();
     await page.getByRole("searchbox", { name: "Search articles" }).fill("matching");
@@ -108,7 +265,7 @@ test("topic selection resets pagination and an empty topic can return to all wri
     }
   });
   try {
-    await page.goto("/blog");
+    await openFeed(page);
     const results = page.locator("#all-writing");
     await results.getByRole("button", { name: "Next", exact: true }).press("Enter");
     await expect(results.getByText("Page 2 article", { exact: true })).toBeVisible();
@@ -133,13 +290,14 @@ test("search filters and page are restored from the URL after reload", async ({ 
     await route.fulfill({ json: result([post(2, "Systems article")], 1, 9) });
   });
 
-  await page.goto("/blog?keyword=systems&categoryId=1&page=2");
+  await openFeed(page, "?keyword=systems&categoryId=1&page=2");
   const results = page.locator("#all-writing");
   await expect(page.getByRole("searchbox", { name: "Search articles" })).toHaveValue("systems");
   await expect(results.getByText("Systems article", { exact: true })).toBeVisible();
   await expect.poll(() => requests.at(-1)).toBe("systems:1:1");
 
   await page.reload();
+  await page.getByRole("tab", { name: "Orbit Feed", exact: true }).click();
   await expect(page.getByRole("searchbox", { name: "Search articles" })).toHaveValue("systems");
   await expect(results.getByText("Systems article", { exact: true })).toBeVisible();
   await expect.poll(() => requests.length).toBeGreaterThanOrEqual(2);
@@ -159,7 +317,7 @@ test("a failed second page retains Previous without reusing the first page total
     }
   });
   try {
-    await page.goto("/blog");
+    await openFeed(page);
     const results = page.locator("#all-writing");
     await results.getByRole("button", { name: "Next", exact: true }).press("Enter");
     await expect(results.getByRole("status", { name: "Loading articles" })).toBeVisible();
@@ -190,7 +348,7 @@ test("a late older keyword response cannot replace the current search", async ({
     });
   });
   try {
-    await page.goto("/blog");
+    await openFeed(page);
     const input = page.getByRole("searchbox", { name: "Search articles" });
     const results = page.locator("#all-writing");
     await input.fill("alpha");
@@ -224,7 +382,7 @@ test("retrying a page after the list shrinks moves to the last available page", 
       await route.fulfill({ json: result([post(1, "Remaining article")], 0, attempts ? 1 : 9) });
     }
   });
-  await page.goto("/blog");
+  await openFeed(page);
   const results = page.locator("#all-writing");
   await results.getByRole("button", { name: "Next", exact: true }).press("Enter");
   await expect(results.getByText("The chronicle is unavailable", { exact: true })).toBeVisible();

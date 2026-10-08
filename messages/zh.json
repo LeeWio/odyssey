@@ -116,6 +116,7 @@
     "noMatchesHint": "换一个标题、主题或说法再试。",
     "noTopicHint": "换一个主题，或回到全部文字。",
     "emptyHint": "文章发布后会出现在这里。",
+    "saveForLaterHint": "稍后阅读",
     "viewAllTopics": "查看全部主题",
     "showing": "显示第 {start}-{end} 篇，共 {total} 篇",
     "pageNumber": "第 {page} 页",
@@ -1067,6 +1068,18 @@
       "writing": "读文章",
       "footprints": "看足迹",
       "tools": "看工具"
+    },
+    "explore": {
+      "eyebrow": "探索",
+      "title": "找到你的 Odyssey 路线。",
+      "description": "写作、动态、项目、地方，以及那些值得再次回来的内容。",
+      "viewArchive": "浏览归档",
+      "writing": { "title": "写作", "description": "来自纪事的文章和笔记。" },
+      "moments": { "title": "动态", "description": "仍在流动的小片段和观察。" },
+      "projects": { "title": "项目", "description": "已经交付的工具与实验。" },
+      "gallery": { "title": "图库", "description": "照片、地方和视觉碎片。" },
+      "footprints": { "title": "足迹", "description": "一张记录留下痕迹之处的地图。" },
+      "library": { "title": "阅读书架", "description": "收藏、整理，再次回到好内容。" }
     },
     "writing": {
       "recently": "最近",

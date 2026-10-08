@@ -164,7 +164,7 @@ export function FeaturedWriting() {
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.16, 14)}>
-          <Link className="mt-2 text-sm no-underline" href="/blog">
+          <Link className="mt-2 text-sm no-underline" href="/single">
             {t("writing.browseAll")}
             <Link.Icon aria-hidden="true">
               <Icon icon="gravity-ui:arrow-up-right" />

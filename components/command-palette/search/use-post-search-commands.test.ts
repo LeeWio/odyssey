@@ -41,7 +41,7 @@ const response = (title: string) =>
     code: 200,
     message: "OK",
     data: {
-      groups: [{ type: "POST", label: "Articles", items: [{ title, url: "/blog" }] }],
+      groups: [{ type: "POST", label: "Articles", items: [{ title, url: "/single" }] }],
     },
   });
 const settle = async (assert: () => void) =>

@@ -51,13 +51,13 @@ describe("auth utilities", () => {
   it("strips OAuth secrets from search and hash", () => {
     const cleaned = clearOAuthParamsFromUrl(
       "/oauth2/redirect",
-      "?token=secret&code=opaque&next=/blog",
+      "?token=secret&code=opaque&next=/single",
       "#access_token=also-secret&error=x&keep=1"
     );
 
-    expect(cleaned.search).toBe("?next=%2Fblog");
+    expect(cleaned.search).toBe("?next=%2Fsingle");
     expect(cleaned.hash).toBe("#keep=1");
-    expect(cleaned.href).toBe("/oauth2/redirect?next=%2Fblog#keep=1");
+    expect(cleaned.href).toBe("/oauth2/redirect?next=%2Fsingle#keep=1");
     expect(cleaned.search).not.toContain("token=");
     expect(cleaned.search).not.toContain("code=");
     expect(cleaned.hash).not.toContain("access_token=");

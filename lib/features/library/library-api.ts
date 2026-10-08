@@ -245,7 +245,10 @@ export const libraryApi = baseApi.injectEndpoints({
           success: "Article added to reading list.",
         });
       },
-      invalidatesTags: [overviewTag, { type: "Library", id: "READING_LIST" }],
+      invalidatesTags: (_result, error, postId) =>
+        error
+          ? []
+          : [overviewTag, { type: "Library", id: "READING_LIST" }, { type: "Post", id: postId }],
     }),
     removeFromReadingList: builder.mutation<void, number>({
       query: (postId) => ({
@@ -261,7 +264,10 @@ export const libraryApi = baseApi.injectEndpoints({
           success: "Article removed from reading list.",
         });
       },
-      invalidatesTags: [overviewTag, { type: "Library", id: "READING_LIST" }],
+      invalidatesTags: (_result, error, postId) =>
+        error
+          ? []
+          : [overviewTag, { type: "Library", id: "READING_LIST" }, { type: "Post", id: postId }],
     }),
     followCategory: builder.mutation<void, number>({
       query: (categoryId) => ({

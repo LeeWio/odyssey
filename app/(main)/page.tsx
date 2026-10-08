@@ -271,6 +271,11 @@ const HomeOrientation = dynamic(
   { ssr: false }
 );
 
+const ExploreOdyssey = dynamic(
+  () => import("@/components/home/explore-odyssey").then((mod) => mod.ExploreOdyssey),
+  { ssr: false }
+);
+
 const MotionAccordion = motion.create(Accordion);
 
 const faqKeys = ["finished", "reply", "building", "desk", "trace"] as const;
@@ -357,6 +362,8 @@ export default function Home() {
         </section>
 
         <HomeOrientation />
+
+        <ExploreOdyssey />
 
         <LatelySection />
 

@@ -30,6 +30,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
+import { ReadingListButton } from "@/features/library/reading-list-button";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
@@ -65,7 +66,15 @@ function getEstimatedReadingMinutes(post: Pick<PostResponse, "title" | "summary"
   return Math.max(2, Math.ceil(source.length / 180));
 }
 
-function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
+function BlogPostCard({
+  post,
+  index,
+  isRefreshing,
+}: {
+  post: PostResponse;
+  index: number;
+  isRefreshing: boolean;
+}) {
   const t = useTranslations("Blog");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -73,14 +82,10 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
   const series = post.series?.name;
 
   return (
-    <Link
-      className="group focus-visible:ring-accent block h-full cursor-[var(--cursor-interactive)] rounded-2xl no-underline outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-      href={`/single/${post.slug}`}
-      prefetch={false}
-    >
+    <article aria-label={post.title} className="h-full">
       <MotionCard
         variant="secondary"
-        className="group-focus-visible:ring-accent flex h-full flex-col group-focus-visible:ring-2"
+        className="group flex h-full flex-col"
         initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         whileHover={
@@ -114,7 +119,15 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
               {String(index + 1).padStart(2, "0")}
             </span>
           </div>
-          <Card.Title className="text-xl leading-snug sm:text-2xl">{post.title}</Card.Title>
+          <Card.Title className="text-xl leading-snug sm:text-2xl">
+            <Link
+              className="hover:text-accent no-underline"
+              href={`/single/${post.slug}`}
+              prefetch={false}
+            >
+              {post.title}
+            </Link>
+          </Card.Title>
           {post.summary ? (
             <Card.Description className="line-clamp-3 leading-6">{post.summary}</Card.Description>
           ) : null}
@@ -124,13 +137,20 @@ function BlogPostCard({ post, index }: { post: PostResponse; index: number }) {
             <span className="truncate">{getDisplayAuthor(post.authorName)}</span>
             <span>{formatDate(post.createdAt, locale, t("recentlyPublished"))}</span>
           </div>
-          <span className="flex shrink-0 items-center gap-1.5 tabular-nums">
-            <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
-            {post.views.toLocaleString(locale)}
-          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="flex items-center gap-1.5 tabular-nums">
+              <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
+              {post.views.toLocaleString(locale)}
+            </span>
+            <ReadingListButton
+              postId={post.id}
+              isSaved={Boolean(post.isInReadingList)}
+              isRefreshing={isRefreshing}
+            />
+          </div>
         </Card.Footer>
       </MotionCard>
-    </Link>
+    </article>
   );
 }
 
@@ -947,7 +967,12 @@ export default function BlogFeed() {
                   >
                     <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                       {posts.map((post, index) => (
-                        <BlogPostCard key={post.id} index={index} post={post} />
+                        <BlogPostCard
+                          key={post.id}
+                          index={index}
+                          post={post}
+                          isRefreshing={isFetching}
+                        />
                       ))}
                     </div>
                   </motion.div>

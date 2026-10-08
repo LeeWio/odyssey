@@ -181,7 +181,7 @@ export const TOP_PAGES: readonly TopPage[] = [
     avgTimeSeconds: 412,
     bounceRate: 28.1,
     id: "p3",
-    path: "/blog/intro-to-pro",
+    path: "/single/intro-to-pro",
     trend: "up",
     trendValue: "21.6%",
     views: 7_210,

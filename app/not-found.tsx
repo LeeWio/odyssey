@@ -12,7 +12,7 @@ export default async function NotFound() {
       actions={
         <>
           <RouteLinkButton href="/">{t("backHome")}</RouteLinkButton>
-          <RouteLinkButton href="/blog" variant="secondary">
+          <RouteLinkButton href="/single" variant="secondary">
             {t("browseChronicle")}
           </RouteLinkButton>
         </>

@@ -32,7 +32,7 @@
 
 ### Blog / Article
 
-位置：`app/(main)/blog`、`app/(main)/single`、`features/blog`、`lib/features/post`
+位置：`app/(main)/single`、`features/blog`、`lib/features/post`
 
 职责：
 

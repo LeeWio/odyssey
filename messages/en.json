@@ -116,6 +116,7 @@
     "noMatchesHint": "Try a different title, topic, or phrase.",
     "noTopicHint": "Choose another topic or return to all writing.",
     "emptyHint": "Published writing will appear here when it is ready.",
+    "saveForLaterHint": "Save for later",
     "viewAllTopics": "View all topics",
     "showing": "Showing {start}-{end} of {total}",
     "pageNumber": "Page {page}",
@@ -1071,6 +1072,21 @@
       "writing": "Read writing",
       "footprints": "Open footprints",
       "tools": "See tools"
+    },
+    "explore": {
+      "eyebrow": "Explore",
+      "title": "Find your way through Odyssey.",
+      "description": "Writing, moments, projects, places, and the things worth returning to.",
+      "viewArchive": "Browse the archive",
+      "writing": { "title": "Writing", "description": "Essays and notes from the chronicle." },
+      "moments": { "title": "Moments", "description": "Small observations, kept in motion." },
+      "projects": { "title": "Projects", "description": "Tools and experiments that shipped." },
+      "gallery": { "title": "Gallery", "description": "Images, places, and visual fragments." },
+      "footprints": { "title": "Footprints", "description": "A map of places that left a mark." },
+      "library": {
+        "title": "Reading library",
+        "description": "Save, collect, and return to good work."
+      }
     },
     "writing": {
       "recently": "Recently",

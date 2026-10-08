@@ -150,7 +150,7 @@ import { SomeInternalHelper } from "@/lib/features/post/internal/helper";
 
 | 目录            | 职责                                    | 示例                                         |
 | --------------- | --------------------------------------- | -------------------------------------------- |
-| `app/`          | 路由、布局和服务端入口                  | `app/(main)/blog/page.tsx`                   |
+| `app/`          | 路由、布局和服务端入口                  | `app/(main)/single/page.tsx`                 |
 | `features/`     | 页面业务组合、领域 UI 和交互 hooks      | `features/blog`、`features/moment`           |
 | `lib/features/` | API、响应 schema、领域类型和 Redux 状态 | `lib/features/post/post-api.ts`              |
 | `components/`   | 跨页面复用的 UI 与既有业务组件          | `components/comment`、`components/rich-text` |

@@ -58,6 +58,27 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  async redirects() {
+    const keyword = { type: "query" as const, key: "keyword", value: "(?<legacyKeyword>.*)" };
+    const category = { type: "query" as const, key: "categoryId", value: "(?<legacyCategory>.*)" };
+    return [
+      {
+        source: "/blog",
+        has: [keyword, category],
+        destination: "/single?q=:legacyKeyword&category=:legacyCategory",
+        permanent: true,
+      },
+      { source: "/blog", has: [keyword], destination: "/single?q=:legacyKeyword", permanent: true },
+      {
+        source: "/blog",
+        has: [category],
+        destination: "/single?category=:legacyCategory",
+        permanent: true,
+      },
+      { source: "/blog", destination: "/single", permanent: true },
+    ];
+  },
+
   async rewrites() {
     const isDev = process.env.NODE_ENV === "development";
     const apiHost = process.env.API_URL || (isDev ? "http://127.0.0.1:8080" : "http://api:8080");

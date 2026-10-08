@@ -10,6 +10,19 @@ Handles long-form content and article presentation.
 
 ## Read later
 
+The `/single` journal exposes standalone bookmark buttons on its latest article
+cards, using `features/library/reading-list-button.tsx`. The embedded Chronicle
+feed reuses the same action. Neither nests a button in an anchor. Guests open the sign-in dialog
+without issuing a reading-list mutation. Authenticated readers use the existing
+PUT/DELETE reading-list endpoints. The button reflects the server response rather
+than a separate persistent local toggle; pending writes and article refreshes
+block duplicate submissions. Failed writes retain the previous server state and
+can be retried. Successful writes invalidate the reading list, overview, and the
+affected Post tag so subscribed list and detail queries stay in sync.
+
+Regression coverage includes keyboard and pointer interaction, guest sign-in,
+failed-save retry, duplicate prevention, reload, and list/detail cache refresh.
+
 The article Action Bar includes a bookmark action for the authenticated user's reading list.
 
 - The server returns `isInReadingList` with the public post response.
@@ -41,9 +54,24 @@ Creating a collection and adding the current article are two separate API calls.
 submission prevention, dismissal locking across both steps, creation failure and
 editable retry, blank names, and save retry without duplicate collection creation.
 
-## Article feed
+## Canonical Journal Route
 
-`features/blog/feed/blog-feed.tsx` powers `/blog` and the embedded Chronicle feed.
+`/single` is the canonical article index. The former `/blog` page has been removed;
+permanent redirects translate its `keyword` and `categoryId` parameters to `q`
+and `category` while preserving pagination. Internal navigation, recovery links,
+newsletter status actions, and library browse links point directly to `/single`.
+Backend `/api/v1/public/blog/...` routes are unchanged.
+
+The latest journal cards use the existing full-post query (six per page), because
+digest responses do not provide viewer-specific reading-list state. This avoids
+per-card detail requests and guessed bookmark membership. Loading, debounce, and
+page correction suppress stale cards and empty-state flashes. Search fields stay
+controlled without remounting on every URL update, and pagination is disabled
+during refresh. `tests/e2e/journal.spec.ts` covers the canonical route and actions.
+
+## Embedded Article Feed
+
+`features/blog/feed/blog-feed.tsx` powers the Orbit tab embedded in `/chronicle`.
 
 - Search text is normalized before requesting. While React defers the new keyword,
   previous results and counts are hidden and no request is made for the old keyword

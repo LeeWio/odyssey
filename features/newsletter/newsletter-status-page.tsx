@@ -142,7 +142,7 @@ function NewsletterStatusContent({
             </Link>
             <Link
               className="text-accent inline-flex items-center gap-2 text-sm font-medium no-underline"
-              href="/blog"
+              href="/single"
             >
               {t("browseWriting")}
               <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />

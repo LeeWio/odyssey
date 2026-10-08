@@ -37,7 +37,7 @@ export function LibraryPage() {
             </EmptyState.Header>
             <EmptyState.Content>
               <Button onPress={() => dispatch(setLoginOpen(true))}>{t("signIn")}</Button>
-              <Link className="no-underline" href="/blog">
+              <Link className="no-underline" href="/single">
                 {t("browseArticles")}
               </Link>
             </EmptyState.Content>

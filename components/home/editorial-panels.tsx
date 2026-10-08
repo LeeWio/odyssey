@@ -409,7 +409,7 @@ export function TraveloguePanel({ reducedMotion }: EditorialPanelProps) {
 
 const archiveItems = [
   {
-    href: "/blog",
+    href: "/single",
     label: "Read",
     title: "Chronicle",
     copy: "Essays and notes with enough time to become useful.",
@@ -417,7 +417,7 @@ const archiveItems = [
     alt: "A monumental stone city under a stormy sky",
   },
   {
-    href: "/blog",
+    href: "/single",
     label: "Listen",
     title: "Listening room",
     copy: "Albums and ambient loops kept close to the work.",
@@ -425,7 +425,7 @@ const archiveItems = [
     alt: "Deep-blue re:member album artwork",
   },
   {
-    href: "/blog",
+    href: "/single",
     label: "Wander",
     title: "Field archive",
     copy: "Real and imagined places collected without hierarchy.",

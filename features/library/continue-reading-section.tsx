@@ -25,7 +25,7 @@ export function ContinueReadingSection() {
             {t("continueDescription")}
           </Typography>
         </div>
-        <Link className="text-accent text-sm font-medium no-underline" href="/blog">
+        <Link className="text-accent text-sm font-medium no-underline" href="/single">
           {t("browseAllWriting")}
         </Link>
       </div>
