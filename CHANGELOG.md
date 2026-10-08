@@ -1,3 +1,10 @@
+# [1.200.0](https://github.com/LeeWio/odyssey/compare/v1.199.0...v1.200.0) (2026-10-08)
+
+
+### Features
+
+* **web:** reveal theme changes with a view transition ([5141586](https://github.com/LeeWio/odyssey/commit/5141586bf9c42b16143bec6f90138d24385d8599))
+
 # [1.199.0](https://github.com/LeeWio/odyssey/compare/v1.198.0...v1.199.0) (2026-10-08)
 
 
