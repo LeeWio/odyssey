@@ -102,11 +102,7 @@ export function CommentActions({
       >
         <Button
           size="sm"
-          variant="ghost"
-          className={cn(
-            "h-7 gap-1.5 px-2 text-xs",
-            liked ? "text-danger hover:text-danger" : "text-muted hover:text-foreground"
-          )}
+          variant={liked ? "danger" : "ghost"}
           aria-label={liked ? t("unlike") : t("like")}
           aria-pressed={liked}
           isPending={isLiking}
@@ -118,14 +114,13 @@ export function CommentActions({
             className="size-3.5"
             aria-hidden="true"
           />
-          <span className="tabular-nums">{comment.likesCount ?? 0}</span>
+          <span>{comment.likesCount ?? 0}</span>
         </Button>
 
         {depth <= 2 ? (
           <Button
             size="sm"
             variant="ghost"
-            className="text-muted hover:text-foreground h-7 px-2 text-xs"
             isDisabled={isUnavailable || isUnapproved}
             onPress={onReplyToggle}
           >
@@ -139,7 +134,6 @@ export function CommentActions({
               isIconOnly
               size="sm"
               variant="ghost"
-              className="text-muted hover:text-foreground size-7"
               aria-label={t("moreActions")}
               isDisabled={isUnavailable}
             >

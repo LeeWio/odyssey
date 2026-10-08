@@ -301,7 +301,7 @@ export function CategoriesPage() {
               </Button>
             </div>
             <SearchField
-              className="w-full sm:w-[220px]"
+              className="w-full sm:w-55"
               name="category-search"
               value={search}
               onChange={handleSearchChange}

@@ -141,7 +141,6 @@ export function CommentList({
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-muted hover:text-foreground h-8 text-xs"
                 isPending={isLoadingMore}
                 isDisabled={isLoadingMore}
                 onPress={loadMore}

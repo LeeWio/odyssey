@@ -342,7 +342,7 @@ export function ColumnsPage() {
           New Column
         </Button>
         <SearchField
-          className="w-full sm:w-[260px]"
+          className="w-full sm:w-65"
           name="column-search"
           value={search}
           onChange={setSearch}

@@ -24,7 +24,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { selectAuthMode, setAuthMode, toggleDashboard } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
-import { Logo, MoonFillIcon, SearchIcon, SunMaxFillIcon } from "../icons";
+import { Logo, SearchIcon } from "../icons";
 
 import { getVisibleFocusableElements } from "./focus";
 import { MegaPanelContent } from "./mega-panel-content";
@@ -50,7 +50,7 @@ const NotificationPopover = dynamic(
 export const Navbar = () => {
   const t = useTranslations("Nav");
   const router = useRouter();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const mounted = useMounted();
   const os = useOs();
   const reduceMotion = useReducedMotionPreference();
@@ -649,8 +649,7 @@ export const Navbar = () => {
 
             <div className="hidden lg:block">
               <Button
-                variant="ghost"
-                className="h-9 min-w-0 gap-2 rounded-xl px-3"
+                variant="tertiary"
                 aria-label={t("searchShortcut", { key: platformKey })}
                 onPress={() => setIsSearchOpen(true)}
               >
@@ -661,56 +660,6 @@ export const Navbar = () => {
                   <Kbd.Content>K</Kbd.Content>
                 </Kbd>
               </Button>
-            </div>
-
-            <div className="hidden md:block">
-              <Tooltip delay={500} closeDelay={100}>
-                <Button
-                  isIconOnly
-                  variant="ghost"
-                  className="size-10 rounded-xl"
-                  aria-label={
-                    mounted
-                      ? resolvedTheme === "dark"
-                        ? t("switchToLight")
-                        : t("switchToDark")
-                      : t("toggleTheme")
-                  }
-                  onPress={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                >
-                  <AnimatePresence mode="wait" initial={false} propagate>
-                    {mounted && (
-                      <motion.span
-                        key={resolvedTheme}
-                        initial={
-                          reduceMotion ? { opacity: 0 } : { opacity: 0, y: -4, filter: "blur(2px)" }
-                        }
-                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                        exit={{
-                          opacity: 0,
-                          ...(reduceMotion ? {} : { y: 4, filter: "blur(2px)" }),
-                          transition: { duration: reduceMotion ? 0 : 0.1, ease: exitEase },
-                        }}
-                        transition={{ duration: 0.14, ease: enterEase }}
-                        className="flex"
-                      >
-                        {resolvedTheme === "dark" ? (
-                          <SunMaxFillIcon size={16} />
-                        ) : (
-                          <MoonFillIcon size={16} />
-                        )}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </Button>
-                <Tooltip.Content placement="bottom" offset={8}>
-                  {mounted
-                    ? resolvedTheme === "dark"
-                      ? t("lightTheme")
-                      : t("darkTheme")
-                    : t("theme")}
-                </Tooltip.Content>
-              </Tooltip>
             </div>
 
             {mounted && isAuthenticated ? <NotificationPopover /> : null}

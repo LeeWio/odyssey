@@ -1327,19 +1327,7 @@ export const openapiApi = baseApi.injectEndpoints({
       providesTags: ["OpenApi"],
     }),
 
-    getContentFunnel: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseContentFunnelResponse"]>,
-      { days?: number; postId?: number }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/analytics/content-funnel`,
-        params: { days: arg.days, postId: arg.postId },
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
+    // Content funnel lives in lib/features/dashboard (avoid injectEndpoints clashes).
 
     clearLogs: builder.mutation<OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>, void>(
       {
@@ -1465,7 +1453,6 @@ export const {
   useGetStorageInventoryQuery,
   useVerifyStorageIntegrityQuery,
   useGetTrending1Query,
-  useGetContentFunnelQuery,
   useClearLogsMutation,
   useClearLogs1Mutation,
 } = openapiApi;

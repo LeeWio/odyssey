@@ -405,7 +405,6 @@ export function CommentInput({
             isIconOnly
             size="sm"
             variant="ghost"
-            className="text-muted size-7"
             aria-label={t("cancelReply")}
             onPress={() => onOpenChange?.(false)}
           >
@@ -437,7 +436,6 @@ export function CommentInput({
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-8"
                 isDisabled={isSubmitting}
                 onPress={() => onOpenChange?.(false)}
               >
@@ -446,7 +444,6 @@ export function CommentInput({
               <Button
                 size="sm"
                 variant="primary"
-                className="h-8"
                 type="submit"
                 isDisabled={!canSubmit || isSubmitting}
                 isPending={isSubmitting}
@@ -464,12 +461,7 @@ export function CommentInput({
     <>
       {!hideTrigger && (
         <div className="flex items-center gap-3">
-          <Button
-            fullWidth
-            className="min-w-0 justify-start"
-            variant="secondary"
-            onPress={openComposer}
-          >
+          <Button fullWidth variant="secondary" onPress={openComposer}>
             <UserAvatar
               size="sm"
               variant="soft"

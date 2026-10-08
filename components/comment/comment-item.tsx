@@ -121,7 +121,6 @@ export function CommentItem(props: CommentItemProps) {
           <Button
             size="sm"
             variant="ghost"
-            className="text-muted hover:text-foreground h-7 px-2 text-xs"
             isDisabled={props.loadingReplyIds.has(comment.id)}
             aria-controls={repliesId}
             aria-expanded={isExpanded}
@@ -168,7 +167,6 @@ export function CommentItem(props: CommentItemProps) {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-muted h-7 px-0 text-xs"
                       onPress={() => props.onLoadReplies(comment.id)}
                       isDisabled={props.loadingReplyIds.has(comment.id)}
                     >
@@ -294,7 +292,6 @@ function CommentRow({
             {replyTo && replyToId !== undefined ? (
               <button
                 type="button"
-                className="text-muted hover:text-foreground inline-flex max-w-[12rem] items-center gap-1 truncate text-xs transition-colors"
                 aria-label={t("jumpTo", { name: replyTo })}
                 onClick={() => setHighlightedCommentId(replyToId)}
               >
@@ -306,7 +303,7 @@ function CommentRow({
           </div>
         </header>
 
-        <div className="mt-1.5 max-w-[68ch]">
+        <div className="mt-1.5">
           <CommentContent
             content={comment.content}
             isEdited={Boolean(comment.editedAt)}
