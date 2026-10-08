@@ -2,44 +2,11 @@
 
 import { Icon } from "@iconify/react";
 
-import dynamic from "next/dynamic";
 import { Card, Chip, Typography } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ColumnResponse } from "@/lib/features/column";
-
-const Grainient = dynamic(() => import("@/components/background/grainient"), {
-  ssr: false,
-  loading: () => <div className="bg-surface-secondary absolute inset-0" aria-hidden />,
-});
-
-function getGrainientProps(seed: string) {
-  let hash = 2166136261;
-  for (let i = 0; i < seed.length; i++) {
-    hash ^= seed.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  hash = hash >>> 0;
-
-  const warpStrength = 0.5 + ((hash % 10) / 10) * 1.5;
-  const warpFrequency = 3.0 + ((hash % 13) / 13) * 6.0;
-  const warpSpeed = 1.0 + ((hash % 7) / 7) * 2.0;
-  const blendAngle = hash % 360;
-  const rotationAmount = 200.0 + ((hash % 15) / 15) * 600.0;
-  const zoom = 0.6 + ((hash % 8) / 8) * 0.6;
-
-  return {
-    warpStrength,
-    warpFrequency,
-    warpSpeed,
-    blendAngle,
-    rotationAmount,
-    zoom,
-    grainAmount: 0,
-    timeSpeed: 0.12,
-  };
-}
 
 export function ColumnCard({ column }: { column: ColumnResponse }) {
   const t = useTranslations("Columns");
@@ -47,40 +14,40 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
   const visual = column.coverImage ? (
     <Image
       alt={t("coverAlt", { name: column.name })}
-      className="object-cover transition-transform duration-500 group-hover:scale-105"
+      className="object-cover"
       fill
-      sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
+      sizes="(min-width: 1920px) 20vw, (min-width: 1440px) 33vw, (min-width: 820px) 50vw, 100vw"
       src={column.coverImage}
     />
-  ) : (
-    <div className="relative h-full w-full">
-      <Grainient {...getGrainientProps(column.name)} className="absolute inset-0" />
-      <Icon
-        icon="gravity-ui:book"
-        aria-hidden="true"
-        className="absolute right-6 bottom-5 z-10 size-16 text-white/28"
-      />
-    </div>
-  );
+  ) : null;
 
   return (
-    <Link className="group block h-full no-underline" href={`/columns/${column.slug}`}>
+    <Link
+      className="group focus-visible:outline-accent block h-full min-w-0 rounded-lg no-underline focus-visible:outline-2 focus-visible:outline-offset-4"
+      href={`/columns/${column.slug}`}
+    >
       <Card
         variant="secondary"
-        className="h-full overflow-hidden p-0 transition-transform duration-200 group-hover:-translate-y-1"
+        className="border-separator h-full min-h-64 overflow-hidden rounded-lg border p-0"
       >
-        <div className="relative aspect-[16/9] overflow-hidden">{visual}</div>
-        <Card.Header className="gap-3">
-          <div className="flex items-center justify-between gap-3">
+        {visual ? <div className="relative aspect-[16/9] overflow-hidden">{visual}</div> : null}
+        <Card.Header className="gap-4 p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <Chip size="sm" variant="soft">
-              {t("column")}
+              {t(column.postsCount > 0 ? "readyToRead" : "startingSoon")}
             </Chip>
             <span className="text-muted text-xs tabular-nums">{essaysLabel}</span>
           </div>
-          <Card.Title>{column.name}</Card.Title>
-          {column.description ? <Card.Description>{column.description}</Card.Description> : null}
+          <Card.Title className="group-hover:text-accent text-xl tracking-normal wrap-anywhere">
+            {column.name}
+          </Card.Title>
+          {column.description ? (
+            <Card.Description className="line-clamp-3 leading-6 wrap-anywhere">
+              {column.description}
+            </Card.Description>
+          ) : null}
         </Card.Header>
-        <Card.Footer className="mt-auto justify-between">
+        <Card.Footer className="border-separator mt-auto justify-between gap-3 border-t px-6 py-4">
           <Typography color="muted" type="body-xs">
             {t("curatedPath")}
           </Typography>

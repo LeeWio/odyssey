@@ -74,6 +74,12 @@ The journal is an editorial index rather than a dashboard or a marketing landing
 
 `tests/e2e/journal-redesign.spec.ts` covers hierarchy and media loading at 390, 820, 1440, 1920 and 2560px, text bounds, pagination placement, column switching, no-match recovery, later pages, all theme variants and text-only recommendations with standard motion. `tests/e2e/journal.spec.ts` retains the existing search, URL restoration, authentication and bookmark regression coverage. Screenshots are generated for desktop/mobile and theme states; geometry and computed-style assertions provide automated layout checks.
 
+## Columns Directory
+
+The columns index uses the full-width PageContainer with a publication summary, HeroUI SearchField, TagGroup availability filters and Select sorting. A shared Tailwind auto-fill grid uses 22rem tracks for both results and skeletons. Cards show reading availability, essay count and a readable introduction; actual cover images remain optional. Missing covers are text-led rather than animated shader placeholders. Card entrances no longer delay results, and keyboard focus is visible around each complete navigation target.
+
+`tests/e2e/columns-redesign.spec.ts` covers five viewport widths, column density, long names, sparse results, search reset, availability selection, keyboard links, failure recovery and empty publication states. The detail page is intentionally unchanged in this batch.
+
 ## Archive Editorial Redesign
 
 Archive is intentionally a timeline directory rather than another article-card grid. The page header now establishes the sequence-reading purpose and surfaces the number of available years. HeroUI Select remains the year control, TagGroup remains the month control, Pagination remains the navigation primitive, and EmptyState owns loading failure and no-content recovery.
