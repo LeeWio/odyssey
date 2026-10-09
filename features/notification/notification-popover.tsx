@@ -27,7 +27,9 @@ import {
 } from "@/lib/features/notification";
 import { NotificationCategoryFilter } from "./notification-category-filter";
 import { NotificationCategoryList } from "./notification-category-list";
-import { getNotificationReaderHref } from "@/lib/notification-presentation";
+import { getNotificationDestination } from "@/lib/notification-presentation";
+import { openDashboardAtPath } from "@/lib/features/ui";
+import { useAppDispatch } from "@/lib/hooks";
 import { useNotificationActions } from "./use-notification-actions";
 
 const POPOVER_PAGE_SIZE = 8;
@@ -88,6 +90,7 @@ export function NotificationPopover() {
   const t = useTranslations("Notifications");
   const locale = useLocale();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [category, setCategory] = useState<NotificationCategory>();
   const [unreadOnly, setUnreadOnly] = useState(false);
@@ -112,19 +115,20 @@ export function NotificationPopover() {
   const isLoadingList = notifications.isLoading || (notifications.isFetching && !currentPage);
 
   const navigateToNotification = (notification: NotificationResponse) => {
-    const link = getNotificationReaderHref(notification.link);
-    if (!link) return;
+    const destination = getNotificationDestination(notification);
+    if (!destination) return;
 
-    if (link.startsWith("/")) {
-      router.push(link);
-      return;
+    if (destination.kind === "dashboard") {
+      dispatch(openDashboardAtPath(destination.path));
+    } else if (destination.kind === "reader") {
+      router.push(destination.href);
+    } else {
+      window.open(destination.href, "_blank", "noopener,noreferrer");
     }
-
-    window.open(link, "_blank", "noopener,noreferrer");
   };
 
   const handleNotificationPress = async (notification: NotificationResponse) => {
-    const destination = getNotificationReaderHref(notification.link);
+    const destination = getNotificationDestination(notification);
     await run(notification.id, "read", async () => {
       if (!notification.read) await markNotificationAsRead(notification.id).unwrap();
       if (destination) {

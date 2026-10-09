@@ -202,6 +202,54 @@ test("a category tab requests that category and hides the previous rows", async 
   }
 });
 
+test("an admin review notification opens the matching dashboard view", async ({ page }) => {
+  await page.addInitScript(() =>
+    sessionStorage.setItem(
+      "odyssey_auth",
+      JSON.stringify({
+        accessToken: "notification-admin-test",
+        username: "admin",
+        roles: ["ROLE_ADMIN"],
+        permissions: [],
+        isAuthenticated: true,
+      })
+    )
+  );
+  await page.route(endpoint, async (route) => {
+    await route.fulfill({
+      json: pageResult([
+        {
+          ...notification(41, "Comment review required"),
+          content: "A comment is waiting for moderation.",
+          type: "COMMENT_PENDING_REVIEW",
+          context: {
+            objectType: "COMMENT",
+            objectId: 7,
+            actorId: 9,
+            action: "REVIEW",
+          },
+        },
+      ]),
+    });
+  });
+  await page.route("**/api/v1/user/notifications/41/read", async (route) => {
+    expect(route.request().method()).toBe("PATCH");
+    await route.fulfill({ json: envelope(null) });
+  });
+
+  await page.goto("/notifications");
+  await expect(page.getByText("Comment review required", { exact: true })).toBeVisible();
+  const reviewRow = page
+    .getByRole("listitem")
+    .filter({ has: page.getByText("Comment review required", { exact: true }) });
+  await reviewRow.getByRole("button").first().press("Enter");
+
+  await expect(page.getByRole("dialog", { name: "Dashboard Overlay" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Comment Governance", exact: true })
+  ).toBeVisible();
+});
+
 test("a failed view can retry and display its own empty state", async ({ page }) => {
   let attempts = 0;
   await page.route(endpoint, async (route) => {

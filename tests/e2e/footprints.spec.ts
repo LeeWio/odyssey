@@ -84,5 +84,5 @@ test("timeline, popup and year selection stay in sync", async ({ page }) => {
   await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Read memory from Chongqing" })).toBeVisible();
   await page.getByRole("tab", { name: "All years", exact: true }).click();
-  await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(7);
+  await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(8);
 });

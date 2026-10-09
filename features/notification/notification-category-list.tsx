@@ -17,7 +17,7 @@ import {
 import { useAuditUserMutation } from "@/lib/features/openapi/openapi-api";
 import {
   getNotificationIcon,
-  getNotificationReaderHref,
+  getNotificationDestination,
   getNotificationTypeLabel,
 } from "@/lib/notification-presentation";
 import { useRelativeTime } from "@/lib/relative-time";
@@ -143,7 +143,7 @@ function NotificationRow({
 }) {
   const t = useTranslations("Notifications");
   const formatRelativeTime = useRelativeTime();
-  const destination = getNotificationReaderHref(notification.link);
+  const destination = getNotificationDestination(notification);
   const rowLocked = disabled || pending !== undefined;
 
   return (

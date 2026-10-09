@@ -22,8 +22,8 @@ import {
   useReopenNotificationMutation,
   useSetNotificationSavedMutation,
 } from "@/lib/features/notification";
-import { getNotificationReaderHref } from "@/lib/notification-presentation";
-import { setLoginOpen } from "@/lib/features/ui";
+import { getNotificationDestination } from "@/lib/notification-presentation";
+import { openDashboardAtPath, setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { NotificationCategoryFilter } from "./notification-category-filter";
 import { NotificationCategoryList } from "./notification-category-list";
@@ -140,15 +140,16 @@ export function NotificationCenterPage() {
     isAdjustingPage || notifications.isLoading || (notifications.isFetching && !currentPage);
 
   const navigateToNotification = (notification: NotificationResponse) => {
-    const link = getNotificationReaderHref(notification.link);
-    if (!link) return;
+    const destination = getNotificationDestination(notification);
+    if (!destination) return;
 
-    if (link.startsWith("/")) {
-      router.push(link);
-      return;
+    if (destination.kind === "dashboard") {
+      dispatch(openDashboardAtPath(destination.path));
+    } else if (destination.kind === "reader") {
+      router.push(destination.href);
+    } else {
+      window.open(destination.href, "_blank", "noopener,noreferrer");
     }
-
-    window.open(link, "_blank", "noopener,noreferrer");
   };
 
   const handleNotificationPress = async (notification: NotificationResponse) => {

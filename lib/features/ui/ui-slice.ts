@@ -22,6 +22,7 @@ interface UiState {
   };
   dashboard: {
     isOpen: boolean;
+    path: string;
   };
   richText: {
     isOpen: boolean;
@@ -48,6 +49,7 @@ const initialState: UiState = {
   },
   dashboard: {
     isOpen: false,
+    path: "/",
   },
   richText: {
     isOpen: false,
@@ -105,6 +107,13 @@ export const uiSlice = createSlice({
     toggleDashboard: (state) => {
       state.dashboard.isOpen = !state.dashboard.isOpen;
     },
+    setDashboardPath: (state, action: PayloadAction<string>) => {
+      state.dashboard.path = action.payload;
+    },
+    openDashboardAtPath: (state, action: PayloadAction<string>) => {
+      state.dashboard.isOpen = true;
+      state.dashboard.path = action.payload;
+    },
     toggleRichText: (state) => {
       state.richText.isOpen = !state.richText.isOpen;
     },
@@ -140,6 +149,8 @@ export const {
   setMiniPlayerOpen,
   setThemeVariant,
   toggleDashboard,
+  setDashboardPath,
+  openDashboardAtPath,
   toggleRichText,
   setActiveId,
   openRichText,
@@ -153,6 +164,7 @@ export const selectIsSheetOpen = (state: RootState) => state.ui.sheet?.isOpen;
 export const selectIsMiniPlayerOpen = (state: RootState) => state.ui.miniPlayer?.isOpen ?? false;
 export const selectThemeVariant = (state: RootState) => state.ui.theme?.variant;
 export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard?.isOpen;
+export const selectDashboardPath = (state: RootState) => state.ui.dashboard?.path ?? "/";
 export const selectIsRichTextOpen = (state: RootState) => state.ui.richText?.isOpen;
 export const selectActiveId = (state: RootState) => state.ui.richText?.activeId;
 export const selectRichTextState = (state: RootState) => state.ui.richText;

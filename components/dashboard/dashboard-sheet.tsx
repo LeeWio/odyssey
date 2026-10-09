@@ -3,9 +3,14 @@
 import { Sheet } from "@heroui-pro/react";
 import { Spinner } from "@heroui/react";
 import { useMounted } from "@mantine/hooks";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense } from "react";
 import { selectIsAdmin, useLogoutMutation } from "@/lib/features/auth";
-import { selectIsDashboardOpen, toggleDashboard } from "@/lib/features/ui";
+import {
+  selectDashboardPath,
+  selectIsDashboardOpen,
+  setDashboardPath,
+  toggleDashboard,
+} from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 import { AppShell } from "./app-shell";
@@ -91,10 +96,11 @@ const AccessPlaceholderPage = lazy(() =>
 export function DashboardSheet() {
   const isMounted = useMounted();
   const isOpen = useAppSelector(selectIsDashboardOpen);
+  const requestedPath = useAppSelector(selectDashboardPath);
   const isAdmin = useAppSelector(selectIsAdmin);
   const dispatch = useAppDispatch();
   const [logout] = useLogoutMutation();
-  const [currentPath, setCurrentPath] = useState("/");
+  const currentPath = requestedPath;
 
   const handleOpenChange = () => {
     dispatch(toggleDashboard());
@@ -107,7 +113,7 @@ export function DashboardSheet() {
       return;
     }
 
-    setCurrentPath(href);
+    dispatch(setDashboardPath(href));
   };
 
   if (!isMounted || !isAdmin) {

@@ -1,5 +1,17 @@
 const READER_LINK_PREFIXES = ["/single/", "/moments", "/guestbook", "/notifications"];
 
+const REVIEW_DESTINATION_PATHS = {
+  COMMENT: "/comments",
+  FRIEND_LINK: "/links",
+  POST: "/posts",
+  USER: "/users",
+} as const;
+
+export type NotificationDestination =
+  | { kind: "reader"; href: string }
+  | { kind: "dashboard"; path: string }
+  | { kind: "external"; href: string };
+
 const notificationDateFormatters = new Map<string, Intl.DateTimeFormat>();
 
 function notificationDateFormatter(locale: string) {
@@ -65,6 +77,31 @@ export function getNotificationReaderHref(link: string | null | undefined) {
     ? value
     : null;
 }
+
+export function getNotificationDestination(
+  notification: Pick<NotificationResponseLike, "link" | "type" | "context">
+): NotificationDestination | null {
+  const context = notification.context;
+  if (context?.action === "REVIEW" || context?.action === "REVIEW_REPORT") {
+    const path = REVIEW_DESTINATION_PATHS[context.objectType];
+    if (path) return { kind: "dashboard", path };
+  }
+
+  const link = getNotificationReaderHref(notification.link);
+  if (!link) return null;
+  if (/^https?:\/\//i.test(link)) return { kind: "external", href: link };
+  return { kind: "reader", href: link };
+}
+
+type NotificationResponseLike = {
+  link?: string | null;
+  type: string;
+  context?: {
+    objectType: "POST" | "COMMENT" | "FRIEND_LINK" | "USER";
+    objectId: number;
+    action: "VIEW" | "REVIEW" | "EDIT" | "REVIEW_REPORT";
+  } | null;
+};
 
 export function formatNotificationDate(value: string, locale: string) {
   const timestamp = new Date(value).getTime();

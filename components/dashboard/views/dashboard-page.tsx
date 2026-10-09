@@ -8,6 +8,7 @@ import { EmployeesTable } from "../widgets/employees-table";
 import { KpiRow } from "../widgets/kpi-row";
 import { ContentOperationsCard } from "../widgets/content-operations-card";
 import { ContentWorkflowCard } from "../widgets/content-workflow-card";
+import { NotificationDeliveryCard } from "../widgets/notification-delivery-card";
 import { SystemSnapshotCard } from "../widgets/system-snapshot-card";
 
 export function DashboardPage() {
@@ -20,6 +21,7 @@ export function DashboardPage() {
         <ContentOperationsCard />
         <SystemSnapshotCard />
       </div>
+      <NotificationDeliveryCard />
       <ContentWorkflowCard />
       <EmployeesTable />
     </PageContainer>

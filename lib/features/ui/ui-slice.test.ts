@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import reducer, { setAuthMode, setLoginOpen, setSignUpOpen } from "./ui-slice";
+import reducer, { openDashboardAtPath, setAuthMode, setLoginOpen, setSignUpOpen } from "./ui-slice";
 
 describe("auth dialog compatibility", () => {
   it("keeps legacy entry points mutually exclusive", () => {
@@ -31,5 +31,14 @@ describe("auth dialog compatibility", () => {
     const signup = reducer(login, setAuthMode("signup"));
     expect(reducer(signup, setSignUpOpen(false)).authDialogs).toEqual(closed);
     expect(reducer(signup, setAuthMode(null)).authDialogs).toEqual(closed);
+  });
+});
+
+describe("dashboard navigation", () => {
+  it("opens the dashboard at a requested view", () => {
+    expect(reducer(undefined, openDashboardAtPath("/comments")).dashboard).toEqual({
+      isOpen: true,
+      path: "/comments",
+    });
   });
 });

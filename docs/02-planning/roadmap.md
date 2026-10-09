@@ -1,85 +1,150 @@
-# Roadmap
+# Project Roadmap
 
-## Baseline (2026-10-08)
+## Scope And Baseline (2026-10-09)
 
-The production-facing application is broad and currently has a healthy quality
-baseline: formatting, lint, type checks, 226 unit tests, and a substantial
-Playwright suite are already present. The next stage should improve product
-coherence and operational confidence before introducing another major content
-type.
+This roadmap covers the two application repositories in the workspace:
 
-The main product loop is:
+- **Odyssey** is the Next.js frontend and owns the user experience, navigation,
+  client-side state, and browser-level verification.
+- **Nexus** is the Spring Boot backend and owns business rules, persistence,
+  authorization, delivery, and API contracts.
 
-```text
-discover -> read -> save or revisit -> return -> create or respond
-```
+Both repositories currently have substantial notification work in progress.
+Odyssey already contains a notification center, category filters, six-category
+delivery preferences, and support for structured notification context. Nexus
+contains the corresponding preference, context, delivery-recovery, and admin
+operations APIs. The next product increment should finish and verify this
+cross-repository workflow before adding another notification family or a new
+content module.
 
-Current implementation is strongest in discovery, reading, comments, and the
-personal library. Dashboard navigation is broad, but several views are still
-static or placeholders. That surface should remain clearly labeled until it is
-connected to real contracts.
+Quality checks run during planning on October 9, 2026:
 
-## Now
+- Odyssey `bun run preflight`: passed; 236 unit tests passed.
+- Nexus `mvn test` in the Java 21 Docker image: 400 tests passed, 0 failed,
+  2 skipped.
+- Nexus `mvn spotless:check` in Docker: passed.
+- Odyssey Footprints Playwright suite: 3 tests passed after correcting the
+  expected entry count from 7 to 8 to include the newly added Huizhou record.
 
-- Keep production surfaces honest: real footprints, real GitHub telemetry, Demo labels on experimental pages.
-- Maintain homepage, blog, comments, and reading experiences already in production use.
-- Hold CI and deploy gates to the same `preflight` command as local development.
-- Protect the core loop with browser tests for discovery, reading, saving, and returning.
+These checks validate the current workspace snapshot only. They do not prove
+production migration compatibility or deployment readiness.
 
-## Next
+## Product Priorities
 
-- Complete Footprints visit years and memory notes.
-- Graduate the reading loop: connect article progress, reading-list actions, history, and library entry points with one consistent action model.
-- Expand remaining stub module docs (`stock`, `timeline`, `profile`, `editor`).
-- Split oversized navbar / library surfaces when those areas are next edited.
-- Define the first wave of future-facing modules only after the core loop has stable analytics and error recovery.
+1. Keep existing production workflows reliable and make errors recoverable.
+2. Complete one coherent notification workflow across Nexus and Odyssey.
+3. Improve the discover-read-save-return loop for published writing.
+4. Reduce operational risk in migrations, mail delivery, and release checks.
+5. Add new product modules only after ownership, lifecycle, and cross-linking
+   behavior are defined.
 
-## Later
+## Delivery Plan
 
-- Formalize content strategy and information architecture.
-- Add experiment notes for motion, layout, and editorial patterns.
-- Keep a changelog that summarizes product-level changes, not just code merges.
-- Create a stable framework for introducing new module types without rewriting the IA.
+### Phase 1: Stabilize The Current Change Set
 
-## Delivery Sequence
+- Keep the passing Footprints count assertion aligned with the actual fixture
+  and retain the existing map, popup, and year-filter coverage.
+- Re-run the Odyssey preflight and Footprints browser tests after any related
+  frontend changes.
+- Run Nexus tests and Spotless through the repository's Java 21 Docker image.
+- Review the full notification diff as one change set: event identity,
+  transactional boundaries, deduplication, retries, admin authorization, and
+  migrations must agree.
 
-### Phase 1: Production confidence
+**Exit criteria:** both repository quality gates pass; all changed migrations
+are ordered and compatible with the intended deployment path; no notification
+payload exposes recipient addresses, message bodies, credentials, or dedup keys
+through admin delivery APIs.
 
-- Keep `preflight` as the single static-quality command in local development,
-  CI, and deploy workflows.
-- Add browser coverage for the most valuable cross-page journeys and for failed
-  API recovery, not only isolated component states.
-- Audit production routes for missing loading, empty, error, and permission
-  states.
+### Phase 2: Complete The Notification Journey
 
-### Phase 2: Reading loop
+- Verify each notification category and structured context from its Nexus
+  business event through the Odyssey API schema and rendered notification row.
+- Make supported destinations explicit. Public content should open its public
+  route; moderation and report contexts should open the relevant authorized
+  admin workflow. Do not infer permissions from a notification context ID.
+- Connect preference editing to Nexus's effective six-category values,
+  including inherited values, save confirmation, retry behavior, and session
+  changes.
+- Verify read, save, complete, reopen, delete, unread count, category filtering,
+  and pagination against the actual backend contract.
+- Keep external friend-link decision email separate from account notification
+  preferences; document that boundary in the UI and operations notes.
+- Verify email delivery recovery, manual retry auditing, and redaction using
+  tests and non-production infrastructure only.
 
-- Make article actions consistent across article cards, article pages, and the
-  reading library.
-- Preserve reading progress and history across navigation and authentication
-  transitions.
-- Improve discovery with related content and explicit return paths from saved
-  items, history, and collections.
+**Exit criteria:** a browser-level end-to-end path covers a real notification
+response, category filtering, preference update, and correct destination or
+moderation action; backend integration tests cover authorization, persistence,
+and retry idempotency.
 
-### Phase 3: Capture and knowledge
+### Phase 3: Protect The Reading Loop
 
-- Introduce one new content type, preferably notes or references, only after its
-  ownership, lifecycle, search behavior, and rendering contract are documented.
-- Cross-link articles, notes, projects, and sources instead of creating another
-  isolated feed.
+- Align article actions across discovery cards, article pages, saved items,
+  reading history, and the personal library.
+- Preserve reading position and useful return paths through navigation and
+  authentication transitions.
+- Audit core routes for loading, empty, failure, and permission states, with a
+  retry or recovery action where appropriate.
+- Add cross-page browser coverage for discover, read, save, revisit, and return.
 
-### Phase 4: Private operations
+**Exit criteria:** core journeys work at mobile and desktop sizes, and state
+does not silently disappear on route changes or sign-in transitions.
 
-- Replace dashboard mock or placeholder views with real APIs in priority order:
-  analytics, tracker, settings, then governance surfaces.
-- Keep non-production data visibly labeled and avoid implying persistence where
-  none exists.
+### Phase 4: Operational Confidence
 
-## Acceptance Criteria
+- Validate notification migrations against a production-like MySQL schema in
+  Docker before rollout; exercise upgrade and documented recovery procedures.
+- Define retention and cleanup for delivery history, retry audit records, and
+  deduplication keys before introducing scheduled cleanup.
+- Measure category-publication recipient volume and define a threshold for
+  batching rather than expanding all recipients in one transaction.
+- Keep frontend preflight and backend Docker test/format checks consistent in
+  CI and deployment gates.
+- Keep secrets out of images, logs, test artifacts, and committed files.
 
-- Every production route has explicit loading, empty, failure, and permission
-  behavior where applicable.
-- Core discovery and reading journeys pass at mobile and desktop breakpoints.
-- CI and deploy invoke the same `bun run preflight` command.
-- New modules ship with contracts, focused unit tests, browser coverage for the
-  primary journey, and a short module document.
+**Exit criteria:** an operator can determine delivery backlog and failure
+state, retry an eligible delivery without exposing recipient data, and follow a
+tested migration and rollback/recovery runbook.
+
+### Phase 5: Product Expansion
+
+- Complete or clearly label existing dashboard placeholders before implying
+  persistence or live data.
+- Expand module documentation for stock, timeline, profile, and editor where
+  those areas are next changed.
+- Consider notes or references only after documenting ownership, lifecycle,
+  search, permissions, and links to articles and sources.
+
+**Exit criteria:** a new module has a defined user problem, API/data owner,
+permission model, empty/error states, focused tests, and a documented
+connection to the existing content graph.
+
+## Product Decisions Required Before UI Finalization
+
+- Which notification actions should navigate directly to public content, and
+  which should open an admin console? Confirm the intended destinations for
+  comment review, post review, reports, friend-link applications, and user
+  review.
+- Are notification emails sent immediately for every opted-in category, or are
+  any categories intended to be digest-only?
+- Does “delete” permanently remove a notification, or should the primary
+  cleanup action archive it while preserving history?
+- Should a notification action mark the item read before navigation, and should
+  an authorized moderation action automatically complete it only after the
+  business mutation succeeds?
+
+Until these decisions are confirmed, preserve the existing API behavior and
+avoid silently changing delivery timing, deletion semantics, or moderation
+state transitions.
+
+## Release Gates
+
+- Odyssey: `bun run preflight`, focused Playwright tests for changed journeys,
+  and the full E2E suite before a frontend release.
+- Nexus: Java 21 Docker `mvn test` and `mvn spotless:check`; run migration
+  compatibility checks when schema changes are included.
+- Cross-repository API changes: update both contract/schema validation and
+  document deployment order and compatibility expectations.
+- Production releases, commits, and pushes follow each repository's
+  `AGENTS.md`; this local plan does not authorize deployment or remote changes.
