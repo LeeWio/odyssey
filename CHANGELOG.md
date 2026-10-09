@@ -1,3 +1,10 @@
+# [1.204.0](https://github.com/LeeWio/odyssey/compare/v1.203.0...v1.204.0) (2026-10-09)
+
+
+### Features
+
+* **web:** improve notification operations dashboard ([4d4a7c8](https://github.com/LeeWio/odyssey/commit/4d4a7c8daa873b8eaa7dd39663d6eefe52dd146d))
+
 # [1.203.0](https://github.com/LeeWio/odyssey/compare/v1.202.1...v1.203.0) (2026-10-09)
 
 
