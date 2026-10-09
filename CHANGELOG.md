@@ -1,3 +1,10 @@
+# [1.203.0](https://github.com/LeeWio/odyssey/compare/v1.202.1...v1.203.0) (2026-10-09)
+
+
+### Features
+
+* **web:** render footprints on the official globe ([251fc3c](https://github.com/LeeWio/odyssey/commit/251fc3c0bc21e1a56ff105699a1a800384b89cec))
+
 ## [1.202.1](https://github.com/LeeWio/odyssey/compare/v1.202.0...v1.202.1) (2026-10-09)
 
 
