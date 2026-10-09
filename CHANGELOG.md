@@ -1,3 +1,10 @@
+# [1.202.0](https://github.com/LeeWio/odyssey/compare/v1.201.1...v1.202.0) (2026-10-09)
+
+
+### Features
+
+* **web:** filter notifications by category and review them in place ([9c507e1](https://github.com/LeeWio/odyssey/commit/9c507e1574de775aad109e0f8131403b8712751a))
+
 ## [1.201.1](https://github.com/LeeWio/odyssey/compare/v1.201.0...v1.201.1) (2026-10-08)
 
 
