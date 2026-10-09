@@ -461,7 +461,7 @@ export const openapiApi = baseApi.injectEndpoints({
       async onQueryStarted(_arg, { queryFulfilled }) {
         await notifyMutation(queryFulfilled, { error: "Request failed." });
       },
-      invalidatesTags: ["OpenApi"],
+      invalidatesTags: ["OpenApi", "Notification"],
     }),
 
     retrieveAllSeries: builder.query<

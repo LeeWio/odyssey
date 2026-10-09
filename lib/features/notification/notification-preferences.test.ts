@@ -34,6 +34,8 @@ const createStore = () =>
 let store: ReturnType<typeof createStore>;
 const query = notificationApi.endpoints.getMyNotificationPreferences;
 const mutation = notificationApi.endpoints.updateMyNotificationPreferences;
+const categoryQuery = notificationApi.endpoints.getMyNotificationCategoryPreferences;
+const categoryMutation = notificationApi.endpoints.replaceMyNotificationCategoryPreferences;
 const cached = () => query.select()(store.getState());
 
 beforeEach(() => {
@@ -120,4 +122,43 @@ it("leaves the cached settings and query untouched when saving fails", async () 
   expect(result.error).toBeDefined();
   expect(cached().data).toEqual(initial);
   expect(reads).toBe(1);
+});
+
+const inherited = { inAppEnabled: true, emailEnabled: false, inherited: true };
+const categories = {
+  COMMENT: inherited,
+  CATEGORY_POST: inherited,
+  CREATOR: inherited,
+  MODERATION: inherited,
+  REPORT: inherited,
+  OPERATIONS: inherited,
+};
+
+it("sends only explicit category overrides and keeps the confirmed response", async () => {
+  const submitted = {
+    ...categories,
+    COMMENT: { inAppEnabled: false, emailEnabled: true, inherited: false },
+  };
+  const accepted = {
+    categories: {
+      ...categories,
+      COMMENT: { inAppEnabled: false, emailEnabled: true, inherited: false },
+      CREATOR: { inAppEnabled: false, emailEnabled: false, inherited: true },
+    },
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (request: Request) => {
+      if (request.method === "PUT") {
+        expect(await request.json()).toEqual({
+          overrides: { COMMENT: { inAppEnabled: false, emailEnabled: true } },
+        });
+        return response(accepted);
+      }
+      return response({ categories });
+    })
+  );
+  await store.dispatch(categoryQuery.initiate()).unwrap();
+  await store.dispatch(categoryMutation.initiate(submitted)).unwrap();
+  expect(categoryQuery.select()(store.getState()).data).toEqual(accepted);
 });

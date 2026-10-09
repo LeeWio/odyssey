@@ -726,6 +726,7 @@ export const commentApi = baseApi.injectEndpoints({
               commentTag("ADMIN_LOGS"),
               commentTag("ADMIN_HIGH_RISK"),
               "Comment",
+              "Notification",
             ],
     }),
 

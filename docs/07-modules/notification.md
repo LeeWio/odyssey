@@ -4,7 +4,7 @@ Notifications provide a reader's inbox, saved/completed activity, and delivery p
 
 ## Delivery preferences
 
-`/notifications/settings` exposes six switches for comment, followed-category, and system notifications across in-app and email delivery. Unauthenticated visitors see the sign-in entry point.
+`/notifications/settings` exposes six categories: comments, followed categories, creator receipts, review work, reports, and operations. Each category has in-app and email switches. A category that still inherits the older three-way setting shows that state and can return to it. Changing a switch stores an explicit override. Unauthenticated visitors see the sign-in entry point.
 
 - Edits stay local until Save preferences is pressed. A synchronous guard prevents overlapping saves in the form, and the save button exposes its pending state.
 - Switches remain usable during saving. Completion adopts the server response and retains fields changed after submission as an unsaved draft; a second save sends those changes.
@@ -15,10 +15,15 @@ Notifications provide a reader's inbox, saved/completed activity, and delivery p
 
 ## Notification lists
 
-- The center's Inbox/Saved/Done views and the popover's All/Unread filters render `currentData`, so rows and totals from a previous query do not appear under a new selection. Uncached queries show a loading state; existing data remains available during a refresh of the same query.
+- The center's Inbox/Saved/Done views, the shared category tabs, and the unread switch render `currentData`, so rows and totals from a previous query do not appear under a new selection. Uncached queries show a loading state; existing data remains available during a refresh of the same query.
+- Category tabs use the six delivery categories. `GET /api/v1/user/notifications` accepts an optional `category`; omitting it returns every category. `unreadOnly` and `view` combine with that filter. The navbar badge stays the total unread count.
 - Pagination is disabled while fetching. An uncached failed page keeps Previous and retry available without inventing a total from the prior page.
 - After a successful response reduces the page count (for example, deleting the final item), the center moves to the last valid page. Failed or in-flight responses do not trigger this adjustment.
 - Empty states distinguish the inbox, saved items, and completed history.
+
+## Opening a notification
+
+A notification opens only when its link points at a reader route: an essay, moments, the guestbook, or the notification center. Review queues such as `/comments` and `/posts` stay in the inbox and show the suggested action from the notification context. External `http` and `https` links still open in a new tab. The popover stays open when the selected notification has no reader destination.
 
 ## Row actions
 

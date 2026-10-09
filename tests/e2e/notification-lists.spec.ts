@@ -20,7 +20,7 @@ const notification = (id: number, title: string, read = false) => ({
   read,
   saved: false,
   createdAt: "2026-09-20T00:00:00Z",
-  link: null,
+  link: "/notifications",
 });
 const pageResult = (list: unknown[], page = 0, totalPages = 1) =>
   envelope({
@@ -165,13 +165,38 @@ test("the popover unread filter hides read messages and previous totals until it
     await page.getByRole("button", { name: "1 unread notifications", exact: true }).press("Enter");
     const dialog = page.getByRole("dialog", { name: "Notifications", exact: true });
     await expect(dialog.getByText("Read message", { exact: true })).toBeVisible();
-    await dialog.getByRole("tab", { name: /Unread/ }).press("Enter");
+    await dialog.getByRole("button", { name: "Unread", exact: true }).press("Enter");
     await expect(dialog.getByText("Read message", { exact: true })).toHaveCount(0);
     await expect(dialog.getByRole("status", { name: "Loading notifications" })).toBeVisible();
     await expect(dialog.getByText("21 total updates", { exact: true })).toHaveCount(0);
     response.resolve();
     await expect(dialog.getByText("Unread message", { exact: true })).toBeVisible();
     await expect(dialog.getByText("1 total updates", { exact: true })).toBeVisible();
+  } finally {
+    response.resolve();
+  }
+});
+
+test("a category tab requests that category and hides the previous rows", async ({ page }) => {
+  const response = Promise.withResolvers<void>();
+  await page.route(endpoint, async (route) => {
+    const category = new URL(route.request().url()).searchParams.get("category");
+    if (category === "MODERATION") {
+      await response.promise;
+      await route.fulfill({ json: pageResult([notification(2, "Review message")]) });
+    } else {
+      expect(category).toBeNull();
+      await route.fulfill({ json: pageResult([notification(1, "Inbox message")]) });
+    }
+  });
+  try {
+    await page.goto("/notifications");
+    await expect(page.getByText("Inbox message", { exact: true })).toBeVisible();
+    await page.getByRole("tab", { name: "Review", exact: true }).press("Enter");
+    await expect(page.getByText("Inbox message", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("status", { name: "Loading notifications" })).toBeVisible();
+    response.resolve();
+    await expect(page.getByText("Review message", { exact: true })).toBeVisible();
   } finally {
     response.resolve();
   }
@@ -227,10 +252,10 @@ test("row actions stay independent and a failed save unlocks only its own row", 
   try {
     await page.goto("/notifications");
     const firstRow = page
-      .getByRole("article")
+      .getByRole("listitem")
       .filter({ has: page.getByText("First message", { exact: true }) });
     const secondRow = page
-      .getByRole("article")
+      .getByRole("listitem")
       .filter({ has: page.getByText("Second message", { exact: true }) });
     const saveFirst = firstRow.getByRole("button", { name: "Save notification", exact: true });
     const saveSecond = secondRow.getByRole("button", { name: "Save notification", exact: true });

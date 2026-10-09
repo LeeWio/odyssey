@@ -5,8 +5,11 @@ import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from 
 import { notifyMutation } from "@/lib/toast";
 import type { RootState } from "@/lib/store";
 import {
+  NotificationCategoryPreferenceSchema,
   NotificationPreferenceSchema,
   NotificationResponseSchema,
+  type NotificationCategory,
+  type NotificationCategoryPreference,
   type NotificationPreference,
   type NotificationResponse,
   type NotificationView,
@@ -16,11 +19,11 @@ export const notificationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getMyNotifications: builder.query<
       PageResult<NotificationResponse>,
-      Pageable & { unreadOnly?: boolean; view?: NotificationView }
+      Pageable & { unreadOnly?: boolean; view?: NotificationView; category?: NotificationCategory }
     >({
-      query: ({ unreadOnly = false, view = "inbox", page = 0, size = 20, sort }) => ({
+      query: ({ unreadOnly = false, view = "inbox", category, page = 0, size = 20, sort }) => ({
         url: "/api/v1/user/notifications",
-        params: { unreadOnly, view, page, size, sort },
+        params: { unreadOnly, view, category, page, size, sort },
       }),
       rawResponseSchema: apiResponseSchema(pageResultSchema(NotificationResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<NotificationResponse>>) => response.data,
@@ -48,6 +51,70 @@ export const notificationApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<NotificationPreference>) => response.data,
       transformErrorResponse: transformApiError,
       providesTags: [{ type: "Notification", id: "PREFERENCES" }],
+    }),
+
+    getMyNotificationCategoryPreferences: builder.query<NotificationCategoryPreference, void>({
+      query: () => "/api/v1/user/notifications/preferences/categories",
+      rawResponseSchema: apiResponseSchema(NotificationCategoryPreferenceSchema),
+      transformResponse: (response: ApiResponse<NotificationCategoryPreference>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "Notification", id: "CATEGORY_PREFERENCES" }],
+    }),
+
+    replaceMyNotificationCategoryPreferences: builder.mutation<
+      NotificationCategoryPreference,
+      NotificationCategoryPreference["categories"]
+    >({
+      query: (categories) => ({
+        url: "/api/v1/user/notifications/preferences/categories",
+        method: "PUT",
+        body: {
+          overrides: Object.fromEntries(
+            Object.entries(categories)
+              .filter(([, channels]) => !channels.inherited)
+              .map(([category, channels]) => [
+                category,
+                { inAppEnabled: channels.inAppEnabled, emailEnabled: channels.emailEnabled },
+              ])
+          ),
+        },
+      }),
+      rawResponseSchema: apiResponseSchema(NotificationCategoryPreferenceSchema),
+      transformResponse: (response: ApiResponse<NotificationCategoryPreference>) => {
+        if (!response.data?.categories) {
+          throw new Error("Notification category preferences response is missing categories.");
+        }
+        return response.data;
+      },
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { dispatch, getState, queryFulfilled }) {
+        const session = (getState() as RootState).auth;
+        try {
+          const { data } = await queryFulfilled;
+          const currentSession = (getState() as RootState).auth;
+          if (
+            currentSession.accessToken === session.accessToken &&
+            currentSession.username === session.username &&
+            currentSession.isAuthenticated === session.isAuthenticated
+          ) {
+            dispatch(
+              notificationApi.util.updateQueryData(
+                "getMyNotificationCategoryPreferences",
+                undefined,
+                () => data
+              )
+            );
+          }
+        } catch {
+          // notifyMutation below owns error feedback; failed saves keep the cache.
+        }
+        await notifyMutation(queryFulfilled, {
+          error: "Failed to save notification preferences.",
+          success: "Notification preferences saved.",
+        });
+      },
+      invalidatesTags: (_result, error) =>
+        error ? [] : [{ type: "Notification", id: "CATEGORY_PREFERENCES" }],
     }),
 
     updateMyNotificationPreferences: builder.mutation<
@@ -195,6 +262,8 @@ export const {
   useGetMyNotificationsQuery,
   useGetUnreadNotificationCountQuery,
   useGetMyNotificationPreferencesQuery,
+  useGetMyNotificationCategoryPreferencesQuery,
+  useReplaceMyNotificationCategoryPreferencesMutation,
   useUpdateMyNotificationPreferencesMutation,
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,

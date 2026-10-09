@@ -1,3 +1,5 @@
+const READER_LINK_PREFIXES = ["/single/", "/moments", "/guestbook", "/notifications"];
+
 const notificationDateFormatters = new Map<string, Intl.DateTimeFormat>();
 
 function notificationDateFormatter(locale: string) {
@@ -22,16 +24,46 @@ export function getNotificationTypeLabel(type: string, fallback = "Update") {
 export function getNotificationIcon(type: string) {
   const normalizedType = type.toLowerCase();
 
+  if (normalizedType.includes("report")) return "lucide:flag";
+  if (normalizedType.includes("friend_link") || normalizedType.includes("friend-link")) {
+    return "lucide:link";
+  }
   if (normalizedType.includes("comment") || normalizedType.includes("reply")) {
     return "lucide:message-square";
   }
   if (normalizedType.includes("like") || normalizedType.includes("favorite")) {
     return "lucide:heart";
   }
-  if (normalizedType.includes("follow")) return "lucide:user-plus";
-  if (normalizedType.includes("publish")) return "lucide:file-text";
+  if (normalizedType.includes("follow") || normalizedType.includes("category")) {
+    return "lucide:user-plus";
+  }
+  if (
+    normalizedType.includes("publish") ||
+    normalizedType.includes("scheduled") ||
+    normalizedType.includes("archived")
+  ) {
+    return "lucide:file-text";
+  }
+  if (normalizedType.includes("health")) return "lucide:heart-pulse";
 
   return "lucide:bell-ring";
+}
+
+/**
+ * Reader surfaces can open public writing, moments, and the guestbook.
+ * Admin queue links stay informational until those consoles accept the same query.
+ */
+export function getNotificationReaderHref(link: string | null | undefined) {
+  const value = link?.trim();
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+  if (!value.startsWith("/")) return null;
+  const path = value.split(/[?#]/, 1)[0] ?? value;
+  return READER_LINK_PREFIXES.some(
+    (prefix) => path === prefix.replace(/\/$/, "") || path.startsWith(prefix)
+  )
+    ? value
+    : null;
 }
 
 export function formatNotificationDate(value: string, locale: string) {

@@ -1,14 +1,15 @@
 "use client";
 
 import { EmptyState } from "@heroui-pro/react";
-import { AlertDialog, Button, Card, Chip, Tabs, Tooltip, Typography } from "@heroui/react";
+import { AlertDialog, Button, Card, Chip, Tabs, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
+  type NotificationCategory,
   type NotificationResponse,
   type NotificationView,
   useClearReadNotificationsMutation,
@@ -21,14 +22,11 @@ import {
   useReopenNotificationMutation,
   useSetNotificationSavedMutation,
 } from "@/lib/features/notification";
-import {
-  formatNotificationDate,
-  getNotificationIcon,
-  getNotificationTypeLabel,
-} from "@/lib/notification-presentation";
-import { useRelativeTime } from "@/lib/relative-time";
+import { getNotificationReaderHref } from "@/lib/notification-presentation";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { NotificationCategoryFilter } from "./notification-category-filter";
+import { NotificationCategoryList } from "./notification-category-list";
 import { useNotificationActions } from "./use-notification-actions";
 
 const NOTIFICATIONS_PAGE_SIZE = 20;
@@ -52,18 +50,33 @@ function NotificationSkeleton() {
   );
 }
 
-function NotificationEmptyState({ view }: { view: NotificationView }) {
+function NotificationEmptyState({
+  category,
+  unreadOnly,
+  view,
+}: {
+  category?: NotificationCategory;
+  unreadOnly: boolean;
+  view: NotificationView;
+}) {
   const t = useTranslations("Notifications");
-  const title = {
-    inbox: t("emptyInboxTitle"),
-    saved: t("emptySavedTitle"),
-    done: t("emptyDoneTitle"),
-  }[view];
-  const description = {
-    inbox: t("emptyInboxDescription"),
-    saved: t("emptySavedDescription"),
-    done: t("emptyDoneDescription"),
-  }[view];
+  const categoryLabel = category ? t(`category.${category}`) : undefined;
+  const title = categoryLabel
+    ? unreadOnly
+      ? t("emptyCategoryUnread", { category: categoryLabel })
+      : t("emptyCategoryTitle", { category: categoryLabel })
+    : {
+        inbox: t("emptyInboxTitle"),
+        saved: t("emptySavedTitle"),
+        done: t("emptyDoneTitle"),
+      }[view];
+  const description = categoryLabel
+    ? t("emptyCategoryDescription")
+    : {
+        inbox: t("emptyInboxDescription"),
+        saved: t("emptySavedDescription"),
+        done: t("emptyDoneDescription"),
+      }[view];
   return (
     <EmptyState size="md">
       <EmptyState.Header>
@@ -79,12 +92,12 @@ function NotificationEmptyState({ view }: { view: NotificationView }) {
 
 export function NotificationCenterPage() {
   const t = useTranslations("Notifications");
-  const locale = useLocale();
-  const formatRelativeTime = useRelativeTime();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [view, setView] = useState<NotificationView>("inbox");
+  const [category, setCategory] = useState<NotificationCategory>();
+  const [unreadOnly, setUnreadOnly] = useState(false);
   const [page, setPage] = useState(0);
   const { pendingActions, pendingBulkAction, run, runBulk, isBulkRunning } =
     useNotificationActions();
@@ -102,6 +115,8 @@ export function NotificationCenterPage() {
       size: NOTIFICATIONS_PAGE_SIZE,
       sort: ["createdAt,desc"],
       view,
+      category,
+      unreadOnly,
     },
     { skip: !isAuthenticated }
   );
@@ -125,7 +140,7 @@ export function NotificationCenterPage() {
     isAdjustingPage || notifications.isLoading || (notifications.isFetching && !currentPage);
 
   const navigateToNotification = (notification: NotificationResponse) => {
-    const link = notification.link?.trim();
+    const link = getNotificationReaderHref(notification.link);
     if (!link) return;
 
     if (link.startsWith("/")) {
@@ -133,9 +148,7 @@ export function NotificationCenterPage() {
       return;
     }
 
-    if (/^https?:\/\//i.test(link)) {
-      window.open(link, "_blank", "noopener,noreferrer");
-    }
+    window.open(link, "_blank", "noopener,noreferrer");
   };
 
   const handleNotificationPress = async (notification: NotificationResponse) => {
@@ -207,6 +220,25 @@ export function NotificationCenterPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
+              aria-label={t("unreadTab")}
+              aria-pressed={unreadOnly}
+              size="sm"
+              variant={unreadOnly ? "secondary" : "ghost"}
+              onPress={() => {
+                setUnreadOnly((current) => !current);
+                setPage(0);
+              }}
+            >
+              {t("unreadTab")}
+              {unreadNotificationCount > 0 ? (
+                <Chip color="accent" size="sm" variant="soft">
+                  <span aria-hidden="true">
+                    {unreadNotificationCount > 99 ? "99+" : unreadNotificationCount}
+                  </span>
+                </Chip>
+              ) : null}
+            </Button>
+            <Button
               size="sm"
               variant="ghost"
               onPress={() => router.push("/notifications/settings")}
@@ -260,6 +292,16 @@ export function NotificationCenterPage() {
           </Tabs.ListContainer>
         </Tabs>
 
+        <div className="mt-4">
+          <NotificationCategoryFilter
+            category={category}
+            onCategoryChange={(next) => {
+              setCategory(next);
+              setPage(0);
+            }}
+          />
+        </div>
+
         <section aria-live="polite" className="mt-6">
           {isLoadingPage ? (
             <NotificationSkeleton />
@@ -276,141 +318,21 @@ export function NotificationCenterPage() {
               </Card.Footer>
             </Card>
           ) : notificationEntries.length === 0 ? (
-            <NotificationEmptyState view={view} />
+            <NotificationEmptyState category={category} unreadOnly={unreadOnly} view={view} />
           ) : (
-            <div className="divide-default-200 border-default-200 divide-y border-y">
-              {notificationEntries.map((notification) => (
-                <article
-                  key={notification.id}
-                  className={`group flex gap-3 py-5 sm:gap-5 ${
-                    notification.read ? "" : "bg-accent/5 -mx-3 px-3 sm:-mx-5 sm:px-5"
-                  }`}
-                >
-                  <div className="bg-default-100 text-muted mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-lg">
-                    <Icon
-                      aria-hidden="true"
-                      className="size-4"
-                      icon={getNotificationIcon(notification.type)}
-                    />
-                  </div>
-                  <Button
-                    fullWidth
-                    className="h-auto min-w-0 flex-1 items-start justify-start p-0 text-left"
-                    isPending={pendingActions.get(notification.id) === "read"}
-                    isDisabled={pendingBulkAction !== null || pendingActions.has(notification.id)}
-                    variant="ghost"
-                    onPress={() => handleNotificationPress(notification)}
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="flex flex-wrap items-center gap-2">
-                        <span className="text-foreground text-sm font-semibold">
-                          {notification.title}
-                        </span>
-                        {!notification.read ? (
-                          <span
-                            aria-label={t("unread")}
-                            className="bg-accent size-2 rounded-full"
-                          />
-                        ) : null}
-                        <Chip size="sm" variant="soft">
-                          {getNotificationTypeLabel(notification.type, t("typeFallback"))}
-                        </Chip>
-                      </span>
-                      <span className="text-muted mt-1.5 block text-sm leading-6 whitespace-pre-wrap">
-                        {notification.content}
-                      </span>
-                      <time
-                        className="text-muted mt-2 block text-xs"
-                        dateTime={notification.createdAt}
-                        title={formatNotificationDate(notification.createdAt, locale)}
-                      >
-                        {formatRelativeTime(notification.createdAt)}
-                      </time>
-                    </span>
-                  </Button>
-                  <div className="flex shrink-0 items-start">
-                    <Tooltip>
-                      <Button
-                        isIconOnly
-                        aria-label={notification.saved ? t("removeSaved") : t("saveNotification")}
-                        isPending={pendingActions.get(notification.id) === "save"}
-                        isDisabled={
-                          pendingBulkAction !== null || pendingActions.has(notification.id)
-                        }
-                        size="sm"
-                        variant="ghost"
-                        onPress={() => handleSaveNotification(notification)}
-                      >
-                        <Icon icon="gravity-ui:bookmark" aria-hidden="true" className="size-4" />
-                      </Button>
-                      <Tooltip.Content>
-                        {notification.saved ? t("removeSaved") : t("saveForLater")}
-                      </Tooltip.Content>
-                    </Tooltip>
-                    {view !== "done" ? (
-                      <Tooltip>
-                        <Button
-                          isIconOnly
-                          aria-label={t("completeNamed", { title: notification.title })}
-                          isPending={pendingActions.get(notification.id) === "complete"}
-                          isDisabled={
-                            pendingBulkAction !== null || pendingActions.has(notification.id)
-                          }
-                          size="sm"
-                          variant="ghost"
-                          onPress={() => handleCompleteNotification(notification.id)}
-                        >
-                          <Icon
-                            icon="gravity-ui:circle-check"
-                            aria-hidden="true"
-                            className="size-4"
-                          />
-                        </Button>
-                        <Tooltip.Content>{t("markDone")}</Tooltip.Content>
-                      </Tooltip>
-                    ) : (
-                      <Tooltip>
-                        <Button
-                          isIconOnly
-                          aria-label={t("reopenNamed", { title: notification.title })}
-                          isPending={pendingActions.get(notification.id) === "reopen"}
-                          isDisabled={
-                            pendingBulkAction !== null || pendingActions.has(notification.id)
-                          }
-                          size="sm"
-                          variant="ghost"
-                          onPress={() => handleReopenNotification(notification.id)}
-                        >
-                          <Icon
-                            icon="gravity-ui:arrow-rotate-left"
-                            aria-hidden="true"
-                            className="size-4"
-                          />
-                        </Button>
-                        <Tooltip.Content>{t("returnToInbox")}</Tooltip.Content>
-                      </Tooltip>
-                    )}
-                    <Tooltip>
-                      <Button
-                        isIconOnly
-                        aria-label={t("deleteNamed", { title: notification.title })}
-                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                        isPending={pendingActions.get(notification.id) === "delete"}
-                        isDisabled={
-                          pendingBulkAction !== null || pendingActions.has(notification.id)
-                        }
-                        size="sm"
-                        variant="ghost"
-                        onPress={() => handleDeleteNotification(notification.id)}
-                      >
-                        <Icon icon="gravity-ui:trash-bin" aria-hidden="true" className="size-4" />
-                      </Button>
-                      <Tooltip.Content>{t("deleteNotification")}</Tooltip.Content>
-                    </Tooltip>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <NotificationCategoryList
+              category={category}
+              disabled={pendingBulkAction !== null}
+              notifications={notificationEntries}
+              pendingActions={pendingActions}
+              showInboxActions
+              view={view}
+              onComplete={handleCompleteNotification}
+              onDelete={handleDeleteNotification}
+              onOpen={handleNotificationPress}
+              onReopen={handleReopenNotification}
+              onSave={handleSaveNotification}
+            />
           )}
         </section>
 

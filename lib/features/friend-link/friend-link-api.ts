@@ -137,7 +137,11 @@ export const friendLinkApi = baseApi.injectEndpoints({
           success: `Friend link status updated to ${status}.`,
         });
       },
-      invalidatesTags: (_result, _error, { id }) => ["FriendLink", { type: "FriendLink", id }],
+      invalidatesTags: (_result, _error, { id }) => [
+        "FriendLink",
+        { type: "FriendLink", id },
+        "Notification",
+      ],
     }),
 
     /**

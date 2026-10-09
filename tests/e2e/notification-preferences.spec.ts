@@ -11,16 +11,19 @@ const test = base.extend<{ browserErrors: string[] }>({
     { auto: true },
   ],
 });
+const channel = { inAppEnabled: true, emailEnabled: false, inherited: true };
 const initial = {
-  commentNotificationsEnabled: true,
-  categoryPostNotificationsEnabled: true,
-  systemNotificationsEnabled: true,
-  commentEmailNotificationsEnabled: false,
-  categoryPostEmailNotificationsEnabled: false,
-  systemEmailNotificationsEnabled: false,
+  categories: {
+    COMMENT: channel,
+    CATEGORY_POST: channel,
+    CREATOR: channel,
+    MODERATION: channel,
+    REPORT: channel,
+    OPERATIONS: channel,
+  },
 };
 const envelope = (data: unknown) => ({ code: 200, message: "OK", data });
-const endpoint = "**/api/v1/user/notifications/preferences";
+const endpoint = "**/api/v1/user/notifications/preferences/categories";
 test.use({ locale: "en-US" });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
@@ -62,7 +65,12 @@ test("preserves changes after a failed save and allows retry without unhandled e
         });
         return;
       }
-      saved = route.request().postDataJSON();
+      saved = {
+        categories: {
+          ...initial.categories,
+          COMMENT: { ...route.request().postDataJSON().overrides.COMMENT, inherited: false },
+        },
+      };
     }
     await route.fulfill({ json: envelope(saved) });
   });
@@ -79,26 +87,43 @@ test("preserves changes after a failed save and allows retry without unhandled e
   await save.press("Enter");
   await expect(save).toBeDisabled();
   await expect(save).not.toHaveAttribute("data-pending", "true");
-  expect(saved.commentEmailNotificationsEnabled).toBe(true);
+  expect(saved.categories.COMMENT).toEqual({
+    inAppEnabled: true,
+    emailEnabled: true,
+    inherited: false,
+  });
   expect(attempts).toBe(2);
 });
 
 test("retains changes made during saving for a subsequent save", async ({ page }) => {
   const response = Promise.withResolvers<void>();
-  let saved = { ...initial };
-  const submissions: (typeof initial)[] = [];
+  let saved = initial;
+  const submissions: {
+    overrides: Record<string, { inAppEnabled: boolean; emailEnabled: boolean }>;
+  }[] = [];
   await page.route(endpoint, async (route) => {
     if (route.request().method() === "PUT") {
       submissions.push(route.request().postDataJSON());
       if (submissions.length === 1) await response.promise;
-      saved = submissions[submissions.length - 1];
+      const body = submissions[submissions.length - 1];
+      saved = {
+        categories: {
+          ...initial.categories,
+          ...Object.fromEntries(
+            Object.entries(body.overrides).map(([category, channels]) => [
+              category,
+              { ...channels, inherited: false },
+            ])
+          ),
+        },
+      };
     }
     await route.fulfill({ json: envelope(saved) });
   });
   try {
     await page.goto("/notifications/settings");
     const comments = page.getByRole("switch", { name: "Comments & replies email", exact: true });
-    const system = page.getByRole("switch", { name: "System updates email", exact: true });
+    const system = page.getByRole("switch", { name: "Site operations email", exact: true });
     const save = page.getByRole("button", { name: "Save preferences" });
     await comments.press("Space");
     await save.press("Enter");
@@ -114,11 +139,12 @@ test("retains changes made during saving for a subsequent save", async ({ page }
     await expect.poll(() => submissions.length).toBe(2);
     await expect(save).not.toHaveAttribute("data-pending", "true");
     await expect(save).toBeDisabled();
-    expect(submissions[0]).toEqual({ ...initial, commentEmailNotificationsEnabled: true });
-    expect(submissions[1]).toEqual({
-      ...initial,
-      commentEmailNotificationsEnabled: true,
-      systemEmailNotificationsEnabled: true,
+    expect(submissions[0].overrides).toEqual({
+      COMMENT: { inAppEnabled: true, emailEnabled: true },
+    });
+    expect(submissions[1].overrides).toEqual({
+      COMMENT: { inAppEnabled: true, emailEnabled: true },
+      OPERATIONS: { inAppEnabled: true, emailEnabled: true },
     });
   } finally {
     response.resolve();
@@ -131,7 +157,12 @@ test("uses the saved server response even when the following refresh fails", asy
     if (route.request().method() === "PUT") {
       updated = true;
       await route.fulfill({
-        json: envelope({ ...initial, commentEmailNotificationsEnabled: true }),
+        json: envelope({
+          categories: {
+            ...initial.categories,
+            COMMENT: { inAppEnabled: true, emailEnabled: true, inherited: false },
+          },
+        }),
       });
     } else if (updated) {
       await route.fulfill({ status: 503, json: { message: "Refresh unavailable" } });
@@ -166,6 +197,6 @@ test("replaces initial loading with an error and supports loading again", async 
   await expect(section.locator('[data-slot="skeleton"]')).toHaveCount(0);
   await expect(section.getByRole("switch")).toHaveCount(0);
   await page.getByRole("button", { name: "Try again", exact: true }).press("Enter");
-  await expect(section.getByRole("switch")).toHaveCount(6);
+  await expect(section.getByRole("switch")).toHaveCount(12);
   await expect(page.getByRole("button", { name: "Save preferences" })).toBeDisabled();
 });

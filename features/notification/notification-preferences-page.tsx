@@ -9,33 +9,63 @@ import { useRef, useState } from "react";
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
-  type NotificationPreference,
-  useGetMyNotificationPreferencesQuery,
-  useUpdateMyNotificationPreferencesMutation,
+  NOTIFICATION_CATEGORIES,
+  type NotificationCategory,
+  type NotificationCategoryPreference,
+  useGetMyNotificationCategoryPreferencesQuery,
+  useReplaceMyNotificationCategoryPreferencesMutation,
 } from "@/lib/features/notification";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
-const PREFERENCE_ROWS = [
+const PREFERENCE_ROWS: {
+  category: NotificationCategory;
+  descriptionKey:
+    | "commentsDescription"
+    | "followsDescription"
+    | "creatorDescription"
+    | "moderationDescription"
+    | "reportsDescription"
+    | "operationsDescription";
+  titleKey:
+    | "commentsTitle"
+    | "followsTitle"
+    | "creatorTitle"
+    | "moderationTitle"
+    | "reportsTitle"
+    | "operationsTitle";
+}[] = [
   {
+    category: "COMMENT",
     descriptionKey: "commentsDescription",
-    emailKey: "commentEmailNotificationsEnabled",
-    inboxKey: "commentNotificationsEnabled",
     titleKey: "commentsTitle",
   },
   {
+    category: "CATEGORY_POST",
     descriptionKey: "followsDescription",
-    emailKey: "categoryPostEmailNotificationsEnabled",
-    inboxKey: "categoryPostNotificationsEnabled",
     titleKey: "followsTitle",
   },
   {
-    descriptionKey: "systemDescription",
-    emailKey: "systemEmailNotificationsEnabled",
-    inboxKey: "systemNotificationsEnabled",
-    titleKey: "systemTitle",
+    category: "CREATOR",
+    descriptionKey: "creatorDescription",
+    titleKey: "creatorTitle",
   },
-] as const;
+  {
+    category: "MODERATION",
+    descriptionKey: "moderationDescription",
+    titleKey: "moderationTitle",
+  },
+  {
+    category: "REPORT",
+    descriptionKey: "reportsDescription",
+    titleKey: "reportsTitle",
+  },
+  {
+    category: "OPERATIONS",
+    descriptionKey: "operationsDescription",
+    titleKey: "operationsTitle",
+  },
+];
 
 function NotificationPreferencesSkeleton() {
   const t = useTranslations("Notifications");
@@ -47,7 +77,7 @@ function NotificationPreferencesSkeleton() {
         <Skeleton className="h-4 w-72 rounded-lg" />
       </Card.Header>
       <Card.Content className="gap-6">
-        {Array.from({ length: 3 }, (_, index) => (
+        {Array.from({ length: NOTIFICATION_CATEGORIES.length }, (_, index) => (
           <div key={index} className="flex items-center justify-between gap-6">
             <div className="space-y-2">
               <Skeleton className="h-4 w-48 rounded-lg" />
@@ -88,9 +118,12 @@ export function NotificationPreferencesPage() {
   const t = useTranslations("Notifications");
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const preferences = useGetMyNotificationPreferencesQuery(undefined, { skip: !isAuthenticated });
-  const [updatePreferences, { isLoading: isSaving }] = useUpdateMyNotificationPreferencesMutation();
-  const [draft, setDraft] = useState<NotificationPreference | null>(null);
+  const preferences = useGetMyNotificationCategoryPreferencesQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+  const [updatePreferences, { isLoading: isSaving }] =
+    useReplaceMyNotificationCategoryPreferencesMutation();
+  const [draft, setDraft] = useState<NotificationCategoryPreference["categories"] | null>(null);
   const saving = useRef(false);
 
   if (!isAuthenticated) {
@@ -114,13 +147,29 @@ export function NotificationPreferencesPage() {
     );
   }
 
-  const updateDraft = <Key extends keyof NotificationPreference>(
-    key: Key,
-    value: NotificationPreference[Key]
+  const updateDraft = (
+    category: NotificationCategory,
+    channel: "inAppEnabled" | "emailEnabled",
+    value: boolean
   ) => {
     setDraft((current) => {
-      const base = current ?? preferences.currentData;
-      return base ? { ...base, [key]: value } : current;
+      const base = current ?? preferences.currentData?.categories;
+      if (!base) return current;
+      return {
+        ...base,
+        [category]: { ...base[category], [channel]: value, inherited: false },
+      };
+    });
+  };
+
+  const resetCategory = (category: NotificationCategory) => {
+    setDraft((current) => {
+      const base = current ?? preferences.currentData?.categories;
+      if (!base?.[category] || base[category].inherited) return current;
+      return {
+        ...base,
+        [category]: { ...base[category], inherited: true },
+      };
     });
   };
 
@@ -132,10 +181,18 @@ export function NotificationPreferencesPage() {
       const saved = await updatePreferences(submitted).unwrap();
       setDraft((current) => {
         if (!current || current === submitted) return null;
-        // Adopt the server result, retaining only edits made after submission.
-        const remaining = { ...saved };
-        for (const key of Object.keys(current) as (keyof NotificationPreference)[]) {
-          if (current[key] !== submitted[key]) remaining[key] = current[key];
+        // Adopt the server result, retaining only category edits made after submission.
+        const remaining = { ...saved.categories };
+        for (const category of NOTIFICATION_CATEGORIES) {
+          const latest = current[category];
+          const sent = submitted[category];
+          if (
+            latest.inAppEnabled !== sent.inAppEnabled ||
+            latest.emailEnabled !== sent.emailEnabled ||
+            latest.inherited !== sent.inherited
+          ) {
+            remaining[category] = latest;
+          }
         }
         return remaining;
       });
@@ -148,16 +205,20 @@ export function NotificationPreferencesPage() {
 
   // `data` may retain the last successful query snapshot after a failed
   // refresh; currentData includes the confirmed mutation's cache update.
-  const savedPreferences = preferences.currentData;
+  const savedPreferences = preferences.currentData?.categories;
   const currentPreferences = draft ?? savedPreferences;
   const isDirty =
     draft !== null &&
     savedPreferences !== undefined &&
-    Object.keys(draft).some(
-      (key) =>
-        draft[key as keyof NotificationPreference] !==
-        savedPreferences[key as keyof NotificationPreference]
-    );
+    NOTIFICATION_CATEGORIES.some((category) => {
+      const next = draft[category];
+      const saved = savedPreferences[category];
+      return (
+        next.inAppEnabled !== saved.inAppEnabled ||
+        next.emailEnabled !== saved.emailEnabled ||
+        next.inherited !== saved.inherited
+      );
+    });
 
   return (
     <div className="bg-background min-h-[100dvh] px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
@@ -206,24 +267,38 @@ export function NotificationPreferencesPage() {
                 </div>
                 {PREFERENCE_ROWS.map((row) => {
                   const title = t(row.titleKey);
+                  const channels = currentPreferences[row.category];
                   return (
                     <div
-                      key={row.inboxKey}
+                      key={row.category}
                       className="grid grid-cols-[1fr_auto_auto] items-center gap-x-5"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold">{title}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold">{title}</p>
+                          {channels.inherited ? (
+                            <span className="text-muted text-xs">{t("inherited")}</span>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onPress={() => resetCategory(row.category)}
+                            >
+                              {t("useDefault")}
+                            </Button>
+                          )}
+                        </div>
                         <p className="text-muted mt-1 text-sm leading-5">{t(row.descriptionKey)}</p>
                       </div>
                       <PreferenceSwitch
-                        isSelected={currentPreferences[row.inboxKey]}
+                        isSelected={channels.inAppEnabled}
                         label={t("inAppNamed", { title })}
-                        onChange={(value) => updateDraft(row.inboxKey, value)}
+                        onChange={(value) => updateDraft(row.category, "inAppEnabled", value)}
                       />
                       <PreferenceSwitch
-                        isSelected={currentPreferences[row.emailKey]}
+                        isSelected={channels.emailEnabled}
                         label={t("emailNamed", { title })}
-                        onChange={(value) => updateDraft(row.emailKey, value)}
+                        onChange={(value) => updateDraft(row.category, "emailEnabled", value)}
                       />
                     </div>
                   );
