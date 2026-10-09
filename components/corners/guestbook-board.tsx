@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { useRelativeTime } from "@/lib/relative-time";
 import ScrollingBanner from "./scrolling-banner";
 import GuestbookCard from "./guestbook-card";
+import { splitIntoColumns, useScrollColumnCount } from "./use-scroll-column-count";
 
 type GuestbookEntry = {
   avatar?: string | null;
@@ -111,6 +112,7 @@ export default function GuestbookBoard() {
   const t = useTranslations("Guestbook");
   const formatRelativeTime = useRelativeTime();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { ref: boardRef, columnCount } = useScrollColumnCount<HTMLDivElement>();
   const { data: rawEntries = [], isLoading } = useGetGuestbookEntriesQuery();
 
   const mappedEntries = React.useMemo(() => {
@@ -125,18 +127,15 @@ export default function GuestbookBoard() {
     return [...live, ...defaultEntries];
   }, [rawEntries, formatRelativeTime, t]);
 
-  const columns = React.useMemo(() => {
-    const cols: GuestbookEntry[][] = [[], [], [], []];
-    mappedEntries.forEach((entry, idx) => {
-      cols[idx % 4].push(entry);
-    });
-    return cols;
-  }, [mappedEntries]);
+  const columns = React.useMemo(
+    () => splitIntoColumns(mappedEntries, columnCount),
+    [mappedEntries, columnCount]
+  );
 
   if (isLoading) {
     return (
       <div className="w-full py-10" aria-busy="true" aria-label={t("loading")}>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4">
           {Array.from({ length: 8 }, (_, index) => (
             <GuestbookSkeletonCard key={index} />
           ))}
@@ -145,49 +144,28 @@ export default function GuestbookBoard() {
     );
   }
 
-  const firstColumn = isMobile ? mappedEntries : columns[0];
-  const secondColumn = columns[1];
-  const thirdColumn = columns[2];
-  const fourthColumn = columns[3];
-
   return (
-    <div className="w-full py-10">
-      <div className="columns-1 gap-4 sm:columns-2 md:columns-3 lg:columns-4">
-        <ScrollingBanner isVertical duration={isMobile ? 200 : 120} shouldPauseOnHover={true}>
-          {firstColumn.map((testimonial, index) => (
-            <GuestbookCard key={`${testimonial.name}-${index}`} index={index} {...testimonial} />
-          ))}
-        </ScrollingBanner>
-        <ScrollingBanner
-          isVertical
-          className="hidden sm:flex"
-          duration={200}
-          shouldPauseOnHover={true}
-        >
-          {secondColumn.map((testimonial, index) => (
-            <GuestbookCard key={`${testimonial.name}-${index}`} index={index} {...testimonial} />
-          ))}
-        </ScrollingBanner>
-        <ScrollingBanner
-          isVertical
-          className="hidden md:flex"
-          duration={200}
-          shouldPauseOnHover={true}
-        >
-          {thirdColumn.map((testimonial, index) => (
-            <GuestbookCard key={`${testimonial.name}-${index}`} index={index} {...testimonial} />
-          ))}
-        </ScrollingBanner>
-        <ScrollingBanner
-          isVertical
-          className="hidden lg:flex"
-          duration={200}
-          shouldPauseOnHover={true}
-        >
-          {fourthColumn.map((testimonial, index) => (
-            <GuestbookCard key={`${testimonial.name}-${index}`} index={index} {...testimonial} />
-          ))}
-        </ScrollingBanner>
+    <div ref={boardRef} className="w-full py-10">
+      <div
+        className="grid gap-4"
+        style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+      >
+        {columns.map((column, columnIndex) => (
+          <ScrollingBanner
+            key={columnIndex}
+            isVertical
+            duration={isMobile ? 200 : columnIndex % 2 === 0 ? 120 : 200}
+            shouldPauseOnHover={true}
+          >
+            {column.map((testimonial, index) => (
+              <GuestbookCard
+                key={`${testimonial.name}-${columnIndex}-${index}`}
+                index={index}
+                {...testimonial}
+              />
+            ))}
+          </ScrollingBanner>
+        ))}
       </div>
     </div>
   );

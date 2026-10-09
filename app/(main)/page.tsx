@@ -123,7 +123,7 @@ const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-boar
     <div
       aria-busy="true"
       aria-label="Loading guestbook"
-      className="grid w-full grid-cols-1 gap-4 py-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      className="grid w-full grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4 py-10"
       role="status"
     >
       {Array.from({ length: 8 }, (_, index) => (
