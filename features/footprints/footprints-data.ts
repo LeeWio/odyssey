@@ -21,6 +21,8 @@ export type FootprintArc = {
   route: string;
   color: string;
   width: number;
+  /** Signed bow for Map.Arc. Nearby routes use opposite signs so they separate. */
+  curvature: number;
 };
 
 /**
@@ -108,6 +110,19 @@ export const FOOTPRINTS: readonly Footprint[] = [
     order: 6,
   },
   {
+    id: "huizhou",
+    title: "East of the bay",
+    place: "Huizhou",
+    country: "China",
+    year: 2025,
+    visitedAt: "2025",
+    latitude: 23.1115,
+    longitude: 114.4152,
+    memory: "A slower afternoon past Shenzhen: the lake, the hills, and the coast.",
+    tags: ["china", "south", "city"],
+    order: 7,
+  },
+  {
     id: "henan",
     title: "Plains this year",
     place: "Henan",
@@ -118,7 +133,7 @@ export const FOOTPRINTS: readonly Footprint[] = [
     longitude: 113.6253,
     memory: "A recent crossing of the central plains.",
     tags: ["china", "central"],
-    order: 7,
+    order: 8,
   },
 ];
 
@@ -146,44 +161,31 @@ export function getFootprintArcs(footprints: readonly Footprint[] = FOOTPRINTS):
   const ordered = [...footprints].sort(
     (first, second) => first.year - second.year || first.order - second.order
   );
+  const home = ordered[0];
+  if (!home) return [];
 
-  return ordered.slice(0, -1).flatMap((from, index) => {
-    const to = ordered[index + 1];
-    if (!to) return [];
+  // Every recorded trip leaves home. A year-by-year chain zigzags inside China and
+  // collapses into one knot at the globe zoom used by the Flight Paths example.
+  return ordered.slice(1).map((destination, index) => {
+    const from: [number, number] = [home.longitude, home.latitude];
+    const to: [number, number] = [destination.longitude, destination.latitude];
+    const distance = Math.hypot(to[0] - from[0], to[1] - from[1]);
+    const reach = Math.min(0.42, 0.16 + distance / 48);
+    const direction = index % 2 === 0 ? 1 : -1;
 
-    return [
-      {
-        id: `${from.id}-${to.id}`,
-        toId: to.id,
-        from: [from.longitude, from.latitude] as [number, number],
-        to: [to.longitude, to.latitude] as [number, number],
-        route: `${from.place} → ${to.place}`,
-        color: index % 2 === 0 ? "#4285f4" : "#8b5cf6",
-        width: index === ordered.length - 2 ? 3.5 : 2.5,
-      },
-    ];
+    return {
+      id: `${home.id}-${destination.id}`,
+      toId: destination.id,
+      from,
+      to,
+      route: `${home.place} → ${destination.place}`,
+      color: "#4285f4",
+      width: distance < 4 ? 1.6 : 2.2,
+      curvature: reach * direction,
+    };
   });
 }
 
 export function getFeaturedFootprints(limit = 3, footprints: readonly Footprint[] = FOOTPRINTS) {
   return getSortedFootprints(footprints).slice(0, Math.max(0, limit));
-}
-
-export function getFootprintsMapView(footprints: readonly Footprint[] = FOOTPRINTS) {
-  if (footprints.length === 0) {
-    return { center: [108, 33] as [number, number], zoom: 3.2 };
-  }
-
-  const longitudes = footprints.map((footprint) => footprint.longitude);
-  const latitudes = footprints.map((footprint) => footprint.latitude);
-  const minLng = Math.min(...longitudes);
-  const maxLng = Math.max(...longitudes);
-  const minLat = Math.min(...latitudes);
-  const maxLat = Math.max(...latitudes);
-  const span = Math.max(maxLng - minLng, maxLat - minLat);
-
-  return {
-    center: [(minLng + maxLng) / 2, (minLat + maxLat) / 2] as [number, number],
-    zoom: span > 40 ? 2.2 : span > 15 ? 3.4 : span > 8 ? 4.2 : 5,
-  };
 }

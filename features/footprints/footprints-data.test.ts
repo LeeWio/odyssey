@@ -5,7 +5,6 @@ import {
   getFootprintArcs,
   getFootprintMetaLabel,
   getFootprintYears,
-  getFootprintsMapView,
   getSortedFootprints,
 } from "./footprints-data";
 
@@ -16,6 +15,7 @@ describe("footprint chronology", () => {
     expect(getSortedFootprints(source).map((item) => item.id)).toEqual([
       "henan",
       "anhui",
+      "huizhou",
       "chongqing",
       "shenzhen",
       "guangzhou",
@@ -37,7 +37,7 @@ describe("footprint chronology", () => {
     expect(getFeaturedFootprints(-1)).toEqual([]);
   });
 
-  it("connects places chronologically with arc data", () => {
+  it("draws each later place as its own route from home", () => {
     const arcs = getFootprintArcs();
     expect(arcs).toHaveLength(FOOTPRINTS.length - 1);
     expect(arcs[0]).toMatchObject({
@@ -47,20 +47,18 @@ describe("footprint chronology", () => {
       to: [108.9398, 34.3416],
       route: "Hubei → Shaanxi",
     });
-    expect(arcs.at(-1)).toMatchObject({
-      id: "anhui-henan",
-      toId: "henan",
-      route: "Anhui → Henan",
-    });
-  });
-
-  it("frames the map around China when footprints are present", () => {
-    const view = getFootprintsMapView();
-    expect(view.center[0]).toBeGreaterThan(100);
-    expect(view.center[0]).toBeLessThan(120);
-    expect(view.center[1]).toBeGreaterThan(20);
-    expect(view.center[1]).toBeLessThan(40);
-    expect(view.zoom).toBeGreaterThan(2);
+    expect(arcs.map((arc) => arc.id)).toEqual([
+      "hubei-shaanxi",
+      "hubei-guangzhou",
+      "hubei-shenzhen",
+      "hubei-chongqing",
+      "hubei-anhui",
+      "hubei-huizhou",
+      "hubei-henan",
+    ]);
+    expect(arcs[1]?.curvature).toBeLessThan(0);
+    expect(arcs[2]?.curvature).toBeGreaterThan(0);
+    expect(Math.sign(arcs[1]!.curvature)).not.toBe(Math.sign(arcs[2]!.curvature));
   });
 
   it("keeps memory titles and avoids em-dashes in visitor copy", () => {

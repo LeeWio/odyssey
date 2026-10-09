@@ -5,12 +5,7 @@ import { Map } from "@heroui-pro/react/map";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import {
-  getFootprintArcs,
-  getFootprintMetaLabel,
-  getFootprintsMapView,
-  type Footprint,
-} from "./footprints-data";
+import { getFootprintArcs, getFootprintMetaLabel, type Footprint } from "./footprints-data";
 import { footprintMapStyles, footprintMapWorkerUrl } from "./map-styles";
 
 export type FootprintsMapProps = {
@@ -36,7 +31,6 @@ export function FootprintsMap({
     : (footprints.find((footprint) => footprint.id === selectedId) ?? null);
   const arcs = getFootprintArcs(footprints);
   const selectedArc = arcs.find((arc) => arc.id === hoveredArcId);
-  const mapView = getFootprintsMapView(footprints);
 
   return (
     <div
@@ -45,37 +39,42 @@ export function FootprintsMap({
     >
       <Map
         aria-label={t("mapLabel")}
-        center={mapView.center}
+        center={[24, 28]}
         projection={{ type: "globe" }}
         styles={footprintMapStyles}
         workerUrl={footprintMapWorkerUrl}
-        zoom={mapView.zoom}
+        zoom={1.9}
       >
-        <Map.Arc
-          curvature={0.34}
-          data={arcs}
-          hoverPaint={{ "line-opacity": 1, "line-width": 5 }}
-          paint={{
-            "line-color": ["get", "color"],
-            "line-opacity": 0.74,
-            "line-width": ["get", "width"],
-          }}
-          onHover={
-            compact
-              ? undefined
-              : (event) => setHoveredArcId(event?.arc.id ? String(event.arc.id) : null)
-          }
-          onClick={
-            compact
-              ? undefined
-              : (event) => {
-                  const destination = footprints.find(
-                    (footprint) => footprint.id === event.arc.toId
-                  );
-                  if (destination) onSelect?.(destination);
-                }
-          }
-        />
+        {arcs.map((arc) => (
+          <Map.Arc
+            key={arc.id}
+            curvature={arc.curvature}
+            data={[arc]}
+            hoverPaint={{ "line-opacity": 1, "line-width": 4 }}
+            paint={{
+              "line-blur": 0.4,
+              "line-color": arc.color,
+              "line-opacity": 0.92,
+              "line-width": arc.width,
+            }}
+            samples={96}
+            onHover={
+              compact
+                ? undefined
+                : (event) => setHoveredArcId(event?.arc.id ? String(event.arc.id) : null)
+            }
+            onClick={
+              compact
+                ? undefined
+                : (event) => {
+                    const destination = footprints.find(
+                      (footprint) => footprint.id === event.arc.toId
+                    );
+                    if (destination) onSelect?.(destination);
+                  }
+            }
+          />
+        ))}
 
         {footprints.map((footprint) => {
           const isSelected = footprint.id === selectedId;

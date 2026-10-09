@@ -17,7 +17,7 @@ async function prepare(page: Page) {
         body: readFileSync(resolve("node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs")),
       })
   );
-  await page.route("https://tiles.openfreemap.org/styles/**", (route) =>
+  await page.route("https://tiles.openfreemap.org/**", (route) =>
     route.fulfill({
       json: {
         version: 8,
@@ -26,17 +26,6 @@ async function prepare(page: Page) {
           { id: "background", type: "background", paint: { "background-color": "#e2e7e8" } },
         ],
       },
-    })
-  );
-  await page.route("https://tiles.openfreemap.org/natural_earth/**", (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: "image/png",
-      // 1x1 transparent PNG
-      body: Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
-        "base64"
-      ),
     })
   );
 }
