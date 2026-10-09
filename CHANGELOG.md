@@ -1,3 +1,10 @@
+## [1.202.1](https://github.com/LeeWio/odyssey/compare/v1.202.0...v1.202.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* **web:** size scrolling boards by container width ([167cf06](https://github.com/LeeWio/odyssey/commit/167cf068ff5e0a54e380d28bbac0c734cb3bb47b))
+
 # [1.202.0](https://github.com/LeeWio/odyssey/compare/v1.201.1...v1.202.0) (2026-10-09)
 
 
