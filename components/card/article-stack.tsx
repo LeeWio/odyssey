@@ -11,15 +11,11 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 
-import {
-  ShaderBackground,
-  type ShaderBackgroundProps,
-} from "@/components/background/shader-background";
+import { ArticleCover } from "@/components/card/article-cover";
 import { MotionCard } from "@/components/ui";
 import { stackTransition } from "@/lib/motion/article-stack";
 import type { ComponentProps } from "react";
@@ -41,58 +37,6 @@ export type ArticleStackItem = {
 const STACK_PEEK = 18;
 
 export { stackTransition };
-const WARP_SHAPES = ["checks", "stripes", "edge"] as const;
-
-function seededRandom(seed: number) {
-  let value = seed >>> 0;
-  return () => {
-    value = (value * 1664525 + 1013904223) >>> 0;
-    return value / 0x100000000;
-  };
-}
-
-function warpForItem(id: string): Extract<ShaderBackgroundProps, { variant: "warp" }> {
-  const seed = Array.from(id).reduce(
-    (hash, char) => Math.imul(hash ^ char.charCodeAt(0), 16777619),
-    2166136261
-  );
-  const random = seededRandom(seed);
-  const between = (min: number, max: number) => min + random() * (max - min);
-  const color = () => {
-    const hue = Math.floor(random() * 360);
-    const saturation = Math.floor(between(38, 68));
-    const lightness = Math.floor(between(38, 62));
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-  };
-  const colorCount = 2 + Math.floor(random() * 2);
-  return {
-    variant: "warp",
-    colors: Array.from({ length: colorCount }, color),
-    proportion: between(0.3, 0.7),
-    softness: between(0.35, 0.8),
-    distortion: between(0.2, 0.55),
-    swirl: between(0.35, 0.7),
-    swirlIterations: Math.floor(between(5, 10)),
-    shape: WARP_SHAPES[Math.floor(random() * WARP_SHAPES.length)],
-    shapeScale: between(0.18, 0.5),
-    scale: between(0.8, 1.3),
-    rotation: Math.floor(random() * 360),
-    speed: between(0.25, 0.65),
-  };
-}
-
-function ArticleCover({ itemId, animated = true }: { itemId: string; animated?: boolean }) {
-  const warp = useMemo(() => warpForItem(itemId), [itemId]);
-  return (
-    <ShaderBackground
-      aria-hidden="true"
-      className="absolute inset-0"
-      {...warp}
-      speed={animated ? warp.speed : 0}
-    />
-  );
-}
-
 function useControllableExpanded({
   expanded,
   defaultExpanded,
@@ -152,7 +96,7 @@ function ArticleCardFace({
           variant="transparent"
           className="relative isolate h-18 w-24 shrink-0 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgb(255_255_255/0.12)] sm:h-20 sm:w-32"
         >
-          {showCover ? <ArticleCover animated={animatedCover} itemId={item.id} /> : null}
+          {showCover ? <ArticleCover animated={animatedCover} seed={item.id} /> : null}
         </Surface>
       </Card.Header>
       <Card.Footer className="flex items-center justify-between gap-3">

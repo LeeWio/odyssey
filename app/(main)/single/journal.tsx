@@ -41,7 +41,6 @@ import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/f
 import { useRetrieveDiscoveryQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
-import { ReadingListButton } from "@/features/library/reading-list-button";
 import { ColumnArticleStack } from "@/features/column/column-article-stack";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 import { useAppSelector } from "@/lib/hooks";
@@ -49,6 +48,8 @@ import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
 import { parsePageParam } from "@/lib/utils/pagination";
 import { PageContainer } from "@/components/layout/page-container";
+import { ArticleCard } from "@/components/card/article-card";
+import { ArticleCover } from "@/components/card/article-cover";
 
 const JOURNAL_STORY_GRID =
   "grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-x-8 gap-y-0";
@@ -101,33 +102,6 @@ function storyKey(post: Story) {
   return post.slug ?? String(post.id ?? "");
 }
 
-const coverHover =
-  "transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100";
-
-function Cover({
-  cover,
-  ratio,
-  eager = false,
-}: {
-  cover?: string;
-  ratio: string;
-  eager?: boolean;
-}) {
-  if (!cover) return <span className={`${ratio} bg-default/40 block`} />;
-
-  return (
-    // Cover hosts are not in next/image remotePatterns.
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      alt=""
-      className={`${ratio} w-full object-cover ${coverHover}`}
-      src={cover}
-      loading={eager ? "eager" : "lazy"}
-      decoding="async"
-    />
-  );
-}
-
 function FeatureCard({
   delay = 0,
   featured = false,
@@ -143,7 +117,7 @@ function FeatureCard({
     .filter(Boolean)
     .join(" · ");
   const title = post.title || t("untitledStory");
-  const cover = post.coverImage?.trim();
+  const seed = String(post.id ?? post.slug ?? title);
 
   return (
     <article
@@ -159,28 +133,26 @@ function FeatureCard({
       <Link
         className={
           featured
-            ? `group relative flex h-80 w-full flex-col justify-end overflow-hidden rounded-lg no-underline sm:h-96 2xl:h-112 ${cover ? "text-white" : "bg-surface-secondary text-foreground"}`
+            ? "group relative flex h-80 w-full flex-col justify-end overflow-hidden rounded-lg text-white no-underline sm:h-96 2xl:h-112"
             : "group text-foreground flex w-full items-start gap-5 no-underline"
         }
         href={storyHref(post)}
       >
-        {featured && cover ? <Cover cover={cover} eager ratio="absolute inset-0 h-full" /> : null}
+        {featured ? <ArticleCover seed={seed} /> : null}
         <div
           className={
             featured
-              ? `relative flex min-w-0 flex-col gap-3 p-6 sm:p-8 ${cover ? "bg-gradient-to-t from-black/90 via-black/65 to-transparent pt-20 sm:pt-24" : ""}`
+              ? "relative flex min-w-0 flex-col gap-3 bg-gradient-to-t from-black/90 via-black/65 to-transparent p-6 pt-20 sm:p-8 sm:pt-24"
               : "flex min-w-0 flex-1 flex-col gap-3"
           }
         >
-          <span className={featured && cover ? "text-xs text-white/80" : "text-muted text-xs"}>
-            {meta}
-          </span>
+          <span className="text-xs text-white/80">{meta}</span>
           <Typography
             type="h3"
             weight="semibold"
             className={
               featured
-                ? `line-clamp-3 text-2xl leading-tight tracking-normal wrap-anywhere sm:text-3xl 2xl:text-4xl ${cover ? "text-white" : "text-foreground"}`
+                ? "line-clamp-3 text-2xl leading-tight tracking-normal wrap-anywhere text-white sm:text-3xl 2xl:text-4xl"
                 : "group-hover:text-accent line-clamp-3 text-xl leading-snug tracking-normal wrap-anywhere"
             }
           >
@@ -189,18 +161,18 @@ function FeatureCard({
           {post.summary ? (
             <Typography
               type="body-sm"
-              className={`line-clamp-2 leading-6 ${featured && cover ? "text-white/85" : "text-muted"}`}
+              className={`line-clamp-2 leading-6 ${featured ? "text-white/85" : "text-muted"}`}
             >
               {post.summary}
             </Typography>
           ) : null}
-          <span className={`mt-1 text-xs ${featured && cover ? "text-white/75" : "text-muted"}`}>
+          <span className={`mt-1 text-xs ${featured ? "text-white/75" : "text-muted"}`}>
             {post.authorName || t("recentlyPublished")}
           </span>
         </div>
-        {!featured && cover ? (
-          <div className="w-24 shrink-0 overflow-hidden rounded-md sm:w-32">
-            <Cover cover={cover} ratio="aspect-[4/3]" />
+        {!featured ? (
+          <div className="relative isolate aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-md sm:w-32">
+            <ArticleCover seed={seed} />
           </div>
         ) : null}
       </Link>
@@ -322,78 +294,8 @@ function LatestPagination({
   );
 }
 
-function StoryRow({ post, isRefreshing = false }: { post: Story; isRefreshing?: boolean }) {
-  const t = useTranslations("Journal");
-  const locale = useLocale();
-  const title = post.title || t("untitledStory");
-  const cover = post.coverImage?.trim();
-  const author = post.authorName?.trim();
-
-  return (
-    <article aria-label={title} className="border-separator h-full min-w-0 border-t py-6">
-      <Card variant="transparent" className="h-full gap-4 rounded-none p-0">
-        <Card.Header className="gap-3">
-          <Typography color="muted" type="body-xs" className="flex flex-wrap gap-x-3 gap-y-1">
-            {post.category?.name ? (
-              <span className="text-accent font-medium">{post.category.name}</span>
-            ) : null}
-            <span>{formatDate(storyDate(post), locale, t("recentlyPublished"))}</span>
-          </Typography>
-          <div className="flex items-start gap-5">
-            <Card.Title className="line-clamp-3 min-w-0 flex-1 text-xl leading-7 tracking-normal">
-              <Link
-                className="text-foreground hover:text-accent block max-w-full wrap-anywhere no-underline"
-                href={storyHref(post)}
-              >
-                {title}
-              </Link>
-            </Card.Title>
-            {cover ? (
-              <Link
-                aria-label={title}
-                className="block w-20 shrink-0 overflow-hidden rounded-md no-underline sm:w-24"
-                href={storyHref(post)}
-              >
-                <Cover cover={cover} ratio="aspect-[4/3]" />
-              </Link>
-            ) : null}
-          </div>
-          {author ? <Card.Description className="text-xs">{author}</Card.Description> : null}
-        </Card.Header>
-        {post.summary ? (
-          <Card.Content>
-            <p className="text-muted line-clamp-3 text-sm leading-6">{post.summary}</p>
-          </Card.Content>
-        ) : null}
-        <Card.Footer className="mt-auto flex-wrap justify-between gap-3">
-          <span className="text-muted text-xs tabular-nums">
-            <NumberValue locale={locale} notation="compact" value={post.views ?? 0}>
-              {(formatted) => t("views", { count: formatted })}
-            </NumberValue>
-            {" · "}
-            <NumberValue locale={locale} notation="compact" value={post.likesCount ?? 0}>
-              {(formatted) => t("likes", { count: formatted })}
-            </NumberValue>
-            {typeof post.commentsCount === "number" ? (
-              <>
-                {" · "}
-                <NumberValue locale={locale} notation="compact" value={post.commentsCount}>
-                  {(formatted) => t("comments", { count: formatted })}
-                </NumberValue>
-              </>
-            ) : null}
-          </span>
-          {post.id != null && typeof post.isInReadingList === "boolean" ? (
-            <ReadingListButton
-              postId={post.id}
-              isSaved={post.isInReadingList}
-              isRefreshing={isRefreshing}
-            />
-          ) : null}
-        </Card.Footer>
-      </Card>
-    </article>
-  );
+function StoryRow({ post }: { post: Story }) {
+  return <ArticleCard post={post} />;
 }
 
 function columnUpdatedAt(column: ColumnResponse) {
@@ -972,7 +874,7 @@ export function JournalPage() {
                   <div className={JOURNAL_STORY_GRID} data-testid="journal-latest-grid">
                     {latestPosts.map((post) => (
                       <div key={post.id ?? post.slug} className="min-w-0" data-journal-reveal="">
-                        <StoryRow post={post} isRefreshing={latestQuery.isFetching} />
+                        <StoryRow post={post} />
                       </div>
                     ))}
                   </div>

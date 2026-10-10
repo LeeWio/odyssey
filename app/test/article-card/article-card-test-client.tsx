@@ -1,11 +1,12 @@
 "use client";
 
-import { Avatar, Button, Card, Chip, Popover } from "@heroui/react";
+import { Avatar, Button, Card, Chip, Dropdown, Label, Popover } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 
 import { ColumnArticleStack } from "@/features/column/column-article-stack";
 import type { ColumnPost } from "@/lib/features/column";
+import { ArticleCover } from "@/components/card/article-cover";
 import {
   ShaderBackground,
   type ShaderBackgroundVariant,
@@ -183,6 +184,161 @@ function ArticleArrow() {
   return <Icon aria-hidden="true" className="size-4" icon="lucide:arrow-up-right" />;
 }
 
+function ScienceArticleCover() {
+  return <ArticleCover seed="science-article" />;
+}
+
+function ScienceArticleAuthor() {
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  return (
+    <Popover>
+      <Popover.Trigger aria-label="View Samantha Smith's profile">
+        <div className="flex items-center gap-2">
+          <Avatar size="sm">
+            <Avatar.Image
+              alt="Sarah Johnson"
+              src="https://img.heroui.chat/image/avatar?w=400&h=400&u=1"
+            />
+            <Avatar.Fallback>SJ</Avatar.Fallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <p className="text-sm font-medium">Sarah Johnson</p>
+            <time className="text-muted text-xs" dateTime="2024-03-11">
+              March 11, 2024
+            </time>
+          </div>
+        </div>
+      </Popover.Trigger>
+      <Popover.Content className="w-80 max-w-[calc(100vw-2rem)]">
+        <Popover.Dialog>
+          <Popover.Heading>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <Avatar size="md">
+                  <Avatar.Image
+                    alt="Sarah Johnson"
+                    src="https://img.heroui.chat/image/avatar?w=400&h=400&u=1"
+                  />
+                  <Avatar.Fallback>SJ</Avatar.Fallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">Sarah Johnson</p>
+                  <p className="text-muted text-sm">March 11, 2024</p>
+                </div>
+              </div>
+              <Button
+                className="shrink-0 rounded-full"
+                size="sm"
+                variant={isFollowing ? "tertiary" : "primary"}
+                onPress={() => setIsFollowing((following) => !following)}
+              >
+                {isFollowing ? "Following" : "Follow"}
+              </Button>
+            </div>
+          </Popover.Heading>
+          <p className="text-muted mt-3 text-sm leading-5">
+            Product designer and creative director. Building beautiful experiences that matter.
+          </p>
+          <div className="mt-3 flex gap-4 text-sm">
+            <p>
+              <span className="font-semibold">892</span>
+              <span className="text-muted ms-1">Following</span>
+            </p>
+            <p>
+              <span className="font-semibold">12.5K</span>
+              <span className="text-muted ms-1">Followers</span>
+            </p>
+          </div>
+        </Popover.Dialog>
+      </Popover.Content>
+    </Popover>
+  );
+}
+
+function ScienceArticleCard() {
+  const [isShared, setIsShared] = useState(false);
+
+  async function handleShare() {
+    try {
+      await navigator.clipboard.writeText("/articles/exploring-the-mysteries-of-the-universe");
+    } catch {
+      // Clipboard access is unavailable in some preview environments.
+    }
+    setIsShared(true);
+    window.setTimeout(() => setIsShared(false), 1800);
+  }
+
+  return (
+    <Card
+      aria-label="Exploring the Mysteries of the Universe article"
+      className="w-full max-w-xl overflow-hidden shadow-sm md:flex-row md:items-stretch"
+      role="article"
+    >
+      <div className="relative isolate min-h-56 w-full shrink-0 overflow-hidden rounded-2xl sm:min-h-64 md:min-h-0 md:w-48 lg:w-52">
+        <ScienceArticleCover />
+        <Chip className="absolute top-3 left-3" size="sm">
+          #science
+        </Chip>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-3">
+        <Card.Header className="gap-1">
+          <Card.Title className="text-foreground max-w-xl pe-8 text-xl leading-tight font-bold text-pretty sm:text-2xl">
+            Become an ACME Creator!
+          </Card.Title>
+          <Card.Description className="text-muted line-clamp-2 max-w-xl text-sm leading-5">
+            Visit the Acme Creator Hub to sign up today and start earning credits from your fans and
+            followers.
+          </Card.Description>
+        </Card.Header>
+
+        <Card.Footer className="mt-auto flex w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <ScienceArticleAuthor />
+
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              aria-label={isShared ? "Article link copied" : "Share article"}
+              isIconOnly
+              size="sm"
+              onPress={handleShare}
+            >
+              <Icon
+                aria-hidden="true"
+                className="size-4"
+                icon={isShared ? "lucide:check" : "lucide:send"}
+              />
+            </Button>
+            <Dropdown>
+              <Button aria-label="More article actions" isIconOnly size="sm" variant="outline">
+                <Icon aria-hidden="true" className="size-4" icon="lucide:ellipsis" />
+              </Button>
+              <Dropdown.Popover>
+                <Dropdown.Menu
+                  onAction={(key) => {
+                    if (key === "copy-link") {
+                      void handleShare();
+                    }
+                  }}
+                >
+                  <Dropdown.Item id="save-article" textValue="Save for later">
+                    <Icon aria-hidden="true" className="text-muted size-4" icon="lucide:bookmark" />
+                    <Label>Save for later</Label>
+                  </Dropdown.Item>
+                  <Dropdown.Item id="copy-link" textValue="Copy article link">
+                    <Icon aria-hidden="true" className="text-muted size-4" icon="lucide:link" />
+                    <Label>Copy article link</Label>
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown.Popover>
+            </Dropdown>
+          </div>
+        </Card.Footer>
+      </div>
+    </Card>
+  );
+}
+
 function CompactArticleCard({ variant }: { variant: ShaderBackgroundVariant }) {
   return (
     <Card className="w-full overflow-hidden p-3" role="article">
@@ -327,6 +483,10 @@ export default function ArticleCardTestClient() {
 
         <section aria-label="Stacked article cards" className="flex flex-col items-start gap-3">
           <ColumnArticleStack posts={STACK_DEMO} title="Quiet Interfaces" />
+        </section>
+
+        <section aria-label="Science article card" className="flex w-full justify-center">
+          <ScienceArticleCard />
         </section>
 
         <section aria-label="Article card variations" className="grid gap-6 lg:grid-cols-3">
