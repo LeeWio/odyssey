@@ -2,7 +2,6 @@
 
 import { Icon } from "@iconify/react";
 import { Carousel } from "@heroui-pro/react/carousel";
-import Autoplay from "embla-carousel-autoplay";
 import { EmptyState, ItemCard, NumberValue, Segment } from "@heroui-pro/react";
 import {
   Alert,
@@ -43,13 +42,13 @@ import { useRetrieveDiscoveryQuery, useRetrieveFacetsQuery } from "@/lib/feature
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
 import { ReadingListButton } from "@/features/library/reading-list-button";
+import { ColumnArticleStack } from "@/features/column/column-article-stack";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
 import { parsePageParam } from "@/lib/utils/pagination";
 import { PageContainer } from "@/components/layout/page-container";
-import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 const JOURNAL_STORY_GRID =
   "grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-x-8 gap-y-0";
@@ -421,41 +420,13 @@ function columnCadence(column: ColumnResponse, t: (key: string) => string) {
 function ColumnDeck({ column }: { column: ColumnResponse }) {
   const t = useTranslations("Journal");
   const name = column.name || t("untitledColumn");
-  const [autoplay] = useState(() => Autoplay({ delay: 2000, stopOnInteraction: true }));
   const locale = useLocale();
-  const shouldReduceMotion = useReducedMotionPreference();
-  const slides = column.posts.map((post) => {
-    const image = post.coverImage?.trim();
-    return {
-      alt: post.title,
-      detail: post.summary?.trim() || undefined,
-      image,
-      meta: [
-        post.authorName,
-        post.publishedAt ? formatDate(post.publishedAt, locale, "") : null,
-        post.views ? t("views", { count: post.views.toLocaleString(locale) }) : null,
-      ]
-        .filter(Boolean)
-        .join(" · "),
-      slug: post.slug,
-      title: post.title,
-    };
-  });
-  if (slides.length === 0) return null;
+  if (column.posts.length === 0) return null;
 
   const updated = columnUpdatedAt(column);
 
   return (
-    <article className="flex min-w-0 flex-col gap-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <Typography type="h3" weight="semibold">
-          {name}
-        </Typography>
-        <Link className="text-sm no-underline" href={`/columns/${column.slug}`}>
-          {t("viewColumn")}
-          <Link.Icon />
-        </Link>
-      </div>
+    <article className="flex min-w-0 flex-col gap-4">
       {column.description ? (
         <Typography className="line-clamp-2" color="muted" type="body-sm">
           {column.description}
@@ -470,48 +441,11 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
           .filter(Boolean)
           .join(" · ")}
       </p>
-      <div className="w-full min-w-0">
-        <Carousel opts={{ loop: true }} plugins={shouldReduceMotion ? [] : [autoplay]}>
-          <Carousel.Content>
-            {slides.map((slide) => (
-              <Carousel.Item key={slide.slug}>
-                <div className="p-1">
-                  <Card className="overflow-hidden select-none">
-                    <Link className="block no-underline" href={`/single/${slide.slug}`}>
-                      {slide.image ? (
-                        <>
-                          {/* Remote cover hosts are not in next/image remotePatterns. */}
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            alt={slide.alt}
-                            className="aspect-[16/9] w-full object-cover"
-                            draggable={false}
-                            src={slide.image}
-                          />
-                        </>
-                      ) : null}
-                      <Card.Footer className="flex flex-col items-start gap-1">
-                        {slide.meta ? (
-                          <span className="text-muted text-xs">{slide.meta}</span>
-                        ) : null}
-                        <Card.Title className="line-clamp-2">{slide.title}</Card.Title>
-                        {slide.detail ? (
-                          <Card.Description className="line-clamp-2">
-                            {slide.detail}
-                          </Card.Description>
-                        ) : null}
-                      </Card.Footer>
-                    </Link>
-                  </Card>
-                </div>
-              </Carousel.Item>
-            ))}
-          </Carousel.Content>
-          <Carousel.Previous />
-          <Carousel.Next />
-          <Carousel.Dots />
-        </Carousel>
-      </div>
+      <ColumnArticleStack posts={column.posts} title={name} />
+      <Link className="w-fit text-sm no-underline" href={`/columns/${column.slug}`}>
+        {t("viewColumn")}
+        <Link.Icon />
+      </Link>
     </article>
   );
 }
