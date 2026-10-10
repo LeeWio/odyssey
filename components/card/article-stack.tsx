@@ -197,7 +197,6 @@ export function ArticleStack({
   const faceRef = useRef<HTMLDivElement>(null);
   const pointerInside = useRef(false);
   const [faceHeight, setFaceHeight] = useState(0);
-  const [hovered, setHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useControllableExpanded({
     expanded,
     defaultExpanded,
@@ -254,13 +253,11 @@ export function ArticleStack({
       onPointerEnter={(event: PointerEvent<HTMLDivElement>) => {
         if (event.pointerType !== "mouse") return;
         pointerInside.current = true;
-        setHovered(true);
         open();
       }}
       onPointerLeave={(event: PointerEvent<HTMLDivElement>) => {
         if (event.pointerType !== "mouse") return;
         pointerInside.current = false;
-        setHovered(false);
         if (!hasFocus.current) collapse();
       }}
       onFocus={() => {
