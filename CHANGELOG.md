@@ -1,3 +1,10 @@
+# [1.205.0](https://github.com/LeeWio/odyssey/compare/v1.204.0...v1.205.0) (2026-10-10)
+
+
+### Features
+
+* **web:** show the column article stack on essays ([3f833df](https://github.com/LeeWio/odyssey/commit/3f833dfcb0715698debb2256c9ab9802d02f1817))
+
 # [1.204.0](https://github.com/LeeWio/odyssey/compare/v1.203.0...v1.204.0) (2026-10-09)
 
 
