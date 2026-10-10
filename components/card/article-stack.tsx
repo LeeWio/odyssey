@@ -5,7 +5,9 @@ import { Avatar, Button, Card, Separator, Surface, Typography } from "@heroui/re
 import { type Transition, useReducedMotion } from "motion/react";
 import {
   type FocusEvent,
+  type KeyboardEvent,
   type PointerEvent,
+  type ReactNode,
   useCallback,
   useEffect,
   useRef,
@@ -17,6 +19,7 @@ import {
   type ShaderBackgroundProps,
 } from "@/components/background/shader-background";
 import { MotionCard } from "@/components/ui";
+import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 export type ArticleStackItem = {
@@ -32,8 +35,7 @@ export type ArticleStackItem = {
   likes: string;
 };
 
-const STACK_PEEK = 11;
-const STACK_INSET = 16;
+const STACK_PEEK = 12;
 
 const stackTransition = (
   reduce: boolean | null,
@@ -113,10 +115,17 @@ function useControllableExpanded({
   return [value, setValue] as const;
 }
 
-function ArticleCardBody({ item }: { item: ArticleStackItem }) {
+function ArticleCardFace({
+  item,
+  children,
+  ...props
+}: { item: ArticleStackItem; children?: ReactNode } & Omit<
+  ComponentProps<typeof MotionCard>,
+  "children"
+>) {
   return (
-    <>
-      <Card.Header className="flex-row items-start justify-between gap-4 p-0">
+    <MotionCard {...props}>
+      <Card.Header className="flex-row items-start justify-between gap-4">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="flex items-center gap-2">
             <Avatar className="size-7" size="sm">
@@ -135,12 +144,12 @@ function ArticleCardBody({ item }: { item: ArticleStackItem }) {
         </div>
         <Surface
           variant="transparent"
-          className="relative isolate h-[4.5rem] w-[5.25rem] shrink-0 overflow-hidden rounded-xl p-0 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.12)] sm:h-20 sm:w-24"
+          className="relative isolate h-18 w-21 shrink-0 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgb(255_255_255/0.12)] sm:h-20 sm:w-24"
         >
           <ArticleCover />
         </Surface>
       </Card.Header>
-      <Card.Footer className="flex items-center justify-between gap-3 p-0">
+      <Card.Footer className="flex items-center justify-between gap-3">
         <Typography className="flex min-w-0 items-center gap-1.5" color="muted" type="body-xs">
           {item.dateTime ? (
             <time dateTime={item.dateTime}>{item.date}</time>
@@ -166,7 +175,8 @@ function ArticleCardBody({ item }: { item: ArticleStackItem }) {
           </Typography>
         </div>
       </Card.Footer>
-    </>
+      {children}
+    </MotionCard>
   );
 }
 
@@ -265,14 +275,19 @@ export function ArticleStack({
         open();
       }}
       onBlur={handleBlur}
+      onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.key !== "Escape") return;
+        event.preventDefault();
+        collapse();
+      }}
     >
       <div aria-hidden="true" className="invisible" inert ref={faceRef}>
-        <ArticleCardBody item={primaryItem} />
+        <ArticleCardFace item={primaryItem} />
       </div>
       {isExpanded ? (
         visibleItems.slice(1).map((item) => (
           <div key={item.id} aria-hidden="true" className="invisible mt-2.5" inert>
-            <ArticleCardBody item={item} />
+            <ArticleCardFace item={item} />
           </div>
         ))
       ) : visibleItems.length > 1 && faceHeight > 0 ? (
@@ -295,41 +310,34 @@ export function ArticleStack({
             const isPrimary = index === 0;
 
             return (
-              <MotionCard
+              <ArticleCardFace
                 key={item.id}
+                item={item}
                 layout="position"
                 initial={false}
                 animate={{
                   y: isExpanded ? 0 : index * STACK_PEEK,
-                  scale: isExpanded ? 1 : 1 - index * 0.012,
-                  opacity: isExpanded ? 1 : 1 - index * 0.14,
-                  clipPath: isExpanded
-                    ? "inset(0px 0px round min(32px, var(--radius)))"
-                    : `inset(0px ${index * STACK_INSET}px round min(32px, var(--radius)))`,
+                  scale: isExpanded ? 1 : 1 - index * 0.035,
                 }}
                 transition={cardTransition(index)}
-                className="border-separator bg-surface col-start-1 flex w-full origin-top flex-col gap-3.5 overflow-hidden rounded-[min(32px,var(--radius))] border px-4 py-3.5 shadow-[0_10px_24px_-18px_rgb(0_0_0/0.7)]"
+                className={cn(
+                  "relative col-start-1 w-full origin-top overflow-hidden shadow-none",
+                  !isExpanded && index > 0 && "opacity-80"
+                )}
                 style={{
                   zIndex: visibleItems.length - index,
                   gridRow: isExpanded ? index + 1 : 1,
                   marginTop: isExpanded && index > 0 ? 10 : 0,
                 }}
-                onKeyDown={(event) => {
-                  if (event.key !== "Escape") return;
-                  event.preventDefault();
-                  collapse();
-                }}
               >
-                <ArticleCardBody item={item} />
                 <Button
                   fullWidth
                   variant="ghost"
                   aria-expanded={isPrimary ? isExpanded : undefined}
                   aria-label={isPrimary ? (isExpanded ? collapseLabel : expandLabel) : item.title}
-                  tabIndex={isPrimary || isExpanded ? 0 : -1}
                   className={cn(
-                    "absolute inset-0 z-10 h-full min-h-0 rounded-[inherit] bg-transparent px-0 py-0 shadow-none data-[pressed=true]:scale-[0.985]",
-                    !isPrimary && !isExpanded && "invisible"
+                    "absolute inset-0 z-10 h-full min-h-0 rounded-[inherit] bg-transparent shadow-none",
+                    !isPrimary && !isExpanded && "hidden"
                   )}
                   onPress={() => {
                     if (!isExpanded) {
@@ -339,7 +347,7 @@ export function ArticleStack({
                     onActivate?.(item);
                   }}
                 />
-              </MotionCard>
+              </ArticleCardFace>
             );
           })}
         </span>

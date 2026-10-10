@@ -1,7 +1,7 @@
 "use client";
 
 import { Widget } from "@heroui-pro/react";
-import { Chip, Separator, Surface } from "@heroui/react";
+import { Chip, Separator } from "@heroui/react";
 import { ChevronDown, Eye, ThumbsUp } from "@gravity-ui/icons";
 import { useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
@@ -15,7 +15,6 @@ import {
 } from "@/components/card/article-stack";
 import { MotionButton, MotionSurface } from "@/components/ui";
 import type { ColumnPost } from "@/lib/features/column";
-import { cn } from "@/lib/utils";
 
 function formatDate(value: string | null | undefined, locale: string, fallback: string) {
   if (!value) return { label: fallback, dateTime: undefined };
@@ -125,14 +124,6 @@ export function ColumnArticleStack({ title, posts }: { title: string; posts: Col
               onActivate={(item) => {
                 if (item.href) router.push(item.href);
               }}
-            />
-            <Surface
-              aria-hidden="true"
-              variant="transparent"
-              className={cn(
-                "from-surface-secondary pointer-events-none absolute inset-x-0 bottom-0 z-20 h-3 bg-gradient-to-t p-0 shadow-none transition-opacity duration-200",
-                expanded ? "opacity-0" : "opacity-100"
-              )}
             />
           </Widget.Content>
           <Widget.Footer>
