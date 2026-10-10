@@ -695,11 +695,7 @@
     "noEssays": "No essays published yet",
     "noEssaysHint": "This column is ready for its first published essay.",
     "recently": "Recently published",
-    "articleCountLabel": "{count, plural, one {# article} other {# articles}}",
-    "expandArticles": "Expand {count} articles in this column",
-    "collapseArticles": "Collapse article preview",
-    "viewsTotal": "{count, number} views",
-    "likesTotal": "{count, number} likes"
+    "articleCountLabel": "{count, plural, one {# article} other {# articles}}"
   },
   "Archive": {
     "loading": "Loading archived articles",

@@ -1,19 +1,14 @@
 "use client";
 
 import { Widget } from "@heroui-pro/react";
-import { Chip, Separator } from "@heroui/react";
-import { ChevronDown, Eye, ThumbsUp } from "@gravity-ui/icons";
+import { Chip, ScrollShadow } from "@heroui/react";
 import { useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
-import {
-  ArticleStack,
-  stackTransition,
-  type ArticleStackItem,
-} from "@/components/card/article-stack";
-import { MotionButton, MotionSurface } from "@/components/ui";
+import { ArticleStack, type ArticleStackItem } from "@/components/card/article-stack";
+import { MotionSurface } from "@/components/ui";
+import { stackTransition } from "@/lib/motion/article-stack";
 import type { ColumnPost } from "@/lib/features/column";
 
 function formatDate(value: string | null | undefined, locale: string, fallback: string) {
@@ -34,9 +29,7 @@ function formatDate(value: string | null | undefined, locale: string, fallback: 
 export function ColumnArticleStack({ title, posts }: { title: string; posts: ColumnPost[] }) {
   const t = useTranslations("Columns");
   const locale = useLocale();
-  const panelId = useId();
-  const router = useRouter();
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotion() ?? false;
   const [expanded, setExpanded] = useState(false);
   const shellRef = useRef<HTMLDivElement>(null);
   const [shellHeight, setShellHeight] = useState<number | "auto">("auto");
@@ -52,7 +45,7 @@ export function ColumnArticleStack({ title, posts }: { title: string; posts: Col
     observer.observe(shell);
     return () => observer.disconnect();
   }, []);
-  const items: ArticleStackItem[] = posts.slice(0, 3).map((post) => {
+  const items: ArticleStackItem[] = posts.map((post) => {
     const published = formatDate(post.publishedAt, locale, t("recently"));
 
     return {
@@ -67,9 +60,6 @@ export function ColumnArticleStack({ title, posts }: { title: string; posts: Col
     };
   });
 
-  const views = posts.reduce((sum, post) => sum + post.views, 0);
-  const likes = posts.reduce((sum, post) => sum + post.likesCount, 0);
-
   return (
     <MotionSurface
       variant="transparent"
@@ -83,60 +73,30 @@ export function ColumnArticleStack({ title, posts }: { title: string; posts: Col
         <Widget className="w-full max-w-md">
           <Widget.Header>
             <Widget.Title>{title}</Widget.Title>
-            <span className="flex h-6 shrink-0 items-center gap-1">
-              <Chip
-                size="sm"
-                variant="soft"
-                aria-label={t("articleCountLabel", { count: posts.length })}
-                className="pointer-events-none h-6 min-w-6 justify-center px-1.5"
-              >
-                <Chip.Label>{posts.length.toLocaleString(locale)}</Chip.Label>
-              </Chip>
-              <MotionButton
-                isIconOnly
-                size="sm"
-                variant="ghost"
-                aria-expanded={expanded}
-                aria-controls={panelId}
-                aria-label={
-                  expanded ? t("collapseArticles") : t("expandArticles", { count: posts.length })
-                }
-                className="size-6 min-h-6 min-w-6 rounded-full"
-                animate={{ rotate: expanded ? 180 : 0 }}
-                initial={false}
-                transition={shellTransition}
-                onPress={() => setExpanded((open) => !open)}
-              >
-                <ChevronDown aria-hidden="true" className="size-3.5" width={14} />
-              </MotionButton>
-            </span>
+            <Chip
+              size="sm"
+              variant="soft"
+              aria-label={t("articleCountLabel", { count: posts.length })}
+              className="pointer-events-none h-6 min-w-6 justify-center px-1.5"
+            >
+              <Chip.Label>{posts.length.toLocaleString(locale)}</Chip.Label>
+            </Chip>
           </Widget.Header>
-          <Widget.Content
-            id={panelId}
-            className="relative overflow-hidden bg-transparent shadow-none"
-          >
-            <ArticleStack
-              items={items}
-              expanded={expanded}
-              expandLabel={t("expandArticles", { count: posts.length })}
-              collapseLabel={t("collapseArticles")}
-              onExpandedChange={setExpanded}
-              onActivate={(item) => {
-                if (item.href) router.push(item.href);
-              }}
-            />
+          <Widget.Content className="relative overflow-hidden bg-transparent shadow-none">
+            <ScrollShadow
+              orientation="vertical"
+              size={32}
+              hideScrollBar
+              className="max-h-[min(70vh,36rem)]"
+            >
+              <ArticleStack
+                items={items}
+                expanded={expanded}
+                collapsedVisibleCount={3}
+                onExpandedChange={setExpanded}
+              />
+            </ScrollShadow>
           </Widget.Content>
-          <Widget.Footer>
-            <Chip color="accent" size="sm" variant="soft">
-              <Eye width={12} />
-              <Chip.Label>{t("viewsTotal", { count: views })}</Chip.Label>
-            </Chip>
-            <Separator className="h-3" orientation="vertical" />
-            <Chip color="warning" size="sm" variant="soft">
-              <ThumbsUp width={12} />
-              <Chip.Label>{t("likesTotal", { count: likes })}</Chip.Label>
-            </Chip>
-          </Widget.Footer>
         </Widget>
       </div>
     </MotionSurface>

@@ -2,14 +2,16 @@
 
 import { Eye, ThumbsUp } from "@gravity-ui/icons";
 import { Avatar, Button, Card, Separator, Surface, Typography } from "@heroui/react";
-import { type Transition, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
+import Link from "next/link";
 import {
-  type FocusEvent,
   type KeyboardEvent,
+  type FocusEvent,
   type PointerEvent,
   type ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -19,6 +21,7 @@ import {
   type ShaderBackgroundProps,
 } from "@/components/background/shader-background";
 import { MotionCard } from "@/components/ui";
+import { stackTransition } from "@/lib/motion/article-stack";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
@@ -35,60 +38,59 @@ export type ArticleStackItem = {
   likes: string;
 };
 
-const STACK_PEEK = 12;
-
-const stackTransition = (
-  reduce: boolean | null,
-  expanded: boolean,
-  index: number,
-  count: number
-): Transition =>
-  reduce
-    ? { duration: 0 }
-    : {
-        type: "spring",
-        stiffness: 420,
-        damping: 36,
-        mass: 0.75,
-        delay: expanded ? index * 0.035 : (count - 1 - index) * 0.02,
-      };
+const STACK_PEEK = 18;
 
 export { stackTransition };
 const WARP_SHAPES = ["checks", "stripes", "edge"] as const;
 
-function randomBetween(min: number, max: number) {
-  return min + Math.random() * (max - min);
-}
-
-function randomColor() {
-  const hue = Math.floor(Math.random() * 360);
-  const saturation = Math.floor(randomBetween(38, 78));
-  const lightness = Math.floor(randomBetween(28, 72));
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-}
-
-function randomWarp(): Extract<ShaderBackgroundProps, { variant: "warp" }> {
-  const colorCount = 2 + Math.floor(Math.random() * 4);
-  return {
-    variant: "warp",
-    colors: Array.from({ length: colorCount }, randomColor),
-    proportion: randomBetween(0.15, 0.85),
-    softness: randomBetween(0, 1),
-    distortion: randomBetween(0.15, 0.85),
-    swirl: randomBetween(0.35, 1),
-    swirlIterations: Math.floor(randomBetween(4, 16)),
-    shape: WARP_SHAPES[Math.floor(Math.random() * WARP_SHAPES.length)],
-    shapeScale: randomBetween(0.08, 0.7),
-    scale: randomBetween(0.6, 1.6),
-    rotation: Math.floor(Math.random() * 360),
-    speed: randomBetween(0.4, 1.6),
+function seededRandom(seed: number) {
+  let value = seed >>> 0;
+  return () => {
+    value = (value * 1664525 + 1013904223) >>> 0;
+    return value / 0x100000000;
   };
 }
 
-function ArticleCover() {
-  const [warp] = useState(randomWarp);
+function warpForItem(id: string): Extract<ShaderBackgroundProps, { variant: "warp" }> {
+  const seed = Array.from(id).reduce(
+    (hash, char) => Math.imul(hash ^ char.charCodeAt(0), 16777619),
+    2166136261
+  );
+  const random = seededRandom(seed);
+  const between = (min: number, max: number) => min + random() * (max - min);
+  const color = () => {
+    const hue = Math.floor(random() * 360);
+    const saturation = Math.floor(between(38, 68));
+    const lightness = Math.floor(between(38, 62));
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  };
+  const colorCount = 2 + Math.floor(random() * 2);
+  return {
+    variant: "warp",
+    colors: Array.from({ length: colorCount }, color),
+    proportion: between(0.3, 0.7),
+    softness: between(0.35, 0.8),
+    distortion: between(0.2, 0.55),
+    swirl: between(0.35, 0.7),
+    swirlIterations: Math.floor(between(5, 10)),
+    shape: WARP_SHAPES[Math.floor(random() * WARP_SHAPES.length)],
+    shapeScale: between(0.18, 0.5),
+    scale: between(0.8, 1.3),
+    rotation: Math.floor(random() * 360),
+    speed: between(0.25, 0.65),
+  };
+}
 
-  return <ShaderBackground aria-hidden="true" className="absolute inset-0" {...warp} />;
+function ArticleCover({ itemId, animated = true }: { itemId: string; animated?: boolean }) {
+  const warp = useMemo(() => warpForItem(itemId), [itemId]);
+  return (
+    <ShaderBackground
+      aria-hidden="true"
+      className="absolute inset-0"
+      {...warp}
+      speed={animated ? warp.speed : 0}
+    />
+  );
 }
 
 function useControllableExpanded({
@@ -118,11 +120,15 @@ function useControllableExpanded({
 function ArticleCardFace({
   item,
   children,
+  showCover = true,
+  animatedCover = true,
   ...props
-}: { item: ArticleStackItem; children?: ReactNode } & Omit<
-  ComponentProps<typeof MotionCard>,
-  "children"
->) {
+}: {
+  item: ArticleStackItem;
+  children?: ReactNode;
+  showCover?: boolean;
+  animatedCover?: boolean;
+} & Omit<ComponentProps<typeof MotionCard>, "children">) {
   return (
     <MotionCard {...props}>
       <Card.Header className="flex-row items-start justify-between gap-4">
@@ -144,9 +150,9 @@ function ArticleCardFace({
         </div>
         <Surface
           variant="transparent"
-          className="relative isolate h-18 w-21 shrink-0 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgb(255_255_255/0.12)] sm:h-20 sm:w-24"
+          className="relative isolate h-18 w-24 shrink-0 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgb(255_255_255/0.12)] sm:h-20 sm:w-32"
         >
-          <ArticleCover />
+          {showCover ? <ArticleCover animated={animatedCover} itemId={item.id} /> : null}
         </Surface>
       </Card.Header>
       <Card.Footer className="flex items-center justify-between gap-3">
@@ -186,9 +192,7 @@ export function ArticleStack({
   defaultExpanded = false,
   onExpandedChange,
   onActivate,
-  maxVisible = 3,
-  expandLabel,
-  collapseLabel,
+  collapsedVisibleCount = 3,
   className,
 }: {
   items: ArticleStackItem[];
@@ -196,16 +200,17 @@ export function ArticleStack({
   defaultExpanded?: boolean;
   onExpandedChange?: (expanded: boolean) => void;
   onActivate?: (item: ArticleStackItem) => void;
-  maxVisible?: number;
-  expandLabel: string;
-  collapseLabel: string;
+  collapsedVisibleCount?: number;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
-  const hasFocus = useRef(false);
+  const reduce = useReducedMotion() ?? false;
   const rootRef = useRef<HTMLDivElement>(null);
   const faceRef = useRef<HTMLDivElement>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasFocus = useRef(false);
   const pointerInside = useRef(false);
+  const lastPointerType = useRef<string | null>(null);
+  const expandedAtPointerDown = useRef(false);
   const [faceHeight, setFaceHeight] = useState(0);
   const [isExpanded, setIsExpanded] = useControllableExpanded({
     expanded,
@@ -213,12 +218,29 @@ export function ArticleStack({
     onExpandedChange,
   });
 
-  const collapse = useCallback(() => {
-    setIsExpanded(false);
-  }, [setIsExpanded]);
+  const primaryItem = items[0];
+  const visibleItems = isExpanded ? items : items.slice(0, Math.max(1, collapsedVisibleCount));
 
-  const visibleItems = items.slice(0, Math.max(1, maxVisible));
-  const primaryItem = visibleItems[0];
+  const collapse = useCallback(() => setIsExpanded(false), [setIsExpanded]);
+  const clearHoverTimer = useCallback(() => {
+    if (!hoverTimerRef.current) return;
+    clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = null;
+  }, []);
+  const scheduleExpanded = useCallback(
+    (next: boolean, delay: number) => {
+      clearHoverTimer();
+      hoverTimerRef.current = setTimeout(() => {
+        setIsExpanded(next);
+        hoverTimerRef.current = null;
+      }, delay);
+    },
+    [clearHoverTimer, setIsExpanded]
+  );
+
+  useEffect(() => {
+    return clearHoverTimer;
+  }, [clearHoverTimer]);
 
   useEffect(() => {
     const face = faceRef.current;
@@ -236,25 +258,18 @@ export function ArticleStack({
 
     const onPointerDown = (event: globalThis.PointerEvent) => {
       if (rootRef.current?.contains(event.target as Node)) return;
+      clearHoverTimer();
       collapse();
     };
 
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [isExpanded, collapse]);
+  }, [isExpanded, clearHoverTimer, collapse]);
 
   const cardTransition = (index: number) =>
     stackTransition(reduce, isExpanded, index, visibleItems.length);
 
   if (!primaryItem) return null;
-
-  const open = () => setIsExpanded(true);
-
-  const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
-    if (event.currentTarget.contains(event.relatedTarget)) return;
-    hasFocus.current = false;
-    if (!pointerInside.current) collapse();
-  };
 
   return (
     <div
@@ -263,31 +278,41 @@ export function ArticleStack({
       onPointerEnter={(event: PointerEvent<HTMLDivElement>) => {
         if (event.pointerType !== "mouse") return;
         pointerInside.current = true;
-        open();
+        scheduleExpanded(true, 100);
       }}
       onPointerLeave={(event: PointerEvent<HTMLDivElement>) => {
         if (event.pointerType !== "mouse") return;
         pointerInside.current = false;
-        if (!hasFocus.current) collapse();
+        if (!hasFocus.current) scheduleExpanded(false, 150);
+      }}
+      onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
+        lastPointerType.current = event.pointerType;
+        expandedAtPointerDown.current = isExpanded;
       }}
       onFocus={() => {
+        clearHoverTimer();
         hasFocus.current = true;
-        open();
+        setIsExpanded(true);
       }}
-      onBlur={handleBlur}
+      onBlur={(event: FocusEvent<HTMLDivElement>) => {
+        if (event.currentTarget.contains(event.relatedTarget)) return;
+        hasFocus.current = false;
+        if (!pointerInside.current) scheduleExpanded(false, 150);
+      }}
       onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
         if (event.key !== "Escape") return;
         event.preventDefault();
-        collapse();
+        clearHoverTimer();
+        setIsExpanded(false);
       }}
     >
       <div aria-hidden="true" className="invisible" inert ref={faceRef}>
-        <ArticleCardFace item={primaryItem} />
+        <ArticleCardFace item={primaryItem} showCover={false} />
       </div>
       {isExpanded ? (
-        visibleItems.slice(1).map((item) => (
+        items.slice(1).map((item) => (
           <div key={item.id} aria-hidden="true" className="invisible mt-2.5" inert>
-            <ArticleCardFace item={item} />
+            <ArticleCardFace item={item} showCover={false} />
           </div>
         ))
       ) : visibleItems.length > 1 && faceHeight > 0 ? (
@@ -307,12 +332,11 @@ export function ArticleStack({
       >
         <span className="relative grid w-full">
           {visibleItems.map((item, index) => {
-            const isPrimary = index === 0;
-
             return (
               <ArticleCardFace
                 key={item.id}
                 item={item}
+                animatedCover={isExpanded ? index < 3 : index === 0}
                 layout="position"
                 initial={false}
                 animate={{
@@ -330,23 +354,46 @@ export function ArticleStack({
                   marginTop: isExpanded && index > 0 ? 10 : 0,
                 }}
               >
-                <Button
-                  fullWidth
-                  variant="ghost"
-                  aria-expanded={isPrimary ? isExpanded : undefined}
-                  aria-label={isPrimary ? (isExpanded ? collapseLabel : expandLabel) : item.title}
-                  className={cn(
-                    "absolute inset-0 z-10 h-full min-h-0 rounded-[inherit] bg-transparent shadow-none",
-                    !isPrimary && !isExpanded && "hidden"
-                  )}
-                  onPress={() => {
-                    if (!isExpanded) {
-                      open();
-                      return;
-                    }
-                    onActivate?.(item);
-                  }}
-                />
+                {item.href ? (
+                  <Link
+                    href={item.href}
+                    prefetch={false}
+                    aria-label={item.title}
+                    className={cn(
+                      "focus-visible:ring-accent absolute inset-0 z-10 cursor-[var(--cursor-interactive)] rounded-[inherit] focus-visible:ring-2 focus-visible:ring-inset",
+                      !isExpanded && index > 0 && "hidden"
+                    )}
+                    onClick={(event) => {
+                      if (
+                        event.detail > 0 &&
+                        lastPointerType.current === "touch" &&
+                        !expandedAtPointerDown.current
+                      ) {
+                        event.preventDefault();
+                        setIsExpanded(true);
+                      }
+                      lastPointerType.current = null;
+                    }}
+                  />
+                ) : onActivate ? (
+                  <Button
+                    fullWidth
+                    variant="ghost"
+                    aria-label={item.title}
+                    className={cn(
+                      "absolute inset-0 z-10 h-full min-h-0 rounded-[inherit] bg-transparent shadow-none",
+                      !isExpanded && index > 0 && "hidden"
+                    )}
+                    onPress={() => {
+                      if (lastPointerType.current === "touch" && !expandedAtPointerDown.current) {
+                        setIsExpanded(true);
+                      } else {
+                        onActivate(item);
+                      }
+                      lastPointerType.current = null;
+                    }}
+                  />
+                ) : null}
               </ArticleCardFace>
             );
           })}

@@ -113,7 +113,7 @@ export const SHADER_BACKGROUND_VARIANTS = Object.keys(
  * is only frozen for reduced motion when the variant actually exposes it.
  */
 export function ShaderBackground({ variant, className, ...rest }: ShaderBackgroundProps) {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useReducedMotion() ?? false;
   const Shader = VARIANT_COMPONENTS[variant] as ComponentType<Record<string, unknown>>;
   const props = rest as Record<string, unknown>;
   const speedProps = reducedMotion && "speed" in props ? { speed: 0 } : {};
