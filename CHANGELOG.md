@@ -1,3 +1,10 @@
+## [1.205.2](https://github.com/LeeWio/odyssey/compare/v1.205.1...v1.205.2) (2026-10-10)
+
+
+### Bug Fixes
+
+* **web:** type the article stack against HeroUI card and button ([5238abe](https://github.com/LeeWio/odyssey/commit/5238abebb4885746a9dbfba044e0b78f49d430f6))
+
 ## [1.205.1](https://github.com/LeeWio/odyssey/compare/v1.205.0...v1.205.1) (2026-10-10)
 
 
