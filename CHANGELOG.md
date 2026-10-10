@@ -1,3 +1,10 @@
+## [1.205.1](https://github.com/LeeWio/odyssey/compare/v1.205.0...v1.205.1) (2026-10-10)
+
+
+### Bug Fixes
+
+* **web:** remove the unused hover state from the article stack ([1fdcf0d](https://github.com/LeeWio/odyssey/commit/1fdcf0d339777e343a36932f798a07d4c09b8f36))
+
 # [1.205.0](https://github.com/LeeWio/odyssey/compare/v1.204.0...v1.205.0) (2026-10-10)
 
 
