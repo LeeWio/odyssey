@@ -1,3 +1,10 @@
+# [1.206.0](https://github.com/LeeWio/odyssey/compare/v1.205.2...v1.206.0) (2026-10-10)
+
+
+### Features
+
+* **single:** show column article stack in journal ([c8e1058](https://github.com/LeeWio/odyssey/commit/c8e1058bc22f479d1ce10158a061dfa87b28d822))
+
 ## [1.205.2](https://github.com/LeeWio/odyssey/compare/v1.205.1...v1.205.2) (2026-10-10)
 
 
