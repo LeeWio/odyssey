@@ -39,6 +39,7 @@ import {
   useRecordReadingProgressMutation,
 } from "@/lib/features/library";
 import { useGetPublicColumnBySlugQuery } from "@/lib/features/column";
+import { ColumnArticleStack } from "@/features/column/column-article-stack";
 import {
   type PostResponse,
   useGetPublicPostBySlugQuery,
@@ -248,13 +249,21 @@ function ColumnInstallment({
 }) {
   const t = useTranslations("Article");
   const column = useGetPublicColumnBySlugQuery(series.slug);
-  const order = columnOrder(column.data?.posts ?? [], slug) ?? undefined;
-  if (!order) return null;
+  const posts = column.data?.posts ?? [];
+  const order = columnOrder(posts, slug) ?? undefined;
+  if (!order && posts.length === 0) return null;
 
   return (
-    <Typography color="muted" type="body-xs">
-      {t("installment", { count: series.postsCount, order })}
-    </Typography>
+    <div className="mt-4 flex flex-col gap-3">
+      {order ? (
+        <Typography color="muted" type="body-xs">
+          {t("installment", { count: series.postsCount, order })}
+        </Typography>
+      ) : null}
+      {posts.length > 0 ? (
+        <ColumnArticleStack posts={posts} title={column.data?.name || series.name} />
+      ) : null}
+    </div>
   );
 }
 

@@ -694,7 +694,12 @@
     "inThisColumn": "本专栏文章",
     "noEssays": "还没有发布的文章",
     "noEssaysHint": "这个专栏已经准备好接收第一篇文章。",
-    "recently": "最近发布"
+    "recently": "最近发布",
+    "articleCountLabel": "{count, plural, other {# 篇文章}}",
+    "expandArticles": "展开专栏中的 {count} 篇文章",
+    "collapseArticles": "收起文章预览",
+    "viewsTotal": "{count, number} 次阅读",
+    "likesTotal": "{count, number} 次点赞"
   },
   "Archive": {
     "loading": "正在加载归档文章",
