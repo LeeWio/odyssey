@@ -1,3 +1,10 @@
+## [1.208.2](https://github.com/LeeWio/odyssey/compare/v1.208.1...v1.208.2) (2026-10-12)
+
+
+### Bug Fixes
+
+* **ci:** tolerate peer conflicts during audit lockfile generation ([60e9a0d](https://github.com/LeeWio/odyssey/commit/60e9a0d2d6010c482507368b7c0bf49e1d8cff4e))
+
 ## [1.208.1](https://github.com/LeeWio/odyssey/compare/v1.208.0...v1.208.1) (2026-10-12)
 
 
