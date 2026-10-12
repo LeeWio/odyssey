@@ -1,7 +1,13 @@
 "use client";
 
 import { Section } from "@/components/layout/section";
-import { HOME_PREVIEW_GRID } from "./layout";
+import {
+  HOME_PREVIEW_GRID,
+  HOME_SECTION_CONTENT,
+  HOME_SECTION_DESCRIPTION,
+  HOME_SECTION_HEADER,
+  HOME_SECTION_TITLE,
+} from "./layout";
 
 import { pageEaseOut } from "@/lib/motion";
 
@@ -43,7 +49,7 @@ export function GalleryShowcase() {
 
   return (
     <Section aria-labelledby="gallery-showcase-title">
-      <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+      <header className={HOME_SECTION_HEADER}>
         <div className="max-w-xl">
           <Chip color="default" size="sm" variant="secondary">
             Gallery
@@ -52,11 +58,11 @@ export function GalleryShowcase() {
             id="gallery-showcase-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
+            className={HOME_SECTION_TITLE}
           >
             A slower way to look.
           </Typography>
-          <Typography color="muted" type="body" className="mt-3 max-w-lg leading-7">
+          <Typography color="muted" type="body" className={HOME_SECTION_DESCRIPTION}>
             Quiet geometry, weather, and the frames that stayed with me.
           </Typography>
         </div>
@@ -68,7 +74,10 @@ export function GalleryShowcase() {
         </Link>
       </header>
 
-      <div className={`mt-10 ${HOME_PREVIEW_GRID}`} data-testid="home-gallery-grid">
+      <div
+        className={`${HOME_SECTION_CONTENT} ${HOME_PREVIEW_GRID}`}
+        data-testid="home-gallery-grid"
+      >
         {GALLERY_PREVIEW.map((photo, index) => (
           <motion.div
             key={photo.src}

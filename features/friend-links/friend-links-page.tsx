@@ -1,7 +1,7 @@
 "use client";
 
 import { createPageReveal } from "@/lib/motion";
-import { PageContainer } from "@/components/layout/page-container";
+import { PageFrame } from "@/components/layout/page-frame";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
@@ -158,7 +158,7 @@ interface FriendLinksPageProps {
 }
 
 export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
-  const Container = compact ? "div" : PageContainer;
+  const Container = compact ? "div" : PageFrame;
   const t = useTranslations("Links");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotionPreference();
@@ -170,6 +170,9 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
   const searchQuery = useDeferredValue(searchValue.trim().toLocaleLowerCase());
   const validLinks = friendLinks.filter((link) => Boolean(toSafeExternalUrl(link.url)));
   const visibleLinks = validLinks.filter((link) => matchesFriendLink(link, searchQuery));
+  const linksWithAvatars = validLinks.filter((link) =>
+    Boolean(toSafeExternalUrl(link.avatar))
+  ).length;
 
   const updateApplication = <Key extends keyof FriendLinkApplication>(
     key: Key,
@@ -217,14 +220,11 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
   };
 
   return (
-    <Surface
-      variant="transparent"
-      className={cn("w-full", compact ? undefined : "bg-background min-h-dvh pt-28 pb-24 lg:pt-32")}
-    >
-      <Container className="w-full min-w-0">
+    <Surface variant="transparent" className={cn("w-full", compact ? undefined : "bg-background")}>
+      <Container className={compact ? "w-full min-w-0" : "mx-auto max-w-7xl"}>
         {!compact ? (
           <>
-            <header className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <header className="border-default-200 grid gap-8 border-b pb-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div className="max-w-3xl">
                 <motion.div {...reveal(0, 10)}>
                   <Chip size="sm" variant="secondary">
@@ -235,35 +235,44 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                   <Typography
                     type="h1"
                     weight="bold"
-                    className="mt-5 tracking-normal text-balance break-words"
+                    className="mt-4 text-4xl leading-[1.08] tracking-normal text-balance break-words sm:text-5xl"
                   >
                     {t("title")}
                   </Typography>
                 </motion.div>
                 <motion.div {...reveal(0.12, 14)}>
-                  <Typography color="muted" type="body" className="mt-5 max-w-xl">
+                  <Typography color="muted" type="body" className="mt-4 max-w-xl leading-7">
                     {t("description")}
                   </Typography>
                 </motion.div>
               </div>
               <motion.div {...reveal(0.1, 12)}>
-                <Surface variant="secondary" className="rounded-2xl px-5 py-4">
-                  <Typography className="font-mono text-3xl tabular-nums" type="body">
-                    {validLinks.length.toLocaleString(locale)}
-                  </Typography>
-                  <Typography color="muted" type="body-sm" className="mt-1">
-                    {t("placesToVisit")}
-                  </Typography>
-                </Surface>
+                <div className="grid grid-cols-2 gap-5 lg:min-w-64">
+                  <div className="border-default-200 border-l pl-3">
+                    <Typography className="font-mono text-3xl tabular-nums" type="body">
+                      {validLinks.length.toLocaleString(locale)}
+                    </Typography>
+                    <Typography color="muted" type="body-xs" className="mt-1 leading-5">
+                      {t("placesToVisit")}
+                    </Typography>
+                  </div>
+                  <div className="border-default-200 border-l pl-3">
+                    <Typography className="font-mono text-3xl tabular-nums" type="body">
+                      {linksWithAvatars.toLocaleString(locale)}
+                    </Typography>
+                    <Typography color="muted" type="body-xs" className="mt-1 leading-5">
+                      {t("withAvatars")}
+                    </Typography>
+                  </div>
+                </div>
               </motion.div>
             </header>
-            <Separator className="mt-10" />
           </>
         ) : null}
 
         <section aria-label={t("section")} className={compact ? undefined : "mt-10"}>
           {!isLoading && !error && validLinks.length > 0 ? (
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="border-default-200 mb-6 flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
               <SearchField
                 className="w-full sm:max-w-sm"
                 name="friend-link-search"
@@ -277,11 +286,13 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                   <SearchField.ClearButton aria-label={t("clearSearch")} />
                 </SearchField.Group>
               </SearchField>
-              <Typography aria-live="polite" color="muted" type="body-xs">
-                {searchQuery
-                  ? t("matches", { count: visibleLinks.length.toLocaleString(locale) })
-                  : t("browse")}
-              </Typography>
+              <div className="flex min-h-9 items-center justify-between gap-4">
+                <Typography aria-live="polite" color="muted" type="body-xs" role="status">
+                  {searchQuery
+                    ? t("matches", { count: visibleLinks.length.toLocaleString(locale) })
+                    : t("browse")}
+                </Typography>
+              </div>
             </div>
           ) : null}
 

@@ -4,6 +4,7 @@ import { Button, Typography } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { MomentCard, MomentCardSkeleton } from "../components/card";
 import { useMomentFeed } from "../hooks/use-moment-feed";
+import { PageFrame } from "@/components/layout/page-frame";
 
 export const PublicFeedView = () => {
   const t = useTranslations("Moments");
@@ -11,7 +12,7 @@ export const PublicFeedView = () => {
     useMomentFeed();
 
   return (
-    <div className="bg-background min-h-screen px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+    <PageFrame className="bg-background">
       <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8">
         <header className="flex w-full max-w-xl flex-col gap-3 text-center">
           <Typography type="h1" weight="bold">
@@ -51,6 +52,6 @@ export const PublicFeedView = () => {
           )}
         </div>
       </div>
-    </div>
+    </PageFrame>
   );
 };

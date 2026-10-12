@@ -1,11 +1,12 @@
 "use client";
 
 import { EmptyState, NumberValue } from "@heroui-pro/react";
-import { Button, Link, Skeleton, Typography } from "@heroui/react";
+import { Button, Link, Skeleton } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 import { ESSAY_GRID } from "../../components/grid-classes";
 
 import { useGetPublicCategoriesQuery } from "@/lib/features/category";
@@ -36,20 +37,14 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
 
   return (
     <PageContainer className="flex flex-col gap-8 pt-28 pb-24 lg:pt-32">
-      <header className="flex max-w-2xl flex-col gap-2">
+      <PageHeader
+        title={category?.name ?? decodeURIComponent(slug)}
+        description={category?.description}
+      >
         <Link className="text-sm no-underline" href="/single/categories">
           {t("allCategories")}
+          <Link.Icon />
         </Link>
-        <Typography
-          type="h1"
-          weight="semibold"
-          className="tracking-normal text-balance break-words"
-        >
-          {category?.name ?? decodeURIComponent(slug)}
-        </Typography>
-        {category?.description ? (
-          <Typography color="muted">{category.description}</Typography>
-        ) : null}
         {posts.data ? (
           <span className="text-muted text-sm tabular-nums">
             <NumberValue locale={locale} value={posts.data.total}>
@@ -57,7 +52,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
             </NumberValue>
           </span>
         ) : null}
-      </header>
+      </PageHeader>
 
       {categories.isLoading || (category && posts.isLoading) ? (
         <div className={ESSAY_GRID} aria-busy="true">

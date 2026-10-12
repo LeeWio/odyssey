@@ -1,6 +1,5 @@
 "use client";
 
-import { useReducedMotion } from "motion/react";
 import { useMemo } from "react";
 
 import {
@@ -56,7 +55,6 @@ export function articleCoverConfig(
 }
 
 export function ArticleCover({ seed, animated = true }: { seed: string; animated?: boolean }) {
-  const reduceMotion = useReducedMotion() ?? false;
   const config = useMemo(() => articleCoverConfig(seed), [seed]);
 
   return (
@@ -64,7 +62,7 @@ export function ArticleCover({ seed, animated = true }: { seed: string; animated
       aria-hidden="true"
       className="absolute inset-0"
       {...config}
-      speed={animated && !reduceMotion ? config.speed : 0}
+      speed={animated ? config.speed : 0}
     />
   );
 }

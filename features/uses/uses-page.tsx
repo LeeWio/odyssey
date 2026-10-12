@@ -3,6 +3,7 @@
 import { createPageReveal } from "@/lib/motion";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
+import { PageFrame } from "@/components/layout/page-frame";
 
 import { EmptyState } from "@heroui-pro/react";
 import {
@@ -13,7 +14,6 @@ import {
   Label,
   Link,
   SearchField,
-  Separator,
   Surface,
   Tag,
   TagGroup,
@@ -148,6 +148,14 @@ export function UsesPage({ compact = false }: UsesPageProps) {
   const deferredSearch = useDeferredValue(searchValue.trim().toLocaleLowerCase());
 
   const totalCount = useMemo(() => getUsesItemCount(usesData), []);
+  const linkedCount = useMemo(
+    () =>
+      usesData.reduce(
+        (count, category) => count + category.items.filter((item) => item.link).length,
+        0
+      ),
+    []
+  );
   const visibleCategories = useMemo(
     () =>
       filterUsesCategories(usesData, {
@@ -172,16 +180,18 @@ export function UsesPage({ compact = false }: UsesPageProps) {
     setCategoryFilter("all");
   };
 
+  const Container = compact ? "div" : PageFrame;
+
   return (
     <Surface variant="transparent" className={cn("w-full", compact ? undefined : "min-h-[100dvh]")}>
-      <div
+      <Container
         className={cn(
-          "mx-auto flex w-full max-w-6xl flex-col",
-          compact ? "gap-10 px-0" : "gap-10 px-6 py-24 sm:px-10 sm:py-32"
+          "mx-auto flex w-full flex-col gap-10",
+          compact ? "max-w-6xl px-0" : "max-w-7xl"
         )}
       >
         {!compact ? (
-          <header className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <header className="border-default-200 grid gap-8 border-b pb-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="max-w-3xl">
               <motion.div {...reveal(0, 10)}>
                 <Chip size="sm" variant="secondary">
@@ -192,33 +202,51 @@ export function UsesPage({ compact = false }: UsesPageProps) {
                 <Typography
                   type="h1"
                   weight="bold"
-                  className="mt-5 text-[clamp(2.25rem,5vw,4.25rem)] leading-[1.02] tracking-[-0.05em] text-balance"
+                  className="mt-4 text-4xl leading-[1.08] tracking-normal text-balance sm:text-5xl"
                 >
                   {t("title")}
                 </Typography>
               </motion.div>
               <motion.div {...reveal(0.12, 14)}>
-                <Typography color="muted" type="body" className="mt-4 max-w-xl text-balance">
+                <Typography
+                  color="muted"
+                  type="body"
+                  className="mt-4 max-w-xl leading-7 text-balance"
+                >
                   {t("description")}
                 </Typography>
               </motion.div>
             </div>
-            <motion.div {...reveal(0.1, 12)}>
-              <Surface variant="secondary" className="rounded-2xl px-5 py-4">
+            <motion.div {...reveal(0.1, 12)} className="grid grid-cols-3 gap-5 lg:min-w-80">
+              <div className="border-default-200 border-l pl-3">
                 <Typography className="font-mono text-3xl tabular-nums" type="body">
                   {totalCount.toLocaleString(locale)}
                 </Typography>
-                <Typography color="muted" type="body-sm" className="mt-1">
+                <Typography color="muted" type="body-xs" className="mt-1 leading-5">
                   {t("onTheDesk")}
                 </Typography>
-              </Surface>
+              </div>
+              <div className="border-default-200 border-l pl-3">
+                <Typography className="font-mono text-3xl tabular-nums" type="body">
+                  {usesData.length.toLocaleString(locale)}
+                </Typography>
+                <Typography color="muted" type="body-xs" className="mt-1 leading-5">
+                  {t("categories")}
+                </Typography>
+              </div>
+              <div className="border-default-200 border-l pl-3">
+                <Typography className="font-mono text-3xl tabular-nums" type="body">
+                  {linkedCount.toLocaleString(locale)}
+                </Typography>
+                <Typography color="muted" type="body-xs" className="mt-1 leading-5">
+                  {t("officialLinks")}
+                </Typography>
+              </div>
             </motion.div>
           </header>
         ) : null}
 
-        {!compact ? <Separator /> : null}
-
-        <div className="flex flex-col gap-4">
+        <div className="border-default-200 flex flex-col gap-4 border-b pb-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <SearchField
               className="w-full sm:max-w-sm"
@@ -233,11 +261,19 @@ export function UsesPage({ compact = false }: UsesPageProps) {
                 <SearchField.ClearButton aria-label={t("clearSearch")} />
               </SearchField.Group>
             </SearchField>
-            <Typography aria-live="polite" color="muted" type="body-xs">
-              {deferredSearch || categoryFilter !== "all"
-                ? t("matches", { count: visibleCount.toLocaleString(locale) })
-                : t("browse")}
-            </Typography>
+            <div className="flex min-h-9 items-center justify-between gap-4">
+              <Typography aria-live="polite" color="muted" type="body-xs" role="status">
+                {deferredSearch || categoryFilter !== "all"
+                  ? t("matches", { count: visibleCount.toLocaleString(locale) })
+                  : t("browse")}
+              </Typography>
+              {categoryFilter !== "all" && !deferredSearch ? (
+                <Button size="sm" variant="tertiary" onPress={clearFilters}>
+                  <Icon aria-hidden="true" icon="lucide:x" className="size-3.5" />
+                  {t("clearFilters")}
+                </Button>
+              ) : null}
+            </div>
           </div>
 
           <TagGroup
@@ -290,7 +326,7 @@ export function UsesPage({ compact = false }: UsesPageProps) {
             ))}
           </div>
         )}
-      </div>
+      </Container>
     </Surface>
   );
 }

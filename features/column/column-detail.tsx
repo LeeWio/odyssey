@@ -15,6 +15,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
+import { PageFrame } from "@/components/layout/page-frame";
 import { useGetPublicColumnBySlugQuery } from "@/lib/features/column";
 import { ColumnArticleStack } from "./column-article-stack";
 
@@ -35,7 +36,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
 
   if (isLoading) {
     return (
-      <div className="bg-background min-h-[100dvh] px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+      <PageFrame className="bg-background">
         <div className="mx-auto max-w-6xl space-y-8">
           <Skeleton className="h-12 w-32 rounded-lg" />
           <Skeleton className="aspect-[21/9] w-full rounded-2xl" />
@@ -45,13 +46,13 @@ export function ColumnDetail({ slug }: { slug: string }) {
             ))}
           </div>
         </div>
-      </div>
+      </PageFrame>
     );
   }
 
   if (error || !column) {
     return (
-      <div className="bg-background flex min-h-[100dvh] items-center justify-center px-6">
+      <PageFrame className="bg-background flex items-center justify-center">
         <Card variant="secondary" className="max-w-md items-start gap-5 p-7">
           <Card.Header>
             <Card.Title>{t("notFound")}</Card.Title>
@@ -65,7 +66,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
             {t("allColumnsLink")}
           </HeroLink>
         </Card>
-      </div>
+      </PageFrame>
     );
   }
 
@@ -87,7 +88,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
   );
 
   return (
-    <div className="bg-background min-h-[100dvh] px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+    <PageFrame className="bg-background">
       <div className="mx-auto w-full max-w-6xl">
         <HeroLink
           className={cn(buttonVariants({ size: "sm", variant: "ghost" }), "mb-8 no-underline")}
@@ -172,6 +173,6 @@ export function ColumnDetail({ slug }: { slug: string }) {
           )}
         </section>
       </div>
-    </div>
+    </PageFrame>
   );
 }

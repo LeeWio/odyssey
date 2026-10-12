@@ -12,6 +12,12 @@ import {
   getFeaturedFootprints,
   getFootprintArcs,
 } from "@/features/footprints";
+import {
+  HOME_SECTION_CONTENT,
+  HOME_SECTION_DESCRIPTION,
+  HOME_SECTION_HEADER,
+  HOME_SECTION_TITLE,
+} from "./layout";
 
 export function FootprintsShowcase() {
   const t = useTranslations("Home");
@@ -21,7 +27,7 @@ export function FootprintsShowcase() {
 
   return (
     <Section id="footprints-showcase" aria-labelledby="footprints-showcase-title">
-      <header className="flex w-full flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+      <header className={`${HOME_SECTION_HEADER} w-full`}>
         <div className="max-w-xl">
           <Chip size="sm" variant="secondary">
             {t("footprints.eyebrow")}
@@ -30,11 +36,11 @@ export function FootprintsShowcase() {
             id="footprints-showcase-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
+            className={HOME_SECTION_TITLE}
           >
             {t("footprints.title")}
           </Typography>
-          <Typography color="muted" type="body" className="mt-3 max-w-lg leading-7">
+          <Typography color="muted" type="body" className={HOME_SECTION_DESCRIPTION}>
             {t("footprints.description")}
           </Typography>
         </div>
@@ -46,7 +52,7 @@ export function FootprintsShowcase() {
         </Link>
       </header>
 
-      <div className="relative mt-10 w-full overflow-hidden rounded-lg">
+      <div className={`${HOME_SECTION_CONTENT} relative w-full overflow-hidden rounded-lg`}>
         <FootprintsMap footprints={FOOTPRINTS} compact />
 
         <Card className="bg-overlay shadow-overlay absolute top-3 left-3 z-10 w-[260px] gap-3 p-4">

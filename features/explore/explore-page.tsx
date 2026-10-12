@@ -25,7 +25,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { motion, useReducedMotion } from "motion/react";
 
 import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
-import { PageContainer } from "@/components/layout/page-container";
+import { PageFrame } from "@/components/layout/page-frame";
 import type { PostResponse } from "@/lib/features/post";
 import { useGetPublicPostsQuery } from "@/lib/features/post";
 import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
@@ -276,8 +276,8 @@ export function ExplorePage() {
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
-    <div className="bg-background min-h-dvh w-full pt-28 pb-24 lg:pt-32">
-      <PageContainer>
+    <PageFrame className="bg-background">
+      <div className="mx-auto w-full max-w-7xl">
         <header className="border-separator grid gap-8 border-b pb-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="min-w-0">
             <motion.div {...revealInView(0, 10)}>
@@ -579,7 +579,7 @@ export function ExplorePage() {
             <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
           </Link>
         </div>
-      </PageContainer>
-    </div>
+      </div>
+    </PageFrame>
   );
 }

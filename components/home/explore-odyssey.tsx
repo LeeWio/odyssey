@@ -1,7 +1,13 @@
 "use client";
 
 import { Section } from "@/components/layout/section";
-import { HOME_CONTENT_GRID } from "./layout";
+import {
+  HOME_CONTENT_GRID,
+  HOME_SECTION_CONTENT,
+  HOME_SECTION_DESCRIPTION,
+  HOME_SECTION_HEADER,
+  HOME_SECTION_TITLE,
+} from "./layout";
 
 import { Icon } from "@iconify/react";
 import { Card, Chip, Link, Typography } from "@heroui/react";
@@ -27,7 +33,7 @@ export function ExploreOdyssey() {
 
   return (
     <Section aria-labelledby="explore-odyssey-title">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <header className={HOME_SECTION_HEADER}>
         <motion.div {...revealInView(0, 10)}>
           <Chip color="accent" size="sm" variant="soft">
             {t("eyebrow")}
@@ -36,11 +42,11 @@ export function ExploreOdyssey() {
             id="explore-odyssey-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
+            className={HOME_SECTION_TITLE}
           >
             {t("title")}
           </Typography>
-          <Typography color="muted" type="body" className="mt-3 max-w-xl leading-6">
+          <Typography color="muted" type="body" className={HOME_SECTION_DESCRIPTION}>
             {t("description")}
           </Typography>
         </motion.div>
@@ -54,7 +60,10 @@ export function ExploreOdyssey() {
         </motion.div>
       </header>
 
-      <div className={`mt-10 ${HOME_CONTENT_GRID}`} data-testid="home-explore-grid">
+      <div
+        className={`${HOME_SECTION_CONTENT} ${HOME_CONTENT_GRID}`}
+        data-testid="home-explore-grid"
+      >
         {DESTINATIONS.map((destination, index) => (
           <motion.div key={destination.key} {...revealInView(0.1 + index * 0.04, 18)}>
             <Link
@@ -63,7 +72,7 @@ export function ExploreOdyssey() {
             >
               <Card
                 variant="secondary"
-                className="group-hover:border-accent/40 group-hover:bg-surface-secondary h-full min-h-36 transition-[border-color,background-color,transform] duration-200 group-hover:-translate-y-1"
+                className="group-hover:border-accent/40 group-hover:bg-surface-secondary/70 border-default-200/70 h-full min-h-32 bg-transparent transition-[border-color,background-color,transform] duration-200 group-hover:-translate-y-1"
               >
                 <Card.Header className="flex-row items-start justify-between gap-4">
                   <span className="bg-accent/12 text-accent flex size-10 shrink-0 items-center justify-center rounded-xl">

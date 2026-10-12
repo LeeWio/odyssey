@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { Card, Chip, Typography, type Selection } from "@heroui/react";
 import { FileTree } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
+import { PageFrame } from "@/components/layout/page-frame";
 
 // Types for workspace representation
 type FileMetadata = {
@@ -120,7 +121,7 @@ export function ExplorerPage() {
   }, [selectedKeys]);
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+    <PageFrame className="bg-background">
       <div className="mx-auto w-full max-w-5xl">
         {/* Header */}
         <motion.header
@@ -379,6 +380,6 @@ export function ExplorerPage() {
           </Card>
         </div>
       </div>
-    </div>
+    </PageFrame>
   );
 }

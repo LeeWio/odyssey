@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { PageFrame } from "@/components/layout/page-frame";
+
 export const metadata: Metadata = {
   title: "Engineering Lab",
   description:
@@ -11,9 +13,5 @@ export default function BuildingLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <section className="relative z-10 mx-auto w-full max-w-7xl px-6 py-12 sm:px-10 md:py-20 lg:py-24">
-      {children}
-    </section>
-  );
+  return <PageFrame className="relative z-10 mx-auto max-w-7xl">{children}</PageFrame>;
 }

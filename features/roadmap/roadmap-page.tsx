@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { Card, Chip, Typography } from "@heroui/react";
 import { Timeline, TrendChip } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
+import { PageFrame } from "@/components/layout/page-frame";
 
 const roadmapEvents = [
   {
@@ -70,7 +71,7 @@ const roadmapEvents = [
 
 export function RoadmapPage() {
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+    <PageFrame className="bg-background">
       <div className="mx-auto w-full max-w-3xl">
         {/* Header */}
         <motion.header
@@ -156,6 +157,6 @@ export function RoadmapPage() {
           </Timeline>
         </div>
       </div>
-    </div>
+    </PageFrame>
   );
 }

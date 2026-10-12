@@ -2,9 +2,10 @@
 
 import { Icon } from "@iconify/react";
 import { EmptyState, NumberValue } from "@heroui-pro/react";
-import { Button, Card, Link, Skeleton, Typography } from "@heroui/react";
+import { Button, Card, Link, Skeleton } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 import { TAXONOMY_GRID } from "../components/grid-classes";
 
 import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
@@ -32,19 +33,12 @@ export default function TagsPage() {
 
   return (
     <PageContainer className="flex flex-col gap-8 pt-28 pb-24 lg:pt-32">
-      <header className="flex max-w-2xl flex-col gap-2">
+      <PageHeader title={t("tagsTitle")} description={t("tagsDescription")}>
         <Link className="text-sm no-underline" href="/single">
           {t("title")}
+          <Link.Icon />
         </Link>
-        <Typography
-          type="h1"
-          weight="semibold"
-          className="tracking-normal text-balance break-words"
-        >
-          {t("tagsTitle")}
-        </Typography>
-        <Typography color="muted">{t("tagsDescription")}</Typography>
-      </header>
+      </PageHeader>
 
       {isLoading ? (
         <div className={TAXONOMY_GRID} aria-busy="true">

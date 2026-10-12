@@ -34,9 +34,13 @@ export function HomeOrientation() {
   }
 
   return (
-    <PageContainer as="section" aria-label={t("orientation.regionLabel")} className="pb-8">
-      <MotionCard variant="secondary" className="relative" {...reveal(0.05, 12)}>
-        <Card.Header className="gap-3 pe-12">
+    <PageContainer as="section" aria-label={t("orientation.regionLabel")} className="pb-4 md:pb-8">
+      <MotionCard
+        variant="secondary"
+        className="border-accent/20 bg-surface-secondary/55 relative"
+        {...reveal(0.05, 12)}
+      >
+        <Card.Header className="gap-2 pe-12 md:gap-3">
           <Chip size="sm" variant="secondary">
             {t("orientation.eyebrow")}
           </Chip>
@@ -45,7 +49,7 @@ export function HomeOrientation() {
             className="absolute end-3 top-3"
             onPress={dismiss}
           />
-          <Card.Title>{t("orientation.title")}</Card.Title>
+          <Card.Title className="text-lg md:text-xl">{t("orientation.title")}</Card.Title>
           <Card.Description className="max-w-xl leading-6">
             {t("orientation.description")}
           </Card.Description>

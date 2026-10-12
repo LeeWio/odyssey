@@ -8,6 +8,7 @@ import { CalendarDateTime } from "@internationalized/date";
 import { Chip, Typography } from "@heroui/react";
 import { Agenda, useAgenda, type AgendaEventType } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
+import { PageFrame } from "@/components/layout/page-frame";
 
 function generateSeedEvents(): AgendaEventType[] {
   const now = new Date();
@@ -123,7 +124,7 @@ export function SchedulePage() {
   });
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+    <PageFrame className="bg-background">
       <div className="mx-auto w-full max-w-5xl">
         {/* Header */}
         <motion.header
@@ -233,6 +234,6 @@ export function SchedulePage() {
           </Agenda>
         </motion.div>
       </div>
-    </div>
+    </PageFrame>
   );
 }

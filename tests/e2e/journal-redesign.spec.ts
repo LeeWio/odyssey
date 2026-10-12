@@ -90,9 +90,7 @@ test("editorial hierarchy adapts across screens without overlapping text or losi
   await expect(heading).toBeVisible();
   await expect(grid.getByRole("article")).toHaveCount(12);
   await expect(companions).toHaveCount(2);
-  await expect
-    .poll(() => lead.locator("img").evaluate((image: HTMLImageElement) => image.naturalWidth))
-    .toBeGreaterThan(0);
+  await expect(lead.locator("canvas")).toBeVisible();
 
   for (const width of [390, 820, 1440, 1920, 2560]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });

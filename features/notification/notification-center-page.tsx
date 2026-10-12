@@ -28,6 +28,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { NotificationCategoryFilter } from "./notification-category-filter";
 import { NotificationCategoryList } from "./notification-category-list";
 import { useNotificationActions } from "./use-notification-actions";
+import { PageFrame } from "@/components/layout/page-frame";
 
 const NOTIFICATIONS_PAGE_SIZE = 20;
 
@@ -184,7 +185,7 @@ export function NotificationCenterPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="bg-background flex min-h-[100dvh] items-center px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+      <PageFrame className="bg-background flex items-center">
         <div className="mx-auto w-full max-w-lg">
           <EmptyState size="lg">
             <EmptyState.Header>
@@ -199,12 +200,12 @@ export function NotificationCenterPage() {
             </EmptyState.Content>
           </EmptyState>
         </div>
-      </div>
+      </PageFrame>
     );
   }
 
   return (
-    <div className="bg-background min-h-[100dvh] px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+    <PageFrame className="bg-background">
       <div className="mx-auto w-full max-w-4xl">
         <header className="flex flex-wrap items-end justify-between gap-5">
           <div className="max-w-2xl">
@@ -404,6 +405,6 @@ export function NotificationCenterPage() {
           </AlertDialog.Container>
         </AlertDialog.Backdrop>
       </AlertDialog>
-    </div>
+    </PageFrame>
   );
 }

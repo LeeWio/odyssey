@@ -2,7 +2,14 @@
 
 import { createPageReveal, pageEaseOut } from "@/lib/motion";
 import { Section } from "@/components/layout/section";
-import { HOME_CAROUSEL_SLIDE, HOME_PREVIEW_GRID } from "./layout";
+import {
+  HOME_CAROUSEL_SLIDE,
+  HOME_PREVIEW_GRID,
+  HOME_SECTION_CONTENT,
+  HOME_SECTION_DESCRIPTION,
+  HOME_SECTION_HEADER_CENTERED,
+  HOME_SECTION_TITLE,
+} from "./layout";
 
 import { Icon } from "@iconify/react";
 
@@ -140,24 +147,19 @@ export function FeaturedWriting() {
 
   return (
     <Section id="writing" aria-labelledby="writing-title">
-      <header className="flex flex-col items-center text-center">
+      <header className={HOME_SECTION_HEADER_CENTERED}>
         <motion.div {...revealInView(0, 10)}>
           <Chip color="accent" size="sm" variant="soft">
             {t("writing.eyebrow")}
           </Chip>
         </motion.div>
         <motion.div {...revealInView(0.06)}>
-          <Typography
-            id="writing-title"
-            type="h2"
-            weight="bold"
-            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
-          >
+          <Typography id="writing-title" type="h2" weight="bold" className={HOME_SECTION_TITLE}>
             {t("writing.title")}
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.12, 14)}>
-          <Typography color="muted" type="body" className="mt-3 max-w-xl leading-6">
+          <Typography color="muted" type="body" className={HOME_SECTION_DESCRIPTION}>
             {t("writing.description")}
           </Typography>
         </motion.div>
@@ -171,7 +173,7 @@ export function FeaturedWriting() {
         </motion.div>
       </header>
 
-      <motion.div className="mt-12" {...revealInView(0.2, 20)}>
+      <motion.div className={HOME_SECTION_CONTENT} {...revealInView(0.2, 20)}>
         {(isError || (isFetching && !isLoading && posts.length === 0)) && (
           <SectionLoadError
             subject="writing"

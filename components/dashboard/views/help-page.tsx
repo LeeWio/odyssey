@@ -1,13 +1,10 @@
 "use client";
 
-// TODO: Wire these link cards to your real documentation, community and
-// support URLs. Replace the FAQ entries with real content or fetch them
-// from your CMS.
-
 import type { ComponentType } from "react";
+import { useMemo, useState } from "react";
 
 import { ArrowRightFromSquare, Book, Comment, LifeRing } from "@gravity-ui/icons";
-import { Accordion, Card, Link } from "@heroui/react";
+import { Accordion, Button, Card, Link, SearchField } from "@heroui/react";
 
 type HelpLink = {
   description: string;
@@ -18,22 +15,22 @@ type HelpLink = {
 
 const HELP_LINKS: readonly HelpLink[] = [
   {
-    description: "Read the docs, guides, and API reference to get up and running.",
-    href: "#",
+    description: "Browse the public writing space and see how content is organized.",
+    href: "/single",
     icon: Book,
-    title: "Documentation",
+    title: "Read the publication",
   },
   {
-    description: "Join the community to ask questions, share tips, and connect with other users.",
-    href: "#",
+    description: "Review the columns that shape the site's main reading paths.",
+    href: "/columns",
     icon: Comment,
-    title: "Community",
+    title: "Browse columns",
   },
   {
-    description: "Get help from our support team. We reply within one business day.",
-    href: "#",
+    description: "Leave a note, report a problem, or suggest an improvement.",
+    href: "/guestbook",
     icon: LifeRing,
-    title: "Contact support",
+    title: "Leave feedback",
   },
 ];
 
@@ -66,41 +63,91 @@ const FAQS: readonly FaqItem[] = [
 ];
 
 export function HelpPage() {
-  return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 pt-4 pb-10">
-      <p className="text-muted text-sm">Find answers, contact support, or dig into the docs.</p>
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredFaqs = useMemo(
+    () =>
+      FAQS.filter(({ answer, question }) =>
+        `${question} ${answer}`.toLowerCase().includes(normalizedQuery)
+      ),
+    [normalizedQuery]
+  );
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+  return (
+    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 pt-8 pb-10">
+      <header className="flex flex-col gap-1">
+        <p className="text-muted text-sm font-medium">Dashboard support</p>
+        <h1 className="text-foreground text-2xl font-semibold">Help &amp; information</h1>
+        <p className="text-muted max-w-2xl text-sm">
+          Find a useful destination or search the answers below before opening another task.
+        </p>
+      </header>
+
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3" aria-label="Help destinations">
         {HELP_LINKS.map((link) => (
           <HelpLinkCard key={link.title} link={link} />
         ))}
       </div>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-foreground text-base font-semibold">Frequently asked questions</h2>
-        <Accordion className="w-full">
-          {FAQS.map((faq, index) => (
-            <Accordion.Item key={faq.question} id={`faq-${index}`}>
-              <Accordion.Heading>
-                <Accordion.Trigger>
-                  {faq.question}
-                  <Accordion.Indicator />
-                </Accordion.Trigger>
-              </Accordion.Heading>
-              <Accordion.Panel>
-                <Accordion.Body className="text-muted text-sm">{faq.answer}</Accordion.Body>
-              </Accordion.Panel>
-            </Accordion.Item>
-          ))}
-        </Accordion>
+      <section aria-labelledby="faq-heading" className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-1">
+            <h2 id="faq-heading" className="text-foreground text-base font-semibold">
+              Frequently asked questions
+            </h2>
+            <p className="text-muted text-sm">
+              {filteredFaqs.length} of {FAQS.length} answers
+            </p>
+          </div>
+          <SearchField
+            aria-label="Search frequently asked questions"
+            className="w-full sm:w-72"
+            name="help-search"
+            value={query}
+            onChange={setQuery}
+          >
+            <SearchField.Group>
+              <SearchField.SearchIcon />
+              <SearchField.Input placeholder="Search help..." />
+              <SearchField.ClearButton />
+            </SearchField.Group>
+          </SearchField>
+        </div>
+
+        {filteredFaqs.length > 0 ? (
+          <Accordion className="w-full">
+            {filteredFaqs.map((faq, index) => (
+              <Accordion.Item key={faq.question} id={`faq-${index}`}>
+                <Accordion.Heading>
+                  <Accordion.Trigger>
+                    {faq.question}
+                    <Accordion.Indicator />
+                  </Accordion.Trigger>
+                </Accordion.Heading>
+                <Accordion.Panel>
+                  <Accordion.Body className="text-muted text-sm">{faq.answer}</Accordion.Body>
+                </Accordion.Panel>
+              </Accordion.Item>
+            ))}
+          </Accordion>
+        ) : (
+          <Card className="rounded-lg">
+            <Card.Header>
+              <Card.Title className="text-base">No answers found</Card.Title>
+              <Card.Description>Try a shorter search or clear the current query.</Card.Description>
+            </Card.Header>
+            <Card.Footer>
+              <Button size="sm" variant="secondary" onPress={() => setQuery("")}>
+                Clear search
+              </Button>
+            </Card.Footer>
+          </Card>
+        )}
       </section>
 
-      <footer className="text-muted text-xs">
-        Still stuck?{" "}
-        <Link className="no-underline" href="mailto:support@example.com">
-          support@example.com
-        </Link>
-      </footer>
+      <p className="text-muted text-xs">
+        Need to report an issue? Use the feedback page so the request stays connected to the site.
+      </p>
     </div>
   );
 }
@@ -109,7 +156,7 @@ function HelpLinkCard({ link }: { link: HelpLink }) {
   const Icon = link.icon;
 
   return (
-    <Card className="rounded-2xl">
+    <Card className="rounded-lg">
       <Card.Header>
         <div className="bg-accent-soft text-accent flex size-10 items-center justify-center rounded-xl">
           <Icon className="size-5" />
@@ -119,7 +166,7 @@ function HelpLinkCard({ link }: { link: HelpLink }) {
       </Card.Header>
       <Card.Footer>
         <Link className="text-accent inline-flex items-center gap-1 text-sm" href={link.href}>
-          Open
+          Open destination
           <ArrowRightFromSquare className="size-3.5" />
         </Link>
       </Card.Footer>

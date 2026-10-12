@@ -24,7 +24,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useEffect } from "react";
 
 import { useRetrieveArchiveQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
-import { PageContainer } from "@/components/layout/page-container";
+import { PageFrame } from "@/components/layout/page-frame";
 
 const PAGE_SIZE = 10;
 
@@ -335,8 +335,8 @@ export function ArchivePage() {
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
-    <div className="bg-background min-h-dvh w-full pt-28 pb-24 lg:pt-32">
-      <PageContainer>
+    <PageFrame className="bg-background">
+      <div className="mx-auto w-full max-w-7xl">
         <header className="border-separator flex min-w-0 flex-col gap-8 border-b pb-10 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
             <motion.div {...revealInView(0, 10)}>
@@ -597,7 +597,7 @@ export function ArchivePage() {
             <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
           </Link>
         </motion.div>
-      </PageContainer>
-    </div>
+      </div>
+    </PageFrame>
   );
 }

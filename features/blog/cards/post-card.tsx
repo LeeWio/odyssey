@@ -2,15 +2,9 @@
 
 import { Icon } from "@iconify/react";
 
-import dynamic from "next/dynamic";
 import { Chip, Surface, Typography, cn } from "@heroui/react";
-import Image from "next/image";
 import Link from "next/link";
-
-const Grainient = dynamic(() => import("@/components/background/grainient"), {
-  ssr: false,
-  loading: () => <div className="bg-surface-secondary absolute inset-0" aria-hidden />,
-});
+import { ArticleCover } from "@/components/card/article-cover";
 
 export type PostCardVariant = "default" | "gradient-header" | "full-gradient";
 
@@ -27,33 +21,6 @@ interface PostCardProps {
   gradient?: string; // e.g. "from-purple-500 to-blue-500"
 }
 
-function getGrainientProps(seed: string) {
-  let hash = 2166136261;
-  for (let i = 0; i < seed.length; i++) {
-    hash ^= seed.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  hash = hash >>> 0;
-
-  const warpStrength = 0.5 + ((hash % 10) / 10) * 1.5;
-  const warpFrequency = 3.0 + ((hash % 13) / 13) * 6.0;
-  const warpSpeed = 1.0 + ((hash % 7) / 7) * 2.0;
-  const blendAngle = hash % 360;
-  const rotationAmount = 200.0 + ((hash % 15) / 15) * 600.0;
-  const zoom = 0.6 + ((hash % 8) / 8) * 0.6;
-
-  return {
-    warpStrength,
-    warpFrequency,
-    warpSpeed,
-    blendAngle,
-    rotationAmount,
-    zoom,
-    grainAmount: 0,
-    timeSpeed: 0.12,
-  };
-}
-
 export const PostCard = ({
   title,
   description,
@@ -61,7 +28,6 @@ export const PostCard = ({
   author,
   category,
   href,
-  coverImage,
   className,
   variant = "default",
   gradient = "from-zinc-500 to-zinc-800",
@@ -81,39 +47,18 @@ export const PostCard = ({
       {variant === "gradient-header" && (
         <div
           className={cn(
-            "relative aspect-square w-full bg-gradient-to-br sm:aspect-[4/3]",
+            "relative isolate aspect-square w-full overflow-hidden bg-gradient-to-br sm:aspect-[4/3]",
             gradient
           )}
         >
-          {coverImage && (
-            <Image
-              src={coverImage}
-              alt={title}
-              fill
-              className="object-cover opacity-60 mix-blend-overlay transition-transform duration-500 group-hover:scale-110"
-            />
-          )}
+          <ArticleCover seed={`${href}:${title}`} />
         </div>
       )}
 
       {/* Variant: Default (Existing) */}
       {variant === "default" && (
-        <div className="bg-surface-secondary relative aspect-video w-full overflow-hidden">
-          {coverImage ? (
-            <Image
-              src={coverImage}
-              alt={title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-110"
-            />
-          ) : (
-            <div className="relative flex h-full w-full items-center justify-center">
-              <Grainient {...getGrainientProps(title)} className="absolute inset-0" />
-              <Typography className="relative z-10 text-sm font-medium text-white/50 italic select-none">
-                Chronicle
-              </Typography>
-            </div>
-          )}
+        <div className="bg-surface-secondary relative isolate aspect-video w-full overflow-hidden">
+          <ArticleCover seed={`${href}:${title}`} />
           <div className="absolute top-4 left-4">
             <Chip
               size="sm"

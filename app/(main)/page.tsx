@@ -3,12 +3,19 @@
 import { createPageReveal } from "@/lib/motion";
 import { PageContainer } from "@/components/layout/page-container";
 import { Section } from "@/components/layout/section";
-import { HOME_PREVIEW_GRID } from "@/components/home/layout";
+import {
+  HOME_PREVIEW_GRID,
+  HOME_SECTION_CONTENT,
+  HOME_SECTION_DESCRIPTION,
+  HOME_SECTION_HEADER_CENTERED,
+  HOME_SECTION_TITLE,
+} from "@/components/home/layout";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { HelloApple } from "@/components/home/hello-apple";
 import { HomeSmoothScroll } from "@/components/home/home-smooth-scroll";
+import { ShaderBackground } from "@/components/background/shader-background";
 import { MotionChip, MotionSurface, MotionTypography } from "@/components/ui";
 import { useState } from "react";
 import dynamic from "next/dynamic";
@@ -26,7 +33,6 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
-import Image from "next/image";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 
@@ -111,11 +117,6 @@ function SkeletonFriendLinkCard() {
     </Card>
   );
 }
-
-const GradientText = dynamic(() => import("@/components/ui/gradient-text"), {
-  ssr: false,
-  loading: () => <span className="contents" />,
-});
 
 const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-board"), {
   ssr: false,
@@ -283,11 +284,11 @@ const MotionAccordion = motion.create(Accordion);
 
 const faqKeys = ["finished", "reply", "building", "desk", "trace"] as const;
 const faqIcons = [
-  "/icons/rocket.png",
-  "/icons/mail.png",
-  "https://img.icons8.com/3d-fluency/94/adobe-animate.png",
-  "https://img.icons8.com/3d-fluency/94/imac.png",
-  "/icons/mail.png",
+  "lucide:circle-help",
+  "lucide:message-circle",
+  "lucide:wand-sparkles",
+  "lucide:monitor",
+  "lucide:pen-line",
 ];
 
 export default function Home() {
@@ -308,13 +309,32 @@ export default function Home() {
         <PageContainer
           as="section"
           aria-labelledby="home-hero-title"
-          className="flex min-h-[90dvh] flex-col items-center justify-center pt-24 pb-12 text-center"
+          className="relative isolate flex min-h-[min(760px,calc(100dvh-2rem))] flex-col items-center justify-center overflow-hidden pt-28 pb-16 text-center"
         >
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(34rem,78%)] overflow-hidden [mask-image:linear-gradient(to_bottom,black_0%,black_54%,transparent_100%)] opacity-80">
+            <ShaderBackground
+              aria-hidden="true"
+              colors={["#243b53", "#4c7a8a", "#b9c6bd", "#d5a36b"]}
+              grainOverlay={0.12}
+              mixing={0.55}
+              positions={3}
+              rotation={214}
+              speed={0.08}
+              variant="static-mesh-gradient"
+              waveX={0.65}
+              waveXShift={0.24}
+              waveY={0.78}
+              waveYShift={0.56}
+              className="opacity-40 saturate-75"
+            />
+            <div className="from-background/10 via-background/75 to-background absolute inset-0 bg-linear-to-b" />
+          </div>
+
           <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
             {t("page.eyebrow")}
           </MotionChip>
 
-          <div className="mt-1 w-full max-w-3xl" aria-hidden="true">
+          <div className="relative mt-2 w-full max-w-2xl" aria-hidden="true">
             <HelloApple />
           </div>
 
@@ -322,7 +342,7 @@ export default function Home() {
             id="home-hero-title"
             type="h1"
             weight="bold"
-            className="max-w-3xl text-4xl leading-tight tracking-normal text-balance break-words sm:text-5xl lg:text-6xl"
+            className="max-w-2xl text-4xl leading-[1.05] tracking-normal text-balance break-words sm:text-5xl lg:text-6xl"
             {...reveal(0.18)}
           >
             {t("page.title")}
@@ -331,7 +351,7 @@ export default function Home() {
           <MotionTypography
             color="muted"
             type="body"
-            className="mt-4 max-w-xl"
+            className="mt-4 max-w-lg leading-7"
             {...reveal(0.26, 14)}
           >
             {t("page.subtitle")}
@@ -339,7 +359,7 @@ export default function Home() {
 
           <MotionSurface
             variant="transparent"
-            className="mt-9 flex max-w-lg flex-col items-center"
+            className="mt-8 flex max-w-lg flex-col items-center"
             {...reveal(0.34, 12)}
           >
             <Typography
@@ -350,7 +370,7 @@ export default function Home() {
             >
               {t("page.prologue")}
             </Typography>
-            <span className="bg-separator my-4 h-12 w-px" aria-hidden="true" />
+            <span className="bg-separator my-4 h-10 w-px" aria-hidden="true" />
             <Typography align="center" color="muted" type="body-sm" className="max-w-md italic">
               {t("page.prologueBody")}
             </Typography>
@@ -370,18 +390,14 @@ export default function Home() {
         <MomentsShowcase />
         <FriendLinksShowcase />
 
-        <Section id="guestbook" aria-labelledby="guestbook-title">
-          <header className="relative mx-auto flex flex-col items-center text-center">
+        <Section id="guestbook" aria-labelledby="guestbook-title" className="relative">
+          <header className={HOME_SECTION_HEADER_CENTERED}>
             <Popover isOpen={isGuestbookPopoverOpen} onOpenChange={setIsGuestbookPopoverOpen}>
-              <Popover.Trigger className="absolute -top-8 -right-20">
-                <Image
-                  alt={t("guestbook.decorationAlt")}
-                  aria-hidden="true"
-                  height={112}
-                  src="/Animation.svg"
-                  unoptimized
-                  width={112}
-                />
+              <Popover.Trigger
+                aria-label={t("guestbook.openComposer")}
+                className="text-muted hover:text-foreground absolute top-0 right-0 inline-flex size-9 items-center justify-center rounded-full transition-colors"
+              >
+                <Icon aria-hidden="true" icon="lucide:pen-line" className="size-4" />
               </Popover.Trigger>
               <Popover.Content
                 className="border-default-200/50 bg-surface/90 w-80 border shadow-xl backdrop-blur-md"
@@ -398,7 +414,7 @@ export default function Home() {
               {t("guestbook.eyebrow")}
             </MotionChip>
 
-            <motion.div className="mt-3" {...revealInView(0.04, 8)}>
+            <motion.div className="mt-2" {...revealInView(0.04, 8)}>
               <Link href="/guestbook" className="text-sm no-underline">
                 {t("guestbook.open")}
                 <Link.Icon aria-hidden="true" />
@@ -410,27 +426,14 @@ export default function Home() {
               align="center"
               type="h2"
               weight="bold"
-              className="mt-4 text-center text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
+              className={HOME_SECTION_TITLE}
               {...revealInView(0.06)}
             >
-              <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
-                {t("guestbook.lineOne")}
-              </GradientText>
-            </MotionTypography>
-
-            <MotionTypography
-              align="center"
-              type="h3"
-              className="text-center text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
-              {...revealInView(0.06)}
-            >
-              <GradientText className="pointer-events-none cursor-default !rounded-none bg-transparent !p-0 shadow-none backdrop-blur-none ![font:inherit]">
-                {t("guestbook.lineTwo")}
-              </GradientText>
+              {t("guestbook.lineOne")} {t("guestbook.lineTwo")}
             </MotionTypography>
           </header>
 
-          <motion.div className="mt-6 w-full" {...revealInView(0.12, 20)}>
+          <motion.div className={`${HOME_SECTION_CONTENT} w-full`} {...revealInView(0.12, 20)}>
             <GuestbookBoard />
           </motion.div>
 
@@ -458,7 +461,7 @@ export default function Home() {
           aria-labelledby="faq-title"
           className="flex flex-col items-center text-center"
         >
-          <header className="flex flex-col items-center text-center">
+          <header className={HOME_SECTION_HEADER_CENTERED}>
             <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
               {t("faq.eyebrow")}
             </MotionChip>
@@ -467,7 +470,7 @@ export default function Home() {
               align="center"
               type="h2"
               weight="bold"
-              className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
+              className={HOME_SECTION_TITLE}
               {...revealInView(0.06)}
             >
               {t("faq.title")}
@@ -476,7 +479,7 @@ export default function Home() {
               align="center"
               type="body"
               color="muted"
-              className="mt-3 max-w-xl text-balance"
+              className={HOME_SECTION_DESCRIPTION}
               {...revealInView(0.12, 14)}
             >
               {t("faq.description")}
@@ -484,7 +487,7 @@ export default function Home() {
           </header>
 
           <MotionAccordion
-            className="mt-10 w-full max-w-3xl"
+            className={`${HOME_SECTION_CONTENT} w-full max-w-3xl`}
             variant="surface"
             {...revealInView(0.18, 20)}
           >
@@ -495,15 +498,9 @@ export default function Home() {
               >
                 <Accordion.Heading>
                   <Accordion.Trigger className="group hover:bg-surface flex items-center gap-2 transition-none">
-                    {faqIcons[index] ? (
-                      <Image
-                        alt={t(`faq.${key}.title`)}
-                        className="h-11 w-11 transition-[scale,rotate] duration-300 ease-out group-hover/item:scale-120 group-hover/item:-rotate-10 group-hover/item:drop-shadow-lg"
-                        src={faqIcons[index]}
-                        width={44}
-                        height={44}
-                      />
-                    ) : null}
+                    <span className="bg-accent/10 text-accent flex size-9 shrink-0 items-center justify-center rounded-lg">
+                      <Icon aria-hidden="true" icon={faqIcons[index]} className="size-4" />
+                    </span>
                     <div className="flex flex-col gap-0 text-start">
                       <span className="leading-5 font-medium">{t(`faq.${key}.title`)}</span>
                       <span className="text-muted/80 leading-6 font-normal">

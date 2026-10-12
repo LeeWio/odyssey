@@ -9,6 +9,7 @@ import { useGetTrendingQuery, useRetrieveDiscoveryQuery } from "@/lib/features/o
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 
 import { EssayGrid } from "../../components/essay-grid";
+import { PageFrame } from "@/components/layout/page-frame";
 
 type Digest = OpenApiComponents["schemas"]["PostDigestResponse"];
 type FullPost = OpenApiComponents["schemas"]["PostResponse"];
@@ -37,47 +38,49 @@ export default function ReadingListPage({ params }: { params: Promise<{ list: st
     kind === "week" ? (trending.data ?? []) : (discovery.data?.mostRead ?? []);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-24 sm:px-10 sm:py-32">
-      <header className="flex max-w-2xl flex-col gap-2">
-        <Link className="text-sm no-underline" href="/single">
-          {t("title")}
-        </Link>
-        <Typography type="h1" weight="semibold">
-          {copy ? t(copy.title) : decodeURIComponent(list)}
-        </Typography>
-        {copy ? <Typography color="muted">{t(copy.description)}</Typography> : null}
-      </header>
+    <PageFrame className="bg-background">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+        <header className="flex max-w-2xl flex-col gap-2">
+          <Link className="text-sm no-underline" href="/single">
+            {t("title")}
+          </Link>
+          <Typography type="h1" weight="semibold">
+            {copy ? t(copy.title) : decodeURIComponent(list)}
+          </Typography>
+          {copy ? <Typography color="muted">{t(copy.description)}</Typography> : null}
+        </header>
 
-      {kind && query.isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {Array.from({ length: 4 }, (_, index) => (
-            <Skeleton key={index} className="h-36 w-full rounded-2xl" />
-          ))}
-        </div>
-      ) : kind && query.isError ? (
-        <EmptyState>
-          <EmptyState.Header>
-            <EmptyState.Title>{t("latestFailed")}</EmptyState.Title>
-            <EmptyState.Description>{t("latestFailedHint")}</EmptyState.Description>
-          </EmptyState.Header>
-          <EmptyState.Content>
-            <Button size="sm" variant="secondary" onPress={() => void query.refetch()}>
-              {t("tryAgain")}
-            </Button>
-          </EmptyState.Content>
-        </EmptyState>
-      ) : !kind || posts.length === 0 ? (
-        <EmptyState>
-          <EmptyState.Header>
-            <EmptyState.Title>{t("readingEmpty")}</EmptyState.Title>
-          </EmptyState.Header>
-          <EmptyState.Content>
-            <Link href="/single">{t("title")}</Link>
-          </EmptyState.Content>
-        </EmptyState>
-      ) : (
-        <EssayGrid posts={posts} />
-      )}
-    </div>
+        {kind && query.isLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} className="h-36 w-full rounded-2xl" />
+            ))}
+          </div>
+        ) : kind && query.isError ? (
+          <EmptyState>
+            <EmptyState.Header>
+              <EmptyState.Title>{t("latestFailed")}</EmptyState.Title>
+              <EmptyState.Description>{t("latestFailedHint")}</EmptyState.Description>
+            </EmptyState.Header>
+            <EmptyState.Content>
+              <Button size="sm" variant="secondary" onPress={() => void query.refetch()}>
+                {t("tryAgain")}
+              </Button>
+            </EmptyState.Content>
+          </EmptyState>
+        ) : !kind || posts.length === 0 ? (
+          <EmptyState>
+            <EmptyState.Header>
+              <EmptyState.Title>{t("readingEmpty")}</EmptyState.Title>
+            </EmptyState.Header>
+            <EmptyState.Content>
+              <Link href="/single">{t("title")}</Link>
+            </EmptyState.Content>
+          </EmptyState>
+        ) : (
+          <EssayGrid posts={posts} />
+        )}
+      </div>
+    </PageFrame>
   );
 }

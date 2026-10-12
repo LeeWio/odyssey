@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Tabs } from "@heroui/react";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import dynamic from "next/dynamic";
+import { PageFrame } from "@/components/layout/page-frame";
 
 const UniverseView = dynamic(
   () => import("@/components/constellation").then((mod) => mod.UniverseView),
@@ -38,8 +39,8 @@ export default function UniversePage() {
   const [activeTab, setActiveTab] = useState<string>("mesh");
 
   return (
-    <div className="min-h-[100dvh] w-full bg-black px-6 pt-28 pb-24 text-white sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-6xl">
+    <PageFrame className="bg-black text-white">
+      <div className="mx-auto w-full max-w-7xl">
         {/* Dark Mode Cosmic Header */}
         <header className="flex flex-col items-center text-center">
           <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
@@ -125,6 +126,6 @@ export default function UniversePage() {
           </Tabs>
         </div>
       </div>
-    </div>
+    </PageFrame>
   );
 }

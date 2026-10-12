@@ -12,6 +12,7 @@ import type { EmblaCarouselType } from "embla-carousel";
 import { Carousel } from "@heroui-pro/react/carousel";
 import { Button, Card, Chip, Modal, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { PageFrame } from "@/components/layout/page-frame";
 
 // Real artist portfolio assets mapping
 const GALLERY_ITEMS = [
@@ -89,27 +90,47 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
   const activePhoto = GALLERY_ITEMS[currentIndex] || GALLERY_ITEMS[0];
 
   return (
-    <div className={compact ? "w-full" : "mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32"}>
+    <PageFrame className={compact ? "min-h-0 w-full p-0" : "mx-auto max-w-7xl"}>
       {!compact ? (
         <motion.header
           initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, ease: pageEaseOut }}
-          className="flex flex-col items-center text-center"
+          className="border-default-200 flex flex-col gap-8 border-b pb-9 lg:flex-row lg:items-end lg:justify-between"
         >
-          <Chip color="accent" size="sm" variant="soft">
-            {t("eyebrow")}
-          </Chip>
-          <Typography
-            type="h1"
-            weight="bold"
-            className="mt-4 max-w-3xl text-4xl leading-tight tracking-tight text-balance sm:text-5xl"
-          >
-            {t("title")}
-          </Typography>
-          <Typography color="muted" type="body" className="mt-4 max-w-xl text-balance">
-            {t("description")}
-          </Typography>
+          <div className="max-w-3xl">
+            <Chip color="accent" size="sm" variant="soft">
+              {t("eyebrow")}
+            </Chip>
+            <Typography
+              type="h1"
+              weight="bold"
+              className="mt-4 text-4xl leading-[1.08] tracking-normal text-balance sm:text-5xl"
+            >
+              {t("title")}
+            </Typography>
+            <Typography color="muted" type="body" className="mt-4 max-w-xl leading-7 text-balance">
+              {t("description")}
+            </Typography>
+          </div>
+          <div className="grid grid-cols-2 gap-5 lg:min-w-56">
+            <div className="border-default-200 border-l pl-3">
+              <Typography className="font-mono text-3xl tabular-nums" type="body">
+                {String(GALLERY_ITEMS.length).padStart(2, "0")}
+              </Typography>
+              <Typography color="muted" type="body-xs" className="mt-1 leading-5">
+                {t("frameCountLabel")}
+              </Typography>
+            </div>
+            <div className="border-default-200 border-l pl-3">
+              <Typography className="font-mono text-3xl tabular-nums" type="body">
+                6×6
+              </Typography>
+              <Typography color="muted" type="body-xs" className="mt-1 leading-5">
+                {t("format")}
+              </Typography>
+            </div>
+          </div>
         </motion.header>
       ) : null}
 
@@ -119,7 +140,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.65, ease: pageEaseOut, delay: shouldReduceMotion ? 0 : 0.08 }}
         className={[
-          compact ? null : "mt-12",
+          compact ? null : "mt-10",
           "grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]",
         ]
           .filter(Boolean)
@@ -275,6 +296,6 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>
-    </div>
+    </PageFrame>
   );
 }

@@ -12,6 +12,12 @@ import { Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { motion } from "motion/react";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { useGetPublicMomentsQuery } from "@/lib/features/moment";
+import {
+  HOME_SECTION_CONTENT,
+  HOME_SECTION_DESCRIPTION,
+  HOME_SECTION_HEADER_CENTERED,
+  HOME_SECTION_TITLE,
+} from "./layout";
 
 const MomentsMasonry = dynamic(
   () =>
@@ -56,7 +62,7 @@ export function MomentsShowcase() {
 
   return (
     <Section id="moments-showcase" aria-labelledby="moments-showcase-title">
-      <header className="flex flex-col items-center text-center">
+      <header className={HOME_SECTION_HEADER_CENTERED}>
         <motion.div {...revealInView(0, 10)}>
           <Chip color="default" size="sm" variant="secondary">
             Moments
@@ -67,13 +73,13 @@ export function MomentsShowcase() {
             id="moments-showcase-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
+            className={HOME_SECTION_TITLE}
           >
             This &amp; That
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.12, 14)}>
-          <Typography color="muted" type="body" className="mt-3 max-w-xl leading-6">
+          <Typography color="muted" type="body" className={HOME_SECTION_DESCRIPTION}>
             A little of this, a little of that.
           </Typography>
         </motion.div>
@@ -87,7 +93,7 @@ export function MomentsShowcase() {
         </motion.div>
       </header>
 
-      <motion.div className="mt-12" {...revealInView(0.2, 20)}>
+      <motion.div className={HOME_SECTION_CONTENT} {...revealInView(0.2, 20)}>
         {(isError || (isFetching && !isLoading && recentMoments.length === 0)) && (
           <SectionLoadError
             subject="moments"

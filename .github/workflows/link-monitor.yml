@@ -5,6 +5,9 @@ on:
     - cron: "0 0 * * *" # Run every day at midnight
   workflow_dispatch: # Allow manual trigger
 
+permissions:
+  contents: read
+
 jobs:
   check-links:
     runs-on: ubuntu-latest
@@ -17,4 +20,4 @@ jobs:
       - name: Run Health Check
         run: bun scripts/check-links.mjs
         env:
-          NEXT_PUBLIC_API_BASE: ${{ secrets.PROD_API_BASE || 'https://odyssey.com' }}
+          NEXT_PUBLIC_API_BASE: ${{ secrets.PROD_API_BASE || 'https://blog.wei.li' }}

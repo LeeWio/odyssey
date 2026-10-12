@@ -11,6 +11,8 @@ import { Tabs, Card, Chip, Skeleton, Typography } from "@heroui/react";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import Image from "next/image";
 import Link from "next/link";
+import { PageFrame } from "@/components/layout/page-frame";
+import { ArticleCover } from "@/components/card/article-cover";
 
 // Sub-components from our modular features
 import BlogFeed from "@/features/blog/feed/blog-feed";
@@ -51,8 +53,8 @@ export default function ChroniclePage() {
   const recentPosts = recentData?.list ?? [];
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-6xl">
+    <PageFrame className="bg-background">
+      <div className="mx-auto w-full max-w-7xl">
         {/* Cinematic Header matching Homepage */}
         <header className="flex flex-col items-center text-center">
           <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
@@ -129,14 +131,8 @@ export default function ChroniclePage() {
                         <div className="grid grid-cols-1 lg:grid-cols-12">
                           {/* Image Visual Column */}
                           <div className="relative aspect-video w-full overflow-hidden lg:col-span-7 lg:aspect-auto lg:min-h-[28rem]">
-                            <Image
-                              alt=""
-                              aria-hidden="true"
-                              className="scale-105 object-cover opacity-25 blur-2xl saturate-75"
-                              fill
-                              src="/IMG_5332.JPG"
-                            />
-                            <div className="from-background/10 via-surface-secondary/70 to-surface-secondary absolute inset-0 bg-linear-to-b lg:bg-linear-to-r" />
+                            <ArticleCover seed={featuredPost.slug} />
+                            <div className="from-background/10 via-surface-secondary/35 to-surface-secondary/80 absolute inset-0 bg-linear-to-b lg:bg-linear-to-r" />
                             {/* Accent Visual */}
                             <div className="absolute inset-0 flex items-center justify-center">
                               <span className="text-foreground/5 font-mono text-7xl font-black italic select-none">
@@ -288,6 +284,6 @@ export default function ChroniclePage() {
           </Tabs>
         </div>
       </div>
-    </div>
+    </PageFrame>
   );
 }

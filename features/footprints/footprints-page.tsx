@@ -12,6 +12,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
+import { PageFrame } from "@/components/layout/page-frame";
 import { FootprintsMap } from "./footprints-map";
 import {
   getFootprintMetaLabel,
@@ -102,7 +103,7 @@ export function FootprintsPage() {
 
   return (
     <Surface variant="transparent" className="bg-background min-h-[100dvh] w-full">
-      <div className="mx-auto w-full max-w-7xl px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+      <PageFrame className="mx-auto max-w-7xl">
         <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <motion.div {...reveal(0, 10)}>
@@ -250,7 +251,7 @@ export function FootprintsPage() {
             )}
           </div>
         </section>
-      </div>
+      </PageFrame>
     </Surface>
   );
 }

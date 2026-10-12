@@ -849,6 +849,7 @@
     "title": "好地方会引向更好的想法。",
     "description": "一小圈在开放网络上认真做事的人和项目。",
     "placesToVisit": "个可以去看看的地方",
+    "withAvatars": "有头像的站点",
     "section": "友情链接",
     "searchLabel": "搜索可以去的地方",
     "searchPlaceholder": "搜索友链",
@@ -902,6 +903,8 @@
     "camera": "相机",
     "film": "胶片",
     "frame": "帧",
+    "frameCountLabel": "张照片",
+    "format": "画幅",
     "viewer": "{title} 全屏查看",
     "frameCount": "第 {current} / {total} 帧"
   },
@@ -980,6 +983,8 @@
     "clearSearch": "清除工具搜索",
     "matches": "{count} 个匹配",
     "browse": "浏览工具箱",
+    "categories": "个分类",
+    "officialLinks": "有官方链接",
     "filterCategory": "按分类筛选工具",
     "allTools": "全部工具",
     "all": "全部",
@@ -1164,6 +1169,7 @@
     },
     "guestbook": {
       "decorationAlt": "留言装饰动画",
+      "openComposer": "打开留言编辑器",
       "eyebrow": "留言",
       "open": "打开留言簿",
       "lineOne": "既然你来了，",

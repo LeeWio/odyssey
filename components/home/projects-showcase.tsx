@@ -1,7 +1,14 @@
 "use client";
 
 import { Section } from "@/components/layout/section";
-import { HOME_PREVIEW_GRID } from "./layout";
+import { ProjectShader } from "@/components/project/project-shader";
+import {
+  HOME_PREVIEW_GRID,
+  HOME_SECTION_CONTENT,
+  HOME_SECTION_DESCRIPTION,
+  HOME_SECTION_HEADER,
+  HOME_SECTION_TITLE,
+} from "./layout";
 
 import { pageEaseOut } from "@/lib/motion";
 
@@ -18,7 +25,6 @@ import {
   buttonVariants,
   cn,
 } from "@heroui/react";
-import Image from "next/image";
 import { motion } from "motion/react";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
@@ -47,31 +53,15 @@ function getTechnologyLabels(value?: string | null) {
 }
 
 function ProjectMedia({ project }: { project: ProjectResponse }) {
-  const t = useTranslations("Home");
-  const coverImage = toSafeExternalUrl(project.coverImage);
-
-  if (coverImage) {
-    return (
-      <Image
-        unoptimized
-        alt={t("projects.coverAlt", { name: project.name })}
-        className="object-cover"
-        fill
-        sizes="(max-width: 639px) 100vw, (max-width: 943px) 50vw, (max-width: 1247px) 33vw, (max-width: 1551px) 25vw, (max-width: 1855px) 20vw, 17vw"
-        src={coverImage}
-      />
-    );
-  }
-
   return (
-    <Surface
-      className="from-accent-500 via-accent-700 to-default-900 flex h-full items-end justify-between bg-linear-to-br p-5 text-white"
-      variant="tertiary"
-    >
-      <Typography className="max-w-[12ch] text-2xl font-semibold tracking-normal text-white">
-        {project.name}
-      </Typography>
-      <Icon aria-hidden="true" className="size-10 text-white/45" icon="gravity-ui:code" />
+    <Surface className="relative h-full overflow-hidden" variant="tertiary">
+      <ProjectShader seed={`project-${project.slug}`} />
+      <div className="absolute inset-0 bg-linear-to-br from-black/5 via-transparent to-black/35" />
+      <Icon
+        aria-hidden="true"
+        className="absolute right-5 bottom-5 size-10 text-white/55"
+        icon="gravity-ui:code"
+      />
     </Surface>
   );
 }
@@ -184,7 +174,7 @@ export function ProjectsShowcase() {
 
   return (
     <Section id="projects-showcase" aria-labelledby="projects-showcase-title">
-      <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+      <header className={HOME_SECTION_HEADER}>
         <div className="max-w-xl">
           <Chip color="accent" size="sm" variant="soft">
             {t("projects.eyebrow")}
@@ -193,11 +183,11 @@ export function ProjectsShowcase() {
             id="projects-showcase-title"
             type="h2"
             weight="bold"
-            className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
+            className={HOME_SECTION_TITLE}
           >
             {t("projects.title")}
           </Typography>
-          <Typography color="muted" type="body" className="mt-3 max-w-lg leading-7">
+          <Typography color="muted" type="body" className={HOME_SECTION_DESCRIPTION}>
             {t("projects.description")}
           </Typography>
         </div>
@@ -209,9 +199,9 @@ export function ProjectsShowcase() {
         </Link>
       </header>
 
-      <Separator className="mt-8" />
+      <Separator className="mt-7" />
 
-      <div className="mt-8">
+      <div className={HOME_SECTION_CONTENT}>
         {isLoading ? (
           <div
             aria-busy="true"

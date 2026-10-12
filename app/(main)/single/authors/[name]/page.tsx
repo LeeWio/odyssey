@@ -6,9 +6,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 
+import { PageContainer } from "@/components/layout/page-container";
 import { type PostResponse, useGetPublicPostsQuery } from "@/lib/features/post";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
+import { ArticleCover } from "@/components/card/article-cover";
 
 import { EssayPagination } from "../../components/essay-pagination";
 import { parsePageParam } from "@/lib/utils/pagination";
@@ -36,16 +38,13 @@ function formatDate(value: string | null | undefined, locale: string) {
 function EssayRow({ lead = false, post }: { lead?: boolean; post: PostResponse }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const cover = post.coverImage?.trim();
+  const seed = String(post.id ?? post.slug ?? post.title ?? "essay");
 
   return (
     <ItemCard className="items-start p-3" variant="secondary">
-      {cover ? (
-        <ItemCard.Icon className="size-20 overflow-hidden rounded-xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="" className="size-20 object-cover" src={cover} />
-        </ItemCard.Icon>
-      ) : null}
+      <ItemCard.Icon className="relative size-20 overflow-hidden rounded-xl">
+        <ArticleCover animated={false} seed={seed} />
+      </ItemCard.Icon>
       <ItemCard.Content className="gap-1.5">
         <ItemCard.Title
           className={lead ? "text-xl leading-7 font-semibold" : "text-base leading-6 font-semibold"}
@@ -101,8 +100,8 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
     ).values(),
   ];
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-8 pt-28 pb-24 md:px-12 xl:px-16">
-      <div className="grid w-full items-start gap-x-16 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem]">
+    <PageContainer className="bg-background min-h-[100dvh] pt-28 pb-24">
+      <div className="grid items-start gap-x-12 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem] 2xl:gap-x-16">
         <div className="flex min-w-0 flex-col gap-8">
           <header className="flex flex-col gap-5">
             <Link className="text-sm no-underline" href="/single/authors">
@@ -223,6 +222,6 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
           <Separator className="xl:hidden" />
         </aside>
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -29,9 +29,10 @@ jobs:
         with:
           install-deps: "false"
 
-      # Generate temporary lockfile for audit-ci compatibility
+      # Generate only a temporary Yarn v1 lockfile for audit-ci compatibility.
+      # The repository's canonical lockfile remains bun.lock.
       - name: Generate Temporary Lockfile for Auditing
-        run: bun install --yarn
+        run: bun install --yarn --lockfile-only
 
       # Perform deep, strict security threshold checking
       - name: Run Deep Dependency Security Audit (audit-ci)

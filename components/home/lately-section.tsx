@@ -1,6 +1,13 @@
 "use client";
 
 import { Section } from "@/components/layout/section";
+import { ShaderBackground } from "@/components/background/shader-background";
+import {
+  HOME_SECTION_CONTENT,
+  HOME_SECTION_DESCRIPTION,
+  HOME_SECTION_HEADER_CENTERED,
+  HOME_SECTION_TITLE,
+} from "./layout";
 
 import { createPageReveal, pageEaseOut } from "@/lib/motion";
 
@@ -21,7 +28,6 @@ import { KPI } from "@heroui-pro/react/kpi";
 import { Card, Chip, Skeleton, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMounted } from "@mantine/hooks";
-import Image from "next/image";
 import { motion } from "motion/react";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
@@ -49,6 +55,26 @@ const mapSparkline = (data?: number[]) => {
   }));
 };
 
+function ListeningShader() {
+  return (
+    <ShaderBackground
+      aria-hidden="true"
+      colorBack="#172b3a"
+      colors={["#2b5876", "#4e9a9a", "#d7a86e"]}
+      distortion={0.18}
+      distortionFreq={7}
+      falloff={0.24}
+      focalAngle={2.2}
+      focalDistance={0.66}
+      frame={0}
+      mixing={0.62}
+      radius={0.95}
+      speed={0.08}
+      variant="static-radial-gradient"
+    />
+  );
+}
+
 export function LatelySection() {
   const t = useTranslations("Home");
   const mounted = useMounted();
@@ -68,7 +94,7 @@ export function LatelySection() {
 
   return (
     <Section id="lately" aria-labelledby="lately-title">
-      <header className="flex flex-col items-center text-center">
+      <header className={HOME_SECTION_HEADER_CENTERED}>
         <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
           Lately
         </MotionChip>
@@ -77,7 +103,7 @@ export function LatelySection() {
           align="center"
           type="h2"
           weight="bold"
-          className="mt-4 text-3xl leading-tight tracking-normal text-balance sm:text-4xl"
+          className={HOME_SECTION_TITLE}
           {...revealInView(0.06)}
         >
           What I&apos;ve been up to
@@ -86,29 +112,22 @@ export function LatelySection() {
           align="center"
           type="body"
           color="muted"
-          className="mt-3"
+          className={HOME_SECTION_DESCRIPTION}
           {...revealInView(0.12, 14)}
         >
           A favorite track, a live market signal, and recent GitHub work.
         </MotionTypography>
       </header>
 
-      <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+      <div className={`${HOME_SECTION_CONTENT} grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6`}>
         <MotionCard
           variant="secondary"
           className="group relative min-h-[34rem] overflow-hidden lg:col-span-7"
           {...revealInView(0.08, 28)}
         >
-          <div className="absolute inset-0">
-            <Image
-              alt=""
-              aria-hidden="true"
-              className="scale-105 object-cover opacity-35 blur-2xl saturate-75"
-              fill
-              sizes="(min-width: 1024px) 55vw, 100vw"
-              src="/IMG_5332.JPG"
-            />
-            <div className="from-background/10 via-surface-secondary/75 to-surface-secondary absolute inset-0 bg-linear-to-b" />
+          <div className="absolute inset-0 opacity-70">
+            <ListeningShader />
+            <div className="from-background/10 via-surface-secondary/65 to-surface-secondary absolute inset-0 bg-linear-to-b" />
           </div>
 
           <Card.Header className="relative flex-row items-start justify-between">
@@ -132,13 +151,17 @@ export function LatelySection() {
               viewport={{ once: true, amount: 0.5 }}
               transition={{ duration: 1.2, ease: pageEaseOut }}
             >
-              <Image
-                alt="Cover art for 老歌 by 安泊猜想"
-                className="object-cover"
-                fill
-                sizes="288px"
-                src="/IMG_5332.JPG"
-              />
+              <ListeningShader />
+              <div className="absolute inset-0 flex flex-col justify-between p-5 text-white">
+                <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-white/70 uppercase">
+                  <span>Listening</span>
+                  <span>01</span>
+                </div>
+                <div>
+                  <p className="text-3xl leading-none font-semibold tracking-normal">老歌</p>
+                  <p className="mt-2 text-xs text-white/75">安泊猜想</p>
+                </div>
+              </div>
               <div className="pointer-events-none absolute inset-0 rounded-[1.75rem] border border-black/10 dark:border-white/10" />
             </motion.div>
 

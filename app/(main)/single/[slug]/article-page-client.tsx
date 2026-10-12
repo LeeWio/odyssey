@@ -48,6 +48,7 @@ import {
   useUnlikePostMutation,
 } from "@/lib/features/post";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
+import { ArticleCover } from "@/components/card/article-cover";
 import { useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
 import {
@@ -599,15 +600,9 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
                   <BreadcrumbsItem>{article.category?.name || t("essay")}</BreadcrumbsItem>
                 </Breadcrumbs>
 
-                {article.coverImage?.trim() ? (
-                  // Cover hosts are not in next/image remotePatterns.
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    alt=""
-                    className="aspect-[16/9] w-full rounded-2xl object-cover"
-                    src={article.coverImage.trim()}
-                  />
-                ) : null}
+                <div className="relative isolate aspect-[16/9] w-full overflow-hidden rounded-2xl">
+                  <ArticleCover seed={String(article.id ?? article.slug ?? article.title)} />
+                </div>
 
                 <Typography
                   className="text-4xl leading-tight tracking-normal text-balance break-words sm:text-5xl"

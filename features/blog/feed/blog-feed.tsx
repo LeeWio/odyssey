@@ -33,6 +33,7 @@ import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/f
 import { ReadingListButton } from "@/features/library/reading-list-button";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
+import { PageFrame } from "@/components/layout/page-frame";
 import { useRelativeTime } from "@/lib/relative-time";
 
 const PAGE_SIZE = 8;
@@ -675,175 +676,319 @@ export default function BlogFeed() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-24 sm:px-10 sm:py-32">
-      <div className="w-full">
-        <header className="flex w-full flex-col items-center text-center">
-          <MotionChip
-            color="accent"
-            size="sm"
-            variant="soft"
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : motionDuration.reveal,
-              ease: pageEaseOut,
-            }}
-          >
-            {t("eyebrow")}
-          </MotionChip>
-          <MotionTypography
-            type="h1"
-            weight="bold"
-            className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.05em]"
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : motionDuration.reveal,
-              delay: shouldReduceMotion ? 0 : 0.06,
-              ease: pageEaseOut,
-            }}
-          >
-            {t("title")}
-          </MotionTypography>
-          <MotionTypography
-            color="muted"
-            type="body"
-            className="mt-3 max-w-xl text-balance"
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : motionDuration.reveal,
-              delay: shouldReduceMotion ? 0 : 0.12,
-              ease: pageEaseOut,
-            }}
-          >
-            {t("description")}
-          </MotionTypography>
-          <MotionLink
-            className="text-accent mt-2 inline-flex cursor-[var(--cursor-interactive)] items-center gap-2 text-sm font-medium no-underline"
-            href="/columns"
-            whileHover={shouldReduceMotion ? undefined : { x: 2 }}
-            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : motionDuration.interaction,
-              ease: pageEaseOut,
-            }}
-          >
-            {t("browseColumns")}
-            <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
-          </MotionLink>
-        </header>
+    <PageFrame className="bg-background">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="w-full">
+          <header className="flex w-full flex-col items-center text-center">
+            <MotionChip
+              color="accent"
+              size="sm"
+              variant="soft"
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : motionDuration.reveal,
+                ease: pageEaseOut,
+              }}
+            >
+              {t("eyebrow")}
+            </MotionChip>
+            <MotionTypography
+              type="h1"
+              weight="bold"
+              className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.05em]"
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : motionDuration.reveal,
+                delay: shouldReduceMotion ? 0 : 0.06,
+                ease: pageEaseOut,
+              }}
+            >
+              {t("title")}
+            </MotionTypography>
+            <MotionTypography
+              color="muted"
+              type="body"
+              className="mt-3 max-w-xl text-balance"
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : motionDuration.reveal,
+                delay: shouldReduceMotion ? 0 : 0.12,
+                ease: pageEaseOut,
+              }}
+            >
+              {t("description")}
+            </MotionTypography>
+            <MotionLink
+              className="text-accent mt-2 inline-flex cursor-[var(--cursor-interactive)] items-center gap-2 text-sm font-medium no-underline"
+              href="/columns"
+              whileHover={shouldReduceMotion ? undefined : { x: 2 }}
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : motionDuration.interaction,
+                ease: pageEaseOut,
+              }}
+            >
+              {t("browseColumns")}
+              <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
+            </MotionLink>
+          </header>
 
-        <section
-          aria-label={t("browseArchive")}
-          className="bg-surface-secondary mx-auto mt-12 flex w-full max-w-6xl flex-col gap-4 rounded-2xl p-3 sm:p-4"
-        >
-          <SearchField
-            fullWidth
-            name="article-search"
-            value={searchValue}
-            onChange={handleSearchChange}
-            className="w-full"
+          <section
+            aria-label={t("browseArchive")}
+            className="bg-surface-secondary mx-auto mt-12 flex w-full max-w-6xl flex-col gap-4 rounded-2xl p-3 sm:p-4"
           >
-            <Label className="sr-only">{t("searchArticles")}</Label>
-            <SearchField.Group>
-              <SearchField.SearchIcon />
-              <SearchField.Input placeholder={t("searchPlaceholder")} />
-              <SearchField.ClearButton aria-label={t("clearSearch")} />
-            </SearchField.Group>
-          </SearchField>
+            <SearchField
+              fullWidth
+              name="article-search"
+              value={searchValue}
+              onChange={handleSearchChange}
+              className="w-full"
+            >
+              <Label className="sr-only">{t("searchArticles")}</Label>
+              <SearchField.Group>
+                <SearchField.SearchIcon />
+                <SearchField.Input placeholder={t("searchPlaceholder")} />
+                <SearchField.ClearButton aria-label={t("clearSearch")} />
+              </SearchField.Group>
+            </SearchField>
 
-          <div className="min-w-0">
-            {isFacetsLoading ? (
-              <div aria-label={t("loadingTopics")} className="flex gap-2" role="status">
-                {["w-20", "w-28", "w-24", "w-36"].map((width) => (
-                  <Skeleton key={width} className={`h-8 ${width} rounded-full`} />
-                ))}
-              </div>
-            ) : categories.length > 0 ? (
-              <ScrollShadow hideScrollBar orientation="horizontal" className="-mx-1 px-1">
-                <TagGroup
-                  aria-label={t("filterTopics")}
-                  selectedKeys={new Set([selectedCategoryId ? String(selectedCategoryId) : "all"])}
-                  selectionMode="single"
-                  size="sm"
-                  variant="surface"
-                  className="w-max min-w-full"
-                  onSelectionChange={handleCategoryChange}
-                >
-                  <TagGroup.List className="flex-nowrap pr-8">
-                    <Tag id="all" textValue={t("allTopics")}>
-                      {t("allTopics")}
-                      <span className="text-muted text-xs tabular-nums">
-                        {facets?.totalPublishedCount ?? 0}
-                      </span>
-                    </Tag>
-                    {categories.map((category) => (
-                      <Tag key={category.id} id={String(category.id)} textValue={category.name}>
-                        {category.name}
+            <div className="min-w-0">
+              {isFacetsLoading ? (
+                <div aria-label={t("loadingTopics")} className="flex gap-2" role="status">
+                  {["w-20", "w-28", "w-24", "w-36"].map((width) => (
+                    <Skeleton key={width} className={`h-8 ${width} rounded-full`} />
+                  ))}
+                </div>
+              ) : categories.length > 0 ? (
+                <ScrollShadow hideScrollBar orientation="horizontal" className="-mx-1 px-1">
+                  <TagGroup
+                    aria-label={t("filterTopics")}
+                    selectedKeys={
+                      new Set([selectedCategoryId ? String(selectedCategoryId) : "all"])
+                    }
+                    selectionMode="single"
+                    size="sm"
+                    variant="surface"
+                    className="w-max min-w-full"
+                    onSelectionChange={handleCategoryChange}
+                  >
+                    <TagGroup.List className="flex-nowrap pr-8">
+                      <Tag id="all" textValue={t("allTopics")}>
+                        {t("allTopics")}
                         <span className="text-muted text-xs tabular-nums">
-                          {category.count ?? 0}
+                          {facets?.totalPublishedCount ?? 0}
                         </span>
                       </Tag>
-                    ))}
-                  </TagGroup.List>
-                </TagGroup>
-              </ScrollShadow>
-            ) : null}
-          </div>
-        </section>
-
-        <div className="mt-12 grid gap-10 xl:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)] xl:items-start">
-          <div className="min-w-0">
-            <AnimatePresence initial={false} mode="wait">
-              {!normalizedKeyword && !selectedCategoryId && featuredPost ? (
-                <motion.section
-                  key="featured-writing"
-                  aria-labelledby="featured-writing-title"
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={
-                    shouldReduceMotion
-                      ? { opacity: 0, transition: exitTransition }
-                      : { opacity: 0, y: -6, transition: exitTransition }
-                  }
-                  transition={revealTransition}
-                >
-                  <Typography
-                    id="featured-writing-title"
-                    type="h2"
-                    weight="semibold"
-                    className="mb-5"
-                  >
-                    {t("featuredWriting")}
-                  </Typography>
-                  <FeaturedPost post={featuredPost} />
-                </motion.section>
+                      {categories.map((category) => (
+                        <Tag key={category.id} id={String(category.id)} textValue={category.name}>
+                          {category.name}
+                          <span className="text-muted text-xs tabular-nums">
+                            {category.count ?? 0}
+                          </span>
+                        </Tag>
+                      ))}
+                    </TagGroup.List>
+                  </TagGroup>
+                </ScrollShadow>
               ) : null}
-            </AnimatePresence>
+            </div>
+          </section>
 
-            <section
-              id="all-writing"
-              aria-busy={isUpdating}
-              aria-labelledby="all-writing-title"
-              className="scroll-mt-28 pt-16 sm:pt-20"
-            >
-              <div className="mb-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <Typography id="all-writing-title" type="h2" weight="semibold">
-                    {normalizedKeyword
-                      ? t("searchResults")
-                      : selectedCategory?.name || t("allWriting")}
-                  </Typography>
-                  <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
-                    {data ? t("articleCount", { count: data.total }) : t("browseArchive")}
-                  </Typography>
+          <div className="mt-12 grid gap-10 xl:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)] xl:items-start">
+            <div className="min-w-0">
+              <AnimatePresence initial={false} mode="wait">
+                {!normalizedKeyword && !selectedCategoryId && featuredPost ? (
+                  <motion.section
+                    key="featured-writing"
+                    aria-labelledby="featured-writing-title"
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={
+                      shouldReduceMotion
+                        ? { opacity: 0, transition: exitTransition }
+                        : { opacity: 0, y: -6, transition: exitTransition }
+                    }
+                    transition={revealTransition}
+                  >
+                    <Typography
+                      id="featured-writing-title"
+                      type="h2"
+                      weight="semibold"
+                      className="mb-5"
+                    >
+                      {t("featuredWriting")}
+                    </Typography>
+                    <FeaturedPost post={featuredPost} />
+                  </motion.section>
+                ) : null}
+              </AnimatePresence>
+
+              <section
+                id="all-writing"
+                aria-busy={isUpdating}
+                aria-labelledby="all-writing-title"
+                className="scroll-mt-28 pt-16 sm:pt-20"
+              >
+                <div className="mb-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <Typography id="all-writing-title" type="h2" weight="semibold">
+                      {normalizedKeyword
+                        ? t("searchResults")
+                        : selectedCategory?.name || t("allWriting")}
+                    </Typography>
+                    <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
+                      {data ? t("articleCount", { count: data.total }) : t("browseArchive")}
+                    </Typography>
+                  </div>
+                  <AnimatePresence initial={false} mode="wait">
+                    {isFetching && !isLoadingPage ? (
+                      <motion.div
+                        key="updating-results"
+                        initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={
+                          shouldReduceMotion
+                            ? { opacity: 0, transition: exitTransition }
+                            : { opacity: 0, y: -4, transition: exitTransition }
+                        }
+                        transition={{
+                          duration: shouldReduceMotion ? 0 : motionDuration.interaction,
+                          ease: pageEaseOut,
+                        }}
+                      >
+                        <Typography aria-live="polite" color="muted" type="body-xs">
+                          {t("updating")}
+                        </Typography>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
                 </div>
-                <AnimatePresence initial={false} mode="wait">
-                  {isFetching && !isLoadingPage ? (
+
+                <AnimatePresence key={`results-${selectionKey}`} initial={false} mode="wait">
+                  {isLoadingPage ? (
                     <motion.div
-                      key="updating-results"
-                      initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+                      key="loading"
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={
+                        shouldReduceMotion
+                          ? { opacity: 0, transition: exitTransition }
+                          : { opacity: 0, y: -6, transition: exitTransition }
+                      }
+                      transition={stateTransition}
+                    >
+                      <FeedSkeleton />
+                    </motion.div>
+                  ) : isError ? (
+                    <motion.div
+                      key="error"
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={
+                        shouldReduceMotion
+                          ? { opacity: 0, transition: exitTransition }
+                          : { opacity: 0, y: -6, transition: exitTransition }
+                      }
+                      transition={stateTransition}
+                    >
+                      <EmptyState size="lg">
+                        <EmptyState.Header>
+                          <EmptyState.Media variant="icon">
+                            <Icon icon="gravity-ui:book-open" aria-hidden="true" />
+                          </EmptyState.Media>
+                          <EmptyState.Title>{t("unavailableTitle")}</EmptyState.Title>
+                          <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
+                        </EmptyState.Header>
+                        <EmptyState.Content>
+                          <Button variant="outline" onPress={() => refetch()}>
+                            <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
+                            {t("tryAgain")}
+                          </Button>
+                        </EmptyState.Content>
+                      </EmptyState>
+                    </motion.div>
+                  ) : posts.length === 0 ? (
+                    <motion.div
+                      key={`empty-${normalizedKeyword || "all"}-${selectedCategoryId ?? "all"}`}
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={
+                        shouldReduceMotion
+                          ? { opacity: 0, transition: exitTransition }
+                          : { opacity: 0, y: -6, transition: exitTransition }
+                      }
+                      transition={stateTransition}
+                    >
+                      <EmptyState size="lg">
+                        <EmptyState.Header>
+                          <EmptyState.Media variant="icon">
+                            <Icon icon="gravity-ui:book-open" aria-hidden="true" />
+                          </EmptyState.Media>
+                          <EmptyState.Title>
+                            {normalizedKeyword
+                              ? t("noMatches")
+                              : selectedCategoryId
+                                ? t("noTopic")
+                                : t("empty")}
+                          </EmptyState.Title>
+                          <EmptyState.Description>
+                            {normalizedKeyword
+                              ? t("noMatchesHint")
+                              : selectedCategoryId
+                                ? t("noTopicHint")
+                                : t("emptyHint")}
+                          </EmptyState.Description>
+                        </EmptyState.Header>
+                        {normalizedKeyword ? (
+                          <EmptyState.Content>
+                            <Button variant="outline" onPress={() => handleSearchChange("")}>
+                              {t("clearSearch")}
+                            </Button>
+                          </EmptyState.Content>
+                        ) : selectedCategoryId ? (
+                          <EmptyState.Content>
+                            <Button
+                              variant="outline"
+                              onPress={() => handleCategoryChange(new Set(["all"]))}
+                            >
+                              {t("viewAllTopics")}
+                            </Button>
+                          </EmptyState.Content>
+                        ) : null}
+                      </EmptyState>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key={`results-${resultsKey}`}
+                      className="min-w-0"
+                      initial={shouldReduceMotion ? false : { opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0, transition: exitTransition }}
+                      transition={stateTransition}
+                    >
+                      <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                        {posts.map((post, index) => (
+                          <BlogPostCard
+                            key={post.id}
+                            index={index}
+                            post={post}
+                            isRefreshing={isFetching}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence key={`pagination-${selectionKey}`} initial={false} mode="wait">
+                  {!isAdjustingPage && (page > 0 || totalPages > 1) ? (
+                    <motion.div
+                      key={`pagination-${totalPages}`}
+                      layout={!shouldReduceMotion}
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={
                         shouldReduceMotion
@@ -855,245 +1000,105 @@ export default function BlogFeed() {
                         ease: pageEaseOut,
                       }}
                     >
-                      <Typography aria-live="polite" color="muted" type="body-xs">
-                        {t("updating")}
-                      </Typography>
+                      <Pagination
+                        className="mt-10 w-full flex-col items-start gap-4 sm:mt-12 sm:flex-row sm:items-center sm:justify-between"
+                        size="sm"
+                      >
+                        <Pagination.Summary>
+                          {data
+                            ? t("showing", { start: startItem, end: endItem, total: data.total })
+                            : t("pageNumber", { page: page + 1 })}
+                        </Pagination.Summary>
+                        <Pagination.Content>
+                          <Pagination.Item>
+                            <Pagination.Previous
+                              isDisabled={page === 0 || isUpdating}
+                              onPress={() => handlePageChange(page - 1)}
+                            >
+                              <Pagination.PreviousIcon />
+                              <span>{t("previous")}</span>
+                            </Pagination.Previous>
+                          </Pagination.Item>
+                          {getPageNumbers(page, totalPages).map((value) =>
+                            typeof value === "number" ? (
+                              <Pagination.Item key={value}>
+                                <Pagination.Link
+                                  isActive={value === page + 1}
+                                  isDisabled={isUpdating}
+                                  onPress={() => handlePageChange(value - 1)}
+                                >
+                                  {value}
+                                </Pagination.Link>
+                              </Pagination.Item>
+                            ) : (
+                              <Pagination.Item key={value}>
+                                <Pagination.Ellipsis />
+                              </Pagination.Item>
+                            )
+                          )}
+                          <Pagination.Item>
+                            <Pagination.Next
+                              isDisabled={isUpdating || !data || page >= totalPages - 1}
+                              onPress={() => handlePageChange(page + 1)}
+                            >
+                              <span>{t("next")}</span>
+                              <Pagination.NextIcon />
+                            </Pagination.Next>
+                          </Pagination.Item>
+                        </Pagination.Content>
+                      </Pagination>
                     </motion.div>
                   ) : null}
                 </AnimatePresence>
-              </div>
+              </section>
+            </div>
 
-              <AnimatePresence key={`results-${selectionKey}`} initial={false} mode="wait">
-                {isLoadingPage ? (
+            <aside
+              aria-label={t("overview")}
+              className="flex min-w-0 flex-col gap-6 xl:sticky xl:top-24"
+            >
+              <motion.div
+                layout={!shouldReduceMotion}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: shouldReduceMotion ? 0 : 0.16,
+                  duration: shouldReduceMotion ? 0 : motionDuration.reveal,
+                  ease: pageEaseOut,
+                }}
+              >
+                <ArchiveRail
+                  key={selectionKey}
+                  categories={categories}
+                  posts={posts}
+                  publishedTotal={facets?.totalPublishedCount ?? data?.total ?? 0}
+                />
+              </motion.div>
+              <AnimatePresence initial={false} mode="wait">
+                {!normalizedKeyword && !selectedCategoryId && continueReading.length > 0 ? (
                   <motion.div
-                    key="loading"
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={
-                      shouldReduceMotion
-                        ? { opacity: 0, transition: exitTransition }
-                        : { opacity: 0, y: -6, transition: exitTransition }
-                    }
-                    transition={stateTransition}
-                  >
-                    <FeedSkeleton />
-                  </motion.div>
-                ) : isError ? (
-                  <motion.div
-                    key="error"
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={
-                      shouldReduceMotion
-                        ? { opacity: 0, transition: exitTransition }
-                        : { opacity: 0, y: -6, transition: exitTransition }
-                    }
-                    transition={stateTransition}
-                  >
-                    <EmptyState size="lg">
-                      <EmptyState.Header>
-                        <EmptyState.Media variant="icon">
-                          <Icon icon="gravity-ui:book-open" aria-hidden="true" />
-                        </EmptyState.Media>
-                        <EmptyState.Title>{t("unavailableTitle")}</EmptyState.Title>
-                        <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
-                      </EmptyState.Header>
-                      <EmptyState.Content>
-                        <Button variant="outline" onPress={() => refetch()}>
-                          <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                          {t("tryAgain")}
-                        </Button>
-                      </EmptyState.Content>
-                    </EmptyState>
-                  </motion.div>
-                ) : posts.length === 0 ? (
-                  <motion.div
-                    key={`empty-${normalizedKeyword || "all"}-${selectedCategoryId ?? "all"}`}
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={
-                      shouldReduceMotion
-                        ? { opacity: 0, transition: exitTransition }
-                        : { opacity: 0, y: -6, transition: exitTransition }
-                    }
-                    transition={stateTransition}
-                  >
-                    <EmptyState size="lg">
-                      <EmptyState.Header>
-                        <EmptyState.Media variant="icon">
-                          <Icon icon="gravity-ui:book-open" aria-hidden="true" />
-                        </EmptyState.Media>
-                        <EmptyState.Title>
-                          {normalizedKeyword
-                            ? t("noMatches")
-                            : selectedCategoryId
-                              ? t("noTopic")
-                              : t("empty")}
-                        </EmptyState.Title>
-                        <EmptyState.Description>
-                          {normalizedKeyword
-                            ? t("noMatchesHint")
-                            : selectedCategoryId
-                              ? t("noTopicHint")
-                              : t("emptyHint")}
-                        </EmptyState.Description>
-                      </EmptyState.Header>
-                      {normalizedKeyword ? (
-                        <EmptyState.Content>
-                          <Button variant="outline" onPress={() => handleSearchChange("")}>
-                            {t("clearSearch")}
-                          </Button>
-                        </EmptyState.Content>
-                      ) : selectedCategoryId ? (
-                        <EmptyState.Content>
-                          <Button
-                            variant="outline"
-                            onPress={() => handleCategoryChange(new Set(["all"]))}
-                          >
-                            {t("viewAllTopics")}
-                          </Button>
-                        </EmptyState.Content>
-                      ) : null}
-                    </EmptyState>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key={`results-${resultsKey}`}
-                    className="min-w-0"
-                    initial={shouldReduceMotion ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0, transition: exitTransition }}
-                    transition={stateTransition}
-                  >
-                    <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                      {posts.map((post, index) => (
-                        <BlogPostCard
-                          key={post.id}
-                          index={index}
-                          post={post}
-                          isRefreshing={isFetching}
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <AnimatePresence key={`pagination-${selectionKey}`} initial={false} mode="wait">
-                {!isAdjustingPage && (page > 0 || totalPages > 1) ? (
-                  <motion.div
-                    key={`pagination-${totalPages}`}
+                    key="continue-reading"
                     layout={!shouldReduceMotion}
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={
                       shouldReduceMotion
                         ? { opacity: 0, transition: exitTransition }
-                        : { opacity: 0, y: -4, transition: exitTransition }
+                        : { opacity: 0, y: -8, transition: exitTransition }
                     }
                     transition={{
-                      duration: shouldReduceMotion ? 0 : motionDuration.interaction,
+                      duration: shouldReduceMotion ? 0 : motionDuration.reveal,
                       ease: pageEaseOut,
                     }}
                   >
-                    <Pagination
-                      className="mt-10 w-full flex-col items-start gap-4 sm:mt-12 sm:flex-row sm:items-center sm:justify-between"
-                      size="sm"
-                    >
-                      <Pagination.Summary>
-                        {data
-                          ? t("showing", { start: startItem, end: endItem, total: data.total })
-                          : t("pageNumber", { page: page + 1 })}
-                      </Pagination.Summary>
-                      <Pagination.Content>
-                        <Pagination.Item>
-                          <Pagination.Previous
-                            isDisabled={page === 0 || isUpdating}
-                            onPress={() => handlePageChange(page - 1)}
-                          >
-                            <Pagination.PreviousIcon />
-                            <span>{t("previous")}</span>
-                          </Pagination.Previous>
-                        </Pagination.Item>
-                        {getPageNumbers(page, totalPages).map((value) =>
-                          typeof value === "number" ? (
-                            <Pagination.Item key={value}>
-                              <Pagination.Link
-                                isActive={value === page + 1}
-                                isDisabled={isUpdating}
-                                onPress={() => handlePageChange(value - 1)}
-                              >
-                                {value}
-                              </Pagination.Link>
-                            </Pagination.Item>
-                          ) : (
-                            <Pagination.Item key={value}>
-                              <Pagination.Ellipsis />
-                            </Pagination.Item>
-                          )
-                        )}
-                        <Pagination.Item>
-                          <Pagination.Next
-                            isDisabled={isUpdating || !data || page >= totalPages - 1}
-                            onPress={() => handlePageChange(page + 1)}
-                          >
-                            <span>{t("next")}</span>
-                            <Pagination.NextIcon />
-                          </Pagination.Next>
-                        </Pagination.Item>
-                      </Pagination.Content>
-                    </Pagination>
+                    <ContinueReading compact entries={continueReading} />
                   </motion.div>
                 ) : null}
               </AnimatePresence>
-            </section>
+            </aside>
           </div>
-
-          <aside
-            aria-label={t("overview")}
-            className="flex min-w-0 flex-col gap-6 xl:sticky xl:top-24"
-          >
-            <motion.div
-              layout={!shouldReduceMotion}
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: shouldReduceMotion ? 0 : 0.16,
-                duration: shouldReduceMotion ? 0 : motionDuration.reveal,
-                ease: pageEaseOut,
-              }}
-            >
-              <ArchiveRail
-                key={selectionKey}
-                categories={categories}
-                posts={posts}
-                publishedTotal={facets?.totalPublishedCount ?? data?.total ?? 0}
-              />
-            </motion.div>
-            <AnimatePresence initial={false} mode="wait">
-              {!normalizedKeyword && !selectedCategoryId && continueReading.length > 0 ? (
-                <motion.div
-                  key="continue-reading"
-                  layout={!shouldReduceMotion}
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={
-                    shouldReduceMotion
-                      ? { opacity: 0, transition: exitTransition }
-                      : { opacity: 0, y: -8, transition: exitTransition }
-                  }
-                  transition={{
-                    duration: shouldReduceMotion ? 0 : motionDuration.reveal,
-                    ease: pageEaseOut,
-                  }}
-                >
-                  <ContinueReading compact entries={continueReading} />
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-          </aside>
         </div>
       </div>
-    </div>
+    </PageFrame>
   );
 }

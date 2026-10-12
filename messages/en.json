@@ -849,6 +849,7 @@
     "title": "Good places lead to better ideas.",
     "description": "A small collection of people and projects making thoughtful work on the open web.",
     "placesToVisit": "places to visit",
+    "withAvatars": "with avatars",
     "section": "Friend links",
     "searchLabel": "Search places to visit",
     "searchPlaceholder": "Search the blogroll",
@@ -902,6 +903,8 @@
     "camera": "Camera",
     "film": "Film",
     "frame": "Frame",
+    "frameCountLabel": "frames",
+    "format": "format",
     "viewer": "{title} full screen viewer",
     "frameCount": "Frame {current} / {total}"
   },
@@ -980,6 +983,8 @@
     "clearSearch": "Clear tool search",
     "matches": "{count} matches",
     "browse": "Browse the toolkit",
+    "categories": "categories",
+    "officialLinks": "official links",
     "filterCategory": "Filter tools by category",
     "allTools": "All tools",
     "all": "All",
@@ -1171,6 +1176,7 @@
     },
     "guestbook": {
       "decorationAlt": "Guestbook decorative animation",
+      "openComposer": "Open guestbook composer",
       "eyebrow": "Guestbook",
       "open": "Open the guestbook",
       "lineOne": "Since you're here,",

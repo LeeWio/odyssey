@@ -17,6 +17,7 @@ import { ReadingHistorySection } from "./reading-history-section";
 import { ReadingListSection } from "./reading-list-section";
 import { ReadingPreferencesSection } from "./reading-preferences-section";
 import { RecommendationsSection } from "./recommendations-section";
+import { PageFrame } from "@/components/layout/page-frame";
 
 export function LibraryPage() {
   const t = useTranslations("Library");
@@ -25,7 +26,7 @@ export function LibraryPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="bg-background flex min-h-[100dvh] items-center px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+      <PageFrame className="bg-background flex items-center">
         <div className="mx-auto w-full max-w-lg">
           <EmptyState size="lg">
             <EmptyState.Header>
@@ -43,12 +44,12 @@ export function LibraryPage() {
             </EmptyState.Content>
           </EmptyState>
         </div>
-      </div>
+      </PageFrame>
     );
   }
 
   return (
-    <div className="bg-background min-h-[100dvh] px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
+    <PageFrame className="bg-background">
       <div className="mx-auto w-full max-w-6xl">
         <header className="max-w-3xl">
           <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
@@ -72,6 +73,6 @@ export function LibraryPage() {
         <RecommendationsSection />
         <ReadingHistorySection />
       </div>
-    </div>
+    </PageFrame>
   );
 }

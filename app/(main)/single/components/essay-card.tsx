@@ -4,6 +4,7 @@ import { NumberValue } from "@heroui-pro/react";
 import { Card, Link } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { ArticleCover } from "@/components/card/article-cover";
 import { ReadingListButton } from "@/features/library/reading-list-button";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 
@@ -38,32 +39,24 @@ export function EssayCard({ post }: { post: EssayCardPost }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
   const title = post.title || t("untitledStory");
-  const cover = post.coverImage?.trim();
   const slug = post.slug ?? "";
   const date = getPostPublishedAt(post);
+  const seed = String(post.id ?? post.slug ?? title);
 
   return (
-    <Card className="h-full">
+    <Card className="h-full overflow-hidden">
+      <div className="relative isolate aspect-[16/7] w-full overflow-hidden">
+        <ArticleCover animated={false} seed={seed} />
+      </div>
       <Card.Header>
-        <div className="flex items-start gap-3">
-          <Card.Title className="line-clamp-2 min-w-0 flex-1 text-base leading-6">
-            <Link
-              className="text-foreground block max-w-full wrap-anywhere no-underline"
-              href={`/single/${slug}`}
-            >
-              {title}
-            </Link>
-          </Card.Title>
-          {cover ? (
-            <Link
-              className="block size-12 shrink-0 overflow-hidden rounded-lg no-underline"
-              href={`/single/${slug}`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt="" className="size-12 object-cover" src={cover} />
-            </Link>
-          ) : null}
-        </div>
+        <Card.Title className="line-clamp-2 min-w-0 text-base leading-6">
+          <Link
+            className="text-foreground block max-w-full wrap-anywhere no-underline"
+            href={`/single/${slug}`}
+          >
+            {title}
+          </Link>
+        </Card.Title>
         <Card.Description>
           {[post.authorName, post.category?.name, formatDate(date, locale, t("recentlyPublished"))]
             .filter(Boolean)

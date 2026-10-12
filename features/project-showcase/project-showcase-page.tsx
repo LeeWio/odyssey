@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@iconify/react";
+import { ProjectShader } from "@/components/project/project-shader";
 
 import { EmptyState } from "@heroui-pro/react";
 import {
@@ -18,13 +19,11 @@ import {
   buttonVariants,
   cn,
 } from "@heroui/react";
-import Image from "next/image";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useDeferredValue, useMemo, useState } from "react";
 
-import { getSmartColorTone, SmartColorSurface } from "@/components/background/smart-color-surface";
-import { PageContainer } from "@/components/layout/page-container";
+import { PageFrame } from "@/components/layout/page-frame";
 import { type ProjectResponse, useGetPublicProjectsQuery } from "@/lib/features/project";
 
 type ProjectAvailability = "all" | "preview" | "source";
@@ -86,34 +85,16 @@ function ProjectSkeleton() {
 }
 
 function ProjectVisual({ project }: { project: ProjectResponse }) {
-  const t = useTranslations("Projects");
-  const coverImage = toSafeExternalUrl(project.coverImage);
-
-  if (coverImage) {
-    return (
-      <Image
-        unoptimized
-        alt={t("coverAlt", { name: project.name })}
-        className="object-cover transition-transform duration-500 group-hover:scale-105"
-        fill
-        sizes="(min-width: 1920px) 20vw, (min-width: 1536px) 25vw, (min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
-        src={coverImage}
-      />
-    );
-  }
-
   return (
-    <SmartColorSurface
-      className="h-full"
-      seed={`project-${project.slug}`}
-      tone={getSmartColorTone({ categoryName: project.techStack, title: project.name })}
-    >
+    <div className="relative h-full overflow-hidden">
+      <ProjectShader seed={`project-${project.slug}`} />
+      <div className="absolute inset-0 bg-linear-to-br from-black/5 via-transparent to-black/35" />
       <Icon
         icon="gravity-ui:code"
         aria-hidden="true"
-        className="absolute right-6 bottom-5 size-16 text-white/28"
+        className="absolute right-6 bottom-5 size-16 text-white/40"
       />
-    </SmartColorSurface>
+    </div>
   );
 }
 
@@ -258,9 +239,9 @@ export function ProjectShowcasePage() {
   };
 
   return (
-    <div className="bg-background min-h-dvh w-full pt-28 pb-24 lg:pt-32">
-      <PageContainer>
-        <header className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-end">
+    <PageFrame className="bg-background">
+      <div className="mx-auto w-full max-w-7xl">
+        <header className="border-default-200 grid gap-8 border-b pb-10 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-end lg:gap-12">
           <div className="max-w-3xl">
             <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
               <Icon icon="gravity-ui:code" aria-hidden="true" className="size-4" />
@@ -273,21 +254,39 @@ export function ProjectShowcasePage() {
             >
               {t("title")}
             </Typography>
-            <Typography color="muted" type="body" className="mt-5 max-w-xl">
+            <Typography color="muted" type="body" className="mt-4 max-w-xl leading-7">
               {t("description")}
             </Typography>
           </div>
-          <div className="border-default-200 border-l pl-5 sm:pl-6">
-            <Typography className="font-mono text-3xl tabular-nums" type="body">
-              {projects.length.toLocaleString(locale)}
-            </Typography>
-            <Typography color="muted" type="body-sm" className="mt-1">
-              {t("publishedCount")}
-            </Typography>
+          <div className="lg:border-default-200 grid grid-cols-3 gap-4 lg:border-l lg:pl-6">
+            <div className="min-w-0">
+              <Typography className="font-mono text-2xl tabular-nums" type="body">
+                {projects.length.toLocaleString(locale)}
+              </Typography>
+              <Typography color="muted" type="body-xs" className="mt-1 leading-5">
+                {t("publishedCount")}
+              </Typography>
+            </div>
+            <div className="min-w-0">
+              <Typography className="font-mono text-2xl tabular-nums" type="body">
+                {previewCount.toLocaleString(locale)}
+              </Typography>
+              <Typography color="muted" type="body-xs" className="mt-1 leading-5">
+                {t("livePreview")}
+              </Typography>
+            </div>
+            <div className="min-w-0">
+              <Typography className="font-mono text-2xl tabular-nums" type="body">
+                {sourceCount.toLocaleString(locale)}
+              </Typography>
+              <Typography color="muted" type="body-xs" className="mt-1 leading-5">
+                {t("sourceAvailable")}
+              </Typography>
+            </div>
           </div>
         </header>
 
-        <section aria-label={t("section")} className="mt-14">
+        <section aria-label={t("section")} className="mt-12">
           {isLoading ? <ProjectSkeleton /> : null}
 
           {!isLoading && error ? (
@@ -324,7 +323,7 @@ export function ProjectShowcasePage() {
 
           {!isLoading && !error && projects.length > 0 ? (
             <>
-              <div className="border-default-200 grid gap-5 border-y py-6 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-end">
+              <div className="border-default-200 grid gap-5 border-t border-b py-5 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-end">
                 <div className="min-w-0">
                   <SearchField fullWidth name="project-search" value={search} onChange={setSearch}>
                     <Label className="sr-only">{t("searchLabel")}</Label>
@@ -397,7 +396,7 @@ export function ProjectShowcasePage() {
                 </Select>
               </div>
 
-              <div className="mt-7 flex items-center justify-between gap-4">
+              <div className="mt-6 flex items-center justify-between gap-4">
                 <Typography color="muted" type="body-sm">
                   {t("toExplore", { count: visibleProjects.length })}
                 </Typography>
@@ -409,7 +408,7 @@ export function ProjectShowcasePage() {
               </div>
 
               {visibleProjects.length > 0 ? (
-                <div className={cn(PROJECT_GRID, "mt-6")} data-testid="projects-grid">
+                <div className={cn(PROJECT_GRID, "mt-5")} data-testid="projects-grid">
                   {visibleProjects.map((project) => (
                     <ProjectCard key={project.id} project={project} />
                   ))}
@@ -444,7 +443,7 @@ export function ProjectShowcasePage() {
             <Icon icon="gravity-ui:arrow-right" aria-hidden="true" className="size-4" />
           </Link>
         </div>
-      </PageContainer>
-    </div>
+      </div>
+    </PageFrame>
   );
 }
