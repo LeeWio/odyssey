@@ -32,7 +32,7 @@ jobs:
       # Generate a temporary npm lockfile because audit-ci does not audit Bun's
       # native bun.lock format. No dependency installation is performed.
       - name: Generate Temporary Lockfile for Auditing
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+        run: npm install --package-lock-only --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 
       # Perform deep, strict security threshold checking
       - name: Run Deep Dependency Security Audit (audit-ci)
