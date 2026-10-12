@@ -1,3 +1,10 @@
+# [1.209.0](https://github.com/LeeWio/odyssey/compare/v1.208.2...v1.209.0) (2026-10-12)
+
+
+### Features
+
+* **web:** refine homepage UI and localization ([b7b3ae0](https://github.com/LeeWio/odyssey/commit/b7b3ae093ce698a83545e2427659d8ab7d0c53e4))
+
 ## [1.208.2](https://github.com/LeeWio/odyssey/compare/v1.208.1...v1.208.2) (2026-10-12)
 
 
