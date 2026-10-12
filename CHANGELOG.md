@@ -1,3 +1,10 @@
+# [1.208.0](https://github.com/LeeWio/odyssey/compare/v1.207.0...v1.208.0) (2026-10-12)
+
+
+### Features
+
+* **frontend:** refine public pages and harden CI workflows ([fdd8470](https://github.com/LeeWio/odyssey/commit/fdd847045cf0d2243615fc87476c01b2e96c23eb))
+
 # [1.207.0](https://github.com/LeeWio/odyssey/compare/v1.206.0...v1.207.0) (2026-10-10)
 
 
