@@ -1,3 +1,10 @@
+## [1.208.1](https://github.com/LeeWio/odyssey/compare/v1.208.0...v1.208.1) (2026-10-12)
+
+
+### Bug Fixes
+
+* **ci:** audit dependencies with npm lockfile ([818477c](https://github.com/LeeWio/odyssey/commit/818477c7dc654398fbb3dee700cedb938886835a))
+
 # [1.208.0](https://github.com/LeeWio/odyssey/compare/v1.207.0...v1.208.0) (2026-10-12)
 
 
