@@ -4,47 +4,62 @@ import { Icon } from "@iconify/react";
 
 import { Card, Chip, Link } from "@heroui/react";
 import { Timeline } from "@heroui-pro/react";
+import { useLocale, useTranslations } from "next-intl";
+import { formatActivityPeriod } from "./github-activity-format";
 
 import type { GitHubActivityResponse, GitHubRepositoryActivity } from "@/lib/features/github";
 
-const formatDate = (value: string | null) =>
+const formatDate = (value: string | null, locale: string) =>
   value
-    ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(
-        new Date(value)
-      )
+    ? new Intl.DateTimeFormat(locale, {
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      }).format(new Date(value))
     : undefined;
 
-const mapRepositories = (repositories: GitHubRepositoryActivity[], label: string) =>
+const mapRepositories = (
+  repositories: GitHubRepositoryActivity[],
+  label: (count: number) => string
+) =>
   repositories.map((repository) => ({
-    commits: `${repository.count} ${label}`,
+    commits: label(repository.count),
     href: repository.url,
     name: repository.nameWithOwner,
   }));
 
 export function RepositoryActivity({ activity }: { activity: GitHubActivityResponse }) {
+  const locale = useLocale();
+  const t = useTranslations("Home.lately");
   const repositoryActivity = [
     {
       actor: activity.actor,
       icon: "gravity-ui:code-commits",
-      repositories: mapRepositories(activity.commitRepositories, "commits"),
+      repositories: mapRepositories(activity.commitRepositories, (count) =>
+        t("activityCommitCount", { count })
+      ),
       status: "success" as const,
-      title: `Committed across ${activity.commitRepositories.length} product workspaces`,
+      title: t("activityCommittedAcross", { count: activity.commitRepositories.length }),
     },
     ...(activity.latestMergedPullRequest
       ? [
           {
             actor: activity.actor,
-            date: formatDate(activity.latestMergedPullRequest.mergedAt),
+            date: formatDate(activity.latestMergedPullRequest.mergedAt, locale),
             icon: "gravity-ui:code-pull-request",
             pullRequest: {
               additions: activity.latestMergedPullRequest.additions,
-              comments: `${activity.latestMergedPullRequest.commentCount} comments`,
+              comments: t("activityCommentCount", {
+                count: activity.latestMergedPullRequest.commentCount,
+              }),
               deletions: activity.latestMergedPullRequest.deletions,
               description: activity.latestMergedPullRequest.description,
               title: activity.latestMergedPullRequest.title,
             },
             status: "current" as const,
-            title: `Merged a pull request in ${activity.latestMergedPullRequest.repositoryNameWithOwner}`,
+            title: t("activityMergedPullRequest", {
+              repository: activity.latestMergedPullRequest.repositoryNameWithOwner,
+            }),
           },
         ]
       : []),
@@ -56,17 +71,27 @@ export function RepositoryActivity({ activity }: { activity: GitHubActivityRespo
         open: activity.openIssues,
         total: activity.totalIssues,
       },
-      repositories: mapRepositories(activity.issueRepositories, "issues"),
+      repositories: mapRepositories(activity.issueRepositories, (count) =>
+        t("activityIssueCount", { count })
+      ),
       status: "warning" as const,
-      title: `Opened ${activity.totalIssues} issues across ${activity.issueRepositories.length} workspaces`,
+      title: t("activityOpenedIssues", {
+        count: activity.totalIssues,
+        repositories: activity.issueRepositories.length,
+      }),
     },
     {
       actor: activity.actor,
-      date: formatDate(activity.latestReviewAt),
+      date: formatDate(activity.latestReviewAt, locale),
       icon: "gravity-ui:eye",
-      repositories: mapRepositories(activity.reviewRepositories, "reviews"),
+      repositories: mapRepositories(activity.reviewRepositories, (count) =>
+        t("activityReviewCount", { count })
+      ),
       status: "default" as const,
-      title: `Reviewed ${activity.totalReviews} pull requests in ${activity.reviewRepositories.length} workspaces`,
+      title: t("activityReviewedPullRequests", {
+        count: activity.totalReviews,
+        repositories: activity.reviewRepositories.length,
+      }),
     },
   ] as const;
 
@@ -74,7 +99,7 @@ export function RepositoryActivity({ activity }: { activity: GitHubActivityRespo
     <div className="w-full max-w-155 min-w-0">
       <div className="mb-4 flex items-center gap-4">
         <h3 className="text-foreground m-0 shrink-0 text-sm font-semibold">
-          {activity.periodLabel}
+          {formatActivityPeriod(activity.month, locale, activity.periodLabel)}
         </h3>
         <div className="bg-separator h-px flex-1" />
       </div>
@@ -153,13 +178,13 @@ export function RepositoryActivity({ activity }: { activity: GitHubActivityRespo
                 {"issueSummary" in event ? (
                   <div className="flex flex-wrap gap-2">
                     <Chip color="success" size="sm" variant="soft">
-                      {event.issueSummary.total} opened
+                      {t("activityIssueOpened", { count: event.issueSummary.total })}
                     </Chip>
                     <Chip color="accent" size="sm" variant="soft">
-                      {event.issueSummary.closed} closed
+                      {t("activityIssueClosed", { count: event.issueSummary.closed })}
                     </Chip>
                     <Chip color="danger" size="sm" variant="soft">
-                      {event.issueSummary.open} open
+                      {t("activityIssueOpen", { count: event.issueSummary.open })}
                     </Chip>
                   </div>
                 ) : null}

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui";
 import { useGetMarketIndexBySymbolQuery } from "@/lib/features/market";
 import { useGetGitHubActivityQuery } from "@/lib/features/github";
+import { formatActivityPeriod } from "./github-activity-format";
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
 import { ItemCard, TrendChip } from "@heroui-pro/react";
@@ -31,7 +32,7 @@ import { useMounted } from "@mantine/hooks";
 import { motion } from "motion/react";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 const RepositoryActivityPanel = dynamic(
   () =>
@@ -77,6 +78,7 @@ function ListeningShader() {
 
 export function LatelySection() {
   const t = useTranslations("Home");
+  const locale = useLocale();
   const mounted = useMounted();
   const shouldReduceMotion = useReducedMotionPreference();
   const { data: nasdaqData, isLoading: isNasdaqLoading } = useGetMarketIndexBySymbolQuery(
@@ -89,6 +91,9 @@ export function LatelySection() {
     undefined,
     { pollingInterval: 3600000, refetchOnFocus: true }
   );
+  const githubPeriodLabel = githubActivity
+    ? formatActivityPeriod(githubActivity.month, locale, githubActivity.periodLabel)
+    : t("lately.periodFallback");
 
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
@@ -96,7 +101,7 @@ export function LatelySection() {
     <Section id="lately" aria-labelledby="lately-title">
       <header className={HOME_SECTION_HEADER_CENTERED}>
         <MotionChip size="sm" color="default" variant="secondary" {...revealInView(0, 10)}>
-          Lately
+          {t("lately.sectionLabel")}
         </MotionChip>
         <MotionTypography
           id="lately-title"
@@ -106,7 +111,7 @@ export function LatelySection() {
           className={HOME_SECTION_TITLE}
           {...revealInView(0.06)}
         >
-          What I&apos;ve been up to
+          {t("lately.sectionTitle")}
         </MotionTypography>
         <MotionTypography
           align="center"
@@ -115,7 +120,7 @@ export function LatelySection() {
           className={HOME_SECTION_DESCRIPTION}
           {...revealInView(0.12, 14)}
         >
-          A favorite track, a live market signal, and recent GitHub work.
+          {t("lately.sectionDescription")}
         </MotionTypography>
       </header>
 
@@ -132,7 +137,7 @@ export function LatelySection() {
 
           <Card.Header className="relative flex-row items-start justify-between">
             <Chip size="sm" variant="soft">
-              Favorite
+              {t("lately.trackBadge")}
             </Chip>
             <Typography
               aria-hidden="true"
@@ -140,7 +145,7 @@ export function LatelySection() {
               type="body-xs"
               className="font-mono tracking-normal"
             >
-              KEPT CLOSE
+              {t("lately.trackEyebrow")}
             </Typography>
           </Card.Header>
 
@@ -154,7 +159,7 @@ export function LatelySection() {
               <ListeningShader />
               <div className="absolute inset-0 flex flex-col justify-between p-5 text-white">
                 <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-white/70 uppercase">
-                  <span>Listening</span>
+                  <span>{t("lately.listeningLabel")}</span>
                   <span>01</span>
                 </div>
                 <div>
@@ -167,11 +172,10 @@ export function LatelySection() {
 
             <div className="max-w-lg">
               <Typography type="h3" weight="semibold" className="tracking-normal">
-                One song, kept close.
+                {t("lately.trackTitle")}
               </Typography>
               <Typography color="muted" type="body-sm" className="mt-2 leading-6">
-                A favorite on the shelf — artwork and title only, until a real listening source is
-                wired in.
+                {t("lately.trackDescription")}
               </Typography>
             </div>
           </Card.Content>
@@ -184,7 +188,7 @@ export function LatelySection() {
               </ItemCard.Content>
               <ItemCard.Action>
                 <Chip size="sm" variant="soft">
-                  Not streaming here
+                  {t("lately.streamingStatus")}
                 </Chip>
               </ItemCard.Action>
             </MotionItemCard>
@@ -260,10 +264,10 @@ export function LatelySection() {
                 </span>
                 <div>
                   <Typography type="body-sm" weight="semibold">
-                    Market signal unavailable
+                    {t("lately.marketUnavailable")}
                   </Typography>
                   <Typography color="muted" type="body-xs">
-                    The latest NASDAQ reading could not be loaded.
+                    {t("lately.marketUnavailableHint")}
                   </Typography>
                 </div>
               </div>
@@ -276,11 +280,6 @@ export function LatelySection() {
           className="relative min-h-[30rem] overflow-hidden lg:col-span-12 lg:grid lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12 lg:p-12"
           {...revealInView(0.18, 24)}
         >
-          <span
-            aria-hidden="true"
-            className="bg-accent/8 absolute -top-20 -right-16 size-72 rounded-full blur-3xl"
-          />
-
           {/* Left side: Editorial introduction */}
           <div className="relative flex flex-col gap-5 p-6 lg:p-0">
             <div>
@@ -289,14 +288,13 @@ export function LatelySection() {
                 color="muted"
                 className="font-mono tracking-normal uppercase"
               >
-                Building & training
+                {t("lately.trainingEyebrow")}
               </Typography>
               <Card.Title className="mt-4 text-3xl font-bold tracking-normal">
-                Practice is part of the archive.
+                {t("lately.trainingTitle")}
               </Card.Title>
               <Card.Description className="mt-2 max-w-sm text-sm leading-relaxed">
-                Public GitHub activity for the current reporting window — commits, repositories, and
-                reviews.
+                {t("lately.trainingDescription")}
               </Card.Description>
             </div>
             <span className="bg-default-100/50 my-1 h-px w-24" />
@@ -305,8 +303,7 @@ export function LatelySection() {
               color="muted"
               className="max-w-md text-sm leading-relaxed italic"
             >
-              “The unfinished work matters: systems shipped, questions carried forward, and the next
-              commit still waiting.”
+              {t("lately.trainingQuote")}
             </Typography>
           </div>
 
@@ -330,7 +327,7 @@ export function LatelySection() {
                 <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
                   <KPI.Header>
                     <KPI.Title className="text-muted font-mono text-xs font-bold tracking-normal uppercase">
-                      Commits
+                      {t("lately.commits")}
                     </KPI.Title>
                   </KPI.Header>
                   <KPI.Content className="mt-2.5 items-end gap-1">
@@ -341,7 +338,7 @@ export function LatelySection() {
                       maximumFractionDigits={0}
                     />
                     <div className="text-muted/60 mt-1 font-mono text-[10px] font-medium">
-                      {githubActivity.periodLabel || "this period"}
+                      {githubPeriodLabel}
                     </div>
                   </KPI.Content>
                 </KPI>
@@ -349,7 +346,7 @@ export function LatelySection() {
                 <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
                   <KPI.Header>
                     <KPI.Title className="text-muted font-mono text-xs font-bold tracking-normal uppercase">
-                      Repositories
+                      {t("lately.repositories")}
                     </KPI.Title>
                   </KPI.Header>
                   <KPI.Content className="mt-2.5 items-end gap-1">
@@ -360,7 +357,7 @@ export function LatelySection() {
                       maximumFractionDigits={0}
                     />
                     <div className="text-muted/60 mt-1 font-mono text-[10px] font-medium">
-                      with commits
+                      {t("lately.repositoriesWithCommits")}
                     </div>
                   </KPI.Content>
                 </KPI>
@@ -368,7 +365,7 @@ export function LatelySection() {
                 <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
                   <KPI.Header>
                     <KPI.Title className="text-muted font-mono text-xs font-bold tracking-normal uppercase">
-                      Reviews
+                      {t("lately.reviews")}
                     </KPI.Title>
                   </KPI.Header>
                   <KPI.Content className="mt-2.5 items-end gap-1">
@@ -379,7 +376,7 @@ export function LatelySection() {
                       maximumFractionDigits={0}
                     />
                     <div className="text-muted/60 mt-1 font-mono text-[10px] font-medium">
-                      code reviews
+                      {t("lately.codeReviews")}
                     </div>
                   </KPI.Content>
                 </KPI>
@@ -394,10 +391,10 @@ export function LatelySection() {
                 </span>
                 <div>
                   <Typography type="body-sm" weight="semibold">
-                    GitHub telemetry unavailable
+                    {t("lately.telemetryUnavailable")}
                   </Typography>
                   <Typography color="muted" type="body-xs">
-                    Commit and review counts could not be loaded right now.
+                    {t("lately.telemetryUnavailableHint")}
                   </Typography>
                 </div>
               </div>
@@ -413,7 +410,7 @@ export function LatelySection() {
       >
         <div className="flex w-full min-w-0 flex-col items-center text-center">
           <Typography color="muted" type="body-xs" className="font-mono tracking-normal uppercase">
-            Development log
+            {t("lately.developmentLog")}
           </Typography>
           <Typography
             id="github-activity-title"

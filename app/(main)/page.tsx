@@ -16,7 +16,7 @@ import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preferenc
 import { HelloApple } from "@/components/home/hello-apple";
 import { HomeSmoothScroll } from "@/components/home/home-smooth-scroll";
 import { ShaderBackground } from "@/components/background/shader-background";
-import { MotionChip, MotionSurface, MotionTypography } from "@/components/ui";
+import { MotionChip, MotionTypography } from "@/components/ui";
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import {
@@ -309,7 +309,7 @@ export default function Home() {
         <PageContainer
           as="section"
           aria-labelledby="home-hero-title"
-          className="relative isolate flex min-h-[min(760px,calc(100dvh-2rem))] flex-col items-center justify-center overflow-hidden pt-28 pb-16 text-center"
+          className="relative isolate flex min-h-[min(680px,calc(100dvh-3rem))] flex-col items-center justify-center overflow-hidden pt-24 pb-12 text-center"
         >
           <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(34rem,78%)] overflow-hidden [mask-image:linear-gradient(to_bottom,black_0%,black_54%,transparent_100%)] opacity-80">
             <ShaderBackground
@@ -357,29 +357,32 @@ export default function Home() {
             {t("page.subtitle")}
           </MotionTypography>
 
-          <MotionSurface
-            variant="transparent"
-            className="mt-8 flex max-w-lg flex-col items-center"
-            {...reveal(0.34, 12)}
+          <div
+            className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+            {...reveal(0.32, 12)}
           >
-            <Typography
-              aria-hidden="true"
-              className="font-mono tracking-normal uppercase"
-              color="muted"
-              type="body-xs"
+            <Link
+              href="/chronicle"
+              className="bg-accent text-accent-foreground hover:bg-accent/90 focus-visible:ring-accent inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold no-underline transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
-              {t("page.prologue")}
-            </Typography>
-            <span className="bg-separator my-4 h-10 w-px" aria-hidden="true" />
-            <Typography align="center" color="muted" type="body-sm" className="max-w-md italic">
-              {t("page.prologueBody")}
-            </Typography>
-          </MotionSurface>
+              {t("page.readWriting")}
+              <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
+            </Link>
+            <Link
+              href="#explore-odyssey"
+              className="border-default-200/70 bg-surface/60 text-foreground hover:bg-surface-secondary/80 focus-visible:ring-accent inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold no-underline backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              {t("page.exploreField")}
+              <Icon aria-hidden="true" icon="lucide:arrow-down" className="size-4" />
+            </Link>
+          </div>
         </PageContainer>
 
         <HomeOrientation />
 
-        <ExploreOdyssey />
+        <div id="explore-odyssey">
+          <ExploreOdyssey />
+        </div>
 
         <LatelySection />
 
