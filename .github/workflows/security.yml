@@ -29,11 +29,11 @@ jobs:
         with:
           install-deps: "false"
 
-      # Generate only a temporary Yarn v1 lockfile for audit-ci compatibility.
-      # The repository's canonical lockfile remains bun.lock.
+      # Generate a temporary npm lockfile because audit-ci does not audit Bun's
+      # native bun.lock format. No dependency installation is performed.
       - name: Generate Temporary Lockfile for Auditing
-        run: bun install --yarn --lockfile-only
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
 
       # Perform deep, strict security threshold checking
       - name: Run Deep Dependency Security Audit (audit-ci)
-        run: bun x audit-ci --high
+        run: bun x audit-ci --high --package-manager npm
