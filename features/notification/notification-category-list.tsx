@@ -3,7 +3,7 @@
 import { Button, Chip, Tooltip } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 
 import { selectIsAdmin } from "@/lib/features/auth";
 import { useModerateCommentMutation } from "@/lib/features/comment";
@@ -14,7 +14,7 @@ import {
   type NotificationResponse,
   useMarkNotificationAsDoneMutation,
 } from "@/lib/features/notification";
-import { useAuditUserMutation } from "@/lib/features/openapi/openapi-api";
+import { useAuditUserMutation, useReviewPostMutation } from "@/lib/features/openapi/openapi-api";
 import {
   getNotificationIcon,
   getNotificationDestination,
@@ -51,6 +51,12 @@ function reviewTarget(notification: NotificationResponse) {
   ) {
     return { kind: "comment" as const, id: context.objectId };
   }
+  if (notification.type === "GUESTBOOK_COMMENT" && context.objectType === "COMMENT") {
+    return { kind: "comment" as const, id: context.objectId };
+  }
+  if (notification.type === "POST_PENDING_REVIEW" && context.objectType === "POST") {
+    return { kind: "post" as const, id: context.objectId };
+  }
   if (notification.type === "FRIEND_LINK_APPLICATION" && context.objectType === "FRIEND_LINK") {
     return { kind: "friend-link" as const, id: context.objectId };
   }
@@ -68,25 +74,51 @@ function RegistrationDecision({
   const isAdmin = useAppSelector(selectIsAdmin);
   const target = reviewTarget(notification);
   const [auditUser, auditState] = useAuditUserMutation();
+  const [reviewPost, postState] = useReviewPostMutation();
   const [moderateComment, commentState] = useModerateCommentMutation();
   const [moderateFriendLink, linkState] = useModerateFriendLinkMutation();
   const [markDone] = useMarkNotificationAsDoneMutation();
-  const pending = auditState.isLoading || commentState.isLoading || linkState.isLoading;
+  const deciding = useRef(false);
+  const [isDeciding, setIsDeciding] = useState(false);
+  const pending =
+    isDeciding ||
+    auditState.isLoading ||
+    postState.isLoading ||
+    commentState.isLoading ||
+    linkState.isLoading;
 
   if (!isAdmin || !target || notification.completedAt) return null;
 
   const decide = async (approved: boolean) => {
-    if (target.kind === "user") {
-      await auditUser({ id: target.id, approved }).unwrap();
-    } else if (target.kind === "comment") {
-      await moderateComment({ id: target.id, status: approved ? "APPROVED" : "REJECTED" }).unwrap();
-    } else {
-      await moderateFriendLink({
-        id: target.id,
-        status: approved ? "APPROVED" : "REJECTED",
-      }).unwrap();
+    if (deciding.current) return;
+    deciding.current = true;
+    setIsDeciding(true);
+    try {
+      if (target.kind === "user") {
+        await auditUser({ id: target.id, approved }).unwrap();
+      } else if (target.kind === "comment") {
+        await moderateComment({
+          id: target.id,
+          status: approved ? "APPROVED" : "REJECTED",
+        }).unwrap();
+      } else if (target.kind === "post") {
+        await reviewPost({ id: target.id, body: { approved } }).unwrap();
+      } else {
+        await moderateFriendLink({
+          id: target.id,
+          status: approved ? "APPROVED" : "REJECTED",
+        }).unwrap();
+      }
+      // Completing the inbox item is deliberately second: a failed business
+      // mutation must leave the moderation notification actionable.
+      await markDone(notification.id).unwrap();
+    } catch {
+      // The mutations own user-facing error feedback. Keep the notification
+      // open so the administrator can retry the decision.
+    } finally {
+      deciding.current = false;
+      setIsDeciding(false);
     }
-    await markDone(notification.id).unwrap();
   };
 
   return (

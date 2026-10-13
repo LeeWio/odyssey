@@ -50,6 +50,7 @@ A notification opens only when its link points at a reader route: an essay, mome
 - `notification-preferences.test.ts` exercises real RTK Query cache behavior: canonical save responses survive refresh failures, late saves cannot directly patch a changed session, and failed saves retain the previous cache.
 - `tests/e2e/notification-preferences.spec.ts` covers failed saves/retry, edits during a delayed save, refresh failure after saving, and initial loading failure/retry. API requests are mocked; no real notification settings change.
 - `tests/e2e/notification-lists.spec.ts` covers delayed view/page/filter changes, page-load failure and back navigation, retry with view-specific empty states, and pagination after deleting the last item. Requests and deletion are mocked.
+- Moderation notifications for guestbook comments and posts execute the authorized business mutation before completing the inbox item; failed decisions leave the notification actionable and retryable.
 - `use-notification-actions.test.ts` covers synchronous duplicate/conflict prevention, independent completion, and retry after rejection. Notification list browser tests also cover concurrent saves with failure/retry and concurrent popover reads.
 - Bulk hook tests cover row/bulk exclusion, repeated bulk events before rendering,
   and lock release after rejection or a synchronous throw. Browser tests cover

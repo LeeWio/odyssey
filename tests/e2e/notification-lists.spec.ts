@@ -250,6 +250,163 @@ test("an admin review notification opens the matching dashboard view", async ({ 
   ).toBeVisible();
 });
 
+test("a guestbook moderation notification can be approved before it is completed", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    sessionStorage.setItem(
+      "odyssey_auth",
+      JSON.stringify({
+        accessToken: "guestbook-notification-admin-test",
+        username: "admin",
+        roles: ["ROLE_ADMIN"],
+        permissions: [],
+        isAuthenticated: true,
+      })
+    )
+  );
+
+  let moderationCompleted = false;
+  await page.route(endpoint, async (route) => {
+    await route.fulfill({
+      json: pageResult([
+        {
+          ...notification(42, "Guestbook message awaiting review"),
+          content: "A guestbook message is waiting for moderation.",
+          type: "GUESTBOOK_COMMENT",
+          context: {
+            objectType: "COMMENT",
+            objectId: 18,
+            actorId: 11,
+            action: "REVIEW",
+          },
+        },
+      ]),
+    });
+  });
+  await page.route("**/api/v1/admin/comments/18/status?**", async (route) => {
+    expect(route.request().method()).toBe("PATCH");
+    expect(new URL(route.request().url()).searchParams.get("status")).toBe("APPROVED");
+    moderationCompleted = true;
+    await route.fulfill({ json: envelope(null) });
+  });
+  await page.route("**/api/v1/user/notifications/42/done", async (route) => {
+    expect(route.request().method()).toBe("PATCH");
+    expect(moderationCompleted).toBe(true);
+    await route.fulfill({ json: envelope(null) });
+  });
+
+  await page.goto("/notifications");
+  const row = page
+    .getByRole("listitem")
+    .filter({ has: page.getByText("Guestbook message awaiting review", { exact: true }) });
+  await expect(row.getByRole("button", { name: "Approve", exact: true })).toBeVisible();
+  await row.getByRole("button", { name: "Approve", exact: true }).press("Enter");
+  await expect(row.getByRole("button", { name: "Approve", exact: true })).toBeEnabled();
+});
+
+test("a failed moderation decision leaves the notification actionable", async ({ page }) => {
+  await page.addInitScript(() =>
+    sessionStorage.setItem(
+      "odyssey_auth",
+      JSON.stringify({
+        accessToken: "guestbook-notification-admin-failure-test",
+        username: "admin",
+        roles: ["ROLE_ADMIN"],
+        permissions: [],
+        isAuthenticated: true,
+      })
+    )
+  );
+
+  let doneRequests = 0;
+  await page.route(endpoint, async (route) => {
+    await route.fulfill({
+      json: pageResult([
+        {
+          ...notification(43, "Comment moderation failed"),
+          type: "GUESTBOOK_COMMENT",
+          context: {
+            objectType: "COMMENT",
+            objectId: 19,
+            actorId: 12,
+            action: "REVIEW",
+          },
+        },
+      ]),
+    });
+  });
+  await page.route("**/api/v1/admin/comments/19/status?**", async (route) => {
+    await route.fulfill({ status: 503, json: { message: "Moderation temporarily unavailable" } });
+  });
+  await page.route("**/api/v1/user/notifications/43/done", async (route) => {
+    doneRequests += 1;
+    await route.fulfill({ json: envelope(null) });
+  });
+
+  await page.goto("/notifications");
+  const row = page
+    .getByRole("listitem")
+    .filter({ has: page.getByText("Comment moderation failed", { exact: true }) });
+  const approve = row.getByRole("button", { name: "Approve", exact: true });
+  await approve.press("Enter");
+  await expect(page.getByText("Moderation temporarily unavailable", { exact: true })).toBeVisible();
+  await expect(approve).toBeEnabled();
+  expect(doneRequests).toBe(0);
+});
+
+test("a post review notification uses the post review contract before completion", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    sessionStorage.setItem(
+      "odyssey_auth",
+      JSON.stringify({
+        accessToken: "post-notification-admin-test",
+        username: "admin",
+        roles: ["ROLE_ADMIN"],
+        permissions: [],
+        isAuthenticated: true,
+      })
+    )
+  );
+
+  let reviewCompleted = false;
+  await page.route(endpoint, async (route) => {
+    await route.fulfill({
+      json: pageResult([
+        {
+          ...notification(44, "Post review required"),
+          type: "POST_PENDING_REVIEW",
+          context: {
+            objectType: "POST",
+            objectId: 27,
+            actorId: 13,
+            action: "REVIEW",
+          },
+        },
+      ]),
+    });
+  });
+  await page.route("**/api/v1/admin/posts/27/review", async (route) => {
+    expect(route.request().method()).toBe("POST");
+    expect(route.request().postDataJSON()).toEqual({ approved: true });
+    reviewCompleted = true;
+    await route.fulfill({ json: envelope(null) });
+  });
+  await page.route("**/api/v1/user/notifications/44/done", async (route) => {
+    expect(reviewCompleted).toBe(true);
+    await route.fulfill({ json: envelope(null) });
+  });
+
+  await page.goto("/notifications");
+  const row = page
+    .getByRole("listitem")
+    .filter({ has: page.getByText("Post review required", { exact: true }) });
+  await row.getByRole("button", { name: "Approve", exact: true }).press("Enter");
+  await expect(row.getByRole("button", { name: "Approve", exact: true })).toBeEnabled();
+});
+
 test("a failed view can retry and display its own empty state", async ({ page }) => {
   let attempts = 0;
   await page.route(endpoint, async (route) => {
