@@ -1,3 +1,10 @@
+# [1.210.0](https://github.com/LeeWio/odyssey/compare/v1.209.0...v1.210.0) (2026-10-13)
+
+
+### Features
+
+* **web:** open public pages to the full viewport ([6b32b4a](https://github.com/LeeWio/odyssey/commit/6b32b4a765a217a1566ef80549a679fadadce1ee))
+
 # [1.209.0](https://github.com/LeeWio/odyssey/compare/v1.208.2...v1.209.0) (2026-10-12)
 
 
