@@ -2,7 +2,13 @@ import { z } from "zod";
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
 import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
 import { notifyMutation } from "@/lib/toast";
-import { MomentResponseSchema, type MomentRequest, type MomentResponse } from "./moment-contracts";
+import {
+  MomentCadenceResponseSchema,
+  MomentResponseSchema,
+  type MomentCadenceResponse,
+  type MomentRequest,
+  type MomentResponse,
+} from "./moment-contracts";
 
 type MomentListEndpoint = "getPublicMoments" | "getAllMoments";
 
@@ -39,6 +45,17 @@ export const momentApi = baseApi.injectEndpoints({
     /**
      * Public: Get published moments timeline
      */
+    /**
+     * Public: buckets in the current day, month, and year that contain a public moment.
+     */
+    getMomentCadence: builder.query<MomentCadenceResponse, void>({
+      query: () => "/api/v1/public/moments/cadence",
+      rawResponseSchema: apiResponseSchema(MomentCadenceResponseSchema),
+      transformResponse: (response: ApiResponse<MomentCadenceResponse>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "Moment", id: "LIST" }],
+    }),
+
     getPublicMoments: builder.query<PageResult<MomentResponse>, Pageable>({
       query: ({ page = 0, size = 10 }) => ({
         url: "/api/v1/public/moments",
@@ -231,6 +248,7 @@ export const momentApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useGetMomentCadenceQuery,
   useGetPublicMomentsQuery,
   useLazyGetPublicMomentsQuery,
   useGetLikedMomentIdsQuery,

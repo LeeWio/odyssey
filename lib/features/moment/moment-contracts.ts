@@ -55,6 +55,44 @@ export interface MomentImageRequest {
   altText: string;
 }
 
+const boundedActive = (limit: number) =>
+  z
+    .array(z.number().int().nonnegative())
+    .refine(
+      (active) =>
+        new Set(active).size === active.length && active.every((bucket) => bucket < limit),
+      {
+        message: "Cadence bucket is duplicated or outside its period",
+      }
+    );
+
+export const MomentCadenceResponseSchema = z
+  .object({
+    zone: z.string().min(1),
+    day: z.object({
+      start: z.string().min(1),
+      active: boundedActive(24),
+    }),
+    month: z.object({
+      start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      days: z.number().int().min(28).max(31),
+      offset: z.number().int().min(0).max(6),
+      active: z.array(z.number().int().nonnegative()),
+    }),
+    year: z.object({
+      year: z.number().int().min(1),
+      active: boundedActive(48),
+    }),
+  })
+  .refine(
+    (cadence) =>
+      new Set(cadence.month.active).size === cadence.month.active.length &&
+      cadence.month.active.every((bucket) => bucket < cadence.month.days),
+    { path: ["month", "active"], message: "Cadence bucket is duplicated or outside its period" }
+  );
+
+export type MomentCadenceResponse = z.infer<typeof MomentCadenceResponseSchema>;
+
 export interface MomentRequest {
   content: string;
   visibility: "public" | "followers" | "private";
