@@ -206,14 +206,17 @@ export function NotificationCenterPage() {
 
   return (
     <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="flex w-full flex-col gap-8">
         <header className="flex flex-wrap items-end justify-between gap-5">
-          <div className="max-w-2xl">
-            <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <Icon icon="gravity-ui:bell" aria-hidden="true" className="size-4" />
+          <div className="max-w-xl">
+            <Chip size="sm" variant="secondary">
               {t("eyebrow")}
-            </div>
-            <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
+            </Chip>
+            <Typography
+              type="h1"
+              weight="bold"
+              className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
+            >
               {t("title")}
             </Typography>
             <Typography color="muted" type="body" className="mt-5">
@@ -294,7 +297,7 @@ export function NotificationCenterPage() {
           </Tabs.ListContainer>
         </Tabs>
 
-        <div className="mt-4">
+        <div>
           <NotificationCategoryFilter
             category={category}
             onCategoryChange={(next) => {
@@ -304,7 +307,7 @@ export function NotificationCenterPage() {
           />
         </div>
 
-        <section aria-live="polite" className="mt-6">
+        <section aria-live="polite">
           {isLoadingPage ? (
             <NotificationSkeleton />
           ) : notifications.isError ? (

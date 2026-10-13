@@ -90,26 +90,26 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
   const activePhoto = GALLERY_ITEMS[currentIndex] || GALLERY_ITEMS[0];
 
   return (
-    <PageFrame className={compact ? "min-h-0 w-full p-0" : "mx-auto max-w-7xl"}>
+    <PageFrame className={compact ? "min-h-0 w-full p-0" : "w-full"}>
       {!compact ? (
         <motion.header
           initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, ease: pageEaseOut }}
-          className="border-default-200 flex flex-col gap-8 border-b pb-9 lg:flex-row lg:items-end lg:justify-between"
+          className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between"
         >
-          <div className="max-w-3xl">
+          <div className="max-w-xl">
             <Chip color="accent" size="sm" variant="soft">
               {t("eyebrow")}
             </Chip>
             <Typography
               type="h1"
               weight="bold"
-              className="mt-4 text-4xl leading-[1.08] tracking-normal text-balance sm:text-5xl"
+              className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
             >
               {t("title")}
             </Typography>
-            <Typography color="muted" type="body" className="mt-4 max-w-xl leading-7 text-balance">
+            <Typography color="muted" type="body" className="mt-4 max-w-md leading-7 text-balance">
               {t("description")}
             </Typography>
           </div>
@@ -141,7 +141,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
         transition={{ duration: 0.65, ease: pageEaseOut, delay: shouldReduceMotion ? 0 : 0.08 }}
         className={[
           compact ? null : "mt-10",
-          "grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]",
+          "grid items-stretch gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(18rem,0.45fr)]",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -151,13 +151,13 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
             {GALLERY_ITEMS.map((item) => (
               <Carousel.Item key={item.src}>
                 <Card className="overflow-hidden p-0" variant="transparent">
-                  <div className="group relative aspect-[4/3]">
+                  <div className="group relative aspect-[16/9] min-h-[52vh] lg:aspect-auto lg:h-[68vh]">
                     <Image
                       fill
                       alt={item.alt}
                       className="object-cover select-none"
                       draggable={false}
-                      sizes="(min-width: 1024px) 720px, 100vw"
+                      sizes="100vw"
                       src={item.src}
                     />
                     <Button

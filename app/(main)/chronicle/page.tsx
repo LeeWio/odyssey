@@ -54,38 +54,73 @@ export default function ChroniclePage() {
 
   return (
     <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-7xl">
-        {/* Cinematic Header matching Homepage */}
-        <header className="flex flex-col items-center text-center">
-          <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
-            {t("chronicleEyebrow")}
-          </MotionChip>
-          <MotionTypography
-            type="h1"
-            weight="bold"
-            className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.055em]"
-            {...reveal(0.12)}
-          >
-            {t("chronicleTitle")}
-          </MotionTypography>
-          <MotionTypography
-            color="muted"
-            type="body"
-            className="mt-4 max-w-xl leading-relaxed text-balance"
-            {...reveal(0.2, 12)}
-          >
-            {t("chronicleDescription")}
-          </MotionTypography>
+      <div className="w-full">
+        <header className="grid items-end gap-8 lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
+          <div>
+            <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
+              {t("chronicleEyebrow")}
+            </MotionChip>
+            <MotionTypography
+              type="h1"
+              weight="bold"
+              className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em]"
+              {...reveal(0.12)}
+            >
+              {t("chronicleTitle")}
+            </MotionTypography>
+            <MotionTypography
+              color="muted"
+              type="body"
+              className="mt-4 max-w-sm leading-relaxed text-balance"
+              {...reveal(0.2, 12)}
+            >
+              {t("chronicleDescription")}
+            </MotionTypography>
+          </div>
+
+          {isFeaturedLoading ? (
+            <Card variant="secondary" className="overflow-hidden p-0">
+              <Skeleton className="aspect-[16/8] w-full" />
+            </Card>
+          ) : featuredPost ? (
+            <motion.div {...reveal(0.16, 16)}>
+              <Link className="group block no-underline" href={`/single/${featuredPost.slug}`}>
+                <Card
+                  variant="secondary"
+                  className="grid overflow-hidden p-0 transition-shadow duration-300 hover:shadow-xl lg:grid-cols-[minmax(0,1.3fr)_minmax(16rem,0.7fr)]"
+                >
+                  <div className="relative aspect-[16/9] min-h-64 overflow-hidden lg:aspect-auto">
+                    <ArticleCover seed={featuredPost.slug} />
+                  </div>
+                  <Card.Header className="justify-end gap-4 p-6 sm:p-8">
+                    <Chip color="accent" size="sm" variant="soft" className="w-fit">
+                      {t("highlight")}
+                    </Chip>
+                    <Card.Title className="group-hover:text-accent text-2xl leading-tight font-bold tracking-[-0.03em] transition-colors sm:text-4xl">
+                      {featuredPost.title}
+                    </Card.Title>
+                    {featuredPost.summary ? (
+                      <Card.Description className="line-clamp-3 text-sm leading-relaxed">
+                        {featuredPost.summary}
+                      </Card.Description>
+                    ) : null}
+                    <Typography color="muted" type="body-xs" className="tabular-nums">
+                      {formatDate(featuredPost.publishedAt, locale, t("recentlyPublished"))}
+                    </Typography>
+                  </Card.Header>
+                </Card>
+              </Link>
+            </motion.div>
+          ) : null}
         </header>
 
-        {/* High-Aesthetic Tabs Bar */}
-        <div className="mt-12 flex justify-center">
+        <div className="mt-12">
           <Tabs
             selectedKey={activeTab}
             onSelectionChange={(key) => setActiveTab(key as string)}
-            className="w-full max-w-4xl"
+            className="w-full"
           >
-            <Tabs.ListContainer className="border-default-100 border-b bg-transparent p-0">
+            <Tabs.ListContainer className="bg-transparent p-0">
               <Tabs.List aria-label={t("sections")} className="gap-6 sm:gap-8">
                 <Tabs.Tab id="featured" className="h-12 px-1 text-sm font-medium">
                   {t("featured")}
@@ -111,71 +146,10 @@ export default function ChroniclePage() {
             </Tabs.ListContainer>
 
             {/* Panel 1: Featured Hub (Dynamic Cinematic Collage) */}
-            <Tabs.Panel id="featured" className="mt-10 outline-none">
-              <motion.div className="space-y-16" {...reveal(0.05, 10)}>
-                {/* Section A: Featured Essay (Cinematic Banner Card) */}
+            <Tabs.Panel id="featured" className="mt-8 outline-none">
+              <motion.div {...reveal(0.05, 10)}>
                 <div>
-                  {isFeaturedLoading ? (
-                    <Card variant="secondary" className="overflow-hidden p-0">
-                      <Skeleton className="aspect-[16/9] w-full" />
-                    </Card>
-                  ) : featuredPost ? (
-                    <Link
-                      className="group block no-underline"
-                      href={`/single/${featuredPost.slug}`}
-                    >
-                      <Card
-                        variant="secondary"
-                        className="relative overflow-hidden p-0 transition-shadow duration-300 hover:shadow-xl"
-                      >
-                        <div className="grid grid-cols-1 lg:grid-cols-12">
-                          {/* Image Visual Column */}
-                          <div className="relative aspect-video w-full overflow-hidden lg:col-span-7 lg:aspect-auto lg:min-h-[28rem]">
-                            <ArticleCover seed={featuredPost.slug} />
-                            <div className="from-background/10 via-surface-secondary/35 to-surface-secondary/80 absolute inset-0 bg-linear-to-b lg:bg-linear-to-r" />
-                            {/* Accent Visual */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-foreground/5 font-mono text-7xl font-black italic select-none">
-                                {t("featured")}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Detail Content Column */}
-                          <div className="flex flex-col justify-center p-8 sm:p-10 lg:col-span-5">
-                            <Chip color="accent" size="sm" variant="soft" className="w-fit">
-                              {t("highlight")}
-                            </Chip>
-                            <Card.Header className="mt-4 p-0">
-                              <Card.Title className="group-hover:text-accent text-3xl leading-tight font-bold tracking-[-0.03em] transition-colors sm:text-4xl">
-                                {featuredPost.title}
-                              </Card.Title>
-                              {featuredPost.summary ? (
-                                <Card.Description className="mt-3 text-sm leading-relaxed text-balance">
-                                  {featuredPost.summary}
-                                </Card.Description>
-                              ) : null}
-                            </Card.Header>
-
-                            <Typography color="muted" type="body-xs" className="mt-6 tabular-nums">
-                              {t("publishedOn", {
-                                date: formatDate(
-                                  featuredPost.publishedAt,
-                                  locale,
-                                  t("recentlyPublished")
-                                ),
-                              })}
-                            </Typography>
-                          </div>
-                        </div>
-                      </Card>
-                    </Link>
-                  ) : null}
-                </div>
-
-                {/* Section B: Recent Essays Grid */}
-                <div>
-                  <div className="mb-6 flex items-end justify-between">
+                  <div className="mb-6 flex items-end justify-between gap-6">
                     <div>
                       <Typography type="h3" weight="bold" className="tracking-tight">
                         {t("recentLogs")}
@@ -187,8 +161,8 @@ export default function ChroniclePage() {
                   </div>
 
                   {isRecentLoading ? (
-                    <div className="grid gap-6 md:grid-cols-3">
-                      {Array.from({ length: 3 }).map((_, index) => (
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-4">
+                      {Array.from({ length: 6 }).map((_, index) => (
                         <Card key={index} variant="secondary" className="overflow-hidden p-0">
                           <Skeleton className="aspect-video w-full" />
                           <Card.Header className="p-5">
@@ -199,7 +173,7 @@ export default function ChroniclePage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="grid gap-6 md:grid-cols-3">
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-4">
                       {recentPosts.map((post) => (
                         <Link
                           key={post.id}
@@ -257,28 +231,28 @@ export default function ChroniclePage() {
             {/* Panel 2: Explore & Filters */}
             <Tabs.Panel id="explore" className="outline-none">
               <motion.div {...reveal(0.05, 10)}>
-                <ExplorePage />
+                <ExplorePage embedded />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 3: Orbit Logs Feed */}
             <Tabs.Panel id="orbit" className="outline-none">
               <motion.div {...reveal(0.05, 10)}>
-                <BlogFeed />
+                <BlogFeed embedded />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 4: Columns index */}
             <Tabs.Panel id="columns" className="outline-none">
               <motion.div {...reveal(0.05, 10)}>
-                <ColumnsIndex />
+                <ColumnsIndex embedded />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 5: Timeline Archive */}
             <Tabs.Panel id="archive" className="outline-none">
               <motion.div {...reveal(0.05, 10)}>
-                <ArchivePage />
+                <ArchivePage embedded />
               </motion.div>
             </Tabs.Panel>
           </Tabs>

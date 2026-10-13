@@ -36,10 +36,10 @@ export function AboutHeader({ compact = false }: AboutHeaderProps) {
             type="h1"
             weight="bold"
             className={cn(
-              "tracking-[-0.04em] text-balance",
+              "tracking-[-0.045em] text-balance",
               compact
                 ? "text-[clamp(1.75rem,4vw,2.5rem)] leading-[1.05]"
-                : "text-[clamp(2rem,4.5vw,3rem)] leading-[1.05]"
+                : "text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92]"
             )}
           >
             {aboutPerson.name}
@@ -58,7 +58,7 @@ export function AboutHeader({ compact = false }: AboutHeaderProps) {
         ))}
       </div>
 
-      <div className="max-w-2xl">
+      <div className="max-w-xl">
         <Typography type="body" className="text-pretty">
           {aboutIntro.lead}
         </Typography>

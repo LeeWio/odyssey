@@ -3,7 +3,7 @@
 import { Icon } from "@iconify/react";
 
 import { EmptyState } from "@heroui-pro/react";
-import { Button, Card, Skeleton, Switch, Typography } from "@heroui/react";
+import { Button, Card, Chip, Skeleton, Switch, Typography } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
@@ -129,8 +129,8 @@ export function NotificationPreferencesPage() {
 
   if (!isAuthenticated) {
     return (
-      <PageFrame className="bg-background flex items-center">
-        <div className="mx-auto w-full max-w-lg">
+      <PageFrame className="bg-background flex items-start pt-8">
+        <div className="w-full max-w-md">
           <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
@@ -223,21 +223,26 @@ export function NotificationPreferencesPage() {
 
   return (
     <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-3xl">
-        <header className="max-w-2xl">
-          <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-            <Icon icon="gravity-ui:gear" aria-hidden="true" className="size-4" />{" "}
-            {t("deliveryControls")}
+      <div className="flex w-full flex-col gap-10">
+        <header className="flex flex-wrap items-end justify-between gap-5">
+          <div className="max-w-xl">
+            <Chip size="sm" variant="secondary">
+              {t("deliveryControls")}
+            </Chip>
+            <Typography
+              type="h1"
+              weight="bold"
+              className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
+            >
+              {t("title")}
+            </Typography>
+            <Typography color="muted" type="body" className="mt-4 leading-7">
+              {t("preferencesDescription")}
+            </Typography>
           </div>
-          <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
-            {t("title")}
-          </Typography>
-          <Typography color="muted" type="body" className="mt-5">
-            {t("preferencesDescription")}
-          </Typography>
         </header>
 
-        <section className="mt-12" aria-label={t("deliveryPreferences")}>
+        <section aria-label={t("deliveryPreferences")}>
           {!currentPreferences && (preferences.isLoading || preferences.isFetching) ? (
             <NotificationPreferencesSkeleton />
           ) : null}
@@ -255,28 +260,16 @@ export function NotificationPreferencesPage() {
             </Card>
           ) : null}
           {currentPreferences ? (
-            <Card>
-              <Card.Header>
-                <Card.Title>{t("whatReachesYou")}</Card.Title>
-                <Card.Description>{t("whatReachesYouHint")}</Card.Description>
-              </Card.Header>
-              <Card.Content className="gap-6">
-                <div className="text-muted grid grid-cols-[1fr_auto_auto] items-center gap-x-5 text-xs font-medium">
-                  <span>{t("activity")}</span>
-                  <span>{t("inApp")}</span>
-                  <span>{t("email")}</span>
-                </div>
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-4">
                 {PREFERENCE_ROWS.map((row) => {
                   const title = t(row.titleKey);
                   const channels = currentPreferences[row.category];
                   return (
-                    <div
-                      key={row.category}
-                      className="grid grid-cols-[1fr_auto_auto] items-center gap-x-5"
-                    >
-                      <div className="min-w-0">
+                    <Card key={row.category} className="h-full" variant="secondary">
+                      <Card.Header className="gap-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-semibold">{title}</p>
+                          <Card.Title className="text-base">{title}</Card.Title>
                           {channels.inherited ? (
                             <span className="text-muted text-xs">{t("inherited")}</span>
                           ) : (
@@ -289,23 +282,33 @@ export function NotificationPreferencesPage() {
                             </Button>
                           )}
                         </div>
-                        <p className="text-muted mt-1 text-sm leading-5">{t(row.descriptionKey)}</p>
-                      </div>
-                      <PreferenceSwitch
-                        isSelected={channels.inAppEnabled}
-                        label={t("inAppNamed", { title })}
-                        onChange={(value) => updateDraft(row.category, "inAppEnabled", value)}
-                      />
-                      <PreferenceSwitch
-                        isSelected={channels.emailEnabled}
-                        label={t("emailNamed", { title })}
-                        onChange={(value) => updateDraft(row.category, "emailEnabled", value)}
-                      />
-                    </div>
+                        <Card.Description className="leading-6">
+                          {t(row.descriptionKey)}
+                        </Card.Description>
+                      </Card.Header>
+                      <Card.Footer className="justify-between">
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-muted">{t("inApp")}</span>
+                          <PreferenceSwitch
+                            isSelected={channels.inAppEnabled}
+                            label={t("inAppNamed", { title })}
+                            onChange={(value) => updateDraft(row.category, "inAppEnabled", value)}
+                          />
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-muted">{t("email")}</span>
+                          <PreferenceSwitch
+                            isSelected={channels.emailEnabled}
+                            label={t("emailNamed", { title })}
+                            onChange={(value) => updateDraft(row.category, "emailEnabled", value)}
+                          />
+                        </div>
+                      </Card.Footer>
+                    </Card>
                   );
                 })}
-              </Card.Content>
-              <Card.Footer className="justify-between gap-4">
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="text-muted flex items-center gap-2 text-xs">
                   <Icon icon="gravity-ui:envelope" aria-hidden="true" className="size-4" />{" "}
                   {t("emailOptIn")}
@@ -313,8 +316,8 @@ export function NotificationPreferencesPage() {
                 <Button isDisabled={!isDirty || isSaving} isPending={isSaving} onPress={handleSave}>
                   {t("savePreferences")}
                 </Button>
-              </Card.Footer>
-            </Card>
+              </div>
+            </div>
           ) : null}
         </section>
       </div>

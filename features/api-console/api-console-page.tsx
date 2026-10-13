@@ -28,96 +28,33 @@ type Endpoint = {
 
 const API_ENDPOINTS: Endpoint[] = [
   {
-    id: "get-chronicles",
+    id: "get-posts",
     method: "GET",
-    path: "/api/chronicles",
-    description:
-      "Fetch high-fidelity, peer-vetted technical essays categorized by design and systems.",
-    params: [
-      {
-        name: "category",
-        required: false,
-        type: "string",
-        defaultVal: "systems",
-        description: "Filter essays by category. Options: systems | frontend | creative",
-      },
-      {
-        name: "limit",
-        required: false,
-        type: "number",
-        defaultVal: "5",
-        description: "The maximum number of chronicles to return.",
-      },
-    ],
+    path: "/single",
+    description: "东鳞西爪。文章列表和单篇都从这里读，不是一条叫 chronicles 的接口。",
+    params: [],
     mockResponse: {
-      success: true,
-      count: 2,
-      data: [
-        {
-          id: "e1",
-          title: "Fluid Interfaces: The Invisible Mechanics of Motion",
-          category: "frontend",
-          readingTime: 10,
-          publishedAt: "2026-05-18",
-        },
-        {
-          id: "s1",
-          title: "RTOS Kernel Scheduling and Priority Inversions",
-          category: "systems",
-          readingTime: 15,
-          publishedAt: "2026-07-22",
-        },
-      ],
+      note: "这是页面，不是可试的接口。打开 /single 看文章。",
     },
   },
   {
-    id: "get-vae-stream",
+    id: "get-guestbook",
     method: "GET",
-    path: "/api/vae-stream",
-    description:
-      "Intercepts dynamic requests for the Chinese singer Vae (许嵩) and maps secure CDN stream URLs.",
-    params: [
-      {
-        name: "title",
-        required: true,
-        type: "string",
-        defaultVal: "雅俗共赏",
-        description: "The exact name of the song to resolve from Kuwo CDN. Fallback: 浅唱",
-      },
-    ],
+    path: "/guestbook",
+    description: "墙上的句子。阅读公开，写一句需要登录，写完会先看过。",
+    params: [],
     mockResponse: {
-      success: true,
-      title: "雅俗共赏",
-      duration: 245,
-      codec: "AAC High Definition",
-      streamUrl:
-        "https://secure-cdn.kuwo.cn/audio/yashugongshang_secure_128k.mp3?token=odyssey_7fc3b",
-      redirectSecure: true,
+      note: "这里不会替你提交留言。去 /guestbook 写。",
     },
   },
   {
-    id: "post-guestbook",
-    method: "POST",
-    path: "/api/guestbook",
-    description: "Saves a public message or visitor comment into the moderated platform guestbook.",
-    params: [
-      {
-        name: "comment",
-        required: true,
-        type: "string",
-        defaultVal: "Awesome portfolio design!",
-        description: "The raw text comment content to submit for moderation.",
-      },
-    ],
+    id: "get-footprints",
+    method: "GET",
+    path: "/footprints",
+    description: "落过脚的地方。地点是页面里的一份清单，不是一条公开查询接口。",
+    params: [],
     mockResponse: {
-      success: true,
-      message: "Comment submitted successfully.",
-      status: "pending_moderation",
-      comment: {
-        id: "cmt_4fc92",
-        content: "Awesome portfolio design!",
-        createdAt: "2026-08-14T12:00:00Z",
-      },
+      note: "打开 /footprints 看地图。",
     },
   },
 ];
@@ -181,43 +118,37 @@ export function ApiConsolePage() {
   };
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-5xl">
+    <div className="bg-background min-h-[100dvh] w-full px-4 pt-28 pb-24 md:px-6 lg:pt-32 xl:px-8">
+      <div className="flex w-full flex-col gap-10">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: pageEaseOut }}
-          className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
+          className="max-w-xl"
         >
           <Chip color="accent" size="sm" variant="soft">
-            <Icon icon="gravity-ui:terminal" className="text-accent size-3" />
-            API Playground Console
+            不会发请求
           </Chip>
           <Typography
             type="h1"
             weight="bold"
-            className="mt-4 text-4xl leading-tight text-balance sm:text-5xl"
+            className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
           >
-            Interactive API Sandboxes
+            这几处怎么进
           </Typography>
-          <Typography color="muted" type="body" className="mt-4 max-w-xl leading-relaxed">
-            Directly test the core endpoints driving the Odyssey workspace. Inspect contracts, hover
-            over schemas, and fetch live telemetry payloads.
+          <Typography color="muted" type="body" className="mt-4 leading-7">
+            左边是入口，右边是一句说明。点发送只会把这句说明显示出来，不会打到服务器。
           </Typography>
         </motion.header>
 
         {/* Console split view grid */}
-        <div className="mt-10 grid items-start gap-6 md:grid-cols-12">
-          {/* Left panel: Endpoints selector & Param inputs */}
-          <div className="flex flex-col gap-5 md:col-span-5">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]">
+          <div className="flex flex-col gap-4">
             {/* Endpoints menu */}
-            <Card
-              variant="secondary"
-              className="border-default-200/50 bg-surface-secondary/20 rounded-2xl border p-4 shadow-sm"
-            >
+            <Card variant="secondary" className="p-4">
               <span className="text-muted/60 mb-3 block pl-1 font-mono text-[9px] font-bold tracking-wider uppercase">
-                API CONTRACT LIST
+                入口
               </span>
               <div className="flex flex-col gap-2">
                 {API_ENDPOINTS.map((endpoint) => {
@@ -251,7 +182,7 @@ export function ApiConsolePage() {
             >
               <div>
                 <span className="text-muted/60 mb-1 block font-mono text-[9px] font-bold tracking-wider uppercase">
-                  QUERY PARAMETERS
+                  说明
                 </span>
                 <Typography color="muted" type="body-xs">
                   Hover over parameters with the underline to inspect definitions.
@@ -325,21 +256,16 @@ export function ApiConsolePage() {
                 ) : (
                   <Icon icon="gravity-ui:paper-plane" className="size-4" />
                 )}
-                Send Live Request
+                看这句说明
               </Button>
             </Card>
           </div>
 
           {/* Right panel: Response terminal */}
-          <Card
-            variant="secondary"
-            className="border-default-200/50 bg-surface-secondary/10 flex min-h-[460px] flex-col overflow-hidden rounded-2xl border shadow-sm md:col-span-7"
-          >
+          <Card variant="secondary" className="flex min-h-[32rem] flex-col overflow-hidden">
             {/* Response Console Topbar */}
             <div className="border-default-100 flex shrink-0 items-center justify-between border-b bg-black/35 px-5 py-4 font-mono text-xs">
-              <span className="text-muted/60 font-bold tracking-wider uppercase">
-                RESPONSE PAYLOAD
-              </span>
+              <span className="text-muted/60 font-bold tracking-wider uppercase">看一句</span>
 
               {/* Dynamic Status chip */}
               {responseState.status && (

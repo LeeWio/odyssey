@@ -30,40 +30,37 @@ const WORKSPACE_METADATA: Record<string, FileMetadata> = {
     exports: ["RootLayout", "metadata"],
     fact: "Serves as the high-performance entryway, injecting theme-init scripts before hydration to prevent layout flashes.",
   },
-  "app-const": {
-    id: "app-const",
-    name: "app/(main)/constellations/page.tsx",
-    purpose:
-      "Client router page dynamically importing and rendering the R3F 3D spatial orbit view with ssr: false.",
-    stack: ["Dynamic Import", "SSR Optimization", "Next.js Route"],
-    exports: ["ConstellationsPage"],
-    fact: "Renders a pulse indicator loading fallback while the massive Saturn, Earth, and Sun GLB models stream into the canvas.",
+  "app-single": {
+    id: "app-single",
+    name: "app/(main)/single/blog-index.tsx",
+    purpose: "东鳞西爪的列表。第一篇横跨屏幕，其余是竖卡。",
+    stack: ["HeroUI", "文章卡片"],
+    exports: ["BlogIndex"],
+    fact: "博客在 /single，不在 /chronicle。",
   },
   "uses-page": {
     id: "uses-page",
     name: "features/uses/uses-page.tsx",
-    purpose: "Exposes physical hardware rigs, modular synthesizers, and desktop layouts.",
-    stack: ["HeroUI Card", "motion/react", "Responsive Grid"],
+    purpose: "桌上这些。还在用的硬件和软件，按分类铺开。",
+    stack: ["HeroUI Card"],
     exports: ["UsesPage"],
-    fact: "Features custom layout boundaries that render on-scroll fades, giving an editorial look to technical desk staples.",
+    fact: "清单来自 uses-data，这一页没有新编设备。",
   },
-  "copilot-page": {
-    id: "copilot-page",
-    name: "features/copilot/copilot-page.tsx",
-    purpose:
-      "An interactive AI chat space built with specialized Pro AI components to answer questions about Odyssey.",
-    stack: ["ChatConversation", "PromptInput", "TextShimmer", "Markdown"],
-    exports: ["CopilotPage"],
-    fact: "Simulates stream rendering on responses, showcasing specialized fluid gradients while formulating markdown text blocks.",
+  "gallery-page": {
+    id: "gallery-page",
+    name: "features/gallery/gallery-page.tsx",
+    purpose: "路上的光。当前这张照片占左边，地点和胶片在右边。",
+    stack: ["HeroUI Card", "next/image"],
+    exports: ["GalleryPage"],
+    fact: "照片是仓库里现有的几张。",
   },
-  "roadmap-page": {
-    id: "roadmap-page",
-    name: "features/roadmap/roadmap-page.tsx",
-    purpose:
-      "Chronologically displays released versions, active rollouts, and future AR spatial galleries.",
-    stack: ["HeroUI Pro Timeline", "TrendChip", "Lucide Icons"],
-    exports: ["RoadmapPage"],
-    fact: "Leverages the trend-chip to visual performance changes MoM, integrating color indicator statuses.",
+  "footprints-page": {
+    id: "footprints-page",
+    name: "features/footprints/footprints-page.tsx",
+    purpose: "落过脚的地方。地图铺满，选中的地方叠在右上角。",
+    stack: ["地图", "HeroUI"],
+    exports: ["FootprintsPage"],
+    fact: "地点从湖北老家出去：陕西、广州、深圳、重庆、安徽、河南。",
   },
   "const-universe": {
     id: "const-universe",
@@ -122,44 +119,32 @@ export function ExplorerPage() {
 
   return (
     <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-5xl">
-        {/* Header */}
+      <div className="flex w-full flex-col gap-10">
         <motion.header
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: pageEaseOut }}
-          className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
+          className="max-w-xl"
         >
-          <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <Icon icon="gravity-ui:grip-horizontal" className="text-accent size-3" />
-            Demo · Sample tree
+          <Chip color="accent" size="sm" variant="soft">
+            样例，不是仓库镜像
           </Chip>
           <Typography
             type="h1"
             weight="bold"
-            className="mt-4 text-4xl leading-tight text-balance sm:text-5xl"
+            className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
           >
-            Odyssey Codebase Map
+            这几页在哪
           </Typography>
-          <Typography color="muted" type="body" className="mt-4 max-w-xl leading-relaxed">
-            A curated sample tree for exploring Odyssey&apos;s shape. Select a node to read its
-            purpose — this is not a live repository mirror.
+          <Typography color="muted" type="body" className="mt-4 leading-7">
+            点一个文件，看它负责哪一块。树是挑出来的，不是整份代码。
           </Typography>
         </motion.header>
 
         {/* Split Explorer Pane */}
-        <div className="mt-10 grid items-start gap-6 md:grid-cols-12">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]">
           {/* Left Panel: The File Tree */}
-          <Card
-            variant="secondary"
-            className="border-default-200/50 bg-surface-secondary/20 h-[460px] overflow-y-auto rounded-2xl border p-5 shadow-sm md:col-span-5"
-          >
-            <div className="mb-4">
-              <span className="text-muted/60 font-mono text-xs font-bold tracking-wider uppercase">
-                WORKSPACE
-              </span>
-            </div>
-
+          <Card variant="secondary" className="h-[70vh] min-h-[28rem] overflow-y-auto p-5">
             <FileTree
               aria-label="Repository File Tree"
               size="sm"
@@ -167,7 +152,7 @@ export function ExplorerPage() {
               selectedKeys={selectedKeys}
               selectionMode="single"
               onSelectionChange={setSelectedKeys}
-              defaultExpandedKeys={["app", "app-main", "features", "components", "const", "docs"]}
+              defaultExpandedKeys={["app", "app-main", "features", "components", "single", "docs"]}
               className="text-foreground"
             >
               <FileTree.Item icon={folderIcon} id="app" textValue="app" title="app">
@@ -178,17 +163,12 @@ export function ExplorerPage() {
                   title="layout.tsx"
                 />
                 <FileTree.Item icon={folderIcon} id="app-main" textValue="(main)" title="(main)">
-                  <FileTree.Item
-                    icon={folderIcon}
-                    id="const"
-                    textValue="constellations"
-                    title="constellations"
-                  >
+                  <FileTree.Item icon={folderIcon} id="single" textValue="single" title="single">
                     <FileTree.Item
                       icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
-                      id="app-const"
-                      textValue="page.tsx"
-                      title="page.tsx"
+                      id="app-single"
+                      textValue="blog-index.tsx"
+                      title="blog-index.tsx"
                     />
                   </FileTree.Item>
                 </FileTree.Item>
@@ -203,20 +183,25 @@ export function ExplorerPage() {
                     title="uses-page.tsx"
                   />
                 </FileTree.Item>
-                <FileTree.Item icon={folderIcon} id="copilot" textValue="copilot" title="copilot">
+                <FileTree.Item icon={folderIcon} id="gallery" textValue="gallery" title="gallery">
                   <FileTree.Item
                     icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
-                    id="copilot-page"
-                    textValue="copilot-page.tsx"
-                    title="copilot-page.tsx"
+                    id="gallery-page"
+                    textValue="gallery-page.tsx"
+                    title="gallery-page.tsx"
                   />
                 </FileTree.Item>
-                <FileTree.Item icon={folderIcon} id="roadmap" textValue="roadmap" title="roadmap">
+                <FileTree.Item
+                  icon={folderIcon}
+                  id="footprints"
+                  textValue="footprints"
+                  title="footprints"
+                >
                   <FileTree.Item
                     icon={<Icon icon="gravity-ui:code" className="text-default-500 size-4" />}
-                    id="roadmap-page"
-                    textValue="roadmap-page.tsx"
-                    title="roadmap-page.tsx"
+                    id="footprints-page"
+                    textValue="footprints-page.tsx"
+                    title="footprints-page.tsx"
                   />
                 </FileTree.Item>
               </FileTree.Item>
@@ -267,10 +252,7 @@ export function ExplorerPage() {
           </Card>
 
           {/* Right Panel: File Metadata Preview Inspector */}
-          <Card
-            variant="secondary"
-            className="border-default-200/50 bg-surface-secondary/10 min-h-[460px] rounded-2xl border p-6 shadow-sm md:col-span-7"
-          >
+          <Card variant="secondary" className="min-h-[70vh] p-6 md:p-8">
             <div className="flex h-full flex-col justify-between">
               {activeFile ? (
                 <div className="flex flex-col gap-6">
@@ -278,7 +260,7 @@ export function ExplorerPage() {
                   <div>
                     <div className="text-muted/60 mb-2 flex items-center gap-2 font-mono text-[10px] font-bold tracking-wider uppercase">
                       <Icon icon="gravity-ui:file-code" className="text-accent size-3.5" />
-                      FILE PREVIEW
+                      这个文件
                     </div>
                     <Typography type="h3" weight="bold" className="text-foreground tracking-tight">
                       {activeFile.name}
@@ -292,7 +274,7 @@ export function ExplorerPage() {
                       type="body-sm"
                       className="text-muted/60 mb-1.5 text-[10px] font-semibold tracking-wider uppercase"
                     >
-                      Core Purpose
+                      负责什么
                     </Typography>
                     <Typography
                       color="muted"
@@ -310,7 +292,7 @@ export function ExplorerPage() {
                       type="body-sm"
                       className="text-muted/60 mb-2 text-[10px] font-semibold tracking-wider uppercase"
                     >
-                      Technical Stack
+                      用到什么
                     </Typography>
                     <div className="flex flex-wrap gap-1.5">
                       {activeFile.stack.map((s) => (
@@ -331,7 +313,7 @@ export function ExplorerPage() {
                       type="body-sm"
                       className="text-muted/60 mb-2 text-[10px] font-semibold tracking-wider uppercase"
                     >
-                      Exports & Constants
+                      导出
                     </Typography>
                     <div className="border-default-100/50 flex flex-wrap items-center gap-2 rounded-xl border bg-black/40 p-3 font-mono text-xs text-cyan-400">
                       <Icon icon="gravity-ui:cpu" className="size-3 shrink-0 text-cyan-500" />

@@ -249,9 +249,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
   }, [searchQuery]);
 
   return (
-    <section
-      className={compact ? "w-full" : "mx-auto w-full max-w-5xl px-6 py-24 sm:px-10 sm:py-32"}
-    >
+    <section className={compact ? "w-full" : "w-full px-6 py-24 sm:px-10 sm:py-32"}>
       <div className="w-full">
         {/* Header */}
         <motion.header

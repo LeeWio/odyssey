@@ -23,11 +23,11 @@ async function getInitialArticle(slug: string): Promise<PostResponse | null> {
   }
 }
 
-interface SinglePageProps {
+interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default async function SinglePage({ params }: SinglePageProps) {
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const initialArticle = await getInitialArticle(slug);
 

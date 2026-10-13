@@ -1,5 +1,5 @@
-import { JournalPage } from "./journal";
+import { BlogIndex } from "./blog-index";
 
-export default function SingleIndexPage() {
-  return <JournalPage />;
+export default function BlogIndexPage() {
+  return <BlogIndex />;
 }

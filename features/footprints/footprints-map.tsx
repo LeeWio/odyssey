@@ -35,7 +35,7 @@ export function FootprintsMap({
   return (
     <div
       data-testid="footprints-map-frame"
-      className={`relative w-full overflow-hidden ${compact ? "h-[clamp(28rem,60svh,44rem)]" : "h-[min(70vh,42rem)] min-h-[32rem] rounded-3xl"}`}
+      className={`relative w-full overflow-hidden ${compact ? "h-[clamp(28rem,60svh,44rem)]" : "h-[72vh] min-h-[32rem] rounded-3xl"}`}
     >
       <Map
         aria-label={t("mapLabel")}

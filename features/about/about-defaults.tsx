@@ -10,7 +10,7 @@ export function AboutDefaults() {
       <Chip size="sm" variant="secondary" className="w-fit">
         Defaults
       </Chip>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {aboutDefaults.map((item) => (
           <Card key={item.id} className="h-full" variant="secondary">
             <Card.Header>

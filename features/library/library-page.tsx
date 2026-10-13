@@ -1,7 +1,7 @@
 "use client";
 
 import { EmptyState } from "@heroui-pro/react";
-import { Button, Link, Typography } from "@heroui/react";
+import { Button, Chip, Link, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
@@ -50,16 +50,19 @@ export function LibraryPage() {
 
   return (
     <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-6xl">
-        <header className="max-w-3xl">
-          <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-            <Icon icon="gravity-ui:book-open" aria-hidden="true" className="size-4" />
+      <div className="flex w-full flex-col gap-16">
+        <header className="max-w-xl">
+          <Chip size="sm" variant="secondary">
             {t("eyebrow")}
-          </div>
-          <Typography type="h1" weight="bold" className="mt-5 leading-[1.02] text-balance">
+          </Chip>
+          <Typography
+            type="h1"
+            weight="bold"
+            className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
+          >
             {t("title")}
           </Typography>
-          <Typography color="muted" type="body" className="mt-5 max-w-xl">
+          <Typography color="muted" type="body" className="mt-4 leading-7">
             {t("description")}
           </Typography>
         </header>

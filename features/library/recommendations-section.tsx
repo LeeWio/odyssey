@@ -42,7 +42,7 @@ export function RecommendationsSection() {
           {t("recommendedDescription")}
         </Typography>
       </div>
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4">
         {recommendations.slice(0, 6).map((entry) => (
           <RecommendedCard
             key={entry.post.id}

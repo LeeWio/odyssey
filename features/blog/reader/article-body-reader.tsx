@@ -17,6 +17,7 @@ export interface ArticleBodyReaderProps {
   contentType?: string | null;
   /** Remount key when the source document changes. Defaults to `content`. */
   contentKey?: string | null;
+  className?: string;
   shellClassName?: string;
   /** Entrance animation delay in seconds. */
   motionDelay?: number;
@@ -35,6 +36,7 @@ export function ArticleBodyReader({
   content,
   contentType,
   contentKey,
+  className,
   shellClassName = "border-none bg-transparent p-0",
   motionDelay = 0,
   outlineLabel,
@@ -60,6 +62,7 @@ export function ArticleBodyReader({
   return (
     <MotionRichTextEditor
       key={contentKey ?? content ?? "article-body"}
+      className={className}
       isReadOnly
       extensions={extensions}
       // HeroUI RichTextEditor already disables immediatelyRender for Next.js SSR.

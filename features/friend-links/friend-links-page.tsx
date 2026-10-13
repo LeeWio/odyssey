@@ -18,7 +18,6 @@ import {
   Input,
   Label,
   SearchField,
-  Separator,
   Skeleton,
   Surface,
   TextArea,
@@ -221,7 +220,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
 
   return (
     <Surface variant="transparent" className={cn("w-full", compact ? undefined : "bg-background")}>
-      <Container className={compact ? "w-full min-w-0" : "mx-auto max-w-7xl"}>
+      <Container className="w-full min-w-0">
         {!compact ? (
           <>
             <header className="border-default-200 grid gap-8 border-b pb-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
@@ -235,7 +234,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
                   <Typography
                     type="h1"
                     weight="bold"
-                    className="mt-4 text-4xl leading-[1.08] tracking-normal text-balance break-words sm:text-5xl"
+                    className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance break-words"
                   >
                     {t("title")}
                   </Typography>
@@ -354,116 +353,120 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           ) : null}
         </section>
 
-        <Separator className={compact ? "mt-16" : "mt-20"} />
-
-        <section
-          aria-labelledby="friend-link-exchange-title"
-          className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(23rem,0.7fr)] lg:gap-16"
-        >
-          <div className="max-w-xl">
-            <Chip size="sm" variant="secondary" className="w-fit">
-              {t("exchange")}
-            </Chip>
-            <Typography
-              id="friend-link-exchange-title"
-              type="h2"
-              weight="semibold"
-              className="mt-4 text-balance"
-            >
-              {t("exchangeTitle")}
-            </Typography>
-            <Typography color="muted" type="body" className="mt-4 leading-7">
-              {t("exchangeDescription")}
-            </Typography>
-            <Chip className="mt-6" size="sm" variant="soft">
-              {t("reviewed")}
-            </Chip>
-          </div>
-
-          <Card variant="secondary" className="p-5 sm:p-6">
-            <Form className="gap-5" validationBehavior="native" onSubmit={handleSubmit}>
-              <TextField
-                fullWidth
-                isRequired
-                name="name"
-                value={application.name}
-                onChange={(value) => updateApplication("name", value)}
+        {!compact ? (
+          <section
+            aria-labelledby="friend-link-exchange-title"
+            className="mt-12 grid gap-8 lg:grid-cols-[minmax(16rem,0.6fr)_minmax(0,1.2fr)] lg:items-start"
+          >
+            <div>
+              <Chip size="sm" variant="secondary" className="w-fit">
+                {t("exchange")}
+              </Chip>
+              <Typography
+                id="friend-link-exchange-title"
+                type="h2"
+                weight="semibold"
+                className="mt-4 text-balance"
               >
-                <Label>{t("siteName")}</Label>
-                <Input maxLength={100} placeholder={t("siteNamePlaceholder")} variant="secondary" />
-                <FieldError />
-              </TextField>
+                {t("exchangeTitle")}
+              </Typography>
+              <Typography color="muted" type="body" className="mt-4 leading-7">
+                {t("exchangeDescription")}
+              </Typography>
+              <Chip className="mt-6" size="sm" variant="soft">
+                {t("reviewed")}
+              </Chip>
+            </div>
 
-              <TextField
-                fullWidth
-                isRequired
-                name="url"
-                type="url"
-                value={application.url}
-                onChange={(value) => updateApplication("url", value)}
-              >
-                <Label>{t("siteUrl")}</Label>
-                <Input maxLength={255} placeholder="https://example.com" variant="secondary" />
-                <FieldError />
-              </TextField>
+            <Card variant="secondary" className="p-5 sm:p-6">
+              <Form className="gap-5" validationBehavior="native" onSubmit={handleSubmit}>
+                <TextField
+                  fullWidth
+                  isRequired
+                  name="name"
+                  value={application.name}
+                  onChange={(value) => updateApplication("name", value)}
+                >
+                  <Label>{t("siteName")}</Label>
+                  <Input
+                    maxLength={100}
+                    placeholder={t("siteNamePlaceholder")}
+                    variant="secondary"
+                  />
+                  <FieldError />
+                </TextField>
 
-              <TextField
-                fullWidth
-                isRequired
-                name="email"
-                type="email"
-                value={application.email}
-                onChange={(value) => updateApplication("email", value)}
-              >
-                <Label>{t("contactEmail")}</Label>
-                <Input maxLength={100} placeholder="hello@example.com" variant="secondary" />
-                <FieldError />
-              </TextField>
+                <TextField
+                  fullWidth
+                  isRequired
+                  name="url"
+                  type="url"
+                  value={application.url}
+                  onChange={(value) => updateApplication("url", value)}
+                >
+                  <Label>{t("siteUrl")}</Label>
+                  <Input maxLength={255} placeholder="https://example.com" variant="secondary" />
+                  <FieldError />
+                </TextField>
 
-              <TextField
-                fullWidth
-                name="avatar"
-                type="url"
-                value={application.avatar}
-                onChange={(value) => updateApplication("avatar", value)}
-              >
-                <Label>
-                  {t("avatarUrl")} <span className="text-muted font-normal">{t("optional")}</span>
-                </Label>
-                <Input
-                  maxLength={255}
-                  placeholder="https://example.com/avatar.png"
-                  variant="secondary"
-                />
-                <FieldError />
-              </TextField>
+                <TextField
+                  fullWidth
+                  isRequired
+                  name="email"
+                  type="email"
+                  value={application.email}
+                  onChange={(value) => updateApplication("email", value)}
+                >
+                  <Label>{t("contactEmail")}</Label>
+                  <Input maxLength={100} placeholder="hello@example.com" variant="secondary" />
+                  <FieldError />
+                </TextField>
 
-              <TextField
-                fullWidth
-                name="description"
-                value={application.description}
-                onChange={(value) => updateApplication("description", value)}
-              >
-                <Label>
-                  {t("introduction")}{" "}
-                  <span className="text-muted font-normal">{t("optional")}</span>
-                </Label>
-                <TextArea
-                  maxLength={500}
-                  placeholder={t("introductionPlaceholder")}
-                  rows={3}
-                  variant="secondary"
-                />
-                <FieldError />
-              </TextField>
+                <TextField
+                  fullWidth
+                  name="avatar"
+                  type="url"
+                  value={application.avatar}
+                  onChange={(value) => updateApplication("avatar", value)}
+                >
+                  <Label>
+                    {t("avatarUrl")} <span className="text-muted font-normal">{t("optional")}</span>
+                  </Label>
+                  <Input
+                    maxLength={255}
+                    placeholder="https://example.com/avatar.png"
+                    variant="secondary"
+                  />
+                  <FieldError />
+                </TextField>
 
-              <Button isPending={isApplying} type="submit">
-                <Icon icon="gravity-ui:paper-plane" aria-hidden="true" className="size-4" />
-                {t("submit")}
-              </Button>
-            </Form>
-          </Card>
-        </section>
+                <TextField
+                  fullWidth
+                  name="description"
+                  value={application.description}
+                  onChange={(value) => updateApplication("description", value)}
+                >
+                  <Label>
+                    {t("introduction")}{" "}
+                    <span className="text-muted font-normal">{t("optional")}</span>
+                  </Label>
+                  <TextArea
+                    maxLength={500}
+                    placeholder={t("introductionPlaceholder")}
+                    rows={3}
+                    variant="secondary"
+                  />
+                  <FieldError />
+                </TextField>
+
+                <Button isPending={isApplying} type="submit">
+                  <Icon icon="gravity-ui:paper-plane" aria-hidden="true" className="size-4" />
+                  {t("submit")}
+                </Button>
+              </Form>
+            </Card>
+          </section>
+        ) : null}
       </Container>
     </Surface>
   );

@@ -92,7 +92,7 @@ export function ColumnArticleStack({ title, posts }: { title: string; posts: Col
               <ArticleStack
                 items={items}
                 expanded={expanded}
-                collapsedVisibleCount={3}
+                collapsedVisibleCount={4}
                 onExpandedChange={setExpanded}
               />
             </ScrollShadow>

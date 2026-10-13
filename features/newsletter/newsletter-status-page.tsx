@@ -83,15 +83,17 @@ function NewsletterStatusContent({
   }, [action, state, token, router]);
 
   return (
-    <div className="bg-background flex min-h-[100dvh] items-center px-6 py-24 sm:px-10">
-      <div className="mx-auto w-full max-w-xl">
-        <Card>
+    <div className="bg-background flex min-h-[100dvh] items-start px-4 pt-28 pb-24 md:px-6 xl:px-8">
+      <div className="w-full max-w-xl">
+        <Card variant="secondary">
           <Card.Header>
-            <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
+            <div className="text-muted flex items-center gap-2 text-xs font-medium">
               <Icon icon="gravity-ui:envelope" aria-hidden="true" className="size-4" />{" "}
               {t("eyebrow")}
             </div>
-            <Card.Title className="mt-4 text-3xl tracking-[-0.03em]">{title}</Card.Title>
+            <Card.Title className="mt-4 text-[clamp(2.25rem,5vw,3.5rem)] leading-[0.96] tracking-[-0.045em]">
+              {title}
+            </Card.Title>
             <Card.Description className="mt-3 max-w-md text-base leading-7">
               {description}
             </Card.Description>

@@ -280,7 +280,7 @@ export function ArticleStack({
               <ArticleCardFace
                 key={item.id}
                 item={item}
-                animatedCover={isExpanded ? index < 3 : index === 0}
+                animatedCover={isExpanded ? index < 4 : index === 0}
                 layout="position"
                 initial={false}
                 animate={{

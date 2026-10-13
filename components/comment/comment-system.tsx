@@ -30,9 +30,10 @@ export interface CommentSystemRenderParts {
 }
 
 function CommentSystemContent({
+  wide = false,
   onRequestClose,
   children,
-}: Pick<CommentSystemProps, "onRequestClose" | "children">) {
+}: Pick<CommentSystemProps, "onRequestClose" | "children"> & { wide?: boolean }) {
   const t = useTranslations("Comments");
   const {
     comments,
@@ -134,7 +135,11 @@ function CommentSystemContent({
   return (
     <section
       aria-label={t("section")}
-      className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col"
+      className={
+        wide
+          ? "flex min-h-0 w-full flex-1 flex-col"
+          : "mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col"
+      }
     >
       <div className="shrink-0 pb-3">
         <CommentHeader
@@ -168,7 +173,9 @@ export function CommentSystem({
 }: CommentSystemProps) {
   return (
     <CommentProvider postId={postId} momentId={momentId} isGuestbook={isGuestbook}>
-      <CommentSystemContent onRequestClose={onRequestClose}>{children}</CommentSystemContent>
+      <CommentSystemContent onRequestClose={onRequestClose} wide={isGuestbook}>
+        {children}
+      </CommentSystemContent>
     </CommentProvider>
   );
 }

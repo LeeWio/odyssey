@@ -100,10 +100,10 @@ function CategorySection({
     <motion.section
       key={category.name}
       aria-labelledby={`uses-category-${category.name}`}
-      className="grid gap-8 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1.35fr)] lg:gap-12"
+      className="flex flex-col gap-6"
       {...reveal(index * 0.06, 20)}
     >
-      <header className="self-start lg:sticky lg:top-28">
+      <header>
         <div className="flex items-center gap-3">
           <Avatar className="size-10 shrink-0" size="sm" variant="soft">
             <Avatar.Fallback>
@@ -129,7 +129,7 @@ function CategorySection({
         </Typography>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {category.items.map((item) => (
           <UsesItemCard key={item.name} item={item} />
         ))}
@@ -185,10 +185,7 @@ export function UsesPage({ compact = false }: UsesPageProps) {
   return (
     <Surface variant="transparent" className={cn("w-full", compact ? undefined : "min-h-[100dvh]")}>
       <Container
-        className={cn(
-          "mx-auto flex w-full flex-col gap-10",
-          compact ? "max-w-6xl px-0" : "max-w-7xl"
-        )}
+        className={cn("mx-auto flex w-full flex-col gap-10", compact ? "w-full px-0" : "w-full")}
       >
         {!compact ? (
           <header className="border-default-200 grid gap-8 border-b pb-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
@@ -202,7 +199,7 @@ export function UsesPage({ compact = false }: UsesPageProps) {
                 <Typography
                   type="h1"
                   weight="bold"
-                  className="mt-4 text-4xl leading-[1.08] tracking-normal text-balance sm:text-5xl"
+                  className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
                 >
                   {t("title")}
                 </Typography>

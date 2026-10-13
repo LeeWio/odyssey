@@ -97,7 +97,15 @@ function ArticleAuthor({
   );
 }
 
-export function ArticleCard({ post }: { post: ArticleCardPost }) {
+export function ArticleCard({
+  animatedCover = true,
+  layout = "row",
+  post,
+}: {
+  animatedCover?: boolean;
+  layout?: "row" | "tile";
+  post: ArticleCardPost;
+}) {
   const t = useTranslations("Journal");
   const title = post.title || t("untitledStory");
   const slug = post.slug || "";
@@ -119,11 +127,21 @@ export function ArticleCard({ post }: { post: ArticleCardPost }) {
   return (
     <Card
       aria-label={title}
-      className="w-full max-w-xl overflow-hidden shadow-sm md:flex-row md:items-stretch"
+      className={
+        layout === "tile"
+          ? "h-full w-full overflow-hidden p-0 shadow-sm"
+          : "w-full max-w-xl overflow-hidden shadow-sm md:flex-row md:items-stretch"
+      }
       role="article"
     >
-      <div className="relative isolate min-h-56 w-full shrink-0 overflow-hidden rounded-2xl sm:min-h-64 md:min-h-0 md:w-48 lg:w-52">
-        <ArticleCover seed={seed} />
+      <div
+        className={
+          layout === "tile"
+            ? "relative isolate aspect-[16/10] w-full overflow-hidden"
+            : "relative isolate min-h-56 w-full shrink-0 overflow-hidden rounded-2xl sm:min-h-64 md:min-h-0 md:w-48 lg:w-52"
+        }
+      >
+        <ArticleCover animated={animatedCover} seed={seed} />
         {post.category?.name ? (
           <Chip className="absolute top-3 left-3" size="sm">
             {post.category.name}
@@ -131,7 +149,11 @@ export function ArticleCard({ post }: { post: ArticleCardPost }) {
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3">
+      <div
+        className={
+          layout === "tile" ? "flex flex-1 flex-col gap-3 p-5" : "flex flex-1 flex-col gap-3"
+        }
+      >
         <Card.Header className="gap-1">
           <Card.Title className="text-foreground max-w-xl pe-8 text-xl leading-tight font-bold text-pretty sm:text-2xl">
             <Link className="text-foreground hover:text-accent no-underline" href={href}>

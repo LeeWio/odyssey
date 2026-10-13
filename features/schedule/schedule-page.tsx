@@ -2,100 +2,25 @@
 
 import { pageEaseOut } from "@/lib/motion";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "motion/react";
 import { CalendarDateTime } from "@internationalized/date";
 import { Chip, Typography } from "@heroui/react";
 import { Agenda, useAgenda, type AgendaEventType } from "@heroui-pro/react";
-import { Icon } from "@iconify/react";
 import { PageFrame } from "@/components/layout/page-frame";
-
-function generateSeedEvents(): AgendaEventType[] {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth() + 1;
-  const d = now.getDate();
-
-  const dt = (year: number, month: number, day: number, hour: number, minute = 0) => {
-    return new CalendarDateTime(year, month, day, hour, minute);
-  };
-
-  return [
-    {
-      color: "#10b981",
-      end: dt(y, m, d + 1, 23, 59),
-      id: "allday-1",
-      isAllDay: true,
-      start: dt(y, m, d, 0),
-      title: "Hasselblad Darkroom Lab",
-    },
-    {
-      color: "#3b82f6",
-      end: dt(y, m, d, 9, 30),
-      id: "1",
-      start: dt(y, m, d, 9, 0),
-      title: "Team Standup",
-    },
-    {
-      color: "#8b5cf6",
-      end: dt(y, m, d, 12, 0),
-      id: "2",
-      start: dt(y, m, d, 10, 0),
-      title: "Deep Focus: R3F Galaxy Shaders",
-    },
-    {
-      color: "#d946ef",
-      end: dt(y, m, d, 13, 0),
-      id: "3",
-      start: dt(y, m, d, 12, 0),
-      title: "Lunch with Design Partners",
-    },
-    {
-      color: "#3b82f6",
-      end: dt(y, m, d, 15, 30),
-      id: "4",
-      start: dt(y, m, d, 14, 0),
-      title: "Design Review: HeroUI AI Components",
-    },
-    {
-      color: "#10b981",
-      end: dt(y, m, d, 16, 30),
-      id: "5",
-      start: dt(y, m, d, 16, 0),
-      title: "1:1 with Tech Architect",
-    },
-    {
-      color: "#f59e0b",
-      end: dt(y, m, d + 1, 12, 0),
-      id: "6",
-      start: dt(y, m, d + 1, 10, 0),
-      title: "Eurorack Synthesizer Recording",
-    },
-    {
-      color: "#06b6d4",
-      end: dt(y, m, d + 2, 11, 30),
-      id: "7",
-      start: dt(y, m, d + 2, 9, 30),
-      title: "Code Review & Refactoring",
-    },
-  ];
-}
-
-const EVENT_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#d946ef", "#8b5cf6", "#ef4444", "#06b6d4"];
 let nextId = 100;
 
 export function SchedulePage() {
-  const seedEvents = useMemo(() => generateSeedEvents(), []);
-  const [events, setEvents] = useState<AgendaEventType[]>(seedEvents);
+  const [events, setEvents] = useState<AgendaEventType[]>([]);
 
   const handleCreate = useCallback(
     (newEvent: { start: CalendarDateTime; end: CalendarDateTime }) => {
       const id = String(nextId++);
-      const color = EVENT_COLORS[nextId % EVENT_COLORS.length];
+      const color = "var(--accent)";
 
       setEvents((prev) => [
         ...prev,
-        { color, end: newEvent.end, id, start: newEvent.start, title: "New Task" },
+        { color, end: newEvent.end, id, start: newEvent.start, title: "一件事" },
       ]);
     },
     []
@@ -125,28 +50,25 @@ export function SchedulePage() {
 
   return (
     <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-5xl">
-        {/* Header */}
+      <div className="flex w-full flex-col gap-8">
         <motion.header
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: pageEaseOut }}
-          className="border-default-200/50 mb-10 flex flex-col items-center border-b pb-8 text-center"
+          className="max-w-xl"
         >
-          <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <Icon icon="gravity-ui:calendar" className="text-accent size-3" />
-            Demo · Seed calendar
+          <Chip color="accent" size="sm" variant="soft">
+            只在这台浏览器里
           </Chip>
           <Typography
             type="h1"
             weight="bold"
-            className="mt-4 text-4xl leading-tight text-balance sm:text-5xl"
+            className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
           >
-            Daily Focus & Agenda
+            这周的空格
           </Typography>
-          <Typography color="muted" type="body" className="mt-4 max-w-xl leading-relaxed">
-            A local demo agenda with seed events. Drag to explore the UI — nothing here is synced to
-            a real calendar yet.
+          <Typography color="muted" type="body" className="mt-4 leading-7">
+            拖一块出来，就是一件事。刷新就没了，没有同步到任何日历。
           </Typography>
         </motion.header>
 
@@ -155,8 +77,7 @@ export function SchedulePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.15, ease: pageEaseOut }}
-          className="border-default-200 bg-surface-secondary/40 overflow-hidden rounded-3xl border p-4 shadow-sm md:p-6"
-          style={{ height: 680, width: "100%" }}
+          className="border-separator bg-surface-secondary/40 h-[72vh] min-h-[36rem] w-full overflow-hidden rounded-3xl border p-4 md:p-6"
         >
           <Agenda {...agenda}>
             <Agenda.Header className="border-default-100 mb-4 flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">

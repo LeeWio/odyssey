@@ -306,7 +306,7 @@ export function LibrarySkeleton({ count = 3 }: { count?: number }) {
     <div
       aria-busy="true"
       aria-label={t("loading")}
-      className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+      className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4"
       role="status"
     >
       {Array.from({ length: count }, (_, index) => (

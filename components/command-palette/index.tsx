@@ -217,8 +217,13 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
         }}
         variant="blur"
       >
-        <Command.Container size="lg">
-          <Command.Dialog filter={() => true} inputValue={inputValue} onInputChange={setInputValue}>
+        <Command.Container className="w-[min(72rem,calc(100vw-2rem))]" size="lg">
+          <Command.Dialog
+            className="max-h-[min(44rem,calc(100vh-4rem))]"
+            filter={() => true}
+            inputValue={inputValue}
+            onInputChange={setInputValue}
+          >
             <Command.Header className="flex items-start gap-2 px-4">
               <ToggleButtonGroup
                 aria-label={t("scope")}

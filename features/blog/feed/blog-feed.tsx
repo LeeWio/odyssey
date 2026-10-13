@@ -540,7 +540,7 @@ function parsePositiveInteger(value: string | null) {
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-export default function BlogFeed() {
+export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("Blog");
   const shouldReduceMotion = useReducedMotion() ?? false;
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -675,9 +675,11 @@ export default function BlogFeed() {
     });
   };
 
+  const Shell = embedded ? "div" : PageFrame;
+
   return (
-    <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-7xl">
+    <Shell className={embedded ? "bg-background w-full pt-10" : "bg-background"}>
+      <div className="w-full">
         <div className="w-full">
           <header className="flex w-full flex-col items-center text-center">
             <MotionChip
@@ -738,7 +740,7 @@ export default function BlogFeed() {
 
           <section
             aria-label={t("browseArchive")}
-            className="bg-surface-secondary mx-auto mt-12 flex w-full max-w-6xl flex-col gap-4 rounded-2xl p-3 sm:p-4"
+            className="bg-surface-secondary mt-12 flex w-full flex-col gap-4 rounded-2xl p-3 sm:p-4"
           >
             <SearchField
               fullWidth
@@ -1099,6 +1101,6 @@ export default function BlogFeed() {
           </div>
         </div>
       </div>
-    </PageFrame>
+    </Shell>
   );
 }

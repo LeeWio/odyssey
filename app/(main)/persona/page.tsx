@@ -8,6 +8,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Skeleton, Tabs, Typography } from "@heroui/react";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import { PageFrame } from "@/components/layout/page-frame";
+import { useTranslations } from "next-intl";
 
 // Sub-components from our modular features
 import { AboutPage } from "@/features/about";
@@ -20,6 +21,7 @@ const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-boar
 });
 
 export default function PersonaPage() {
+  const t = useTranslations("Home.persona");
   const shouldReduceMotion = useReducedMotion() ?? false;
 
   const { reveal } = createPageReveal(shouldReduceMotion);
@@ -27,53 +29,53 @@ export default function PersonaPage() {
 
   return (
     <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-7xl">
-        {/* Cinematic Header matching Homepage & Chronicle */}
-        <header className="flex flex-col items-center text-center">
-          <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
-            Persona
-          </MotionChip>
-          <MotionTypography
-            type="h1"
-            weight="bold"
-            className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.055em]"
-            {...reveal(0.12)}
-          >
-            The person behind the work.
-          </MotionTypography>
-          <MotionTypography
-            color="muted"
-            type="body"
-            className="mt-4 max-w-xl leading-relaxed text-balance"
-            {...reveal(0.2, 12)}
-          >
-            A few principles, tools, and notes on the work in progress.
-          </MotionTypography>
+      <div className="w-full">
+        <header className="grid items-end gap-6 lg:grid-cols-[minmax(0,1fr)_auto]">
+          <div>
+            <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
+              {t("eyebrow")}
+            </MotionChip>
+            <MotionTypography
+              type="h1"
+              weight="bold"
+              className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em]"
+              {...reveal(0.12)}
+            >
+              {t("title")}
+            </MotionTypography>
+            <MotionTypography
+              color="muted"
+              type="body"
+              className="mt-4 max-w-md leading-relaxed text-balance"
+              {...reveal(0.2, 12)}
+            >
+              {t("description")}
+            </MotionTypography>
+          </div>
         </header>
 
-        {/* High-Aesthetic Tabs Bar */}
-        <div className="mt-12 flex justify-center">
+        <div className="mt-10">
           <Tabs
             selectedKey={activeTab}
             onSelectionChange={(key) => setActiveTab(key as string)}
-            className="w-full max-w-4xl"
+            className="w-full"
           >
-            <Tabs.ListContainer className="border-default-100 border-b bg-transparent p-0">
-              <Tabs.List aria-label="Persona sections" className="gap-6 sm:gap-8">
+            <Tabs.ListContainer className="bg-transparent p-0">
+              <Tabs.List aria-label={t("sections")} className="gap-6 sm:gap-8">
                 <Tabs.Tab id="about" className="h-12 px-1 text-sm font-medium">
-                  About
+                  {t("about")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="setup" className="h-12 px-1 text-sm font-medium">
-                  Tools
+                  {t("tools")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="career" className="h-12 px-1 text-sm font-medium">
-                  Work
+                  {t("work")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="guestbook" className="h-12 px-1 text-sm font-medium">
-                  Guestbook
+                  {t("guestbook")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
               </Tabs.List>
@@ -104,11 +106,11 @@ export default function PersonaPage() {
             <Tabs.Panel id="guestbook" className="mt-10 outline-none">
               <motion.div className="space-y-12" {...reveal(0.05, 10)}>
                 <div>
-                  <Typography type="h3" weight="bold" className="text-center tracking-tight">
-                    A note from you.
+                  <Typography type="h3" weight="bold" className="tracking-tight">
+                    {t("guestbookTitle")}
                   </Typography>
-                  <Typography color="muted" type="body-sm" className="mt-1 text-center">
-                    Small notes from visitors who have spent time here.
+                  <Typography color="muted" type="body-sm" className="mt-1">
+                    {t("guestbookLine")}
                   </Typography>
                 </div>
                 <div className="w-full overflow-hidden">

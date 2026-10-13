@@ -188,7 +188,7 @@ function ExploreSearchField({
   );
 }
 
-export function ExplorePage() {
+export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("Explore");
   const locale = useLocale();
   const router = useRouter();
@@ -275,9 +275,11 @@ export function ExplorePage() {
 
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
+  const Shell = embedded ? "div" : PageFrame;
+
   return (
-    <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-7xl">
+    <Shell className={embedded ? "bg-background w-full pt-10" : "bg-background"}>
+      <div className="w-full">
         <header className="border-separator grid gap-8 border-b pb-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="min-w-0">
             <motion.div {...revealInView(0, 10)}>
@@ -580,6 +582,6 @@ export function ExplorePage() {
           </Link>
         </div>
       </div>
-    </PageFrame>
+    </Shell>
   );
 }

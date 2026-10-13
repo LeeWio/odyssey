@@ -30,7 +30,7 @@ export function FavoritesSection() {
       ) : favorites.isError ? (
         <EmptyLibrarySection title={t("savedUnavailable")} description={t("tryAgainHint")} />
       ) : (favorites.data?.list.length ?? 0) > 0 ? (
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4">
           {favorites.data?.list.map((entry) => (
             <FavoriteCard key={entry.post.id} entry={entry} />
           ))}

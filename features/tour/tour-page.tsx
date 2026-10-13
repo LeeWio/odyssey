@@ -11,36 +11,44 @@ import Link from "next/link";
 
 const TOUR_STEPS = [
   {
-    title: "Welcome to Odyssey",
-    description: "The core vision and philosophy",
-    icon: "gravity-ui:compass",
-    heading: "A Connected Digital Notebook",
-    body: "Odyssey is a personal knowledge product designed as a living universe. Unlike flat chronological blogs, Odyssey maps knowledge dynamically as a spatial ecosystem of interconnected stars, topics, and essays.",
-    badge: "VISION",
+    title: "先读一篇",
+    description: "东鳞西爪",
+    icon: "gravity-ui:file-text",
+    heading: "从一篇文章开始",
+    body: "长的、短的、还没写完的，都在东鳞西爪。点开一篇，读完再决定要不要继续。",
+    badge: "读",
+    href: "/single",
+    action: "去东鳞西爪",
   },
   {
-    title: "Planetary Constellations",
-    description: "Our 3D interactive knowledge space",
-    icon: "gravity-ui:sparkles",
-    heading: "The 3D Interactive Map",
-    body: "Step into our immersive three-dimensional constellations space to explore articles physically! Stars are mapped to categories like Creative, Design, and Systems, surrounded by glowing space dust and orbiting article satellites.",
-    badge: "INTERACTIVE R3F",
+    title: "看路上的光",
+    description: "图库和足迹",
+    icon: "gravity-ui:picture",
+    heading: "照片和落过脚的地方",
+    body: "图库是相机不肯删的几张。足迹从湖北老家出去，点一个点，看那一程。",
+    badge: "看",
+    href: "/gallery",
+    action: "去看看",
   },
   {
-    title: "The Creator Rig",
-    description: "Physical hardware & workspace staples",
-    icon: "gravity-ui:display",
-    heading: "Workspace利器 & Tools",
-    body: 'Browse our comprehensive Uses page to inspect the mechanical keys, 16" MacBook Pro M3 Max, 5K Studio Display, Ghostty terminal, and development utilities powering our low-level RTOS and graphics compilation workflows.',
-    badge: "TOOLKIT",
+    title: "看桌上",
+    description: "还在用的东西",
+    icon: "gravity-ui:layers",
+    heading: "桌上这些",
+    body: "硬件和软件还在用的那一份。少一点，就够了。已经交出去的项目在旁边。",
+    badge: "用",
+    href: "/uses",
+    action: "看桌上",
   },
   {
-    title: "Complete the Orbit",
-    description: "Unleash the full experience",
-    icon: "gravity-ui:circle-check",
-    heading: "You're Ready to Explore",
-    body: "Now that you understand the coordinate system, launch the AI Copilot to ask questions, explore the milestone Roadmap, schedule deep focus blocks in the Planner, or leave a note in the moderated Guestbook!",
-    badge: "MISSION COMPLETE",
+    title: "留一句",
+    description: "墙上",
+    icon: "gravity-ui:comment",
+    heading: "留一句也行",
+    body: "问题、一句观察、一个有用的链接。写完会先看过，再出现在墙上。",
+    badge: "写",
+    href: "/guestbook",
+    action: "去墙上",
   },
 ];
 
@@ -59,45 +67,34 @@ export function TourPage() {
   const activeContent = TOUR_STEPS[activeStep] || TOUR_STEPS[0];
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full px-6 pt-28 pb-24 sm:px-10 lg:pt-32">
-      <div className="mx-auto w-full max-w-4xl">
+    <div className="bg-background min-h-[100dvh] w-full px-4 pt-28 pb-24 md:px-6 lg:pt-32 xl:px-8">
+      <div className="flex w-full flex-col gap-12">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: pageEaseOut }}
-          className="border-default-200/50 mb-16 flex flex-col items-center border-b pb-8 text-center"
+          className="max-w-xl"
         >
-          <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
-            <Icon icon="gravity-ui:compass" className="text-accent size-3" />
-            Demo · Guided tour
+          <Chip color="accent" size="sm" variant="soft">
+            四步
           </Chip>
           <Typography
             type="h1"
             weight="bold"
-            className="mt-4 text-4xl leading-tight text-balance sm:text-5xl"
+            className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
           >
-            Odyssey Workspace Tour
+            从哪开始
           </Typography>
-          <Typography color="muted" type="body" className="mt-4 max-w-xl leading-relaxed">
-            A curated walkthrough of how Odyssey connects systems, design, and physical tools —
-            illustrative, not a live product tour backend.
+          <Typography color="muted" type="body" className="mt-4 leading-7">
+            读一篇，看几张照片，看桌上，或者留一句。
           </Typography>
         </motion.header>
 
         {/* Multi-step controlled workspace grid */}
-        <div className="mt-10 grid items-start gap-8 md:grid-cols-12">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(16rem,0.7fr)_minmax(0,1.3fr)]">
           {/* Left Column: Vertical Stepper Navigation */}
-          <Card
-            variant="secondary"
-            className="border-default-200/50 bg-surface-secondary/20 min-h-[380px] rounded-2xl border p-6 shadow-sm md:col-span-5"
-          >
-            <div className="mb-6">
-              <span className="text-muted/60 font-mono text-xs font-bold tracking-wider uppercase">
-                JOURNEY PROGRESS
-              </span>
-            </div>
-
+          <Card variant="secondary" className="min-h-[24rem] p-6">
             <Stepper
               currentStep={activeStep}
               orientation="vertical"
@@ -126,7 +123,7 @@ export function TourPage() {
           {/* Right Column: Dynamic Screen Content */}
           <Card
             variant="secondary"
-            className="border-default-200/50 bg-surface-secondary/10 flex min-h-[380px] flex-col justify-between rounded-2xl border p-6 shadow-sm md:col-span-7 md:p-8"
+            className="flex min-h-[24rem] flex-col justify-between p-6 md:p-8"
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -142,8 +139,8 @@ export function TourPage() {
                   <Chip size="sm" variant="soft" color="accent">
                     {activeContent.badge}
                   </Chip>
-                  <span className="text-muted/50 font-mono text-xs font-semibold uppercase">
-                    STEP {activeStep + 1} OF {totalSteps}
+                  <span className="text-muted text-xs tabular-nums">
+                    {activeStep + 1} / {totalSteps}
                   </span>
                 </div>
 
@@ -167,70 +164,18 @@ export function TourPage() {
                 </div>
 
                 {/* Sub-navigation buttons / Actions inside card content */}
-                {activeStep === 0 && (
-                  <div className="flex gap-3">
-                    <Link
-                      href="/about"
-                      className={cn(
-                        buttonVariants({ variant: "secondary", size: "sm" }),
-                        "gap-1.5 no-underline"
-                      )}
-                    >
-                      Read Core Story
-                      <Icon icon="gravity-ui:arrow-right" className="size-3.5" />
-                    </Link>
-                  </div>
-                )}
-                {activeStep === 1 && (
-                  <div className="flex gap-3">
-                    <Link
-                      href="/constellations"
-                      className={cn(
-                        buttonVariants({ variant: "primary", size: "sm" }),
-                        "bg-accent gap-1.5 border-none text-white no-underline"
-                      )}
-                    >
-                      Launch 3D Universe
-                      <Icon icon="gravity-ui:arrow-right" className="size-3.5" />
-                    </Link>
-                  </div>
-                )}
-                {activeStep === 2 && (
-                  <div className="flex gap-3">
-                    <Link
-                      href="/uses"
-                      className={cn(
-                        buttonVariants({ variant: "secondary", size: "sm" }),
-                        "gap-1.5 no-underline"
-                      )}
-                    >
-                      Browse Uses Desk
-                      <Icon icon="gravity-ui:arrow-right" className="size-3.5" />
-                    </Link>
-                  </div>
-                )}
-                {activeStep === 3 && (
-                  <div className="flex flex-wrap gap-3">
-                    <Link
-                      href="/copilot"
-                      className={cn(
-                        buttonVariants({ variant: "primary", size: "sm" }),
-                        "bg-accent gap-1.5 border-none text-white no-underline"
-                      )}
-                    >
-                      Chat with Copilot
-                    </Link>
-                    <Link
-                      href="/guestbook"
-                      className={cn(
-                        buttonVariants({ variant: "secondary", size: "sm" }),
-                        "gap-1.5 no-underline"
-                      )}
-                    >
-                      Leave visitor log
-                    </Link>
-                  </div>
-                )}
+                <div className="flex gap-3">
+                  <Link
+                    href={activeContent.href}
+                    className={cn(
+                      buttonVariants({ variant: "primary", size: "sm" }),
+                      "no-underline"
+                    )}
+                  >
+                    {activeContent.action}
+                    <Icon icon="gravity-ui:arrow-right" className="size-3.5" />
+                  </Link>
+                </div>
               </motion.div>
             </AnimatePresence>
 
@@ -243,7 +188,7 @@ export function TourPage() {
                 onPress={handleBack}
               >
                 <Icon icon="gravity-ui:chevron-left" aria-hidden="true" />
-                Back
+                上一步
               </Button>
 
               <Button
@@ -252,7 +197,7 @@ export function TourPage() {
                 isDisabled={activeStep === totalSteps - 1}
                 onPress={handleNext}
               >
-                Continue
+                下一步
                 <Icon icon="gravity-ui:chevron-right" aria-hidden="true" />
               </Button>
             </div>

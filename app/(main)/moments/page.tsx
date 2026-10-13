@@ -111,8 +111,8 @@ export default function MomentsPage() {
 
   return (
     <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-7xl">
-        <header className="flex flex-col items-center text-center">
+      <div className="w-full">
+        <header className="flex flex-col items-start">
           <motion.div {...revealInView(0, 10)}>
             <Chip color="default" size="sm" variant="secondary">
               {t("eyebrow")}
@@ -122,7 +122,7 @@ export default function MomentsPage() {
             <Typography
               type="h1"
               weight="bold"
-              className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] tracking-[-0.05em]"
+              className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em]"
             >
               {t("headline")}
             </Typography>
@@ -133,7 +133,7 @@ export default function MomentsPage() {
             </Typography>
           </motion.div>
           <motion.div {...revealInView(0.16, 14)}>
-            <div className="mt-4 flex items-center justify-center gap-4">
+            <div className="mt-4 flex items-center gap-4">
               <Link className="text-sm no-underline" href="/moments/topics">
                 {t("topicsTitle")}
               </Link>
@@ -148,7 +148,7 @@ export default function MomentsPage() {
           </motion.div>
         </header>
 
-        <motion.div className="mx-auto mt-12 w-full max-w-2xl" {...revealInView(0.18, 16)}>
+        <motion.div className="mt-10 w-full" {...revealInView(0.18, 16)}>
           <Tabs selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(key as Timeframe)}>
             <Tabs.ListContainer>
               <Tabs.List aria-label={t("filterByDate")}>
@@ -163,7 +163,7 @@ export default function MomentsPage() {
           </Tabs>
         </motion.div>
 
-        <section aria-label={t("feed")} className="mx-auto mt-12 w-full max-w-3xl">
+        <section aria-label={t("feed")} className="mt-10 w-full">
           {isLoading ? (
             <div className="flex flex-col gap-6" aria-busy="true" aria-live="polite">
               {Array.from({ length: 3 }, (_, index) => (
@@ -201,7 +201,7 @@ export default function MomentsPage() {
               ) : null}
             </EmptyState>
           ) : (
-            <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-4">
               {filteredMoments.map((moment, index) => (
                 <motion.div
                   key={moment.id}

@@ -5,7 +5,7 @@ import { createPageReveal } from "@/lib/motion";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { EmptyState, Timeline } from "@heroui-pro/react";
-import { Button, Card, Chip, Link, Separator, Surface, Tabs, Typography } from "@heroui/react";
+import { Button, Card, Chip, Link, Surface, Tabs, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -48,7 +48,7 @@ function FootprintDetail({ footprint }: { footprint: Footprint | null }) {
               fill
               alt={t("memoryAlt", { place: footprint.place })}
               className="object-cover"
-              sizes="(max-width: 1023px) 100vw, 32vw"
+              sizes="(min-width: 1024px) 24rem, 100vw"
               src={footprint.image}
             />
           </div>
@@ -103,7 +103,7 @@ export function FootprintsPage() {
 
   return (
     <Surface variant="transparent" className="bg-background min-h-[100dvh] w-full">
-      <PageFrame className="mx-auto max-w-7xl">
+      <PageFrame className="w-full">
         <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <motion.div {...reveal(0, 10)}>
@@ -115,7 +115,7 @@ export function FootprintsPage() {
               <Typography
                 type="h1"
                 weight="bold"
-                className="mt-5 text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.96] tracking-[-0.06em] text-balance"
+                className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
               >
                 {t("title")}
               </Typography>
@@ -136,15 +136,15 @@ export function FootprintsPage() {
           </motion.div>
         </header>
 
-        <Separator className="mt-10" />
-
-        <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(20rem,0.6fr)]">
+        <div className="relative mt-8">
           <FootprintsMap
             footprints={visibleFootprints}
             selectedId={activeId}
             onSelect={selectFootprint}
           />
-          <FootprintDetail footprint={selectedFootprint} />
+          <div className="mt-4 lg:absolute lg:top-4 lg:right-4 lg:mt-0 lg:w-96">
+            <FootprintDetail footprint={selectedFootprint} />
+          </div>
         </div>
 
         <section aria-labelledby="footprints-timeline-title" className="mt-20">
@@ -194,7 +194,7 @@ export function FootprintsPage() {
             </Tabs.ListContainer>
           </Tabs>
 
-          <div className="mt-8 max-w-3xl">
+          <div className="mt-8 grid gap-4 lg:grid-cols-2">
             {visibleFootprints.length === 0 ? (
               <EmptyState className="bg-surface-secondary rounded-2xl" size="md">
                 <EmptyState.Header>

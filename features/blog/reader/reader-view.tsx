@@ -6,7 +6,7 @@ import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CommentSystem } from "@/components/comment";
 import {
   useGetPublicPostBySlugQuery,
@@ -57,48 +57,6 @@ interface LikeRipple {
   delay: number;
   maxScale: number;
 }
-
-const BACKGROUND_PRESETS = [
-  {
-    name: "Sunset",
-    colors: ["rgba(245, 158, 11, 0.08)", "rgba(244, 63, 94, 0.06)"],
-  }, // Amber + Rose
-  {
-    name: "Aurora",
-    colors: ["rgba(16, 185, 129, 0.08)", "rgba(6, 182, 212, 0.08)"],
-  }, // Emerald + Cyan
-  {
-    name: "Cosmic",
-    colors: ["rgba(139, 92, 246, 0.08)", "rgba(14, 165, 233, 0.08)"],
-  }, // Violet + Sky Blue
-  {
-    name: "Forest",
-    colors: ["rgba(20, 184, 166, 0.08)", "rgba(245, 158, 11, 0.06)"],
-  }, // Teal + Amber
-  {
-    name: "Velvet",
-    colors: ["rgba(217, 70, 239, 0.06)", "rgba(99, 102, 241, 0.08)"],
-  }, // Fuchsia + Indigo
-  {
-    name: "Abyss",
-    colors: ["rgba(37, 99, 235, 0.08)", "rgba(20, 184, 166, 0.06)"],
-  }, // Blue + Teal
-  {
-    name: "Midas",
-    colors: ["rgba(234, 179, 8, 0.08)", "rgba(115, 115, 115, 0.06)"],
-  }, // Yellow + Neutral
-  {
-    name: "Orchid",
-    colors: ["rgba(236, 72, 153, 0.06)", "rgba(168, 85, 247, 0.08)"],
-  }, // Pink + Purple
-];
-
-const getArticleBackgroundPreset = (id: number | string) => {
-  const numId =
-    typeof id === "number" ? id : id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const index = Math.abs(numId) % BACKGROUND_PRESETS.length;
-  return BACKGROUND_PRESETS[index]!;
-};
 
 const MOCK_POST_FALLBACK = {
   id: 9999,
@@ -215,11 +173,6 @@ export function ReaderView({ slug }: ReaderViewProps) {
   const { data: postData, isLoading } = useGetPublicPostBySlugQuery(slug);
 
   const article = postData || MOCK_POST_FALLBACK;
-
-  const articlePreset = useMemo(
-    () => getArticleBackgroundPreset(article.id || slug),
-    [article.id, slug]
-  );
 
   const [likePost, { isLoading: isLiking }] = useLikePostMutation();
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation();
@@ -372,64 +325,6 @@ export function ReaderView({ slug }: ReaderViewProps) {
   return (
     <Surface variant="transparent" className="relative min-h-screen w-full overflow-hidden">
       <ReadingProgressBar />
-      {/* 🌌 Ambient Aesthetic Background Systems (Dynamic Preset-driven Morphing Auras) */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-        {/* Slow Morphing Floating Aura A */}
-        <motion.div
-          className="absolute rounded-full blur-[140px]"
-          style={{
-            backgroundColor: articlePreset.colors[0],
-            width: "55rem",
-            height: "55rem",
-            top: "-12rem",
-            left: "-12rem",
-          }}
-          animate={{
-            x: [0, 50, -40, 0],
-            y: [0, -30, 50, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
-
-        {/* Slow Morphing Floating Aura B */}
-        <motion.div
-          className="absolute rounded-full blur-[150px]"
-          style={{
-            backgroundColor: articlePreset.colors[1],
-            width: "48rem",
-            height: "48rem",
-            top: "32rem",
-            right: "-12rem",
-          }}
-          animate={{
-            x: [0, -60, 45, 0],
-            y: [0, 40, -40, 0],
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
-
-        {/* 🏁 Distraction-Free Refined Dot Grid Overlay */}
-        <div
-          className="absolute inset-0 opacity-40 dark:opacity-[0.22]"
-          style={{
-            backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-            color: "var(--default-200)",
-            maskImage:
-              "linear-gradient(to bottom, black 15%, rgba(0,0,0,0.4) 45%, transparent 80%)",
-            WebkitMaskImage:
-              "linear-gradient(to bottom, black 15%, rgba(0,0,0,0.4) 45%, transparent 80%)",
-          }}
-        />
-      </div>
 
       {/* <div className="mb-10 flex items-center justify-between">
           <Button
@@ -444,7 +339,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
           </Button>
         </div> */}
 
-      <div className="relative z-10 mx-auto max-w-3xl pt-12 pb-24">
+      <div className="relative z-10 w-full px-4 pt-28 pb-24 md:px-6 xl:px-8">
         {/* 🧭 Back Navigation Header Link (Choreographed Entrance 1) */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -460,9 +355,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
             aria-label="Back to blog"
           >
             <Icon icon="lucide:arrow-left" className="size-3.5" />
-            <span className="font-mono text-[10px] font-semibold tracking-widest uppercase">
-              CHRONICLE INDEX
-            </span>
+            <span className="text-sm font-medium">东鳞西爪</span>
           </Button>
         </motion.div>
 
@@ -488,7 +381,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
             initial={{ opacity: 0, y: 22, filter: "blur(8px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.26 }}
-            className="text-foreground font-display mb-8 w-full text-4xl leading-[1.12] font-bold tracking-tight sm:text-5xl"
+            className="text-foreground mb-8 w-full text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.96] font-bold tracking-[-0.045em]"
           >
             {article.title}
           </motion.h1>
@@ -498,10 +391,10 @@ export function ReaderView({ slug }: ReaderViewProps) {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.42 }}
-            className="border-default-100/40 grid w-full grid-cols-1 gap-8 border-t pt-6 pb-4 md:grid-cols-12"
+            className="border-separator grid w-full grid-cols-1 gap-8 border-t pt-6 pb-4 lg:grid-cols-[16rem_minmax(0,42rem)]"
           >
             {/* Left Column: Stacked Monospace Metadata Block */}
-            <div className="flex flex-col gap-4 select-none md:col-span-4">
+            <div className="flex flex-col gap-4 select-none">
               <div className="flex flex-col gap-0.5">
                 <span className="text-default-400 text-[9px] font-bold tracking-widest uppercase">
                   Written By
@@ -532,7 +425,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
             </div>
 
             {/* Right Column: Abstract Summary with Gold Ribbon Accent */}
-            <div className="border-default-100/40 flex flex-col justify-start border-l pl-6 md:col-span-8 md:pl-8">
+            <div className="border-separator flex flex-col justify-start border-l pl-6 lg:pl-8">
               <span className="text-accent mb-3 text-[9px] font-bold tracking-widest uppercase">
                 Abstract
               </span>
@@ -555,6 +448,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
 
         {/* Core Article Prose Text (Choreographed Entrance 5) */}
         <ArticleBodyReader
+          className="max-w-[42rem]"
           content={article.content}
           contentType={article.contentType}
           contentKey={article.content}

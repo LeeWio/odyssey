@@ -34,7 +34,7 @@ function getCreatedAtTime(value: string) {
   return Number.isFinite(time) ? time : 0;
 }
 
-export function ColumnsIndex() {
+export function ColumnsIndex({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("Columns");
   const locale = useLocale();
   const { data: columns = [], error, isLoading, refetch } = useGetPublicColumnsQuery();
@@ -82,9 +82,11 @@ export function ColumnsIndex() {
 
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
+  const Shell = embedded ? "div" : PageFrame;
+
   return (
-    <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-7xl">
+    <Shell className={embedded ? "bg-background w-full pt-10" : "bg-background"}>
+      <div className="w-full">
         <header className="border-separator grid gap-8 border-b pb-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="min-w-0">
             <motion.div {...revealInView(0, 10)}>
@@ -96,7 +98,7 @@ export function ColumnsIndex() {
               <Typography
                 type="h1"
                 weight="bold"
-                className="mt-4 text-4xl leading-none tracking-normal text-balance wrap-anywhere sm:text-5xl lg:text-6xl"
+                className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance wrap-anywhere"
               >
                 {t("title")}
               </Typography>
@@ -120,11 +122,7 @@ export function ColumnsIndex() {
           </div>
         </header>
 
-        <motion.section
-          aria-label={t("published")}
-          className="border-separator mt-10 border-b pb-8"
-          {...revealInView(0.18, 16)}
-        >
+        <motion.section aria-label={t("published")} className="mt-10" {...revealInView(0.18, 16)}>
           {isLoading ? (
             <div className={COLUMNS_GRID}>
               {Array.from({ length: 6 }, (_, index) => (
@@ -164,7 +162,7 @@ export function ColumnsIndex() {
             </Card>
           ) : (
             <>
-              <div className="border-default-200 grid gap-5 border-y py-6 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-end">
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-end">
                 <div className="min-w-0">
                   <SearchField fullWidth name="column-search" value={search} onChange={setSearch}>
                     <Label className="sr-only">{t("searchLabel")}</Label>
@@ -275,6 +273,6 @@ export function ColumnsIndex() {
           )}
         </motion.section>
       </div>
-    </PageFrame>
+    </Shell>
   );
 }

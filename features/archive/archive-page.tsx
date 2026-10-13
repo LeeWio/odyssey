@@ -9,9 +9,7 @@ import {
   Button,
   Chip,
   Label,
-  ListBox,
   Pagination,
-  Select,
   Skeleton,
   Tag,
   TagGroup,
@@ -186,7 +184,7 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
   const t = useTranslations("Archive");
   const locale = useLocale();
   return (
-    <article className="group grid min-w-0 gap-4 py-7 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-8 lg:grid-cols-[9rem_minmax(0,1fr)_auto]">
+    <article className="group border-separator grid min-w-0 gap-4 border-b py-7 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-10 lg:grid-cols-[11rem_minmax(0,1fr)_auto]">
       <time
         className="text-muted hidden pt-1 font-mono text-sm tabular-nums sm:block"
         dateTime={post.publishedAt}
@@ -233,7 +231,7 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
   );
 }
 
-export function ArchivePage() {
+export function ArchivePage({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("Archive");
   const locale = useLocale();
   const router = useRouter();
@@ -334,9 +332,11 @@ export function ArchivePage() {
 
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
+  const Shell = embedded ? "div" : PageFrame;
+
   return (
-    <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-7xl">
+    <Shell className={embedded ? "bg-background w-full pt-10" : "bg-background"}>
+      <div className="w-full">
         <header className="border-separator flex min-w-0 flex-col gap-8 border-b pb-10 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
             <motion.div {...revealInView(0, 10)}>
@@ -348,7 +348,7 @@ export function ArchivePage() {
               <Typography
                 type="h1"
                 weight="bold"
-                className="mt-4 text-4xl leading-none tracking-normal text-balance wrap-anywhere sm:text-5xl lg:text-6xl"
+                className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance wrap-anywhere"
               >
                 {t("title")}
               </Typography>
@@ -374,37 +374,33 @@ export function ArchivePage() {
 
         <motion.section
           aria-label={t("periodSelector")}
-          className="border-separator mt-10 border-b pb-8"
+          className="mt-10"
           {...revealInView(0.18, 16)}
         >
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:items-end lg:gap-10">
-            <Select
-              fullWidth
-              placeholder={t("allYears")}
-              value={selectedYear ? String(selectedYear) : "all"}
-              variant="secondary"
-              onChange={handleYearChange}
+          <div className="flex flex-col gap-6">
+            <TagGroup
+              aria-label={t("year")}
+              selectedKeys={new Set([selectedYear ? String(selectedYear) : "all"])}
+              selectionMode="single"
+              variant="surface"
+              onSelectionChange={(keys) => {
+                if (keys === "all") return;
+                const [key] = Array.from(keys);
+                handleYearChange(key == null || key === "all" ? "all" : String(key));
+              }}
             >
               <Label>{t("year")}</Label>
-              <Select.Trigger>
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox>
-                  <ListBox.Item id="all" textValue={t("allYears")}>
-                    {t("allYears")}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  {years.map((year) => (
-                    <ListBox.Item key={year} id={String(year)} textValue={String(year)}>
-                      {year}
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  ))}
-                </ListBox>
-              </Select.Popover>
-            </Select>
+              <TagGroup.List className="flex-wrap">
+                <Tag id="all" textValue={t("allYears")}>
+                  {t("allYears")}
+                </Tag>
+                {years.map((year) => (
+                  <Tag key={year} id={String(year)} textValue={String(year)}>
+                    {year}
+                  </Tag>
+                ))}
+              </TagGroup.List>
+            </TagGroup>
 
             <div className="min-w-0">
               <div className="mb-3 flex items-center gap-2">
@@ -598,6 +594,6 @@ export function ArchivePage() {
           </Link>
         </motion.div>
       </div>
-    </PageFrame>
+    </Shell>
   );
 }

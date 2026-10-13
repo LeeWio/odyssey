@@ -21,7 +21,6 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import {
   Skeleton,
-  Typography,
   Button,
   Card,
   Link,

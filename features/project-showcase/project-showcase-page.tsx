@@ -98,7 +98,13 @@ function ProjectVisual({ project }: { project: ProjectResponse }) {
   );
 }
 
-function ProjectCard({ project }: { project: ProjectResponse }) {
+function ProjectCard({
+  project,
+  featured = false,
+}: {
+  project: ProjectResponse;
+  featured?: boolean;
+}) {
   const t = useTranslations("Projects");
   const locale = useLocale();
   const githubUrl = toSafeExternalUrl(project.githubUrl);
@@ -109,8 +115,19 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
   const hasMetrics = starsCount > 0 || forksCount > 0;
 
   return (
-    <Card variant="secondary" className="group h-full overflow-hidden p-0">
-      <div className="relative aspect-[16/9] overflow-hidden">
+    <Card
+      variant="secondary"
+      className={cn(
+        "group h-full overflow-hidden p-0",
+        featured && "lg:grid lg:grid-cols-[minmax(0,1.4fr)_minmax(18rem,0.7fr)]"
+      )}
+    >
+      <div
+        className={cn(
+          "relative overflow-hidden",
+          featured ? "aspect-[16/9] min-h-72 lg:aspect-auto lg:min-h-[26rem]" : "aspect-[16/9]"
+        )}
+      >
         <ProjectVisual project={project} />
         {project.language ? (
           <Chip
@@ -122,9 +139,13 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
           </Chip>
         ) : null}
       </div>
-      <Card.Header className="gap-3">
+      <Card.Header className={cn("gap-3", featured && "justify-end p-6 sm:p-8")}>
         <div className="flex items-start justify-between gap-4">
-          <Card.Title className="min-w-0 text-xl break-words">{project.name}</Card.Title>
+          <Card.Title
+            className={cn("min-w-0 break-words", featured ? "text-3xl sm:text-4xl" : "text-xl")}
+          >
+            {project.name}
+          </Card.Title>
           {hasMetrics ? (
             <div className="text-muted flex shrink-0 items-center gap-3 font-mono text-xs tabular-nums">
               {starsCount > 0 ? (
@@ -240,17 +261,16 @@ export function ProjectShowcasePage() {
 
   return (
     <PageFrame className="bg-background">
-      <div className="mx-auto w-full max-w-7xl">
-        <header className="border-default-200 grid gap-8 border-b pb-10 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-end lg:gap-12">
-          <div className="max-w-3xl">
-            <div className="text-muted flex items-center gap-2 font-mono text-xs font-semibold uppercase">
-              <Icon icon="gravity-ui:code" aria-hidden="true" className="size-4" />
+      <div className="w-full">
+        <header className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="max-w-xl">
+            <Chip color="accent" size="sm" variant="soft">
               {t("eyebrow")}
-            </div>
+            </Chip>
             <Typography
               type="h1"
               weight="bold"
-              className="mt-5 tracking-normal text-balance break-words"
+              className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance break-words"
             >
               {t("title")}
             </Typography>
@@ -408,10 +428,17 @@ export function ProjectShowcasePage() {
               </div>
 
               {visibleProjects.length > 0 ? (
-                <div className={cn(PROJECT_GRID, "mt-5")} data-testid="projects-grid">
-                  {visibleProjects.map((project) => (
-                    <ProjectCard key={project.id} project={project} />
-                  ))}
+                <div className="mt-5 flex flex-col gap-4" data-testid="projects-grid">
+                  {visibleProjects[0] ? (
+                    <ProjectCard featured project={visibleProjects[0]} />
+                  ) : null}
+                  {visibleProjects.length > 1 ? (
+                    <div className={PROJECT_GRID}>
+                      {visibleProjects.slice(1).map((project) => (
+                        <ProjectCard key={project.id} project={project} />
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               ) : (
                 <Card variant="secondary" className="mt-6 items-start gap-4 p-7">

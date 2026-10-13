@@ -16,7 +16,7 @@ const UniverseView = dynamic(
     loading: () => (
       <div className="flex h-[80dvh] w-full items-center justify-center rounded-3xl bg-black">
         <div className="animate-pulse text-xs tracking-widest text-white/30 uppercase">
-          Initializing 3D Constellation Mesh...
+          星图还在展开…
         </div>
       </div>
     ),
@@ -40,59 +40,57 @@ export default function UniversePage() {
 
   return (
     <PageFrame className="bg-black text-white">
-      <div className="mx-auto w-full max-w-7xl">
-        {/* Dark Mode Cosmic Header */}
-        <header className="flex flex-col items-center text-center">
+      <div className="w-full">
+        <header className="max-w-xl">
           <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
-            The Universe
+            星图
           </MotionChip>
           <MotionTypography
             type="h1"
             weight="bold"
-            className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.055em] text-white"
+            className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-white"
             {...reveal(0.12)}
           >
-            Cosmic Connections.
+            文章连成的图
           </MotionTypography>
           <MotionTypography
             color="muted"
             type="body"
-            className="mt-4 max-w-xl leading-relaxed text-balance text-zinc-400"
+            className="mt-4 max-w-md leading-relaxed text-balance text-zinc-400"
             {...reveal(0.2, 12)}
           >
-            A cohesive canvas of intellectual constellations, atmospheric film studies, and the web
-            of external friendships that bridge different digital worlds.
+            点一个点，去那篇文章。照片和隔壁的站点在旁边两格。
           </MotionTypography>
         </header>
 
         {/* High-Aesthetic Dark Theme Tabs Bar */}
-        <div className="mt-12 flex justify-center">
+        <div className="mt-10">
           <Tabs
             selectedKey={activeTab}
             onSelectionChange={(key) => setActiveTab(key as string)}
-            className="w-full max-w-4xl"
+            className="w-full"
           >
-            <Tabs.ListContainer className="border-b border-zinc-800 bg-transparent p-0">
-              <Tabs.List aria-label="Universe sections" className="gap-6 sm:gap-8">
+            <Tabs.ListContainer className="bg-transparent p-0">
+              <Tabs.List aria-label="星图里的几块" className="gap-6 sm:gap-8">
                 <Tabs.Tab
                   id="mesh"
                   className="h-12 px-1 text-sm font-medium text-zinc-400 data-[selected=true]:text-white"
                 >
-                  3D Constellations Mesh
+                  星图
                   <Tabs.Indicator className="bg-accent" />
                 </Tabs.Tab>
                 <Tabs.Tab
                   id="atmosphere"
                   className="h-12 px-1 text-sm font-medium text-zinc-400 data-[selected=true]:text-white"
                 >
-                  Atmosphere Studies
+                  路上的光
                   <Tabs.Indicator className="bg-accent" />
                 </Tabs.Tab>
                 <Tabs.Tab
                   id="relations"
                   className="h-12 px-1 text-sm font-medium text-zinc-400 data-[selected=true]:text-white"
                 >
-                  External Relations
+                  隔壁
                   <Tabs.Indicator className="bg-accent" />
                 </Tabs.Tab>
               </Tabs.List>
@@ -104,7 +102,7 @@ export default function UniversePage() {
                 className="relative overflow-hidden rounded-3xl border border-zinc-800 shadow-2xl"
                 {...reveal(0.05, 10)}
               >
-                <div className="h-[75dvh] w-full bg-neutral-950">
+                <div className="h-[78vh] min-h-[32rem] w-full bg-neutral-950">
                   <UniverseView />
                 </div>
               </motion.div>

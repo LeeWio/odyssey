@@ -1,8 +1,7 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { Timeline } from "@heroui-pro/react";
-import { Chip, Typography } from "@heroui/react";
+import { Card, Chip, Typography } from "@heroui/react";
 
 import { tasteTrail } from "./about-content";
 
@@ -22,23 +21,17 @@ export function AboutTimeline() {
           Taste
         </Typography>
       </div>
-      <Timeline density="compact" size="sm">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {tasteTrail.map((event) => (
-          <Timeline.Item key={event.id} align="start" status={event.status}>
-            <Timeline.Marker aria-hidden="true" className="p-1">
-              <Icon icon={event.icon} className="size-3.5" />
-            </Timeline.Marker>
-            <Timeline.Content className="gap-1 pb-8">
-              <Typography type="body-sm" weight="semibold">
-                {event.label}
-              </Typography>
-              <Typography color="muted" type="body-sm" className="leading-6">
-                {event.description}
-              </Typography>
-            </Timeline.Content>
-          </Timeline.Item>
+          <Card key={event.id} className="h-full" variant="secondary">
+            <Card.Header className="gap-3">
+              <Icon aria-hidden="true" className="text-accent size-4" icon={event.icon} />
+              <Card.Title className="text-base">{event.label}</Card.Title>
+              <Card.Description className="leading-6">{event.description}</Card.Description>
+            </Card.Header>
+          </Card>
         ))}
-      </Timeline>
+      </div>
     </section>
   );
 }

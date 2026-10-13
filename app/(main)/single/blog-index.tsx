@@ -31,6 +31,7 @@ gsap.registerPlugin(useGSAP);
 import { useLocale, useTranslations } from "next-intl";
 import { useDebouncedCallback } from "use-debounce";
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useGetPublicColumnBySlugQuery,
@@ -51,8 +52,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { ArticleCard } from "@/components/card/article-card";
 import { ArticleCover } from "@/components/card/article-cover";
 
-const JOURNAL_STORY_GRID =
-  "grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-x-8 gap-y-0";
+const JOURNAL_STORY_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4";
 const LATEST_PAGE_SIZE = 12;
 
 type ArchiveFacet = OpenApiComponents["schemas"]["ArchiveFacet"];
@@ -133,16 +133,20 @@ function FeatureCard({
       <Link
         className={
           featured
-            ? "group relative flex h-80 w-full flex-col justify-end overflow-hidden rounded-lg text-white no-underline sm:h-96 2xl:h-112"
+            ? "group grid min-h-[28rem] w-full overflow-hidden rounded-lg text-white no-underline lg:min-h-[36rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.7fr)]"
             : "group text-foreground flex w-full items-start gap-5 no-underline"
         }
         href={storyHref(post)}
       >
-        {featured ? <ArticleCover seed={seed} /> : null}
+        {featured ? (
+          <div className="absolute inset-0 lg:relative lg:col-start-1 lg:row-start-1 lg:min-h-[36rem]">
+            <ArticleCover animated={false} seed={seed} />
+          </div>
+        ) : null}
         <div
           className={
             featured
-              ? "relative flex min-w-0 flex-col gap-3 bg-gradient-to-t from-black/90 via-black/65 to-transparent p-6 pt-20 sm:p-8 sm:pt-24"
+              ? "relative z-10 flex min-w-0 flex-col justify-end gap-3 bg-gradient-to-t from-black/90 via-black/65 to-transparent p-6 pt-20 sm:p-8 lg:col-start-2 lg:row-start-1 lg:bg-black lg:p-10"
               : "flex min-w-0 flex-1 flex-col gap-3"
           }
         >
@@ -152,7 +156,7 @@ function FeatureCard({
             weight="semibold"
             className={
               featured
-                ? "line-clamp-3 text-2xl leading-tight tracking-normal wrap-anywhere text-white sm:text-3xl 2xl:text-4xl"
+                ? "line-clamp-3 text-3xl leading-[1.05] tracking-[-0.03em] wrap-anywhere text-white sm:text-5xl"
                 : "group-hover:text-accent line-clamp-3 text-xl leading-snug tracking-normal wrap-anywhere"
             }
           >
@@ -172,7 +176,7 @@ function FeatureCard({
         </div>
         {!featured ? (
           <div className="relative isolate aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-md sm:w-32">
-            <ArticleCover seed={seed} />
+            <ArticleCover animated={false} seed={seed} />
           </div>
         ) : null}
       </Link>
@@ -182,10 +186,7 @@ function FeatureCard({
 
 function FeatureMosaic({ lead, companions }: { lead: Story; companions: Story[] }) {
   return (
-    <div
-      className={`grid min-w-0 gap-8 lg:gap-10 ${companions.length > 0 ? "lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]" : ""}`}
-      data-testid="journal-feature-layout"
-    >
+    <div className="grid min-w-0 gap-8" data-testid="journal-feature-layout">
       <FeatureCard featured post={lead} />
       {companions.length > 0 ? (
         <div className="flex min-w-0 flex-col justify-center">
@@ -295,7 +296,7 @@ function LatestPagination({
 }
 
 function StoryRow({ post }: { post: Story }) {
-  return <ArticleCard post={post} />;
+  return <ArticleCard animatedCover={false} layout="tile" post={post} />;
 }
 
 function columnUpdatedAt(column: ColumnResponse) {
@@ -312,7 +313,7 @@ function columnCadence(column: ColumnResponse, t: (key: string) => string) {
     .filter((value) => !Number.isNaN(value))
     .sort((a, b) => a - b);
   if (stamps.length < 2) return t("occasional");
-  const spanDays = (stamps[stamps.length - 1] - stamps[0]) / 86_400_000;
+  const spanDays = (stamps[stamps.length - 1]! - stamps[0]!) / 86_400_000;
   const gap = spanDays / (stamps.length - 1);
   if (gap <= 10) return t("weekly");
   if (gap <= 40) return t("monthly");
@@ -321,21 +322,16 @@ function columnCadence(column: ColumnResponse, t: (key: string) => string) {
 
 function ColumnDeck({ column }: { column: ColumnResponse }) {
   const t = useTranslations("Journal");
-  const name = column.name || t("untitledColumn");
   const locale = useLocale();
   if (column.posts.length === 0) return null;
 
   const updated = columnUpdatedAt(column);
 
   return (
-    <article className="flex min-w-0 flex-col gap-4">
-      {column.description ? (
-        <Typography className="line-clamp-2" color="muted" type="body-sm">
-          {column.description}
-        </Typography>
-      ) : null}
+    <article className="flex min-w-0 flex-col gap-3">
       <p className="text-muted text-xs">
         {[
+          column.description,
           t("essays", { count: column.postsCount.toLocaleString(locale) }),
           columnCadence(column, t),
           updated ? t("updated", { date: formatDate(updated, locale, "") }) : null,
@@ -343,7 +339,7 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
           .filter(Boolean)
           .join(" · ")}
       </p>
-      <ColumnArticleStack posts={column.posts} title={name} />
+      <ColumnArticleStack posts={column.posts} title={column.name || t("untitledColumn")} />
       <Link className="w-fit text-sm no-underline" href={`/columns/${column.slug}`}>
         {t("viewColumn")}
         <Link.Icon />
@@ -354,11 +350,24 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
 
 function ColumnDeckPreview({ column }: { column: ColumnResponse }) {
   const detail = useGetPublicColumnBySlugQuery(column.slug);
+  const reduce = useReducedMotion() ?? false;
   const resolved = detail.data ?? column;
   if (detail.isLoading && resolved.posts.length === 0) {
     return <Skeleton className="h-80 w-full rounded-lg" />;
   }
-  return <ColumnDeck column={resolved} />;
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={resolved.slug}
+        initial={reduce ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={reduce ? undefined : { opacity: 0, y: -8 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <ColumnDeck column={resolved} />
+      </motion.div>
+    </AnimatePresence>
+  );
 }
 
 function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
@@ -371,21 +380,31 @@ function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
   if (!active) return null;
 
   return (
-    <section aria-labelledby="columns-title" className="flex flex-col gap-6">
-      <div className="flex items-baseline justify-between gap-4">
-        <Typography id="columns-title" type="h2" weight="semibold">
-          {t("columns")}
-        </Typography>
+    <section aria-labelledby="columns-title" className="flex flex-col gap-8">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="max-w-xl">
+          <Typography
+            id="columns-title"
+            type="h2"
+            weight="bold"
+            className="text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.05] tracking-[-0.03em]"
+          >
+            {t("columns")}
+          </Typography>
+          <Typography className="mt-2" color="muted" type="body-sm">
+            {t("columnsLine")}
+          </Typography>
+        </div>
         <Link className="text-sm no-underline" href="/columns">
           {t("viewAllColumns")}
           <Link.Icon />
         </Link>
       </div>
-      <div className="grid min-w-0 items-start gap-8 md:grid-cols-2">
+      <div className="grid min-w-0 items-start gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.85fr)]">
         <ColumnDeckPreview column={active} />
         {rest.length > 0 ? (
-          <div className="flex flex-col gap-3">
-            <Typography type="body-sm" weight="semibold">
+          <div className="flex flex-col gap-2 lg:sticky lg:top-24">
+            <Typography color="muted" type="body-xs">
               {t("nextColumn")}
             </Typography>
             {rest.map((column) => {
@@ -393,6 +412,7 @@ function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
               return (
                 <Button
                   key={column.slug}
+                  className="h-auto items-start justify-start px-3 py-3 text-start"
                   variant="tertiary"
                   onPress={() => setSelected(column.slug)}
                 >
@@ -409,10 +429,6 @@ function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
                 </Button>
               );
             })}
-            <Link className="px-1 text-sm no-underline" href={`/columns/${active.slug}`}>
-              {t("followColumn")}
-              <Link.Icon />
-            </Link>
           </div>
         ) : null}
       </div>
@@ -534,7 +550,7 @@ function JournalSkeleton() {
   );
 }
 
-export function JournalPage() {
+export function BlogIndex() {
   const t = useTranslations("Journal");
   const locale = useLocale();
   const router = useRouter();
@@ -675,7 +691,7 @@ export function JournalPage() {
             <Typography
               type="h1"
               weight="bold"
-              className="font-display text-4xl leading-none tracking-normal sm:text-5xl lg:text-6xl"
+              className="text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em]"
             >
               {t("title")}
             </Typography>
@@ -806,9 +822,7 @@ export function JournalPage() {
           </Alert>
         ) : null}
 
-        <div
-          className={`grid min-w-0 items-start gap-12 xl:gap-10 2xl:gap-16 ${hasDiscoveryRail ? "xl:grid-cols-[minmax(0,1fr)_17rem]" : ""}`}
-        >
+        <div className="flex min-w-0 flex-col gap-16">
           <div className="flex min-w-0 flex-col gap-12">
             <section
               aria-labelledby="latest-title"
@@ -838,7 +852,7 @@ export function JournalPage() {
               {latestLoading && !openingLoading ? (
                 <div role="status" aria-label={t("loadingStories")} className={JOURNAL_STORY_GRID}>
                   {Array.from({ length: LATEST_PAGE_SIZE }, (_, index) => (
-                    <Skeleton key={index} className="my-6 h-56 w-full rounded-lg" />
+                    <Skeleton key={index} className="aspect-[16/10] w-full rounded-lg" />
                   ))}
                 </div>
               ) : latestQuery.isError ? (
@@ -927,7 +941,7 @@ export function JournalPage() {
           {hasDiscoveryRail ? (
             <aside
               aria-label={t("exploreWriting")}
-              className="border-separator grid min-w-0 gap-8 border-t pt-8 sm:grid-cols-2 xl:grid-cols-1 xl:border-t-0 xl:border-l xl:pt-0 xl:pl-6"
+              className="border-separator grid min-w-0 gap-8 border-t pt-8 sm:grid-cols-2 lg:grid-cols-4"
             >
               <Typography type="h2" className="sr-only">
                 {t("exploreWriting")}

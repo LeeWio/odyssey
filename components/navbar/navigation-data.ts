@@ -9,7 +9,7 @@ const NAVIGATION_COPY: Record<
   { href: string; label: string; eyebrow: string; title: string; description: string; cta: string }
 > = {
   chronicle: {
-    href: "/chronicle",
+    href: "/single",
     label: "items.chronicle.label",
     eyebrow: "items.chronicle.eyebrow",
     title: "items.chronicle.title",

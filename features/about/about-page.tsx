@@ -32,8 +32,8 @@ export function AboutPage({ compact = false }: AboutPageProps) {
     <Surface variant="transparent" className={cn("w-full", compact ? "pb-8" : "pb-16 sm:pb-24")}>
       <div
         className={cn(
-          "mx-auto flex w-full max-w-6xl flex-col",
-          compact ? "gap-12 px-0" : "gap-16 px-5 pt-28 pb-8 sm:gap-20 sm:px-8 sm:pt-32 lg:px-12"
+          "flex w-full flex-col",
+          compact ? "gap-12 px-0" : "gap-16 px-4 pt-28 pb-8 sm:px-6 sm:pt-32 xl:px-8"
         )}
       >
         <motion.div {...reveal(0, 12)}>
@@ -46,10 +46,10 @@ export function AboutPage({ compact = false }: AboutPageProps) {
 
         <motion.section
           aria-labelledby="about-play-title"
-          className="flex flex-col gap-4"
+          className="grid gap-8 lg:grid-cols-[minmax(16rem,0.7fr)_minmax(0,1.3fr)] lg:items-end"
           {...reveal(0.06, 16)}
         >
-          <div className="max-w-2xl">
+          <div>
             <Chip size="sm" variant="secondary" className="w-fit">
               Play
             </Chip>
@@ -81,7 +81,7 @@ export function AboutPage({ compact = false }: AboutPageProps) {
           </div>
         </motion.section>
 
-        <motion.div className="grid gap-4" {...reveal(0.08, 16)}>
+        <motion.div className="grid gap-4 lg:grid-cols-2" {...reveal(0.08, 16)}>
           <Card variant="secondary">
             <Card.Header>
               <Card.Title className="text-base">{aboutCraft.title}</Card.Title>
@@ -116,7 +116,7 @@ export function AboutPage({ compact = false }: AboutPageProps) {
 
         <motion.section
           aria-labelledby="about-close-title"
-          className="flex max-w-xl flex-col gap-5"
+          className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"
           {...reveal(0.12, 12)}
         >
           <Typography id="about-close-title" type="h2" weight="bold" className="tracking-[-0.03em]">
