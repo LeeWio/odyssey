@@ -18,21 +18,29 @@ describe("moment cadence dots", () => {
     expect(rows).toHaveLength(2);
     expect(rows.every((row) => row.length === 12)).toBe(true);
     expect(cadenceProgress(rows)).toEqual({ total: 24, value: 5 });
-    expect(rows[0]?.slice(0, 3)).toEqual(["filled", "filled", "filled"]);
-    expect(rows[0]?.[8]).toBe("filled");
-    expect(rows[1]?.[11]).toBe("filled");
+    expect(rows[0]?.slice(0, 3).map((cell) => cell.state)).toEqual(["filled", "filled", "filled"]);
+    expect(rows[0]?.[0]?.label).toBe("00:00–01:00");
+    expect(rows[0]?.[8]?.state).toBe("filled");
+    expect(rows[1]?.[11]?.state).toBe("filled");
+    expect(rows[1]?.[11]?.label).toBe("23:00–24:00");
   });
 
   it("offsets the month without counting the blank weekdays", () => {
     const rows = cadenceRows(cadence, "month");
 
-    expect(rows[0]?.slice(0, 4)).toEqual(["none", "none", "none", "none"]);
-    expect(rows[0]?.[4]).toBe("filled");
+    expect(rows[0]?.slice(0, 4).map((cell) => cell.state)).toEqual([
+      "none",
+      "none",
+      "none",
+      "none",
+    ]);
+    expect(rows[0]?.[4]?.state).toBe("filled");
+    expect(rows[0]?.[4]?.label).toBe("2026-10-01");
     expect(rows.flat()).toHaveLength(36);
-    expect(rows[1]?.[7]).toBe("filled");
+    expect(rows[1]?.[7]?.state).toBe("filled");
     expect(rows).toHaveLength(3);
     expect(rows.every((row) => row.length === 12)).toBe(true);
-    expect(rows[2]?.at(-1)).toBe("none");
+    expect(rows[2]?.at(-1)?.state).toBe("none");
     expect(cadenceProgress(rows)).toEqual({ total: 31, value: 2 });
   });
 
@@ -41,8 +49,10 @@ describe("moment cadence dots", () => {
 
     expect(rows).toHaveLength(4);
     expect(rows.every((row) => row.length === 12)).toBe(true);
-    expect(rows[0]?.[0]).toBe("filled");
-    expect(rows[3]?.[1]).toBe("filled");
+    expect(rows[0]?.[0]?.state).toBe("filled");
+    expect(rows[0]?.[0]?.label).toBe("2026-01-01 – 2026-01-07");
+    expect(rows[3]?.[1]?.state).toBe("filled");
+    expect(rows[3]?.[1]?.label).toBe("2026-10-08 – 2026-10-14");
     expect(cadenceProgress(rows)).toEqual({ total: 48, value: 2 });
   });
 
@@ -57,8 +67,8 @@ describe("moment cadence dots", () => {
     expect(
       rows
         .flat()
-        .filter((dot) => dot !== "none")
-        .at(-1)
+        .filter((cell) => cell.state !== "none")
+        .at(-1)?.state
     ).toBe("filled");
   });
 });

@@ -1,9 +1,8 @@
 "use client";
 
-import { Button, Card, ColorSwatch, Meter, Skeleton, Typography } from "@heroui/react";
+import { Button, Card, ColorSwatch, Meter, Skeleton, Tooltip, Typography } from "@heroui/react";
 import { Segment } from "@heroui-pro/react";
-import { motion, useReducedMotion } from "motion/react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { CSSProperties } from "react";
 import type { Key } from "react-aria-components";
 
@@ -12,7 +11,7 @@ import { useGetMomentCadenceQuery, type MomentCadenceResponse } from "@/lib/feat
 import {
   cadenceProgress,
   cadenceRows,
-  type CadenceDot,
+  type CadenceCell,
   type CadencePeriod,
 } from "../utils/cadence";
 
@@ -113,69 +112,61 @@ function CadenceDots({
   cadence: MomentCadenceResponse;
   period: CadencePeriod;
 }) {
-  const reducedMotion = useReducedMotion() ?? false;
   const rows = cadenceRows(cadence, period);
-  const content = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState<number | "auto">("auto");
-
-  useLayoutEffect(() => {
-    const node = content.current;
-    if (!node) return;
-    const next = node.offsetHeight;
-    if (reducedMotion) {
-      setHeight(next);
-      return;
-    }
-    setHeight((current) => (current === next ? current : current === "auto" ? next : current));
-    const frame = requestAnimationFrame(() => setHeight(next));
-    return () => cancelAnimationFrame(frame);
-  }, [period, reducedMotion]);
 
   return (
-    <motion.div
-      aria-hidden="true"
-      animate={{ height }}
-      className="overflow-hidden"
-      initial={false}
-      transition={reducedMotion ? { duration: 0 } : heightTransition}
-    >
-      <div ref={content} className="flex flex-col gap-2.5">
-        {rows.map((row, rowIndex) => (
-          <div
-            key={rowIndex}
-            className="grid gap-2.5"
-            style={{ gridTemplateColumns: `repeat(${DOT_COLUMNS}, minmax(0, 1fr))` }}
-          >
-            {row.map((dot, dotIndex) => (
-              <CadenceDotView key={dotIndex} dot={dot} />
-            ))}
-          </div>
-        ))}
-      </div>
-    </motion.div>
+    <div className="flex flex-col gap-2.5">
+      {rows.map((row, rowIndex) => (
+        <div
+          key={rowIndex}
+          className="grid gap-2.5"
+          style={{ gridTemplateColumns: `repeat(${DOT_COLUMNS}, minmax(0, 1fr))` }}
+        >
+          {row.map((dot, dotIndex) => (
+            <CadenceDotView key={dotIndex} dot={dot} />
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }
 
-function CadenceDotView({ dot }: { dot: CadenceDot }) {
-  if (dot === "none") return <span className="aspect-square" />;
+function CadenceDotView({ dot }: { dot: CadenceCell }) {
+  if (dot.state === "none" || dot.label == null) return <span className="aspect-square" />;
 
   return (
-    <ColorSwatch
-      className="aspect-square size-auto w-full rounded-full shadow-none"
-      color={SWATCH_COLOR}
-      size="xs"
-      style={swatchStyle(dot)}
-    />
+    <Tooltip closeDelay={0} delay={250}>
+      <Tooltip.Trigger
+        aria-label={dot.label}
+        className="flex aspect-square cursor-help rounded-full"
+      >
+        <ColorSwatch
+          aria-hidden="true"
+          className="pointer-events-none size-full rounded-full shadow-none"
+          color={SWATCH_COLOR}
+          size="xs"
+          style={swatchStyle(dot.state)}
+        />
+      </Tooltip.Trigger>
+      <CadenceTip label={dot.label} />
+    </Tooltip>
+  );
+}
+
+function CadenceTip({ label }: { label: string }) {
+  return (
+    <Tooltip.Content showArrow className="px-2 py-1 text-xs" placement="top" shouldFlip>
+      <Tooltip.Arrow />
+      <p>{label}</p>
+    </Tooltip.Content>
   );
 }
 
 const SWATCH_COLOR = "rgba(0, 0, 0, 1)";
 
-function swatchStyle(dot: CadenceDot): CSSProperties {
+function swatchStyle(dot: CadenceCell["state"]): CSSProperties {
   return { background: dot === "filled" ? "var(--accent)" : "var(--default)" };
 }
-
-const heightTransition = { duration: 0.2, ease: [0.23, 1, 0.32, 1] as const };
 
 function isPeriod(key: Key): key is CadencePeriod {
   return PERIODS.some((period) => period === key);
