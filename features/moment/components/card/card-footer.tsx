@@ -34,15 +34,14 @@ export const CardFooter = ({
       <div className="flex flex-row items-center gap-1">
         <Button
           size="sm"
-          variant={isLiked ? "danger" : "ghost"}
+          variant={isLiked ? "danger-soft" : "ghost"}
           onPress={onLikeToggle}
           isPending={isLiking}
           aria-label={isLiked ? t("unlike") : t("like")}
-          className="gap-1.5 transition-all active:scale-95"
         >
           <Icon
             icon={isLiked ? "gravity-ui:heart-fill" : "gravity-ui:heart"}
-            className={`size-4.5 transition-transform duration-200 ${isLiked ? "text-danger scale-110" : ""}`}
+            className={`size-4.5 transition-transform duration-200`}
           />
           {likesCount > 0 ? <span className="text-xs tabular-nums">{likesCount}</span> : null}
         </Button>
@@ -53,7 +52,6 @@ export const CardFooter = ({
             variant={isCommentsOpen ? "secondary" : "ghost"}
             onPress={onCommentToggle}
             aria-label={t("openComments", { count: commentsCount })}
-            className="gap-1.5 transition-all active:scale-95"
           >
             <Icon icon="gravity-ui:comment" className="size-4.5" />
             {commentsCount > 0 ? (

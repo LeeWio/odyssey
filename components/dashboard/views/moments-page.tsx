@@ -191,10 +191,7 @@ function TimelineItem({ moment }: TimelineItemProps) {
         <div className="border-border/40 flex items-center gap-2 border-t pt-3">
           <Button
             size="sm"
-            variant="ghost"
-            className={`gap-1.5 rounded-full px-4 text-xs ${
-              isLiked ? "text-danger bg-danger-soft/10" : "text-muted"
-            }`}
+            variant={isLiked ? "danger-soft" : "ghost"}
             onPress={() => void toggleLike()}
             isDisabled={isLiking}
             aria-label={isLiked ? "Unlike moment" : "Like moment"}
