@@ -1,3 +1,10 @@
+# [1.213.0](https://github.com/LeeWio/odyssey/compare/v1.212.0...v1.213.0) (2026-10-13)
+
+
+### Features
+
+* **notification:** complete moderation notification actions ([3f599b8](https://github.com/LeeWio/odyssey/commit/3f599b8477bda2886b1d00dbdc6573ecc045232e))
+
 # [1.212.0](https://github.com/LeeWio/odyssey/compare/v1.211.0...v1.212.0) (2026-10-13)
 
 
