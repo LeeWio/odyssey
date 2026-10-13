@@ -1,3 +1,10 @@
+# [1.212.0](https://github.com/LeeWio/odyssey/compare/v1.211.0...v1.212.0) (2026-10-13)
+
+
+### Features
+
+* **moments:** describe each cadence dot in a tooltip ([6d60198](https://github.com/LeeWio/odyssey/commit/6d60198dde5da9ed630d6bdbc50b916b3ce63d0b))
+
 # [1.211.0](https://github.com/LeeWio/odyssey/compare/v1.210.0...v1.211.0) (2026-10-13)
 
 
