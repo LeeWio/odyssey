@@ -1,3 +1,10 @@
+## [1.213.2](https://github.com/LeeWio/odyssey/compare/v1.213.1...v1.213.2) (2026-10-14)
+
+
+### Bug Fixes
+
+* **ci:** point link health check at the live site ([664e12b](https://github.com/LeeWio/odyssey/commit/664e12b0e004839d67b3285f546587edb1726ab5))
+
 ## [1.213.1](https://github.com/LeeWio/odyssey/compare/v1.213.0...v1.213.1) (2026-10-14)
 
 
