@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @source not "../.next";
 @source not "../.next-design";
+@source not "../.next-article-shader";
 @import "@heroui/styles";
 @import "@heroui-pro/react/css";
 @import "./themes/heroui-pro-themes.scoped.css";

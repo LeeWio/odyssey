@@ -24,7 +24,7 @@ export function ReadingListButton(props: ReadingListButtonProps) {
   return <ReadingListAction key={`${username ?? "guest"}:${props.postId}`} {...props} />;
 }
 
-function ReadingListAction({ postId, isSaved, isRefreshing = false }: ReadingListButtonProps) {
+function ReadingListAction({ isRefreshing = false, isSaved, postId }: ReadingListButtonProps) {
   const t = useTranslations("Article");
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);

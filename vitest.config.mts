@@ -43,6 +43,7 @@ export default defineConfig({
       "features/notification/**/*.test.ts",
       "features/footprints/**/*.test.ts",
       "features/uses/**/*.test.ts",
+      "features/blog/reader/article-actions/**/*.test.ts",
     ],
     setupFiles: ["./components/rich-text/testing/setup.ts"],
   },

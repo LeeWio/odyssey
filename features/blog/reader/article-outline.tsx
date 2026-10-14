@@ -1,8 +1,8 @@
 "use client";
 
+import { Accordion } from "@heroui/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import type { TableOfContentData } from "@tiptap/extension-table-of-contents";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
@@ -25,7 +25,6 @@ export function ArticleOutline({
   maxHeadingLevel?: number;
   variant?: "inline" | "rail";
 }) {
-  const t = useTranslations("Article");
   const { editor } = useRichTextEditor();
   const storedItems = useRichTextEditorState(
     (state) =>
@@ -128,20 +127,30 @@ export function ArticleOutline({
     </ol>
   );
 
+  const accordion = (
+    <Accordion
+      className={cn(variant === "inline" && "mb-8 xl:hidden", className)}
+      variant="surface"
+    >
+      <Accordion.Item defaultExpanded id="article-outline">
+        <Accordion.Heading>
+          <Accordion.Trigger>
+            {label}
+            <Accordion.Indicator />
+          </Accordion.Trigger>
+        </Accordion.Heading>
+        <Accordion.Panel>
+          <Accordion.Body>
+            <nav aria-label={label}>{outlineList}</nav>
+          </Accordion.Body>
+        </Accordion.Panel>
+      </Accordion.Item>
+    </Accordion>
+  );
+
   if (variant === "rail") {
-    const rail = (
-      <nav aria-label={label} className={className}>
-        <p className="text-muted text-xs font-medium">{t("onThisPage")}</p>
-        {outlineList}
-      </nav>
-    );
-    return railHost ? createPortal(rail, railHost) : null;
+    return railHost ? createPortal(accordion, railHost) : null;
   }
 
-  return (
-    <details className={cn("mb-8 xl:hidden", className)}>
-      <summary className="text-muted cursor-pointer text-sm font-medium">{t("onThisPage")}</summary>
-      {outlineList}
-    </details>
-  );
+  return accordion;
 }

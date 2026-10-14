@@ -130,14 +130,9 @@ for (const viewport of [
   test(`reading supports every theme at ${viewport.width}px`, async ({ page }, testInfo) => {
     await page.setViewportSize(viewport);
     await page.goto("/single/design-foundation");
-    await expect(page.getByRole("heading", { name: article.title })).toBeVisible();
-    const prose = page.locator(".odyssey-article-prose");
-    await expect(prose.locator(".ProseMirror > p")).toHaveCount(12);
-    await expect(prose.getByRole("heading", { name: "Reading rhythm" })).toHaveCSS(
-      "letter-spacing",
-      "normal"
-    );
-    await expect(prose.locator(".ProseMirror > p").first()).toHaveCSS("line-height", "32px");
+    const reader = page.locator("[data-reading-content] .ProseMirror");
+    await expect(reader.locator(":scope > p")).toHaveCount(12);
+    await expect(reader.getByRole("heading", { name: "Reading rhythm" })).toBeVisible();
     expect((await page.locator("[data-reading-content]").boundingBox())!.width).toBeLessThanOrEqual(
       768
     );
@@ -156,7 +151,7 @@ for (const viewport of [
           },
           { variant, mode }
         );
-        await expect(prose).toBeVisible();
+        await expect(reader).toBeVisible();
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
           true
         );

@@ -2,6 +2,9 @@
 
 Handles long-form content and article presentation.
 
+Action Bar 的滚动可见性、文章顶部/结尾位置策略、交互锁定和测试规范见
+[`docs/07-modules/article-action-bar-visibility.md`](./article-action-bar-visibility.md)。
+
 ## Responsibilities
 
 - render article pages
