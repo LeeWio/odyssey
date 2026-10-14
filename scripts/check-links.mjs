@@ -15,7 +15,7 @@ async function checkLink(url) {
       method: "GET",
       signal: controller.signal,
       headers: {
-        "User-Agent": "Odyssey-Bot/1.0 (+https://blog.wei.li)",
+        "User-Agent": "Odyssey-Bot/1.0 (+https://easylove.top)",
       },
     });
 

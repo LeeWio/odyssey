@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://blog.wei.li
+      url: https://easylove.top
     steps:
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v1.2.2

@@ -20,4 +20,4 @@ jobs:
       - name: Run Health Check
         run: bun scripts/check-links.mjs
         env:
-          NEXT_PUBLIC_API_BASE: ${{ secrets.PROD_API_BASE || 'https://blog.wei.li' }}
+          NEXT_PUBLIC_API_BASE: ${{ secrets.PROD_API_BASE || 'https://easylove.top' }}
