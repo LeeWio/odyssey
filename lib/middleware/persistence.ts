@@ -39,6 +39,7 @@ persistenceMiddleware.startListening({
             roles: auth.roles,
             permissions: auth.permissions,
             isAuthenticated: auth.isAuthenticated,
+            persistedAt: Date.now(),
           })
         );
       } else {
@@ -132,7 +133,7 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
           persistedAuth.accessToken.length > 0,
       };
 
-      // One-time migrate legacy localStorage → sessionStorage.
+      // Drop a copy left in sessionStorage by the previous tab-scoped login.
       writeAuthStorage(auth);
     }
     if (theme || draftId) {
