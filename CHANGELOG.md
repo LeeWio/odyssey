@@ -1,3 +1,10 @@
+## [1.213.1](https://github.com/LeeWio/odyssey/compare/v1.213.0...v1.213.1) (2026-10-14)
+
+
+### Bug Fixes
+
+* **auth:** keep login for seven days by default ([5c8964d](https://github.com/LeeWio/odyssey/commit/5c8964da9cd3856959fd40e807620e1e79b20d77))
+
 # [1.213.0](https://github.com/LeeWio/odyssey/compare/v1.212.0...v1.213.0) (2026-10-13)
 
 
