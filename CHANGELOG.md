@@ -1,3 +1,10 @@
+# [1.214.0](https://github.com/LeeWio/odyssey/compare/v1.213.2...v1.214.0) (2026-10-14)
+
+
+### Features
+
+* **article:** redesign article reading experience ([c9c4418](https://github.com/LeeWio/odyssey/commit/c9c44182aa28e15103c640dd1ac7a30744316279))
+
 ## [1.213.2](https://github.com/LeeWio/odyssey/compare/v1.213.1...v1.213.2) (2026-10-14)
 
 
