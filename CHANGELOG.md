@@ -1,3 +1,10 @@
+# [1.215.0](https://github.com/LeeWio/odyssey/compare/v1.214.0...v1.215.0) (2026-10-15)
+
+
+### Features
+
+* **article:** restyle the article masthead and outline ([0b1b92d](https://github.com/LeeWio/odyssey/commit/0b1b92d3da0e1b55dfa5bd375cfa76c607bd96fd))
+
 # [1.214.0](https://github.com/LeeWio/odyssey/compare/v1.213.2...v1.214.0) (2026-10-14)
 
 
