@@ -73,11 +73,7 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
       <PageContainer className="relative z-10 px-0 pb-24 md:px-0 xl:px-0">
         <article className="w-full min-w-0" data-reading-content>
           {isLoading || !article ? (
-            <div
-              aria-busy="true"
-              aria-label={t("loading")}
-              className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 md:px-6 xl:px-8"
-            >
+            <div aria-busy="true" aria-label={t("loading")} className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 md:px-6 xl:px-8">
               <Skeleton className="h-4 w-full rounded-md" />
               <Skeleton className="h-4 w-11/12 rounded-md" />
               <Skeleton className="h-4 w-4/5 rounded-md" />

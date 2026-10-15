@@ -58,13 +58,15 @@ export function ArticleHeader({ article }: { article: PostResponse }) {
       {/* The shader fills the viewport. Keep it free of any max-width. */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <ArticleAmbientBackground seed={article.slug} />
-        <div className="to-background absolute inset-x-0 bottom-0 h-28 bg-linear-to-b from-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-linear-to-b from-transparent to-background" />
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-128 max-w-3xl flex-col items-center justify-center px-6 py-24 text-center sm:min-h-144">
         {category ? (
           <Chip size="sm" variant="soft">
-            <Link href={`/single/categories/${encodeURIComponent(category.slug)}`}>
+            <Link
+              href={`/single/categories/${encodeURIComponent(category.slug)}`}
+            >
               {category.name}
             </Link>
           </Chip>
