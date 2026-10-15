@@ -64,7 +64,7 @@ function OutlineList({
   );
 }
 
-export function ArticleOutline({
+export function ArticleToc({
   className = "",
   label,
   maxHeadingLevel = 3,
@@ -90,7 +90,7 @@ export function ArticleOutline({
     () => false
   );
   const railHost =
-    variant === "rail" && isClient ? document.getElementById("article-outline-rail") : null;
+    variant === "rail" && isClient ? document.getElementById("article-toc-rail") : null;
 
   if (!editor || items.length === 0) return null;
 
@@ -115,10 +115,10 @@ export function ArticleOutline({
   const accordion = (
     <Accordion
       className={cn(variant === "inline" && "mb-8 xl:hidden", className)}
-      defaultExpandedKeys={[`article-outline-${variant}`]}
+      defaultExpandedKeys={[`article-toc-${variant}`]}
       variant="surface"
     >
-      <Accordion.Item id={`article-outline-${variant}`}>
+      <Accordion.Item id={`article-toc-${variant}`}>
         <Accordion.Heading>
           <Accordion.Trigger>
             {label}

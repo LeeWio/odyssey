@@ -41,7 +41,7 @@ function getEstimatedReadingMinutes(article: Pick<PostResponse, "content" | "sum
   return Math.max(1, Math.ceil(approximateCount / 225));
 }
 
-export function ArticleHeader({ article }: { article: PostResponse }) {
+export function ArticleHero({ article }: { article: PostResponse }) {
   const locale = useLocale();
   const router = useRouter();
   const t = useTranslations("Article");

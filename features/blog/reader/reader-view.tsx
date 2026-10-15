@@ -29,10 +29,10 @@ const ReadingProgressBar = dynamic(
   { ssr: false }
 );
 
-const ArticleBodyReader = dynamic(
+const ArticleBody = dynamic(
   () =>
-    import("./article-body-reader").then((mod) => ({
-      default: mod.ArticleBodyReader,
+    import("./article/article-body").then((mod) => ({
+      default: mod.ArticleBody,
     })),
   {
     ssr: false,
@@ -447,7 +447,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
         </div>
 
         {/* Core Article Prose Text (Choreographed Entrance 5) */}
-        <ArticleBodyReader
+        <ArticleBody
           className="max-w-[42rem]"
           content={article.content}
           contentType={article.contentType}

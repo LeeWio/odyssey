@@ -1,2 +1,2 @@
-export { ActionBar } from "./action-bar";
+export { ArticleActionBar } from "./action-bar";
 export type { Target } from "./target";

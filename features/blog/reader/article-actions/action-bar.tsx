@@ -16,7 +16,7 @@ import type { Target } from "./target";
 import { useEngagement } from "./use-engagement";
 import { useVisibility } from "./use-visibility";
 
-export function ActionBar({
+export function ArticleActionBar({
   article,
   articleEndRef,
   isRefreshing = false,

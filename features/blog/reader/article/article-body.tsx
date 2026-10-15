@@ -6,14 +6,14 @@ import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-te
 import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
-import { ArticleOutline } from "@/features/blog/reader/article-outline";
+import { ArticleToc } from "@/features/blog/reader/article/article-toc";
 import {
   normalizeRichTextDocument,
   parseJSONContent,
 } from "@/components/rich-text/utils/document-normalizer";
 import { MotionRichTextEditor } from "@/components/ui/motion-rich-text";
 
-export interface ArticleBodyReaderProps {
+export interface ArticleBodyProps {
   content: string | null | undefined;
   contentType?: string | null;
   /** Remount key when the source document changes. Defaults to `content`. */
@@ -33,7 +33,7 @@ export interface ArticleBodyReaderProps {
  * Isolated TipTap read surface. Keep this module behind `next/dynamic` so
  * article chrome can paint without pulling the editor graph.
  */
-export function ArticleBodyReader({
+export function ArticleBody({
   content,
   contentType,
   contentKey,
@@ -43,7 +43,7 @@ export function ArticleBodyReader({
   outlineLabel,
   outlineRail,
   showTableOfContents = true,
-}: ArticleBodyReaderProps) {
+}: ArticleBodyProps) {
   const parsedContent = useMemo(() => {
     if (!content || contentType !== "JSON") return null;
     const doc = parseJSONContent(content);
@@ -75,7 +75,7 @@ export function ArticleBodyReader({
     >
       {outlineRail}
       <RichTextEditor.Shell className={shellClassName}>
-        {outlineLabel ? <ArticleOutline label={outlineLabel} /> : null}
+        {outlineLabel ? <ArticleToc label={outlineLabel} /> : null}
         <AnimatedRichTextContent />
         {showTableOfContents && !outlineLabel ? (
           <RichTextTableOfContents placement="right" />
