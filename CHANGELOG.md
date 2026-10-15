@@ -1,3 +1,10 @@
+# [1.218.0](https://github.com/LeeWio/odyssey/compare/v1.217.0...v1.218.0) (2026-10-15)
+
+
+### Features
+
+* **rich-text:** improve publishing workflow and mobile settings ([5cb5fb7](https://github.com/LeeWio/odyssey/commit/5cb5fb72f53b270e76ed6ba35642810e4ca12afd))
+
 # [1.217.0](https://github.com/LeeWio/odyssey/compare/v1.216.0...v1.217.0) (2026-10-15)
 
 
