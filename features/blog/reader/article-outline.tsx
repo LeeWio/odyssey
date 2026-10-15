@@ -2,7 +2,10 @@
 
 import { Accordion, ListBox } from "@heroui/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
-import type { TableOfContentData, TableOfContentDataItem } from "@tiptap/extension-table-of-contents";
+import type {
+  TableOfContentData,
+  TableOfContentDataItem,
+} from "@tiptap/extension-table-of-contents";
 import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
@@ -27,7 +30,11 @@ function OutlineList({
   onJump: (item: TableOfContentDataItem) => void;
   variant: "inline" | "rail";
 }) {
-  useSyncExternalStore(subscribeToOutline, () => items.find((item) => item.isActive)?.id ?? "", () => "");
+  useSyncExternalStore(
+    subscribeToOutline,
+    () => items.find((item) => item.isActive)?.id ?? "",
+    () => ""
+  );
   const activeId = items.find((item) => item.isActive)?.id ?? items[0]?.id ?? "";
 
   return (
@@ -48,7 +55,9 @@ function OutlineList({
           id={item.id}
           textValue={item.textContent}
         >
-          <span style={{ marginInlineStart: `${(item.level - 1) * 0.75}rem` }}>{item.textContent}</span>
+          <span style={{ marginInlineStart: `${(item.level - 1) * 0.75}rem` }}>
+            {item.textContent}
+          </span>
         </ListBox.Item>
       ))}
     </ListBox>
@@ -101,9 +110,7 @@ export function ArticleOutline({
     }
   };
 
-  const outlineList = (
-    <OutlineList items={items} label={label} variant={variant} onJump={jumpTo} />
-  );
+  const outlineList = <OutlineList items={items} label={label} variant={variant} onJump={jumpTo} />;
 
   const accordion = (
     <Accordion

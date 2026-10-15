@@ -40,7 +40,9 @@ const OutlineScrollOffset = Extension.create({
       }
 
       const changed = items.some(
-        (item) => item.isActive !== (item.id === activeId) || item.isScrolledOver !== scrolledOver.has(item.id)
+        (item) =>
+          item.isActive !== (item.id === activeId) ||
+          item.isScrolledOver !== scrolledOver.has(item.id)
       );
       storage.scrollPosition = position;
       if (!changed) return;
