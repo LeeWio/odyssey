@@ -1,9 +1,11 @@
 "use client";
 
-import { NumberValue } from "@heroui-pro/react";
-import { Avatar, Link } from "@heroui/react";
+import { Calendar, Clock } from "@gravity-ui/icons";
+import { Avatar, Chip, Link, Tag, TagGroup, Typography } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
+import { ArticleAmbientBackground } from "@/features/blog/reader/article-ambient-background";
 import { type PostResponse } from "@/lib/features/post";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 
@@ -13,8 +15,8 @@ function formatDate(value: string | null, locale: string, fallback: string) {
   if (Number.isNaN(date.getTime())) return fallback;
 
   return new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "long",
+    day: "2-digit",
+    month: "2-digit",
     year: "numeric",
   }).format(date);
 }
@@ -41,89 +43,101 @@ function getEstimatedReadingMinutes(article: Pick<PostResponse, "content" | "sum
 
 export function ArticleHeader({ article }: { article: PostResponse }) {
   const locale = useLocale();
+  const router = useRouter();
   const t = useTranslations("Article");
   const authorName = article.authorName?.trim() || "Odyssey";
   const publishedAt = getPostPublishedAt(article);
   const readingMinutes = getEstimatedReadingMinutes(article);
-  const hasUpdated = Boolean(article.updatedAt && publishedAt && article.updatedAt !== publishedAt);
+  const category = article.category;
+  const tags = article.tags ?? [];
+
+  const publishedLabel = formatDate(publishedAt, locale, t("recentlyPublished"));
 
   return (
-    <header className="mb-14 flex flex-col gap-6">
-      <div className="flex max-w-3xl flex-col gap-5">
-        <h1 className="text-foreground text-4xl leading-[1.1] font-semibold text-balance sm:text-5xl">
+    <header className="relative mb-16 min-h-128 w-full max-w-none overflow-hidden sm:min-h-144">
+      {/* The shader fills the viewport. Keep it free of any max-width. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <ArticleAmbientBackground seed={article.slug} />
+        <div className="to-background absolute inset-x-0 bottom-0 h-28 bg-linear-to-b from-transparent" />
+      </div>
+
+      <div className="relative z-10 mx-auto flex min-h-128 max-w-3xl flex-col items-center justify-center px-6 py-24 text-center sm:min-h-144">
+        {category ? (
+          <Chip size="sm" variant="soft">
+            <Link href={`/single/categories/${encodeURIComponent(category.slug)}`}>
+              {category.name}
+            </Link>
+          </Chip>
+        ) : null}
+
+        <h1 className="mt-6 max-w-2xl text-4xl leading-[1.15] font-semibold text-balance sm:text-5xl">
           {article.title}
         </h1>
+
         {article.summary ? (
-          <p className="text-muted max-w-2xl text-lg leading-8 text-pretty sm:text-xl">
+          <p className="text-muted mt-5 max-w-xl text-base leading-7 text-pretty sm:text-lg">
             {article.summary}
           </p>
         ) : null}
-      </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 text-sm">
-        <div className="flex items-center gap-2">
-          <Avatar size="sm">
-            {article.authorAvatar ? (
-              <Avatar.Image alt={authorName} src={article.authorAvatar} />
-            ) : null}
-            <Avatar.Fallback>{getAuthorInitials(authorName)}</Avatar.Fallback>
-          </Avatar>
+        <div className="mt-4">
           {article.authorName?.trim() ? (
             <Link
-              className="text-foreground font-medium no-underline hover:underline"
+              className="flex flex-col items-center gap-1.5 no-underline"
               href={`/single/authors/${encodeURIComponent(article.authorName.trim())}`}
             >
-              {authorName}
+              <Avatar size="md">
+                {article.authorAvatar ? (
+                  <Avatar.Image alt={authorName} src={article.authorAvatar} />
+                ) : null}
+                <Avatar.Fallback>{getAuthorInitials(authorName)}</Avatar.Fallback>
+              </Avatar>
+              <span className="text-foreground text-base font-medium">{authorName}</span>
             </Link>
           ) : (
-            <span className="text-foreground font-medium">{authorName}</span>
+            <div className="flex flex-col items-center gap-1.5">
+              <Avatar size="md">
+                <Avatar.Fallback>{getAuthorInitials(authorName)}</Avatar.Fallback>
+              </Avatar>
+              <Typography className="font-medium" type="body">
+                {authorName}
+              </Typography>
+            </div>
           )}
         </div>
 
-        <span aria-hidden="true" className="text-muted/60">
-          ·
-        </span>
-
-        <time className="text-muted" dateTime={publishedAt ?? undefined}>
-          {formatDate(publishedAt, locale, t("recentlyPublished"))}
-        </time>
-
-        <span aria-hidden="true" className="text-muted/60">
-          ·
-        </span>
-
-        <span className="text-muted tabular-nums">{t("minRead", { count: readingMinutes })}</span>
-
-        <span aria-hidden="true" className="text-muted/60">
-          ·
-        </span>
-
-        <span className="text-muted tabular-nums">
-          <NumberValue locale={locale} notation="compact" value={article.views}>
-            {(formatted) => t("views", { count: formatted })}
-          </NumberValue>
-        </span>
-
-        {hasUpdated ? (
-          <span className="text-muted basis-full text-xs">
-            {t("updated", { date: formatDate(article.updatedAt, locale, t("recentlyPublished")) })}
-          </span>
-        ) : null}
+        <div className="mt-6 flex flex-col items-center gap-3">
+          <div className="text-muted flex items-center gap-2 text-sm">
+            <span className="inline-flex items-center gap-1.5">
+              <Calendar className="size-3.5" />
+              <time dateTime={publishedAt ?? undefined}>{publishedLabel}</time>
+            </span>
+            <span aria-hidden="true">·</span>
+            <span className="inline-flex items-center gap-1.5 tabular-nums">
+              <Clock className="size-3.5" />
+              {t("minRead", { count: readingMinutes })}
+            </span>
+          </div>
+          {tags.length > 0 ? (
+            <TagGroup aria-label={t("tags")} size="sm" variant="surface">
+              <TagGroup.List className="justify-center">
+                {tags.map((tag) => (
+                  <Tag
+                    key={tag.id}
+                    id={tag.slug}
+                    textValue={tag.name}
+                    onAction={() => {
+                      router.push(`/single/tags/${encodeURIComponent(tag.slug)}`);
+                    }}
+                  >
+                    {tag.name}
+                  </Tag>
+                ))}
+              </TagGroup.List>
+            </TagGroup>
+          ) : null}
+        </div>
       </div>
-
-      {article.tags?.length ? (
-        <nav aria-label={t("tags")} className="flex flex-wrap gap-x-3 gap-y-1.5">
-          {article.tags.map((tag) => (
-            <Link
-              key={tag.id}
-              className="text-muted hover:text-foreground text-xs no-underline hover:underline"
-              href={`/single/tags/${encodeURIComponent(tag.slug)}`}
-            >
-              #{tag.name}
-            </Link>
-          ))}
-        </nav>
-      ) : null}
     </header>
   );
 }

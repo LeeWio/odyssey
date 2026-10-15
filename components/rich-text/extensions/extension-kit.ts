@@ -119,7 +119,7 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
         ]
       : []),
     TableKit.configure({}),
-    createTableOfContents(tableOfContents),
+    ...createTableOfContents(tableOfContents),
   ];
 }
 

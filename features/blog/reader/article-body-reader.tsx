@@ -4,6 +4,7 @@ import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useMemo, type ReactNode } from "react";
 import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
 import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
+
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import { ArticleOutline } from "@/features/blog/reader/article-outline";
 import {

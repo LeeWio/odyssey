@@ -1,21 +1,71 @@
 "use client";
 
-import { Accordion } from "@heroui/react";
+import { Accordion, ListBox } from "@heroui/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
-import type { TableOfContentData } from "@tiptap/extension-table-of-contents";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import type {
+  TableOfContentData,
+  TableOfContentDataItem,
+} from "@tiptap/extension-table-of-contents";
+import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
+import { ARTICLE_OUTLINE_TOP_OFFSET } from "@/components/rich-text/extensions/table-of-contents";
 import { cn } from "@/lib/utils";
 
 const EMPTY_OUTLINE: TableOfContentData = [];
 
-function headingElement(editorElement: HTMLElement, id: string) {
-  return editorElement.querySelector<HTMLElement>(`[data-toc-id="${CSS.escape(id)}"]`);
+function subscribeToOutline(onChange: () => void) {
+  window.addEventListener("odyssey-outline-scroll", onChange);
+  return () => window.removeEventListener("odyssey-outline-scroll", onChange);
+}
+
+function OutlineList({
+  items,
+  label,
+  onJump,
+  variant,
+}: {
+  items: TableOfContentData;
+  label: string;
+  onJump: (item: TableOfContentDataItem) => void;
+  variant: "inline" | "rail";
+}) {
+  useSyncExternalStore(
+    subscribeToOutline,
+    () => items.find((item) => item.isActive)?.id ?? "",
+    () => ""
+  );
+  const activeId = items.find((item) => item.isActive)?.id ?? items[0]?.id ?? "";
+
+  return (
+    <ListBox
+      aria-label={label}
+      className={cn(variant === "rail" && "max-h-[calc(100dvh-9rem)] overflow-y-auto")}
+      selectedKeys={activeId ? [activeId] : []}
+      selectionMode="none"
+      onAction={(key) => {
+        const item = items.find((entry) => entry.id === String(key));
+        if (item) onJump(item);
+      }}
+    >
+      {items.map((item) => (
+        <ListBox.Item
+          key={item.id}
+          className={cn(item.id === activeId && "bg-default")}
+          id={item.id}
+          textValue={item.textContent}
+        >
+          <span style={{ marginInlineStart: `${(item.level - 1) * 0.75}rem` }}>
+            {item.textContent}
+          </span>
+        </ListBox.Item>
+      ))}
+    </ListBox>
+  );
 }
 
 export function ArticleOutline({
-  className,
+  className = "",
   label,
   maxHeadingLevel = 3,
   variant = "inline",
@@ -26,16 +76,14 @@ export function ArticleOutline({
   variant?: "inline" | "rail";
 }) {
   const { editor } = useRichTextEditor();
-  const storedItems = useRichTextEditorState(
-    (state) =>
-      (state.editor.storage.tableOfContents?.content as TableOfContentData | undefined) ??
-      EMPTY_OUTLINE
-  );
-  const items = useMemo(
-    () => (storedItems ?? EMPTY_OUTLINE).filter((item) => item.originalLevel <= maxHeadingLevel),
-    [maxHeadingLevel, storedItems]
-  );
-  const [activeId, setActiveId] = useState("");
+  const items =
+    useRichTextEditorState((state) => {
+      const content =
+        (state.editor.storage.tableOfContents?.content as TableOfContentData | undefined) ??
+        EMPTY_OUTLINE;
+
+      return content.filter((item) => item.originalLevel <= maxHeadingLevel);
+    }) ?? EMPTY_OUTLINE;
   const isClient = useSyncExternalStore(
     () => () => undefined,
     () => true,
@@ -44,95 +92,33 @@ export function ArticleOutline({
   const railHost =
     variant === "rail" && isClient ? document.getElementById("article-outline-rail") : null;
 
-  useEffect(() => {
-    if (!editor || items.length === 0) return;
-
-    let frame = 0;
-    const updateActiveHeading = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        let nextId = items[0]?.id ?? "";
-        for (const item of items) {
-          const heading = headingElement(editor.view.dom, item.id);
-          if (!heading) continue;
-          if (heading.getBoundingClientRect().top <= 140) {
-            nextId = item.id;
-            continue;
-          }
-          break;
-        }
-        setActiveId((current) => (current === nextId ? current : nextId));
-      });
-    };
-
-    updateActiveHeading();
-    window.addEventListener("scroll", updateActiveHeading, { passive: true });
-    window.addEventListener("resize", updateActiveHeading);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", updateActiveHeading);
-      window.removeEventListener("resize", updateActiveHeading);
-    };
-  }, [editor, items]);
-
   if (!editor || items.length === 0) return null;
 
-  const jumpTo = (id: string) => {
-    const heading = headingElement(editor.view.dom, id);
+  const jumpTo = (item: TableOfContentDataItem) => {
+    const heading = item.dom;
     if (!heading) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     heading.setAttribute("tabindex", "-1");
     window.scrollTo({
       behavior: reduceMotion ? "auto" : "smooth",
-      top: heading.getBoundingClientRect().top + window.scrollY - 112,
+      top: heading.getBoundingClientRect().top + window.scrollY - ARTICLE_OUTLINE_TOP_OFFSET,
     });
     heading.focus({ preventScroll: true });
     if (window.history.pushState) {
-      window.history.pushState(null, "", `#${id}`);
+      window.history.pushState(null, "", `#${item.id}`);
     }
-    setActiveId(id);
   };
 
-  const outlineList = (
-    <ol
-      className={cn(
-        "mt-3 flex flex-col gap-1",
-        variant === "rail" && "max-h-[calc(100dvh-9rem)] overflow-y-auto"
-      )}
-    >
-      {items.map((item) => {
-        const isActive = item.id === activeId;
-        return (
-          <li key={item.id}>
-            <a
-              aria-current={isActive ? "location" : undefined}
-              className={cn(
-                "block rounded-md py-1 text-sm leading-5 no-underline",
-                item.level > 1 ? "ps-3" : "",
-                isActive ? "text-foreground font-medium" : "text-muted hover:text-foreground"
-              )}
-              href={`#${item.id}`}
-              onClick={(event) => {
-                event.preventDefault();
-                jumpTo(item.id);
-              }}
-            >
-              {item.textContent}
-            </a>
-          </li>
-        );
-      })}
-    </ol>
-  );
+  const outlineList = <OutlineList items={items} label={label} variant={variant} onJump={jumpTo} />;
 
   const accordion = (
     <Accordion
       className={cn(variant === "inline" && "mb-8 xl:hidden", className)}
+      defaultExpandedKeys={[`article-outline-${variant}`]}
       variant="surface"
     >
-      <Accordion.Item defaultExpanded id="article-outline">
+      <Accordion.Item id={`article-outline-${variant}`}>
         <Accordion.Heading>
           <Accordion.Trigger>
             {label}
@@ -140,9 +126,7 @@ export function ArticleOutline({
           </Accordion.Trigger>
         </Accordion.Heading>
         <Accordion.Panel>
-          <Accordion.Body>
-            <nav aria-label={label}>{outlineList}</nav>
-          </Accordion.Body>
+          <Accordion.Body>{outlineList}</Accordion.Body>
         </Accordion.Panel>
       </Accordion.Item>
     </Accordion>

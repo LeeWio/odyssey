@@ -13,14 +13,6 @@ import { ArticleHeader } from "@/features/blog/reader/article-header";
 import { ArticleOutline } from "@/features/blog/reader/article-outline";
 import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/post";
 
-const ArticleAmbientBackground = dynamic(
-  () =>
-    import("@/features/blog/reader/article-ambient-background").then(
-      (mod) => mod.ArticleAmbientBackground
-    ),
-  { ssr: false }
-);
-
 const ArticleBodyReader = dynamic(
   () =>
     import("@/features/blog/reader/article-body-reader").then((mod) => ({
@@ -78,27 +70,22 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
 
   return (
     <div className="bg-background relative isolate min-h-[100dvh] overflow-x-clip">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-0 h-[100dvh] w-screen overflow-hidden"
-      >
-        <ArticleAmbientBackground seed={article?.slug ?? slug} />
-      </div>
-
-      <PageContainer className="relative z-10 pt-28 pb-24">
-        <article className="mx-auto w-full max-w-6xl min-w-0" data-reading-content>
+      <PageContainer className="relative z-10 px-0 pb-24 md:px-0 xl:px-0">
+        <article className="w-full min-w-0" data-reading-content>
           {isLoading || !article ? (
-            <div aria-busy="true" aria-label={t("loading")} className="flex flex-col gap-3 py-6">
+            <div
+              aria-busy="true"
+              aria-label={t("loading")}
+              className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 md:px-6 xl:px-8"
+            >
               <Skeleton className="h-4 w-full rounded-md" />
               <Skeleton className="h-4 w-11/12 rounded-md" />
               <Skeleton className="h-4 w-4/5 rounded-md" />
             </div>
           ) : (
             <>
-              <div className="max-w-3xl">
-                <ArticleHeader article={article} />
-              </div>
-              <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,48rem)_14rem] xl:justify-center">
+              <ArticleHeader article={article} />
+              <div className="mx-auto grid w-full max-w-6xl items-start gap-8 px-4 md:px-6 xl:grid-cols-[minmax(0,48rem)_14rem] xl:justify-center xl:px-8">
                 <div className="min-w-0">
                   <ArticleBodyReader
                     content={article.content}
