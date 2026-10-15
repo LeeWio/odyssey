@@ -1,5 +1,6 @@
 "use client";
 
+import { Typography } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import type { Editor } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/react";
@@ -97,10 +98,12 @@ export function RichText({
             <MediaInsertDialog />
           </>
         ) : null}
-        <RichTextEditor.Content
-          id={scrollContainerId}
-          className="[&_.ProseMirror-selectednode]:outline-accent/40 min-h-0 flex-1 scrollbar-none overflow-y-auto outline-none focus:outline-none [&_.ProseMirror-selectednode]:rounded-md [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-offset-2 [&.resize-cursor]:cursor-col-resize"
-        />
+        <Typography.Prose className="flex min-h-0 flex-1 flex-col">
+          <RichTextEditor.Content
+            id={scrollContainerId}
+            className="[&_.ProseMirror-selectednode]:outline-accent/40 min-h-0 flex-1 scrollbar-none overflow-y-auto outline-none focus:outline-none [&_.ProseMirror-selectednode]:rounded-md [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-offset-2 [&.resize-cursor]:cursor-col-resize"
+          />
+        </Typography.Prose>
         {showTableOfContents && (
           <RichTextTableOfContents
             maxHeadingLevel={2}

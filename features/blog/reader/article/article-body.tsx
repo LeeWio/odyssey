@@ -1,5 +1,6 @@
 "use client";
 
+import { Typography } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useMemo, type ReactNode } from "react";
 import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
@@ -76,7 +77,9 @@ export function ArticleBody({
       {outlineRail}
       <RichTextEditor.Shell className={shellClassName}>
         {outlineLabel ? <ArticleToc label={outlineLabel} /> : null}
-        <AnimatedRichTextContent />
+        <Typography.Prose>
+          <AnimatedRichTextContent />
+        </Typography.Prose>
         {showTableOfContents && !outlineLabel ? (
           <RichTextTableOfContents placement="right" />
         ) : null}

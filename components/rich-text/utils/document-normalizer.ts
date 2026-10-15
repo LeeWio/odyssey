@@ -1,6 +1,8 @@
 import { isValidYoutubeUrl } from "@tiptap/extension-youtube";
 import type { JSONContent } from "@tiptap/react";
 
+import { clampHeadingLevel } from "@/components/rich-text/extensions/heading";
+
 import { normalizeLinkUrl } from "./link-utils";
 
 // The minimal valid, standard ProseMirror document structure
@@ -89,6 +91,16 @@ export function normalizeRichTextDocument(content: JSONContent): JSONContent {
     const normalizedContent = node.content?.map(normalizeNode);
     const normalizedMarks = normalizeMarks(node.marks);
     const attrs = node.attrs ? { ...node.attrs } : undefined;
+
+    if (node.type === "heading") {
+      const level = clampHeadingLevel(Number(attrs?.level));
+      return {
+        ...node,
+        attrs: { ...attrs, level },
+        ...(normalizedMarks ? { marks: normalizedMarks } : {}),
+        ...(normalizedContent ? { content: normalizedContent } : {}),
+      };
+    }
 
     return {
       ...node,

@@ -41,10 +41,10 @@ export function TaskItemNodeView({ editor, extension, node, getPos }: NodeViewPr
 
   return (
     <NodeViewWrapper className="contents">
-      <div className="contents" contentEditable={false}>
+      <div className="flex h-7 shrink-0 items-center" contentEditable={false}>
         <Checkbox
           aria-label={label}
-          className="mt-1 shrink-0"
+          className="shrink-0"
           isReadOnly={!editor.isEditable}
           isSelected={checked}
           onChange={handleChange}

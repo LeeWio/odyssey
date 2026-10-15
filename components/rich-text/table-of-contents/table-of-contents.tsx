@@ -8,13 +8,18 @@ import type {
   TableOfContentDataItem,
 } from "@tiptap/extension-table-of-contents";
 import type React from "react";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
 import { cn } from "@/lib/utils";
 
 export type TableOfContentsAnchor = TableOfContentDataItem;
 
 const EMPTY_TABLE_OF_CONTENTS: TableOfContentData = [];
+
+function subscribeToOutline(onChange: () => void) {
+  window.addEventListener("odyssey-outline-scroll", onChange);
+  return () => window.removeEventListener("odyssey-outline-scroll", onChange);
+}
 
 export type TableOfContentsProps = {
   className?: string;
@@ -89,70 +94,62 @@ export const RichTextTableOfContents = memo(
     updateLocationHash = true,
   }: TableOfContentsProps) => {
     const { editor } = useRichTextEditor();
-    const editorState = useRichTextEditorState(
-      (state) => ({
-        cursorPosition: state.editor.state.selection.from,
-        storedItems: state.editor.storage.tableOfContents?.content || EMPTY_TABLE_OF_CONTENTS,
-      }),
-      (previous, next) =>
-        previous?.cursorPosition === next?.cursorPosition &&
-        previous?.storedItems === next?.storedItems
-    );
-    const storedItems = editorState?.storedItems ?? EMPTY_TABLE_OF_CONTENTS;
-    const cursorPosition = editorState?.cursorPosition ?? null;
+    const storedItems =
+      useRichTextEditorState(
+        (state) =>
+          (state.editor.storage.tableOfContents?.content as TableOfContentData | undefined) ??
+          EMPTY_TABLE_OF_CONTENTS
+      ) ?? EMPTY_TABLE_OF_CONTENTS;
+    const cursorPosition =
+      useRichTextEditorState((state) => state.editor.state.selection.from) ?? null;
     const allItems = controlledItems ?? storedItems;
     const items = useMemo(
       () => allItems.filter((item) => item.originalLevel <= maxHeadingLevel).slice(0, maxShowCount),
       [allItems, maxHeadingLevel, maxShowCount]
     );
-    const [fallbackScrollActiveId, setFallbackScrollActiveId] = useState("");
+    const activeSignature = useSyncExternalStore(
+      subscribeToOutline,
+      () => items.map((item) => (item.isActive ? item.id : "")).join("|"),
+      () => ""
+    );
+    const [containerActiveId, setContainerActiveId] = useState("");
     const [manualActiveId, setManualActiveId] = useState<string | null>(null);
     const manualNavigationCleanupRef = useRef<() => void>(() => undefined);
 
     useEffect(() => {
-      if (controlledItems || !editor || items.length === 0) return;
+      if (scrollMode !== "editor" || !editor || items.length === 0) return;
 
       const scrollRoot = getScrollRoot(editor.view.dom, scrollMode);
+      if (!scrollRoot || scrollRoot instanceof Window) return;
 
-      if (!scrollRoot) return;
-
-      let animationFrame = 0;
-
-      const updateFallbackActiveHeading = () => {
-        cancelAnimationFrame(animationFrame);
-        animationFrame = requestAnimationFrame(() => {
-          const rootTop = scrollRoot instanceof Window ? 0 : scrollRoot.getBoundingClientRect().top;
+      let frame = 0;
+      const updateActiveHeading = () => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          const rootTop = scrollRoot.getBoundingClientRect().top;
           let activeId = items[0]?.id ?? "";
 
           for (const item of items) {
-            const heading = getHeadingElement(editor.view.dom, item.id);
-
+            const heading = item.dom ?? getHeadingElement(editor.view.dom, item.id);
             if (!heading) continue;
-
             if (heading.getBoundingClientRect().top - rootTop <= topOffset) {
               activeId = item.id;
               continue;
             }
-
             break;
           }
 
-          setFallbackScrollActiveId((currentId) => (currentId === activeId ? currentId : activeId));
+          setContainerActiveId((current) => (current === activeId ? current : activeId));
         });
       };
 
-      updateFallbackActiveHeading();
-      scrollRoot.addEventListener("scroll", updateFallbackActiveHeading, { passive: true });
-      window.addEventListener("resize", updateFallbackActiveHeading);
-
+      updateActiveHeading();
+      scrollRoot.addEventListener("scroll", updateActiveHeading, { passive: true });
       return () => {
-        cancelAnimationFrame(animationFrame);
-        scrollRoot.removeEventListener("scroll", updateFallbackActiveHeading);
-        window.removeEventListener("resize", updateFallbackActiveHeading);
+        cancelAnimationFrame(frame);
+        scrollRoot.removeEventListener("scroll", updateActiveHeading);
       };
-    }, [controlledItems, editor, items, scrollMode, topOffset]);
-
-    useEffect(() => () => manualNavigationCleanupRef.current(), []);
+    }, [editor, items, scrollMode, topOffset]);
 
     if (!editor || items.length === 0) {
       return null;
@@ -161,7 +158,7 @@ export const RichTextTableOfContents = memo(
     const onItemClick = (event: React.MouseEvent, item: TableOfContentsAnchor) => {
       event.preventDefault();
 
-      const element = getHeadingElement(editor.view.dom, item.id);
+      const element = item.dom ?? getHeadingElement(editor.view.dom, item.id);
       const scrollRoot = getScrollRoot(editor.view.dom, scrollMode);
 
       if (!element || !scrollRoot) return;
@@ -224,19 +221,19 @@ export const RichTextTableOfContents = memo(
 
     const pluginActiveItem = items.find((item) => item.isActive);
     const cursorActiveItem =
-      cursorPosition === null
-        ? undefined
-        : items.reduce<TableOfContentsAnchor | undefined>(
+      scrollMode === "editor" && cursorPosition !== null
+        ? items.reduce<TableOfContentsAnchor | undefined>(
             (activeItem, item) => (item.pos <= cursorPosition ? item : activeItem),
             undefined
-          );
+          )
+        : undefined;
     const activeId =
       manualActiveId ??
-      pluginActiveItem?.id ??
-      (controlledItems ? undefined : fallbackScrollActiveId || undefined) ??
+      (scrollMode === "editor" ? containerActiveId : pluginActiveItem?.id) ??
       cursorActiveItem?.id ??
       items[0]?.id ??
       "";
+    void activeSignature;
 
     return (
       <div

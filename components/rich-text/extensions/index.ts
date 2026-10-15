@@ -5,6 +5,7 @@ export { Indent } from "./indent";
 export { Image } from "./Image";
 export { ImageUpload } from "./ImageUpload";
 export { FileHandler, type FileHandlerOptions } from "./FileHandler";
+export { Heading, HEADING_LEVELS, clampHeadingLevel, type HeadingLevel } from "./heading";
 export { Mathematics } from "./mathematics";
 export { Mention } from "./mention";
 export { Attachment, Audio, Youtube } from "./media";

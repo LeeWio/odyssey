@@ -6,6 +6,7 @@ import {
   DetailsKit,
   Emoji,
   Indent,
+  Heading,
   Image,
   ImageUpload,
   Mathematics,
@@ -21,22 +22,31 @@ import {
 } from ".";
 import { FileHandler } from "./FileHandler";
 import type { TableOfContentsOptions } from "@tiptap/extension-table-of-contents";
-import { TaskItem, TaskList } from "@tiptap/extension-list";
+import { BulletList, ListItem, TaskItem, TaskList } from "@tiptap/extension-list";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { FindAndReplace } from "@tiptap/extension-find-and-replace";
 import { Markdown } from "@tiptap/markdown";
 import StarterKit from "@tiptap/starter-kit";
 
 import { EmojiBase } from "./emoji/emoji-base";
+import { BulletListItemNodeView } from "./bullet-list/bullet-list-item-node-view";
 import { TaskItemNodeView } from "./task-list/task-item-node-view";
-import { ReaderCodeBlock } from "./code-block/code-block-reader";
+
+const HeroUIBulletListItem = ListItem.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(BulletListItemNodeView, {
+      as: "li",
+      className: "flex items-start gap-2 [&_p]:my-0 [&_p]:leading-7",
+    });
+  },
+});
 
 const HeroUITaskItem = TaskItem.extend({
   addNodeView() {
     return ReactNodeViewRenderer(TaskItemNodeView, {
       as: "li",
       // Keep odyssey-task-item for CSS + e2e; HTMLAttributes do not apply to React node views.
-      className: "odyssey-task-item flex items-start gap-2",
+      className: "odyssey-task-item flex items-start gap-2 [&_p]:my-0 [&_p]:leading-7",
     });
   },
 });
@@ -71,6 +81,7 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
   return [
     ...DetailsKit.map((extension) => extension.configure({})),
     (emojiSuggestion ? Emoji : EmojiBase).configure({}),
+    Heading,
     Image.configure({}),
     ImageUpload,
     Audio.configure({}),
@@ -80,6 +91,12 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
     Mathematics.configure({}),
     Mention.configure({}),
     Typography.configure({}),
+    BulletList.configure({
+      HTMLAttributes: {
+        class: "list-none space-y-1 ps-0",
+      },
+    }),
+    HeroUIBulletListItem,
     TaskList.configure({
       HTMLAttributes: {
         class: "odyssey-task-list my-3 list-none space-y-1 pl-0",
@@ -141,7 +158,7 @@ export function createReaderExtensionKit(options: ExtensionKitOptions = {}) {
     ...options,
   });
 
-  return [...extensions, ReaderCodeBlock];
+  return extensions;
 }
 
 /**
@@ -149,5 +166,8 @@ export function createReaderExtensionKit(options: ExtensionKitOptions = {}) {
  * RichTextEditor injects these base extensions itself at runtime.
  */
 export function createConversionExtensions() {
-  return [StarterKit.configure({ heading: { levels: [1, 2, 3] } }), ...createExtensionKit()];
+  return [
+    StarterKit.configure({ bulletList: false, heading: false, listItem: false }),
+    ...createExtensionKit(),
+  ];
 }
