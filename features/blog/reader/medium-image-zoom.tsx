@@ -12,9 +12,16 @@ interface MediumImageZoomProps {
   alt: string;
   className?: string;
   unoptimized?: boolean;
+  enableZoom?: boolean;
 }
 
-export function MediumImageZoom({ src, alt, className, unoptimized }: MediumImageZoomProps) {
+export function MediumImageZoom({
+  src,
+  alt,
+  className,
+  unoptimized,
+  enableZoom = true,
+}: MediumImageZoomProps) {
   const t = useTranslations("Article");
   const [isZoomed, setIsZoomed] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -43,6 +50,19 @@ export function MediumImageZoom({ src, alt, className, unoptimized }: MediumImag
       };
     }
   }, [closeZoom, isZoomed]);
+
+  if (!enableZoom) {
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        width={800}
+        height={450}
+        unoptimized={unoptimized}
+        className={className}
+      />
+    );
+  }
 
   return (
     <>

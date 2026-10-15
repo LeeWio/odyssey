@@ -4,12 +4,17 @@ import { Alert, AlertDialog, Button, Modal, Spinner, toast } from "@heroui/react
 import { Icon } from "@iconify/react";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { Editor } from "@tiptap/react";
+import { Sheet } from "@heroui-pro/react";
+import { useMediaQuery } from "@mantine/hooks";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
+import { getApiErrorMessage } from "@/lib/api/errors";
 import { RichText } from "@/components/rich-text/rich-text";
 import { RichTextForm } from "@/components/rich-text/rich-text-form";
+import { PublishingWorkflow } from "@/components/rich-text/publishing-workflow";
+import { RevisionHistoryDialog } from "@/components/rich-text/revision-history-dialog";
 import { MotionButton } from "@/components/ui";
 import { closeRichText, selectRichTextState } from "@/lib/features";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
@@ -29,7 +34,9 @@ import {
   removeTemporaryMediaAttributes,
 } from "./utils/document-normalizer";
 import {
+  useAutosavePostMutation,
   useCreatePostMutation,
+  useGetAutosaveQuery,
   useGetAdminPostByIdQuery,
   useUpdatePostMutation,
   type PostResponse,
@@ -71,6 +78,12 @@ function serializePostData(data: Partial<PostRequest>): string {
   });
 }
 
+function serializeDocument(content: ProseMirrorNode | ReturnType<typeof normalizeJSONContent>) {
+  return JSON.stringify(
+    normalizeRichTextDocument("toJSON" in content ? content.toJSON() : content)
+  );
+}
+
 function areMediaIssuesEqual(
   currentIssues: ReturnType<typeof getMediaValidationIssues>,
   nextIssues: ReturnType<typeof getMediaValidationIssues>
@@ -89,6 +102,7 @@ export function RichTextModal() {
   const dispatch = useAppDispatch();
 
   const [showForm, setShowForm] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 767px)", false);
   const editorRef = useRef<Editor | null>(null);
   const initialEditorDocumentRef = useRef<ProseMirrorNode | null>(null);
   const initialPostDataRef = useRef(serializePostData(EMPTY_POST_DATA));
@@ -97,7 +111,9 @@ export function RichTextModal() {
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [isDraftRecoveryDialogOpen, setIsDraftRecoveryDialogOpen] = useState(false);
   const [recoveryDraft, setRecoveryDraft] = useState<RichTextDraft | null>(null);
+  const [recoverySource, setRecoverySource] = useState<"browser" | "server" | null>(null);
   const [isEditorReady, setIsEditorReady] = useState(false);
+  const [editorInstanceVersion, setEditorInstanceVersion] = useState(0);
   const [isPostDataReady, setIsPostDataReady] = useState(false);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
   const [mediaIssues, setMediaIssues] = useState(() =>
@@ -107,6 +123,11 @@ export function RichTextModal() {
     activeId: string;
     message: string;
   } | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [autosaveError, setAutosaveError] = useState<string | null>(null);
+  const [isAutosaving, setIsAutosaving] = useState(false);
+  const lastSaveStatusRef = useRef<PostRequest["status"]>("DRAFT");
+  const autosaveSequenceRef = useRef(0);
 
   // Reset showForm when modal opens or activeId changes
   useEffect(() => {
@@ -122,9 +143,11 @@ export function RichTextModal() {
   // API Mutations
   const [createPost, { isLoading: isCreating }] = useCreatePostMutation();
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation();
+  const [autosavePost] = useAutosavePostMutation();
 
   const isPending = isCreating || isUpdating || isCoverUploading;
   const hasContentSchemaError = contentSchemaError?.activeId === activeId;
+  const isExistingPost = Boolean(activeId && !Number.isNaN(Number(activeId)));
 
   const saveDraft = useDebouncedCallback(
     (
@@ -142,6 +165,31 @@ export function RichTextModal() {
     },
     750
   );
+  const saveServerDraft = useDebouncedCallback(
+    async (draftId: string | null, editor: Editor | null, isEnabled: boolean) => {
+      if (!isEnabled || !isExistingPost || !draftId || !editor || editor.isDestroyed) return;
+
+      const content = editor.getJSON();
+      if (hasPendingMediaUploads(content)) return;
+
+      const sequence = ++autosaveSequenceRef.current;
+      setIsAutosaving(true);
+      setAutosaveError(null);
+
+      try {
+        await autosavePost({
+          identifier: draftId,
+          content: content as Record<string, unknown>,
+        }).unwrap();
+        if (sequence === autosaveSequenceRef.current) setIsAutosaving(false);
+      } catch (error) {
+        if (sequence !== autosaveSequenceRef.current) return;
+        setIsAutosaving(false);
+        setAutosaveError(getApiErrorMessage(error, "Server autosave failed. Try again."));
+      }
+    },
+    1200
+  );
   const updateMediaIssues = useDebouncedCallback((editor: Editor) => {
     if (editor.isDestroyed) return;
 
@@ -155,8 +203,14 @@ export function RichTextModal() {
   }, 200);
 
   // Fetch existing post data if activeId is a numeric string (existing ID)
-  const isExistingPost = activeId && !isNaN(Number(activeId));
-  const { data: existingPost, isLoading: isFetching } = useGetAdminPostByIdQuery(Number(activeId), {
+  const {
+    data: existingPost,
+    isLoading: isFetching,
+    refetch: refetchExistingPost,
+  } = useGetAdminPostByIdQuery(Number(activeId), {
+    skip: !isExistingPost || !isOpen,
+  });
+  const { data: serverAutosave } = useGetAutosaveQuery(activeId ?? "", {
     skip: !isExistingPost || !isOpen,
   });
   const existingContentIsEditable = useMemo(() => {
@@ -167,33 +221,63 @@ export function RichTextModal() {
     () => normalizeJSONContent(existingPost?.content),
     [existingPost?.content]
   );
+  const serverAutosaveContent = useMemo(
+    () => (serverAutosave ? parseJSONContent(serverAutosave.content) : null),
+    [serverAutosave]
+  );
 
   useEffect(() => {
     editorRef.current = null;
     initialEditorDocumentRef.current = null;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsEditorReady(false);
+    setEditorInstanceVersion(0);
     setIsPostDataReady(false);
     setIsCoverUploading(false);
     setIsContentDirty(false);
     setIsMetadataDirty(false);
     setIsDraftRecoveryDialogOpen(false);
     setRecoveryDraft(null);
+    setRecoverySource(null);
     setContentSchemaError(null);
+    setSaveError(null);
+    setAutosaveError(null);
+    setIsAutosaving(false);
     setMediaIssues([]);
   }, [activeId, isOpen]);
 
   useEffect(() => {
     if (!isOpen || !activeId || !isPostDataReady || !existingContentIsEditable) return;
 
-    const draft = readRichTextDraft(activeId);
+    const localDraft = readRichTextDraft(activeId);
+    const serverDraft =
+      existingPost &&
+      serverAutosaveContent &&
+      serializeDocument(serverAutosaveContent) !== serializeDocument(editorContent)
+        ? {
+            content: serverAutosaveContent,
+            postData: toPostData(existingPost),
+            savedAt: Date.now(),
+            version: 1 as const,
+          }
+        : null;
+    const draft = localDraft ?? serverDraft;
     const timer = window.setTimeout(() => {
       setRecoveryDraft(draft);
+      setRecoverySource(localDraft ? "browser" : serverDraft ? "server" : null);
       setIsDraftRecoveryDialogOpen(Boolean(draft));
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [activeId, existingContentIsEditable, isOpen, isPostDataReady]);
+  }, [
+    activeId,
+    editorContent,
+    existingContentIsEditable,
+    existingPost,
+    isOpen,
+    isPostDataReady,
+    serverAutosaveContent,
+  ]);
 
   // Initialize form with existing post data
   useEffect(() => {
@@ -220,6 +304,7 @@ export function RichTextModal() {
 
   const handlePostDataChange = (nextPostData: Partial<PostRequest>) => {
     setPostData(nextPostData);
+    setSaveError(null);
     setIsMetadataDirty(serializePostData(nextPostData) !== initialPostDataRef.current);
     saveDraft(
       activeId,
@@ -227,14 +312,20 @@ export function RichTextModal() {
       nextPostData,
       Boolean(isOpen && activeId && isPostDataReady && !hasContentSchemaError)
     );
+    saveServerDraft(
+      activeId,
+      editorRef.current,
+      Boolean(isOpen && activeId && isPostDataReady && !hasContentSchemaError)
+    );
   };
 
   useEffect(() => {
     return () => {
       saveDraft.cancel();
+      saveServerDraft.cancel();
       updateMediaIssues.cancel();
     };
-  }, [activeId, hasContentSchemaError, isOpen, saveDraft, updateMediaIssues]);
+  }, [activeId, hasContentSchemaError, isOpen, saveDraft, saveServerDraft, updateMediaIssues]);
 
   useEffect(() => {
     if (!isOpen || !isDirty) return;
@@ -250,12 +341,17 @@ export function RichTextModal() {
 
   const closeEditor = () => {
     saveDraft.cancel();
+    saveServerDraft.cancel();
     dispatch(closeRichText());
     setShowForm(false);
     setIsDiscardDialogOpen(false);
     setIsDraftRecoveryDialogOpen(false);
     setRecoveryDraft(null);
+    setRecoverySource(null);
     setContentSchemaError(null);
+    setSaveError(null);
+    setAutosaveError(null);
+    setIsAutosaving(false);
   };
 
   const requestClose = () => {
@@ -273,6 +369,7 @@ export function RichTextModal() {
     clearRichTextDraft(activeId);
     setRecoveryDraft(null);
     setIsDraftRecoveryDialogOpen(false);
+    setRecoverySource(null);
   };
 
   const discardChanges = () => {
@@ -304,11 +401,17 @@ export function RichTextModal() {
         : true
     );
     setIsMetadataDirty(serializePostData(restoredPostData) !== initialPostDataRef.current);
+    saveDraft(activeId, editorRef.current, restoredPostData, Boolean(isOpen && activeId));
+    saveServerDraft(activeId, editorRef.current, Boolean(isOpen && activeId && isExistingPost));
     setRecoveryDraft(null);
     setIsDraftRecoveryDialogOpen(false);
+    setRecoverySource(null);
   };
 
   const handleSave = async (statusOverride?: PostRequest["status"]) => {
+    const requestedStatus = statusOverride || postData.status || "DRAFT";
+    lastSaveStatusRef.current = requestedStatus;
+    setSaveError(null);
     if (hasContentSchemaError) {
       toast.danger(
         "This document is incompatible with the current editor schema and cannot be saved."
@@ -356,7 +459,7 @@ export function RichTextModal() {
       slug,
       content: JSON.stringify(normalizeRichTextDocument(removeTemporaryMediaAttributes(content))),
       contentType: "JSON",
-      status: statusOverride || postData.status || "DRAFT",
+      status: requestedStatus,
     };
 
     try {
@@ -365,12 +468,158 @@ export function RichTextModal() {
       } else {
         await createPost(payload).unwrap();
       }
+      saveServerDraft.cancel();
+      setAutosaveError(null);
       clearRichTextDraft(activeId);
       closeEditor();
     } catch (error) {
-      console.error("Save failed", error);
+      setSaveError(getApiErrorMessage(error, "The article could not be saved. Try again."));
     }
   };
+
+  const handleRevisionRestored = async () => {
+    clearRichTextDraft(activeId);
+    saveDraft.cancel();
+    saveServerDraft.cancel();
+    setIsContentDirty(false);
+    setIsMetadataDirty(false);
+    setSaveError(null);
+    setAutosaveError(null);
+    setIsEditorReady(false);
+    setEditorInstanceVersion((version) => version + 1);
+    await refetchExistingPost();
+  };
+
+  const settingsContent = (
+    <>
+      <RichTextForm
+        data={postData}
+        onChange={handlePostDataChange}
+        onUploadStateChange={setIsCoverUploading}
+      />
+
+      {isExistingPost ? (
+        <div className="border-default-200 border-b px-6 py-4 md:px-10 lg:px-16">
+          <RevisionHistoryDialog
+            postId={Number(activeId)}
+            isDisabled={isPending || hasContentSchemaError || isDirty}
+            onRestored={handleRevisionRestored}
+          />
+        </div>
+      ) : null}
+
+      {isExistingPost ? (
+        <div className="px-6 md:px-10 lg:px-16">
+          <PublishingWorkflow
+            postId={Number(activeId)}
+            status={postData.status || "DRAFT"}
+            scheduledAt={existingPost?.scheduledAt ?? undefined}
+            isDisabled={isPending || hasContentSchemaError || isDirty}
+            onStatusChange={(status) => setPostData((current) => ({ ...current, status }))}
+            onCompleted={async () => {
+              await refetchExistingPost();
+            }}
+          />
+        </div>
+      ) : null}
+
+      <div className="p-6 pb-8 md:px-10 lg:px-16">
+        <div className="flex w-full flex-col gap-4">
+          {saveError && (
+            <Alert status="danger">
+              <Alert.Content>
+                <Alert.Title>Save failed</Alert.Title>
+                <Alert.Description>
+                  <span>{saveError}</span>
+                  <Button
+                    className="mt-2"
+                    size="sm"
+                    variant="tertiary"
+                    onPress={() => void handleSave(lastSaveStatusRef.current)}
+                  >
+                    Retry save
+                  </Button>
+                </Alert.Description>
+              </Alert.Content>
+            </Alert>
+          )}
+          {autosaveError && (
+            <Alert status="warning">
+              <Alert.Content>
+                <Alert.Title>Server autosave unavailable</Alert.Title>
+                <Alert.Description>
+                  <span>{autosaveError} Local draft recovery remains available.</span>
+                  <Button
+                    className="mt-2"
+                    size="sm"
+                    variant="tertiary"
+                    onPress={() => saveServerDraft(activeId, editorRef.current, true)}
+                  >
+                    Retry autosave
+                  </Button>
+                </Alert.Description>
+              </Alert.Content>
+            </Alert>
+          )}
+          {mediaIssues.length > 0 && (
+            <Alert status="warning">
+              <Alert.Content>
+                <Alert.Title>Media needs attention</Alert.Title>
+                <Alert.Description>
+                  {mediaIssues.some(
+                    (issue) => issue.code === "pending-upload" || issue.code === "missing-source"
+                  )
+                    ? "Finish, retry, or remove incomplete uploads before saving."
+                    : "Add alternative text to every image before publishing."}
+                </Alert.Description>
+              </Alert.Content>
+            </Alert>
+          )}
+          <div className="flex w-full items-center gap-3">
+            <Button
+              fullWidth
+              variant="secondary"
+              onPress={() => handleSave("DRAFT")}
+              isDisabled={
+                isCoverUploading ||
+                hasContentSchemaError ||
+                mediaIssues.some(
+                  (issue) => issue.code === "pending-upload" || issue.code === "missing-source"
+                )
+              }
+              isPending={isPending}
+            >
+              {({ isPending }) => (
+                <>
+                  {isPending && <Spinner color="current" size="sm" />}
+                  Save Draft
+                </>
+              )}
+            </Button>
+            <Button
+              fullWidth
+              variant="primary"
+              onPress={() => handleSave("PUBLISHED")}
+              isDisabled={isCoverUploading || hasContentSchemaError || mediaIssues.length > 0}
+              isPending={isPending}
+            >
+              {({ isPending }) => (
+                <>
+                  {isPending && <Spinner color="current" size="sm" />}
+                  {postData.status === "PUBLISHED" ? "Update" : "Publish"}
+                </>
+              )}
+            </Button>
+          </div>
+          {isAutosaving ? (
+            <p aria-live="polite" className="text-muted text-xs">
+              Saving a server draft…
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <>
@@ -458,51 +707,63 @@ export function RichTextModal() {
                     <motion.div
                       layout
                       initial={false}
-                      animate={{ width: showForm ? "70%" : "100%" }}
+                      animate={{ width: showForm && !isMobile ? "70%" : "100%" }}
                       transition={{ type: "spring", bounce: 0, duration: 0.5 }}
-                      className="h-full min-w-0 flex-shrink-0"
+                      className="flex h-full min-w-0 flex-shrink-0 flex-col"
                     >
-                      <RichText
-                        key={`${activeId}-${existingPost?.updatedAt || "new"}`}
-                        content={editorContent}
-                        isDisabled={hasContentSchemaError}
-                        showTableOfContents
-                        onReady={(editor) => {
-                          editorRef.current = editor;
-                          initialEditorDocumentRef.current = editor.state.doc;
-                          const content = editor.getJSON();
-                          queueMicrotask(() => {
-                            if (editor.isDestroyed) return;
-                            setIsContentDirty(false);
-                            setMediaIssues(getMediaValidationIssues(content));
-                            setIsEditorReady(true);
-                          });
-                        }}
-                        onContentError={(error) => {
-                          setContentSchemaError({
-                            activeId: activeId || "unknown",
-                            message: error.message,
-                          });
-                        }}
-                        onUpdate={(editor) => {
-                          saveDraft(
-                            activeId,
-                            editor,
-                            postData,
-                            Boolean(isOpen && activeId && isPostDataReady && !hasContentSchemaError)
-                          );
-                          updateMediaIssues(editor);
-
-                          queueMicrotask(() => {
-                            if (editor.isDestroyed) return;
-                            setIsContentDirty(
-                              initialEditorDocumentRef.current
-                                ? !initialEditorDocumentRef.current.eq(editor.state.doc)
-                                : true
+                      <div className="relative min-h-0 flex-1">
+                        <RichText
+                          key={`${activeId}-${existingPost?.updatedAt || "new"}-${editorInstanceVersion}`}
+                          content={editorContent}
+                          isDisabled={hasContentSchemaError}
+                          showTableOfContents
+                          onReady={(editor) => {
+                            editorRef.current = editor;
+                            initialEditorDocumentRef.current = editor.state.doc;
+                            const content = editor.getJSON();
+                            queueMicrotask(() => {
+                              if (editor.isDestroyed) return;
+                              setIsContentDirty(false);
+                              setMediaIssues(getMediaValidationIssues(content));
+                              setIsEditorReady(true);
+                            });
+                          }}
+                          onContentError={(error) => {
+                            setContentSchemaError({
+                              activeId: activeId || "unknown",
+                              message: error.message,
+                            });
+                          }}
+                          onUpdate={(editor) => {
+                            setSaveError(null);
+                            saveDraft(
+                              activeId,
+                              editor,
+                              postData,
+                              Boolean(
+                                isOpen && activeId && isPostDataReady && !hasContentSchemaError
+                              )
                             );
-                          });
-                        }}
-                      />
+                            saveServerDraft(
+                              activeId,
+                              editor,
+                              Boolean(
+                                isOpen && activeId && isPostDataReady && !hasContentSchemaError
+                              )
+                            );
+                            updateMediaIssues(editor);
+
+                            queueMicrotask(() => {
+                              if (editor.isDestroyed) return;
+                              setIsContentDirty(
+                                initialEditorDocumentRef.current
+                                  ? !initialEditorDocumentRef.current.eq(editor.state.doc)
+                                  : true
+                              );
+                            });
+                          }}
+                        />
+                      </div>
                       {hasContentSchemaError && (
                         <div className="bg-background/95 absolute inset-0 z-20 flex items-center justify-center p-8 text-center backdrop-blur-sm">
                           <div className="max-w-lg space-y-3">
@@ -523,83 +784,16 @@ export function RichTextModal() {
                     </motion.div>
 
                     <AnimatePresence initial={false}>
-                      {showForm && (
+                      {showForm && !isMobile && (
                         <motion.div
                           key="settings"
                           initial={{ width: 0, opacity: 0, x: 20 }}
                           animate={{ width: "30%", opacity: 1, x: 0 }}
                           exit={{ width: 0, opacity: 0, x: 20 }}
                           transition={{ type: "spring", bounce: 0, duration: 0.5 }}
-                          className="flex h-full shrink-0 flex-col overflow-hidden backdrop-blur-sm"
+                          className="hidden h-full shrink-0 flex-col overflow-y-auto backdrop-blur-sm md:flex"
                         >
-                          <RichTextForm
-                            data={postData}
-                            onChange={handlePostDataChange}
-                            onUploadStateChange={setIsCoverUploading}
-                          />
-
-                          <div className="min-w-[320px] p-6 pb-8 md:px-10 lg:px-16">
-                            <div className="flex w-full flex-col gap-4">
-                              {mediaIssues.length > 0 && (
-                                <Alert status="warning">
-                                  <Alert.Content>
-                                    <Alert.Title>Media needs attention</Alert.Title>
-                                    <Alert.Description>
-                                      {mediaIssues.some(
-                                        (issue) =>
-                                          issue.code === "pending-upload" ||
-                                          issue.code === "missing-source"
-                                      )
-                                        ? "Finish, retry, or remove incomplete uploads before saving."
-                                        : "Add alternative text to every image before publishing."}
-                                    </Alert.Description>
-                                  </Alert.Content>
-                                </Alert>
-                              )}
-                              <div className="flex w-full items-center gap-3">
-                                <Button
-                                  fullWidth
-                                  variant="secondary"
-                                  onPress={() => handleSave("DRAFT")}
-                                  isDisabled={
-                                    isCoverUploading ||
-                                    hasContentSchemaError ||
-                                    mediaIssues.some(
-                                      (issue) =>
-                                        issue.code === "pending-upload" ||
-                                        issue.code === "missing-source"
-                                    )
-                                  }
-                                  isPending={isPending}
-                                >
-                                  {({ isPending }) => (
-                                    <>
-                                      {isPending && <Spinner color="current" size="sm" />}
-                                      Save Draft
-                                    </>
-                                  )}
-                                </Button>
-                                <Button
-                                  fullWidth
-                                  variant="primary"
-                                  onPress={() => handleSave("PUBLISHED")}
-                                  isDisabled={
-                                    isCoverUploading ||
-                                    hasContentSchemaError ||
-                                    mediaIssues.length > 0
-                                  }
-                                  isPending={isPending}
-                                >
-                                  {({ isPending }) => (
-                                    <>
-                                      {isPending && <Spinner color="current" size="sm" />}
-                                      {postData.status === "PUBLISHED" ? "Update" : "Publish"}
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
+                          {settingsContent}
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -610,6 +804,25 @@ export function RichTextModal() {
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>
+      <Sheet
+        isDetached
+        isDismissable={!isPending}
+        isOpen={showForm && isMobile}
+        placement="right"
+        onOpenChange={setShowForm}
+      >
+        <Sheet.Backdrop variant="blur">
+          <Sheet.Content className="w-[min(100vw,32rem)] max-w-full">
+            <Sheet.Dialog className="min-h-0">
+              <Sheet.CloseTrigger isDisabled={isPending} />
+              <Sheet.Header>
+                <Sheet.Heading>Article settings</Sheet.Heading>
+              </Sheet.Header>
+              <Sheet.Body className="min-h-0 overflow-y-auto p-0">{settingsContent}</Sheet.Body>
+            </Sheet.Dialog>
+          </Sheet.Content>
+        </Sheet.Backdrop>
+      </Sheet>
       <AlertDialog>
         <AlertDialog.Backdrop
           isOpen={isDiscardDialogOpen}
@@ -651,11 +864,13 @@ export function RichTextModal() {
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="text-sm">
-                  A locally saved draft is available from{" "}
-                  {recoveryDraft
+                  A {recoverySource === "server" ? "server autosave" : "locally saved draft"} is
+                  {recoverySource === "server"
+                    ? " available for this article."
+                    : " available from "}
+                  {recoverySource !== "server" && recoveryDraft
                     ? new Date(recoveryDraft.savedAt).toLocaleString()
-                    : "this browser"}
-                  .
+                    : null}
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>

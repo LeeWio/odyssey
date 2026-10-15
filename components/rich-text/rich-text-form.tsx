@@ -244,7 +244,7 @@ export function RichTextForm({ data, onChange, onUploadStateChange }: RichTextFo
     [handleFieldChange, onUploadStateChange]
   );
   return (
-    <div className="flex h-full w-full scrollbar-none flex-col overflow-y-auto">
+    <div className="flex min-h-0 w-full flex-1 scrollbar-none flex-col overflow-y-auto">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Icon icon="gravity-ui:picture" />
@@ -497,8 +497,20 @@ export function RichTextForm({ data, onChange, onUploadStateChange }: RichTextFo
                   Draft
                   <ListBox.ItemIndicator />
                 </ListBox.Item>
+                <ListBox.Item id="PENDING_REVIEW" textValue="Pending review">
+                  Pending review
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+                <ListBox.Item id="SCHEDULED" textValue="Scheduled">
+                  Scheduled
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
                 <ListBox.Item id="PUBLISHED" textValue="Published">
                   Published
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+                <ListBox.Item id="REJECTED" textValue="Rejected">
+                  Rejected
                   <ListBox.ItemIndicator />
                 </ListBox.Item>
                 <ListBox.Item id="ARCHIVED" textValue="Archived">

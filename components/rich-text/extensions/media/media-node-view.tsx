@@ -71,6 +71,13 @@ export function MediaNodeView({ deleteNode, editor, node, updateAttributes }: No
       const queuedUpload = retry ? retryMediaUpload(editor, id) : claimMediaUpload(editor, id);
       if (!queuedUpload) return;
 
+      const validationError = validateMediaFile(queuedUpload.file, queuedUpload.kind);
+      if (validationError) {
+        failMediaUpload(editor, id, validationError);
+        refreshUpload();
+        return;
+      }
+
       const request = uploadFile(queuedUpload.file);
       const activeUpload = { abort: request.abort, id };
       activeUploadRef.current = activeUpload;

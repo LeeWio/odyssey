@@ -2,6 +2,7 @@
 
 import { Surface, Typography } from "@heroui/react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
+import type { MouseEvent } from "react";
 
 import { MediumImageZoom } from "@/features/blog/reader/medium-image-zoom";
 
@@ -41,21 +42,29 @@ export function ImageView({ editor, getPos, node }: NodeViewProps) {
     return null;
   }
 
+  const selectImageNode = () => {
+    const pos = getPos();
+    if (typeof pos === "number") {
+      editor.chain().focus().setNodeSelection(pos).run();
+    }
+  };
+
   return (
     <NodeViewWrapper
       className={`my-8 flex w-full ${IMAGE_ALIGNMENT_CLASS_NAMES[alignment]}`}
       contentEditable={false}
       data-drag-handle
-      onClick={() => {
-        const pos = getPos();
-        if (typeof pos === "number") {
-          editor.commands.setNodeSelection(pos);
+      onMouseDown={(event: MouseEvent) => {
+        if (event.button === 0) {
+          event.preventDefault();
+          selectImageNode();
         }
       }}
+      onClick={selectImageNode}
     >
       <figure className="max-w-full flex-none" style={{ width: `${widthPercent}%` }}>
         <Surface variant="transparent" className="relative overflow-hidden rounded-2xl">
-          <MediumImageZoom alt={alt} className="w-full" src={src} unoptimized />
+          <MediumImageZoom alt={alt} className="w-full" enableZoom={false} src={src} unoptimized />
         </Surface>
         {caption ? (
           <figcaption className="mt-2 text-center">

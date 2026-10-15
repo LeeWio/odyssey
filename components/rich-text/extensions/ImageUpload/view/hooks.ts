@@ -58,6 +58,13 @@ export function useImageUploader({ onUpload }: { onUpload: (url: string) => void
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      abortRef.current?.();
+      abortRef.current = null;
+    };
+  }, []);
+
   return { activeFile, clear, error, loading, retry, upload };
 }
 

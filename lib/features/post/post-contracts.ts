@@ -67,6 +67,7 @@ export const PostResponseSchema = z.object({
   seriesOrder: z.number().nullable(),
   tags: z.array(TagResponseSchema).nullable().default([]),
   publishedAt: z.string().nullable().optional(),
+  scheduledAt: z.string().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
   navigation: PostNavigationSchema.nullable().optional().default(null),
