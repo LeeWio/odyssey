@@ -36,17 +36,23 @@ async function readPage<T>(url: string, schema: z.ZodType<T>) {
   }
 }
 
-export async function getPublicJournalInitialData(): Promise<PublicJournalInitialData> {
+export async function getPublicJournalInitialData({
+  featuredSize = 8,
+  latestSize = 12,
+}: {
+  featuredSize?: number;
+  latestSize?: number;
+} = {}): Promise<PublicJournalInitialData> {
   const origin = apiOrigin();
   if (!origin) return { featured: null, latest: null };
 
   const [featured, latest] = await Promise.all([
     readPage(
-      `${origin}/api/v1/public/blog/posts/featured?page=0&size=8`,
+      `${origin}/api/v1/public/blog/posts/featured?page=0&size=${featuredSize}`,
       pageResultSchema(PostDigestResponseSchema)
     ),
     readPage(
-      `${origin}/api/v1/public/blog/posts/digest?page=0&size=12`,
+      `${origin}/api/v1/public/blog/posts/digest?page=0&size=${latestSize}`,
       pageResultSchema(PostDigestResponseSchema)
     ),
   ]);

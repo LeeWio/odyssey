@@ -11,6 +11,7 @@ export const fontSans = localFont({
       style: "italic",
     },
   ],
+  preload: false,
   variable: "--font-sans",
 });
 
@@ -25,6 +26,7 @@ export const fontMono = localFont({
       style: "italic",
     },
   ],
+  preload: false,
   variable: "--font-mono",
 });
 
@@ -39,15 +41,18 @@ export const fontDisplay = localFont({
       style: "italic",
     },
   ],
+  preload: false,
   variable: "--font-display",
 });
 
 export const fontBrutalismBody = localFont({
   src: "../fonts/Share_Tech_Mono/ShareTechMono-Regular.ttf",
+  preload: false,
   variable: "--font-brutalism-body",
 });
 
 export const fontBrutalismDisplay = localFont({
   src: "../fonts/Anton/Anton-Regular.ttf",
+  preload: false,
   variable: "--font-brutalism-display",
 });

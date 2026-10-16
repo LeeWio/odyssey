@@ -168,3 +168,27 @@ Client Component 只包住需要 state、effect、浏览器 API、事件和动�
 - shader 卡片调度器改为按实例生命周期注册和移除全局 scroll/resize 监听，避免空页面持续调度。
 - 文章阅读进度条按百分比变化更新 React 状态，并复用 glow tween；阅读操作栏只在阈值变化时更新状态。
 - Moments 登录用户的点赞状态改为列表级批量查询，避免每张卡片产生独立请求。
+- 非核心字体关闭全局 preload，避免 Mono、Display 和 Brutalism 字体在公共首屏抢占请求。
+- `/chronicle` 的 featured 和 recent 首屏数据改为服务端提供，客户端跳过重复第一页请求。
+
+## 专题衡量维度
+
+后续性能工作统一按以下四个维度记录，避免只优化单一分数：
+
+### 01. 页面加载性能
+
+关注首屏渲染、Server Component、静态生成、字体预加载、图片优先级、关键 CSS、路由级 JavaScript 体积和 LCP/FCP/TTFB/CLS。
+
+### 02. 运行时性能
+
+关注 React 重渲染、Client Component 边界、长列表、事件处理、滚动采样、动画生命周期、shader/WebGL 和主线程占用。
+
+### 03. 数据与缓存
+
+关注服务端请求、数据库查询边界、请求瀑布、首屏数据前置、缓存时间、tag 失效、预取、重复请求和客户端 cache 生命周期。
+
+### 04. 视觉与交互体验
+
+关注 Core Web Vitals、页面转场、shader 背景、滚动手感、布局稳定性、移动端触控、reduced motion 和错误/慢网络下的连续体验。
+
+当前每个改动至少需要归属其中一个维度，并说明它对请求数、首屏时间、主线程工作或布局稳定性的影响。
