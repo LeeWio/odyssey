@@ -90,7 +90,11 @@ export default function ChroniclePage() {
                   className="grid overflow-hidden p-0 transition-shadow duration-300 hover:shadow-xl lg:grid-cols-[minmax(0,1.3fr)_minmax(16rem,0.7fr)]"
                 >
                   <div className="relative aspect-[16/9] min-h-64 overflow-hidden lg:aspect-auto">
-                    <ArticleCover seed={featuredPost.slug} />
+                    <ArticleCover
+                      animated={false}
+                      presetId={featuredPost.shaderPreset}
+                      seed={featuredPost.slug}
+                    />
                   </div>
                   <Card.Header className="justify-end gap-4 p-6 sm:p-8">
                     <Chip color="accent" size="sm" variant="soft" className="w-fit">

@@ -1,42 +1,34 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { SHADER_BACKGROUND_VARIANTS } from "@/components/background/shader-background";
+import {
+  presetForSeed,
+  resolveArticleShaderPreset,
+} from "@/components/shader-background/article-shader-presets";
 
-import { getAmbientConfig } from "./article-ambient-background";
+describe("ArticleAmbientBackground", () => {
+  it("renders the shader directly on the reading page", () => {
+    const source = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), "article-ambient-background.tsx"),
+      "utf8"
+    );
+    expect(source).toContain("<ShaderBackground");
+    expect(source).not.toContain("ShaderBackgroundView");
+    expect(source).not.toContain("preset.swatch");
+  });
+});
 
-const STATIC_VARIANTS = new Set(["dot-grid", "waves"]);
-
-describe("getAmbientConfig", () => {
-  it("keeps the same ink and mist for the same article", () => {
-    const first = getAmbientConfig("memories-of-grandpa");
-    const second = getAmbientConfig("memories-of-grandpa");
-
-    expect(first.ink).toBe(second.ink);
-    expect(first.mist).toBe(second.mist);
-    expect(first.variant).toBe(second.variant);
+describe("article ambient preset resolution", () => {
+  it("returns the saved catalog preset for the article slug", () => {
+    expect(resolveArticleShaderPreset("mesh-aurora", "memories-of-grandpa").id).toBe("mesh-aurora");
   });
 
-  it("can land on every supported background and keeps animated ones moving", () => {
-    const seen = new Set<string>();
-
-    for (let index = 0; index < 400; index += 1) {
-      const config = getAmbientConfig(`article-${index}`);
-      seen.add(config.variant);
-      if (STATIC_VARIANTS.has(config.variant)) continue;
-      expect("speed" in config && typeof config.speed === "number" && config.speed).toBeGreaterThan(
-        0.15
-      );
-    }
-
-    expect([...seen].sort()).toEqual([...SHADER_BACKGROUND_VARIANTS].sort());
-  });
-
-  it("takes the fade colors from the shader palette", () => {
-    const tone = getAmbientConfig("odyssey-notes");
-
-    expect(tone.ink).toMatch(/^#[0-9a-f]{6}$/);
-    expect(tone.mist).toMatch(/^#[0-9a-f]{6}$/);
-    expect(tone.ink).not.toBe(tone.mist);
-    expect("colors" in tone && Array.isArray(tone.colors) && tone.colors[0]).toBeTruthy();
+  it("uses the same slug default when the article has no saved preset", () => {
+    const expected = presetForSeed("memories-of-grandpa");
+    expect(resolveArticleShaderPreset(undefined, "memories-of-grandpa")).toBe(expected);
+    expect(resolveArticleShaderPreset(null, "memories-of-grandpa")).toBe(expected);
+    expect(resolveArticleShaderPreset("retired-preset", "memories-of-grandpa")).toBe(expected);
   });
 });

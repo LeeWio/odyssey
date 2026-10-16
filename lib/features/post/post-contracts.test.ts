@@ -49,6 +49,14 @@ describe("PostResponseSchema", () => {
     expect(parsed.summary).toBe("");
     expect(parsed.tags).toEqual([]);
     expect(parsed.navigation).toBeNull();
+    expect(parsed.shaderPreset).toBeNull();
+  });
+
+  it("keeps a saved shader preset and treats a blank one as unset", () => {
+    expect(
+      PostResponseSchema.parse({ ...basePost, shaderPreset: "mesh-aurora" }).shaderPreset
+    ).toBe("mesh-aurora");
+    expect(PostResponseSchema.parse({ ...basePost, shaderPreset: "  " }).shaderPreset).toBeNull();
   });
 
   it("preserves explicit null media fields from the API", () => {
@@ -71,6 +79,7 @@ describe("PostDigestResponseSchema", () => {
     expect(parsed.commentsCount).toBe(0);
     expect(parsed.authorName).toBe("Anonymous");
     expect(parsed.coverImage).toBe("");
+    expect(parsed.shaderPreset).toBeNull();
   });
 });
 

@@ -21,6 +21,14 @@ export type PostStatus = z.infer<typeof PostStatusSchema>;
 const PostContentTypeSchema = z.enum(["JSON", "MDX"]);
 export type PostContentType = z.infer<typeof PostContentTypeSchema>;
 
+const shaderPresetSchema = z
+  .string()
+  .nullish()
+  .transform((value) => {
+    const trimmed = value?.trim();
+    return trimmed ? trimmed : null;
+  });
+
 // Series Schema
 export const SeriesResponseSchema = z.object({
   id: z.number(),
@@ -49,6 +57,7 @@ export const PostResponseSchema = z.object({
   title: z.string(),
   slug: z.string(),
   coverImage: z.string().nullable().default(""),
+  shaderPreset: shaderPresetSchema.default(null),
   summary: z.string().nullable().default(""),
   content: z.string().nullable().default(""),
   contentType: PostContentTypeSchema.nullish().transform((value) => value ?? "JSON"),
@@ -79,6 +88,7 @@ export const PostDigestResponseSchema = z.object({
   title: z.string(),
   slug: z.string(),
   coverImage: z.string().nullable().default(""),
+  shaderPreset: shaderPresetSchema.default(null),
   summary: z.string().nullable().default(""),
   authorName: z.string().nullable().default("Anonymous"),
   authorAvatar: z.string().nullable().default(""),

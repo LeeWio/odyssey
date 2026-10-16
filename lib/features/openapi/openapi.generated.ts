@@ -49,6 +49,7 @@ export interface OpenApiComponents {
       title?: string;
       slug?: string;
       coverImage?: string;
+      shaderPreset?: string;
       summary?: string;
       authorName?: string;
       authorAvatar?: string;
@@ -133,6 +134,7 @@ export interface OpenApiComponents {
       title?: string;
       slug?: string;
       coverImage?: string;
+      shaderPreset?: string;
       summary?: string;
       autoSummary?: string;
       content?: string;
@@ -244,6 +246,7 @@ export interface OpenApiComponents {
       title: string;
       slug?: string;
       coverImage?: string;
+      shaderPreset?: string;
       summary?: string;
       content: string;
       contentType?: "JSON" | "MDX";

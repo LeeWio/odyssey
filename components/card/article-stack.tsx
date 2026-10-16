@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 export type ArticleStackItem = {
   id: string;
   href?: string;
+  shaderPreset?: string | null;
   author: string;
   avatarUrl?: string;
   title: string;
@@ -96,7 +97,14 @@ function ArticleCardFace({
           variant="transparent"
           className="relative isolate h-18 w-24 shrink-0 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgb(255_255_255/0.12)] sm:h-20 sm:w-32"
         >
-          {showCover ? <ArticleCover animated={animatedCover} seed={item.id} /> : null}
+          {showCover ? (
+            <ArticleCover
+              animated={animatedCover}
+              presetId={item.shaderPreset}
+              scheduled={false}
+              seed={item.id}
+            />
+          ) : null}
         </Surface>
       </Card.Header>
       <Card.Footer className="flex items-center justify-between gap-3">

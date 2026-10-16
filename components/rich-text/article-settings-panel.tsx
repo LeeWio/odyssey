@@ -17,6 +17,7 @@ export function ArticleSettingsPanel({
   isDisabled,
   isExistingPost,
   isOpen,
+  isWorkflowDisabled,
   isPending,
   mediaWarning,
   onChange,
@@ -33,6 +34,7 @@ export function ArticleSettingsPanel({
   isAutosaving: boolean;
   isDisabled: boolean;
   isExistingPost: boolean;
+  isWorkflowDisabled: boolean;
   isOpen: boolean;
   isPending: boolean;
   mediaWarning: string | null;
@@ -58,6 +60,7 @@ export function ArticleSettingsPanel({
             isAutosaving,
             isDisabled,
             isExistingPost,
+            isWorkflowDisabled,
             isPending,
             mediaWarning,
             onChange,
@@ -83,6 +86,7 @@ function SettingsMotion({
   isDisabled,
   isExistingPost,
   isPending,
+  isWorkflowDisabled,
   mediaWarning,
   onChange,
   onRetryAutosave,
@@ -156,12 +160,12 @@ function SettingsMotion({
             {isExistingPost && postId ? (
               <div className="border-separator mt-4 flex flex-col gap-4 border-t pt-4">
                 <RevisionHistoryDialog
-                  isDisabled={isDisabled}
+                  isDisabled={isWorkflowDisabled}
                   postId={postId}
                   onRestored={() => void onWorkflowCompleted()}
                 />
                 <PublishingWorkflow
-                  isDisabled={isDisabled}
+                  isDisabled={isWorkflowDisabled}
                   postId={postId}
                   scheduledAt={scheduledAt}
                   status={data.status || "DRAFT"}

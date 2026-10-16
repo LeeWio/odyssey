@@ -14,6 +14,7 @@ export interface ArticleCardPost {
   slug?: string | null;
   summary?: string | null;
   coverImage?: string | null;
+  shaderPreset?: string | null;
   authorName?: string | null;
   authorAvatar?: string | null;
   category?: { name?: string | null } | null;
@@ -141,7 +142,7 @@ export function ArticleCard({
             : "relative isolate min-h-56 w-full shrink-0 overflow-hidden rounded-2xl sm:min-h-64 md:min-h-0 md:w-48 lg:w-52"
         }
       >
-        <ArticleCover animated={animatedCover} seed={seed} />
+        <ArticleCover animated={animatedCover} presetId={post.shaderPreset} seed={seed} />
         {post.category?.name ? (
           <Chip className="absolute top-3 left-3" size="sm">
             {post.category.name}

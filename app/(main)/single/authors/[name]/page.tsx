@@ -43,7 +43,7 @@ function EssayRow({ lead = false, post }: { lead?: boolean; post: PostResponse }
   return (
     <ItemCard className="items-start p-3" variant="secondary">
       <ItemCard.Icon className="relative size-20 overflow-hidden rounded-xl">
-        <ArticleCover animated={false} seed={seed} />
+        <ArticleCover animated={false} presetId={post.shaderPreset} seed={seed} />
       </ItemCard.Icon>
       <ItemCard.Content className="gap-1.5">
         <ItemCard.Title

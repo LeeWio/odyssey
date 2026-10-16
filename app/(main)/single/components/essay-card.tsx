@@ -14,6 +14,7 @@ export interface EssayCardPost {
   slug?: string | null;
   summary?: string | null;
   coverImage?: string | null;
+  shaderPreset?: string | null;
   authorName?: string | null;
   category?: { name?: string | null } | null;
   views?: number;
@@ -46,7 +47,7 @@ export function EssayCard({ post }: { post: EssayCardPost }) {
   return (
     <Card className="h-full overflow-hidden">
       <div className="relative isolate aspect-[16/7] w-full overflow-hidden">
-        <ArticleCover animated={false} seed={seed} />
+        <ArticleCover animated={false} presetId={post.shaderPreset} seed={seed} />
       </div>
       <Card.Header>
         <Card.Title className="line-clamp-2 min-w-0 text-base leading-6">

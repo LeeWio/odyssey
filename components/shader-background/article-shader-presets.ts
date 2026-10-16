@@ -238,6 +238,27 @@ export function presetById(id: string | null | undefined): ArticleShaderPreset |
   return PRESET_BY_ID.get(id) ?? null;
 }
 
+function hashSeed(value: string) {
+  return Array.from(value).reduce(
+    (hash, character) => Math.imul(hash ^ character.charCodeAt(0), 16777619),
+    2166136261
+  );
+}
+
+/** Same seed always lands on the same catalog entry. */
+export function presetForSeed(seed: string): ArticleShaderPreset {
+  const index = hashSeed(seed || "article") % ARTICLE_SHADER_PRESETS.length;
+  return ARTICLE_SHADER_PRESETS[index] ?? ARTICLE_SHADER_PRESETS[0];
+}
+
+/** A saved id wins. Unknown and empty ids fall back to the slug default. */
+export function resolveArticleShaderPreset(
+  presetId: string | null | undefined,
+  seed: string
+): ArticleShaderPreset {
+  return presetById(presetId) ?? presetForSeed(seed);
+}
+
 export function presetsInGroup(groupId: ShaderPresetGroupId): ArticleShaderPreset[] {
   const group = SHADER_PRESET_GROUPS.find((item) => item.id === groupId);
   if (!group) return [];

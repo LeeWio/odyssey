@@ -51,6 +51,7 @@ function toPostData(post: PostResponse): Partial<PostRequest> {
     summary: post.summary || "",
     status: post.status,
     coverImage: post.coverImage || "",
+    shaderPreset: post.shaderPreset,
     isFeatured: post.isFeatured,
     categoryId: post.category?.id,
     seriesId: post.series?.id,
@@ -66,6 +67,7 @@ function serializePostData(data: Partial<PostRequest>): string {
     summary: data.summary || "",
     status: data.status || "DRAFT",
     coverImage: data.coverImage || "",
+    shaderPreset: data.shaderPreset || null,
     isFeatured: Boolean(data.isFeatured),
     categoryId: data.categoryId ?? null,
     seriesId: data.seriesId ?? null,
@@ -649,7 +651,8 @@ export function RichTextModal() {
                       autosaveError={autosaveError}
                       data={postData}
                       isAutosaving={isAutosaving}
-                      isDisabled={isPending || hasContentSchemaError || isDirty}
+                      isDisabled={isPending || hasContentSchemaError}
+                      isWorkflowDisabled={isPending || hasContentSchemaError || isDirty}
                       isExistingPost={isExistingPost}
                       isOpen={settingsOpen}
                       isPending={isPending}

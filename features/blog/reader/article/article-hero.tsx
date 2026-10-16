@@ -4,12 +4,7 @@ import { Calendar, Clock } from "@gravity-ui/icons";
 import { Avatar, Chip, Link, Tag, TagGroup, Typography } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
-
-import {
-  ArticleAmbientBackground,
-  getAmbientConfig,
-} from "@/features/blog/reader/article-ambient-background";
+import { ArticleAmbientBackground } from "@/features/blog/reader/article-ambient-background";
 import { type PostResponse } from "@/lib/features/post";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 
@@ -56,12 +51,11 @@ export function ArticleHero({ article }: { article: PostResponse }) {
   const tags = article.tags ?? [];
 
   const publishedLabel = formatDate(publishedAt, locale, t("recentlyPublished"));
-  const ambient = useMemo(() => getAmbientConfig(article.slug), [article.slug]);
 
   return (
     <header className="relative mb-16 h-[100dvh] w-full max-w-none">
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
-        <ArticleAmbientBackground config={ambient} />
+        <ArticleAmbientBackground presetId={article.shaderPreset} slug={article.slug} />
       </div>
 
       <div className="relative z-10 mx-auto flex h-full max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">

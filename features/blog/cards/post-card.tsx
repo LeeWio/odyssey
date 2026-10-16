@@ -16,6 +16,7 @@ interface PostCardProps {
   category: string;
   href: string;
   coverImage?: string;
+  shaderPreset?: string | null;
   className?: string;
   variant?: PostCardVariant;
   gradient?: string; // e.g. "from-purple-500 to-blue-500"
@@ -28,6 +29,7 @@ export const PostCard = ({
   author,
   category,
   href,
+  shaderPreset,
   className,
   variant = "default",
   gradient = "from-zinc-500 to-zinc-800",
@@ -51,14 +53,14 @@ export const PostCard = ({
             gradient
           )}
         >
-          <ArticleCover seed={`${href}:${title}`} />
+          <ArticleCover presetId={shaderPreset} seed={`${href}:${title}`} />
         </div>
       )}
 
       {/* Variant: Default (Existing) */}
       {variant === "default" && (
         <div className="bg-surface-secondary relative isolate aspect-video w-full overflow-hidden">
-          <ArticleCover seed={`${href}:${title}`} />
+          <ArticleCover presetId={shaderPreset} seed={`${href}:${title}`} />
           <div className="absolute top-4 left-4">
             <Chip
               size="sm"

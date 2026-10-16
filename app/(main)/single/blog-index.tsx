@@ -65,6 +65,7 @@ type Story = {
   slug?: string | null;
   summary?: string | null;
   coverImage?: string | null;
+  shaderPreset?: string | null;
   authorName?: string | null;
   authorAvatar?: string | null;
   category?: { name?: string | null } | null;
@@ -140,7 +141,7 @@ function FeatureCard({
       >
         {featured ? (
           <div className="absolute inset-0 lg:relative lg:col-start-1 lg:row-start-1 lg:min-h-[36rem]">
-            <ArticleCover animated={false} seed={seed} />
+            <ArticleCover animated={false} presetId={post.shaderPreset} seed={seed} />
           </div>
         ) : null}
         <div
@@ -176,7 +177,7 @@ function FeatureCard({
         </div>
         {!featured ? (
           <div className="relative isolate aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-md sm:w-32">
-            <ArticleCover animated={false} seed={seed} />
+            <ArticleCover animated={false} presetId={post.shaderPreset} seed={seed} />
           </div>
         ) : null}
       </Link>

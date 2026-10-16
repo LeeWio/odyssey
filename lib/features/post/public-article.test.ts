@@ -8,6 +8,7 @@ const article = {
   title: "Cached essay",
   slug: "cached essay",
   coverImage: null,
+  shaderPreset: "mesh-aurora",
   summary: "A public summary",
   content: "{}",
   contentType: "JSON",
