@@ -1,27 +1,8 @@
-import { PostResponseSchema, type PostResponse } from "@/lib/features/post";
+import { notFound } from "next/navigation";
+
+import { getPublicArticle } from "@/lib/features/post/public-article";
 
 import ArticlePageClient from "./article-page-client";
-
-async function getInitialArticle(slug: string): Promise<PostResponse | null> {
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "");
-  if (!apiBase) return null;
-
-  try {
-    const response = await fetch(
-      `${apiBase}/api/v1/public/blog/posts/${encodeURIComponent(slug)}`,
-      { next: { revalidate: 60 } }
-    );
-    if (!response.ok) return null;
-
-    const payload: unknown = await response.json();
-    if (!payload || typeof payload !== "object" || !("data" in payload)) return null;
-
-    const parsed = PostResponseSchema.safeParse(payload.data);
-    return parsed.success ? parsed.data : null;
-  } catch {
-    return null;
-  }
-}
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -29,7 +10,12 @@ interface BlogPostPageProps {
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const initialArticle = await getInitialArticle(slug);
+  const result = await getPublicArticle(slug);
 
-  return <ArticlePageClient initialArticle={initialArticle} slug={slug} />;
+  if (result.status === "not-found") notFound();
+  if (result.status === "error") {
+    throw new Error("Article request failed");
+  }
+
+  return <ArticlePageClient initialArticle={result.article} slug={slug} />;
 }

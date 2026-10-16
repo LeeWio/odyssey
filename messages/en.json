@@ -258,6 +258,7 @@
     "loadFailedTitle": "This article could not be loaded",
     "loadFailedDescription": "Try loading the article again in a moment.",
     "tryAgain": "Try again",
+    "unsupportedContent": "This article is unavailable because its content is not a supported document.",
     "controls": "Article controls",
     "back": "Back",
     "like": "Like article",

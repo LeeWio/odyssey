@@ -1,20 +1,16 @@
 "use client";
 
-import { Alert, AlertDialog, Button, Modal, Spinner, toast } from "@heroui/react";
+import { AlertDialog, Button, Modal, Spinner, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { Editor } from "@tiptap/react";
-import { Sheet } from "@heroui-pro/react";
-import { useMediaQuery } from "@mantine/hooks";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 import { getApiErrorMessage } from "@/lib/api/errors";
 import { RichText } from "@/components/rich-text/rich-text";
-import { RichTextForm } from "@/components/rich-text/rich-text-form";
-import { PublishingWorkflow } from "@/components/rich-text/publishing-workflow";
-import { RevisionHistoryDialog } from "@/components/rich-text/revision-history-dialog";
+import { ArticleSettingsPanel } from "@/components/rich-text/article-settings-panel";
 import { MotionButton } from "@/components/ui";
 import { closeRichText, selectRichTextState } from "@/lib/features";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
@@ -101,8 +97,7 @@ export function RichTextModal() {
   const { isOpen, activeId } = useAppSelector(selectRichTextState);
   const dispatch = useAppDispatch();
 
-  const [showForm, setShowForm] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 767px)", false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const editorRef = useRef<Editor | null>(null);
   const initialEditorDocumentRef = useRef<ProseMirrorNode | null>(null);
   const initialPostDataRef = useRef(serializePostData(EMPTY_POST_DATA));
@@ -129,11 +124,10 @@ export function RichTextModal() {
   const lastSaveStatusRef = useRef<PostRequest["status"]>("DRAFT");
   const autosaveSequenceRef = useRef(0);
 
-  // Reset showForm when modal opens or activeId changes
   useEffect(() => {
     if (isOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowForm(false);
+      setSettingsOpen(false);
     }
   }, [isOpen, activeId]);
 
@@ -343,7 +337,7 @@ export function RichTextModal() {
     saveDraft.cancel();
     saveServerDraft.cancel();
     dispatch(closeRichText());
-    setShowForm(false);
+    setSettingsOpen(false);
     setIsDiscardDialogOpen(false);
     setIsDraftRecoveryDialogOpen(false);
     setRecoveryDraft(null);
@@ -490,137 +484,6 @@ export function RichTextModal() {
     await refetchExistingPost();
   };
 
-  const settingsContent = (
-    <>
-      <RichTextForm
-        data={postData}
-        onChange={handlePostDataChange}
-        onUploadStateChange={setIsCoverUploading}
-      />
-
-      {isExistingPost ? (
-        <div className="border-default-200 border-b px-6 py-4 md:px-10 lg:px-16">
-          <RevisionHistoryDialog
-            postId={Number(activeId)}
-            isDisabled={isPending || hasContentSchemaError || isDirty}
-            onRestored={handleRevisionRestored}
-          />
-        </div>
-      ) : null}
-
-      {isExistingPost ? (
-        <div className="px-6 md:px-10 lg:px-16">
-          <PublishingWorkflow
-            postId={Number(activeId)}
-            status={postData.status || "DRAFT"}
-            scheduledAt={existingPost?.scheduledAt ?? undefined}
-            isDisabled={isPending || hasContentSchemaError || isDirty}
-            onStatusChange={(status) => setPostData((current) => ({ ...current, status }))}
-            onCompleted={async () => {
-              await refetchExistingPost();
-            }}
-          />
-        </div>
-      ) : null}
-
-      <div className="p-6 pb-8 md:px-10 lg:px-16">
-        <div className="flex w-full flex-col gap-4">
-          {saveError && (
-            <Alert status="danger">
-              <Alert.Content>
-                <Alert.Title>Save failed</Alert.Title>
-                <Alert.Description>
-                  <span>{saveError}</span>
-                  <Button
-                    className="mt-2"
-                    size="sm"
-                    variant="tertiary"
-                    onPress={() => void handleSave(lastSaveStatusRef.current)}
-                  >
-                    Retry save
-                  </Button>
-                </Alert.Description>
-              </Alert.Content>
-            </Alert>
-          )}
-          {autosaveError && (
-            <Alert status="warning">
-              <Alert.Content>
-                <Alert.Title>Server autosave unavailable</Alert.Title>
-                <Alert.Description>
-                  <span>{autosaveError} Local draft recovery remains available.</span>
-                  <Button
-                    className="mt-2"
-                    size="sm"
-                    variant="tertiary"
-                    onPress={() => saveServerDraft(activeId, editorRef.current, true)}
-                  >
-                    Retry autosave
-                  </Button>
-                </Alert.Description>
-              </Alert.Content>
-            </Alert>
-          )}
-          {mediaIssues.length > 0 && (
-            <Alert status="warning">
-              <Alert.Content>
-                <Alert.Title>Media needs attention</Alert.Title>
-                <Alert.Description>
-                  {mediaIssues.some(
-                    (issue) => issue.code === "pending-upload" || issue.code === "missing-source"
-                  )
-                    ? "Finish, retry, or remove incomplete uploads before saving."
-                    : "Add alternative text to every image before publishing."}
-                </Alert.Description>
-              </Alert.Content>
-            </Alert>
-          )}
-          <div className="flex w-full items-center gap-3">
-            <Button
-              fullWidth
-              variant="secondary"
-              onPress={() => handleSave("DRAFT")}
-              isDisabled={
-                isCoverUploading ||
-                hasContentSchemaError ||
-                mediaIssues.some(
-                  (issue) => issue.code === "pending-upload" || issue.code === "missing-source"
-                )
-              }
-              isPending={isPending}
-            >
-              {({ isPending }) => (
-                <>
-                  {isPending && <Spinner color="current" size="sm" />}
-                  Save Draft
-                </>
-              )}
-            </Button>
-            <Button
-              fullWidth
-              variant="primary"
-              onPress={() => handleSave("PUBLISHED")}
-              isDisabled={isCoverUploading || hasContentSchemaError || mediaIssues.length > 0}
-              isPending={isPending}
-            >
-              {({ isPending }) => (
-                <>
-                  {isPending && <Spinner color="current" size="sm" />}
-                  {postData.status === "PUBLISHED" ? "Update" : "Publish"}
-                </>
-              )}
-            </Button>
-          </div>
-          {isAutosaving ? (
-            <p aria-live="polite" className="text-muted text-xs">
-              Saving a server draft…
-            </p>
-          ) : null}
-        </div>
-      </div>
-    </>
-  );
-
   return (
     <>
       <Modal key={activeId}>
@@ -636,6 +499,7 @@ export function RichTextModal() {
             <Modal.Dialog
               aria-label={isExistingPost ? "Edit article" : "Create article"}
               className="relative flex h-full w-full flex-col overflow-hidden"
+              data-lenis-prevent
             >
               {/* Toggle Button */}
               <MotionButton
@@ -643,9 +507,8 @@ export function RichTextModal() {
                 variant="secondary"
                 size="sm"
                 className="absolute top-4 right-4 z-50 overflow-hidden backdrop-blur-xl"
-                aria-label={showForm ? "Back to editor" : "Open settings"}
-                isDisabled={isCoverUploading}
-                onPress={() => setShowForm((prev) => !prev)}
+                aria-label={settingsOpen ? "Back to editor" : "Open settings"}
+                onPress={() => setSettingsOpen((open) => !open)}
                 whileHover={{
                   scale: 1.06,
                 }}
@@ -660,7 +523,7 @@ export function RichTextModal() {
               >
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
-                    key={showForm ? "back" : "settings"}
+                    key={settingsOpen ? "back" : "settings"}
                     initial={{
                       opacity: 0,
                       scale: 0.4,
@@ -685,14 +548,14 @@ export function RichTextModal() {
                     }}
                   >
                     <Icon
-                      icon={showForm ? "gravity-ui:arrow-left" : "gravity-ui:sliders"}
+                      icon={settingsOpen ? "gravity-ui:arrow-left" : "gravity-ui:sliders"}
                       className="size-4"
                     />
                   </motion.div>
                 </AnimatePresence>
               </MotionButton>
 
-              <Modal.Body className="relative min-h-0 flex-1 overflow-hidden p-0">
+              <Modal.Body className="relative min-h-0 flex-1 overflow-hidden">
                 {isFetching ? (
                   <div className="flex h-full w-full items-center justify-center">
                     <Spinner size="lg" />
@@ -707,9 +570,9 @@ export function RichTextModal() {
                     <motion.div
                       layout
                       initial={false}
-                      animate={{ width: showForm && !isMobile ? "70%" : "100%" }}
+                      animate={{ width: "100%" }}
                       transition={{ type: "spring", bounce: 0, duration: 0.5 }}
-                      className="flex h-full min-w-0 flex-shrink-0 flex-col"
+                      className={`flex h-full min-w-0 flex-shrink-0 flex-col ${settingsOpen ? "invisible" : ""}`}
                     >
                       <div className="relative min-h-0 flex-1">
                         <RichText
@@ -782,21 +645,33 @@ export function RichTextModal() {
                         </div>
                       )}
                     </motion.div>
-
-                    <AnimatePresence initial={false}>
-                      {showForm && !isMobile && (
-                        <motion.div
-                          key="settings"
-                          initial={{ width: 0, opacity: 0, x: 20 }}
-                          animate={{ width: "30%", opacity: 1, x: 0 }}
-                          exit={{ width: 0, opacity: 0, x: 20 }}
-                          transition={{ type: "spring", bounce: 0, duration: 0.5 }}
-                          className="hidden h-full shrink-0 flex-col overflow-y-auto backdrop-blur-sm md:flex"
-                        >
-                          {settingsContent}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    <ArticleSettingsPanel
+                      autosaveError={autosaveError}
+                      data={postData}
+                      isAutosaving={isAutosaving}
+                      isDisabled={isPending || hasContentSchemaError || isDirty}
+                      isExistingPost={isExistingPost}
+                      isOpen={settingsOpen}
+                      isPending={isPending}
+                      mediaWarning={
+                        mediaIssues.length === 0
+                          ? null
+                          : mediaIssues.some(
+                                (issue) =>
+                                  issue.code === "pending-upload" || issue.code === "missing-source"
+                              )
+                            ? "Finish, retry, or remove incomplete uploads before saving."
+                            : "Add alternative text to every image before publishing."
+                      }
+                      postId={isExistingPost ? Number(activeId) : undefined}
+                      saveError={saveError}
+                      scheduledAt={existingPost?.scheduledAt ?? undefined}
+                      onChange={handlePostDataChange}
+                      onRetryAutosave={() => saveServerDraft(activeId, editorRef.current, true)}
+                      onRetrySave={() => void handleSave(lastSaveStatusRef.current)}
+                      onSave={(status) => void handleSave(status)}
+                      onWorkflowCompleted={handleRevisionRestored}
+                    />
                   </div>
                 )}
               </Modal.Body>
@@ -804,25 +679,6 @@ export function RichTextModal() {
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>
-      <Sheet
-        isDetached
-        isDismissable={!isPending}
-        isOpen={showForm && isMobile}
-        placement="right"
-        onOpenChange={setShowForm}
-      >
-        <Sheet.Backdrop variant="blur">
-          <Sheet.Content className="w-[min(100vw,32rem)] max-w-full">
-            <Sheet.Dialog className="min-h-0">
-              <Sheet.CloseTrigger isDisabled={isPending} />
-              <Sheet.Header>
-                <Sheet.Heading>Article settings</Sheet.Heading>
-              </Sheet.Header>
-              <Sheet.Body className="min-h-0 overflow-y-auto p-0">{settingsContent}</Sheet.Body>
-            </Sheet.Dialog>
-          </Sheet.Content>
-        </Sheet.Backdrop>
-      </Sheet>
       <AlertDialog>
         <AlertDialog.Backdrop
           isOpen={isDiscardDialogOpen}

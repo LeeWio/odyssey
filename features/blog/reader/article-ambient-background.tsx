@@ -3,30 +3,13 @@
 import { useMemo } from "react";
 
 import {
+  SHADER_BACKGROUND_VARIANTS,
   ShaderBackground,
   type ShaderBackgroundProps,
+  type ShaderBackgroundVariant,
 } from "@/components/background/shader-background";
 
-type ArticleShaderPreset =
-  | "mesh"
-  | "grain"
-  | "grain-sunset"
-  | "grain-pastel"
-  | "mesh-aurora"
-  | "mesh-citrus"
-  | "warp"
-  | "voronoi";
-
-const PRESETS: ArticleShaderPreset[] = [
-  "mesh",
-  "grain",
-  "grain-sunset",
-  "grain-pastel",
-  "mesh-aurora",
-  "mesh-citrus",
-  "warp",
-  "voronoi",
-];
+const MOTION_SPEED = [0.16, 0.3] as const;
 
 const PALETTES = {
   blue: ["#0b1220", "#16243a", "#31506a", "#5f7180"],
@@ -69,106 +52,352 @@ function pick<T>(random: () => number, values: readonly T[]) {
   return values[Math.floor(random() * values.length)];
 }
 
-function getAmbientConfig(seed: string): ShaderBackgroundProps {
-  const random = seededRandom(hashSeed(seed));
-  const preset = pick(random, PRESETS);
+export type AmbientTone = {
+  ink: string;
+  mist: string;
+};
 
-  switch (preset) {
-    case "grain":
+function ambientTone(colors: readonly string[], fallbackInk: string): AmbientTone {
+  return {
+    ink: colors[0] ?? fallbackInk,
+    mist: colors[colors.length - 1] ?? colors[0] ?? fallbackInk,
+  };
+}
+
+function motion(random: () => number) {
+  return range(random, MOTION_SPEED[0], MOTION_SPEED[1]);
+}
+
+function colorsOf(random: () => number, count = 4) {
+  const palette = pick(random, Object.values(PALETTES));
+  return [...palette].slice(0, count);
+}
+
+/**
+ * The seed fixes the variant, palette, and motion. The same article therefore
+ * keeps one background across visits. Variants without a time axis stay still.
+ */
+export function getAmbientConfig(seed: string): ShaderBackgroundProps & AmbientTone {
+  const random = seededRandom(hashSeed(seed));
+  const variant = pick(random, SHADER_BACKGROUND_VARIANTS);
+
+  return configForVariant(variant, random);
+}
+
+function configForVariant(
+  variant: ShaderBackgroundVariant,
+  random: () => number
+): ShaderBackgroundProps & AmbientTone {
+  const colors = colorsOf(random);
+
+  switch (variant) {
+    case "mesh-gradient":
       return {
-        variant: "grain-gradient",
-        colors: [...pick(random, [PALETTES.blue, PALETTES.teal, PALETTES.graphite])],
-        intensity: range(random, 0.08, 0.18),
-        noise: range(random, 0.06, 0.14),
-        shape: pick(random, ["wave", "blob", "ripple"]),
-        softness: range(random, 0.62, 0.82),
-        speed: range(random, 0.06, 0.12),
-      };
-    case "grain-sunset":
-      return {
-        variant: "grain-gradient",
-        colors: [...PALETTES.sunset],
-        intensity: range(random, 0.1, 0.2),
-        noise: range(random, 0.07, 0.15),
-        shape: pick(random, ["wave", "blob", "sphere"]),
-        softness: range(random, 0.58, 0.78),
-        speed: range(random, 0.055, 0.105),
-      };
-    case "grain-pastel":
-      return {
-        variant: "grain-gradient",
-        colors: [...PALETTES.pastel],
-        intensity: range(random, 0.06, 0.14),
-        noise: range(random, 0.05, 0.12),
-        shape: pick(random, ["dots", "truchet", "blob"]),
-        softness: range(random, 0.72, 0.92),
-        speed: range(random, 0.045, 0.09),
-      };
-    case "mesh-aurora":
-      return {
-        variant: "mesh-gradient",
-        colors: [...PALETTES.aurora],
-        distortion: range(random, 0.24, 0.42),
-        grainMixer: range(random, 0.025, 0.07),
+        ...ambientTone(colors, "#0b1220"),
+        variant,
+        colors,
+        distortion: range(random, 0.35, 0.7),
+        grainMixer: range(random, 0.02, 0.08),
         grainOverlay: range(random, 0.01, 0.04),
-        rotation: integer(random, 0, 359),
-        speed: range(random, 0.07, 0.14),
-        swirl: range(random, 0.12, 0.28),
+        speed: motion(random),
+        swirl: range(random, 0.25, 0.6),
       };
-    case "mesh-citrus":
+    case "grain-gradient":
       return {
-        variant: "mesh-gradient",
-        colors: [...PALETTES.citrus],
-        distortion: range(random, 0.2, 0.36),
-        grainMixer: range(random, 0.02, 0.06),
-        grainOverlay: range(random, 0.01, 0.035),
-        rotation: integer(random, 0, 359),
-        speed: range(random, 0.08, 0.16),
-        swirl: range(random, 0.1, 0.24),
+        ...ambientTone(colors, "#0b1220"),
+        variant,
+        colorBack: colors[0],
+        colors,
+        intensity: range(random, 0.25, 0.5),
+        noise: range(random, 0.06, 0.16),
+        shape: pick(random, ["wave", "ripple", "blob", "sphere"]),
+        softness: range(random, 0.55, 0.85),
+        speed: motion(random),
+      };
+    case "dot-grid":
+      return {
+        ...ambientTone(colors, "#101417"),
+        variant,
+        colorBack: colors[0],
+        colorFill: colors[2] ?? colors[1],
+        colorStroke: colors[3] ?? colors[1],
+        gapX: range(random, 18, 42),
+        gapY: range(random, 18, 42),
+        opacityRange: range(random, 0.1, 0.4),
+        shape: pick(random, ["circle", "diamond", "square"]),
+        size: range(random, 2, 6),
+        sizeRange: range(random, 0.1, 0.45),
+        strokeWidth: range(random, 0, 1.5),
+      };
+    case "dot-orbit":
+      return {
+        ...ambientTone(colors, "#101417"),
+        variant,
+        colorBack: colors[0],
+        colors,
+        size: range(random, 0.25, 0.55),
+        sizeRange: range(random, 0.15, 0.5),
+        speed: motion(random),
+        spreading: range(random, 0.2, 0.6),
+        stepsPerColor: integer(random, 1, 2),
       };
     case "warp":
       return {
-        variant: "warp",
-        colors: [...pick(random, [PALETTES.sunset, PALETTES.violet, PALETTES.teal])],
-        distortion: range(random, 0.12, 0.26),
-        proportion: range(random, 0.42, 0.58),
-        shape: pick(random, ["stripes", "edge", "checks"]),
-        shapeScale: range(random, 0.3, 0.62),
-        softness: range(random, 0.68, 0.88),
-        swirl: range(random, 0.08, 0.2),
+        ...ambientTone(colors, "#1c1314"),
+        variant,
+        colors,
+        distortion: range(random, 0.2, 0.5),
+        proportion: range(random, 0.4, 0.6),
+        shape: pick(random, ["stripes", "edge"]),
+        shapeScale: range(random, 0.3, 0.6),
+        softness: range(random, 0.6, 0.88),
+        speed: motion(random),
+        swirl: range(random, 0.15, 0.4),
         swirlIterations: integer(random, 2, 5),
-        speed: range(random, 0.05, 0.11),
+      };
+    case "waves":
+      return {
+        ...ambientTone(colors, "#0b1c1e"),
+        variant,
+        amplitude: range(random, 0.4, 0.8),
+        colorBack: colors[0],
+        colorFront: colors[2] ?? colors[1],
+        frequency: range(random, 0.6, 1.3),
+        proportion: range(random, 0.4, 0.6),
+        shape: range(random, 1, 2.6),
+        softness: range(random, 0.5, 0.85),
+        spacing: range(random, 0.3, 0.8),
+      };
+    case "water":
+      return {
+        ...ambientTone(colors, "#0b1220"),
+        variant,
+        caustic: range(random, 0.3, 0.6),
+        colorBack: colors[0],
+        colorHighlight: colors[2] ?? colors[1],
+        edges: range(random, 0.1, 0.35),
+        highlights: range(random, 0.2, 0.5),
+        layering: range(random, 0.3, 0.7),
+        scale: range(random, 0.9, 1.3),
+        size: range(random, 0.8, 1.6),
+        speed: motion(random),
+        waves: range(random, 0.3, 0.7),
       };
     case "voronoi":
       return {
-        variant: "voronoi",
-        colorGap: pick(random, ["#11181a", "#151b1d", "#201a17"]),
-        colorGlow: pick(random, ["#6d827f", "#806d78", "#8b735e"]),
-        colors: [...pick(random, [PALETTES.blue, PALETTES.aurora, PALETTES.sunset])],
-        distortion: range(random, 0.08, 0.2),
-        gap: range(random, 0.008, 0.022),
-        glow: range(random, 0.04, 0.12),
-        scale: range(random, 0.76, 1.08),
-        speed: range(random, 0.045, 0.095),
+        ink: colors[0],
+        mist: colors[colors.length - 1] ?? colors[0],
+        variant,
+        colorGap: colors[0],
+        colorGlow: colors[2] ?? colors[1],
+        colors,
+        distortion: range(random, 0.1, 0.3),
+        gap: range(random, 0.008, 0.03),
+        glow: range(random, 0.05, 0.2),
+        speed: motion(random),
         stepsPerColor: integer(random, 1, 2),
       };
-    case "mesh":
-    default:
+    case "swirl":
       return {
-        variant: "mesh-gradient",
-        colors: [...pick(random, [PALETTES.blue, PALETTES.teal, PALETTES.graphite])],
-        distortion: range(random, 0.22, 0.44),
-        grainMixer: range(random, 0.025, 0.075),
-        grainOverlay: range(random, 0.01, 0.04),
-        rotation: integer(random, 0, 359),
-        speed: range(random, 0.08, 0.16),
-        swirl: range(random, 0.12, 0.28),
+        ...ambientTone(colors, "#1a1721"),
+        variant,
+        bandCount: integer(random, 4, 8),
+        center: range(random, 0.08, 0.3),
+        colorBack: colors[0],
+        colors,
+        noise: range(random, 0.15, 0.4),
+        noiseFrequency: range(random, 0.2, 0.55),
+        proportion: range(random, 0.4, 0.6),
+        softness: range(random, 0.55, 0.85),
+        speed: motion(random),
+        twist: range(random, 0.4, 0.8),
       };
+    case "smoke-ring":
+      return {
+        ...ambientTone(colors, "#101b1d"),
+        variant,
+        colorBack: colors[0],
+        colors,
+        innerShape: range(random, 0.4, 1.4),
+        noiseIterations: integer(random, 2, 5),
+        noiseScale: range(random, 0.4, 1),
+        radius: range(random, 0.35, 0.7),
+        speed: motion(random),
+        thickness: range(random, 0.2, 0.55),
+      };
+    case "static-radial-gradient":
+      return {
+        ...ambientTone(colors, "#171a26"),
+        variant,
+        colorBack: colors[0],
+        colors,
+        distortion: range(random, 0.15, 0.45),
+        distortionFreq: range(random, 0.4, 1.2),
+        distortionShift: range(random, 0, 1),
+        falloff: range(random, 0.4, 0.8),
+        focalAngle: integer(random, 0, 359),
+        focalDistance: range(random, 0.1, 0.6),
+        grainMixer: range(random, 0.02, 0.08),
+        grainOverlay: range(random, 0.01, 0.04),
+        mixing: range(random, 0.35, 0.7),
+        radius: range(random, 0.8, 1.6),
+        speed: motion(random),
+      };
+    case "neuro-noise":
+      return {
+        ...ambientTone(colors, "#101417"),
+        variant,
+        brightness: range(random, 0.35, 0.7),
+        colorBack: colors[0],
+        colorFront: colors[3] ?? colors[2],
+        colorMid: colors[2] ?? colors[1],
+        contrast: range(random, 0.3, 0.65),
+        speed: motion(random),
+      };
+    case "metaballs":
+      return {
+        ...ambientTone(colors, "#1c1314"),
+        variant,
+        colorBack: colors[0],
+        colors: colors.slice(1),
+        count: integer(random, 6, 12),
+        scale: range(random, 1, 1.5),
+        size: range(random, 0.4, 0.72),
+        speed: motion(random),
+      };
+    case "god-rays":
+      return {
+        ...ambientTone(colors, "#101b1d"),
+        variant,
+        bloom: range(random, 0.2, 0.5),
+        colorBack: colors[0],
+        colorBloom: colors[2] ?? colors[1],
+        colors,
+        density: range(random, 0.3, 0.7),
+        intensity: range(random, 0.35, 0.7),
+        midIntensity: range(random, 0.2, 0.5),
+        midSize: range(random, 0.2, 0.5),
+        speed: motion(random),
+        spotty: range(random, 0.1, 0.4),
+      };
+    case "spiral":
+      return {
+        ...ambientTone(colors, "#1a1721"),
+        variant,
+        colorBack: colors[0],
+        colorFront: colors[2] ?? colors[1],
+        density: range(random, 0.3, 0.7),
+        distortion: range(random, 0.15, 0.45),
+        noise: range(random, 0.1, 0.35),
+        noiseFrequency: range(random, 0.2, 0.6),
+        softness: range(random, 0.4, 0.8),
+        speed: motion(random),
+        strokeCap: range(random, 0, 1),
+        strokeTaper: range(random, 0, 0.6),
+        strokeWidth: range(random, 0.15, 0.45),
+      };
+    case "dithering":
+      return {
+        ...ambientTone(colors, "#101417"),
+        variant,
+        colorBack: colors[0],
+        colorFront: colors[2] ?? colors[1],
+        shape: pick(random, ["simplex", "warp", "wave", "swirl", "ripple"]),
+        size: range(random, 2, 5),
+        speed: motion(random),
+        type: pick(random, ["random", "4x4", "8x8"]),
+      };
+    case "pulsing-border":
+      return {
+        ...ambientTone(colors, "#171a26"),
+        variant,
+        aspectRatio: "auto",
+        bloom: range(random, 0.2, 0.55),
+        colorBack: colors[0],
+        colors,
+        intensity: range(random, 0.3, 0.65),
+        margin: range(random, 0.08, 0.2),
+        pulse: range(random, 0.2, 0.55),
+        roundness: range(random, 0.2, 0.7),
+        smoke: range(random, 0.15, 0.45),
+        smokeSize: range(random, 0.2, 0.5),
+        softness: range(random, 0.45, 0.8),
+        speed: motion(random),
+        spotSize: range(random, 0.2, 0.5),
+        spots: integer(random, 2, 4),
+        thickness: range(random, 0.15, 0.4),
+      };
+    case "color-panels":
+      return {
+        ...ambientTone(colors, "#101417"),
+        variant,
+        angle1: range(random, -0.4, 0.4),
+        angle2: range(random, -0.4, 0.4),
+        blur: range(random, 0.05, 0.3),
+        colorBack: colors[0],
+        colors,
+        density: range(random, 0.6, 2),
+        fadeIn: range(random, 0.1, 0.4),
+        fadeOut: range(random, 0.1, 0.4),
+        gradient: range(random, 0.2, 0.7),
+        length: range(random, 0.6, 1.2),
+        speed: motion(random),
+      };
+    case "static-mesh-gradient":
+      return {
+        ...ambientTone(colors, "#0b1220"),
+        variant,
+        colors,
+        grainMixer: range(random, 0.02, 0.08),
+        grainOverlay: range(random, 0.01, 0.04),
+        mixing: range(random, 0.35, 0.7),
+        positions: integer(random, 1, 12),
+        speed: motion(random),
+        waveX: range(random, 0.2, 0.6),
+        waveXShift: range(random, 0, 1),
+        waveY: range(random, 0.2, 0.6),
+        waveYShift: range(random, 0, 1),
+      };
+    case "simplex-noise":
+      return {
+        ...ambientTone(colors, "#101b1d"),
+        variant,
+        colors,
+        softness: range(random, 0.45, 0.85),
+        speed: motion(random),
+        stepsPerColor: integer(random, 1, 3),
+      };
+    case "perlin-noise":
+      return {
+        ...ambientTone(colors, "#101417"),
+        variant,
+        colorBack: colors[0],
+        colorFront: colors[2] ?? colors[1],
+        lacunarity: range(random, 1.4, 2.2),
+        octaveCount: integer(random, 3, 6),
+        persistence: range(random, 0.4, 0.75),
+        proportion: range(random, 0.4, 0.6),
+        softness: range(random, 0.4, 0.8),
+        speed: motion(random),
+      };
+    default: {
+      const unreachable: never = variant;
+      return unreachable;
+    }
   }
 }
 
-export function ArticleAmbientBackground({ seed }: { seed: string }) {
-  const config = useMemo(() => getAmbientConfig(seed), [seed]);
+export function ArticleAmbientBackground({
+  seed,
+  config,
+}: {
+  seed?: string;
+  config?: ReturnType<typeof getAmbientConfig>;
+}) {
+  const resolved = useMemo(() => config ?? getAmbientConfig(seed ?? "article"), [config, seed]);
+  const { ink, mist, ...shader } = resolved;
+  void ink;
+  void mist;
 
-  return <ShaderBackground aria-hidden="true" {...config} />;
+  return <ShaderBackground aria-hidden="true" {...shader} />;
 }

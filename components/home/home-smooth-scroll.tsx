@@ -10,6 +10,12 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+function isInsideNativeScroll(node: HTMLElement) {
+  return Boolean(
+    node.closest("[data-lenis-prevent], [role='dialog'], [role='listbox'], [data-slot='popover']")
+  );
+}
+
 /**
  * Homepage wheel smoothing. GSAP's ticker drives Lenis, and Lenis tells
  * ScrollTrigger whenever the scroll position changes. Touch stays native.
@@ -20,6 +26,7 @@ export function HomeSmoothScroll() {
     const lenis = new Lenis({
       anchors: true,
       lerp: 0.1,
+      prevent: isInsideNativeScroll,
       smoothWheel: true,
       syncTouch: false,
       stopInertiaOnNavigate: true,

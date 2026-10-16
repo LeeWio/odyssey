@@ -258,6 +258,7 @@
     "loadFailedTitle": "文章加载失败",
     "loadFailedDescription": "请稍后重新加载这篇文章。",
     "tryAgain": "重试",
+    "unsupportedContent": "这篇文章的内容格式暂不支持，暂时无法阅读。",
     "controls": "文章操作",
     "back": "返回",
     "like": "喜欢这篇文章",

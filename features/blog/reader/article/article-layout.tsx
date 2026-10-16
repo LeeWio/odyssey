@@ -18,7 +18,7 @@ export function ArticleLayout({
   label: string;
 }) {
   return (
-    <div className="bg-background relative isolate min-h-[100dvh] overflow-x-clip">
+    <div className="relative isolate min-h-[100dvh] overflow-x-clip bg-transparent">
       <PageContainer className="relative z-10 px-0 pb-24 md:px-0 xl:px-0">
         <article className="w-full min-w-0" data-reading-content>
           {hero}

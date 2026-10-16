@@ -2,36 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { siteConfig } from "@/config/site";
-
-type ArticleMetadata = {
-  title?: string;
-  summary?: string | null;
-  coverImage?: string | null;
-  authorName?: string | null;
-  category?: { name?: string | null } | null;
-  tags?: Array<{ name?: string | null }> | null;
-  publishedAt?: string | null;
-  updatedAt?: string | null;
-};
-
-async function getArticleMetadata(slug: string): Promise<ArticleMetadata | null> {
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "");
-  if (!apiBase) return null;
-
-  try {
-    const response = await fetch(
-      `${apiBase}/api/v1/public/blog/posts/${encodeURIComponent(slug)}`,
-      {
-        next: { revalidate: 60 },
-      }
-    );
-    if (!response.ok) return null;
-    const payload = (await response.json()) as { data?: ArticleMetadata };
-    return payload.data ?? null;
-  } catch {
-    return null;
-  }
-}
+import { getPublicArticle } from "@/lib/features/post/public-article";
 
 export async function generateMetadata({
   params,
@@ -39,9 +10,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const article = await getArticleMetadata(slug);
-  if (!article) return {};
+  const result = await getPublicArticle(slug);
+  if (result.status !== "ok") return {};
 
+  const article = result.article;
   const title = article.title || "Article";
   const description = article.summary || undefined;
   const tags = article.tags?.map((tag) => tag.name).filter((tag): tag is string => Boolean(tag));

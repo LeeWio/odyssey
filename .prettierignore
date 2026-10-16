@@ -15,3 +15,6 @@ styles/themes/heroui-pro-themes.scoped.css
 a.yaml
 trivy-image-report.json
 11/
+
+# Local design notes, not part of the app
+shader_background/

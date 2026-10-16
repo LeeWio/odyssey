@@ -2,6 +2,7 @@
 
 import { Typography } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
+import { useTranslations } from "next-intl";
 import { useMemo, type ReactNode } from "react";
 import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
 import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
@@ -45,6 +46,7 @@ export function ArticleBody({
   outlineRail,
   showTableOfContents = true,
 }: ArticleBodyProps) {
+  const t = useTranslations("Article");
   const parsedContent = useMemo(() => {
     if (!content || contentType !== "JSON") return null;
     const doc = parseJSONContent(content);
@@ -54,11 +56,7 @@ export function ArticleBody({
   const extensions = useMemo(() => createReaderExtensionKit(), []);
 
   if (!parsedContent) {
-    return (
-      <p className="text-default-500 text-base leading-8">
-        This article is unavailable because its content is not a supported Tiptap document.
-      </p>
-    );
+    return <p className="text-default-500 text-base leading-8">{t("unsupportedContent")}</p>;
   }
 
   return (

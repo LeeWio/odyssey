@@ -155,10 +155,7 @@ export function PublishingWorkflow({
   };
 
   return (
-    <section
-      className="border-default-200 flex flex-col gap-4 border-y py-4"
-      aria-label="Publishing workflow"
-    >
+    <section className="flex flex-col gap-4" aria-label="Publishing workflow">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3">
           <Icon

@@ -164,6 +164,7 @@ export interface PostRequest {
   title: string;
   slug: string;
   coverImage?: string;
+  shaderPreset?: string | null;
   summary?: string;
   content: string;
   contentType: "JSON";

@@ -44,6 +44,7 @@ export default defineConfig({
       "features/footprints/**/*.test.ts",
       "features/uses/**/*.test.ts",
       "features/blog/reader/article-actions/**/*.test.ts",
+      "features/blog/reader/article-ambient-background.test.ts",
     ],
     setupFiles: ["./components/rich-text/testing/setup.ts"],
   },

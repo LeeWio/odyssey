@@ -48,3 +48,5 @@ bun.lockb
 # local reference repositories
 .reference/
 demo/
+
+shader_background/

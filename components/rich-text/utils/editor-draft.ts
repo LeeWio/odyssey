@@ -34,7 +34,7 @@ function sanitizePostData(value: unknown): Partial<PostRequest> | null {
   if (!isRecord(value)) return null;
 
   const data: Partial<PostRequest> = {};
-  const stringFields = ["title", "slug", "summary", "coverImage"] as const;
+  const stringFields = ["title", "slug", "summary", "coverImage", "shaderPreset"] as const;
 
   for (const field of stringFields) {
     if (typeof value[field] === "string") data[field] = value[field];

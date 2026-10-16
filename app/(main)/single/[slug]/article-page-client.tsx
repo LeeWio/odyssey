@@ -14,6 +14,8 @@ import {
   ArticleToc,
 } from "@/features/blog/reader/article";
 import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/post";
+import { selectIsAuthenticated } from "@/lib/features/auth";
+import { useAppSelector } from "@/lib/hooks";
 
 const ArticleBody = dynamic(
   () =>
@@ -34,7 +36,7 @@ const ArticleBody = dynamic(
 );
 
 interface SinglePageProps {
-  initialArticle: PostResponse | null;
+  initialArticle: PostResponse;
   slug: string;
 }
 
@@ -42,15 +44,36 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
   const t = useTranslations("Article");
   const router = useRouter();
   const articleEndRef = useRef<HTMLDivElement>(null);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const {
     currentData: fetchedArticle,
+    isError,
     isFetching,
     isUninitialized,
-  } = useGetPublicPostBySlugQuery(slug);
+    refetch,
+  } = useGetPublicPostBySlugQuery(slug, {
+    // Anonymous visitors already have the public article. Signed-in visitors
+    // need one credentialed request for like, favorite, and reading-list state.
+    skip: !isAuthenticated,
+  });
   const article = fetchedArticle ?? initialArticle;
 
-  const isLoading = (isFetching || isUninitialized) && !article;
+  const isLoading = isAuthenticated && (isFetching || isUninitialized) && !article;
   const isUnavailable = !isLoading && !article;
+
+  if (isError && !fetchedArticle) {
+    return (
+      <div className="flex min-h-[70dvh] items-center justify-center px-6">
+        <div className="flex max-w-md flex-col items-center gap-4 text-center">
+          <h1 className="text-xl font-semibold">{t("loadFailedTitle")}</h1>
+          <p className="text-muted text-sm">{t("loadFailedDescription")}</p>
+          <Button size="sm" variant="secondary" onPress={() => refetch()}>
+            {t("tryAgain")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isUnavailable) {
     return (
@@ -90,7 +113,7 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
         body={
           <ArticleBody
             content={article.content}
-            contentKey={article.content}
+            contentKey={`${article.id}:${article.updatedAt}`}
             contentType={article.contentType}
             outlineLabel={t("onThisPage")}
             outlineRail={<ArticleToc label={t("onThisPage")} variant="rail" />}
