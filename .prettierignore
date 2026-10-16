@@ -18,3 +18,4 @@ trivy-image-report.json
 
 # Local design notes, not part of the app
 shader_background/
+important.md

@@ -1,7 +1,6 @@
 "use client";
 
 import { Section } from "@/components/layout/section";
-import { ShaderBackground } from "@/components/background/shader-background";
 import {
   HOME_SECTION_CONTENT,
   HOME_SECTION_DESCRIPTION,
@@ -36,7 +35,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 const RepositoryActivityPanel = dynamic(
   () =>
-    import("@/components/home/repository-activity").then((mod) => ({
+    import("@/features/home/repository-activity").then((mod) => ({
       default: mod.RepositoryActivity,
     })),
   {
@@ -56,22 +55,11 @@ const mapSparkline = (data?: number[]) => {
   }));
 };
 
-function ListeningShader() {
+function ListeningWash() {
   return (
-    <ShaderBackground
+    <div
       aria-hidden="true"
-      colorBack="#172b3a"
-      colors={["#2b5876", "#4e9a9a", "#d7a86e"]}
-      distortion={0.18}
-      distortionFreq={7}
-      falloff={0.24}
-      focalAngle={2.2}
-      focalDistance={0.66}
-      frame={0}
-      mixing={0.62}
-      radius={0.95}
-      speed={0.08}
-      variant="static-radial-gradient"
+      className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,#4e9a9a_0%,#2b5876_42%,#172b3a_100%)]"
     />
   );
 }
@@ -83,13 +71,13 @@ export function LatelySection() {
   const shouldReduceMotion = useReducedMotionPreference();
   const { data: nasdaqData, isLoading: isNasdaqLoading } = useGetMarketIndexBySymbolQuery(
     { symbol: ".ixic", period: "1D" },
-    { pollingInterval: 300000, refetchOnFocus: true }
+    { pollingInterval: 300000 }
   );
   const isPositive = nasdaqData ? nasdaqData.changePct >= 0 : false;
   const sparklineData = useMemo(() => mapSparkline(nasdaqData?.sparkline), [nasdaqData?.sparkline]);
   const { data: githubActivity, isLoading: isGitHubActivityLoading } = useGetGitHubActivityQuery(
     undefined,
-    { pollingInterval: 3600000, refetchOnFocus: true }
+    { pollingInterval: 3600000 }
   );
   const githubPeriodLabel = githubActivity
     ? formatActivityPeriod(githubActivity.month, locale, githubActivity.periodLabel)
@@ -131,7 +119,7 @@ export function LatelySection() {
           {...revealInView(0.08, 28)}
         >
           <div className="absolute inset-0 opacity-70">
-            <ListeningShader />
+            <ListeningWash />
             <div className="from-background/10 via-surface-secondary/65 to-surface-secondary absolute inset-0 bg-linear-to-b" />
           </div>
 
@@ -156,7 +144,7 @@ export function LatelySection() {
               viewport={{ once: true, amount: 0.5 }}
               transition={{ duration: 1.2, ease: pageEaseOut }}
             >
-              <ListeningShader />
+              <ListeningWash />
               <div className="absolute inset-0 flex flex-col justify-between p-5 text-white">
                 <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-white/70 uppercase">
                   <span>{t("lately.listeningLabel")}</span>

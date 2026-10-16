@@ -1,4 +1,4 @@
-import { BlogIndex } from "./blog-index";
+import { BlogIndex } from "@/features/blog/index/blog-index";
 import { getPublicJournalInitialData } from "@/lib/features/post/public-journal";
 
 export default async function BlogIndexPage() {

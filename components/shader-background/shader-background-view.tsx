@@ -232,7 +232,7 @@ export function ShaderBackgroundView({
       className={cn("h-full w-full overflow-hidden", className)}
     >
       <div className="absolute inset-0" style={{ background: backdrop(preset) }} />
-      <canvas data-shader-frame="" className="absolute inset-0 h-full w-full" />
+      {mounted ? null : <canvas data-shader-frame="" className="absolute inset-0 h-full w-full" />}
       {mounted ? (
         <ShaderBackground
           key={preset.id}

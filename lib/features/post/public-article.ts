@@ -42,7 +42,10 @@ export const getPublicArticle = cache(async (slug: string): Promise<PublicArticl
 
   try {
     const response = await fetch(url, {
-      next: { revalidate: REVALIDATE_SECONDS },
+      next: {
+        revalidate: REVALIDATE_SECONDS,
+        tags: [`article:${slug}`],
+      },
     });
     if (response.status === 404) return { status: "not-found" };
     if (!response.ok) return { status: "error" };

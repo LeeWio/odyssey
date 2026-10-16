@@ -309,7 +309,6 @@ export function ArticleStack({
                 {item.href ? (
                   <Link
                     href={item.href}
-                    prefetch={false}
                     aria-label={item.title}
                     className={cn(
                       "focus-visible:ring-accent absolute inset-0 z-10 cursor-[var(--cursor-interactive)] rounded-[inherit] focus-visible:ring-2 focus-visible:ring-inset",

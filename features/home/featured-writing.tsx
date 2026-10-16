@@ -13,7 +13,6 @@ import {
 
 import { Icon } from "@iconify/react";
 
-import dynamic from "next/dynamic";
 import { SectionLoadError } from "./section-load-error";
 import { Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { motion } from "motion/react";
@@ -22,10 +21,12 @@ import { Carousel } from "@heroui-pro/react/carousel";
 import { useGetFeaturedPostsQuery } from "@/lib/features/post";
 import { useLocale, useTranslations } from "next-intl";
 
-const Grainient = dynamic(() => import("@/components/background/grainient"), {
-  ssr: false,
-  loading: () => <div className="bg-surface-secondary absolute inset-0" aria-hidden />,
-});
+const FEATURED_WASHES = [
+  "bg-[radial-gradient(circle_at_20%_15%,#d7c4a3_0%,#8e7358_46%,#2c3338_100%)]",
+  "bg-[radial-gradient(circle_at_80%_10%,#b7c7be_0%,#5d7a78_48%,#243038_100%)]",
+  "bg-[radial-gradient(circle_at_30%_80%,#e2c2a4_0%,#a56b58_46%,#2a2428_100%)]",
+  "bg-[radial-gradient(circle_at_70%_30%,#c9d3c2_0%,#6d7f72_50%,#1e2826_100%)]",
+] as const;
 
 const formatDate = (date: string | null | undefined, locale: string, fallback: string) => {
   if (!date) return fallback;
@@ -36,27 +37,6 @@ const formatDate = (date: string | null | undefined, locale: string, fallback: s
     year: "numeric",
   }).format(new Date(date));
 };
-
-function getGrainientProps(seed: string, index: number) {
-  let hash = 2166136261;
-  for (let i = 0; i < seed.length; i++) {
-    hash ^= seed.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  hash = (hash + index * 2654435761) >>> 0;
-
-  return {
-    warpStrength: 0.7 + ((hash % 9) / 9) * 1.2,
-    warpFrequency: 3.5 + ((hash % 11) / 11) * 5.5,
-    warpSpeed: 1.1 + ((hash % 7) / 7) * 1.8,
-    blendAngle: (hash % 280) - 140,
-    rotationAmount: 240 + ((hash % 13) / 13) * 560,
-    zoom: 0.7 + ((hash % 6) / 6) * 0.5,
-    grainAmount: 0,
-    grainScale: 1.8 + ((hash % 5) / 5) * 1.2,
-    timeSpeed: 0.1 + (index % 3) * 0.025,
-  };
-}
 
 function FeaturedArticle({
   title,
@@ -78,29 +58,18 @@ function FeaturedArticle({
 
   return (
     <Card className="group relative h-full overflow-hidden" variant="transparent">
-      <Grainient
-        {...getGrainientProps(slug, index)}
-        grainAnimated={false}
-        className="absolute inset-0 opacity-100"
+      <div
+        aria-hidden="true"
+        className={`absolute inset-0 ${FEATURED_WASHES[index % FEATURED_WASHES.length]}`}
       />
       <div className="absolute inset-0 bg-black/10" />
       <div className="relative z-10 flex h-full flex-col">
         <Card.Header>
           <div className="flex items-center justify-between gap-3">
-            <Chip
-              color="accent"
-              size="sm"
-              variant="soft"
-              className="bg-background/35 backdrop-blur-md"
-            >
+            <Chip color="accent" size="sm" variant="soft" className="bg-background/70">
               {category}
             </Chip>
-            <Chip
-              color="default"
-              size="sm"
-              variant="soft"
-              className="bg-background/35 backdrop-blur-md"
-            >
+            <Chip color="default" size="sm" variant="soft" className="bg-background/70">
               <Icon icon="gravity-ui:calendar" aria-hidden="true" className="size-3" />
               {formatDate(publishedAt, locale, t("writing.recently"))}
             </Chip>

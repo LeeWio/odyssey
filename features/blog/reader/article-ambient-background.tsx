@@ -18,7 +18,7 @@ export function ArticleAmbientBackground({
     <ShaderBackground
       aria-hidden="true"
       className="h-full w-full"
-      maxPixelCount={1920 * 1080}
+      maxPixelCount={1280 * 720}
       minPixelRatio={1}
       {...preset.config}
     />

@@ -39,8 +39,7 @@ const StockWidget = ({ config }: { config: StockConfig }) => {
       period: range as MarketPeriod,
     },
     {
-      pollingInterval: 300000, // 5 minutes
-      refetchOnFocus: true,
+      pollingInterval: 300000,
     }
   );
 

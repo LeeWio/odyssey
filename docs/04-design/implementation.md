@@ -16,7 +16,7 @@ Route pages use one outer rhythm and one inner content measure. Do not combine i
 
 The home hero uses a bounded `min-h-[min(760px,calc(100dvh-2rem))]` rhythm so it feels like an entrance rather than a full-screen cover. Its only atmospheric visual is a subdued shader background; the content remains text-led and the next section can begin without an oversized blank fold.
 
-The home page now shares section header and content offsets through `components/home/layout.ts`. Exploration is treated as a lightweight route index, while writing, projects, gallery, footprints, moments and friend links keep their feature-specific content surfaces. This keeps the homepage expressive without making every section a competing hero or card wall.
+The home page now shares section header and content offsets through `features/home/layout.ts`. Exploration is treated as a lightweight route index, while writing, projects, gallery, footprints, moments and friend links keep their feature-specific content surfaces. This keeps the homepage expressive without making every section a competing hero or card wall.
 
 The homepage closing modules keep the same hierarchy: Guestbook is a social action surface with one clear composer control, and FAQ uses local icon glyphs with text-first accordion rows. Decorative gradient headings and remote 3D icon assets are intentionally avoided so the closing sequence stays quiet and readable.
 
@@ -24,7 +24,7 @@ The Lately listening surface follows the same media rule as articles: the track 
 
 ## Responsive Content Density
 
-Home sections use Tailwind named inline-size containers (`@container/home-section`). Shared Tailwind class constants in `components/home/layout.ts` use an 18rem minimum card width with `gap-4`, adding columns as available space grows instead of stretching a fixed three-column layout. All layout and visibility rules use Tailwind utilities and container-query variants, with no custom CSS rules.
+Home sections use Tailwind named inline-size containers (`@container/home-section`). Shared Tailwind class constants in `features/home/layout.ts` use an 18rem minimum card width with `gap-4`, adding columns as available space grows instead of stretching a fixed three-column layout. All layout and visibility rules use Tailwind utilities and container-query variants, with no custom CSS rules.
 
 Project and friend-link previews keep up to 12 real entries available. Container queries show 3 entries in a single column, then 4/6/8/10/12 entries as the layout gains columns. The full-list links remain available at every size. Navigation destinations are never hidden by preview limits. Gallery previews use the available photos only, with no duplicated entries to fill space.
 

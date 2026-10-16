@@ -21,7 +21,7 @@ import {
 
 const MomentsMasonry = dynamic(
   () =>
-    import("@/components/home/moments-masonry").then((mod) => ({
+    import("@/features/home/moments-masonry").then((mod) => ({
       default: mod.MomentsMasonry,
     })),
   {

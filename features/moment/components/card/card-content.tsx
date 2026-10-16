@@ -18,7 +18,7 @@ const BounceCards = dynamic(() => import("@/components/ui/bounce-cards"), {
 });
 
 const StockTrendCard = dynamic(
-  () => import("@/components/stock/stock-trend-card").then((mod) => mod.StockTrendCard),
+  () => import("../stock/stock-trend-card").then((mod) => mod.StockTrendCard),
   {
     ssr: false,
     loading: () => <div className="bg-surface-secondary h-24 w-full rounded-2xl" aria-hidden />,

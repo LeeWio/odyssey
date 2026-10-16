@@ -16,7 +16,7 @@
 
 ### Home
 
-位置：`app/(main)/page.tsx`、`components/home`、`components/background`、`components/music`
+位置：`app/(main)/page.tsx`、`features/home`、`components/background`、`components/music`
 
 职责：
 
@@ -29,10 +29,29 @@
 - 不承担文章业务规则。
 - 不直接定义后端数据模型。
 - 首页实验动效不得影响全局 layout 稳定性。
+- 只被首页使用的区块放在 `features/home`，不放进 `components/`。
+- `app/(main)/page.tsx` 只负责组合这些区块，不承载区块内部的数据请求。
+
+### Constellation
+
+位置：`features/constellation`、`app/(main)/constellations/page.tsx`、`app/(main)/universe/page.tsx`
+
+职责：
+
+- 三维星图和星座交互。
+- 星图数据、轨道和详情面板。
+
+边界：
+
+- 这是实验模块。路由页只负责挂载 `UniverseView`。
+- 星图不读取文章接口，也不进入公共 `components/`。
+- Three.js 只在这个模块内加载。
 
 ### Blog / Article
 
 位置：`app/(main)/single`、`features/blog`、`lib/features/post`
+
+列表页的筛选、分页和卡片组合在 `features/blog/index`。`app/(main)/single/page.tsx` 只负责挂载这个列表。
 
 职责：
 
@@ -124,6 +143,20 @@
 
 - UI shell 不持有业务列表数据。
 - 主题系统不应被单个模块私自覆盖。
+
+### Moment
+
+位置：`features/moment`、`lib/features/moment`、`lib/features/stock`
+
+职责：
+
+- 动态发布、卡片和画廊。
+- 动态里附带的股票走势。
+
+边界：
+
+- 股票走势卡片只服务动态，放在 `features/moment/components/stock`。
+- 股票行情接口留在 `lib/features/stock`，卡片不自己定义行情模型。
 
 ### Music
 

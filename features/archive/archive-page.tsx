@@ -191,7 +191,7 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
       >
         {formatDate(post.publishedAt, locale, t("recently"))}
       </time>
-      <Link className="block min-w-0 no-underline" href={`/single/${post.slug}`} prefetch={false}>
+      <Link className="block min-w-0 no-underline" href={`/single/${post.slug}`}>
         <div className="flex flex-wrap items-center gap-2">
           {post.categoryName ? (
             <Chip size="sm" variant="soft">

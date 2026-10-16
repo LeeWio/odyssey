@@ -1,5 +1,6 @@
 import localFont from "next/font/local";
 
+/** Body face. Preloaded because it paints the first screen. */
 export const fontSans = localFont({
   src: [
     {
@@ -11,7 +12,9 @@ export const fontSans = localFont({
       style: "italic",
     },
   ],
-  preload: false,
+  adjustFontFallback: "Arial",
+  display: "swap",
+  preload: true,
   variable: "--font-sans",
 });
 
@@ -26,6 +29,8 @@ export const fontMono = localFont({
       style: "italic",
     },
   ],
+  adjustFontFallback: "Arial",
+  display: "swap",
   preload: false,
   variable: "--font-mono",
 });
@@ -41,18 +46,24 @@ export const fontDisplay = localFont({
       style: "italic",
     },
   ],
+  adjustFontFallback: "Times New Roman",
+  display: "swap",
   preload: false,
   variable: "--font-display",
 });
 
 export const fontBrutalismBody = localFont({
   src: "../fonts/Share_Tech_Mono/ShareTechMono-Regular.ttf",
+  adjustFontFallback: "Arial",
+  display: "swap",
   preload: false,
   variable: "--font-brutalism-body",
 });
 
 export const fontBrutalismDisplay = localFont({
   src: "../fonts/Anton/Anton-Regular.ttf",
+  adjustFontFallback: "Arial",
+  display: "swap",
   preload: false,
   variable: "--font-brutalism-display",
 });

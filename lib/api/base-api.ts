@@ -182,6 +182,8 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const baseApi = createApi({
   reducerPath: "api",
   keepUnusedDataFor: 300,
+  // Focus refetches every subscribed query. Polling and reconnect cover freshness.
+  refetchOnFocus: false,
   refetchOnReconnect: true,
   baseQuery: baseQueryWithReauth,
   tagTypes: [

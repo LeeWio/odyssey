@@ -48,6 +48,14 @@ import { PageContainer } from "@/components/layout/page-container";
 import { ArticleCard } from "@/components/card/article-card";
 import { ArticleCover } from "@/components/card/article-cover";
 import type { PublicJournalInitialData } from "@/lib/features/post/public-journal";
+import {
+  formatJournalDate,
+  journalPageNumbers,
+  journalStoryDate,
+  journalStoryHref,
+  journalStoryKey,
+  type JournalStory,
+} from "./journal-story";
 
 const JOURNAL_STORY_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4";
 const LATEST_PAGE_SIZE = 12;
@@ -56,49 +64,7 @@ type ArchiveFacet = OpenApiComponents["schemas"]["ArchiveFacet"];
 type CategoryFacet = OpenApiComponents["schemas"]["CategoryFacet"];
 type CategoryGroup = OpenApiComponents["schemas"]["CategoryGroup"];
 type TagFacet = OpenApiComponents["schemas"]["TagFacet"];
-type Story = {
-  id?: number;
-  title?: string | null;
-  slug?: string | null;
-  summary?: string | null;
-  coverImage?: string | null;
-  shaderPreset?: string | null;
-  authorName?: string | null;
-  authorAvatar?: string | null;
-  category?: { name?: string | null } | null;
-  views?: number;
-  likesCount?: number;
-  commentsCount?: number;
-  isInReadingList?: boolean | null;
-  publishedAt?: string | null;
-  createdAt?: string | null;
-};
-
-function formatDate(value: string | null | undefined, locale: string, fallback: string) {
-  if (!value) return fallback;
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return fallback;
-
-  return new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(date);
-}
-
-function storyDate(post: Story) {
-  if ("publishedAt" in post && post.publishedAt) return post.publishedAt;
-  return "createdAt" in post ? post.createdAt : undefined;
-}
-
-function storyHref(post: Story) {
-  return post.slug ? `/single/${post.slug}` : "/single";
-}
-
-function storyKey(post: Story) {
-  return post.slug ?? String(post.id ?? "");
-}
+type Story = JournalStory;
 
 function FeatureCard({
   delay = 0,
@@ -111,7 +77,10 @@ function FeatureCard({
 }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const meta = [post.category?.name, formatDate(storyDate(post), locale, t("recentlyPublished"))]
+  const meta = [
+    post.category?.name,
+    formatJournalDate(journalStoryDate(post), locale, t("recentlyPublished")),
+  ]
     .filter(Boolean)
     .join(" · ");
   const title = post.title || t("untitledStory");
@@ -134,7 +103,7 @@ function FeatureCard({
             ? "group grid min-h-[28rem] w-full overflow-hidden rounded-lg text-white no-underline lg:min-h-[36rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.7fr)]"
             : "group text-foreground flex w-full items-start gap-5 no-underline"
         }
-        href={storyHref(post)}
+        href={journalStoryHref(post)}
       >
         {featured ? (
           <div className="absolute inset-0 lg:relative lg:col-start-1 lg:row-start-1 lg:min-h-[36rem]">
@@ -197,37 +166,6 @@ function FeatureMosaic({ lead, companions }: { lead: Story; companions: Story[] 
   );
 }
 
-function pageNumbers(page: number, totalPages: number) {
-  const pages: (number | "ellipsis")[] = [];
-
-  if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(i);
-    }
-  } else {
-    pages.push(1);
-
-    if (page > 3) {
-      pages.push("ellipsis");
-    }
-
-    const start = Math.max(2, page - 1);
-    const end = Math.min(totalPages - 1, page + 1);
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    if (page < totalPages - 2) {
-      pages.push("ellipsis");
-    }
-
-    pages.push(totalPages);
-  }
-
-  return pages;
-}
-
 function parsePositiveInteger(value: string | null) {
   if (!value) return undefined;
   const parsed = Number(value);
@@ -261,7 +199,7 @@ function LatestPagination({
               <span>{t("previous")}</span>
             </Pagination.Previous>
           </Pagination.Item>
-          {pageNumbers(page, pages).map((item, index) =>
+          {journalPageNumbers(page, pages).map((item, index) =>
             item === "ellipsis" ? (
               <Pagination.Item key={`ellipsis-${index}`}>
                 <Pagination.Ellipsis />
@@ -332,7 +270,7 @@ function ColumnDeck({ column }: { column: ColumnResponse }) {
           column.description,
           t("essays", { count: column.postsCount.toLocaleString(locale) }),
           columnCadence(column, t),
-          updated ? t("updated", { date: formatDate(updated, locale, "") }) : null,
+          updated ? t("updated", { date: formatJournalDate(updated, locale, "") }) : null,
         ]
           .filter(Boolean)
           .join(" · ")}
@@ -419,7 +357,9 @@ function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
                   <span className="text-muted text-xs">
                     {[
                       t("essays", { count: column.postsCount.toLocaleString(locale) }),
-                      updated ? t("updated", { date: formatDate(updated, locale, "") }) : null,
+                      updated
+                        ? t("updated", { date: formatJournalDate(updated, locale, "") })
+                        : null,
                     ]
                       .filter(Boolean)
                       .join(" · ")}
@@ -1014,8 +954,8 @@ function AttentionCard({ mostRead, trending }: { mostRead: Story[]; trending: St
           className="w-full p-1"
           selectionMode="none"
           onAction={(key) => {
-            const post = active.posts.find((item) => storyKey(item) === String(key));
-            if (post) router.push(storyHref(post));
+            const post = active.posts.find((item) => journalStoryKey(item) === String(key));
+            if (post) router.push(journalStoryHref(post));
           }}
         >
           {active.posts.slice(0, 6).map((post, index) => {
@@ -1024,9 +964,9 @@ function AttentionCard({ mostRead, trending }: { mostRead: Story[]; trending: St
 
             return (
               <ListBox.Item
-                key={storyKey(post)}
+                key={journalStoryKey(post)}
                 className="items-start"
-                id={storyKey(post)}
+                id={journalStoryKey(post)}
                 textValue={title}
               >
                 <span className="text-muted w-4 shrink-0 pt-0.5 text-xs tabular-nums">
@@ -1214,7 +1154,7 @@ function FeaturedCarousel({ posts }: { posts: Story[] }) {
         <Carousel.Content>
           {posts.slice(0, 12).map((post) => (
             <Carousel.Item
-              key={storyKey(post)}
+              key={journalStoryKey(post)}
               className="basis-full @min-[36rem]:basis-1/2 @min-[52rem]:basis-1/3 @min-[68rem]:basis-1/4 @min-[84rem]:basis-1/5"
             >
               <div className="pe-3">

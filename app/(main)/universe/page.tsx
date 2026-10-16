@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import { PageFrame } from "@/components/layout/page-frame";
 
 const UniverseView = dynamic(
-  () => import("@/components/constellation").then((mod) => mod.UniverseView),
+  () => import("@/features/constellation").then((mod) => mod.UniverseView),
   {
     ssr: false,
     loading: () => (

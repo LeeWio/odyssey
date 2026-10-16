@@ -52,6 +52,7 @@ export function useCommentFreshness({
     {
       skip: !enabled || isGuestbook || isMoment || afterId == null,
       pollingInterval: POLL_MS,
+      // Count queries stay quiet while the tab is in the background.
       refetchOnFocus: true,
     }
   );

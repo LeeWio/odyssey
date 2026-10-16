@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 
 const UniverseView = dynamic(
-  () => import("@/components/constellation").then((mod) => mod.UniverseView),
+  () => import("@/features/constellation").then((mod) => mod.UniverseView),
   {
     ssr: false,
     loading: () => (

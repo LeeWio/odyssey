@@ -9,11 +9,11 @@ import {
   HOME_SECTION_DESCRIPTION,
   HOME_SECTION_HEADER_CENTERED,
   HOME_SECTION_TITLE,
-} from "@/components/home/layout";
+} from "@/features/home/layout";
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
-import { HelloApple } from "@/components/home/hello-apple";
+import { HelloApple } from "@/features/home/hello-apple";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import { useState } from "react";
 import dynamic from "next/dynamic";
@@ -40,16 +40,8 @@ import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 const HomeSmoothScroll = dynamic(
-  () => import("@/components/home/home-smooth-scroll").then((mod) => mod.HomeSmoothScroll),
+  () => import("@/features/home/home-smooth-scroll").then((mod) => mod.HomeSmoothScroll),
   { ssr: false }
-);
-
-const HomeShaderBackground = dynamic(
-  () => import("@/components/background/shader-background").then((mod) => mod.ShaderBackground),
-  {
-    ssr: false,
-    loading: () => <div aria-hidden="true" className="h-full w-full bg-[#355266]/35" />,
-  }
 );
 
 function SkeletonSectionHeader({
@@ -152,7 +144,7 @@ const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-boar
 });
 
 const FeaturedWriting = dynamic(
-  () => import("@/components/home/featured-writing").then((mod) => mod.FeaturedWriting),
+  () => import("@/features/home/featured-writing").then((mod) => mod.FeaturedWriting),
   {
     ssr: false,
     loading: () => (
@@ -169,7 +161,7 @@ const FeaturedWriting = dynamic(
 );
 
 const MomentsShowcase = dynamic(
-  () => import("@/components/home/moments-showcase").then((mod) => mod.MomentsShowcase),
+  () => import("@/features/home/moments-showcase").then((mod) => mod.MomentsShowcase),
   {
     ssr: false,
     loading: () => (
@@ -190,7 +182,7 @@ const MomentsShowcase = dynamic(
 );
 
 const ProjectsShowcase = dynamic(
-  () => import("@/components/home/projects-showcase").then((mod) => mod.ProjectsShowcase),
+  () => import("@/features/home/projects-showcase").then((mod) => mod.ProjectsShowcase),
   {
     ssr: false,
     loading: () => (
@@ -208,7 +200,7 @@ const ProjectsShowcase = dynamic(
 );
 
 const GalleryShowcase = dynamic(
-  () => import("@/components/home/gallery-showcase").then((mod) => mod.GalleryShowcase),
+  () => import("@/features/home/gallery-showcase").then((mod) => mod.GalleryShowcase),
   {
     ssr: false,
     loading: () => (
@@ -231,7 +223,7 @@ const GalleryShowcase = dynamic(
 );
 
 const FriendLinksShowcase = dynamic(
-  () => import("@/components/home/friend-links-showcase").then((mod) => mod.FriendLinksShowcase),
+  () => import("@/features/home/friend-links-showcase").then((mod) => mod.FriendLinksShowcase),
   {
     ssr: false,
     loading: () => (
@@ -248,7 +240,7 @@ const FriendLinksShowcase = dynamic(
 );
 
 const FootprintsShowcase = dynamic(
-  () => import("@/components/home/footprints-showcase").then((mod) => mod.FootprintsShowcase),
+  () => import("@/features/home/footprints-showcase").then((mod) => mod.FootprintsShowcase),
   {
     ssr: false,
     loading: () => (
@@ -264,7 +256,7 @@ const FootprintsShowcase = dynamic(
 );
 
 const LatelySection = dynamic(
-  () => import("@/components/home/lately-section").then((mod) => mod.LatelySection),
+  () => import("@/features/home/lately-section").then((mod) => mod.LatelySection),
   {
     ssr: false,
     loading: () => (
@@ -281,12 +273,12 @@ const LatelySection = dynamic(
 );
 
 const HomeOrientation = dynamic(
-  () => import("@/components/home/home-orientation").then((mod) => mod.HomeOrientation),
+  () => import("@/features/home/home-orientation").then((mod) => mod.HomeOrientation),
   { ssr: false }
 );
 
 const ExploreOdyssey = dynamic(
-  () => import("@/components/home/explore-odyssey").then((mod) => mod.ExploreOdyssey),
+  () => import("@/features/home/explore-odyssey").then((mod) => mod.ExploreOdyssey),
   { ssr: false }
 );
 
@@ -321,25 +313,6 @@ export default function Home() {
           aria-labelledby="home-hero-title"
           className="relative isolate flex min-h-[min(680px,calc(100dvh-3rem))] flex-col items-center justify-center overflow-hidden pt-24 pb-12 text-center"
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(34rem,78%)] overflow-hidden [mask-image:linear-gradient(to_bottom,black_0%,black_54%,transparent_100%)] opacity-80">
-            <HomeShaderBackground
-              aria-hidden="true"
-              colors={["#243b53", "#4c7a8a", "#b9c6bd", "#d5a36b"]}
-              grainOverlay={0.12}
-              mixing={0.55}
-              positions={3}
-              rotation={214}
-              speed={0.08}
-              variant="static-mesh-gradient"
-              waveX={0.65}
-              waveXShift={0.24}
-              waveY={0.78}
-              waveYShift={0.56}
-              className="opacity-40 saturate-75"
-            />
-            <div className="from-background/10 via-background/75 to-background absolute inset-0 bg-linear-to-b" />
-          </div>
-
           <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
             {t("page.eyebrow")}
           </MotionChip>
@@ -380,7 +353,7 @@ export default function Home() {
             </Link>
             <Link
               href="#explore-odyssey"
-              className="border-default-200/70 bg-surface/60 text-foreground hover:bg-surface-secondary/80 focus-visible:ring-accent inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold no-underline backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="border-default-200/70 bg-surface text-foreground hover:bg-surface-secondary focus-visible:ring-accent inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold no-underline transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               {t("page.exploreField")}
               <Icon aria-hidden="true" icon="lucide:arrow-down" className="size-4" />

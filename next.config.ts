@@ -12,7 +12,13 @@ const nextConfig: NextConfig = {
   transpilePackages: ["lowlight"],
 
   experimental: {
-    optimizePackageImports: ["@heroui/react", "@heroui-pro/react", "@iconify/react", "motion"],
+    optimizePackageImports: [
+      "@heroui/react",
+      "@heroui-pro/react",
+      "@iconify/react",
+      "@paper-design/shaders-react",
+      "motion",
+    ],
   },
 
   compiler: {

@@ -16,7 +16,7 @@ import {
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useLazySearchStocksQuery } from "@/lib/features/stock/stock-api";
-import { StockTrendCard } from "@/components/stock/stock-trend-card";
+import { StockTrendCard } from "../stock/stock-trend-card";
 import { EmptyState } from "@heroui-pro/react";
 import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
 

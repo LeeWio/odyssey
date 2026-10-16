@@ -64,7 +64,7 @@ describe("getPublicArticle", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.example.test/api/v1/public/blog/posts/cached%20essay",
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 60, tags: ["article:cached essay"] } }
     );
     expect(result).toMatchObject({
       status: "ok",
@@ -87,7 +87,7 @@ describe("getPublicArticle", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://127.0.0.1:8080/api/v1/public/blog/posts/cached%20essay",
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 60, tags: ["article:cached essay"] } }
     );
   });
 

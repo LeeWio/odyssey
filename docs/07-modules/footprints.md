@@ -14,10 +14,10 @@ Footprints is the personal travel atlas: a China-focused map, timeline, and deta
 
 ## Surfaces
 
-| Surface      | Path / component                          | Notes                                                                                                            |
-| ------------ | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Full atlas   | `/footprints` → `FootprintsPage`          | Map + detail card + year tabs + timeline                                                                         |
-| Home preview | `components/home/footprints-showcase.tsx` | Chip header + compact map HUD; preview rows use `title` then place/year; single atlas Link in the section header |
+| Surface      | Path / component                        | Notes                                                                                                            |
+| ------------ | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Full atlas   | `/footprints` → `FootprintsPage`        | Map + detail card + year tabs + timeline                                                                         |
+| Home preview | `features/home/footprints-showcase.tsx` | Chip header + compact map HUD; preview rows use `title` then place/year; single atlas Link in the section header |
 
 ## Map
 

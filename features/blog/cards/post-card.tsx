@@ -140,7 +140,7 @@ export const PostCard = ({
 
   return (
     <div className={cn("h-full", className)}>
-      <Link href={href} className="group block h-full" prefetch={false}>
+      <Link href={href} className="group block h-full">
         {content}
       </Link>
     </div>

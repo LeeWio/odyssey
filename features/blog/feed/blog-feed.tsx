@@ -121,11 +121,7 @@ function BlogPostCard({
             </span>
           </div>
           <Card.Title className="text-xl leading-snug sm:text-2xl">
-            <Link
-              className="hover:text-accent no-underline"
-              href={`/single/${post.slug}`}
-              prefetch={false}
-            >
+            <Link className="hover:text-accent no-underline" href={`/single/${post.slug}`}>
               {post.title}
             </Link>
           </Card.Title>
@@ -164,7 +160,6 @@ function FeaturedPost({ post }: { post: PostDigestResponse }) {
     <Link
       className="group focus-visible:ring-accent block cursor-[var(--cursor-interactive)] rounded-2xl no-underline outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       href={`/single/${post.slug}`}
-      prefetch={false}
     >
       <MotionCard
         variant="tertiary"

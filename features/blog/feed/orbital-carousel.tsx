@@ -16,7 +16,7 @@ import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { type MouseEvent, type TouchEvent, useRef, useState } from "react";
-import TrueFocus from "@/components/text/true-focus";
+import TrueFocus from "./text/true-focus";
 
 export function OrbitalCarousel() {
   const [activeIndex, setActiveIndex] = useState(1); // Start on the middle card (PS5)

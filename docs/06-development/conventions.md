@@ -4,12 +4,31 @@
 
 - Use domain names that match the product language.
 - Keep route and feature names consistent across code and docs.
+- Files and directories use kebab-case. Next.js route files keep their reserved names.
+- React components use PascalCase and named exports.
+- Hooks start with `use`. Functions and variables use camelCase.
+- Types and interfaces use PascalCase. Props types are named `<Component>Props`.
+- Constants that never change use UPPER_SNAKE_CASE. RTK Query APIs end with `Api`, slices end with `Slice`.
+- Tests sit next to the module they cover and end with `.test.ts`.
 
 ## Boundaries
 
 - `app/` owns routing and page composition.
-- `components/` owns reusable UI and feature assemblies.
+- `features/<domain>/` owns a domain that has its own pages, data, and UI.
+- `components/` owns UI reused by more than one feature. A component used by one page stays with that page or feature.
+- `components/ui/` owns project-level primitives. `components/layout/` owns shells reused across pages.
 - `lib/features/` owns domain state, data access, and business logic.
+- `hooks/` owns behavior reused across features. A hook used by one feature stays in that feature.
+
+## Where new code goes
+
+- A new route goes under `app/` and composes a feature. It does not fetch and render a whole domain inline.
+- A new domain with its own data and screens goes under `features/<domain>/`, with API access in `lib/features/<domain>/`.
+- Split a component when it owns a separate data flow or a separate interaction, not because a file is long.
+- Promote a component to `components/` only after a second feature needs it.
+- Extract a hook or helper only when the logic is reused or needs its own test.
+- Server data stays in RTK Query. Page interaction stays in component state. Cross-page client state stays in Redux.
+- Do not import another feature's private file. Use its public export.
 
 ## Hooks
 

@@ -2,6 +2,7 @@
 @source not "../.next";
 @source not "../.next-design";
 @source not "../.next-article-shader";
+@source not "../.next-e2e";
 @import "@heroui/styles";
 @import "@heroui-pro/react/css";
 @import "./themes/heroui-pro-themes.scoped.css";

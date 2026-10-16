@@ -64,26 +64,27 @@ export function ExploreOdyssey() {
         data-testid="home-explore-grid"
       >
         {DESTINATIONS.map((destination) => (
-          <Link
-            key={destination.key}
-            href={destination.href}
-            className="group border-separator focus-visible:outline-accent flex min-h-24 items-center gap-4 border-t py-5 no-underline focus-visible:outline-2 focus-visible:outline-offset-4"
-          >
-            <span className="text-muted group-hover:text-accent flex size-9 shrink-0 items-center justify-center transition-colors">
-              <Icon aria-hidden="true" icon={destination.icon} className="size-5" />
-            </span>
-            <span className="flex min-w-0 flex-1 flex-col gap-1">
-              <span className="text-foreground font-medium">{t(`${destination.key}.title`)}</span>
-              <span className="text-muted text-sm leading-5">
-                {t(`${destination.key}.description`)}
+          <div key={destination.key}>
+            <Link
+              href={destination.href}
+              className="group border-separator focus-visible:outline-accent flex min-h-24 items-center gap-4 border-t py-5 no-underline focus-visible:outline-2 focus-visible:outline-offset-4"
+            >
+              <span className="text-muted group-hover:text-accent flex size-9 shrink-0 items-center justify-center transition-colors">
+                <Icon aria-hidden="true" icon={destination.icon} className="size-5" />
               </span>
-            </span>
-            <Icon
-              aria-hidden="true"
-              icon="lucide:arrow-up-right"
-              className="text-muted/60 size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-            />
-          </Link>
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="text-foreground font-medium">{t(`${destination.key}.title`)}</span>
+                <span className="text-muted text-sm leading-5">
+                  {t(`${destination.key}.description`)}
+                </span>
+              </span>
+              <Icon
+                aria-hidden="true"
+                icon="lucide:arrow-up-right"
+                className="text-muted/60 size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              />
+            </Link>
+          </div>
         ))}
       </div>
     </Section>
