@@ -1,3 +1,10 @@
+## [1.220.3](https://github.com/LeeWio/odyssey/compare/v1.220.2...v1.220.3) (2026-10-16)
+
+
+### Performance Improvements
+
+* **web:** trim unused assets and tighten home rendering ([816dd8b](https://github.com/LeeWio/odyssey/commit/816dd8b3fe90ca6e47098f43cbfcb04c588e15ca))
+
 ## [1.220.2](https://github.com/LeeWio/odyssey/compare/v1.220.1...v1.220.2) (2026-10-16)
 
 
