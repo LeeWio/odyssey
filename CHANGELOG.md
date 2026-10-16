@@ -1,3 +1,10 @@
+## [1.220.1](https://github.com/LeeWio/odyssey/compare/v1.220.0...v1.220.1) (2026-10-16)
+
+
+### Performance Improvements
+
+* **web:** optimize shared rendering and request costs ([348b6d1](https://github.com/LeeWio/odyssey/commit/348b6d1560adc472caf6857346754782d6721552))
+
 # [1.220.0](https://github.com/LeeWio/odyssey/compare/v1.219.0...v1.220.0) (2026-10-16)
 
 
