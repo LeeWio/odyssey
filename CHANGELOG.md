@@ -1,3 +1,10 @@
+## [1.220.2](https://github.com/LeeWio/odyssey/compare/v1.220.1...v1.220.2) (2026-10-16)
+
+
+### Performance Improvements
+
+* **web:** optimize chronicle page loading ([c3f4665](https://github.com/LeeWio/odyssey/commit/c3f4665ba36cfa28aa809ecf02474225c4c3fb84))
+
 ## [1.220.1](https://github.com/LeeWio/odyssey/compare/v1.220.0...v1.220.1) (2026-10-16)
 
 
