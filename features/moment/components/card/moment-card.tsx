@@ -55,12 +55,14 @@ interface MomentCardProps {
   moment?: MomentResponse;
   isLoading?: boolean;
   enableComments?: boolean;
+  knownLikedMomentIds?: number[];
 }
 
 export const MomentCard = ({
   moment: propMoment,
   isLoading: propIsLoading,
   enableComments = true,
+  knownLikedMomentIds,
 }: MomentCardProps) => {
   const formatRelativeTime = useRelativeTime();
   const t = useTranslations("Moments");
@@ -123,7 +125,8 @@ export const MomentCard = ({
   // Likes hook
   const { isLiked, likesCount, isLiking, toggleLike } = useMomentLike(
     moment?.id,
-    moment?.likesCount
+    moment?.likesCount,
+    knownLikedMomentIds
   );
 
   useEffect(() => {

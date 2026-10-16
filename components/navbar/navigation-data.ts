@@ -1,5 +1,3 @@
-"use client";
-
 import type { NavigationId } from "./types";
 
 type NavigationTranslator = (key: string) => string;

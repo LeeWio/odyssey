@@ -23,16 +23,19 @@ export function MomentCadenceCard({
   labels,
   unavailable,
   retryLabel,
+  initialData = null,
 }: {
   label: string;
   labels: Record<CadencePeriod, string>;
   unavailable: string;
   retryLabel: string;
+  initialData?: MomentCadenceResponse | null;
 }) {
-  const cadence = useGetMomentCadenceQuery();
+  const query = useGetMomentCadenceQuery(undefined, { skip: Boolean(initialData) });
   const [period, setPeriod] = useState<CadencePeriod>("day");
+  const data = initialData ?? query.data;
 
-  if (cadence.isError) {
+  if (!initialData && query.isError) {
     return (
       <Card className="w-full gap-3 p-4" role="alert">
         <Typography type="body-sm">{unavailable}</Typography>
@@ -40,7 +43,7 @@ export function MomentCadenceCard({
           className="self-start"
           size="sm"
           variant="secondary"
-          onPress={() => cadence.refetch()}
+          onPress={() => query.refetch()}
         >
           {retryLabel}
         </Button>
@@ -49,11 +52,11 @@ export function MomentCadenceCard({
   }
 
   return (
-    <Card aria-busy={cadence.isLoading} className="w-full gap-4 p-4">
+    <Card aria-busy={!initialData && query.isLoading} className="w-full gap-4 p-4">
       <div className="flex items-center justify-between gap-3">
         <Segment
           aria-label={label}
-          isDisabled={cadence.isLoading || cadence.data == null}
+          isDisabled={(!initialData && query.isLoading) || data == null}
           selectedKey={period}
           size="sm"
           onSelectionChange={(key: Key) => {
@@ -66,13 +69,11 @@ export function MomentCadenceCard({
             </Segment.Item>
           ))}
         </Segment>
-        {cadence.data ? (
-          <CadenceMeter cadence={cadence.data} label={labels[period]} period={period} />
-        ) : null}
+        {data ? <CadenceMeter cadence={data} label={labels[period]} period={period} /> : null}
       </div>
 
-      {cadence.data ? (
-        <CadenceDots cadence={cadence.data} period={period} />
+      {data ? (
+        <CadenceDots cadence={data} period={period} />
       ) : (
         <Skeleton animationType="shimmer" className="h-[110px] w-full rounded-xl" />
       )}

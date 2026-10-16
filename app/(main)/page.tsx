@@ -14,8 +14,6 @@ import {
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { HelloApple } from "@/components/home/hello-apple";
-import { HomeSmoothScroll } from "@/components/home/home-smooth-scroll";
-import { ShaderBackground } from "@/components/background/shader-background";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import { useState } from "react";
 import dynamic from "next/dynamic";
@@ -40,6 +38,19 @@ import { selectIsAuthenticated } from "@/lib/features/auth";
 import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+
+const HomeSmoothScroll = dynamic(
+  () => import("@/components/home/home-smooth-scroll").then((mod) => mod.HomeSmoothScroll),
+  { ssr: false }
+);
+
+const HomeShaderBackground = dynamic(
+  () => import("@/components/background/shader-background").then((mod) => mod.ShaderBackground),
+  {
+    ssr: false,
+    loading: () => <div aria-hidden="true" className="h-full w-full bg-[#355266]/35" />,
+  }
+);
 
 function SkeletonSectionHeader({
   centered = false,
@@ -311,7 +322,7 @@ export default function Home() {
           className="relative isolate flex min-h-[min(680px,calc(100dvh-3rem))] flex-col items-center justify-center overflow-hidden pt-24 pb-12 text-center"
         >
           <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(34rem,78%)] overflow-hidden [mask-image:linear-gradient(to_bottom,black_0%,black_54%,transparent_100%)] opacity-80">
-            <ShaderBackground
+            <HomeShaderBackground
               aria-hidden="true"
               colors={["#243b53", "#4c7a8a", "#b9c6bd", "#d5a36b"]}
               grainOverlay={0.12}

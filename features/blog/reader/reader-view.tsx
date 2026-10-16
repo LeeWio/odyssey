@@ -6,7 +6,7 @@ import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CommentSystem } from "@/components/comment";
 import {
   useGetPublicPostBySlugQuery,
@@ -184,6 +184,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
   const [isInReadingList, setIsInReadingList] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [showActionBar, setShowActionBar] = useState(false);
+  const showActionBarRef = useRef(false);
   const [ripples, setRipples] = useState<LikeRipple[]>([]);
 
   // Synchronize component state with fresh server-side article attributes
@@ -201,9 +202,12 @@ export function ReaderView({ slug }: ReaderViewProps) {
   // Handle scroll trigger for Action Bar display
   useEffect(() => {
     const handleScroll = () => {
-      setShowActionBar(window.scrollY > 150);
+      const next = window.scrollY > 150;
+      if (next === showActionBarRef.current) return;
+      showActionBarRef.current = next;
+      setShowActionBar(next);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

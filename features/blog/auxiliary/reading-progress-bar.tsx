@@ -14,6 +14,7 @@ export function ReadingProgressBar() {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const barRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
+  const lastProgressRef = useRef(-1);
   const [progress, setProgress] = useState(0);
 
   useGSAP(
@@ -28,11 +29,20 @@ export function ReadingProgressBar() {
           start: "top top",
           end: "bottom bottom",
           scrub: 0.3,
-          onUpdate: (self) => setProgress(Math.round(self.progress * 100)),
+          onUpdate: (self) => {
+            const nextProgress = Math.round(self.progress * 100);
+            if (nextProgress === lastProgressRef.current) return;
+            lastProgressRef.current = nextProgress;
+            setProgress(nextProgress);
+          },
         },
       });
 
       // Subtle pulse/glow effect when scrolling fast
+      const glowTo = glowRef.current
+        ? gsap.quickTo(glowRef.current, "opacity", { duration: 0.25 })
+        : null;
+      let wasFast = false;
       gsap.to(glowRef.current, {
         opacity: 1,
         duration: 0.2,
@@ -42,11 +52,10 @@ export function ReadingProgressBar() {
           end: "bottom bottom",
           onUpdate: (self) => {
             const velocity = Math.abs(self.getVelocity());
-            if (velocity > 500) {
-              gsap.to(glowRef.current, { opacity: 0.8, duration: 0.2 });
-            } else {
-              gsap.to(glowRef.current, { opacity: 0, duration: 0.5 });
-            }
+            const isFast = velocity > 500;
+            if (isFast === wasFast) return;
+            wasFast = isFast;
+            glowTo?.(isFast ? 0.8 : 0);
           },
         },
       });
@@ -57,14 +66,22 @@ export function ReadingProgressBar() {
   useEffect(() => {
     if (!shouldReduceMotion) return;
 
+    let frame = 0;
     const update = () => {
-      const doc = document.documentElement;
-      const max = doc.scrollHeight - window.innerHeight;
-      const next = max > 0 ? Math.round((window.scrollY / max) * 100) : 0;
-      setProgress(next);
-      if (barRef.current) {
-        barRef.current.style.transform = `scaleX(${next / 100})`;
-      }
+      if (frame !== 0) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        const doc = document.documentElement;
+        const max = doc.scrollHeight - window.innerHeight;
+        const next = max > 0 ? Math.round((window.scrollY / max) * 100) : 0;
+        if (next !== lastProgressRef.current) {
+          lastProgressRef.current = next;
+          setProgress(next);
+        }
+        if (barRef.current) {
+          barRef.current.style.transform = `scaleX(${next / 100})`;
+        }
+      });
     };
 
     update();
@@ -73,6 +90,7 @@ export function ReadingProgressBar() {
     return () => {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
+      if (frame !== 0) window.cancelAnimationFrame(frame);
     };
   }, [shouldReduceMotion]);
 

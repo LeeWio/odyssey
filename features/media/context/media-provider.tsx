@@ -18,20 +18,29 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const playerRef = useRef<MediaPlayer | null>(null);
 
-  useEffect(() => {
+  const ensurePlayer = useCallback(() => {
+    if (playerRef.current) return playerRef.current;
+
     const player = new MediaPlayer((newState) => {
       setState((prev) => ({ ...prev, ...newState }));
     });
     playerRef.current = player;
+    return player;
+  }, []);
 
+  useEffect(() => {
     return () => {
-      player.destroy();
+      playerRef.current?.destroy();
+      playerRef.current = null;
     };
   }, []);
 
-  const play = useCallback((media: MediaItem) => {
-    playerRef.current?.play(media);
-  }, []);
+  const play = useCallback(
+    (media: MediaItem) => {
+      ensurePlayer().play(media);
+    },
+    [ensurePlayer]
+  );
 
   const pause = useCallback(() => {
     playerRef.current?.pause();

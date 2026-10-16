@@ -21,6 +21,7 @@ type CoverEntry = {
 const covers = new Map<symbol, CoverEntry>();
 const live = new Set<symbol>();
 let reconcileFrame = 0;
+let listenersAttached = false;
 
 export function selectLiveCoverIds(
   items: { distance: number; eligible: boolean; id: string; live: boolean }[],
@@ -112,19 +113,37 @@ function scheduleReconcile() {
   });
 }
 
-if (typeof window !== "undefined") {
+function attachListeners() {
+  if (listenersAttached || typeof window === "undefined") return;
+  listenersAttached = true;
   window.addEventListener("scroll", scheduleReconcile, { capture: true, passive: true });
   window.addEventListener("resize", scheduleReconcile);
 }
 
+function detachListeners() {
+  if (!listenersAttached || typeof window === "undefined") return;
+  listenersAttached = false;
+  window.removeEventListener("scroll", scheduleReconcile, true);
+  window.removeEventListener("resize", scheduleReconcile);
+  if (reconcileFrame) {
+    window.cancelAnimationFrame(reconcileFrame);
+    reconcileFrame = 0;
+  }
+}
+
 function registerCover(entry: CoverEntry) {
   covers.set(entry.id, entry);
+  attachListeners();
   scheduleReconcile();
   return () => {
     captureFrame(entry.element);
     covers.delete(entry.id);
     live.delete(entry.id);
-    scheduleReconcile();
+    if (covers.size === 0) {
+      detachListeners();
+    } else {
+      scheduleReconcile();
+    }
   };
 }
 

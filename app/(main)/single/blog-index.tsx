@@ -24,13 +24,9 @@ import {
 } from "@heroui/react";
 import type { Key } from "react-aria-components/Breadcrumbs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-
-gsap.registerPlugin(useGSAP);
 import { useLocale, useTranslations } from "next-intl";
 import { useDebouncedCallback } from "use-debounce";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
@@ -51,6 +47,7 @@ import { parsePageParam } from "@/lib/utils/pagination";
 import { PageContainer } from "@/components/layout/page-container";
 import { ArticleCard } from "@/components/card/article-card";
 import { ArticleCover } from "@/components/card/article-cover";
+import type { PublicJournalInitialData } from "@/lib/features/post/public-journal";
 
 const JOURNAL_STORY_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4";
 const LATEST_PAGE_SIZE = 12;
@@ -551,7 +548,7 @@ function JournalSkeleton() {
   );
 }
 
-export function BlogIndex() {
+export function BlogIndex({ initialData }: { initialData: PublicJournalInitialData }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
   const router = useRouter();
@@ -568,11 +565,18 @@ export function BlogIndex() {
   const searchValue = searchDraft.source === normalizedQuery ? searchDraft.value : normalizedQuery;
   const isDebouncingSearch = searchValue.trim() !== normalizedQuery;
   const selectedCategoryId = parsePositiveInteger(searchParams.get("category"));
-  const discoveryQuery = useRetrieveDiscoveryQuery();
-  const facetsQuery = useRetrieveFacetsQuery();
-  const featuredQuery = useGetFeaturedPostsQuery({ page: 0, size: 8 });
   const requestedLatestPage = parsePageParam(searchParams.get("page"));
   const latestPage = requestedLatestPage - 1;
+  const hasInitialLatest =
+    !normalizedQuery && !selectedCategoryId && latestPage === 0 && Boolean(initialData.latest);
+  const hasInitialFeatured =
+    !normalizedQuery && !selectedCategoryId && Boolean(initialData.featured);
+  const discoveryQuery = useRetrieveDiscoveryQuery();
+  const facetsQuery = useRetrieveFacetsQuery();
+  const featuredQuery = useGetFeaturedPostsQuery(
+    { page: 0, size: 8 },
+    { skip: hasInitialFeatured }
+  );
   const latestQuery = useGetPublicPostsQuery(
     {
       categoryId: selectedCategoryId,
@@ -580,9 +584,16 @@ export function BlogIndex() {
       page: latestPage,
       size: LATEST_PAGE_SIZE,
     },
-    { skip: isDebouncingSearch, refetchOnMountOrArgChange: true }
+    {
+      skip: isDebouncingSearch || hasInitialLatest,
+      refetchOnMountOrArgChange: true,
+    }
   );
-  const latestData = isDebouncingSearch ? undefined : latestQuery.currentData;
+  const latestData = hasInitialLatest
+    ? initialData.latest
+    : isDebouncingSearch
+      ? undefined
+      : latestQuery.currentData;
   const isAdjustingPage =
     latestQuery.isSuccess &&
     !latestQuery.isFetching &&
@@ -591,7 +602,7 @@ export function BlogIndex() {
   const latestLoading =
     isDebouncingSearch ||
     isAdjustingPage ||
-    latestQuery.isLoading ||
+    (!hasInitialLatest && latestQuery.isLoading) ||
     (latestQuery.isFetching && !latestData);
   useNormalizePageParam(
     requestedLatestPage,
@@ -618,7 +629,9 @@ export function BlogIndex() {
   useEffect(() => () => updateSearch.cancel(), [normalizedQuery, updateSearch]);
 
   const discovery = discoveryQuery.data;
-  const featuredPosts = featuredQuery.data?.list ?? [];
+  const featuredPosts = hasInitialFeatured
+    ? (initialData.featured?.list ?? [])
+    : (featuredQuery.data?.list ?? []);
   const latestPool = latestLoading ? [] : (latestData?.list ?? []);
   const categories = (facetsQuery.data?.categories ?? []).filter(
     (category): category is CategoryFacet & { id: number; name: string } =>
@@ -636,29 +649,6 @@ export function BlogIndex() {
   const essayCount = hasArchiveFilters
     ? (latestData?.total ?? 0)
     : (facetsQuery.data?.totalPublishedCount ?? latestData?.total ?? 0);
-  const pageRef = useRef<HTMLDivElement>(null);
-  const contentReady = !discoveryQuery.isLoading && !featuredQuery.isLoading;
-
-  useGSAP(
-    () => {
-      const root = pageRef.current;
-      if (!root || !contentReady) return;
-      const pieces = root.querySelectorAll<HTMLElement>("[data-journal-reveal]");
-      const motion = gsap.matchMedia();
-      motion.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from(pieces, {
-          autoAlpha: 0,
-          duration: 0.28,
-          ease: "power3.out",
-          stagger: 0.04,
-          y: 12,
-        });
-      });
-      return () => motion.revert();
-    },
-    { dependencies: [contentReady], scope: pageRef, revertOnUpdate: true }
-  );
-
   const trending = discovery?.trending ?? [];
   const mostRead = discovery?.mostRead ?? [];
   const hasDiscoveryRail =
@@ -685,7 +675,7 @@ export function BlogIndex() {
     !openingLoading && !latestLoading && !latestQuery.isError && !lead && latestPosts.length === 0;
 
   return (
-    <div ref={pageRef} className="bg-background min-h-dvh w-full pt-28 pb-24 lg:pt-32">
+    <div className="bg-background min-h-dvh w-full pt-28 pb-24 lg:pt-32">
       <PageContainer className="flex flex-col gap-10 md:gap-12">
         <header className="border-separator flex min-w-0 flex-col gap-6 border-b pb-8 md:flex-row md:items-end md:justify-between">
           <div className="flex min-w-0 flex-col gap-4">

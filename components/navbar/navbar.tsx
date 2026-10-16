@@ -94,9 +94,6 @@ export const Navbar = () => {
   const activeItem = getNavigationItem(activeNavigation, t);
   const platformKey = mounted && (os === "macos" || os === "ios") ? "⌘" : "Ctrl";
 
-  if (isSearchOpen && !hasOpenedSearch) setHasOpenedSearch(true);
-  if (authMode && !hasOpenedAuth) setHasOpenedAuth(true);
-
   useHotkeys(
     [
       [
@@ -323,6 +320,7 @@ export const Navbar = () => {
     setIsLocked(false);
     setIsMobileMenuOpen(false);
 
+    setHasOpenedAuth(true);
     dispatch(setAuthMode(mode));
   };
 
@@ -638,7 +636,10 @@ export const Navbar = () => {
                 variant="ghost"
                 className="size-10 rounded-xl lg:hidden"
                 aria-label={t("search")}
-                onPress={() => setIsSearchOpen(true)}
+                onPress={() => {
+                  setHasOpenedSearch(true);
+                  setIsSearchOpen(true);
+                }}
               >
                 <SearchIcon aria-hidden="true" size={16} />
               </Button>
@@ -651,7 +652,10 @@ export const Navbar = () => {
               <Button
                 variant="tertiary"
                 aria-label={t("searchShortcut", { key: platformKey })}
-                onPress={() => setIsSearchOpen(true)}
+                onPress={() => {
+                  setHasOpenedSearch(true);
+                  setIsSearchOpen(true);
+                }}
               >
                 <SearchIcon aria-hidden="true" size={14} />
                 <span className="text-xs font-medium">{t("search")}</span>
@@ -717,7 +721,10 @@ export const Navbar = () => {
                 size="sm"
                 variant="ghost"
                 className="hidden h-9 rounded-xl px-3.5 font-semibold sm:flex"
-                onPress={() => dispatch(setAuthMode("login"))}
+                onPress={() => {
+                  setHasOpenedAuth(true);
+                  dispatch(setAuthMode("login"));
+                }}
               >
                 {t("signIn")}
               </Button>

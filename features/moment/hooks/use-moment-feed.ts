@@ -7,15 +7,23 @@ import {
   useLazyGetPublicMomentsQuery,
   type MomentResponse,
 } from "@/lib/features/moment";
+import type { PageResult } from "@/lib/api";
 
-export const useMomentFeed = (pageSize: number = 12) => {
+export const useMomentFeed = (
+  pageSize: number = 12,
+  initialPage: PageResult<MomentResponse> | null = null
+) => {
   const [extraEntries, setExtraEntries] = useState<MomentResponse[]>([]);
   const [nextPage, setNextPage] = useState(1);
 
-  const { data, isLoading, isError, refetch } = useGetPublicMomentsQuery({
-    page: 0,
-    size: pageSize,
-  });
+  const query = useGetPublicMomentsQuery(
+    { page: 0, size: pageSize },
+    { skip: Boolean(initialPage) }
+  );
+  const data = initialPage ?? query.data;
+  const isLoading = !initialPage && query.isLoading;
+  const isError = !initialPage && query.isError;
+  const refetch = query.refetch;
   const [loadPage, loadingMore] = useLazyGetPublicMomentsQuery();
 
   const moments = useMemo(() => {

@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 import { useEffect } from "react";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -22,7 +23,11 @@ function isInsideNativeScroll(node: HTMLElement) {
  * Lenis disables smoothing when prefers-reduced-motion is set.
  */
 export function HomeSmoothScroll() {
+  const reducedMotion = useReducedMotionPreference();
+
   useEffect(() => {
+    if (reducedMotion) return;
+
     const lenis = new Lenis({
       anchors: true,
       lerp: 0.1,
@@ -48,7 +53,7 @@ export function HomeSmoothScroll() {
       gsap.ticker.lagSmoothing(500, 33);
       lenis.destroy();
     };
-  }, []);
+  }, [reducedMotion]);
 
   return null;
 }

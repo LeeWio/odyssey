@@ -1,5 +1,3 @@
-"use client";
-
 // Premium ease-out: starts extremely fast, settles gracefully and intentionally
 export const enterEase = [0.23, 1, 0.32, 1] as const;
 export const exitEase = [0.4, 0, 1, 1] as const;

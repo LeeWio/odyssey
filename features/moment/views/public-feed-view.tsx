@@ -5,11 +5,20 @@ import { useTranslations } from "next-intl";
 import { MomentCard, MomentCardSkeleton } from "../components/card";
 import { useMomentFeed } from "../hooks/use-moment-feed";
 import { PageFrame } from "@/components/layout/page-frame";
+import { useGetLikedMomentIdsQuery } from "@/lib/features/moment";
+import { selectIsAuthenticated } from "@/lib/features/auth";
+import { useAppSelector } from "@/lib/hooks";
 
 export const PublicFeedView = () => {
   const t = useTranslations("Moments");
   const { moments, isLoading, isError, isFetchingMore, hasMore, loadMore, refetch } =
     useMomentFeed();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const likedMomentIdsQuery = useGetLikedMomentIdsQuery(
+    moments.map((moment) => moment.id),
+    { skip: !isAuthenticated || moments.length === 0 }
+  );
+  const knownLikedMomentIds = isAuthenticated ? (likedMomentIdsQuery.data ?? []) : undefined;
 
   return (
     <PageFrame className="bg-background">
@@ -36,7 +45,11 @@ export const PublicFeedView = () => {
           ) : moments.length > 0 ? (
             <>
               {moments.map((moment) => (
-                <MomentCard key={moment.id} moment={moment} />
+                <MomentCard
+                  key={moment.id}
+                  moment={moment}
+                  knownLikedMomentIds={knownLikedMomentIds}
+                />
               ))}
 
               {hasMore && (

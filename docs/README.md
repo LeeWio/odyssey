@@ -23,6 +23,7 @@ Odyssey is a personal product, not just a blog. This documentation space is orga
 1. [Project Background](./01-introduction/overview.md)
 1. [Roadmap](./02-planning/roadmap.md)
 1. [Architecture Overview](./05-architecture/architecture-overview.md)
+1. [Performance Optimization](./05-architecture/performance-optimization.md)
 1. [Development Setup](./06-development/setup.md)
 1. [Design System](./04-design/design-system.md)
 1. [Design Foundation Implementation](./04-design/implementation.md)

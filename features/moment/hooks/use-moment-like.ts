@@ -8,7 +8,11 @@ import {
 } from "@/lib/features/moment";
 import { setLoginOpen } from "@/lib/features/ui";
 
-export const useMomentLike = (momentId?: number, initialLikesCount: number = 0) => {
+export const useMomentLike = (
+  momentId?: number,
+  initialLikesCount: number = 0,
+  knownLikedMomentIds?: number[]
+) => {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [likeMoment] = useLikeMomentMutation();
@@ -16,9 +20,12 @@ export const useMomentLike = (momentId?: number, initialLikesCount: number = 0) 
   const [isLiking, setIsLiking] = useState(false);
 
   const likedMomentsQuery = useGetLikedMomentIdsQuery([momentId ?? 0], {
-    skip: !isAuthenticated || !momentId,
+    skip: !isAuthenticated || !momentId || knownLikedMomentIds !== undefined,
   });
-  const isServerLiked = likedMomentsQuery.data?.includes(momentId ?? 0) ?? false;
+  const isServerLiked =
+    knownLikedMomentIds?.includes(momentId ?? 0) ??
+    likedMomentsQuery.data?.includes(momentId ?? 0) ??
+    false;
 
   const [localLikeOverride, setLocalLikeOverride] = useState<boolean | null>(null);
   const isLiked = localLikeOverride !== null ? localLikeOverride : isServerLiked;
