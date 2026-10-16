@@ -1,3 +1,10 @@
+# [1.220.0](https://github.com/LeeWio/odyssey/compare/v1.219.0...v1.220.0) (2026-10-16)
+
+
+### Features
+
+* **article:** persist and schedule shader background presets ([1fc5893](https://github.com/LeeWio/odyssey/commit/1fc5893eed2179ec7165b0965db5463a590f3faa))
+
 # [1.219.0](https://github.com/LeeWio/odyssey/compare/v1.218.0...v1.219.0) (2026-10-16)
 
 
