@@ -1,3 +1,10 @@
+# [1.219.0](https://github.com/LeeWio/odyssey/compare/v1.218.0...v1.219.0) (2026-10-16)
+
+
+### Features
+
+* **article:** add preset shader backgrounds and settings panel ([49d0e03](https://github.com/LeeWio/odyssey/commit/49d0e035bb8dc98700b0a1d6d674d8b650878662))
+
 # [1.218.0](https://github.com/LeeWio/odyssey/compare/v1.217.0...v1.218.0) (2026-10-15)
 
 
