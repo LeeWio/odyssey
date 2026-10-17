@@ -1,3 +1,10 @@
+## [1.220.6](https://github.com/LeeWio/odyssey/compare/v1.220.5...v1.220.6) (2026-10-17)
+
+
+### Bug Fixes
+
+* **web:** paint the article shader behind Safari bars ([011d58e](https://github.com/LeeWio/odyssey/commit/011d58e382591a93c0a7ed272b7cc53551bd9cf7))
+
 ## [1.220.5](https://github.com/LeeWio/odyssey/compare/v1.220.4...v1.220.5) (2026-10-17)
 
 
