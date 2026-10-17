@@ -53,8 +53,8 @@ export function ArticleHero({ article }: { article: PostResponse }) {
   const publishedLabel = formatDate(publishedAt, locale, t("recentlyPublished"));
 
   return (
-    <header className="relative mb-16 h-[100dvh] w-full max-w-none">
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
+    <header className="relative isolate mb-16 h-[calc(100lvh+1px)] w-full max-w-none lg:h-[100lvh]">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 lg:fixed">
         <ArticleAmbientBackground presetId={article.shaderPreset} slug={article.slug} />
       </div>
 
