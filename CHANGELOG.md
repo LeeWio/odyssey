@@ -1,3 +1,10 @@
+## [1.220.5](https://github.com/LeeWio/odyssey/compare/v1.220.4...v1.220.5) (2026-10-17)
+
+
+### Bug Fixes
+
+* **web:** fill the article shader on notched iPhones ([bb2e29e](https://github.com/LeeWio/odyssey/commit/bb2e29eafd866312b3816d7298bcadb4e70a42ff))
+
 ## [1.220.4](https://github.com/LeeWio/odyssey/compare/v1.220.3...v1.220.4) (2026-10-17)
 
 
