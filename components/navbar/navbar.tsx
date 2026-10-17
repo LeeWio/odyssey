@@ -418,7 +418,7 @@ export const Navbar = () => {
         role={isLocked || isMobileMenuOpen ? "dialog" : undefined}
         aria-modal={isLocked || isMobileMenuOpen ? true : undefined}
         aria-label={isLocked || isMobileMenuOpen ? t("dialogLabel") : undefined}
-        className="fixed inset-x-0 top-0 z-50 mx-auto w-full overflow-hidden rounded-2xl border"
+        className="fixed inset-x-0 top-0 z-50 mx-auto w-full overflow-hidden rounded-2xl border ps-[env(safe-area-inset-left)] pe-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)]"
         initial={reduceMotion ? false : { opacity: 0 }}
         animate={{
           opacity: 1,

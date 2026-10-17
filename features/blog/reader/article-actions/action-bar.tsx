@@ -39,6 +39,7 @@ export function ArticleActionBar({
   return (
     <div
       ref={rootRef}
+      className="[&_.action-bar]:bottom-[calc(1.5rem+env(safe-area-inset-bottom))]!"
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setIsFocusWithin(false);
       }}

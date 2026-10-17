@@ -151,7 +151,7 @@ export function Footer() {
 
   return (
     <footer className="w-full">
-      <div className="flex w-full flex-col gap-10 px-4 pt-20 pb-8 sm:pt-28 md:px-6 xl:px-8">
+      <div className="flex w-full flex-col gap-10 px-4 ps-[max(1rem,env(safe-area-inset-left))] pe-[max(1rem,env(safe-area-inset-right))] pt-20 pb-[max(2rem,env(safe-area-inset-bottom))] sm:pt-28 md:ps-[max(1.5rem,env(safe-area-inset-left))] md:pe-[max(1.5rem,env(safe-area-inset-right))] xl:ps-[max(2rem,env(safe-area-inset-left))] xl:pe-[max(2rem,env(safe-area-inset-right))]">
         <motion.div {...reveal()}>
           <Card variant="secondary" className="gap-6 p-6 sm:p-8">
             <Card.Header className="max-w-xl gap-2 p-0">

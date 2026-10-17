@@ -58,7 +58,7 @@ export function ArticleHero({ article }: { article: PostResponse }) {
         <ArticleAmbientBackground presetId={article.shaderPreset} slug={article.slug} />
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">
+      <div className="relative z-10 mx-auto flex h-full max-w-3xl flex-col items-center justify-center py-24 ps-[max(1.5rem,env(safe-area-inset-left))] pe-[max(1.5rem,env(safe-area-inset-right))] text-center">
         {category ? (
           <Chip size="sm" variant="soft">
             <Link href={`/single/categories/${encodeURIComponent(category.slug)}`}>

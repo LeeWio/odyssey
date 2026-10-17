@@ -37,6 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "black" },
@@ -71,7 +72,7 @@ export default async function RootLayout({
         fontBrutalismBody.variable,
         fontBrutalismDisplay.variable,
         initialTheme.resolvedMode,
-        "h-full antialiased"
+        "bg-background h-full antialiased"
       )}
     >
       <body

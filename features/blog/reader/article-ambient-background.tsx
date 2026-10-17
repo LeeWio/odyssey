@@ -21,6 +21,7 @@ export function ArticleAmbientBackground({
       maxPixelCount={1280 * 720}
       minPixelRatio={1}
       {...preset.config}
+      fit="cover"
     />
   );
 }

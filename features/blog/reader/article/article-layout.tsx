@@ -22,7 +22,7 @@ export function ArticleLayout({
       <PageContainer className="relative z-10 px-0 pb-24 md:px-0 xl:px-0">
         <article className="w-full min-w-0" data-reading-content>
           {hero}
-          <div className="mx-auto grid w-full max-w-6xl items-start gap-8 xl:grid-cols-[minmax(0,48rem)_14rem] xl:justify-center">
+          <div className="mx-auto grid w-full max-w-6xl items-start gap-8 ps-[env(safe-area-inset-left)] pe-[env(safe-area-inset-right)] xl:grid-cols-[minmax(0,48rem)_14rem] xl:justify-center">
             <div className="min-w-0">{body}</div>
             <aside
               aria-label={label}

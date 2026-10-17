@@ -20,7 +20,7 @@ export default function DedicatedDashboardRoute() {
   }
 
   return (
-    <div className="bg-background min-h-[100dvh] w-full pt-20 pb-16">
+    <div className="bg-background min-h-[100dvh] w-full pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))]">
       <DashboardPage />
     </div>
   );
