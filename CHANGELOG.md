@@ -1,3 +1,10 @@
+## [1.220.4](https://github.com/LeeWio/odyssey/compare/v1.220.3...v1.220.4) (2026-10-17)
+
+
+### Bug Fixes
+
+* remove padding ([4746ec4](https://github.com/LeeWio/odyssey/commit/4746ec4f3209bc8017c4e67c80f9b23112cbce7e))
+
 ## [1.220.3](https://github.com/LeeWio/odyssey/compare/v1.220.2...v1.220.3) (2026-10-16)
 
 
