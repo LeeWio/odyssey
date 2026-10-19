@@ -1,3 +1,10 @@
+# [1.223.0](https://github.com/LeeWio/odyssey/compare/v1.222.0...v1.223.0) (2026-10-19)
+
+
+### Features
+
+* **footprints:** render precise colored coverage zones ([3823ea4](https://github.com/LeeWio/odyssey/commit/3823ea4b60970ce2eac2b81ac6837ba949b47f49))
+
 # [1.222.0](https://github.com/LeeWio/odyssey/compare/v1.221.0...v1.222.0) (2026-10-19)
 
 
