@@ -16,6 +16,7 @@ describe("footprint chronology", () => {
       "anhui",
       "huizhou",
       "chongqing",
+      "hunan",
       "shenzhen",
       "guangzhou",
       "hubei",

@@ -23,7 +23,7 @@ Footprints is the personal travel atlas: a China-focused map, timeline, and deta
 
 - Shared map UI: `FootprintsMap` (HeroUI Pro Map + MapLibre)
 - Coverage zones use the exact administrative boundaries in `public/data/footprints-boundaries.geojson`, registered through MapLibre's `fill` and `line` layers via HeroUI's `useMap` hook
-- Boundary source records: DataV administrative boundary GeoJSON for Hubei, Shaanxi, Guangzhou, Shenzhen, Chongqing, Anhui, Huizhou, and Henan
+- Boundary source records: DataV administrative boundary GeoJSON for Hubei, Shaanxi, Guangzhou, Shenzhen, Chongqing, Anhui, Huizhou, Henan, and Hunan
 - Basemap styles live in `features/footprints/map-styles.ts`
 - Viewport centers on the footprint set via `getFootprintsMapView`
 

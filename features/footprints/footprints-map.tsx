@@ -23,6 +23,7 @@ const COVERAGE_COLORS: Record<string, { fill: string; stroke: string }> = {
   anhui: { fill: "#eab308", stroke: "#ca8a04" },
   huizhou: { fill: "#ec4899", stroke: "#db2777" },
   henan: { fill: "#ef4444", stroke: "#dc2626" },
+  hunan: { fill: "#6366f1", stroke: "#4f46e5" },
 };
 
 function getCoverageColor(id: string) {

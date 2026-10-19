@@ -123,6 +123,19 @@ export const FOOTPRINTS: readonly Footprint[] = [
     tags: ["china", "central"],
     order: 8,
   },
+  {
+    id: "hunan",
+    title: "Next to home",
+    place: "Hunan",
+    country: "China",
+    year: 2024,
+    visitedAt: "2024",
+    latitude: 28.19409,
+    longitude: 112.982279,
+    memory: "The province beside Hubei, kept on the same map.",
+    tags: ["china", "central"],
+    order: 9,
+  },
 ];
 
 export function getFootprintMetaLabel(footprint: Footprint) {
