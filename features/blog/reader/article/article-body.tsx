@@ -3,7 +3,7 @@
 import { Typography } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useTranslations } from "next-intl";
-import { useMemo, type ReactNode } from "react";
+import { useMemo } from "react";
 import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
 import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 
@@ -27,8 +27,6 @@ export interface ArticleBodyProps {
   showTableOfContents?: boolean;
   /** Persistent heading list. The floating contents control stays off when this is set. */
   outlineLabel?: string;
-  /** Desktop rail rendered in the editor context, so it can read heading storage. */
-  outlineRail?: ReactNode;
 }
 
 /**
@@ -43,7 +41,6 @@ export function ArticleBody({
   shellClassName = "border-none bg-transparent p-0",
   motionDelay = 0,
   outlineLabel,
-  outlineRail,
   showTableOfContents = true,
 }: ArticleBodyProps) {
   const t = useTranslations("Article");
@@ -72,10 +69,9 @@ export function ArticleBody({
       transition={{ duration: 0.8, ease: "easeOut", delay: motionDelay }}
       style={{ willChange: "opacity" }}
     >
-      {outlineRail}
       <RichTextEditor.Shell className={shellClassName}>
         {outlineLabel ? <ArticleToc label={outlineLabel} /> : null}
-        <Typography.Prose>
+        <Typography.Prose className="max-w-none [&_img]:h-auto [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto">
           <AnimatedRichTextContent />
         </Typography.Prose>
         {showTableOfContents && !outlineLabel ? (

@@ -13,6 +13,7 @@ export function ArticleAmbientBackground({
   slug: string;
 }) {
   const preset = useMemo(() => resolveArticleShaderPreset(presetId, slug), [presetId, slug]);
+  const speed = "speed" in preset.config ? preset.config.speed : undefined;
 
   return (
     <ShaderBackground
@@ -21,6 +22,7 @@ export function ArticleAmbientBackground({
       maxPixelCount={1280 * 720}
       minPixelRatio={1}
       {...preset.config}
+      {...(speed === undefined ? {} : { speed: speed * 0.4 })}
     />
   );
 }

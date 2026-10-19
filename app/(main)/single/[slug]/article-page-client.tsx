@@ -9,10 +9,12 @@ import { useRef } from "react";
 
 import {
   ArticleActionBar,
+  ArticleFooter,
   ArticleHero,
   ArticleLayout,
-  ArticleToc,
+  ArticleSidebar,
 } from "@/features/blog/reader/article";
+import { articleHasContext } from "@/features/blog/reader/article/article-sidebar";
 import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/post";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
@@ -116,11 +118,13 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
             contentKey={`${article.id}:${article.updatedAt}`}
             contentType={article.contentType}
             outlineLabel={t("onThisPage")}
-            outlineRail={<ArticleToc label={t("onThisPage")} variant="rail" />}
             showTableOfContents={false}
           />
         }
+        context={<ArticleSidebar article={article} />}
+        showContext={articleHasContext(article)}
         endRef={articleEndRef}
+        footer={<ArticleFooter article={article} />}
         hero={<ArticleHero article={article} />}
         label={t("onThisPage")}
       />

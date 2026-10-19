@@ -67,7 +67,7 @@ export function ArticleHero({ article }: { article: PostResponse }) {
           </Chip>
         ) : null}
 
-        <h1 className="mt-6 max-w-2xl text-4xl leading-[1.15] font-semibold text-balance sm:text-5xl">
+        <h1 className="mt-6 max-w-2xl text-4xl leading-[1.15] font-semibold text-balance wrap-break-word sm:text-5xl">
           {article.title}
         </h1>
 

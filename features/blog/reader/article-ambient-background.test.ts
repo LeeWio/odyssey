@@ -15,6 +15,7 @@ describe("ArticleAmbientBackground", () => {
       "utf8"
     );
     expect(source).toContain("<ShaderBackground");
+    expect(source).toContain("speed * 0.4");
     expect(source).not.toContain("ShaderBackgroundView");
     expect(source).not.toContain("preset.swatch");
   });

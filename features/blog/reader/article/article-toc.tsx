@@ -1,14 +1,13 @@
 "use client";
 
-import { Accordion, ListBox } from "@heroui/react";
+import { Accordion, ListBox, ScrollShadow } from "@heroui/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import type {
   TableOfContentData,
   TableOfContentDataItem,
 } from "@tiptap/extension-table-of-contents";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-
 import { ARTICLE_OUTLINE_TOP_OFFSET } from "@/components/rich-text/extensions/table-of-contents";
 import { cn } from "@/lib/utils";
 
@@ -23,12 +22,10 @@ function OutlineList({
   items,
   label,
   onJump,
-  variant,
 }: {
   items: TableOfContentData;
   label: string;
   onJump: (item: TableOfContentDataItem) => void;
-  variant: "inline" | "rail";
 }) {
   useSyncExternalStore(
     subscribeToOutline,
@@ -38,29 +35,33 @@ function OutlineList({
   const activeId = items.find((item) => item.isActive)?.id ?? items[0]?.id ?? "";
 
   return (
-    <ListBox
-      aria-label={label}
-      className={cn(variant === "rail" && "max-h-[calc(100dvh-9rem)] overflow-y-auto")}
-      selectedKeys={activeId ? [activeId] : []}
-      selectionMode="none"
-      onAction={(key) => {
-        const item = items.find((entry) => entry.id === String(key));
-        if (item) onJump(item);
-      }}
-    >
-      {items.map((item) => (
-        <ListBox.Item
-          key={item.id}
-          className={cn(item.id === activeId && "bg-default")}
-          id={item.id}
-          textValue={item.textContent}
-        >
-          <span style={{ marginInlineStart: `${(item.level - 1) * 0.75}rem` }}>
-            {item.textContent}
-          </span>
-        </ListBox.Item>
-      ))}
-    </ListBox>
+    <ScrollShadow className="max-h-72" hideScrollBar size={28}>
+      <ListBox
+        aria-label={label}
+        selectedKeys={activeId ? [activeId] : []}
+        selectionMode="none"
+        onAction={(key) => {
+          const item = items.find((entry) => entry.id === String(key));
+          if (item) onJump(item);
+        }}
+      >
+        {items.map((item) => (
+          <ListBox.Item
+            key={item.id}
+            className={cn(item.id === activeId && "bg-default")}
+            id={item.id}
+            textValue={item.textContent}
+          >
+            <span
+              className="line-clamp-2"
+              style={{ marginInlineStart: `${(item.level - 1) * 0.75}rem` }}
+            >
+              {item.textContent}
+            </span>
+          </ListBox.Item>
+        ))}
+      </ListBox>
+    </ScrollShadow>
   );
 }
 
@@ -68,12 +69,10 @@ export function ArticleToc({
   className = "",
   label,
   maxHeadingLevel = 3,
-  variant = "inline",
 }: {
   className?: string;
   label: string;
   maxHeadingLevel?: number;
-  variant?: "inline" | "rail";
 }) {
   const { editor } = useRichTextEditor();
   const items =
@@ -89,8 +88,27 @@ export function ArticleToc({
     () => true,
     () => false
   );
-  const railHost =
-    variant === "rail" && isClient ? document.getElementById("article-toc-rail") : null;
+  const isWide = useSyncExternalStore(
+    (onChange) => {
+      const query = window.matchMedia("(min-width: 80rem)");
+      query.addEventListener("change", onChange);
+      return () => query.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia("(min-width: 80rem)").matches,
+    () => false
+  );
+  const [railHost, setRailHost] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!isClient || !isWide) return;
+    const findHost = () => {
+      const host = document.getElementById("article-toc-rail");
+      if (host) setRailHost(host);
+    };
+    findHost();
+    const frame = window.requestAnimationFrame(findHost);
+    return () => window.cancelAnimationFrame(frame);
+  }, [isClient, isWide, items.length]);
 
   if (!editor || items.length === 0) return null;
 
@@ -110,15 +128,9 @@ export function ArticleToc({
     }
   };
 
-  const outlineList = <OutlineList items={items} label={label} variant={variant} onJump={jumpTo} />;
-
   const accordion = (
-    <Accordion
-      className={cn(variant === "inline" && "mb-8 xl:hidden", className)}
-      defaultExpandedKeys={[`article-toc-${variant}`]}
-      variant="surface"
-    >
-      <Accordion.Item id={`article-toc-${variant}`}>
+    <Accordion className={className} defaultExpandedKeys={["article-toc"]} variant="surface">
+      <Accordion.Item id="article-toc">
         <Accordion.Heading>
           <Accordion.Trigger>
             {label}
@@ -126,15 +138,13 @@ export function ArticleToc({
           </Accordion.Trigger>
         </Accordion.Heading>
         <Accordion.Panel>
-          <Accordion.Body>{outlineList}</Accordion.Body>
+          <Accordion.Body>
+            <OutlineList items={items} label={label} onJump={jumpTo} />
+          </Accordion.Body>
         </Accordion.Panel>
       </Accordion.Item>
     </Accordion>
   );
 
-  if (variant === "rail") {
-    return railHost ? createPortal(accordion, railHost) : null;
-  }
-
-  return accordion;
+  return isWide && railHost ? createPortal(accordion, railHost) : accordion;
 }
