@@ -1,3 +1,10 @@
+# [1.222.0](https://github.com/LeeWio/odyssey/compare/v1.221.0...v1.222.0) (2026-10-19)
+
+
+### Features
+
+* **web:** open the moment composer from search ([829fb6c](https://github.com/LeeWio/odyssey/commit/829fb6ca38a5bc887840bdd04d2ed9ded39e53ec))
+
 # [1.221.0](https://github.com/LeeWio/odyssey/compare/v1.220.4...v1.221.0) (2026-10-19)
 
 
