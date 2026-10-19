@@ -48,12 +48,36 @@ for (const width of [390, 1440]) {
     await expect(section.getByText("Footprints", { exact: true }).first()).toBeVisible();
     await expect(section.getByRole("link", { name: "Open the atlas" })).toBeVisible();
     await expect(section.getByRole("link", { name: "Open the atlas" })).toHaveCount(1);
-    await expect(section.getByTestId("footprints-map-frame").getByText("Hubei")).toBeVisible();
-    const overlay = section.locator(".bg-overlay");
-    await expect(overlay.getByText("Places kept on the map")).toBeVisible();
-    await expect(overlay.getByText("Latest")).toBeVisible();
-    await expect(overlay.getByText("Plains this year")).toBeVisible();
-    await expect(overlay.getByText("Henan · 2026")).toBeVisible();
+    const mapFrame = section.getByTestId("footprints-map-frame");
+    await expect(mapFrame.getByText("Hubei")).toBeVisible();
+    const overlay = mapFrame.getByTestId("footprints-map-overlay");
+    const summary = section.getByTestId("footprints-mobile-summary");
+    if (width < 1024) {
+      await expect(overlay).toBeHidden();
+      await expect(summary).toBeVisible();
+      await expect(summary.getByText("Places", { exact: true })).toBeVisible();
+      await expect(summary.getByText("Latest", { exact: true })).toBeVisible();
+      await expect(summary.getByText("Plains this year")).toBeVisible();
+      await expect(summary.getByText("Henan · 2026")).toBeVisible();
+      const mapBox = await mapFrame.boundingBox();
+      const summaryBox = await summary.boundingBox();
+      expect(mapBox).toBeTruthy();
+      expect(summaryBox).toBeTruthy();
+      expect(summaryBox!.y).toBeGreaterThanOrEqual(mapBox!.y + mapBox!.height - 1);
+      expect(summaryBox!.height).toBeLessThan(180);
+    } else {
+      await expect(overlay).toBeVisible();
+      await expect(summary).toBeHidden();
+      await expect(overlay.getByText("Places kept on the map")).toBeVisible();
+      await expect(overlay.getByText("Latest")).toBeVisible();
+      await expect(overlay.getByText("Plains this year")).toBeVisible();
+      await expect(overlay.getByText("Henan · 2026")).toBeVisible();
+      const mapBox = await mapFrame.boundingBox();
+      const overlayBox = await overlay.boundingBox();
+      expect(mapBox).toBeTruthy();
+      expect(overlayBox).toBeTruthy();
+      expect(overlayBox!.width / mapBox!.width).toBeLessThan(0.35);
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true
     );
@@ -84,5 +108,5 @@ test("timeline, popup and year selection stay in sync", async ({ page }) => {
   await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Read memory from Chongqing" })).toBeVisible();
   await page.getByRole("tab", { name: "All years", exact: true }).click();
-  await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(8);
+  await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(9);
 });
