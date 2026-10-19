@@ -1,3 +1,15 @@
+# [1.224.0](https://github.com/LeeWio/odyssey/compare/v1.223.0...v1.224.0) (2026-10-19)
+
+
+### Bug Fixes
+
+* **home:** keep the footprints summary off the map on small screens ([cce0ff5](https://github.com/LeeWio/odyssey/commit/cce0ff58c5c37f7264bbda0418bace7525497e4b))
+
+
+### Features
+
+* **footprints:** record a 2024 visit to Hunan ([669b6de](https://github.com/LeeWio/odyssey/commit/669b6deffd9858ab57e2f3b8aa97c2eaf8055db0))
+
 # [1.223.0](https://github.com/LeeWio/odyssey/compare/v1.222.0...v1.223.0) (2026-10-19)
 
 
