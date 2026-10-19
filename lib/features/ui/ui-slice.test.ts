@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import reducer, { openDashboardAtPath, setAuthMode, setLoginOpen, setSignUpOpen } from "./ui-slice";
+import reducer, {
+  openDashboardAtPath,
+  setAuthMode,
+  setLoginOpen,
+  setMomentPublisherOpen,
+  setSignUpOpen,
+} from "./ui-slice";
 
 describe("auth dialog compatibility", () => {
   it("keeps legacy entry points mutually exclusive", () => {
@@ -31,6 +37,16 @@ describe("auth dialog compatibility", () => {
     const signup = reducer(login, setAuthMode("signup"));
     expect(reducer(signup, setSignUpOpen(false)).authDialogs).toEqual(closed);
     expect(reducer(signup, setAuthMode(null)).authDialogs).toEqual(closed);
+  });
+});
+
+describe("moment publisher", () => {
+  it("opens and closes the composer", () => {
+    const opened = reducer(undefined, setMomentPublisherOpen(true));
+    expect(opened.momentPublisher).toEqual({ isOpen: true });
+    expect(reducer(opened, setMomentPublisherOpen(false)).momentPublisher).toEqual({
+      isOpen: false,
+    });
   });
 });
 

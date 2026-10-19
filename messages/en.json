@@ -1094,7 +1094,9 @@
       "adminDashboard": "Open admin dashboard",
       "adminDashboardHint": "View site-wide analytics and statistics",
       "postEditor": "Open post editor",
-      "postEditorHint": "Create or edit a post with rich text"
+      "postEditorHint": "Create or edit a post with rich text",
+      "writeMoment": "Write a moment",
+      "writeMomentHint": "Open the composer and publish a short note"
     }
   },
   "Errors": {

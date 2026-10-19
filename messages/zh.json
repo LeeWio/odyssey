@@ -1090,7 +1090,9 @@
       "adminDashboard": "打开管理控制台",
       "adminDashboardHint": "查看全站分析和统计",
       "postEditor": "打开文章编辑器",
-      "postEditorHint": "用富文本创建或编辑文章"
+      "postEditorHint": "用富文本创建或编辑文章",
+      "writeMoment": "写动态",
+      "writeMomentHint": "打开编辑器，发布一条动态"
     }
   },
   "Errors": {

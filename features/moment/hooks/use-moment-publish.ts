@@ -81,7 +81,7 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
     initialMoment?.topics.map((topic) => topic.slug) ?? []
   );
   const [visibility, setVisibility] = useState(initialMoment?.visibility ?? "public");
-  const [shareToX, setShareToX] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [attachedStockSymbol, setAttachedStockSymbol] = useState<string | null>(
@@ -304,7 +304,6 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
     setTopics([]);
     setAttachedStockSymbol(null);
     setVisibility("public");
-    setShareToX(false);
     setIsSubmitting(false);
   };
 
@@ -363,22 +362,17 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
         finalContent = JSON.stringify(fallbackEditor);
       }
 
-      const shouldShareToX = !initialMoment && shareToX && visibility === "public";
       const body = {
         content: finalContent,
         visibility,
         images,
         topicSlugs: topics,
         stockSymbol: attachedStockSymbol,
-        ...(shouldShareToX ? { shareToX: true } : {}),
       };
       if (initialMoment) {
         await updateMoment({ id: initialMoment.id, body }).unwrap();
       } else {
         await createMoment(body).unwrap();
-        if (shouldShareToX) {
-          toast.success("Moment shared. X sync queued.");
-        }
       }
 
       handleReset();
@@ -416,8 +410,6 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
       setTopics((current) => current.filter((item) => item !== topic)),
     visibility,
     setVisibility,
-    shareToX,
-    setShareToX,
     isSubmitting,
     handleSelectFiles,
     handleDrop,

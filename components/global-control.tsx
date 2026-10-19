@@ -6,8 +6,10 @@ import { useState } from "react";
 import { selectIsAdmin } from "@/lib/features/auth";
 import {
   selectIsDashboardOpen,
+  selectIsMomentPublisherOpen,
   selectIsRichTextOpen,
   selectIsSheetOpen,
+  setMomentPublisherOpen,
   toggleSheet,
 } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
@@ -18,6 +20,11 @@ const Cockpit = dynamic(() => import("@/components/cockpit").then((mod) => mod.C
 
 const DashboardSheet = dynamic(
   () => import("@/components/dashboard/dashboard-sheet").then((mod) => mod.DashboardSheet),
+  { ssr: false }
+);
+
+const MomentPublisher = dynamic(
+  () => import("@/features/moment/components/publisher").then((mod) => mod.MomentPublisher),
   { ssr: false }
 );
 
@@ -66,6 +73,20 @@ function DashboardGate() {
   return <DashboardSheet />;
 }
 
+function MomentPublisherGate() {
+  const dispatch = useAppDispatch();
+  const isOpen = useAppSelector(selectIsMomentPublisherOpen);
+  const loaded = useLoadOnce(isOpen);
+
+  if (!loaded) return null;
+  return (
+    <MomentPublisher
+      isOpen={isOpen}
+      onOpenChange={(open) => dispatch(setMomentPublisherOpen(open))}
+    />
+  );
+}
+
 function RichTextGate() {
   const isOpen = useAppSelector(selectIsRichTextOpen);
   const loaded = useLoadOnce(isOpen);
@@ -80,6 +101,7 @@ export function GlobalControl() {
       <CockpitGate />
       <DashboardGate />
       <RichTextGate />
+      <MomentPublisherGate />
     </>
   );
 }

@@ -14,7 +14,6 @@ import {
   SearchField,
   Tag,
   TagGroup,
-  Switch,
   Tooltip,
   useFilter,
 } from "@heroui/react";
@@ -57,9 +56,6 @@ interface PublisherToolbarProps {
   onRemoveTopic: (topic: string) => void;
   onAttachStock?: (symbol: string | null) => void;
   attachedStockSymbol?: string | null;
-  visibility?: "public" | "followers" | "private";
-  shareToX?: boolean;
-  onShareToXChange?: (value: boolean) => void;
 }
 
 export const PublisherToolbar = ({
@@ -75,9 +71,6 @@ export const PublisherToolbar = ({
   onRemoveTopic,
   onAttachStock,
   attachedStockSymbol,
-  visibility = "public",
-  shareToX = false,
-  onShareToXChange,
 }: PublisherToolbarProps) => {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const { openFilePicker } = useDropZonePickerContext();
@@ -291,32 +284,7 @@ export const PublisherToolbar = ({
         )}
       </ScrollShadow>
 
-      {!isEditing && onShareToXChange ? (
-        <div className="border-border/50 flex items-center justify-between gap-3 rounded-2xl border px-3 py-2">
-          <div className="min-w-0">
-            <p className="text-foreground text-sm font-medium">Also share to X</p>
-            <p className="text-muted text-xs">
-              {visibility === "public"
-                ? "Posts from the site account after publish. First 4 images only."
-                : "Switch visibility to Public to enable X sync."}
-            </p>
-          </div>
-          <Switch
-            aria-label="Also share to X"
-            isSelected={shareToX && visibility === "public"}
-            isDisabled={visibility !== "public"}
-            onChange={(value) => onShareToXChange(value)}
-          >
-            <Switch.Content>
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch.Content>
-          </Switch>
-        </div>
-      ) : null}
-
-      {/* 2. Divider-free footer row with metrics & share button */}
+      {/* Divider-free footer row with metrics and the publish button */}
       <div className="flex w-full flex-row items-center justify-between gap-3 pt-1">
         {/* Left: Selected topics with ScrollShadow & max-width */}
         {topics.length > 0 && (

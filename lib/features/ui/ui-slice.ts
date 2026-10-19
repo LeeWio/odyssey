@@ -30,6 +30,9 @@ interface UiState {
     initialValue: JSONContent | null;
     isReadOnly: boolean;
   };
+  momentPublisher: {
+    isOpen: boolean;
+  };
 }
 
 const initialState: UiState = {
@@ -56,6 +59,9 @@ const initialState: UiState = {
     activeId: null,
     initialValue: null,
     isReadOnly: false,
+  },
+  momentPublisher: {
+    isOpen: false,
   },
 };
 
@@ -136,6 +142,10 @@ export const uiSlice = createSlice({
     closeRichText: (state) => {
       state.richText.isOpen = false;
     },
+    setMomentPublisherOpen: (state, action: PayloadAction<boolean>) => {
+      state.momentPublisher ??= { isOpen: false };
+      state.momentPublisher.isOpen = action.payload;
+    },
   },
 });
 
@@ -155,6 +165,7 @@ export const {
   setActiveId,
   openRichText,
   closeRichText,
+  setMomentPublisherOpen,
 } = uiSlice.actions;
 
 export const selectIsLoginOpen = (state: RootState) => state.ui.authDialogs?.isLoginOpen ?? false;
@@ -168,5 +179,7 @@ export const selectDashboardPath = (state: RootState) => state.ui.dashboard?.pat
 export const selectIsRichTextOpen = (state: RootState) => state.ui.richText?.isOpen;
 export const selectActiveId = (state: RootState) => state.ui.richText?.activeId;
 export const selectRichTextState = (state: RootState) => state.ui.richText;
+export const selectIsMomentPublisherOpen = (state: RootState) =>
+  state.ui.momentPublisher?.isOpen ?? false;
 
 export default uiSlice.reducer;

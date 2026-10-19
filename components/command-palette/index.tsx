@@ -14,6 +14,7 @@ import { buildCommandSearchText, filterCommands } from "./command-model";
 import { usePostSearchCommands } from "./search/use-post-search-commands";
 import { STATIC_COMMANDS } from "./static-commands";
 import { useThemeCommands } from "./theme/use-theme-commands";
+import { useMomentCommands } from "./moment/use-moment-commands";
 import { useSystemCommands } from "./system/use-system-commands";
 import {
   COMMAND_CATEGORY_ORDER,
@@ -76,6 +77,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   }, [isOpen]);
 
   const themeCommands = useThemeCommands();
+  const momentCommands = useMomentCommands();
   const systemCommands = useSystemCommands();
   const adminCommands = useAdminCommands();
   const searchState = usePostSearchCommands(
@@ -84,8 +86,14 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
   );
 
   const baseCommands = useMemo(
-    () => [...STATIC_COMMANDS, ...themeCommands, ...systemCommands, ...adminCommands],
-    [themeCommands, systemCommands, adminCommands]
+    () => [
+      ...STATIC_COMMANDS,
+      ...momentCommands,
+      ...themeCommands,
+      ...systemCommands,
+      ...adminCommands,
+    ],
+    [adminCommands, momentCommands, systemCommands, themeCommands]
   );
   const isSearching = inputValue.trim().length > 0;
 
