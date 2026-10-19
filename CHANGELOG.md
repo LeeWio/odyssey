@@ -1,3 +1,10 @@
+# [1.221.0](https://github.com/LeeWio/odyssey/compare/v1.220.4...v1.221.0) (2026-10-19)
+
+
+### Features
+
+* **web:** center the reading page and add previous and next ([7f0a41c](https://github.com/LeeWio/odyssey/commit/7f0a41cb67e0a2cb3f1ba0387fac8714415f64ff))
+
 ## [1.220.4](https://github.com/LeeWio/odyssey/compare/v1.220.3...v1.220.4) (2026-10-17)
 
 
