@@ -1,12 +1,155 @@
 "use client";
 
 import { Card, Chip, Typography } from "@heroui/react";
-import { Map } from "@heroui-pro/react/map";
+import { Map, useMap } from "@heroui-pro/react/map";
+import type { DataDrivenPropertyValueSpecification, MapLayerMouseEvent } from "maplibre-gl";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect } from "react";
 
-import { getFootprintArcs, getFootprintMetaLabel, type Footprint } from "./footprints-data";
+import { getFootprintMetaLabel, type Footprint } from "./footprints-data";
 import { footprintMapStyles, footprintMapWorkerUrl } from "./map-styles";
+
+const SOURCE_ID = "footprints-coverage-zones-source";
+const FILL_LAYER_ID = "footprints-coverage-zones-fill";
+const LINE_LAYER_ID = "footprints-coverage-zones-line";
+const FOOTPRINT_BOUNDARIES_URL = "/data/footprints-boundaries.geojson";
+
+const COVERAGE_COLORS: Record<string, { fill: string; stroke: string }> = {
+  hubei: { fill: "#4285f4", stroke: "#2563eb" },
+  shaanxi: { fill: "#a855f7", stroke: "#7e22ce" },
+  guangzhou: { fill: "#22c55e", stroke: "#16a34a" },
+  shenzhen: { fill: "#f97316", stroke: "#ea580c" },
+  chongqing: { fill: "#06b6d4", stroke: "#0891b2" },
+  anhui: { fill: "#eab308", stroke: "#ca8a04" },
+  huizhou: { fill: "#ec4899", stroke: "#db2777" },
+  henan: { fill: "#ef4444", stroke: "#dc2626" },
+};
+
+function getCoverageColor(id: string) {
+  return COVERAGE_COLORS[id]?.fill ?? "#4285f4";
+}
+
+function getCoveragePaintExpression(
+  property: "fill" | "stroke"
+): DataDrivenPropertyValueSpecification<string> {
+  return [
+    "match",
+    ["get", "id"],
+    ...Object.entries(COVERAGE_COLORS).flatMap(([id, colors]) => [id, colors[property]]),
+    property === "fill" ? "#4285f4" : "#2563eb",
+  ] as unknown as DataDrivenPropertyValueSpecification<string>;
+}
+
+function getFirstSymbolLayer(map: NonNullable<ReturnType<typeof useMap>["map"]>) {
+  return map.getStyle().layers?.find((layer) => layer.type === "symbol")?.id;
+}
+
+function FootprintCoverageZones({
+  footprints,
+  onSelect,
+  interactive,
+  selectedId,
+}: {
+  footprints: readonly Footprint[];
+  onSelect?: (footprint: Footprint) => void;
+  interactive: boolean;
+  selectedId?: string | null;
+}) {
+  const { isLoaded, map } = useMap();
+
+  useEffect(() => {
+    if (!isLoaded || !map) return;
+
+    const addLayers = () => {
+      if (map.getSource(SOURCE_ID)) return;
+
+      const beforeId = getFirstSymbolLayer(map);
+      map.addSource(SOURCE_ID, { type: "geojson", data: FOOTPRINT_BOUNDARIES_URL });
+      map.addLayer(
+        {
+          id: FILL_LAYER_ID,
+          type: "fill",
+          source: SOURCE_ID,
+          filter: ["in", ["get", "id"], ["literal", footprints.map((item) => item.id)]],
+          paint: {
+            "fill-color": getCoveragePaintExpression("fill"),
+            "fill-opacity": 0.16,
+          },
+        },
+        beforeId
+      );
+      map.addLayer(
+        {
+          id: LINE_LAYER_ID,
+          type: "line",
+          source: SOURCE_ID,
+          filter: ["in", ["get", "id"], ["literal", footprints.map((item) => item.id)]],
+          paint: {
+            "line-color": getCoveragePaintExpression("stroke"),
+            "line-opacity": 0.72,
+            "line-width": 1.5,
+          },
+        },
+        beforeId
+      );
+    };
+
+    const handleClick = (event: MapLayerMouseEvent) => {
+      const id = event.features?.[0]?.properties?.id;
+      const footprint = footprints.find((item) => item.id === id);
+      if (footprint) onSelect?.(footprint);
+    };
+    const handleMouseEnter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    const handleMouseLeave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+
+    if (map.isStyleLoaded()) {
+      addLayers();
+    } else {
+      map.once("idle", addLayers);
+    }
+
+    if (interactive) {
+      map.on("click", FILL_LAYER_ID, handleClick);
+      map.on("mouseenter", FILL_LAYER_ID, handleMouseEnter);
+      map.on("mouseleave", FILL_LAYER_ID, handleMouseLeave);
+    }
+
+    return () => {
+      map.off("idle", addLayers);
+      map.off("click", FILL_LAYER_ID, handleClick);
+      map.off("mouseenter", FILL_LAYER_ID, handleMouseEnter);
+      map.off("mouseleave", FILL_LAYER_ID, handleMouseLeave);
+      if (map.getLayer(LINE_LAYER_ID)) map.removeLayer(LINE_LAYER_ID);
+      if (map.getLayer(FILL_LAYER_ID)) map.removeLayer(FILL_LAYER_ID);
+      if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID);
+      map.getCanvas().style.cursor = "";
+    };
+  }, [footprints, interactive, isLoaded, map, onSelect]);
+
+  useEffect(() => {
+    if (!isLoaded || !map) return;
+    if (!map.getLayer(FILL_LAYER_ID)) return;
+
+    map.setPaintProperty(FILL_LAYER_ID, "fill-opacity", [
+      "case",
+      ["==", ["get", "id"], selectedId ?? ""],
+      0.34,
+      0.12,
+    ]);
+    map.setPaintProperty(LINE_LAYER_ID, "line-width", [
+      "case",
+      ["==", ["get", "id"], selectedId ?? ""],
+      2.5,
+      1.25,
+    ]);
+  }, [isLoaded, map, selectedId]);
+
+  return null;
+}
 
 export type FootprintsMapProps = {
   footprints: readonly Footprint[];
@@ -25,12 +168,9 @@ export function FootprintsMap({
   compact = false,
 }: FootprintsMapProps) {
   const t = useTranslations("Footprints");
-  const [hoveredArcId, setHoveredArcId] = useState<string | null>(null);
   const selectedFootprint = compact
     ? null
     : (footprints.find((footprint) => footprint.id === selectedId) ?? null);
-  const arcs = getFootprintArcs(footprints);
-  const selectedArc = arcs.find((arc) => arc.id === hoveredArcId);
 
   return (
     <div
@@ -39,42 +179,18 @@ export function FootprintsMap({
     >
       <Map
         aria-label={t("mapLabel")}
-        center={[24, 28]}
+        center={[114, 28]} // China-wide view for the coverage zones.
         projection={{ type: "globe" }}
         styles={footprintMapStyles}
         workerUrl={footprintMapWorkerUrl}
         zoom={1.9}
       >
-        {arcs.map((arc) => (
-          <Map.Arc
-            key={arc.id}
-            curvature={arc.curvature}
-            data={[arc]}
-            hoverPaint={{ "line-opacity": 1, "line-width": 4 }}
-            paint={{
-              "line-blur": 0.4,
-              "line-color": arc.color,
-              "line-opacity": 0.92,
-              "line-width": arc.width,
-            }}
-            samples={96}
-            onHover={
-              compact
-                ? undefined
-                : (event) => setHoveredArcId(event?.arc.id ? String(event.arc.id) : null)
-            }
-            onClick={
-              compact
-                ? undefined
-                : (event) => {
-                    const destination = footprints.find(
-                      (footprint) => footprint.id === event.arc.toId
-                    );
-                    if (destination) onSelect?.(destination);
-                  }
-            }
-          />
-        ))}
+        <FootprintCoverageZones
+          footprints={footprints}
+          onSelect={compact ? undefined : onSelect}
+          interactive={!compact}
+          selectedId={selectedId}
+        />
 
         {footprints.map((footprint) => {
           const isSelected = footprint.id === selectedId;
@@ -87,7 +203,15 @@ export function FootprintsMap({
               onClick={compact ? undefined : () => onSelect?.(footprint)}
             >
               <Map.MarkerContent>
-                <Map.MarkerDot color={compact ? "#4285f4" : isSelected ? "#f59e0b" : "#4285f4"} />
+                <Map.MarkerDot
+                  color={
+                    compact
+                      ? getCoverageColor(footprint.id)
+                      : isSelected
+                        ? "#f59e0b"
+                        : getCoverageColor(footprint.id)
+                  }
+                />
                 <Map.MarkerLabel>{footprint.place}</Map.MarkerLabel>
               </Map.MarkerContent>
               <Map.MarkerTooltip>
@@ -145,8 +269,8 @@ export function FootprintsMap({
                 {t("places")}
               </span>
               <span>
-                <strong className="text-foreground block text-base">{arcs.length}</strong>
-                {t("paths")}
+                <strong className="text-foreground block text-base">{footprints.length}</strong>
+                {t("zones")}
               </span>
               <span>
                 <strong className="text-foreground block text-base">
@@ -155,21 +279,9 @@ export function FootprintsMap({
                 {t("latest")}
               </span>
             </div>
-            {selectedArc ? (
-              <div className="border-default-200 flex items-center gap-2 border-t pt-3 text-xs">
-                <span
-                  className="h-0.5 w-4 rounded-full"
-                  style={{ backgroundColor: selectedArc.color }}
-                />
-                <Typography color="muted" type="body-xs" className="truncate">
-                  {selectedArc.route}
-                </Typography>
-              </div>
-            ) : (
-              <Chip size="sm" variant="soft" className="w-fit">
-                {t("hoverPath")}
-              </Chip>
-            )}
+            <Chip size="sm" variant="soft" className="w-fit">
+              {t("coverageHint")}
+            </Chip>
           </Card.Content>
         </Card>
       ) : null}

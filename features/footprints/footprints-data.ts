@@ -13,18 +13,6 @@ export type Footprint = {
   order: number;
 };
 
-export type FootprintArc = {
-  id: string;
-  toId: string;
-  from: [number, number];
-  to: [number, number];
-  route: string;
-  color: string;
-  width: number;
-  /** Signed bow for Map.Arc. Nearby routes use opposite signs so they separate. */
-  curvature: number;
-};
-
 /**
  * Personal places in China.
  * Coordinates use a representative city for each province/region.
@@ -155,35 +143,6 @@ export function getFootprintYears(footprints: readonly Footprint[] = FOOTPRINTS)
   return [...new Set(footprints.map((footprint) => footprint.year))].sort(
     (first, second) => second - first
   );
-}
-
-export function getFootprintArcs(footprints: readonly Footprint[] = FOOTPRINTS): FootprintArc[] {
-  const ordered = [...footprints].sort(
-    (first, second) => first.year - second.year || first.order - second.order
-  );
-  const home = ordered[0];
-  if (!home) return [];
-
-  // Every recorded trip leaves home. A year-by-year chain zigzags inside China and
-  // collapses into one knot at the globe zoom used by the Flight Paths example.
-  return ordered.slice(1).map((destination, index) => {
-    const from: [number, number] = [home.longitude, home.latitude];
-    const to: [number, number] = [destination.longitude, destination.latitude];
-    const distance = Math.hypot(to[0] - from[0], to[1] - from[1]);
-    const reach = Math.min(0.42, 0.16 + distance / 48);
-    const direction = index % 2 === 0 ? 1 : -1;
-
-    return {
-      id: `${home.id}-${destination.id}`,
-      toId: destination.id,
-      from,
-      to,
-      route: `${home.place} → ${destination.place}`,
-      color: "#4285f4",
-      width: distance < 4 ? 1.6 : 2.2,
-      curvature: reach * direction,
-    };
-  });
 }
 
 export function getFeaturedFootprints(limit = 3, footprints: readonly Footprint[] = FOOTPRINTS) {

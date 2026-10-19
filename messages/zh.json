@@ -1018,9 +1018,9 @@
     "mapTitle": "足迹",
     "mapDescription": "留在地图上的地方",
     "places": "地点",
-    "paths": "路径",
+    "zones": "区域",
     "latest": "最近",
-    "hoverPath": "悬停一条路径，看走过的路线",
+    "coverageHint": "每个地点周围的覆盖区域",
     "noPlaces": "这一年没有地点",
     "noPlacesHint": "换一个年份标签，继续顺着路线看。",
     "selectedMemory": "选中的旅行记忆",
@@ -1252,7 +1252,7 @@
       "cardTitle": "足迹",
       "cardDescription": "留在地图上的地方",
       "places": "地方",
-      "paths": "路径",
+      "zones": "区域",
       "latest": "最近"
     },
     "links": {

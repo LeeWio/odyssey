@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   FOOTPRINTS,
   getFeaturedFootprints,
-  getFootprintArcs,
   getFootprintMetaLabel,
   getFootprintYears,
   getSortedFootprints,
@@ -32,33 +31,8 @@ describe("footprint chronology", () => {
     ]);
     expect(getSortedFootprints([])).toEqual([]);
     expect(getFootprintYears([])).toEqual([]);
-    expect(getFootprintArcs([])).toEqual([]);
     expect(getFeaturedFootprints(4, [])).toEqual([]);
     expect(getFeaturedFootprints(-1)).toEqual([]);
-  });
-
-  it("draws each later place as its own route from home", () => {
-    const arcs = getFootprintArcs();
-    expect(arcs).toHaveLength(FOOTPRINTS.length - 1);
-    expect(arcs[0]).toMatchObject({
-      id: "hubei-shaanxi",
-      toId: "shaanxi",
-      from: [114.3055, 30.5928],
-      to: [108.9398, 34.3416],
-      route: "Hubei → Shaanxi",
-    });
-    expect(arcs.map((arc) => arc.id)).toEqual([
-      "hubei-shaanxi",
-      "hubei-guangzhou",
-      "hubei-shenzhen",
-      "hubei-chongqing",
-      "hubei-anhui",
-      "hubei-huizhou",
-      "hubei-henan",
-    ]);
-    expect(arcs[1]?.curvature).toBeLessThan(0);
-    expect(arcs[2]?.curvature).toBeGreaterThan(0);
-    expect(Math.sign(arcs[1]!.curvature)).not.toBe(Math.sign(arcs[2]!.curvature));
   });
 
   it("keeps memory titles and avoids em-dashes in visitor copy", () => {

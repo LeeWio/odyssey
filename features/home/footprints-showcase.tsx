@@ -6,12 +6,7 @@ import { Card, Chip, Link, Typography } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { Icon } from "@iconify/react";
 
-import {
-  FootprintsMap,
-  FOOTPRINTS,
-  getFeaturedFootprints,
-  getFootprintArcs,
-} from "@/features/footprints";
+import { FootprintsMap, FOOTPRINTS, getFeaturedFootprints } from "@/features/footprints";
 import {
   HOME_SECTION_CONTENT,
   HOME_SECTION_DESCRIPTION,
@@ -21,7 +16,6 @@ import {
 
 export function FootprintsShowcase() {
   const t = useTranslations("Home");
-  const arcs = getFootprintArcs(FOOTPRINTS);
   const previewPlaces = getFeaturedFootprints(3, FOOTPRINTS);
   const latestYear = Math.max(...FOOTPRINTS.map((footprint) => footprint.year));
 
@@ -70,9 +64,9 @@ export function FootprintsShowcase() {
               </span>
               <span>
                 <strong className="text-foreground block text-base tabular-nums">
-                  {arcs.length}
+                  {FOOTPRINTS.length}
                 </strong>
-                {t("footprints.paths")}
+                {t("footprints.zones")}
               </span>
               <span>
                 <strong className="text-foreground block text-base tabular-nums">

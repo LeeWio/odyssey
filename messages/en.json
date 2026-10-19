@@ -1018,9 +1018,9 @@
     "mapTitle": "Footprints",
     "mapDescription": "Places kept on the map",
     "places": "Places",
-    "paths": "Paths",
+    "zones": "Zones",
     "latest": "Latest",
-    "hoverPath": "Hover a path to trace the route",
+    "coverageHint": "Coverage around each place",
     "noPlaces": "No places in this year",
     "noPlacesHint": "Pick another year tab to keep following the route.",
     "selectedMemory": "Selected travel memory",
@@ -1259,7 +1259,7 @@
       "cardTitle": "Footprints",
       "cardDescription": "Places kept on the map",
       "places": "Places",
-      "paths": "Paths",
+      "zones": "Zones",
       "latest": "Latest"
     },
     "links": {
