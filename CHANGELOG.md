@@ -1,3 +1,10 @@
+## [1.226.2](https://github.com/LeeWio/odyssey/compare/v1.226.1...v1.226.2) (2026-10-20)
+
+
+### Bug Fixes
+
+* **web:** blur the article shader under the reading surface ([50f2737](https://github.com/LeeWio/odyssey/commit/50f27376eb3bb1453a04162034fd18957b020a48))
+
 ## [1.226.1](https://github.com/LeeWio/odyssey/compare/v1.226.0...v1.226.1) (2026-10-20)
 
 
