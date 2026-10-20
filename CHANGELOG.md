@@ -1,3 +1,10 @@
+# [1.226.0](https://github.com/LeeWio/odyssey/compare/v1.225.0...v1.226.0) (2026-10-20)
+
+
+### Features
+
+* **moments:** filter the feed from sidebar topics ([d6c3503](https://github.com/LeeWio/odyssey/commit/d6c3503601d8470fde2e2ff626d757d5d7c8b73e))
+
 # [1.225.0](https://github.com/LeeWio/odyssey/compare/v1.224.8...v1.225.0) (2026-10-20)
 
 
