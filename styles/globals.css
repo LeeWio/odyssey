@@ -37,13 +37,23 @@
   white-space: pre !important;
 }
 
-/* Shared route crossfade. Navigation and footer stay outside this snapshot. */
+/* Shared route crossfade. The shell is named only during the theme reveal
+   (html[data-beui-vt]); a permanent view-transition-name flashes the first
+   top-layer overlay. */
 ::view-transition-old(.page-fade) {
   animation: page-fade-out 160ms cubic-bezier(0.4, 0, 1, 1) both;
 }
 
 ::view-transition-new(.page-fade) {
   animation: page-fade-in 420ms cubic-bezier(0.16, 1.08, 0.3, 1) both;
+}
+
+html[data-beui-vt] [data-view-transition-shell="site-navbar"] {
+  view-transition-name: site-navbar;
+}
+
+html[data-beui-vt] [data-view-transition-shell="site-footer"] {
+  view-transition-name: site-footer;
 }
 
 ::view-transition-group(site-navbar),
