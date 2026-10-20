@@ -1,3 +1,10 @@
+# [1.225.0](https://github.com/LeeWio/odyssey/compare/v1.224.8...v1.225.0) (2026-10-20)
+
+
+### Features
+
+* **life-list:** add the public list and nested admin board ([7537c0a](https://github.com/LeeWio/odyssey/commit/7537c0aad53f405617a312afc53eb7741500ede4))
+
 ## [1.224.8](https://github.com/LeeWio/odyssey/compare/v1.224.7...v1.224.8) (2026-10-20)
 
 
