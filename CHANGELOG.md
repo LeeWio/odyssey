@@ -1,3 +1,10 @@
+## [1.224.8](https://github.com/LeeWio/odyssey/compare/v1.224.7...v1.224.8) (2026-10-20)
+
+
+### Bug Fixes
+
+* **motion:** drop unused reveal duration from lint ([ca91db0](https://github.com/LeeWio/odyssey/commit/ca91db0dc57928beb2c6fb65615f1e569b7b62ef))
+
 ## [1.224.7](https://github.com/LeeWio/odyssey/compare/v1.224.6...v1.224.7) (2026-10-20)
 
 
