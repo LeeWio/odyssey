@@ -1,3 +1,10 @@
+## [1.224.4](https://github.com/LeeWio/odyssey/compare/v1.224.3...v1.224.4) (2026-10-20)
+
+
+### Bug Fixes
+
+* **navbar:** use the site favicon as the home mark ([99b8041](https://github.com/LeeWio/odyssey/commit/99b8041137c16fa7939f1131a0eb677e63ccfcb7))
+
 ## [1.224.3](https://github.com/LeeWio/odyssey/compare/v1.224.2...v1.224.3) (2026-10-20)
 
 
