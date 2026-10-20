@@ -320,7 +320,7 @@ export const PublisherToolbar = ({
           <AnimatePresence>
             {charCount > 0 && (
               <motion.div
-                initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.6, x: -5 }}
+                initial={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.6, x: -5 }}
                 animate={{ opacity: 1, scale: 1, x: 0 }}
                 exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.6, x: -5 }}
                 transition={

@@ -181,7 +181,7 @@ export function FeaturedWriting() {
                   data-testid="home-writing-slide"
                 >
                   <motion.div
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+                    initial={shouldReduceMotion ? undefined : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 24 }}
                     transition={{

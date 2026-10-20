@@ -81,7 +81,7 @@ export function GalleryShowcase() {
         {GALLERY_PREVIEW.map((photo, index) => (
           <motion.div
             key={photo.src}
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{

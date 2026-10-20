@@ -1,5 +1,16 @@
 export type OAuthProvider = "google" | "github";
 
+/** Providers the dialog can start. Labels stay proper nouns; button copy comes from i18n. */
+export const SOCIAL_LOGIN_PROVIDERS: Array<{
+  id: OAuthProvider;
+  label: string;
+  icon: string;
+  enabled: boolean;
+}> = [
+  { id: "google", label: "Google", icon: "devicon:google", enabled: false },
+  { id: "github", label: "GitHub", icon: "devicon:github", enabled: true },
+];
+
 export const OAUTH_REDIRECT_KEY = "oauth_redirect_referrer";
 
 export const getOAuthAuthorizationUrl = (provider: OAuthProvider, apiBaseUrl?: string) => {
@@ -15,8 +26,6 @@ export const startOAuthLogin = (provider: OAuthProvider) => {
   );
   window.location.assign(getOAuthAuthorizationUrl(provider, process.env.NEXT_PUBLIC_API_BASE_URL));
 };
-
-export const maskEmail = (email: string) => email.replace(/^(.)(.*)(@.*)$/, "$1****$3");
 
 export const isSafeRedirectPath = (value: string) =>
   value.startsWith("/") && !value.startsWith("//") && !value.includes("\\");
@@ -95,19 +104,4 @@ export const scrubOAuthParamsFromLocation = () => {
     window.location.hash
   );
   window.history.replaceState(window.history.state, "", cleaned.href);
-};
-
-export const validatePassword = (
-  value: string,
-  messages: {
-    min?: string;
-    uppercase?: string;
-    number?: string;
-  } = {}
-) => {
-  if (value.length < 8) return messages.min ?? "Password must be at least 8 characters";
-  if (!/[A-Z]/.test(value))
-    return messages.uppercase ?? "Password must contain at least one uppercase letter";
-  if (!/[0-9]/.test(value)) return messages.number ?? "Password must contain at least one number";
-  return null;
 };

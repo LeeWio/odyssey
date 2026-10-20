@@ -32,7 +32,7 @@ import { activeIndicatorSpring, enterEase, exitEase, navigationSpring } from "./
 import { getNavigationItem } from "./navigation-data";
 import type { NavigationId } from "./types";
 
-const AuthDialog = dynamic(() => import("../auth/auth-dialog").then((mod) => mod.AuthDialog), {
+const AuthDialog = dynamic(() => import("../auth").then((mod) => mod.AuthDialog), {
   ssr: false,
 });
 
@@ -419,7 +419,7 @@ export const Navbar = () => {
         aria-modal={isLocked || isMobileMenuOpen ? true : undefined}
         aria-label={isLocked || isMobileMenuOpen ? t("dialogLabel") : undefined}
         className="fixed inset-x-0 top-0 z-50 mx-auto w-full overflow-hidden rounded-2xl border"
-        initial={reduceMotion ? false : { opacity: 0 }}
+        initial={reduceMotion ? undefined : { opacity: 0 }}
         animate={{
           opacity: 1,
           width: targetNavigationWidth || "100%",
@@ -809,7 +809,7 @@ export const Navbar = () => {
                   {!activeItem ? (
                     <motion.div
                       key="mobile-index"
-                      initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                      initial={reduceMotion ? undefined : { opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -12 }}
                       className="pb-3"
@@ -822,7 +822,7 @@ export const Navbar = () => {
                       <div className="grid gap-1">
                         {/* Mobile 1: Chronicle */}
                         <motion.div
-                          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                          initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0, duration: 0.16, ease: enterEase }}
                         >
@@ -846,7 +846,7 @@ export const Navbar = () => {
 
                         {/* Mobile 2: Orbit */}
                         <motion.div
-                          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                          initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.04, duration: 0.16, ease: enterEase }}
                         >
@@ -870,7 +870,7 @@ export const Navbar = () => {
 
                         {/* Mobile 3: Travelogue */}
                         <motion.div
-                          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                          initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.08, duration: 0.16, ease: enterEase }}
                         >
@@ -894,7 +894,7 @@ export const Navbar = () => {
 
                         {/* Mobile 4: Archive */}
                         <motion.div
-                          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                          initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.12, duration: 0.16, ease: enterEase }}
                         >
@@ -993,7 +993,7 @@ export const Navbar = () => {
                         <motion.p
                           custom={0}
                           variants={textEntrance}
-                          initial={reduceMotion ? false : "hidden"}
+                          initial={reduceMotion ? undefined : "hidden"}
                           animate="visible"
                           className="text-accent text-xs font-semibold tracking-[0.16em] uppercase"
                         >
@@ -1002,7 +1002,7 @@ export const Navbar = () => {
                         <motion.h2
                           custom={1}
                           variants={textEntrance}
-                          initial={reduceMotion ? false : "hidden"}
+                          initial={reduceMotion ? undefined : "hidden"}
                           animate="visible"
                           className="mt-4 max-w-[10ch] text-[clamp(2.5rem,4.5vw,5rem)] leading-[0.94] font-semibold tracking-[-0.055em]"
                         >
@@ -1011,7 +1011,7 @@ export const Navbar = () => {
                         <motion.p
                           custom={2}
                           variants={textEntrance}
-                          initial={reduceMotion ? false : "hidden"}
+                          initial={reduceMotion ? undefined : "hidden"}
                           animate="visible"
                           className="text-muted mt-5 max-w-md text-sm leading-6 sm:text-base sm:leading-7"
                         >
@@ -1020,7 +1020,7 @@ export const Navbar = () => {
                         <motion.div
                           custom={3}
                           variants={textEntrance}
-                          initial={reduceMotion ? false : "hidden"}
+                          initial={reduceMotion ? undefined : "hidden"}
                           animate="visible"
                         >
                           <Button

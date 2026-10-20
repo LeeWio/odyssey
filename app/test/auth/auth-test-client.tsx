@@ -3,7 +3,7 @@
 import { Button } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { AuthDialog, type AuthMode } from "@/components/auth/auth-dialog";
+import { AuthDialog, type AuthMode } from "@/components/auth";
 
 const Grainient = dynamic(() => import("@/components/background/grainient"), {
   ssr: false,

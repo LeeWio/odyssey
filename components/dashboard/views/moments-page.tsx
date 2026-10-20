@@ -70,7 +70,7 @@ function TimelineItem({ moment }: TimelineItemProps) {
 
   return (
     <motion.div
-      initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+      initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{

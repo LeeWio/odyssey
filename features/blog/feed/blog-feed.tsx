@@ -87,7 +87,7 @@ function BlogPostCard({
       <MotionCard
         variant="secondary"
         className="group flex h-full flex-col"
-        initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+        initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         whileHover={
           shouldReduceMotion
@@ -164,7 +164,7 @@ function FeaturedPost({ post }: { post: PostDigestResponse }) {
       <MotionCard
         variant="tertiary"
         className="group-focus-visible:ring-accent flex flex-col group-focus-visible:ring-2"
-        initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+        initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         whileHover={
           shouldReduceMotion
@@ -258,7 +258,7 @@ function ContinueReading({
             <motion.div
               key={post.id}
               layout={!shouldReduceMotion}
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+              initial={shouldReduceMotion ? undefined : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{
                 opacity: 0,
@@ -468,7 +468,7 @@ function ArchiveRail({
           <motion.div
             key={activeSeries.map(([name]) => name).join("|")}
             layout={!shouldReduceMotion}
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{
               opacity: 0,
@@ -681,7 +681,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
               color="accent"
               size="sm"
               variant="soft"
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+              initial={shouldReduceMotion ? undefined : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: shouldReduceMotion ? 0 : motionDuration.reveal,
@@ -694,7 +694,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
               type="h1"
               weight="bold"
               className="mt-4 text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.05em]"
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+              initial={shouldReduceMotion ? undefined : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: shouldReduceMotion ? 0 : motionDuration.reveal,
@@ -708,7 +708,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
               color="muted"
               type="body"
               className="mt-3 max-w-xl text-balance"
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
+              initial={shouldReduceMotion ? undefined : { opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: shouldReduceMotion ? 0 : motionDuration.reveal,
@@ -801,7 +801,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
                   <motion.section
                     key="featured-writing"
                     aria-labelledby="featured-writing-title"
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                    initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={
                       shouldReduceMotion
@@ -844,7 +844,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
                     {isFetching && !isLoadingPage ? (
                       <motion.div
                         key="updating-results"
-                        initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+                        initial={shouldReduceMotion ? undefined : { opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={
                           shouldReduceMotion
@@ -868,7 +868,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
                   {isLoadingPage ? (
                     <motion.div
                       key="loading"
-                      initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                      initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={
                         shouldReduceMotion
@@ -882,7 +882,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
                   ) : isError ? (
                     <motion.div
                       key="error"
-                      initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                      initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={
                         shouldReduceMotion
@@ -910,7 +910,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
                   ) : posts.length === 0 ? (
                     <motion.div
                       key={`empty-${normalizedKeyword || "all"}-${selectedCategoryId ?? "all"}`}
-                      initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                      initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={
                         shouldReduceMotion
@@ -961,7 +961,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
                     <motion.div
                       key={`results-${resultsKey}`}
                       className="min-w-0"
-                      initial={shouldReduceMotion ? false : { opacity: 0 }}
+                      initial={shouldReduceMotion ? undefined : { opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0, transition: exitTransition }}
                       transition={stateTransition}
@@ -985,7 +985,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
                     <motion.div
                       key={`pagination-${totalPages}`}
                       layout={!shouldReduceMotion}
-                      initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+                      initial={shouldReduceMotion ? undefined : { opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={
                         shouldReduceMotion
@@ -1056,7 +1056,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
             >
               <motion.div
                 layout={!shouldReduceMotion}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+                initial={shouldReduceMotion ? undefined : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
                   delay: shouldReduceMotion ? 0 : 0.16,
@@ -1076,7 +1076,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
                   <motion.div
                     key="continue-reading"
                     layout={!shouldReduceMotion}
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+                    initial={shouldReduceMotion ? undefined : { opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={
                       shouldReduceMotion

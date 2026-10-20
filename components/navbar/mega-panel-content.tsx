@@ -14,7 +14,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
   const t = useTranslations("Nav");
   const reveal = (index: number) => ({
     variants: reduceMotion ? undefined : contentEntrance,
-    initial: reduceMotion ? false : "hidden",
+    initial: reduceMotion ? undefined : "hidden",
     animate: "visible",
     custom: index,
   });

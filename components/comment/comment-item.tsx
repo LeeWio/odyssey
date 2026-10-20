@@ -147,7 +147,7 @@ export function CommentItem(props: CommentItemProps) {
             {isExpanded ? (
               <motion.div
                 id={repliesId}
-                initial={shouldReduceMotion ? false : { height: 0, opacity: 0 }}
+                initial={shouldReduceMotion ? undefined : { height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={shouldReduceMotion ? undefined : { height: 0, opacity: 0 }}
                 transition={{ duration: 0.18, ease: microEaseOut }}

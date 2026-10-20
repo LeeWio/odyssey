@@ -14,7 +14,7 @@ export type PageRevealInViewOptions = {
 };
 
 export type PageRevealMotion = {
-  initial: false | { opacity: number; y: number };
+  initial?: { opacity: number; y: number };
   animate?: { opacity: number; y: number };
   whileInView?: { opacity: number; y: number };
   viewport?: { once: true; amount?: number; margin?: string };
@@ -33,7 +33,7 @@ export function pageReveal(
   duration = sectionRevealDuration
 ): PageRevealMotion {
   return {
-    initial: reducedMotion ? false : { opacity: 0, y: distance },
+    initial: reducedMotion ? undefined : { opacity: 0, y: distance },
     animate: { opacity: 1, y: 0 },
     transition: {
       duration: reducedMotion ? 0 : duration,
@@ -53,7 +53,7 @@ export function pageRevealInView(
   const { duration = sectionRevealDuration, amount = 0.3, margin } = options;
 
   return {
-    initial: reducedMotion ? false : { opacity: 0, y: distance },
+    initial: reducedMotion ? undefined : { opacity: 0, y: distance },
     whileInView: { opacity: 1, y: 0 },
     viewport: margin ? { once: true, amount, margin } : { once: true, amount },
     transition: {

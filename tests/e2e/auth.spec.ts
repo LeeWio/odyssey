@@ -61,6 +61,40 @@ test("switches views with reduced motion enabled", async ({ page }) => {
   await expect(dialog).toHaveCount(1);
 });
 
+test("registration success explains that an administrator must approve the account", async ({
+  page,
+}) => {
+  await page.route("**/api/v1/auth/register", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        code: 0,
+        message: "Account submitted for review",
+        data: null,
+      }),
+    });
+  });
+
+  await page.getByRole("button", { name: "Open signup" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name: "Continue with Email" }).click();
+  await dialog.locator('input[name="username"]').fill("ada");
+  await dialog.locator('input[name="email"]').fill("ada@example.com");
+  await dialog.locator('input[name="password"]').fill("Secret123");
+  await dialog.locator('input[name="password"]').press("Tab");
+  await expect(dialog.locator('input[name="confirmPassword"]')).toBeFocused();
+  await dialog.locator('input[name="confirmPassword"]').fill("Secret123");
+  await dialog.getByRole("button", { name: "Sign Up", exact: true }).click();
+
+  await expect(dialog.getByRole("heading", { name: "Sign Up" })).toBeVisible();
+  await expect(dialog.getByText("Request received")).toBeVisible();
+  await expect(dialog.getByText("cannot sign in yet")).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Log In" })).toHaveCount(0);
+  await dialog.getByRole("button", { name: "Done" }).click();
+  await expect(dialog).toHaveCount(0);
+});
+
 test("can close during a view transition and reopen the requested view", async ({ page }) => {
   await page.getByRole("button", { name: "Open login" }).click();
   const dialog = page.getByRole("dialog");

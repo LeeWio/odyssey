@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Alert,
   Button,
   FieldError,
   Form,
@@ -9,54 +10,63 @@ import {
   Label,
   Spinner,
   TextField,
+  Tooltip,
 } from "@heroui/react";
-import { useMounted } from "@mantine/hooks";
 import { Icon } from "@iconify/react";
-import { useIsPresent } from "motion/react";
 import { useTranslations } from "next-intl";
 import type React from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRegisterMutation } from "@/lib/features/auth";
-import { validatePassword } from "./auth-utils";
-import { AuthView, AuthDivider, AuthStep, AuthSwitchPrompt } from "./auth-layout";
+import { useRegistrationSession } from "../hooks/use-registration-session";
+import { isValidEmail } from "../utils/email";
+import { validatePassword } from "../utils/password";
+import { AuthDivider, AuthSwitchPrompt } from "./auth-prompts";
+import { AuthView } from "./auth-shell";
+import { AuthStep } from "./auth-step";
 import { SocialLoginButtons } from "./social-login-buttons";
 
 export interface SignupContentProps {
-  onSuccess: () => void;
+  /** False while the dialog is closed or showing login. A late registration must not open the review step. */
+  isActive?: boolean;
+  onDone: () => void;
   onSwitchToLogIn?: () => void;
 }
 
-export const SignupContent = ({ onSuccess, onSwitchToLogIn }: SignupContentProps) => {
+export const SignupContent = ({ isActive = true, onDone, onSwitchToLogIn }: SignupContentProps) => {
   const t = useTranslations("Auth");
-  const isPresent = useIsPresent();
-  const mounted = useMounted();
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const wasActive = useRef(false);
   const [isVisible, setIsVisible] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [register, { isLoading: isRegLoading }] = useRegisterMutation();
+  const { isPendingReview, submit } = useRegistrationSession(isActive, register);
+
+  useEffect(() => {
+    if (!isActive) {
+      wasActive.current = false;
+      return;
+    }
+    if (wasActive.current) return;
+    wasActive.current = true;
+    setIsFormVisible(false);
+    setIsVisible(false);
+    setPassword("");
+    setConfirmPassword("");
+  }, [isActive]);
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
 
-    const submit = async () => {
-      try {
-        await register({
-          username: data.username as string,
-          email: data.email as string,
-          password: data.password as string,
-        }).unwrap();
-
-        if (mounted && isPresent) onSuccess();
-      } catch {
-        // The mutation displays the server error through the shared API toast handler.
-      }
-    };
-
-    void submit();
+    void submit({
+      username: data.username as string,
+      email: data.email as string,
+      password: data.password as string,
+    }).catch(() => {
+      // The mutation displays the server error through the shared API toast handler.
+    });
   };
 
   const switchView = useCallback((showForm: boolean) => {
@@ -70,59 +80,63 @@ export const SignupContent = ({ onSuccess, onSwitchToLogIn }: SignupContentProps
     }
   }, []);
 
+  if (isPendingReview) {
+    return (
+      <AuthView title={t("signUp")}>
+        <AuthStep stepKey="pending-review">
+          <Alert status="warning">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>{t("registrationPendingTitle")}</Alert.Title>
+              <Alert.Description>{t("registrationPendingBody")}</Alert.Description>
+            </Alert.Content>
+          </Alert>
+          <Button autoFocus fullWidth variant="primary" onPress={onDone}>
+            {t("registrationPendingDone")}
+          </Button>
+        </AuthStep>
+      </AuthView>
+    );
+  }
+
   return (
     <AuthView title={t("signUp")}>
       {isFormVisible ? (
         <AuthStep stepKey="form">
           <Form validationBehavior="native" className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <TextField
+              fullWidth
               isRequired
-              name="username"
               minLength={3}
-              validate={(value) => {
-                if (value.length < 3) {
-                  return t("usernameMin");
-                }
-                return null;
-              }}
+              name="username"
+              variant="secondary"
+              validate={(value) => (value.length < 3 ? t("usernameMin") : null)}
             >
               <Label>{t("username")}</Label>
-              <Input
-                autoFocus
-                id="sign-up-username"
-                name="username"
-                placeholder="johndoe"
-                variant="secondary"
-              />
+              <Input autoFocus className="w-full" placeholder="johndoe" />
               <FieldError />
             </TextField>
 
             <TextField
+              fullWidth
               isRequired
               name="email"
               type="email"
-              validate={(value) => {
-                if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
-                  return t("validEmail");
-                }
-                return null;
-              }}
+              variant="secondary"
+              validate={(value) => (isValidEmail(value) ? null : t("validEmail"))}
             >
               <Label>{t("email")}</Label>
-              <Input
-                id="sign-up-email"
-                name="email"
-                placeholder="john@example.com"
-                variant="secondary"
-              />
+              <Input className="w-full" placeholder="john@example.com" />
               <FieldError />
             </TextField>
 
             <TextField
+              fullWidth
               isRequired
               minLength={8}
               name="password"
               value={password}
+              variant="secondary"
               onChange={setPassword}
               validate={(value) =>
                 validatePassword(value, {
@@ -133,49 +147,49 @@ export const SignupContent = ({ onSuccess, onSwitchToLogIn }: SignupContentProps
               }
             >
               <Label>{t("password")}</Label>
-              <InputGroup variant="secondary">
+              <InputGroup fullWidth>
                 <InputGroup.Input
-                  id="sign-up-password"
-                  name="password"
                   placeholder="Create a password"
                   type={isVisible ? "text" : "password"}
                 />
-                <InputGroup.Suffix className="pr-0">
-                  <Button
-                    isIconOnly
-                    aria-label={isVisible ? "Hide password" : "Show password"}
-                    aria-pressed={isVisible}
-                    size="sm"
-                    type="button"
-                    variant="ghost"
-                    onPress={() => setIsVisible(!isVisible)}
-                  >
-                    {isVisible ? (
-                      <Icon icon="gravity-ui:eye" className="size-4" aria-hidden="true" />
-                    ) : (
-                      <Icon icon="gravity-ui:eye-slash" className="size-4" aria-hidden="true" />
-                    )}
-                  </Button>
+                <InputGroup.Suffix>
+                  <Tooltip delay={300}>
+                    <Button
+                      isIconOnly
+                      aria-label={isVisible ? t("hidePassword") : t("showPassword")}
+                      aria-pressed={isVisible}
+                      size="sm"
+                      tabIndex={-1}
+                      variant="ghost"
+                      onPress={() => setIsVisible(!isVisible)}
+                    >
+                      {isVisible ? (
+                        <Icon icon="gravity-ui:eye" className="size-4" aria-hidden="true" />
+                      ) : (
+                        <Icon icon="gravity-ui:eye-slash" className="size-4" aria-hidden="true" />
+                      )}
+                    </Button>
+                    <Tooltip.Content>
+                      {isVisible ? t("hidePassword") : t("showPassword")}
+                    </Tooltip.Content>
+                  </Tooltip>
                 </InputGroup.Suffix>
               </InputGroup>
               <FieldError />
             </TextField>
 
             <TextField
+              fullWidth
               isRequired
               name="confirmPassword"
+              type={isVisible ? "text" : "password"}
               value={confirmPassword}
+              variant="secondary"
               onChange={setConfirmPassword}
               validate={(value) => (value !== password ? t("passwordMismatch") : null)}
             >
               <Label>{t("confirmPassword")}</Label>
-              <Input
-                id="sign-up-confirm-password"
-                name="confirmPassword"
-                placeholder="Repeat your password"
-                type={isVisible ? "text" : "password"}
-                variant="secondary"
-              />
+              <Input className="w-full" placeholder="Repeat your password" />
               <FieldError />
             </TextField>
 

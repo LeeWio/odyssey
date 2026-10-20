@@ -18,7 +18,7 @@ export function MomentsMasonry({ moments }: MomentsMasonryProps) {
       {moments.map((moment, index) => (
         <motion.div
           key={moment.id}
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={
             shouldReduceMotion

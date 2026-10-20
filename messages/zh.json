@@ -17,6 +17,7 @@
     "sendCode": "发送验证码",
     "verifyAccount": "验证账户",
     "otpLabel": "一次性密码验证码",
+    "otpInvalid": "验证码不正确，请再试一次。",
     "codeSentTo": "验证码已发送至 {email}",
     "didntReceiveCode": "没有收到验证码？",
     "resend": "重新发送",
@@ -33,7 +34,12 @@
     "passwordMin": "密码至少需要 8 个字符",
     "passwordUppercase": "密码必须包含至少一个大写字母",
     "passwordNumber": "密码必须包含至少一个数字",
-    "passwordMismatch": "两次输入的密码不一致"
+    "passwordMismatch": "两次输入的密码不一致",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "registrationPendingTitle": "申请已提交",
+    "registrationPendingBody": "这个账号还不能登录，需要管理员审核通过。你可以先关闭，审核通过后再回来。",
+    "registrationPendingDone": "知道了"
   },
   "Index": {
     "title": "不止于行",

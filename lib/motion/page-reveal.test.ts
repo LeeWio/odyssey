@@ -17,7 +17,7 @@ describe("page reveal presets", () => {
 
   it("disables travel when reduced motion is on", () => {
     const reveal = pageReveal(true, 0.1, 18);
-    expect(reveal.initial).toBe(false);
+    expect(reveal.initial).toBeUndefined();
     expect(reveal.transition.duration).toBe(0);
     expect(reveal.transition.delay).toBe(0);
     expect(reveal.transition.ease).toBe(pageEaseOut);
@@ -37,7 +37,7 @@ describe("page reveal presets", () => {
 
   it("removes stagger delays from reduced-motion section reveals", () => {
     const reveal = createPageReveal(true).revealInView(0.4);
-    expect(reveal.initial).toBe(false);
+    expect(reveal.initial).toBeUndefined();
     expect(reveal.transition).toMatchObject({ duration: 0, delay: 0 });
   });
 

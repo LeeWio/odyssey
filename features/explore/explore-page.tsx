@@ -505,7 +505,7 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
               {posts.map((post, index) => (
                 <motion.div
                   key={post.id}
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+                  initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{

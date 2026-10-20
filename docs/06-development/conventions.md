@@ -94,7 +94,7 @@ Animation decisions must follow [Animation Design Specification](../04-design/an
 - `features/blog/auxiliary/reading-progress-bar.tsx`: GSAP is justified because it is scroll-linked and progress-driven
 - `app/(main)/single/archive-timeline.tsx`: GSAP is justified because it is scroll-linked timeline choreography
 - `components/music/*`: mostly `motion/react` plus CSS micro-effects; should stay on that path unless the interaction becomes scroll-driven
-- `components/auth/*`: `motion/react` is the right default for modal/login transitions
+- `components/auth/dialog`: `motion/react` is the right default for modal/login transitions
 - `features/blog/*` loaders and placeholders: CSS is appropriate and should stay simple
 
 ### Required Documentation

@@ -118,7 +118,7 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
                 <motion.div
                   key={moment.id}
                   className="mb-4 break-inside-avoid"
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+                  initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
                     duration: shouldReduceMotion ? 0 : 0.65,

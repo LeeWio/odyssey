@@ -1,4 +1,4 @@
-import { Link, Modal, Separator, cn } from "@heroui/react";
+import { cn } from "@heroui/react";
 import {
   AnimatePresence,
   domMax,
@@ -8,41 +8,6 @@ import {
   useReducedMotion,
 } from "motion/react";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
-
-interface AuthDialogShellProps {
-  children: ReactNode;
-  isOpen?: boolean;
-  onOpenChange?: (isOpen: boolean) => void;
-}
-
-export const AuthDialogShell = ({ children, isOpen, onOpenChange }: AuthDialogShellProps) => (
-  <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
-    <Modal.Container scroll="inside">
-      <Modal.Dialog className="w-full sm:max-w-90">
-        <Modal.CloseTrigger />
-        {children}
-      </Modal.Dialog>
-    </Modal.Container>
-  </Modal.Backdrop>
-);
-
-export const AuthView = ({
-  title,
-  subtitle,
-  children,
-}: {
-  title: ReactNode;
-  subtitle?: ReactNode;
-  children: ReactNode;
-}) => (
-  <>
-    <Modal.Header>
-      <Modal.Heading className="text-xl font-medium">{title}</Modal.Heading>
-      {subtitle ? <p className="text-muted text-sm wrap-break-word">{subtitle}</p> : null}
-    </Modal.Header>
-    <Modal.Body data-scrollbar="none">{children}</Modal.Body>
-  </>
-);
 
 interface AuthStepProps {
   children: ReactNode;
@@ -60,16 +25,16 @@ const motionVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      opacity: { duration: 0.14, ease: "easeOut" as const },
-      y: { duration: 0.18, ease: "easeOut" as const },
+      opacity: { duration: 0.2, ease: "easeOut" as const },
+      y: { duration: 0.2, ease: "easeOut" as const },
     },
   },
   hidden: {
     opacity: 0,
     y: 6,
     transition: {
-      opacity: { duration: 0.08, ease: "easeIn" as const },
-      y: { duration: 0.1, ease: "easeIn" as const },
+      opacity: { duration: 0.12, ease: "easeIn" as const },
+      y: { duration: 0.12, ease: "easeIn" as const },
     },
   },
 };
@@ -88,6 +53,7 @@ export const AuthStep = ({ children, className, stepKey }: AuthStepProps) => {
             : { type: "spring", stiffness: 360, damping: 38, mass: 0.8 },
         }}
       >
+        {/* wait keeps the leaving step in flow until it exits, so the dialog height does not stack both steps. */}
         <AnimatePresence initial={false} mode="wait">
           <AuthStepContent
             key={stepKey}
@@ -138,24 +104,3 @@ function AuthStepContent({
     </m.div>
   );
 }
-
-export const AuthDivider = () => (
-  <div className="flex items-center gap-4 py-2" aria-hidden="true">
-    <Separator className="flex-1" />
-    <p className="text-tiny text-default-500 shrink-0">OR</p>
-    <Separator className="flex-1" />
-  </div>
-);
-
-interface AuthSwitchPromptProps {
-  actionLabel: ReactNode;
-  onAction?: () => void;
-  text: ReactNode;
-}
-
-export const AuthSwitchPrompt = ({ actionLabel, onAction, text }: AuthSwitchPromptProps) => (
-  <div className="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-sm">
-    <span>{text}</span>
-    <Link onPress={onAction}>{actionLabel}</Link>
-  </div>
-);

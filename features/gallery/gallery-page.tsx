@@ -93,7 +93,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
     <PageFrame className={compact ? "min-h-0 w-full p-0" : "w-full"}>
       {!compact ? (
         <motion.header
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, ease: pageEaseOut }}
           className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between"
@@ -135,7 +135,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
       ) : null}
 
       <motion.section
-        initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.65, ease: pageEaseOut, delay: shouldReduceMotion ? 0 : 0.08 }}

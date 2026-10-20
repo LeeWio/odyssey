@@ -42,7 +42,7 @@ export const PublisherGallery = ({
             <motion.div
               key={item.id}
               layout={!shouldReduceMotion}
-              initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.85, x: 15 }}
+              initial={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.85, x: 15 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.85, x: -15 }}
               transition={

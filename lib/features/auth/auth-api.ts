@@ -130,7 +130,9 @@ export const authApi = baseApi.injectEndpoints({
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          toast.success(data.message || "Account created successfully!");
+          toast.success(
+            data.message || "Account submitted. An administrator still needs to approve it."
+          );
         } catch (error: unknown) {
           toast.danger(getApiErrorMessage(error, "Registration failed"));
         }

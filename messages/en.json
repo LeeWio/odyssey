@@ -17,6 +17,7 @@
     "sendCode": "Send Code",
     "verifyAccount": "Verify account",
     "otpLabel": "One-time password verification code",
+    "otpInvalid": "That code is not valid. Try again.",
     "codeSentTo": "We've sent a code to {email}",
     "didntReceiveCode": "Don't see it?",
     "resend": "Resend",
@@ -33,7 +34,12 @@
     "passwordMin": "Password must be at least 8 characters",
     "passwordUppercase": "Password must contain at least one uppercase letter",
     "passwordNumber": "Password must contain at least one number",
-    "passwordMismatch": "Passwords do not match"
+    "passwordMismatch": "Passwords do not match",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "registrationPendingTitle": "Request received",
+    "registrationPendingBody": "This account cannot sign in yet. An administrator still needs to approve it. You can close this and come back after it is approved.",
+    "registrationPendingDone": "Done"
   },
   "Index": {
     "title": "don't just do it",

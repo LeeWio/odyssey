@@ -118,6 +118,8 @@
 
 位置：`components/auth`、`lib/features/auth`
 
+`components/auth` 的入口是 `index.ts`。`dialog/` 按弹层壳、步骤动画、登录、注册分开。`hooks/` 把登录会话和注册会话分开。`utils/` 把邮箱遮罩、密码校验和 OAuth 回跳分开。步骤动画留在 `Modal.Body` 内的容器上，并用 `mode="wait"` 让旧步骤先离开。同步叠两步会把弹层高度撑开再缩回。
+
 职责：
 
 - 登录、注册弹层状态。

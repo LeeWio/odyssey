@@ -11,7 +11,7 @@ import {
   getSafeRedirectPath,
   OAUTH_REDIRECT_KEY,
   scrubOAuthParamsFromLocation,
-} from "@/components/auth/auth-utils";
+} from "@/components/auth";
 import { baseApi } from "@/lib/api";
 import { authApi } from "@/lib/features/auth/auth-api";
 import { setCredentials, setPermissions } from "@/lib/features/auth";
