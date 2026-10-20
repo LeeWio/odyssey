@@ -1,3 +1,4 @@
+import { PageTransition } from "@/components/motion/page-transition";
 import { Navbar } from "@/components/navbar";
 import { GlobalControl } from "@/components/global-control";
 import { Footer } from "@/components/footer";
@@ -15,7 +16,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <Navbar />
       <GlobalControl />
       <main id="main-content" tabIndex={-1} className="flex w-full grow flex-col outline-none">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
       <Footer />
       <MiniPlayerGate />

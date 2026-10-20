@@ -1,6 +1,6 @@
 "use client";
 
-import { createPageReveal, pageEaseOut } from "@/lib/motion";
+import { createPageReveal } from "@/lib/motion";
 import { Section } from "@/components/layout/section";
 import {
   HOME_CAROUSEL_SLIDE,
@@ -97,7 +97,7 @@ function FeaturedArticle({
 export function FeaturedWriting() {
   const t = useTranslations("Home");
   const shouldReduceMotion = useReducedMotionPreference();
-  const { revealInView } = createPageReveal(shouldReduceMotion);
+  const { presence } = createPageReveal(shouldReduceMotion);
 
   const {
     data: featuredPosts,
@@ -117,22 +117,22 @@ export function FeaturedWriting() {
   return (
     <Section id="writing" aria-labelledby="writing-title">
       <header className={HOME_SECTION_HEADER_CENTERED}>
-        <motion.div {...revealInView(0, 10)}>
+        <motion.div {...presence(0, 10)}>
           <Chip color="accent" size="sm" variant="soft">
             {t("writing.eyebrow")}
           </Chip>
         </motion.div>
-        <motion.div {...revealInView(0.06)}>
+        <motion.div {...presence()}>
           <Typography id="writing-title" type="h2" weight="bold" className={HOME_SECTION_TITLE}>
             {t("writing.title")}
           </Typography>
         </motion.div>
-        <motion.div {...revealInView(0.12, 14)}>
+        <motion.div {...presence(0.04, 14)}>
           <Typography color="muted" type="body" className={HOME_SECTION_DESCRIPTION}>
             {t("writing.description")}
           </Typography>
         </motion.div>
-        <motion.div {...revealInView(0.16, 14)}>
+        <motion.div {...presence(0.08, 14)}>
           <Link className="mt-2 text-sm no-underline" href="/single">
             {t("writing.browseAll")}
             <Link.Icon aria-hidden="true">
@@ -142,7 +142,7 @@ export function FeaturedWriting() {
         </motion.div>
       </header>
 
-      <motion.div className={HOME_SECTION_CONTENT} {...revealInView(0.2, 20)}>
+      <motion.div className={HOME_SECTION_CONTENT} {...presence(0.08, 16)}>
         {(isError || (isFetching && !isLoading && posts.length === 0)) && (
           <SectionLoadError
             subject="writing"
@@ -180,17 +180,7 @@ export function FeaturedWriting() {
                   className={HOME_CAROUSEL_SLIDE}
                   data-testid="home-writing-slide"
                 >
-                  <motion.div
-                    initial={shouldReduceMotion ? undefined : { opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 24 }}
-                    transition={{
-                      duration: shouldReduceMotion ? 0 : 0.28,
-                      delay: shouldReduceMotion ? 0 : Math.min(index * 0.04, 0.2),
-                      ease: pageEaseOut,
-                    }}
-                    className="aspect-[16/10] min-h-64 w-full"
-                  >
+                  <div className="aspect-[16/10] min-h-64 w-full">
                     <FeaturedArticle
                       title={post.title}
                       summary={post.summary || t("writing.fallbackSummary")}
@@ -199,7 +189,7 @@ export function FeaturedWriting() {
                       publishedAt={post.publishedAt}
                       index={index}
                     />
-                  </motion.div>
+                  </div>
                 </Carousel.Item>
               ))}
             </Carousel.Content>

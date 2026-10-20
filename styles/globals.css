@@ -37,10 +37,44 @@
   white-space: pre !important;
 }
 
+/* Shared route crossfade. Navigation and footer stay outside this snapshot. */
+::view-transition-old(.page-fade) {
+  animation: page-fade-out 160ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+::view-transition-new(.page-fade) {
+  animation: page-fade-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::view-transition-group(site-navbar),
+::view-transition-group(site-footer) {
+  animation: none;
+  z-index: 40;
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rich-text-block-enter,
   .rich-text-block-enter-pending {
     opacity: 1;
+    animation: none;
+  }
+
+  ::view-transition-old(.page-fade),
+  ::view-transition-new(.page-fade) {
     animation: none;
   }
 }

@@ -6,6 +6,7 @@ import {
   pageEaseOut,
   pageReveal,
   pageRevealInView,
+  sectionPresence,
   sectionRevealDuration,
 } from "./page-reveal";
 
@@ -24,7 +25,7 @@ describe("page reveal presets", () => {
   });
 
   it("uses short section transitions and modest travel by default", () => {
-    expect(sectionRevealDuration).toBe(0.28);
+    expect(sectionRevealDuration).toBe(0.24);
     for (const reveal of [
       pageReveal(false),
       pageRevealInView(false),
@@ -46,6 +47,21 @@ describe("page reveal presets", () => {
     expect(reveal.initial).toEqual({ opacity: 0, y: 14 });
     expect(reveal.whileInView).toEqual({ opacity: 1, y: 0 });
     expect(reveal.viewport).toEqual({ once: true, amount: 0.2, margin: "-40px" });
+  });
+
+  it("enters a section over 250ms and leaves faster when it scrolls away", () => {
+    const presence = sectionPresence(false, { delay: 0.08, duration: 0.27 });
+    expect(presence.viewport).toEqual({ once: false, amount: 0.35 });
+    expect(presence.variants.visible.transition).toMatchObject({ duration: 0.27, delay: 0.08 });
+    expect(presence.variants.hidden.transition.duration).toBe(0.16);
+    expect(presence.variants.visible.transition.ease).toEqual([0.22, 1, 0.36, 1]);
+    expect(presence.variants.hidden).toMatchObject({ opacity: 0, y: 12 });
+  });
+
+  it("keeps a reduced-motion section visible without travel", () => {
+    const presence = sectionPresence(true, { delay: 0.08 });
+    expect(presence.variants.hidden).toMatchObject({ opacity: 1, y: 0 });
+    expect(presence.variants.visible.transition).toMatchObject({ duration: 0, delay: 0 });
   });
 
   it("binds reduced motion through createPageReveal", () => {

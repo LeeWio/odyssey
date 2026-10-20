@@ -69,7 +69,8 @@ Animation decisions must follow [Animation Design Specification](../04-design/an
 - default to CSS for local decorative effects, loading states, and micro-feedback
 - use GSAP only when a timeline, scroll linkage, or complex orchestration is genuinely required
 - do not add a second animation system to a module without updating the module docs or an ADR
-- for page and section entrances, reuse `lib/motion` (`pageEaseOut`, `createPageReveal`, `pageReveal`, `pageRevealInView`) instead of copying local `easeOut` / `revealInView` helpers
+- page changes use the shared `PageTransition` crossfade: enter `240ms` with `pageEaseOut`, exit `160ms` with `pageEaseIn`. Do not add a second route fade.
+- section entrances reuse `lib/motion` (`createPageReveal`, `sectionPresence`, `pageFadeDuration`) instead of copying local fade helpers
 - for short icon/button transitions, reuse `microEaseOut` (same curve as `pageEaseOut`)
 - prefer `hooks/use-reduced-motion-preference` on hydration-sensitive surfaces so SSR defaults to reduced motion
 

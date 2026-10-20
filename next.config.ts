@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ["lowlight"],
 
   experimental: {
+    viewTransition: true,
     optimizePackageImports: [
       "@heroui/react",
       "@heroui-pro/react",

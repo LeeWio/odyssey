@@ -5,7 +5,10 @@ export const pageEaseOut = [0.22, 1, 0.36, 1] as const;
 /** Alias for short icon/button transitions that share the same curve. */
 export const microEaseOut = pageEaseOut;
 
-export const sectionRevealDuration = 0.28;
+/** Shared fade used by page changes and section presence. Exit stays shorter. */
+export const pageFadeDuration = 0.24;
+export const pageFadeExitDuration = 0.16;
+export const sectionRevealDuration = pageFadeDuration;
 
 export type PageRevealInViewOptions = {
   duration?: number;
@@ -64,6 +67,50 @@ export function pageRevealInView(
   };
 }
 
+export const pageEaseIn = [0.4, 0, 1, 1] as const;
+
+export type SectionPresenceOptions = {
+  amount?: number;
+  delay?: number;
+  distance?: number;
+  duration?: number;
+};
+
+/**
+ * Scroll presence for a title or list. Enter eases out; leaving reverses to a
+ * shorter fade so the block can disappear without moving the page background.
+ */
+export function sectionPresence(reducedMotion: boolean, options: SectionPresenceOptions = {}) {
+  const delay = reducedMotion ? 0 : (options.delay ?? 0);
+  const duration = reducedMotion ? 0 : (options.duration ?? pageFadeDuration);
+  const distance = options.distance ?? 12;
+
+  return {
+    initial: "hidden" as const,
+    whileInView: "visible" as const,
+    viewport: { once: false as const, amount: options.amount ?? 0.35 },
+    variants: {
+      hidden: {
+        opacity: reducedMotion ? 1 : 0,
+        y: reducedMotion ? 0 : distance,
+        transition: {
+          duration: reducedMotion ? 0 : pageFadeExitDuration,
+          ease: pageEaseIn,
+        },
+      },
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+          duration,
+          delay,
+          ease: pageEaseOut,
+        },
+      },
+    },
+  };
+}
+
 /** Bind reduced-motion once for a page or section. */
 export function createPageReveal(reducedMotion: boolean, defaults: PageRevealInViewOptions = {}) {
   const defaultDuration = defaults.duration ?? sectionRevealDuration;
@@ -73,5 +120,7 @@ export function createPageReveal(reducedMotion: boolean, defaults: PageRevealInV
       pageReveal(reducedMotion, delay, distance, duration),
     revealInView: (delay = 0, distance = 12, options: PageRevealInViewOptions = {}) =>
       pageRevealInView(reducedMotion, delay, distance, { ...defaults, ...options }),
+    presence: (delay = 0, distance = 12, options: SectionPresenceOptions = {}) =>
+      sectionPresence(reducedMotion, { delay, distance, ...options, ...defaults }),
   };
 }

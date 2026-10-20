@@ -2,8 +2,6 @@
 
 import React from "react";
 import { useMediaQuery } from "@mantine/hooks";
-import { Card, Skeleton } from "@heroui/react";
-
 import { useGetGuestbookEntriesQuery } from "@/lib/features/comment";
 import { useTranslations } from "next-intl";
 import { useRelativeTime } from "@/lib/relative-time";
@@ -93,27 +91,12 @@ const defaultEntries: GuestbookEntry[] = [
   },
 ];
 
-function GuestbookSkeletonCard() {
-  return (
-    <Card className="border-default-100/50 bg-surface-secondary/10 flex w-full flex-col gap-3 rounded-2xl border p-4">
-      <div className="flex items-center gap-3">
-        <Skeleton className="size-8 rounded-full" />
-        <Skeleton className="h-4 w-24 rounded-md" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-3 w-full rounded-md" />
-        <Skeleton className="h-3 w-5/6 rounded-md" />
-      </div>
-    </Card>
-  );
-}
-
 export default function GuestbookBoard() {
   const t = useTranslations("Guestbook");
   const formatRelativeTime = useRelativeTime();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { ref: boardRef, columnCount } = useScrollColumnCount<HTMLDivElement>();
-  const { data: rawEntries = [], isLoading } = useGetGuestbookEntriesQuery();
+  const { data: rawEntries = [] } = useGetGuestbookEntriesQuery();
 
   const mappedEntries = React.useMemo(() => {
     const live = (rawEntries || []).map((comment) => ({
@@ -131,18 +114,6 @@ export default function GuestbookBoard() {
     () => splitIntoColumns(mappedEntries, columnCount),
     [mappedEntries, columnCount]
   );
-
-  if (isLoading) {
-    return (
-      <div className="w-full py-10" aria-busy="true" aria-label={t("loading")}>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4">
-          {Array.from({ length: 8 }, (_, index) => (
-            <GuestbookSkeletonCard key={index} />
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div ref={boardRef} className="w-full py-10">

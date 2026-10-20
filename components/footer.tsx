@@ -150,7 +150,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="w-full">
+    <footer className="w-full" style={{ viewTransitionName: "site-footer" }}>
       <div className="flex w-full flex-col gap-10 px-4 pt-20 pb-8 sm:pt-28 md:px-6 xl:px-8">
         <motion.div {...reveal()}>
           <Card variant="secondary" className="gap-6 p-6 sm:p-8">

@@ -4,7 +4,6 @@ import { createPageReveal } from "@/lib/motion";
 import { PageContainer } from "@/components/layout/page-container";
 import { Section } from "@/components/layout/section";
 import {
-  HOME_PREVIEW_GRID,
   HOME_SECTION_CONTENT,
   HOME_SECTION_DESCRIPTION,
   HOME_SECTION_HEADER_CENTERED,
@@ -13,12 +12,21 @@ import {
 
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
+import { ExploreOdyssey } from "@/features/home/explore-odyssey";
+import { FeaturedWriting } from "@/features/home/featured-writing";
+import { FootprintsShowcase } from "@/features/home/footprints-showcase";
+import { FriendLinksShowcase } from "@/features/home/friend-links-showcase";
+import { GalleryShowcase } from "@/features/home/gallery-showcase";
 import { HelloApple } from "@/features/home/hello-apple";
+import { HomeOrientation } from "@/features/home/home-orientation";
+import { LatelySection } from "@/features/home/lately-section";
+import { MomentsShowcase } from "@/features/home/moments-showcase";
+import { ProjectsShowcase } from "@/features/home/projects-showcase";
+import GuestbookBoard from "@/components/corners/guestbook-board";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import {
-  Skeleton,
   Button,
   Card,
   Link,
@@ -44,244 +52,6 @@ const HomeSmoothScroll = dynamic(
   { ssr: false }
 );
 
-function SkeletonSectionHeader({
-  centered = false,
-  eyebrow = "w-24",
-  title = "w-72",
-  description = "w-full max-w-xl",
-}: {
-  centered?: boolean;
-  eyebrow?: string;
-  title?: string;
-  description?: string;
-}) {
-  return (
-    <div className={centered ? "flex flex-col items-center text-center" : "max-w-xl"}>
-      <Skeleton className={`h-5 max-w-full rounded-full ${eyebrow}`} />
-      <Skeleton className={`mt-5 h-12 max-w-full rounded-xl ${title}`} />
-      <Skeleton className={`mt-4 h-5 max-w-full rounded-lg ${description}`} />
-    </div>
-  );
-}
-
-function SkeletonMetaLine({ className = "w-24" }: { className?: string }) {
-  return <Skeleton className={`h-4 rounded-md ${className}`} />;
-}
-
-function SkeletonArticleCard() {
-  return (
-    <div className="bg-surface-secondary/45 flex aspect-[16/10] min-h-64 flex-col justify-between rounded-3xl p-5">
-      <div className="flex items-center justify-between gap-3">
-        <Skeleton className="h-6 w-20 rounded-full" />
-        <Skeleton className="h-6 w-24 rounded-full" />
-      </div>
-      <div className="flex flex-col gap-3">
-        <Skeleton className="h-7 w-4/5 rounded-lg" />
-        <Skeleton className="h-4 w-full rounded-md" />
-        <Skeleton className="h-4 w-3/5 rounded-md" />
-      </div>
-    </div>
-  );
-}
-
-function SkeletonProjectCard() {
-  return (
-    <Card variant="secondary" className="overflow-hidden p-0">
-      <Skeleton className="aspect-[16/10] w-full rounded-none" />
-      <Card.Header className="gap-3">
-        <Skeleton className="h-6 w-36 rounded-lg" />
-        <Skeleton className="h-4 w-full rounded-md" />
-        <Skeleton className="h-4 w-4/5 rounded-md" />
-        <div className="flex gap-2">
-          <Skeleton className="h-6 w-20 rounded-full" />
-          <Skeleton className="h-6 w-24 rounded-full" />
-        </div>
-      </Card.Header>
-    </Card>
-  );
-}
-
-function SkeletonFriendLinkCard() {
-  return (
-    <Card variant="secondary" className="min-h-44 gap-4 p-5">
-      <div className="flex items-center gap-3">
-        <Skeleton className="size-11 rounded-full" />
-        <div className="flex flex-1 flex-col gap-2">
-          <Skeleton className="h-4 w-28 rounded-md" />
-          <Skeleton className="h-3 w-36 rounded-md" />
-        </div>
-        <Skeleton className="size-4 rounded-full" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-4 w-full rounded-md" />
-        <Skeleton className="h-4 w-4/5 rounded-md" />
-      </div>
-    </Card>
-  );
-}
-
-const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-board"), {
-  ssr: false,
-  loading: () => (
-    <div
-      aria-busy="true"
-      aria-label="Loading guestbook"
-      className="grid w-full grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4 py-10"
-      role="status"
-    >
-      {Array.from({ length: 8 }, (_, index) => (
-        <Card key={index} variant="secondary" className="flex min-h-36 flex-col gap-3 p-4">
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-8 rounded-full" />
-            <SkeletonMetaLine className="w-24" />
-          </div>
-          <SkeletonMetaLine className="w-full" />
-          <SkeletonMetaLine className="w-5/6" />
-        </Card>
-      ))}
-    </div>
-  ),
-});
-
-const FeaturedWriting = dynamic(
-  () => import("@/features/home/featured-writing").then((mod) => mod.FeaturedWriting),
-  {
-    ssr: false,
-    loading: () => (
-      <Section aria-busy="true">
-        <SkeletonSectionHeader centered eyebrow="w-28" title="w-72" />
-        <div className={`mt-12 ${HOME_PREVIEW_GRID}`}>
-          {Array.from({ length: 12 }).map((_, index) => (
-            <SkeletonArticleCard key={index} />
-          ))}
-        </div>
-      </Section>
-    ),
-  }
-);
-
-const MomentsShowcase = dynamic(
-  () => import("@/features/home/moments-showcase").then((mod) => mod.MomentsShowcase),
-  {
-    ssr: false,
-    loading: () => (
-      <Section aria-busy="true">
-        <SkeletonSectionHeader centered eyebrow="w-24" title="w-64" />
-        <div className="mt-12 [columns:20rem] gap-5">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="mb-5 break-inside-avoid">
-              <Skeleton
-                className={`w-full rounded-2xl ${index % 3 === 0 ? "aspect-[4/5]" : index % 3 === 1 ? "aspect-[5/6]" : "aspect-[1/1]"}`}
-              />
-            </div>
-          ))}
-        </div>
-      </Section>
-    ),
-  }
-);
-
-const ProjectsShowcase = dynamic(
-  () => import("@/features/home/projects-showcase").then((mod) => mod.ProjectsShowcase),
-  {
-    ssr: false,
-    loading: () => (
-      <Section aria-busy="true">
-        <SkeletonSectionHeader title="w-full max-w-xl" />
-        <div className="bg-separator mt-8 h-px w-full" />
-        <div className={`mt-8 ${HOME_PREVIEW_GRID}`}>
-          {Array.from({ length: 12 }, (_, index) => (
-            <SkeletonProjectCard key={index} />
-          ))}
-        </div>
-      </Section>
-    ),
-  }
-);
-
-const GalleryShowcase = dynamic(
-  () => import("@/features/home/gallery-showcase").then((mod) => mod.GalleryShowcase),
-  {
-    ssr: false,
-    loading: () => (
-      <Section aria-busy="true">
-        <SkeletonSectionHeader title="w-full max-w-xl" />
-        <div className={`mt-10 ${HOME_PREVIEW_GRID}`}>
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Card key={index} variant="secondary" className="overflow-hidden p-0">
-              <Skeleton className="aspect-[4/3] w-full rounded-none" />
-              <Card.Header className="gap-2">
-                <Skeleton className="h-6 w-2/3 rounded-lg" />
-                <Skeleton className="h-4 w-1/2 rounded-md" />
-              </Card.Header>
-            </Card>
-          ))}
-        </div>
-      </Section>
-    ),
-  }
-);
-
-const FriendLinksShowcase = dynamic(
-  () => import("@/features/home/friend-links-showcase").then((mod) => mod.FriendLinksShowcase),
-  {
-    ssr: false,
-    loading: () => (
-      <Section aria-busy="true">
-        <SkeletonSectionHeader title="w-full max-w-xl" />
-        <div className={`mt-10 ${HOME_PREVIEW_GRID}`}>
-          {Array.from({ length: 12 }, (_, index) => (
-            <SkeletonFriendLinkCard key={index} />
-          ))}
-        </div>
-      </Section>
-    ),
-  }
-);
-
-const FootprintsShowcase = dynamic(
-  () => import("@/features/home/footprints-showcase").then((mod) => mod.FootprintsShowcase),
-  {
-    ssr: false,
-    loading: () => (
-      <Section aria-busy="true">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <SkeletonSectionHeader title="w-72" description="w-full max-w-xl" />
-          <Skeleton className="h-5 w-32 rounded-md" />
-        </div>
-        <Skeleton className="mt-10 h-[clamp(28rem,60svh,44rem)] w-full rounded-lg" />
-      </Section>
-    ),
-  }
-);
-
-const LatelySection = dynamic(
-  () => import("@/features/home/lately-section").then((mod) => mod.LatelySection),
-  {
-    ssr: false,
-    loading: () => (
-      <Section aria-busy="true">
-        <SkeletonSectionHeader centered eyebrow="w-20" title="w-80" description="w-96" />
-        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-12">
-          <Skeleton className="min-h-[34rem] rounded-3xl lg:col-span-7" />
-          <Skeleton className="min-h-[34rem] rounded-3xl lg:col-span-5" />
-          <Skeleton className="min-h-[20rem] rounded-3xl lg:col-span-12" />
-        </div>
-      </Section>
-    ),
-  }
-);
-
-const HomeOrientation = dynamic(
-  () => import("@/features/home/home-orientation").then((mod) => mod.HomeOrientation),
-  { ssr: false }
-);
-
-const ExploreOdyssey = dynamic(
-  () => import("@/features/home/explore-odyssey").then((mod) => mod.ExploreOdyssey),
-  { ssr: false }
-);
-
 const MotionAccordion = motion.create(Accordion);
 
 const faqKeys = ["finished", "reply", "building", "desk", "trace"] as const;
@@ -302,7 +72,7 @@ export default function Home() {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  const { reveal, revealInView } = createPageReveal(shouldReduceMotion);
+  const { revealInView, presence } = createPageReveal(shouldReduceMotion);
 
   return (
     <>
@@ -313,7 +83,7 @@ export default function Home() {
           aria-labelledby="home-hero-title"
           className="relative isolate flex min-h-[min(680px,calc(100dvh-3rem))] flex-col items-center justify-center overflow-hidden pt-24 pb-12 text-center"
         >
-          <MotionChip color="accent" size="sm" variant="soft" {...reveal(0.05, 10)}>
+          <MotionChip color="accent" size="sm" variant="soft" {...presence(0, 10)}>
             {t("page.eyebrow")}
           </MotionChip>
 
@@ -326,7 +96,7 @@ export default function Home() {
             type="h1"
             weight="bold"
             className="max-w-2xl text-4xl leading-[1.05] tracking-normal text-balance break-words sm:text-5xl lg:text-6xl"
-            {...reveal(0.18)}
+            {...presence()}
           >
             {t("page.title")}
           </MotionTypography>
@@ -335,14 +105,14 @@ export default function Home() {
             color="muted"
             type="body"
             className="mt-4 max-w-lg leading-7"
-            {...reveal(0.26, 14)}
+            {...presence(0.04, 14)}
           >
             {t("page.subtitle")}
           </MotionTypography>
 
-          <div
+          <motion.div
             className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
-            {...reveal(0.32, 12)}
+            {...presence(0.08, 12)}
           >
             <Link
               href="/chronicle"
@@ -358,7 +128,7 @@ export default function Home() {
               {t("page.exploreField")}
               <Icon aria-hidden="true" icon="lucide:arrow-down" className="size-4" />
             </Link>
-          </div>
+          </motion.div>
         </PageContainer>
 
         <HomeOrientation />
