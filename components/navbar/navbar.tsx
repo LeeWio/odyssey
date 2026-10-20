@@ -7,6 +7,7 @@ import { Icon } from "@iconify/react";
 import { useHotkeys, useMounted, useOs } from "@mantine/hooks";
 import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -457,7 +458,14 @@ export const Navbar = () => {
             whileTap={reduceMotion ? undefined : { scale: 0.97 }}
           >
             <Link href="/" onClick={closeNavigation} aria-label={t("home")}>
-              <img src="/favicon.svg" alt="" width={30} height={30} className="size-[30px]" />
+              <Image
+                src="/favicon.svg"
+                alt=""
+                width={30}
+                height={30}
+                unoptimized
+                className="size-[30px]"
+              />
             </Link>
           </motion.div>
 

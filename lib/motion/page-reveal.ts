@@ -43,12 +43,7 @@ export type PageRevealMotion = {
 };
 
 /** Mount/entrance reveal driven by `animate`. */
-export function pageReveal(
-  reducedMotion: boolean,
-  delay = 0,
-  distance = 12,
-  duration = sectionRevealDuration
-): PageRevealMotion {
+export function pageReveal(reducedMotion: boolean, delay = 0, distance = 12): PageRevealMotion {
   return {
     initial: reducedMotion ? undefined : { opacity: 0, y: distance },
     animate: { opacity: 1, y: 0 },
@@ -65,7 +60,7 @@ export function pageRevealInView(
   distance = 12,
   options: PageRevealInViewOptions = {}
 ): PageRevealMotion {
-  const { duration = sectionRevealDuration, amount = 0.3, margin } = options;
+  const { amount = 0.3, margin } = options;
 
   return {
     initial: reducedMotion ? undefined : { opacity: 0, y: distance },
@@ -73,11 +68,7 @@ export function pageRevealInView(
     viewport: margin ? { once: true, amount, margin } : { once: true, amount },
     transition: reducedMotion
       ? { duration: 0, delay: 0, ease: pageEaseOut }
-      : {
-          ...pageSpring,
-          delay,
-          ...(duration === sectionRevealDuration ? {} : { visualDuration: duration }),
-        },
+      : { ...pageSpring, delay },
   };
 }
 
@@ -96,7 +87,6 @@ export type SectionPresenceOptions = {
  */
 export function sectionPresence(reducedMotion: boolean, options: SectionPresenceOptions = {}) {
   const delay = reducedMotion ? 0 : (options.delay ?? 0);
-  const duration = reducedMotion ? 0 : (options.duration ?? pageFadeDuration);
   const distance = options.distance ?? 12;
 
   return {
@@ -125,11 +115,8 @@ export function sectionPresence(reducedMotion: boolean, options: SectionPresence
 
 /** Bind reduced-motion once for a page or section. */
 export function createPageReveal(reducedMotion: boolean, defaults: PageRevealInViewOptions = {}) {
-  const defaultDuration = defaults.duration ?? sectionRevealDuration;
-
   return {
-    reveal: (delay = 0, distance = 12, duration = defaultDuration) =>
-      pageReveal(reducedMotion, delay, distance, duration),
+    reveal: (delay = 0, distance = 12) => pageReveal(reducedMotion, delay, distance),
     revealInView: (delay = 0, distance = 12, options: PageRevealInViewOptions = {}) =>
       pageRevealInView(reducedMotion, delay, distance, { ...defaults, ...options }),
     presence: (delay = 0, distance = 12, options: SectionPresenceOptions = {}) =>
