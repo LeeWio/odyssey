@@ -205,6 +205,7 @@ export const baseApi = createApi({
     "Column",
     "Kanban",
     "AuditLog",
+    "LifeList",
   ],
   endpoints: () => ({}),
 });

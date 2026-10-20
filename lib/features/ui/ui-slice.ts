@@ -113,6 +113,9 @@ export const uiSlice = createSlice({
     toggleDashboard: (state) => {
       state.dashboard.isOpen = !state.dashboard.isOpen;
     },
+    setDashboardOpen: (state, action: PayloadAction<boolean>) => {
+      state.dashboard.isOpen = action.payload;
+    },
     setDashboardPath: (state, action: PayloadAction<string>) => {
       state.dashboard.path = action.payload;
     },
@@ -159,6 +162,7 @@ export const {
   setMiniPlayerOpen,
   setThemeVariant,
   toggleDashboard,
+  setDashboardOpen,
   setDashboardPath,
   openDashboardAtPath,
   toggleRichText,

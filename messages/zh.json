@@ -72,7 +72,7 @@
     "readMore": "阅读更多",
     "backToArchive": "返回归档",
     "abstract": "摘要",
-    "publishedOn": "发布于",
+    "publishedOn": "{date}",
     "minRead": "分钟阅读",
     "loadingArticles": "正在加载文章",
     "recentlyPublished": "最近发布",
@@ -138,7 +138,6 @@
     "columns": "专栏",
     "timelineArchive": "按时间",
     "highlight": "先读这篇",
-    "publishedOn": "{date}",
     "recentLogs": "还没凉的",
     "recentLogsHint": "刚写完，还热着。",
     "metaGalleryTitle": "胶片观察 | Odyssey",
@@ -425,7 +424,6 @@
     "collectionArticlesUnavailable": "收藏夹里的文章暂时不可用",
     "collectionEmpty": "这个收藏夹是空的",
     "collectionEmptyHint": "打开一篇文章，用收藏操作把它加到这里。",
-    "addedAt": "添加于 {date}",
     "removeFromNamed": "把《{title}》从 {name} 移除",
     "removeFromCollection": "从收藏夹移除",
     "pageOfArticles": "第 {page} / {pages} 页 · {count} 篇文章",
@@ -1082,10 +1080,18 @@
       "currentMode": "当前颜色模式",
       "matchDevice": "跟随设备外观",
       "useMode": "使用{mode}界面",
-      "modes": { "light": "浅色", "dark": "深色", "system": "跟随系统" },
+      "modes": {
+        "light": "浅色",
+        "dark": "深色",
+        "system": "跟随系统"
+      },
       "useTheme": "使用{theme}主题",
       "currentTheme": "当前主题样式",
-      "variants": { "glass": "玻璃", "mouve": "Mouve", "brutalism": "粗野" },
+      "variants": {
+        "glass": "玻璃",
+        "mouve": "Mouve",
+        "brutalism": "粗野"
+      },
       "variantHints": {
         "glass": "应用玻璃主题",
         "mouve": "应用 Mouve 主题",
@@ -1158,12 +1164,30 @@
       "title": "找到你的 Odyssey 路线。",
       "description": "写作、动态、项目、地方，以及那些值得再次回来的内容。",
       "viewArchive": "浏览归档",
-      "writing": { "title": "写作", "description": "来自纪事的文章和笔记。" },
-      "moments": { "title": "动态", "description": "仍在流动的小片段和观察。" },
-      "projects": { "title": "项目", "description": "已经交付的工具与实验。" },
-      "gallery": { "title": "图库", "description": "照片、地方和视觉碎片。" },
-      "footprints": { "title": "足迹", "description": "一张记录留下痕迹之处的地图。" },
-      "library": { "title": "阅读书架", "description": "收藏、整理，再次回到好内容。" }
+      "writing": {
+        "title": "写作",
+        "description": "来自纪事的文章和笔记。"
+      },
+      "moments": {
+        "title": "动态",
+        "description": "仍在流动的小片段和观察。"
+      },
+      "projects": {
+        "title": "项目",
+        "description": "已经交付的工具与实验。"
+      },
+      "gallery": {
+        "title": "图库",
+        "description": "照片、地方和视觉碎片。"
+      },
+      "footprints": {
+        "title": "足迹",
+        "description": "一张记录留下痕迹之处的地图。"
+      },
+      "library": {
+        "title": "阅读书架",
+        "description": "收藏、整理，再次回到好内容。"
+      }
     },
     "writing": {
       "recently": "最近",
@@ -1475,5 +1499,56 @@
         "browseTools": "浏览工具"
       }
     }
+  },
+  "LifeList": {
+    "title": "Before I Die",
+    "subtitle": "想去看一些地方，想尝试一些事情，也想在有限的时间里，认真经历属于自己的生活。",
+    "pace": "慢慢来，不必着急。",
+    "progress": "{completed} / {total} 已发生",
+    "progressPrivate": "{completed} / {total} 已发生，含私密事项",
+    "allCategories": "全部",
+    "allStatuses": "全部状态",
+    "status": {
+      "planned": "计划中",
+      "in_progress": "进行中",
+      "completed": "已完成",
+      "abandoned": "后来，我改变了想法"
+    },
+    "empty": "这里还没有写下任何愿望。可以从一件小事开始。",
+    "noResults": "没有符合筛选的事项。",
+    "loadError": "清单暂时无法加载。",
+    "notFound": "这件事是私密的、已归档，或已经不在这里。",
+    "why": "为什么想做",
+    "completedOn": "完成于 {date}",
+    "memories": "经历",
+    "noMemories": "还没有公开的经历。这没关系。",
+    "privateMemory": "私密",
+    "back": "返回清单",
+    "markComplete": "标记完成",
+    "completedToast": "这件事，终于发生了。",
+    "memoryHint": "如果愿意，可以为这段经历留下一点记录；也可以以后再补。",
+    "addMemory": "留下记录",
+    "memoryContent": "发生了什么",
+    "memoryLocation": "地点",
+    "memoryDate": "日期",
+    "memoryVisibility": "可见性",
+    "visibilityPublic": "公开",
+    "visibilityPrivate": "私密",
+    "save": "保存",
+    "saving": "保存中…",
+    "manage": "管理",
+    "newWish": "新愿望",
+    "editWish": "编辑愿望",
+    "titleLabel": "标题",
+    "descriptionLabel": "描述",
+    "motivationLabel": "原因",
+    "categoryLabel": "分类",
+    "uncategorized": "未分类",
+    "showArchived": "显示已归档",
+    "archive": "归档",
+    "restore": "恢复",
+    "remove": "移除",
+    "confirmRemove": "移除这项愿望和它的经历？",
+    "number": "第 {number} 件"
   }
 }

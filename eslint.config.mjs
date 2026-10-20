@@ -74,6 +74,7 @@ const eslintConfig = defineConfig([
     ".heroui-docs/**",
     ".reference/**",
     "demo/**",
+    "template-crm/**",
     "components/icons.tsx",
   ]),
 ]);

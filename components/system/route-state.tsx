@@ -2,15 +2,7 @@
 
 import { Icon } from "@iconify/react";
 
-import {
-  Link,
-  ProgressCircle,
-  Skeleton,
-  Surface,
-  Typography,
-  buttonVariants,
-  cn,
-} from "@heroui/react";
+import { Link, Typography, buttonVariants, cn } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import type { ReactNode } from "react";
 
@@ -90,43 +82,5 @@ export function RouteLinkButton({
     <Link className={cn(buttonVariants({ variant }), "no-underline")} href={href}>
       {children}
     </Link>
-  );
-}
-
-export function RouteLoading() {
-  return (
-    <main
-      aria-busy="true"
-      className="bg-background flex min-h-[100dvh] items-center justify-center px-5 py-24"
-    >
-      <Surface
-        aria-live="polite"
-        className="flex w-full max-w-md flex-col items-center gap-6 p-8 text-center sm:p-10"
-        role="status"
-        variant="transparent"
-      >
-        <ProgressCircle isIndeterminate aria-label="Loading page" size="lg">
-          <ProgressCircle.Track>
-            <ProgressCircle.TrackCircle />
-            <ProgressCircle.FillCircle />
-          </ProgressCircle.Track>
-        </ProgressCircle>
-
-        <div className="flex flex-col gap-1">
-          <Typography type="h3" weight="semibold">
-            Loading
-          </Typography>
-          <Typography color="muted" type="body-sm">
-            Preparing the next page.
-          </Typography>
-        </div>
-
-        <div aria-hidden="true" className="flex w-full flex-col gap-3">
-          <Skeleton animationType="pulse" className="h-3 w-3/4 self-center rounded-lg" />
-          <Skeleton animationType="pulse" className="h-3 w-full rounded-lg" />
-          <Skeleton animationType="pulse" className="h-3 w-2/3 self-center rounded-lg" />
-        </div>
-      </Surface>
-    </main>
   );
 }

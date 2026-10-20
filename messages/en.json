@@ -72,7 +72,7 @@
     "readMore": "Read More",
     "backToArchive": "Back to Archive",
     "abstract": "Abstract",
-    "publishedOn": "Published on",
+    "publishedOn": "{date}",
     "minRead": "min read",
     "loadingArticles": "Loading articles",
     "recentlyPublished": "Recently published",
@@ -138,7 +138,6 @@
     "columns": "Columns",
     "timelineArchive": "In order",
     "highlight": "Start here",
-    "publishedOn": "{date}",
     "recentLogs": "Still warm",
     "recentLogsHint": "The pieces that just landed.",
     "metaGalleryTitle": "Analog Photography Gallery | Odyssey",
@@ -425,7 +424,6 @@
     "collectionArticlesUnavailable": "Collection articles are unavailable",
     "collectionEmpty": "This collection is empty",
     "collectionEmptyHint": "Open an article and use the collection action to add it here.",
-    "addedAt": "Added {date}",
     "removeFromNamed": "Remove {title} from {name}",
     "removeFromCollection": "Remove from collection",
     "pageOfArticles": "Page {page} of {pages} · {count} articles",
@@ -1082,7 +1080,11 @@
       "currentMode": "Current color mode",
       "matchDevice": "Match the device appearance",
       "useMode": "Use a {mode} interface",
-      "modes": { "light": "Light", "dark": "Dark", "system": "System" },
+      "modes": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
       "useTheme": "Use {theme} theme",
       "currentTheme": "Current theme style",
       "variants": {
@@ -1162,11 +1164,26 @@
       "title": "Find your way through Odyssey.",
       "description": "Writing, moments, projects, places, and the things worth returning to.",
       "viewArchive": "Browse the archive",
-      "writing": { "title": "Writing", "description": "Essays and notes from the chronicle." },
-      "moments": { "title": "Moments", "description": "Small observations, kept in motion." },
-      "projects": { "title": "Projects", "description": "Tools and experiments that shipped." },
-      "gallery": { "title": "Gallery", "description": "Images, places, and visual fragments." },
-      "footprints": { "title": "Footprints", "description": "A map of places that left a mark." },
+      "writing": {
+        "title": "Writing",
+        "description": "Essays and notes from the chronicle."
+      },
+      "moments": {
+        "title": "Moments",
+        "description": "Small observations, kept in motion."
+      },
+      "projects": {
+        "title": "Projects",
+        "description": "Tools and experiments that shipped."
+      },
+      "gallery": {
+        "title": "Gallery",
+        "description": "Images, places, and visual fragments."
+      },
+      "footprints": {
+        "title": "Footprints",
+        "description": "A map of places that left a mark."
+      },
       "library": {
         "title": "Reading library",
         "description": "Save, collect, and return to good work."
@@ -1482,5 +1499,56 @@
         "browseTools": "Browse tools"
       }
     }
+  },
+  "LifeList": {
+    "title": "Before I Die",
+    "subtitle": "Things I want to see, try, learn, and experience in this lifetime.",
+    "pace": "Take your time.",
+    "progress": "{completed} / {total} completed",
+    "progressPrivate": "{completed} / {total} completed, including private wishes",
+    "allCategories": "All",
+    "allStatuses": "Any status",
+    "status": {
+      "planned": "Planned",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "abandoned": "Changed my mind"
+    },
+    "empty": "Nothing is written here yet. Start with one small wish.",
+    "noResults": "Nothing matches these filters.",
+    "loadError": "The list could not be loaded.",
+    "notFound": "This wish is private, archived, or no longer here.",
+    "why": "Why this matters",
+    "completedOn": "Completed {date}",
+    "memories": "Memories",
+    "noMemories": "No public memory yet. That is fine.",
+    "privateMemory": "Private",
+    "back": "Back to the list",
+    "markComplete": "Mark complete",
+    "completedToast": "This finally happened.",
+    "memoryHint": "Leave a note if you want. You can also come back later.",
+    "addMemory": "Leave a note",
+    "memoryContent": "What happened",
+    "memoryLocation": "Place",
+    "memoryDate": "Date",
+    "memoryVisibility": "Visibility",
+    "visibilityPublic": "Public",
+    "visibilityPrivate": "Private",
+    "save": "Save",
+    "saving": "Saving…",
+    "manage": "Manage",
+    "newWish": "New wish",
+    "editWish": "Edit wish",
+    "titleLabel": "Title",
+    "descriptionLabel": "Description",
+    "motivationLabel": "Why",
+    "categoryLabel": "Category",
+    "uncategorized": "Uncategorized",
+    "showArchived": "Show archived",
+    "archive": "Archive",
+    "restore": "Restore",
+    "remove": "Remove",
+    "confirmRemove": "Remove this wish and its memories?",
+    "number": "No. {number}"
   }
 }

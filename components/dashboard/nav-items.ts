@@ -59,6 +59,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { href: "/tags", icon: Tag, label: "Tags" },
       { href: "/comments", icon: Comment, label: "Comments" },
       { href: "/moments", icon: Sparkles, label: "Moments" },
+      { href: "/life-list", icon: ListCheck, label: "Life list" },
     ],
   },
   {

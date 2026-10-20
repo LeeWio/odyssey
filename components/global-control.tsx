@@ -2,10 +2,9 @@
 
 import dynamic from "next/dynamic";
 import { useHotkeys } from "@mantine/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { selectIsAdmin } from "@/lib/features/auth";
 import {
-  selectIsDashboardOpen,
   selectIsMomentPublisherOpen,
   selectIsRichTextOpen,
   selectIsSheetOpen,
@@ -65,11 +64,23 @@ function CockpitGate() {
 }
 
 function DashboardGate() {
-  const isOpen = useAppSelector(selectIsDashboardOpen);
   const isAdmin = useAppSelector(selectIsAdmin);
-  const loaded = useLoadOnce(isOpen && isAdmin);
+  const [ready, setReady] = useState(false);
 
-  if (!isAdmin || !loaded) return null;
+  useEffect(() => {
+    if (!isAdmin) return;
+    let cancelled = false;
+    void import("@/components/dashboard/dashboard-sheet").then(() => {
+      if (!cancelled) setReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAdmin]);
+
+  // Mount while closed. Opening on the same frame as the first mount replays the
+  // entrance and looks like the dashboard flashes.
+  if (!isAdmin || !ready) return null;
   return <DashboardSheet />;
 }
 

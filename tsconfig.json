@@ -32,5 +32,5 @@
     ".next-design/types/**/*.ts",
     ".next-design/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "demo", "shader_background"]
+  "exclude": ["node_modules", "demo", "shader_background", "template-crm"]
 }

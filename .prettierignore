@@ -9,6 +9,7 @@ CHANGELOG.md
 .env.production
 .reference
 demo
+template-crm
 playwright-report
 test-results
 styles/themes/heroui-pro-themes.scoped.css

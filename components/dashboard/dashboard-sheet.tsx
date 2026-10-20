@@ -1,109 +1,71 @@
 "use client";
 
+import { Xmark } from "@gravity-ui/icons";
 import { Sheet } from "@heroui-pro/react";
-import { Spinner } from "@heroui/react";
-import { useMounted } from "@mantine/hooks";
-import { lazy, Suspense } from "react";
+import { Button } from "@heroui/react";
+import { useState } from "react";
+import type { LifeListItemResponse, LifeListStatus } from "@/lib/features/life-list";
 import { selectIsAdmin, useLogoutMutation } from "@/lib/features/auth";
 import {
   selectDashboardPath,
   selectIsDashboardOpen,
+  setDashboardOpen,
   setDashboardPath,
   toggleDashboard,
 } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 import { AppShell } from "./app-shell";
-
-function ViewFallback() {
-  return (
-    <div className="flex min-h-64 w-full items-center justify-center">
-      <Spinner size="lg" />
-    </div>
-  );
-}
-
-const DashboardPage = lazy(() =>
-  import("./views/dashboard-page").then((mod) => ({ default: mod.DashboardPage }))
-);
-const PostsPage = lazy(() =>
-  import("./views/posts-page").then((mod) => ({ default: mod.PostsPage }))
-);
-const ColumnsPage = lazy(() =>
-  import("./views/columns-page").then((mod) => ({ default: mod.ColumnsPage }))
-);
-const FriendLinksPage = lazy(() =>
-  import("./views/friend-links-page").then((mod) => ({ default: mod.FriendLinksPage }))
-);
-const BrokenLinksPage = lazy(() =>
-  import("./views/broken-links-page").then((mod) => ({ default: mod.BrokenLinksPage }))
-);
-const CategoriesPage = lazy(() =>
-  import("./views/categories-page").then((mod) => ({ default: mod.CategoriesPage }))
-);
-const TagsPage = lazy(() => import("./views/tags-page").then((mod) => ({ default: mod.TagsPage })));
-const CommentsPage = lazy(() =>
-  import("./views/comments-page").then((mod) => ({ default: mod.CommentsPage }))
-);
-const MomentsPage = lazy(() =>
-  import("./views/moments-page").then((mod) => ({ default: mod.MomentsPage }))
-);
-const FilesPage = lazy(() =>
-  import("./views/files-page").then((mod) => ({ default: mod.FilesPage }))
-);
-const AnalyticsPage = lazy(() =>
-  import("./views/analytics-page").then((mod) => ({ default: mod.AnalyticsPage }))
-);
-const EditorialCalendarPage = lazy(() =>
-  import("./views/editorial-calendar-page").then((mod) => ({
-    default: mod.EditorialCalendarPage,
-  }))
-);
-const OrdersPage = lazy(() =>
-  import("./views/orders-page").then((mod) => ({ default: mod.OrdersPage }))
-);
-const UsersPage = lazy(() =>
-  import("./views/users-page").then((mod) => ({ default: mod.UsersPage }))
-);
-const AudiencePage = lazy(() =>
-  import("./views/audience-page").then((mod) => ({ default: mod.AudiencePage }))
-);
-const RolesPage = lazy(() =>
-  import("./views/roles-page").then((mod) => ({ default: mod.RolesPage }))
-);
-const PermissionsPage = lazy(() =>
-  import("./views/permissions-page").then((mod) => ({ default: mod.PermissionsPage }))
-);
-const TrackerPage = lazy(() =>
-  import("./views/tracker-page").then((mod) => ({ default: mod.TrackerPage }))
-);
-const SettingsPage = lazy(() =>
-  import("./views/settings-page").then((mod) => ({ default: mod.SettingsPage }))
-);
-const WebhooksPage = lazy(() =>
-  import("./views/webhooks-page").then((mod) => ({ default: mod.WebhooksPage }))
-);
-const AuditLogsPage = lazy(() =>
-  import("./views/audit-logs-page").then((mod) => ({ default: mod.AuditLogsPage }))
-);
-const HelpPage = lazy(() => import("./views/help-page").then((mod) => ({ default: mod.HelpPage })));
-const AccessPlaceholderPage = lazy(() =>
-  import("./views/access-placeholder-page").then((mod) => ({
-    default: mod.AccessPlaceholderPage,
-  }))
-);
+import { AccessPlaceholderPage } from "./views/access-placeholder-page";
+import { AnalyticsPage } from "./views/analytics-page";
+import { AudiencePage } from "./views/audience-page";
+import { AuditLogsPage } from "./views/audit-logs-page";
+import { BrokenLinksPage } from "./views/broken-links-page";
+import { CategoriesPage } from "./views/categories-page";
+import { ColumnsPage } from "./views/columns-page";
+import { CommentsPage } from "./views/comments-page";
+import { DashboardPage } from "./views/dashboard-page";
+import { EditorialCalendarPage } from "./views/editorial-calendar-page";
+import { FilesPage } from "./views/files-page";
+import { FriendLinksPage } from "./views/friend-links-page";
+import { HelpPage } from "./views/help-page";
+import { LifeListAdminPage, LifeListNestedSheets } from "./views/life-list-page";
+import { MomentsPage } from "./views/moments-page";
+import { OrdersPage } from "./views/orders-page";
+import { PermissionsPage } from "./views/permissions-page";
+import { PostsPage } from "./views/posts-page";
+import { RolesPage } from "./views/roles-page";
+import { SettingsPage } from "./views/settings-page";
+import { TagsPage } from "./views/tags-page";
+import { TrackerPage } from "./views/tracker-page";
+import { UsersPage } from "./views/users-page";
+import { WebhooksPage } from "./views/webhooks-page";
 
 export function DashboardSheet() {
-  const isMounted = useMounted();
   const isOpen = useAppSelector(selectIsDashboardOpen);
   const requestedPath = useAppSelector(selectDashboardPath);
   const isAdmin = useAppSelector(selectIsAdmin);
   const dispatch = useAppDispatch();
   const [logout] = useLogoutMutation();
   const currentPath = requestedPath;
+  const [lifeListItem, setLifeListItem] = useState<LifeListItemResponse | null>(null);
+  const [createWishOpen, setCreateWishOpen] = useState(false);
+  const [createWishStatus, setCreateWishStatus] = useState<LifeListStatus>("planned");
+  const [suppressOutsideClose, setSuppressOutsideClose] = useState(false);
 
-  const handleOpenChange = () => {
-    dispatch(toggleDashboard());
+  const handleOpenChange = (open: boolean) => {
+    // The press that opens a nested sheet is also reported as an outside close.
+    // Ignore only that event. Backdrop and drag closes still dismiss the dashboard.
+    if (!open && suppressOutsideClose) {
+      setSuppressOutsideClose(false);
+      return;
+    }
+    dispatch(setDashboardOpen(open));
+  };
+
+  const openWish = (item: LifeListItemResponse) => {
+    setSuppressOutsideClose(true);
+    setLifeListItem(item);
   };
 
   const handleNavigate = (href: string) => {
@@ -116,7 +78,7 @@ export function DashboardSheet() {
     dispatch(setDashboardPath(href));
   };
 
-  if (!isMounted || !isAdmin) {
+  if (!isAdmin) {
     return null;
   }
 
@@ -140,6 +102,16 @@ export function DashboardSheet() {
         return <CommentsPage />;
       case "/moments":
         return <MomentsPage />;
+      case "/life-list":
+        return (
+          <LifeListAdminPage
+            onCreate={(status) => {
+              setCreateWishStatus(status);
+              setCreateWishOpen(true);
+            }}
+            onOpen={openWish}
+          />
+        );
       case "/files":
         return <FilesPage />;
       case "/analytics":
@@ -196,14 +168,56 @@ export function DashboardSheet() {
     <Sheet isOpen={isOpen} onOpenChange={handleOpenChange} isDetached>
       <Sheet.Backdrop variant="blur">
         <Sheet.Content>
-          <Sheet.Dialog id="dashboard-sheet-container" aria-label="Dashboard Overlay">
-            <Sheet.Handle />
-            <AppShell pathname={currentPath} onNavigate={handleNavigate}>
-              <Suspense fallback={<ViewFallback />}>{renderContent()}</Suspense>
-            </AppShell>
-          </Sheet.Dialog>
+          <>
+            <Sheet.Dialog id="dashboard-sheet-container" aria-label="Dashboard Overlay">
+              <Sheet.Handle />
+              <Button
+                isIconOnly
+                aria-label="Close dashboard"
+                className="absolute top-3 right-3 z-20"
+                size="sm"
+                variant="tertiary"
+                onPress={() => {
+                  setSuppressOutsideClose(false);
+                  dispatch(setDashboardOpen(false));
+                }}
+              >
+                <Xmark className="size-4" />
+              </Button>
+              <AppShell pathname={currentPath} onNavigate={handleNavigate}>
+                {renderContent()}
+              </AppShell>
+              {currentPath === "/life-list" ? (
+                <LifeListNestedSheets
+                  item={lifeListItem}
+                  onItemOpenChange={(open) => {
+                    if (!open) {
+                      setSuppressOutsideClose(false);
+                      setLifeListItem(null);
+                    }
+                  }}
+                />
+              ) : null}
+            </Sheet.Dialog>
+          </>
         </Sheet.Content>
       </Sheet.Backdrop>
+      {currentPath === "/life-list" ? (
+        <LifeListNestedSheets
+          createOnly
+          createOpen={createWishOpen}
+          createStatus={createWishStatus}
+          item={null}
+          onCreateOpenChange={setCreateWishOpen}
+          onCreateStatusChange={setCreateWishStatus}
+          onCreated={(item) => {
+            setSuppressOutsideClose(true);
+            setCreateWishOpen(false);
+            setLifeListItem(item);
+          }}
+          onItemOpenChange={() => undefined}
+        />
+      ) : null}
     </Sheet>
   );
 }

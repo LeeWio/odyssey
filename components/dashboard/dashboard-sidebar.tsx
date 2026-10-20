@@ -14,11 +14,13 @@ interface DashboardSidebarProps {
   pathname: string;
   basePath: string;
   disableNavigation?: boolean;
+  onNavigate?: (href: string) => void;
 }
 
 export function DashboardSidebar({
   basePath,
   disableNavigation = false,
+  onNavigate,
   pathname,
 }: DashboardSidebarProps) {
   return (
@@ -27,6 +29,7 @@ export function DashboardSidebar({
         <SidebarContents
           basePath={basePath}
           disableNavigation={disableNavigation}
+          onNavigate={onNavigate}
           pathname={pathname}
         />
         <Sidebar.Rail />
@@ -36,6 +39,7 @@ export function DashboardSidebar({
           basePath={basePath}
           disableNavigation={disableNavigation}
           idPrefix="mobile-"
+          onNavigate={onNavigate}
           pathname={pathname}
         />
       </Sidebar.Mobile>
@@ -46,6 +50,7 @@ export function DashboardSidebar({
 interface SidebarContentsProps {
   basePath: string;
   disableNavigation: boolean;
+  onNavigate?: (href: string) => void;
   pathname: string;
   idPrefix?: string;
 }
@@ -54,6 +59,7 @@ function SidebarContents({
   basePath,
   disableNavigation,
   idPrefix = "",
+  onNavigate,
   pathname,
 }: SidebarContentsProps) {
   const { isOpen, toggleSidebar } = useSidebar();
@@ -84,6 +90,7 @@ function SidebarContents({
                   disableNavigation={disableNavigation}
                   idPrefix={idPrefix}
                   item={item}
+                  onNavigate={onNavigate}
                   pathname={pathname}
                 />
               ))}
@@ -100,6 +107,7 @@ function SidebarContents({
               disableNavigation={disableNavigation}
               idPrefix={idPrefix}
               item={item}
+              onNavigate={onNavigate}
               pathname={pathname}
             />
           ))}
@@ -114,6 +122,7 @@ interface SidebarNavItemProps {
   disableNavigation: boolean;
   idPrefix: string;
   item: NavItem;
+  onNavigate?: (href: string) => void;
   pathname: string;
 }
 
@@ -122,6 +131,7 @@ function SidebarNavItem({
   disableNavigation,
   idPrefix,
   item,
+  onNavigate,
   pathname,
 }: SidebarNavItemProps) {
   const Icon = item.icon;
@@ -133,10 +143,11 @@ function SidebarNavItem({
 
   return (
     <Sidebar.MenuItem
-      href={disableNavigation ? undefined : fullHref}
+      href={disableNavigation || onNavigate ? undefined : fullHref}
       id={`${idPrefix}${item.href}`}
       isCurrent={isCurrent}
       textValue={item.label}
+      onAction={onNavigate ? () => onNavigate(item.href) : undefined}
     >
       <Sidebar.MenuIcon>
         <Icon className="size-4" />
