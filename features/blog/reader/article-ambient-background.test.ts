@@ -9,13 +9,15 @@ import {
 } from "@/components/shader-background/article-shader-presets";
 
 describe("ArticleAmbientBackground", () => {
-  it("renders the shader directly on the reading page", () => {
+  it("keeps a blurred shader behind the reading page", () => {
     const source = readFileSync(
       join(dirname(fileURLToPath(import.meta.url)), "article-ambient-background.tsx"),
       "utf8"
     );
     expect(source).toContain("<ShaderBackground");
     expect(source).toContain("speed * 0.4");
+    expect(source).toContain("[&_canvas]:[filter:blur(64px)_saturate(1.5)]");
+    expect(source).toContain("bg-background/72");
     expect(source).not.toContain("ShaderBackgroundView");
     expect(source).not.toContain("preset.swatch");
   });

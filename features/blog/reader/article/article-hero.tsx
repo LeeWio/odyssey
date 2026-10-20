@@ -54,9 +54,7 @@ export function ArticleHero({ article }: { article: PostResponse }) {
 
   return (
     <header className="relative mb-16 h-[100dvh] w-full max-w-none">
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
-        <ArticleAmbientBackground presetId={article.shaderPreset} slug={article.slug} />
-      </div>
+      <ArticleAmbientBackground presetId={article.shaderPreset} slug={article.slug} />
 
       <div className="relative z-10 mx-auto flex h-full max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">
         {category ? (
