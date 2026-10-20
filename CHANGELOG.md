@@ -1,3 +1,10 @@
+## [1.224.1](https://github.com/LeeWio/odyssey/compare/v1.224.0...v1.224.1) (2026-10-20)
+
+
+### Bug Fixes
+
+* **auth:** keep registration in review and tidy the dialog ([5db0a85](https://github.com/LeeWio/odyssey/commit/5db0a8514d2db398dc65d4f35d7a8572e963a193))
+
 # [1.224.0](https://github.com/LeeWio/odyssey/compare/v1.223.0...v1.224.0) (2026-10-19)
 
 
