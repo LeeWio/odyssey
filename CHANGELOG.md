@@ -1,3 +1,10 @@
+## [1.224.5](https://github.com/LeeWio/odyssey/compare/v1.224.4...v1.224.5) (2026-10-20)
+
+
+### Bug Fixes
+
+* **home:** center the footprints story and bleed the map ([57ef474](https://github.com/LeeWio/odyssey/commit/57ef4743dcf790099ccc6c7ca09e953cfaf8b8fb))
+
 ## [1.224.4](https://github.com/LeeWio/odyssey/compare/v1.224.3...v1.224.4) (2026-10-20)
 
 
