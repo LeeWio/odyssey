@@ -1,3 +1,10 @@
+## [1.224.6](https://github.com/LeeWio/odyssey/compare/v1.224.5...v1.224.6) (2026-10-20)
+
+
+### Bug Fixes
+
+* **motion:** share one fade across pages and sections ([1145739](https://github.com/LeeWio/odyssey/commit/11457399d3249be0f1f27265630bcd84d58dc39e))
+
 ## [1.224.5](https://github.com/LeeWio/odyssey/compare/v1.224.4...v1.224.5) (2026-10-20)
 
 
