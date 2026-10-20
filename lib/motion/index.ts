@@ -4,6 +4,7 @@ export {
   pageEaseIn,
   pageEaseOut,
   pageFadeDuration,
+  pageSpring,
   pageFadeExitDuration,
   pageReveal,
   pageRevealInView,

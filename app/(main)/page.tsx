@@ -253,7 +253,7 @@ export default function Home() {
                 className="group/item first:**:data-[slot=accordion-trigger]:rounded-t-2xl last:[&:not(:has([data-slot=accordion-trigger][aria-expanded='true']))_[data-slot=accordion-trigger]]:rounded-b-2xl"
               >
                 <Accordion.Heading>
-                  <Accordion.Trigger className="group hover:bg-surface flex items-center gap-2 transition-none">
+                  <Accordion.Trigger className="group hover:bg-surface flex items-center gap-2 transition-transform duration-200 ease-[cubic-bezier(0.16,1.08,0.3,1)]">
                     <span className="bg-accent/10 text-accent flex size-9 shrink-0 items-center justify-center rounded-lg">
                       <Icon aria-hidden="true" icon={faqIcons[index]} className="size-4" />
                     </span>

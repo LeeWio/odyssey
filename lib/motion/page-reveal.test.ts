@@ -19,9 +19,7 @@ describe("page reveal presets", () => {
   it("disables travel when reduced motion is on", () => {
     const reveal = pageReveal(true, 0.1, 18);
     expect(reveal.initial).toBeUndefined();
-    expect(reveal.transition.duration).toBe(0);
-    expect(reveal.transition.delay).toBe(0);
-    expect(reveal.transition.ease).toBe(pageEaseOut);
+    expect(reveal.transition).toMatchObject({ duration: 0, delay: 0 });
   });
 
   it("uses short section transitions and modest travel by default", () => {
@@ -31,7 +29,7 @@ describe("page reveal presets", () => {
       pageRevealInView(false),
       createPageReveal(false).reveal(),
     ]) {
-      expect(reveal.transition.duration).toBe(sectionRevealDuration);
+      expect(reveal.transition).toMatchObject({ type: "spring", stiffness: 420, damping: 34 });
       expect(reveal.initial).toEqual({ opacity: 0, y: 12 });
     }
   });
@@ -52,9 +50,12 @@ describe("page reveal presets", () => {
   it("enters a section over 250ms and leaves faster when it scrolls away", () => {
     const presence = sectionPresence(false, { delay: 0.08, duration: 0.27 });
     expect(presence.viewport).toEqual({ once: false, amount: 0.35 });
-    expect(presence.variants.visible.transition).toMatchObject({ duration: 0.27, delay: 0.08 });
+    expect(presence.variants.visible.transition).toMatchObject({
+      type: "spring",
+      stiffness: 420,
+      delay: 0.08,
+    });
     expect(presence.variants.hidden.transition.duration).toBe(0.16);
-    expect(presence.variants.visible.transition.ease).toEqual([0.22, 1, 0.36, 1]);
     expect(presence.variants.hidden).toMatchObject({ opacity: 0, y: 12 });
   });
 
@@ -66,7 +67,7 @@ describe("page reveal presets", () => {
 
   it("binds reduced motion through createPageReveal", () => {
     const { reveal, revealInView } = createPageReveal(false, { duration: 0.45 });
-    expect(reveal(0.04, 12).transition.duration).toBe(0.45);
-    expect(revealInView(0.1, 16).transition.ease).toBe(pageEaseOut);
+    expect(reveal(0.04, 12).transition).toMatchObject({ type: "spring", delay: 0.04 });
+    expect(revealInView(0.1, 16).transition).toMatchObject({ type: "spring", delay: 0.1 });
   });
 });

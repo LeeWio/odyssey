@@ -10,6 +10,12 @@ export const pageFadeDuration = 0.24;
 export const pageFadeExitDuration = 0.16;
 export const sectionRevealDuration = pageFadeDuration;
 
+/**
+ * Tight spring for entrances. Most of the travel finishes inside 240ms, with a
+ * small settle instead of a bounce. Exit uses the shorter fade.
+ */
+export const pageSpring = { type: "spring" as const, stiffness: 420, damping: 34, mass: 0.8 };
+
 export type PageRevealInViewOptions = {
   duration?: number;
   amount?: number;
@@ -21,11 +27,19 @@ export type PageRevealMotion = {
   animate?: { opacity: number; y: number };
   whileInView?: { opacity: number; y: number };
   viewport?: { once: true; amount?: number; margin?: string };
-  transition: {
-    duration: number;
-    delay: number;
-    ease: typeof pageEaseOut;
-  };
+  transition:
+    | {
+        duration: number;
+        delay: number;
+        ease: typeof pageEaseOut;
+      }
+    | {
+        type: "spring";
+        stiffness: number;
+        damping: number;
+        mass: number;
+        delay: number;
+      };
 };
 
 /** Mount/entrance reveal driven by `animate`. */
@@ -38,11 +52,9 @@ export function pageReveal(
   return {
     initial: reducedMotion ? undefined : { opacity: 0, y: distance },
     animate: { opacity: 1, y: 0 },
-    transition: {
-      duration: reducedMotion ? 0 : duration,
-      delay: reducedMotion ? 0 : delay,
-      ease: pageEaseOut,
-    },
+    transition: reducedMotion
+      ? { duration: 0, delay: 0, ease: pageEaseOut }
+      : { ...pageSpring, delay },
   };
 }
 
@@ -59,11 +71,13 @@ export function pageRevealInView(
     initial: reducedMotion ? undefined : { opacity: 0, y: distance },
     whileInView: { opacity: 1, y: 0 },
     viewport: margin ? { once: true, amount, margin } : { once: true, amount },
-    transition: {
-      duration: reducedMotion ? 0 : duration,
-      delay: reducedMotion ? 0 : delay,
-      ease: pageEaseOut,
-    },
+    transition: reducedMotion
+      ? { duration: 0, delay: 0, ease: pageEaseOut }
+      : {
+          ...pageSpring,
+          delay,
+          ...(duration === sectionRevealDuration ? {} : { visualDuration: duration }),
+        },
   };
 }
 
@@ -101,11 +115,9 @@ export function sectionPresence(reducedMotion: boolean, options: SectionPresence
       visible: {
         opacity: 1,
         y: 0,
-        transition: {
-          duration,
-          delay,
-          ease: pageEaseOut,
-        },
+        transition: reducedMotion
+          ? { duration: 0, delay: 0, ease: pageEaseOut }
+          : { ...pageSpring, delay },
       },
     },
   };
