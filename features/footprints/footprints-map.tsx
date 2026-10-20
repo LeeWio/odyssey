@@ -180,11 +180,11 @@ export function FootprintsMap({
     >
       <Map
         aria-label={t("mapLabel")}
-        center={[114, 28]} // China-wide view for the coverage zones.
+        center={[114.3, 30.6]}
         projection={{ type: "globe" }}
         styles={footprintMapStyles}
         workerUrl={footprintMapWorkerUrl}
-        zoom={1.9}
+        zoom={4.2}
       >
         <FootprintCoverageZones
           footprints={footprints}
