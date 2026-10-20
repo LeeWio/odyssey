@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:24-alpine AS base
+FROM library/node:24-alpine AS base
 
 WORKDIR /app
 
@@ -30,7 +30,7 @@ ENV NODE_OPTIONS="--max-old-space-size=1200"
 
 RUN bun run build
 
-FROM public.ecr.aws/docker/library/node:24-alpine AS runner
+FROM library/node:24-alpine AS runner
 
 WORKDIR /app
 
@@ -57,7 +57,7 @@ CMD ["node", "server.js"]
 # ========================================================
 # 🌟 Stage 5: runner-prebuilt (专为 GitHub Actions 宿主机编译打造的极速精简运行层)
 # ========================================================
-FROM public.ecr.aws/docker/library/node:24-alpine AS runner-prebuilt
+FROM library/node:24-alpine AS runner-prebuilt
 
 WORKDIR /app
 
