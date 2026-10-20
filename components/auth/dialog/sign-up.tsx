@@ -158,8 +158,8 @@ export const SignupContent = ({ isActive = true, onDone, onSwitchToLogIn }: Sign
                       isIconOnly
                       aria-label={isVisible ? t("hidePassword") : t("showPassword")}
                       aria-pressed={isVisible}
+                      excludeFromTabOrder
                       size="sm"
-                      tabIndex={-1}
                       variant="ghost"
                       onPress={() => setIsVisible(!isVisible)}
                     >
