@@ -24,7 +24,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { selectAuthMode, setAuthMode, toggleDashboard } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
-import { Logo, SearchIcon } from "../icons";
+import { SearchIcon } from "../icons";
 
 import { getVisibleFocusableElements } from "./focus";
 import { MegaPanelContent } from "./mega-panel-content";
@@ -456,7 +456,7 @@ export const Navbar = () => {
             whileTap={reduceMotion ? undefined : { scale: 0.97 }}
           >
             <Link href="/" onClick={closeNavigation} aria-label={t("home")}>
-              <Logo size={30} />
+              <img src="/favicon.svg" alt="" width={30} height={30} className="size-[30px]" />
             </Link>
           </motion.div>
 
