@@ -1,3 +1,10 @@
+## [1.226.1](https://github.com/LeeWio/odyssey/compare/v1.226.0...v1.226.1) (2026-10-20)
+
+
+### Bug Fixes
+
+* **motion:** keep the first overlay from flashing the page ([2ac3cdb](https://github.com/LeeWio/odyssey/commit/2ac3cdb2c5bfcb40809142494fa6532d6f835f1f))
+
 # [1.226.0](https://github.com/LeeWio/odyssey/compare/v1.225.0...v1.226.0) (2026-10-20)
 
 
