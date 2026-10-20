@@ -1,3 +1,10 @@
+## [1.224.3](https://github.com/LeeWio/odyssey/compare/v1.224.2...v1.224.3) (2026-10-20)
+
+
+### Bug Fixes
+
+* **footprints:** open the globe on the places I return to ([1db4c2a](https://github.com/LeeWio/odyssey/commit/1db4c2af4ec1f2f165ccb39af834007ba06bfae2))
+
 ## [1.224.2](https://github.com/LeeWio/odyssey/compare/v1.224.1...v1.224.2) (2026-10-20)
 
 
