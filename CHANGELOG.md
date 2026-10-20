@@ -1,3 +1,10 @@
+## [1.224.7](https://github.com/LeeWio/odyssey/compare/v1.224.6...v1.224.7) (2026-10-20)
+
+
+### Bug Fixes
+
+* **motion:** settle page entrances on a tight spring ([0816068](https://github.com/LeeWio/odyssey/commit/081606811e3cd35c2fc0f234acab9c9ebf364079))
+
 ## [1.224.6](https://github.com/LeeWio/odyssey/compare/v1.224.5...v1.224.6) (2026-10-20)
 
 
