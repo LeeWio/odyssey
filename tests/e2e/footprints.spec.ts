@@ -39,11 +39,9 @@ for (const width of [390, 1440]) {
     const map = section.locator('[data-slot="map"]');
     await section.scrollIntoViewIfNeeded();
     await expect(map).toHaveAttribute("data-loaded", "true");
-    await expect(section.getByRole("heading", { name: "Places I've Been" })).toBeVisible();
+    await expect(section.getByRole("heading", { name: "A Map of Memories" })).toBeVisible();
     await expect(
-      section.getByText(
-        "A record of provinces and cities across China. The stops that stayed on the map."
-      )
+      section.getByText("Not just places on a map, but moments along the way.")
     ).toBeVisible();
     await expect(section.getByText("Footprints", { exact: true }).first()).toBeVisible();
     await expect(section.getByRole("link", { name: "Open the atlas" })).toBeVisible();

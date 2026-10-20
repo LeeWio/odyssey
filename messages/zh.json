@@ -1251,9 +1251,9 @@
       }
     },
     "footprints": {
-      "eyebrow": "足迹",
-      "title": "去过的地方",
-      "description": "中国各省市的一份记录。那些留在地图上的站点。",
+      "eyebrow": "关于远方",
+      "title": "A Map of Memories",
+      "description": "地图上不只是地点，还有一路走来的时光。",
       "openAtlas": "打开地图",
       "cardTitle": "足迹",
       "cardDescription": "留在地图上的地方",

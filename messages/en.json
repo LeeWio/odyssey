@@ -1259,8 +1259,8 @@
     },
     "footprints": {
       "eyebrow": "Footprints",
-      "title": "Places I've Been",
-      "description": "A record of provinces and cities across China. The stops that stayed on the map.",
+      "title": "A Map of Memories",
+      "description": "Not just places on a map, but moments along the way.",
       "openAtlas": "Open the atlas",
       "cardTitle": "Footprints",
       "cardDescription": "Places kept on the map",
