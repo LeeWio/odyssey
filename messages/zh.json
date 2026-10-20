@@ -832,6 +832,7 @@
     "savedSignInDescription": "收藏跟着你在这台设备上使用的账号。",
     "signIn": "登录",
     "backToMoments": "动态",
+    "topicsUnavailable": "话题暂时没有加载出来。",
     "topicsTitle": "聊过的",
     "topicsDescription": "动态里出现过的话题。",
     "topicNotes": "{count} 条",

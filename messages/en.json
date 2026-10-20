@@ -832,6 +832,7 @@
     "savedSignInDescription": "Saved moments stay with the account you use on this device.",
     "signIn": "Sign in",
     "backToMoments": "Moments",
+    "topicsUnavailable": "Topics could not be loaded.",
     "topicsTitle": "Topics",
     "topicsDescription": "Subjects that show up across the moments.",
     "topicNotes": "{count} notes",

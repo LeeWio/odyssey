@@ -11,18 +11,27 @@ import type { PageResult } from "@/lib/api";
 
 export const useMomentFeed = (
   pageSize: number = 12,
-  initialPage: PageResult<MomentResponse> | null = null
+  initialPage: PageResult<MomentResponse> | null = null,
+  topic?: string
 ) => {
   const [extraEntries, setExtraEntries] = useState<MomentResponse[]>([]);
   const [nextPage, setNextPage] = useState(1);
+  const [loadedTopic, setLoadedTopic] = useState(topic);
+  const filtered = Boolean(topic);
+
+  if (topic !== loadedTopic) {
+    setLoadedTopic(topic);
+    setExtraEntries([]);
+    setNextPage(1);
+  }
 
   const query = useGetPublicMomentsQuery(
-    { page: 0, size: pageSize },
-    { skip: Boolean(initialPage) }
+    { page: 0, size: pageSize, ...(topic ? { topic } : {}) },
+    { skip: Boolean(initialPage) && !filtered }
   );
-  const data = initialPage ?? query.data;
-  const isLoading = !initialPage && query.isLoading;
-  const isError = !initialPage && query.isError;
+  const data = !filtered && initialPage ? initialPage : query.data;
+  const isLoading = (!initialPage || filtered) && query.isLoading;
+  const isError = (!initialPage || filtered) && query.isError;
   const refetch = query.refetch;
   const [loadPage, loadingMore] = useLazyGetPublicMomentsQuery();
 
@@ -35,7 +44,11 @@ export const useMomentFeed = (
 
   const loadMore = useCallback(async () => {
     try {
-      const result = await loadPage({ page: nextPage, size: pageSize }).unwrap();
+      const result = await loadPage({
+        page: nextPage,
+        size: pageSize,
+        ...(topic ? { topic } : {}),
+      }).unwrap();
       setExtraEntries((current) => {
         const merged = new Map(current.map((m) => [m.id, m]));
         result.list.forEach((m) => merged.set(m.id, m));
@@ -45,7 +58,7 @@ export const useMomentFeed = (
     } catch (err) {
       toast.danger(getApiErrorMessage(err, "Unable to load more moments. Please try again."));
     }
-  }, [loadPage, nextPage, pageSize]);
+  }, [loadPage, nextPage, pageSize, topic]);
   const hasMore = data ? nextPage < data.totalPages : false;
 
   return {

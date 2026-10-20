@@ -27,7 +27,7 @@ export default function MomentTopicPage({ params }: { params: Promise<{ slug: st
             {t("allTopics")}
           </Link>
           <Typography type="h1" weight="semibold">
-            #{topic}
+            {topic}
           </Typography>
           <p className="text-muted text-sm tabular-nums">
             <NumberValue locale={locale} value={moments.length}>

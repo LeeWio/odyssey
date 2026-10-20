@@ -12,6 +12,13 @@ export const MomentImageResponseSchema = z.object({
   sortOrder: z.number(),
 });
 
+export const MomentTopicCountSchema = z.object({
+  slug: z.string(),
+  count: z.number(),
+});
+
+export type MomentTopicCount = z.infer<typeof MomentTopicCountSchema>;
+
 export const MomentTopicResponseSchema = z.object({
   id: z.number(),
   slug: z.string(),

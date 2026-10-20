@@ -5,9 +5,11 @@ import { notifyMutation } from "@/lib/toast";
 import {
   MomentCadenceResponseSchema,
   MomentResponseSchema,
+  MomentTopicCountSchema,
   type MomentCadenceResponse,
   type MomentRequest,
   type MomentResponse,
+  type MomentTopicCount,
 } from "./moment-contracts";
 
 type MomentListEndpoint = "getPublicMoments" | "getAllMoments";
@@ -56,10 +58,18 @@ export const momentApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Moment", id: "LIST" }],
     }),
 
-    getPublicMoments: builder.query<PageResult<MomentResponse>, Pageable>({
-      query: ({ page = 0, size = 10 }) => ({
+    getPublicMomentTopics: builder.query<MomentTopicCount[], void>({
+      query: () => "/api/v1/public/moments/topics",
+      rawResponseSchema: apiResponseSchema(z.array(MomentTopicCountSchema)),
+      transformResponse: (response: ApiResponse<MomentTopicCount[]>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: [{ type: "Moment", id: "TOPICS" }],
+    }),
+
+    getPublicMoments: builder.query<PageResult<MomentResponse>, Pageable & { topic?: string }>({
+      query: ({ page = 0, size = 10, topic }) => ({
         url: "/api/v1/public/moments",
-        params: { page, size },
+        params: { page, size, ...(topic ? { topic } : {}) },
       }),
       rawResponseSchema: apiResponseSchema(pageResultSchema(MomentResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<MomentResponse>>) => response.data,
@@ -69,8 +79,12 @@ export const momentApi = baseApi.injectEndpoints({
           ? [
               ...result.list.map(({ id }) => ({ type: "Moment" as const, id })),
               { type: "Moment", id: "LIST" },
+              { type: "Moment", id: "TOPICS" },
             ]
-          : [{ type: "Moment", id: "LIST" }],
+          : [
+              { type: "Moment", id: "LIST" },
+              { type: "Moment", id: "TOPICS" },
+            ],
     }),
 
     /**
@@ -249,6 +263,7 @@ export const momentApi = baseApi.injectEndpoints({
 
 export const {
   useGetMomentCadenceQuery,
+  useGetPublicMomentTopicsQuery,
   useGetPublicMomentsQuery,
   useLazyGetPublicMomentsQuery,
   useGetLikedMomentIdsQuery,

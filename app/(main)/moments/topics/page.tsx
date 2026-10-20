@@ -61,7 +61,7 @@ export default function MomentTopicsPage() {
                         className="text-foreground no-underline"
                         href={`/moments/topics/${encodeURIComponent(topic.slug)}`}
                       >
-                        #{topic.slug}
+                        {topic.slug}
                       </Link>
                     </Card.Title>
                     <Card.Description>

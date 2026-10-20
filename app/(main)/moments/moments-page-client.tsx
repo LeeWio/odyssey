@@ -6,10 +6,11 @@ import { Button, Card, Typography } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { MomentCard, MomentCardSkeleton } from "@/features/moment/components/card";
 import { MomentCadenceCard } from "@/features/moment/components/cadence-card";
+import { MomentTopicWidget } from "@/features/moment/components/topic-widget";
 import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
 import { useMomentBookmarks } from "@/features/moment/hooks/use-moment-bookmarks";
 import { PageFrame } from "@/components/layout/page-frame";
@@ -52,6 +53,8 @@ function DeskRow({
 export default function MomentsPage({ initialData }: { initialData: PublicMomentsInitialData }) {
   const t = useTranslations("Moments");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const topic = searchParams.get("topic") || undefined;
   const shouldReduceMotion = useReducedMotion() ?? false;
   const bookmarks = useMomentBookmarks();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -59,6 +62,17 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
     12,
     initialData.page
   );
+  const visibleMoments = topic
+    ? moments.filter((moment) => moment.topics.some((item) => item.slug === topic))
+    : moments;
+
+  const selectTopic = (slug?: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (slug) params.set("topic", slug);
+    else params.delete("topic");
+    const query = params.toString();
+    router.replace(query ? `/moments?${query}` : "/moments", { scroll: false });
+  };
   const likedMomentIdsQuery = useGetLikedMomentIdsQuery(
     moments.map((moment) => moment.id),
     { skip: !isAuthenticated || moments.length === 0 }
@@ -76,7 +90,7 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
             unavailable={t("cadenceUnavailable")}
             initialData={initialData.cadence}
           />
-          <DeskRow label={t("topicsTitle")} onPress={() => router.push("/moments/topics")} />
+          <MomentTopicWidget moments={moments} selected={topic} onSelect={selectTopic} />
           <DeskRow label={t("liked")} onPress={() => router.push("/moments/liked")} />
           <DeskRow
             count={bookmarks.ids.length}
@@ -106,7 +120,7 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
                 </Button>
               </EmptyState.Content>
             </EmptyState>
-          ) : moments.length === 0 ? (
+          ) : visibleMoments.length === 0 ? (
             <EmptyState className="bg-surface-secondary rounded-2xl">
               <EmptyState.Header>
                 <EmptyState.Title>{t("empty")}</EmptyState.Title>
@@ -114,7 +128,7 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
             </EmptyState>
           ) : (
             <div className="columns-1 gap-4 sm:columns-2 xl:columns-3">
-              {moments.map((moment, index) => (
+              {visibleMoments.map((moment, index) => (
                 <motion.div
                   key={moment.id}
                   className="mb-4 break-inside-avoid"

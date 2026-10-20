@@ -41,7 +41,7 @@ function TopicTag({ id, slug }: { id: number; slug: string }) {
         className="text-foreground no-underline"
         href={`/moments/topics/${encodeURIComponent(slug)}`}
       >
-        #{slug}
+        {slug}
       </Link>
     </Tag>
   );

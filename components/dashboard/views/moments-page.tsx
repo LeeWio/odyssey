@@ -159,7 +159,7 @@ function TimelineItem({ moment }: TimelineItemProps) {
             <TagGroup.List className="flex flex-wrap gap-1.5">
               {moment.topics.map((topic) => (
                 <Tag key={topic.id} id={topic.id} textValue={topic.slug}>
-                  #{topic.slug}
+                  {topic.slug}
                 </Tag>
               ))}
             </TagGroup.List>
