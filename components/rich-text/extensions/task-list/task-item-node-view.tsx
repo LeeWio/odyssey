@@ -41,7 +41,7 @@ export function TaskItemNodeView({ editor, extension, node, getPos }: NodeViewPr
 
   return (
     <NodeViewWrapper className="contents">
-      <div className="flex h-7 shrink-0 items-center" contentEditable={false}>
+      <div contentEditable={false}>
         <Checkbox
           aria-label={label}
           className="shrink-0"
@@ -56,10 +56,7 @@ export function TaskItemNodeView({ editor, extension, node, getPos }: NodeViewPr
           </Checkbox.Content>
         </Checkbox>
       </div>
-      <NodeViewContent
-        as="div"
-        className={checked ? "text-muted min-w-0 flex-1 line-through" : "min-w-0 flex-1"}
-      />
+      <NodeViewContent as="div" className="min-w-0 flex-auto" />
     </NodeViewWrapper>
   );
 }

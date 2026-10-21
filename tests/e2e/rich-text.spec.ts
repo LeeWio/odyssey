@@ -19,7 +19,7 @@ test("loads the persisted schema fixture in the real editor", async ({ page }) =
   await expect(page.getByTestId("schema-nodes")).toContainText("table");
   await expect(page.getByTestId("schema-nodes")).toContainText("taskList");
   await expect(editor.locator('ul[data-type="taskList"]')).toHaveCount(2);
-  await expect(editor.locator("li.odyssey-task-item")).toHaveCount(3);
+  await expect(editor.locator('li[data-type="taskItem"]')).toHaveCount(3);
   await expect(editor.locator('pre code[class="language-typescript"]')).toContainText(
     "const stable = true;"
   );
@@ -33,8 +33,8 @@ test("creates a task list from the HeroUI toolbar", async ({ page }) => {
 
   await paragraph.click();
   await page.getByRole("button", { name: "Toggle task list" }).click();
-  await expect(editor.locator("ul.odyssey-task-list")).toHaveCount(3);
-  await expect(editor.locator("li.odyssey-task-item")).toHaveCount(4);
+  await expect(editor.locator('ul[data-type="taskList"]')).toHaveCount(3);
+  await expect(editor.locator('li[data-type="taskItem"]')).toHaveCount(4);
 });
 
 test("preserves nested tasks and code language after save and reload", async ({ page }) => {
@@ -52,7 +52,7 @@ test("preserves nested tasks and code language after save and reload", async ({ 
   await expect(page.getByTestId("draft-status")).toHaveText("Editor ready");
 
   await expect(editor.locator('ul[data-type="taskList"]')).toHaveCount(2);
-  await expect(editor.locator("li.odyssey-task-item")).toHaveCount(3);
+  await expect(editor.locator('li[data-type="taskItem"]')).toHaveCount(3);
   await expect(page.getByRole("checkbox", { name: /Completed task/ })).not.toBeChecked();
   await expect(editor.locator('pre code[class="language-typescript"]')).toContainText(
     "const stable = true;"

@@ -135,35 +135,6 @@ html[data-beui-vt] [data-view-transition-shell="site-footer"] {
     @apply ring-accent/35 ring-offset-background ring-2 ring-offset-2 outline-none;
   }
 
-  .ProseMirror ul.odyssey-task-list {
-    @apply my-3 list-none space-y-1 pl-0;
-  }
-
-  .ProseMirror li.odyssey-task-item {
-    @apply flex items-start gap-2;
-  }
-
-  .ProseMirror li.odyssey-task-item > label {
-    @apply flex h-7 shrink-0 items-center justify-center;
-  }
-
-  .ProseMirror li.odyssey-task-item > label input[type="checkbox"] {
-    accent-color: var(--accent);
-    cursor: var(--cursor-interactive);
-  }
-
-  .ProseMirror li.odyssey-task-item > div {
-    @apply min-w-0 flex-1;
-  }
-
-  .ProseMirror li.odyssey-task-item > div > p {
-    @apply my-0;
-  }
-
-  .ProseMirror li.odyssey-task-item[data-checked="true"] > div > p {
-    @apply text-muted line-through;
-  }
-
   .ProseMirror div[data-youtube-video] {
     @apply my-8 aspect-video w-full overflow-hidden rounded-2xl;
   }
@@ -241,6 +212,44 @@ html[data-beui-vt] [data-view-transition-shell="site-footer"] {
   }
 } */
 
+@layer components {
+  .rich-text-editor__prosemirror ul,
+  .rich-text-editor__prosemirror ol {
+    @apply my-2! list-outside py-0! ps-6!;
+  }
+
+  .rich-text-editor__prosemirror ul {
+    @apply list-disc!;
+  }
+
+  .rich-text-editor__prosemirror ol {
+    @apply list-decimal!;
+  }
+
+  .rich-text-editor__prosemirror li + li {
+    @apply mt-0!;
+  }
+
+  .rich-text-editor__prosemirror li > p {
+    @apply my-0! min-h-0! leading-6!;
+  }
+
+  .rich-text-editor__prosemirror ul[data-type="taskList"] {
+    @apply list-none! ps-0!;
+  }
+
+  .rich-text-editor__prosemirror li[data-type="taskItem"] {
+    @apply flex items-start gap-2;
+  }
+
+  .rich-text-editor__prosemirror li[data-type="taskItem"][data-checked="true"] {
+    @apply text-muted line-through;
+  }
+
+  .rich-text-editor__prosemirror blockquote {
+    @apply border-border text-muted my-4 border-s-4 ps-4 italic;
+  }
+}
 /* Code Block Syntax Highlighting (Highlight.js / Lowlight) */
 .hljs-comment,
 .hljs-quote {

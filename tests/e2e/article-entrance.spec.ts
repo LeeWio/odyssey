@@ -106,7 +106,7 @@ test("nested reading units wait for the viewport without animating parent and ch
   await openArticle(page, [...paragraphs, ...fixture, ...paragraphs]);
   const editor = page.locator('.ProseMirror[contenteditable="false"]');
   const row = editor.locator("tr").first();
-  const listItem = editor.locator("ul:not(.odyssey-task-list) > li").first();
+  const listItem = editor.locator('ul[data-type="bulletList"] > li').first();
   const task = editor.locator("li.node-taskItem").first();
   const columnParagraph = editor.locator('[data-type="column"] p').first();
   const details = editor.locator(".odyssey-details");

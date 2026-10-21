@@ -1,6 +1,5 @@
 "use client";
 
-import { Typography } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
@@ -71,9 +70,9 @@ export function ArticleBody({
     >
       <RichTextEditor.Shell className={shellClassName}>
         {outlineLabel ? <ArticleToc label={outlineLabel} /> : null}
-        <Typography.Prose className="max-w-none [&_img]:h-auto [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto">
+        <div className="max-w-none [&_img]:h-auto [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto">
           <AnimatedRichTextContent />
-        </Typography.Prose>
+        </div>
         {showTableOfContents && !outlineLabel ? (
           <RichTextTableOfContents placement="right" />
         ) : null}
