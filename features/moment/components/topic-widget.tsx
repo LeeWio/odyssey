@@ -1,32 +1,21 @@
 "use client";
 
-import { Card, Chip } from "@heroui/react";
+import { Card, Chip, Skeleton, Typography } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
 
-import {
-  collectMomentTopics,
-  type MomentResponse,
-  type MomentTopicResponse,
-} from "@/lib/features/moment";
+import { useGetPublicMomentTopicsQuery } from "@/lib/features/moment";
 
 export function MomentTopicWidget({
-  moments,
   selected,
   onSelect,
 }: {
-  moments: MomentResponse[];
   selected?: string;
   onSelect: (slug?: string) => void;
 }) {
   const t = useTranslations("Moments");
   const locale = useLocale();
-  const [known, setKnown] = useState<Array<MomentTopicResponse & { count: number }>>([]);
-  const current = collectMomentTopics(moments);
-  if (current.length > known.length) {
-    setKnown(current);
-  }
-  const topics = known.length > 0 ? known : current;
+  const query = useGetPublicMomentTopicsQuery();
+  const topics = query.data ?? [];
 
   return (
     <Card className="w-full gap-3 p-4">
@@ -35,16 +24,24 @@ export function MomentTopicWidget({
       </Card.Header>
       <Card.Content className="flex flex-row flex-wrap gap-2 p-0">
         <TopicChip current={!selected} label={t("allTopics")} onPress={() => onSelect(undefined)} />
-        {topics.map((topic) => (
-          <TopicChip
-            key={topic.slug}
-            count={topic.count}
-            current={selected === topic.slug}
-            label={topic.slug}
-            locale={locale}
-            onPress={() => onSelect(selected === topic.slug ? undefined : topic.slug)}
-          />
-        ))}
+        {query.isLoading ? (
+          <Skeleton className="h-6 w-16 rounded-full" />
+        ) : query.isError ? (
+          <Typography color="muted" type="body-sm">
+            {t("topicsUnavailable")}
+          </Typography>
+        ) : (
+          topics.map((topic) => (
+            <TopicChip
+              key={topic.slug}
+              count={topic.count}
+              current={selected === topic.slug}
+              label={topic.slug}
+              locale={locale}
+              onPress={() => onSelect(selected === topic.slug ? undefined : topic.slug)}
+            />
+          ))
+        )}
       </Card.Content>
     </Card>
   );

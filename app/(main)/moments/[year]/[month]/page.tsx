@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 
 import { MomentCard } from "@/features/moment/components/card";
-import { usePublishedMoments } from "@/lib/features/moment";
+import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
 import { PageFrame } from "@/components/layout/page-frame";
 
 function isYear(value: string) {
@@ -15,14 +15,6 @@ function isYear(value: string) {
 
 function isMonth(value: string) {
   return /^(?:[1-9]|1[0-2])$/.test(value);
-}
-
-function momentParts(value: string) {
-  const date = new Date(
-    value.includes("T") && !value.endsWith("Z") && !value.includes("+") ? `${value}Z` : value
-  );
-  if (Number.isNaN(date.getTime())) return null;
-  return { month: date.getUTCMonth() + 1, year: date.getUTCFullYear() };
 }
 
 export default function MomentMonthPage({
@@ -36,11 +28,13 @@ export default function MomentMonthPage({
   const valid = isYear(year) && isMonth(month);
   const t = useTranslations("Moments");
   const locale = useLocale();
-  const catalog = usePublishedMoments();
-  const moments = catalog.moments.filter((moment) => {
-    const parts = momentParts(moment.createdAt);
-    return parts?.year === Number(year) && parts.month === Number(month);
-  });
+  const catalog = useMomentFeed(
+    20,
+    null,
+    undefined,
+    valid ? { year: Number(year), month: Number(month) } : undefined
+  );
+  const moments = catalog.moments;
   const heading = valid
     ? new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(
         new Date(Date.UTC(Number(year), Number(month) - 1, 1))
@@ -79,7 +73,7 @@ export default function MomentMonthPage({
               <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
-              <Button size="sm" variant="secondary" onPress={catalog.retry}>
+              <Button size="sm" variant="secondary" onPress={catalog.refetch}>
                 {t("tryAgain")}
               </Button>
             </EmptyState.Content>

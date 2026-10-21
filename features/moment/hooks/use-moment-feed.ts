@@ -12,12 +12,13 @@ import type { PageResult } from "@/lib/api";
 export const useMomentFeed = (
   pageSize: number = 12,
   initialPage: PageResult<MomentResponse> | null = null,
-  topic?: string
+  topic?: string,
+  period?: { year: number; month: number }
 ) => {
   const [extraEntries, setExtraEntries] = useState<MomentResponse[]>([]);
   const [nextPage, setNextPage] = useState(1);
   const [loadedTopic, setLoadedTopic] = useState(topic);
-  const filtered = Boolean(topic);
+  const filtered = Boolean(topic || period);
 
   if (topic !== loadedTopic) {
     setLoadedTopic(topic);
@@ -26,7 +27,7 @@ export const useMomentFeed = (
   }
 
   const query = useGetPublicMomentsQuery(
-    { page: 0, size: pageSize, ...(topic ? { topic } : {}) },
+    { page: 0, size: pageSize, ...(topic ? { topic } : {}), ...(period ?? {}) },
     { skip: Boolean(initialPage) && !filtered }
   );
   const clientList = query.data?.list ?? [];
@@ -56,6 +57,7 @@ export const useMomentFeed = (
         page: nextPage,
         size: pageSize,
         ...(topic ? { topic } : {}),
+        ...(period ?? {}),
       }).unwrap();
       setExtraEntries((current) => {
         const merged = new Map(current.map((m) => [m.id, m]));
@@ -66,7 +68,7 @@ export const useMomentFeed = (
     } catch (err) {
       toast.danger(getApiErrorMessage(err, "Unable to load more moments. Please try again."));
     }
-  }, [loadPage, nextPage, pageSize, topic]);
+  }, [loadPage, nextPage, pageSize, period, topic]);
   const hasMore = data ? nextPage < data.totalPages : false;
 
   return {

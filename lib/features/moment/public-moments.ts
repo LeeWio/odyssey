@@ -10,8 +10,6 @@ import {
   type MomentResponse,
 } from "./moment-contracts";
 
-const MOMENTS_REVALIDATE_SECONDS = 60;
-
 export interface PublicMomentsInitialData {
   page: PageResult<MomentResponse> | null;
   cadence: MomentCadenceResponse | null;
@@ -29,7 +27,7 @@ async function readPublicData<T>(url: string, schema: z.ZodType<T>): Promise<T |
   try {
     const response = await fetch(url, {
       signal: AbortSignal.timeout(3_000),
-      next: { revalidate: MOMENTS_REVALIDATE_SECONDS, tags: ["public-moments"] },
+      cache: "no-store",
     });
     if (!response.ok) return null;
 

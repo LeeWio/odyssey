@@ -60,11 +60,10 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const { moments, isLoading, isError, isFetchingMore, hasMore, loadMore, refetch } = useMomentFeed(
     12,
-    initialData.page
+    initialData.page,
+    topic
   );
-  const visibleMoments = topic
-    ? moments.filter((moment) => moment.topics.some((item) => item.slug === topic))
-    : moments;
+  const visibleMoments = moments;
 
   const selectTopic = (slug?: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -90,7 +89,7 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
             unavailable={t("cadenceUnavailable")}
             initialData={initialData.cadence}
           />
-          <MomentTopicWidget moments={moments} selected={topic} onSelect={selectTopic} />
+          <MomentTopicWidget selected={topic} onSelect={selectTopic} />
           <DeskRow label={t("liked")} onPress={() => router.push("/moments/liked")} />
           <DeskRow
             count={bookmarks.ids.length}

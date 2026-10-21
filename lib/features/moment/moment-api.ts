@@ -66,10 +66,18 @@ export const momentApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Moment", id: "TOPICS" }],
     }),
 
-    getPublicMoments: builder.query<PageResult<MomentResponse>, Pageable & { topic?: string }>({
-      query: ({ page = 0, size = 10, topic }) => ({
+    getPublicMoments: builder.query<
+      PageResult<MomentResponse>,
+      Pageable & { topic?: string; year?: number; month?: number }
+    >({
+      query: ({ page = 0, size = 10, topic, year, month }) => ({
         url: "/api/v1/public/moments",
-        params: { page, size, ...(topic ? { topic } : {}) },
+        params: {
+          page,
+          size,
+          ...(topic ? { topic } : {}),
+          ...(year && month ? { year, month } : {}),
+        },
       }),
       rawResponseSchema: apiResponseSchema(pageResultSchema(MomentResponseSchema)),
       transformResponse: (response: ApiResponse<PageResult<MomentResponse>>) => response.data,

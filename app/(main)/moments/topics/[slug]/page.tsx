@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 
 import { MomentCard } from "@/features/moment/components/card";
-import { usePublishedMoments } from "@/lib/features/moment";
+import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
 import { PageFrame } from "@/components/layout/page-frame";
 
 export default function MomentTopicPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -14,10 +14,8 @@ export default function MomentTopicPage({ params }: { params: Promise<{ slug: st
   const topic = decodeURIComponent(slug);
   const t = useTranslations("Moments");
   const locale = useLocale();
-  const catalog = usePublishedMoments();
-  const moments = catalog.moments.filter((moment) =>
-    moment.topics.some((item) => item.slug === topic)
-  );
+  const catalog = useMomentFeed(20, null, topic);
+  const moments = catalog.moments;
 
   return (
     <PageFrame className="bg-background">
@@ -49,7 +47,7 @@ export default function MomentTopicPage({ params }: { params: Promise<{ slug: st
               <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
-              <Button size="sm" variant="secondary" onPress={catalog.retry}>
+              <Button size="sm" variant="secondary" onPress={catalog.refetch}>
                 {t("tryAgain")}
               </Button>
             </EmptyState.Content>
