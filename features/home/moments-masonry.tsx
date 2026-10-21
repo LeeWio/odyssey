@@ -3,7 +3,10 @@
 import { motion } from "motion/react";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
+import { Link } from "@heroui/react";
+
 import { MomentCard } from "@/features/moment/components/card";
+import { pageRevealInView } from "@/lib/motion";
 import type { MomentResponse } from "@/lib/features/moment";
 
 interface MomentsMasonryProps {
@@ -14,20 +17,16 @@ export function MomentsMasonry({ moments }: MomentsMasonryProps) {
   const shouldReduceMotion = useReducedMotionPreference();
 
   return (
-    <div data-testid="moments-masonry" className="[columns:20rem] gap-5">
-      {moments.map((moment, index) => (
+    <div data-testid="moments-masonry" className="columns-1 gap-5 sm:[columns:20rem]">
+      {moments.map((moment) => (
         <motion.div
           key={moment.id}
-          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={
-            shouldReduceMotion
-              ? { duration: 0 }
-              : { duration: 0.24, delay: Math.min(index * 0.015, 0.18), ease: [0.16, 1, 0.3, 1] }
-          }
+          {...pageRevealInView(shouldReduceMotion, 0, 12, { amount: 0.15 })}
           className="mb-5 w-full break-inside-avoid"
         >
-          <MomentCard enableComments={false} moment={moment} />
+          <Link className="block w-full text-inherit no-underline" href="/moments">
+            <MomentCard enableComments={false} interactive={false} moment={moment} />
+          </Link>
         </motion.div>
       ))}
     </div>

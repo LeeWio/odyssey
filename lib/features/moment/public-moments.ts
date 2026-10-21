@@ -41,7 +41,7 @@ async function readPublicData<T>(url: string, schema: z.ZodType<T>): Promise<T |
   }
 }
 
-export async function getPublicMomentsInitialData(): Promise<PublicMomentsInitialData> {
+export async function getPublicMomentsInitialData(size = 12): Promise<PublicMomentsInitialData> {
   if (process.env.NEXT_PHASE === "phase-production-build") {
     return { page: null, cadence: null };
   }
@@ -51,7 +51,7 @@ export async function getPublicMomentsInitialData(): Promise<PublicMomentsInitia
 
   const [page, cadence] = await Promise.all([
     readPublicData(
-      `${origin}/api/v1/public/moments?page=0&size=12`,
+      `${origin}/api/v1/public/moments?page=0&size=${size}`,
       pageResultSchema(MomentResponseSchema)
     ),
     readPublicData(`${origin}/api/v1/public/moments/cadence`, MomentCadenceResponseSchema),

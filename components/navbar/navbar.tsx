@@ -421,7 +421,7 @@ export const Navbar = () => {
         aria-modal={isLocked || isMobileMenuOpen ? true : undefined}
         aria-label={isLocked || isMobileMenuOpen ? t("dialogLabel") : undefined}
         className="fixed inset-x-0 top-0 z-50 mx-auto w-full overflow-hidden rounded-2xl border"
-        initial={reduceMotion ? undefined : { opacity: 0 }}
+        initial={false}
         animate={{
           opacity: 1,
           width: targetNavigationWidth || "100%",

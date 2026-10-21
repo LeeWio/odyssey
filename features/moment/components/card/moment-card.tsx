@@ -55,6 +55,7 @@ interface MomentCardProps {
   moment?: MomentResponse;
   isLoading?: boolean;
   enableComments?: boolean;
+  interactive?: boolean;
   knownLikedMomentIds?: number[];
 }
 
@@ -62,6 +63,7 @@ export const MomentCard = ({
   moment: propMoment,
   isLoading: propIsLoading,
   enableComments = true,
+  interactive = true,
   knownLikedMomentIds,
 }: MomentCardProps) => {
   const formatRelativeTime = useRelativeTime();
@@ -207,24 +209,25 @@ export const MomentCard = ({
         parsedContent={parsedContent}
         imageUrls={imageUrls}
         topics={moment?.topics ?? []}
-        onCardClick={setActiveIndex}
+        onCardClick={interactive ? setActiveIndex : undefined}
         stockSymbol={stockSymbol}
       />
 
-      {/* 3. Card Footer */}
-      <CardFooter
-        isLiked={isLiked}
-        isLiking={isLiking}
-        likesCount={likesCount}
-        commentsCount={enableComments ? (moment?.commentsCount ?? 0) : undefined}
-        onLikeToggle={toggleLike}
-        isCommentsOpen={isCommentsOpen}
-        onCommentToggle={
-          enableComments && moment?.id ? () => setIsCommentsOpen((open) => !open) : undefined
-        }
-        isBookmarked={isBookmarked}
-        onBookmarkToggle={handleBookmarkToggle}
-      />
+      {interactive ? (
+        <CardFooter
+          isLiked={isLiked}
+          isLiking={isLiking}
+          likesCount={likesCount}
+          commentsCount={enableComments ? (moment?.commentsCount ?? 0) : undefined}
+          onLikeToggle={toggleLike}
+          isCommentsOpen={isCommentsOpen}
+          onCommentToggle={
+            enableComments && moment?.id ? () => setIsCommentsOpen((open) => !open) : undefined
+          }
+          isBookmarked={isBookmarked}
+          onBookmarkToggle={handleBookmarkToggle}
+        />
+      ) : null}
 
       {enableComments && isCommentsOpen && moment?.id ? (
         <CommentSheet
