@@ -29,7 +29,15 @@ export const useMomentFeed = (
     { page: 0, size: pageSize, ...(topic ? { topic } : {}) },
     { skip: Boolean(initialPage) && !filtered }
   );
-  const data = !filtered && initialPage ? initialPage : query.data;
+  const clientList = query.data?.list ?? [];
+  const initialList = initialPage?.list ?? [];
+  const clientIsNewer =
+    clientList.length > 0 &&
+    (initialList.length === 0 ||
+      clientList[0].id !== initialList[0].id ||
+      clientList.length !== initialList.length);
+  const data =
+    !filtered && initialPage && !clientIsNewer ? initialPage : (query.data ?? initialPage);
   const isLoading = (!initialPage || filtered) && query.isLoading;
   const isError = (!initialPage || filtered) && query.isError;
   const refetch = query.refetch;

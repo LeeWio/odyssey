@@ -179,6 +179,12 @@ export const momentApi = baseApi.injectEndpoints({
             }
           });
           dispatch(momentApi.util.upsertQueryData("getMomentById", data.id, data));
+          dispatch(
+            momentApi.endpoints.getPublicMoments.initiate(
+              { page: 0, size: 12 },
+              { forceRefetch: true, subscribe: false }
+            )
+          );
         } catch {
           // Toast handled by notifyMutation.
         }
