@@ -1,3 +1,10 @@
+## [1.226.11](https://github.com/LeeWio/odyssey/compare/v1.226.10...v1.226.11) (2026-10-21)
+
+
+### Bug Fixes
+
+* **rich-text:** clear selected node outline while reading ([25c6c8e](https://github.com/LeeWio/odyssey/commit/25c6c8e09f36e81629b7b766ae44f3d0bcf8202e))
+
 ## [1.226.10](https://github.com/LeeWio/odyssey/compare/v1.226.9...v1.226.10) (2026-10-21)
 
 
