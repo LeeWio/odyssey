@@ -1,3 +1,10 @@
+## [1.226.10](https://github.com/LeeWio/odyssey/compare/v1.226.9...v1.226.10) (2026-10-21)
+
+
+### Bug Fixes
+
+* **rich-text:** hide image selection outline while reading ([7ef64a8](https://github.com/LeeWio/odyssey/commit/7ef64a8d2207156bc7844950475ebd8de9c73a2e))
+
 ## [1.226.9](https://github.com/LeeWio/odyssey/compare/v1.226.8...v1.226.9) (2026-10-21)
 
 
