@@ -1,3 +1,10 @@
+## [1.226.3](https://github.com/LeeWio/odyssey/compare/v1.226.2...v1.226.3) (2026-10-21)
+
+
+### Bug Fixes
+
+* **moments:** show a newly published moment without waiting for cache expiry ([e9dadf7](https://github.com/LeeWio/odyssey/commit/e9dadf7c884897afdc1ad0e54101072e1f26268c))
+
 ## [1.226.2](https://github.com/LeeWio/odyssey/compare/v1.226.1...v1.226.2) (2026-10-20)
 
 
