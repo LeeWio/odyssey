@@ -1,3 +1,10 @@
+## [1.226.4](https://github.com/LeeWio/odyssey/compare/v1.226.3...v1.226.4) (2026-10-21)
+
+
+### Bug Fixes
+
+* **home:** reveal This and That moments on short screens ([047d4ec](https://github.com/LeeWio/odyssey/commit/047d4ec45ce79ac03ce82ae300d73fd55253229e))
+
 ## [1.226.3](https://github.com/LeeWio/odyssey/compare/v1.226.2...v1.226.3) (2026-10-21)
 
 
