@@ -26,7 +26,7 @@ export function ImageView({ editor, getPos, node }: NodeViewProps) {
   if (!src) {
     if (!editor.isEditable) {
       return (
-        <NodeViewWrapper className="my-8" contentEditable={false}>
+        <NodeViewWrapper contentEditable={false}>
           <Surface
             variant="secondary"
             className="flex min-h-32 items-center justify-center rounded-2xl px-4"
@@ -51,7 +51,7 @@ export function ImageView({ editor, getPos, node }: NodeViewProps) {
 
   return (
     <NodeViewWrapper
-      className={`my-8 flex w-full ${IMAGE_ALIGNMENT_CLASS_NAMES[alignment]}`}
+      className={`flex w-full ${IMAGE_ALIGNMENT_CLASS_NAMES[alignment]}`}
       contentEditable={false}
       data-drag-handle
       onMouseDown={(event: MouseEvent) => {

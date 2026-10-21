@@ -35,7 +35,7 @@ export function ImageUploadView({ editor, getPos, node, deleteNode }: NodeViewPr
 
   if (!editor.isEditable) {
     return (
-      <NodeViewWrapper className="my-8" contentEditable={false}>
+      <NodeViewWrapper contentEditable={false}>
         <Surface
           variant="secondary"
           className="flex min-h-32 items-center justify-center rounded-2xl px-4"
@@ -49,7 +49,7 @@ export function ImageUploadView({ editor, getPos, node, deleteNode }: NodeViewPr
   }
 
   return (
-    <NodeViewWrapper className="my-8" contentEditable={false} data-drag-handle>
+    <NodeViewWrapper contentEditable={false} data-drag-handle>
       <ImageUploader
         initialFile={pendingFile}
         onCancel={() => deleteNode()}
