@@ -1,3 +1,10 @@
+## [1.226.7](https://github.com/LeeWio/odyssey/compare/v1.226.6...v1.226.7) (2026-10-21)
+
+
+### Bug Fixes
+
+* **moments:** query topics and months on the server ([b8c0b75](https://github.com/LeeWio/odyssey/commit/b8c0b75e4362b39355b7bda981849d1fb1a155b1))
+
 ## [1.226.6](https://github.com/LeeWio/odyssey/compare/v1.226.5...v1.226.6) (2026-10-21)
 
 
