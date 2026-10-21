@@ -1,3 +1,10 @@
+## [1.226.8](https://github.com/LeeWio/odyssey/compare/v1.226.7...v1.226.8) (2026-10-21)
+
+
+### Bug Fixes
+
+* **rich-text:** use native bullets and tighten list spacing ([3a5eedd](https://github.com/LeeWio/odyssey/commit/3a5eeddae674834c7440dfce8d099d2edf6c2923))
+
 ## [1.226.7](https://github.com/LeeWio/odyssey/compare/v1.226.6...v1.226.7) (2026-10-21)
 
 
