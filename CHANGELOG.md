@@ -1,3 +1,10 @@
+## [1.226.9](https://github.com/LeeWio/odyssey/compare/v1.226.8...v1.226.9) (2026-10-21)
+
+
+### Bug Fixes
+
+* **rich-text:** remove extra image block margin ([2dd15d2](https://github.com/LeeWio/odyssey/commit/2dd15d216b39dc83efc8916aba320213b2c594c5))
+
 ## [1.226.8](https://github.com/LeeWio/odyssey/compare/v1.226.7...v1.226.8) (2026-10-21)
 
 
