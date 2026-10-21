@@ -1,3 +1,10 @@
+## [1.226.5](https://github.com/LeeWio/odyssey/compare/v1.226.4...v1.226.5) (2026-10-21)
+
+
+### Bug Fixes
+
+* **home:** render This and That from server data ([66dbded](https://github.com/LeeWio/odyssey/commit/66dbdedb821b8c62cac6435be3a312f70bd7eb20))
+
 ## [1.226.4](https://github.com/LeeWio/odyssey/compare/v1.226.3...v1.226.4) (2026-10-21)
 
 
