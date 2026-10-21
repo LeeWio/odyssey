@@ -73,7 +73,7 @@ export function MomentsShowcase() {
         </motion.div>
       </header>
 
-      <motion.div className={HOME_SECTION_CONTENT} {...revealInView(0.2, 20)}>
+      <motion.div className={HOME_SECTION_CONTENT} {...revealInView(0.2, 20, { amount: 0 })}>
         {(isError || (isFetching && !isLoading && recentMoments.length === 0)) && (
           <SectionLoadError
             subject="moments"
