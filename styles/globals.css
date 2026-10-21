@@ -213,6 +213,10 @@ html[data-beui-vt] [data-view-transition-shell="site-footer"] {
 } */
 
 @layer components {
+  .rich-text-editor[data-readonly] .ProseMirror-selectednode {
+    @apply rounded-none! outline-none!;
+  }
+
   .rich-text-editor__prosemirror ul,
   .rich-text-editor__prosemirror ol {
     @apply my-2! list-outside py-0! ps-6!;

@@ -43,8 +43,6 @@ export function ImageView({ editor, getPos, node }: NodeViewProps) {
   }
 
   const selectImageNode = () => {
-    if (!editor.isEditable) return;
-
     const pos = getPos();
     if (typeof pos === "number") {
       editor.chain().focus().setNodeSelection(pos).run();
@@ -57,9 +55,10 @@ export function ImageView({ editor, getPos, node }: NodeViewProps) {
       contentEditable={false}
       data-drag-handle
       onMouseDown={(event: MouseEvent) => {
-        if (!editor.isEditable || event.button !== 0) return;
-        event.preventDefault();
-        selectImageNode();
+        if (event.button === 0) {
+          event.preventDefault();
+          selectImageNode();
+        }
       }}
       onClick={selectImageNode}
     >
