@@ -1,3 +1,10 @@
+## [1.226.15](https://github.com/LeeWio/odyssey/compare/v1.226.14...v1.226.15) (2026-10-22)
+
+
+### Bug Fixes
+
+* **moments:** open the image viewer at large size ([ae350ed](https://github.com/LeeWio/odyssey/commit/ae350ed668a97ba4ddf5c8b9cce0e94672acf24b))
+
 ## [1.226.14](https://github.com/LeeWio/odyssey/compare/v1.226.13...v1.226.14) (2026-10-22)
 
 
