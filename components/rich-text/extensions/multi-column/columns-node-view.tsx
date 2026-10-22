@@ -49,7 +49,10 @@ const ColumnsResizeOverlay = React.memo(function ColumnsResizeOverlay({
   onKeyUpCapture,
 }: ColumnsResizeOverlayProps) {
   return (
-    <div className="pointer-events-none absolute inset-0 z-10" contentEditable={false}>
+    <div
+      className="pointer-events-none absolute inset-0 z-10 hidden sm:block"
+      contentEditable={false}
+    >
       <Resizable
         className="pointer-events-none [--resizable-handle-hit-area:1rem] [--resizable-handle-size:1rem]"
         id={groupId}
@@ -168,12 +171,12 @@ export function ColumnsNodeView({ editor, getPos, node, updateAttributes }: Node
 
   return (
     <NodeViewWrapper
-      className="relative my-4 w-full"
+      className="relative w-full"
       data-column-widths={serializeColumnWidths(displayedWidths)}
       data-type="columns"
       style={style}
     >
-      <NodeViewContent className="contents *:grid *:[grid-template-columns:var(--column-widths)] *:gap-4" />
+      <NodeViewContent className="contents *:grid *:grid-cols-1 *:gap-4 sm:*:[grid-template-columns:var(--column-widths)]" />
 
       {isColumnsActive && editor.isEditable && (
         <ColumnsResizeOverlay

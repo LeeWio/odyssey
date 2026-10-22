@@ -20,6 +20,7 @@ import { EditorFooter } from "./editor-footer";
 import { ContentItemMenu } from "./menus/content-item-menu";
 import { MediaInsertDialog } from "./media-insert-dialog";
 import { clearMediaUploads } from "./extensions/media";
+import { RICH_TEXT_PROSE_CLASS_NAME } from "./prose";
 
 export interface RichTextProps {
   content?: JSONContent;
@@ -61,6 +62,7 @@ export function RichText({
     <RichTextEditor
       extensions={extensions}
       editorOptions={{
+        editorProps: { attributes: { class: RICH_TEXT_PROSE_CLASS_NAME } },
         // HeroUI RichTextEditor already forces immediatelyRender/shouldRerenderOnTransaction
         // to false for Next.js SSR (see @heroui-pro rich-text-editor + Tiptap React install guide).
         autofocus: !isReadOnly,

@@ -14,7 +14,7 @@ export function clampHeadingLevel(level: number): HeadingLevel {
 
 /**
  * Shared heading node for the editor and the reader.
- * Visual rhythm comes from the heading node classes.
+ * Visual rhythm comes from the shared HeroUI Prose adapter.
  */
 export const Heading = TiptapHeading.extend({
   renderHTML({ node, HTMLAttributes }) {

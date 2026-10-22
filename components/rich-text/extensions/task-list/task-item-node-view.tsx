@@ -40,8 +40,8 @@ export function TaskItemNodeView({ editor, extension, node, getPos }: NodeViewPr
   };
 
   return (
-    <NodeViewWrapper className="contents">
-      <div contentEditable={false}>
+    <NodeViewWrapper className="contents" data-checked={checked}>
+      <div className="pt-1" contentEditable={false}>
         <Checkbox
           aria-label={label}
           className="shrink-0"

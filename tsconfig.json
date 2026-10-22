@@ -30,7 +30,9 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts",
     ".next-design/types/**/*.ts",
-    ".next-design/dev/types/**/*.ts"
+    ".next-design/dev/types/**/*.ts",
+    ".next-e2e/types/**/*.ts",
+    ".next-e2e/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules", "demo", "shader_background", "template-crm"]
 }

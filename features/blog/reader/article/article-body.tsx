@@ -13,6 +13,7 @@ import {
   parseJSONContent,
 } from "@/components/rich-text/utils/document-normalizer";
 import { MotionRichTextEditor } from "@/components/ui/motion-rich-text";
+import { RICH_TEXT_PROSE_CLASS_NAME } from "@/components/rich-text/prose";
 
 export interface ArticleBodyProps {
   content: string | null | undefined;
@@ -61,6 +62,7 @@ export function ArticleBody({
       className={className}
       isReadOnly
       extensions={extensions}
+      editorOptions={{ editorProps: { attributes: { class: RICH_TEXT_PROSE_CLASS_NAME } } }}
       // HeroUI RichTextEditor already disables immediatelyRender for Next.js SSR.
       defaultValue={parsedContent}
       initial={{ opacity: 0 }}
@@ -70,9 +72,7 @@ export function ArticleBody({
     >
       <RichTextEditor.Shell className={shellClassName}>
         {outlineLabel ? <ArticleToc label={outlineLabel} /> : null}
-        <div className="max-w-none [&_img]:h-auto [&_img]:max-w-full [&_pre]:max-w-full [&_pre]:overflow-x-auto">
-          <AnimatedRichTextContent />
-        </div>
+        <AnimatedRichTextContent />
         {showTableOfContents && !outlineLabel ? (
           <RichTextTableOfContents placement="right" />
         ) : null}

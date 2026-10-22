@@ -68,7 +68,7 @@ export function ImageView({ editor, getPos, node }: NodeViewProps) {
         </Surface>
         {caption ? (
           <figcaption className="mt-2 text-center">
-            <Typography color="muted" type="body-sm">
+            <Typography className="text-sm! leading-6!" color="muted" type="body-sm">
               {caption}
             </Typography>
           </figcaption>

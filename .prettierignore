@@ -1,5 +1,6 @@
 .next
 .next-design
+.next-e2e
 node_modules
 build
 out

@@ -187,7 +187,7 @@ export function MediaNodeView({ deleteNode, editor, node, updateAttributes }: No
 
     if (!editor.isEditable && !pendingUpload) {
       return (
-        <NodeViewWrapper className="my-6" contentEditable={false}>
+        <NodeViewWrapper contentEditable={false}>
           <Surface
             variant="secondary"
             className="flex min-h-24 items-center justify-center rounded-2xl px-4"
@@ -201,7 +201,7 @@ export function MediaNodeView({ deleteNode, editor, node, updateAttributes }: No
     }
 
     return (
-      <NodeViewWrapper className="my-6" contentEditable={false}>
+      <NodeViewWrapper contentEditable={false}>
         <DropZone className="w-full">
           {!pendingUpload && (
             <DropZone.Area isDisabled={isDisabled} onDrop={handleDrop}>
@@ -263,7 +263,7 @@ export function MediaNodeView({ deleteNode, editor, node, updateAttributes }: No
   }
 
   return (
-    <NodeViewWrapper className="my-6" contentEditable={false} data-drag-handle>
+    <NodeViewWrapper contentEditable={false} data-drag-handle>
       {kind === "audio" ? (
         <div className="flex w-full flex-col gap-2">
           <ItemCard variant="secondary" className="w-full">

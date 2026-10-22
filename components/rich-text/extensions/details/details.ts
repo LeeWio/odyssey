@@ -116,7 +116,7 @@ export const Details = TiptapDetails.extend({
   openClassName: "is-open",
   HTMLAttributes: {
     class:
-      "accordion accordion__item odyssey-details my-4 overflow-hidden rounded-2xl bg-surface-secondary/70 ring-1 ring-foreground/8",
+      "accordion accordion__item odyssey-details overflow-hidden rounded-2xl bg-surface-secondary/70 ring-1 ring-foreground/8",
     "data-hide-separator": "true",
   },
   renderToggleButton,

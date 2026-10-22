@@ -35,7 +35,11 @@ const HeroUITaskItem = TaskItem.extend({
   addNodeView() {
     return ReactNodeViewRenderer(TaskItemNodeView, {
       as: "li",
-      className: "flex items-start",
+      className: "flex items-start gap-2",
+      attrs: ({ node }) => ({
+        "data-type": "taskItem",
+        "data-checked": String(Boolean(node.attrs.checked)),
+      }),
     });
   },
 });

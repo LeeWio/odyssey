@@ -6,6 +6,8 @@ import { useMemo, useState } from "react";
 
 import { RichText } from "@/components/rich-text/rich-text";
 import { RICH_TEXT_DOCUMENT_FIXTURE } from "@/components/rich-text/testing/rich-text-document.fixture";
+import { RICH_TEXT_TYPOGRAPHY_FIXTURE } from "@/components/rich-text/testing/rich-text-typography.fixture";
+import { ArticleBody } from "@/features/blog/reader/article/article-body";
 import {
   clearRichTextDraft,
   readRichTextDraft,
@@ -14,11 +16,16 @@ import {
 
 const TEST_DRAFT_ID = "browser-smoke";
 
-export default function RichTextTestClient() {
+export default function RichTextTestClient({ typography = false }: { typography?: boolean }) {
   const initialContent = useMemo<JSONContent>(
-    () => readRichTextDraft(TEST_DRAFT_ID)?.content ?? RICH_TEXT_DOCUMENT_FIXTURE,
-    []
+    () =>
+      typography
+        ? RICH_TEXT_TYPOGRAPHY_FIXTURE
+        : (readRichTextDraft(TEST_DRAFT_ID)?.content ?? RICH_TEXT_DOCUMENT_FIXTURE),
+    [typography]
   );
+  const [reading, setReading] = useState(false);
+  const [previewContent, setPreviewContent] = useState(initialContent);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [status, setStatus] = useState("Loading editor");
   const [schemaNodes, setSchemaNodes] = useState("");
@@ -50,8 +57,21 @@ export default function RichTextTestClient() {
   };
 
   return (
-    <main className="bg-background text-foreground flex min-h-screen flex-col gap-4 p-6">
+    <main className="bg-background text-foreground mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 p-4 sm:p-6">
       <header className="flex flex-wrap items-center gap-2">
+        {typography ? (
+          <Button
+            data-testid="toggle-reading"
+            size="sm"
+            variant="secondary"
+            onPress={() => {
+              if (!reading && editor) setPreviewContent(editor.getJSON());
+              setReading(!reading);
+            }}
+          >
+            {reading ? "Edit specimen" : "Read specimen"}
+          </Button>
+        ) : null}
         <Button data-testid="save-draft" size="sm" variant="secondary" onPress={saveDraft}>
           Save test draft
         </Button>
@@ -87,15 +107,23 @@ export default function RichTextTestClient() {
       </header>
 
       <section className="border-separator min-h-[70vh] flex-1 overflow-hidden rounded-2xl border">
-        <RichText
-          content={initialContent}
-          onContentError={(error) => setStatus(`Content error: ${error.message}`)}
-          onReady={(readyEditor) => {
-            setEditor(readyEditor);
-            setSchemaNodes(Object.keys(readyEditor.schema.nodes).sort().join(","));
-            setStatus("Editor ready");
-          }}
-        />
+        {reading ? (
+          <ArticleBody
+            content={JSON.stringify(previewContent)}
+            contentType="JSON"
+            showTableOfContents={false}
+          />
+        ) : (
+          <RichText
+            content={typography ? previewContent : initialContent}
+            onContentError={(error) => setStatus(`Content error: ${error.message}`)}
+            onReady={(readyEditor) => {
+              setEditor(readyEditor);
+              setSchemaNodes(Object.keys(readyEditor.schema.nodes).sort().join(","));
+              setStatus("Editor ready");
+            }}
+          />
+        )}
       </section>
     </main>
   );
