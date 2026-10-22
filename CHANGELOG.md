@@ -1,3 +1,10 @@
+## [1.226.14](https://github.com/LeeWio/odyssey/compare/v1.226.13...v1.226.14) (2026-10-22)
+
+
+### Bug Fixes
+
+* **reader:** keep article outline sticky while scrolling ([010da55](https://github.com/LeeWio/odyssey/commit/010da55d6abef67c7ef47167d28420a93a48d21e))
+
 ## [1.226.13](https://github.com/LeeWio/odyssey/compare/v1.226.12...v1.226.13) (2026-10-22)
 
 
