@@ -34,7 +34,7 @@ export const Column = Node.create<ColumnOptions>({
       "div",
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
         "data-type": "column",
-        class: "relative min-w-0",
+        class: "relative min-w-0 rounded-2xl bg-surface-secondary p-2",
       }),
       0,
     ];

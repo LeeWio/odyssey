@@ -129,9 +129,8 @@ for (const width of [360, 768, 1440]) {
         const secondColumn = await columns.nth(1).boundingBox();
         expect(firstColumn).not.toBeNull();
         expect(secondColumn).not.toBeNull();
-        if (width < 640)
-          expect(secondColumn!.y).toBeGreaterThan(firstColumn!.y + firstColumn!.height);
-        else expect(secondColumn!.y).toBeCloseTo(firstColumn!.y, 0);
+        expect(secondColumn!.y).toBeCloseTo(firstColumn!.y, 0);
+        expect(secondColumn!.x).toBeGreaterThan(firstColumn!.x + firstColumn!.width);
         const iframe = await editor.locator("iframe").boundingBox();
         expect(iframe!.width / iframe!.height).toBeCloseTo(16 / 9, 1);
         await expect(editor.getByText("An explicit author format remains intact.")).toHaveCSS(
