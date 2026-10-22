@@ -45,7 +45,7 @@ function ViewerImage({ alt, src }: { alt: string; src: string }) {
 export const CarouselModal = ({ images, activeIndex, onClose }: CarouselModalProps) => {
   const t = useTranslations("Moments");
   const [carouselApi, setCarouselApi] = useState<EmblaCarouselType>();
-  const [size, setSize] = useState<ViewerSize>("cover");
+  const [size, setSize] = useState<ViewerSize>("lg");
 
   useEffect(() => {
     if (activeIndex !== null && carouselApi) {
@@ -73,6 +73,7 @@ export const CarouselModal = ({ images, activeIndex, onClose }: CarouselModalPro
             aria-label="Image viewer"
             className="transition-[max-width,height,border-radius,padding] duration-300 ease-out motion-reduce:transition-none"
           >
+            <Modal.CloseTrigger className="z-20" />
             <Modal.Body>
               <Carousel opts={{ loop: true }} setApi={setCarouselApi}>
                 <Carousel.Content>
@@ -85,7 +86,7 @@ export const CarouselModal = ({ images, activeIndex, onClose }: CarouselModalPro
                 <Carousel.Previous />
                 <Carousel.Next />
                 <Carousel.Dots />
-                <div className="absolute top-4 right-4 z-50">
+                <div className="absolute top-4 left-4 z-50">
                   <Dropdown>
                     <Button aria-label={t("viewerSize")} size="sm" variant="secondary">
                       {t(sizeLabels[size])}
