@@ -8,6 +8,7 @@ import { RichText } from "@/components/rich-text/rich-text";
 import { RICH_TEXT_DOCUMENT_FIXTURE } from "@/components/rich-text/testing/rich-text-document.fixture";
 import { RICH_TEXT_TYPOGRAPHY_FIXTURE } from "@/components/rich-text/testing/rich-text-typography.fixture";
 import { ArticleBody } from "@/features/blog/reader/article/article-body";
+import { ArticleLayout } from "@/features/blog/reader/article/article-layout";
 import {
   clearRichTextDraft,
   readRichTextDraft,
@@ -16,7 +17,28 @@ import {
 
 const TEST_DRAFT_ID = "browser-smoke";
 
-export default function RichTextTestClient({ typography = false }: { typography?: boolean }) {
+const OUTLINE_DOCUMENT: JSONContent = {
+  type: "doc",
+  content: Array.from({ length: 6 }, (_, section) => [
+    {
+      type: "heading",
+      attrs: { level: 2 },
+      content: [{ type: "text", text: `Section ${section + 1}` }],
+    },
+    ...Array.from({ length: 20 }, () => ({
+      type: "paragraph",
+      content: [{ type: "text", text: "Article content keeps the reading rail in view." }],
+    })),
+  ]).flat(),
+};
+
+export default function RichTextTestClient({
+  typography = false,
+  outline = false,
+}: {
+  typography?: boolean;
+  outline?: boolean;
+}) {
   const initialContent = useMemo<JSONContent>(
     () =>
       typography
@@ -55,6 +77,22 @@ export default function RichTextTestClient({ typography = false }: { typography?
     });
     setStatus("Draft restored");
   };
+
+  if (outline) {
+    return (
+      <ArticleLayout
+        body={
+          <ArticleBody
+            content={JSON.stringify(OUTLINE_DOCUMENT)}
+            contentType="JSON"
+            outlineLabel="On this page"
+          />
+        }
+        hero={<h1 className="mx-auto max-w-3xl py-24 text-3xl">Article outline regression</h1>}
+        label="On this page"
+      />
+    );
+  }
 
   return (
     <main className="bg-background text-foreground mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 p-4 sm:p-6">

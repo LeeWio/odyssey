@@ -31,7 +31,7 @@ export function ArticleLayout({
         <article className="w-full min-w-0" data-reading-content>
           {hero}
           <div className="mx-auto grid w-full max-w-3xl items-start xl:max-w-[85rem] xl:grid-cols-[16rem_minmax(0,48rem)_16rem] xl:justify-center xl:gap-10">
-            <div className="hidden min-h-px xl:block">
+            <div className="hidden min-h-px self-stretch xl:block">
               {showContext ? (
                 <aside
                   aria-label={label}
@@ -43,7 +43,7 @@ export function ArticleLayout({
               ) : null}
             </div>
             <div className="min-w-0">{body}</div>
-            <div className="hidden min-h-px xl:block">
+            <div className="hidden min-h-px self-stretch xl:block">
               <aside aria-label={label} className="sticky top-28" id="article-toc-rail" />
             </div>
           </div>
