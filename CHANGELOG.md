@@ -1,3 +1,10 @@
+## [1.226.13](https://github.com/LeeWio/odyssey/compare/v1.226.12...v1.226.13) (2026-10-22)
+
+
+### Bug Fixes
+
+* **rich-text:** restore column layout and resize controls ([a6dda3e](https://github.com/LeeWio/odyssey/commit/a6dda3e26ff32cdbc917ecf5f92cb10f3fe437cb))
+
 ## [1.226.12](https://github.com/LeeWio/odyssey/compare/v1.226.11...v1.226.12) (2026-10-22)
 
 
