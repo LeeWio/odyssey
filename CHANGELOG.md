@@ -1,3 +1,10 @@
+## [1.226.12](https://github.com/LeeWio/odyssey/compare/v1.226.11...v1.226.12) (2026-10-22)
+
+
+### Bug Fixes
+
+* **rich-text:** unify HeroUI editor and reader typography ([e7ca235](https://github.com/LeeWio/odyssey/commit/e7ca235041ba9d75f6417fd0ae4cf14d5400225f))
+
 ## [1.226.11](https://github.com/LeeWio/odyssey/compare/v1.226.10...v1.226.11) (2026-10-21)
 
 
