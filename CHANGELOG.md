@@ -1,3 +1,10 @@
+## [1.226.16](https://github.com/LeeWio/odyssey/compare/v1.226.15...v1.226.16) (2026-10-23)
+
+
+### Bug Fixes
+
+* **rich-text:** restore glass BubbleMenu backdrop blur ([bdf25b0](https://github.com/LeeWio/odyssey/commit/bdf25b0b4d45de2e453adae48db5a073709f06eb))
+
 ## [1.226.15](https://github.com/LeeWio/odyssey/compare/v1.226.14...v1.226.15) (2026-10-22)
 
 
