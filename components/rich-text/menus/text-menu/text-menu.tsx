@@ -12,6 +12,7 @@ import { LineHeightPicker } from "./components/line-height-picker";
 import { TextColorPicker } from "./components/text-color-picker";
 import { useRichTextCommands } from "./hooks/use-rich-text-commands";
 import { useTextMenuStates } from "./hooks/use-text-menu-states";
+import { BubbleMenu } from "../bubble-menu";
 
 export function TextMenu() {
   const states = useTextMenuStates();
@@ -20,13 +21,7 @@ export function TextMenu() {
   const moreOverlayState = useOverlayState();
 
   return (
-    <RichTextEditor.BubbleMenu
-      pluginKey="text-menu"
-      shouldShow={states.shouldShow}
-      appendTo={() =>
-        (document.querySelector("[data-slot='modal-dialog']") as HTMLElement) || document.body
-      }
-    >
+    <BubbleMenu pluginKey="text-menu" shouldShow={states.shouldShow}>
       <motion.div
         layout
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -129,6 +124,6 @@ export function TextMenu() {
           </Popover.Content>
         </Popover>
       </motion.div>
-    </RichTextEditor.BubbleMenu>
+    </BubbleMenu>
   );
 }

@@ -1,15 +1,12 @@
 "use client";
 
 import { Surface } from "@heroui/react";
-import {
-  RichTextEditor,
-  useRichTextEditor,
-  useRichTextEditorState,
-} from "@heroui-pro/react/rich-text-editor";
+import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import { isNodeSelection } from "@tiptap/core";
 import { useCallback } from "react";
 import { MathEditorPanel, type MathKind } from "../../mathematics/math-editor-popover";
 import type { ShouldShowProps } from "../types";
+import { BubbleMenu } from "../bubble-menu";
 
 interface MathSelectionState {
   kind: MathKind | null;
@@ -64,14 +61,7 @@ export function MathMenu() {
   );
 
   return (
-    <RichTextEditor.BubbleMenu
-      aria-label="Formula actions"
-      pluginKey="math-menu"
-      shouldShow={shouldShow}
-      appendTo={() =>
-        (document.querySelector("[data-slot='modal-dialog']") as HTMLElement) || document.body
-      }
-    >
+    <BubbleMenu aria-label="Formula actions" pluginKey="math-menu" shouldShow={shouldShow}>
       {mathSelection.kind && (
         <Surface
           aria-label="Formula editor"
@@ -96,6 +86,6 @@ export function MathMenu() {
           />
         </Surface>
       )}
-    </RichTextEditor.BubbleMenu>
+    </BubbleMenu>
   );
 }

@@ -12,5 +12,6 @@
   - host: `liwei@47.122.123.12`
   - path: `/srv/blog/apps/web`
 - Do **not** commit or push from a local workstation copy.
-- Sync local edits to the server (e.g. rsync), then `git add` / `git commit` / `git push` there.
+- Sync local edits to the server as targeted patches using `git apply --check` and `git apply`, then `git add` / `git commit` / `git push` there. Do not sync by copying files or directories (including rsync).
+- Run heavyweight checks locally; keep server-side verification lightweight to avoid exhausting production resources.
 - Never commit secrets (`.env`, API keys, credential screenshots).

@@ -5,6 +5,7 @@ import type { Editor, JSONContent } from "@tiptap/react";
 import { useMemo, useState } from "react";
 
 import { RichText } from "@/components/rich-text/rich-text";
+import { RichTextModalTestClient } from "./rich-text-modal-test-client";
 import { RICH_TEXT_DOCUMENT_FIXTURE } from "@/components/rich-text/testing/rich-text-document.fixture";
 import { RICH_TEXT_TYPOGRAPHY_FIXTURE } from "@/components/rich-text/testing/rich-text-typography.fixture";
 import { ArticleBody } from "@/features/blog/reader/article/article-body";
@@ -35,9 +36,11 @@ const OUTLINE_DOCUMENT: JSONContent = {
 export default function RichTextTestClient({
   typography = false,
   outline = false,
+  modal = false,
 }: {
   typography?: boolean;
   outline?: boolean;
+  modal?: boolean;
 }) {
   const initialContent = useMemo<JSONContent>(
     () =>
@@ -92,6 +95,10 @@ export default function RichTextTestClient({
         label="On this page"
       />
     );
+  }
+
+  if (modal) {
+    return <RichTextModalTestClient />;
   }
 
   return (

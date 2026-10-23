@@ -20,6 +20,7 @@ import {
   getColumnWidthsAtSelection,
 } from "../../extensions/multi-column/columns";
 import type { ShouldShowProps } from "../types";
+import { BubbleMenu } from "../bubble-menu";
 
 const COLUMN_LAYOUT_OPTIONS: ReadonlyArray<{
   label: string;
@@ -102,13 +103,10 @@ export function ColumnsMenu() {
   );
 
   return (
-    <RichTextEditor.BubbleMenu
+    <BubbleMenu
       aria-label="Column layout actions"
       pluginKey="columns-menu"
       shouldShow={shouldShow}
-      appendTo={() =>
-        (document.querySelector("[data-slot='modal-dialog']") as HTMLElement) || document.body
-      }
       getReferencedVirtualElement={() => getColumnsElement(editor)}
     >
       <RichTextEditor.ToolbarGroup aria-label="Column layout actions">
@@ -153,6 +151,6 @@ export function ColumnsMenu() {
           <Icon aria-hidden="true" icon="gravity-ui:scissors" />
         </RichTextEditor.CommandButton>
       </RichTextEditor.ToolbarGroup>
-    </RichTextEditor.BubbleMenu>
+    </BubbleMenu>
   );
 }

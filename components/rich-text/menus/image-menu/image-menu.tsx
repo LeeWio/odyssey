@@ -33,6 +33,7 @@ import {
 import { validateMediaFile } from "../../extensions/media/media-upload";
 import { useUploadFileMutation } from "@/lib/features/file";
 import type { ShouldShowProps } from "../types";
+import { BubbleMenu } from "../bubble-menu";
 
 interface ImagePreview {
   alt: string;
@@ -114,14 +115,7 @@ export function ImageMenu() {
 
   return (
     <>
-      <RichTextEditor.BubbleMenu
-        aria-label="Image actions"
-        pluginKey="image-menu"
-        shouldShow={shouldShow}
-        appendTo={() =>
-          (document.querySelector("[data-slot='modal-dialog']") as HTMLElement) || document.body
-        }
-      >
+      <BubbleMenu aria-label="Image actions" pluginKey="image-menu" shouldShow={shouldShow}>
         <RichTextEditor.ToolbarGroup aria-label="Image actions">
           <Popover>
             <Button
@@ -268,7 +262,7 @@ export function ImageMenu() {
           type="file"
           onChange={replaceImage}
         />
-      </RichTextEditor.BubbleMenu>
+      </BubbleMenu>
 
       <Modal.Backdrop
         isOpen={preview !== null}

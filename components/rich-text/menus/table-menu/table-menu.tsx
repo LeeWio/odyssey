@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react";
 import { useCallback } from "react";
 
 import type { ShouldShowProps } from "../types";
+import { BubbleMenu } from "../bubble-menu";
 
 export function TableMenu() {
   const { editor, isReadOnly } = useRichTextEditor();
@@ -28,13 +29,10 @@ export function TableMenu() {
   if (!editor) return null;
 
   return (
-    <RichTextEditor.BubbleMenu
+    <BubbleMenu
       aria-label="Table actions"
       pluginKey="table-menu"
       shouldShow={shouldShow}
-      appendTo={() =>
-        (document.querySelector("[data-slot='modal-dialog']") as HTMLElement) || document.body
-      }
       toolbarProps={{ className: "max-w-[calc(100vw-1rem)] scrollbar-none overflow-x-auto" }}
     >
       <RichTextEditor.ToolbarGroup aria-label="Table structure">
@@ -128,6 +126,6 @@ export function TableMenu() {
           <Icon aria-hidden="true" className="text-danger" icon="gravity-ui:trash-bin" />
         </RichTextEditor.CommandButton>
       </RichTextEditor.ToolbarGroup>
-    </RichTextEditor.BubbleMenu>
+    </BubbleMenu>
   );
 }
