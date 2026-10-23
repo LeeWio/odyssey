@@ -44,3 +44,22 @@ Pixel checks measure whether blur smooths stripes in the menu's padding, away
 from the buttons' own backdrop filters.
 An additional negative control places actual editor glyphs behind the same menu:
 the old dialog mount leaves sharp text, while the container mount smooths it.
+
+## Suggestions In Modals
+
+HeroUI Pro's native `SuggestionMenu` portals to `document.body`, below the article
+modal. `SuggestionToolbar` moves the `/` and `@` menu roots into the owning
+`Modal.Container` using their element refs, and restores the original portal
+parent during ref cleanup so React can remove them safely. The menus retain
+HeroUI styling and explicitly accept pointer events.
+
+The React Aria top-layer marker keeps menus interactive when the modal's queued
+body mutation observer runs, and allows their focus and pointer interactions.
+ListBox uses the official action-list pattern (`selectionMode="none"` with
+`onAction`) so a single click inserts the command or mention. Active suggestion
+highlighting follows the suggestion plugin's index. Escape exits the active
+plugin before reaching the modal, including when focus is inside the list.
+
+`tests/e2e/rich-text-suggestions.spec.ts` covers hit testing, mouse insertion,
+keyboard selection, repeated dismissal, menu focus and modal reopening across
+light and dark glass themes and the standalone editor.

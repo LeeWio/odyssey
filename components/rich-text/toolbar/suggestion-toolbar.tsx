@@ -1,12 +1,15 @@
 "use client";
 
 import { Icon } from "@iconify/react";
+import { PluginKey } from "@tiptap/pm/state";
+import { exitSuggestion } from "@tiptap/suggestion";
 
 import { Description, Header, Kbd, Label, ListBox, ScrollShadow, Separator } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import {
   filterRichTextEditorSuggestionItems,
   RichTextEditor,
+  useRichTextEditor,
   type RichTextEditorSuggestionItem,
   type RichTextEditorSuggestionMenuRenderProps,
 } from "@heroui-pro/react/rich-text-editor";
@@ -15,6 +18,9 @@ import { UserAvatar } from "@/components/user-avatar";
 import { userApi, type UserMentionResponse } from "@/lib/features/user";
 import { useAppDispatch } from "@/lib/hooks";
 import { OPEN_YOUTUBE_DIALOG_EVENT } from "../media-insert-dialog";
+
+const slashPluginKey = new PluginKey<{ active: boolean }>("slash-command-menu");
+const mentionPluginKey = new PluginKey<{ active: boolean }>("mention-menu");
 
 const SLASH_COMMAND_GROUPS = [
   { id: "text", label: "Text" },
@@ -322,8 +328,7 @@ function SuggestionMenuContent({
         <ListBox
           aria-label="Insert block"
           className="w-full gap-1 p-1"
-          selectedKeys={selectedItem ? new Set([selectedItem.id]) : new Set()}
-          selectionMode="single"
+          selectionMode="none"
           onAction={(key) => {
             const item = items.find((candidate) => candidate.id === String(key));
 
@@ -339,12 +344,12 @@ function SuggestionMenuContent({
                 return (
                   <ListBox.Item
                     key={item.id}
-                    className="data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent-soft-foreground"
+                    className="data-[active=true]:bg-accent-soft data-[active=true]:text-accent-soft-foreground"
+                    data-active={selectedItem?.id === item.id || undefined}
                     data-slash-command-id={item.id}
                     id={item.id}
                     textValue={item.title}
                     onHoverStart={() => setSelectedIndex(index)}
-                    onMouseDown={(event) => event.preventDefault()}
                   >
                     <span className="bg-default text-muted flex size-9 shrink-0 items-center justify-center rounded-full">
                       {item.icon}
@@ -353,13 +358,13 @@ function SuggestionMenuContent({
                       <Label>{item.title}</Label>
                       <Description className="truncate">{item.description}</Description>
                     </span>
-                    <ListBox.ItemIndicator className="text-accent ms-auto">
-                      {({ isSelected }) =>
-                        isSelected ? (
-                          <Icon icon="gravity-ui:check" aria-hidden="true" className="size-4" />
-                        ) : null
-                      }
-                    </ListBox.ItemIndicator>
+                    {selectedItem?.id === item.id && (
+                      <Icon
+                        icon="gravity-ui:check"
+                        aria-hidden="true"
+                        className="text-accent ms-auto size-4"
+                      />
+                    )}
                   </ListBox.Item>
                 );
               })}
@@ -435,8 +440,7 @@ function MentionMenuContent({
       <ListBox
         aria-label="Mention user"
         className="w-64 p-1"
-        selectedKeys={selectedItem ? new Set([selectedItem.id]) : new Set()}
-        selectionMode="single"
+        selectionMode="none"
         onAction={(key) => {
           const item = items.find((candidate) => candidate.id === String(key));
           if (item) selectItem(item);
@@ -445,17 +449,16 @@ function MentionMenuContent({
         {items.map((item, index) => (
           <ListBox.Item
             key={item.id}
-            className="data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent-soft-foreground"
+            className="data-[active=true]:bg-accent-soft data-[active=true]:text-accent-soft-foreground"
+            data-active={selectedItem?.id === item.id || undefined}
             id={item.id}
             data-mention-user-id={item.id}
             textValue={item.title}
             onHoverStart={() => setSelectedIndex(index)}
-            onMouseDown={(event) => event.preventDefault()}
           >
             <UserAvatar size="sm" name={item.title} avatar={item.user.avatar} />
             <Label className="min-w-0 truncate">{item.title}</Label>
             <Description className="min-w-0 truncate">{item.description}</Description>
-            <ListBox.ItemIndicator />
           </ListBox.Item>
         ))}
       </ListBox>
@@ -488,6 +491,48 @@ function toMentionItem(user: UserMentionResponse): MentionItem {
 
 export function SuggestionToolbar() {
   const dispatch = useAppDispatch();
+  const { editor } = useRichTextEditor();
+  const dismissSuggestion = useCallback(
+    (event: Pick<KeyboardEvent, "key" | "preventDefault" | "stopPropagation">) => {
+      if (!editor || event.key !== "Escape") return;
+      const key = [slashPluginKey, mentionPluginKey].find(
+        (candidate) => candidate.getState(editor.state)?.active
+      );
+      if (!key) return;
+      // Dismiss the suggestion before Escape can reach the enclosing modal.
+      event.preventDefault();
+      event.stopPropagation();
+      exitSuggestion(editor.view, key);
+      editor.commands.focus();
+    },
+    [editor]
+  );
+
+  useEffect(() => {
+    if (!editor) return;
+    const element = editor.view.dom;
+    element.addEventListener("keydown", dismissSuggestion, true);
+    return () => element.removeEventListener("keydown", dismissSuggestion, true);
+  }, [editor, dismissSuggestion]);
+
+  const attachSuggestionMenu = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (!element || !editor || editor.isDestroyed) return;
+      const container = editor.view.dom.closest<HTMLElement>("[data-slot='modal-container']");
+      if (!container) return;
+
+      // HeroUI portals to body; keep suggestions inside the owning modal's focus scope.
+      // The top-layer marker also exempts queued body mutations from modal inert handling.
+      const portalParent = element.parentNode;
+      element.setAttribute("data-react-aria-top-layer", "");
+      container.appendChild(element);
+      return () => {
+        // React removes the portal from its original parent after detaching this ref.
+        if (element.parentNode === container) portalParent?.appendChild(element);
+      };
+    },
+    [editor]
+  );
 
   const loadMentionItems = useCallback(
     async ({ query }: { query: string }) => {
@@ -509,19 +554,23 @@ export function SuggestionToolbar() {
   return (
     <>
       <RichTextEditor.SuggestionMenu<SlashCommandItem>
+        ref={attachSuggestionMenu}
+        onKeyDownCapture={dismissSuggestion}
         char="/"
-        className="p-0"
+        className="pointer-events-auto p-0"
         items={getSlashItems}
         maxHeight={384}
-        pluginKey="slash-command-menu"
+        pluginKey={slashPluginKey}
       >
         {(props) => <SuggestionMenuContent {...props} />}
       </RichTextEditor.SuggestionMenu>
       <RichTextEditor.SuggestionMenu<MentionItem>
+        ref={attachSuggestionMenu}
+        onKeyDownCapture={dismissSuggestion}
         char="@"
-        className="w-fit min-w-0"
+        className="pointer-events-auto w-fit min-w-0"
         items={loadMentionItems}
-        pluginKey="mention-menu"
+        pluginKey={mentionPluginKey}
       >
         {(props) => <MentionMenuContent {...props} />}
       </RichTextEditor.SuggestionMenu>
