@@ -1,3 +1,10 @@
+## [1.226.17](https://github.com/LeeWio/odyssey/compare/v1.226.16...v1.226.17) (2026-10-23)
+
+
+### Bug Fixes
+
+* **rich-text:** keep suggestion menus above editor modals ([5180c85](https://github.com/LeeWio/odyssey/commit/5180c85667791412d9309acd4219731e3ebd0b18))
+
 ## [1.226.16](https://github.com/LeeWio/odyssey/compare/v1.226.15...v1.226.16) (2026-10-23)
 
 
