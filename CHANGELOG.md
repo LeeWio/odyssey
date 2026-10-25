@@ -1,3 +1,10 @@
+## [1.226.18](https://github.com/LeeWio/odyssey/compare/v1.226.17...v1.226.18) (2026-10-25)
+
+
+### Bug Fixes
+
+* **web:** restore sheet drag-to-dismiss ([2599e0d](https://github.com/LeeWio/odyssey/commit/2599e0dbc32fc87e0c7db83764899337166c16de))
+
 ## [1.226.17](https://github.com/LeeWio/odyssey/compare/v1.226.16...v1.226.17) (2026-10-23)
 
 
