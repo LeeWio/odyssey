@@ -13,6 +13,7 @@ import {
   setDashboardPath,
   toggleDashboard,
 } from "@/lib/features/ui";
+import { useSheetDismissScrollLock } from "@/components/sheet/use-sheet-dismiss-scroll-lock";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 import { AppShell } from "./app-shell";
@@ -52,6 +53,7 @@ export function DashboardSheet() {
   const [createWishOpen, setCreateWishOpen] = useState(false);
   const [createWishStatus, setCreateWishStatus] = useState<LifeListStatus>("planned");
   const [suppressOutsideClose, setSuppressOutsideClose] = useState(false);
+  useSheetDismissScrollLock(isOpen);
 
   const handleOpenChange = (open: boolean) => {
     // The press that opens a nested sheet is also reported as an outside close.

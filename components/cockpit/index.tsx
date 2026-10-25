@@ -4,6 +4,7 @@ import { Card, Chip, Typography } from "@heroui/react";
 import { Sheet } from "@heroui-pro/react";
 import { useState } from "react";
 import { useRealTime } from "@/hooks/use-real-time";
+import { useSheetDismissScrollLock } from "@/components/sheet/use-sheet-dismiss-scroll-lock";
 import { selectIsSheetOpen, setSheetOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { MusicMiniWidget } from "@/features/blog/auxiliary/music-mini-widget";
@@ -14,6 +15,7 @@ import { Stocks } from "./widgets/stocks";
 export function Cockpit() {
   const isOpen = useAppSelector(selectIsSheetOpen);
   const dispatch = useAppDispatch();
+  useSheetDismissScrollLock(isOpen);
 
   const { formattedDate, hours, minutes } = useRealTime();
 
