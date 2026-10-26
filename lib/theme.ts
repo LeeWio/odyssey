@@ -6,7 +6,7 @@ export type ThemeMode = (typeof THEME_MODES)[number];
 export type ResolvedThemeMode = Exclude<ThemeMode, "system">;
 export type ThemeName = `${ThemeVariant}-${ResolvedThemeMode}`;
 
-export const DEFAULT_THEME_VARIANT: ThemeVariant = "mouve";
+export const DEFAULT_THEME_VARIANT: ThemeVariant = "glass";
 export const DEFAULT_THEME_MODE: ThemeMode = "dark";
 export const DEFAULT_RESOLVED_THEME_MODE: ResolvedThemeMode = "dark";
 
