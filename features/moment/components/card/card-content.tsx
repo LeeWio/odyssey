@@ -32,17 +32,22 @@ interface CardContentProps {
   topics: MomentTopicResponse[];
   onCardClick?: (index: number) => void;
   stockSymbol?: string;
+  linkTopics?: boolean;
 }
 
-function TopicTag({ id, slug }: { id: number; slug: string }) {
+function TopicTag({ id, link, slug }: { id: number; link: boolean; slug: string }) {
   return (
     <Tag id={id} textValue={slug}>
-      <Link
-        className="text-foreground no-underline"
-        href={`/moments/topics/${encodeURIComponent(slug)}`}
-      >
-        {slug}
-      </Link>
+      {link ? (
+        <Link
+          className="text-foreground no-underline"
+          href={`/moments/topics/${encodeURIComponent(slug)}`}
+        >
+          {slug}
+        </Link>
+      ) : (
+        slug
+      )}
     </Tag>
   );
 }
@@ -69,6 +74,7 @@ export const CardContent = ({
   topics,
   onCardClick,
   stockSymbol,
+  linkTopics = true,
 }: CardContentProps) => {
   const t = useTranslations("Moments");
   const count = imageUrls.length;
@@ -112,7 +118,7 @@ export const CardContent = ({
             <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
               <TagGroup.List className="flex flex-wrap justify-center gap-1.5">
                 {topics.map((topic) => (
-                  <TopicTag key={topic.id} slug={topic.slug} id={topic.id} />
+                  <TopicTag key={topic.id} id={topic.id} link={linkTopics} slug={topic.slug} />
                 ))}
               </TagGroup.List>
             </TagGroup>
@@ -136,7 +142,7 @@ export const CardContent = ({
             <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
               <TagGroup.List className="flex flex-wrap gap-1.5">
                 {topics.map((topic) => (
-                  <TopicTag key={topic.id} slug={topic.slug} id={topic.id} />
+                  <TopicTag key={topic.id} id={topic.id} link={linkTopics} slug={topic.slug} />
                 ))}
               </TagGroup.List>
             </TagGroup>
@@ -166,7 +172,7 @@ export const CardContent = ({
         <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
           <TagGroup.List className="flex flex-wrap gap-1.5">
             {topics.map((topic) => (
-              <TopicTag key={topic.id} id={topic.id} slug={topic.slug} />
+              <TopicTag key={topic.id} id={topic.id} link={linkTopics} slug={topic.slug} />
             ))}
           </TagGroup.List>
         </TagGroup>

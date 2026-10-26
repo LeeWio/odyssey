@@ -208,6 +208,7 @@ export const MomentCard = ({
         momentId={moment?.id ?? "default"}
         parsedContent={parsedContent}
         imageUrls={imageUrls}
+        linkTopics={interactive}
         topics={moment?.topics ?? []}
         onCardClick={interactive ? setActiveIndex : undefined}
         stockSymbol={stockSymbol}
