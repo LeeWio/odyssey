@@ -1,3 +1,10 @@
+## [1.226.20](https://github.com/LeeWio/odyssey/compare/v1.226.19...v1.226.20) (2026-10-26)
+
+
+### Bug Fixes
+
+* **rich-text:** keep table height stable while typing and resizing ([7a8abc8](https://github.com/LeeWio/odyssey/commit/7a8abc81afd0f9ee77b6a35c5a21e678f50082db))
+
 ## [1.226.19](https://github.com/LeeWio/odyssey/compare/v1.226.18...v1.226.19) (2026-10-26)
 
 
