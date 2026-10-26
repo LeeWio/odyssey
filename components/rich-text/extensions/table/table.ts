@@ -1,50 +1,97 @@
 import { TableKit as TiptapTableKit, TableView as TiptapTableView } from "@tiptap/extension-table";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { CellSelection } from "@tiptap/pm/tables";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { EditorView } from "@tiptap/pm/view";
-
-const tableClassName =
-  "w-full max-w-full table-fixed border-collapse [&_.column-resize-handle]:pointer-events-none [&_.column-resize-handle]:absolute [&_.column-resize-handle]:top-0 [&_.column-resize-handle]:right-[-2px] [&_.column-resize-handle]:bottom-[-1px] [&_.column-resize-handle]:z-[3] [&_.column-resize-handle]:w-1 [&_.column-resize-handle]:bg-accent [&_.selectedCell]:after:pointer-events-none [&_.selectedCell]:after:absolute [&_.selectedCell]:after:inset-0 [&_.selectedCell]:after:z-[2] [&_.selectedCell]:after:bg-accent/15 [&_.selectedCell]:after:content-['']";
 
 class TableView extends TiptapTableView {
   constructor(
     node: ProseMirrorNode,
     cellMinWidth: number,
-    view: EditorView,
+    view?: EditorView,
     HTMLAttributes: Record<string, unknown> = {}
   ) {
     super(node, cellMinWidth, view, HTMLAttributes);
-    // prosemirror-tables builds this view as View(node, cellMinWidth, editorView)
-    // and never forwards HTMLAttributes, so the table is born without table-fixed.
-    if (!this.table.className) {
-      this.table.className = tableClassName;
+    // 3.32.0 still builds the resize view as View(node, cellMinWidth, editorView)
+    // and drops HTMLAttributes. Apply them here until the reference View: null ships.
+    const className = HTMLAttributes.class;
+    if (!this.table.className && typeof className === "string") {
+      this.table.className = className;
     }
-    this.dom.className = "tableWrapper w-full max-w-full overflow-x-auto overflow-y-hidden";
-    this.table.style.setProperty("--default-cell-min-width", `${cellMinWidth}px`);
   }
 }
 
-export const TableKit = TiptapTableKit.configure({
+const activeCellKey = new PluginKey("table-active-cell");
+
+function activeCellDecoration(state: {
+  doc: ProseMirrorNode;
+  selection: {
+    $from: {
+      depth: number;
+      node: (depth: number) => ProseMirrorNode;
+      before: (depth: number) => number;
+    };
+  };
+}) {
+  const selection = state.selection;
+  if (selection instanceof CellSelection) return DecorationSet.empty;
+
+  const $from = selection.$from;
+  for (let depth = $from.depth; depth > 0; depth -= 1) {
+    const role = $from.node(depth).type.spec.tableRole;
+    if (role !== "cell" && role !== "header_cell") continue;
+
+    const pos = $from.before(depth);
+    const node = $from.node(depth);
+    return DecorationSet.create(state.doc, [
+      Decoration.node(pos, pos + node.nodeSize, { class: "table-cell-active" }),
+    ]);
+  }
+
+  return DecorationSet.empty;
+}
+
+export const TableKit = TiptapTableKit.extend({
+  addExtensions() {
+    return (this.parent?.() ?? []).map((extension) => {
+      if (extension.name !== "table") return extension;
+
+      return extension.extend({
+        addProseMirrorPlugins() {
+          return [
+            ...(this.parent?.() ?? []),
+            new Plugin({
+              key: activeCellKey,
+              props: {
+                decorations: (state) => activeCellDecoration(state),
+              },
+            }),
+          ];
+        },
+      });
+    });
+  },
+}).configure({
   table: {
     HTMLAttributes: {
-      class: tableClassName,
+      class: "w-full max-w-full border-collapse",
     },
+    cellMinWidth: 100,
+    handleWidth: 5,
     resizable: true,
     renderWrapper: true,
     View: TableView,
   },
-  tableRow: {
-    HTMLAttributes: {
-      class: "border-separator border-b",
-    },
-  },
+  tableRow: {},
   tableHeader: {
     HTMLAttributes: {
-      class: "border-separator relative box-border border text-left align-top font-semibold",
+      class: "text-left align-top",
     },
   },
   tableCell: {
     HTMLAttributes: {
-      class: "border-separator relative box-border border align-top",
+      class: "align-top",
     },
   },
 });

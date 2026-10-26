@@ -175,42 +175,6 @@ export const useContentItemActions = (currentNode: Node | null, currentNodePos: 
     editor.view.dispatch(transaction.scrollIntoView());
   }, [editor, currentNode, currentNodePos]);
 
-  // Context-Aware Table actions
-  const addTableColumnBefore = useCallback(() => {
-    if (!editor) return;
-    editor.chain().focus().addColumnBefore().run();
-  }, [editor]);
-
-  const addTableColumnAfter = useCallback(() => {
-    if (!editor) return;
-    editor.chain().focus().addColumnAfter().run();
-  }, [editor]);
-
-  const deleteTableColumn = useCallback(() => {
-    if (!editor) return;
-    editor.chain().focus().deleteColumn().run();
-  }, [editor]);
-
-  const addTableRowBefore = useCallback(() => {
-    if (!editor) return;
-    editor.chain().focus().addRowBefore().run();
-  }, [editor]);
-
-  const addTableRowAfter = useCallback(() => {
-    if (!editor) return;
-    editor.chain().focus().addRowAfter().run();
-  }, [editor]);
-
-  const deleteTableRow = useCallback(() => {
-    if (!editor) return;
-    editor.chain().focus().deleteRow().run();
-  }, [editor]);
-
-  const deleteTable = useCallback(() => {
-    if (!editor) return;
-    editor.chain().focus().deleteTable().run();
-  }, [editor]);
-
   // Context-Aware Image actions
   const updateImageAttributes = useCallback(
     (attrs: Record<string, unknown>) => {
@@ -249,13 +213,6 @@ export const useContentItemActions = (currentNode: Node | null, currentNodePos: 
     toggleNodeType,
     moveNodeUp,
     moveNodeDown,
-    addTableColumnBefore,
-    addTableColumnAfter,
-    deleteTableColumn,
-    addTableRowBefore,
-    addTableRowAfter,
-    deleteTableRow,
-    deleteTable,
     updateImageAttributes,
     toggleTaskChecked,
   };

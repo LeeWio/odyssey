@@ -27,23 +27,6 @@ export function ContentItemMenu() {
   // Context-Aware Node Detection with defensive RangeError boundaries
   const isImageNode = activeBlock?.node.type.name === "image";
 
-  const isTableNode = useMemo(() => {
-    if (!editor || !activeBlock) return false;
-    if (activeBlock.node.type.name === "table") return true;
-
-    try {
-      const resolved = editor.state.doc.resolve(activeBlock.position);
-      for (let depth = resolved.depth; depth > 0; depth -= 1) {
-        if (resolved.node(depth).type.name === "table") {
-          return true;
-        }
-      }
-    } catch {
-      // Defensive fallback
-    }
-    return false;
-  }, [editor, activeBlock]);
-
   const isTaskNode = useMemo(() => {
     if (!editor || !activeBlock) return false;
     if (activeBlock.node.type.name === "taskItem") return true;
@@ -149,31 +132,6 @@ export function ContentItemMenu() {
       setAnnouncement("Block moved down");
     }
 
-    // Context Table Actions
-    else if (action === "table-add-col-before") {
-      actions.addTableColumnBefore();
-      setAnnouncement("Column added left");
-    } else if (action === "table-add-col-after") {
-      actions.addTableColumnAfter();
-      setAnnouncement("Column added right");
-    } else if (action === "table-add-row-before") {
-      actions.addTableRowBefore();
-      setAnnouncement("Row added above");
-    } else if (action === "table-add-row-after") {
-      actions.addTableRowAfter();
-      setAnnouncement("Row added below");
-    } else if (action === "table-delete-col") {
-      actions.deleteTableColumn();
-      setAnnouncement("Column deleted");
-    } else if (action === "table-delete-row") {
-      actions.deleteTableRow();
-      setAnnouncement("Row deleted");
-    } else if (action === "table-delete") {
-      actions.deleteTable();
-      setAnnouncement("Table deleted");
-      setActiveBlock(null);
-    }
-
     // Context Image Actions
     else if (action === "image-align-left") {
       actions.updateImageAttributes({ alignment: "left" });
@@ -274,41 +232,6 @@ export function ContentItemMenu() {
           </Button>
           <Dropdown.Popover placement="bottom start">
             <Dropdown.Menu aria-label="Block actions" onAction={(key) => runAction(String(key))}>
-              {/* Context-Aware Section: Table */}
-              {isTableNode && (
-                <Dropdown.Section>
-                  <Header>Table Actions</Header>
-                  <Dropdown.Item id="table-add-col-before" textValue="Insert Column Left">
-                    <Icon icon="gravity-ui:layout-columns" className="text-muted size-4 shrink-0" />
-                    <Label>Insert Column Left</Label>
-                  </Dropdown.Item>
-                  <Dropdown.Item id="table-add-col-after" textValue="Insert Column Right">
-                    <Icon icon="gravity-ui:layout-columns" className="text-muted size-4 shrink-0" />
-                    <Label>Insert Column Right</Label>
-                  </Dropdown.Item>
-                  <Dropdown.Item id="table-add-row-before" textValue="Insert Row Above">
-                    <Icon icon="gravity-ui:layout-rows" className="text-muted size-4 shrink-0" />
-                    <Label>Insert Row Above</Label>
-                  </Dropdown.Item>
-                  <Dropdown.Item id="table-add-row-after" textValue="Insert Row Below">
-                    <Icon icon="gravity-ui:layout-rows" className="text-muted size-4 shrink-0" />
-                    <Label>Insert Row Below</Label>
-                  </Dropdown.Item>
-                  <Dropdown.Item id="table-delete-col" textValue="Delete Column">
-                    <Icon icon="gravity-ui:minus" className="text-muted size-4 shrink-0" />
-                    <Label>Delete Column</Label>
-                  </Dropdown.Item>
-                  <Dropdown.Item id="table-delete-row" textValue="Delete Row">
-                    <Icon icon="gravity-ui:minus" className="text-muted size-4 shrink-0" />
-                    <Label>Delete Row</Label>
-                  </Dropdown.Item>
-                  <Dropdown.Item id="table-delete" textValue="Delete Table" variant="danger">
-                    <Icon icon="gravity-ui:trash-bin" className="text-danger size-4 shrink-0" />
-                    <Label>Delete Table</Label>
-                  </Dropdown.Item>
-                </Dropdown.Section>
-              )}
-
               {/* Context-Aware Section: Image */}
               {isImageNode && (
                 <Dropdown.Section>

@@ -27,14 +27,16 @@ export const RICH_TEXT_PROSE_CLASS_NAME = [
   "[&_hr]:my-8! [&_hr]:border-separator",
   "[&_img]:m-0! [&_img]:h-auto [&_img]:max-w-full [&_figure]:m-0",
   // Match HeroUI Table's theme-driven outer radius, including square-corner themes.
-  "[&_.tableWrapper]:min-w-0 [&_.tableWrapper]:max-w-full [&_.tableWrapper]:overflow-x-auto [&_.tableWrapper]:overflow-y-hidden [&_.tableWrapper]:rounded-[min(32px,calc(var(--radius)*2.5))]! [&_.tableWrapper]:border [&_.tableWrapper]:border-separator [&_.tableWrapper]:bg-surface",
-  // prosemirror-tables marks the editor itself when the pointer is on a column edge.
-  "[&.resize-cursor]:cursor-col-resize!",
-  // The wrapper owns the outer edge; collapsed cell borders keep merged cells seamless.
-  "[&_.tableWrapper_table]:m-0! [&_.tableWrapper_table]:border-collapse! [&_.tableWrapper_table]:border-hidden!",
-  "[&_.tableWrapper_:is(td,th)]:box-border [&_.tableWrapper_:is(td,th)]:border-separator-tertiary/50! [&_.tableWrapper_:is(td,th)]:px-3! [&_.tableWrapper_:is(td,th)]:py-2.5! sm:[&_.tableWrapper_:is(td,th)]:px-4! sm:[&_.tableWrapper_:is(td,th)]:py-3!",
-  // Unsized columns need a stable floor. Otherwise the first typed glyph widens the column and the row jumps.
-  "[&_.tableWrapper_:is(td,th):not([data-colwidth])]:min-w-[var(--default-cell-min-width,100px)]",
+  "[&_.tableWrapper]:min-w-0 [&_.tableWrapper]:max-w-full [&_.tableWrapper]:overflow-x-auto [&_.tableWrapper]:rounded-[min(32px,calc(var(--radius)*2.5))]! [&_.tableWrapper]:border [&_.tableWrapper]:border-separator [&_.tableWrapper]:bg-surface",
+  "[&_.tableWrapper_table]:m-0! [&_.tableWrapper_table]:w-full [&_.tableWrapper_table]:max-w-full [&_.tableWrapper_table]:table-fixed [&_.tableWrapper_table]:overflow-hidden [&_.tableWrapper_table]:border-collapse! [&_.tableWrapper_table]:border-hidden!",
+  "[&_.tableWrapper_:is(td,th)]:relative [&_.tableWrapper_:is(td,th)]:box-border [&_.tableWrapper_:is(td,th)]:border! [&_.tableWrapper_:is(td,th)]:border-separator-tertiary/50! [&_.tableWrapper_:is(td,th)]:px-3! [&_.tableWrapper_:is(td,th)]:py-2.5! sm:[&_.tableWrapper_:is(td,th)]:px-4! sm:[&_.tableWrapper_:is(td,th)]:py-3!",
+  "[&_.tableWrapper_.column-resize-handle]:pointer-events-none [&_.tableWrapper_.column-resize-handle]:absolute [&_.tableWrapper_.column-resize-handle]:top-0 [&_.tableWrapper_.column-resize-handle]:right-[-2px] [&_.tableWrapper_.column-resize-handle]:bottom-[-2px] [&_.tableWrapper_.column-resize-handle]:z-[3] [&_.tableWrapper_.column-resize-handle]:w-[5px] [&_.tableWrapper_.column-resize-handle]:bg-accent",
+  "[&_.tableWrapper_.selectedCell]:after:pointer-events-none [&_.tableWrapper_.selectedCell]:after:absolute [&_.tableWrapper_.selectedCell]:after:inset-0 [&_.tableWrapper_.selectedCell]:after:z-[2] [&_.tableWrapper_.selectedCell]:after:bg-accent/15 [&_.tableWrapper_.selectedCell]:after:content-['']",
+  "[&_.tableWrapper_.table-cell-active]:before:pointer-events-none [&_.tableWrapper_.table-cell-active]:before:absolute [&_.tableWrapper_.table-cell-active]:before:inset-px [&_.tableWrapper_.table-cell-active]:before:z-[4] [&_.tableWrapper_.table-cell-active]:before:border-2 [&_.tableWrapper_.table-cell-active]:before:border-accent [&_.tableWrapper_.table-cell-active]:before:content-['']",
+  "[&_.tableWrapper_tr:first-child_:is(td,th).table-cell-active:first-child]:before:rounded-tl-[min(31px,calc(var(--radius)*2.5-1px))]",
+  "[&_.tableWrapper_tr:first-child_:is(td,th).table-cell-active:last-child]:before:rounded-tr-[min(31px,calc(var(--radius)*2.5-1px))]",
+  "[&_.tableWrapper_tr:last-child_:is(td,th).table-cell-active:first-child]:before:rounded-bl-[min(31px,calc(var(--radius)*2.5-1px))]",
+  "[&_.tableWrapper_tr:last-child_:is(td,th).table-cell-active:last-child]:before:rounded-br-[min(31px,calc(var(--radius)*2.5-1px))]",
   "[&_.tableWrapper_th]:border-separator/50! [&_.tableWrapper_th]:bg-surface-secondary! [&_.tableWrapper_th]:text-muted [&_.tableWrapper_th]:font-medium! [&_.tableWrapper_th]:text-start",
   // Zero every cell child, not only :first/:last. The resize handle is a trailing widget,
   // so a :last-child rule lets the paragraph margin return and the header jumps.

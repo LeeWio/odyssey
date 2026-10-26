@@ -4,6 +4,8 @@ import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react/rich-text-e
 import { Icon } from "@iconify/react";
 import { useCallback } from "react";
 
+import { CellSelection } from "@tiptap/pm/tables";
+
 import type { ShouldShowProps } from "../types";
 import { BubbleMenu } from "../bubble-menu";
 
@@ -21,7 +23,15 @@ export function TableMenu() {
         return false;
       }
 
-      return currentEditor.isActive("table") || element.contains(document.activeElement);
+      const selection = currentEditor.state.selection;
+      const axisSelected =
+        selection instanceof CellSelection &&
+        (selection.isColSelection() || selection.isRowSelection());
+
+      return (
+        axisSelected &&
+        (currentEditor.isActive("table") || element.contains(document.activeElement))
+      );
     },
     [isReadOnly]
   );
