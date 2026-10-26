@@ -26,8 +26,22 @@ export const RICH_TEXT_PROSE_CLASS_NAME = [
   "[&_.node-codeBlock>[data-node-view-content-react]]:block [&_.node-codeBlock>[data-node-view-content-react]]:max-w-full [&_.node-codeBlock>[data-node-view-content-react]]:overflow-x-auto [&_.node-codeBlock>[data-node-view-content-react]]:p-4 [&_.node-codeBlock>[data-node-view-content-react]]:whitespace-pre!",
   "[&_hr]:my-8! [&_hr]:border-separator",
   "[&_img]:m-0! [&_img]:h-auto [&_img]:max-w-full [&_figure]:m-0",
-  "[&_.tableWrapper]:max-w-full [&_.tableWrapper_table]:m-0 [&_:is(td,th)]:px-3 [&_:is(td,th)]:py-2",
-  "[&_:is(td,th)>:first-child]:mt-0! [&_:is(td,th)>:last-child]:mb-0!",
+  // Match HeroUI Table's theme-driven outer radius, including square-corner themes.
+  "[&_.tableWrapper]:min-w-0 [&_.tableWrapper]:max-w-full [&_.tableWrapper]:overflow-x-auto [&_.tableWrapper]:overflow-y-hidden [&_.tableWrapper]:rounded-[min(32px,calc(var(--radius)*2.5))]! [&_.tableWrapper]:border [&_.tableWrapper]:border-separator [&_.tableWrapper]:bg-surface",
+  // prosemirror-tables marks the editor itself when the pointer is on a column edge.
+  "[&.resize-cursor]:cursor-col-resize!",
+  // The wrapper owns the outer edge; collapsed cell borders keep merged cells seamless.
+  "[&_.tableWrapper_table]:m-0! [&_.tableWrapper_table]:border-collapse! [&_.tableWrapper_table]:border-hidden!",
+  "[&_.tableWrapper_:is(td,th)]:box-border [&_.tableWrapper_:is(td,th)]:border-separator-tertiary/50! [&_.tableWrapper_:is(td,th)]:px-3! [&_.tableWrapper_:is(td,th)]:py-2.5! sm:[&_.tableWrapper_:is(td,th)]:px-4! sm:[&_.tableWrapper_:is(td,th)]:py-3!",
+  // Unsized columns need a stable floor. Otherwise the first typed glyph widens the column and the row jumps.
+  "[&_.tableWrapper_:is(td,th):not([data-colwidth])]:min-w-[var(--default-cell-min-width,100px)]",
+  "[&_.tableWrapper_th]:border-separator/50! [&_.tableWrapper_th]:bg-surface-secondary! [&_.tableWrapper_th]:text-muted [&_.tableWrapper_th]:font-medium! [&_.tableWrapper_th]:text-start",
+  // Zero every cell child, not only :first/:last. The resize handle is a trailing widget,
+  // so a :last-child rule lets the paragraph margin return and the header jumps.
+  "[&_:is(td,th)>*]:my-0!",
+  "[&_:is(td,th)>p+p]:mt-3!",
+  // Empty cell paragraphs collapse to 0 until the caret or first glyph arrives.
+  "[&_:is(td,th)>p]:min-h-[1lh]",
   "[&_[data-type=column]>:first-child]:mt-0! [&_[data-type=column]>:last-child]:mb-0!",
   "[&_[data-type=detailsContent]>:first-child]:mt-0! [&_[data-type=detailsContent]>:last-child]:mb-0!",
   "[&_[data-youtube-video]]:aspect-video [&_[data-youtube-video]]:max-w-full [&_[data-youtube-video]_iframe]:h-full [&_[data-youtube-video]_iframe]:w-full",

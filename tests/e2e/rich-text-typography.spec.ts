@@ -36,6 +36,15 @@ for (const width of [360, 768, 1440]) {
       await page.goto("/test/rich-text?typography=1");
       await expect(page.getByTestId("draft-status")).toHaveText("Editor ready");
       await expect(page.locator("html")).toHaveAttribute("data-theme", `mouve-${theme}`);
+      const tableRadius = await page.evaluate(() => {
+        const reference = document.createElement("div");
+        reference.className = "table-root table-root--primary";
+        reference.hidden = true;
+        document.body.append(reference);
+        const radius = getComputedStyle(reference).borderRadius;
+        reference.remove();
+        return radius;
+      });
 
       let editMetrics: Awaited<ReturnType<typeof measureBlocks>> | undefined;
       for (const mode of ["edit", "read"]) {
@@ -120,7 +129,24 @@ for (const width of [360, 768, 1440]) {
           await expect(editor.locator(selector)).toHaveCSS("margin-top", "16px");
           await expect(editor.locator(selector)).toHaveCSS("margin-bottom", "16px");
         }
-        await expect(editor.locator("th")).toHaveCSS("padding", "8px 12px");
+        const tableWrapper = editor.locator(".tableWrapper");
+        await expect(tableWrapper).toHaveCSS("border-radius", tableRadius);
+        const squareRadius = await tableWrapper.evaluate((element) => {
+          const previous = element.style.getPropertyValue("--radius");
+          const priority = element.style.getPropertyPriority("--radius");
+          try {
+            element.style.setProperty("--radius", "0px");
+            return getComputedStyle(element).borderRadius;
+          } finally {
+            if (previous) element.style.setProperty("--radius", previous, priority);
+            else element.style.removeProperty("--radius");
+          }
+        });
+        expect(squareRadius).toBe("0px");
+        await expect(editor.locator("th")).toHaveCSS(
+          "padding",
+          width < 640 ? "10px 12px" : "12px 16px"
+        );
         await expect(editor.locator("th p")).toHaveCSS("margin", "0px");
         await expect(editor.locator('[data-type="detailsContent"] p')).toHaveCSS("margin", "0px");
         await expect(editor.locator("[data-type=block-math]")).toHaveCSS("overflow-x", "auto");

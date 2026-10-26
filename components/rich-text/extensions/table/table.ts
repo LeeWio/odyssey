@@ -13,8 +13,13 @@ class TableView extends TiptapTableView {
     HTMLAttributes: Record<string, unknown> = {}
   ) {
     super(node, cellMinWidth, view, HTMLAttributes);
-
+    // prosemirror-tables builds this view as View(node, cellMinWidth, editorView)
+    // and never forwards HTMLAttributes, so the table is born without table-fixed.
+    if (!this.table.className) {
+      this.table.className = tableClassName;
+    }
     this.dom.className = "tableWrapper w-full max-w-full overflow-x-auto overflow-y-hidden";
+    this.table.style.setProperty("--default-cell-min-width", `${cellMinWidth}px`);
   }
 }
 
@@ -34,14 +39,12 @@ export const TableKit = TiptapTableKit.configure({
   },
   tableHeader: {
     HTMLAttributes: {
-      class:
-        "border-separator relative min-w-[1em] border text-left align-top font-semibold [&>:first-child]:mt-0 [&>:last-child]:mb-0",
+      class: "border-separator relative box-border border text-left align-top font-semibold",
     },
   },
   tableCell: {
     HTMLAttributes: {
-      class:
-        "border-separator relative min-w-[1em] border align-top [&>:first-child]:mt-0 [&>:last-child]:mb-0",
+      class: "border-separator relative box-border border align-top",
     },
   },
 });

@@ -102,7 +102,7 @@ export function RichText({
         <div className="flex min-h-0 flex-1 flex-col">
           <RichTextEditor.Content
             id={scrollContainerId}
-            className="[&_.ProseMirror-selectednode]:outline-accent/40 min-h-0 flex-1 scrollbar-none overflow-y-auto outline-none focus:outline-none [&_.ProseMirror-selectednode]:rounded-md [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-offset-2 [&.resize-cursor]:cursor-col-resize"
+            className="[&_.ProseMirror-selectednode]:outline-accent/40 min-h-0 flex-1 scrollbar-none overflow-y-auto outline-none focus:outline-none [&_.ProseMirror-selectednode]:rounded-md [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-offset-2 [&_.ProseMirror.resize-cursor]:cursor-col-resize"
           />
         </div>
         {showTableOfContents && (
