@@ -1,3 +1,10 @@
+## [1.226.19](https://github.com/LeeWio/odyssey/compare/v1.226.18...v1.226.19) (2026-10-26)
+
+
+### Bug Fixes
+
+* **moments:** stop nested links in the home showcase ([5192526](https://github.com/LeeWio/odyssey/commit/51925260d8fe5eae04f05dd2467a38c031b99362))
+
 ## [1.226.18](https://github.com/LeeWio/odyssey/compare/v1.226.17...v1.226.18) (2026-10-25)
 
 
