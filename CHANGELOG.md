@@ -1,3 +1,10 @@
+## [1.226.21](https://github.com/LeeWio/odyssey/compare/v1.226.20...v1.226.21) (2026-10-26)
+
+
+### Bug Fixes
+
+* **rich-text:** highlight the active table cell ([9d9c51b](https://github.com/LeeWio/odyssey/commit/9d9c51b99c31ee2fd595d251aa24a71a225e2dcb))
+
 ## [1.226.20](https://github.com/LeeWio/odyssey/compare/v1.226.19...v1.226.20) (2026-10-26)
 
 
