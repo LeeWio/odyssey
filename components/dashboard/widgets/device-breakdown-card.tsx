@@ -8,7 +8,12 @@ import { PieChart } from "@heroui-pro/react/pie-chart";
 
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
 
-const DEVICE_COLORS = ["var(--chart-3)", "var(--chart-2)", "var(--chart-4)"];
+const DEVICE_ORDER = ["Mobile", "Desktop", "Tablet"] as const;
+const DEVICE_COLORS: Record<(typeof DEVICE_ORDER)[number], string> = {
+  Mobile: "var(--chart-3)",
+  Desktop: "var(--chart-2)",
+  Tablet: "var(--chart-4)",
+};
 
 function formatCount(value: number): string {
   return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value.toString();
@@ -41,10 +46,12 @@ function DeviceTooltip({ active, payload }: DeviceTooltipProps) {
 
 export function DeviceBreakdownCard() {
   const { data } = useGetTrafficAnalyticsQuery(30);
-  const devices = (data?.devices ?? []).map((device) => ({
-    name: device.name,
-    value: device.views,
+  const counts = new Map((data?.devices ?? []).map((device) => [device.name, device.views]));
+  const devices = DEVICE_ORDER.map((name) => ({
+    name,
+    value: counts.get(name) ?? 0,
   }));
+  const chartDevices = devices.filter((device) => device.value > 0);
   const total = devices.reduce((sum, device) => sum + device.value, 0);
   const formattedTotal = formatCount(total);
 
@@ -61,15 +68,15 @@ export function DeviceBreakdownCard() {
               cornerRadius={8}
               cx="50%"
               cy="50%"
-              data={devices}
+              data={chartDevices}
               dataKey="value"
               innerRadius="68%"
               nameKey="name"
-              paddingAngle={-12}
+              paddingAngle={chartDevices.length > 1 ? -12 : 0}
               strokeWidth={0}
             >
-              {devices.map((_, idx) => (
-                <PieChart.Cell key={idx} fill={DEVICE_COLORS[idx % DEVICE_COLORS.length]} />
+              {chartDevices.map((device) => (
+                <PieChart.Cell key={device.name} fill={DEVICE_COLORS[device.name]} />
               ))}
             </PieChart.Pie>
             <PieChart.Tooltip content={<DeviceTooltip />} />
@@ -96,14 +103,14 @@ function DeviceLegend({
 }): ReactNode {
   return (
     <div className="flex w-full max-w-[240px] flex-col gap-2">
-      {devices.map((entry, idx) => {
+      {devices.map((entry) => {
         const pct = total > 0 ? ((entry.value / total) * 100).toFixed(0) : "0";
 
         return (
           <div key={entry.name} className="flex items-center gap-3">
             <span
               className="size-3 shrink-0 rounded-full"
-              style={{ backgroundColor: DEVICE_COLORS[idx % DEVICE_COLORS.length] }}
+              style={{ backgroundColor: DEVICE_COLORS[entry.name] }}
             />
             <span className="text-foreground flex-1 text-sm">{entry.name}</span>
             <span className="text-foreground text-sm font-semibold tabular-nums">

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { PageResult } from "@/lib/api";
+import { SERVER_PREFETCH_HEADER } from "@/lib/api/client-device";
 import { apiResponseSchema, pageResultSchema } from "@/lib/api";
 
 import { PostDigestResponseSchema, type PostDigestResponse } from "./post-contracts";
@@ -23,6 +24,7 @@ function apiOrigin() {
 async function readPage<T>(url: string, schema: z.ZodType<T>) {
   try {
     const response = await fetch(url, {
+      headers: { [SERVER_PREFETCH_HEADER]: "1" },
       signal: AbortSignal.timeout(3_000),
       next: { revalidate: JOURNAL_REVALIDATE_SECONDS, tags: ["public-journal"] },
     });

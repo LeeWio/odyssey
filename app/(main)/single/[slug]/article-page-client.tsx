@@ -5,7 +5,7 @@ import { Button, Skeleton } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import {
   ArticleActionBar,
@@ -16,6 +16,7 @@ import {
 } from "@/features/blog/reader/article";
 import { articleHasContext } from "@/features/blog/reader/article/article-sidebar";
 import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/post";
+import { recordPublicVisit } from "@/lib/features/post/record-public-visit";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
 
@@ -59,6 +60,11 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
     skip: !isAuthenticated,
   });
   const article = fetchedArticle ?? initialArticle;
+
+  useEffect(() => {
+    if (isAuthenticated) return;
+    recordPublicVisit(`/api/v1/public/blog/posts/${encodeURIComponent(slug)}`);
+  }, [isAuthenticated, slug]);
 
   const isLoading = isAuthenticated && (isFetching || isUninitialized) && !article;
   const isUnavailable = !isLoading && !article;

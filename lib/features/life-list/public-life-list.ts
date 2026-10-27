@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { SERVER_PREFETCH_HEADER } from "@/lib/api/client-device";
 import { apiResponseSchema } from "@/lib/api";
 
 import {
@@ -24,6 +25,7 @@ function apiOrigin() {
 async function readPublicData<T>(url: string, schema: z.ZodType<T>): Promise<T | null> {
   try {
     const response = await fetch(url, {
+      headers: { [SERVER_PREFETCH_HEADER]: "1" },
       signal: AbortSignal.timeout(3_000),
       next: { revalidate: REVALIDATE_SECONDS, tags: ["public-life-list"] },
     });

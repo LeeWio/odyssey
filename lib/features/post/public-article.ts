@@ -1,5 +1,7 @@
 import { cache } from "react";
 
+import { SERVER_PREFETCH_HEADER } from "@/lib/api/client-device";
+
 import { PostResponseSchema, type PostResponse } from "./post-contracts";
 
 const REVALIDATE_SECONDS = 60;
@@ -42,6 +44,7 @@ export const getPublicArticle = cache(async (slug: string): Promise<PublicArticl
 
   try {
     const response = await fetch(url, {
+      headers: { [SERVER_PREFETCH_HEADER]: "1" },
       next: {
         revalidate: REVALIDATE_SECONDS,
         tags: [`article:${slug}`],

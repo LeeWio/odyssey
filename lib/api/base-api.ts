@@ -65,6 +65,9 @@ const rawBaseQuery = fetchBaseQuery({
       headers.delete("authorization");
     }
     headers.set("accept", "application/json");
+    if (typeof navigator !== "undefined" && navigator.userAgent) {
+      headers.set("x-odyssey-client-ua", navigator.userAgent);
+    }
     return headers;
   },
 });
