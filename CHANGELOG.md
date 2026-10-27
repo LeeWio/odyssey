@@ -1,3 +1,10 @@
+## [1.226.22](https://github.com/LeeWio/odyssey/compare/v1.226.21...v1.226.22) (2026-10-27)
+
+
+### Bug Fixes
+
+* **analytics:** classify traffic by the visitor device ([38aef72](https://github.com/LeeWio/odyssey/commit/38aef725eefcc679a27089d068a3101dd30f38ad))
+
 ## [1.226.21](https://github.com/LeeWio/odyssey/compare/v1.226.20...v1.226.21) (2026-10-26)
 
 
