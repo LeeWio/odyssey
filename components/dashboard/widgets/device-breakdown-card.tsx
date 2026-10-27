@@ -9,7 +9,9 @@ import { PieChart } from "@heroui-pro/react/pie-chart";
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
 
 const DEVICE_ORDER = ["Mobile", "Desktop", "Tablet"] as const;
-const DEVICE_COLORS: Record<(typeof DEVICE_ORDER)[number], string> = {
+
+type DeviceName = (typeof DEVICE_ORDER)[number];
+const DEVICE_COLORS: Record<DeviceName, string> = {
   Mobile: "var(--chart-3)",
   Desktop: "var(--chart-2)",
   Tablet: "var(--chart-4)",
@@ -98,7 +100,7 @@ function DeviceLegend({
   devices,
   total,
 }: {
-  devices: ReadonlyArray<{ name: string; value: number }>;
+  devices: ReadonlyArray<{ name: DeviceName; value: number }>;
   total: number;
 }): ReactNode {
   return (
