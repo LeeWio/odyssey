@@ -1,3 +1,10 @@
+## [1.226.23](https://github.com/LeeWio/odyssey/compare/v1.226.22...v1.226.23) (2026-10-27)
+
+
+### Bug Fixes
+
+* **analytics:** type device chart color lookups ([42afeab](https://github.com/LeeWio/odyssey/commit/42afeab09cc388b0aac3b5d177d03e132d1773c5))
+
 ## [1.226.22](https://github.com/LeeWio/odyssey/compare/v1.226.21...v1.226.22) (2026-10-27)
 
 
