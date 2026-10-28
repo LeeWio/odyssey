@@ -5,7 +5,6 @@ import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preferenc
 import { createPageReveal } from "@/lib/motion";
 
 import { Card, Chip, Link, Typography } from "@heroui/react";
-import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 
@@ -13,6 +12,7 @@ import {
   FOOTPRINTS,
   FootprintsMap,
   getFeaturedFootprints,
+  getFootprintYears,
   type Footprint,
 } from "@/features/footprints";
 import {
@@ -21,7 +21,15 @@ import {
   HOME_SECTION_TITLE,
 } from "./layout";
 
-function FootprintCounts({ latestYear, dense = false }: { latestYear: number; dense?: boolean }) {
+function FootprintCounts({
+  yearCount,
+  latestYear,
+  dense = false,
+}: {
+  yearCount: number;
+  latestYear: number;
+  dense?: boolean;
+}) {
   const t = useTranslations("Home");
 
   return (
@@ -36,9 +44,9 @@ function FootprintCounts({ latestYear, dense = false }: { latestYear: number; de
       </span>
       <span>
         <strong className={`text-foreground block tabular-nums ${dense ? "text-sm" : "text-base"}`}>
-          {FOOTPRINTS.length}
+          {yearCount}
         </strong>
-        {t("footprints.zones")}
+        {t("footprints.years")}
       </span>
       <span>
         <strong className={`text-foreground block tabular-nums ${dense ? "text-sm" : "text-base"}`}>
@@ -93,6 +101,7 @@ export function FootprintsShowcase() {
   const shouldReduceMotion = useReducedMotionPreference();
   const { revealInView } = createPageReveal(shouldReduceMotion);
   const previewPlaces = getFeaturedFootprints(3, FOOTPRINTS);
+  const yearCount = getFootprintYears(FOOTPRINTS).length;
   const latestYear = Math.max(...FOOTPRINTS.map((footprint) => footprint.year));
 
   return (
@@ -115,21 +124,15 @@ export function FootprintsShowcase() {
               weight="bold"
               className={HOME_SECTION_TITLE}
             >
-              {t("footprints.title")}
+              <Link className="text-inherit no-underline" href="/footprints">
+                {t("footprints.title")}
+              </Link>
             </Typography>
           </motion.div>
           <motion.div {...revealInView(0.12, 14)}>
             <Typography color="muted" type="body" className={HOME_SECTION_DESCRIPTION}>
               {t("footprints.description")}
             </Typography>
-          </motion.div>
-          <motion.div {...revealInView(0.16, 14)}>
-            <Link href="/footprints" className="mt-2 text-sm no-underline">
-              {t("footprints.openAtlas")}
-              <Link.Icon aria-hidden="true">
-                <Icon icon="gravity-ui:arrow-up-right" />
-              </Link.Icon>
-            </Link>
           </motion.div>
         </header>
       </PageContainer>
@@ -149,7 +152,7 @@ export function FootprintsShowcase() {
               </Card.Description>
             </Card.Header>
             <Card.Content className="gap-3">
-              <FootprintCounts latestYear={latestYear} />
+              <FootprintCounts latestYear={latestYear} yearCount={yearCount} />
               <FootprintPreviewList places={previewPlaces} />
             </Card.Content>
           </Card>
@@ -161,7 +164,7 @@ export function FootprintsShowcase() {
           data-testid="footprints-mobile-summary"
           className="mt-3 flex min-w-0 flex-col gap-2 @min-[64rem]/home-section:hidden"
         >
-          <FootprintCounts latestYear={latestYear} dense />
+          <FootprintCounts latestYear={latestYear} yearCount={yearCount} dense />
           <FootprintPreviewList places={previewPlaces} compact />
         </div>
       </PageContainer>

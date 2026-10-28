@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { toast } from "@heroui/react";
 
 import { getApiErrorMessage } from "@/lib/api/errors";
@@ -17,11 +17,21 @@ export const useMomentFeed = (
 ) => {
   const [extraEntries, setExtraEntries] = useState<MomentResponse[]>([]);
   const [nextPage, setNextPage] = useState(1);
-  const [loadedTopic, setLoadedTopic] = useState(topic);
+  const filterKey = JSON.stringify([topic ?? null, period?.year ?? null, period?.month ?? null]);
+  const [loadedFilter, setLoadedFilter] = useState(filterKey);
+  const currentFilter = useRef<string | null>(filterKey);
+  const pendingPage = useRef<string | null>(null);
   const filtered = Boolean(topic || period);
 
-  if (topic !== loadedTopic) {
-    setLoadedTopic(topic);
+  useEffect(() => {
+    currentFilter.current = filterKey;
+    return () => {
+      currentFilter.current = null;
+    };
+  }, [filterKey]);
+
+  if (filterKey !== loadedFilter) {
+    setLoadedFilter(filterKey);
     setExtraEntries([]);
     setNextPage(1);
   }
@@ -52,6 +62,10 @@ export const useMomentFeed = (
   }, [extraEntries, data?.list]);
 
   const loadMore = useCallback(async () => {
+    const requestKey = JSON.stringify([filterKey, nextPage]);
+    if (pendingPage.current === requestKey) return false;
+    pendingPage.current = requestKey;
+
     try {
       const result = await loadPage({
         page: nextPage,
@@ -59,16 +73,23 @@ export const useMomentFeed = (
         ...(topic ? { topic } : {}),
         ...(period ?? {}),
       }).unwrap();
+      if (currentFilter.current !== filterKey) return false;
       setExtraEntries((current) => {
         const merged = new Map(current.map((m) => [m.id, m]));
         result.list.forEach((m) => merged.set(m.id, m));
         return [...merged.values()];
       });
       setNextPage((current) => current + 1);
+      return true;
     } catch (err) {
-      toast.danger(getApiErrorMessage(err, "Unable to load more moments. Please try again."));
+      if (currentFilter.current === filterKey) {
+        toast.danger(getApiErrorMessage(err, "Unable to load more moments. Please try again."));
+      }
+      return false;
+    } finally {
+      if (pendingPage.current === requestKey) pendingPage.current = null;
     }
-  }, [loadPage, nextPage, pageSize, period, topic]);
+  }, [filterKey, loadPage, nextPage, pageSize, period, topic]);
   const hasMore = data ? nextPage < data.totalPages : false;
 
   return {

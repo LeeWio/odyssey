@@ -635,7 +635,7 @@ export function ReaderView({ slug }: ReaderViewProps) {
               isIconOnly
               size="sm"
               variant="ghost"
-              onPress={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              onPress={() => window.scrollTo({ top: 0, behavior: "auto" })}
               aria-label="Scroll to top"
             >
               <Icon icon="lucide:arrow-up" className="size-4" />

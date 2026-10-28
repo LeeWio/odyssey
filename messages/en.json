@@ -98,12 +98,12 @@
     "noEntries": "No entries",
     "columnsInView": "Columns in view",
     "columnsInViewHint": "Series represented in this page.",
-    "eyebrow": "Chronicle",
+    "eyebrow": "Writing",
     "title": "Writing worth returning to.",
     "description": "Essays on software, design, markets, and the questions that remain useful over time.",
     "browseArchive": "Browse the archive",
     "searchArticles": "Search articles",
-    "searchPlaceholder": "Search the chronicle",
+    "searchPlaceholder": "Search essays and notes",
     "clearSearch": "Clear search",
     "loadingTopics": "Loading topics",
     "filterTopics": "Filter articles by topic",
@@ -113,7 +113,7 @@
     "allWriting": "All writing",
     "articleCount": "{count, plural, one {# article} other {# articles}}",
     "updating": "Updating results",
-    "unavailableTitle": "The chronicle is unavailable",
+    "unavailableTitle": "Writing is unavailable",
     "unavailableHint": "The archive could not be loaded. Please try again in a moment.",
     "tryAgain": "Try again",
     "noMatches": "No matching articles",
@@ -129,9 +129,9 @@
     "previous": "Previous",
     "next": "Next",
     "overview": "Archive overview",
-    "chronicleEyebrow": "This & That",
-    "chronicleTitle": "This & That",
-    "chronicleDescription": "Notes and longer pieces, newest first.",
+    "chronicleEyebrow": "Writing",
+    "chronicleTitle": "Essays & Notes",
+    "chronicleDescription": "Ideas given a little more room.",
     "sections": "Ways through the writing",
     "exploreFilters": "Find a piece",
     "orbitFeed": "Read through",
@@ -146,21 +146,21 @@
     "metaUsesDescription": "The hardware, software, and tools I use on a daily basis.",
     "metaFootprintsTitle": "Footprints | Odyssey",
     "metaFootprintsDescription": "A personal atlas of places, years, and memories that stayed on the road.",
-    "metaMomentsTitle": "Moments | Odyssey",
+    "metaMomentsTitle": "This & That | Odyssey",
     "metaMomentsDescription": "Short field notes, captured fragments, and everyday design/architectural notices.",
     "metaAboutTitle": "About | Odyssey",
     "metaAboutDescription": "A short page of defaults: taste, solitude, play, and the stack behind Odyssey. Not a resume."
   },
   "Journal": {
-    "title": "This & That",
-    "description": "Notes and longer pieces. Start here.",
+    "title": "Essays & Notes",
+    "description": "Ideas given a little more room.",
     "browseArchive": "Browse the archive",
     "searchArticles": "Search articles",
-    "searchPlaceholder": "Search the chronicle",
+    "searchPlaceholder": "Search essays and notes",
     "clearSearch": "Clear search",
     "filterTopics": "Filter articles by topic",
     "clearFilters": "Reset filters",
-    "exploreWriting": "Explore the journal",
+    "exploreWriting": "Explore essays and notes",
     "noResultsTitle": "No stories match your search",
     "noResultsDescription": "Try another phrase or reset the filters to browse all writing.",
     "allTopics": "All topics",
@@ -787,8 +787,17 @@
     "browseColumns": "Browse columns"
   },
   "Moments": {
-    "title": "Moments",
-    "description": "Short field notes and captured fragments from everyday notices.",
+    "title": "This & That",
+    "description": "A little of this, a little of that.",
+    "anchor": {
+      "searching": "Finding the moment you followed…",
+      "missing": "This moment is no longer in the public feed.",
+      "error": "Couldn't load the next page. Your place in the feed is kept.",
+      "paused": "This moment may be further back. Keep looking?",
+      "continue": "Keep looking",
+      "stop": "Stop searching",
+      "dismiss": "Dismiss"
+    },
     "loadFailed": "Failed to load moments. Please try again.",
     "retry": "Retry",
     "loadMore": "Load more moments",
@@ -959,7 +968,7 @@
     "tryAgain": "Try again",
     "saved": "Your preference has been saved.",
     "backHome": "Home",
-    "browseWriting": "Read This & That"
+    "browseWriting": "Read essays and notes"
   },
   "Projects": {
     "loading": "Loading projects",
@@ -1023,7 +1032,7 @@
     "mapTitle": "Footprints",
     "mapDescription": "Places kept on the map",
     "places": "Places",
-    "zones": "Zones",
+    "years": "Years",
     "latest": "Latest",
     "coverageHint": "Coverage around each place",
     "noPlaces": "No places in this year",
@@ -1112,7 +1121,7 @@
     "notFoundTitle": "This page isn't here.",
     "notFoundDescription": "The address may have changed, or the page may no longer be available.",
     "backHome": "Back home",
-    "browseChronicle": "Browse Chronicle",
+    "browseChronicle": "Read essays and notes",
     "errorTitle": "Something went wrong.",
     "errorDescription": "The page could not finish loading. Try again, or return home if the problem continues.",
     "tryAgain": "Try again"
@@ -1136,14 +1145,14 @@
     "copyFailed": "Couldn't copy {name}.",
     "tagline": "A living notebook for ideas, systems, and the quiet momentum between them.",
     "navigation": "Footer navigation",
-    "chronicle": "Chronicle",
+    "chronicle": "Essays & Notes",
     "universe": "Universe",
     "guestbook": "Guestbook",
     "github": "GitHub",
     "email": "Email",
     "rss": "RSS",
-    "rssValue": "The Chronicle",
-    "rssCompact": "Chronicle",
+    "rssValue": "Essays & Notes",
+    "rssCompact": "Essays & Notes",
     "x": "X"
   },
   "Home": {
@@ -1166,12 +1175,12 @@
       "description": "Writing, moments, projects, places, and the things worth returning to.",
       "viewArchive": "Browse the archive",
       "writing": {
-        "title": "Writing",
-        "description": "Essays and notes from the chronicle."
+        "title": "Essays & Notes",
+        "description": "Ideas given a little more room."
       },
       "moments": {
-        "title": "Moments",
-        "description": "Small observations, kept in motion."
+        "title": "This & That",
+        "description": "A little of this, a little of that."
       },
       "projects": {
         "title": "Projects",
@@ -1194,11 +1203,16 @@
       "recently": "Recently",
       "readEssay": "Read",
       "eyebrow": "Writing",
-      "title": "From the chronicle",
-      "description": "Essays and notes, newest first.",
+      "title": "Essays & Notes",
+      "description": "Ideas given a little more room.",
       "browseAll": "Browse all",
       "fallbackSummary": "A note from the archive.",
       "fallbackCategory": "Essay"
+    },
+    "moments": {
+      "eyebrow": "Moments",
+      "title": "This & That",
+      "description": "A little of this, a little of that."
     },
     "projects": {
       "coverAlt": "Cover for {name}",
@@ -1218,7 +1232,7 @@
       "eyebrow": "A personal field journal",
       "title": "A living notebook, kept in motion.",
       "subtitle": "Software, markets, music, and the habits that shape the work.",
-      "readWriting": "Read the chronicle",
+      "readWriting": "Read essays and notes",
       "exploreField": "Explore the field",
       "prologue": "Prologue · 01",
       "prologueBody": "Begin with what is close at hand. A song still playing, a market moving, a thought not yet finished."
@@ -1279,11 +1293,10 @@
       "eyebrow": "Footprints",
       "title": "A Map of Memories",
       "description": "Not just places on a map, but moments along the way.",
-      "openAtlas": "Open the atlas",
       "cardTitle": "Footprints",
       "cardDescription": "Places kept on the map",
       "places": "Places",
-      "zones": "Zones",
+      "years": "Years",
       "latest": "Latest"
     },
     "links": {
@@ -1348,7 +1361,7 @@
       "activityIssueClosed": "{count} closed",
       "activityIssueOpen": "{count} open",
       "buildTitle": "What's Being Built",
-      "buildDescription": "A closer look at the work behind the site: new features, fixes, experiments, and everything slowly taking shape.",
+      "buildDescription": "Code is cheap. Show me the talk.",
       "loadingGithub": "Loading GitHub repository activity",
       "githubUnavailable": "GitHub activity is unavailable",
       "githubUnavailableHint": "The public activity feed could not be loaded right now."
@@ -1404,11 +1417,11 @@
     "travellingsAria": "Travellings friend-link relay (opens in a new window)",
     "items": {
       "chronicle": {
-        "label": "This & That",
+        "label": "Essays & Notes",
         "eyebrow": "Writing",
-        "title": "Things Worth Reading",
-        "description": "Notes and longer pieces, newest first.",
-        "cta": "Open This & That"
+        "title": "Essays & Notes",
+        "description": "Ideas given a little more room.",
+        "cta": "Read essays and notes"
       },
       "orbit": {
         "label": "Lately",
@@ -1435,7 +1448,7 @@
     },
     "mega": {
       "chronicle": {
-        "imageAlt": "Featured chronicle image",
+        "imageAlt": "Featured essay image",
         "featured": "Featured",
         "readStory": "Read story",
         "latestNotes": "Latest notes",

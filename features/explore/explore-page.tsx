@@ -262,7 +262,7 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
     updateSearch({ page: String(nextPage + 1) });
     document
       .getElementById("explore-results")
-      ?.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth", block: "start" });
+      ?.scrollIntoView({ behavior: "auto", block: "start" });
   };
 
   const clearFilters = () => {

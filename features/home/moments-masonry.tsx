@@ -24,7 +24,10 @@ export function MomentsMasonry({ moments }: MomentsMasonryProps) {
           {...pageRevealInView(shouldReduceMotion, 0, 12, { amount: 0.15 })}
           className="mb-5 w-full break-inside-avoid"
         >
-          <Link className="block w-full text-inherit no-underline" href="/moments">
+          <Link
+            className="block w-full text-inherit no-underline"
+            href={`/moments#moment-${moment.id}`}
+          >
             <MomentCard enableComments={false} interactive={false} moment={moment} />
           </Link>
         </motion.div>

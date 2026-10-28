@@ -6,7 +6,7 @@ import type { DataDrivenPropertyValueSpecification, MapLayerMouseEvent } from "m
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
-import { getFootprintMetaLabel, type Footprint } from "./footprints-data";
+import { getFootprintMetaLabel, getFootprintYears, type Footprint } from "./footprints-data";
 import { footprintMapStyles, footprintMapWorkerUrl } from "./map-styles";
 
 const SOURCE_ID = "footprints-coverage-zones-source";
@@ -270,8 +270,10 @@ export function FootprintsMap({
                 {t("places")}
               </span>
               <span>
-                <strong className="text-foreground block text-base">{footprints.length}</strong>
-                {t("zones")}
+                <strong className="text-foreground block text-base">
+                  {getFootprintYears(footprints).length}
+                </strong>
+                {t("years")}
               </span>
               <span>
                 <strong className="text-foreground block text-base">

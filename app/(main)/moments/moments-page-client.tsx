@@ -7,11 +7,13 @@ import { EmptyState } from "@heroui-pro/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Icon } from "@iconify/react";
 
 import { MomentCard, MomentCardSkeleton } from "@/features/moment/components/card";
 import { MomentCadenceCard } from "@/features/moment/components/cadence-card";
 import { MomentTopicWidget } from "@/features/moment/components/topic-widget";
 import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
+import { useMomentAnchor } from "@/features/moment/hooks/use-moment-anchor";
 import { useMomentBookmarks } from "@/features/moment/hooks/use-moment-bookmarks";
 import { PageFrame } from "@/components/layout/page-frame";
 import type { PublicMomentsInitialData } from "@/lib/features/moment/public-moments";
@@ -64,6 +66,14 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
     topic
   );
   const visibleMoments = moments;
+  const anchor = useMomentAnchor({
+    moments,
+    hasMore,
+    isLoading,
+    isError,
+    isFetchingMore,
+    loadMore,
+  });
 
   const selectTopic = (slug?: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -99,6 +109,26 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
         </nav>
 
         <section aria-label={t("feed")} className="w-full">
+          {!isLoading && !isError && !["dismissed", "found"].includes(anchor.status) ? (
+            <div className="border-separator mb-5 flex flex-wrap items-center gap-3 border-b pb-4">
+              <p className="text-muted min-w-0 flex-1 text-sm" role="status">
+                {t(`anchor.${anchor.status}`)}
+              </p>
+              {anchor.status === "error" || anchor.status === "paused" ? (
+                <Button size="sm" variant="secondary" onPress={anchor.retry}>
+                  <Icon
+                    aria-hidden="true"
+                    icon={anchor.status === "error" ? "lucide:rotate-cw" : "lucide:search"}
+                  />
+                  {t(anchor.status === "error" ? "tryAgain" : "anchor.continue")}
+                </Button>
+              ) : null}
+              <Button size="sm" variant="ghost" onPress={anchor.dismiss}>
+                <Icon aria-hidden="true" icon="lucide:x" />
+                {t(anchor.status === "searching" ? "anchor.stop" : "anchor.dismiss")}
+              </Button>
+            </div>
+          ) : null}
           {isLoading ? (
             <div className="flex flex-col gap-6" aria-busy="true" aria-live="polite">
               {Array.from({ length: 3 }, (_, index) => (
@@ -130,7 +160,10 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
               {visibleMoments.map((moment, index) => (
                 <motion.div
                   key={moment.id}
-                  className="mb-4 break-inside-avoid"
+                  id={`moment-${moment.id}`}
+                  tabIndex={-1}
+                  data-moment-target={anchor.targetId === moment.id && anchor.status === "found"}
+                  className="data-[moment-target=true]:ring-accent data-[moment-target=true]:ring-offset-background focus-visible:ring-accent mb-4 scroll-mt-28 break-inside-avoid rounded-lg outline-none focus-visible:ring-2 data-[moment-target=true]:ring-2 data-[moment-target=true]:ring-offset-2"
                   initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
@@ -146,6 +179,7 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
               {hasMore ? (
                 <div className="flex justify-center pt-2">
                   <Button
+                    isDisabled={anchor.status === "searching"}
                     isPending={isFetchingMore}
                     size="sm"
                     variant="secondary"

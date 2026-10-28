@@ -232,7 +232,7 @@ function CommentRow({
       () =>
         document
           .getElementById(`comment-${comment.id}`)
-          ?.scrollIntoView({ behavior: "smooth", block: "center" }),
+          ?.scrollIntoView({ behavior: "auto", block: "center" }),
       0
     );
     const clearHighlightTimer = window.setTimeout(() => setHighlightedCommentId(null), 2500);

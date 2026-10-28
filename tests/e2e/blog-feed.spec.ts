@@ -324,7 +324,7 @@ test("a failed second page retains Previous without reusing the first page total
     await expect(results.getByRole("button", { name: "Previous", exact: true })).toBeDisabled();
     await expect(results.getByText("First-page article", { exact: true })).toHaveCount(0);
     response.resolve();
-    await expect(results.getByText("The chronicle is unavailable", { exact: true })).toBeVisible();
+    await expect(results.getByText("Writing is unavailable", { exact: true })).toBeVisible();
     await expect(results.getByText("9 articles", { exact: true })).toHaveCount(0);
     await expect(results.getByRole("button", { name: "Next", exact: true })).toBeDisabled();
     await results.getByRole("button", { name: "Previous", exact: true }).press("Enter");
@@ -385,7 +385,7 @@ test("retrying a page after the list shrinks moves to the last available page", 
   await openFeed(page);
   const results = page.locator("#all-writing");
   await results.getByRole("button", { name: "Next", exact: true }).press("Enter");
-  await expect(results.getByText("The chronicle is unavailable", { exact: true })).toBeVisible();
+  await expect(results.getByText("Writing is unavailable", { exact: true })).toBeVisible();
   await results.getByRole("button", { name: "Try again", exact: true }).press("Enter");
   await expect(results.getByText("Remaining article", { exact: true })).toBeVisible();
   await expect(results.getByText("1 article", { exact: true })).toBeVisible();

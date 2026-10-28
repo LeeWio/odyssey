@@ -501,7 +501,6 @@ export function RichTextModal() {
             <Modal.Dialog
               aria-label={isExistingPost ? "Edit article" : "Create article"}
               className="relative flex h-full w-full flex-col overflow-hidden"
-              data-lenis-prevent
             >
               {/* Toggle Button */}
               <MotionButton

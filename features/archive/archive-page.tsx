@@ -314,7 +314,7 @@ export function ArchivePage({ embedded = false }: { embedded?: boolean }) {
     updateSearch({ page: String(nextPage + 1) });
     document
       .getElementById("archive-results")
-      ?.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth", block: "start" });
+      ?.scrollIntoView({ behavior: "auto", block: "start" });
   };
 
   const clearPeriod = () => updateSearch({ month: undefined, page: undefined, year: undefined });

@@ -44,17 +44,23 @@ for (const width of [390, 1440]) {
       section.getByText("Not just places on a map, but moments along the way.")
     ).toBeVisible();
     await expect(section.getByText("Footprints", { exact: true }).first()).toBeVisible();
-    await expect(section.getByRole("link", { name: "Open the atlas" })).toBeVisible();
-    await expect(section.getByRole("link", { name: "Open the atlas" })).toHaveCount(1);
+    await expect(section.getByRole("link", { name: "A Map of Memories" })).toHaveAttribute(
+      "href",
+      "/footprints"
+    );
+    await expect(section.getByRole("link")).toHaveCount(1);
+    await expect(section.getByText("Open the atlas", { exact: true })).toHaveCount(0);
     const mapFrame = section.getByTestId("footprints-map-frame");
     await expect(mapFrame.getByText("Hubei")).toBeVisible();
-    const overlay = mapFrame.getByTestId("footprints-map-overlay");
+    const overlay = section.getByTestId("footprints-map-overlay");
     const summary = section.getByTestId("footprints-mobile-summary");
     if (width < 1024) {
       await expect(overlay).toBeHidden();
       await expect(summary).toBeVisible();
-      await expect(summary.getByText("Places", { exact: true })).toBeVisible();
-      await expect(summary.getByText("Latest", { exact: true })).toBeVisible();
+      await expect(summary.getByText("Places")).toBeVisible();
+      await expect(summary.getByText("Latest")).toBeVisible();
+      await expect(summary.getByText("Years")).toBeVisible();
+      await expect(summary.locator("strong")).toHaveText(["9", "6", "2026"]);
       await expect(summary.getByText("Plains this year")).toBeVisible();
       await expect(summary.getByText("Henan · 2026")).toBeVisible();
       const mapBox = await mapFrame.boundingBox();
@@ -68,6 +74,8 @@ for (const width of [390, 1440]) {
       await expect(summary).toBeHidden();
       await expect(overlay.getByText("Places kept on the map")).toBeVisible();
       await expect(overlay.getByText("Latest")).toBeVisible();
+      await expect(overlay.getByText("Years")).toBeVisible();
+      await expect(overlay.locator("strong")).toHaveText(["9", "6", "2026"]);
       await expect(overlay.getByText("Plains this year")).toBeVisible();
       await expect(overlay.getByText("Henan · 2026")).toBeVisible();
       const mapBox = await mapFrame.boundingBox();
@@ -103,8 +111,9 @@ test("timeline, popup and year selection stay in sync", async ({ page }) => {
   await expect(entry).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByLabel("Selected travel memory")).toContainText("A city rewriting itself");
   await page.getByRole("tab", { name: "2024", exact: true }).click();
-  await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(1);
+  await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(2);
   await expect(page.getByRole("button", { name: "Read memory from Chongqing" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Read memory from Hunan" })).toBeVisible();
   await page.getByRole("tab", { name: "All years", exact: true }).click();
   await expect(page.getByRole("button", { name: /^Read memory from/ })).toHaveCount(9);
 });

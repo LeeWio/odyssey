@@ -116,10 +116,9 @@ export function ArticleToc({
     const heading = item.dom;
     if (!heading) return;
 
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     heading.setAttribute("tabindex", "-1");
     window.scrollTo({
-      behavior: reduceMotion ? "auto" : "smooth",
+      behavior: "auto",
       top: heading.getBoundingClientRect().top + window.scrollY - ARTICLE_OUTLINE_TOP_OFFSET,
     });
     heading.focus({ preventScroll: true });

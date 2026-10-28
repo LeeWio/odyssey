@@ -26,7 +26,6 @@ import { ProjectsShowcase } from "@/features/home/projects-showcase";
 import GuestbookBoard from "@/components/corners/guestbook-board";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import {
   Button,
   Card,
@@ -47,11 +46,6 @@ import { selectIsAuthenticated } from "@/lib/features/auth";
 import { usePostGuestbookEntryMutation } from "@/lib/features/comment";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-
-const HomeSmoothScroll = dynamic(
-  () => import("@/features/home/home-smooth-scroll").then((mod) => mod.HomeSmoothScroll),
-  { ssr: false }
-);
 
 const MotionAccordion = motion.create(Accordion);
 
@@ -77,7 +71,6 @@ export default function Home({ moments = [] }: { moments?: MomentResponse[] }) {
 
   return (
     <>
-      <HomeSmoothScroll />
       <div className="bg-background w-full overflow-x-clip">
         <PageContainer
           as="section"

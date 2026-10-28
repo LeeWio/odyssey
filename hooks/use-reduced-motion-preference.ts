@@ -3,11 +3,8 @@
 import { useMediaQuery } from "@mantine/hooks";
 
 /**
- * Follow the live browser preference. The first frame assumes motion is allowed
- * so an entrance can play; a reduce preference then stops later motion.
+ * Keep SSR and hydration identical; read the live preference after mounting.
  */
 export function useReducedMotionPreference() {
-  return useMediaQuery("(prefers-reduced-motion: reduce)", false, {
-    getInitialValueInEffect: false,
-  });
+  return useMediaQuery("(prefers-reduced-motion: reduce)", true);
 }

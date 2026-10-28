@@ -98,12 +98,12 @@
     "noEntries": "还没有条目",
     "columnsInView": "本页专栏",
     "columnsInViewHint": "这一页里出现的系列。",
-    "eyebrow": "编年",
+    "eyebrow": "写作",
     "title": "值得再读的文字。",
     "description": "关于软件、设计、市场，以及那些过了很久仍然有用的问题。",
     "browseArchive": "浏览归档",
     "searchArticles": "搜索文章",
-    "searchPlaceholder": "搜索编年",
+    "searchPlaceholder": "搜索文章与笔记",
     "clearSearch": "清除搜索",
     "loadingTopics": "正在加载主题",
     "filterTopics": "按主题筛选文章",
@@ -113,7 +113,7 @@
     "allWriting": "全部文字",
     "articleCount": "{count, plural, other {# 篇文章}}",
     "updating": "正在更新结果",
-    "unavailableTitle": "编年暂时打不开",
+    "unavailableTitle": "文章暂时打不开",
     "unavailableHint": "归档没有加载出来。过一会儿再试。",
     "tryAgain": "再试一次",
     "noMatches": "没有匹配的文章",
@@ -129,9 +129,9 @@
     "previous": "上一页",
     "next": "下一页",
     "overview": "归档概览",
-    "chronicleEyebrow": "东鳞西爪",
-    "chronicleTitle": "东鳞西爪",
-    "chronicleDescription": "长的、短的、还没写完的，先放在这里。",
+    "chronicleEyebrow": "写作",
+    "chronicleTitle": "所思所写",
+    "chronicleDescription": "有些想法，值得多写几行。",
     "sections": "这一页的几扇门",
     "exploreFilters": "找一篇",
     "orbitFeed": "顺着读",
@@ -146,21 +146,21 @@
     "metaUsesDescription": "我每天使用的硬件、软件和工具。",
     "metaFootprintsTitle": "足迹 | Odyssey",
     "metaFootprintsDescription": "一份带着地点、年份和路上记忆的个人地图。",
-    "metaMomentsTitle": "片刻 | Odyssey",
+    "metaMomentsTitle": "三言两语 | Odyssey",
     "metaMomentsDescription": "短的现场笔记、记下的片段，以及日常的设计与建筑观察。",
     "metaAboutTitle": "关于 | Odyssey",
     "metaAboutDescription": "一页短的默认设置：品味、独处、玩，以及 Odyssey 背后的技术栈。"
   },
   "Journal": {
-    "title": "东鳞西爪",
-    "description": "长的、短的、还没写完的，都从这里读。",
+    "title": "所思所写",
+    "description": "有些想法，值得多写几行。",
     "browseArchive": "浏览归档",
     "searchArticles": "搜索文章",
-    "searchPlaceholder": "搜索编年",
+    "searchPlaceholder": "搜索文章与笔记",
     "clearSearch": "清除搜索",
     "filterTopics": "按主题筛选文章",
     "clearFilters": "重置筛选",
-    "exploreWriting": "探索日志",
+    "exploreWriting": "阅读所思所写",
     "noResultsTitle": "没有找到匹配的文章",
     "noResultsDescription": "试试其他关键词，或重置筛选以浏览全部文章。",
     "allTopics": "全部主题",
@@ -787,8 +787,17 @@
     "browseColumns": "浏览专栏"
   },
   "Moments": {
-    "title": "动态",
-    "description": "日常留意里的短笔记和随手记下的片段。",
+    "title": "三言两语",
+    "description": "说说这个，聊聊那个。",
+    "anchor": {
+      "searching": "正在寻找你点开的那条动态…",
+      "missing": "这条动态已不在公开列表中。",
+      "error": "下一页没有加载成功，已保留当前浏览位置。",
+      "paused": "这条动态可能在更早的记录里，要继续找吗？",
+      "continue": "继续寻找",
+      "stop": "停止寻找",
+      "dismiss": "收起"
+    },
     "loadFailed": "动态加载失败，请再试一次。",
     "retry": "重试",
     "loadMore": "加载更多动态",
@@ -959,7 +968,7 @@
     "tryAgain": "重试",
     "saved": "你的偏好已保存。",
     "backHome": "回首页",
-    "browseWriting": "去东鳞西爪"
+    "browseWriting": "阅读所思所写"
   },
   "Projects": {
     "loading": "正在加载项目",
@@ -1023,7 +1032,7 @@
     "mapTitle": "足迹",
     "mapDescription": "留在地图上的地方",
     "places": "地点",
-    "zones": "区域",
+    "years": "年份",
     "latest": "最近",
     "coverageHint": "每个地点周围的覆盖区域",
     "noPlaces": "这一年没有地点",
@@ -1112,7 +1121,7 @@
     "notFoundTitle": "这个页面不在这里。",
     "notFoundDescription": "地址可能已经改了，或者这个页面已经不再提供。",
     "backHome": "返回首页",
-    "browseChronicle": "浏览纪事",
+    "browseChronicle": "阅读所思所写",
     "errorTitle": "出了点问题。",
     "errorDescription": "页面没有加载完。可以重试，如果还是不行就返回首页。",
     "tryAgain": "重试"
@@ -1136,14 +1145,14 @@
     "copyFailed": "无法复制{name}。",
     "tagline": "一本还在生长的笔记，记下想法、系统，以及它们之间安静的推进。",
     "navigation": "页脚导航",
-    "chronicle": "东鳞西爪",
+    "chronicle": "所思所写",
     "universe": "宇宙",
     "guestbook": "留言",
     "github": "GitHub",
     "email": "邮箱",
     "rss": "RSS",
-    "rssValue": "东鳞西爪",
-    "rssCompact": "东鳞西爪",
+    "rssValue": "所思所写",
+    "rssCompact": "所思所写",
     "x": "X"
   },
   "Home": {
@@ -1166,12 +1175,12 @@
       "description": "写作、动态、项目、地方，以及那些值得再次回来的内容。",
       "viewArchive": "浏览归档",
       "writing": {
-        "title": "写作",
-        "description": "来自纪事的文章和笔记。"
+        "title": "所思所写",
+        "description": "有些想法，值得多写几行。"
       },
       "moments": {
-        "title": "动态",
-        "description": "仍在流动的小片段和观察。"
+        "title": "三言两语",
+        "description": "说说这个，聊聊那个。"
       },
       "projects": {
         "title": "项目",
@@ -1194,11 +1203,16 @@
       "recently": "最近",
       "readEssay": "阅读",
       "eyebrow": "写作",
-      "title": "来自纪事",
-      "description": "文章和笔记，最新的在前。",
+      "title": "所思所写",
+      "description": "有些想法，值得多写几行。",
       "browseAll": "查看全部",
       "fallbackSummary": "来自归档的一则笔记。",
       "fallbackCategory": "随笔"
+    },
+    "moments": {
+      "eyebrow": "动态",
+      "title": "三言两语",
+      "description": "说说这个，聊聊那个。"
     },
     "projects": {
       "coverAlt": "{name} 的封面",
@@ -1218,7 +1232,7 @@
       "eyebrow": "一本私人的野外日志",
       "title": "一本还在动的笔记。",
       "subtitle": "软件、市场、音乐，以及塑造这些作品的习惯。",
-      "readWriting": "阅读纪事",
+      "readWriting": "阅读所思所写",
       "exploreField": "探索这里",
       "prologue": "序章 · 01",
       "prologueBody": "从手边的东西开始。一首还在放的歌，一个还在动的市场，一个还没写完的想法。"
@@ -1277,13 +1291,12 @@
     },
     "footprints": {
       "eyebrow": "关于远方",
-      "title": "A Map of Memories",
+      "title": "记忆地图",
       "description": "地图上不只是地点，还有一路走来的时光。",
-      "openAtlas": "打开地图",
       "cardTitle": "足迹",
       "cardDescription": "留在地图上的地方",
       "places": "地方",
-      "zones": "区域",
+      "years": "年份",
       "latest": "最近"
     },
     "links": {
@@ -1347,8 +1360,8 @@
       "activityIssueOpened": "新建 {count}",
       "activityIssueClosed": "已关闭 {count}",
       "activityIssueOpen": "未关闭 {count}",
-      "buildTitle": "正在被建造的东西",
-      "buildDescription": "靠近看这个站点背后的工作：新功能、修复、实验，以及慢慢成形的部分。",
+      "buildTitle": "手头在做的事",
+      "buildDescription": "Code is cheap. Show me the talk.",
       "loadingGithub": "正在加载 GitHub 仓库动态",
       "githubUnavailable": "GitHub 动态暂时不可用",
       "githubUnavailableHint": "公开动态现在加载不出来。"
@@ -1404,10 +1417,10 @@
     "travellingsAria": "开往友链接力（在新窗口打开）",
     "items": {
       "chronicle": {
-        "label": "东鳞西爪",
+        "label": "所思所写",
         "eyebrow": "写作",
-        "title": "东鳞西爪",
-        "description": "长的、短的、还没写完的。",
+        "title": "所思所写",
+        "description": "有些想法，值得多写几行。",
         "cta": "翻一翻"
       },
       "orbit": {
@@ -1435,7 +1448,7 @@
     },
     "mega": {
       "chronicle": {
-        "imageAlt": "纪事配图",
+        "imageAlt": "精选文章配图",
         "featured": "精选",
         "readStory": "阅读",
         "latestNotes": "最新笔记",

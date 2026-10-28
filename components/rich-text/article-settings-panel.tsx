@@ -130,10 +130,7 @@ function SettingsMotion({
         },
       }}
     >
-      <div
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto xl:flex-row xl:items-start"
-        data-lenis-prevent
-      >
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto xl:flex-row xl:items-start">
         <motion.div
           className="contents xl:flex xl:min-w-0 xl:flex-1 xl:flex-col xl:gap-4"
           variants={columnVariants(reducedMotion)}

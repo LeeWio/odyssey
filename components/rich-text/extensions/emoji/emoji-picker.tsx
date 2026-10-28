@@ -85,7 +85,7 @@ function EmojiPickerContent({ inputRef, onSkinToneChange, skinTone }: EmojiPicke
     const itemsPerRow = Math.floor(grid.clientWidth / itemSize);
     const scrollTop = Math.floor(index / itemsPerRow) * itemSize;
 
-    grid.scrollTo({ behavior: "smooth", top: scrollTop });
+    grid.scrollTo({ behavior: "auto", top: scrollTop });
   };
 
   return (

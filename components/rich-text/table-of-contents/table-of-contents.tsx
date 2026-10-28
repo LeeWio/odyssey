@@ -65,7 +65,7 @@ function scrollToHeading(
 ) {
   if (scrollRoot instanceof Window) {
     scrollRoot.scrollTo({
-      behavior: "smooth",
+      behavior: "auto",
       top: element.getBoundingClientRect().top + scrollRoot.scrollY - topOffset,
     });
     return;
@@ -74,7 +74,7 @@ function scrollToHeading(
   const rootTop = scrollRoot.getBoundingClientRect().top;
 
   scrollRoot.scrollTo({
-    behavior: "smooth",
+    behavior: "auto",
     top: scrollRoot.scrollTop + element.getBoundingClientRect().top - rootTop - topOffset,
   });
 }

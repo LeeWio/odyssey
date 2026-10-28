@@ -6,6 +6,7 @@ import { Chip, Link, Typography } from "@heroui/react";
 import { motion } from "motion/react";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { useGetPublicMomentsQuery, type MomentResponse } from "@/lib/features/moment";
+import { useTranslations } from "next-intl";
 import {
   HOME_SECTION_CONTENT,
   HOME_SECTION_DESCRIPTION,
@@ -18,6 +19,7 @@ import { MomentsMasonry } from "./moments-masonry";
 export const MOMENTS_SHOWCASE_LIMIT = 18;
 
 export function MomentsShowcase({ moments }: { moments: MomentResponse[] }) {
+  const t = useTranslations("Home");
   const shouldReduceMotion = useReducedMotionPreference();
   const { revealInView } = createPageReveal(shouldReduceMotion);
   const query = useGetPublicMomentsQuery(
@@ -36,7 +38,7 @@ export function MomentsShowcase({ moments }: { moments: MomentResponse[] }) {
       <header className={HOME_SECTION_HEADER_CENTERED}>
         <motion.div {...revealInView(0, 10)}>
           <Chip color="default" size="sm" variant="secondary">
-            Moments
+            {t("moments.eyebrow")}
           </Chip>
         </motion.div>
         <motion.div {...revealInView(0.06)}>
@@ -47,13 +49,13 @@ export function MomentsShowcase({ moments }: { moments: MomentResponse[] }) {
             className={HOME_SECTION_TITLE}
           >
             <Link className="text-inherit no-underline" href="/moments">
-              This &amp; That
+              {t("moments.title")}
             </Link>
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.12, 14)}>
           <Typography color="muted" type="body" className={HOME_SECTION_DESCRIPTION}>
-            A little of this, a little of that.
+            {t("moments.description")}
           </Typography>
         </motion.div>
       </header>
