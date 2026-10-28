@@ -7,7 +7,7 @@ import { typographyVariants } from "@heroui/styles";
  */
 export const RICH_TEXT_PROSE_CLASS_NAME = [
   typographyVariants().prose(),
-  "font-sans text-base! leading-7! tracking-normal wrap-anywhere",
+  "font-sans text-base! leading-7! p-0! tracking-normal wrap-anywhere",
   "[&>*]:my-4! [&>:first-child]:mt-0! [&>:last-child]:mb-0!",
   "[&_:where(blockquote,[data-type=column],[data-type=detailsContent])>*]:my-4!",
   "[&_h1]:text-4xl! [&_h1]:leading-10! [&_h1]:mt-8! [&_h1]:mb-4!",
