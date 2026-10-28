@@ -1,3 +1,10 @@
+# [1.228.0](https://github.com/LeeWio/odyssey/compare/v1.227.0...v1.228.0) (2026-10-28)
+
+
+### Features
+
+* **home:** redesign friend links with HeroUI cards ([3f0772b](https://github.com/LeeWio/odyssey/commit/3f0772b47ce3972df35cbacb658ada947621a386))
+
 # [1.227.0](https://github.com/LeeWio/odyssey/compare/v1.226.23...v1.227.0) (2026-10-28)
 
 
