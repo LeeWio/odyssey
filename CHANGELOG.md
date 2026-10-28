@@ -1,3 +1,10 @@
+# [1.227.0](https://github.com/LeeWio/odyssey/compare/v1.226.23...v1.227.0) (2026-10-28)
+
+
+### Features
+
+* **home:** refine homepage navigation and remove smooth scrolling ([00f7201](https://github.com/LeeWio/odyssey/commit/00f720144107457814f381eeefc9e0d9c45d8910))
+
 ## [1.226.23](https://github.com/LeeWio/odyssey/compare/v1.226.22...v1.226.23) (2026-10-27)
 
 
