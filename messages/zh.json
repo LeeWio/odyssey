@@ -1300,12 +1300,14 @@
       "latest": "最近"
     },
     "links": {
-      "fallback": "值得去看看的同行者。",
-      "eyebrow": "友链",
-      "title": "好地方会带出更好的想法。",
-      "description": "一些在开放网络上认真做作品的人和项目。",
-      "visitAll": "查看全部友链",
-      "loading": "正在加载友链"
+      "eyebrow": "同道",
+      "title": "有朋自远方",
+      "description": "各在一方，亦有共鸣。",
+      "loading": "正在加载友链",
+      "visitSite": "访问{name}（在新窗口打开）",
+      "unavailable": "暂时无法加载友链。",
+      "retry": "重试",
+      "empty": "暂时还没有公开的友链。"
     },
     "persona": {
       "eyebrow": "近来",

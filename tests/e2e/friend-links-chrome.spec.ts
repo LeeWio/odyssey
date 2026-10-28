@@ -26,7 +26,7 @@ const sampleLink = {
 };
 
 test.describe("friend links page chrome", () => {
-  test("shows Blogroll chrome and suggest section", async ({ page }) => {
+  test("shows friend links chrome and suggest section", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.route("**/api/v1/**", (route) => {
       const path = new URL(route.request().url()).pathname;
@@ -38,9 +38,9 @@ test.describe("friend links page chrome", () => {
 
     await page.goto("/links");
 
-    await expect(page.getByText("Blogroll", { exact: true })).toBeVisible();
+    await expect(page.getByText(messages.Links.eyebrow, { exact: true })).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Good places lead to better ideas." })
+      page.getByRole("heading", { name: messages.Links.title, exact: true })
     ).toBeVisible();
     await expect(page.getByText("places to visit", { exact: true })).toBeVisible();
     await expect(page.getByText("The blogroll", { exact: true })).toHaveCount(0);

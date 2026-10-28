@@ -62,7 +62,7 @@ test("home reveals more real content as its container grows without refetching",
   const projectGrid = page.getByTestId("home-projects-grid");
   const linkGrid = page.getByTestId("home-links-grid");
   await expect(projectGrid.locator(":scope > div")).toHaveCount(12);
-  await expect(linkGrid.locator(":scope > div")).toHaveCount(12);
+  await expect(linkGrid.getByRole("listitem", { includeHidden: true })).toHaveCount(6);
   const slides = page.getByTestId("home-writing-slide");
   await expect(slides).toHaveCount(12);
 
@@ -75,7 +75,7 @@ test("home reveals more real content as its container grows without refetching",
     { width: 390, columns: 1, preview: 3, carousel: 1, gallery: 3 },
   ]) {
     await page.setViewportSize({ width: viewport.width, height: 900 });
-    for (const grid of [projectGrid, linkGrid]) {
+    for (const grid of [projectGrid]) {
       await expect(grid.locator(":scope > div:visible")).toHaveCount(viewport.preview);
       const layout = await grid.evaluate((element) => {
         const children = [...element.children].filter(
@@ -104,6 +104,7 @@ test("home reveals more real content as its container grows without refetching",
       expect(layout.overflow).toBe(false);
       expect(layout.overlap).toBe(false);
     }
+    await expect(linkGrid.locator(":scope > li:visible")).toHaveCount(viewport.width < 640 ? 4 : 6);
     await expect(page.getByTestId("home-explore-grid").locator(":scope > div:visible")).toHaveCount(
       6
     );

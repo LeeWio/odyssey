@@ -1300,12 +1300,14 @@
       "latest": "Latest"
     },
     "links": {
-      "fallback": "A fellow traveler worth visiting.",
-      "eyebrow": "The blogroll",
-      "title": "Good places lead to better ideas.",
-      "description": "A few people and projects making thoughtful work on the open web.",
-      "visitAll": "Visit the full blogroll",
-      "loading": "Loading blogroll"
+      "eyebrow": "Friends",
+      "title": "Near & Far",
+      "description": "Good company knows no distance.",
+      "loading": "Loading friends",
+      "visitSite": "Visit {name} (opens in a new window)",
+      "unavailable": "The links couldn't be loaded right now.",
+      "retry": "Try again",
+      "empty": "No public links just yet."
     },
     "persona": {
       "eyebrow": "Lately",
