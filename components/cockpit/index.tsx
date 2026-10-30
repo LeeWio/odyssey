@@ -1,7 +1,6 @@
 "use client";
 
-import { Card, Chip, Typography } from "@heroui/react";
-import { Sheet } from "@heroui-pro/react";
+import { Card, Chip, Sheet, Typography } from "@heroui/react";
 import { useState } from "react";
 import { useRealTime } from "@/hooks/use-real-time";
 import { selectIsSheetOpen, setSheetOpen } from "@/lib/features/ui";
@@ -26,9 +25,10 @@ export function Cockpit() {
       isDetached
       placement="top"
     >
-      <Sheet.Backdrop variant="blur">
+      <Sheet.Backdrop isExiting variant="blur">
         <Sheet.Content>
           <Sheet.Dialog>
+            <Sheet.CloseTrigger className="absolute top-3 right-3 z-20" />
             <Sheet.Heading className="sr-only">Odyssey control center</Sheet.Heading>
             <Sheet.Header className="block">
               <Stocks />

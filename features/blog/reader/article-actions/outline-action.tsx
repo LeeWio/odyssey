@@ -1,7 +1,6 @@
 "use client";
 
-import { Button, ListBox, Tooltip } from "@heroui/react";
-import { Sheet } from "@heroui-pro/react";
+import { Button, ListBox, Sheet, Tooltip } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useScrollIntoView } from "@mantine/hooks";
 import { useEffect, useRef, useState } from "react";
@@ -82,8 +81,8 @@ export function OutlineAction({ report }: { report: Report }) {
         </Button>
         <Tooltip.Content>{label}</Tooltip.Content>
       </Tooltip>
-      <Sheet isDetached isHandleOnly isOpen={isOpen} placement="bottom" onOpenChange={setIsOpen}>
-        <Sheet.Backdrop variant="blur">
+      <Sheet isDetached isOpen={isOpen} placement="bottom" onOpenChange={setIsOpen}>
+        <Sheet.Backdrop isExiting variant="blur">
           <Sheet.Content className="mx-auto max-h-[min(70dvh,32rem)] w-[min(32rem,calc(100vw-1rem))]">
             <Sheet.Dialog className="max-h-[min(70dvh,32rem)]">
               <Sheet.Handle />

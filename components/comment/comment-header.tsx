@@ -2,8 +2,7 @@
 
 import { Icon } from "@iconify/react";
 
-import { Button, Dropdown, Label, Typography, type Key } from "@heroui/react";
-import { Sheet } from "@heroui-pro/react";
+import { Button, Dropdown, Label, Sheet, Typography, type Key } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { memo } from "react";
 import {

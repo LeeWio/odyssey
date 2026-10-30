@@ -1,7 +1,6 @@
 "use client";
 
-import { ScrollShadow } from "@heroui/react";
-import { Sheet } from "@heroui-pro/react";
+import { ScrollShadow, Sheet } from "@heroui/react";
 import { useCallback } from "react";
 import { CommentHeader } from "./comment-header";
 import { CommentSystem, type CommentSystemRenderParts } from "./comment-system";
@@ -21,8 +20,14 @@ export function CommentSheet({ postId, momentId, isOpen, onOpenChange }: Comment
   );
 
   return (
-    <Sheet isDetached isOpen={isOpen} placement="bottom" onOpenChange={onOpenChange}>
-      <Sheet.Backdrop variant="blur">
+    <Sheet
+      isDetached
+      isOpen={isOpen}
+      placement="bottom"
+      snapPoints={["min(420px,55dvh)"]}
+      onOpenChange={onOpenChange}
+    >
+      <Sheet.Backdrop isExiting variant="blur">
         <Sheet.Content className="mx-auto w-[min(760px,calc(100vw-2rem))] max-w-none">
           <Sheet.Dialog className="h-[min(720px,calc(100dvh-1rem))] min-h-0">
             <Sheet.Handle />

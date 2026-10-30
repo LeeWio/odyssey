@@ -2,8 +2,7 @@
 
 import { Icon } from "@iconify/react";
 
-import { Button, Label, Slider, Tooltip, type ButtonProps } from "@heroui/react";
-import { Sheet } from "@heroui-pro/react";
+import { Button, Label, Sheet, Slider, Tooltip, type ButtonProps } from "@heroui/react";
 import Image from "next/image";
 import { useState, type ReactNode } from "react";
 import { selectIsMiniPlayerOpen, setMiniPlayerOpen } from "@/lib/features/ui";
@@ -65,14 +64,8 @@ export const MiniPlayer: React.FC = () => {
   const [coverFailed, setCoverFailed] = useState(false);
 
   return (
-    <Sheet
-      isHandleOnly
-      shouldAutoFocus
-      isOpen={isOpen}
-      isDetached
-      onOpenChange={(open) => dispatch(setMiniPlayerOpen(open))}
-    >
-      <Sheet.Backdrop>
+    <Sheet isOpen={isOpen} isDetached onOpenChange={(open) => dispatch(setMiniPlayerOpen(open))}>
+      <Sheet.Backdrop isExiting>
         <Sheet.Content className="mx-auto w-[calc(100%-2rem)] max-w-md">
           <Sheet.Dialog>
             <Sheet.Handle />

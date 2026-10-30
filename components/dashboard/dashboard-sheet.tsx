@@ -1,8 +1,7 @@
 "use client";
 
 import { Xmark } from "@gravity-ui/icons";
-import { Sheet } from "@heroui-pro/react";
-import { Button } from "@heroui/react";
+import { Sheet } from "@heroui/react";
 import { useState } from "react";
 import type { LifeListItemResponse, LifeListStatus } from "@/lib/features/life-list";
 import { selectIsAdmin, useLogoutMutation } from "@/lib/features/auth";
@@ -166,24 +165,17 @@ export function DashboardSheet() {
 
   return (
     <Sheet isOpen={isOpen} onOpenChange={handleOpenChange} isDetached>
-      <Sheet.Backdrop variant="blur">
+      <Sheet.Backdrop isExiting variant="blur">
         <Sheet.Content>
           <>
             <Sheet.Dialog id="dashboard-sheet-container" aria-label="Dashboard Overlay">
               <Sheet.Handle />
-              <Button
-                isIconOnly
+              <Sheet.CloseTrigger
                 aria-label="Close dashboard"
                 className="absolute top-3 right-3 z-20"
-                size="sm"
-                variant="tertiary"
-                onPress={() => {
-                  setSuppressOutsideClose(false);
-                  dispatch(setDashboardOpen(false));
-                }}
               >
                 <Xmark className="size-4" />
-              </Button>
+              </Sheet.CloseTrigger>
               <AppShell pathname={currentPath} onNavigate={handleNavigate}>
                 {renderContent()}
               </AppShell>

@@ -12,6 +12,7 @@ import {
   ListBox,
   Modal,
   Select,
+  Sheet,
   TextArea,
   TextField,
   toast,
@@ -19,7 +20,6 @@ import {
 import {
   EmptyState,
   Kanban,
-  Sheet,
   useKanban,
   useKanbanCardPlaceholder,
   useKanbanColumn,
@@ -366,7 +366,7 @@ function LifeListSheet({
 
   return (
     <Sheet.NestedRoot isOpen={Boolean(item)} placement="right" onOpenChange={onOpenChange}>
-      <Sheet.Backdrop variant="transparent">
+      <Sheet.Backdrop isExiting variant="transparent">
         <Sheet.Content className="mx-auto w-full sm:max-w-[520px]">
           <Sheet.Dialog className="h-[85vh]">
             <Sheet.CloseTrigger />
