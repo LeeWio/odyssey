@@ -1,3 +1,10 @@
+# [1.229.0](https://github.com/LeeWio/odyssey/compare/v1.228.0...v1.229.0) (2026-10-30)
+
+
+### Features
+
+* **reader:** open the article outline from the action bar ([285a6ba](https://github.com/LeeWio/odyssey/commit/285a6ba3cce45fe7470ab8962704ab7572b8c224))
+
 # [1.228.0](https://github.com/LeeWio/odyssey/compare/v1.227.0...v1.228.0) (2026-10-28)
 
 
