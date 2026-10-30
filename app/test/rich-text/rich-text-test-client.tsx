@@ -2,14 +2,16 @@
 
 import { Button } from "@heroui/react";
 import type { Editor, JSONContent } from "@tiptap/react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { RichText } from "@/components/rich-text/rich-text";
 import { RichTextModalTestClient } from "./rich-text-modal-test-client";
 import { RICH_TEXT_DOCUMENT_FIXTURE } from "@/components/rich-text/testing/rich-text-document.fixture";
 import { RICH_TEXT_TYPOGRAPHY_FIXTURE } from "@/components/rich-text/testing/rich-text-typography.fixture";
+import { ArticleActionBar } from "@/features/blog/reader/article-actions";
 import { ArticleBody } from "@/features/blog/reader/article/article-body";
 import { ArticleLayout } from "@/features/blog/reader/article/article-layout";
+import { ArticleOutlineScope } from "@/features/blog/reader/article/article-outline";
 import {
   clearRichTextDraft,
   readRichTextDraft,
@@ -54,6 +56,7 @@ export default function RichTextTestClient({
   const [editor, setEditor] = useState<Editor | null>(null);
   const [status, setStatus] = useState("Loading editor");
   const [schemaNodes, setSchemaNodes] = useState("");
+  const articleEndRef = useRef<HTMLDivElement>(null);
 
   const saveDraft = () => {
     if (!editor) return;
@@ -83,17 +86,32 @@ export default function RichTextTestClient({
 
   if (outline) {
     return (
-      <ArticleLayout
-        body={
-          <ArticleBody
-            content={JSON.stringify(OUTLINE_DOCUMENT)}
-            contentType="JSON"
-            outlineLabel="On this page"
-          />
-        }
-        hero={<h1 className="mx-auto max-w-3xl py-24 text-3xl">Article outline regression</h1>}
-        label="On this page"
-      />
+      <ArticleOutlineScope>
+        <ArticleLayout
+          body={
+            <ArticleBody
+              content={JSON.stringify(OUTLINE_DOCUMENT)}
+              contentType="JSON"
+              outlineLabel="On this page"
+            />
+          }
+          endRef={articleEndRef}
+          hero={<h1 className="mx-auto max-w-3xl py-24 text-3xl">Article outline regression</h1>}
+          label="On this page"
+        />
+        <ArticleActionBar
+          article={{
+            id: 1,
+            isInReadingList: false,
+            isLiked: false,
+            likesCount: 0,
+            slug: "outline-regression",
+            summary: "",
+            title: "Article outline regression",
+          }}
+          articleEndRef={articleEndRef}
+        />
+      </ArticleOutlineScope>
     );
   }
 

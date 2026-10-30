@@ -11,6 +11,7 @@ import { CollectionMenu } from "./collection-menu";
 import { CommentAction } from "./comment-action";
 import { LikeAction } from "./like-action";
 import { BackAction, LibraryAction, ProgressAction } from "./navigation";
+import { OutlineAction } from "./outline-action";
 import { ShareAction } from "./share-action";
 import type { Target } from "./target";
 import { useEngagement } from "./use-engagement";
@@ -50,6 +51,7 @@ export function ArticleActionBar({
         </Bar.Prefix>
         <Separator orientation="vertical" />
         <Bar.Content>
+          <OutlineAction report={report} />
           <LikeAction article={article} report={report} />
           <ReadingListButton
             isRefreshing={isRefreshing}

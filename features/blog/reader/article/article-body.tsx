@@ -7,7 +7,7 @@ import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-te
 import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
-import { ArticleToc } from "@/features/blog/reader/article/article-toc";
+import { ArticleOutlinePublisher } from "@/features/blog/reader/article/article-outline";
 import {
   normalizeRichTextDocument,
   parseJSONContent,
@@ -25,7 +25,7 @@ export interface ArticleBodyProps {
   /** Entrance animation delay in seconds. */
   motionDelay?: number;
   showTableOfContents?: boolean;
-  /** Persistent heading list. The floating contents control stays off when this is set. */
+  /** Publishes the heading list to the reading action bar. */
   outlineLabel?: string;
 }
 
@@ -71,7 +71,7 @@ export function ArticleBody({
       style={{ willChange: "opacity" }}
     >
       <RichTextEditor.Shell className={shellClassName}>
-        {outlineLabel ? <ArticleToc label={outlineLabel} /> : null}
+        {outlineLabel ? <ArticleOutlinePublisher label={outlineLabel} /> : null}
         <AnimatedRichTextContent />
         {showTableOfContents && !outlineLabel ? (
           <RichTextTableOfContents placement="right" />

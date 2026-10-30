@@ -12,6 +12,7 @@ import {
   ArticleFooter,
   ArticleHero,
   ArticleLayout,
+  ArticleOutlineScope,
   ArticleSidebar,
 } from "@/features/blog/reader/article";
 import { articleHasContext } from "@/features/blog/reader/article/article-sidebar";
@@ -116,7 +117,7 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
   }
 
   return (
-    <>
+    <ArticleOutlineScope>
       <ArticleLayout
         body={
           <ArticleBody
@@ -135,6 +136,6 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
         label={t("onThisPage")}
       />
       <ArticleActionBar article={article} articleEndRef={articleEndRef} isRefreshing={isFetching} />
-    </>
+    </ArticleOutlineScope>
   );
 }
