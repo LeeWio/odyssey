@@ -11,7 +11,7 @@ import { RICH_TEXT_TYPOGRAPHY_FIXTURE } from "@/components/rich-text/testing/ric
 import { ArticleActionBar } from "@/features/blog/reader/article-actions";
 import { ArticleBody } from "@/features/blog/reader/article/article-body";
 import { ArticleLayout } from "@/features/blog/reader/article/article-layout";
-import { ArticleOutlineScope } from "@/features/blog/reader/article/article-outline";
+import { ArticleOutlineProvider } from "@/features/blog/reader/article/article-outline";
 import {
   clearRichTextDraft,
   readRichTextDraft,
@@ -86,7 +86,7 @@ export default function RichTextTestClient({
 
   if (outline) {
     return (
-      <ArticleOutlineScope>
+      <ArticleOutlineProvider>
         <ArticleLayout
           body={
             <ArticleBody
@@ -111,7 +111,7 @@ export default function RichTextTestClient({
           }}
           articleEndRef={articleEndRef}
         />
-      </ArticleOutlineScope>
+      </ArticleOutlineProvider>
     );
   }
 

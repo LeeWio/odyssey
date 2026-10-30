@@ -3,7 +3,6 @@
 import { ScrollShadow } from "@heroui/react";
 import { Sheet } from "@heroui-pro/react";
 import { useCallback } from "react";
-import { useSheetDismissScrollLock } from "@/components/sheet/use-sheet-dismiss-scroll-lock";
 import { CommentHeader } from "./comment-header";
 import { CommentSystem, type CommentSystemRenderParts } from "./comment-system";
 
@@ -15,7 +14,6 @@ interface CommentSheetProps {
 }
 
 export function CommentSheet({ postId, momentId, isOpen, onOpenChange }: CommentSheetProps) {
-  useSheetDismissScrollLock(isOpen);
   const handleRequestClose = useCallback(() => onOpenChange(false), [onOpenChange]);
   const renderContent = useCallback(
     (parts: CommentSystemRenderParts) => <CommentSheetContent {...parts} />,

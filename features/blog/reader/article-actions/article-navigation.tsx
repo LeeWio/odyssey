@@ -2,8 +2,10 @@
 
 import { Button, ProgressCircle, Tooltip } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { useScrollIntoView } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 
 export function BackAction() {
   const t = useTranslations("Article");
@@ -47,6 +49,16 @@ export function LibraryAction() {
 
 export function ProgressAction({ progress }: { progress: number }) {
   const t = useTranslations("Article");
+  const { scrollIntoView, targetRef } = useScrollIntoView<HTMLElement>({
+    duration: readingReturnDuration(progress),
+    easing: easeOutCubic,
+  });
+
+  useEffect(() => {
+    // The title sits in the middle of the opening screen. Returning to the title
+    // leaves that screen partly above the viewport.
+    targetRef.current = document.body;
+  });
 
   return (
     <Tooltip delay={100}>
@@ -55,12 +67,7 @@ export function ProgressAction({ progress }: { progress: number }) {
         aria-label={t("scrollToTop", { progress })}
         size="sm"
         variant="ghost"
-        onPress={() =>
-          window.scrollTo({
-            top: 0,
-            behavior: "auto",
-          })
-        }
+        onPress={() => scrollIntoView({ alignment: "start" })}
       >
         <ProgressCircle
           aria-hidden="true"
@@ -79,4 +86,13 @@ export function ProgressAction({ progress }: { progress: number }) {
       <Tooltip.Content>{t("percentRead", { progress })}</Tooltip.Content>
     </Tooltip>
   );
+}
+
+/** A short read returns quickly. A long read gets more time, without becoming a tour. */
+function readingReturnDuration(progress: number) {
+  return Math.min(900, Math.max(420, progress * 9));
+}
+
+function easeOutCubic(t: number) {
+  return 1 - (1 - t) ** 3;
 }

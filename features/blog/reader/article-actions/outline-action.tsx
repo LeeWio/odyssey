@@ -1,58 +1,69 @@
 "use client";
 
-import { Button, Tooltip } from "@heroui/react";
+import { Button, ListBox, Tooltip } from "@heroui/react";
 import { Sheet } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useScrollIntoView } from "@mantine/hooks";
+import { useEffect, useRef, useState } from "react";
 
 import {
-  jumpToOutlineItem,
-  useArticleOutlineRegistry,
+  ARTICLE_OUTLINE_TOP_OFFSET,
+  readingScrollOffset,
+} from "@/components/rich-text/extensions/table-of-contents";
+import {
+  currentHeadingId,
+  headingElement,
+  useArticleOutline,
+  writeHeadingHash,
 } from "@/features/blog/reader/article/article-outline";
 import { cn } from "@/lib/utils";
 
 import { useReport, type Report } from "./use-engagement";
 
+function easeOutCubic(t: number) {
+  return 1 - (1 - t) ** 3;
+}
+
+function headingClass(level: number) {
+  if (level <= 1) return "text-foreground font-medium";
+  if (level === 2) return "text-foreground font-normal";
+  return "text-muted text-sm font-normal";
+}
+
 export function OutlineAction({ report }: { report: Report }) {
-  const registry = useArticleOutlineRegistry();
-  const hasOutline = useSyncExternalStore(
-    registry?.subscribe ?? (() => () => undefined),
-    () => Boolean(registry?.getSnapshot()),
-    () => false
-  );
+  const outline = useArticleOutline();
   const [isOpen, setIsOpen] = useState(false);
-  const [placement, setPlacement] = useState<"bottom" | "right">("bottom");
   const activeItemRef = useRef<HTMLDivElement>(null);
+  const { scrollIntoView, targetRef } = useScrollIntoView<HTMLElement>({
+    duration: 700,
+    easing: easeOutCubic,
+    offset: ARTICLE_OUTLINE_TOP_OFFSET,
+  });
   useReport("outline", isOpen, report);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const query = window.matchMedia("(min-width: 48rem)");
-    const update = () => setPlacement(query.matches ? "right" : "bottom");
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, [isOpen]);
-
-  const items = isOpen ? (registry?.getSnapshot()?.items ?? []) : [];
-  const label = registry?.getSnapshot()?.label ?? "";
-  const activeId = items.find((item) => item.isActive)?.id ?? items[0]?.id ?? "";
-  const activeIndex = Math.max(
-    items.findIndex((item) => item.id === activeId),
-    0
-  );
+  const items = outline?.items ?? [];
+  const label = outline?.label ?? "";
+  const activeId = isOpen ? currentHeadingId(items) : "";
 
   useEffect(() => {
     if (!isOpen) return;
     activeItemRef.current?.scrollIntoView({ block: "nearest" });
   }, [isOpen, activeId]);
 
-  if (!hasOutline || !registry) return null;
+  if (!outline) return null;
 
   const jumpTo = (id: string) => {
-    const item = registry.getSnapshot()?.items.find((entry) => entry.id === id);
-    if (!item) return;
-    jumpToOutlineItem(item);
+    const item = items.find((entry) => entry.id === id);
+    const heading = item ? headingElement(item) : null;
+    if (!item || !heading) return;
+    writeHeadingHash(item);
+    const anchor = document.createElement("div");
+    anchor.style.position = "absolute";
+    anchor.style.top = `${heading.getBoundingClientRect().top + readingScrollOffset()}px`;
+    document.body.append(anchor);
+    targetRef.current = anchor;
+    scrollIntoView({ alignment: "start" });
+    anchor.remove();
     setIsOpen(false);
   };
 
@@ -71,64 +82,48 @@ export function OutlineAction({ report }: { report: Report }) {
         </Button>
         <Tooltip.Content>{label}</Tooltip.Content>
       </Tooltip>
-      <Sheet isDetached isHandleOnly isOpen={isOpen} placement={placement} onOpenChange={setIsOpen}>
+      <Sheet isDetached isHandleOnly isOpen={isOpen} placement="bottom" onOpenChange={setIsOpen}>
         <Sheet.Backdrop variant="blur">
-          <Sheet.Content
-            className={
-              placement === "right"
-                ? "w-[min(22rem,calc(100vw-1rem))]"
-                : "mx-auto max-h-[min(70dvh,32rem)] w-[min(32rem,calc(100vw-1rem))]"
-            }
-          >
-            <Sheet.Dialog
-              className={placement === "bottom" ? "max-h-[min(70dvh,32rem)]" : undefined}
-            >
-              {placement === "bottom" ? <Sheet.Handle /> : null}
+          <Sheet.Content className="mx-auto max-h-[min(70dvh,32rem)] w-[min(32rem,calc(100vw-1rem))]">
+            <Sheet.Dialog className="max-h-[min(70dvh,32rem)]">
+              <Sheet.Handle />
               <Sheet.CloseTrigger />
               <Sheet.Header>
-                <Sheet.Heading>{label}</Sheet.Heading>
-                <p className="text-muted text-xs tabular-nums">
-                  {activeIndex + 1} / {items.length}
-                </p>
+                <Sheet.Heading className="text-muted text-xs font-medium tracking-wide uppercase">
+                  {label}
+                </Sheet.Heading>
               </Sheet.Header>
               <Sheet.Body className="px-2">
-                <nav aria-label={label} className="flex flex-col gap-0.5">
+                <ListBox
+                  aria-label={label}
+                  className="p-0"
+                  selectedKeys={activeId ? [activeId] : []}
+                  selectionMode="single"
+                >
                   {items.map((item) => {
                     const isActive = item.id === activeId;
                     return (
-                      <Button
+                      <ListBox.Item
                         key={item.id}
-                        aria-current={isActive ? "true" : undefined}
-                        className="h-auto min-h-11 justify-start rounded-lg px-2 py-2"
-                        fullWidth
-                        variant="ghost"
+                        className="data-[selected=true]:bg-default min-h-11"
+                        id={item.id}
+                        textValue={item.textContent}
                         onPress={() => jumpTo(item.id)}
                       >
                         <span
-                          className="flex min-w-0 items-start gap-3 text-left"
+                          className={cn(
+                            "line-clamp-2 min-w-0 text-left leading-5",
+                            headingClass(item.level)
+                          )}
                           ref={isActive ? activeItemRef : undefined}
-                          style={{ marginInlineStart: `${(item.level - 1) * 0.75}rem` }}
+                          style={{ marginInlineStart: `${(item.level - 1) * 1}rem` }}
                         >
-                          <span
-                            aria-hidden="true"
-                            className={cn(
-                              "mt-1 h-4 w-0.5 shrink-0 rounded-full",
-                              isActive ? "bg-accent" : "bg-separator"
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              "line-clamp-2 leading-5 font-normal",
-                              isActive ? "text-foreground font-medium" : "text-muted"
-                            )}
-                          >
-                            {item.textContent}
-                          </span>
+                          {item.textContent}
                         </span>
-                      </Button>
+                      </ListBox.Item>
                     );
                   })}
-                </nav>
+                </ListBox>
               </Sheet.Body>
             </Sheet.Dialog>
           </Sheet.Content>

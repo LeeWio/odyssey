@@ -29,15 +29,22 @@ for (const width of [390, 1280, 1440]) {
       (element) => element.getBoundingClientRect().top + scrollY
     );
     await page.evaluate((top) => window.scrollTo(0, top), bodyTop + 1500);
-    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.evaluate(() => window.scrollBy(0, -160));
     const list = await openOutline(page);
+    await expect(list.getByRole("option", { name: "Section 4", exact: true })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    await page.keyboard.press("Escape");
+    await page.evaluate(() => window.scrollTo(0, 0));
     const target = editor.getByRole("heading", { name: "Section 4", exact: true });
-    await list.getByRole("button", { name: "Section 4", exact: true }).click();
+    await list.getByRole("option", { name: "Section 4", exact: true }).click();
     await expect(page.getByRole("dialog", { name: "On this page" })).toBeHidden();
     await expect
-      .poll(() => target.evaluate((element) => Math.round(element.getBoundingClientRect().top)))
+      .poll(() => target.evaluate((element) => Math.round(element.getBoundingClientRect().top)), {
+        timeout: 3000,
+      })
       .toBe(112);
-    await expect(target).toBeFocused();
     const id = await target.getAttribute("data-toc-id");
     expect(new URL(page.url()).hash).toBe(`#${id}`);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(

@@ -120,6 +120,7 @@ test("article save for later uses the library queue and returns there", async ({
   await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 500));
 
+  await page.getByRole("button", { name: "More actions", exact: true }).click();
   const save = page.getByRole("button", { name: "Save for later", exact: true });
   await save.press("Enter");
   const savedButton = page.getByRole("button", { name: "Saved for later", exact: true });

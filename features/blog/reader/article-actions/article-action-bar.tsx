@@ -5,12 +5,10 @@ import { Separator } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useRef, useState, type RefObject } from "react";
 
-import { ReadingListButton } from "@/features/library/reading-list-button";
-
 import { CollectionMenu } from "./collection-menu";
 import { CommentAction } from "./comment-action";
 import { LikeAction } from "./like-action";
-import { BackAction, LibraryAction, ProgressAction } from "./navigation";
+import { BackAction, LibraryAction, ProgressAction } from "./article-navigation";
 import { OutlineAction } from "./outline-action";
 import { ShareAction } from "./share-action";
 import type { Target } from "./target";
@@ -53,15 +51,10 @@ export function ArticleActionBar({
         <Bar.Content>
           <OutlineAction report={report} />
           <LikeAction article={article} report={report} />
-          <ReadingListButton
-            isRefreshing={isRefreshing}
-            isSaved={Boolean(article.isInReadingList)}
-            postId={article.id}
-          />
           <ShareAction article={article} report={report} />
           <LibraryAction />
           <CommentAction postId={article.id} report={report} />
-          <CollectionMenu article={article} report={report} />
+          <CollectionMenu article={article} isRefreshing={isRefreshing} report={report} />
         </Bar.Content>
         <Separator orientation="vertical" />
         <Bar.Suffix>

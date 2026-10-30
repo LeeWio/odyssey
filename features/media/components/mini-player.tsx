@@ -6,7 +6,6 @@ import { Button, Label, Slider, Tooltip, type ButtonProps } from "@heroui/react"
 import { Sheet } from "@heroui-pro/react";
 import Image from "next/image";
 import { useState, type ReactNode } from "react";
-import { useSheetDismissScrollLock } from "@/components/sheet/use-sheet-dismiss-scroll-lock";
 import { selectIsMiniPlayerOpen, setMiniPlayerOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
@@ -59,7 +58,6 @@ function Control({
 export const MiniPlayer: React.FC = () => {
   const dispatch = useAppDispatch();
   const isOpen = useAppSelector(selectIsMiniPlayerOpen);
-  useSheetDismissScrollLock(isOpen);
   const [playing, setPlaying] = useState(false);
   const [saved, setSaved] = useState(false);
   const [position, setPosition] = useState(104);

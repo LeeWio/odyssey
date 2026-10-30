@@ -7,7 +7,7 @@ import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-te
 import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
-import { ArticleOutlinePublisher } from "@/features/blog/reader/article/article-outline";
+import { ArticleOutlineSource } from "@/features/blog/reader/article/article-outline";
 import {
   normalizeRichTextDocument,
   parseJSONContent,
@@ -71,7 +71,7 @@ export function ArticleBody({
       style={{ willChange: "opacity" }}
     >
       <RichTextEditor.Shell className={shellClassName}>
-        {outlineLabel ? <ArticleOutlinePublisher label={outlineLabel} /> : null}
+        {outlineLabel ? <ArticleOutlineSource label={outlineLabel} /> : null}
         <AnimatedRichTextContent />
         {showTableOfContents && !outlineLabel ? (
           <RichTextTableOfContents placement="right" />

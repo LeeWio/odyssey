@@ -7,10 +7,7 @@ import {
   ARTICLE_ACTION_VISIBILITY_CONFIG,
   createArticleActionScrollMemory,
   decideArticleActionVisibility,
-  type ArticleActionDirection,
   type ArticleActionScrollMemory,
-  type ArticleActionVisibilityState,
-  type ArticleActionZone,
 } from "./visibility";
 
 export interface VisibilityOptions {
@@ -22,38 +19,16 @@ export interface VisibilityOptions {
 
 interface PublishedVisibility {
   isOpen: boolean;
-  zone: ArticleActionZone;
-  direction: ArticleActionDirection;
   progress: number;
-  isInteractionLocked: boolean;
 }
 
 const INITIAL_VISIBILITY: PublishedVisibility = {
   isOpen: true,
-  zone: "top",
-  direction: "idle",
   progress: 0,
-  isInteractionLocked: false,
 };
 
-function publishable(state: ArticleActionVisibilityState): PublishedVisibility {
-  return {
-    isOpen: state.isOpen,
-    zone: state.zone,
-    direction: state.direction,
-    progress: state.progress,
-    isInteractionLocked: state.isInteractionLocked,
-  };
-}
-
 function sameVisibility(current: PublishedVisibility, next: PublishedVisibility) {
-  return (
-    current.isOpen === next.isOpen &&
-    current.zone === next.zone &&
-    current.direction === next.direction &&
-    current.progress === next.progress &&
-    current.isInteractionLocked === next.isInteractionLocked
-  );
+  return current.isOpen === next.isOpen && current.progress === next.progress;
 }
 
 /**
@@ -116,7 +91,7 @@ export function useVisibility({
       });
       memory = next.memory;
 
-      const candidate = publishable(next);
+      const candidate = { isOpen: next.isOpen, progress: next.progress };
       if (sameVisibility(published, candidate)) return;
       published = candidate;
       setVisibility(candidate);

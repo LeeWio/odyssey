@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { CreateCollectionDialog } from "@/features/library/create-collection-dialog";
+import { ReadingListButton } from "@/features/library/reading-list-button";
 import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
 import { useAddPostToCollectionMutation, useGetPostCollectionsQuery } from "@/lib/features/library";
 import { useAppSelector } from "@/lib/hooks";
@@ -13,7 +14,15 @@ import { useAppSelector } from "@/lib/hooks";
 import type { Target } from "./target";
 import { useReport, type Report } from "./use-engagement";
 
-export function CollectionMenu({ article, report }: { article: Target; report: Report }) {
+export function CollectionMenu({
+  article,
+  isRefreshing = false,
+  report,
+}: {
+  article: Target;
+  isRefreshing?: boolean;
+  report: Report;
+}) {
   const t = useTranslations("Article");
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
@@ -44,6 +53,13 @@ export function CollectionMenu({ article, report }: { article: Target; report: R
         <Popover.Content placement="top">
           <Popover.Dialog>
             <Popover.Heading>{t("moreActionsTitle")}</Popover.Heading>
+            <div className="mt-3">
+              <ReadingListButton
+                isRefreshing={isRefreshing}
+                isSaved={Boolean(article.isInReadingList)}
+                postId={article.id}
+              />
+            </div>
             {isAuthenticated ? (
               <div className="mt-3 flex flex-col gap-1">
                 <Typography className="px-2 py-1" color="muted" type="body-xs">

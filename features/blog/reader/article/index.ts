@@ -5,9 +5,4 @@ export { ArticleNeighbors } from "./neighbors";
 export { ArticleHero } from "./article-hero";
 export { ArticleLayout } from "./article-layout";
 export { ArticleSidebar } from "./article-sidebar";
-export {
-  ArticleOutlinePublisher,
-  ArticleOutlineScope,
-  useArticleOutlineRegistry,
-} from "./article-outline";
-export { ReadingProgress } from "./reading-progress";
+export { ArticleOutlineProvider, ArticleOutlineSource, useArticleOutline } from "./article-outline";

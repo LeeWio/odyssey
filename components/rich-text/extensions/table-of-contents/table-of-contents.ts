@@ -9,6 +9,17 @@ import {
 /** Matches the sticky site header, so the active heading and the jump land on the same line. */
 export const ARTICLE_OUTLINE_TOP_OFFSET = 112;
 
+/** A sheet locks the page by fixing the body. The reading position then lives in `body.top`. */
+export function readingScrollOffset() {
+  if (typeof document === "undefined") return 0;
+  const { body } = document;
+  if (body.style.position === "fixed") {
+    const parked = Number.parseFloat(body.style.top);
+    if (Number.isFinite(parked)) return -parked;
+  }
+  return window.scrollY;
+}
+
 /**
  * The extension marks a heading active once `scrollY` passes its `offsetTop`.
  * Shift the recorded position by the sticky header so that line matches the jump.
@@ -17,16 +28,14 @@ const OutlineScrollOffset = Extension.create({
   name: "outlineScrollOffset",
 
   onCreate() {
-    const storage = this.editor.storage.tableOfContents;
-    if (!storage || typeof window === "undefined") return;
-
-    let items = storage.content;
+    if (!this.editor.storage.tableOfContents || typeof window === "undefined") return;
 
     const onScroll = () => {
-      if (items.length === 0) items = storage.content;
-      if (items.length === 0) return;
+      const items = this.editor.storage.tableOfContents?.content as
+        TableOfContentDataItem[] | undefined;
+      if (!items || items.length === 0) return;
 
-      const position = window.scrollY + ARTICLE_OUTLINE_TOP_OFFSET;
+      const position = readingScrollOffset() + ARTICLE_OUTLINE_TOP_OFFSET;
       let activeId = items[0]?.id ?? null;
       const scrolledOver = new Set<string>();
 
@@ -44,23 +53,22 @@ const OutlineScrollOffset = Extension.create({
           item.isActive !== (item.id === activeId) ||
           item.isScrolledOver !== scrolledOver.has(item.id)
       );
-      storage.scrollPosition = position;
+      this.editor.storage.tableOfContents.scrollPosition = position;
       if (!changed) return;
 
       for (const item of items) {
         item.isActive = item.id === activeId;
         item.isScrolledOver = scrolledOver.has(item.id);
       }
-      storage.content = items;
+      this.editor.storage.tableOfContents.content = items;
       window.dispatchEvent(new CustomEvent("odyssey-outline-scroll"));
     };
 
     const start = () => {
-      if (storage.content.length === 0) {
+      if (this.editor.storage.tableOfContents.content.length === 0) {
         requestAnimationFrame(start);
         return;
       }
-      items = storage.content;
       onScroll();
     };
     requestAnimationFrame(start);

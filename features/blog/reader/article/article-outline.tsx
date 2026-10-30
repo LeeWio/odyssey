@@ -5,97 +5,68 @@ import type {
   TableOfContentData,
   TableOfContentDataItem,
 } from "@tiptap/extension-table-of-contents";
-import { createContext, use, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
-import { ARTICLE_OUTLINE_TOP_OFFSET } from "@/components/rich-text/extensions/table-of-contents";
+import {
+  ARTICLE_OUTLINE_TOP_OFFSET,
+  readingScrollOffset,
+} from "@/components/rich-text/extensions/table-of-contents";
 
 const EMPTY_OUTLINE: TableOfContentData = [];
 
-export interface ArticleOutlineSnapshot {
+export interface ArticleOutline {
   items: TableOfContentData;
   label: string;
 }
 
-type OutlineListener = () => void;
+const ArticleOutlineContext = createContext<ArticleOutline | null>(null);
+const SetArticleOutlineContext = createContext<(outline: ArticleOutline | null) => void>(() => {});
 
-/**
- * The action bar lives outside the editor. A revision counter keeps the bar
- * mounted while heading activity changes; callers read the latest list.
- */
-class ArticleOutlineRegistry {
-  private listeners = new Set<OutlineListener>();
-  private revision = 0;
-  private snapshot: ArticleOutlineSnapshot | null = null;
+export function ArticleOutlineProvider({ children }: { children: ReactNode }) {
+  const [outline, setOutline] = useState<ArticleOutline | null>(null);
+  const publish = useCallback((next: ArticleOutline | null) => setOutline(next), []);
 
-  getSnapshot = () => this.snapshot;
-
-  subscribe = (listener: OutlineListener) => {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  };
-
-  publish(snapshot: ArticleOutlineSnapshot | null) {
-    const current = this.snapshot;
-    const presenceChanged = Boolean(current) !== Boolean(snapshot);
-    if (!presenceChanged && sameOutline(current, snapshot)) {
-      this.snapshot = snapshot;
-      return;
-    }
-    this.snapshot = snapshot;
-    this.revision += 1;
-    if (presenceChanged) {
-      for (const listener of this.listeners) listener();
-    }
-  }
-}
-
-function sameOutline(current: ArticleOutlineSnapshot | null, next: ArticleOutlineSnapshot | null) {
-  if (current === next) return true;
-  if (!current || !next || current.label !== next.label) return false;
-  if (current.items.length !== next.items.length) return false;
-  return current.items.every(
-    (item, index) =>
-      item.id === next.items[index]?.id && item.isActive === next.items[index]?.isActive
+  return (
+    <SetArticleOutlineContext value={publish}>
+      <ArticleOutlineContext value={outline}>{children}</ArticleOutlineContext>
+    </SetArticleOutlineContext>
   );
 }
 
-const ArticleOutlineRegistryContext = createContext<ArticleOutlineRegistry | null>(null);
-
-export function ArticleOutlineScope({ children }: { children: ReactNode }) {
-  const [registry] = useState(() => new ArticleOutlineRegistry());
-
-  return <ArticleOutlineRegistryContext value={registry}>{children}</ArticleOutlineRegistryContext>;
+export function useArticleOutline() {
+  return use(ArticleOutlineContext);
 }
 
-export function useArticleOutlineRegistry() {
-  return use(ArticleOutlineRegistryContext);
+function outlineSignature(items: TableOfContentData) {
+  return items.map((item) => `${item.id}:${item.isActive ? 1 : 0}`).join("|");
 }
 
-export function jumpToOutlineItem(item: TableOfContentDataItem) {
-  const heading = item.dom;
-  if (!heading) return;
-
-  heading.setAttribute("tabindex", "-1");
-  window.scrollTo({
-    behavior: "auto",
-    top: heading.getBoundingClientRect().top + window.scrollY - ARTICLE_OUTLINE_TOP_OFFSET,
-  });
-  if (window.history.pushState) {
-    window.history.pushState(null, "", `#${item.id}`);
-  }
-  // The sheet restores focus to its trigger while closing. Focus the heading
-  // after that restoration, without scrolling away from the landed position.
-  window.setTimeout(() => heading.focus({ preventScroll: true }), 520);
+function subscribeToReadingPosition(onChange: () => void) {
+  window.addEventListener("odyssey-outline-scroll", onChange);
+  return () => window.removeEventListener("odyssey-outline-scroll", onChange);
 }
 
-export function ArticleOutlinePublisher({
+/**
+ * The heading list lives in the editor. This publishes it when the headings
+ * or the active section change, so the action bar can open the list.
+ */
+export function ArticleOutlineSource({
   label,
   maxHeadingLevel = 3,
 }: {
   label: string;
   maxHeadingLevel?: number;
 }) {
-  const registry = useArticleOutlineRegistry();
+  const publish = use(SetArticleOutlineContext);
   const { editor } = useRichTextEditor();
   const items =
     useRichTextEditorState((state) => {
@@ -103,16 +74,56 @@ export function ArticleOutlinePublisher({
         (state.editor.storage.tableOfContents?.content as TableOfContentData | undefined) ??
         EMPTY_OUTLINE;
 
-      return content.filter((item) => item.originalLevel <= maxHeadingLevel);
+      return !editor || content.length === 0
+        ? EMPTY_OUTLINE
+        : content.filter((item) => item.originalLevel <= maxHeadingLevel);
     }) ?? EMPTY_OUTLINE;
+  const activeSignature = useSyncExternalStore(
+    subscribeToReadingPosition,
+    () => outlineSignature(items),
+    () => ""
+  );
+  const published = useRef<string | null>(null);
 
   useEffect(() => {
-    registry?.publish(!editor || items.length === 0 ? null : { items, label });
-  });
+    if (published.current === activeSignature) return;
+    published.current = activeSignature;
+    publish(!editor || !activeSignature ? null : { items, label });
+  }, [activeSignature, editor, items, label, publish]);
 
   useEffect(() => {
-    return () => registry?.publish(null);
-  }, [registry]);
+    return () => {
+      published.current = null;
+      publish(null);
+    };
+  }, [publish]);
 
   return null;
+}
+
+export function currentHeadingId(items: TableOfContentData) {
+  const position = readingScrollOffset() + ARTICLE_OUTLINE_TOP_OFFSET;
+  let activeId = items[0]?.id ?? "";
+
+  for (const item of items) {
+    const heading = document.getElementById(item.id) ?? item.dom;
+    if (!heading) continue;
+    const top = heading.getBoundingClientRect().top + readingScrollOffset();
+    if (position >= top) activeId = item.id;
+  }
+
+  return activeId;
+}
+
+export function headingElement(item: TableOfContentDataItem) {
+  const heading = document.getElementById(item.id) ?? item.dom;
+  if (!heading) return null;
+  heading.setAttribute("tabindex", "-1");
+  return heading;
+}
+
+export function writeHeadingHash(item: TableOfContentDataItem) {
+  if (window.history.pushState) {
+    window.history.pushState(null, "", `#${item.id}`);
+  }
 }
