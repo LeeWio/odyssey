@@ -788,7 +788,7 @@
   },
   "Moments": {
     "title": "This & That",
-    "description": "A little of this, a little of that.",
+    "description": "Thoughts, moments, and everything between.",
     "anchor": {
       "searching": "Finding the moment you followed…",
       "missing": "This moment is no longer in the public feed.",
@@ -1180,7 +1180,7 @@
       },
       "moments": {
         "title": "This & That",
-        "description": "A little of this, a little of that."
+        "description": "Bits and pieces of everyday life."
       },
       "projects": {
         "title": "Projects",
@@ -1212,7 +1212,7 @@
     "moments": {
       "eyebrow": "Moments",
       "title": "This & That",
-      "description": "A little of this, a little of that."
+      "description": "Bits and pieces of everyday life."
     },
     "projects": {
       "coverAlt": "Cover for {name}",
@@ -1291,8 +1291,8 @@
     },
     "footprints": {
       "eyebrow": "Footprints",
-      "title": "A Map of Memories",
-      "description": "Not just places on a map, but moments along the way.",
+      "title": "Along the Way",
+      "description": "Every step leaves something behind.",
       "cardTitle": "Footprints",
       "cardDescription": "Places kept on the map",
       "places": "Places",
@@ -1311,8 +1311,8 @@
     },
     "persona": {
       "eyebrow": "Lately",
-      "title": "What I've Been Up To",
-      "description": "The person, the desk, the work, and a few notes on the wall.",
+      "title": "These Days",
+      "description": "Notes from the days in between",
       "sections": "Pieces of lately",
       "about": "Person",
       "tools": "Desk",

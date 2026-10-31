@@ -146,7 +146,7 @@
     "metaUsesDescription": "我每天使用的硬件、软件和工具。",
     "metaFootprintsTitle": "足迹 | Odyssey",
     "metaFootprintsDescription": "一份带着地点、年份和路上记忆的个人地图。",
-    "metaMomentsTitle": "三言两语 | Odyssey",
+    "metaMomentsTitle": "闲言碎语 | Odyssey",
     "metaMomentsDescription": "短的现场笔记、记下的片段，以及日常的设计与建筑观察。",
     "metaAboutTitle": "关于 | Odyssey",
     "metaAboutDescription": "一页短的默认设置：品味、独处、玩，以及 Odyssey 背后的技术栈。"
@@ -787,8 +787,8 @@
     "browseColumns": "浏览专栏"
   },
   "Moments": {
-    "title": "三言两语",
-    "description": "说说这个，聊聊那个。",
+    "title": "闲言碎语",
+    "description": "随心而谈，随手而记。",
     "anchor": {
       "searching": "正在寻找你点开的那条动态…",
       "missing": "这条动态已不在公开列表中。",
@@ -1179,8 +1179,8 @@
         "description": "有些想法，值得多写几行。"
       },
       "moments": {
-        "title": "三言两语",
-        "description": "说说这个，聊聊那个。"
+        "title": "闲言碎语",
+        "description": "想到哪里，就说到哪里。"
       },
       "projects": {
         "title": "项目",
@@ -1211,8 +1211,8 @@
     },
     "moments": {
       "eyebrow": "动态",
-      "title": "三言两语",
-      "description": "说说这个，聊聊那个。"
+      "title": "闲言碎语",
+      "description": "想到哪里，就说到哪里。"
     },
     "projects": {
       "coverAlt": "{name} 的封面",
@@ -1290,9 +1290,9 @@
       }
     },
     "footprints": {
-      "eyebrow": "关于远方",
+      "eyebrow": "一路走来",
       "title": "记忆地图",
-      "description": "地图上不只是地点，还有一路走来的时光。",
+      "description": "走过的地方，留下的时光。",
       "cardTitle": "足迹",
       "cardDescription": "留在地图上的地方",
       "places": "地方",
@@ -1323,8 +1323,8 @@
     },
     "lately": {
       "sectionLabel": "近况",
-      "sectionTitle": "最近在做什么",
-      "sectionDescription": "最近常听的一首歌、市场一瞥，以及 GitHub 上的近期工作。",
+      "sectionTitle": "此时此刻",
+      "sectionDescription": "一些近况，一些日常",
       "trackBadge": "循环播放",
       "trackEyebrow": "最近喜欢",
       "listeningLabel": "正在听",
