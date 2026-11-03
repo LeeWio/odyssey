@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import {
   commentApi,
@@ -58,6 +59,7 @@ export function useCommentMutations({
   reconcileDeletedComment,
 }: MutationHookProps) {
   const dispatch = useAppDispatch();
+  const t = useTranslations("Comments");
   const { isGuestbook, isMoment, postId, momentId, currentUser, currentUserId, isAuthenticated } =
     useCommentContext();
   const [publishCommentApi] = usePublishCommentMutation();
@@ -146,16 +148,16 @@ export function useCommentMutations({
     const guestEmail = guest?.guestEmail?.trim() || undefined;
     const guestWebsite = guest?.guestWebsite?.trim() || undefined;
     if (!isAuthenticated && !guestName) {
-      toast.warning("Add a display name or sign in to post a comment.");
+      toast.warning(t("displayNameRequired"));
       return false;
     }
 
     if (!isGuestbook && !isMoment && postId <= 0) {
-      toast.danger("This comment thread is unavailable.");
+      toast.danger(t("threadUnavailable"));
       return false;
     }
     if (isMoment && momentId <= 0) {
-      toast.danger("This moment comment thread is unavailable.");
+      toast.danger(t("momentThreadUnavailable"));
       return false;
     }
 
@@ -239,7 +241,7 @@ export function useCommentMutations({
 
   const toggleLike = async (id: number, currentIsLiked: boolean, currentLikesCount = 0) => {
     if (!isAuthenticated) {
-      toast.warning("Please sign in to react to comments.");
+      toast.warning(t("signInToReact"));
       dispatch(setLoginOpen(true));
       return;
     }
@@ -267,7 +269,7 @@ export function useCommentMutations({
     } catch (err) {
       revertLikeOverride(id, previous);
       console.error("Failed to sync comment like state:", err);
-      toast.danger("Couldn't update comment reaction.");
+      toast.danger(t("reactionFailed"));
     } finally {
       pendingLikes.current.delete(id);
       setPendingLikeIds(new Set(pendingLikes.current));
@@ -281,7 +283,7 @@ export function useCommentMutations({
       return true;
     } catch (err) {
       console.error("Failed to sync comment edit:", err);
-      toast.danger("Couldn't update the comment.");
+      toast.danger(t("editFailed"));
       return false;
     }
   };
@@ -299,25 +301,25 @@ export function useCommentMutations({
       return true;
     } catch (err) {
       console.error("Failed to sync comment deletion:", err);
-      toast.danger("Couldn't delete the comment.");
+      toast.danger(t("deleteFailed"));
       return false;
     }
   };
 
   const reportComment = async (id: number, reason: string) => {
     if (!isAuthenticated) {
-      toast.warning("Please sign in to report a comment.");
+      toast.warning(t("signInToReport"));
       dispatch(setLoginOpen(true));
       return false;
     }
 
     try {
       await reportCommentApi({ id, reason }).unwrap();
-      toast.success("Report submitted.");
+      toast.success(t("reportSubmitted"));
       return true;
     } catch (err) {
       console.error("Failed to sync comment report:", err);
-      toast.danger("Couldn't submit the report.");
+      toast.danger(t("reportFailed"));
       return false;
     }
   };

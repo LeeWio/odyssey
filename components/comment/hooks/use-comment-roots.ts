@@ -273,7 +273,7 @@ export function useCommentRoots({
           [queryKey]: { cursor: result.nextCursor ?? undefined, hasMore: result.hasMore },
         }));
       },
-      "Couldn’t load more comments. Please try again."
+      "loadMoreFailed"
     );
   }, [
     run,

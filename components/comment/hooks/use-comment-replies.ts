@@ -82,7 +82,7 @@ export function useCommentReplies({ threadKey }: UseCommentRepliesArgs) {
             };
           });
         },
-        "Couldn’t load replies. Please try again."
+        "loadRepliesFailed"
       );
     },
     [loadRepliesQuery, run, replyPages, threadKey]

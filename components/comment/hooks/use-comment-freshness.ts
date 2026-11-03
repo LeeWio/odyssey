@@ -35,7 +35,7 @@ export function useCommentFreshness({
   newestSeenId,
   onPrefetchRoots,
 }: UseCommentFreshnessArgs) {
-  const enabled = sortOrder === "newest" && (isGuestbook || (isMoment ? momentId > 0 : postId > 0));
+  const enabled = isGuestbook || (isMoment ? momentId > 0 : postId > 0);
   const baselineKey = `${isGuestbook ? "guestbook" : isMoment ? `moment:${momentId}` : `post:${postId}`}:${sortOrder}`;
   const [baselineByKey, setBaselineByKey] = useState<Record<string, number | undefined>>({});
   const { pendingKeys, run } = useCommentLoader();
@@ -104,7 +104,7 @@ export function useCommentFreshness({
         );
         setBaselineByKey((previous) => ({ ...previous, [baselineKey]: maxIncoming }));
       },
-      "Couldn’t load new comments. Please try again."
+      "loadNewFailed"
     );
   }, [
     run,

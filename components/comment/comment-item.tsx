@@ -74,7 +74,12 @@ function StatusHint({ comment }: { comment: EnhancedComment }) {
     return <span className="text-muted text-xs">{t("sending")}</span>;
   }
   if (comment.status === "PENDING") {
-    return <span className="text-warning text-xs font-medium">{t("awaitingReview")}</span>;
+    return (
+      <span className="text-warning inline-flex items-center gap-1 text-xs font-medium">
+        <span aria-hidden="true" className="bg-warning size-1.5 rounded-full" />
+        {t("awaitingReview")}
+      </span>
+    );
   }
   if (comment.pinned) {
     return <span className="text-muted text-xs">{t("pinned")}</span>;
@@ -91,10 +96,13 @@ export function CommentItem(props: CommentItemProps) {
   const { highlightedCommentId } = useCommentContext();
   const replies = useMemo(() => flattenReplies(comment), [comment]);
   const replyTotal = Math.max(comment.replyCount ?? 0, replies.length);
+  const previewCount = 2;
   const shouldReduceMotion = useReducedMotion() === true;
   const hasHighlightedReply = replies.some(
     ({ comment: reply }) => reply.id === highlightedCommentId
   );
+  const previewReplies = replies.slice(0, previewCount);
+  const hiddenCount = Math.max(0, replyTotal - previewReplies.length);
   const [isExpanded, setIsExpanded] = useState(hasHighlightedReply);
   const repliesId = `comment-replies-${comment.id}`;
   const isHighlighted = highlightedCommentId === comment.id;
@@ -117,36 +125,51 @@ export function CommentItem(props: CommentItemProps) {
     >
       <CommentRow {...props} comment={comment} depth={1} />
 
-      {(replies.length > 0 || replyTotal > 0) && (
+      {(previewReplies.length > 0 || replyTotal > 0) && (
         <div className="mt-3 ml-10 sm:ml-12">
-          <Button
-            size="sm"
-            variant="ghost"
-            isDisabled={props.loadingReplyIds.has(comment.id)}
-            aria-controls={repliesId}
-            aria-expanded={isExpanded}
-            onPress={async () => {
-              if (!isExpanded && replies.length === 0 && replyTotal > 0) {
-                if (!(await props.onLoadReplies(comment.id))) return;
-              }
-              setIsExpanded((expanded) => !expanded);
-            }}
-          >
-            <Icon
-              icon="gravity-ui:chevron-down"
-              aria-hidden="true"
-              className={cn(
-                "size-3.5 transition-transform duration-160",
-                isExpanded && "rotate-180",
-                shouldReduceMotion && "transition-none"
-              )}
-            />
-            {props.loadingReplyIds.has(comment.id)
-              ? t("loadingReplies")
-              : isExpanded
-                ? t("hideReplies", { count: replyTotal })
-                : t("showReplies", { count: replyTotal })}
-          </Button>
+          {previewReplies.length > 0 ? (
+            <div className="border-border/80 space-y-4 border-l pl-4 sm:pl-5">
+              {previewReplies.map(({ comment: reply, replyTo, replyToId }) => (
+                <ReplyRow
+                  key={reply.id}
+                  {...props}
+                  comment={reply}
+                  replyTo={replyTo}
+                  replyToId={replyToId}
+                />
+              ))}
+            </div>
+          ) : null}
+          {hiddenCount > 0 ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              isDisabled={props.loadingReplyIds.has(comment.id)}
+              aria-controls={repliesId}
+              aria-expanded={isExpanded}
+              onPress={async () => {
+                if (!isExpanded && replies.length < replyTotal) {
+                  if (!(await props.onLoadReplies(comment.id))) return;
+                }
+                setIsExpanded((expanded) => !expanded);
+              }}
+            >
+              <Icon
+                icon="gravity-ui:chevron-down"
+                aria-hidden="true"
+                className={cn(
+                  "size-3.5 transition-transform duration-160",
+                  isExpanded && "rotate-180",
+                  shouldReduceMotion && "transition-none"
+                )}
+              />
+              {props.loadingReplyIds.has(comment.id)
+                ? t("loadingReplies")
+                : isExpanded
+                  ? t("hideReplies", { count: hiddenCount })
+                  : t("showReplies", { count: hiddenCount })}
+            </Button>
+          ) : null}
 
           <AnimatePresence initial={false}>
             {isExpanded ? (
@@ -171,7 +194,7 @@ export function CommentItem(props: CommentItemProps) {
                 className="overflow-hidden"
               >
                 <div className="border-border/80 mt-3 space-y-4 border-l pl-4 sm:pl-5">
-                  {replies.map(({ comment: reply, replyTo, replyToId }) => (
+                  {replies.slice(previewCount).map(({ comment: reply, replyTo, replyToId }) => (
                     <ReplyRow
                       key={reply.id}
                       {...props}
