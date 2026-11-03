@@ -1,3 +1,10 @@
+# [1.230.0](https://github.com/LeeWio/odyssey/compare/v1.229.0...v1.230.0) (2026-11-03)
+
+
+### Features
+
+* **comment:** compose comments in nested sheets ([929dc33](https://github.com/LeeWio/odyssey/commit/929dc33628c4d6d8239693adf6701a33860876ba))
+
 # [1.229.0](https://github.com/LeeWio/odyssey/compare/v1.228.0...v1.229.0) (2026-10-30)
 
 
