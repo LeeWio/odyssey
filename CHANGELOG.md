@@ -1,3 +1,10 @@
+## [1.230.1](https://github.com/LeeWio/odyssey/compare/v1.230.0...v1.230.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* **comment:** keep sorted comments visible and field values committed ([219c9e2](https://github.com/LeeWio/odyssey/commit/219c9e298d243c4b88fe32922d95b50b488f04fa))
+
 # [1.230.0](https://github.com/LeeWio/odyssey/compare/v1.229.0...v1.230.0) (2026-11-03)
 
 
