@@ -343,15 +343,16 @@ export function RolesPage() {
                   </p>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4 py-4">
-                  <TextField isRequired name="name" type="text">
+                  <TextField
+                    isRequired
+                    name="name"
+                    type="text"
+                    value={formName}
+                    onChange={setFormName}
+                    onBlur={handleNameBlur}
+                  >
                     <Label className="text-sm font-medium">Role Name</Label>
-                    <Input
-                      variant="secondary"
-                      placeholder="e.g. Content Editor"
-                      value={formName}
-                      onChange={(e) => setFormName(e.target.value)}
-                      onBlur={handleNameBlur}
-                    />
+                    <Input variant="secondary" placeholder="e.g. Content Editor" />
                     <FieldError />
                   </TextField>
 
@@ -359,31 +360,30 @@ export function RolesPage() {
                     isRequired
                     name="code"
                     type="text"
+                    value={formCode}
                     validate={(val) => {
                       if (!/^ROLE_[A-Z0-9_]+$/.test(val)) {
                         return "Code must start with 'ROLE_' followed by uppercase letters, numbers and underscores";
                       }
                       return null;
                     }}
+                    onChange={setFormCode}
                   >
                     <Label className="text-sm font-medium">Security Code</Label>
-                    <Input
-                      variant="secondary"
-                      placeholder="e.g. ROLE_EDITOR"
-                      value={formCode}
-                      onChange={(e) => setFormCode(e.target.value)}
-                    />
+                    <Input variant="secondary" placeholder="e.g. ROLE_EDITOR" />
                     <FieldError />
                   </TextField>
 
-                  <TextField name="description">
+                  <TextField
+                    name="description"
+                    value={formDescription}
+                    onChange={setFormDescription}
+                  >
                     <Label className="text-sm font-medium">Description</Label>
                     <TextArea
                       variant="secondary"
                       placeholder="e.g. Bundles publishing, drafting and editing rights."
                       className="min-h-20"
-                      value={formDescription}
-                      onChange={(e) => setFormDescription(e.target.value)}
                     />
                     <FieldError />
                   </TextField>

@@ -58,22 +58,24 @@ export function RichTextForm({ data, onChange, step }: RichTextFormProps) {
   if (step === "article") {
     return (
       <div className="flex flex-col gap-6">
-        <TextField isRequired className="w-full">
+        <TextField
+          isRequired
+          className="w-full"
+          value={data.title || ""}
+          onChange={(value) => handleFieldChange("title", value)}
+        >
           <Label>Title</Label>
-          <Input
-            placeholder="The art of design..."
-            value={data.title || ""}
-            onChange={(e) => handleFieldChange("title", e.target.value)}
-          />
+          <Input placeholder="The art of design..." />
         </TextField>
 
-        <TextField isRequired className="w-full">
+        <TextField
+          isRequired
+          className="w-full"
+          value={data.slug || ""}
+          onChange={(value) => handleFieldChange("slug", value)}
+        >
           <Label>Slug</Label>
-          <Input
-            placeholder="art-of-design"
-            value={data.slug || ""}
-            onChange={(e) => handleFieldChange("slug", e.target.value)}
-          />
+          <Input placeholder="art-of-design" />
         </TextField>
 
         <TextField className="w-full">

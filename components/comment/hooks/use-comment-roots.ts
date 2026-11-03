@@ -62,15 +62,15 @@ export function useCommentRoots({
 
   const postCursorResult = useGetPostCommentRootsCursorQuery(
     { postId, size: PAGE_SIZE },
-    { skip: !usePost || !useCursorRoots || postId <= 0 }
+    { skip: !usePost || postId <= 0 }
   );
   const momentCursorResult = useGetMomentCommentRootsCursorQuery(
     { momentId, size: PAGE_SIZE },
-    { skip: !isMoment || !useCursorRoots || momentId <= 0 }
+    { skip: !isMoment || momentId <= 0 }
   );
   const guestbookCursorResult = useGetGuestbookRootsCursorQuery(
     { size: PAGE_SIZE },
-    { skip: !isGuestbook || !useCursorRoots }
+    { skip: !isGuestbook }
   );
   const postOldestResult = useGetPostCommentRootsQuery(
     {
@@ -79,7 +79,7 @@ export function useCommentRoots({
       size: PAGE_SIZE,
       sort: ["createdAt,asc"],
     },
-    { skip: !usePost || useCursorRoots || sortOrder !== "oldest" || postId <= 0 }
+    { skip: !usePost || postId <= 0 }
   );
   const momentOldestResult = useGetMomentCommentRootsQuery(
     {
@@ -88,15 +88,15 @@ export function useCommentRoots({
       size: PAGE_SIZE,
       sort: ["createdAt,asc"],
     },
-    { skip: !isMoment || useCursorRoots || sortOrder !== "oldest" || momentId <= 0 }
+    { skip: !isMoment || momentId <= 0 }
   );
   const postHotResult = useGetHotPostCommentRootsQuery(
     { postId, page: 0, size: PAGE_SIZE },
-    { skip: !usePost || useCursorRoots || sortOrder !== "likes" || postId <= 0 }
+    { skip: !usePost || postId <= 0 }
   );
   const momentHotResult = useGetHotMomentCommentRootsQuery(
     { momentId, page: 0, size: PAGE_SIZE },
-    { skip: !isMoment || useCursorRoots || sortOrder !== "likes" || momentId <= 0 }
+    { skip: !isMoment || momentId <= 0 }
   );
   const guestbookOldestResult = useGetGuestbookRootsQuery(
     {
@@ -104,11 +104,11 @@ export function useCommentRoots({
       size: PAGE_SIZE,
       sort: ["createdAt,asc"],
     },
-    { skip: !isGuestbook || useCursorRoots || sortOrder !== "oldest" }
+    { skip: !isGuestbook }
   );
   const guestbookHotResult = useGetHotGuestbookRootsQuery(
     { page: 0, size: PAGE_SIZE },
-    { skip: !isGuestbook || useCursorRoots || sortOrder !== "likes" }
+    { skip: !isGuestbook }
   );
 
   const [loadPostCursor] = useLazyGetPostCommentRootsCursorQuery();

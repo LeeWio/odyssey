@@ -4,8 +4,10 @@ import { Icon } from "@iconify/react";
 
 import { Alert, Button, Skeleton } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
+import { AnimatePresence, LayoutGroup } from "motion/react";
 import { useTranslations } from "next-intl";
 import { CommentItem } from "./comment-item";
+import { CommentPresence } from "./comment-motion";
 import { useCommentContext } from "./context/comment-context";
 import type { EnhancedComment } from "./types";
 
@@ -117,39 +119,44 @@ export function CommentList({
           </EmptyState.Header>
         </EmptyState>
       ) : (
-        <div className="flex flex-col">
-          {comments.map((comment) => (
-            <CommentItem
-              key={comment.id}
-              comment={comment}
-              onDelete={onDelete}
-              onEditSave={onEditSave}
-              onLikeToggle={onLikeToggle}
-              pendingLikeIds={pendingLikeIds}
-              onAuthenticationRequired={onAuthenticationRequired}
-              onReplySubmit={onReplySubmit}
-              onReport={onReport}
-              onRetry={onRetry}
-              onLoadReplies={onLoadReplies}
-              loadingReplyIds={loadingReplyIds}
-              hasMoreReplies={hasMoreReplies}
-            />
-          ))}
+        <LayoutGroup>
+          <div className="relative flex flex-col">
+            <AnimatePresence initial={false} mode="sync">
+              {comments.map((comment) => (
+                <CommentPresence key={comment.id}>
+                  <CommentItem
+                    comment={comment}
+                    onDelete={onDelete}
+                    onEditSave={onEditSave}
+                    onLikeToggle={onLikeToggle}
+                    pendingLikeIds={pendingLikeIds}
+                    onAuthenticationRequired={onAuthenticationRequired}
+                    onReplySubmit={onReplySubmit}
+                    onReport={onReport}
+                    onRetry={onRetry}
+                    onLoadReplies={onLoadReplies}
+                    loadingReplyIds={loadingReplyIds}
+                    hasMoreReplies={hasMoreReplies}
+                  />
+                </CommentPresence>
+              ))}
+            </AnimatePresence>
 
-          {hasMore ? (
-            <div className="flex justify-center py-4">
-              <Button
-                size="sm"
-                variant="ghost"
-                isPending={isLoadingMore}
-                isDisabled={isLoadingMore}
-                onPress={loadMore}
-              >
-                {t("loadMore")}
-              </Button>
-            </div>
-          ) : null}
-        </div>
+            {hasMore ? (
+              <div className="flex justify-center py-4">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  isPending={isLoadingMore}
+                  isDisabled={isLoadingMore}
+                  onPress={loadMore}
+                >
+                  {t("loadMore")}
+                </Button>
+              </div>
+            ) : null}
+          </div>
+        </LayoutGroup>
       )}
     </div>
   );

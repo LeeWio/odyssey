@@ -341,14 +341,15 @@ export function TagsPage() {
                   </p>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4 py-4">
-                  <TextField isRequired name="name" type="text">
+                  <TextField
+                    isRequired
+                    name="name"
+                    type="text"
+                    value={formName}
+                    onChange={handleNameChange}
+                  >
                     <Label className="text-sm font-medium">Name</Label>
-                    <Input
-                      variant="secondary"
-                      placeholder="e.g. Next.js"
-                      value={formName}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                    />
+                    <Input variant="secondary" placeholder="e.g. Next.js" />
                     <FieldError />
                   </TextField>
 
@@ -356,18 +357,15 @@ export function TagsPage() {
                     isRequired
                     name="slug"
                     type="text"
+                    value={formSlug}
                     validate={(val) => validateUrlSlug(val)}
+                    onChange={(value) => {
+                      setSlugTouched(true);
+                      setFormSlug(value);
+                    }}
                   >
                     <Label className="text-sm font-medium">Slug</Label>
-                    <Input
-                      variant="secondary"
-                      placeholder="e.g. next-js"
-                      value={formSlug}
-                      onChange={(e) => {
-                        setSlugTouched(true);
-                        setFormSlug(e.target.value);
-                      }}
-                    />
+                    <Input variant="secondary" placeholder="e.g. next-js" />
                     <FieldError />
                   </TextField>
                 </Modal.Body>

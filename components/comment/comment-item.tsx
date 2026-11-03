@@ -8,8 +8,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
 import { UserAvatar } from "@/components/user-avatar";
-import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
-import { microEaseOut } from "@/lib/motion";
+import { useReducedMotion } from "motion/react";
+import { microEaseOut, pageFadeExitDuration } from "@/lib/motion";
 import { useRelativeTime } from "@/lib/relative-time";
 import { publicWebsiteHref } from "./comment-website";
 import { CommentActions } from "./comment-actions";
@@ -91,7 +91,7 @@ export function CommentItem(props: CommentItemProps) {
   const { highlightedCommentId } = useCommentContext();
   const replies = useMemo(() => flattenReplies(comment), [comment]);
   const replyTotal = Math.max(comment.replyCount ?? 0, replies.length);
-  const shouldReduceMotion = useReducedMotionPreference();
+  const shouldReduceMotion = useReducedMotion() === true;
   const hasHighlightedReply = replies.some(
     ({ comment: reply }) => reply.id === highlightedCommentId
   );
@@ -110,7 +110,7 @@ export function CommentItem(props: CommentItemProps) {
       id={`comment-${comment.id}`}
       data-comment-card={comment.id}
       className={cn(
-        "scroll-mt-24 py-4",
+        "scroll-mt-24 py-4 transition-colors duration-200",
         isHighlighted &&
           "bg-accent/5 ring-accent/20 -mx-2 rounded-xl border-b-transparent px-2 ring-1"
       )}
@@ -133,9 +133,13 @@ export function CommentItem(props: CommentItemProps) {
             }}
           >
             <Icon
-              icon={isExpanded ? "gravity-ui:chevron-up" : "gravity-ui:chevron-down"}
+              icon="gravity-ui:chevron-down"
               aria-hidden="true"
-              className="size-3.5"
+              className={cn(
+                "size-3.5 transition-transform duration-160",
+                isExpanded && "rotate-180",
+                shouldReduceMotion && "transition-none"
+              )}
             />
             {props.loadingReplyIds.has(comment.id)
               ? t("loadingReplies")
@@ -148,10 +152,22 @@ export function CommentItem(props: CommentItemProps) {
             {isExpanded ? (
               <motion.div
                 id={repliesId}
-                initial={shouldReduceMotion ? undefined : { height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={shouldReduceMotion ? undefined : { height: 0, opacity: 0 }}
-                transition={{ duration: 0.18, ease: microEaseOut }}
+                layout={false}
+                initial={shouldReduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { height: "auto", opacity: 1 }}
+                exit={
+                  shouldReduceMotion
+                    ? { opacity: 0, transition: { duration: 0.1 } }
+                    : {
+                        height: 0,
+                        opacity: 0,
+                        transition: { duration: pageFadeExitDuration, ease: [0.4, 0, 1, 1] },
+                      }
+                }
+                transition={{
+                  height: { duration: 0.2, ease: microEaseOut },
+                  opacity: { duration: 0.14, ease: microEaseOut },
+                }}
                 className="overflow-hidden"
               >
                 <div className="border-border/80 mt-3 space-y-4 border-l pl-4 sm:pl-5">

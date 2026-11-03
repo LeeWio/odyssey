@@ -356,14 +356,15 @@ export function CategoriesPage() {
                   </p>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4 py-4">
-                  <TextField isRequired name="name" type="text">
+                  <TextField
+                    isRequired
+                    name="name"
+                    type="text"
+                    value={formName}
+                    onChange={handleNameChange}
+                  >
                     <Label className="text-sm font-medium">Name</Label>
-                    <Input
-                      variant="secondary"
-                      placeholder="e.g. Technology"
-                      value={formName}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                    />
+                    <Input variant="secondary" placeholder="e.g. Technology" />
                     <FieldError />
                   </TextField>
 
@@ -371,29 +372,28 @@ export function CategoriesPage() {
                     isRequired
                     name="slug"
                     type="text"
+                    value={formSlug}
                     validate={(val) => validateUrlSlug(val)}
+                    onChange={(value) => {
+                      setSlugTouched(true);
+                      setFormSlug(value);
+                    }}
                   >
                     <Label className="text-sm font-medium">Slug</Label>
-                    <Input
-                      variant="secondary"
-                      placeholder="e.g. technology"
-                      value={formSlug}
-                      onChange={(e) => {
-                        setSlugTouched(true);
-                        setFormSlug(e.target.value);
-                      }}
-                    />
+                    <Input variant="secondary" placeholder="e.g. technology" />
                     <FieldError />
                   </TextField>
 
-                  <TextField name="description">
+                  <TextField
+                    name="description"
+                    value={formDescription}
+                    onChange={setFormDescription}
+                  >
                     <Label className="text-sm font-medium">Description</Label>
                     <TextArea
                       variant="secondary"
                       placeholder="Describe this category..."
                       className="min-h-20"
-                      value={formDescription}
-                      onChange={(e) => setFormDescription(e.target.value)}
                     />
                     <FieldError />
                   </TextField>
