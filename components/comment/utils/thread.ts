@@ -9,6 +9,15 @@ export type FlattenedReplyRow = {
   replyToId: number;
 };
 
+export function findCommentById(comments: EnhancedComment[], id: number): EnhancedComment | null {
+  for (const comment of comments) {
+    if (comment.id === id) return comment;
+    const child = findCommentById(comment.children ?? [], id);
+    if (child) return child;
+  }
+  return null;
+}
+
 export function getCommentDisplayName(
   comment: Pick<CommentResponse, "nickname" | "username">
 ): string {
@@ -45,6 +54,7 @@ export function normalizeCommentTree(
     nickname: node.nickname || node.username || "Anonymous",
     avatar: node.avatar || "",
     anonymous: Boolean(node.anonymous),
+    website: node.website ?? null,
     status: node.status ?? "APPROVED",
     postId: node.postId || postId,
     postTitle: node.postTitle || "",

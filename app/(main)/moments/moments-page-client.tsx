@@ -2,10 +2,10 @@
 
 import { pageEaseOut } from "@/lib/motion";
 
-import { Button, Card, Typography } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { motion, useReducedMotion } from "motion/react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@iconify/react";
 
@@ -14,43 +14,11 @@ import { MomentCadenceCard } from "@/features/moment/components/cadence-card";
 import { MomentTopicWidget } from "@/features/moment/components/topic-widget";
 import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
 import { useMomentAnchor } from "@/features/moment/hooks/use-moment-anchor";
-import { useMomentBookmarks } from "@/features/moment/hooks/use-moment-bookmarks";
 import { PageFrame } from "@/components/layout/page-frame";
 import type { PublicMomentsInitialData } from "@/lib/features/moment/public-moments";
 import { useGetLikedMomentIdsQuery } from "@/lib/features/moment";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
-
-function DeskRow({
-  count,
-  current = false,
-  label,
-  onPress,
-}: {
-  count?: number | null;
-  current?: boolean;
-  label: string;
-  onPress?: () => void;
-}) {
-  const locale = useLocale();
-
-  return (
-    <Card
-      variant={current ? "secondary" : "transparent"}
-      className="w-full"
-      {...(onPress ? { onPress } : {})}
-    >
-      <Card.Header className="flex-row items-baseline justify-between gap-3">
-        <Card.Title className="text-base">{label}</Card.Title>
-        {count == null ? null : (
-          <Typography color="muted" type="body-sm" className="tabular-nums">
-            {count.toLocaleString(locale)}
-          </Typography>
-        )}
-      </Card.Header>
-    </Card>
-  );
-}
 
 export default function MomentsPage({ initialData }: { initialData: PublicMomentsInitialData }) {
   const t = useTranslations("Moments");
@@ -58,7 +26,6 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic") || undefined;
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const bookmarks = useMomentBookmarks();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const { moments, isLoading, isError, isFetchingMore, hasMore, loadMore, refetch } = useMomentFeed(
     12,
@@ -100,12 +67,6 @@ export default function MomentsPage({ initialData }: { initialData: PublicMoment
             initialData={initialData.cadence}
           />
           <MomentTopicWidget selected={topic} onSelect={selectTopic} />
-          <DeskRow label={t("liked")} onPress={() => router.push("/moments/liked")} />
-          <DeskRow
-            count={bookmarks.ids.length}
-            label={t("saved")}
-            onPress={() => router.push("/moments/saved")}
-          />
         </nav>
 
         <section aria-label={t("feed")} className="w-full">

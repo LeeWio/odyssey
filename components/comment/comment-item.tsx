@@ -11,6 +11,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { microEaseOut } from "@/lib/motion";
 import { useRelativeTime } from "@/lib/relative-time";
+import { publicWebsiteHref } from "./comment-website";
 import { CommentActions } from "./comment-actions";
 import { CommentContent } from "./comment-content";
 import { CommentInput } from "./comment-input";
@@ -217,13 +218,21 @@ function CommentRow({
   const t = useTranslations("Comments");
   const locale = useLocale();
   const formatRelativeTime = useRelativeTime();
-  const { activeReplyId, setActiveReplyId, highlightedCommentId, setHighlightedCommentId } =
-    useCommentContext();
+  const {
+    activeReplyId,
+    setActiveReplyId,
+    setReplyTarget,
+    setEditTarget,
+    highlightedCommentId,
+    setHighlightedCommentId,
+    useNestedComposer,
+  } = useCommentContext();
   const [isEditing, setIsEditing] = useState(false);
   const isReplying = activeReplyId === comment.id;
   const isHighlighted = highlightedCommentId === comment.id;
   const isDeleted = comment.deletedPlaceholder === true;
   const displayName = getCommentDisplayName(comment);
+  const websiteHref = publicWebsiteHref(comment.website);
   const timeLabel = formatRelativeTime(comment.createdAt);
 
   useEffect(() => {
@@ -255,25 +264,51 @@ function CommentRow({
 
   return (
     <div className="flex gap-3">
-      <UserAvatar
-        size="md"
-        variant="soft"
-        className="shrink-0"
-        name={displayName}
-        avatar={comment.avatar}
-      />
+      {websiteHref ? (
+        <a href={websiteHref} target="_blank" rel="noopener noreferrer" aria-label={displayName}>
+          <UserAvatar
+            size="md"
+            variant="soft"
+            className="shrink-0"
+            name={displayName}
+            avatar={comment.avatar}
+          />
+        </a>
+      ) : (
+        <UserAvatar
+          size="md"
+          variant="soft"
+          className="shrink-0"
+          name={displayName}
+          avatar={comment.avatar}
+        />
+      )}
 
       <div className="min-w-0 flex-1">
         <header className="flex min-w-0 flex-col gap-0.5">
-          <Typography
-            className="leading-none"
-            truncate
-            align="start"
-            type="body-sm"
-            weight="semibold"
-          >
-            {displayName}
-          </Typography>
+          {websiteHref ? (
+            <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="min-w-0">
+              <Typography
+                className="leading-none"
+                truncate
+                align="start"
+                type="body-sm"
+                weight="semibold"
+              >
+                {displayName}
+              </Typography>
+            </a>
+          ) : (
+            <Typography
+              className="leading-none"
+              truncate
+              align="start"
+              type="body-sm"
+              weight="semibold"
+            >
+              {displayName}
+            </Typography>
+          )}
           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
             <Typography
               truncate
@@ -341,18 +376,27 @@ function CommentRow({
             isReplying={isReplying}
             onCopyLink={copyCommentLink}
             onDelete={() => onDelete(comment.id)}
-            onEditStart={() => setIsEditing(true)}
+            onEditStart={() => {
+              if (useNestedComposer) {
+                setEditTarget({ id: comment.id, name: displayName });
+                return;
+              }
+              setIsEditing(true);
+            }}
             onLikeToggle={() =>
               onLikeToggle(comment.id, Boolean(comment.likedByCurrentUser), comment.likesCount ?? 0)
             }
             onReplyToggle={() => {
+              if (useNestedComposer) {
+                setReplyTarget(isReplying ? null : { id: comment.id, name: displayName });
+              }
               setActiveReplyId(isReplying ? null : comment.id);
             }}
             onReport={(reason) => onReport(comment.id, reason)}
           />
         ) : null}
 
-        {isReplying ? (
+        {isReplying && !useNestedComposer ? (
           <CommentInput
             hideTrigger
             isOpen

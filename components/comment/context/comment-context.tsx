@@ -8,6 +8,11 @@ import { useAppSelector } from "@/lib/hooks";
 
 export type SortOrder = "newest" | "oldest" | "likes";
 
+export interface CommentComposerTarget {
+  id: number;
+  name: string;
+}
+
 interface CommentContextType {
   postId: number;
   momentId: number;
@@ -15,6 +20,10 @@ interface CommentContextType {
   isMoment: boolean;
   activeReplyId: number | null;
   setActiveReplyId: (id: number | null) => void;
+  replyTarget: CommentComposerTarget | null;
+  setReplyTarget: (target: CommentComposerTarget | null) => void;
+  editTarget: CommentComposerTarget | null;
+  setEditTarget: (target: CommentComposerTarget | null) => void;
   sortOrder: SortOrder;
   setSortOrder: (order: SortOrder) => void;
   isAuthenticated: boolean;
@@ -22,6 +31,8 @@ interface CommentContextType {
   currentUserId: number | null;
   highlightedCommentId: number | null;
   setHighlightedCommentId: (id: number | null) => void;
+  /** Sheet threads open reply and edit in a nested sheet. Inline threads keep the row composer. */
+  useNestedComposer: boolean;
 }
 
 interface CommentSortContextType {
@@ -36,14 +47,18 @@ export function CommentProvider({
   postId = 0,
   momentId = 0,
   isGuestbook = false,
+  useNestedComposer = false,
   children,
 }: {
   postId?: number;
   momentId?: number;
   isGuestbook?: boolean;
+  useNestedComposer?: boolean;
   children: React.ReactNode;
 }) {
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
+  const [replyTarget, setReplyTarget] = useState<CommentComposerTarget | null>(null);
+  const [editTarget, setEditTarget] = useState<CommentComposerTarget | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [highlightedCommentId, setHighlightedCommentId] = useState<number | null>(null);
 
@@ -62,6 +77,10 @@ export function CommentProvider({
       isMoment,
       activeReplyId,
       setActiveReplyId,
+      replyTarget,
+      setReplyTarget,
+      editTarget,
+      setEditTarget,
       sortOrder,
       setSortOrder,
       isAuthenticated,
@@ -69,10 +88,13 @@ export function CommentProvider({
       currentUserId,
       highlightedCommentId,
       setHighlightedCommentId,
+      useNestedComposer,
     }),
     [
       activeReplyId,
       currentUser,
+      editTarget,
+      replyTarget,
       currentUserId,
       highlightedCommentId,
       isAuthenticated,
@@ -81,6 +103,7 @@ export function CommentProvider({
       momentId,
       postId,
       sortOrder,
+      useNestedComposer,
     ]
   );
   const sortContextValue = useMemo(() => ({ sortOrder, setSortOrder }), [sortOrder]);

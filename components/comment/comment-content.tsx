@@ -1,8 +1,11 @@
 "use client";
 
-import { Button, TextArea, TextField, Typography, toast } from "@heroui/react";
+import { Button, Typography, toast } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
+import { CommentBody } from "./comment-body";
+import { CommentComposerEditor } from "./comment-composer-editor";
+import { parseCommentDocument, serializeCommentDocument } from "./comment-document";
 
 interface CommentContentProps {
   content: string;
@@ -13,26 +16,56 @@ interface CommentContentProps {
   isDeleted?: boolean;
 }
 
-// Mount a fresh editor for each edit session. Background refetches must not
-// overwrite a user's work; cancelling unmounts and discards that session.
-function CommentEditor({
+interface CommentEditSessionValue {
+  formId: string;
+  source: string;
+  canSave: boolean;
+  isSaving: boolean;
+  setDocument: (serialized: string, isEmpty: boolean) => void;
+  save: () => Promise<void>;
+}
+
+const CommentEditSessionContext = createContext<CommentEditSessionValue | null>(null);
+
+export function useCommentEditSession() {
+  const session = useContext(CommentEditSessionContext);
+  if (!session) {
+    throw new Error("useCommentEditSession must be used within a CommentEditSession");
+  }
+  return session;
+}
+
+export function CommentEditSession({
   content,
+  formId,
   onEditSave,
   onEditCancel,
-}: Pick<CommentContentProps, "content" | "onEditSave" | "onEditCancel">) {
+  children,
+}: {
+  content: string;
+  formId: string;
+  onEditSave: (newContent: string) => Promise<boolean>;
+  onEditCancel: () => void;
+  children: React.ReactNode;
+}) {
   const t = useTranslations("Comments");
-  const [editedText, setEditedText] = useState(content);
+  const [editedDocument, setEditedDocument] = useState(content);
+  const [editorEmpty, setEditorEmpty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const saving = useRef(false);
-  const trimmedText = editedText.trim();
-  const unchanged = trimmedText === content.trim();
+  const unchanged = editedDocument === content;
+
+  const setDocument = (serialized: string, isEmpty: boolean) => {
+    setEditedDocument(serialized);
+    setEditorEmpty(isEmpty);
+  };
 
   const save = async () => {
-    if (saving.current || !trimmedText || unchanged) return;
+    if (saving.current || editorEmpty || unchanged) return;
     saving.current = true;
     setIsSaving(true);
     try {
-      if (await onEditSave(trimmedText)) onEditCancel();
+      if (await onEditSave(editedDocument)) onEditCancel();
     } catch {
       // The normal mutation path handles API errors and returns false. Keep
       // the draft even if a caller unexpectedly rejects instead.
@@ -44,37 +77,89 @@ function CommentEditor({
   };
 
   return (
+    <CommentEditSessionContext.Provider
+      value={{
+        formId,
+        source: content,
+        setDocument,
+        canSave: !editorEmpty && !unchanged,
+        isSaving,
+        save,
+      }}
+    >
+      {children}
+    </CommentEditSessionContext.Provider>
+  );
+}
+
+export function CommentEditFields() {
+  const t = useTranslations("Comments");
+  const { isSaving, setDocument, source } = useCommentEditSession();
+
+  return (
+    <CommentComposerEditor
+      defaultValue={parseCommentDocument(source)}
+      isReadOnly={isSaving}
+      placeholder={t("editComment")}
+      resetKey={source}
+      onDocumentChange={(document, isEmpty) =>
+        setDocument(serializeCommentDocument(document), isEmpty)
+      }
+    />
+  );
+}
+
+// Mount a fresh editor for each edit session. Background refetches must not
+// overwrite a user's work; cancelling unmounts and discards that session.
+function CommentEditor({
+  content,
+  onEditSave,
+  onEditCancel,
+}: Pick<CommentContentProps, "content" | "onEditSave" | "onEditCancel">) {
+  const t = useTranslations("Comments");
+
+  return (
+    <CommentEditSession
+      content={content}
+      formId="inline-comment-edit"
+      onEditCancel={onEditCancel}
+      onEditSave={onEditSave}
+    >
+      <InlineCommentEditor
+        cancelLabel={t("cancel")}
+        saveLabel={t("save")}
+        onCancel={onEditCancel}
+      />
+    </CommentEditSession>
+  );
+}
+
+function InlineCommentEditor({
+  cancelLabel,
+  saveLabel,
+  onCancel,
+}: {
+  cancelLabel: string;
+  saveLabel: string;
+  onCancel: () => void;
+}) {
+  const { canSave, isSaving, save } = useCommentEditSession();
+
+  return (
     <div className="flex w-full flex-col gap-2 pt-1">
-      <TextField
-        isRequired
-        fullWidth
-        name="edit-comment"
-        aria-label={t("editComment")}
-        isReadOnly={isSaving}
-      >
-        <TextArea
-          autoFocus
-          aria-label={t("editComment")}
-          fullWidth
-          maxLength={1000}
-          rows={3}
-          value={editedText}
-          variant="secondary"
-          onChange={(event) => setEditedText(event.target.value)}
-        />
-      </TextField>
+      <CommentEditFields />
       <div className="flex justify-end gap-2">
-        <Button size="sm" variant="ghost" isDisabled={isSaving} onPress={onEditCancel}>
-          {t("cancel")}
+        <Button size="sm" variant="ghost" isDisabled={isSaving} onPress={onCancel}>
+          {cancelLabel}
         </Button>
         <Button
           size="sm"
           variant="primary"
           isPending={isSaving}
-          isDisabled={isSaving || !trimmedText || unchanged}
+          isDisabled={isSaving || !canSave}
           onPress={() => void save()}
         >
-          {t("save")}
+          {saveLabel}
         </Button>
       </div>
     </div>
@@ -103,14 +188,11 @@ export function CommentContent({
   }
 
   return (
-    <Typography
-      type="body-sm"
-      className="text-foreground/90 leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap"
-    >
-      {content}
+    <div>
+      <CommentBody content={content} />
       {isEdited ? (
         <span className="text-muted ml-1.5 text-xs font-normal not-italic">{t("edited")}</span>
       ) : null}
-    </Typography>
+    </div>
   );
 }

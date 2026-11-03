@@ -7,14 +7,16 @@ import { CommentInput } from "./comment-input";
 import { CommentHeader } from "./comment-header";
 import { CommentList } from "./comment-list";
 import { CommentProvider } from "./context/comment-context";
+import type { EnhancedComment } from "./types";
 import { useCommentHighlight } from "./hooks/use-comment-highlight";
-import { useCommentMutations } from "./hooks/use-comment-mutations";
+import { useCommentMutations, type GuestCommentIdentity } from "./hooks/use-comment-mutations";
 import { useComments } from "./hooks/use-comments";
 
 interface CommentSystemProps {
   postId?: number;
   momentId?: number;
   isGuestbook?: boolean;
+  useNestedComposer?: boolean;
   onRequestClose?: () => void;
   children?: (parts: CommentSystemRenderParts) => React.ReactNode;
 }
@@ -25,8 +27,15 @@ export interface CommentSystemRenderParts {
   newCount: number;
   isLoadingNew: boolean;
   onLoadNew: () => void;
+  comments: EnhancedComment[];
   commentList: React.ReactNode;
   commentInput: React.ReactNode;
+  publishComment: (
+    content: string,
+    parentId: number | null,
+    guest?: GuestCommentIdentity
+  ) => Promise<boolean>;
+  editComment: (id: number, content: string) => Promise<boolean>;
 }
 
 function CommentSystemContent({
@@ -127,8 +136,12 @@ function CommentSystemContent({
       newCount,
       isLoadingNew,
       onLoadNew: loadNewComments,
+      comments,
       commentList,
       commentInput,
+      publishComment: (content, parentId, guest) =>
+        publishComment(content, parentId, undefined, guest),
+      editComment,
     });
   }
 
@@ -168,11 +181,17 @@ export function CommentSystem({
   postId = 0,
   momentId = 0,
   isGuestbook = false,
+  useNestedComposer = false,
   onRequestClose,
   children,
 }: CommentSystemProps) {
   return (
-    <CommentProvider postId={postId} momentId={momentId} isGuestbook={isGuestbook}>
+    <CommentProvider
+      postId={postId}
+      momentId={momentId}
+      isGuestbook={isGuestbook}
+      useNestedComposer={useNestedComposer}
+    >
       <CommentSystemContent onRequestClose={onRequestClose} wide={isGuestbook}>
         {children}
       </CommentSystemContent>

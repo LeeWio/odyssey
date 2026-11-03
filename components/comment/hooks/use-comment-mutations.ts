@@ -28,6 +28,7 @@ import { commentDebug } from "@/lib/comment-debug";
 export interface GuestCommentIdentity {
   guestName: string;
   guestEmail?: string;
+  guestWebsite?: string;
 }
 
 interface MutationHookProps {
@@ -114,6 +115,7 @@ export function useCommentMutations({
       username: guestName || currentUser || "Anonymous",
       nickname: guestName || currentUser || "Anonymous",
       anonymous: Boolean(guestName),
+      website: guest?.guestWebsite ?? null,
       avatar: "",
       status: "PENDING",
       postId: isMoment ? null : postId,
@@ -142,6 +144,7 @@ export function useCommentMutations({
   ): Promise<boolean> => {
     const guestName = guest?.guestName.trim();
     const guestEmail = guest?.guestEmail?.trim() || undefined;
+    const guestWebsite = guest?.guestWebsite?.trim() || undefined;
     if (!isAuthenticated && !guestName) {
       toast.warning("Add a display name or sign in to post a comment.");
       return false;
@@ -174,7 +177,7 @@ export function useCommentMutations({
       addPendingComment(createOptimisticComment(tempId, content, parentId, guest));
     }
 
-    const guestFields = guestName ? { guestName, guestEmail } : {};
+    const guestFields = guestName ? { guestName, guestEmail, guestWebsite } : {};
 
     try {
       if (isGuestbook) {

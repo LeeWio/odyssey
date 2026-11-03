@@ -4,14 +4,14 @@ import { ArrowUp, Paperclip } from "@gravity-ui/icons";
 import { Icon } from "@iconify/react";
 
 import {
-  Accordion,
+  Avatar,
   Button,
   Description,
   Form,
   Input,
   Label,
   Modal,
-  Switch,
+  Popover,
   TextArea,
   TextField,
   Typography,
@@ -32,15 +32,56 @@ import { setLoginOpen } from "@/lib/features/ui";
 import { useGetCurrentUserQuery } from "@/lib/features/user";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
+import { CommentComposerEditor } from "./comment-composer-editor";
+import { serializeCommentDocument } from "./comment-document";
+import { publicWebsiteHref } from "./comment-website";
 import { useCommentContext } from "./context/comment-context";
 import { useCommentDraft } from "./hooks/use-comment-draft";
+import { emailAvatarUrl, resolveStoredAvatar } from "@/lib/features/user/user-avatar";
 import type { GuestCommentIdentity } from "./hooks/use-comment-mutations";
+
+function SignatureAvatarImage({
+  name,
+  avatar,
+  email,
+}: {
+  name: string;
+  avatar?: string | null;
+  email?: string | null;
+}) {
+  const stored = resolveStoredAvatar(avatar);
+  const [emailSrc, setEmailSrc] = useState<string | null>(null);
+  const src = stored ?? emailSrc;
+
+  useEffect(() => {
+    if (stored || !email) return;
+    let cancelled = false;
+    void emailAvatarUrl(email).then((url) => {
+      if (!cancelled) setEmailSrc(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [stored, email]);
+
+  if (!src) return null;
+  return <Avatar.Image alt={name} referrerPolicy="no-referrer" src={src} />;
+}
 
 interface CommentInputProps {
   replyId?: number | null;
   replyTo?: string;
   isOpen?: boolean;
   hideTrigger?: boolean;
+  /** Render the composer fields for a parent sheet. The sheet owns heading and footer. */
+  embedded?: boolean;
+  renderEmbedded?: (parts: {
+    signature: React.ReactNode;
+    editor: React.ReactNode;
+  }) => React.ReactNode;
+  formId?: string;
+  /** Closes the owning nested sheet after a successful embedded submit. */
+  onSubmitted?: () => void;
   onOpenChange?: (isOpen: boolean) => void;
   onAuthenticationRequired?: () => void;
   onSubmit: (content: string, guest?: GuestCommentIdentity) => Promise<boolean>;
@@ -109,6 +150,10 @@ export function CommentInput({
   replyTo,
   isOpen,
   hideTrigger = false,
+  embedded = false,
+  renderEmbedded,
+  formId: formIdProp,
+  onSubmitted,
   onOpenChange,
   onAuthenticationRequired,
   onSubmit,
@@ -130,11 +175,14 @@ export function CommentInput({
       ? `moment:${momentId}`
       : `post:${postId}`;
   const [content, setDraft, clearDraft] = useCommentDraft(draftThreadKey, replyId);
+  const [documentJson, setDocumentJson] = useState("");
+  const [editorEmpty, setEditorEmpty] = useState(true);
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const attachmentsRef = useRef<PendingAttachment[]>([]);
   const [postAsGuest, setPostAsGuest] = useState(false);
   const [guestName, setGuestName] = useState(readStoredGuestName);
   const [guestEmail, setGuestEmail] = useState("");
+  const [guestWebsite, setGuestWebsite] = useState("");
   const draftScope = `${draftThreadKey}:${replyId ?? "root"}`;
   const [internalOpen, setInternalOpen] = useState(false);
   const [pendingSubmission, setPendingSubmission] = useState<{ scope: string } | null>(null);
@@ -142,7 +190,8 @@ export function CommentInput({
   const isSubmitting = pendingSubmission?.scope === draftScope;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dispatch = useAppDispatch();
-  const formId = useId();
+  const generatedFormId = useId();
+  const formId = formIdProp ?? generatedFormId;
   const modalIsOpen = isOpen ?? internalOpen;
   const isReply = replyId !== null;
   const composerName = currentUser || t("anonymous");
@@ -202,53 +251,66 @@ export function CommentInput({
     setDraft(event.target.value);
   };
 
-  const submitComment = async () => {
+  const submitComment = async (): Promise<boolean> => {
     commentDebug("input:submit-called", {
       replyId,
       isAuthenticated,
-      hasContent: Boolean(content.trim()),
+      hasContent: !editorEmpty,
       isSubmitting,
     });
 
     if (postAsGuest && !guestName.trim()) {
-      return;
+      return false;
     }
     if (!postAsGuest && !isAuthenticated) {
       setModalOpen(false);
       onAuthenticationRequired?.();
       dispatch(setLoginOpen(true));
-      return;
+      return false;
     }
 
-    if (!content.trim() || isSubmitting || activeSubmission.current?.scope === draftScope) return;
+    if (
+      editorEmpty ||
+      !documentJson ||
+      isSubmitting ||
+      activeSubmission.current?.scope === draftScope
+    )
+      return false;
 
     const submission = { scope: draftScope };
     activeSubmission.current = submission;
     setPendingSubmission(submission);
-    commentDebug("input:submit-start", { replyId, contentLength: content.trim().length });
+    commentDebug("input:submit-start", { replyId, contentLength: documentJson.length });
     try {
       const guest = postAsGuest
-        ? { guestName: guestName.trim(), guestEmail: guestEmail.trim() || undefined }
+        ? {
+            guestName: guestName.trim(),
+            guestEmail: guestEmail.trim() || undefined,
+            guestWebsite: publicWebsiteHref(guestWebsite) ?? undefined,
+          }
         : undefined;
       if (guest) {
         window.localStorage.setItem(GUEST_NAME_STORAGE_KEY, guest.guestName);
       }
-      const submitted = await onSubmit(content.trim(), guest);
+      const submitted = await onSubmit(documentJson, guest);
       if (!submitted) {
         commentDebug("input:submit-not-accepted", { replyId });
-        return;
+        return false;
       }
       commentDebug("input:submit-resolved", { replyId });
-      if (clearDraft(content) && activeSubmission.current === submission) {
+      if (clearDraft(documentJson) && activeSubmission.current === submission) {
         clearAttachments();
         setModalOpen(false);
+        onSubmitted?.();
       }
+      return true;
     } catch (error) {
       commentDebug("input:submit-rejected", {
         replyId,
         error: error instanceof Error ? error.message : String(error),
       });
       console.error("Comment submission failed:", error);
+      return false;
     } finally {
       if (activeSubmission.current === submission) activeSubmission.current = null;
       setPendingSubmission((current) => (current === submission ? null : current));
@@ -272,34 +334,74 @@ export function CommentInput({
 
   const heading = isReply && replyTo ? t("replyTo", { name: replyTo }) : t("writeComment");
   const description = isReply ? t("replyDescription") : t("writeDescription");
-  const canSubmit = Boolean(content.trim()) && (!postAsGuest || Boolean(guestName.trim()));
+  const canSubmit = !editorEmpty && (!postAsGuest || Boolean(guestName.trim()));
 
-  const guestSwitch = (
-    <Switch
-      aria-label={t("postAsGuest")}
-      isSelected={postAsGuest}
-      size="sm"
-      onChange={setPostAsGuest}
-    >
-      <Switch.Content>
-        <Label className="text-xs">{t("postAsGuest")}</Label>
-        <Switch.Control>
-          <Switch.Thumb />
-        </Switch.Control>
-      </Switch.Content>
-    </Switch>
-  );
-
-  const guestFields = (
-    <Accordion expandedKeys={postAsGuest ? ["guest"] : []}>
-      <Accordion.Item id="guest">
-        <Accordion.Heading className="sr-only">
-          <Accordion.Trigger>{t("postAsGuest")}</Accordion.Trigger>
-        </Accordion.Heading>
-        <Accordion.Panel>
-          <Accordion.Body className="flex flex-col gap-3 px-0">
-            <TextField isRequired name="guestName" value={guestName} onChange={setGuestName}>
-              <Label>{t("guestName")}</Label>
+  const signatureName = postAsGuest ? guestName.trim() || t("anonymous") : composerName;
+  const signatureAvatar = postAsGuest ? undefined : currentUserProfile?.avatar;
+  const signatureEmail = postAsGuest ? undefined : email;
+  const signature = (
+    <Popover>
+      <Popover.Trigger aria-label={t("signComment")} className="w-fit">
+        <span className="flex items-center gap-2">
+          <Avatar size="sm" variant="soft">
+            <SignatureAvatarImage
+              name={signatureName}
+              avatar={signatureAvatar}
+              email={signatureEmail}
+            />
+            <Avatar.Fallback>{signatureName.trim().charAt(0).toUpperCase() || "U"}</Avatar.Fallback>
+          </Avatar>
+          <span className="flex min-w-0 flex-col items-start">
+            <Typography type="body-sm">{signatureName}</Typography>
+            {isReply && replyTo ? (
+              <Typography color="muted" type="body-xs">
+                {t("replyTo", { name: replyTo })}
+              </Typography>
+            ) : null}
+          </span>
+        </span>
+      </Popover.Trigger>
+      <Popover.Content className="w-72" offset={10} placement="bottom start">
+        <Popover.Dialog>
+          <Popover.Heading>
+            <div className="flex items-center gap-3">
+              <Avatar size="md" variant="soft">
+                <SignatureAvatarImage
+                  name={signatureName}
+                  avatar={signatureAvatar}
+                  email={signatureEmail}
+                />
+                <Avatar.Fallback>
+                  {signatureName.trim().charAt(0).toUpperCase() || "U"}
+                </Avatar.Fallback>
+              </Avatar>
+              <span>{signatureName}</span>
+            </div>
+          </Popover.Heading>
+          <div className="mt-3 flex flex-col gap-3">
+            {isAuthenticated ? (
+              <Button
+                size="sm"
+                variant={postAsGuest ? "secondary" : "primary"}
+                onPress={() => setPostAsGuest(false)}
+              >
+                {t("useAccount", { name: composerName })}
+              </Button>
+            ) : (
+              <Button size="sm" variant="secondary" onPress={() => dispatch(setLoginOpen(true))}>
+                {t("signInToPost")}
+              </Button>
+            )}
+            <TextField
+              isRequired
+              name="guestName"
+              value={guestName}
+              onChange={(value) => {
+                setGuestName(value);
+                setPostAsGuest(true);
+              }}
+            >
+              <Label>{t("anonymous")}</Label>
               <Input maxLength={32} placeholder={t("guestNamePlaceholder")} variant="secondary" />
             </TextField>
             <TextField name="guestEmail" type="email" value={guestEmail} onChange={setGuestEmail}>
@@ -312,22 +414,30 @@ export function CommentInput({
               />
               <Description>{t("guestEmailHint")}</Description>
             </TextField>
-          </Accordion.Body>
-        </Accordion.Panel>
-      </Accordion.Item>
-    </Accordion>
+            <TextField
+              name="guestWebsite"
+              type="url"
+              value={guestWebsite}
+              onChange={setGuestWebsite}
+            >
+              <Label>{t("guestWebsite")}</Label>
+              <Input
+                maxLength={100}
+                placeholder={t("guestWebsitePlaceholder")}
+                type="url"
+                variant="secondary"
+              />
+              <Description>{t("guestWebsiteHint")}</Description>
+            </TextField>
+          </div>
+        </Popover.Dialog>
+      </Popover.Content>
+    </Popover>
   );
 
   if (!isReply && !hideTrigger) {
     return (
       <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3">
-          <Typography color="muted" type="body-sm">
-            {t("writeCommentTrigger")}
-          </Typography>
-          {guestSwitch}
-        </div>
-        {guestFields}
         <PromptInput
           layout="compact"
           status={isSubmitting ? "submitted" : "ready"}
@@ -364,6 +474,7 @@ export function CommentInput({
                   </PromptInput.Content>
                   <PromptInput.Toolbar>
                     <PromptInput.ToolbarStart>
+                      {signature}
                       <ChatAttachmentInput.Trigger
                         render={(triggerProps) => (
                           <PromptInput.Action
@@ -394,6 +505,24 @@ export function CommentInput({
     );
   }
 
+  if (embedded) {
+    const editor = (
+      <Form id={formId} onSubmit={handleFormSubmit}>
+        <CommentComposerEditor
+          placeholder={resolvedPlaceholder}
+          resetKey={draftScope}
+          onDocumentChange={(document, isEmpty) => {
+            const serialized = serializeCommentDocument(document);
+            setDocumentJson(serialized);
+            setEditorEmpty(isEmpty);
+            setDraft(serialized);
+          }}
+        />
+      </Form>
+    );
+    return renderEmbedded ? renderEmbedded({ signature, editor }) : editor;
+  }
+
   if (isReply && hideTrigger) {
     return (
       <div className="border-border/80 bg-surface/40 mt-3 rounded-xl border p-3">
@@ -413,8 +542,6 @@ export function CommentInput({
         </div>
 
         <Form id={formId} className="flex flex-col gap-2.5" onSubmit={handleFormSubmit}>
-          <div className="flex justify-end">{guestSwitch}</div>
-          {guestFields}
           <TextField isRequired fullWidth name="reply">
             <Label className="sr-only">{t("replyContent")}</Label>
             <TextArea
@@ -431,6 +558,7 @@ export function CommentInput({
             />
           </TextField>
           <div className="flex items-center justify-between gap-2">
+            {signature}
             <span className="text-muted text-[11px] tabular-nums">{content.length}/1000</span>
             <div className="flex items-center gap-2">
               <Button
@@ -474,7 +602,6 @@ export function CommentInput({
               {t("writeCommentTrigger")}
             </Typography>
           </Button>
-          {guestSwitch}
         </div>
       )}
 
@@ -488,7 +615,6 @@ export function CommentInput({
 
             <Modal.Body>
               <Form id={formId} className="flex flex-col gap-4" onSubmit={handleFormSubmit}>
-                {guestFields}
                 <TextField isRequired fullWidth name={isReply ? "reply" : "comment"}>
                   <Label> {description}</Label>
                   <TextArea
@@ -505,6 +631,7 @@ export function CommentInput({
                   />
                   <Description>{content.length}/1000</Description>
                 </TextField>
+                {signature}
               </Form>
 
               <PromptSuggestion className="gap-3">

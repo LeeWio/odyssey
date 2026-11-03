@@ -15,6 +15,7 @@ const baseCommentFields = {
     .nullable()
     .optional()
     .transform((value) => Boolean(value)),
+  website: z.string().nullable().optional(),
   status: z.enum(["PENDING", "APPROVED", "REJECTED", "SPAM"]).optional(),
   postId: z.number().nullable().optional(),
   postTitle: z.string().nullable().optional(),
@@ -68,6 +69,7 @@ export type CommentStatus = "PENDING" | "APPROVED" | "REJECTED" | "SPAM";
 export interface GuestCommentFields {
   guestName?: string;
   guestEmail?: string;
+  guestWebsite?: string;
 }
 
 export interface CommentRequest extends GuestCommentFields {
