@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { NextIntlClientProvider } from "next-intl";
 import { act, createElement, useLayoutEffect } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Provider, type ProviderProps } from "react-redux";
@@ -43,7 +44,11 @@ async function render(postId: number, sortOrder: SortOrder = "newest") {
       createElement(
         Provider,
         { store } as ProviderProps,
-        createElement(Harness, { postId, sortOrder })
+        createElement(
+          NextIntlClientProvider,
+          { locale: "en", messages: { Comments: {} } },
+          createElement(Harness, { postId, sortOrder })
+        )
       )
     );
   });
