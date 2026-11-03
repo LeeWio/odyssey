@@ -1,3 +1,10 @@
+# [1.231.0](https://github.com/LeeWio/odyssey/compare/v1.230.1...v1.231.0) (2026-11-03)
+
+
+### Features
+
+* **comment:** preview short replies and translate comment actions ([78fcde6](https://github.com/LeeWio/odyssey/commit/78fcde63c43b67d645d2b99f630ed36a7c3bf656))
+
 ## [1.230.1](https://github.com/LeeWio/odyssey/compare/v1.230.0...v1.230.1) (2026-11-03)
 
 
