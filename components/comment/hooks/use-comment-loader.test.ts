@@ -1,6 +1,6 @@
 import { toast } from "@heroui/react";
 import { NextIntlClientProvider } from "next-intl";
-import { act, createElement, useLayoutEffect } from "react";
+import { act, createElement, useLayoutEffect, type ComponentProps } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useCommentLoader } from "./use-comment-loader";
@@ -26,7 +26,10 @@ beforeEach(async () => {
     root.render(
       createElement(
         NextIntlClientProvider,
-        { locale: "en", messages: { Comments: {} } },
+        {
+          locale: "en",
+          messages: { Comments: {} },
+        } as unknown as ComponentProps<typeof NextIntlClientProvider>,
         createElement(Harness)
       )
     )

@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { NextIntlClientProvider } from "next-intl";
-import { act, createElement, useLayoutEffect } from "react";
+import { act, createElement, useLayoutEffect, type ComponentProps } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Provider, type ProviderProps } from "react-redux";
 import { afterAll, afterEach, beforeEach, expect, it, vi } from "vitest";
@@ -46,7 +46,10 @@ async function render(postId: number, sortOrder: SortOrder = "newest") {
         { store } as ProviderProps,
         createElement(
           NextIntlClientProvider,
-          { locale: "en", messages: { Comments: {} } },
+          {
+            locale: "en",
+            messages: { Comments: {} },
+          } as unknown as ComponentProps<typeof NextIntlClientProvider>,
           createElement(Harness, { postId, sortOrder })
         )
       )
