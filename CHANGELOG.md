@@ -1,3 +1,10 @@
+# [1.233.0](https://github.com/LeeWio/odyssey/compare/v1.232.1...v1.233.0) (2026-11-04)
+
+
+### Features
+
+* **moments:** expand circular galleries to the viewport ([449e3e5](https://github.com/LeeWio/odyssey/commit/449e3e5340bfdb80844769f10f17b0f81f82f407))
+
 ## [1.232.1](https://github.com/LeeWio/odyssey/compare/v1.232.0...v1.232.1) (2026-11-04)
 
 
