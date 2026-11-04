@@ -897,13 +897,11 @@
     "recently": "刚刚",
     "imageAlt": "动态图片",
     "openImage": "查看第 {index} 张图片，共 {total} 张",
-    "viewerSize": "查看尺寸",
-    "viewerSizeXs": "极小",
-    "viewerSizeSm": "小",
-    "viewerSizeMd": "中",
-    "viewerSizeLg": "大",
-    "viewerSizeCover": "覆盖",
-    "viewerSizeFull": "全屏",
+    "imageViewer": "图片查看器",
+    "viewerMode": "图片展示方式",
+    "viewerFit": "适合窗口",
+    "viewerRead": "按宽阅读",
+    "viewerImageRegion": "图片阅读区域",
     "topics": "话题"
   },
   "Links": {

@@ -36,12 +36,33 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-async function render() {
+async function render(bounded = false) {
   await act(async () =>
-    root.render(createElement(NaturalImage, { src: "/photo.jpg", alt: "Photo", interactive: true }))
+    root.render(
+      createElement(NaturalImage, { src: "/photo.jpg", alt: "Photo", interactive: true, bounded })
+    )
   );
   return container.querySelector("img")!;
 }
+
+it("bounds single-image previews with CSS without assigning an aspect ratio or dimensions", async () => {
+  const image = await render(true);
+  expect(image.className).toContain("object-contain");
+  expect(image.className).toContain("w-auto");
+  expect(image.className).toContain("max-w-full");
+  expect(image.className).toContain("max-h-[min(55svh,420px)]");
+  expect(image.className).toContain("lg:max-h-[min(60svh,560px)]");
+  expect(image.className).toContain("group-data-[view=grid]/moment-feed:max-h-[min(50svh,360px)]");
+  expect(image.hasAttribute("width")).toBe(false);
+  expect(image.hasAttribute("height")).toBe(false);
+  expect(image.style.aspectRatio).toBe("");
+});
+
+it("leaves multi-image natural sizing unchanged", async () => {
+  const image = await render();
+  expect(image.className).toContain("w-full");
+  expect(image.className).not.toContain("max-h-");
+});
 
 async function load(image: HTMLImageElement) {
   await act(async () => {

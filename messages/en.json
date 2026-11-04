@@ -897,13 +897,11 @@
     "recently": "Recently",
     "imageAlt": "Moment image",
     "openImage": "Open image {index} of {total}",
-    "viewerSize": "Viewer size",
-    "viewerSizeXs": "Extra small",
-    "viewerSizeSm": "Small",
-    "viewerSizeMd": "Medium",
-    "viewerSizeLg": "Large",
-    "viewerSizeCover": "Cover",
-    "viewerSizeFull": "Full",
+    "imageViewer": "Image viewer",
+    "viewerMode": "Image display",
+    "viewerFit": "Fit window",
+    "viewerRead": "Read at width",
+    "viewerImageRegion": "Image reading area",
     "topics": "Topics"
   },
   "Links": {

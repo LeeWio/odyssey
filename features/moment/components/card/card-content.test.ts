@@ -22,7 +22,8 @@ vi.mock("../moment-content", () => ({
   MomentContent: () => createElement("p", null, "Preserved content"),
 }));
 vi.mock("./natural-image", () => ({
-  NaturalImage: ({ src }: { src: string }) => createElement("img", { src, alt: "Photo" }),
+  NaturalImage: ({ src, bounded }: { src: string; bounded: boolean }) =>
+    createElement("img", { src, alt: "Photo", "data-bounded": String(bounded) }),
 }));
 vi.mock("@heroui/react", () => ({
   Button: ({ children }: { children: React.ReactNode }) => createElement("button", null, children),
@@ -53,6 +54,8 @@ for (const mediaLayout of ["natural", "stacked"] as const) {
         expect(html).not.toContain('data-gallery="circular"');
         if (count > 0)
           expect(html).toContain(mediaLayout === "natural" ? "<img" : 'data-gallery="compact"');
+        if (count > 0 && mediaLayout === "natural")
+          expect(html).toContain(`data-bounded="${count === 1}"`);
       }
     }
   );

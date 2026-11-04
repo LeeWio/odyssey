@@ -19,7 +19,13 @@ and comment state. The page extracts the topic and page into a memoized content 
 so view-only URL changes do not rerender data hooks, the sidebar or cards. Topic
 selection reads the current URL to preserve the chosen view. Reloads, shared links
 and browser history restore the URL's mode, including server-rendered markup.
-The feed keeps natural images for one to three photos. Four or more photos use the
+The feed keeps natural images for one to three photos. Single images have a CSS-only
+height budget: `min(60svh, 560px)` in desktop List, `min(50svh, 360px)` in desktop Grid,
+and `min(55svh, 420px)` below the desktop breakpoint. The image's auto dimensions and
+maximum width/height preserve its complete intrinsic ratio, center narrow long images,
+and avoid upscaling small uploads. These are maximums, not fixed-height frames. Two
+and three-image layouts are unchanged; no image ratio or card position is measured.
+Four or more photos use the
 supplied `CircularGallery` in a compact media viewport, including other Moment card
 consumers. Its original WebGL arc, wave, inertia and internal viewer are retained;
 Motion still owns outer card animations, not the canvas renderer. No card positions
@@ -40,6 +46,23 @@ Same-origin upload textures do not opt into CORS; only cross-origin images use
 losing the canvas context, so React Strict Mode can replay the effect safely. Stale
 image callbacks and animation frames are ignored after cleanup. Regression tests
 verify real texture uploads and live draw calls, not just nonblank placeholders.
+
+Image clicks use a consistent, inset full-viewport HeroUI Modal (`size="cover"`),
+without a viewer-size dropdown. Single-image clicks use a default,
+small Segment offering Fit window and Read at width. Fit window displays the complete
+image; Read at width uses natural image sizing constrained by the available width in
+a keyboard-focusable vertical scroll region. The viewer body and reading region hide
+their scrollbars with `scrollbar-none`, preserving native wheel, touch and keyboard scrolling.
+The toolbar and close control remain
+outside that region. The same image DOM node survives mode changes; a 120ms
+Motion opacity transition never animates image width or height. Switching modes and
+reopening start at the image top; closing restores focus and the underlying feed's
+scroll position. Small uploads are not enlarged beyond their intrinsic size. The
+multi-image carousel retains image navigation and thumbnails in the same large viewport;
+CircularGallery keeps its existing controls and rendering.
+`tests/e2e/moment-single-image.spec.ts` covers responsive height budgets, intrinsic
+ratios, retained nodes, reading/keyboard scrolling, the large viewport, focus/scroll
+restoration, and the unchanged multi-image carousel.
 
 Both views use the same small HeroUI `Pagination`, following its compound API from
 the HeroUI MCP documentation. Each page contains up to 12 notes and replaces rather

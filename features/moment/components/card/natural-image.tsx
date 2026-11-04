@@ -13,10 +13,12 @@ export function NaturalImage({
   src,
   alt,
   interactive,
+  bounded = false,
 }: {
   src: string;
   alt: string;
   interactive: boolean;
+  bounded?: boolean;
 }) {
   const { enabled, reduced } = useMomentMotion();
   const controls = useAnimationControls();
@@ -35,7 +37,11 @@ export function NaturalImage({
       }}
       src={src}
       alt={alt}
-      className="block h-auto w-full rounded-lg"
+      className={
+        bounded
+          ? "mx-auto block h-auto max-h-[min(55svh,420px)] w-auto max-w-full rounded-lg object-contain lg:max-h-[min(60svh,560px)] lg:group-data-[view=grid]/moment-feed:max-h-[min(50svh,360px)]"
+          : "block h-auto w-full rounded-lg"
+      }
       initial={false}
       layout={enabled ? true : undefined}
       animate={controls}

@@ -121,6 +121,7 @@ export const CardContent = ({
                 src={url}
                 alt={imageAltTexts?.[index] || t("imageAlt")}
                 interactive={Boolean(onCardClick)}
+                bounded={count === 1}
               />
             );
 
