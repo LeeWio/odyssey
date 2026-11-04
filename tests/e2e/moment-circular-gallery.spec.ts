@@ -6,6 +6,8 @@ interface GalleryCheck {
   canvas: HTMLCanvasElement;
   draws: number;
   uploaded: string[];
+  peakAngle: number;
+  peakWave: number;
 }
 
 declare global {
@@ -31,8 +33,28 @@ async function prepare(page: Page, missingPhoto = false) {
         context instanceof WebGL2RenderingContext &&
         !window.circularGalleryChecks.some((entry) => entry.canvas === this)
       ) {
-        const entry: GalleryCheck = { canvas: this, draws: 0, uploaded: [] };
+        const entry: GalleryCheck = {
+          canvas: this,
+          draws: 0,
+          uploaded: [],
+          peakAngle: 0,
+          peakWave: 0,
+        };
         window.circularGalleryChecks.push(entry);
+        const uniforms = new Map<WebGLUniformLocation, string>();
+        const location = context.getUniformLocation.bind(context);
+        context.getUniformLocation = (program, name) => {
+          const result = location(program, name);
+          if (result) uniforms.set(result, name);
+          return result;
+        };
+        const uniform = context.uniform1f.bind(context);
+        context.uniform1f = (location, value) => {
+          const name = location && uniforms.get(location);
+          if (name === "uAngle") entry.peakAngle = Math.max(entry.peakAngle, Math.abs(value));
+          if (name === "uWave") entry.peakWave = Math.max(entry.peakWave, Math.abs(value));
+          uniform(location, value);
+        };
         const draw = context.drawElements.bind(context);
         context.drawElements = (...args) => {
           entry.draws++;
@@ -192,4 +214,133 @@ test("one missing source file does not prevent the other photos from rendering",
       )
     )
     .toBeGreaterThan(0);
+});
+
+for (const width of [390, 1440]) {
+  test(`the original gallery expands to the viewport and restores in both layouts at ${width}px`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width, height: 900 });
+    const requests = await prepare(page);
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto("/moments?topic=circular-fixture");
+    const inline = page.locator("#moment-944 canvas");
+    await expect(inline).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => window.circularGalleryChecks[0]?.uploaded.length))
+      .toBe(4);
+    const original = await inline.elementHandle();
+    const beforeRequests = [...requests];
+
+    for (const mode of ["List", "Grid"]) {
+      await page.getByRole("radio", { name: mode, exact: true }).click();
+      await inline.scrollIntoViewIfNeeded();
+      const before = await inline.boundingBox();
+      const scroll = await page.evaluate(() => scrollY);
+      await inline.click({ position: { x: before!.width / 2, y: before!.height / 2 } });
+      const dialog = page.getByRole("dialog", { name: "Image gallery", exact: true });
+      const expanded = dialog.locator("canvas");
+      await expect(dialog).toBeVisible();
+      await expect
+        .poll(async () => {
+          const box = await expanded.boundingBox();
+          return box ? { width: Math.round(box.width), height: Math.round(box.height) } : null;
+        })
+        .toEqual({ width, height: 900 });
+      expect(await original!.evaluate((node) => node.closest('[role="dialog"]') !== null)).toBe(
+        true
+      );
+      expect(await page.evaluate(() => window.circularGalleryChecks.length)).toBe(1);
+      expect(requests).toEqual(beforeRequests);
+      expect(
+        await expanded.evaluate((element) =>
+          (element as HTMLCanvasElement).getContext("webgl2")!.isContextLost()
+        )
+      ).toBe(false);
+      const screenshot = await expanded.screenshot({
+        path: testInfo.outputPath(`expanded-${width}-${mode}.png`),
+      });
+      const { data, info } = await sharp(screenshot)
+        .removeAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      let colored = 0;
+      for (let index = 0; index < data.length; index += info.channels) {
+        const channels = [data[index], data[index + 1], data[index + 2]];
+        if (Math.max(...channels) - Math.min(...channels) > 20) colored++;
+      }
+      expect(colored).toBeGreaterThan(width * 100);
+      await page.keyboard.press("ArrowRight");
+      await expect(dialog.locator('[data-gallery-list] [aria-current="true"]')).toHaveAttribute(
+        "aria-label",
+        "Photo 2, 2 of 4"
+      );
+      const close = dialog.getByRole("button", { name: "Close", exact: true });
+      await close.focus();
+      for (let index = 0; index < 3; index++) {
+        await page.keyboard.press("Tab");
+        expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(
+          true
+        );
+      }
+      await page.keyboard.press("Escape");
+      await expect(dialog).toBeHidden();
+      await expect(inline).toBeVisible();
+      expect(await original!.evaluate((node) => node.closest("#moment-944") !== null)).toBe(true);
+      expect(await page.evaluate(() => scrollY)).toBe(scroll);
+      expect((await inline.boundingBox())!.height).toBe(before!.height);
+      await page.screenshot({ path: testInfo.outputPath(`restored-${width}-${mode}.png`) });
+      // Restore the first image with the original gallery keyboard navigation.
+      await page.locator('#moment-944 [data-gallery-list] [aria-current="true"]').focus();
+      await page.keyboard.press("ArrowLeft");
+    }
+    expect(errors).toEqual([]);
+  });
+}
+
+test("keyboard opening, close-button dismissal, arc and wave rendering keep the original engine", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await prepare(page);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/moments?topic=circular-fixture&view=grid");
+  const canvas = page.locator("#moment-944 canvas");
+  await expect(canvas).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => window.circularGalleryChecks[0]?.peakAngle))
+    .toBeGreaterThan(0);
+  const original = await canvas.elementHandle();
+  const trigger = page.locator('#moment-944 [data-gallery-list] [aria-current="true"]');
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "Image gallery", exact: true });
+  await expect(dialog.locator("canvas")).toBeVisible();
+  await page.evaluate(() => {
+    window.circularGalleryChecks[0].peakWave = 0;
+  });
+  await dialog.locator("canvas").hover();
+  await page.mouse.wheel(300, 0);
+  await expect
+    .poll(() => page.evaluate(() => window.circularGalleryChecks[0]?.peakWave))
+    .toBeGreaterThan(0);
+  const box = await dialog.locator("canvas").boundingBox();
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + box!.width / 2 - 160, box!.y + box!.height / 2, { steps: 8 });
+  await expect(dialog.locator('[aria-roledescription="carousel"]')).toHaveAttribute(
+    "data-dragging",
+    ""
+  );
+  await page.mouse.up();
+  await expect(dialog.locator('[aria-roledescription="carousel"]')).not.toHaveAttribute(
+    "data-dragging"
+  );
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect(canvas).toBeVisible();
+  expect(await original!.evaluate((node) => node.isConnected)).toBe(true);
+  await expect(page.locator('#moment-944 [data-gallery-list] [aria-current="true"]')).toBeFocused();
 });

@@ -106,6 +106,7 @@ export const CardContent = ({
       {count >= 4 ? (
         <div className="h-80 w-full">
           <CircularGallery
+            expandOnOpen
             items={imageUrls.map((image, index) => ({
               image,
               alt: imageAltTexts?.[index] || t("imageAlt"),

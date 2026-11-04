@@ -8,6 +8,7 @@ import {
   type CSSProperties,
   type HTMLAttributes,
 } from "react";
+import { CircularGalleryViewport } from "./circular-gallery-viewport";
 
 export type GalleryItem = {
   image: string;
@@ -36,6 +37,7 @@ export interface CircularGalleryProps extends Omit<HTMLAttributes<HTMLDivElement
   snap?: boolean;
   autoScroll?: number;
   openOnClick?: boolean;
+  expandOnOpen?: boolean;
   intro?: boolean;
   onItemClick?: (item: GalleryItem, index: number) => void;
   onActiveChange?: (index: number) => void;
@@ -391,6 +393,7 @@ const CircularGallery = ({
   snap = true,
   autoScroll = 0,
   openOnClick = true,
+  expandOnOpen = false,
   intro = true,
   onItemClick,
   onActiveChange,
@@ -1226,7 +1229,7 @@ const CircularGallery = ({
   const count = list.length;
   const current = list[active % count] || list[0];
 
-  return (
+  const gallery = (
     <div
       ref={containerRef}
       className={`${CLASSES.root}${className ? ` ${className}` : ""}`}
@@ -1282,6 +1285,14 @@ const CircularGallery = ({
         {open && current ? `${current.text || current.alt || "Image"} opened` : ""}
       </div>
     </div>
+  );
+
+  return expandOnOpen ? (
+    <CircularGalleryViewport expanded={open} onClose={() => engineRef.current?.close()}>
+      {gallery}
+    </CircularGalleryViewport>
+  ) : (
+    gallery
   );
 };
 

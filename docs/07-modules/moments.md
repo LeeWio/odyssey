@@ -25,6 +25,16 @@ consumers. Its original WebGL arc, wave, inertia and internal viewer are retaine
 Motion still owns outer card animations, not the canvas renderer. No card positions
 or shared row heights are calculated for CSS Columns.
 
+Moment cards opt into `expandOnOpen`: opening a photo enlarges the original gallery
+to a full-viewport HeroUI Modal, rather than replacing it with another image viewer.
+A stable portal host moves between the reserved inline slot and the modal. The same
+canvas, WebGL context, textures, scroll position and engine stay mounted; its existing
+ResizeObserver adapts the original arc, wave and image-focus rendering to the new
+viewport. Closing restores the inline slot without changing the card's footprint.
+Keyboard and pointer opening share the same behavior, and the Modal provides focus
+containment and background scroll locking. Standalone galleries retain inline
+expansion by default.
+
 Same-origin upload textures do not opt into CORS; only cross-origin images use
 `crossOrigin="anonymous"`. Cleanup deletes owned GPU resources without forcibly
 losing the canvas context, so React Strict Mode can replay the effect safely. Stale
