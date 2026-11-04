@@ -35,7 +35,6 @@ export function MomentFeedLayout({
     return () => controls.stop();
   }, [animate, busy, reduced, scope]);
 
-  // Keep layout state below the page's data hooks and preserve the card subtree.
   return (
     <LayoutGroup id={layoutId} inherit={false}>
       <div className="group/moment-feed min-w-0" data-view={viewMode}>
@@ -44,7 +43,6 @@ export function MomentFeedLayout({
             aria-label={t("viewMode")}
             selectedKey={viewMode}
             size="sm"
-            className="[&_[data-slot=segment-indicator]]:hidden"
             onSelectionChange={(key) => {
               if (key === "list" || key === "grid") {
                 const url = new URL(window.location.href);
@@ -54,31 +52,11 @@ export function MomentFeedLayout({
             }}
           >
             <Segment.Item id="list">
-              {viewMode === "list" ? (
-                <motion.span
-                  aria-hidden="true"
-                  data-slot="moment-view-indicator"
-                  className="shadow-surface pointer-events-none absolute inset-0 -z-10 rounded-[var(--radius-3xl)] bg-[var(--segment)]"
-                  layoutId={reduced ? undefined : "view-indicator"}
-                  initial={false}
-                  transition={{ layout: reduced ? { duration: 0 } : momentLayoutTransition }}
-                />
-              ) : null}
-              <Icon aria-hidden="true" icon="lucide:list" />
+              <Icon aria-hidden="true" icon="gravity-ui:list-ul" />
               {t("listView")}
             </Segment.Item>
             <Segment.Item id="grid">
-              {viewMode === "grid" ? (
-                <motion.span
-                  aria-hidden="true"
-                  data-slot="moment-view-indicator"
-                  className="shadow-surface pointer-events-none absolute inset-0 -z-10 rounded-[var(--radius-3xl)] bg-[var(--segment)]"
-                  layoutId={reduced ? undefined : "view-indicator"}
-                  initial={false}
-                  transition={{ layout: reduced ? { duration: 0 } : momentLayoutTransition }}
-                />
-              ) : null}
-              <Icon aria-hidden="true" icon="lucide:layout-grid" />
+              <Icon aria-hidden="true" icon="gravity-ui:rectangles-4" />
               {t("gridView")}
             </Segment.Item>
           </Segment>
