@@ -811,6 +811,7 @@
     "browseColumns": "Browse columns"
   },
   "Moments": {
+    "loading": "Loading moments",
     "title": "This & That",
     "description": "Thoughts, moments, and everything between.",
     "anchor": {
@@ -842,6 +843,9 @@
     "thisWeek": "This week",
     "thisMonth": "This month",
     "feed": "Moments feed",
+    "viewMode": "Moment view",
+    "listView": "List",
+    "gridView": "Grid",
     "unavailable": "Moments are taking a moment",
     "unavailableHint": "The feed could not be loaded right now. Please try again.",
     "tryAgain": "Try again",
@@ -888,6 +892,7 @@
     "deleteFailed": "This moment could not be deleted.",
     "recently": "Recently",
     "imageAlt": "Moment image",
+    "openImage": "Open image {index} of {total}",
     "viewerSize": "Viewer size",
     "viewerSizeXs": "Extra small",
     "viewerSizeSm": "Small",

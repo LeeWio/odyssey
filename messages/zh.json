@@ -811,6 +811,7 @@
     "browseColumns": "浏览专栏"
   },
   "Moments": {
+    "loading": "正在加载动态",
     "title": "闲言碎语",
     "description": "随心而谈，随手而记。",
     "anchor": {
@@ -842,6 +843,9 @@
     "thisWeek": "本周",
     "thisMonth": "本月",
     "feed": "动态列表",
+    "viewMode": "动态视图",
+    "listView": "列表",
+    "gridView": "网格",
     "unavailable": "动态暂时打不开",
     "unavailableHint": "列表现在没有加载成功，请再试一次。",
     "tryAgain": "重试",
@@ -888,6 +892,7 @@
     "deleteFailed": "这条动态没有删除成功。",
     "recently": "刚刚",
     "imageAlt": "动态图片",
+    "openImage": "查看第 {index} 张图片，共 {total} 张",
     "viewerSize": "查看尺寸",
     "viewerSizeXs": "极小",
     "viewerSizeSm": "小",

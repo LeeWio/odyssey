@@ -13,15 +13,21 @@ export const useMomentFeed = (
   pageSize: number = 12,
   initialPage: PageResult<MomentResponse> | null = null,
   topic?: string,
-  period?: { year: number; month: number }
+  period?: { year: number; month: number },
+  options?: { retainPreviousData?: boolean }
 ) => {
-  const [extraEntries, setExtraEntries] = useState<MomentResponse[]>([]);
-  const [nextPage, setNextPage] = useState(1);
+  const retainPreviousData = options?.retainPreviousData ?? false;
   const filterKey = JSON.stringify([topic ?? null, period?.year ?? null, period?.month ?? null]);
-  const [loadedFilter, setLoadedFilter] = useState(filterKey);
   const currentFilter = useRef<string | null>(filterKey);
   const pendingPage = useRef<string | null>(null);
+  const [removedIds, setRemovedIds] = useState<ReadonlySet<number>>(() => new Set());
   const filtered = Boolean(topic || period);
+  const [displayed, setDisplayed] = useState(() => ({
+    filterKey,
+    page: filtered ? null : initialPage,
+    extraEntries: [] as MomentResponse[],
+    nextPage: 1,
+  }));
 
   useEffect(() => {
     currentFilter.current = filterKey;
@@ -30,38 +36,45 @@ export const useMomentFeed = (
     };
   }, [filterKey]);
 
-  if (filterKey !== loadedFilter) {
-    setLoadedFilter(filterKey);
-    setExtraEntries([]);
-    setNextPage(1);
-  }
-
   const query = useGetPublicMomentsQuery(
     { page: 0, size: pageSize, ...(topic ? { topic } : {}), ...(period ?? {}) },
     { skip: Boolean(initialPage) && !filtered }
   );
-  const clientList = query.data?.list ?? [];
-  const initialList = initialPage?.list ?? [];
-  const clientIsNewer =
-    clientList.length > 0 &&
-    (initialList.length === 0 ||
-      clientList[0].id !== initialList[0].id ||
-      clientList.length !== initialList.length);
-  const data =
-    !filtered && initialPage && !clientIsNewer ? initialPage : (query.data ?? initialPage);
-  const isLoading = (!initialPage || filtered) && query.isLoading;
-  const isError = (!initialPage || filtered) && query.isError;
+  // currentData belongs to these exact query args; data can still belong to the old topic.
+  const requestedData = query.currentData ?? (!filtered ? initialPage : null);
+  if (requestedData && (displayed.filterKey !== filterKey || displayed.page !== requestedData)) {
+    setDisplayed({
+      filterKey,
+      page: requestedData,
+      extraEntries: displayed.filterKey === filterKey ? displayed.extraEntries : [],
+      nextPage: displayed.filterKey === filterKey ? displayed.nextPage : 1,
+    });
+  }
+
+  const { extraEntries, nextPage } = displayed;
+  const waitingForFilter = displayed.filterKey !== filterKey;
+  const data = waitingForFilter && !retainPreviousData ? null : displayed.page;
+  const isLoading = !data && !query.isError;
+  const isError = (!retainPreviousData || !data) && query.isError;
+  const isRefreshing = Boolean(data) && Boolean(query.isFetching) && !query.currentData;
+  const isRefreshError = retainPreviousData && Boolean(data) && query.isError;
   const refetch = query.refetch;
   const [loadPage, loadingMore] = useLazyGetPublicMomentsQuery();
 
   const moments = useMemo(() => {
+    if (waitingForFilter && !retainPreviousData) return [];
     const merged = new Map<number, MomentResponse>();
     data?.list.forEach((moment) => merged.set(moment.id, moment));
     extraEntries.forEach((moment) => merged.set(moment.id, moment));
-    return [...merged.values()];
-  }, [extraEntries, data?.list]);
+    return [...merged.values()].filter((moment) => !removedIds.has(moment.id));
+  }, [extraEntries, data?.list, removedIds, waitingForFilter, retainPreviousData]);
+
+  const removeMoment = useCallback((id: number) => {
+    setRemovedIds((current) => new Set([...current, id]));
+  }, []);
 
   const loadMore = useCallback(async () => {
+    if (displayed.filterKey !== filterKey) return false;
     const requestKey = JSON.stringify([filterKey, nextPage]);
     if (pendingPage.current === requestKey) return false;
     pendingPage.current = requestKey;
@@ -74,12 +87,12 @@ export const useMomentFeed = (
         ...(period ?? {}),
       }).unwrap();
       if (currentFilter.current !== filterKey) return false;
-      setExtraEntries((current) => {
-        const merged = new Map(current.map((m) => [m.id, m]));
+      setDisplayed((current) => {
+        if (current.filterKey !== filterKey) return current;
+        const merged = new Map(current.extraEntries.map((m) => [m.id, m]));
         result.list.forEach((m) => merged.set(m.id, m));
-        return [...merged.values()];
+        return { ...current, extraEntries: [...merged.values()], nextPage: current.nextPage + 1 };
       });
-      setNextPage((current) => current + 1);
       return true;
     } catch (err) {
       if (currentFilter.current === filterKey) {
@@ -89,16 +102,20 @@ export const useMomentFeed = (
     } finally {
       if (pendingPage.current === requestKey) pendingPage.current = null;
     }
-  }, [filterKey, loadPage, nextPage, pageSize, period, topic]);
-  const hasMore = data ? nextPage < data.totalPages : false;
+  }, [displayed.filterKey, filterKey, loadPage, nextPage, pageSize, period, topic]);
+  const hasMore = data && displayed.filterKey === filterKey ? nextPage < data.totalPages : false;
 
   return {
     moments,
     isLoading,
     isError,
+    isRefreshing,
+    isRefreshError,
+    displayKey: displayed.filterKey,
     isFetchingMore: loadingMore.isFetching,
     hasMore,
     loadMore,
+    removeMoment,
     refetch,
   };
 };

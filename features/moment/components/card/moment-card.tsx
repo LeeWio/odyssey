@@ -19,6 +19,8 @@ import {
 } from "@/lib/features/moment";
 import { useRelativeTime } from "@/lib/relative-time";
 import { useTranslations } from "next-intl";
+import { motion } from "motion/react";
+import { momentLayoutTransition, useMomentMotion } from "../feed-motion";
 
 import { parseMomentContent } from "../../utils/content-parser";
 import { useMomentLike } from "../../hooks/use-moment-like";
@@ -34,6 +36,8 @@ const CarouselModal = dynamic(
   () => import("../gallery/carousel-modal").then((mod) => mod.CarouselModal),
   { ssr: false }
 );
+
+const MotionCard = motion.create(Card);
 
 // Default content for fallback
 const defaultContent: JSONContent = {
@@ -57,6 +61,8 @@ interface MomentCardProps {
   enableComments?: boolean;
   interactive?: boolean;
   knownLikedMomentIds?: number[];
+  mediaLayout?: "stacked" | "natural";
+  onDeleted?: (id: number) => void;
 }
 
 export const MomentCard = ({
@@ -65,9 +71,12 @@ export const MomentCard = ({
   enableComments = true,
   interactive = true,
   knownLikedMomentIds,
+  mediaLayout = "stacked",
+  onDeleted,
 }: MomentCardProps) => {
   const formatRelativeTime = useRelativeTime();
   const t = useTranslations("Moments");
+  const { enabled, reduced } = useMomentMotion();
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const username = useAppSelector(selectCurrentUser);
@@ -154,6 +163,7 @@ export const MomentCard = ({
       await deleteMoment(moment.id).unwrap();
       toast.success(t("deleted"));
       setIsDeleteDialogOpen(false);
+      onDeleted?.(moment.id);
     } catch (err) {
       toast.danger(getApiErrorMessage(err, t("deleteFailed")));
     } finally {
@@ -191,7 +201,12 @@ export const MomentCard = ({
   const timeLabel = moment ? formatRelativeTime(moment.createdAt) : t("recently");
 
   return (
-    <Card className="w-full" variant="default">
+    <MotionCard
+      className="w-full"
+      variant="default"
+      layout={enabled ? true : undefined}
+      transition={{ layout: reduced ? { duration: 0 } : momentLayoutTransition }}
+    >
       {/* 1. Card Header */}
       <CardHeader
         authorName={authorName}
@@ -208,6 +223,8 @@ export const MomentCard = ({
         momentId={moment?.id ?? "default"}
         parsedContent={parsedContent}
         imageUrls={imageUrls}
+        imageAltTexts={moment?.images?.map((image) => image.altText)}
+        mediaLayout={mediaLayout}
         linkTopics={interactive}
         topics={moment?.topics ?? []}
         onCardClick={interactive ? setActiveIndex : undefined}
@@ -288,32 +305,36 @@ export const MomentCard = ({
           </AlertDialog.Container>
         </AlertDialog.Backdrop>
       </AlertDialog>
-    </Card>
+    </MotionCard>
   );
 };
 
-export const MomentCardSkeleton = () => {
+export const MomentCardSkeleton = ({
+  animationType,
+}: {
+  animationType?: "none" | "pulse" | "shimmer";
+}) => {
   return (
     <Card className="w-full" variant="default">
       <Card.Header className="flex flex-row items-center justify-between">
         <div className="flex min-w-0 flex-row items-center gap-3">
-          <Skeleton className="size-10 rounded-full" />
+          <Skeleton animationType={animationType} className="size-10 rounded-full" />
           <div className="flex min-w-0 flex-col gap-1.5">
-            <Skeleton className="h-4 w-20 rounded-lg" />
-            <Skeleton className="h-3 w-12 rounded-lg" />
+            <Skeleton animationType={animationType} className="h-4 w-20 rounded-lg" />
+            <Skeleton animationType={animationType} className="h-3 w-12 rounded-lg" />
           </div>
         </div>
-        <Skeleton className="size-8 rounded-lg" />
+        <Skeleton animationType={animationType} className="size-8 rounded-lg" />
       </Card.Header>
       <Card.Content className="flex flex-col gap-3">
-        <Skeleton className="h-4.5 w-full rounded-lg" />
-        <Skeleton className="h-4.5 w-5/6 rounded-lg" />
-        <Skeleton className="h-4.5 w-2/3 rounded-lg" />
+        <Skeleton animationType={animationType} className="h-4.5 w-full rounded-lg" />
+        <Skeleton animationType={animationType} className="h-4.5 w-5/6 rounded-lg" />
+        <Skeleton animationType={animationType} className="h-4.5 w-2/3 rounded-lg" />
       </Card.Content>
       <Card.Footer className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-1">
-          <Skeleton className="h-8 w-14 rounded-lg" />
-          <Skeleton className="size-8 rounded-lg" />
+          <Skeleton animationType={animationType} className="h-8 w-14 rounded-lg" />
+          <Skeleton animationType={animationType} className="size-8 rounded-lg" />
         </div>
       </Card.Footer>
     </Card>

@@ -1,9 +1,10 @@
 "use client";
 
-import type { ImgHTMLAttributes } from "react";
+import type { ImgHTMLAttributes, Ref } from "react";
 
 export type RemoteMediaProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> & {
   src: string;
+  ref?: Ref<HTMLImageElement>;
 };
 
 /**

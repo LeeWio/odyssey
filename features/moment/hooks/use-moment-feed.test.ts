@@ -9,13 +9,18 @@ import { useMomentFeed } from "./use-moment-feed";
 const mocks = vi.hoisted(() => ({
   loadPage: vi.fn(),
   refetch: vi.fn(),
+  query: {
+    data: undefined as PageResult<MomentResponse> | undefined,
+    currentData: undefined as PageResult<MomentResponse> | undefined,
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+  },
 }));
 
 vi.mock("@/lib/features/moment", () => ({
   useGetPublicMomentsQuery: () => ({
-    data: undefined,
-    isLoading: false,
-    isError: false,
+    ...mocks.query,
     refetch: mocks.refetch,
   }),
   useLazyGetPublicMomentsQuery: () => [mocks.loadPage, { isFetching: false }],
@@ -26,6 +31,7 @@ let container: HTMLDivElement;
 let feed: ReturnType<typeof useMomentFeed>;
 let topic: string | undefined;
 let period: { year: number; month: number } | undefined;
+let retainPreviousData = true;
 const moment = (id: number) => ({ id }) as MomentResponse;
 const initial: PageResult<MomentResponse> = {
   list: [moment(3)],
@@ -36,7 +42,7 @@ const initial: PageResult<MomentResponse> = {
 };
 
 function Harness() {
-  const value = useMomentFeed(1, initial, topic, period);
+  const value = useMomentFeed(1, initial, topic, period, { retainPreviousData });
   useLayoutEffect(() => {
     feed = value;
   });
@@ -50,8 +56,16 @@ async function render() {
 beforeEach(async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   mocks.loadPage.mockReset();
+  Object.assign(mocks.query, {
+    data: undefined,
+    currentData: undefined,
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+  });
   topic = undefined;
   period = undefined;
+  retainPreviousData = true;
   container = document.createElement("div");
   root = createRoot(container);
   await render();
@@ -125,6 +139,7 @@ describe("moment pagination safety", () => {
 
   it("resets pagination when a month filter changes", async () => {
     period = { year: 2026, month: 9 };
+    mocks.query.currentData = initial;
     await render();
     mocks.loadPage.mockReturnValue({
       unwrap: async () => ({ ...initial, page: 1, list: [moment(2)] }),
@@ -141,5 +156,99 @@ describe("moment pagination safety", () => {
       [1, 9],
       [1, 10],
     ]);
+  });
+
+  it("keeps the complete old feed while a different topic is loading", async () => {
+    mocks.loadPage.mockReturnValue({
+      unwrap: async () => ({ ...initial, page: 1, list: [moment(2)] }),
+    });
+    await act(async () => {
+      await feed.loadMore();
+    });
+    const key = feed.displayKey;
+    topic = "design";
+    mocks.query.data = initial;
+    mocks.query.isFetching = true;
+    await render();
+    expect(feed.moments.map(({ id }) => id)).toEqual([3, 2]);
+    expect(feed.displayKey).toBe(key);
+    expect(feed.isLoading).toBe(false);
+    expect(feed.isRefreshing).toBe(true);
+    expect(await feed.loadMore()).toBe(false);
+    expect(mocks.loadPage).toHaveBeenCalledTimes(1);
+
+    mocks.query.currentData = { ...initial, list: [moment(10)] };
+    mocks.query.isFetching = false;
+    await render();
+    expect(feed.moments.map(({ id }) => id)).toEqual([10]);
+    expect(feed.displayKey).not.toBe(key);
+    expect(feed.isRefreshing).toBe(false);
+    await act(async () => {
+      await feed.loadMore();
+    });
+    expect(mocks.loadPage.mock.lastCall?.[0]).toMatchObject({ page: 1, topic: "design" });
+  });
+
+  it("retains readable content on a filter error and accepts an empty retry result", async () => {
+    topic = "design";
+    mocks.query.isError = true;
+    await render();
+    expect(feed.moments.map(({ id }) => id)).toEqual([3]);
+    expect(feed.isError).toBe(false);
+    expect(feed.isRefreshError).toBe(true);
+    mocks.query.isError = false;
+    mocks.query.currentData = { ...initial, list: [], total: 0, totalPages: 0 };
+    await render();
+    expect(feed.moments).toEqual([]);
+    expect(feed.isRefreshError).toBe(false);
+    expect(feed.hasMore).toBe(false);
+  });
+
+  it("does not fall back to unfiltered server data on a filtered first visit", async () => {
+    topic = "design";
+    mocks.query.data = initial;
+    mocks.query.isFetching = true;
+    mocks.query.isLoading = true;
+    await act(async () => root.render(createElement(Harness, { key: "filtered-first-visit" })));
+    expect(feed.moments).toEqual([]);
+    expect(feed.isLoading).toBe(true);
+  });
+
+  it("returns to the server-provided unfiltered feed without another request", async () => {
+    topic = "design";
+    mocks.query.currentData = { ...initial, list: [moment(10)] };
+    await render();
+    expect(feed.moments.map(({ id }) => id)).toEqual([10]);
+    topic = undefined;
+    mocks.query.currentData = undefined;
+    await render();
+    expect(feed.moments.map(({ id }) => id)).toEqual([3]);
+    expect(feed.isLoading).toBe(false);
+    expect(feed.isRefreshing).toBe(false);
+  });
+
+  it("removes a successfully deleted entry even when the feed came from SSR", async () => {
+    await act(async () => feed.removeMoment(3));
+    expect(feed.moments).toEqual([]);
+    await render();
+    expect(feed.moments).toEqual([]);
+    topic = "design";
+    mocks.query.currentData = { ...initial, list: [moment(3), moment(10)] };
+    await render();
+    expect(feed.moments.map(({ id }) => id)).toEqual([10]);
+  });
+
+  it("keeps other hook consumers on the normal loading and error states", async () => {
+    retainPreviousData = false;
+    topic = "design";
+    mocks.query.isFetching = true;
+    await render();
+    expect(feed.moments).toEqual([]);
+    expect(feed.isLoading).toBe(true);
+    mocks.query.isFetching = false;
+    mocks.query.isError = true;
+    await render();
+    expect(feed.isError).toBe(true);
+    expect(feed.isRefreshError).toBe(false);
   });
 });

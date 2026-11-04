@@ -6,7 +6,7 @@ const content = JSON.stringify(multilineMoment);
 
 for (const scenario of [
   { name: "regular cards", path: "/moments", imageCount: 0 },
-  { name: "stacked image cards", path: "/moments", imageCount: 4 },
+  { name: "multi-image cards", path: "/moments", imageCount: 4 },
   { name: "home previews", path: "/", imageCount: 0 },
 ]) {
   test(`${scenario.name} retain authored line breaks and paragraph spacing`, async ({ page }) => {

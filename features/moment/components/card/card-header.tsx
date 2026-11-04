@@ -3,6 +3,8 @@
 import { Avatar, Button, Dropdown, Spinner, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useTranslations } from "next-intl";
+import { motion } from "motion/react";
+import { momentLayoutTransition, useMomentMotion } from "../feed-motion";
 
 interface CardHeaderProps {
   authorName: string;
@@ -24,9 +26,14 @@ export const CardHeader = ({
   onDelete,
 }: CardHeaderProps) => {
   const t = useTranslations("Moments");
+  const { enabled, reduced } = useMomentMotion();
 
   return (
-    <div className="flex w-full flex-row items-center justify-between">
+    <motion.div
+      className="flex w-full flex-row items-center justify-between"
+      layout={enabled ? "position" : undefined}
+      transition={{ layout: reduced ? { duration: 0 } : momentLayoutTransition }}
+    >
       <div className="flex min-w-0 flex-row items-center gap-2">
         <Avatar>
           {authorAvatar ? <Avatar.Image alt={authorName} src={authorAvatar} /> : null}
@@ -79,6 +86,6 @@ export const CardHeader = ({
           <Icon icon="gravity-ui:ellipsis" className="size-4.5" />
         </Button>
       )}
-    </div>
+    </motion.div>
   );
 };

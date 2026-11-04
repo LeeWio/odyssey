@@ -1,5 +1,98 @@
 # Moments
 
+## Feed Layout
+
+`/moments` defaults to a plain single-column List without a date axis. A small,
+default-variant HeroUI Pro `Segment` switches to Grid, implemented with CSS Columns
+and a 20rem preferred column width with a maximum of four columns. The feed keeps
+the full available width, so wider screens expand cards rather than adding columns
+or constraining the content container. The browser adapts the column count; cards
+flow vertically without shared rows, row spans, position calculation,
+or height measurement. The load-more control sits outside the multicolumn container.
+
+`MomentFeedLayout` reads `view=list|grid` from the URL (missing/invalid values use
+List). Selection uses the native History `replaceState` API integrated with Next,
+preserving other query parameters and the hash without navigation or a server request.
+It changes `data-view`; Tailwind group variants reflow the existing children.
+Cards retain the same keyed DOM hierarchy in both modes, including image galleries
+and comment state. The page extracts only the topic into a memoized content component,
+so view-only URL changes do not rerender data hooks, the sidebar or cards. Topic
+selection reads the current URL to preserve the chosen view. Reloads, shared links
+and browser history restore the URL's mode, including server-rendered markup.
+The feed uses `MomentCard`'s natural media layout: native images with `w-full h-auto`
+determine their own height and keep their original proportions. No aspect ratios or
+fixed image heights are calculated. Other card consumers keep the stacked gallery.
+
+Both views retain the same load-more pagination model. Numbered Pagination was
+evaluated against the HeroUI MCP documentation, but it is not added just for Grid:
+changing presentation should not change navigation, and continuous browsing plus
+the existing cross-page hash lookup remain the feed's primary behavior.
+
+`feed-layout.test.ts` verifies render/mount isolation and preserved child state.
+`tests/e2e/moment-view-mode.spec.ts` covers the real Segment, responsive columns,
+natural card/image sizing, retained nodes, query and sidebar state, unchanged API requests,
+keyboard selection, refresh persistence, and pagination at 390, 820, 1024, 1440,
+1920, 2560 and 3440px.
+
+## Feed Motion
+
+The Moments surface uses `motion/react` for its own animations, scoped by
+`MomentMotionProvider`. The existing HeroUI menus, image viewer, carousel,
+comment sheets, dialogs and toast animations are deliberately unchanged.
+The shared browser ViewTransition opts this route out of page fades so a topic
+query change cannot flash the whole page or overlap the local Motion entrance.
+No CSS stylesheets or handwritten card measurements/positioning are added.
+Motion's internal FLIP measurement is used for layout projection, not for Masonry
+placement or calculating image aspect ratios.
+
+- First-load and genuinely new cards reveal individually (opacity 0 to 1, y 16
+  to 0), with a 400ms ease-out and 160ms between starts. Tails intentionally overlap;
+  this is not a 400ms wait followed by an additional 160ms pause. CSS Columns reads
+  down each column, then left to right; scheduling follows that same DOM order
+  without measuring geometry. A Tailwind scripting/motion-safe initial-opacity
+  utility prevents a visible SSR-to-hydration flash; Motion alone animates it and
+  its inline values take over after mounting. No-JS and reduced-motion readers see
+  SSR content immediately. A
+  provider-scoped ID registry prevents replays on refresh, filtering or feed remounts.
+  Hash navigation skips entrances; focusing a pending card reveals it immediately.
+- List/Grid selection and `data-view` update immediately. A scoped `LayoutGroup`
+  coordinates 400ms layout transitions with `[0.22, 1, 0.36, 1]` easing. The body
+  uses `layoutDependency` to capture unchanged descendants without rerendering
+  the card subtree. Cards animate position/size at opacity 1 without stagger,
+  remounts or data requests. Nested text regions correct parent scaling; images
+  participate in layout projection and retain their natural ratio. Image buttons
+  do not clip the projected image during resizing.
+- The default small HeroUI Segment keeps its semantics and styling. Only its
+  built-in selection indicator is hidden and replaced with a Motion shared-layout
+  background, scoped to this feed's group so other Segments are unaffected.
+- Filter requests retain the entire previous feed, including appended pages, with
+  opacity 0.72. Only `currentData` for the requested arguments commits a result.
+  Successful results restore full opacity without replaying old cards; failures retain
+  readable content and offer retry. Genuine filter results reset pagination, but
+  switching presentation does not.
+  This behavior is opt-in via `retainPreviousData`; archive consumers keep their
+  normal loading/error states.
+- Initial skeletons wait 150ms to avoid flashing on quick requests. On this feed,
+  static HeroUI skeletons share a Motion opacity pulse instead of CSS shimmer.
+  Added cards use the same 400ms/160ms sequence. Removed cards fade for 140ms and are
+  inert while exiting. CSS Columns still owns layout and can rebalance on additions
+  or natural image loading; Motion never fixes card heights or changes column flow.
+  Successful deletions are also excluded locally from SSR-provided feed data.
+- Natural images reveal for 180ms on their first uncached load and have a small
+  image-only press response. Their native aspect ratio and intrinsic layout remain
+  untouched. User-triggered likes/bookmarks pulse only their icon; count changes
+  fade locally. These effects do not replace HeroUI Button animations.
+- Cadence period changes fade only the dot matrix for 160ms, with reserved vertical
+  space. Anchor targets receive a one-shot ring pulse without animated scrolling.
+- The SSR-safe reduced-motion preference disables delays, spatial movement,
+  pulses and layout transitions, and settles interrupted transitions immediately.
+
+Unit coverage includes cancelled view sequences, child render/mount isolation,
+reduced-motion interruption, stale filter responses, retained content on errors,
+and empty results. Browser tests exercise real Motion on desktop and mobile,
+including frame-by-frame geometry and opacity, stable card/image nodes, natural
+image ratios throughout transitions, sidebar state and API isolation.
+
 ## Content rendering
 
 Moment content is stored as Tiptap JSON. The publisher uses HeroUI Pro's

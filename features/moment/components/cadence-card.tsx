@@ -5,8 +5,11 @@ import { Segment } from "@heroui-pro/react";
 import { useState } from "react";
 import type { CSSProperties } from "react";
 import type { Key } from "react-aria-components";
+import { motion } from "motion/react";
 
 import { useGetMomentCadenceQuery, type MomentCadenceResponse } from "@/lib/features/moment";
+import { pageEaseOut } from "@/lib/motion";
+import { useMomentMotion } from "./feed-motion";
 
 import {
   cadenceProgress,
@@ -73,7 +76,9 @@ export function MomentCadenceCard({
       </div>
 
       {data ? (
-        <CadenceDots cadence={data} period={period} />
+        <div className="min-h-28">
+          <CadenceDots key={period} cadence={data} period={period} />
+        </div>
       ) : (
         <Skeleton animationType="shimmer" className="h-[110px] w-full rounded-xl" />
       )}
@@ -114,9 +119,16 @@ function CadenceDots({
   period: CadencePeriod;
 }) {
   const rows = cadenceRows(cadence, period);
+  const { reduced } = useMomentMotion();
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <motion.div
+      className="flex flex-col gap-2.5"
+      data-slot="moment-cadence-dots"
+      initial={reduced ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: reduced ? 0 : 0.16, ease: pageEaseOut }}
+    >
       {rows.map((row, rowIndex) => (
         <div
           key={rowIndex}
@@ -128,7 +140,7 @@ function CadenceDots({
           ))}
         </div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 

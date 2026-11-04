@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Link, Tag, TagGroup } from "@heroui/react";
+import { Button, Link, Tag, TagGroup } from "@heroui/react";
 import { RemoteMedia } from "@/components/ui/remote-media";
 import Stack from "../gallery/stack";
 import type { MomentTopicResponse } from "@/lib/features/moment";
@@ -11,6 +11,9 @@ import { useMemo } from "react";
 import { isDocumentEmpty } from "../../utils/content-parser";
 import { MomentContent } from "../moment-content";
 import { useTranslations } from "next-intl";
+import { NaturalImage } from "./natural-image";
+import { motion } from "motion/react";
+import { momentLayoutTransition, useMomentMotion } from "../feed-motion";
 
 const BounceCards = dynamic(() => import("@/components/ui/bounce-cards"), {
   ssr: false,
@@ -29,6 +32,8 @@ interface CardContentProps {
   momentId: string | number;
   parsedContent: JSONContent;
   imageUrls: string[];
+  imageAltTexts?: string[];
+  mediaLayout?: "stacked" | "natural";
   topics: MomentTopicResponse[];
   onCardClick?: (index: number) => void;
   stockSymbol?: string;
@@ -71,17 +76,17 @@ const getDynamicContainerHeight = (count: number) => {
 export const CardContent = ({
   parsedContent,
   imageUrls,
+  imageAltTexts,
+  mediaLayout = "stacked",
   topics,
   onCardClick,
   stockSymbol,
   linkTopics = true,
 }: CardContentProps) => {
   const t = useTranslations("Moments");
+  const { enabled, reduced } = useMomentMotion();
   const count = imageUrls.length;
-  const cardSize = getDynamicCardSize(count);
-  const containerHeight = getDynamicContainerHeight(count);
-
-  const isStackLayout = count > 3;
+  const isStackLayout = mediaLayout === "stacked" && count > 3;
 
   // Memoize cards array to maintain stable reference, preventing the Stack component's internal
   // state and drag cycling from being reset on every parent re-render.
@@ -165,7 +170,11 @@ export const CardContent = ({
   }
 
   return (
-    <div className="flex w-full flex-col gap-3">
+    <motion.div
+      className="flex w-full flex-col gap-3"
+      layout={enabled ? "position" : undefined}
+      transition={{ layout: reduced ? { duration: 0 } : momentLayoutTransition }}
+    >
       <MomentContent content={parsedContent} />
 
       {topics.length > 0 && (
@@ -178,13 +187,39 @@ export const CardContent = ({
         </TagGroup>
       )}
 
-      {count > 0 && (
+      {count > 0 && mediaLayout === "natural" ? (
+        <div className="flex min-w-0 flex-col gap-3">
+          {imageUrls.map((url, index) => {
+            const image = (
+              <NaturalImage
+                src={url}
+                alt={imageAltTexts?.[index] || t("imageAlt")}
+                interactive={Boolean(onCardClick)}
+              />
+            );
+
+            return onCardClick ? (
+              <Button
+                key={`${url}-${index}`}
+                aria-label={t("openImage", { index: index + 1, total: count })}
+                className="block h-auto w-full min-w-0 overflow-visible rounded-lg p-0"
+                variant="ghost"
+                onPress={() => onCardClick(index)}
+              >
+                {image}
+              </Button>
+            ) : (
+              <div key={`${url}-${index}`}>{image}</div>
+            );
+          })}
+        </div>
+      ) : count > 0 ? (
         <div className="flex w-full justify-center">
           <BounceCards
             images={imageUrls}
-            cardSize={cardSize}
+            cardSize={getDynamicCardSize(count)}
             containerWidth={280}
-            containerHeight={containerHeight}
+            containerHeight={getDynamicContainerHeight(count)}
             animationDelay={0.2}
             animationStagger={0.045}
             transformStyles={getTransformStyles(count)}
@@ -192,9 +227,9 @@ export const CardContent = ({
             onCardClick={onCardClick}
           />
         </div>
-      )}
+      ) : null}
 
       {stockSymbol && <StockTrendCard symbol={stockSymbol} variant="transparent" />}
-    </div>
+    </motion.div>
   );
 };
