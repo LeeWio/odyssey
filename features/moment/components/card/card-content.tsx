@@ -2,18 +2,16 @@
 
 import dynamic from "next/dynamic";
 import { Button, Link, Tag, TagGroup } from "@heroui/react";
-import { RemoteMedia } from "@/components/ui/remote-media";
-import Stack from "../gallery/stack";
 import type { MomentTopicResponse } from "@/lib/features/moment";
 import type { JSONContent } from "@tiptap/core";
 import { getTransformStyles } from "../../utils/transform-styles";
-import { useMemo } from "react";
-import { isDocumentEmpty } from "../../utils/content-parser";
 import { MomentContent } from "../moment-content";
 import { useTranslations } from "next-intl";
 import { NaturalImage } from "./natural-image";
 import { motion } from "motion/react";
 import { momentLayoutTransition, useMomentMotion } from "../feed-motion";
+
+const CircularGallery = dynamic(() => import("@/components/ui/circular-gallery"), { ssr: false });
 
 const BounceCards = dynamic(() => import("@/components/ui/bounce-cards"), {
   ssr: false,
@@ -86,88 +84,6 @@ export const CardContent = ({
   const t = useTranslations("Moments");
   const { enabled, reduced } = useMomentMotion();
   const count = imageUrls.length;
-  const isStackLayout = mediaLayout === "stacked" && count > 3;
-
-  // Memoize cards array to maintain stable reference, preventing the Stack component's internal
-  // state and drag cycling from being reset on every parent re-render.
-  const stackCards = useMemo(() => {
-    if (!isStackLayout) return [];
-    return imageUrls.map((url, idx) => (
-      <div
-        key={idx}
-        className="border-default-200/60 bg-background h-full w-full cursor-pointer overflow-hidden rounded-2xl border shadow-sm"
-        onClick={() => onCardClick?.(idx)}
-      >
-        <RemoteMedia
-          src={url}
-          alt={`moment-img-${idx}`}
-          className="pointer-events-none h-full w-full object-cover"
-        />
-      </div>
-    ));
-  }, [imageUrls, isStackLayout, onCardClick]);
-
-  if (isStackLayout) {
-    const isTextEmpty = isDocumentEmpty(parsedContent);
-
-    if (isTextEmpty) {
-      return (
-        <div className="flex w-full flex-col gap-4">
-          <div className="flex w-full justify-center py-2">
-            <div className="h-28 w-28 shrink-0 sm:h-32 sm:w-32">
-              <Stack randomRotation sendToBackOnClick={false} cards={stackCards} />
-            </div>
-          </div>
-
-          {topics.length > 0 && (
-            <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
-              <TagGroup.List className="flex flex-wrap justify-center gap-1.5">
-                {topics.map((topic) => (
-                  <TopicTag key={topic.id} id={topic.id} link={linkTopics} slug={topic.slug} />
-                ))}
-              </TagGroup.List>
-            </TagGroup>
-          )}
-
-          {stockSymbol && (
-            <div className="flex w-full justify-center">
-              <StockTrendCard symbol={stockSymbol} variant="transparent" />
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex w-full flex-row items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <MomentContent content={parsedContent} />
-
-          {topics.length > 0 && (
-            <TagGroup aria-label={t("topics")} size="sm" selectionMode="none">
-              <TagGroup.List className="flex flex-wrap gap-1.5">
-                {topics.map((topic) => (
-                  <TopicTag key={topic.id} id={topic.id} link={linkTopics} slug={topic.slug} />
-                ))}
-              </TagGroup.List>
-            </TagGroup>
-          )}
-
-          {stockSymbol && <StockTrendCard symbol={stockSymbol} variant="transparent" />}
-        </div>
-
-        <div className="h-28 w-28 shrink-0 sm:h-32 sm:w-32">
-          <Stack
-            autoplay={true}
-            pauseOnHover={true}
-            randomRotation
-            sendToBackOnClick={false}
-            cards={stackCards}
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <motion.div
@@ -187,7 +103,16 @@ export const CardContent = ({
         </TagGroup>
       )}
 
-      {count > 0 && mediaLayout === "natural" ? (
+      {count >= 4 ? (
+        <div className="h-80 w-full">
+          <CircularGallery
+            items={imageUrls.map((image, index) => ({
+              image,
+              alt: imageAltTexts?.[index] || t("imageAlt"),
+            }))}
+          />
+        </div>
+      ) : count > 0 && mediaLayout === "natural" ? (
         <div className="flex min-w-0 flex-col gap-3">
           {imageUrls.map((url, index) => {
             const image = (

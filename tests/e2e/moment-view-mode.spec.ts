@@ -576,7 +576,7 @@ for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
     await month.click();
     await expect(month).toBeChecked();
     await expect(sidebar.getByText("daily")).toBeVisible();
-    const photo = cards.nth(2).getByAltText("Photo 1");
+    const photo = cards.nth(1).getByAltText("Photo 1");
     await expect(photo).toBeVisible();
     await expect
       .poll(() =>

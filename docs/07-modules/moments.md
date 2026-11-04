@@ -19,9 +19,17 @@ and comment state. The page extracts only the topic into a memoized content comp
 so view-only URL changes do not rerender data hooks, the sidebar or cards. Topic
 selection reads the current URL to preserve the chosen view. Reloads, shared links
 and browser history restore the URL's mode, including server-rendered markup.
-The feed uses `MomentCard`'s natural media layout: native images with `w-full h-auto`
-determine their own height and keep their original proportions. No aspect ratios or
-fixed image heights are calculated. Other card consumers keep the stacked gallery.
+The feed keeps natural images for one to three photos. Four or more photos use the
+supplied `CircularGallery` in a compact media viewport, including other Moment card
+consumers. Its original WebGL arc, wave, inertia and internal viewer are retained;
+Motion still owns outer card animations, not the canvas renderer. No card positions
+or shared row heights are calculated for CSS Columns.
+
+Same-origin upload textures do not opt into CORS; only cross-origin images use
+`crossOrigin="anonymous"`. Cleanup deletes owned GPU resources without forcibly
+losing the canvas context, so React Strict Mode can replay the effect safely. Stale
+image callbacks and animation frames are ignored after cleanup. Regression tests
+verify real texture uploads and live draw calls, not just nonblank placeholders.
 
 Both views retain the same load-more pagination model. Numbered Pagination was
 evaluated against the HeroUI MCP documentation, but it is not added just for Grid:

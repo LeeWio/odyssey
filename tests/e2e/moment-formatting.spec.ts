@@ -5,8 +5,8 @@ import multilineMoment from "../../features/moment/__tests__/fixtures/multiline-
 const content = JSON.stringify(multilineMoment);
 
 for (const scenario of [
-  { name: "regular cards", path: "/moments", imageCount: 0 },
-  { name: "multi-image cards", path: "/moments", imageCount: 4 },
+  { name: "regular cards", path: "/moments?topic=formatting-fixture", imageCount: 0 },
+  { name: "multi-image cards", path: "/moments?topic=formatting-fixture", imageCount: 4 },
   { name: "home previews", path: "/", imageCount: 0 },
 ]) {
   test(`${scenario.name} retain authored line breaks and paragraph spacing`, async ({ page }) => {
@@ -62,7 +62,7 @@ for (const scenario of [
     );
     await page.goto(scenario.path);
     const contentView = page.locator('[data-slot="moment-content"]').first();
-    // The home showcase and masonry are loaded as separate dynamic chunks.
+    // Filtered feeds use client requests so the fixture also replaces prefetched data.
     await expect(contentView).toBeVisible({ timeout: 15_000 });
     await expect(contentView.locator("p")).toHaveCount(7);
     await expect(contentView.locator("br")).toHaveCount(9);
