@@ -1,3 +1,10 @@
+# [1.232.0](https://github.com/LeeWio/odyssey/compare/v1.231.0...v1.232.0) (2026-11-04)
+
+
+### Features
+
+* **moments:** add persistent layouts and smooth feed motion ([e7245be](https://github.com/LeeWio/odyssey/commit/e7245be0a5cddbfcc2bb818ee70afea092eb3c12))
+
 # [1.231.0](https://github.com/LeeWio/odyssey/compare/v1.230.1...v1.231.0) (2026-11-03)
 
 
