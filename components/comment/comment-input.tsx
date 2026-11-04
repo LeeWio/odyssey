@@ -34,11 +34,11 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
 import { CommentComposerEditor } from "./comment-composer-editor";
 import { serializeCommentDocument } from "./comment-document";
-import { publicWebsiteHref } from "./comment-website";
 import { useCommentContext } from "./context/comment-context";
 import { useCommentDraft } from "./hooks/use-comment-draft";
 import { emailAvatarUrl, resolveStoredAvatar } from "@/lib/features/user/user-avatar";
 import type { GuestCommentIdentity } from "./hooks/use-comment-mutations";
+import { isCommentComposerSubmitTarget, resolveGuestCommentIdentity } from "./utils/guest-identity";
 
 function SignatureAvatarImage({
   name,
@@ -78,6 +78,8 @@ interface CommentInputProps {
   renderEmbedded?: (parts: {
     signature: React.ReactNode;
     editor: React.ReactNode;
+    canSubmit: boolean;
+    isSubmitting: boolean;
   }) => React.ReactNode;
   formId?: string;
   /** Closes the owning nested sheet after a successful embedded submit. */
@@ -177,13 +179,17 @@ export function CommentInput({
   const [content, setDraft, clearDraft] = useCommentDraft(draftThreadKey, replyId);
   const [documentJson, setDocumentJson] = useState("");
   const [editorEmpty, setEditorEmpty] = useState(true);
+  const documentJsonRef = useRef("");
+  const editorEmptyRef = useRef(true);
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const attachmentsRef = useRef<PendingAttachment[]>([]);
-  const [postAsGuest, setPostAsGuest] = useState(false);
+  const [preferGuest, setPreferGuest] = useState(false);
+  const postAsGuest = !isAuthenticated || preferGuest;
   const [guestName, setGuestName] = useState(readStoredGuestName);
   const [guestEmail, setGuestEmail] = useState("");
   const [guestWebsite, setGuestWebsite] = useState("");
   const draftScope = `${draftThreadKey}:${replyId ?? "root"}`;
+  const previousDraftScope = useRef(draftScope);
   const [internalOpen, setInternalOpen] = useState(false);
   const [pendingSubmission, setPendingSubmission] = useState<{ scope: string } | null>(null);
   const activeSubmission = useRef<{ scope: string } | null>(null);
@@ -201,6 +207,13 @@ export function CommentInput({
   }, [attachments]);
 
   useEffect(() => {
+    if (previousDraftScope.current !== draftScope) {
+      previousDraftScope.current = draftScope;
+      documentJsonRef.current = "";
+      editorEmptyRef.current = true;
+      setDocumentJson("");
+      setEditorEmpty(true);
+    }
     return () => {
       // A previous thread's request may finish, but must not close this composer.
       activeSubmission.current = null;
@@ -252,53 +265,50 @@ export function CommentInput({
   };
 
   const submitComment = async (): Promise<boolean> => {
+    const serialized = documentJsonRef.current || documentJson;
+    const empty = editorEmptyRef.current;
     commentDebug("input:submit-called", {
       replyId,
       isAuthenticated,
-      hasContent: !editorEmpty,
+      postAsGuest,
+      hasContent: !empty,
       isSubmitting,
     });
 
-    if (postAsGuest && !guestName.trim()) {
-      return false;
-    }
-    if (!postAsGuest && !isAuthenticated) {
+    const guest = resolveGuestCommentIdentity({
+      isAuthenticated,
+      postAsGuest,
+      guestName,
+      guestEmail,
+      guestWebsite,
+      anonymousLabel: t("anonymous"),
+    });
+    if (!isAuthenticated && !guest) {
       setModalOpen(false);
       onAuthenticationRequired?.();
       dispatch(setLoginOpen(true));
       return false;
     }
 
-    if (
-      editorEmpty ||
-      !documentJson ||
-      isSubmitting ||
-      activeSubmission.current?.scope === draftScope
-    )
+    if (empty || !serialized || isSubmitting || activeSubmission.current?.scope === draftScope)
       return false;
 
     const submission = { scope: draftScope };
     activeSubmission.current = submission;
     setPendingSubmission(submission);
-    commentDebug("input:submit-start", { replyId, contentLength: documentJson.length });
+    commentDebug("input:submit-start", { replyId, contentLength: serialized.length });
     try {
-      const guest = postAsGuest
-        ? {
-            guestName: guestName.trim(),
-            guestEmail: guestEmail.trim() || undefined,
-            guestWebsite: publicWebsiteHref(guestWebsite) ?? undefined,
-          }
-        : undefined;
-      if (guest) {
-        window.localStorage.setItem(GUEST_NAME_STORAGE_KEY, guest.guestName);
+      const typedGuestName = guestName.trim();
+      if (guest && typedGuestName) {
+        window.localStorage.setItem(GUEST_NAME_STORAGE_KEY, typedGuestName);
       }
-      const submitted = await onSubmit(documentJson, guest);
+      const submitted = await onSubmit(serialized, guest);
       if (!submitted) {
         commentDebug("input:submit-not-accepted", { replyId });
         return false;
       }
       commentDebug("input:submit-resolved", { replyId });
-      if (clearDraft(documentJson) && activeSubmission.current === submission) {
+      if (clearDraft(serialized) && activeSubmission.current === submission) {
         clearAttachments();
         setModalOpen(false);
         onSubmitted?.();
@@ -334,7 +344,7 @@ export function CommentInput({
 
   const heading = isReply && replyTo ? t("replyTo", { name: replyTo }) : t("writeComment");
   const description = isReply ? t("replyDescription") : t("writeDescription");
-  const canSubmit = !editorEmpty && (!postAsGuest || Boolean(guestName.trim()));
+  const canSubmit = !editorEmpty;
 
   const signatureName = postAsGuest ? guestName.trim() || t("anonymous") : composerName;
   const signatureAvatar = postAsGuest ? undefined : currentUserProfile?.avatar;
@@ -361,7 +371,13 @@ export function CommentInput({
           </span>
         </span>
       </Popover.Trigger>
-      <Popover.Content className="w-72" offset={10} placement="bottom start">
+      <Popover.Content
+        className="w-72"
+        isNonModal
+        offset={10}
+        placement="bottom start"
+        shouldCloseOnInteractOutside={(element) => !isCommentComposerSubmitTarget(element)}
+      >
         <Popover.Dialog>
           <Popover.Heading>
             <div className="flex items-center gap-3">
@@ -383,7 +399,7 @@ export function CommentInput({
               <Button
                 size="sm"
                 variant={postAsGuest ? "secondary" : "primary"}
-                onPress={() => setPostAsGuest(false)}
+                onPress={() => setPreferGuest(false)}
               >
                 {t("useAccount", { name: composerName })}
               </Button>
@@ -393,12 +409,12 @@ export function CommentInput({
               </Button>
             )}
             <TextField
-              isRequired
               name="guestName"
               value={guestName}
+              onFocus={() => setPreferGuest(true)}
               onChange={(value) => {
                 setGuestName(value);
-                setPostAsGuest(true);
+                setPreferGuest(true);
               }}
             >
               <Label>{t("anonymous")}</Label>
@@ -443,13 +459,7 @@ export function CommentInput({
           status={isSubmitting ? "submitted" : "ready"}
           value={content}
           onSubmit={() => {
-            if (!canSubmit) {
-              if (!postAsGuest && !isAuthenticated) {
-                onAuthenticationRequired?.();
-                dispatch(setLoginOpen(true));
-              }
-              return;
-            }
+            if (!canSubmit) return;
             void submitComment();
           }}
           onValueChange={handleValueChange}
@@ -513,6 +523,8 @@ export function CommentInput({
           resetKey={draftScope}
           onDocumentChange={(document, isEmpty) => {
             const serialized = serializeCommentDocument(document);
+            documentJsonRef.current = serialized;
+            editorEmptyRef.current = isEmpty;
             setDocumentJson(serialized);
             setEditorEmpty(isEmpty);
             setDraft(serialized);
@@ -520,7 +532,7 @@ export function CommentInput({
         />
       </Form>
     );
-    return renderEmbedded ? renderEmbedded({ signature, editor }) : editor;
+    return renderEmbedded ? renderEmbedded({ signature, editor, canSubmit, isSubmitting }) : editor;
   }
 
   if (isReply && hideTrigger) {
@@ -575,6 +587,7 @@ export function CommentInput({
                 type="submit"
                 isDisabled={!canSubmit || isSubmitting}
                 isPending={isSubmitting}
+                data-comment-composer-submit=""
               >
                 {resolvedSubmit}
               </Button>
@@ -631,8 +644,8 @@ export function CommentInput({
                   />
                   <Description>{content.length}/1000</Description>
                 </TextField>
-                {signature}
               </Form>
+              {signature}
 
               <PromptSuggestion className="gap-3">
                 <PromptSuggestion.Header>
@@ -661,6 +674,7 @@ export function CommentInput({
                 variant="primary"
                 isDisabled={!canSubmit || isSubmitting}
                 isPending={isSubmitting}
+                data-comment-composer-submit=""
               >
                 {resolvedSubmit}
               </Button>

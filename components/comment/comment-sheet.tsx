@@ -120,10 +120,27 @@ function CommentSheetContent({
                   placeholder={
                     replyTarget ? t("replyPlaceholder", { name: replyTarget.name }) : undefined
                   }
-                  renderEmbedded={({ editor, signature }) => (
+                  renderEmbedded={({ editor, signature, canSubmit, isSubmitting }) => (
                     <>
                       <Sheet.Header>{signature}</Sheet.Header>
                       <Sheet.Body>{editor}</Sheet.Body>
+                      <Sheet.Footer>
+                        <Sheet.Close>
+                          <Button variant="secondary">{t("cancel")}</Button>
+                        </Sheet.Close>
+                        <Button
+                          data-comment-composer-submit=""
+                          isDisabled={!canSubmit || isSubmitting}
+                          isPending={isSubmitting}
+                          variant="secondary"
+                          onPress={() => {
+                            const form = document.getElementById(composerFormId);
+                            if (form instanceof HTMLFormElement) form.requestSubmit();
+                          }}
+                        >
+                          {replyTarget ? t("reply") : t("postComment")}
+                        </Button>
+                      </Sheet.Footer>
                     </>
                   )}
                   submitButtonText={replyTarget ? t("reply") : t("postComment")}
@@ -135,14 +152,6 @@ function CommentSheetContent({
                     publishComment(content, replyTarget?.id ?? null, guest)
                   }
                 />
-                <Sheet.Footer>
-                  <Sheet.Close>
-                    <Button variant="secondary">{t("cancel")}</Button>
-                  </Sheet.Close>
-                  <Button form={composerFormId} type="submit" variant="secondary">
-                    {replyTarget ? t("reply") : t("postComment")}
-                  </Button>
-                </Sheet.Footer>
               </Sheet.Dialog>
             </Sheet.Content>
           </Sheet.Backdrop>
