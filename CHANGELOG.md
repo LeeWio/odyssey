@@ -1,3 +1,10 @@
+## [1.232.1](https://github.com/LeeWio/odyssey/compare/v1.232.0...v1.232.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* **moments:** render uploaded photos in circular galleries ([672d15b](https://github.com/LeeWio/odyssey/commit/672d15b53d9618ac791addf73311ee8e26f73507))
+
 # [1.232.0](https://github.com/LeeWio/odyssey/compare/v1.231.0...v1.232.0) (2026-11-04)
 
 
