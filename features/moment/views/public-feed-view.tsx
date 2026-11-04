@@ -2,7 +2,9 @@
 
 import { Button, Typography } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { MomentCard, MomentCardSkeleton } from "../components/card";
+import { MomentsPagination } from "../components/moments-pagination";
 import { useMomentFeed } from "../hooks/use-moment-feed";
 import { PageFrame } from "@/components/layout/page-frame";
 import { useGetLikedMomentIdsQuery } from "@/lib/features/moment";
@@ -11,8 +13,17 @@ import { useAppSelector } from "@/lib/hooks";
 
 export const PublicFeedView = () => {
   const t = useTranslations("Moments");
-  const { moments, isLoading, isError, isFetchingMore, hasMore, loadMore, refetch } =
-    useMomentFeed();
+  const [page, setPage] = useState(1);
+  const {
+    moments,
+    isLoading,
+    isError,
+    isRefreshError,
+    isFetchingPage,
+    displayedPage,
+    totalPages,
+    refetch,
+  } = useMomentFeed(12, null, undefined, undefined, { retainPreviousData: true }, page);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const likedMomentIdsQuery = useGetLikedMomentIdsQuery(
     moments.map((moment) => moment.id),
@@ -33,6 +44,14 @@ export const PublicFeedView = () => {
         </header>
 
         <div className="flex w-full flex-col items-center gap-6">
+          {isRefreshError ? (
+            <div className="text-muted flex items-center gap-3 text-sm" role="status">
+              <span>{t("loadFailed")}</span>
+              <Button size="sm" variant="secondary" onPress={refetch}>
+                {t("retry")}
+              </Button>
+            </div>
+          ) : null}
           {isLoading && moments.length === 0 ? (
             Array.from({ length: 3 }).map((_, i) => <MomentCardSkeleton key={i} />)
           ) : isError ? (
@@ -52,13 +71,12 @@ export const PublicFeedView = () => {
                 />
               ))}
 
-              {hasMore && (
-                <div className="mt-8 flex w-full justify-center">
-                  <Button isPending={isFetchingMore} variant="secondary" onPress={loadMore}>
-                    {t("loadMore")}
-                  </Button>
-                </div>
-              )}
+              <MomentsPagination
+                page={displayedPage}
+                pages={totalPages}
+                isDisabled={isFetchingPage}
+                onPageChange={setPage}
+              />
             </>
           ) : (
             <div className="text-muted py-12 text-sm">{t("empty")}</div>

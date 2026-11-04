@@ -36,7 +36,7 @@ async function prepare(page: Page, reducedMotion: "reduce" | "no-preference" = "
       return fulfill({
         list: moments.slice(pageNumber * size, (pageNumber + 1) * size),
         total: moments.length,
-        page: pageNumber,
+        page: pageNumber + 1,
         size,
         totalPages: Math.ceil(moments.length / size),
       });
@@ -228,12 +228,15 @@ for (const mode of ["List", "Grid"] as const) {
       )
       .toBe(true);
 
-    // Existing IDs must not participate in the next batch's entrance schedule.
-    await feed.getByRole("button", { name: "Load more notes", exact: true }).click();
-    await expect(feed.locator("ol > li")).toHaveCount(14);
+    // Pagination replaces the page; revisiting known IDs must not replay entrances.
+    await feed.getByRole("button", { name: "Next", exact: true }).click();
+    await expect(feed.locator("ol > li")).toHaveCount(2);
+    await expect(page.locator("#moment-100")).toHaveCount(0);
+    await expect(page.locator("#moment-87")).toHaveCSS("opacity", "1");
+    await feed.getByRole("button", { name: "Previous", exact: true }).click();
+    await expect(feed.locator("ol > li")).toHaveCount(12);
     await expect(page.locator("#moment-100")).toHaveCSS("opacity", "1");
     await expect(page.locator("#moment-100")).toHaveCSS("transform", "none");
-    await expect(page.locator("#moment-87")).toHaveCSS("opacity", "1");
     if (mode === "List") {
       await page.reload();
       await assertSequence();
@@ -318,12 +321,12 @@ for (const width of [390, 1440]) {
     await grid.click();
     await expect(layout).toHaveAttribute("data-view", "grid");
     await expect(body).toHaveCSS("opacity", "1");
-    await feed.getByRole("button", { name: "Load more notes", exact: true }).click();
-    await expect(feed.locator("ol > li")).toHaveCount(14);
+    await feed.getByRole("button", { name: "Next", exact: true }).click();
+    await expect(feed.locator("ol > li")).toHaveCount(2);
     await expect(page.locator("#moment-87")).toHaveCSS("opacity", "1");
     expect(
       await firstCard?.evaluate((node) => node === document.getElementById("moment-100"))
-    ).toBe(true);
+    ).toBe(false);
     await page.screenshot({ path: testInfo.outputPath(`motion-grid-${width}.png`) });
     expect(errors).toEqual([]);
   });
@@ -670,10 +673,10 @@ for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
     );
 
     await gridButton.click();
-    await feed.getByRole("button", { name: "Load more notes", exact: true }).click();
-    await expect(cards).toHaveCount(14);
+    await feed.getByRole("button", { name: "Next", exact: true }).click();
+    await expect(cards).toHaveCount(2);
     await listButton.click();
-    await expect(cards).toHaveCount(14);
+    await expect(cards).toHaveCount(2);
     await expect(cards.last()).toHaveAttribute("id", "moment-87");
     expect(errors).toEqual([]);
   });

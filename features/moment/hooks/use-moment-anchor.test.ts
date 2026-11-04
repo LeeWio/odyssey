@@ -63,11 +63,13 @@ beforeEach(() => {
   window.history.replaceState(null, "", "/moments#moment-18");
   options = {
     moments: [],
-    hasMore: true,
+    page: 1,
+    totalPages: 20,
     isLoading: false,
     isError: false,
-    isFetchingMore: false,
-    loadMore: vi.fn(async () => false),
+    isFetchingPage: false,
+    fetchPage: vi.fn(async () => null),
+    onPageChange: vi.fn(),
   };
   container = document.createElement("div");
   document.body.append(container);
@@ -112,77 +114,82 @@ describe("moment anchor navigation", () => {
     await render({ moments: [moment(18), moment(17)] });
     await flushFrames();
     expect(HTMLElement.prototype.scrollIntoView).toHaveBeenCalledTimes(1);
-    expect(options.loadMore).not.toHaveBeenCalled();
+    expect(options.fetchPage).not.toHaveBeenCalled();
   });
 
   it("waits for initial loading and avoids duplicate requests in StrictMode", async () => {
-    const response = Promise.withResolvers<boolean>();
-    const loadMore = vi.fn(() => response.promise);
-    await render({ isLoading: true, loadMore });
-    expect(loadMore).not.toHaveBeenCalled();
+    const response = Promise.withResolvers<{ list: MomentResponse[] } | null>();
+    const fetchPage = vi.fn(() => response.promise);
+    await render({ isLoading: true, fetchPage });
+    expect(fetchPage).not.toHaveBeenCalled();
     await render({ isLoading: false });
     await render();
-    expect(loadMore).toHaveBeenCalledTimes(1);
-    await act(async () => response.resolve(false));
+    expect(fetchPage).toHaveBeenCalledTimes(1);
+    await act(async () => response.resolve(null));
     expect(anchor.status).toBe("error");
   });
 
   it("stops fetching when a target arrives on the next page", async () => {
-    const response = Promise.withResolvers<boolean>();
-    const loadMore = vi.fn(() => response.promise);
-    await render({ moments: [moment(20)], loadMore });
-    await render({ moments: [moment(20), moment(18)] });
-    await act(async () => response.resolve(true));
+    const response = Promise.withResolvers<{ list: MomentResponse[] } | null>();
+    const fetchPage = vi.fn(() => response.promise);
+    await render({ moments: [moment(20)], fetchPage });
+    await act(async () => response.resolve({ list: [moment(18)] }));
+    expect(options.onPageChange).toHaveBeenCalledExactlyOnceWith(2);
+    expect(document.getElementById("moment-20")).not.toBeNull();
+    expect(document.getElementById("moment-18")).toBeNull();
+    await render({ moments: [moment(18)], page: 2 });
     await flushFrames();
     expect(anchor.status).toBe("found");
-    expect(loadMore).toHaveBeenCalledTimes(1);
+    expect(fetchPage).toHaveBeenCalledTimes(1);
   });
 
   it("does not scan for malformed hashes", async () => {
     await navigate("#moment-0");
     await render();
     expect(anchor.status).toBe("dismissed");
-    expect(options.loadMore).not.toHaveBeenCalled();
+    expect(options.fetchPage).not.toHaveBeenCalled();
   });
 
   it("reports a missing target when the public feed ends", async () => {
-    await render({ hasMore: false });
+    await render({ totalPages: 1 });
     await flushFrames();
     expect(anchor.status).toBe("missing");
-    expect(options.loadMore).not.toHaveBeenCalled();
+    expect(options.fetchPage).not.toHaveBeenCalled();
   });
 
   it("stops on failure and retries only on explicit action", async () => {
-    const loadMore = vi.fn(async () => false);
-    await render({ loadMore });
+    const fetchPage = vi.fn(async () => null);
+    await render({ fetchPage });
     await render();
     expect(anchor.status).toBe("error");
-    expect(loadMore).toHaveBeenCalledTimes(1);
+    expect(fetchPage).toHaveBeenCalledTimes(1);
     await act(async () => anchor.retry());
-    expect(loadMore).toHaveBeenCalledTimes(2);
+    expect(fetchPage).toHaveBeenCalledTimes(2);
+    expect(fetchPage.mock.calls).toEqual([[2], [2]]);
     expect(anchor.status).toBe("error");
   });
 
   it("bounds automatic pagination and lets the reader explicitly continue", async () => {
-    const loadMore = vi.fn(async () => true);
-    await render({ loadMore });
+    const fetchPage = vi.fn(async () => ({ list: [] }));
+    await render({ fetchPage });
     await flushFrames();
-    expect(loadMore).toHaveBeenCalledTimes(MOMENT_ANCHOR_PAGE_LIMIT);
+    expect(fetchPage).toHaveBeenCalledTimes(MOMENT_ANCHOR_PAGE_LIMIT);
     expect(anchor.status).toBe("paused");
     await act(async () => anchor.retry());
     await flushFrames();
-    expect(loadMore).toHaveBeenCalledTimes(MOMENT_ANCHOR_PAGE_LIMIT * 2);
+    expect(fetchPage).toHaveBeenCalledTimes(MOMENT_ANCHOR_PAGE_LIMIT * 2);
     expect(anchor.status).toBe("paused");
   });
 
   it("respects cancellation while a page is in flight", async () => {
-    const response = Promise.withResolvers<boolean>();
-    const loadMore = vi.fn(() => response.promise);
-    await render({ loadMore });
+    const response = Promise.withResolvers<{ list: MomentResponse[] } | null>();
+    const fetchPage = vi.fn(() => response.promise);
+    await render({ fetchPage });
     await act(async () => anchor.dismiss());
-    await act(async () => response.resolve(true));
+    await act(async () => response.resolve({ list: [moment(18)] }));
     expect(anchor.status).toBe("dismissed");
-    expect(loadMore).toHaveBeenCalledTimes(1);
+    expect(fetchPage).toHaveBeenCalledTimes(1);
+    expect(options.onPageChange).not.toHaveBeenCalled();
     expect(HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
   });
 

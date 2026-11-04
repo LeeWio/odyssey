@@ -1,7 +1,4 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { toast } from "@heroui/react";
-
-import { getApiErrorMessage } from "@/lib/api/errors";
 import {
   useGetPublicMomentsQuery,
   useLazyGetPublicMomentsQuery,
@@ -9,112 +6,113 @@ import {
 } from "@/lib/features/moment";
 import type { PageResult } from "@/lib/api";
 
+interface MomentFeedOptions {
+  retainPreviousData?: boolean;
+}
+
 export const useMomentFeed = (
   pageSize: number = 12,
   initialPage: PageResult<MomentResponse> | null = null,
   topic?: string,
   period?: { year: number; month: number },
-  options?: { retainPreviousData?: boolean }
+  options?: MomentFeedOptions,
+  requestedPage: number = 1
 ) => {
   const retainPreviousData = options?.retainPreviousData ?? false;
   const filterKey = JSON.stringify([topic ?? null, period?.year ?? null, period?.month ?? null]);
-  const currentFilter = useRef<string | null>(filterKey);
-  const pendingPage = useRef<string | null>(null);
+  const currentFilter = useRef(filterKey);
+  const pendingPages = useRef(new Map<string, Promise<PageResult<MomentResponse> | null>>());
+  const [initial] = useState(() => ({ filterKey, page: initialPage }));
+  const [reloadInitial, setReloadInitial] = useState(false);
   const [removedIds, setRemovedIds] = useState<ReadonlySet<number>>(() => new Set());
-  const filtered = Boolean(topic || period);
   const [displayed, setDisplayed] = useState(() => ({
     filterKey,
-    page: filtered ? null : initialPage,
-    extraEntries: [] as MomentResponse[],
-    nextPage: 1,
+    page:
+      initial.filterKey === filterKey && initial.page?.page === requestedPage ? initial.page : null,
   }));
 
   useEffect(() => {
     currentFilter.current = filterKey;
     return () => {
-      currentFilter.current = null;
+      currentFilter.current = "";
     };
   }, [filterKey]);
 
+  const initialMatches = initial.filterKey === filterKey && initial.page?.page === requestedPage;
   const query = useGetPublicMomentsQuery(
-    { page: 0, size: pageSize, ...(topic ? { topic } : {}), ...(period ?? {}) },
-    { skip: Boolean(initialPage) && !filtered }
+    { page: requestedPage - 1, size: pageSize, ...(topic ? { topic } : {}), ...(period ?? {}) },
+    { skip: initialMatches && !reloadInitial }
   );
-  // currentData belongs to these exact query args; data can still belong to the old topic.
-  const requestedData = query.currentData ?? (!filtered ? initialPage : null);
+  const requestedData = query.currentData ?? (initialMatches ? initial.page : null);
+
+  // Replace the current page atomically after the exact query succeeds. This
+  // keeps Grid from appending into CSS columns and triggering a visible reflow.
   if (requestedData && (displayed.filterKey !== filterKey || displayed.page !== requestedData)) {
-    setDisplayed({
-      filterKey,
-      page: requestedData,
-      extraEntries: displayed.filterKey === filterKey ? displayed.extraEntries : [],
-      nextPage: displayed.filterKey === filterKey ? displayed.nextPage : 1,
-    });
+    setDisplayed({ filterKey, page: requestedData });
   }
 
-  const { extraEntries, nextPage } = displayed;
-  const waitingForFilter = displayed.filterKey !== filterKey;
-  const data = waitingForFilter && !retainPreviousData ? null : displayed.page;
+  const waitingForPage =
+    displayed.filterKey !== filterKey || displayed.page?.page !== requestedPage;
+  const data = waitingForPage && !retainPreviousData ? null : displayed.page;
   const isLoading = !data && !query.isError;
   const isError = (!retainPreviousData || !data) && query.isError;
   const isRefreshing = Boolean(data) && Boolean(query.isFetching) && !query.currentData;
   const isRefreshError = retainPreviousData && Boolean(data) && query.isError;
-  const refetch = query.refetch;
-  const [loadPage, loadingMore] = useLazyGetPublicMomentsQuery();
+  const queryRefetch = query.refetch;
+  const refetch = useCallback(() => {
+    if (initialMatches && !reloadInitial) setReloadInitial(true);
+    else void queryRefetch();
+  }, [initialMatches, reloadInitial, queryRefetch]);
 
   const moments = useMemo(() => {
-    if (waitingForFilter && !retainPreviousData) return [];
-    const merged = new Map<number, MomentResponse>();
-    data?.list.forEach((moment) => merged.set(moment.id, moment));
-    extraEntries.forEach((moment) => merged.set(moment.id, moment));
-    return [...merged.values()].filter((moment) => !removedIds.has(moment.id));
-  }, [extraEntries, data?.list, removedIds, waitingForFilter, retainPreviousData]);
+    return (data?.list ?? []).filter((moment) => !removedIds.has(moment.id));
+  }, [data?.list, removedIds]);
+
+  const [loadPage, loadingPage] = useLazyGetPublicMomentsQuery();
+
+  const fetchPage = useCallback(
+    (page: number): Promise<PageResult<MomentResponse> | null> => {
+      if (!Number.isSafeInteger(page) || page < 1) return Promise.resolve(null);
+      const requestKey = JSON.stringify([filterKey, page]);
+      const pending = pendingPages.current.get(requestKey);
+      if (pending) return pending;
+
+      const request = loadPage({
+        page: page - 1,
+        size: pageSize,
+        ...(topic ? { topic } : {}),
+        ...(period ?? {}),
+      })
+        .unwrap()
+        .then((result) => (currentFilter.current === filterKey ? result : null))
+        .catch(() => null)
+        .finally(() => pendingPages.current.delete(requestKey));
+      pendingPages.current.set(requestKey, request);
+      return request;
+    },
+    [filterKey, loadPage, pageSize, period, topic]
+  );
 
   const removeMoment = useCallback((id: number) => {
     setRemovedIds((current) => new Set([...current, id]));
   }, []);
 
-  const loadMore = useCallback(async () => {
-    if (displayed.filterKey !== filterKey) return false;
-    const requestKey = JSON.stringify([filterKey, nextPage]);
-    if (pendingPage.current === requestKey) return false;
-    pendingPage.current = requestKey;
-
-    try {
-      const result = await loadPage({
-        page: nextPage,
-        size: pageSize,
-        ...(topic ? { topic } : {}),
-        ...(period ?? {}),
-      }).unwrap();
-      if (currentFilter.current !== filterKey) return false;
-      setDisplayed((current) => {
-        if (current.filterKey !== filterKey) return current;
-        const merged = new Map(current.extraEntries.map((m) => [m.id, m]));
-        result.list.forEach((m) => merged.set(m.id, m));
-        return { ...current, extraEntries: [...merged.values()], nextPage: current.nextPage + 1 };
-      });
-      return true;
-    } catch (err) {
-      if (currentFilter.current === filterKey) {
-        toast.danger(getApiErrorMessage(err, "Unable to load more moments. Please try again."));
-      }
-      return false;
-    } finally {
-      if (pendingPage.current === requestKey) pendingPage.current = null;
-    }
-  }, [displayed.filterKey, filterKey, loadPage, nextPage, pageSize, period, topic]);
-  const hasMore = data && displayed.filterKey === filterKey ? nextPage < data.totalPages : false;
+  const totalPages = data?.totalPages ?? 0;
 
   return {
     moments,
+    currentPage: requestedPage,
+    displayedPage: data?.page ?? requestedPage,
+    resolvedTotalPages: requestedData?.totalPages,
+    totalPages,
+    total: data?.total ?? 0,
     isLoading,
     isError,
     isRefreshing,
     isRefreshError,
-    displayKey: displayed.filterKey,
-    isFetchingMore: loadingMore.isFetching,
-    hasMore,
-    loadMore,
+    displayKey: `${displayed.filterKey}:${data?.page ?? requestedPage}`,
+    isFetchingPage: query.isFetching || loadingPage.isFetching,
+    fetchPage,
     removeMoment,
     refetch,
   };

@@ -34,7 +34,7 @@ async function prepare(page: Page, failNextPage = false) {
           data: {
             list: moments.slice(pageNumber * size, (pageNumber + 1) * size),
             total: moments.length,
-            page: pageNumber,
+            page: pageNumber + 1,
             size,
             totalPages: Math.ceil(moments.length / size),
           },
@@ -63,7 +63,7 @@ for (const width of [390, 1440]) {
     );
     const card = showcase.locator('a[href="/moments#moment-79"]');
     await card.click();
-    await expect(page).toHaveURL(/\/moments#moment-79$/);
+    await expect(page).toHaveURL(/\/moments\?page=2#moment-79$/);
     const target = page.locator("#moment-79");
     await expect(target).toHaveAttribute("data-moment-target", "true");
     await expect(target).toBeFocused();
@@ -80,10 +80,11 @@ for (const width of [390, 1440]) {
     await expect(target).toBeInViewport();
     await expect.poll(async () => (await target.boundingBox())?.y ?? -1).toBeGreaterThanOrEqual(96);
 
-    const loadMore = page.getByRole("button", { name: "Load more notes", exact: true });
-    await loadMore.click();
+    await page.getByRole("button", { name: "Next", exact: true }).click();
     await expect(page.locator("#moment-61")).toBeAttached();
-    await expect(loadMore).toBeFocused();
+    await expect(page.locator("#moment-79")).toHaveCount(0);
+    await expect(page).toHaveURL(/\/moments\?page=3$/);
+    await expect(page.getByRole("region", { name: "Moments feed" })).toBeFocused();
     expect(errors).toEqual([]);
   });
 }
@@ -156,8 +157,8 @@ test.describe("Chinese home", () => {
     await page.goto("/");
     await expect(page.getByRole("button", { name: "所思所写", exact: true }).first()).toBeVisible();
     const showcase = page.locator("#moments-showcase");
-    await expect(showcase.getByRole("heading", { name: "三言两语" })).toBeVisible();
-    await expect(showcase.getByText("说说这个，聊聊那个。", { exact: true })).toBeVisible();
+    await expect(showcase.getByRole("heading", { name: "闲言碎语" })).toBeVisible();
+    await expect(showcase.getByText("想到哪里，就说到哪里。", { exact: true })).toBeVisible();
     const map = page.locator("#footprints-showcase");
     await expect(map.getByRole("link", { name: "记忆地图", exact: true })).toHaveAttribute(
       "href",

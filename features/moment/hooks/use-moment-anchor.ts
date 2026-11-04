@@ -22,27 +22,35 @@ function subscribeToHash(onChange: () => void) {
 
 type AnchorStatus = "searching" | "found" | "missing" | "error" | "paused" | "dismissed";
 interface Progress {
-  hash: string;
+  scope: string;
   status: AnchorStatus;
   pages: number;
+  nextPage: number;
+  matchedPage?: number;
 }
 
 interface MomentAnchorOptions {
   moments: MomentResponse[];
-  hasMore: boolean;
+  page: number;
+  totalPages: number;
   isLoading: boolean;
   isError: boolean;
-  isFetchingMore: boolean;
-  loadMore: () => Promise<boolean>;
+  isFetchingPage: boolean;
+  fetchPage: (page: number) => Promise<{ list: MomentResponse[] } | null>;
+  onPageChange: (page: number) => void;
+  filterKey?: string;
 }
 
 export function useMomentAnchor({
   moments,
-  hasMore,
+  page,
+  totalPages,
   isLoading,
   isError,
-  isFetchingMore,
-  loadMore,
+  isFetchingPage,
+  fetchPage,
+  onPageChange,
+  filterKey = "",
 }: MomentAnchorOptions) {
   const hash = useSyncExternalStore(
     subscribeToHash,
@@ -50,17 +58,33 @@ export function useMomentAnchor({
     () => ""
   );
   const targetId = getMomentAnchorId(hash);
-  const [progress, setProgress] = useState<Progress>({ hash: "", status: "dismissed", pages: 0 });
-  const pending = useRef(false);
+  const scope = `${filterKey}:${hash}`;
+  const [progress, setProgress] = useState<Progress>({
+    scope: "",
+    status: "dismissed",
+    pages: 0,
+    nextPage: 1,
+  });
+  const pending = useRef<object | null>(null);
+  const activeScope = useRef(scope);
+  const previousScope = useRef(scope);
   const [requestVersion, requestFinished] = useReducer((value: number) => value + 1, 0);
-  if (progress.hash !== hash) {
-    setProgress({ hash, status: targetId ? "searching" : "dismissed", pages: 0 });
+  if (progress.scope !== scope) {
+    setProgress({ scope, status: targetId ? "searching" : "dismissed", pages: 0, nextPage: 1 });
   }
-  const status = progress.hash === hash ? progress.status : "searching";
-  const pages = progress.hash === hash ? progress.pages : 0;
+  const status = progress.scope === scope ? progress.status : "searching";
 
   useEffect(() => {
-    if (!targetId || status !== "searching" || isLoading || isError || isFetchingMore) return;
+    if (previousScope.current !== scope) pending.current = null;
+    previousScope.current = scope;
+    activeScope.current = scope;
+    return () => {
+      activeScope.current = "";
+    };
+  }, [scope]);
+
+  useEffect(() => {
+    if (!targetId || status !== "searching" || isLoading || isError || isFetchingPage) return;
 
     const target = moments.some((moment) => moment.id === targetId)
       ? document.getElementById(`moment-${targetId}`)
@@ -70,49 +94,72 @@ export function useMomentAnchor({
         // Resolve once, without smooth scrolling or refocusing after feed updates.
         target.scrollIntoView({ behavior: "instant", block: "start" });
         target.focus({ preventScroll: true });
-        setProgress({ hash, status: "found", pages });
+        setProgress((current) => ({ ...current, status: "found" }));
       });
       return () => cancelAnimationFrame(frame);
     }
 
-    if (pending.current) return;
-    if (!hasMore || pages >= MOMENT_ANCHOR_PAGE_LIMIT) {
+    if (pending.current || progress.matchedPage !== undefined) return;
+    const nextPage = progress.nextPage === page ? progress.nextPage + 1 : progress.nextPage;
+    if (progress.pages >= MOMENT_ANCHOR_PAGE_LIMIT || nextPage > totalPages) {
       const frame = requestAnimationFrame(() => {
-        setProgress({ hash, status: hasMore ? "paused" : "missing", pages });
+        setProgress((current) => ({
+          ...current,
+          status: nextPage > totalPages ? "missing" : "paused",
+          nextPage,
+        }));
       });
       return () => cancelAnimationFrame(frame);
     }
 
-    pending.current = true;
-    void loadMore()
-      .catch(() => false)
-      .then((success) => {
-        if (window.location.hash !== hash) return;
-        setProgress((current) => {
-          if (current.hash === hash && current.status !== "searching") return current;
-          return { hash, status: success ? "searching" : "error", pages: pages + 1 };
-        });
+    const request = {};
+    pending.current = request;
+    void fetchPage(nextPage)
+      .catch(() => null)
+      .then((result) => {
+        if (pending.current !== request || activeScope.current !== scope) return;
+        const found = result?.list.some((moment) => moment.id === targetId);
+        setProgress((current) => ({
+          ...current,
+          status: result ? "searching" : "error",
+          pages: current.pages + 1,
+          nextPage: result ? nextPage + 1 : nextPage,
+          matchedPage: found ? nextPage : undefined,
+        }));
+        // Background lookup never mounts scanned pages. Navigate only once the
+        // matching page is known, keeping the visitor's current view intact.
+        if (found) onPageChange(nextPage);
       })
       .finally(() => {
-        pending.current = false;
-        requestFinished();
+        if (pending.current === request && activeScope.current === scope) {
+          pending.current = null;
+          requestFinished();
+        }
       });
   }, [
     hash,
     targetId,
     status,
-    pages,
+    progress,
+    scope,
     moments,
-    hasMore,
+    page,
+    totalPages,
     isLoading,
     isError,
-    isFetchingMore,
-    loadMore,
+    isFetchingPage,
+    fetchPage,
+    onPageChange,
     requestVersion,
   ]);
 
-  const retry = useCallback(() => setProgress({ hash, status: "searching", pages: 0 }), [hash]);
-  const dismiss = useCallback(() => setProgress({ hash, status: "dismissed", pages: 0 }), [hash]);
+  const retry = useCallback(() => {
+    setProgress((current) => ({ ...current, status: "searching", pages: 0 }));
+  }, []);
+  const dismiss = useCallback(() => {
+    pending.current = null;
+    setProgress((current) => ({ ...current, status: "dismissed" }));
+  }, []);
 
   return { targetId, status: targetId ? status : "dismissed", retry, dismiss };
 }

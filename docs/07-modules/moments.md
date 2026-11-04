@@ -8,14 +8,14 @@ and a 20rem preferred column width with a maximum of four columns. The feed keep
 the full available width, so wider screens expand cards rather than adding columns
 or constraining the content container. The browser adapts the column count; cards
 flow vertically without shared rows, row spans, position calculation,
-or height measurement. The load-more control sits outside the multicolumn container.
+or height measurement. Numbered pagination sits outside the multicolumn container.
 
 `MomentFeedLayout` reads `view=list|grid` from the URL (missing/invalid values use
 List). Selection uses the native History `replaceState` API integrated with Next,
 preserving other query parameters and the hash without navigation or a server request.
 It changes `data-view`; Tailwind group variants reflow the existing children.
 Cards retain the same keyed DOM hierarchy in both modes, including image galleries
-and comment state. The page extracts only the topic into a memoized content component,
+and comment state. The page extracts the topic and page into a memoized content component,
 so view-only URL changes do not rerender data hooks, the sidebar or cards. Topic
 selection reads the current URL to preserve the chosen view. Reloads, shared links
 and browser history restore the URL's mode, including server-rendered markup.
@@ -41,16 +41,36 @@ losing the canvas context, so React Strict Mode can replay the effect safely. St
 image callbacks and animation frames are ignored after cleanup. Regression tests
 verify real texture uploads and live draw calls, not just nonblank placeholders.
 
-Both views retain the same load-more pagination model. Numbered Pagination was
-evaluated against the HeroUI MCP documentation, but it is not added just for Grid:
-changing presentation should not change navigation, and continuous browsing plus
-the existing cross-page hash lookup remain the feed's primary behavior.
+Both views use the same small HeroUI `Pagination`, following its compound API from
+the HeroUI MCP documentation. Each page contains up to 12 notes and replaces rather
+than appends to the previous page. The one-based `page` URL parameter maps to the
+API's zero-based request parameter; the response's `page` is already one-based.
+Server prefetch reads the selected page and topic on direct visits and refreshes.
+Client page/topic changes use native History navigation, preserving the selected
+view without fetching a server page or remounting the sidebar. Topic selection
+resets the page, while view selection preserves it. Back/forward and shared URLs
+restore the selection. Empty/single-page feeds omit the controls, and out-of-range
+pages normalize to the last available page.
+
+While a page is pending, the previous page remains readable and the pagination is
+disabled. A failure retains that page and exposes a local retry. A successful
+change replaces the cards atomically and scrolls/focuses the feed start, not the
+page header; old galleries unmount and release their resources. The existing ID
+registry skips repeated entrances when revisiting known cards. Manual pagination
+clears an old Moment hash; cross-page hash lookup searches in the background and
+only navigates to the matching page, preserving its hash and focusing the target.
+The archive search still supports cancellation, retry and bounded scan batches.
+Topic/month archive routes use the same Pagination rather than silently hiding
+entries beyond their first page.
 
 `feed-layout.test.ts` verifies render/mount isolation and preserved child state.
 `tests/e2e/moment-view-mode.spec.ts` covers the real Segment, responsive columns,
 natural card/image sizing, retained nodes, query and sidebar state, unchanged API requests,
 keyboard selection, refresh persistence, and pagination at 390, 820, 1024, 1440,
 1920, 2560 and 3440px.
+`tests/e2e/moment-pagination.spec.ts` covers page replacement, URL/history recovery,
+sidebar isolation, keyboard navigation, error recovery, filtering and page bounds
+in List/Grid at mobile and desktop widths.
 
 ## Feed Motion
 
