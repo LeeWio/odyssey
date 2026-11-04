@@ -1,3 +1,10 @@
+## [1.235.1](https://github.com/LeeWio/odyssey/compare/v1.235.0...v1.235.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* **comments:** post anonymous nested-sheet comments without renaming ([f5349b4](https://github.com/LeeWio/odyssey/commit/f5349b45fcb90036ce8ccc49d1cc596769b28cfb))
+
 # [1.235.0](https://github.com/LeeWio/odyssey/compare/v1.234.0...v1.235.0) (2026-11-04)
 
 
