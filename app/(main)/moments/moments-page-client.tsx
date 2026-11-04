@@ -182,7 +182,7 @@ const MomentsContent = memo(function MomentsContent({
                 <MomentFeedLoading label={t("loading")} />
               ) : isError ? (
                 <MomentState>
-                  <EmptyState className="bg-surface-secondary rounded-2xl">
+                  <EmptyState>
                     <EmptyState.Header>
                       <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
                       <EmptyState.Description className="max-w-sm text-pretty">
