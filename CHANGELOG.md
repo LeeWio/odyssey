@@ -1,3 +1,10 @@
+# [1.235.0](https://github.com/LeeWio/odyssey/compare/v1.234.0...v1.235.0) (2026-11-04)
+
+
+### Features
+
+* **moments:** improve long-image previews and reading ([d1a98bc](https://github.com/LeeWio/odyssey/commit/d1a98bc8b35ab5d3854fdf3aafc940b45d62093a))
+
 # [1.234.0](https://github.com/LeeWio/odyssey/compare/v1.233.0...v1.234.0) (2026-11-04)
 
 
