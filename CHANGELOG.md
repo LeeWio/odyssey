@@ -1,3 +1,10 @@
+# [1.234.0](https://github.com/LeeWio/odyssey/compare/v1.233.0...v1.234.0) (2026-11-04)
+
+
+### Features
+
+* **moments:** replace load more with numbered pagination ([3d50376](https://github.com/LeeWio/odyssey/commit/3d5037695dc945ef0bd71f10ca725231b9980233))
+
 # [1.233.0](https://github.com/LeeWio/odyssey/compare/v1.232.1...v1.233.0) (2026-11-04)
 
 
