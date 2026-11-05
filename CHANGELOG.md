@@ -1,3 +1,10 @@
+## [1.235.2](https://github.com/LeeWio/odyssey/compare/v1.235.1...v1.235.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **moments:** keep list spacing until grid has columns ([c2dd81d](https://github.com/LeeWio/odyssey/commit/c2dd81d4002feacfa531e443834a13e470b9274e))
+
 ## [1.235.1](https://github.com/LeeWio/odyssey/compare/v1.235.0...v1.235.1) (2026-11-04)
 
 
