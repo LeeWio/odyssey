@@ -141,8 +141,8 @@ export function RepositoryActivity({ activity }: { activity: GitHubActivityRespo
                 ) : null}
 
                 {"pullRequest" in event ? (
-                  <Card className="w-full min-w-0 p-3">
-                    <Card.Header className="gap-2.5 p-0">
+                  <Card className="w-full min-w-0">
+                    <Card.Header className="gap-2.5">
                       <Icon
                         icon="gravity-ui:code-pull-request-check"
                         className="text-accent size-4 shrink-0"

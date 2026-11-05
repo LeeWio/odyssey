@@ -84,7 +84,7 @@ export function CreateCollectionDialog({
               <Modal.Header>
                 <Modal.Heading>{t("createCollection")}</Modal.Heading>
               </Modal.Header>
-              <Modal.Body className="flex flex-col gap-4 py-4">
+              <Modal.Body className="flex flex-col gap-4">
                 <p className="text-muted text-sm">{t("saveToNew")}</p>
                 <TextField
                   isRequired

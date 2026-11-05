@@ -24,8 +24,8 @@ export function NotificationDeliveryCard() {
   const failed = (counts.FAILED ?? 0) + (counts.ABANDONED ?? 0);
 
   return (
-    <Card className="rounded-2xl">
-      <Card.Header className="flex-col items-start gap-2">
+    <Card>
+      <Card.Header className="items-start gap-2">
         <div className="flex w-full items-center justify-between gap-3">
           <div>
             <Card.Title className="text-base">Notification delivery</Card.Title>

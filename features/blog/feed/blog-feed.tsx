@@ -742,7 +742,6 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
               name="article-search"
               value={searchValue}
               onChange={handleSearchChange}
-              className="w-full"
             >
               <Label className="sr-only">{t("searchArticles")}</Label>
               <SearchField.Group>

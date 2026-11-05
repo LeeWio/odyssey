@@ -115,7 +115,7 @@ export function HelpPage() {
         </div>
 
         {filteredFaqs.length > 0 ? (
-          <Accordion className="w-full">
+          <Accordion>
             {filteredFaqs.map((faq, index) => (
               <Accordion.Item key={faq.question} id={`faq-${index}`}>
                 <Accordion.Heading>
@@ -125,13 +125,13 @@ export function HelpPage() {
                   </Accordion.Trigger>
                 </Accordion.Heading>
                 <Accordion.Panel>
-                  <Accordion.Body className="text-muted text-sm">{faq.answer}</Accordion.Body>
+                  <Accordion.Body>{faq.answer}</Accordion.Body>
                 </Accordion.Panel>
               </Accordion.Item>
             ))}
           </Accordion>
         ) : (
-          <Card className="rounded-lg">
+          <Card>
             <Card.Header>
               <Card.Title className="text-base">No answers found</Card.Title>
               <Card.Description>Try a shorter search or clear the current query.</Card.Description>
@@ -156,7 +156,7 @@ function HelpLinkCard({ link }: { link: HelpLink }) {
   const Icon = link.icon;
 
   return (
-    <Card className="rounded-lg">
+    <Card>
       <Card.Header>
         <div className="bg-accent-soft text-accent flex size-10 items-center justify-center rounded-xl">
           <Icon className="size-5" />

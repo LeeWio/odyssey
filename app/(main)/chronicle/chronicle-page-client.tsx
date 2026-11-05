@@ -104,7 +104,7 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
                     />
                   </div>
                   <Card.Header className="justify-end gap-4 p-6 sm:p-8">
-                    <Chip color="accent" size="sm" variant="soft" className="w-fit">
+                    <Chip color="accent" size="sm" variant="soft">
                       {t("highlight")}
                     </Chip>
                     <Card.Title className="group-hover:text-accent text-2xl leading-tight font-bold tracking-[-0.03em] transition-colors sm:text-4xl">
@@ -130,26 +130,27 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
             selectedKey={activeTab}
             onSelectionChange={(key) => setActiveTab(key as string)}
             className="w-full"
+            variant="secondary"
           >
-            <Tabs.ListContainer className="bg-transparent p-0">
+            <Tabs.ListContainer>
               <Tabs.List aria-label={t("sections")} className="gap-6 sm:gap-8">
-                <Tabs.Tab id="featured" className="h-12 px-1 text-sm font-medium">
+                <Tabs.Tab id="featured">
                   {t("featured")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab id="explore" className="h-12 px-1 text-sm font-medium">
+                <Tabs.Tab id="explore">
                   {t("exploreFilters")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab id="orbit" className="h-12 px-1 text-sm font-medium">
+                <Tabs.Tab id="orbit">
                   {t("orbitFeed")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab id="columns" className="h-12 px-1 text-sm font-medium">
+                <Tabs.Tab id="columns">
                   {t("columns")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab id="archive" className="h-12 px-1 text-sm font-medium">
+                <Tabs.Tab id="archive">
                   {t("timelineArchive")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
@@ -157,7 +158,7 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
             </Tabs.ListContainer>
 
             {/* Panel 1: Featured Hub (Dynamic Cinematic Collage) */}
-            <Tabs.Panel id="featured" className="mt-8 outline-none">
+            <Tabs.Panel id="featured" className="mt-8">
               <motion.div {...reveal(0.05, 10)}>
                 <div>
                   <div className="mb-6 flex items-end justify-between gap-6">
@@ -193,7 +194,7 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
                         >
                           <Card
                             variant="secondary"
-                            className="flex h-full flex-col overflow-hidden p-0 transition-shadow duration-300 hover:shadow-lg"
+                            className="h-full overflow-hidden p-0 transition-shadow duration-300 hover:shadow-lg"
                           >
                             <div className="bg-default-100 relative aspect-video w-full overflow-hidden">
                               <Image
@@ -207,7 +208,7 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
 
                             <Card.Header className="p-5">
                               {post.category?.name ? (
-                                <Chip size="sm" variant="soft" className="w-fit">
+                                <Chip size="sm" variant="soft">
                                   {post.category.name}
                                 </Chip>
                               ) : null}
@@ -240,28 +241,28 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
             </Tabs.Panel>
 
             {/* Panel 2: Explore & Filters */}
-            <Tabs.Panel id="explore" className="outline-none">
+            <Tabs.Panel id="explore">
               <motion.div {...reveal(0.05, 10)}>
                 <ExplorePage embedded />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 3: Orbit Logs Feed */}
-            <Tabs.Panel id="orbit" className="outline-none">
+            <Tabs.Panel id="orbit">
               <motion.div {...reveal(0.05, 10)}>
                 <BlogFeed embedded />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 4: Columns index */}
-            <Tabs.Panel id="columns" className="outline-none">
+            <Tabs.Panel id="columns">
               <motion.div {...reveal(0.05, 10)}>
                 <ColumnsIndex embedded />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 5: Timeline Archive */}
-            <Tabs.Panel id="archive" className="outline-none">
+            <Tabs.Panel id="archive">
               <motion.div {...reveal(0.05, 10)}>
                 <ArchivePage embedded />
               </motion.div>

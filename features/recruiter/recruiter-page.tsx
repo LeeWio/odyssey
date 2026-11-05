@@ -258,7 +258,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
           transition={{ duration: 0.6, ease: pageEaseOut }}
           className="border-default-200/50 mb-12 flex flex-col items-center border-b pb-8 text-center"
         >
-          <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
+          <Chip color="accent" size="sm" variant="soft">
             <Icon icon="gravity-ui:person-check" className="text-accent size-3" />
             Demo · Recruiter sandbox
           </Chip>
@@ -311,7 +311,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
           {/* Fit score Card */}
           <Card
             variant="secondary"
-            className="border-default-200/50 bg-accent/5 flex flex-col justify-between rounded-2xl border p-6 md:col-span-4"
+            className="border-default-200/50 bg-accent/5 justify-between rounded-2xl border p-6 md:col-span-4"
           >
             <div>
               <span className="text-muted/60 mb-2 block font-mono text-[9px] font-bold tracking-wider uppercase">
@@ -343,7 +343,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
           {/* Detailed Alignment Assessment Report */}
           <Card
             variant="secondary"
-            className="border-default-200/50 bg-surface-secondary/20 flex flex-col justify-between rounded-2xl border p-6 shadow-sm md:col-span-8"
+            className="border-default-200/50 bg-surface-secondary/20 justify-between rounded-2xl border p-6 shadow-sm md:col-span-8"
           >
             <div>
               <span className="text-muted/60 mb-2 block font-mono text-[9px] font-bold tracking-wider uppercase">

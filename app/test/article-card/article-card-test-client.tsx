@@ -152,7 +152,7 @@ function ArticleAuthorPopover() {
                 </div>
               </div>
               <Button
-                className="shrink-0 rounded-full"
+                className="shrink-0"
                 size="sm"
                 variant={isFollowing ? "tertiary" : "primary"}
                 onPress={() => setIsFollowing((following) => !following)}
@@ -228,7 +228,7 @@ function ScienceArticleAuthor() {
                 </div>
               </div>
               <Button
-                className="shrink-0 rounded-full"
+                className="shrink-0"
                 size="sm"
                 variant={isFollowing ? "tertiary" : "primary"}
                 onPress={() => setIsFollowing((following) => !following)}
@@ -293,7 +293,7 @@ function ScienceArticleCard() {
           </Card.Description>
         </Card.Header>
 
-        <Card.Footer className="mt-auto flex w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Card.Footer className="mt-auto w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <ScienceArticleAuthor />
 
           <div className="flex shrink-0 items-center gap-2">

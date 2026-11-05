@@ -51,7 +51,7 @@ export function EmojiToolbarPicker() {
         className="overflow-visible bg-transparent p-0 shadow-none"
         placement="bottom start"
       >
-        <Popover.Dialog className="p-0 outline-none">
+        <Popover.Dialog className="p-0">
           <InlineEmojiPicker onSelect={handleSelect} />
         </Popover.Dialog>
       </Popover.Content>

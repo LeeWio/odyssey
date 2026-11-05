@@ -60,15 +60,15 @@ export function StorageHealth() {
   const totalPages = check?.totalPages ?? 0;
 
   return (
-    <Card className="rounded-2xl">
-      <Card.Header className="flex-col items-start gap-1">
+    <Card>
+      <Card.Header className="items-start gap-1">
         <Card.Title className="text-base">Stored assets</Card.Title>
         <Card.Description>
           Counts come from file metadata. The check compares one page of assets with the storage
           provider.
         </Card.Description>
       </Card.Header>
-      <Card.Content className="flex flex-col gap-4">
+      <Card.Content className="gap-4">
         {inventory.isLoading ? (
           <div className="flex min-h-16 items-center justify-center">
             <Spinner />

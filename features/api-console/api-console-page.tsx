@@ -146,7 +146,7 @@ export function ApiConsolePage() {
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]">
           <div className="flex flex-col gap-4">
             {/* Endpoints menu */}
-            <Card variant="secondary" className="p-4">
+            <Card variant="secondary">
               <span className="text-muted/60 mb-3 block pl-1 font-mono text-[9px] font-bold tracking-wider uppercase">
                 入口
               </span>
@@ -178,7 +178,7 @@ export function ApiConsolePage() {
             {/* Parameters & Send triggers panel */}
             <Card
               variant="secondary"
-              className="border-default-200/50 bg-surface-secondary/20 flex flex-col gap-5 rounded-2xl border p-5 shadow-sm"
+              className="border-default-200/50 bg-surface-secondary/20 gap-5 rounded-2xl border p-5 shadow-sm"
             >
               <div>
                 <span className="text-muted/60 mb-1 block font-mono text-[9px] font-bold tracking-wider uppercase">
@@ -249,7 +249,8 @@ export function ApiConsolePage() {
               <Button
                 isDisabled={responseState.loading}
                 onPress={handleSendRequest}
-                className="bg-accent mt-2 w-full gap-2 rounded-xl border-none font-bold text-white"
+                className="mt-2"
+                fullWidth
               >
                 {responseState.loading ? (
                   <Icon icon="gravity-ui:arrow-clockwise" className="size-4 animate-spin" />
@@ -262,7 +263,7 @@ export function ApiConsolePage() {
           </div>
 
           {/* Right panel: Response terminal */}
-          <Card variant="secondary" className="flex min-h-[32rem] flex-col overflow-hidden">
+          <Card variant="secondary" className="min-h-[32rem] overflow-hidden">
             {/* Response Console Topbar */}
             <div className="border-default-100 flex shrink-0 items-center justify-between border-b bg-black/35 px-5 py-4 font-mono text-xs">
               <span className="text-muted/60 font-bold tracking-wider uppercase">看一句</span>

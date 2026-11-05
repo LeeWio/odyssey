@@ -75,7 +75,7 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
 
   return (
     <>
-      <TextField className="w-full" name="text">
+      <TextField fullWidth name="text">
         <Label>Display Text</Label>
         <InputGroup variant="secondary">
           <InputGroup.Prefix>
@@ -89,7 +89,7 @@ export const LinkMenuEdit: React.FC<LinkMenuEditProps> = ({ onCancel }) => {
         </InputGroup>
       </TextField>
 
-      <TextField className="w-full" name="url">
+      <TextField fullWidth name="url">
         <Label>Link URL</Label>
         <InputGroup variant="secondary">
           <InputGroup.Prefix>

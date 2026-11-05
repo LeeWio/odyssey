@@ -238,7 +238,7 @@ Feel free to pick one of the suggestions below, or type your own question!`;
           transition={{ duration: 0.5, ease: pageEaseOut }}
           className="mb-6 flex flex-col items-center text-center"
         >
-          <Chip color="accent" size="sm" variant="soft" className="gap-1.5 pl-2">
+          <Chip color="accent" size="sm" variant="soft">
             <Icon icon="gravity-ui:sparkles" className="text-accent size-3" />
             Demo · Scripted guide
           </Chip>

@@ -298,7 +298,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           {isLoading ? <FriendLinkSkeleton /> : null}
 
           {!isLoading && error ? (
-            <EmptyState className="bg-surface-secondary rounded-2xl" size="lg">
+            <EmptyState size="lg">
               <EmptyState.Header>
                 <EmptyState.Media variant="icon">
                   <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
@@ -316,7 +316,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           ) : null}
 
           {!isLoading && !error && validLinks.length === 0 ? (
-            <EmptyState className="bg-surface-secondary rounded-2xl" size="lg">
+            <EmptyState size="lg">
               <EmptyState.Header>
                 <EmptyState.Media variant="icon">
                   <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
@@ -328,7 +328,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           ) : null}
 
           {!isLoading && !error && validLinks.length > 0 && visibleLinks.length === 0 ? (
-            <EmptyState className="bg-surface-secondary rounded-2xl" size="md">
+            <EmptyState size="md">
               <EmptyState.Header>
                 <EmptyState.Media variant="icon">
                   <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
@@ -359,7 +359,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
             className="mt-12 grid gap-8 lg:grid-cols-[minmax(16rem,0.6fr)_minmax(0,1.2fr)] lg:items-start"
           >
             <div>
-              <Chip size="sm" variant="secondary" className="w-fit">
+              <Chip size="sm" variant="secondary">
                 {t("exchange")}
               </Chip>
               <Typography

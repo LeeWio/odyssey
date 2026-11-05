@@ -57,7 +57,7 @@ export function RecommendedCard({
   return (
     <Card variant="secondary" className="h-full overflow-hidden p-0">
       <LibraryPostVisual post={post} />
-      <Card.Header className="gap-3">
+      <Card.Header>
         <div className="flex items-center justify-between gap-3">
           {post.category?.name ? (
             <Chip size="sm" variant="soft">
@@ -112,7 +112,7 @@ export function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
     <Link className="block h-full no-underline" href={href}>
       <Card variant="secondary" className="h-full overflow-hidden p-0">
         <LibraryPostVisual post={post} />
-        <Card.Header className="gap-3">
+        <Card.Header>
           <div className="flex items-start justify-between gap-3">
             {post.category?.name ? (
               <Chip size="sm" variant="soft">
@@ -165,7 +165,7 @@ export function FavoriteCard({ entry }: { entry: FavoritePostResponse }) {
     <Link className="block h-full no-underline" href={`/single/${post.slug}`}>
       <Card variant="secondary" className="h-full overflow-hidden p-0">
         <LibraryPostVisual post={post} />
-        <Card.Header className="gap-3">
+        <Card.Header>
           <div className="flex items-center justify-between gap-3">
             {post.category?.name ? (
               <Chip size="sm" variant="soft">
@@ -214,7 +214,7 @@ export function ReadingListCard({
   return (
     <Card variant="secondary" className="h-full overflow-hidden p-0">
       <LibraryPostVisual post={post} />
-      <Card.Header className="gap-3">
+      <Card.Header>
         <div className="flex items-start justify-between gap-3">
           {post.category?.name ? (
             <Chip size="sm" variant="soft">
@@ -270,7 +270,7 @@ export function FollowingCard({ post }: { post: PostDigestResponse }) {
     <Link className="block h-full no-underline" href={`/single/${post.slug}`}>
       <Card variant="secondary" className="h-full overflow-hidden p-0">
         <LibraryPostVisual post={post} />
-        <Card.Header className="gap-3">
+        <Card.Header>
           {post.category?.name ? (
             <Chip size="sm" variant="soft">
               {post.category.name}

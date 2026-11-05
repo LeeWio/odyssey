@@ -77,7 +77,7 @@ export const PostCard = ({
       <div className={cn("flex flex-1 flex-col", variant === "full-gradient" ? "p-8" : "p-6")}>
         {variant === "gradient-header" && (
           <div className="mb-4">
-            <Chip size="sm" variant="soft" color="accent" className="font-bold">
+            <Chip size="sm" variant="soft" color="accent">
               {category}
             </Chip>
           </div>
@@ -129,7 +129,10 @@ export const PostCard = ({
 
           <div className="flex items-center gap-1.5 opacity-60">
             <Icon icon="gravity-ui:calendar" className="size-3.5" />
-            <Typography className="text-[10px] font-bold tracking-widest uppercase tabular-nums">
+            <Typography
+              className="text-[10px] tracking-widest uppercase tabular-nums"
+              weight="bold"
+            >
               {date}
             </Typography>
           </div>

@@ -327,7 +327,6 @@ function SuggestionMenuContent({
       >
         <ListBox
           aria-label="Insert block"
-          className="w-full gap-1 p-1"
           selectionMode="none"
           onAction={(key) => {
             const item = items.find((candidate) => candidate.id === String(key));
@@ -439,7 +438,7 @@ function MentionMenuContent({
     >
       <ListBox
         aria-label="Mention user"
-        className="w-64 p-1"
+        className="w-64"
         selectionMode="none"
         onAction={(key) => {
           const item = items.find((candidate) => candidate.id === String(key));

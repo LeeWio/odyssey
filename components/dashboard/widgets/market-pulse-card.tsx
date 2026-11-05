@@ -10,17 +10,15 @@ export function MarketPulseCard() {
   const { data: indices = [], isLoading } = useGetMarketIndicesQuery("1D");
 
   return (
-    <Card className="rounded-2xl">
+    <Card>
       <Card.Header className="flex-row items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon icon="gravity-ui:chart-line" className="text-accent size-5" />
           <Card.Title className="text-base">Market Pulse</Card.Title>
         </div>
-        <TrendChip className="bg-transparent" trend="up">
-          Real-time
-        </TrendChip>
+        <TrendChip trend="up">Real-time</TrendChip>
       </Card.Header>
-      <Card.Content className="flex flex-col gap-6">
+      <Card.Content className="gap-6">
         {isLoading ? (
           <div className="flex h-[180px] items-center justify-center">
             <Spinner size="sm" />

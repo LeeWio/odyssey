@@ -112,7 +112,7 @@ export const LoginContent = ({
               validate={(value) => (isValidEmail(value) ? null : t("validEmail"))}
             >
               <Label>{t("email")}</Label>
-              <Input autoFocus className="w-full" placeholder="john@example.com" />
+              <Input autoFocus fullWidth placeholder="john@example.com" />
               <FieldError />
             </TextField>
             <Button fullWidth type="submit" variant="primary" isPending={isSendingOtp}>

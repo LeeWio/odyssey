@@ -273,7 +273,7 @@ export const MomentCard = ({
         >
           <AlertDialog.Container size="xs">
             <AlertDialog.Dialog className="max-w-[calc(100vw-32px)] sm:max-w-md">
-              <AlertDialog.Header className="mx-auto flex flex-row">
+              <AlertDialog.Header className="mx-auto flex-row">
                 <Icon
                   icon="gravity-ui:trash-bin"
                   className="text-danger drop-shadow-danger size-28 sm:size-32 md:size-36"
@@ -288,7 +288,7 @@ export const MomentCard = ({
                   {t("deleteDescription")}
                 </Typography>
               </AlertDialog.Body>
-              <AlertDialog.Footer className="flex justify-end gap-2">
+              <AlertDialog.Footer>
                 <Button
                   fullWidth
                   variant="danger"
@@ -326,7 +326,7 @@ export const MomentCardSkeleton = ({
         </div>
         <Skeleton animationType={animationType} className="size-8 rounded-lg" />
       </Card.Header>
-      <Card.Content className="flex flex-col gap-3">
+      <Card.Content>
         <Skeleton animationType={animationType} className="h-4.5 w-full rounded-lg" />
         <Skeleton animationType={animationType} className="h-4.5 w-5/6 rounded-lg" />
         <Skeleton animationType={animationType} className="h-4.5 w-2/3 rounded-lg" />

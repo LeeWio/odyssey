@@ -31,7 +31,7 @@ export const PublisherHeader = ({
   };
 
   return (
-    <Modal.Header className="flex flex-row items-center justify-between">
+    <Modal.Header className="flex-row items-center justify-between">
       <div className="flex flex-row items-center gap-3">
         <UserAvatar name={displayName} avatar={user?.avatar} email={user?.email} />
         <div className="flex flex-col">

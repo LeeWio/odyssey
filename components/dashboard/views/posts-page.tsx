@@ -203,7 +203,7 @@ export function PostsPage() {
         cell: (post) => (
           <Tooltip delay={400}>
             <div className="flex w-full min-w-0 items-center gap-2">
-              <Avatar className="size-5 shrink-0 rounded-md">
+              <Avatar className="size-5" size="sm">
                 {post.coverImage ? <Avatar.Image alt="" src={post.coverImage} /> : null}
                 <Avatar.Fallback className="text-[9px]">{initials(post.title)}</Avatar.Fallback>
               </Avatar>
@@ -284,7 +284,7 @@ export function PostsPage() {
         allowsSorting: true,
         cell: (post) => (
           <div className="flex items-center gap-2">
-            <Avatar className="size-5 rounded-[var(--radius)]">
+            <Avatar className="size-5" size="sm">
               {post.authorAvatar ? (
                 <Avatar.Image alt={post.authorName || "Author"} src={post.authorAvatar} />
               ) : null}
@@ -553,9 +553,8 @@ export function PostsPage() {
           </Button>
           <Button
             aria-label="Delete"
-            className="text-danger bg-danger/10"
             size="sm"
-            variant="ghost"
+            variant="danger-soft"
             onPress={() => {
               const first = filteredPosts.find((post) => selectedIds.has(String(post.id)));
               if (!first) return;

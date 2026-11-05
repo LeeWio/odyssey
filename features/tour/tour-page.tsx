@@ -121,10 +121,7 @@ export function TourPage() {
           </Card>
 
           {/* Right Column: Dynamic Screen Content */}
-          <Card
-            variant="secondary"
-            className="flex min-h-[24rem] flex-col justify-between p-6 md:p-8"
-          >
+          <Card variant="secondary" className="min-h-[24rem] justify-between p-6 md:p-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeStep}

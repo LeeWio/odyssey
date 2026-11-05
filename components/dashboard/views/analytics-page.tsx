@@ -16,7 +16,7 @@ export function AnalyticsPage() {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-4 pb-10">
       <div className="flex flex-col gap-2">
-        <Chip className="w-fit" size="sm" variant="soft">
+        <Chip size="sm" variant="soft">
           Admin analytics
         </Chip>
         <p className="text-muted text-sm">

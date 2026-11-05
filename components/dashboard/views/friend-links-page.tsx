@@ -516,11 +516,11 @@ export function FriendLinksPage() {
               <Modal.CloseTrigger />
               <Form onSubmit={handleFormSubmit}>
                 <Modal.Header>
-                  <Modal.Heading className="text-lg font-bold">
+                  <Modal.Heading>
                     {selectedLink ? "Edit Friend Link" : "Add Friend Link"}
                   </Modal.Heading>
                 </Modal.Header>
-                <Modal.Body className="flex flex-col gap-4 py-4">
+                <Modal.Body className="flex flex-col gap-4">
                   <TextField isRequired name="name">
                     <Label>Site Name</Label>
                     <Input
@@ -589,7 +589,9 @@ export function FriendLinksPage() {
 
                   <div className="bg-surface-secondary ring-border/50 flex items-center justify-between rounded-xl p-4 ring-1">
                     <div className="flex flex-col gap-0.5">
-                      <Typography className="text-sm font-semibold">Publicly Visible</Typography>
+                      <Typography className="text-sm" weight="semibold">
+                        Publicly Visible
+                      </Typography>
                       <Typography className="text-muted text-[10px]">
                         Enable this to show the link on the public page.
                       </Typography>
@@ -600,14 +602,14 @@ export function FriendLinksPage() {
                     />
                   </div>
                 </Modal.Body>
-                <Modal.Footer className="border-border border-t pt-4">
+                <Modal.Footer>
                   <Button slot="close" variant="tertiary" size="sm">
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     size="sm"
-                    className="bg-accent text-accent-foreground"
+                    variant="primary"
                     isPending={isCreating || isUpdating}
                   >
                     {({ isPending }) => (

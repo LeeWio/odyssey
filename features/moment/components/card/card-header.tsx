@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Button, Dropdown, Spinner, Typography } from "@heroui/react";
+import { Avatar, Button, Dropdown, Label, Spinner, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
@@ -70,13 +70,11 @@ export const CardHeader = ({
               <Dropdown.Item
                 id="delete"
                 textValue={t("deleteMoment")}
-                className="text-danger"
+                variant="danger"
                 onPress={onDelete}
               >
-                <div className="flex flex-row items-center gap-2">
-                  <Icon icon="gravity-ui:trash-bin" className="size-4" />
-                  <span>{t("deleteMoment")}</span>
-                </div>
+                <Icon icon="gravity-ui:trash-bin" className="text-danger size-4" />
+                <Label>{t("deleteMoment")}</Label>
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown.Popover>

@@ -41,7 +41,7 @@ function EssayRow({ lead = false, post }: { lead?: boolean; post: PostResponse }
   const seed = String(post.id ?? post.slug ?? post.title ?? "essay");
 
   return (
-    <ItemCard className="items-start p-3" variant="secondary">
+    <ItemCard className="items-start" variant="secondary">
       <ItemCard.Icon className="relative size-20 overflow-hidden rounded-xl">
         <ArticleCover animated={false} presetId={post.shaderPreset} seed={seed} />
       </ItemCard.Icon>

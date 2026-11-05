@@ -58,12 +58,12 @@ export function DeviceBreakdownCard() {
   const formattedTotal = formatCount(total);
 
   return (
-    <Card className="h-full rounded-2xl">
+    <Card className="h-full">
       <Card.Header>
         <Card.Title className="text-base">Traffic by device</Card.Title>
         <Card.Description>How visitors are reaching your site.</Card.Description>
       </Card.Header>
-      <Card.Content className="flex flex-1 flex-col items-center justify-center gap-6">
+      <Card.Content className="flex-1 items-center justify-center gap-6">
         <div className="relative">
           <PieChart height={240} width={240}>
             <PieChart.Pie

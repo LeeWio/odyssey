@@ -333,16 +333,14 @@ export function RolesPage() {
               <Modal.CloseTrigger />
               <Form onSubmit={handleFormSubmit}>
                 <Modal.Header>
-                  <Modal.Heading className="text-lg font-bold">
-                    {selectedRole ? "Edit Role" : "Create Role"}
-                  </Modal.Heading>
+                  <Modal.Heading>{selectedRole ? "Edit Role" : "Create Role"}</Modal.Heading>
                   <p className="text-muted text-sm">
                     {selectedRole
                       ? "Update the role attributes. The code must be compliant with Security standards."
                       : "Define a new security role to bundle permissions."}
                   </p>
                 </Modal.Header>
-                <Modal.Body className="flex flex-col gap-4 py-4">
+                <Modal.Body className="flex flex-col gap-4">
                   <TextField
                     isRequired
                     name="name"
@@ -388,7 +386,7 @@ export function RolesPage() {
                     <FieldError />
                   </TextField>
                 </Modal.Body>
-                <Modal.Footer className="border-border border-t pt-4">
+                <Modal.Footer>
                   <Button slot="close" variant="tertiary" size="sm">
                     Cancel
                   </Button>

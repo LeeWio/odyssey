@@ -30,6 +30,8 @@ import {
   Button,
   Card,
   Link,
+  buttonVariants,
+  cn,
   Popover,
   TextArea,
   Description,
@@ -110,14 +112,14 @@ export default function Home({ moments = [] }: { moments?: MomentResponse[] }) {
           >
             <Link
               href="/chronicle"
-              className="bg-accent text-accent-foreground hover:bg-accent/90 focus-visible:ring-accent inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold no-underline transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className={cn(buttonVariants({ variant: "primary" }), "no-underline")}
             >
               {t("page.readWriting")}
               <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
             </Link>
             <Link
               href="#explore-odyssey"
-              className="border-default-200/70 bg-surface text-foreground hover:bg-surface-secondary focus-visible:ring-accent inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold no-underline transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className={cn(buttonVariants({ variant: "outline" }), "no-underline")}
             >
               {t("page.exploreField")}
               <Icon aria-hidden="true" icon="lucide:arrow-down" className="size-4" />
@@ -153,7 +155,7 @@ export default function Home({ moments = [] }: { moments?: MomentResponse[] }) {
                 className="border-default-200/50 bg-surface/90 w-80 border shadow-xl backdrop-blur-md"
                 placement="bottom end"
               >
-                <Popover.Dialog className="p-4 outline-none">
+                <Popover.Dialog>
                   <Popover.Arrow />
                   <GuestbookQuickForm onClose={() => setIsGuestbookPopoverOpen(false)} />
                 </Popover.Dialog>
@@ -247,7 +249,7 @@ export default function Home({ moments = [] }: { moments?: MomentResponse[] }) {
                 className="group/item first:**:data-[slot=accordion-trigger]:rounded-t-2xl last:[&:not(:has([data-slot=accordion-trigger][aria-expanded='true']))_[data-slot=accordion-trigger]]:rounded-b-2xl"
               >
                 <Accordion.Heading>
-                  <Accordion.Trigger className="group hover:bg-surface flex items-center gap-2 transition-transform duration-200 ease-[cubic-bezier(0.16,1.08,0.3,1)]">
+                  <Accordion.Trigger className="group hover:bg-surface gap-2 transition-transform duration-200 ease-[cubic-bezier(0.16,1.08,0.3,1)]">
                     <span className="bg-accent/10 text-accent flex size-9 shrink-0 items-center justify-center rounded-lg">
                       <Icon aria-hidden="true" icon={faqIcons[index]} className="size-4" />
                     </span>
@@ -257,7 +259,7 @@ export default function Home({ moments = [] }: { moments?: MomentResponse[] }) {
                         {t(`faq.${key}.subtitle`)}
                       </span>
                     </div>
-                    <Accordion.Indicator className="text-muted/50 [&>svg]:size-4">
+                    <Accordion.Indicator className="text-muted/50">
                       <Icon icon="gravity-ui:chevron-down" />
                     </Accordion.Indicator>
                   </Accordion.Trigger>
@@ -304,7 +306,7 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
       <div className="flex flex-col gap-3 text-start">
         <div className="flex items-center gap-2">
           <span className="text-accent text-base">✨</span>
-          <Popover.Heading className="text-foreground text-sm font-semibold tracking-normal">
+          <Popover.Heading className="text-sm tracking-normal">
             {t("guestbook.signTitle")}
           </Popover.Heading>
         </div>
@@ -333,7 +335,7 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 text-start">
       <div className="flex items-center gap-2">
         <span className="text-accent text-base">✨</span>
-        <Popover.Heading className="text-foreground text-sm font-semibold tracking-normal">
+        <Popover.Heading className="text-sm font-semibold tracking-normal">
           {t("guestbook.beforeYouGo")}
         </Popover.Heading>
       </div>

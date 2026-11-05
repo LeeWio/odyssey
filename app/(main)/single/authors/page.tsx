@@ -127,7 +127,7 @@ export default function AuthorsPage() {
                     </div>
                   </div>
                 </Card.Header>
-                <Card.Content className="flex flex-col gap-2">
+                <Card.Content className="gap-2">
                   {author.categories.length > 0 ? (
                     <p className="text-muted text-xs">{author.categories.join(" · ")}</p>
                   ) : null}

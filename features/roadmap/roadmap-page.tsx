@@ -66,7 +66,7 @@ export function RoadmapPage() {
         <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-4">
           {roadmapEvents.map((event) => (
             <Card key={event.title} className="h-full" variant="secondary">
-              <Card.Header className="gap-3">
+              <Card.Header>
                 <div className="flex items-center justify-between gap-3">
                   <Icon aria-hidden="true" className="text-accent size-4" icon={event.icon} />
                   <Chip color={event.tagColor} size="sm" variant="soft">

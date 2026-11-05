@@ -445,7 +445,7 @@ function TrackerLoading() {
 function TrackerError({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="mx-auto flex max-w-7xl px-5 pt-4 pb-10">
-      <EmptyState className="bg-surface-secondary w-full rounded-2xl">
+      <EmptyState className="w-full">
         <EmptyState.Header>
           <EmptyState.Title>Tracker is unavailable</EmptyState.Title>
           <EmptyState.Description>Try loading the board again in a moment.</EmptyState.Description>
@@ -463,7 +463,7 @@ function TrackerError({ onRetry }: { onRetry: () => void }) {
 function TrackerEmpty({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="mx-auto flex max-w-7xl px-5 pt-4 pb-10">
-      <EmptyState className="bg-surface-secondary w-full rounded-2xl">
+      <EmptyState className="w-full">
         <EmptyState.Header>
           <EmptyState.Title>Your tracker is ready for its first task</EmptyState.Title>
           <EmptyState.Description>

@@ -69,7 +69,7 @@ function ProjectSkeleton() {
       {Array.from({ length: 6 }, (_, index) => (
         <Card key={index} variant="secondary" className="overflow-hidden p-0">
           <Skeleton className="aspect-[16/9] w-full rounded-none" />
-          <Card.Header className="gap-3">
+          <Card.Header>
             <Skeleton className="h-5 w-24 rounded-lg" />
             <Skeleton className="h-7 w-3/5 rounded-lg" />
             <Skeleton className="h-4 w-full rounded-lg" />

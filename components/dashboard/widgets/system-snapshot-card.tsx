@@ -19,8 +19,8 @@ export function SystemSnapshotCard() {
   const snapshot = query.data as SystemSnapshot | undefined;
 
   return (
-    <Card className="rounded-2xl">
-      <Card.Header className="flex-col items-start gap-1">
+    <Card>
+      <Card.Header className="items-start gap-1">
         <Card.Title className="text-base">System snapshot</Card.Title>
         <Card.Description>JVM, HTTP, cache, and queue counters from this process.</Card.Description>
       </Card.Header>

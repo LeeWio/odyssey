@@ -17,8 +17,8 @@ export function ContentOperationsCard() {
   const attention = data?.attentionItems ?? [];
 
   return (
-    <Card className="rounded-2xl">
-      <Card.Header className="flex-col items-start gap-2">
+    <Card>
+      <Card.Header className="items-start gap-2">
         <Card.Title className="text-base">Content operations</Card.Title>
         <Card.Description>Publishing, comments, and subscribers right now.</Card.Description>
       </Card.Header>

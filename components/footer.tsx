@@ -153,14 +153,14 @@ export function Footer() {
     <footer className="w-full" data-view-transition-shell="site-footer">
       <div className="flex w-full flex-col gap-10 px-4 pt-20 pb-8 sm:pt-28 md:px-6 xl:px-8">
         <motion.div {...reveal()}>
-          <Card variant="secondary" className="gap-6 p-6 sm:p-8">
-            <Card.Header className="max-w-xl gap-2 p-0">
+          <Card variant="secondary" className="gap-6">
+            <Card.Header className="max-w-xl gap-2">
               <Card.Title className="text-2xl tracking-[-0.03em]">
                 {t("newsletterTitle")}
               </Card.Title>
               <Card.Description>{t("newsletterDescription")}</Card.Description>
             </Card.Header>
-            <Card.Content className="p-0">
+            <Card.Content>
               <div className="max-w-lg">
                 <NewsletterSubscribeForm variant="inline" />
               </div>

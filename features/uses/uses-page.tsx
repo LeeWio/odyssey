@@ -56,7 +56,7 @@ function UsesItemCard({ item }: { item: UsesItem }) {
         <Card.Title className="text-base">{item.name}</Card.Title>
         <Card.Description className="line-clamp-3 leading-6">{item.description}</Card.Description>
       </Card.Header>
-      <Card.Footer className="mt-auto flex flex-col items-start gap-3">
+      <Card.Footer className="mt-auto flex-col items-start gap-3">
         <div className="flex flex-wrap gap-2">
           {item.note ? (
             <Chip size="sm" variant="soft">
@@ -297,7 +297,7 @@ export function UsesPage({ compact = false }: UsesPageProps) {
         </div>
 
         {visibleCategories.length === 0 ? (
-          <EmptyState className="bg-surface-secondary rounded-2xl" size="lg">
+          <EmptyState size="lg">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:magnifier" aria-hidden="true" />

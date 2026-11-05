@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Chip, Skeleton, Typography } from "@heroui/react";
+import { Card, Skeleton, Tag, TagGroup, Typography } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { useGetPublicMomentTopicsQuery } from "@/lib/features/moment";
@@ -18,12 +18,11 @@ export function MomentTopicWidget({
   const topics = query.data ?? [];
 
   return (
-    <Card className="w-full gap-3 p-4">
-      <Card.Header className="p-0">
+    <Card className="w-full">
+      <Card.Header>
         <Card.Title className="text-base">{t("topicsTitle")}</Card.Title>
       </Card.Header>
-      <Card.Content className="flex flex-row flex-wrap gap-2 p-0">
-        <TopicChip current={!selected} label={t("allTopics")} onPress={() => onSelect(undefined)} />
+      <Card.Content className="flex flex-row flex-wrap gap-2">
         {query.isLoading ? (
           <Skeleton className="h-6 w-16 rounded-full" />
         ) : query.isError ? (
@@ -31,47 +30,32 @@ export function MomentTopicWidget({
             {t("topicsUnavailable")}
           </Typography>
         ) : (
-          topics.map((topic) => (
-            <TopicChip
-              key={topic.slug}
-              count={topic.count}
-              current={selected === topic.slug}
-              label={topic.slug}
-              locale={locale}
-              onPress={() => onSelect(selected === topic.slug ? undefined : topic.slug)}
-            />
-          ))
+          <TagGroup
+            aria-label={t("topicsTitle")}
+            selectedKeys={selected ? [selected] : ["all"]}
+            selectionMode="single"
+            size="sm"
+            onSelectionChange={(keys) => {
+              const key = [...keys][0];
+              onSelect(key == null || key === "all" ? undefined : String(key));
+            }}
+          >
+            <TagGroup.List className="flex-wrap">
+              <Tag id="all">{t("allTopics")}</Tag>
+              {topics.map((topic) => (
+                <Tag key={topic.slug} id={topic.slug} textValue={topic.slug}>
+                  {topic.slug}
+                  {topic.count == null ? null : (
+                    <span className="text-muted tabular-nums">
+                      {topic.count.toLocaleString(locale)}
+                    </span>
+                  )}
+                </Tag>
+              ))}
+            </TagGroup.List>
+          </TagGroup>
         )}
       </Card.Content>
     </Card>
-  );
-}
-
-function TopicChip({
-  count,
-  current,
-  label,
-  locale,
-  onPress,
-}: {
-  count?: number;
-  current: boolean;
-  label: string;
-  locale?: string;
-  onPress: () => void;
-}) {
-  return (
-    <Chip
-      className="w-auto max-w-full cursor-pointer"
-      color={current ? "accent" : "default"}
-      size="sm"
-      variant={current ? "primary" : "secondary"}
-      onClick={onPress}
-    >
-      {label}
-      {count == null ? null : (
-        <span className="text-muted tabular-nums">{count.toLocaleString(locale)}</span>
-      )}
-    </Chip>
   );
 }

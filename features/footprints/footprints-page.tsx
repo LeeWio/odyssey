@@ -27,7 +27,7 @@ function FootprintDetail({ footprint }: { footprint: Footprint | null }) {
   const t = useTranslations("Footprints");
   if (!footprint) {
     return (
-      <EmptyState className="bg-surface-secondary min-h-56 rounded-2xl" size="lg">
+      <EmptyState className="min-h-56" size="lg">
         <EmptyState.Header>
           <EmptyState.Media variant="icon">
             <Icon icon="gravity-ui:location-pin" aria-hidden="true" />
@@ -54,8 +54,8 @@ function FootprintDetail({ footprint }: { footprint: Footprint | null }) {
           </div>
         </Card.Content>
       ) : null}
-      <Card.Header className="gap-3">
-        <Chip size="sm" variant="soft" className="w-fit">
+      <Card.Header>
+        <Chip size="sm" variant="soft">
           {getFootprintMetaLabel(footprint)}
         </Chip>
         <Card.Title className="text-2xl tracking-[-0.03em] text-balance">
@@ -174,18 +174,19 @@ export function FootprintsPage() {
               setSelectedYear(String(key));
               setSelectedId(null);
             }}
+            variant="secondary"
           >
-            <Tabs.ListContainer className="border-default-200 border-b bg-transparent p-0">
+            <Tabs.ListContainer>
               <Tabs.List
                 aria-label={t("filterYear")}
                 className="justify-start gap-5 overflow-x-auto"
               >
-                <Tabs.Tab id={ALL_YEARS} className="px-1">
+                <Tabs.Tab id={ALL_YEARS}>
                   {t("allYears")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 {years.map((year) => (
-                  <Tabs.Tab key={year} id={String(year)} className="px-1">
+                  <Tabs.Tab key={year} id={String(year)}>
                     {year}
                     <Tabs.Indicator />
                   </Tabs.Tab>
@@ -196,7 +197,7 @@ export function FootprintsPage() {
 
           <div className="mt-8 grid gap-4 lg:grid-cols-2">
             {visibleFootprints.length === 0 ? (
-              <EmptyState className="bg-surface-secondary rounded-2xl" size="md">
+              <EmptyState size="md">
                 <EmptyState.Header>
                   <EmptyState.Title>{t("noStops")}</EmptyState.Title>
                   <EmptyState.Description>{t("noStopsHint")}</EmptyState.Description>

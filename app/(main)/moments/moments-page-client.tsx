@@ -208,7 +208,7 @@ const MomentsContent = memo(function MomentsContent({
 
                   {visibleMoments.length === 0 ? (
                     <MomentState>
-                      <EmptyState className="bg-surface-secondary rounded-2xl">
+                      <EmptyState>
                         <EmptyState.Header>
                           <EmptyState.Title>{t("empty")}</EmptyState.Title>
                         </EmptyState.Header>

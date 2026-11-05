@@ -390,7 +390,7 @@ export function ColumnsPage() {
                 <Modal.Header>
                   <Modal.Heading>{selectedColumn ? "Edit Column" : "Create Column"}</Modal.Heading>
                 </Modal.Header>
-                <Modal.Body className="flex flex-col gap-4 py-4">
+                <Modal.Body className="flex flex-col gap-4">
                   <TextField isRequired name="name">
                     <Label>Name</Label>
                     <Input

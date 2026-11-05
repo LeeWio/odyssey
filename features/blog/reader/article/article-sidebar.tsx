@@ -85,15 +85,21 @@ export function ArticleSidebar({ article }: { article: PostResponse }) {
         </Chip>
       ) : null}
       {tags.length > 0 ? (
-        <TagGroup aria-label={t("tags")} size="sm" variant="surface">
+        <TagGroup
+          aria-label={t("tags")}
+          selectionMode="single"
+          size="sm"
+          variant="surface"
+          onSelectionChange={(keys) => {
+            if (keys === "all") return;
+            const slug = [...keys][0];
+            if (slug == null) return;
+            router.push(`/single/tags/${encodeURIComponent(String(slug))}`);
+          }}
+        >
           <TagGroup.List>
             {tags.map((tag) => (
-              <Tag
-                key={tag.id}
-                id={tag.slug}
-                textValue={tag.name}
-                onAction={() => router.push(`/single/tags/${encodeURIComponent(tag.slug)}`)}
-              >
+              <Tag key={tag.id} id={tag.slug} textValue={tag.name}>
                 {tag.name}
               </Tag>
             ))}

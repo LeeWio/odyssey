@@ -234,7 +234,7 @@ export function FootprintsMap({
             onClose={onPopupClose}
           >
             <div className="flex w-56 flex-col gap-2 pr-4">
-              <Chip size="sm" variant="soft" className="w-fit">
+              <Chip size="sm" variant="soft">
                 {getFootprintMetaLabel(selectedFootprint)}
               </Chip>
               <Typography weight="semibold" className="text-sm leading-5 text-balance">
@@ -258,12 +258,12 @@ export function FootprintsMap({
       </Map>
 
       {!compact ? (
-        <Card className="bg-overlay shadow-overlay absolute top-3 left-3 z-10 w-[260px] gap-3 p-4">
+        <Card className="absolute top-3 left-3 z-10 w-[260px]">
           <Card.Header>
             <Card.Title className="text-sm">{t("mapTitle")}</Card.Title>
             <Card.Description>{t("mapDescription")}</Card.Description>
           </Card.Header>
-          <Card.Content className="gap-3">
+          <Card.Content>
             <div className="grid grid-cols-3 gap-3 text-xs">
               <span>
                 <strong className="text-foreground block text-base">{footprints.length}</strong>
@@ -282,7 +282,7 @@ export function FootprintsMap({
                 {t("latest")}
               </span>
             </div>
-            <Chip size="sm" variant="soft" className="w-fit">
+            <Chip size="sm" variant="soft">
               {t("coverageHint")}
             </Chip>
           </Card.Content>

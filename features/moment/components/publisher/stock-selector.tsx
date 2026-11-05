@@ -159,7 +159,7 @@ export function StockSelector({ onSelect, attachedStockSymbol }: StockSelectorPr
                     autoFocus
                     value={keyword}
                     onChange={setKeyword}
-                    className="w-full"
+                    fullWidth
                   >
                     <SearchField.Group>
                       <SearchField.SearchIcon>
@@ -234,7 +234,7 @@ export function StockSelector({ onSelect, attachedStockSymbol }: StockSelectorPr
                   exit="exit"
                   className="flex h-full w-full flex-col gap-3.5"
                 >
-                  <Popover.Heading className="flex flex-row items-center gap-2">
+                  <Popover.Heading className="flex-row items-center gap-2">
                     <Icon icon="gravity-ui:chart-mixed" />
                     <span>Interactive Preview</span>
                   </Popover.Heading>

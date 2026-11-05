@@ -90,7 +90,7 @@ export function ShaderBackgroundPreview({
         }}
       >
         <Tabs.ListContainer>
-          <Tabs.List aria-label="Shader families" className="w-full justify-start">
+          <Tabs.List aria-label="Shader families" className="justify-start">
             {SHADER_PRESET_GROUPS.map((group) => (
               <Tabs.Tab key={group.id} id={group.id}>
                 {group.label}

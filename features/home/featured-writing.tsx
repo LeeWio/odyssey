@@ -157,7 +157,7 @@ export function FeaturedWriting() {
               <Card
                 key={index}
                 variant="secondary"
-                className="bg-surface-secondary/45 flex aspect-[16/10] min-h-64 flex-col justify-between overflow-hidden p-5"
+                className="bg-surface-secondary/45 aspect-[16/10] min-h-64 justify-between overflow-hidden p-5"
               >
                 <div className="flex items-center justify-between gap-3">
                   <Skeleton className="h-6 w-20 rounded-full" />

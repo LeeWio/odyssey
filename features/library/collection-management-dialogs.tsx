@@ -90,7 +90,7 @@ export function CollectionFormDialog({
                   {collection ? t("editCollection") : t("createCollection")}
                 </Modal.Heading>
               </Modal.Header>
-              <Modal.Body className="flex flex-col gap-4 py-4">
+              <Modal.Body className="flex flex-col gap-4">
                 <TextField
                   isRequired
                   isReadOnly={isPending}

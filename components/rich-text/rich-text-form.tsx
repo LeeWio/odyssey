@@ -78,7 +78,7 @@ export function RichTextForm({ data, onChange, step }: RichTextFormProps) {
           <Input placeholder="art-of-design" />
         </TextField>
 
-        <TextField className="w-full">
+        <TextField fullWidth>
           <Label>Summary</Label>
           <TextArea
             placeholder="In this article, we explore..."
@@ -141,7 +141,7 @@ export function RichTextForm({ data, onChange, step }: RichTextFormProps) {
         </Select>
 
         {data.seriesId ? (
-          <TextField className="w-full">
+          <TextField fullWidth>
             <Label>Column order</Label>
             <Input
               min={0}

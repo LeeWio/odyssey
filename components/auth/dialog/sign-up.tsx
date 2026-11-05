@@ -113,7 +113,7 @@ export const SignupContent = ({ isActive = true, onDone, onSwitchToLogIn }: Sign
               validate={(value) => (value.length < 3 ? t("usernameMin") : null)}
             >
               <Label>{t("username")}</Label>
-              <Input autoFocus className="w-full" placeholder="johndoe" />
+              <Input autoFocus fullWidth placeholder="johndoe" />
               <FieldError />
             </TextField>
 
@@ -126,7 +126,7 @@ export const SignupContent = ({ isActive = true, onDone, onSwitchToLogIn }: Sign
               validate={(value) => (isValidEmail(value) ? null : t("validEmail"))}
             >
               <Label>{t("email")}</Label>
-              <Input className="w-full" placeholder="john@example.com" />
+              <Input fullWidth placeholder="john@example.com" />
               <FieldError />
             </TextField>
 
@@ -189,7 +189,7 @@ export const SignupContent = ({ isActive = true, onDone, onSwitchToLogIn }: Sign
               validate={(value) => (value !== password ? t("passwordMismatch") : null)}
             >
               <Label>{t("confirmPassword")}</Label>
-              <Input className="w-full" placeholder="Repeat your password" />
+              <Input fullWidth placeholder="Repeat your password" />
               <FieldError />
             </TextField>
 

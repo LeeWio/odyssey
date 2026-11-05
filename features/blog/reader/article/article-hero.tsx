@@ -114,17 +114,21 @@ export function ArticleHero({ article }: { article: PostResponse }) {
             </span>
           </div>
           {tags.length > 0 ? (
-            <TagGroup aria-label={t("tags")} size="sm" variant="surface">
+            <TagGroup
+              aria-label={t("tags")}
+              selectionMode="single"
+              size="sm"
+              variant="surface"
+              onSelectionChange={(keys) => {
+                if (keys === "all") return;
+                const slug = [...keys][0];
+                if (slug == null) return;
+                router.push(`/single/tags/${encodeURIComponent(String(slug))}`);
+              }}
+            >
               <TagGroup.List className="justify-center">
                 {tags.map((tag) => (
-                  <Tag
-                    key={tag.id}
-                    id={tag.slug}
-                    textValue={tag.name}
-                    onAction={() => {
-                      router.push(`/single/tags/${encodeURIComponent(tag.slug)}`);
-                    }}
-                  >
+                  <Tag key={tag.id} id={tag.slug} textValue={tag.name}>
                     {tag.name}
                   </Tag>
                 ))}

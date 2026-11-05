@@ -69,35 +69,27 @@ export default function UniversePage() {
             selectedKey={activeTab}
             onSelectionChange={(key) => setActiveTab(key as string)}
             className="w-full"
+            variant="secondary"
           >
-            <Tabs.ListContainer className="bg-transparent p-0">
+            <Tabs.ListContainer>
               <Tabs.List aria-label="星图里的几块" className="gap-6 sm:gap-8">
-                <Tabs.Tab
-                  id="mesh"
-                  className="h-12 px-1 text-sm font-medium text-zinc-400 data-[selected=true]:text-white"
-                >
+                <Tabs.Tab id="mesh">
                   星图
-                  <Tabs.Indicator className="bg-accent" />
+                  <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab
-                  id="atmosphere"
-                  className="h-12 px-1 text-sm font-medium text-zinc-400 data-[selected=true]:text-white"
-                >
+                <Tabs.Tab id="atmosphere">
                   路上的光
-                  <Tabs.Indicator className="bg-accent" />
+                  <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab
-                  id="relations"
-                  className="h-12 px-1 text-sm font-medium text-zinc-400 data-[selected=true]:text-white"
-                >
+                <Tabs.Tab id="relations">
                   隔壁
-                  <Tabs.Indicator className="bg-accent" />
+                  <Tabs.Indicator />
                 </Tabs.Tab>
               </Tabs.List>
             </Tabs.ListContainer>
 
             {/* Panel 1: 3D Constellations Network Mesh */}
-            <Tabs.Panel id="mesh" className="mt-10 outline-none">
+            <Tabs.Panel id="mesh" className="mt-10">
               <motion.div
                 className="relative overflow-hidden rounded-3xl border border-zinc-800 shadow-2xl"
                 {...reveal(0.05, 10)}
@@ -109,14 +101,14 @@ export default function UniversePage() {
             </Tabs.Panel>
 
             {/* Panel 2: Atmosphere Studies (Gallery) */}
-            <Tabs.Panel id="atmosphere" className="mt-10 outline-none">
+            <Tabs.Panel id="atmosphere" className="mt-10">
               <motion.div {...reveal(0.05, 10)} className="text-zinc-100">
                 <GalleryPage compact />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 3: External Relations Map (Friend Links) */}
-            <Tabs.Panel id="relations" className="mt-10 outline-none">
+            <Tabs.Panel id="relations" className="mt-10">
               <motion.div {...reveal(0.05, 10)} className="text-zinc-100">
                 <FriendLinksPage compact />
               </motion.div>

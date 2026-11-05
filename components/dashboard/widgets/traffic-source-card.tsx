@@ -32,7 +32,7 @@ export function TrafficSourceCard() {
   const total = data?.summary.sessions.numericValue ?? 0;
 
   return (
-    <Card className="rounded-2xl">
+    <Card>
       <Card.Header className="flex-row items-center justify-between">
         <Card.Title className="text-base">Traffic Source</Card.Title>
         <div className="flex items-center gap-4">
@@ -45,7 +45,7 @@ export function TrafficSourceCard() {
           </IconButton>
         </div>
       </Card.Header>
-      <Card.Content className="flex flex-col gap-4">
+      <Card.Content className="gap-4">
         <div className="flex flex-col">
           <span className="text-foreground text-lg font-semibold tabular-nums">
             {total.toLocaleString("en-US")}

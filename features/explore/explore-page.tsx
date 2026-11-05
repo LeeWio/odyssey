@@ -100,7 +100,7 @@ function ExplorePostCard({ post }: { post: PostResponse }) {
         >
           <div aria-hidden="true" className="aspect-[16/9] w-full" />
         </SmartColorSurface>
-        <Card.Header className="gap-3">
+        <Card.Header>
           <div className="flex flex-wrap items-center gap-2">
             {post.category?.name ? (
               <Chip size="sm" variant="soft">
@@ -143,7 +143,7 @@ function ExploreSkeleton() {
       {Array.from({ length: 6 }, (_, index) => (
         <Card key={index} variant="secondary" className="overflow-hidden p-0">
           <Skeleton className="aspect-[16/9] w-full rounded-none" />
-          <Card.Header className="gap-3">
+          <Card.Header>
             <Skeleton className="h-5 w-20 rounded-lg" />
             <Skeleton className="h-6 w-4/5 rounded-lg" />
             <Skeleton className="h-4 w-full rounded-lg" />

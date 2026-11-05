@@ -299,7 +299,7 @@ function WishCard({ id, item, onAction }: { id: string; item: BoardItem; onActio
           </div>
         </div>
         <Chip
-          className="h-6 shrink-0"
+          className="shrink-0"
           color={item.visibility === "private" ? "default" : "success"}
           size="sm"
           variant="soft"

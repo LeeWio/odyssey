@@ -359,7 +359,7 @@ export function UsersPage() {
         cell: (item) => (
           <div className="flex min-w-0 gap-1 overflow-hidden">
             {item.roles.map((role) => (
-              <Chip key={role} size="sm" variant="soft" className="shrink-0 text-xs uppercase">
+              <Chip key={role} size="sm" variant="soft" className="uppercase">
                 {role}
               </Chip>
             ))}
@@ -504,7 +504,7 @@ export function UsersPage() {
 
       <ActionBar aria-label="Bulk user actions" isOpen={selectionCount > 0}>
         <ActionBar.Prefix>
-          <Chip className="size-5 shrink-0 tabular-nums" size="sm">
+          <Chip className="tabular-nums" size="sm">
             {selectionCount}
           </Chip>
         </ActionBar.Prefix>

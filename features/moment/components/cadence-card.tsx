@@ -40,7 +40,7 @@ export function MomentCadenceCard({
 
   if (!initialData && query.isError) {
     return (
-      <Card className="w-full gap-3 p-4" role="alert">
+      <Card className="w-full" role="alert">
         <Typography type="body-sm">{unavailable}</Typography>
         <Button
           className="self-start"

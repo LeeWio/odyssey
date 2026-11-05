@@ -26,7 +26,7 @@ export function SessionsOverTimeCard() {
   const growth = data?.summary.sessions.growthRate ?? 0;
 
   return (
-    <Card className="rounded-2xl">
+    <Card>
       <Card.Header className="flex-row items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <Card.Title className="text-base">Sessions over time</Card.Title>

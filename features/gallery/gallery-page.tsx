@@ -185,7 +185,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
           </Carousel.Thumbnails>
         </Carousel>
 
-        <Card className="flex h-full flex-col" variant="secondary">
+        <Card className="h-full" variant="secondary">
           <Card.Header>
             <Typography color="muted" type="body-xs" className="font-mono tracking-wide">
               {t("fromTheFrame")}

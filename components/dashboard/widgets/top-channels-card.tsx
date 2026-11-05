@@ -17,7 +17,7 @@ export function TopChannelsCard() {
   }));
 
   return (
-    <Card className="h-full rounded-2xl">
+    <Card className="h-full">
       <Card.Header>
         <Card.Title className="text-base">Top channels</Card.Title>
         <Card.Description>Sessions by acquisition channel.</Card.Description>

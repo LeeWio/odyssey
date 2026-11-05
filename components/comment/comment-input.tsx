@@ -351,7 +351,7 @@ export function CommentInput({
   const signatureEmail = postAsGuest ? undefined : email;
   const signature = (
     <Popover>
-      <Popover.Trigger aria-label={t("signComment")} className="w-fit">
+      <Popover.Trigger aria-label={t("signComment")}>
         <span className="flex items-center gap-2">
           <Avatar size="sm" variant="soft">
             <SignatureAvatarImage

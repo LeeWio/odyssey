@@ -150,7 +150,7 @@ export function ReadingHistorySection() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-3">
                     <Link className="min-w-0 no-underline" href={href}>
-                      <Typography className="line-clamp-2 text-base font-semibold" type="h3">
+                      <Typography className="line-clamp-2 text-base" type="h3" weight="semibold">
                         {entry.post.title}
                       </Typography>
                     </Link>

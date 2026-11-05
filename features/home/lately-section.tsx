@@ -434,7 +434,7 @@ export function LatelySection() {
           ) : githubActivity?.available ? (
             <RepositoryActivityPanel activity={githubActivity} />
           ) : (
-            <Card className="w-full max-w-[620px] min-w-0 p-5" variant="secondary">
+            <Card className="w-full max-w-[620px] min-w-0" variant="secondary">
               <Card.Title className="text-sm">{t("lately.githubUnavailable")}</Card.Title>
               <Card.Description className="mt-1 text-xs">
                 {t("lately.githubUnavailableHint")}

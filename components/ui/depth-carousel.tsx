@@ -504,7 +504,7 @@ const DepthCarousel = ({
                 style={{ background: tint }}
               />
               {item.title || item.meta || item.detail ? (
-                <Card.Footer className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-1 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-4 pt-14 pb-4 text-left">
+                <Card.Footer className="pointer-events-none absolute inset-x-0 bottom-0 flex-col items-start gap-1 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-4 pt-14 pb-4 text-left">
                   {item.meta ? <span className="text-xs text-white/75">{item.meta}</span> : null}
                   {item.title ? (
                     <Card.Title className="line-clamp-2 text-base leading-5 font-semibold tracking-tight text-white">

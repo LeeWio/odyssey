@@ -643,7 +643,7 @@ export const Navbar = () => {
               <Button
                 isIconOnly
                 variant="ghost"
-                className="size-10 rounded-xl lg:hidden"
+                className="lg:hidden"
                 aria-label={t("search")}
                 onPress={() => {
                   setHasOpenedSearch(true);
@@ -729,7 +729,7 @@ export const Navbar = () => {
               <Button
                 size="sm"
                 variant="ghost"
-                className="hidden h-9 rounded-xl px-3.5 font-semibold sm:flex"
+                className="hidden sm:flex"
                 onPress={() => {
                   setHasOpenedAuth(true);
                   dispatch(setAuthMode("login"));
@@ -744,7 +744,6 @@ export const Navbar = () => {
                 <Button
                   isIconOnly
                   variant="ghost"
-                  className="size-10 rounded-xl"
                   aria-label={isMobileMenuOpen ? t("closeMenu") : t("openMenu")}
                   aria-haspopup="dialog"
                   aria-expanded={isMobileMenuOpen}

@@ -82,7 +82,6 @@ function ArticleAuthor({
                 </div>
               </div>
               <Button
-                className="rounded-full"
                 size="sm"
                 variant={isFollowing ? "tertiary" : "primary"}
                 onPress={() => setIsFollowing((following) => !following)}
@@ -168,7 +167,7 @@ export function ArticleCard({
           ) : null}
         </Card.Header>
 
-        <Card.Footer className="mt-auto flex w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Card.Footer className="mt-auto w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <ArticleAuthor post={post} publishedAt={publishedAt} />
           <div className="flex shrink-0 items-center gap-2">
             <Button

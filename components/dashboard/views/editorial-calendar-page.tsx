@@ -75,7 +75,7 @@ export function EditorialCalendarPage() {
     <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 pt-8 pb-10">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-2">
-          <Chip className="w-fit" color="accent" size="sm" variant="soft">
+          <Chip color="accent" size="sm" variant="soft">
             Editorial planning
           </Chip>
           <div>
@@ -94,7 +94,7 @@ export function EditorialCalendarPage() {
       </header>
 
       {isError ? (
-        <EmptyState className="bg-surface-secondary w-full rounded-2xl">
+        <EmptyState className="w-full">
           <EmptyState.Header>
             <EmptyState.Media variant="icon">
               <Icon icon="gravity-ui:circle-exclamation" />

@@ -53,7 +53,7 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
 
   if (isError || !data) {
     return (
-      <EmptyState className="bg-surface-secondary border-default-100 rounded-2xl border p-4">
+      <EmptyState>
         <EmptyState.Header>
           <EmptyState.Media variant="icon">
             <Icon icon="gravity-ui:chart-line-arrow-up" className="size-4" />

@@ -111,7 +111,7 @@ function ProjectCard({
           </Surface>
         </Card.Content>
 
-        <Card.Header className="gap-3">
+        <Card.Header>
           <Card.Title className="text-xl tracking-normal">{project.name}</Card.Title>
           <Card.Description className="line-clamp-3 leading-6">
             {project.description || t("projects.fallbackDescription")}
@@ -212,7 +212,7 @@ export function ProjectsShowcase() {
             {Array.from({ length: SHOWCASE_LIMIT }, (_, index) => (
               <Card key={index} variant="secondary">
                 <Skeleton className="aspect-[16/10] w-full rounded-t-[inherit]" />
-                <Card.Header className="gap-3">
+                <Card.Header>
                   <Skeleton className="h-6 w-36 rounded-lg" />
                   <Skeleton className="h-12 w-full rounded-lg" />
                   <Skeleton className="h-6 w-24 rounded-full" />
@@ -221,8 +221,8 @@ export function ProjectsShowcase() {
             ))}
           </div>
         ) : error ? (
-          <Card className="flex flex-col items-start gap-4 p-6" variant="secondary">
-            <Card.Header className="p-0">
+          <Card className="items-start" variant="secondary">
+            <Card.Header>
               <Card.Title>{t("projects.errorTitle")}</Card.Title>
               <Card.Description>{t("projects.errorDescription")}</Card.Description>
             </Card.Header>

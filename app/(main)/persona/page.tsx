@@ -59,22 +59,23 @@ export default function PersonaPage() {
             selectedKey={activeTab}
             onSelectionChange={(key) => setActiveTab(key as string)}
             className="w-full"
+            variant="secondary"
           >
-            <Tabs.ListContainer className="bg-transparent p-0">
+            <Tabs.ListContainer>
               <Tabs.List aria-label={t("sections")} className="gap-6 sm:gap-8">
-                <Tabs.Tab id="about" className="h-12 px-1 text-sm font-medium">
+                <Tabs.Tab id="about">
                   {t("about")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab id="setup" className="h-12 px-1 text-sm font-medium">
+                <Tabs.Tab id="setup">
                   {t("tools")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab id="career" className="h-12 px-1 text-sm font-medium">
+                <Tabs.Tab id="career">
                   {t("work")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
-                <Tabs.Tab id="guestbook" className="h-12 px-1 text-sm font-medium">
+                <Tabs.Tab id="guestbook">
                   {t("guestbook")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
@@ -82,28 +83,28 @@ export default function PersonaPage() {
             </Tabs.ListContainer>
 
             {/* Panel 1: About Me (Identity & Philosophy) */}
-            <Tabs.Panel id="about" className="mt-10 outline-none">
+            <Tabs.Panel id="about" className="mt-10">
               <motion.div {...reveal(0.05, 10)}>
                 <AboutPage compact />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 2: The Setup (Hardware & Configurations) */}
-            <Tabs.Panel id="setup" className="mt-10 outline-none">
+            <Tabs.Panel id="setup" className="mt-10">
               <motion.div {...reveal(0.05, 10)}>
                 <UsesPage compact />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 3: Career Radar (Professional presentation) */}
-            <Tabs.Panel id="career" className="mt-10 outline-none">
+            <Tabs.Panel id="career" className="mt-10">
               <motion.div {...reveal(0.05, 10)}>
                 <RecruiterPage compact />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 4: Guestbook Signings */}
-            <Tabs.Panel id="guestbook" className="mt-10 outline-none">
+            <Tabs.Panel id="guestbook" className="mt-10">
               <motion.div className="space-y-12" {...reveal(0.05, 10)}>
                 <div>
                   <Typography type="h3" weight="bold" className="tracking-tight">

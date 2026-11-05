@@ -7,7 +7,7 @@ import { aboutDefaults } from "./about-content";
 export function AboutDefaults() {
   return (
     <section aria-label="Defaults" className="flex flex-col gap-4">
-      <Chip size="sm" variant="secondary" className="w-fit">
+      <Chip size="sm" variant="secondary">
         Defaults
       </Chip>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

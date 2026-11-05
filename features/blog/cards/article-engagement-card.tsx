@@ -110,11 +110,7 @@ export function ArticleEngagementCard({ post }: { post: ArticleEngagementCardPos
   };
 
   return (
-    <Card
-      className="relative mx-auto flex w-full max-w-2xs flex-col"
-      role="article"
-      variant="default"
-    >
+    <Card className="relative mx-auto w-full max-w-2xs" role="article" variant="default">
       <div className="relative">
         <div className="relative aspect-4/3 overflow-hidden rounded-2xl">
           <Grainient {...getGrainientProps(post.slug || title)} className="absolute inset-0" />

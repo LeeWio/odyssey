@@ -346,7 +346,7 @@ export function CategoriesPage() {
               <Modal.CloseTrigger />
               <Form onSubmit={handleFormSubmit}>
                 <Modal.Header>
-                  <Modal.Heading className="text-lg font-bold">
+                  <Modal.Heading>
                     {selectedCategory ? "Edit Category" : "Create Category"}
                   </Modal.Heading>
                   <p className="text-muted text-sm">
@@ -355,7 +355,7 @@ export function CategoriesPage() {
                       : "Add a new category to group related blog posts."}
                   </p>
                 </Modal.Header>
-                <Modal.Body className="flex flex-col gap-4 py-4">
+                <Modal.Body className="flex flex-col gap-4">
                   <TextField
                     isRequired
                     name="name"
@@ -398,7 +398,7 @@ export function CategoriesPage() {
                     <FieldError />
                   </TextField>
                 </Modal.Body>
-                <Modal.Footer className="border-border border-t pt-4">
+                <Modal.Footer>
                   <Button slot="close" variant="tertiary" size="sm">
                     Cancel
                   </Button>

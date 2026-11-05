@@ -87,7 +87,8 @@ export function NewsletterSubscribeForm({ variant = "stacked" }: NewsletterSubsc
           <FieldError />
         </TextField>
         <Button
-          className={variant === "inline" ? "shrink-0" : "w-full"}
+          className={variant === "inline" ? "shrink-0" : undefined}
+          fullWidth={variant !== "inline"}
           isPending={isSubscribing}
           type="submit"
         >

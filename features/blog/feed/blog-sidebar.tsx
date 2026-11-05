@@ -2,7 +2,7 @@
 
 import { Icon } from "@iconify/react";
 
-import { Chip, Surface, Typography, cn } from "@heroui/react";
+import { Card, Chip, Typography, cn } from "@heroui/react";
 import { ItemCard } from "@heroui-pro/react";
 import Link from "next/link";
 
@@ -67,13 +67,12 @@ export function BlogSidebar() {
   return (
     <aside className="flex flex-col gap-8">
       {/* Categories Widget */}
-      <Surface variant="secondary" className="rounded-3xl p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <Typography className="text-lg font-bold">Categories</Typography>
-          <Link
-            href="/categories"
-            className="text-primary flex items-center gap-1 text-xs font-bold"
-          >
+      <Card variant="secondary">
+        <div className="flex items-center justify-between">
+          <Typography type="h5" weight="semibold">
+            Categories
+          </Typography>
+          <Link href="/categories" className="text-primary flex items-center gap-1 text-xs">
             View all <Icon icon="gravity-ui:circle-chevron-right" className="size-3" />
           </Link>
         </div>
@@ -82,7 +81,7 @@ export function BlogSidebar() {
             <ItemCard
               key={cat.id}
               variant="transparent"
-              className="hover:bg-default-100 rounded-xl px-2 py-1 transition-colors"
+              className="hover:bg-default-100 transition-colors"
             >
               <ItemCard.Icon className={cn("bg-opacity-10 size-8 rounded-full", `bg-${cat.color}`)}>
                 <div className={cn("size-2 rounded-full", `bg-${cat.color}`)} />
@@ -98,36 +97,35 @@ export function BlogSidebar() {
             </ItemCard>
           ))}
         </div>
-      </Surface>
+      </Card>
 
       {/* Tags Widget */}
-      <Surface variant="secondary" className="rounded-3xl p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <Typography className="text-lg font-bold">Tags</Typography>
+      <Card variant="secondary">
+        <div className="flex items-center justify-between">
+          <Typography type="h5" weight="semibold">
+            Tags
+          </Typography>
         </div>
         <div className="flex flex-wrap gap-2">
           {TAGS.map((tag) => (
-            <Chip
-              key={tag}
-              size="sm"
-              variant="soft"
-              className="bg-background hover:bg-default-200 cursor-pointer font-medium transition-colors"
-            >
+            <Chip key={tag} size="sm" variant="soft">
               {tag}
             </Chip>
           ))}
         </div>
-        <Link href="/tags" className="text-primary mt-6 block text-xs font-bold">
+        <Link href="/tags" className="text-primary mt-6 block text-xs">
           View all tags →
         </Link>
-      </Surface>
+      </Card>
 
       {/* Newsletter Widget */}
-      <Surface variant="secondary" className="relative overflow-hidden rounded-3xl p-6">
+      <Card variant="secondary" className="relative overflow-hidden">
         <div className="bg-primary absolute top-4 right-4 flex size-8 items-center justify-center rounded-full text-white">
           <Icon icon="gravity-ui:bell" className="size-4" />
         </div>
-        <Typography className="mb-2 text-lg leading-tight font-bold">Newsletter</Typography>
+        <Typography type="h5" weight="semibold" className="leading-tight">
+          Newsletter
+        </Typography>
         <Typography className="text-default-500 mb-6 text-xs leading-relaxed">
           Curated articles and thoughts in your inbox.
         </Typography>
@@ -135,12 +133,14 @@ export function BlogSidebar() {
         <Typography className="text-default-400 mt-4 text-center text-[10px]">
           No spam. Unsubscribe anytime.
         </Typography>
-      </Surface>
+      </Card>
 
       {/* Weekly Hot Widget */}
-      <Surface variant="secondary" className="rounded-3xl p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <Typography className="text-lg font-bold">本周热门</Typography>
+      <Card variant="secondary">
+        <div className="flex items-center justify-between">
+          <Typography type="h5" weight="semibold">
+            本周热门
+          </Typography>
         </div>
         <div className="flex flex-col gap-6">
           {WEEKLY_HOT.map((item) => (
@@ -155,7 +155,10 @@ export function BlogSidebar() {
                 )}
               />
               <div className="flex flex-col gap-1">
-                <Typography className="group-hover:text-primary line-clamp-1 text-sm leading-snug font-bold transition-colors">
+                <Typography
+                  className="group-hover:text-primary line-clamp-1 text-sm leading-snug transition-colors"
+                  weight="semibold"
+                >
                   {item.title}
                 </Typography>
                 <Typography className="text-default-400 text-[10px] font-medium">
@@ -165,7 +168,7 @@ export function BlogSidebar() {
             </div>
           ))}
         </div>
-      </Surface>
+      </Card>
     </aside>
   );
 }

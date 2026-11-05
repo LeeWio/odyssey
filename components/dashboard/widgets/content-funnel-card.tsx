@@ -20,8 +20,8 @@ export function ContentFunnelCard() {
   const widest = Math.max(1, ...steps.map((step) => step.count));
 
   return (
-    <Card className="rounded-2xl">
-      <Card.Header className="flex-col items-start gap-1">
+    <Card>
+      <Card.Header className="items-start gap-1">
         <Card.Title className="text-base">Content funnel</Card.Title>
         <Card.Description>
           Last 30 days. Click-through {formatRate(data?.clickThroughRate)} · completion{" "}

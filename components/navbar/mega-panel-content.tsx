@@ -106,10 +106,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
       <div className="grid gap-4 md:col-span-8 md:grid-cols-2">
         {/* Pillar 1: Soul Soothe (听歌) */}
         <motion.div {...reveal(0)}>
-          <Card
-            className="group relative flex h-full flex-col justify-between overflow-hidden"
-            variant="default"
-          >
+          <Card className="group relative h-full justify-between overflow-hidden" variant="default">
             <Card.Header className="flex flex-row items-start justify-between pb-2">
               <div className="bg-default flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:music" className="size-5" />
@@ -151,7 +148,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
                 isIconOnly
                 size="sm"
                 variant="ghost"
-                className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
+                className="size-7 transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label={t("mega.orbit.openSoulSoothe")}
                 onPress={() => onNavigate("/persona")}
               >
@@ -163,10 +160,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
 
         {/* Pillar 2: Patience & Wait (炒股) */}
         <motion.div {...reveal(1)}>
-          <Card
-            className="group relative flex h-full flex-col justify-between overflow-hidden"
-            variant="default"
-          >
+          <Card className="group relative h-full justify-between overflow-hidden" variant="default">
             <Card.Header className="flex flex-row items-start justify-between pb-2">
               <div className="bg-default flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:trending-up" className="size-5" />
@@ -210,7 +204,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
                 isIconOnly
                 size="sm"
                 variant="ghost"
-                className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
+                className="size-7 transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label={t("mega.orbit.openPatience")}
                 onPress={() => onNavigate("/persona")}
               >
@@ -222,10 +216,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
 
         {/* Pillar 3: Sweat It Out (健身) */}
         <motion.div {...reveal(2)}>
-          <Card
-            className="group relative flex h-full flex-col justify-between overflow-hidden"
-            variant="default"
-          >
+          <Card className="group relative h-full justify-between overflow-hidden" variant="default">
             <Card.Header className="flex flex-row items-start justify-between pb-2">
               <div className="bg-default flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:dumbbell" className="size-5" />
@@ -293,7 +284,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
                 isIconOnly
                 size="sm"
                 variant="ghost"
-                className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
+                className="size-7 transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label={t("mega.orbit.openSweat")}
                 onPress={() => onNavigate("/persona")}
               >
@@ -305,10 +296,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
 
         {/* Pillar 4: Code & Build (编程) */}
         <motion.div {...reveal(3)}>
-          <Card
-            className="group relative flex h-full flex-col justify-between overflow-hidden"
-            variant="default"
-          >
+          <Card className="group relative h-full justify-between overflow-hidden" variant="default">
             <Card.Header className="flex flex-row items-start justify-between pb-2">
               <div className="bg-default flex size-10 items-center justify-center rounded-xl transition-all duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105">
                 <Icon aria-hidden="true" icon="lucide:terminal" className="size-5" />
@@ -347,7 +335,7 @@ export function MegaPanelContent({ id, onNavigate, reduceMotion }: MegaPanelCont
                 isIconOnly
                 size="sm"
                 variant="ghost"
-                className="size-7 rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
+                className="size-7 transition-transform duration-200 group-hover:translate-x-0.5"
                 aria-label={t("mega.orbit.openCode")}
                 onPress={() => onNavigate("/persona")}
               >

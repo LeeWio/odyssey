@@ -64,12 +64,12 @@ export function PipelineFunnelCard() {
 
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-      <Card className="rounded-2xl">
+      <Card>
         <Card.Header className="flex-row items-center justify-between gap-3">
           <Card.Title className="text-base">Weighted Forecast</Card.Title>
           <span className="text-sm font-semibold tabular-nums">{formatCount(forecastTotal)}</span>
         </Card.Header>
-        <Card.Content className="flex flex-col items-center gap-4">
+        <Card.Content className="items-center gap-4">
           <ClientChart height={220}>
             <PieChart height={220} width={220}>
               <PieChart.Pie
@@ -114,11 +114,11 @@ export function PipelineFunnelCard() {
         </Card.Content>
       </Card>
 
-      <Card className="rounded-2xl">
+      <Card>
         <Card.Header>
           <Card.Title className="text-base">Pipeline Funnel</Card.Title>
         </Card.Header>
-        <Card.Content className="flex flex-col gap-4">
+        <Card.Content className="gap-4">
           <ClientChart className="w-full" height={168}>
             <div aria-label="Pipeline funnel" className="relative h-[168px] w-full">
               <ResponsiveContainer height={168} width="100%">

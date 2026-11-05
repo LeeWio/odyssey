@@ -217,16 +217,14 @@ export function CommentModerationPanel() {
           <div className="flex items-center justify-end gap-1">
             <Button
               size="sm"
-              variant="tertiary"
-              className="text-success"
+              variant="secondary"
               onPress={() => handleModerate(item.id, "APPROVED")}
             >
               Approve
             </Button>
             <Button
               size="sm"
-              variant="tertiary"
-              className="text-danger"
+              variant="danger-soft"
               onPress={() => handleModerate(item.id, "REJECTED")}
             >
               Reject
@@ -399,8 +397,7 @@ export function CommentModerationPanel() {
           </Button>
           <Button
             size="sm"
-            variant="ghost"
-            className="text-danger bg-danger/10"
+            variant="danger-soft"
             isPending={isBatching}
             onPress={() => handleBatch("SPAM")}
           >

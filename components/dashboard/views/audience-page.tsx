@@ -200,7 +200,7 @@ export function AudiencePage() {
 
           {deliveryDetails.isLoading ? (
             <Card variant="secondary">
-              <Card.Content className="gap-3">
+              <Card.Content>
                 {Array.from({ length: 3 }, (_, index) => (
                   <Skeleton key={index} className="h-10 w-full rounded-lg" />
                 ))}
@@ -306,7 +306,7 @@ export function AudiencePage() {
 
         {subscribers.isLoading ? (
           <Card variant="secondary">
-            <Card.Content className="gap-3">
+            <Card.Content>
               {Array.from({ length: 5 }, (_, index) => (
                 <Skeleton key={index} className="h-12 w-full rounded-lg" />
               ))}
@@ -314,7 +314,7 @@ export function AudiencePage() {
           </Card>
         ) : null}
         {subscribers.isError ? (
-          <EmptyState className="bg-surface-secondary rounded-2xl" size="md">
+          <EmptyState size="md">
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:envelope" aria-hidden="true" />

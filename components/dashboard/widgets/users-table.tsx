@@ -82,7 +82,7 @@ export function UsersTable() {
         cell: (item) => (
           <div className="flex items-center gap-3">
             <Avatar className="size-8">
-              <Avatar.Fallback className="bg-accent/10 text-accent text-[10px] font-bold">
+              <Avatar.Fallback color="accent" className="text-[10px]">
                 {item.username.slice(0, 2).toUpperCase()}
               </Avatar.Fallback>
             </Avatar>
@@ -123,7 +123,7 @@ export function UsersTable() {
         cell: (item) => (
           <div className="flex flex-wrap gap-1">
             {item.roles.map((role) => (
-              <Chip key={role} size="sm" variant="secondary" className="h-5 text-[10px]">
+              <Chip key={role} size="sm" variant="secondary">
                 {role.replace("ROLE_", "")}
               </Chip>
             ))}

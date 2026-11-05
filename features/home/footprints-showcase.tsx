@@ -141,17 +141,14 @@ export function FootprintsShowcase() {
         <FootprintsMap footprints={FOOTPRINTS} compact />
 
         <div className="absolute top-4 left-4 z-10 hidden w-[260px] @min-[64rem]/home-section:block">
-          <Card
-            data-testid="footprints-map-overlay"
-            className="bg-overlay shadow-overlay gap-3 p-4"
-          >
+          <Card data-testid="footprints-map-overlay">
             <Card.Header className="gap-1">
               <Card.Title className="text-sm">{t("footprints.cardTitle")}</Card.Title>
               <Card.Description className="text-xs">
                 {t("footprints.cardDescription")}
               </Card.Description>
             </Card.Header>
-            <Card.Content className="gap-3">
+            <Card.Content>
               <FootprintCounts latestYear={latestYear} yearCount={yearCount} />
               <FootprintPreviewList places={previewPlaces} />
             </Card.Content>

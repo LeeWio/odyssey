@@ -398,7 +398,6 @@ function CategoryList({
         <ScrollShadow className="max-h-80">
           <ListBox
             aria-label={t("topics")}
-            className="w-full p-1"
             selectionMode="none"
             onAction={(key) => {
               const category = categories.find((item) => String(item.id) === String(key));
@@ -951,7 +950,6 @@ function AttentionCard({ mostRead, trending }: { mostRead: Story[]; trending: St
       <Card.Content className="p-1 pt-0">
         <ListBox
           aria-label={active.title}
-          className="w-full p-1"
           selectionMode="none"
           onAction={(key) => {
             const post = active.posts.find((item) => journalStoryKey(item) === String(key));
@@ -1015,7 +1013,6 @@ function YearList({ archives }: { archives: Array<ArchiveFacet & { year: number 
       <Card.Content className="p-0">
         <ListBox
           aria-label={t("years")}
-          className="w-full p-1"
           selectionMode="none"
           onAction={(key) => router.push(`/single/years/${key}`)}
         >

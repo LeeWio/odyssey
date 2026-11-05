@@ -259,11 +259,7 @@ export function OrbitalCarousel() {
               </Card.Content>
 
               <Card.Footer className="border-border/5 flex items-center justify-between border-t px-6 py-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="hover:bg-muted/30 h-8 px-3 text-xs font-semibold"
-                >
+                <Button variant="ghost" size="sm">
                   View Details
                   <span className="ml-1 inline-block transition-transform duration-300 group-hover:translate-x-1">
                     →
@@ -297,11 +293,11 @@ export function OrbitalCarousel() {
 
               {/* <div className="absolute inset-x-0 bottom-0 z-20 h-72 bg-linear-to-t from-white via-white/85 to-transparent backdrop-blur-[5px] dark:from-black dark:via-black/85 dark:to-transparent" /> */}
 
-              <Chip size="sm" variant="soft" className="w-fit">
+              <Chip size="sm" variant="soft">
                 Mobile
               </Chip>
 
-              <Card.Header className="absolute inset-x-0 bottom-24 z-30 flex flex-col items-start gap-3 px-6">
+              <Card.Header className="absolute inset-x-0 bottom-24 z-30 items-start gap-3 px-6">
                 <Card.Title>
                   <TrueFocus
                     sentence="iPhone 16 Pro"
@@ -313,7 +309,7 @@ export function OrbitalCarousel() {
                     initialIndex={2}
                   />
                 </Card.Title>
-                <TagGroup selectionMode="single" size="md" variant="surface">
+                <TagGroup aria-label="Product platforms" size="md" variant="surface">
                   <TagGroup.List>
                     <Tag>
                       <Icon icon="mdi:apple" className="size-4" />

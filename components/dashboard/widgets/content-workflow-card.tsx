@@ -17,8 +17,8 @@ export function ContentWorkflowCard() {
   const items = data?.items ?? [];
 
   return (
-    <Card className="rounded-2xl">
-      <Card.Header className="flex-col items-start gap-2">
+    <Card>
+      <Card.Header className="items-start gap-2">
         <Card.Title className="text-base">Editorial queue</Card.Title>
         <Card.Description>Posts waiting on a publishing decision.</Card.Description>
         {summary ? (

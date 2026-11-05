@@ -119,8 +119,8 @@ export function PermissionsPage() {
 
       <div className="mt-2 grid grid-cols-1 items-start gap-6 md:grid-cols-[280px_1fr]">
         {/* Left Side: Roles list card */}
-        <Card className="border-border/60 bg-surface shrink-0 rounded-3xl border shadow-sm">
-          <Card.Header className="border-border/40 flex flex-col items-start gap-1 border-b p-5 select-none">
+        <Card className="shrink-0">
+          <Card.Header className="border-separator items-start gap-1 border-b select-none">
             <Card.Title className="flex items-center gap-1.5 text-sm font-bold">
               <Icon icon="gravity-ui:person" className="text-primary size-4" />
               安全角色 (Roles)
@@ -128,7 +128,7 @@ export function PermissionsPage() {
             <Card.Description className="text-xs">选择角色并配置其专属权限</Card.Description>
           </Card.Header>
 
-          <Card.Content className="p-2">
+          <Card.Content>
             <ListBox
               aria-label="Security Roles"
               selectionMode="single"
@@ -142,12 +142,7 @@ export function PermissionsPage() {
               }}
             >
               {roles.map((role) => (
-                <ListBox.Item
-                  id={role.id.toString()}
-                  textValue={role.name}
-                  key={role.id}
-                  className="rounded-2xl"
-                >
+                <ListBox.Item id={role.id.toString()} textValue={role.name} key={role.id}>
                   <div className="flex flex-col items-start gap-1 select-none">
                     <Label className="text-xs font-bold">{role.name}</Label>
                     <Description className="text-default-400 font-mono text-[9px] leading-none">
@@ -181,7 +176,7 @@ export function PermissionsPage() {
               <Button
                 variant="primary"
                 size="sm"
-                className="flex items-center gap-1.5 font-bold shadow-sm"
+                className="gap-1.5"
                 onPress={handleSavePermissions}
                 isDisabled={isSaving || isRoleMenusLoading}
               >

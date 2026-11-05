@@ -102,7 +102,7 @@ function CommentSheetContent({
           }}
         >
           <Sheet.Trigger>
-            <Button className="w-full" variant="secondary">
+            <Button fullWidth variant="secondary">
               {t("writeComment")}
             </Button>
           </Sheet.Trigger>

@@ -44,7 +44,7 @@ function Control({
         variant={variant}
         aria-label={label}
         aria-pressed={pressed}
-        className={`${className}`}
+        className={className || undefined}
         onPress={onPress}
       >
         {children}
@@ -114,10 +114,12 @@ export const MiniPlayer: React.FC = () => {
                 minValue={0}
                 maxValue={DEMO_TRACK.duration}
                 step={1}
-                onChange={(value) => setPosition(Array.isArray(value) ? value[0] : value)}
+                onChange={(value) => {
+                  if (typeof value === "number") setPosition(value);
+                }}
                 className="flex w-full min-w-0 flex-row items-center justify-center gap-2"
               >
-                <Label className="text-muted w-10 shrink-0 text-center text-xs tabular-nums">
+                <Label className="text-muted w-10 shrink-0 text-center text-xs font-normal tabular-nums">
                   {formatTime(position)}
                 </Label>
                 <Slider.Track className="min-w-0 flex-1">

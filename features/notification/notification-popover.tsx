@@ -165,7 +165,7 @@ export function NotificationPopover() {
           <Popover.Dialog className="flex max-h-[min(32rem,80dvh)] flex-col gap-3 overflow-hidden p-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <Popover.Heading className="text-base font-semibold">{t("title")}</Popover.Heading>
+                <Popover.Heading className="text-base">{t("title")}</Popover.Heading>
                 <Typography className="mt-1" color="muted" type="body-xs">
                   {t("popoverSubtitle")}
                 </Typography>

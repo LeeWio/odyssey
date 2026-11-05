@@ -72,7 +72,7 @@ export function CollectionContents({ collection }: { collection: PostCollectionR
               </div>
               <div className="min-w-0 flex-1">
                 <Link className="no-underline" href={`/single/${post.slug}`}>
-                  <Typography className="line-clamp-2 text-base font-semibold" type="h4">
+                  <Typography className="line-clamp-2 text-base" type="h4" weight="semibold">
                     {post.title}
                   </Typography>
                 </Link>

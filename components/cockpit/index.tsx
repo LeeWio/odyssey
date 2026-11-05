@@ -28,7 +28,7 @@ export function Cockpit() {
       <Sheet.Backdrop isExiting variant="blur">
         <Sheet.Content>
           <Sheet.Dialog>
-            <Sheet.CloseTrigger className="absolute top-3 right-3 z-20" />
+            <Sheet.CloseTrigger className="z-20" />
             <Sheet.Heading className="sr-only">Odyssey control center</Sheet.Heading>
             <Sheet.Header className="block">
               <Stocks />
@@ -59,7 +59,7 @@ export function Cockpit() {
 
                 <Card.Footer className="flex items-center justify-center gap-2">
                   <SunMaxFillIcon className="text-warning-hover size-7" />
-                  <Typography className="text-2xl font-bold tracking-tight">
+                  <Typography className="text-2xl tracking-tight" weight="bold">
                     {weather.tempMin}-{weather.tempMax}°
                   </Typography>
                 </Card.Footer>

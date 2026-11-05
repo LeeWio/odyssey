@@ -170,10 +170,7 @@ export function DashboardSheet() {
           <>
             <Sheet.Dialog id="dashboard-sheet-container" aria-label="Dashboard Overlay">
               <Sheet.Handle />
-              <Sheet.CloseTrigger
-                aria-label="Close dashboard"
-                className="absolute top-3 right-3 z-20"
-              >
+              <Sheet.CloseTrigger aria-label="Close dashboard" className="z-20">
                 <Xmark className="size-4" />
               </Sheet.CloseTrigger>
               <AppShell pathname={currentPath} onNavigate={handleNavigate}>

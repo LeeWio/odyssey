@@ -351,11 +351,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                           </div>
                           <div className="ml-auto flex items-center gap-2 pl-3">
                             {command.shortcut ? (
-                              <Kbd
-                                className="text-muted-foreground border-none bg-transparent text-xs shadow-none"
-                                slot="keyboard"
-                                variant="light"
-                              >
+                              <Kbd className="text-xs" slot="keyboard" variant="light">
                                 {command.shortcut.map((key) =>
                                   key === "mod" ? (
                                     <Kbd.Abbr
@@ -368,11 +364,7 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                                 )}
                               </Kbd>
                             ) : command.intent === CommandIntent.NAVIGATE ? (
-                              <Kbd
-                                className="text-muted-foreground border-none bg-transparent text-xs shadow-none"
-                                slot="keyboard"
-                                variant="light"
-                              >
+                              <Kbd className="text-xs" slot="keyboard" variant="light">
                                 <Kbd.Abbr keyValue="enter" />
                               </Kbd>
                             ) : null}
