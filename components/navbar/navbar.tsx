@@ -415,7 +415,6 @@ export const Navbar = () => {
 
       <motion.div
         ref={panelRef}
-        data-view-transition-shell="site-navbar"
         data-compact={isCompact}
         role={isLocked || isMobileMenuOpen ? "dialog" : undefined}
         aria-modal={isLocked || isMobileMenuOpen ? true : undefined}

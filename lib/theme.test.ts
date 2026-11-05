@@ -1,56 +1,62 @@
 import { describe, expect, it } from "vitest";
 
-import { applyThemeToElement } from "./theme";
+import { applyThemeToElement, getInitialTheme, getStoredThemeVariant } from "./theme";
 
-function createRoot(initial: { dark?: boolean; light?: boolean } = {}) {
-  const classes = new Set<string>();
-  if (initial.dark) classes.add("dark");
-  if (initial.light) classes.add("light");
+function createRoot(classes: string[] = []) {
+  const tokens = new Set(classes);
 
   return {
-    dataset: {} as {
-      theme?: string;
-      themeVariant?: string;
-      themeMode?: string;
-      themeResolvedMode?: string;
-    },
+    dataset: {} as { theme?: string },
     classList: {
-      toggle(token: string, force?: boolean) {
-        if (force) classes.add(token);
-        else classes.delete(token);
+      add(token: string) {
+        tokens.add(token);
+      },
+      remove(...removed: string[]) {
+        for (const token of removed) tokens.delete(token);
       },
     },
-    style: { colorScheme: "" },
-    classes,
+    tokens,
   };
 }
 
 describe("applyThemeToElement", () => {
-  it("writes the resolved theme onto the root before any effect can run", () => {
-    const root = createRoot({ dark: true });
+  it("writes the Pro selector and leaves the color-scheme class alone", () => {
+    const root = createRoot(["dark", "glass-dark"]);
 
-    const themeName = applyThemeToElement(root, "mouve", "light", "light");
+    applyThemeToElement(root, "mouve", "light");
 
-    expect(themeName).toBe("mouve-light");
-    expect(root.dataset).toEqual({
-      theme: "mouve-light",
-      themeVariant: "mouve",
-      themeMode: "light",
-      themeResolvedMode: "light",
+    expect(root.dataset.theme).toBe("mouve-light");
+    expect(root.tokens.has("mouve-light")).toBe(true);
+    expect(root.tokens.has("glass-dark")).toBe(false);
+    expect(root.tokens.has("dark")).toBe(true);
+  });
+});
+
+describe("getStoredThemeVariant", () => {
+  it("uses the cookie when localStorage is empty", () => {
+    localStorage.removeItem("odyssey_theme_variant");
+    document.cookie = "odyssey_theme_variant=mouve; path=/";
+
+    expect(getStoredThemeVariant()).toBe("mouve");
+
+    document.cookie = "odyssey_theme_variant=; path=/; max-age=0";
+  });
+});
+
+describe("getInitialTheme", () => {
+  it("reads the palette and mode cookies", () => {
+    expect(getInitialTheme("odyssey_theme_variant=mouve; odyssey_theme_mode=light")).toEqual({
+      resolvedMode: "light",
+      selector: "mouve-light",
+      variant: "mouve",
     });
-    expect(root.style.colorScheme).toBe("light");
-    expect(root.classes.has("light")).toBe(true);
-    expect(root.classes.has("dark")).toBe(false);
   });
 
-  it("keeps system mode distinct from the resolved color scheme", () => {
-    const root = createRoot();
+  it("falls back to the legacy combined cookie", () => {
+    expect(getInitialTheme("odyssey_theme=brutalism-dark").selector).toBe("brutalism-dark");
+  });
 
-    applyThemeToElement(root, "glass", "system", "dark");
-
-    expect(root.dataset.theme).toBe("glass-dark");
-    expect(root.dataset.themeMode).toBe("system");
-    expect(root.dataset.themeResolvedMode).toBe("dark");
-    expect(root.classes.has("dark")).toBe(true);
+  it("uses the dark selector when mode is system", () => {
+    expect(getInitialTheme("odyssey_theme_mode=system").selector).toBe("glass-dark");
   });
 });

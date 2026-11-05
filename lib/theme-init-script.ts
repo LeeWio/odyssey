@@ -1,28 +1,27 @@
 import {
   DEFAULT_THEME_MODE,
   DEFAULT_THEME_VARIANT,
-  LEGACY_THEME_STORAGE_KEY,
   THEME_MODE_STORAGE_KEY,
-  THEME_NAME_STORAGE_KEY,
-  THEME_RESOLVED_MODE_STORAGE_KEY,
   THEME_VARIANT_STORAGE_KEY,
   THEME_VARIANTS,
 } from "./theme";
 
+/**
+ * Paints `data-theme` and the Pro palette class before hydration.
+ * next-themes paints `.light` / `.dark` from its own script.
+ */
 export function getThemeInitScript() {
   return `
 (function () {
-  var variants = ${JSON.stringify(THEME_VARIANTS)};
-  var modes = ["light", "dark", "system"];
+  var variants = ${JSON.stringify([...THEME_VARIANTS])};
   var defaultVariant = ${JSON.stringify(DEFAULT_THEME_VARIANT)};
   var defaultMode = ${JSON.stringify(DEFAULT_THEME_MODE)};
   var variantKey = ${JSON.stringify(THEME_VARIANT_STORAGE_KEY)};
   var modeKey = ${JSON.stringify(THEME_MODE_STORAGE_KEY)};
-  var resolvedKey = ${JSON.stringify(THEME_RESOLVED_MODE_STORAGE_KEY)};
-  var themeNameKey = ${JSON.stringify(THEME_NAME_STORAGE_KEY)};
-  var legacyKey = ${JSON.stringify(LEGACY_THEME_STORAGE_KEY)};
+  var legacyKey = "odyssey_theme";
+  var paletteClasses = ${JSON.stringify(THEME_VARIANTS.flatMap((variant) => [`${variant}-light`, `${variant}-dark`]))};
 
-  function readStorage(key) {
+  function read(key) {
     try {
       return window.localStorage.getItem(key);
     } catch (error) {
@@ -30,82 +29,61 @@ export function getThemeInitScript() {
     }
   }
 
-  function readCookie(key) {
-    var pairs = document.cookie ? document.cookie.split(";") : [];
+  function write(key, value) {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch (error) {}
+  }
 
+  function cookie(key) {
+    var pairs = document.cookie ? document.cookie.split(";") : [];
     for (var index = 0; index < pairs.length; index += 1) {
       var pair = pairs[index].trim();
       var separator = pair.indexOf("=");
-
-      if (separator === -1) continue;
-      if (pair.slice(0, separator) === key) {
+      if (separator !== -1 && pair.slice(0, separator) === key) {
         return decodeURIComponent(pair.slice(separator + 1));
       }
     }
-
     return null;
   }
 
-  function pick(list, value, fallback) {
-    return list.indexOf(value) >= 0 ? value : fallback;
+  function variantOf(value) {
+    if (!value) return null;
+    if (variants.indexOf(value) >= 0) return value;
+    var separator = value.lastIndexOf("-");
+    if (separator <= 0) return null;
+    var variant = value.slice(0, separator);
+    var mode = value.slice(separator + 1);
+    return variants.indexOf(variant) >= 0 && (mode === "light" || mode === "dark") ? variant : null;
   }
 
-  function parseThemeName(value) {
-    if (!value || typeof value !== "string") return null;
+  function modeOf(value) {
+    if (!value) return null;
+    var mode = value.slice(value.lastIndexOf("-") + 1);
+    return mode === "light" || mode === "dark" || mode === "system" ? mode : null;
+  }
 
-    var parts = value.split("-");
-    if (parts.length !== 2) return null;
+  var legacy = read(legacyKey) || cookie(legacyKey);
+  var variant = variantOf(read(variantKey)) || variantOf(cookie(variantKey)) || variantOf(legacy) || defaultVariant;
+  var mode = modeOf(read(modeKey)) || modeOf(cookie(modeKey)) || modeOf(legacy) || defaultMode;
 
-    var variant = parts[0];
-    var mode = parts[1];
-
-    if (variants.indexOf(variant) === -1 || (mode !== "light" && mode !== "dark")) {
-      return null;
+  if (legacy) {
+    if (!variantOf(read(variantKey))) {
+      write(variantKey, variant);
+      document.cookie = variantKey + "=" + encodeURIComponent(variant) + "; path=/; max-age=31536000; SameSite=Lax";
     }
-
-    return { variant: variant, mode: mode };
+    try { window.localStorage.removeItem(legacyKey); } catch (error) {}
+    document.cookie = legacyKey + "=; path=/; max-age=0; SameSite=Lax";
   }
 
-  var legacyTheme = readStorage(legacyKey) || readCookie(legacyKey);
-  var parsedLegacyTheme = parseThemeName(legacyTheme);
-  var variant = pick(
-    variants,
-    readStorage(variantKey) ||
-      readCookie(variantKey) ||
-      (parsedLegacyTheme && parsedLegacyTheme.variant) ||
-      legacyTheme,
-    defaultVariant
-  );
-  var selectedMode = pick(
-    modes,
-    readStorage(modeKey) ||
-      readCookie(modeKey) ||
-      (parsedLegacyTheme && parsedLegacyTheme.mode) ||
-      defaultMode,
-    defaultMode
-  );
-  var systemMode =
-    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  var resolvedMode = selectedMode === "system" ? systemMode : selectedMode;
+  var systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  var resolved = mode === "system" ? (systemDark ? "dark" : "light") : mode;
   var root = document.documentElement;
-  var themeName = variant + "-" + resolvedMode;
+  var selector = variant + "-" + resolved;
 
-  root.dataset.theme = themeName;
-  root.dataset.themeVariant = variant;
-  root.dataset.themeMode = selectedMode;
-  root.dataset.themeResolvedMode = resolvedMode;
-  root.classList.remove("light", "dark");
-  root.classList.add(resolvedMode);
-  root.style.colorScheme = resolvedMode;
-
-  try {
-    window.localStorage.setItem(variantKey, variant);
-    window.localStorage.setItem(modeKey, selectedMode);
-    window.localStorage.setItem(resolvedKey, resolvedMode);
-    window.localStorage.setItem(themeNameKey, themeName);
-  } catch (error) {}
+  root.setAttribute("data-theme", selector);
+  paletteClasses.forEach(function (className) { root.classList.remove(className); });
+  root.classList.add(selector);
 })();
 `.trim();
 }

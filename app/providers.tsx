@@ -7,28 +7,16 @@ import type { ThemeProviderProps } from "next-themes";
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import * as React from "react";
 import { Provider as ReduxProvider } from "react-redux";
-import { selectThemeVariant, setThemeVariant } from "@/lib/features/ui";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { getServerState, makeStore } from "@/lib/store";
 import { MediaProvider } from "@/features/media/context/media-provider";
 import {
-  coerceResolvedThemeMode,
-  coerceThemeMode,
-  coerceThemeVariant,
-  DEFAULT_THEME_MODE,
-  DEFAULT_THEME_VARIANT,
   applyThemeToElement,
-  LEGACY_THEME_STORAGE_KEY,
-  parseThemeName,
-  type ResolvedThemeMode,
-  resolveThemeMode,
-  THEME_COOKIE_OPTIONS,
+  DEFAULT_THEME_MODE,
+  getStoredThemeVariant,
+  isResolvedThemeMode,
+  isThemeMode,
+  persistThemeMode,
   THEME_MODE_STORAGE_KEY,
-  THEME_NAME_STORAGE_KEY,
-  THEME_RESOLVED_MODE_STORAGE_KEY,
-  THEME_VARIANT_STORAGE_KEY,
-  type ThemeMode,
-  type ThemeVariant,
 } from "@/lib/theme";
 
 // next-themes renders an inline <script> to prevent theme flicker on SSR.
@@ -51,61 +39,15 @@ if (process.env.NODE_ENV === "development") {
   };
 }
 
-function writeThemeCookie(name: string, value: string) {
-  document.cookie = `${name}=${encodeURIComponent(value)}; ${THEME_COOKIE_OPTIONS}`;
-}
-
-function persistThemeState(
-  variant: ThemeVariant,
-  mode: ThemeMode,
-  resolvedMode: ResolvedThemeMode,
-  themeName: string
-) {
-  try {
-    localStorage.setItem(THEME_VARIANT_STORAGE_KEY, variant);
-    localStorage.setItem(LEGACY_THEME_STORAGE_KEY, variant);
-    localStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
-    localStorage.setItem(THEME_RESOLVED_MODE_STORAGE_KEY, resolvedMode);
-    localStorage.setItem(THEME_NAME_STORAGE_KEY, themeName);
-  } catch {}
-
-  try {
-    writeThemeCookie(THEME_VARIANT_STORAGE_KEY, variant);
-    writeThemeCookie(LEGACY_THEME_STORAGE_KEY, variant);
-    writeThemeCookie(THEME_MODE_STORAGE_KEY, mode);
-    writeThemeCookie(THEME_RESOLVED_MODE_STORAGE_KEY, resolvedMode);
-    writeThemeCookie(THEME_NAME_STORAGE_KEY, themeName);
-  } catch {}
-}
-
 function ThemeRootSync() {
-  const dispatch = useAppDispatch();
-  const variant = useAppSelector(selectThemeVariant) ?? DEFAULT_THEME_VARIANT;
-  const { resolvedTheme, setTheme, theme } = useTheme();
+  const { resolvedTheme, theme } = useTheme();
 
   React.useEffect(() => {
-    if (!theme) return;
+    if (!isResolvedThemeMode(resolvedTheme)) return;
 
-    const parsedTheme = parseThemeName(theme);
-
-    if (parsedTheme) {
-      dispatch(setThemeVariant(parsedTheme.variant));
-      setTheme(parsedTheme.resolvedMode);
-      return;
-    }
-
-    const mode = coerceThemeMode(theme);
-    const safeVariant = coerceThemeVariant(variant);
-    const resolvedMode = resolveThemeMode(mode, coerceResolvedThemeMode(resolvedTheme));
-    const themeName = applyThemeToElement(
-      document.documentElement,
-      safeVariant,
-      mode,
-      resolvedMode
-    );
-
-    persistThemeState(safeVariant, mode, resolvedMode, themeName);
-  }, [dispatch, resolvedTheme, setTheme, theme, variant]);
+    applyThemeToElement(document.documentElement, getStoredThemeVariant(), resolvedTheme);
+    if (isThemeMode(theme)) persistThemeMode(theme);
+  }, [resolvedTheme, theme]);
 
   return null;
 }

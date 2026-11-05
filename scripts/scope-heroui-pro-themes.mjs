@@ -157,6 +157,8 @@ const output = [
   "/* It scopes HeroUI Pro theme component overrides to their active data-theme. */",
   ...sections,
   [
+    "html.brutalism-light,",
+    "html.brutalism-dark,",
     'html[data-theme^="brutalism-"] {',
     "  --brutalism-font-body: var(--font-brutalism-body);",
     "  --brutalism-font-display: var(--font-brutalism-display);",

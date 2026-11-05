@@ -1,10 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { JSONContent } from "@tiptap/react";
 import type { RootState } from "../../store";
-import { DEFAULT_THEME_VARIANT, type ThemeVariant } from "../../theme";
-
-export type { ThemeVariant } from "../../theme";
-
 interface UiState {
   authDialogs: {
     authMode: "login" | "signup" | null;
@@ -16,9 +12,6 @@ interface UiState {
   };
   miniPlayer: {
     isOpen: boolean;
-  };
-  theme: {
-    variant: ThemeVariant;
   };
   dashboard: {
     isOpen: boolean;
@@ -46,9 +39,6 @@ const initialState: UiState = {
   },
   miniPlayer: {
     isOpen: false,
-  },
-  theme: {
-    variant: DEFAULT_THEME_VARIANT,
   },
   dashboard: {
     isOpen: false,
@@ -107,9 +97,6 @@ export const uiSlice = createSlice({
     setMiniPlayerOpen: (state, action: PayloadAction<boolean>) => {
       state.miniPlayer.isOpen = action.payload;
     },
-    setThemeVariant: (state, action: PayloadAction<ThemeVariant>) => {
-      state.theme.variant = action.payload;
-    },
     toggleDashboard: (state) => {
       state.dashboard.isOpen = !state.dashboard.isOpen;
     },
@@ -160,7 +147,6 @@ export const {
   setSheetOpen,
   toggleMiniPlayer,
   setMiniPlayerOpen,
-  setThemeVariant,
   toggleDashboard,
   setDashboardOpen,
   setDashboardPath,
@@ -177,7 +163,6 @@ export const selectIsSignUpOpen = (state: RootState) => state.ui.authDialogs?.is
 export const selectAuthMode = (state: RootState) => state.ui.authDialogs?.authMode ?? null;
 export const selectIsSheetOpen = (state: RootState) => state.ui.sheet?.isOpen;
 export const selectIsMiniPlayerOpen = (state: RootState) => state.ui.miniPlayer?.isOpen ?? false;
-export const selectThemeVariant = (state: RootState) => state.ui.theme?.variant;
 export const selectIsDashboardOpen = (state: RootState) => state.ui.dashboard?.isOpen;
 export const selectDashboardPath = (state: RootState) => state.ui.dashboard?.path ?? "/";
 export const selectIsRichTextOpen = (state: RootState) => state.ui.richText?.isOpen;

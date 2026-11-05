@@ -4,20 +4,24 @@ export type ThemeVariant = (typeof THEME_VARIANTS)[number];
 export const THEME_MODES = ["light", "dark", "system"] as const;
 export type ThemeMode = (typeof THEME_MODES)[number];
 export type ResolvedThemeMode = Exclude<ThemeMode, "system">;
-export type ThemeName = `${ThemeVariant}-${ResolvedThemeMode}`;
 
 export const DEFAULT_THEME_VARIANT: ThemeVariant = "glass";
 export const DEFAULT_THEME_MODE: ThemeMode = "dark";
 export const DEFAULT_RESOLVED_THEME_MODE: ResolvedThemeMode = "dark";
 
+/** Palette. Written only by `setStoredThemeVariant`. */
 export const THEME_VARIANT_STORAGE_KEY = "odyssey_theme_variant";
+/** Light, dark, or system. Written by next-themes. */
 export const THEME_MODE_STORAGE_KEY = "odyssey_theme_mode";
-export const THEME_RESOLVED_MODE_STORAGE_KEY = "odyssey_theme_resolved_mode";
-export const THEME_NAME_STORAGE_KEY = "odyssey_theme_name";
-export const LEGACY_THEME_STORAGE_KEY = "odyssey_theme";
+export const THEME_CHANGE_EVENT = "odyssey-theme-change";
 
-const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
-export const THEME_COOKIE_OPTIONS = `path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
+const LEGACY_THEME_STORAGE_KEY = "odyssey_theme";
+const THEME_COOKIE = `path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+
+const PALETTE_CLASSES = THEME_VARIANTS.flatMap((variant) => [
+  `${variant}-light`,
+  `${variant}-dark`,
+]);
 
 export function isThemeVariant(value: unknown): value is ThemeVariant {
   return typeof value === "string" && THEME_VARIANTS.includes(value as ThemeVariant);
@@ -31,99 +35,57 @@ export function isResolvedThemeMode(value: unknown): value is ResolvedThemeMode 
   return value === "light" || value === "dark";
 }
 
-export function parseThemeName(value: unknown): {
-  variant: ThemeVariant;
-  resolvedMode: ResolvedThemeMode;
-} | null {
-  if (typeof value !== "string") return null;
-
-  const [variant, resolvedMode] = value.split("-") as [ThemeVariant, ResolvedThemeMode];
-
-  if (!isThemeVariant(variant) || !isResolvedThemeMode(resolvedMode)) {
-    return null;
-  }
-
-  return { variant, resolvedMode };
-}
-
-export function coerceThemeVariant(value: unknown): ThemeVariant {
-  if (isThemeVariant(value)) return value;
-
-  const parsed = parseThemeName(value);
-  return parsed?.variant ?? DEFAULT_THEME_VARIANT;
-}
-
-export function coerceThemeMode(value: unknown): ThemeMode {
-  if (isThemeMode(value)) return value;
-
-  const parsed = parseThemeName(value);
-  return parsed?.resolvedMode ?? DEFAULT_THEME_MODE;
-}
-
-export function coerceResolvedThemeMode(value: unknown): ResolvedThemeMode {
-  return isResolvedThemeMode(value) ? value : DEFAULT_RESOLVED_THEME_MODE;
-}
-
 export function resolveThemeMode(
-  mode: ThemeMode | undefined,
-  systemMode: ResolvedThemeMode | undefined
-): ResolvedThemeMode {
-  const safeMode = isThemeMode(mode) ? mode : DEFAULT_THEME_MODE;
-
-  if (safeMode === "system") {
-    return coerceResolvedThemeMode(systemMode);
-  }
-
-  return safeMode;
-}
-
-export function getThemeName(variant: ThemeVariant, resolvedMode: ResolvedThemeMode): ThemeName {
-  return `${variant}-${resolvedMode}`;
-}
-
-/** Element surface that carries the active theme. Structural so tests can pass a fake root. */
-export interface ThemeRootElement {
-  dataset: {
-    theme?: string;
-    themeVariant?: string;
-    themeMode?: string;
-    themeResolvedMode?: string;
-  };
-  classList: {
-    toggle(token: string, force?: boolean): void;
-  };
-  style: {
-    colorScheme: string;
-  };
-}
-
-/**
- * Write the theme onto the document element immediately.
- * next-themes and ThemeRootSync both apply it in useEffect, which is after a
- * view-transition snapshot. Call this inside the transition callback so the
- * new frame is already the next theme.
- */
-export function applyThemeToElement(
-  root: ThemeRootElement,
-  variant: ThemeVariant,
   mode: ThemeMode,
+  systemMode: ResolvedThemeMode
+): ResolvedThemeMode {
+  return mode === "system" ? systemMode : mode;
+}
+
+export interface ThemeRoot {
+  dataset: { theme?: string };
+  classList: {
+    add(token: string): void;
+    remove(...tokens: string[]): void;
+  };
+}
+
+/** Write the selector Pro CSS matches: `data-theme="glass-dark"` and `.glass-dark`. */
+export function applyThemeToElement(
+  root: ThemeRoot,
+  variant: ThemeVariant,
   resolvedMode: ResolvedThemeMode
 ) {
-  const safeVariant = coerceThemeVariant(variant);
-  const themeName = getThemeName(safeVariant, resolvedMode);
+  const selector = `${variant}-${resolvedMode}`;
 
-  root.dataset.theme = themeName;
-  root.dataset.themeVariant = safeVariant;
-  root.dataset.themeMode = mode;
-  root.dataset.themeResolvedMode = resolvedMode;
-  root.classList.toggle("dark", resolvedMode === "dark");
-  root.classList.toggle("light", resolvedMode === "light");
-  root.style.colorScheme = resolvedMode;
-
-  return themeName;
+  root.dataset.theme = selector;
+  root.classList.remove(...PALETTE_CLASSES);
+  root.classList.add(selector);
 }
 
-function getCookieValue(cookieHeader: string | null | undefined, name: string): string | null {
+function readLocal(key: string): string | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeLocal(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {}
+}
+
+function removeLocal(key: string) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch {}
+}
+
+function readCookie(cookieHeader: string | null | undefined, name: string): string | null {
   if (!cookieHeader) return null;
 
   const cookie = cookieHeader
@@ -131,26 +93,83 @@ function getCookieValue(cookieHeader: string | null | undefined, name: string): 
     .map((part) => part.trim())
     .find((part) => part.startsWith(`${name}=`));
 
-  if (!cookie) return null;
-
-  return decodeURIComponent(cookie.slice(name.length + 1));
+  return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : null;
 }
 
-export function getInitialThemeState(cookieHeader: string | null | undefined) {
-  const legacyTheme = getCookieValue(cookieHeader, LEGACY_THEME_STORAGE_KEY);
-  const variant = coerceThemeVariant(
-    getCookieValue(cookieHeader, THEME_VARIANT_STORAGE_KEY) ?? legacyTheme
+function writeCookie(name: string, value: string) {
+  document.cookie = `${name}=${encodeURIComponent(value)}; ${THEME_COOKIE}`;
+}
+
+function removeCookie(name: string) {
+  document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
+}
+
+function legacyVariant(value: string | null): ThemeVariant | null {
+  if (!value) return null;
+  if (isThemeVariant(value)) return value;
+
+  const separator = value.lastIndexOf("-");
+  if (separator <= 0) return null;
+
+  const variant = value.slice(0, separator);
+  const mode = value.slice(separator + 1);
+
+  return isThemeVariant(variant) && isResolvedThemeMode(mode) ? variant : null;
+}
+
+function legacyMode(value: string | null): ThemeMode | null {
+  if (!value) return null;
+
+  const mode = value.slice(value.lastIndexOf("-") + 1);
+  return isThemeMode(mode) ? mode : null;
+}
+
+export function getStoredThemeVariant(): ThemeVariant {
+  if (typeof window === "undefined") return DEFAULT_THEME_VARIANT;
+
+  const stored = readLocal(THEME_VARIANT_STORAGE_KEY);
+  if (isThemeVariant(stored)) return stored;
+
+  const cookieVariant = readCookie(document.cookie, THEME_VARIANT_STORAGE_KEY);
+  if (isThemeVariant(cookieVariant)) return cookieVariant;
+
+  return (
+    legacyVariant(readLocal(LEGACY_THEME_STORAGE_KEY)) ??
+    legacyVariant(readCookie(document.cookie, LEGACY_THEME_STORAGE_KEY)) ??
+    DEFAULT_THEME_VARIANT
   );
-  const mode = coerceThemeMode(getCookieValue(cookieHeader, THEME_MODE_STORAGE_KEY) ?? legacyTheme);
-  const resolvedMode =
-    mode === "system"
-      ? coerceResolvedThemeMode(getCookieValue(cookieHeader, THEME_RESOLVED_MODE_STORAGE_KEY))
-      : resolveThemeMode(mode, undefined);
+}
+
+export function setStoredThemeVariant(variant: ThemeVariant) {
+  writeLocal(THEME_VARIANT_STORAGE_KEY, variant);
+  writeCookie(THEME_VARIANT_STORAGE_KEY, variant);
+  removeLocal(LEGACY_THEME_STORAGE_KEY);
+  removeCookie(LEGACY_THEME_STORAGE_KEY);
+
+  const resolvedMode = document.documentElement.classList.contains("dark") ? "dark" : "light";
+  applyThemeToElement(document.documentElement, variant, resolvedMode);
+
+  window.dispatchEvent(new CustomEvent(THEME_CHANGE_EVENT, { detail: { variant } }));
+}
+
+/** next-themes stores the mode in localStorage. SSR can only see the cookie. */
+export function persistThemeMode(mode: ThemeMode) {
+  writeCookie(THEME_MODE_STORAGE_KEY, mode);
+}
+
+export function getInitialTheme(cookieHeader: string | null | undefined) {
+  const legacy = readCookie(cookieHeader, LEGACY_THEME_STORAGE_KEY);
+  const storedVariant = readCookie(cookieHeader, THEME_VARIANT_STORAGE_KEY);
+  const variant = isThemeVariant(storedVariant)
+    ? storedVariant
+    : (legacyVariant(legacy) ?? DEFAULT_THEME_VARIANT);
+  const storedMode = readCookie(cookieHeader, THEME_MODE_STORAGE_KEY);
+  const mode = isThemeMode(storedMode) ? storedMode : (legacyMode(legacy) ?? DEFAULT_THEME_MODE);
+  const resolvedMode = mode === "light" ? "light" : DEFAULT_RESOLVED_THEME_MODE;
 
   return {
-    mode,
     resolvedMode,
-    themeName: getThemeName(variant, resolvedMode),
+    selector: `${variant}-${resolvedMode}`,
     variant,
   };
 }

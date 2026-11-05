@@ -188,15 +188,12 @@ test("light theme retains visible keyboard focus with motion enabled", async ({
 }, testInfo) => {
   await prepare(page);
   await page.emulateMedia({ reducedMotion: "no-preference", colorScheme: "light" });
-  await page.context().addCookies([
-    { name: "odyssey_theme_mode", value: "light", url: baseURL! },
-    { name: "odyssey_theme_resolved_mode", value: "light", url: baseURL! },
-  ]);
+  await page.context().addCookies([{ name: "odyssey_theme_mode", value: "light", url: baseURL! }]);
   await page.addInitScript(() => localStorage.setItem("odyssey_theme_mode", "light"));
   await page.route(`**${endpoint}`, (route) => route.fulfill({ json: response(links) }));
   await page.goto("/");
   const section = page.locator("#friend-links-showcase");
-  await expect(page.locator("html")).toHaveAttribute("data-theme-resolved-mode", "light");
+  await expect(page.locator("html")).toHaveClass(/light/);
   const first = section.getByRole("list").getByRole("link").first();
   await expect(first).toBeVisible();
   await section.scrollIntoViewIfNeeded();

@@ -142,10 +142,19 @@ for (const viewport of [
         await page.evaluate(
           ({ variant, mode }) => {
             const root = document.documentElement;
-            root.dataset.theme = `${variant}-${mode}`;
-            root.dataset.themeVariant = variant;
-            root.dataset.themeMode = mode;
-            root.dataset.themeResolvedMode = mode;
+            const themeName = `${variant}-${mode}`;
+            root.dataset.theme = themeName;
+            for (const className of [
+              "mouve-light",
+              "mouve-dark",
+              "glass-light",
+              "glass-dark",
+              "brutalism-light",
+              "brutalism-dark",
+            ]) {
+              root.classList.remove(className);
+            }
+            root.classList.add(themeName);
             root.classList.toggle("dark", mode === "dark");
             root.classList.toggle("light", mode === "light");
           },

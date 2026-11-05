@@ -15,7 +15,7 @@ import { isRTL } from "@heroui/react";
 import { getMessages } from "next-intl/server";
 import { siteConfig } from "@/config/site";
 import { resolveAppLocale } from "@/i18n/locale";
-import { getInitialThemeState } from "@/lib/theme";
+import { getInitialTheme } from "@/lib/theme";
 import { getThemeInitScript } from "@/lib/theme-init-script";
 import { Providers } from "./providers";
 import WebVitals from "./web-vitals";
@@ -50,7 +50,7 @@ export default async function RootLayout({
 }>) {
   const requestHeaders = await headers();
   const lang = resolveAppLocale(requestHeaders.get("accept-language"));
-  const initialTheme = getInitialThemeState(requestHeaders.get("cookie"));
+  const initialTheme = getInitialTheme(requestHeaders.get("cookie"));
 
   const messages = await getMessages({ locale: lang });
 
@@ -59,10 +59,7 @@ export default async function RootLayout({
       data-scrollbar="none"
       lang={lang}
       dir={isRTL(lang) ? "rtl" : "ltr"}
-      data-theme={initialTheme.themeName}
-      data-theme-variant={initialTheme.variant}
-      data-theme-mode={initialTheme.mode}
-      data-theme-resolved-mode={initialTheme.resolvedMode}
+      data-theme={initialTheme.selector}
       suppressHydrationWarning
       className={clsx(
         fontSans.variable,
@@ -70,6 +67,7 @@ export default async function RootLayout({
         fontDisplay.variable,
         fontBrutalismBody.variable,
         fontBrutalismDisplay.variable,
+        initialTheme.selector,
         initialTheme.resolvedMode,
         "h-full antialiased"
       )}

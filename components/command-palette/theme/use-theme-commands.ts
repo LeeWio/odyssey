@@ -12,8 +12,8 @@ import {
   SunMaxFillIcon,
   TargetIcon,
 } from "@/components/icons";
-import { selectThemeVariant, setThemeVariant, type ThemeVariant } from "@/lib/features/ui";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useStoredThemeVariant } from "@/hooks/use-stored-theme-variant";
+import { setStoredThemeVariant, type ThemeVariant } from "@/lib/theme";
 import { createActionCommand, createNavigationCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 
@@ -85,8 +85,7 @@ const THEME_VARIANTS: readonly ThemeVariantDefinition[] = [
 
 export const useThemeCommands = (): CommandItem[] => {
   const t = useTranslations("Search");
-  const dispatch = useAppDispatch();
-  const themeVariant = useAppSelector(selectThemeVariant);
+  const themeVariant = useStoredThemeVariant();
   const { theme, setTheme } = useTheme();
 
   return useMemo(() => {
@@ -133,7 +132,7 @@ export const useThemeCommands = (): CommandItem[] => {
         defaultVisible: true,
         payload: {
           action: () => {
-            dispatch(setThemeVariant(variant.variant));
+            setStoredThemeVariant(variant.variant);
           },
           closeOnExecute: true,
         },
@@ -155,5 +154,5 @@ export const useThemeCommands = (): CommandItem[] => {
     });
 
     return [...modeCommands, ...variantCommands, systemSettingsCommand];
-  }, [dispatch, setTheme, t, theme, themeVariant]);
+  }, [setTheme, t, theme, themeVariant]);
 };
