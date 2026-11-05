@@ -65,7 +65,7 @@ function MomentFeedItem({
       inert={!present ? true : undefined}
       aria-hidden={!present ? true : undefined}
       className={cn(
-        "focus-visible:ring-accent relative mb-6 flow-root w-full min-w-0 scroll-mt-28 break-inside-avoid rounded-lg outline-none group-data-[view=grid]/moment-feed:mb-4 focus-visible:ring-2",
+        "focus-visible:ring-accent relative mb-6 flow-root w-full min-w-0 scroll-mt-28 break-inside-avoid rounded-lg outline-none focus-visible:ring-2 @min-[41rem]/moment-feed:group-data-[view=grid]/moment-feed:mb-4",
         entrance.play && "[@media(scripting:enabled)]:motion-safe:opacity-0"
       )}
       initial={false}
@@ -112,7 +112,7 @@ export function MomentFeedList({
   let entranceOrder = 0;
 
   return (
-    <ol className="mx-auto w-full max-w-2xl gap-4 group-data-[view=grid]/moment-feed:max-w-none group-data-[view=grid]/moment-feed:columns-[20rem_4]">
+    <ol className="mx-auto w-full max-w-2xl gap-4 @min-[41rem]/moment-feed:group-data-[view=grid]/moment-feed:max-w-none @min-[41rem]/moment-feed:group-data-[view=grid]/moment-feed:columns-[20rem_4]">
       <AnimatePresence initial={false}>
         {moments.map((moment) => (
           <MomentFeedItem

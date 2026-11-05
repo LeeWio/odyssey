@@ -17,7 +17,7 @@ export function MomentFeedLoading({ label }: { label: string }) {
 
   return (
     <motion.div
-      className="mx-auto min-h-48 w-full max-w-2xl gap-4 group-data-[view=grid]/moment-feed:max-w-none group-data-[view=grid]/moment-feed:columns-[20rem]"
+      className="mx-auto min-h-48 w-full max-w-2xl gap-4 @min-[41rem]/moment-feed:group-data-[view=grid]/moment-feed:max-w-none @min-[41rem]/moment-feed:group-data-[view=grid]/moment-feed:columns-[20rem]"
       role="status"
       aria-label={label}
       aria-busy="true"
@@ -35,7 +35,7 @@ export function MomentFeedLoading({ label }: { label: string }) {
             <div
               key={index}
               aria-hidden="true"
-              className="mb-6 break-inside-avoid group-data-[view=grid]/moment-feed:mb-4"
+              className="mb-6 break-inside-avoid @min-[41rem]/moment-feed:group-data-[view=grid]/moment-feed:mb-4"
             >
               <MomentCardSkeleton animationType="none" />
             </div>

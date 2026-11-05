@@ -37,7 +37,7 @@ export function MomentFeedLayout({
 
   return (
     <LayoutGroup id={layoutId} inherit={false}>
-      <div className="group/moment-feed min-w-0" data-view={viewMode}>
+      <div className="group/moment-feed @container/moment-feed min-w-0" data-view={viewMode}>
         <div className="mb-5 flex justify-end" data-slot="moment-feed-view">
           <Segment
             aria-label={t("viewMode")}

@@ -4,11 +4,15 @@
 
 `/moments` defaults to a plain single-column List without a date axis. A small,
 default-variant HeroUI Pro `Segment` switches to Grid, implemented with CSS Columns
-and a 20rem preferred column width with a maximum of four columns. The feed keeps
-the full available width, so wider screens expand cards rather than adding columns
-or constraining the content container. The browser adapts the column count; cards
-flow vertically without shared rows, row spans, position calculation,
-or height measurement. Numbered pagination sits outside the multicolumn container.
+and a 20rem preferred column width with a maximum of four columns. Columns and the
+tighter 16px card gap apply only when the feed container is at least 41rem, two
+20rem columns plus the 16px column gap. Below that, Grid keeps the List
+stack: one column, `max-w-2xl`, and the 24px card rhythm from the spacing guide.
+The feed keeps the full available width once columns start, so wider screens expand
+cards rather than adding columns or constraining the content container. The browser
+adapts the column count; cards flow vertically without shared rows, row spans,
+position calculation, or height measurement. Numbered pagination sits outside the
+multicolumn container.
 
 `MomentFeedLayout` reads `view=list|grid` from the URL (missing/invalid values use
 List). Selection uses the native History `replaceState` API integrated with Next,

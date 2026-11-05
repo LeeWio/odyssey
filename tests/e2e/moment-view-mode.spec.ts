@@ -603,9 +603,15 @@ for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
     await gridButton.click();
     await expect(gridButton).toBeChecked();
     await expect(list).toHaveCSS("display", "block");
-    await expect(list).toHaveCSS("column-width", "320px");
-    await expect(list).toHaveCSS("column-count", "4");
-    await expect(list).toHaveCSS("column-gap", "16px");
+    const singleColumn = width === 390 || width === 1024;
+    if (singleColumn) {
+      await expect(list).toHaveCSS("column-count", "auto");
+      await expect(list).toHaveCSS("column-width", "auto");
+    } else {
+      await expect(list).toHaveCSS("column-width", "320px");
+      await expect(list).toHaveCSS("column-count", "4");
+      await expect(list).toHaveCSS("column-gap", "16px");
+    }
     const fullWidth = await list.evaluate((node) => ({
       content: node.getBoundingClientRect().width,
       available: node.parentElement!.getBoundingClientRect().width,
@@ -618,6 +624,7 @@ for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
       })
     );
     const columns = [...new Set(positions.map(({ x }) => x))];
+    const cardGap = columns.length > 1 ? 16 : 24;
     if (width >= 1920) {
       // A tall unbreakable image card can leave the last balanced column unused.
       expect(columns.length).toBeGreaterThanOrEqual(3);
@@ -629,7 +636,7 @@ for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
     for (const x of columns) {
       const column = positions.filter((position) => position.x === x);
       for (let index = 1; index < column.length; index += 1) {
-        expect(column[index].y - column[index - 1].bottom).toBeCloseTo(16, 0);
+        expect(column[index].y - column[index - 1].bottom).toBeCloseTo(cardGap, 0);
       }
     }
     expect(positions[0].height).not.toBeCloseTo(positions[1].height, 0);
