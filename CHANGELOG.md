@@ -1,3 +1,10 @@
+# [1.236.0](https://github.com/LeeWio/odyssey/compare/v1.235.2...v1.236.0) (2026-11-09)
+
+
+### Features
+
+* **analytics:** record real page views in the admin dashboard ([73fb048](https://github.com/LeeWio/odyssey/commit/73fb0482b140b113d52389b737b0f22d6f9d6ba5))
+
 ## [1.235.2](https://github.com/LeeWio/odyssey/compare/v1.235.1...v1.235.2) (2026-11-05)
 
 
