@@ -16,7 +16,9 @@ export function SessionsOverTimeCard() {
   const points = useMemo(
     () =>
       data?.timeSeries.map((point) => ({
-        day: new Date(point.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        day: /^\d{4}-\d{2}-\d{2}/.test(point.date)
+          ? point.date.slice(5)
+          : new Date(point.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
         sessions: point.sessions,
         users: point.users,
       })) ?? [],

@@ -81,6 +81,33 @@ export type AnalyticsOverviewResponse = z.infer<typeof AnalyticsOverviewResponse
 export type TopPageResponse = z.infer<typeof TopPageSchema>;
 export type TrafficResponse = z.infer<typeof TrafficResponseSchema>;
 
+export const VisitorSummarySchema = z.object({
+  visitorHash: z.string(),
+  ipAddress: z.string().nullable().optional(),
+  country: z.string().nullable().optional(),
+  region: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  clientName: z.string().nullable().optional(),
+  osName: z.string().nullable().optional(),
+  deviceType: z.string().nullable().optional(),
+  firstSeen: z.string().nullable().optional(),
+  lastSeen: z.string().nullable().optional(),
+  views: z.number().default(0),
+  sessions: z.number().default(0),
+  pages: z.number().default(0),
+});
+
+export const VisitorPageSchema = z.object({
+  list: z.array(VisitorSummarySchema).default([]),
+  total: z.number().default(0),
+  page: z.number().default(1),
+  size: z.number().default(50),
+  totalPages: z.number().default(0),
+});
+
+export type VisitorSummary = z.infer<typeof VisitorSummarySchema>;
+export type VisitorPage = z.infer<typeof VisitorPageSchema>;
+
 export const ContentFunnelResponseSchema = z.object({
   impressions: z.number().default(0),
   clicks: z.number().default(0),

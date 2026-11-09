@@ -11,6 +11,7 @@ import { DeviceBreakdownCard } from "../widgets/device-breakdown-card";
 import { SessionsOverTimeCard } from "../widgets/sessions-over-time-card";
 import { TopChannelsCard } from "../widgets/top-channels-card";
 import { TopPagesCard } from "../widgets/top-pages-card";
+import { VisitorsCard } from "../widgets/visitors-card";
 
 export function AnalyticsPage() {
   return (
@@ -20,8 +21,8 @@ export function AnalyticsPage() {
           Admin analytics
         </Chip>
         <p className="text-muted text-sm">
-          Sessions, devices, channels, top pages, and the content funnel come from the admin
-          analytics API. Cards use a fixed 30-day window.
+          Reader page views, devices, channels, and visitors. Your own signed-in visits and detected
+          crawlers stay out of these numbers. The visitor table covers the last 7 days.
         </p>
       </div>
 
@@ -38,6 +39,7 @@ export function AnalyticsPage() {
       </div>
 
       <TopPagesCard />
+      <VisitorsCard />
     </div>
   );
 }

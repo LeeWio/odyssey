@@ -16,6 +16,8 @@ import {
   type DashboardStatsResponse,
   type TopPageResponse,
   type TrafficResponse,
+  VisitorPageSchema,
+  type VisitorPage,
 } from "./dashboard-contracts";
 
 export const dashboardApi = baseApi.injectEndpoints({
@@ -113,6 +115,21 @@ export const dashboardApi = baseApi.injectEndpoints({
       transformErrorResponse: transformApiError,
     }),
 
+    getVisitors: builder.query<
+      VisitorPage,
+      { days?: number; page?: number; includeOwner?: boolean; includeBots?: boolean }
+    >({
+      query: ({ days = 7, page = 0, includeOwner = false, includeBots = false }) => ({
+        url: "/api/v1/admin/analytics/visitors",
+        method: "GET",
+        params: { days, page, size: 50, includeOwner, includeBots },
+      }),
+      providesTags: ["Dashboard"],
+      rawResponseSchema: apiResponseSchema(VisitorPageSchema),
+      transformResponse: (response: { data: VisitorPage }) => response.data,
+      transformErrorResponse: transformApiError,
+    }),
+
     getTrafficAnalytics: builder.query<TrafficResponse, number | undefined>({
       query: (days) => ({
         url: "/api/v1/admin/analytics/traffic",
@@ -137,4 +154,5 @@ export const {
   useGetContentFunnelQuery,
   useGetTopPagesQuery,
   useGetTrafficAnalyticsQuery,
+  useGetVisitorsQuery,
 } = dashboardApi;

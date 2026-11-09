@@ -3,6 +3,7 @@ import { Navbar } from "@/components/navbar";
 import { GlobalControl } from "@/components/global-control";
 import { Footer } from "@/components/footer";
 import { MiniPlayerGate } from "@/features/media/components/mini-player-gate";
+import { PageViewReporter } from "@/components/analytics/page-view-reporter";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       >
         Skip to content
       </a>
+      <PageViewReporter />
       <Navbar />
       <GlobalControl />
       <main id="main-content" tabIndex={-1} className="flex w-full grow flex-col outline-none">
