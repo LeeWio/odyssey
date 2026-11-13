@@ -49,6 +49,7 @@ export const CardFooter = ({
             count={likesCount}
             showCount="positive"
             idleVariant="ghost"
+            idleColor="inherit"
             selectedVariant="danger-soft"
             selectedColor="danger"
             onSelectedChange={onLikeToggle}
@@ -66,7 +67,7 @@ export const CardFooter = ({
             onPress={onCommentToggle}
             aria-label={t("openComments", { count: commentsCount })}
           >
-            <Icon icon="gravity-ui:comment" className="size-4.5" />
+            <Icon icon="gravity-ui:comment" className="m-0 size-4" />
             {commentsCount > 0 ? (
               <span className="text-xs tabular-nums">{commentsCount}</span>
             ) : null}
@@ -81,6 +82,7 @@ export const CardFooter = ({
           selected={isBookmarked}
           showCount={false}
           idleVariant="ghost"
+          idleColor="inherit"
           selectedVariant="secondary"
           selectedColor="warning"
           onSelectedChange={() => onBookmarkToggle?.() ?? false}

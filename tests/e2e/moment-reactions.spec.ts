@@ -285,12 +285,28 @@ for (const width of [360, 768, 1440]) {
     const card = page.locator("#moment-100");
     const like = card.getByRole("button", { name: "Like moment, 8", exact: true });
     const save = card.getByRole("button", { name: "Save moment", exact: true });
+    const comment = card.getByRole("button", { name: "Open 0 comments", exact: true });
     await expect(like.locator("svg")).toBeVisible();
     const height = width >= 768 ? 32 : 36;
     await expect(like).toHaveCSS("height", `${height}px`);
     await expect(save).toHaveCSS("height", `${height}px`);
     await expect(save).toHaveCSS("width", `${height}px`);
-    await expect(like.locator("svg")).toHaveCSS("width", "16px");
+    const ghostForeground = await comment.evaluate((button) => getComputedStyle(button).color);
+    for (const button of [like, comment, save]) {
+      const icon = button.locator("svg");
+      await expect(icon).toBeVisible();
+      await expect(icon).toHaveCSS("width", "16px");
+      await expect(icon).toHaveCSS("height", "16px");
+      await expect(icon).toHaveCSS("color", ghostForeground);
+      await expect(icon).toHaveCSS("margin", "0px");
+      const buttonBounds = await button.boundingBox();
+      const iconBounds = await icon.boundingBox();
+      expect(
+        Math.abs(
+          iconBounds!.y + iconBounds!.height / 2 - buttonBounds!.y - buttonBounds!.height / 2
+        )
+      ).toBeLessThan(1);
+    }
     await expect(like.locator("span[aria-hidden=true]").nth(1)).toHaveCSS("font-size", "14px");
     const bounds = await like.boundingBox();
     const savedBounds = await save.boundingBox();
@@ -301,6 +317,16 @@ for (const width of [360, 768, 1440]) {
     );
     await like.press("Enter");
     await save.press("Enter");
+    const selectedColors: string[] = [];
+    for (const button of [
+      card.getByRole("button", { name: "Unlike moment, 9", exact: true }),
+      card.getByRole("button", { name: "Remove from saved", exact: true }),
+    ]) {
+      const color = await button.locator("svg").evaluate((icon) => getComputedStyle(icon).color);
+      expect(color).not.toBe(ghostForeground);
+      selectedColors.push(color);
+    }
+    expect(selectedColors[0]).not.toBe(selectedColors[1]);
     await expect(
       card.getByRole("button", { name: "Unlike moment, 9", exact: true })
     ).not.toHaveAttribute("data-running");
