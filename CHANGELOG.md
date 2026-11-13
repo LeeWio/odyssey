@@ -1,3 +1,10 @@
+# [1.237.0](https://github.com/LeeWio/odyssey/compare/v1.236.1...v1.237.0) (2026-11-13)
+
+
+### Features
+
+* **moments:** integrate animated reaction buttons ([7226d99](https://github.com/LeeWio/odyssey/commit/7226d991329d560166fcd2d1d87f58fe1e5f4255))
+
 ## [1.236.1](https://github.com/LeeWio/odyssey/compare/v1.236.0...v1.236.1) (2026-11-13)
 
 
