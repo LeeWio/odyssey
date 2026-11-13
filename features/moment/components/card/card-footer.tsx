@@ -1,12 +1,11 @@
 "use client";
 
-import { Button } from "@heroui/react";
+import { Button, Tooltip } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useTranslations } from "next-intl";
-import { motion, useAnimationControls } from "motion/react";
-import { useEffect, useRef } from "react";
+import { motion } from "motion/react";
 
-import { pageEaseOut } from "@/lib/motion";
+import { ReactionButton } from "@/components/ui/reaction-button";
 import { momentLayoutTransition, useMomentMotion } from "../feed-motion";
 
 interface CardFooterProps {
@@ -14,11 +13,11 @@ interface CardFooterProps {
   isLiking: boolean;
   likesCount: number;
   commentsCount?: number;
-  onLikeToggle: () => void;
+  onLikeToggle: () => boolean;
   isCommentsOpen?: boolean;
   onCommentToggle?: () => void;
   isBookmarked?: boolean;
-  onBookmarkToggle?: () => void;
+  onBookmarkToggle?: () => boolean;
 }
 
 export const CardFooter = ({
@@ -34,38 +33,6 @@ export const CardFooter = ({
 }: CardFooterProps) => {
   const t = useTranslations("Moments");
   const { enabled, reduced } = useMomentMotion();
-  const likeAnimation = useAnimationControls();
-  const bookmarkAnimation = useAnimationControls();
-  const likePressed = useRef(false);
-  const bookmarkPressed = useRef(false);
-
-  useEffect(() => {
-    if (!reduced) return;
-    likeAnimation.stop();
-    bookmarkAnimation.stop();
-    likeAnimation.set({ scale: 1 });
-    bookmarkAnimation.set({ scale: 1 });
-  }, [bookmarkAnimation, likeAnimation, reduced]);
-
-  useEffect(() => {
-    if (!likePressed.current) return;
-    likePressed.current = false;
-    if (!enabled || reduced) return;
-    void likeAnimation.start({
-      scale: isLiked ? [1, 1.12, 1] : 1,
-      transition: { duration: isLiked ? 0.18 : 0.1, ease: pageEaseOut },
-    });
-  }, [enabled, isLiked, likeAnimation, reduced]);
-
-  useEffect(() => {
-    if (!bookmarkPressed.current) return;
-    bookmarkPressed.current = false;
-    if (!enabled || reduced) return;
-    void bookmarkAnimation.start({
-      scale: isBookmarked ? [1, 1.1, 1] : 1,
-      transition: { duration: isBookmarked ? 0.16 : 0.1, ease: pageEaseOut },
-    });
-  }, [bookmarkAnimation, enabled, isBookmarked, reduced]);
 
   return (
     <motion.div
@@ -74,39 +41,23 @@ export const CardFooter = ({
       transition={{ layout: reduced ? { duration: 0 } : momentLayoutTransition }}
     >
       <div className="flex flex-row items-center gap-1">
-        <Button
-          size="sm"
-          variant={isLiked ? "danger-soft" : "ghost"}
-          onPress={() => {
-            likePressed.current = true;
-            onLikeToggle();
-          }}
-          isPending={isLiking}
-          aria-label={isLiked ? t("unlike") : t("like")}
-        >
-          <motion.span
-            aria-hidden="true"
-            className="inline-flex size-4.5 shrink-0"
-            initial={false}
-            animate={likeAnimation}
-          >
-            <Icon
-              icon={isLiked ? "gravity-ui:heart-fill" : "gravity-ui:heart"}
-              className="size-4.5"
-            />
-          </motion.span>
-          {likesCount > 0 ? (
-            <motion.span
-              key={likesCount}
-              className="min-w-[1ch] text-xs tabular-nums"
-              initial={enabled && !reduced ? { opacity: 0.4 } : false}
-              animate={{ opacity: 1 }}
-              transition={{ duration: reduced ? 0 : 0.12 }}
-            >
-              {likesCount}
-            </motion.span>
-          ) : null}
-        </Button>
+        <Tooltip delay={300}>
+          <ReactionButton
+            size="sm"
+            icon="heart"
+            selected={isLiked}
+            count={likesCount}
+            showCount="positive"
+            idleVariant="ghost"
+            selectedVariant="danger-soft"
+            selectedColor="danger"
+            onSelectedChange={onLikeToggle}
+            isPending={isLiking}
+            animationEnabled={enabled && !reduced}
+            label={isLiked ? t("unlike") : t("like")}
+          />
+          <Tooltip.Content>{isLiked ? t("unlike") : t("like")}</Tooltip.Content>
+        </Tooltip>
 
         {onCommentToggle ? (
           <Button
@@ -123,29 +74,22 @@ export const CardFooter = ({
         ) : null}
       </div>
 
-      <Button
-        size="sm"
-        variant={isBookmarked ? "secondary" : "ghost"}
-        onPress={() => {
-          bookmarkPressed.current = true;
-          onBookmarkToggle?.();
-        }}
-        isIconOnly
-        aria-label={isBookmarked ? t("unsaveMoment") : t("saveMoment")}
-        className={enabled ? undefined : "transition-all active:scale-95"}
-      >
-        <motion.span
-          aria-hidden="true"
-          className="inline-flex size-4.5 shrink-0"
-          initial={false}
-          animate={bookmarkAnimation}
-        >
-          <Icon
-            icon={isBookmarked ? "gravity-ui:star-fill" : "gravity-ui:star"}
-            className={`size-4.5 ${isBookmarked ? "text-warning" : ""}`}
-          />
-        </motion.span>
-      </Button>
+      <Tooltip delay={300}>
+        <ReactionButton
+          size="sm"
+          icon="star"
+          selected={isBookmarked}
+          showCount={false}
+          idleVariant="ghost"
+          selectedVariant="secondary"
+          selectedColor="warning"
+          onSelectedChange={() => onBookmarkToggle?.() ?? false}
+          isDisabled={!onBookmarkToggle}
+          animationEnabled={enabled && !reduced}
+          label={isBookmarked ? t("unsaveMoment") : t("saveMoment")}
+        />
+        <Tooltip.Content>{isBookmarked ? t("unsaveMoment") : t("saveMoment")}</Tooltip.Content>
+      </Tooltip>
     </motion.div>
   );
 };

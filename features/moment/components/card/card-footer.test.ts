@@ -1,128 +1,124 @@
-import { act, createElement, type ComponentProps } from "react";
+import { act, createElement, Fragment, type ComponentProps, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
+import type { ReactionButtonProps } from "@/components/ui/reaction-button";
 import { CardFooter } from "./card-footer";
 
 const mocks = vi.hoisted(() => ({
   reduced: false,
-  controls: [] as Array<{
-    start: ReturnType<typeof vi.fn>;
-    set: ReturnType<typeof vi.fn>;
-    stop: ReturnType<typeof vi.fn>;
-    subscribe: ReturnType<typeof vi.fn>;
-  }>,
+  enabled: true,
+  reactions: [] as ReactionButtonProps[],
 }));
 vi.mock("../feed-motion", () => ({
   momentLayoutTransition: { duration: 0.4 },
-  useMomentMotion: () => ({ enabled: true, reduced: mocks.reduced }),
+  useMomentMotion: () => ({ enabled: mocks.enabled, reduced: mocks.reduced }),
 }));
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("@iconify/react", () => ({ Icon: () => null }));
+vi.mock("@/components/ui/reaction-button", () => ({
+  ReactionButton: (props: ReactionButtonProps) => {
+    mocks.reactions.push(props);
+    return createElement("button", {
+      "aria-label": props.label,
+      onClick: () => props.onSelectedChange(!props.selected),
+    });
+  },
+}));
 vi.mock("@heroui/react", () => ({
   Button: ({
     children,
     onPress,
     "aria-label": label,
   }: {
-    children: React.ReactNode;
+    children: ReactNode;
     onPress: () => void;
     "aria-label": string;
   }) => createElement("button", { onClick: onPress, "aria-label": label }, children),
+  Tooltip: Object.assign(
+    ({ children }: { children: ReactNode }) => createElement(Fragment, null, children),
+    { Content: () => null }
+  ),
 }));
-vi.mock("motion/react", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("motion/react")>();
-  const { useMemo } = await import("react");
-  return {
-    ...actual,
-    useAnimationControls: () =>
-      useMemo(() => {
-        const controls = {
-          start: vi.fn(),
-          set: vi.fn(),
-          stop: vi.fn(),
-          subscribe: vi.fn(() => () => {}),
-        };
-        mocks.controls.push(controls);
-        return controls;
-      }, []),
-  };
-});
 
 let root: Root;
 let container: HTMLDivElement;
 let props: ComponentProps<typeof CardFooter>;
-
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   mocks.reduced = false;
-  mocks.controls = [];
+  mocks.enabled = true;
+  mocks.reactions = [];
   container = document.createElement("div");
   root = createRoot(container);
   props = {
     isLiked: false,
     isLiking: false,
     likesCount: 0,
-    onLikeToggle: vi.fn(),
-    onBookmarkToggle: vi.fn(),
+    onLikeToggle: vi.fn(() => true),
+    onBookmarkToggle: vi.fn(() => true),
   };
 });
-
 afterEach(async () => {
   await act(async () => root.unmount());
   vi.unstubAllGlobals();
 });
-
 async function render(next: Partial<typeof props> = {}) {
   props = { ...props, ...next };
+  mocks.reactions = [];
   await act(async () => root.render(createElement(CardFooter, props)));
 }
 
-async function press(label: string) {
-  await act(async () =>
-    container.querySelector<HTMLButtonElement>(`[aria-label="${label}"]`)!.click()
-  );
-}
-
-it("does not celebrate hydrated reactions or bookmarks", async () => {
-  await render();
-  await render({ isLiked: true, isBookmarked: true });
-  expect(mocks.controls[0].start).not.toHaveBeenCalled();
-  expect(mocks.controls[1].start).not.toHaveBeenCalled();
+it("configures a counted danger heart and an icon-only warning star", async () => {
+  await render({ isLiked: true, likesCount: 12, isBookmarked: true });
+  expect(mocks.reactions[0]).toMatchObject({
+    selected: true,
+    count: 12,
+    size: "sm",
+    icon: "heart",
+    showCount: "positive",
+    selectedVariant: "danger-soft",
+    selectedColor: "danger",
+    label: "unlike",
+  });
+  expect(mocks.reactions[1]).toMatchObject({
+    selected: true,
+    size: "sm",
+    icon: "star",
+    showCount: false,
+    selectedVariant: "secondary",
+    selectedColor: "warning",
+    label: "unsaveMoment",
+  });
 });
-
-it("pulses a user-triggered like once and does not pulse on rollback", async () => {
+it("delegates actions without owning business state", async () => {
   await render();
-  await press("like");
+  await act(async () => {
+    container.querySelector<HTMLButtonElement>('[aria-label="like"]')!.click();
+    container.querySelector<HTMLButtonElement>('[aria-label="saveMoment"]')!.click();
+  });
   expect(props.onLikeToggle).toHaveBeenCalledTimes(1);
-  await render({ isLiked: true, likesCount: 1 });
-  expect(mocks.controls[0].start).toHaveBeenCalledWith(
-    expect.objectContaining({ scale: [1, 1.12, 1] })
-  );
-  await render({ isLiked: false, likesCount: 0 });
-  expect(mocks.controls[0].start).toHaveBeenCalledTimes(1);
-});
-
-it("pulses only the bookmark icon after a user action", async () => {
-  await render();
-  await press("saveMoment");
-  await render({ isBookmarked: true });
   expect(props.onBookmarkToggle).toHaveBeenCalledTimes(1);
-  expect(mocks.controls[1].start).toHaveBeenCalledWith(
-    expect.objectContaining({ scale: [1, 1.1, 1] })
-  );
-  expect(mocks.controls[0].start).not.toHaveBeenCalled();
+  expect(mocks.reactions[0].selected).toBe(false);
+  expect(mocks.reactions[1].selected).toBe(false);
 });
-
-it("settles icon feedback and skips new pulses with reduced motion", async () => {
-  await render();
+it("passes pending and motion preferences through", async () => {
   mocks.reduced = true;
+  await render({ isLiking: true });
+  expect(mocks.reactions[0].isPending).toBe(true);
+  expect(mocks.reactions.every((props) => !props.animationEnabled)).toBe(true);
+  mocks.reduced = false;
+  mocks.enabled = false;
   await render();
-  await press("like");
-  await render({ isLiked: true });
-  for (const controls of mocks.controls) {
-    expect(controls.stop).toHaveBeenCalled();
-    expect(controls.set).toHaveBeenCalledWith({ scale: 1 });
-    expect(controls.start).not.toHaveBeenCalled();
-  }
+  expect(mocks.reactions.every((props) => !props.animationEnabled)).toBe(true);
+});
+it("preserves comments and disables an unavailable bookmark action", async () => {
+  const onCommentToggle = vi.fn();
+  await render({ onBookmarkToggle: undefined, onCommentToggle, commentsCount: 2 });
+  await act(async () =>
+    container.querySelector<HTMLButtonElement>('[aria-label="openComments"]')!.click()
+  );
+  expect(onCommentToggle).toHaveBeenCalledTimes(1);
+  expect(mocks.reactions[1].isDisabled).toBe(true);
+  expect(mocks.reactions[1].onSelectedChange(true)).toBe(false);
 });

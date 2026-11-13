@@ -148,12 +148,13 @@ export const MomentCard = ({
   }, [isAuthenticated, moment?.id, username]);
 
   const handleBookmarkToggle = () => {
-    if (!moment?.id) return;
+    if (!moment?.id) return false;
     if (!isAuthenticated || !username) {
       dispatch(setLoginOpen(true));
-      return;
+      return false;
     }
     setIsBookmarked(toggleMomentBookmark(username, moment.id));
+    return true;
   };
 
   const handleDeleteConfirm = async () => {

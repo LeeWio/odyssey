@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { selectIsAuthenticated } from "@/lib/features/auth";
+import { selectCurrentUser, selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useLikeMomentMutation,
   useUnlikeMomentMutation,
@@ -15,9 +15,18 @@ export const useMomentLike = (
 ) => {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const username = useAppSelector(selectCurrentUser);
   const [likeMoment] = useLikeMomentMutation();
   const [unlikeMoment] = useUnlikeMomentMutation();
-  const [isLiking, setIsLiking] = useState(false);
+  const inFlight = useRef(new Set<string>());
+  const scope = JSON.stringify([momentId, isAuthenticated, username]);
+  const [override, setOverride] = useState<{
+    scope: string;
+    liked: boolean;
+    count: number;
+    pending: boolean;
+    request: symbol;
+  } | null>(null);
 
   const likedMomentsQuery = useGetLikedMomentIdsQuery([momentId ?? 0], {
     skip: !isAuthenticated || !momentId || knownLikedMomentIds !== undefined,
@@ -27,48 +36,39 @@ export const useMomentLike = (
     likedMomentsQuery.data?.includes(momentId ?? 0) ??
     false;
 
-  const [localLikeOverride, setLocalLikeOverride] = useState<boolean | null>(null);
-  const isLiked = localLikeOverride !== null ? localLikeOverride : isServerLiked;
+  const current = override?.scope === scope ? override : null;
+  const isLiked = isAuthenticated && (current?.liked ?? isServerLiked);
+  const likesCount = current?.count ?? initialLikesCount;
+  const isLiking = current?.pending ?? false;
 
-  const [localLikesCountOverride, setLocalLikesCountOverride] = useState<number | null>(null);
-  const likesCount = localLikesCountOverride !== null ? localLikesCountOverride : initialLikesCount;
-
-  // Sync state if parent moment changes (official React derived state pattern to avoid useEffect cascades)
-  const [prevMomentId, setPrevMomentId] = useState<number | undefined>(momentId);
-  if (momentId !== prevMomentId) {
-    setPrevMomentId(momentId);
-    setLocalLikeOverride(null);
-    setLocalLikesCountOverride(null);
-  }
-
-  const toggleLike = async () => {
-    if (!momentId) return;
+  const toggleLike = () => {
+    if (!momentId) return false;
     if (!isAuthenticated) {
       dispatch(setLoginOpen(true));
-      return;
+      return false;
     }
-    if (isLiking) return;
+    if (inFlight.current.has(scope)) return false;
 
     const nextLiked = !isLiked;
-    const nextLikesCount = likesCount + (nextLiked ? 1 : -1);
+    const nextLikesCount = Math.max(0, likesCount + (nextLiked ? 1 : -1));
+    const request = Symbol();
+    inFlight.current.add(scope);
+    setOverride({ scope, liked: nextLiked, count: nextLikesCount, pending: true, request });
 
-    setLocalLikeOverride(nextLiked);
-    setLocalLikesCountOverride(nextLikesCount);
-    setIsLiking(true);
-
-    try {
-      if (nextLiked) {
-        await likeMoment(momentId).unwrap();
-      } else {
-        await unlikeMoment(momentId).unwrap();
+    // Accept synchronously; presentation follows the optimistic state, not request completion.
+    void (async () => {
+      try {
+        await (nextLiked ? likeMoment(momentId) : unlikeMoment(momentId)).unwrap();
+      } catch {
+        setOverride((value) =>
+          value?.request === request ? { ...value, liked: isLiked, count: likesCount } : value
+        );
+      } finally {
+        inFlight.current.delete(scope);
+        setOverride((value) => (value?.request === request ? { ...value, pending: false } : value));
       }
-    } catch {
-      // rollback
-      setLocalLikeOverride(null);
-      setLocalLikesCountOverride(null);
-    } finally {
-      setIsLiking(false);
-    }
+    })();
+    return true;
   };
 
   return {

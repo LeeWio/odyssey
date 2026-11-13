@@ -82,6 +82,8 @@ export const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [hasOpenedSearch, setHasOpenedSearch] = useState(false);
   const [hasOpenedAuth, setHasOpenedAuth] = useState(false);
+  // Feature actions can open auth without passing through the navigation triggers.
+  if (authMode !== null && !hasOpenedAuth) setHasOpenedAuth(true);
   const [isCompact, setIsCompact] = useState(false);
   const [navigationWidths, setNavigationWidths] = useState({
     compact: 0,

@@ -31,6 +31,7 @@ export default defineConfig({
     },
     include: [
       "hooks/**/*.test.ts",
+      "components/ui/**/*.test.ts",
       "components/reading/**/*.test.ts",
       "components/rich-text/**/*.test.ts",
       "components/auth/**/*.test.ts",
