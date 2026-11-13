@@ -1,3 +1,10 @@
+## [1.236.1](https://github.com/LeeWio/odyssey/compare/v1.236.0...v1.236.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* **comment:** detach the comment sheet from the viewport edge ([c311eac](https://github.com/LeeWio/odyssey/commit/c311eac05e21f7f09d63ff27da292d06f0360c9a))
+
 # [1.236.0](https://github.com/LeeWio/odyssey/compare/v1.235.2...v1.236.0) (2026-11-09)
 
 
