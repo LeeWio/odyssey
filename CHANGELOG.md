@@ -1,3 +1,10 @@
+## [1.237.1](https://github.com/LeeWio/odyssey/compare/v1.237.0...v1.237.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* **moments:** align ghost action icon size and color ([69f63db](https://github.com/LeeWio/odyssey/commit/69f63db916ffbf0e6c6951c3931a8594af0f60d5))
+
 # [1.237.0](https://github.com/LeeWio/odyssey/compare/v1.236.1...v1.237.0) (2026-11-13)
 
 
