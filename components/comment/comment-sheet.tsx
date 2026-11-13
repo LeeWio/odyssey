@@ -30,6 +30,7 @@ export function CommentSheet({ postId, momentId, isOpen, onOpenChange }: Comment
 
   return (
     <Sheet
+      isDetached
       isOpen={isOpen}
       placement="bottom"
       snapPoints={["min(560px,72dvh)", "min(640px,78dvh)"]}
