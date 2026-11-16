@@ -1,3 +1,11 @@
+## [1.239.9](https://github.com/LeeWio/odyssey/compare/v1.239.8...v1.239.9) (2026-11-16)
+
+
+### Bug Fixes
+
+* **reader:** keep the reading position after refresh ([ec5b7ce](https://github.com/LeeWio/odyssey/commit/ec5b7ce0d42e4c070bd68d6a299508c164c672ef))
+* **reader:** measure article reveal once per frame ([1226b20](https://github.com/LeeWio/odyssey/commit/1226b2082a95200c37438711c019a765b272b0ce))
+
 ## [1.239.8](https://github.com/LeeWio/odyssey/compare/v1.239.7...v1.239.8) (2026-11-16)
 
 
