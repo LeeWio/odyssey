@@ -1,3 +1,10 @@
+## [1.239.10](https://github.com/LeeWio/odyssey/compare/v1.239.9...v1.239.10) (2026-11-16)
+
+
+### Bug Fixes
+
+* **reader:** show the article before its footer on refresh ([d1a017b](https://github.com/LeeWio/odyssey/commit/d1a017b13d89fbf530d2faff9f95bd78e7224974))
+
 ## [1.239.9](https://github.com/LeeWio/odyssey/compare/v1.239.8...v1.239.9) (2026-11-16)
 
 
