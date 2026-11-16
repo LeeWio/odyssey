@@ -7,8 +7,6 @@ import type { EditorView } from "@tiptap/pm/view";
 const GAP_MS = 70;
 const TEXT_DURATION_MS = 560;
 const IMAGE_DURATION_MS = 640;
-/** Start just before a block reaches the viewport, as the sample starts on play. */
-const ROOT_MARGIN = "0px 0px 160px";
 
 const TEXT_CLASS = "reading-reveal-text";
 const IMAGE_CLASS = "reading-reveal-image";
