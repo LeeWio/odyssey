@@ -1,12 +1,10 @@
-import { Extension } from "@tiptap/core";
+import { Decoration, Extension } from "@tiptap/core";
 import type { Node as DocumentNode } from "@tiptap/pm/model";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 
 /** The next reading unit starts this long after the previous one has started. */
-const GAP_MS = 70;
-const TEXT_DURATION_MS = 560;
-const IMAGE_DURATION_MS = 640;
+export const REVEAL_GAP_MS = 70;
+const LEAD_PX = 80;
 
 const TEXT_CLASS = "reading-reveal-text";
 const IMAGE_CLASS = "reading-reveal-image";
@@ -18,161 +16,223 @@ const PENDING_CLASS = "reading-reveal-pending";
  */
 const GROUPED_BLOCKS = new Set(["listItem", "taskItem", "tableRow", "blockquote", "details"]);
 
-interface RevealTarget {
+type RevealPhase = "pending" | "playing" | "done";
+
+interface RevealUnit {
   pos: number;
-  node: DocumentNode;
-  element: HTMLElement;
   image: boolean;
+  phase: RevealPhase;
 }
 
-export const readingRevealKey = new PluginKey("readingReveal");
+interface MotionStorage {
+  units: RevealUnit[];
+  cursor: number;
+  enabled: boolean;
+}
 
 function isImage(node: DocumentNode) {
   return node.type.name === "image";
 }
 
-export function collectRevealTargets(view: EditorView): RevealTarget[] {
-  const targets: RevealTarget[] = [];
+export function collectRevealTargets(view: EditorView): RevealUnit[] {
+  const units: RevealUnit[] = [];
   view.state.doc.descendants((node, pos) => {
     if (!node.isBlock) return false;
     if (!node.isTextblock && !node.isAtom && !GROUPED_BLOCKS.has(node.type.name)) return;
     if (node.isTextblock && node.content.size === 0) return false;
-
     const element = view.nodeDOM(pos);
-    if (!(element instanceof HTMLElement)) return false;
-    // A laid-out document can contain zero-height nodes. They intersect the
-    // whole page and would steal a stagger slot. jsdom has no layout.
-    const rootHeight = view.dom.getBoundingClientRect().height;
-    if (rootHeight > 0 && element.getBoundingClientRect().height === 0) return false;
-    targets.push({ pos, node, element: revealElement(element), image: isImage(node) });
+    if (element instanceof HTMLElement) {
+      const rect = element.getBoundingClientRect();
+      if (rect.height === 0 && rect.width > 0) return false;
+    }
+    units.push({ pos, image: isImage(node), phase: "pending" });
     return false;
   });
-  return targets;
-}
-
-/** Node views can use `display: contents`, which leaves the wrapper unpositioned. */
-function revealElement(element: HTMLElement) {
-  const content = element.querySelector("[data-node-view-content-react]");
-  return content instanceof HTMLElement ? content : element;
+  return units;
 }
 
 function reducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+function revealClass(unit: RevealUnit) {
+  if (unit.phase === "done") return null;
+  if (unit.phase === "pending") return PENDING_CLASS;
+  return unit.image ? IMAGE_CLASS : TEXT_CLASS;
+}
+
+function laidOut(rect: DOMRect) {
+  return rect.width > 0 && rect.height > 0;
+}
+
 /**
- * Cinematic reveal for the read-only article body. Classes are written on the
- * block DOM because the reader suppresses decoration redraws. Off-screen
- * Unplayed blocks stay in their layout but are not shown until their turn.
- * A played element never plays again.
+ * Read-only cinematic reveal. `manual` decorations keep the sequence out of
+ * the document. `updateDecorations()` is the supported refresh for external
+ * state; a custom decoration transaction drops pending classes in this reader.
  */
-export const MotionKit = Extension.create({
+export const MotionKit = Extension.create<Record<string, never>, MotionStorage>({
   name: "motionKit",
 
-  addProseMirrorPlugins() {
+  addStorage() {
+    return { units: [], cursor: 0, enabled: false };
+  },
+
+  addDecorations() {
+    return {
+      update: "manual",
+      create: ({ editor, state }) => {
+        const storage = editor.storage.motionKit as MotionStorage;
+        if (!storage.enabled) return [];
+        const decorations = [];
+        for (const unit of storage.units) {
+          const node = state.doc.nodeAt(unit.pos);
+          const className = revealClass(unit);
+          if (!node || !className) continue;
+          decorations.push(
+            Decoration.Node(unit.pos, unit.pos + node.nodeSize, { class: className })
+          );
+        }
+        return decorations;
+      },
+    };
+  },
+
+  onCreate() {
+    const storage = this.storage;
     const editor = this.editor;
-    const played = new WeakSet<HTMLElement>();
-    let lastStartedAt = 0;
-    let frame = 0;
-    let loopStarted = false;
-    const cleanups = new Set<ReturnType<typeof setTimeout>>();
+    let activeView: EditorView | null = null;
+    let observer: IntersectionObserver | null = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     let media: MediaQueryList | null = null;
-    let currentView: EditorView | null = null;
 
-    const clearPlaying = (element: HTMLElement) => {
-      element.classList.remove(TEXT_CLASS, IMAGE_CLASS, PENDING_CLASS);
+    const rebuild = () => {
+      if (!editor.isDestroyed) editor.commands.updateDecorations("motionKit");
     };
 
-    const markPending = (view: EditorView) => {
-      if (reducedMotion()) return;
-      for (const target of collectRevealTargets(view)) {
-        if (played.has(target.element) || target.element.classList.contains(TEXT_CLASS)) continue;
-        if (target.element.classList.contains(IMAGE_CLASS)) continue;
-        target.element.classList.add(PENDING_CLASS);
+    const finish = (unit: RevealUnit, view: EditorView) => {
+      const element = view.nodeDOM(unit.pos);
+      if (!(element instanceof HTMLElement)) {
+        unit.phase = "done";
+        return;
       }
-    };
-
-    const inZone = (element: HTMLElement) => {
-      const rect = element.getBoundingClientRect();
-      if (rect.height === 0) return rect.width === 0;
-      return rect.top < window.innerHeight + 80 && rect.bottom > 0;
-    };
-
-    const startNext = (view: EditorView) => {
-      const now = performance.now();
-      if (lastStartedAt !== 0 && now - lastStartedAt < GAP_MS) return;
-      const next = collectRevealTargets(view).find(
-        (target) => !played.has(target.element) && inZone(target.element)
-      );
-      if (!next) return;
-      played.add(next.element);
-      lastStartedAt = now;
-      next.element.classList.remove(PENDING_CLASS);
-      next.element.classList.add(next.image ? IMAGE_CLASS : TEXT_CLASS);
-      const cleanup = setTimeout(
+      element.addEventListener(
+        "animationend",
         () => {
-          cleanups.delete(cleanup);
-          clearPlaying(next.element);
+          unit.phase = "done";
+          rebuild();
         },
-        (next.image ? IMAGE_DURATION_MS : TEXT_DURATION_MS) + 40
+        { once: true }
       );
-      cleanups.add(cleanup);
     };
 
-    const tick = () => {
-      frame = requestAnimationFrame(tick);
-      const view = currentView;
-      if (!view || view.isDestroyed || editor.isEditable || reducedMotion()) return;
-      markPending(view);
-      const now = performance.now();
-      const due = lastStartedAt === 0 ? 1 : Math.floor((now - lastStartedAt) / GAP_MS);
-      for (let step = 0; step < due; step += 1) startNext(view);
+    const begin = (view: EditorView, unit: RevealUnit) => {
+      unit.phase = "playing";
+      storage.cursor += 1;
+      rebuild();
+      finish(unit, view);
+      arm(view);
     };
 
-    return [
-      new Plugin({
-        key: readingRevealKey,
-        view(view) {
-          currentView = view;
-          media = window.matchMedia("(prefers-reduced-motion: reduce)");
-          const onMotion = () => {
-            if (!reducedMotion()) return;
-            for (const element of view.dom.querySelectorAll(
-              `.${TEXT_CLASS}, .${IMAGE_CLASS}, .${PENDING_CLASS}`
-            )) {
-              if (element instanceof HTMLElement) clearPlaying(element);
-            }
-          };
-          media.addEventListener("change", onMotion);
-          if (!loopStarted) {
-            loopStarted = true;
-            frame = requestAnimationFrame(tick);
+    const currentView = () => {
+      const view = editor.view;
+      return view && !view.isDestroyed && view.dom.isConnected ? view : null;
+    };
+
+    const arm = (requested: EditorView) => {
+      const view = currentView() ?? requested;
+      if (!storage.enabled || view.isDestroyed || !view.dom.isConnected) return;
+      let skipped = false;
+      while (storage.cursor < storage.units.length) {
+        const next = storage.units[storage.cursor];
+        if (!next || next.phase !== "pending") {
+          storage.cursor += 1;
+          continue;
+        }
+        const element = view.nodeDOM(next.pos);
+        if (!(element instanceof HTMLElement) || !element.isConnected) return;
+        const rect = element.getBoundingClientRect();
+        if (laidOut(rect) && rect.bottom < 0) {
+          next.phase = "done";
+          storage.cursor += 1;
+          skipped = true;
+          continue;
+        }
+        const near = !laidOut(rect) || (rect.top < window.innerHeight + LEAD_PX && rect.bottom > 0);
+        if (laidOut(rect) && !near) break;
+        if (timer !== null) return;
+        const caughtUp = laidOut(rect) && rect.top < 0 && rect.bottom > 0;
+        const opening = storage.units.findIndex((unit) => unit.phase === "playing") === -1;
+        if (opening || caughtUp) {
+          begin(view, next);
+          continue;
+        }
+        timer = setTimeout(() => {
+          timer = null;
+          const current = currentView();
+          if (!current) return;
+          begin(current, next);
+        }, REVEAL_GAP_MS);
+        break;
+      }
+      if (skipped) rebuild();
+    };
+
+    const bind = (view: EditorView) => {
+      const shouldReveal = !editor.isEditable && !reducedMotion();
+      if (storage.enabled && shouldReveal && storage.units.length > 0) return;
+      observer?.disconnect();
+      if (timer !== null) clearTimeout(timer);
+      timer = null;
+      storage.cursor = 0;
+      storage.enabled = shouldReveal;
+      storage.units = storage.enabled ? collectRevealTargets(view) : [];
+      rebuild();
+      if (!storage.enabled || typeof IntersectionObserver === "undefined") return;
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.length > 0 && entries.every((entry) => entry.isIntersecting === false)) {
+            return;
           }
-          const onScroll = () => {
-            const active = currentView;
-            if (!active || active.isDestroyed) return;
-            const now = performance.now();
-            const due = lastStartedAt === 0 ? 1 : Math.floor((now - lastStartedAt) / GAP_MS);
-            for (let step = 0; step < due; step += 1) startNext(active);
-          };
-          document.addEventListener("scroll", onScroll, { capture: true, passive: true });
-
-          return {
-            update(next) {
-              currentView = next;
-            },
-            destroy() {
-              currentView = null;
-              loopStarted = false;
-              cancelAnimationFrame(frame);
-              document.removeEventListener("scroll", onScroll, { capture: true });
-              media?.removeEventListener("change", onMotion);
-              for (const cleanup of cleanups) clearTimeout(cleanup);
-              cleanups.clear();
-            },
-          };
+          const view = currentView();
+          if (view) arm(view);
         },
-      }),
-    ];
+        { root: null, rootMargin: `${LEAD_PX}px 0px`, threshold: 0 }
+      );
+      for (const unit of storage.units) {
+        const element = view.nodeDOM(unit.pos);
+        if (element instanceof HTMLElement) observer.observe(element);
+      }
+      arm(view);
+    };
+
+    editor.on("create", ({ editor: current }) => {
+      activeView = current.view;
+    });
+    editor.on("update", ({ editor: current }) => {
+      activeView = current.view;
+      if (!current.isDestroyed && current.view.dom.isConnected) bind(current.view);
+    });
+    editor.on("destroy", () => {
+      observer?.disconnect();
+      if (timer !== null) clearTimeout(timer);
+      media?.removeEventListener("change", onMotion);
+      document.removeEventListener("scroll", onScroll, { capture: true });
+      storage.enabled = false;
+    });
+
+    const onMotion = () => {
+      if (activeView && !activeView.isDestroyed) bind(activeView);
+    };
+    const onScroll = () => {
+      const view = currentView();
+      if (view) arm(view);
+    };
+    media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    media.addEventListener("change", onMotion);
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    if (!editor.isDestroyed && editor.view?.dom.isConnected) bind(editor.view);
+    setTimeout(() => {
+      if (!editor.isDestroyed && editor.view?.dom.isConnected) bind(editor.view);
+    }, 0);
   },
 });

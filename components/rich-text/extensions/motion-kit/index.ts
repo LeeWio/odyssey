@@ -1,3 +1,3 @@
 import "./reading-reveal.css";
 
-export { MotionKit, collectRevealTargets, readingRevealKey } from "./reading-reveal";
+export { MotionKit, collectRevealTargets } from "./reading-reveal";
