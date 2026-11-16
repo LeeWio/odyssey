@@ -3,19 +3,7 @@
 import { Card, Switch } from "@heroui/react";
 import { useState } from "react";
 import { useGetVisitorsQuery } from "@/lib/features/dashboard";
-
-function formatWhen(value?: string | null): string {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value.replace("T", " ").slice(0, 16);
-  return date.toLocaleString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-}
+import { formatAnalyticsTimestamp } from "@/lib/features/dashboard/analytics-time";
 
 function placeOf(visitor: {
   city?: string | null;
@@ -64,7 +52,7 @@ export function VisitorsCard() {
               <th className="py-2 pr-3 font-medium">Place</th>
               <th className="py-2 pr-3 font-medium">Client</th>
               <th className="py-2 pr-3 font-medium">Device</th>
-              <th className="py-2 pr-3 font-medium">Last seen</th>
+              <th className="py-2 pr-3 font-medium">Last seen (UTC+8)</th>
               <th className="py-2 pr-3 font-medium">Views</th>
               <th className="py-2 font-medium">Pages</th>
             </tr>
@@ -87,7 +75,9 @@ export function VisitorsCard() {
                     {visitor.osName ? ` · ${visitor.osName}` : ""}
                   </td>
                   <td className="py-2 pr-3">{visitor.deviceType || "—"}</td>
-                  <td className="py-2 pr-3 tabular-nums">{formatWhen(visitor.lastSeen)}</td>
+                  <td className="py-2 pr-3 tabular-nums">
+                    {formatAnalyticsTimestamp(visitor.lastSeen)}
+                  </td>
                   <td className="py-2 pr-3 tabular-nums">{visitor.views}</td>
                   <td className="py-2 tabular-nums">{visitor.pages}</td>
                 </tr>

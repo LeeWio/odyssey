@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AnalyticsTimestampSchema } from "./analytics-time";
 
 export const DashboardStatsResponseSchema = z.object({
   totalUsers: z.number().default(0),
@@ -90,8 +91,8 @@ export const VisitorSummarySchema = z.object({
   clientName: z.string().nullable().optional(),
   osName: z.string().nullable().optional(),
   deviceType: z.string().nullable().optional(),
-  firstSeen: z.string().nullable().optional(),
-  lastSeen: z.string().nullable().optional(),
+  firstSeen: AnalyticsTimestampSchema.nullable().optional(),
+  lastSeen: AnalyticsTimestampSchema.nullable().optional(),
   views: z.number().default(0),
   sessions: z.number().default(0),
   pages: z.number().default(0),
