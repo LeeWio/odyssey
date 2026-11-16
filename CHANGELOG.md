@@ -1,3 +1,10 @@
+## [1.239.1](https://github.com/LeeWio/odyssey/compare/v1.239.0...v1.239.1) (2026-11-16)
+
+
+### Bug Fixes
+
+* **reader:** drop unused reading reveal margin ([d2cec96](https://github.com/LeeWio/odyssey/commit/d2cec96ae57c494ee8d164665cfac8cf6faa2b87))
+
 # [1.239.0](https://github.com/LeeWio/odyssey/compare/v1.238.2...v1.239.0) (2026-11-16)
 
 
