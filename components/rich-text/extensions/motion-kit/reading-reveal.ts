@@ -100,7 +100,6 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
   onCreate() {
     const storage = this.storage;
     const editor = this.editor;
-    let activeView: EditorView | null = null;
     let observer: IntersectionObserver | null = null;
     let timer: ReturnType<typeof setTimeout> | null = null;
     let media: MediaQueryList | null = null;
@@ -117,9 +116,9 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
       }
       element.addEventListener(
         "animationend",
-        () => {
+        (event) => {
+          if (event.target !== element) return;
           unit.phase = "done";
-          rebuild();
         },
         { once: true }
       );
@@ -140,7 +139,7 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
 
     const arm = (requested: EditorView) => {
       const view = currentView() ?? requested;
-      if (!storage.enabled || view.isDestroyed || !view.dom.isConnected) return;
+      if (!storage.enabled || view.isDestroyed || !view.dom.isConnected || timer !== null) return;
       let skipped = false;
       while (storage.cursor < storage.units.length) {
         const next = storage.units[storage.cursor];
@@ -159,7 +158,6 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
         }
         const near = !laidOut(rect) || (rect.top < window.innerHeight + LEAD_PX && rect.bottom > 0);
         if (laidOut(rect) && !near) break;
-        if (timer !== null) return;
         const caughtUp = laidOut(rect) && rect.top < 0 && rect.bottom > 0;
         const opening = storage.units.findIndex((unit) => unit.phase === "playing") === -1;
         if (opening || caughtUp) {
@@ -205,11 +203,7 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
       arm(view);
     };
 
-    editor.on("create", ({ editor: current }) => {
-      activeView = current.view;
-    });
     editor.on("update", ({ editor: current }) => {
-      activeView = current.view;
       if (!current.isDestroyed && current.view.dom.isConnected) bind(current.view);
     });
     editor.on("destroy", () => {
@@ -221,7 +215,8 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
     });
 
     const onMotion = () => {
-      if (activeView && !activeView.isDestroyed) bind(activeView);
+      const view = currentView();
+      if (view) bind(view);
     };
     const onScroll = () => {
       const view = currentView();

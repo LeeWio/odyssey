@@ -82,7 +82,7 @@ describe("reading reveal", () => {
     placeInView(root);
     editor.emit("create", { editor });
     const blocks = [...root.children] as HTMLElement[];
-    blocks[0]?.dispatchEvent(new Event("animationend"));
+    blocks[0]?.dispatchEvent(new Event("animationend", { bubbles: false }));
 
     await vi.advanceTimersByTimeAsync(REVEAL_GAP_MS);
     expect(blocks[1]?.classList.contains("reading-reveal-text")).toBe(true);
