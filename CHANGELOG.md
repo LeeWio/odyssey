@@ -1,3 +1,10 @@
+## [1.239.2](https://github.com/LeeWio/odyssey/compare/v1.239.1...v1.239.2) (2026-11-16)
+
+
+### Bug Fixes
+
+* **reader:** continue the article reveal on the live view ([75df4a5](https://github.com/LeeWio/odyssey/commit/75df4a56455744173f3c8a4a862b5d395ac185e8))
+
 ## [1.239.1](https://github.com/LeeWio/odyssey/compare/v1.239.0...v1.239.1) (2026-11-16)
 
 
