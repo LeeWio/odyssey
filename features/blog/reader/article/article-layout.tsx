@@ -26,7 +26,7 @@ export function ArticleLayout({
   showContext?: boolean;
 }) {
   return (
-    <div className="relative isolate min-h-dvh overflow-x-clip bg-transparent">
+    <div className="relative isolate min-h-dvh overflow-x-clip bg-transparent [&_*]:[overflow-anchor:none]">
       <PageContainer className="relative z-10 px-4 pb-28 md:px-6 xl:px-8">
         <article className="w-full min-w-0" data-reading-content>
           {hero}

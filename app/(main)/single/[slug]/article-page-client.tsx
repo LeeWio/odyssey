@@ -5,7 +5,7 @@ import { Button, Skeleton } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import {
   ArticleActionBar,
@@ -39,6 +39,19 @@ const ArticleBody = dynamic(
   }
 );
 
+const READING_SCROLL_KEY = "odyssey-reading-scroll";
+
+function savedReadingScroll(path: string) {
+  const navigation = performance.getEntriesByType("navigation")[0] as
+    PerformanceNavigationTiming | undefined;
+  if (navigation?.type !== "reload") return null;
+  const raw = sessionStorage.getItem(READING_SCROLL_KEY);
+  if (!raw) return null;
+  const saved = JSON.parse(raw) as { path?: string; y?: number };
+  if (saved.path !== path || typeof saved.y !== "number") return null;
+  return saved.y;
+}
+
 interface SinglePageProps {
   initialArticle: PostResponse;
   slug: string;
@@ -48,6 +61,28 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
   const t = useTranslations("Article");
   const router = useRouter();
   const articleEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    let frame = 0;
+    const remember = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        sessionStorage.setItem(READING_SCROLL_KEY, JSON.stringify({ path, y: window.scrollY }));
+      });
+    };
+    remember();
+    window.addEventListener("scroll", remember, { passive: true });
+    window.addEventListener("pagehide", remember);
+    window.addEventListener("beforeunload", remember);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", remember);
+      window.removeEventListener("pagehide", remember);
+      window.removeEventListener("beforeunload", remember);
+    };
+  }, []);
+
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const {
     currentData: fetchedArticle,
@@ -61,6 +96,24 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
     skip: !isAuthenticated,
   });
   const article = fetchedArticle ?? initialArticle;
+
+  useEffect(() => {
+    if (!article) return;
+    const y = savedReadingScroll(window.location.pathname);
+    if (y === null) return;
+    let frame = 0;
+    const restore = () => {
+      const scroller = document.scrollingElement ?? document.documentElement;
+      const max = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+      if (max + 1 < y) {
+        frame = requestAnimationFrame(restore);
+        return;
+      }
+      window.scrollTo(0, y);
+    };
+    restore();
+    return () => cancelAnimationFrame(frame);
+  }, [article]);
 
   const isLoading = isAuthenticated && (isFetching || isUninitialized) && !article;
   const isUnavailable = !isLoading && !article;
