@@ -891,7 +891,6 @@
     "editMoment": "编辑动态",
     "saveChanges": "保存修改",
     "savingChanges": "正在保存...",
-    "closeEditor": "关闭编辑器",
     "editFailed": "修改未能保存，编辑内容已保留，请重试。",
     "discardEditTitle": "放弃修改？",
     "discardEditDescription": "当前修改尚未保存。",

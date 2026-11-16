@@ -122,7 +122,6 @@ export const MomentPublisher = ({
               <DropZone className="w-full border-none bg-transparent p-0 shadow-none">
                 <PublisherHeader
                   isEditing={!!initialMoment}
-                  onClose={protectUnsavedChanges ? () => requestOpenChange(false) : undefined}
                   isDisabled={protectUnsavedChanges && isSubmitting}
                   visibility={visibility}
                   onVisibilityChange={(value) => {

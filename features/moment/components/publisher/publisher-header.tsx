@@ -1,13 +1,12 @@
 "use client";
 
-import { Button, Dropdown, Label, Description, Modal, Tooltip } from "@heroui/react";
+import { Button, Dropdown, Label, Description, Modal } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { Icon } from "@iconify/react";
 import { UserAvatar } from "@/components/user-avatar";
 
 interface PublisherHeaderProps {
   isEditing?: boolean;
-  onClose?: () => void;
   isDisabled?: boolean;
   visibility: string;
   onVisibilityChange: (value: string) => void;
@@ -21,7 +20,6 @@ interface PublisherHeaderProps {
 
 export const PublisherHeader = ({
   isEditing = false,
-  onClose,
   isDisabled = false,
   visibility,
   onVisibilityChange,
@@ -87,21 +85,6 @@ export const PublisherHeader = ({
             </Dropdown.Menu>
           </Dropdown.Popover>
         </Dropdown>
-        {onClose ? (
-          <Tooltip>
-            <Button
-              size="sm"
-              isIconOnly
-              variant="ghost"
-              aria-label={t("closeEditor")}
-              onPress={onClose}
-              isDisabled={isDisabled}
-            >
-              <Icon icon="lucide:x" className="size-4" aria-hidden="true" />
-            </Button>
-            <Tooltip.Content>{t("closeEditor")}</Tooltip.Content>
-          </Tooltip>
-        ) : null}
       </div>
     </Modal.Header>
   );

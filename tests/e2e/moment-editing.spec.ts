@@ -158,7 +158,8 @@ for (const [width, view] of [
     const bounds = await dialog.boundingBox();
     expect(bounds!.x).toBeGreaterThanOrEqual(0);
     expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
-    for (const label of ["Visibility", "Close editor", "Save changes"]) {
+    await expect(dialog.getByRole("button", { name: "Close editor" })).toHaveCount(0);
+    for (const label of ["Visibility", "Save changes"]) {
       const button = await dialog.getByRole("button", { name: label, exact: true }).boundingBox();
       expect(button!.x).toBeGreaterThanOrEqual(bounds!.x);
       expect(button!.x + button!.width).toBeLessThanOrEqual(bounds!.x + bounds!.width);
@@ -185,30 +186,28 @@ for (const [width, view] of [
     await expect(card.getByRole("button", { name: "More options" })).toBeFocused();
     await openEditor(page);
     await expect(dialog.locator('[contenteditable="true"]')).toHaveText("Changed moment 100");
-    await dialog.getByRole("button", { name: "Close editor" }).click();
+    await page.keyboard.press("Escape");
     await expect(page.getByRole("alertdialog")).toHaveCount(0);
     const second = await openEditor(page, 99);
     await expect(second.locator('[contenteditable="true"]')).toHaveText("Original moment 99");
   });
 }
 
-test("protects unsaved edits for Escape, close button and backdrop", async ({ page }) => {
+test("protects unsaved edits for Escape and backdrop", async ({ page }) => {
   await prepare(page);
   await visitFeed(page);
   const dialog = await openEditor(page);
   await dialog.locator('[contenteditable="true"]').fill("Unsaved changes");
-  for (const close of [
-    () => page.keyboard.press("Escape"),
-    () => dialog.getByRole("button", { name: "Close editor" }).click(),
-    () => page.mouse.click(5, 5),
-  ]) {
+  for (const close of [() => page.keyboard.press("Escape"), () => page.mouse.click(5, 5)]) {
     await close();
     const confirmation = page.getByRole("alertdialog", { name: "Discard changes?" });
     await expect(confirmation).toBeVisible();
     await confirmation.getByRole("button", { name: "Continue editing" }).click();
+    await expect(confirmation).toHaveCount(0);
     await expect(dialog.locator('[contenteditable="true"]')).toHaveText("Unsaved changes");
+    await dialog.locator('[contenteditable="true"]').focus();
   }
-  await dialog.getByRole("button", { name: "Close editor" }).click();
+  await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Discard changes", exact: true }).click();
   await expect(dialog).toHaveCount(0);
   await openEditor(page);
@@ -224,7 +223,7 @@ test("retains edits on failure, blocks dismissal while saving and retries", asyn
   const dialog = await openEditor(page);
   await dialog.locator('[contenteditable="true"]').fill("Retry these edits");
   await dialog.getByRole("button", { name: "Save changes", exact: true }).click();
-  await expect(dialog.getByRole("button", { name: "Close editor" })).toBeDisabled();
+  await expect(dialog.getByRole("button", { name: "Visibility", exact: true })).toBeDisabled();
   await page.keyboard.press("Escape");
   await expect(dialog).toBeVisible();
   pending.resolve();
