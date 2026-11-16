@@ -1,3 +1,10 @@
+# [1.238.0](https://github.com/LeeWio/odyssey/compare/v1.237.1...v1.238.0) (2026-11-16)
+
+
+### Features
+
+* **moments:** support editing directly from the feed ([fe6c14d](https://github.com/LeeWio/odyssey/commit/fe6c14d9c9e6f3714cea597627c4510a51e5176a))
+
 ## [1.237.1](https://github.com/LeeWio/odyssey/compare/v1.237.0...v1.237.1) (2026-11-13)
 
 
