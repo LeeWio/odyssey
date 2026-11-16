@@ -1,5 +1,26 @@
 # Moments
 
+## In-feed Editing
+
+Administrators can edit a Moment from its card menu on `/moments`. The page owns
+one dynamically loaded `MomentPublisher`; other card consumers do not gain an
+edit action. Each edit session mounts with the selected record and is discarded
+on close, so edits cannot leak between records or into the new-post composer.
+
+The edit session confirms dismissal when persisted fields have changed, blocks
+dismissal and duplicate submissions while saving, and retains input on failure.
+Existing attachments reuse their file IDs. The complete saved server response is
+returned to the feed and reconciled with both SSR-provided and queried pages.
+Nonpublic records and records leaving the current topic are removed; the current
+page is revalidated and the existing URL normalization handles empty last pages.
+In-feed saves bypass broad list invalidation, leaving cadence and topic requests
+alone. Closing restores focus and scroll without changing the selected view.
+
+Unit tests cover edit payloads, dirty state, duplicate submission, SSR updates and
+filtered page reconciliation. `tests/e2e/moment-editing.spec.ts` covers the shared
+dialog, responsive saves, dismissal protection, failed retries, private records,
+empty last pages and administrator-only access using mocked API responses.
+
 ## Feed Layout
 
 `/moments` defaults to a plain single-column List without a date axis. A small,

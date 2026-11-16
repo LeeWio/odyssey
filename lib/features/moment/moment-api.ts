@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
 import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
 import { notifyMutation } from "@/lib/toast";
+import { reconcileMomentPage } from "./moment-pages";
 import {
   MomentCadenceResponseSchema,
   MomentResponseSchema,
@@ -17,7 +18,11 @@ type MomentListEndpoint = "getPublicMoments" | "getAllMoments";
 function patchMomentLists(
   dispatch: (action: unknown) => { undo: () => void },
   getState: () => unknown,
-  mutate: (draft: PageResult<MomentResponse>) => void
+  mutate: (
+    draft: PageResult<MomentResponse>,
+    args: Pageable & { topic?: string },
+    endpoint: MomentListEndpoint
+  ) => void
 ) {
   const state = getState() as Record<string, unknown>;
   const apiState = state.api as
@@ -34,7 +39,7 @@ function patchMomentLists(
     patches.push(
       dispatch(
         momentApi.util.updateQueryData(endpoint, entry.originalArgs as Pageable, (draft) => {
-          mutate(draft);
+          mutate(draft, entry.originalArgs as Pageable, endpoint);
         })
       )
     );
@@ -204,7 +209,10 @@ export const momentApi = baseApi.injectEndpoints({
     /**
      * Admin: Update a moment
      */
-    updateMoment: builder.mutation<MomentResponse, { id: number; body: MomentRequest }>({
+    updateMoment: builder.mutation<
+      MomentResponse,
+      { id: number; body: MomentRequest; revalidateLists?: boolean }
+    >({
       query: ({ id, body }) => ({
         url: `/api/v1/admin/moments/${id}`,
         method: "PUT",
@@ -220,20 +228,30 @@ export const momentApi = baseApi.injectEndpoints({
         });
         try {
           const { data } = await queryFulfilled;
-          patchMomentLists(dispatch, getState, (draft) => {
-            const index = draft.list.findIndex((moment) => moment.id === id);
-            if (index >= 0) draft.list[index] = data;
+          patchMomentLists(dispatch, getState, (draft, args, endpoint) => {
+            Object.assign(
+              draft,
+              reconcileMomentPage(draft, data, args, endpoint === "getPublicMoments")
+            );
           });
-          dispatch(momentApi.util.upsertQueryData("getMomentById", id, data));
+          // The saved response is already transformed; bypass raw envelope validation.
+          dispatch(
+            momentApi.util.upsertQueryEntries([
+              { endpointName: "getMomentById", arg: id, value: data },
+            ])
+          );
         } catch {
           // Toast handled by notifyMutation.
         }
         await notify;
       },
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Moment", id },
-        { type: "Moment", id: "LIST" },
-      ],
+      invalidatesTags: (_result, error, { id, revalidateLists = true }) =>
+        error || !revalidateLists
+          ? []
+          : [
+              { type: "Moment", id },
+              { type: "Moment", id: "LIST" },
+            ],
     }),
 
     /**

@@ -888,6 +888,26 @@
     "unsaveMoment": "Remove from saved",
     "moreOptions": "More options",
     "deleteMoment": "Delete moment",
+    "editMoment": "Edit moment",
+    "saveChanges": "Save changes",
+    "savingChanges": "Saving changes...",
+    "closeEditor": "Close editor",
+    "editFailed": "Changes could not be saved. Your edits are kept; please try again.",
+    "discardEditTitle": "Discard changes?",
+    "discardEditDescription": "Your changes have not been saved.",
+    "continueEditing": "Continue editing",
+    "discardChanges": "Discard changes",
+    "visibilityLabel": "Visibility",
+    "visibilityDescription": {
+      "public": "Anyone can see this moment",
+      "followers": "Only your followers can see this moment",
+      "private": "Only you can see this moment"
+    },
+    "visibility": {
+      "public": "Public",
+      "followers": "Followers",
+      "private": "Private"
+    },
     "deleteTitle": "Delete this moment",
     "deleteDescription": "The moment and everything attached to it will be removed.",
     "delete": "Delete",

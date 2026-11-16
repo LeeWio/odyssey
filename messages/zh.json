@@ -888,6 +888,26 @@
     "unsaveMoment": "取消收藏",
     "moreOptions": "更多",
     "deleteMoment": "删除动态",
+    "editMoment": "编辑动态",
+    "saveChanges": "保存修改",
+    "savingChanges": "正在保存...",
+    "closeEditor": "关闭编辑器",
+    "editFailed": "修改未能保存，编辑内容已保留，请重试。",
+    "discardEditTitle": "放弃修改？",
+    "discardEditDescription": "当前修改尚未保存。",
+    "continueEditing": "继续编辑",
+    "discardChanges": "放弃修改",
+    "visibilityLabel": "可见范围",
+    "visibilityDescription": {
+      "public": "所有人都可以查看这条动态",
+      "followers": "仅关注者可以查看这条动态",
+      "private": "只有自己可以查看这条动态"
+    },
+    "visibility": {
+      "public": "公开",
+      "followers": "关注者可见",
+      "private": "仅自己可见"
+    },
     "deleteTitle": "删除这条动态",
     "deleteDescription": "这条动态和附带的内容会一起删除。",
     "delete": "删除",

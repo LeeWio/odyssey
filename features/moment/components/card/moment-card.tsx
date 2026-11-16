@@ -63,6 +63,7 @@ interface MomentCardProps {
   knownLikedMomentIds?: number[];
   mediaLayout?: "stacked" | "natural";
   onDeleted?: (id: number) => void;
+  onEdit?: (moment: MomentResponse) => void;
 }
 
 export const MomentCard = ({
@@ -73,6 +74,7 @@ export const MomentCard = ({
   knownLikedMomentIds,
   mediaLayout = "stacked",
   onDeleted,
+  onEdit,
 }: MomentCardProps) => {
   const formatRelativeTime = useRelativeTime();
   const t = useTranslations("Moments");
@@ -216,6 +218,7 @@ export const MomentCard = ({
         timeLabel={timeLabel}
         isAdmin={isAdmin}
         isDeleting={isDeleting}
+        onEdit={isAdmin && moment && onEdit ? () => onEdit(moment) : undefined}
         onDelete={moment?.id ? () => setIsDeleteDialogOpen(true) : undefined}
       />
 

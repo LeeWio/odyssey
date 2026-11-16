@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useDropZonePickerContext } from "@heroui-pro/react";
 import {
   Button,
@@ -72,6 +73,7 @@ export const PublisherToolbar = ({
   onAttachStock,
   attachedStockSymbol,
 }: PublisherToolbarProps) => {
+  const t = useTranslations("Moments");
   const shouldReduceMotion = useReducedMotion() ?? false;
   const { openFilePicker } = useDropZonePickerContext();
   const { contains } = useFilter({ sensitivity: "base" });
@@ -371,7 +373,7 @@ export const PublisherToolbar = ({
                 onPress={onPublish}
                 isDisabled
                 size="sm"
-                aria-label={`${isEditing ? "Save" : "Share"} moment. ${submitDisabledReason}`}
+                aria-label={`${isEditing ? t("saveChanges") : "Share moment"}. ${submitDisabledReason}`}
               >
                 {isSubmitting ? (
                   <Spinner size="sm" color="current" className="mr-1.5" aria-hidden="true" />
@@ -384,8 +386,8 @@ export const PublisherToolbar = ({
                 )}
                 {isEditing
                   ? isSubmitting
-                    ? "Saving..."
-                    : "Save"
+                    ? t("savingChanges")
+                    : t("saveChanges")
                   : isSubmitting
                     ? "Sharing..."
                     : "Share"}
@@ -399,7 +401,7 @@ export const PublisherToolbar = ({
             onPress={onPublish}
             isDisabled={isSubmitDisabled}
             size="sm"
-            aria-label={isEditing ? "Save moment" : "Share moment"}
+            aria-label={isEditing ? t("saveChanges") : "Share moment"}
           >
             {isSubmitting ? (
               <Spinner size="sm" color="current" className="mr-1.5" aria-hidden="true" />
@@ -408,8 +410,8 @@ export const PublisherToolbar = ({
             )}
             {isEditing
               ? isSubmitting
-                ? "Saving..."
-                : "Save"
+                ? t("savingChanges")
+                : t("saveChanges")
               : isSubmitting
                 ? "Sharing..."
                 : "Share"}

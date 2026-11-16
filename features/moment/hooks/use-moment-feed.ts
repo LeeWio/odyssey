@@ -5,6 +5,7 @@ import {
   type MomentResponse,
 } from "@/lib/features/moment";
 import type { PageResult } from "@/lib/api";
+import { reconcileMomentPage } from "@/lib/features/moment/moment-pages";
 
 interface MomentFeedOptions {
   retainPreviousData?: boolean;
@@ -22,11 +23,13 @@ export const useMomentFeed = (
   const filterKey = JSON.stringify([topic ?? null, period?.year ?? null, period?.month ?? null]);
   const currentFilter = useRef(filterKey);
   const pendingPages = useRef(new Map<string, Promise<PageResult<MomentResponse> | null>>());
-  const [initial] = useState(() => ({ filterKey, page: initialPage }));
+  const [initial, setInitial] = useState(() => ({ filterKey, page: initialPage }));
   const [reloadInitial, setReloadInitial] = useState(false);
   const [removedIds, setRemovedIds] = useState<ReadonlySet<number>>(() => new Set());
   const [displayed, setDisplayed] = useState(() => ({
     filterKey,
+    // Track response identity separately from locally reconciled content.
+    source: initial.page,
     page:
       initial.filterKey === filterKey && initial.page?.page === requestedPage ? initial.page : null,
   }));
@@ -47,8 +50,8 @@ export const useMomentFeed = (
 
   // Replace the current page atomically after the exact query succeeds. This
   // keeps Grid from appending into CSS columns and triggering a visible reflow.
-  if (requestedData && (displayed.filterKey !== filterKey || displayed.page !== requestedData)) {
-    setDisplayed({ filterKey, page: requestedData });
+  if (requestedData && (displayed.filterKey !== filterKey || displayed.source !== requestedData)) {
+    setDisplayed({ filterKey, source: requestedData, page: requestedData });
   }
 
   const waitingForPage =
@@ -97,6 +100,23 @@ export const useMomentFeed = (
     setRemovedIds((current) => new Set([...current, id]));
   }, []);
 
+  const updateMoment = useCallback(
+    (saved: MomentResponse) => {
+      const patch = (value: typeof initial) => {
+        if (!value.page) return value;
+        const [savedTopic] = JSON.parse(value.filterKey) as [string | null];
+        return {
+          ...value,
+          page: reconcileMomentPage(value.page, saved, { topic: savedTopic ?? undefined }),
+        };
+      };
+      setInitial(patch);
+      setDisplayed((current) => ({ ...current, ...patch(current) }));
+      refetch();
+    },
+    [refetch]
+  );
+
   const totalPages = data?.totalPages ?? 0;
 
   return {
@@ -114,6 +134,7 @@ export const useMomentFeed = (
     isFetchingPage: query.isFetching || loadingPage.isFetching,
     fetchPage,
     removeMoment,
+    updateMoment,
     refetch,
   };
 };

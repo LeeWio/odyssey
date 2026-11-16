@@ -48,10 +48,10 @@ const original: MomentResponse = {
 };
 let root: ReturnType<typeof createRoot> | undefined;
 let state: ReturnType<typeof useMomentPublish>;
-function setup(moment?: MomentResponse) {
+function setup(moment?: MomentResponse, options?: { revalidateLists?: boolean }) {
   const success = vi.fn();
   function Harness() {
-    state = useMomentPublish(success, moment);
+    state = useMomentPublish(success, moment, options);
     return null;
   }
   const container = document.createElement("div");
@@ -97,6 +97,54 @@ afterEach(() => {
 });
 
 describe("moment publishing", () => {
+  it("tracks reversible changes to edit content, topics, visibility and media", () => {
+    setup(original);
+    expect(state.isDirty).toBe(false);
+    act(() => state.setVisibility("private"));
+    expect(state.isDirty).toBe(true);
+    act(() => state.setVisibility(original.visibility));
+    expect(state.isDirty).toBe(false);
+    act(() => state.updateMediaAlt(state.mediaItems[0].id, "Changed alt"));
+    expect(state.isDirty).toBe(true);
+    act(() => state.updateMediaAlt(state.mediaItems[0].id, "A photo"));
+    expect(state.isDirty).toBe(false);
+    act(() => state.addTopic("new"));
+    expect(state.isDirty).toBe(true);
+    act(() => state.removeTopic("new"));
+    expect(state.isDirty).toBe(false);
+    act(() =>
+      state.setEditorValue({
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text: "Edited" }] }],
+      })
+    );
+    expect(state.isDirty).toBe(true);
+  });
+
+  it("returns the server response and can defer broad list invalidation to the feed", async () => {
+    const saved = { ...original, content: "Server-normalized edit" };
+    api.update.mockReturnValue({ unwrap: () => Promise.resolve(saved) });
+    const success = setup(original, { revalidateLists: false });
+    await act(async () => state.publishMoment());
+    expect(success).toHaveBeenCalledWith(saved);
+    expect(api.update.mock.calls[0][0].revalidateLists).toBe(false);
+  });
+
+  it("rejects simultaneous submissions before React has rendered pending state", async () => {
+    const pending = Promise.withResolvers<MomentResponse>();
+    api.update.mockReturnValue({ unwrap: () => pending.promise });
+    setup(original);
+    let first!: Promise<void>;
+    await act(async () => {
+      first = state.publishMoment();
+      await state.publishMoment();
+    });
+    expect(api.update).toHaveBeenCalledOnce();
+    await act(async () => {
+      pending.resolve(original);
+      await first;
+    });
+  });
   it("counts hard breaks consistently with Tiptap CharacterCount when opening an edit", () => {
     setup({
       ...original,
@@ -228,6 +276,7 @@ describe("moment publishing", () => {
     expect(state.mediaItems).toHaveLength(1);
     expect(state.mediaItems[0]).toMatchObject({ kind: "existing", fileId: 90 });
     expect(state.isSubmitting).toBe(false);
+    expect(state.hasSubmitError).toBe(true);
     log.mockRestore();
   });
 

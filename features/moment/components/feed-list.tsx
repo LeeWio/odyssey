@@ -100,11 +100,13 @@ export function MomentFeedList({
   knownLikedMomentIds,
   targetId,
   onDeleted,
+  onEdit,
 }: {
   moments: MomentResponse[];
   knownLikedMomentIds?: number[];
   targetId?: number | null;
   onDeleted?: (id: number) => void;
+  onEdit?: (moment: MomentResponse) => void;
 }) {
   const { enteredMomentIds: registry } = useMomentMotion();
   const localRegistry = useMemo(() => new Set<number>(), []);
@@ -127,6 +129,7 @@ export function MomentFeedList({
               knownLikedMomentIds={knownLikedMomentIds}
               mediaLayout="natural"
               onDeleted={onDeleted}
+              onEdit={onEdit}
             />
           </MomentFeedItem>
         ))}

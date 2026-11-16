@@ -14,6 +14,7 @@ interface CardHeaderProps {
   isAdmin: boolean;
   isDeleting: boolean;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
 export const CardHeader = ({
@@ -24,6 +25,7 @@ export const CardHeader = ({
   isAdmin,
   isDeleting,
   onDelete,
+  onEdit,
 }: CardHeaderProps) => {
   const t = useTranslations("Moments");
   const { enabled, reduced } = useMomentMotion();
@@ -57,6 +59,7 @@ export const CardHeader = ({
             isIconOnly
             variant="ghost"
             aria-label={t("moreOptions")}
+            data-moment-menu
             isDisabled={isDeleting}
           >
             {isDeleting ? (
@@ -67,6 +70,12 @@ export const CardHeader = ({
           </Button>
           <Dropdown.Popover>
             <Dropdown.Menu>
+              {onEdit ? (
+                <Dropdown.Item id="edit" textValue={t("editMoment")} onPress={onEdit}>
+                  <Icon icon="lucide:pencil" className="size-4" aria-hidden="true" />
+                  <Label>{t("editMoment")}</Label>
+                </Dropdown.Item>
+              ) : null}
               <Dropdown.Item
                 id="delete"
                 textValue={t("deleteMoment")}

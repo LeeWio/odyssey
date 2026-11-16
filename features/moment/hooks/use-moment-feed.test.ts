@@ -34,7 +34,8 @@ let feed: ReturnType<typeof useMomentFeed>;
 let requestedPage = 1;
 let topic: string | undefined;
 let initialPage: PageResult<MomentResponse> | null;
-const moment = (id: number) => ({ id }) as MomentResponse;
+const moment = (id: number) =>
+  ({ id, content: `Moment ${id}`, visibility: "public", topics: [] }) as unknown as MomentResponse;
 const page = (currentPage: number, ids: number[]): PageResult<MomentResponse> => ({
   list: ids.map(moment),
   page: currentPage,
@@ -197,5 +198,51 @@ describe("moment pagination", () => {
   it("keeps a deleted moment removed from the current page", async () => {
     act(() => feed.removeMoment(4));
     expect(feed.moments.map(({ id }) => id)).toEqual([3]);
+  });
+
+  it("applies a saved response to SSR content without changing the display key", async () => {
+    const key = feed.displayKey;
+    const saved = { ...moment(4), content: "Updated from server" };
+    await act(async () => feed.updateMoment(saved));
+    expect(feed.moments[0]).toEqual(saved);
+    expect(feed.displayKey).toBe(key);
+    expect(mocks.queryArgs.mock.lastCall?.[1]).toEqual({ skip: false });
+    await render();
+    expect(feed.moments[0].content).toBe("Updated from server");
+  });
+
+  it("removes a newly private SSR moment and corrects totals", async () => {
+    await act(async () => feed.updateMoment({ ...moment(4), visibility: "private" }));
+    expect(feed.moments.map(({ id }) => id)).toEqual([3]);
+    expect(feed.total).toBe(3);
+    expect(feed.totalPages).toBe(2);
+  });
+
+  it("keeps an active query's edit visible until authoritative revalidation arrives", async () => {
+    mocks.query.currentData = initial;
+    await render();
+    await act(async () => feed.updateMoment({ ...moment(4), content: "Saved edit" }));
+    expect(feed.moments[0].content).toBe("Saved edit");
+    mocks.query.currentData = {
+      ...initial,
+      list: [{ ...moment(4), content: "Revalidated edit" }, moment(3)],
+    };
+    await render();
+    expect(feed.moments[0].content).toBe("Revalidated edit");
+  });
+
+  it("removes edits that leave the active topic and normalizes an empty last page", async () => {
+    topic = "design";
+    requestedPage = 2;
+    initialPage = {
+      ...page(2, [2]),
+      total: 3,
+      list: [{ ...moment(2), topics: [{ id: 1, slug: "design" }] }],
+    };
+    await act(async () => root.render(createElement(Harness, { key: "topic-page" })));
+    await act(async () => feed.updateMoment({ ...moment(2), topics: [] }));
+    expect(feed.moments).toEqual([]);
+    expect(feed.resolvedTotalPages).toBe(1);
+    expect(feed.total).toBe(2);
   });
 });

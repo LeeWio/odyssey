@@ -63,7 +63,11 @@ function createLocalId() {
   return `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentResponse) => {
+export const useMomentPublish = (
+  onSuccess?: (saved: MomentResponse) => void,
+  initialMoment?: MomentResponse,
+  options?: { revalidateLists?: boolean }
+) => {
   const initialContent = initialMoment ? parseMomentContent(initialMoment.content) : undefined;
   const [mediaItems, setMediaItems] = useState<PublisherMediaItem[]>(
     () => initialMoment?.images.map(toExistingMedia) ?? []
@@ -83,16 +87,35 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
   const [visibility, setVisibility] = useState(initialMoment?.visibility ?? "public");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitting = useRef(false);
+  const [hasSubmitError, setHasSubmitError] = useState(false);
 
   const [attachedStockSymbol, setAttachedStockSymbol] = useState<string | null>(
     initialMoment?.stockSymbol ?? null
   );
+
+  const snapshot = JSON.stringify({
+    content: editorValue ?? null,
+    images: mediaItems.map((item) => ({
+      id: item.kind === "existing" ? item.fileId : item.id,
+      altText: item.altText,
+    })),
+    topics,
+    visibility,
+    stock: attachedStockSymbol,
+  });
+  const [originalSnapshot] = useState(snapshot);
+  const isDirty = snapshot !== originalSnapshot;
 
   const [createMoment] = useCreateMomentMutation();
   const [updateMoment] = useUpdateMomentMutation();
   const [uploadFile] = useUploadFileMutation();
   const activeUploads = useRef(new Map<string, { abort: () => void }>());
   const progressTimers = useRef(new Map<string, number>());
+  const liveMedia = useRef(mediaItems);
+  useEffect(() => {
+    liveMedia.current = mediaItems;
+  }, [mediaItems]);
 
   const clearProgressPulse = (id: string) => {
     const timer = progressTimers.current.get(id);
@@ -128,6 +151,9 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
       uploads.clear();
       timers.forEach((timer) => window.clearInterval(timer));
       timers.clear();
+      liveMedia.current.forEach((item) => {
+        if (item.kind === "local") URL.revokeObjectURL(item.preview);
+      });
     };
   }, []);
 
@@ -324,12 +350,14 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
     if (
       (isEmpty && mediaItems.length === 0 && !attachedStockSymbol) ||
       charCount > MOMENT_CHARACTER_LIMIT ||
-      isSubmitting ||
+      submitting.current ||
       hasIncompleteUploads ||
       hasMissingAlt
     )
       return;
+    submitting.current = true;
     setIsSubmitting(true);
+    setHasSubmitError(false);
     try {
       const images = mediaItems.map((item) => {
         if (item.kind === "existing") {
@@ -369,18 +397,22 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
         topicSlugs: topics,
         stockSymbol: attachedStockSymbol,
       };
-      if (initialMoment) {
-        await updateMoment({ id: initialMoment.id, body }).unwrap();
-      } else {
-        await createMoment(body).unwrap();
-      }
+      const saved = initialMoment
+        ? await updateMoment({
+            id: initialMoment.id,
+            body,
+            ...(options?.revalidateLists === false ? { revalidateLists: false } : {}),
+          }).unwrap()
+        : await createMoment(body).unwrap();
 
       handleReset();
-      if (onSuccess) onSuccess();
+      onSuccess?.(saved);
     } catch (error) {
       console.error("Failed to share moment:", error);
+      setHasSubmitError(true);
       // Keep the draft open; the API layer displays the mutation error.
     } finally {
+      submitting.current = false;
       setIsSubmitting(false);
     }
   };
@@ -411,6 +443,8 @@ export const useMomentPublish = (onSuccess?: () => void, initialMoment?: MomentR
     visibility,
     setVisibility,
     isSubmitting,
+    isDirty,
+    hasSubmitError,
     handleSelectFiles,
     handleDrop,
     publishMoment,

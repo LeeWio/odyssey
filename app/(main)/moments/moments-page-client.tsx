@@ -4,8 +4,9 @@ import { Button } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Icon } from "@iconify/react";
-import { memo, useCallback, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 import { MomentCadenceCard } from "@/features/moment/components/cadence-card";
 import { MomentTopicWidget } from "@/features/moment/components/topic-widget";
@@ -18,10 +19,18 @@ import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
 import { useMomentAnchor } from "@/features/moment/hooks/use-moment-anchor";
 import { PageFrame } from "@/components/layout/page-frame";
 import type { PublicMomentsInitialData } from "@/lib/features/moment/public-moments";
-import { useGetLikedMomentIdsQuery } from "@/lib/features/moment";
-import { selectIsAuthenticated } from "@/lib/features/auth";
+import { useGetLikedMomentIdsQuery, type MomentResponse } from "@/lib/features/moment";
+import { selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
 import { clampPageToTotal, parsePageParam } from "@/lib/utils/pagination";
+
+const MomentPublisher = dynamic(
+  () =>
+    import("@/features/moment/components/publisher/moment-publisher").then(
+      (mod) => mod.MomentPublisher
+    ),
+  { ssr: false }
+);
 
 export default function MomentsPage({ initialData }: { initialData: PublicMomentsInitialData }) {
   const searchParams = useSearchParams();
@@ -44,6 +53,10 @@ const MomentsContent = memo(function MomentsContent({
   const feedRef = useRef<HTMLElement>(null);
   const previousDisplay = useRef<string | null>(null);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const isAdmin = useAppSelector(selectIsAdmin);
+  const [editingMoment, setEditingMoment] = useState<MomentResponse | null>(null);
+  const editingId = useRef<number | null>(null);
+  const editingScroll = useRef({ x: 0, y: 0, page });
   const {
     moments,
     isLoading,
@@ -57,9 +70,39 @@ const MomentsContent = memo(function MomentsContent({
     displayedPage,
     fetchPage,
     removeMoment,
+    updateMoment,
     refetch,
   } = useMomentFeed(12, initialData.page, topic, undefined, { retainPreviousData: true }, page);
   const visibleMoments = moments;
+
+  const editMoment = useCallback(
+    (moment: MomentResponse) => {
+      editingId.current = moment.id;
+      editingScroll.current = { x: window.scrollX, y: window.scrollY, page };
+      setEditingMoment(moment);
+    },
+    [page]
+  );
+  const closeEditor = useCallback((open: boolean) => {
+    if (open) return;
+    setEditingMoment(null);
+    requestAnimationFrame(() => {
+      const element = document.getElementById(`moment-${editingId.current}`);
+      const card = element?.hasAttribute("inert") ? null : element;
+      const trigger = card?.querySelector<HTMLButtonElement>("[data-moment-menu]");
+      (trigger ?? card ?? feedRef.current)?.focus({ preventScroll: true });
+      if (
+        parsePageParam(new URLSearchParams(window.location.search).get("page")) ===
+        editingScroll.current.page
+      ) {
+        window.scrollTo({
+          left: editingScroll.current.x,
+          top: editingScroll.current.y,
+          behavior: "instant",
+        });
+      }
+    });
+  }, []);
 
   const changePage = useCallback((nextPage: number, keepAnchor = false) => {
     if (!Number.isSafeInteger(nextPage) || nextPage < 1) return;
@@ -204,6 +247,11 @@ const MomentsContent = memo(function MomentsContent({
                     knownLikedMomentIds={knownLikedMomentIds}
                     targetId={anchor.status === "found" ? anchor.targetId : null}
                     onDeleted={removeMoment}
+                    onEdit={
+                      isAdmin && !isRefreshing && anchor.status !== "searching"
+                        ? editMoment
+                        : undefined
+                    }
                   />
 
                   {visibleMoments.length === 0 ? (
@@ -227,6 +275,16 @@ const MomentsContent = memo(function MomentsContent({
             </MomentFeedLayout>
           </section>
         </div>
+        {isAdmin && editingMoment ? (
+          <MomentPublisher
+            key={editingMoment.id}
+            initialMoment={editingMoment}
+            isOpen
+            onOpenChange={closeEditor}
+            onSaved={updateMoment}
+            protectUnsavedChanges
+          />
+        ) : null}
       </PageFrame>
     </MomentMotionProvider>
   );
