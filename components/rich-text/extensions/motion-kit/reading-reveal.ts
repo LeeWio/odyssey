@@ -22,6 +22,7 @@ interface RevealUnit {
   pos: number;
   image: boolean;
   phase: RevealPhase;
+  element: HTMLElement | null;
 }
 
 interface MotionStorage {
@@ -45,7 +46,12 @@ export function collectRevealTargets(view: EditorView): RevealUnit[] {
       const rect = element.getBoundingClientRect();
       if (rect.height === 0 && rect.width > 0) return false;
     }
-    units.push({ pos, image: isImage(node), phase: "pending" });
+    units.push({
+      pos,
+      image: isImage(node),
+      phase: "pending",
+      element: element instanceof HTMLElement ? element : null,
+    });
     return false;
   });
   return units;
@@ -63,6 +69,13 @@ function revealClass(unit: RevealUnit) {
 
 function laidOut(rect: DOMRect) {
   return rect.width > 0 && rect.height > 0;
+}
+
+function unitElement(view: EditorView, unit: RevealUnit) {
+  if (unit.element?.isConnected) return unit.element;
+  const element = view.nodeDOM(unit.pos);
+  unit.element = element instanceof HTMLElement ? element : null;
+  return unit.element;
 }
 
 /**
@@ -109,7 +122,7 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
     };
 
     const finish = (unit: RevealUnit, view: EditorView) => {
-      const element = view.nodeDOM(unit.pos);
+      const element = unitElement(view, unit);
       if (!(element instanceof HTMLElement)) {
         unit.phase = "done";
         return;
@@ -147,8 +160,8 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
           storage.cursor += 1;
           continue;
         }
-        const element = view.nodeDOM(next.pos);
-        if (!(element instanceof HTMLElement) || !element.isConnected) return;
+        const element = unitElement(view, next);
+        if (!element) return;
         const rect = element.getBoundingClientRect();
         if (laidOut(rect) && rect.bottom < 0) {
           next.phase = "done";
@@ -157,8 +170,8 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
           for (let index = storage.cursor; index < storage.units.length; index += 1) {
             const later = storage.units[index];
             if (!later || later.phase !== "pending") continue;
-            const laterElement = view.nodeDOM(later.pos);
-            if (!(laterElement instanceof HTMLElement)) break;
+            const laterElement = unitElement(view, later);
+            if (!laterElement) break;
             const laterRect = laterElement.getBoundingClientRect();
             if (!laidOut(laterRect) || laterRect.bottom >= 0) break;
             later.phase = "done";
@@ -207,8 +220,8 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
         { root: null, rootMargin: `${LEAD_PX}px 0px`, threshold: 0 }
       );
       for (const unit of storage.units) {
-        const element = view.nodeDOM(unit.pos);
-        if (element instanceof HTMLElement) observer.observe(element);
+        const element = unitElement(view, unit);
+        if (element) observer.observe(element);
       }
       arm(view);
     };
