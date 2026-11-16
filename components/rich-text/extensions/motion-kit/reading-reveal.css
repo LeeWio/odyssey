@@ -3,11 +3,11 @@
 }
 
 .reading-reveal-text {
-  animation: reading-reveal-text 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: reading-reveal-text 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .reading-reveal-image {
-  animation: reading-reveal-image 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: reading-reveal-image 780ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes reading-reveal-text {

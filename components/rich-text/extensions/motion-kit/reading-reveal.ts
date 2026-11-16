@@ -3,7 +3,7 @@ import type { Node as DocumentNode } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 
 /** The next reading unit starts this long after the previous one has started. */
-export const REVEAL_GAP_MS = 70;
+export const REVEAL_GAP_MS = 90;
 const LEAD_PX = 80;
 
 const TEXT_CLASS = "reading-reveal-text";
