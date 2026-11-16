@@ -1,3 +1,10 @@
+## [1.238.1](https://github.com/LeeWio/odyssey/compare/v1.238.0...v1.238.1) (2026-11-16)
+
+
+### Bug Fixes
+
+* **moments:** remove extra editor close button ([dd0faf6](https://github.com/LeeWio/odyssey/commit/dd0faf68f5eac74953a79d256be81bfbc2e3a4d8))
+
 # [1.238.0](https://github.com/LeeWio/odyssey/compare/v1.237.1...v1.238.0) (2026-11-16)
 
 
