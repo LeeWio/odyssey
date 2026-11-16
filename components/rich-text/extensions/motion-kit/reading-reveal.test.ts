@@ -66,6 +66,7 @@ describe("reading reveal", () => {
 
     const [first, second] = [...root.children] as HTMLElement[];
     expect(first?.classList.contains("reading-reveal-text")).toBe(true);
+    expect(Observer.instances.at(-1)?.observe).toHaveBeenCalledTimes(2);
     expect(editor.getJSON().content?.[0]?.attrs).toBeUndefined();
 
     Observer.instances.at(-1)?.enter();
@@ -106,6 +107,7 @@ describe("reading reveal", () => {
     expect(blocks[0]?.classList.contains("reading-reveal-pending")).toBe(false);
     expect(blocks[1]?.classList.contains("reading-reveal-pending")).toBe(false);
     expect(blocks[2]?.classList.contains("reading-reveal-text")).toBe(true);
+    expect(Observer.instances.at(-1)?.observe).not.toHaveBeenCalled();
   });
 
   it("does not reveal the editor while it is editable", () => {

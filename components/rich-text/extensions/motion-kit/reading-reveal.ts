@@ -167,16 +167,6 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
           next.phase = "done";
           storage.cursor += 1;
           skipped = true;
-          for (let index = storage.cursor; index < storage.units.length; index += 1) {
-            const later = storage.units[index];
-            if (!later || later.phase !== "pending") continue;
-            const laterElement = unitElement(view, later);
-            if (!laterElement) break;
-            const laterRect = laterElement.getBoundingClientRect();
-            if (!laidOut(laterRect) || laterRect.bottom >= 0) break;
-            later.phase = "done";
-            storage.cursor = index + 1;
-          }
           continue;
         }
         const near = !laidOut(rect) || (rect.top < window.innerHeight + LEAD_PX && rect.bottom > 0);
@@ -196,6 +186,16 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
         break;
       }
       if (skipped) rebuild();
+      watch(view);
+    };
+
+    const watch = (view: EditorView) => {
+      if (!observer) return;
+      observer.disconnect();
+      const next = storage.units[storage.cursor];
+      if (!next) return;
+      const element = unitElement(view, next);
+      if (element) observer.observe(element);
     };
 
     const bind = (view: EditorView) => {
@@ -219,10 +219,6 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
         },
         { root: null, rootMargin: `${LEAD_PX}px 0px`, threshold: 0 }
       );
-      for (const unit of storage.units) {
-        const element = unitElement(view, unit);
-        if (element) observer.observe(element);
-      }
       arm(view);
     };
 
