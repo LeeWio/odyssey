@@ -1,3 +1,10 @@
+## [1.239.4](https://github.com/LeeWio/odyssey/compare/v1.239.3...v1.239.4) (2026-11-16)
+
+
+### Bug Fixes
+
+* **reader:** slow the article reveal pace ([2e6217d](https://github.com/LeeWio/odyssey/commit/2e6217dec4254cab4304b505752d03510b9a690f))
+
 ## [1.239.3](https://github.com/LeeWio/odyssey/compare/v1.239.2...v1.239.3) (2026-11-16)
 
 
