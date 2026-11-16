@@ -31,6 +31,12 @@ interface MotionStorage {
   enabled: boolean;
 }
 
+declare module "@tiptap/core" {
+  interface Storage {
+    motionKit: MotionStorage;
+  }
+}
+
 function isImage(node: DocumentNode) {
   return node.type.name === "image";
 }
@@ -94,7 +100,7 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
     return {
       update: "manual",
       create: ({ editor, state }) => {
-        const storage = editor.storage.motionKit as MotionStorage;
+        const storage = editor.storage.motionKit;
         if (!storage.enabled) return [];
         const decorations = [];
         for (const unit of storage.units) {
@@ -116,6 +122,7 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
     let observer: IntersectionObserver | null = null;
     let timer: ReturnType<typeof setTimeout> | null = null;
     let media: MediaQueryList | null = null;
+    let playing = 0;
 
     const rebuild = () => {
       if (!editor.isDestroyed) editor.commands.updateDecorations("motionKit");
@@ -125,6 +132,7 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
       const element = unitElement(view, unit);
       if (!(element instanceof HTMLElement)) {
         unit.phase = "done";
+        playing = Math.max(0, playing - 1);
         return;
       }
       element.addEventListener(
@@ -132,12 +140,14 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
         (event) => {
           if (event.target !== element) return;
           unit.phase = "done";
+          playing = Math.max(0, playing - 1);
         },
         { once: true }
       );
     };
 
     const begin = (view: EditorView, unit: RevealUnit) => {
+      playing += 1;
       unit.phase = "playing";
       storage.cursor += 1;
       rebuild();
@@ -172,8 +182,7 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
         const near = !laidOut(rect) || (rect.top < window.innerHeight + LEAD_PX && rect.bottom > 0);
         if (laidOut(rect) && !near) break;
         const caughtUp = laidOut(rect) && rect.top < 0 && rect.bottom > 0;
-        const opening = storage.units.findIndex((unit) => unit.phase === "playing") === -1;
-        if (opening || caughtUp) {
+        if (playing === 0 || caughtUp) {
           begin(view, next);
           continue;
         }
@@ -205,6 +214,7 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
       if (timer !== null) clearTimeout(timer);
       timer = null;
       storage.cursor = 0;
+      playing = 0;
       storage.enabled = shouldReveal;
       storage.units = storage.enabled ? collectRevealTargets(view) : [];
       rebuild();
