@@ -1,3 +1,10 @@
+## [1.239.5](https://github.com/LeeWio/odyssey/compare/v1.239.4...v1.239.5) (2026-11-16)
+
+
+### Bug Fixes
+
+* **reader:** skip scrolled-past article blocks in one pass ([4232f92](https://github.com/LeeWio/odyssey/commit/4232f92cb30350c2b177d3ff3cd786439835decd))
+
 ## [1.239.4](https://github.com/LeeWio/odyssey/compare/v1.239.3...v1.239.4) (2026-11-16)
 
 
