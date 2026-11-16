@@ -1,3 +1,10 @@
+## [1.239.7](https://github.com/LeeWio/odyssey/compare/v1.239.6...v1.239.7) (2026-11-16)
+
+
+### Bug Fixes
+
+* **reader:** watch only the next article block ([348a710](https://github.com/LeeWio/odyssey/commit/348a710d5eb91215d978c5eaa19c9b7072111199))
+
 ## [1.239.6](https://github.com/LeeWio/odyssey/compare/v1.239.5...v1.239.6) (2026-11-16)
 
 
