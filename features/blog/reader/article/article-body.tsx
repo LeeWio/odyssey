@@ -3,7 +3,6 @@
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AnimatedRichTextContent } from "@/components/rich-text/animated-rich-text-content";
 import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
 
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
@@ -12,7 +11,6 @@ import {
   normalizeRichTextDocument,
   parseJSONContent,
 } from "@/components/rich-text/utils/document-normalizer";
-import { MotionRichTextEditor } from "@/components/ui/motion-rich-text";
 import { RICH_TEXT_PROSE_CLASS_NAME } from "@/components/rich-text/prose";
 
 export interface ArticleBodyProps {
@@ -22,8 +20,6 @@ export interface ArticleBodyProps {
   contentKey?: string | null;
   className?: string;
   shellClassName?: string;
-  /** Entrance animation delay in seconds. */
-  motionDelay?: number;
   showTableOfContents?: boolean;
   /** Publishes the heading list to the reading action bar. */
   outlineLabel?: string;
@@ -39,7 +35,6 @@ export function ArticleBody({
   contentKey,
   className,
   shellClassName = "border-none bg-transparent p-0",
-  motionDelay = 0,
   outlineLabel,
   showTableOfContents = true,
 }: ArticleBodyProps) {
@@ -57,7 +52,7 @@ export function ArticleBody({
   }
 
   return (
-    <MotionRichTextEditor
+    <RichTextEditor
       key={contentKey ?? content ?? "article-body"}
       className={className}
       isReadOnly
@@ -65,18 +60,14 @@ export function ArticleBody({
       editorOptions={{ editorProps: { attributes: { class: RICH_TEXT_PROSE_CLASS_NAME } } }}
       // HeroUI RichTextEditor already disables immediatelyRender for Next.js SSR.
       defaultValue={parsedContent}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8, ease: "easeOut", delay: motionDelay }}
-      style={{ willChange: "opacity" }}
     >
       <RichTextEditor.Shell className={shellClassName}>
         {outlineLabel ? <ArticleOutlineSource label={outlineLabel} /> : null}
-        <AnimatedRichTextContent />
+        <RichTextEditor.Content />
         {showTableOfContents && !outlineLabel ? (
           <RichTextTableOfContents placement="right" />
         ) : null}
       </RichTextEditor.Shell>
-    </MotionRichTextEditor>
+    </RichTextEditor>
   );
 }

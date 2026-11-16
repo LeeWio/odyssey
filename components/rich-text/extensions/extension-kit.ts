@@ -11,6 +11,7 @@ import {
   ImageUpload,
   Mathematics,
   Mention,
+  MotionKit,
   Subscript,
   Superscript,
   TableKit,
@@ -141,7 +142,7 @@ export function createReaderExtensionKit(options: ExtensionKitOptions = {}) {
     ...options,
   });
 
-  return extensions;
+  return [...extensions, MotionKit];
 }
 
 /**

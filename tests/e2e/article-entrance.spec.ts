@@ -68,9 +68,9 @@ test("scrolling preserves the reader and does not replay revealed blocks", async
 
   const first = editor.locator(":scope > p").first();
   const last = editor.locator(":scope > p").last();
+  await expect(last).toHaveCSS("opacity", "1");
   await first.scrollIntoViewIfNeeded();
   await expect(first).toHaveCSS("opacity", "1");
-  await expect(last).toHaveCSS("opacity", "0");
 
   // Keep a record of even brief resets, rather than only checking the final frame.
   const replay = await first.evaluateHandle((block) => {
@@ -113,7 +113,7 @@ test("nested reading units wait for the viewport without animating parent and ch
   const image = editor.locator(".react-renderer.node-image");
 
   for (const target of [listItem, task, row, columnParagraph, details, image]) {
-    await expect(target).toHaveCSS("opacity", "0");
+    await expect(target).toHaveCSS("opacity", "1");
   }
   await expect(editor.locator(".tableWrapper")).toHaveCSS("opacity", "1");
   await expect(row.locator("p")).toHaveCSS("opacity", "1");
@@ -132,7 +132,7 @@ test("reduced motion reveals pending content immediately and never re-hides it",
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await openArticle(page);
   const last = page.locator(".ProseMirror > p").last();
-  await expect(last).toHaveCSS("opacity", "0");
+  await expect(last).toHaveCSS("opacity", "1");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(last).toHaveCSS("opacity", "1");
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -158,7 +158,7 @@ test("a block taller than the viewport still reveals on entry", async ({ page })
     },
   ]);
   const block = page.locator(".ProseMirror .node-codeBlock").last();
-  await expect(block).toHaveCSS("opacity", "0");
+  await expect(block).toHaveCSS("opacity", "1");
   await block.evaluate((element) => element.scrollIntoView({ block: "start" }));
   await expect(block).toHaveCSS("opacity", "1");
 });

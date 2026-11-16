@@ -65,6 +65,8 @@ describe("shared extension kit", () => {
     expect(names).not.toContain("findAndReplace");
     expect(names).not.toContain("markdown");
     expect(names).not.toContain("fileHandler");
+    expect(names).toContain("motionKit");
+    expect(createExtensionKit().map((ext) => ext.name)).not.toContain("motionKit");
   });
 
   it("returns distinct configured plugin instances per call", () => {

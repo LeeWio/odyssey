@@ -8,6 +8,7 @@ export { FileHandler, type FileHandlerOptions } from "./FileHandler";
 export { Heading, HEADING_LEVELS, clampHeadingLevel, type HeadingLevel } from "./heading";
 export { Mathematics } from "./mathematics";
 export { Mention } from "./mention";
+export { MotionKit } from "./motion-kit";
 export { Attachment, Audio, Youtube } from "./media";
 export { Column, Columns } from "./multi-column";
 export { TableKit } from "./table";
