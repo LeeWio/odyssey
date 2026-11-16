@@ -1,3 +1,10 @@
+## [1.239.8](https://github.com/LeeWio/odyssey/compare/v1.239.7...v1.239.8) (2026-11-16)
+
+
+### Bug Fixes
+
+* **reader:** count playing article blocks instead of scanning them ([dbaaffe](https://github.com/LeeWio/odyssey/commit/dbaaffe14263dc417b0066f5a2dfc31b46e4bed5))
+
 ## [1.239.7](https://github.com/LeeWio/odyssey/compare/v1.239.6...v1.239.7) (2026-11-16)
 
 
