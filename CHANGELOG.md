@@ -1,3 +1,10 @@
+## [1.239.3](https://github.com/LeeWio/odyssey/compare/v1.239.2...v1.239.3) (2026-11-16)
+
+
+### Bug Fixes
+
+* **reader:** refresh article reveal decorations with the next beat ([7ebd3ba](https://github.com/LeeWio/odyssey/commit/7ebd3ba1b0dbdac29f3dd87f9517b6a21774493f))
+
 ## [1.239.2](https://github.com/LeeWio/odyssey/compare/v1.239.1...v1.239.2) (2026-11-16)
 
 
