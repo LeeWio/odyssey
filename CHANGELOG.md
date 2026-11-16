@@ -1,3 +1,10 @@
+## [1.239.6](https://github.com/LeeWio/odyssey/compare/v1.239.5...v1.239.6) (2026-11-16)
+
+
+### Bug Fixes
+
+* **reader:** reuse article block elements while revealing ([596845b](https://github.com/LeeWio/odyssey/commit/596845b0696aee04b5bee89e434580d5477ef23d))
+
 ## [1.239.5](https://github.com/LeeWio/odyssey/compare/v1.239.4...v1.239.5) (2026-11-16)
 
 
