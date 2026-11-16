@@ -1,3 +1,10 @@
+## [1.238.2](https://github.com/LeeWio/odyssey/compare/v1.238.1...v1.238.2) (2026-11-16)
+
+
+### Bug Fixes
+
+* **analytics:** require zoned timestamps and display Shanghai time ([7185815](https://github.com/LeeWio/odyssey/commit/718581591b6834063b70437abd90d6e0637400b5))
+
 ## [1.238.1](https://github.com/LeeWio/odyssey/compare/v1.238.0...v1.238.1) (2026-11-16)
 
 
