@@ -1,3 +1,10 @@
+# [1.239.0](https://github.com/LeeWio/odyssey/compare/v1.238.2...v1.239.0) (2026-11-16)
+
+
+### Features
+
+* **reader:** reveal article blocks in document order ([4200d98](https://github.com/LeeWio/odyssey/commit/4200d98bceb8b68e47e36deadc9c2b717e728d53))
+
 ## [1.238.2](https://github.com/LeeWio/odyssey/compare/v1.238.1...v1.238.2) (2026-11-16)
 
 
