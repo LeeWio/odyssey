@@ -1,14 +1,14 @@
 "use client";
 
 import { EmptyState } from "@heroui-pro/react";
-import { Button, Skeleton } from "@heroui/react";
-import dynamic from "next/dynamic";
+import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 import {
   ArticleActionBar,
+  ArticleBody,
   ArticleFooter,
   ArticleHero,
   ArticleLayout,
@@ -20,24 +20,6 @@ import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/p
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
-
-const ArticleBody = dynamic(
-  () =>
-    import("@/features/blog/reader/article/article-body").then((mod) => ({
-      default: mod.ArticleBody,
-    })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex flex-col gap-3 py-6" aria-hidden>
-        <Skeleton className="h-4 w-11/12 rounded" />
-        <Skeleton className="h-4 w-10/12 rounded" />
-        <Skeleton className="h-4 w-9/12 rounded" />
-        <Skeleton className="h-4 w-8/12 rounded" />
-      </div>
-    ),
-  }
-);
 
 const READING_SCROLL_KEY = "odyssey-reading-scroll";
 
@@ -97,22 +79,19 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
   });
   const article = fetchedArticle ?? initialArticle;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!article) return;
     const y = savedReadingScroll(window.location.pathname);
     if (y === null) return;
-    let frame = 0;
-    const restore = () => {
-      const scroller = document.scrollingElement ?? document.documentElement;
-      const max = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
-      if (max + 1 < y) {
-        frame = requestAnimationFrame(restore);
-        return;
-      }
-      window.scrollTo(0, y);
+    const scroller = document.scrollingElement ?? document.documentElement;
+    if (!(scroller instanceof HTMLElement)) return;
+    if (scroller.scrollHeight - scroller.clientHeight + 1 < y) {
+      scroller.style.minHeight = `${y + scroller.clientHeight}px`;
+    }
+    window.scrollTo(0, y);
+    return () => {
+      scroller.style.minHeight = "";
     };
-    restore();
-    return () => cancelAnimationFrame(frame);
   }, [article]);
 
   const isLoading = isAuthenticated && (isFetching || isUninitialized) && !article;
@@ -151,17 +130,7 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
   }
 
   if (isLoading || !article) {
-    return (
-      <div
-        aria-busy="true"
-        aria-label={t("loading")}
-        className="mx-auto flex min-h-[70dvh] w-full max-w-6xl flex-col gap-3 px-4 py-6 md:px-6 xl:px-8"
-      >
-        <Skeleton className="h-4 w-full rounded-md" />
-        <Skeleton className="h-4 w-11/12 rounded-md" />
-        <Skeleton className="h-4 w-4/5 rounded-md" />
-      </div>
-    );
+    return <div aria-busy="true" aria-label={t("loading")} className="min-h-[70dvh]" />;
   }
 
   return (

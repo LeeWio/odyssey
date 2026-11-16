@@ -1,6 +1,6 @@
 "use client";
 
-import { Link, Skeleton } from "@heroui/react";
+import { Link } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { articleHasContext, ArticleSidebar } from "./article-sidebar";
@@ -77,16 +77,7 @@ export function ArticleFooter({ article }: { article: PostResponse }) {
             {exploringArchive ? t("aroundTheArchiveHint") : t("relatedHint")}
           </p>
         </div>
-        {related.isLoading || (relatedPosts.length === 0 && featured.isLoading) ? (
-          <div
-            aria-busy="true"
-            aria-label={t("loadingRelated")}
-            className="flex flex-col gap-3 py-4"
-          >
-            <Skeleton className="h-16 w-full rounded-md" />
-            <Skeleton className="h-16 w-full rounded-md" />
-          </div>
-        ) : explorePosts.length > 0 ? (
+        {explorePosts.length > 0 ? (
           <div className="grid gap-x-10 md:grid-cols-3">
             {explorePosts.map((post) => (
               <StoryLink key={post.id} post={post} />

@@ -10,7 +10,7 @@ import { useArticleNeighbors } from "./use-article-neighbors";
 
 export function ArticleNeighbors({ article }: { article: PostResponse }) {
   const t = useTranslations("Article");
-  const { isLoading, next, order, previous } = useArticleNeighbors(article);
+  const { next, order, previous } = useArticleNeighbors(article);
 
   return (
     <section aria-label={t("keepReading")} className="mx-auto w-full max-w-3xl px-4 md:px-6">
@@ -23,8 +23,8 @@ export function ArticleNeighbors({ article }: { article: PostResponse }) {
         </Typography>
       </header>
       <div className="grid items-stretch gap-4 sm:grid-cols-2">
-        <NeighborCard direction="previous" isLoading={isLoading && !previous} neighbor={previous} />
-        <NeighborCard direction="next" isLoading={isLoading && !next} neighbor={next} />
+        <NeighborCard direction="previous" neighbor={previous} />
+        <NeighborCard direction="next" neighbor={next} />
       </div>
     </section>
   );

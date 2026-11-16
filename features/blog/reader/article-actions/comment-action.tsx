@@ -8,9 +8,7 @@ import { useTranslations } from "next-intl";
 
 import { useReport, type Report } from "./use-engagement";
 
-const CommentSheet = dynamic(() => import("@/components/comment").then((mod) => mod.CommentSheet), {
-  ssr: false,
-});
+const CommentSheet = dynamic(() => import("@/components/comment").then((mod) => mod.CommentSheet));
 
 export function CommentAction({ postId, report }: { postId: number; report: Report }) {
   const t = useTranslations("Article");

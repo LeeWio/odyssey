@@ -2,8 +2,9 @@
 
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
+import { readingHtml } from "@/components/rich-text/reading-html";
 
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import { ArticleOutlineSource } from "@/features/blog/reader/article/article-outline";
@@ -26,8 +27,8 @@ export interface ArticleBodyProps {
 }
 
 /**
- * Isolated TipTap read surface. Keep this module behind `next/dynamic` so
- * article chrome can paint without pulling the editor graph.
+ * The server renders reading HTML from the article JSON. The editor hydrates
+ * that markup, so a refresh does not pass through a skeleton.
  */
 export function ArticleBody({
   content,
@@ -46,6 +47,8 @@ export function ArticleBody({
   }, [content, contentType]);
 
   const extensions = useMemo(() => createReaderExtensionKit(), []);
+  const html = useMemo(() => readingHtml(content, contentType), [content, contentType]);
+  const [editorReady, setEditorReady] = useState(false);
 
   if (!parsedContent) {
     return <p className="text-default-500 text-base leading-8">{t("unsupportedContent")}</p>;
@@ -57,13 +60,19 @@ export function ArticleBody({
       className={className}
       isReadOnly
       extensions={extensions}
-      editorOptions={{ editorProps: { attributes: { class: RICH_TEXT_PROSE_CLASS_NAME } } }}
+      editorOptions={{
+        editorProps: { attributes: { class: RICH_TEXT_PROSE_CLASS_NAME } },
+        onCreate: () => setEditorReady(true),
+      }}
       // HeroUI RichTextEditor already disables immediatelyRender for Next.js SSR.
       defaultValue={parsedContent}
     >
       <RichTextEditor.Shell className={shellClassName}>
         {outlineLabel ? <ArticleOutlineSource label={outlineLabel} /> : null}
-        <RichTextEditor.Content />
+        {editorReady ? null : (
+          <div className={RICH_TEXT_PROSE_CLASS_NAME} dangerouslySetInnerHTML={{ __html: html }} />
+        )}
+        <RichTextEditor.Content className={editorReady ? undefined : "hidden"} />
         {showTableOfContents && !outlineLabel ? (
           <RichTextTableOfContents placement="right" />
         ) : null}
