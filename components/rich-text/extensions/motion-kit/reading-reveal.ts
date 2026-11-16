@@ -121,6 +121,7 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
     const editor = this.editor;
     let observer: IntersectionObserver | null = null;
     let timer: ReturnType<typeof setTimeout> | null = null;
+    let frame = 0;
     let media: MediaQueryList | null = null;
     let playing = 0;
 
@@ -238,6 +239,7 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
     editor.on("destroy", () => {
       observer?.disconnect();
       if (timer !== null) clearTimeout(timer);
+      if (frame !== 0) cancelAnimationFrame(frame);
       media?.removeEventListener("change", onMotion);
       document.removeEventListener("scroll", onScroll, { capture: true });
       storage.enabled = false;
@@ -247,9 +249,16 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
       const view = currentView();
       if (view) bind(view);
     };
+    const scheduleArm = () => {
+      if (frame !== 0 || !storage.enabled) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const view = currentView();
+        if (view) arm(view);
+      });
+    };
     const onScroll = () => {
-      const view = currentView();
-      if (view) arm(view);
+      scheduleArm();
     };
     media = window.matchMedia("(prefers-reduced-motion: reduce)");
     media.addEventListener("change", onMotion);
