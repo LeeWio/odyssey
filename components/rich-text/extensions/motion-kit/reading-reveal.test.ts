@@ -89,6 +89,25 @@ describe("reading reveal", () => {
     expect(blocks[2]?.classList.contains("reading-reveal-pending")).toBe(true);
   });
 
+  it("marks a run of scrolled-past paragraphs done before the next rebuild", () => {
+    vi.useFakeTimers();
+    const root = setup("<p>One</p><p>Two</p><p>Three</p>");
+    const blocks = [...root.children] as HTMLElement[];
+    const rects = [
+      { top: -80, height: 24, bottom: -56, left: 0, right: 100, width: 100 },
+      { top: -40, height: 24, bottom: -16, left: 0, right: 100, width: 100 },
+      { top: 20, height: 24, bottom: 44, left: 0, right: 100, width: 100 },
+    ];
+    blocks.forEach((block, index) => {
+      Object.defineProperty(block, "getBoundingClientRect", { value: () => rects[index] });
+    });
+    editor.emit("create", { editor });
+
+    expect(blocks[0]?.classList.contains("reading-reveal-pending")).toBe(false);
+    expect(blocks[1]?.classList.contains("reading-reveal-pending")).toBe(false);
+    expect(blocks[2]?.classList.contains("reading-reveal-text")).toBe(true);
+  });
+
   it("does not reveal the editor while it is editable", () => {
     vi.useFakeTimers();
     const element = document.createElement("div");

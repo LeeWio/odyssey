@@ -154,6 +154,16 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
           next.phase = "done";
           storage.cursor += 1;
           skipped = true;
+          for (let index = storage.cursor; index < storage.units.length; index += 1) {
+            const later = storage.units[index];
+            if (!later || later.phase !== "pending") continue;
+            const laterElement = view.nodeDOM(later.pos);
+            if (!(laterElement instanceof HTMLElement)) break;
+            const laterRect = laterElement.getBoundingClientRect();
+            if (!laidOut(laterRect) || laterRect.bottom >= 0) break;
+            later.phase = "done";
+            storage.cursor = index + 1;
+          }
           continue;
         }
         const near = !laidOut(rect) || (rect.top < window.innerHeight + LEAD_PX && rect.bottom > 0);
