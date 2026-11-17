@@ -5,6 +5,13 @@
 
 * **reader:** resume article reveal after the editor mounts ([89490f5](https://github.com/LeeWio/odyssey/commit/89490f58476db8fb9ee744013355aacdc394dfed))
 
+## [1.239.11](https://github.com/LeeWio/odyssey/compare/v1.239.10...v1.239.11) (2026-11-17)
+
+
+### Bug Fixes
+
+* **reader:** resume article reveal after the editor mounts ([89490f5](https://github.com/LeeWio/odyssey/commit/89490f58476db8fb9ee744013355aacdc394dfed))
+
 ## [1.239.10](https://github.com/LeeWio/odyssey/compare/v1.239.9...v1.239.10) (2026-11-16)
 
 
