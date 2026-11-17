@@ -1,3 +1,10 @@
+# [1.240.0](https://github.com/LeeWio/odyssey/compare/v1.239.16...v1.240.0) (2026-11-17)
+
+
+### Features
+
+* **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
+
 ## [1.239.16](https://github.com/LeeWio/odyssey/compare/v1.239.15...v1.239.16) (2026-11-17)
 
 
