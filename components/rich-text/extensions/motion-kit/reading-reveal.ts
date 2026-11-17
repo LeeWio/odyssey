@@ -48,7 +48,9 @@ export function collectRevealTargets(view: EditorView): RevealUnit[] {
     if (!node.isTextblock && !node.isAtom && !GROUPED_BLOCKS.has(node.type.name)) return;
     if (node.isTextblock && node.content.size === 0) return false;
     const element = view.nodeDOM(pos);
-    if (element instanceof HTMLElement) {
+    // A mounted, laid-out document can contain zero-height nodes. They would
+    // steal a stagger slot. An unmounted editor has no layout yet, so keep it.
+    if (view.dom.isConnected && element instanceof HTMLElement) {
       const rect = element.getBoundingClientRect();
       if (rect.height === 0 && rect.width > 0) return false;
     }
@@ -120,6 +122,8 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
     const storage = this.storage;
     const editor = this.editor;
     let observer: IntersectionObserver | null = null;
+    let mountObserver: MutationObserver | null = null;
+    let resizeObserver: ResizeObserver | null = null;
     let timer: ReturnType<typeof setTimeout> | null = null;
     let frame = 0;
     let media: MediaQueryList | null = null;
@@ -150,20 +154,30 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
     const begin = (view: EditorView, unit: RevealUnit) => {
       playing += 1;
       unit.phase = "playing";
-      storage.cursor += 1;
+      const index = storage.units.indexOf(unit);
+      storage.cursor = index === -1 ? storage.cursor + 1 : index + 1;
       rebuild();
       finish(unit, view);
       arm(view);
     };
 
     const currentView = () => {
-      const view = editor.view;
+      if (editor.isDestroyed) return null;
+      let view: EditorView;
+      try {
+        view = editor.view;
+      } catch {
+        return null;
+      }
       return view && !view.isDestroyed && view.dom.isConnected ? view : null;
     };
 
     const arm = (requested: EditorView) => {
       const view = currentView() ?? requested;
       if (!storage.enabled || view.isDestroyed || !view.dom.isConnected || timer !== null) return;
+      // React mounts the editor after create. A zero-size root is not a
+      // measurement of the article, so wait for the next layout.
+      if (view.dom.getBoundingClientRect().height === 0) return;
       let skipped = false;
       while (storage.cursor < storage.units.length) {
         const next = storage.units[storage.cursor];
@@ -172,9 +186,18 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
           continue;
         }
         const element = unitElement(view, next);
-        if (!element) return;
+        if (!element) {
+          // A replacement can be measured before its DOM nodes exist. Retry on
+          // the next turn instead of leaving the new document hidden.
+          timer = setTimeout(() => {
+            timer = null;
+            const current = currentView();
+            if (current) arm(current);
+          }, 0);
+          return;
+        }
         const rect = element.getBoundingClientRect();
-        if (laidOut(rect) && rect.bottom < 0) {
+        if (laidOut(rect) && rect.bottom <= 0) {
           next.phase = "done";
           storage.cursor += 1;
           skipped = true;
@@ -183,6 +206,8 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
         const near = !laidOut(rect) || (rect.top < window.innerHeight + LEAD_PX && rect.bottom > 0);
         if (laidOut(rect) && !near) break;
         const caughtUp = laidOut(rect) && rect.top < 0 && rect.bottom > 0;
+        // The first visible unit starts immediately. A block already crossing
+        // the top of the viewport must not wait behind one that is scrolling away.
         if (playing === 0 || caughtUp) {
           begin(view, next);
           continue;
@@ -210,7 +235,16 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
 
     const bind = (view: EditorView) => {
       const shouldReveal = !editor.isEditable && !reducedMotion();
-      if (storage.enabled && shouldReveal && storage.units.length > 0) return;
+      // A document replacement clears the units. Measure the new document even
+      // when an older sequence was already enabled.
+      if (storage.units.length === 0 && shouldReveal && view.dom.isConnected) {
+        storage.enabled = false;
+      }
+      // Units collected before mount stay valid. Mounting must still start them.
+      if (storage.enabled && shouldReveal && storage.units.length > 0) {
+        if (view.dom.isConnected) arm(view);
+        return;
+      }
       observer?.disconnect();
       if (timer !== null) clearTimeout(timer);
       timer = null;
@@ -219,7 +253,10 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
       storage.enabled = shouldReveal;
       storage.units = storage.enabled ? collectRevealTargets(view) : [];
       rebuild();
-      if (!storage.enabled || typeof IntersectionObserver === "undefined") return;
+      if (!storage.enabled) return;
+      arm(view);
+      watchSize(view);
+      if (typeof IntersectionObserver === "undefined") return;
       observer = new IntersectionObserver(
         (entries) => {
           if (entries.length > 0 && entries.every((entry) => entry.isIntersecting === false)) {
@@ -230,14 +267,40 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
         },
         { root: null, rootMargin: `${LEAD_PX}px 0px`, threshold: 0 }
       );
-      arm(view);
+      watch(view);
     };
 
-    editor.on("update", ({ editor: current }) => {
-      if (!current.isDestroyed && current.view.dom.isConnected) bind(current.view);
+    const watchSize = (view: EditorView) => {
+      if (typeof ResizeObserver === "undefined") return;
+      resizeObserver?.disconnect();
+      resizeObserver = new ResizeObserver(() => {
+        const view = currentView();
+        if (!view || view.dom.getBoundingClientRect().height === 0) return;
+        const started = storage.units.some((unit) => unit.phase !== "pending");
+        if (!started) {
+          syncMounted();
+          return;
+        }
+        arm(view);
+      });
+      resizeObserver.observe(view.dom);
+    };
+
+    editor.on("update", ({ transaction }) => {
+      if (!transaction.docChanged) return;
+      // Drop the previous sequence before measuring the new document. A cursor
+      // left on the old list skips the start of the replacement.
+      storage.units = [];
+      storage.cursor = 0;
+      playing = 0;
+      if (timer !== null) clearTimeout(timer);
+      timer = null;
+      syncMounted();
     });
     editor.on("destroy", () => {
       observer?.disconnect();
+      mountObserver?.disconnect();
+      resizeObserver?.disconnect();
       if (timer !== null) clearTimeout(timer);
       if (frame !== 0) cancelAnimationFrame(frame);
       media?.removeEventListener("change", onMotion);
@@ -245,9 +308,12 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
       storage.enabled = false;
     });
 
-    const onMotion = () => {
+    const syncMounted = () => {
       const view = currentView();
       if (view) bind(view);
+    };
+    const onMotion = () => {
+      syncMounted();
     };
     const scheduleArm = () => {
       if (frame !== 0 || !storage.enabled) return;
@@ -263,9 +329,24 @@ export const MotionKit = Extension.create<Record<string, never>, MotionStorage>(
     media = window.matchMedia("(prefers-reduced-motion: reduce)");
     media.addEventListener("change", onMotion);
     document.addEventListener("scroll", onScroll, { capture: true, passive: true });
-    if (!editor.isDestroyed && editor.view?.dom.isConnected) bind(editor.view);
-    setTimeout(() => {
-      if (!editor.isDestroyed && editor.view?.dom.isConnected) bind(editor.view);
-    }, 0);
+    const watchMount = () => {
+      mountObserver?.disconnect();
+      if (
+        editor.isDestroyed ||
+        editor.view.dom.isConnected ||
+        typeof MutationObserver === "undefined"
+      ) {
+        return;
+      }
+      mountObserver = new MutationObserver(() => {
+        if (!editor.view.dom.isConnected) return;
+        mountObserver?.disconnect();
+        syncMounted();
+      });
+      mountObserver.observe(document.documentElement, { childList: true, subtree: true });
+    };
+    syncMounted();
+    watchMount();
+    setTimeout(syncMounted, 0);
   },
 });
