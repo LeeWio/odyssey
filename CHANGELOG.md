@@ -1,3 +1,10 @@
+## [1.239.13](https://github.com/LeeWio/odyssey/compare/v1.239.12...v1.239.13) (2026-11-17)
+
+
+### Bug Fixes
+
+* **reader:** read article length from HeroUI character count ([2f69624](https://github.com/LeeWio/odyssey/commit/2f69624f0c1e15dd0155db42230604065f2e6552))
+
 ## [1.239.12](https://github.com/LeeWio/odyssey/compare/v1.239.11...v1.239.12) (2026-11-17)
 
 
