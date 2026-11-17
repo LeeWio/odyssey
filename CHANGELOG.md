@@ -1,3 +1,10 @@
+## [1.239.12](https://github.com/LeeWio/odyssey/compare/v1.239.11...v1.239.12) (2026-11-17)
+
+
+### Bug Fixes
+
+* **reader:** count reading time from the Tiptap document ([77831c5](https://github.com/LeeWio/odyssey/commit/77831c5b782fc488995676e3de9aecfd00867359))
+
 ## [1.239.11](https://github.com/LeeWio/odyssey/compare/v1.239.10...v1.239.11) (2026-11-17)
 
 
