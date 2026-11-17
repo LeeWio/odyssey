@@ -1,3 +1,10 @@
+## [1.239.15](https://github.com/LeeWio/odyssey/compare/v1.239.14...v1.239.15) (2026-11-17)
+
+
+### Bug Fixes
+
+* **reader:** use the shared reaction button for article likes ([7ecc13d](https://github.com/LeeWio/odyssey/commit/7ecc13d5a019b7f400c50f181cf627ae4a89789f))
+
 ## [1.239.14](https://github.com/LeeWio/odyssey/compare/v1.239.13...v1.239.14) (2026-11-17)
 
 
