@@ -4,9 +4,11 @@ import { Calendar, Clock } from "@gravity-ui/icons";
 import { Avatar, Chip, Link, Tag, TagGroup, Typography } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { ArticleAmbientBackground } from "@/features/blog/reader/article-ambient-background";
 import { type PostResponse } from "@/lib/features/post";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
+import { readingMinutes } from "@/lib/reading-time";
 
 function formatDate(value: string | null, locale: string, fallback: string) {
   if (!value) return fallback;
@@ -30,23 +32,16 @@ function getAuthorInitials(value: string) {
     .toUpperCase();
 }
 
-function getEstimatedReadingMinutes(article: Pick<PostResponse, "content" | "summary">) {
-  const source = `${article.content ?? ""} ${article.summary ?? ""}`.trim();
-  if (!source) return 1;
-
-  const wordCount = source.split(/\s+/).filter(Boolean).length;
-  const approximateCount = wordCount > 20 ? wordCount : Math.ceil(source.length / 700);
-
-  return Math.max(1, Math.ceil(approximateCount / 225));
-}
-
 export function ArticleHero({ article }: { article: PostResponse }) {
   const locale = useLocale();
   const router = useRouter();
   const t = useTranslations("Article");
   const authorName = article.authorName?.trim() || "Odyssey";
   const publishedAt = getPostPublishedAt(article);
-  const readingMinutes = getEstimatedReadingMinutes(article);
+  const minutes = useMemo(
+    () => readingMinutes(article.content, article.contentType),
+    [article.content, article.contentType]
+  );
   const category = article.category;
   const tags = article.tags ?? [];
 
@@ -110,7 +105,7 @@ export function ArticleHero({ article }: { article: PostResponse }) {
             <span aria-hidden="true">·</span>
             <span className="inline-flex items-center gap-1.5 tabular-nums">
               <Clock className="size-3.5" />
-              {t("minRead", { count: readingMinutes })}
+              {t("minRead", { count: minutes })}
             </span>
           </div>
           {tags.length > 0 ? (

@@ -62,11 +62,6 @@ function getDisplayAuthor(value?: string | null) {
   return author;
 }
 
-function getEstimatedReadingMinutes(post: Pick<PostResponse, "title" | "summary">) {
-  const source = `${post.title} ${post.summary ?? ""}`.trim();
-  return Math.max(2, Math.ceil(source.length / 180));
-}
-
 function BlogPostCard({
   post,
   index,
@@ -360,11 +355,6 @@ function ArchiveRail({
   const averageViews = posts.length
     ? Math.round(posts.reduce((total, post) => total + post.views, 0) / posts.length)
     : 0;
-  const averageReadingMinutes = posts.length
-    ? Math.round(
-        posts.reduce((total, post) => total + getEstimatedReadingMinutes(post), 0) / posts.length
-      )
-    : 0;
   const latestDate = posts
     .map((post) => post.createdAt)
     .sort((first, second) => second.localeCompare(first))[0];
@@ -443,12 +433,6 @@ function ArchiveRail({
               <dt className="text-muted">{t("averageViews")}</dt>
               <dd className="text-foreground font-mono tabular-nums">
                 {averageViews.toLocaleString(locale)}
-              </dd>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <dt className="text-muted">{t("estimatedRead")}</dt>
-              <dd className="text-foreground font-mono tabular-nums">
-                {averageReadingMinutes ? t("minutes", { count: averageReadingMinutes }) : "—"}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3">
