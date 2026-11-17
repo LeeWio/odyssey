@@ -1,3 +1,10 @@
+## [1.239.14](https://github.com/LeeWio/odyssey/compare/v1.239.13...v1.239.14) (2026-11-17)
+
+
+### Bug Fixes
+
+* **reader:** render article HTML from the server once ([cbff278](https://github.com/LeeWio/odyssey/commit/cbff278065e07d52cc263cb8020ef019f4e773f8))
+
 ## [1.239.13](https://github.com/LeeWio/odyssey/compare/v1.239.12...v1.239.13) (2026-11-17)
 
 
