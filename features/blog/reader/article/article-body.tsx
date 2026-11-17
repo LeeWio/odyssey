@@ -4,7 +4,6 @@ import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { createReaderExtensionKit } from "@/components/rich-text/extensions/extension-kit";
-import { readingHtml } from "@/components/rich-text/reading-html";
 
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
 import {
@@ -27,6 +26,8 @@ export interface ArticleBodyProps {
   showTableOfContents?: boolean;
   /** Publishes the heading list to the reading action bar. */
   outlineLabel?: string;
+  /** Server-rendered reading HTML. Passing it keeps hydration on one string. */
+  readingHtml?: string;
 }
 
 /**
@@ -40,6 +41,7 @@ export function ArticleBody({
   className,
   shellClassName = "border-none bg-transparent p-0",
   outlineLabel,
+  readingHtml,
   showTableOfContents = true,
 }: ArticleBodyProps) {
   const t = useTranslations("Article");
@@ -50,7 +52,7 @@ export function ArticleBody({
   }, [content, contentType]);
 
   const extensions = useMemo(() => createReaderExtensionKit(), []);
-  const html = useMemo(() => readingHtml(content, contentType), [content, contentType]);
+  const html = readingHtml ?? "";
   const [editorReady, setEditorReady] = useState(false);
 
   if (!parsedContent) {

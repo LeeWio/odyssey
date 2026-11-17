@@ -1,4 +1,4 @@
-import { generateHTML } from "@tiptap/core";
+import { generateHTML } from "@tiptap/html/server";
 
 import { createConversionExtensions } from "@/components/rich-text/extensions/extension-kit";
 import {
@@ -11,9 +11,5 @@ export function readingHtml(content: string | null | undefined, contentType?: st
   if (!content || contentType !== "JSON") return "";
   const document = parseJSONContent(content);
   if (!document) return "";
-  try {
-    return generateHTML(normalizeRichTextDocument(document), createConversionExtensions());
-  } catch {
-    return "";
-  }
+  return generateHTML(normalizeRichTextDocument(document), createConversionExtensions());
 }

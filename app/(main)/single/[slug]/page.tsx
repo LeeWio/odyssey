@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { readingHtml } from "@/components/rich-text/reading-html";
 import { getPublicArticle } from "@/lib/features/post/public-article";
 
 import ArticlePageClient from "./article-page-client";
@@ -17,5 +18,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     throw new Error("Article request failed");
   }
 
-  return <ArticlePageClient initialArticle={result.article} slug={slug} />;
+  return (
+    <ArticlePageClient
+      initialArticle={result.article}
+      readingHtml={readingHtml(result.article.content, result.article.contentType)}
+      slug={slug}
+    />
+  );
 }

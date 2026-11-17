@@ -36,10 +36,11 @@ function savedReadingScroll(path: string) {
 
 interface SinglePageProps {
   initialArticle: PostResponse;
+  readingHtml: string;
   slug: string;
 }
 
-export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
+export default function SinglePage({ initialArticle, readingHtml, slug }: SinglePageProps) {
   const t = useTranslations("Article");
   const router = useRouter();
   const articleEndRef = useRef<HTMLDivElement>(null);
@@ -142,6 +143,7 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
             contentKey={`${article.id}:${article.updatedAt}`}
             contentType={article.contentType}
             outlineLabel={t("onThisPage")}
+            readingHtml={article.id === initialArticle.id ? readingHtml : undefined}
             showTableOfContents={false}
           />
         }
