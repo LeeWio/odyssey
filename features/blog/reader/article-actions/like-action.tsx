@@ -1,9 +1,10 @@
 "use client";
 
-import { Button, toast } from "@heroui/react";
-import { Icon } from "@iconify/react";
+import { toast, Tooltip } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { useRef, useState } from "react";
 
+import { ReactionButton } from "@/components/ui/reaction-button";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useLikePostMutation, useUnlikePostMutation } from "@/lib/features/post";
 import { setLoginOpen } from "@/lib/features/ui";
@@ -18,34 +19,69 @@ export function LikeAction({ article, report }: { article: Target; report: Repor
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [like, { isLoading: isLiking }] = useLikePostMutation();
   const [unlike, { isLoading: isUnliking }] = useUnlikePostMutation();
-  const isLiked = Boolean(article.isLiked);
+  const [override, setOverride] = useState<{
+    id: number;
+    liked: boolean;
+    count: number;
+  } | null>(null);
+  const inFlight = useRef(false);
+  const isLiked = override?.id === article.id ? override.liked : Boolean(article.isLiked);
+  const likesCount = override?.id === article.id ? override.count : article.likesCount;
   const isPending = isLiking || isUnliking;
   useReport("like", isPending, report);
 
-  const toggle = async () => {
+  const toggle = (next: boolean) => {
+    if (inFlight.current) return false;
     if (!isAuthenticated) {
       dispatch(setLoginOpen(true));
       toast.danger(t("loginToLike"));
-      return;
+      return false;
     }
 
-    try {
-      await (isLiked ? unlike(article.id) : like(article.id)).unwrap();
-    } catch {
-      toast.danger(t("loginToLike"));
-    }
+    const previous = { liked: isLiked, count: likesCount };
+    inFlight.current = true;
+    setOverride({
+      id: article.id,
+      liked: next,
+      count: Math.max(0, likesCount + (next ? 1 : -1)),
+    });
+    void (async () => {
+      try {
+        const interaction = await (next ? like(article.id) : unlike(article.id)).unwrap();
+        setOverride({
+          id: article.id,
+          liked: interaction.liked,
+          count: interaction.likesCount,
+        });
+      } catch {
+        setOverride({ id: article.id, ...previous });
+        toast.danger(t("loginToLike"));
+      } finally {
+        inFlight.current = false;
+      }
+    })();
+    return true;
   };
 
+  const label = isLiked ? t("unlike") : t("like");
+
   return (
-    <Button
-      aria-label={isLiked ? t("unlike") : t("like")}
-      isPending={isPending}
-      size="sm"
-      variant={isLiked ? "danger-soft" : "ghost"}
-      onPress={() => void toggle()}
-    >
-      <Icon icon={isLiked ? "gravity-ui:heart-fill" : "gravity-ui:heart"} />
-      <span className="action-bar__label tabular-nums">{article.likesCount}</span>
-    </Button>
+    <Tooltip delay={100}>
+      <ReactionButton
+        size="sm"
+        icon="heart"
+        selected={isLiked}
+        count={likesCount}
+        showCount="positive"
+        idleVariant="ghost"
+        idleColor="inherit"
+        selectedVariant="danger-soft"
+        selectedColor="danger"
+        isPending={isPending}
+        label={label}
+        onSelectedChange={toggle}
+      />
+      <Tooltip.Content>{label}</Tooltip.Content>
+    </Tooltip>
   );
 }
