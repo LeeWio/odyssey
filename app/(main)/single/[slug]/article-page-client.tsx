@@ -15,6 +15,7 @@ import {
   ArticleOutlineProvider,
   ArticleSidebar,
 } from "@/features/blog/reader/article";
+import { ArticleReadingTimeProvider } from "@/features/blog/reader/article/article-reading-time";
 import { articleHasContext } from "@/features/blog/reader/article/article-sidebar";
 import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/post";
 
@@ -135,24 +136,30 @@ export default function SinglePage({ initialArticle, slug }: SinglePageProps) {
 
   return (
     <ArticleOutlineProvider>
-      <ArticleLayout
-        body={
-          <ArticleBody
-            content={article.content}
-            contentKey={`${article.id}:${article.updatedAt}`}
-            contentType={article.contentType}
-            outlineLabel={t("onThisPage")}
-            showTableOfContents={false}
-          />
-        }
-        context={<ArticleSidebar article={article} />}
-        showContext={articleHasContext(article)}
-        endRef={articleEndRef}
-        footer={<ArticleFooter article={article} />}
-        hero={<ArticleHero article={article} />}
-        label={t("onThisPage")}
-      />
-      <ArticleActionBar article={article} articleEndRef={articleEndRef} isRefreshing={isFetching} />
+      <ArticleReadingTimeProvider>
+        <ArticleLayout
+          body={
+            <ArticleBody
+              content={article.content}
+              contentKey={`${article.id}:${article.updatedAt}`}
+              contentType={article.contentType}
+              outlineLabel={t("onThisPage")}
+              showTableOfContents={false}
+            />
+          }
+          context={<ArticleSidebar article={article} />}
+          showContext={articleHasContext(article)}
+          endRef={articleEndRef}
+          footer={<ArticleFooter article={article} />}
+          hero={<ArticleHero article={article} />}
+          label={t("onThisPage")}
+        />
+        <ArticleActionBar
+          article={article}
+          articleEndRef={articleEndRef}
+          isRefreshing={isFetching}
+        />
+      </ArticleReadingTimeProvider>
     </ArticleOutlineProvider>
   );
 }

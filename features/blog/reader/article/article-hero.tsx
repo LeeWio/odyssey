@@ -4,11 +4,10 @@ import { Calendar, Clock } from "@gravity-ui/icons";
 import { Avatar, Chip, Link, Tag, TagGroup, Typography } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
 import { ArticleAmbientBackground } from "@/features/blog/reader/article-ambient-background";
 import { type PostResponse } from "@/lib/features/post";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
-import { readingMinutes } from "@/lib/reading-time";
+import { useArticleReadingMinutes } from "./article-reading-time";
 
 function formatDate(value: string | null, locale: string, fallback: string) {
   if (!value) return fallback;
@@ -38,10 +37,7 @@ export function ArticleHero({ article }: { article: PostResponse }) {
   const t = useTranslations("Article");
   const authorName = article.authorName?.trim() || "Odyssey";
   const publishedAt = getPostPublishedAt(article);
-  const minutes = useMemo(
-    () => readingMinutes(article.content, article.contentType),
-    [article.content, article.contentType]
-  );
+  const minutes = useArticleReadingMinutes();
   const category = article.category;
   const tags = article.tags ?? [];
 
@@ -102,11 +98,15 @@ export function ArticleHero({ article }: { article: PostResponse }) {
               <Calendar className="size-3.5" />
               <time dateTime={publishedAt ?? undefined}>{publishedLabel}</time>
             </span>
-            <span aria-hidden="true">·</span>
-            <span className="inline-flex items-center gap-1.5 tabular-nums">
-              <Clock className="size-3.5" />
-              {t("minRead", { count: minutes })}
-            </span>
+            {minutes == null ? null : (
+              <>
+                <span aria-hidden="true">·</span>
+                <span className="inline-flex items-center gap-1.5 tabular-nums">
+                  <Clock className="size-3.5" />
+                  {t("minRead", { count: minutes })}
+                </span>
+              </>
+            )}
           </div>
           {tags.length > 0 ? (
             <TagGroup
