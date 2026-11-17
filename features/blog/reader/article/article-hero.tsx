@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { ArticleAmbientBackground } from "@/features/blog/reader/article-ambient-background";
 import { type PostResponse } from "@/lib/features/post";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
-import { useArticleReadingMinutes } from "./article-reading-time";
+import { useArticleReadingMinutes } from "./article-outline";
 
 function formatDate(value: string | null, locale: string, fallback: string) {
   if (!value) return fallback;

@@ -7,8 +7,10 @@ import { createReaderExtensionKit } from "@/components/rich-text/extensions/exte
 import { readingHtml } from "@/components/rich-text/reading-html";
 
 import { RichTextTableOfContents } from "@/components/rich-text/table-of-contents";
-import { ArticleOutlineSource } from "@/features/blog/reader/article/article-outline";
-import { ArticleReadingTimePublisher } from "@/features/blog/reader/article/article-reading-time";
+import {
+  ArticleOutlineSource,
+  ArticleReadingTimeSource,
+} from "@/features/blog/reader/article/article-outline";
 import {
   normalizeRichTextDocument,
   parseJSONContent,
@@ -70,7 +72,7 @@ export function ArticleBody({
     >
       <RichTextEditor.Shell className={shellClassName}>
         {outlineLabel ? <ArticleOutlineSource label={outlineLabel} /> : null}
-        <ArticleReadingTimePublisher />
+        <ArticleReadingTimeSource />
         {editorReady ? null : (
           <div className={RICH_TEXT_PROSE_CLASS_NAME} dangerouslySetInnerHTML={{ __html: html }} />
         )}

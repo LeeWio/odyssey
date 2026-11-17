@@ -30,16 +30,27 @@ export interface ArticleOutline {
 
 const ArticleOutlineContext = createContext<ArticleOutline | null>(null);
 const SetArticleOutlineContext = createContext<(outline: ArticleOutline | null) => void>(() => {});
+const ArticleReadingMinutesContext = createContext<number | null>(null);
+const SetArticleReadingMinutesContext = createContext<(minutes: number | null) => void>(() => {});
 
 export function ArticleOutlineProvider({ children }: { children: ReactNode }) {
   const [outline, setOutline] = useState<ArticleOutline | null>(null);
+  const [minutes, setMinutes] = useState<number | null>(null);
   const publish = useCallback((next: ArticleOutline | null) => setOutline(next), []);
 
   return (
-    <SetArticleOutlineContext value={publish}>
-      <ArticleOutlineContext value={outline}>{children}</ArticleOutlineContext>
-    </SetArticleOutlineContext>
+    <SetArticleReadingMinutesContext value={setMinutes}>
+      <ArticleReadingMinutesContext value={minutes}>
+        <SetArticleOutlineContext value={publish}>
+          <ArticleOutlineContext value={outline}>{children}</ArticleOutlineContext>
+        </SetArticleOutlineContext>
+      </ArticleReadingMinutesContext>
+    </SetArticleReadingMinutesContext>
   );
+}
+
+export function useArticleReadingMinutes() {
+  return use(ArticleReadingMinutesContext);
 }
 
 export function useArticleOutline() {
@@ -53,6 +64,24 @@ function outlineSignature(items: TableOfContentData) {
 function subscribeToReadingPosition(onChange: () => void) {
   window.addEventListener("odyssey-outline-scroll", onChange);
   return () => window.removeEventListener("odyssey-outline-scroll", onChange);
+}
+
+const CHARACTERS_PER_MINUTE = 260;
+
+/** Publishes HeroUI's character count as reading minutes for the article hero. */
+export function ArticleReadingTimeSource() {
+  const publish = use(SetArticleReadingMinutesContext);
+  const characterCount = useRichTextEditorState((state) => {
+    const count = state.editor.storage.characterCount?.characters?.();
+    return count && count > 0 ? count : null;
+  });
+
+  useEffect(() => {
+    publish(characterCount ? Math.max(1, Math.ceil(characterCount / CHARACTERS_PER_MINUTE)) : null);
+    return () => publish(null);
+  }, [characterCount, publish]);
+
+  return null;
 }
 
 /**
