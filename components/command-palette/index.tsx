@@ -1,11 +1,12 @@
 "use client";
 
-import { Chip, Kbd, ToggleButton, ToggleButtonGroup, toast, type Key } from "@heroui/react";
-import { Command, EmptyState } from "@heroui-pro/react";
+import { Chip, Kbd, toast, type Key } from "@heroui/react";
+import { Command, EmptyState, Segment } from "@heroui-pro/react";
 import { useOs } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { HighlightedText } from "@/components/highlighted-text";
 import { MagnifierIcon, SparklesIcon } from "@/components/icons";
 import { type IconSvgProps } from "@/types";
@@ -44,6 +45,52 @@ interface VisibleGroup {
   heading: string;
   commands: CommandItem[];
   badge?: string;
+}
+
+const REVEAL_EASE = [0.16, 1, 0.3, 1] as const;
+const REVEAL_DURATION = 0.7;
+const REVEAL_STAGGER = 0.105;
+
+function revealFrom(index: number) {
+  const fromRight = index % 2 === 1;
+  return {
+    opacity: 0,
+    x: fromRight ? 12 : -12,
+    y: fromRight ? 18 : 24,
+    scale: 0.97,
+    filter: "blur(6px)",
+  };
+}
+
+function CommandReveal({
+  index,
+  replayKey,
+  className,
+  children,
+}: {
+  index: number;
+  replayKey: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  const reduced = useReducedMotion();
+  if (reduced) return <div className={className}>{children}</div>;
+
+  return (
+    <motion.div
+      key={replayKey}
+      className={className}
+      initial={revealFrom(index)}
+      animate={{ opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)" }}
+      transition={{
+        duration: REVEAL_DURATION,
+        delay: index * REVEAL_STAGGER,
+        ease: REVEAL_EASE,
+      }}
+    >
+      {children}
+    </motion.div>
+  );
 }
 
 function filterBySource(commands: readonly CommandItem[], source: CommandSource | null) {
@@ -162,6 +209,21 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
     return groups;
   }, [activeSource, baseCommands, inputValue, isSearching, searchState.dynamicGroups, t]);
 
+  const renderedGroups = useMemo(
+    () =>
+      visibleGroups
+        .map((group) => ({
+          ...group,
+          commands: group.commands.filter((command) => isSearching || command.defaultVisible),
+        }))
+        .filter((group) => group.commands.length > 0),
+    [isSearching, visibleGroups]
+  );
+  const revealKey = renderedGroups
+    .map((group) => `${group.id}:${group.commands.map((command) => command.id).join(",")}`)
+    .join("|");
+  let revealIndex = 0;
+
   const closePalette = () => {
     setIsOpen(false);
     setInputValue("");
@@ -232,32 +294,6 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
             inputValue={inputValue}
             onInputChange={setInputValue}
           >
-            <Command.Header className="flex items-start gap-2 px-4">
-              <ToggleButtonGroup
-                aria-label={t("scope")}
-                className="flex-wrap"
-                disallowEmptySelection={false}
-                isDetached
-                selectedKeys={new Set(activeSource ? [activeSource] : ["all"])}
-                selectionMode="single"
-                size="sm"
-                onSelectionChange={(keys) => {
-                  const selected = [...keys][0];
-                  setActiveSource(
-                    selected === "all" || selected === undefined
-                      ? null
-                      : (selected as CommandSource)
-                  );
-                }}
-              >
-                {COMMAND_SCOPES.map((scope) => (
-                  <ToggleButton key={scope.id} id={scope.source ?? "all"} className="text-xs">
-                    {t(`scopes.${scope.id}`)}
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup>
-            </Command.Header>
-
             <Command.InputGroup>
               <Command.InputGroup.Prefix>
                 <MagnifierIcon />
@@ -271,6 +307,24 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                 </Kbd>
               </Command.InputGroup.Suffix>
             </Command.InputGroup>
+
+            <div className="px-3 pt-2 [&_.segment]:backdrop-filter-none">
+              <Segment
+                aria-label={t("scope")}
+                selectedKey={activeSource ?? "all"}
+                size="sm"
+                variant="ghost"
+                onSelectionChange={(key) => {
+                  setActiveSource(key === "all" ? null : (key as CommandSource));
+                }}
+              >
+                {COMMAND_SCOPES.map((scope) => (
+                  <Segment.Item key={scope.id} id={scope.id}>
+                    {t(`scopes.${scope.id}`)}
+                  </Segment.Item>
+                ))}
+              </Segment>
+            </div>
 
             <Command.List
               onAction={handleAction}
@@ -292,88 +346,101 @@ export const CommandPalette = ({ isOpen, setIsOpen }: CommandPaletteProps) => {
                 )
               }
             >
-              {visibleGroups.map((group) => (
-                <Command.Group
-                  key={group.id}
-                  heading={
-                    <span className="flex w-full items-center justify-between px-1">
-                      <span className="text-default-500 font-medium">{group.heading}</span>
-                      {group.badge ? (
-                        <span className="text-default-400 text-xs">{group.badge}</span>
-                      ) : null}
-                    </span>
-                  }
-                >
-                  {group.commands
-                    .filter((command) => isSearching || command.defaultVisible)
-                    .map((command) => {
+              {renderedGroups.map((group) => {
+                const headingIndex = revealIndex++;
+                return (
+                  <Command.Group
+                    key={group.id}
+                    heading={
+                      <CommandReveal index={headingIndex} replayKey={`${revealKey}:${group.id}`}>
+                        <span className="flex w-full items-center justify-between px-1">
+                          <span className="text-default-500 font-medium">{group.heading}</span>
+                          {group.badge ? (
+                            <span className="text-default-400 text-xs">{group.badge}</span>
+                          ) : null}
+                        </span>
+                      </CommandReveal>
+                    }
+                  >
+                    {group.commands.map((command) => {
                       const Icon = command.icon as React.ElementType<IconSvgProps>;
                       const showDescription =
                         shouldShowDescription(command) && Boolean(command.description);
+                      const itemIndex = revealIndex++;
 
                       return (
                         <Command.Item
                           key={command.id}
                           className={[
-                            "gap-3",
+                            "gap-3 overflow-visible",
                             showDescription ? "items-start py-2" : "items-center",
                           ].join(" ")}
                           id={command.id}
                           textValue={buildCommandSearchText(command)}
                         >
-                          <div
+                          <CommandReveal
+                            index={itemIndex}
+                            replayKey={`${revealKey}:${command.id}`}
                             className={[
-                              "bg-default/40 text-default-500 flex size-7 shrink-0 items-center justify-center rounded-md",
-                              showDescription ? "mt-0.5" : "",
+                              "flex w-full min-w-0 gap-3",
+                              showDescription ? "items-start" : "items-center",
                             ].join(" ")}
                           >
-                            <Icon width={16} height={16} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="truncate text-sm font-medium">
-                                <HighlightedText text={command.title} query={inputValue} />
-                              </span>
-                              {command.isActive ? (
-                                <Chip color="success" size="sm" variant="soft">
-                                  Current
-                                </Chip>
+                            <div
+                              className={[
+                                "bg-default/40 text-default-500 flex size-7 shrink-0 items-center justify-center rounded-md",
+                                showDescription ? "mt-0.5" : "",
+                              ].join(" ")}
+                            >
+                              <Icon width={16} height={16} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="truncate text-sm font-medium">
+                                  <HighlightedText text={command.title} query={inputValue} />
+                                </span>
+                                {command.isActive ? (
+                                  <Chip color="success" size="sm" variant="soft">
+                                    Current
+                                  </Chip>
+                                ) : null}
+                              </div>
+                              {showDescription ? (
+                                <div className="text-muted mt-0.5 line-clamp-1 text-xs">
+                                  <HighlightedText
+                                    text={command.description || ""}
+                                    query={inputValue}
+                                  />
+                                </div>
                               ) : null}
                             </div>
-                            {showDescription ? (
-                              <div className="text-muted mt-0.5 line-clamp-1 text-xs">
-                                <HighlightedText
-                                  text={command.description || ""}
-                                  query={inputValue}
-                                />
-                              </div>
-                            ) : null}
-                          </div>
-                          <div className="ml-auto flex items-center gap-2 pl-3">
-                            {command.shortcut ? (
-                              <Kbd className="text-xs" slot="keyboard" variant="light">
-                                {command.shortcut.map((key) =>
-                                  key === "mod" ? (
-                                    <Kbd.Abbr
-                                      key={key}
-                                      keyValue={os === "macos" ? "command" : "ctrl"}
-                                    />
-                                  ) : (
-                                    <Kbd.Content key={key}>{key}</Kbd.Content>
-                                  )
-                                )}
-                              </Kbd>
-                            ) : command.intent === CommandIntent.NAVIGATE ? (
-                              <Kbd className="text-xs" slot="keyboard" variant="light">
-                                <Kbd.Abbr keyValue="enter" />
-                              </Kbd>
-                            ) : null}
-                          </div>
+                            <div className="ml-auto flex items-center gap-2 pl-3">
+                              {command.shortcut ? (
+                                <Kbd className="text-xs" slot="keyboard" variant="light">
+                                  {command.shortcut.map((key) =>
+                                    key === "mod" ? (
+                                      <Kbd.Abbr
+                                        key={key}
+                                        keyValue={os === "macos" ? "command" : "ctrl"}
+                                      />
+                                    ) : (
+                                      <Kbd.Content key={key}>{key}</Kbd.Content>
+                                    )
+                                  )}
+                                </Kbd>
+                              ) : command.intent === CommandIntent.NAVIGATE ? (
+                                <Kbd className="text-xs" slot="keyboard" variant="light">
+                                  <Kbd.Abbr keyValue="enter" />
+                                </Kbd>
+                              ) : null}
+                            </div>
+                          </CommandReveal>
                         </Command.Item>
                       );
                     })}
-                </Command.Group>
-              ))}
+                  </Command.Group>
+                );
+              })}
             </Command.List>
 
             {isSearching && searchState.isLoading ? (
