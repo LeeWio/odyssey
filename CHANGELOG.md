@@ -1,3 +1,10 @@
+## [1.239.16](https://github.com/LeeWio/odyssey/compare/v1.239.15...v1.239.16) (2026-11-17)
+
+
+### Bug Fixes
+
+* **reader:** size the article title to its content ([e8fab12](https://github.com/LeeWio/odyssey/commit/e8fab1234eb7d43bedd6e5232e02c22a2ec19a89))
+
 ## [1.239.15](https://github.com/LeeWio/odyssey/compare/v1.239.14...v1.239.15) (2026-11-17)
 
 
