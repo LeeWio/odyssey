@@ -59,5 +59,17 @@ jobs:
               git checkout -B main origin/main
               continue
             fi
+            # A rewritten main can leave an old version tag behind. Remove it
+            # only when it no longer points at this branch, then cut the release again.
+            if [ "$attempt" -lt 3 ] && grep -q "already exists" "$log"; then
+              tag="$(grep -oE "tag 'v[^']+'" "$log" | head -1 | tr -d "'")"
+              tag="${tag#tag }"
+              if [ -n "$tag" ] && git rev-parse -q --verify "refs/tags/$tag" >/dev/null && ! git merge-base --is-ancestor "$tag" HEAD; then
+                echo "removing stale tag $tag that is not on this branch"
+                git push origin ":refs/tags/$tag"
+                git tag -d "$tag"
+                continue
+              fi
+            fi
             exit "$status"
           done
