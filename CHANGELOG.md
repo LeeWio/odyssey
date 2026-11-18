@@ -1,3 +1,10 @@
+# [1.243.0](https://github.com/LeeWio/odyssey/compare/v1.242.0...v1.243.0) (2026-11-18)
+
+
+### Features
+
+* **reader:** refine related article recommendations ([ed38085](https://github.com/LeeWio/odyssey/commit/ed3808518aa53dd879d2960639704510dd590cb5))
+
 # [1.242.0](https://github.com/LeeWio/odyssey/compare/v1.241.0...v1.242.0) (2026-11-18)
 
 
