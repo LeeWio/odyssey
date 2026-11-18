@@ -1,10 +1,11 @@
 "use client";
 
-import { ItemCard, Widget } from "@heroui-pro/react";
-import { Chip, ScrollShadow } from "@heroui/react";
+import { FileText } from "@gravity-ui/icons";
+import { Widget } from "@heroui-pro/react";
+import { Chip, Description, Label, ListBox, ScrollShadow } from "@heroui/react";
 import { motion } from "motion/react";
-import { useEffect, useRef, useState, type ComponentProps } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useId, useRef, useState, type ComponentProps } from "react";
+import { useTranslations } from "next-intl";
 
 import { EASE_OUT } from "@/lib/motion/ease";
 
@@ -12,7 +13,6 @@ import { ArticleCover } from "@/components/card/article-cover";
 
 import type { PostResponse } from "@/lib/features/post";
 
-import { formatReadingDate } from "./recommendation-record";
 import { ALSO_LIKE_LIMIT, continueReadingRail, sameSubjectPosts } from "./recommendations";
 import { useArticleNeighbors } from "./neighbors/use-article-neighbors";
 import { useGetRelatedPostsQuery } from "@/lib/features/post";
@@ -50,7 +50,7 @@ export function ArticleContinue({
   onAvailability?: (available: boolean) => void;
 }) {
   const t = useTranslations("Article");
-  const locale = useLocale();
+  const titleId = useId();
   const { isLoading, sameSubject } = useContinueReading(article);
   const items = sameSubject;
   const [playReveal] = useState(
@@ -88,75 +88,79 @@ export function ArticleContinue({
       {items.length === 0 ? null : (
         <Widget className="max-h-[calc(100dvh-8rem)] w-full">
           <Widget.Header>
-            <Widget.Title>You May Also Like</Widget.Title>
+            <Widget.Title id={titleId}>You May Also Like</Widget.Title>
             <Chip aria-label={t("alsoLikeCount", { count: items.length })} size="sm" variant="soft">
               <Chip.Label>{items.length}</Chip.Label>
             </Chip>
           </Widget.Header>
-          <Widget.Content className="p-2">
-            <ScrollShadow
-              className="max-h-[min(28rem,calc(100dvh-14rem))]"
-              hideScrollBar
-              orientation="vertical"
-              size={40}
-            >
-              <div className="flex flex-col gap-1">
-                {items.map((item, index) => (
-                  <ItemCard
-                    key={item.slug}
-                    variant="transparent"
-                    render={(props) => (
-                      <motion.a
-                        {...(props as ComponentProps<typeof motion.a>)}
-                        href={`/single/${encodeURIComponent(item.slug)}`}
-                        initial={false}
-                        animate={
-                          playReveal && !revealReady
-                            ? revealFrom(index)
-                            : { opacity: 1, x: 0, y: 0, scale: 1 }
-                        }
-                        transition={
-                          playReveal && revealReady
-                            ? {
-                                delay: index * REVEAL_STAGGER,
-                                duration: REVEAL_DURATION,
-                                ease: [...REVEAL_EASE],
-                              }
-                            : { duration: 0 }
-                        }
-                      />
-                    )}
-                  >
-                    {item.shaderPreset || item.coverImage ? (
-                      <ItemCard.Icon className="relative overflow-hidden bg-transparent [&_canvas]:absolute [&_canvas]:inset-0 [&_canvas]:size-full">
+          <Widget.Content>
+            <ScrollShadow className="max-h-[min(28rem,calc(100dvh-14rem))]" hideScrollBar>
+              <ListBox aria-labelledby={titleId} selectionMode="none">
+                {items.map((item, index) => {
+                  const summary = item.summary;
+                  const showSummary =
+                    summary &&
+                    /\p{L}/u.test(summary) &&
+                    summary.toLowerCase() !== item.title.trim().toLowerCase();
+                  return (
+                    <ListBox.Item
+                      key={item.slug}
+                      id={item.slug}
+                      aria-label={item.title}
+                      href={`/single/${encodeURIComponent(item.slug)}`}
+                      textValue={item.title}
+                      render={(props) => (
+                        <motion.a
+                          {...(props as ComponentProps<typeof motion.a>)}
+                          initial={false}
+                          animate={
+                            playReveal && !revealReady
+                              ? revealFrom(index)
+                              : { opacity: 1, x: 0, y: 0, scale: 1 }
+                          }
+                          transition={
+                            playReveal && revealReady
+                              ? {
+                                  delay: index * REVEAL_STAGGER,
+                                  duration: REVEAL_DURATION,
+                                  ease: [...REVEAL_EASE],
+                                }
+                              : { duration: 0 }
+                          }
+                        />
+                      )}
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg [&_canvas]:absolute [&_canvas]:inset-0 [&_canvas]:size-full"
+                      >
                         {item.coverImage ? (
                           <span
-                            aria-hidden="true"
                             className="absolute inset-0 bg-cover bg-center"
                             style={{ backgroundImage: `url("${item.coverImage}")` }}
                           />
-                        ) : (
+                        ) : item.shaderPreset ? (
                           <ArticleCover
                             presetId={item.shaderPreset}
                             scheduled={false}
                             seed={item.slug}
                           />
+                        ) : (
+                          <FileText className="text-muted size-4" />
                         )}
-                      </ItemCard.Icon>
-                    ) : (
-                      <ItemCard.Icon>{null}</ItemCard.Icon>
-                    )}
-                    <ItemCard.Content>
-                      <ItemCard.Title className="w-full whitespace-normal">
-                        {item.title}
-                      </ItemCard.Title>
-                      <ItemCard.Description>
-                        {formatReadingDate(item.publishedAt, locale)}
-                      </ItemCard.Description>
-                    </ItemCard.Content>
-                  </ItemCard>
-                ))}
-              </div>
+                      </div>
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <Label className="line-clamp-2 wrap-anywhere" elementType="span">
+                          {item.title}
+                        </Label>
+                        {showSummary && (
+                          <Description className="line-clamp-1">{summary}</Description>
+                        )}
+                      </span>
+                    </ListBox.Item>
+                  );
+                })}
+              </ListBox>
             </ScrollShadow>
           </Widget.Content>
         </Widget>
