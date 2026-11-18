@@ -1,3 +1,10 @@
+# [1.241.0](https://github.com/LeeWio/odyssey/compare/v1.240.0...v1.241.0) (2026-11-18)
+
+
+### Features
+
+* **reader:** add a related reading panel beside the article ([67885bb](https://github.com/LeeWio/odyssey/commit/67885bb08e963f70b9b177fbdd4edc6f9ecbb545))
+
 # [1.240.0](https://github.com/LeeWio/odyssey/compare/v1.239.16...v1.240.0) (2026-11-17)
 
 
