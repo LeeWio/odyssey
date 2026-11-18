@@ -1,3 +1,10 @@
+# [1.242.0](https://github.com/LeeWio/odyssey/compare/v1.241.0...v1.242.0) (2026-11-18)
+
+
+### Features
+
+* **reader:** request twelve related posts for the rail ([3d56d97](https://github.com/LeeWio/odyssey/commit/3d56d977746e154607cbe3b4f6bf05ec38ed53b0))
+
 # [1.241.0](https://github.com/LeeWio/odyssey/compare/v1.240.0...v1.241.0) (2026-11-18)
 
 
