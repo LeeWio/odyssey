@@ -13,7 +13,7 @@ import { ArticleCover } from "@/components/card/article-cover";
 import type { PostResponse } from "@/lib/features/post";
 
 import { formatReadingDate } from "./recommendation-record";
-import { continueReadingRail, sameSubjectPosts } from "./recommendations";
+import { ALSO_LIKE_LIMIT, continueReadingRail, sameSubjectPosts } from "./recommendations";
 import { useArticleNeighbors } from "./neighbors/use-article-neighbors";
 import { useGetRelatedPostsQuery } from "@/lib/features/post";
 
@@ -29,7 +29,7 @@ function revealFrom(index: number) {
 
 export function useContinueReading(article: PostResponse) {
   const neighbors = useArticleNeighbors(article);
-  const related = useGetRelatedPostsQuery(article.slug);
+  const related = useGetRelatedPostsQuery({ size: ALSO_LIKE_LIMIT, slug: article.slug });
   const sameSubject = sameSubjectPosts(article, related.data);
   return {
     isLoading: neighbors.isLoading || related.isLoading,

@@ -212,8 +212,15 @@ export const postApi = baseApi.injectEndpoints({
     /**
      * Public: Get related posts
      */
-    getRelatedPosts: builder.query<PostDigestResponse[], string>({
-      query: (slug) => `/api/v1/public/blog/posts/${slug}/related`,
+    getRelatedPosts: builder.query<PostDigestResponse[], { slug: string; size?: number } | string>({
+      query: (arg) => {
+        const slug = typeof arg === "string" ? arg : arg.slug;
+        const size = typeof arg === "string" ? undefined : arg.size;
+        return {
+          url: `/api/v1/public/blog/posts/${slug}/related`,
+          ...(size ? { params: { size } } : {}),
+        };
+      },
       rawResponseSchema: apiResponseSchema(z.array(PostDigestResponseSchema)),
       transformResponse: (response: ApiResponse<PostDigestResponse[]>) => response.data,
       transformErrorResponse: transformApiError,

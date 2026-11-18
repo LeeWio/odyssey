@@ -3,6 +3,8 @@ import type { PostDigestResponse, PostResponse } from "@/lib/features/post";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 
 export const SAME_SUBJECT_LIMIT = 3;
+/** Related posts requested for the rail. The endpoint defaults to 6. */
+export const ALSO_LIKE_LIMIT = 12;
 
 export interface ReadingRecommendation {
   coverImage: string | null;
