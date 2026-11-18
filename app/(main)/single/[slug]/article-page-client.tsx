@@ -4,17 +4,20 @@ import { EmptyState } from "@heroui-pro/react";
 import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import {
   ArticleActionBar,
   ArticleBody,
+  ArticleContinue,
   ArticleFooter,
   ArticleHero,
   ArticleLayout,
   ArticleOutlineProvider,
   ArticleSidebar,
 } from "@/features/blog/reader/article";
+import { scrollReadingAnchorIntoView } from "@/features/blog/reader/article/reading-anchor";
+import { useReadingProgress } from "@/features/blog/reader/article/use-reading-progress";
 import { articleHasContext } from "@/features/blog/reader/article/article-sidebar";
 import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/post";
 
@@ -44,6 +47,8 @@ export default function SinglePage({ initialArticle, readingHtml, slug }: Single
   const t = useTranslations("Article");
   const router = useRouter();
   const articleEndRef = useRef<HTMLDivElement>(null);
+  const [readingProgress, setReadingProgress] = useState(0);
+  const [showContinue, setShowContinue] = useState(false);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -71,7 +76,6 @@ export default function SinglePage({ initialArticle, readingHtml, slug }: Single
     currentData: fetchedArticle,
     isError,
     isFetching,
-    isUninitialized,
     refetch,
   } = useGetPublicPostBySlugQuery(slug, {
     // Anonymous visitors already have the public article. Signed-in visitors
@@ -79,9 +83,27 @@ export default function SinglePage({ initialArticle, readingHtml, slug }: Single
     skip: !isAuthenticated,
   });
   const article = fetchedArticle ?? initialArticle;
+  const [continueSlug, setContinueSlug] = useState(article?.slug);
+  if (article?.slug !== continueSlug) {
+    setContinueSlug(article?.slug);
+    setShowContinue(false);
+  }
 
   useLayoutEffect(() => {
     if (!article) return;
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const id = decodeURIComponent(hash);
+      let attempts = 0;
+      let frame = 0;
+      const place = () => {
+        attempts += 1;
+        if (scrollReadingAnchorIntoView(id) || attempts > 20) return;
+        frame = window.requestAnimationFrame(place);
+      };
+      place();
+      return () => window.cancelAnimationFrame(frame);
+    }
     const y = savedReadingScroll(window.location.pathname);
     if (y === null) return;
     const scroller = document.scrollingElement ?? document.documentElement;
@@ -95,8 +117,12 @@ export default function SinglePage({ initialArticle, readingHtml, slug }: Single
     };
   }, [article]);
 
-  const isLoading = isAuthenticated && (isFetching || isUninitialized) && !article;
-  const isUnavailable = !isLoading && !article;
+  useReadingProgress({
+    enabled: isAuthenticated && Boolean(article),
+    postId: article?.id ?? 0,
+    progress: readingProgress,
+  });
+  const isUnavailable = !article;
 
   if (isError && !fetchedArticle) {
     return (
@@ -130,9 +156,7 @@ export default function SinglePage({ initialArticle, readingHtml, slug }: Single
     );
   }
 
-  if (isLoading || !article) {
-    return <div aria-busy="true" aria-label={t("loading")} className="min-h-[70dvh]" />;
-  }
+  if (!article) return null;
 
   return (
     <ArticleOutlineProvider>
@@ -147,14 +171,22 @@ export default function SinglePage({ initialArticle, readingHtml, slug }: Single
             showTableOfContents={false}
           />
         }
+        continueAside={<ArticleContinue article={article} onAvailability={setShowContinue} />}
+        continueLabel={t("continueReading")}
         context={<ArticleSidebar article={article} />}
         showContext={articleHasContext(article)}
+        showContinue={showContinue}
         endRef={articleEndRef}
         footer={<ArticleFooter article={article} />}
         hero={<ArticleHero article={article} />}
         label={t("onThisPage")}
       />
-      <ArticleActionBar article={article} articleEndRef={articleEndRef} isRefreshing={isFetching} />
+      <ArticleActionBar
+        article={article}
+        articleEndRef={articleEndRef}
+        isRefreshing={isFetching}
+        onProgress={setReadingProgress}
+      />
     </ArticleOutlineProvider>
   );
 }

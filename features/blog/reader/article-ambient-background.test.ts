@@ -18,6 +18,10 @@ describe("ArticleAmbientBackground", () => {
     expect(source).toContain("speed * 0.4");
     expect(source).toContain("[&_canvas]:[filter:blur(64px)_saturate(1.5)]");
     expect(source).toContain("bg-background/72");
+    expect(source).toContain(
+      "radial-gradient(ellipse at center, var(--background) 0%, transparent 68%)"
+    );
+    expect(source).not.toContain("bg-[radial-gradient");
     expect(source).not.toContain("ShaderBackgroundView");
     expect(source).not.toContain("preset.swatch");
   });

@@ -33,7 +33,12 @@ export function ArticleAmbientBackground({
         />
       </div>
       <div className="bg-background/72 [@media(prefers-reduced-transparency:reduce)]:bg-background/92 absolute inset-0" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--background)_0%,transparent_68%)] opacity-20 [@media(prefers-reduced-transparency:reduce)]:opacity-60" />
+      <div
+        className="absolute inset-0 opacity-20 [@media(prefers-reduced-transparency:reduce)]:opacity-60"
+        style={{
+          background: "radial-gradient(ellipse at center, var(--background) 0%, transparent 68%)",
+        }}
+      />
     </div>
   );
 }

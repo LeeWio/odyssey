@@ -3,7 +3,7 @@
 import { ActionBar as Bar } from "@heroui-pro/react";
 import { Separator } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import { useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
 import { CollectionMenu } from "./collection-menu";
 import { CommentAction } from "./comment-action";
@@ -19,10 +19,12 @@ export function ArticleActionBar({
   article,
   articleEndRef,
   isRefreshing = false,
+  onProgress,
 }: {
   article: Target;
   articleEndRef: RefObject<HTMLElement | null>;
   isRefreshing?: boolean;
+  onProgress?: (progress: number) => void;
 }) {
   const t = useTranslations("Article");
   const rootRef = useRef<HTMLDivElement>(null);
@@ -34,6 +36,10 @@ export function ArticleActionBar({
     isEngaged: isEngaged || isRefreshing,
     isFocusWithin,
   });
+
+  useEffect(() => {
+    onProgress?.(progress);
+  }, [onProgress, progress]);
 
   return (
     <div

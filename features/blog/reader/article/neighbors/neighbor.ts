@@ -50,7 +50,7 @@ export function resolveArticleNeighbors({
     };
   }
 
-  const posts = [...journalPosts].sort(
+  const posts = [article, ...journalPosts.filter((post) => post.slug !== article.slug)].sort(
     (left, right) =>
       publishedTime(getPostPublishedAt(left), left.id) -
       publishedTime(getPostPublishedAt(right), right.id)

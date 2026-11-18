@@ -66,7 +66,11 @@ export function ArticleBody({
       isReadOnly
       extensions={extensions}
       editorOptions={{
-        editorProps: { attributes: { class: RICH_TEXT_PROSE_CLASS_NAME } },
+        editorProps: {
+          attributes: {
+            class: RICH_TEXT_PROSE_CLASS_NAME,
+          },
+        },
         onCreate: () => setEditorReady(true),
       }}
       // HeroUI RichTextEditor already disables immediatelyRender for Next.js SSR.

@@ -13,7 +13,7 @@ export function ArticleNeighbors({ article }: { article: PostResponse }) {
   const { next, order, previous } = useArticleNeighbors(article);
 
   return (
-    <section aria-label={t("keepReading")} className="mx-auto w-full max-w-3xl px-4 md:px-6">
+    <section aria-label={t("keepReading")} className="mx-auto w-full max-w-3xl">
       <header className="mb-4">
         <Typography type="h3" weight="semibold">
           {t("keepReading")}

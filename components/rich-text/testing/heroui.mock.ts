@@ -12,5 +12,6 @@ export const SearchField = Object.assign(NullComponent, {
 export const Tooltip = Object.assign(NullComponent, { Content: NullComponent });
 export const toast = {
   danger() {},
+  success() {},
   warning() {},
 };

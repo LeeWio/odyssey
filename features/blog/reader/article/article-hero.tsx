@@ -1,9 +1,8 @@
 "use client";
 
 import { Calendar, Clock } from "@gravity-ui/icons";
-import { Avatar, Chip, Link, Tag, TagGroup, Typography } from "@heroui/react";
+import { Avatar, Chip, Link, Typography } from "@heroui/react";
 import { motion, useReducedMotion } from "motion/react";
-import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { ArticleAmbientBackground } from "@/features/blog/reader/article-ambient-background";
@@ -67,26 +66,23 @@ function getAuthorInitials(value: string) {
 
 export function ArticleHero({ article }: { article: PostResponse }) {
   const locale = useLocale();
-  const router = useRouter();
   const t = useTranslations("Article");
   const authorName = article.authorName?.trim() || "Odyssey";
   const publishedAt = getPostPublishedAt(article);
   const minutes = useArticleReadingMinutes();
   const category = article.category;
-  const tags = article.tags ?? [];
 
   const publishedLabel = formatDate(publishedAt, locale, t("recentlyPublished"));
 
   const titleIndex = category ? 1 : 0;
   const summaryIndex = titleIndex + (article.summary ? 1 : 0);
   const metaIndex = summaryIndex + 1;
-  const tagsIndex = metaIndex + 1;
 
   return (
     <header className="relative mb-12 w-full max-w-none md:mb-16">
       <ArticleAmbientBackground presetId={article.shaderPreset} slug={article.slug} />
 
-      <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 pt-28 pb-8 text-center md:pt-32">
+      <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center pt-28 pb-8 text-center md:pt-32">
         {category ? (
           <MaskReveal index={0}>
             <Chip size="sm" variant="soft">
@@ -98,14 +94,14 @@ export function ArticleHero({ article }: { article: PostResponse }) {
         ) : null}
 
         <MaskReveal className="mt-6" index={titleIndex}>
-          <h1 className="max-w-2xl text-4xl leading-[1.15] font-semibold text-balance wrap-break-word sm:text-5xl">
+          <h1 className="max-w-3xl text-4xl leading-[1.15] font-semibold text-balance wrap-break-word sm:text-5xl">
             {article.title}
           </h1>
         </MaskReveal>
 
         {article.summary ? (
           <MaskReveal className="mt-5" index={summaryIndex}>
-            <p className="text-muted max-w-xl text-base leading-7 text-pretty sm:text-lg">
+            <p className="text-muted max-w-3xl text-base leading-7 text-pretty sm:text-lg">
               {article.summary}
             </p>
           </MaskReveal>
@@ -155,31 +151,6 @@ export function ArticleHero({ article }: { article: PostResponse }) {
             </div>
           </div>
         </MaskReveal>
-
-        {tags.length > 0 ? (
-          <MaskReveal className="mt-4" index={tagsIndex}>
-            <TagGroup
-              aria-label={t("tags")}
-              selectionMode="single"
-              size="sm"
-              variant="surface"
-              onSelectionChange={(keys) => {
-                if (keys === "all") return;
-                const slug = [...keys][0];
-                if (slug == null) return;
-                router.push(`/single/tags/${encodeURIComponent(String(slug))}`);
-              }}
-            >
-              <TagGroup.List className="justify-center">
-                {tags.map((tag) => (
-                  <Tag key={tag.id} id={tag.slug} textValue={tag.name}>
-                    {tag.name}
-                  </Tag>
-                ))}
-              </TagGroup.List>
-            </TagGroup>
-          </MaskReveal>
-        ) : null}
       </div>
     </header>
   );

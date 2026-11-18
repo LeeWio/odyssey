@@ -4,6 +4,10 @@ import type { PostResponse } from "@/lib/features/post";
 
 import { resolveArticleNeighbors } from "./neighbor";
 
+function daysFromToday(days: number) {
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+}
+
 function article(overrides: Partial<PostResponse> = {}): PostResponse {
   return {
     authorAvatar: "",
@@ -57,7 +61,7 @@ describe("resolveArticleNeighbors", () => {
 
   it("falls back to publication time when navigation is empty", () => {
     const neighbors = resolveArticleNeighbors({
-      article: article(),
+      article: article({ publishedAt: daysFromToday(0) }),
       columnPosts: [],
       journalPosts: [
         {
@@ -68,7 +72,7 @@ describe("resolveArticleNeighbors", () => {
           coverImage: "",
           id: 2,
           likesCount: 0,
-          publishedAt: "2026-10-09T00:00:00Z",
+          publishedAt: daysFromToday(-2),
           shaderPreset: null,
           slug: "older",
           summary: "",
@@ -83,7 +87,7 @@ describe("resolveArticleNeighbors", () => {
           coverImage: "",
           id: 3,
           likesCount: 0,
-          publishedAt: "2026-10-12T00:00:00Z",
+          publishedAt: daysFromToday(2),
           shaderPreset: null,
           slug: "newer",
           summary: "",

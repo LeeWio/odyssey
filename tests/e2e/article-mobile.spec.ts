@@ -30,6 +30,11 @@ test.beforeEach(async ({ page }) => {
           content: JSON.stringify({
             type: "doc",
             content: [
+              {
+                type: "heading",
+                attrs: { level: 2 },
+                content: [{ type: "text", text: "Chapter one" }],
+              },
               { type: "paragraph", content: [{ type: "text", text: "Opening paragraph." }] },
               {
                 type: "codeBlock",
@@ -166,4 +171,22 @@ test("copies the article link when Web Share is unavailable", async ({ page }) =
     .poll(() => page.evaluate(() => window.sessionStorage.getItem("copied-article-link")))
     .toBe("http://127.0.0.1:3100/single/mobile-reading");
   await expect(page.getByText("Article link copied.", { exact: true })).toBeVisible();
+});
+
+test("places a heading anchor below the site navigation", async ({ page }) => {
+  await page.goto("/single/mobile-reading");
+  const heading = page.getByRole("heading", { name: "Chapter one", exact: true });
+  await expect(heading).toBeVisible();
+  const headingId = await heading.evaluate((element) => element.id);
+  expect(headingId).not.toBe("");
+
+  await page.goto(`/single/mobile-reading#${headingId}`);
+  await expect
+    .poll(async () =>
+      heading.evaluate((element) => {
+        const top = element.getBoundingClientRect().top;
+        return top >= 96 && top < 180;
+      })
+    )
+    .toBe(true);
 });
