@@ -7,7 +7,9 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator("main[data-ready=true]")).toBeVisible();
 });
 
-test("switches content inside the same dialog and restores focus on close", async ({ page }) => {
+test("switches content inside the same dialog and restores focus on close @smoke", async ({
+  page,
+}) => {
   await page.getByRole("button", { name: "Open login" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByRole("heading", { name: "Log In" })).toBeVisible();
@@ -61,7 +63,7 @@ test("switches views with reduced motion enabled", async ({ page }) => {
   await expect(dialog).toHaveCount(1);
 });
 
-test("registration success explains that an administrator must approve the account", async ({
+test("registration success explains that an administrator must approve the account @smoke", async ({
   page,
 }) => {
   await page.route("**/api/v1/auth/register", async (route) => {

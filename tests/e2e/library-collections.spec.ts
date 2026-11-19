@@ -49,7 +49,7 @@ async function openAlpha(page: Page) {
 test.use({ locale: "en-US", contextOptions: { reducedMotion: "reduce" } });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "library-test",
@@ -81,7 +81,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test("pagination hides old rows during loading and supports retry and returning from a failed page", async ({
+test("pagination hides old rows during loading and supports retry and returning from a failed page @smoke", async ({
   page,
 }) => {
   const pending = Promise.withResolvers<void>();

@@ -1,5 +1,6 @@
 import { generateHTML, generateJSON, type JSONContent } from "@tiptap/core";
 import type { Editor } from "@tiptap/react";
+import { parse, type DefaultTreeAdapterTypes } from "parse5";
 
 import { createConversionExtensions } from "../extensions/extension-kit";
 import { parseJSONContent } from "./document-normalizer";
@@ -71,13 +72,21 @@ const SUPPORTED_HTML_TAGS = new Set([
 
 function inspectHTML(source: string): ContentInteroperabilityWarning[] {
   if (!source.trim()) return [];
-  const parsed = new DOMParser().parseFromString(source, "text/html");
+  const parsed = parse(source);
   const unsupported = new Set<string>();
+  const documentElement = parsed.childNodes.find((node) => node.nodeName === "html");
+  if (!documentElement || !("childNodes" in documentElement)) return [];
 
-  parsed.body.querySelectorAll("*").forEach((element) => {
-    const tag = element.tagName.toLowerCase();
-    if (!SUPPORTED_HTML_TAGS.has(tag)) unsupported.add(tag);
-  });
+  // Walk the HTML tree without creating browser elements or loading its resources.
+  function visit(node: DefaultTreeAdapterTypes.ChildNode) {
+    if (!("tagName" in node)) return;
+    if (!SUPPORTED_HTML_TAGS.has(node.tagName)) unsupported.add(node.tagName);
+    node.childNodes.forEach(visit);
+  }
+
+  for (const section of documentElement.childNodes) {
+    if ("childNodes" in section) section.childNodes.forEach(visit);
+  }
 
   if (unsupported.size === 0) return [];
   return [

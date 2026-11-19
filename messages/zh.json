@@ -334,6 +334,7 @@
     "continueReading": "接着读",
     "keepReadingHint": "上一篇和下一篇按发布时间。",
     "keepReadingColumnHint": "上一篇和下一篇留在这个专栏里。",
+    "alsoLikeTitle": "你可能也喜欢",
     "alsoLikeCount": "{count} 篇相关",
     "sameSubject": "同一主题",
     "sameSubjectHint": "和这篇主题接近的其他文章。",

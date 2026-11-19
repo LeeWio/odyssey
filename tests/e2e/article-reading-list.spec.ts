@@ -1,3 +1,4 @@
+import { readingListArticle } from "./fixtures/articles";
 import { expect, test as base } from "@playwright/test";
 
 const test = base.extend<{ browserErrors: string[] }>({
@@ -13,32 +14,7 @@ const test = base.extend<{ browserErrors: string[] }>({
 });
 
 const envelope = (data: unknown) => ({ code: 200, message: "OK", data });
-const article = (saved: boolean) => ({
-  id: 123,
-  slug: "reading-loop",
-  title: "Reading loop article",
-  contentType: "JSON",
-  content: JSON.stringify({
-    type: "doc",
-    content: Array.from({ length: 30 }, (_, index) => ({
-      type: "paragraph",
-      content: [
-        { type: "text", text: `Paragraph ${index + 1}. A note for the later-reading action.` },
-      ],
-    })),
-  }),
-  status: "PUBLISHED",
-  isFeatured: false,
-  views: 0,
-  likesCount: 0,
-  favoritesCount: 0,
-  isInReadingList: saved,
-  category: null,
-  series: null,
-  seriesOrder: null,
-  createdAt: "2026-09-20T00:00:00Z",
-  updatedAt: "2026-09-20T00:00:00Z",
-});
+
 const pageResult = (list: unknown[]) => ({
   list,
   page: 0,
@@ -54,7 +30,7 @@ test("article save for later uses the library queue and returns there", async ({
   const methods: string[] = [];
 
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "article-reading-list-test",
@@ -72,7 +48,7 @@ test("article save for later uses the library queue and returns there", async ({
       return route.fulfill({ json: envelope({ id: 1, username: "reader" }) });
     if (path.endsWith("/unread/count")) return route.fulfill({ json: envelope(0) });
     if (path === "/api/v1/public/blog/posts/reading-loop")
-      return route.fulfill({ json: envelope(article(saved)) });
+      return route.fulfill({ json: envelope({ ...readingListArticle, isInReadingList: saved }) });
     if (path.endsWith("/library/overview"))
       return route.fulfill({
         json: envelope({ continueReading: [], recentFavorites: [], recommendations: [] }),
@@ -118,16 +94,16 @@ test("article save for later uses the library queue and returns there", async ({
     page.getByRole("heading", { name: "Reading loop article", exact: true })
   ).toBeVisible();
   await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
-  await page.evaluate(() => window.scrollTo(0, 500));
-
-  await page.getByRole("button", { name: "More actions", exact: true }).click();
+  await page.getByRole("button", { name: "More article actions", exact: true }).press("Enter");
   const save = page.getByRole("button", { name: "Save for later", exact: true });
   await save.press("Enter");
   const savedButton = page.getByRole("button", { name: "Saved for later", exact: true });
   await expect(savedButton).toHaveAttribute("aria-pressed", "true");
   expect(methods).toEqual(["PUT"]);
 
-  await page.getByRole("button", { name: "Reading library", exact: true }).press("Enter");
+  await page.getByRole("button", { name: "Dismiss", exact: true }).first().press("Enter");
+  await expect(savedButton).toHaveCount(0);
+  await page.getByRole("button", { name: "Reading library", exact: true }).click();
   await expect(page).toHaveURL(/\/library$/);
   const readingList = page.getByRole("region", { name: "Read later", exact: true });
   await expect(

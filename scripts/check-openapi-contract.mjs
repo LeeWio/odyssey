@@ -1,10 +1,14 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { buildBackendOperations, normalizeApiPath } from "./openapi-contract-utils.mjs";
+import {
+  ENDPOINT_METHODS,
+  buildBackendOperations,
+  normalizeApiPath,
+} from "./openapi-contract-utils.mjs";
 
+const OPENAPI_FILE = process.env.OPENAPI_FILE;
 const OPENAPI_URL = process.env.OPENAPI_URL ?? "http://localhost:8080/v3/api-docs";
 const INCLUDE_COVERAGE = process.argv.includes("--coverage");
-const ENDPOINT_METHODS = ["get", "post", "put", "patch", "delete"];
 const API_ROOTS = ["lib/features", "features"];
 
 const collectApiFiles = async (directory) => {
@@ -46,26 +50,32 @@ const extractFrontendOperations = async () => {
   return operations;
 };
 
-let response;
+const readOpenApiDocument = async () => {
+  if (OPENAPI_FILE) return JSON.parse(await readFile(OPENAPI_FILE, "utf8"));
 
-try {
-  response = await fetch(OPENAPI_URL, {
-    headers: { accept: "application/json" },
-    signal: AbortSignal.timeout(15_000),
-  });
-} catch (error) {
-  const reason = error instanceof Error ? (error.cause?.code ?? error.message) : String(error);
-  throw new Error(`Unable to connect to OpenAPI document at ${OPENAPI_URL}: ${reason}`);
-}
+  let response;
+  try {
+    response = await fetch(OPENAPI_URL, {
+      headers: { accept: "application/json" },
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch (error) {
+    const reason = error instanceof Error ? (error.cause?.code ?? error.message) : String(error);
+    throw new Error(`Unable to connect to OpenAPI document at ${OPENAPI_URL}: ${reason}`);
+  }
 
-if (!response.ok) {
-  throw new Error(`Unable to load OpenAPI document: ${response.status} ${response.statusText}`);
-}
+  if (!response.ok) {
+    throw new Error(`Unable to load OpenAPI document: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+};
 
-const document = await response.json();
+const document = await readOpenApiDocument();
 const backendOperations = buildBackendOperations(document.paths, ENDPOINT_METHODS);
+if (backendOperations.size === 0) throw new Error("OpenAPI document contains no API operations");
 
 const frontendOperations = await extractFrontendOperations();
+if (frontendOperations.length === 0) throw new Error("No frontend API operations were extracted");
 const missing = frontendOperations.filter(
   ({ method, path: endpointPath }) => !backendOperations.has(`${method} ${endpointPath}`)
 );
@@ -102,7 +112,8 @@ const tagCoverage = Object.fromEntries(
 console.log(
   JSON.stringify(
     {
-      openapiUrl: OPENAPI_URL,
+      ...(OPENAPI_FILE ? { openapiFile: OPENAPI_FILE } : { openapiUrl: OPENAPI_URL }),
+      ...(document.nexusRevision ? { nexusRevision: document.nexusRevision } : {}),
       frontendOperations: frontendOperations.length,
       backendOperations: backendOperations.size,
       matchedOperations: frontendOperations.length - missing.length,

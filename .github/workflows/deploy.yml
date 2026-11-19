@@ -7,6 +7,7 @@ on:
       - "**.md"
       - "docs/**"
       - "plans/**"
+      - "contracts/**"
       - ".github/workflows/ci.yml"
       - ".github/workflows/security.yml"
       - ".github/workflows/release.yml"
@@ -14,21 +15,27 @@ on:
 
 concurrency:
   group: odyssey-production-deploy
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   build-and-push-image:
     name: Build & Push Docker Image to GHCR
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    outputs:
+      image_digest: ${{ steps.image.outputs.digest }}
     env:
       HEROUI_AUTH_TOKEN: ${{ secrets.HEROUI_AUTH_TOKEN }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # 1. Setup Node/Bun and install dependencies with native cache
       - name: Setup Project Environment
@@ -40,7 +47,7 @@ jobs:
 
       # 3. Restore Next.js cache and compile standalone build on the host runner
       - name: Cache Next.js Build
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-${{ github.sha }}
@@ -52,17 +59,17 @@ jobs:
 
       # 4. Set up Docker Buildx and login to GHCR
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Login to Aliyun Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: crpi-jljp0dhu73tl5aot.cn-shenzhen.personal.cr.aliyuncs.com
           username: ${{ secrets.ALIYUN_REGISTRY_USER }}
@@ -70,15 +77,22 @@ jobs:
 
       # 5. Pack prebuilt standalone files into the ultra-lean runner-prebuilt target stage (takes ~5s)
       - name: Package Prebuilt Output & Push Image
-        uses: docker/build-push-action@v6
+        id: image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
           file: ./Dockerfile
           target: runner-prebuilt
           push: true
           # Aliyun's personal registry rejects Buildx attestation manifests.
+          # Publish signed provenance and SBOM against the same digest in GHCR.
           provenance: false
           sbom: false
+          build-args: |
+            BUILD_REVISION=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
           tags: |
             ghcr.io/leewio/odyssey-web:latest
             ghcr.io/leewio/odyssey-web:${{ github.sha }}
@@ -86,6 +100,33 @@ jobs:
             crpi-jljp0dhu73tl5aot.cn-shenzhen.personal.cr.aliyuncs.com/wei_li/odyssey_web:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Generate Image SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          image: ghcr.io/leewio/odyssey-web@${{ steps.image.outputs.digest }}
+          format: spdx-json
+          output-file: odyssey-web.spdx.json
+          artifact-name: odyssey-web.spdx.json
+          syft-version: v1.43.0
+          upload-release-assets: false
+
+      - name: Publish Signed Image Provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ghcr.io/leewio/odyssey-web
+          subject-digest: ${{ steps.image.outputs.digest }}
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Publish Signed Image SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ghcr.io/leewio/odyssey-web
+          subject-digest: ${{ steps.image.outputs.digest }}
+          sbom-path: odyssey-web.spdx.json
+          push-to-registry: true
+          create-storage-record: false
 
   deploy-to-server:
     name: Pull & Recreate Container on Server
@@ -95,144 +136,39 @@ jobs:
       name: production
       url: https://easylove.top
     steps:
+      - name: Checkout Deployment Script
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Require the production SSH host fingerprint
+        shell: bash
+        env:
+          SERVER_SSH_FINGERPRINT: ${{ secrets.SERVER_SSH_FINGERPRINT }}
+        run: |
+          if [[ ! ${SERVER_SSH_FINGERPRINT} =~ ^SHA256:[A-Za-z0-9+/]{43}$ ]]; then
+            echo "Configure the trusted production SSH host fingerprint before deploying." >&2
+            exit 1
+          fi
+
       - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@v1.2.2
+        uses: appleboy/ssh-action@2ead5e36573f08b82fbfce1504f1a4b05a647c6f # v1.2.2
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
+          fingerprint: ${{ secrets.SERVER_SSH_FINGERPRINT }}
           port: ${{ secrets.SERVER_PORT || 22 }}
-          # Pass temporary GHA secrets and custom health check urls to the SSH session
-          envs: HEALTHCHECK_URL,ALIYUN_REGISTRY,ALIYUN_REGISTRY_USER,ALIYUN_REGISTRY_PASSWORD,ALIYUN_IMAGE,WEB_LATEST_IMAGE
+          envs: HEALTHCHECK_URL,ALIYUN_REGISTRY,ALIYUN_REGISTRY_USER,ALIYUN_REGISTRY_PASSWORD,ALIYUN_IMAGE,WEB_LATEST_IMAGE,EXPECTED_IMAGE_DIGEST,EXPECTED_REVISION,SERVER_PROJECT_PATH
           command_timeout: 15m
-          script: |
-            #!/usr/bin/env bash
-            set -Eeuo pipefail
-
-            log() {
-              printf '\n[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
-            }
-
-            cleanup() {
-              log "Logging out of Aliyun Registry..."
-              docker logout "${ALIYUN_REGISTRY}" >/dev/null 2>&1 || true
-            }
-            trap cleanup EXIT
-
-            # 1. Navigate to the root directory containing compose.yaml
-            log "Navigating to compose directory..."
-            cd ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}
-
-            # 2. Login to Aliyun Container Registry
-            log "Logging in to Aliyun Container Registry on production server..."
-            echo "${ALIYUN_REGISTRY_PASSWORD}" | docker login "${ALIYUN_REGISTRY}" -u "${ALIYUN_REGISTRY_USER}" --password-stdin
-
-            # 3. Pull the precompiled immutable image from Aliyun
-            log "Pulling the latest precompiled web image from Aliyun Registry..."
-            docker pull "${ALIYUN_IMAGE}"
-
-            # 4. Retag the pulled Aliyun image to local ghcr.io tag (referenced by compose.yaml)
-            log "Retagging Aliyun image to local compose target image..."
-            PULLED_IMAGE_ID="$(docker image inspect --format '{{.Id}}' "${ALIYUN_IMAGE}")"
-            docker tag "${PULLED_IMAGE_ID}" "${WEB_LATEST_IMAGE}"
-
-            # 5. Gracefully recreate the Web container using the locally tagged image
-            log "Recreating Web container..."
-            docker compose up -d --no-deps --force-recreate --pull never web
-
-            # 6. Advanced Post-Deployment Verification (imported from remote repository commits)
-            log "Verifying container status..."
-            CONTAINER_ID="$(docker compose ps -q web)"
-
-            if [ -z "${CONTAINER_ID}" ]; then
-              echo "Web container ID could not be resolved"
-              exit 1
-            fi
-
-            READY=false
-
-            for attempt in $(seq 1 30); do
-              RUNNING="$(
-                docker inspect \
-                  --format '{{.State.Running}}' \
-                  "${CONTAINER_ID}"
-              )"
-
-              HEALTH="$(
-                docker inspect \
-                  --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' \
-                  "${CONTAINER_ID}"
-              )"
-
-              echo "Check ${attempt}/30: running=${RUNNING}, health=${HEALTH}"
-
-              if [ "${RUNNING}" != "true" ]; then
-                echo "Web container stopped unexpectedly"
-                docker compose logs --tail=200 web
-                exit 1
-              fi
-
-              case "${HEALTH}" in
-                healthy|none)
-                  READY=true
-                  break
-                  ;;
-                unhealthy)
-                  echo "Web container is unhealthy"
-                  docker compose logs --tail=200 web
-                  exit 1
-                  ;;
-              esac
-
-              sleep 2
-            done
-
-            if [ "${READY}" != "true" ]; then
-              echo "Container did not become ready in time"
-              docker compose logs --tail=200 web
-              exit 1
-            fi
-
-            # 7. HTTP Health Check (imported from remote repository commits)
-            if [ -n "${HEALTHCHECK_URL:-}" ]; then
-              log "Running HTTP health check on url: ${HEALTHCHECK_URL}"
-
-              HEALTHCHECK_OK=false
-
-              for attempt in $(seq 1 10); do
-                if curl \
-                  --fail \
-                  --silent \
-                  --show-error \
-                  --location \
-                  --max-time 10 \
-                  "${HEALTHCHECK_URL}" \
-                  --output /dev/null; then
-                  HEALTHCHECK_OK=true
-                  break
-                fi
-
-                echo "HTTP health check failed: ${attempt}/10"
-                sleep 3
-              done
-
-              if [ "${HEALTHCHECK_OK}" != "true" ]; then
-                echo "HTTP health check failed"
-                docker compose logs --tail=200 web
-                exit 1
-              fi
-            fi
-
-            # 8. Post-deployment safe cleanup of old images to preserve disk space
-            log "Performing safe post-deployment cleanup of old images..."
-            docker image prune --force
-
-            log "Deployment completed successfully!"
-            docker compose ps web
+          script_path: scripts/deploy-web.sh
         env:
-          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL || 'https://easylove.top/healthz/odyssey' }}
           ALIYUN_REGISTRY: crpi-jljp0dhu73tl5aot.cn-shenzhen.personal.cr.aliyuncs.com
           ALIYUN_REGISTRY_USER: ${{ secrets.ALIYUN_REGISTRY_USER }}
           ALIYUN_REGISTRY_PASSWORD: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
-          ALIYUN_IMAGE: crpi-jljp0dhu73tl5aot.cn-shenzhen.personal.cr.aliyuncs.com/wei_li/odyssey_web:${{ github.sha }}
+          ALIYUN_IMAGE: crpi-jljp0dhu73tl5aot.cn-shenzhen.personal.cr.aliyuncs.com/wei_li/odyssey_web
           WEB_LATEST_IMAGE: ghcr.io/leewio/odyssey-web:latest
+          EXPECTED_IMAGE_DIGEST: ${{ needs.build-and-push-image.outputs.image_digest }}
+          EXPECTED_REVISION: ${{ github.sha }}
+          SERVER_PROJECT_PATH: ${{ secrets.SERVER_PROJECT_PATH || '/srv/blog' }}

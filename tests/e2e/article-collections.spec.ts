@@ -1,3 +1,4 @@
+import { collectionArticle } from "./fixtures/articles";
 import { expect, test as base, type Page } from "@playwright/test";
 
 const test = base.extend<{ browserErrors: string[] }>({
@@ -26,7 +27,7 @@ const collection = {
 test.use({ locale: "en-US", contextOptions: { reducedMotion: "reduce" } });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "article-collection-test",
@@ -48,31 +49,7 @@ test.beforeEach(async ({ page }) => {
       await route.fulfill({ json: envelope([]) });
     } else if (path === "/api/v1/public/blog/posts/collection-test") {
       await route.fulfill({
-        json: envelope({
-          id: 123,
-          slug: "collection-test",
-          title: "Collection test article",
-          contentType: "JSON",
-          content: JSON.stringify({
-            type: "doc",
-            content: Array.from({ length: 30 }, (_, i) => ({
-              type: "paragraph",
-              content: [
-                { type: "text", text: `Paragraph ${i + 1}. Notes for the reading collection.` },
-              ],
-            })),
-          }),
-          status: "PUBLISHED",
-          isFeatured: false,
-          views: 0,
-          likesCount: 0,
-          favoritesCount: 0,
-          category: null,
-          series: null,
-          seriesOrder: null,
-          createdAt: "2026-09-20T00:00:00Z",
-          updatedAt: "2026-09-20T00:00:00Z",
-        }),
+        json: envelope(collectionArticle),
       });
     } else {
       await route.fulfill({ status: 503, json: { message: "Unmocked API request" } });
@@ -86,7 +63,6 @@ async function openCreate(page: Page) {
     page.getByRole("heading", { name: "Collection test article", exact: true })
   ).toBeVisible();
   await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
-  await page.evaluate(() => window.scrollTo(0, 500));
   await page.getByRole("button", { name: "More article actions", exact: true }).press("Enter");
   await page.getByRole("button", { name: "Create collection", exact: true }).press("Enter");
   const dialog = page.getByRole("dialog", { name: "Create collection", exact: true });
@@ -205,11 +181,11 @@ test("creation failure preserves editable details and retry completes both steps
   const dialog = await openCreate(page);
   const name = dialog.getByRole("textbox", { name: /Name/ });
   await name.fill("   ");
-  await dialog.getByRole("button", { name: "Create and save", exact: true }).press("Enter");
+  await dialog.getByRole("button", { name: "Create and save", exact: true }).click();
   await expect(dialog.getByText("Enter a collection name.", { exact: true })).toBeVisible();
   expect(creations).toBe(0);
   await name.fill("Reading notes");
-  await dialog.getByRole("button", { name: "Create and save", exact: true }).press("Enter");
+  await dialog.getByRole("button", { name: "Create and save", exact: true }).click();
   await expect(dialog.getByRole("alert")).toContainText("The collection could not be created");
   await expect(name).toHaveValue("Reading notes");
   await expect(name).toBeEditable();
@@ -219,7 +195,7 @@ test("creation failure preserves editable details and retry completes both steps
   await expect(dialog.getByRole("button", { name: "Cancel", exact: true })).toBeEnabled();
   expect(saves).toBe(0);
   await name.fill("Updated notes");
-  await dialog.getByRole("button", { name: "Create and save", exact: true }).press("Enter");
+  await dialog.getByRole("button", { name: "Create and save", exact: true }).click();
   await expect(dialog).toHaveCount(0);
   expect(creations).toBe(2);
   expect(saves).toBe(1);

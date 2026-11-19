@@ -163,7 +163,7 @@ export const postApi = baseApi.injectEndpoints({
      * Public: Get post details by slug
      */
     getPublicPostBySlug: builder.query<PostResponse, string>({
-      query: (slug) => `/api/v1/public/blog/posts/${slug}`,
+      query: (slug) => `/api/v1/public/blog/posts/${encodeURIComponent(slug)}`,
       rawResponseSchema: apiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
       transformErrorResponse: transformApiError,
@@ -217,7 +217,7 @@ export const postApi = baseApi.injectEndpoints({
         const slug = typeof arg === "string" ? arg : arg.slug;
         const size = typeof arg === "string" ? undefined : arg.size;
         return {
-          url: `/api/v1/public/blog/posts/${slug}/related`,
+          url: `/api/v1/public/blog/posts/${encodeURIComponent(slug)}/related`,
           ...(size ? { params: { size } } : {}),
         };
       },

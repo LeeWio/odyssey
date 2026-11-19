@@ -171,7 +171,14 @@ export default function SinglePage({ initialArticle, readingHtml, slug }: Single
             showTableOfContents={false}
           />
         }
-        continueAside={<ArticleContinue article={article} onAvailability={setShowContinue} />}
+        continueAside={
+          <ArticleContinue
+            key={article.id}
+            article={article}
+            isRailAvailable={showContinue}
+            onAvailability={setShowContinue}
+          />
+        }
         continueLabel={t("continueReading")}
         context={<ArticleSidebar article={article} />}
         showContext={articleHasContext(article)}

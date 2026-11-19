@@ -7,6 +7,8 @@ on:
       - "bun.lock"
       - "package.json"
       - ".github/workflows/security.yml"
+  pull_request:
+    branches: [main, master]
   schedule:
     # Run every night at midnight UTC
     - cron: "0 0 * * *"
@@ -21,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # Setup environment (Skip dependency installation to save precious CI minutes)
       - name: Setup Project Environment
@@ -29,11 +31,5 @@ jobs:
         with:
           install-deps: "false"
 
-      # Generate a temporary npm lockfile because audit-ci does not audit Bun's
-      # native bun.lock format. No dependency installation is performed.
-      - name: Generate Temporary Lockfile for Auditing
-        run: npm install --package-lock-only --legacy-peer-deps --ignore-scripts --no-audit --no-fund
-
-      # Perform deep, strict security threshold checking
-      - name: Run Deep Dependency Security Audit (audit-ci)
-        run: bun x audit-ci --high --package-manager npm
+      - name: Audit the resolved Bun dependency graph
+        run: bun audit --audit-level=high

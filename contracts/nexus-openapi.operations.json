@@ -1,0 +1,1717 @@
+{
+  "nexusRevision": "2798438bd94478e6b329ec4a5c4f4bb09ed79022",
+  "paths": {
+    "/api/v1/admin/analytics/content-funnel": {
+      "get": {
+        "operationId": "getContentFunnel",
+        "tags": ["Admin Analytics"]
+      }
+    },
+    "/api/v1/admin/analytics/overview": {
+      "get": {
+        "operationId": "retrieveOverview",
+        "tags": ["Admin Analytics"]
+      }
+    },
+    "/api/v1/admin/analytics/top-pages": {
+      "get": {
+        "operationId": "getTopPages",
+        "tags": ["Admin Analytics"]
+      }
+    },
+    "/api/v1/admin/analytics/traffic": {
+      "get": {
+        "operationId": "getTrafficStats",
+        "tags": ["Admin Analytics"]
+      }
+    },
+    "/api/v1/admin/analytics/trending": {
+      "get": {
+        "operationId": "getTrending_1",
+        "tags": ["Admin Analytics"]
+      }
+    },
+    "/api/v1/admin/analytics/visitors": {
+      "get": {
+        "operationId": "getVisitors",
+        "tags": ["Admin Analytics"]
+      }
+    },
+    "/api/v1/admin/analytics/visitors/{visitorHash}": {
+      "get": {
+        "operationId": "getVisitorTimeline",
+        "tags": ["Admin Analytics"]
+      }
+    },
+    "/api/v1/admin/categories": {
+      "get": {
+        "operationId": "retrieveCategories",
+        "tags": ["Admin Category Management"]
+      },
+      "post": {
+        "operationId": "createCategory_1",
+        "tags": ["Admin Category Management"]
+      }
+    },
+    "/api/v1/admin/categories/{id}": {
+      "put": {
+        "operationId": "updateCategory_1",
+        "tags": ["Admin Category Management"]
+      },
+      "delete": {
+        "operationId": "deleteCategory_1",
+        "tags": ["Admin Category Management"]
+      }
+    },
+    "/api/v1/admin/columns": {
+      "get": {
+        "operationId": "listColumns",
+        "tags": ["Admin Columns"]
+      },
+      "post": {
+        "operationId": "createColumn_1",
+        "tags": ["Admin Columns"]
+      }
+    },
+    "/api/v1/admin/columns/{id}": {
+      "get": {
+        "operationId": "getColumn",
+        "tags": ["Admin Columns"]
+      },
+      "put": {
+        "operationId": "updateColumn_1",
+        "tags": ["Admin Columns"]
+      },
+      "delete": {
+        "operationId": "deleteColumn_1",
+        "tags": ["Admin Columns"]
+      }
+    },
+    "/api/v1/admin/comments": {
+      "get": {
+        "operationId": "searchComments",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/batch/status": {
+      "post": {
+        "operationId": "batchModerateComments",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/high-risk": {
+      "get": {
+        "operationId": "getHighRiskComments",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/moderation-logs": {
+      "get": {
+        "operationId": "getCommentModerationLogs",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/overview": {
+      "get": {
+        "operationId": "getCommentGovernanceOverview",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/pending": {
+      "get": {
+        "operationId": "getPendingComments",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/repair-counters": {
+      "post": {
+        "operationId": "repairCommentCounters",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/reports": {
+      "get": {
+        "operationId": "getCommentReports",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/reports/{commentId}/{reporterId}": {
+      "patch": {
+        "operationId": "resolveCommentReport",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/{id}": {
+      "delete": {
+        "operationId": "deleteComment",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/{id}/feature": {
+      "patch": {
+        "operationId": "featureComment",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/{id}/pin": {
+      "patch": {
+        "operationId": "pinComment",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/comments/{id}/status": {
+      "patch": {
+        "operationId": "moderateComment",
+        "tags": ["Admin Comment Management"]
+      }
+    },
+    "/api/v1/admin/configs": {
+      "get": {
+        "operationId": "getAllConfigs",
+        "tags": ["Admin System Config"]
+      },
+      "post": {
+        "operationId": "createConfig",
+        "tags": ["Admin System Config"]
+      }
+    },
+    "/api/v1/admin/configs/{id}": {
+      "put": {
+        "operationId": "updateConfig",
+        "tags": ["Admin System Config"]
+      },
+      "delete": {
+        "operationId": "deleteConfig",
+        "tags": ["Admin System Config"]
+      }
+    },
+    "/api/v1/admin/dashboard/content-overview": {
+      "get": {
+        "operationId": "getContentOverview",
+        "tags": ["Admin Dashboard"]
+      }
+    },
+    "/api/v1/admin/dashboard/content-workflow": {
+      "get": {
+        "operationId": "getContentWorkflow",
+        "tags": ["Admin Dashboard"]
+      }
+    },
+    "/api/v1/admin/dashboard/editorial-calendar": {
+      "get": {
+        "operationId": "getEditorialCalendar",
+        "tags": ["Admin Dashboard"]
+      }
+    },
+    "/api/v1/admin/dashboard/stats": {
+      "get": {
+        "operationId": "getStatistics",
+        "tags": ["Admin Dashboard"]
+      }
+    },
+    "/api/v1/admin/files": {
+      "get": {
+        "operationId": "searchFiles",
+        "tags": ["Admin File Management"]
+      }
+    },
+    "/api/v1/admin/files/integrity": {
+      "get": {
+        "operationId": "verifyStorageIntegrity",
+        "tags": ["Admin File Management"]
+      }
+    },
+    "/api/v1/admin/files/inventory": {
+      "get": {
+        "operationId": "getStorageInventory",
+        "tags": ["Admin File Management"]
+      }
+    },
+    "/api/v1/admin/files/upload": {
+      "post": {
+        "operationId": "uploadFile",
+        "tags": ["Admin File Management"]
+      }
+    },
+    "/api/v1/admin/files/{fileName}": {
+      "delete": {
+        "operationId": "deleteFile",
+        "tags": ["Admin File Management"]
+      }
+    },
+    "/api/v1/admin/friend-links": {
+      "get": {
+        "operationId": "searchFriendLinks",
+        "tags": ["Admin Friend Link Management"]
+      },
+      "post": {
+        "operationId": "createFriendLink",
+        "tags": ["Admin Friend Link Management"]
+      }
+    },
+    "/api/v1/admin/friend-links/{id}": {
+      "get": {
+        "operationId": "retrieveFriendLink",
+        "tags": ["Admin Friend Link Management"]
+      },
+      "put": {
+        "operationId": "updateFriendLink",
+        "tags": ["Admin Friend Link Management"]
+      },
+      "delete": {
+        "operationId": "deleteFriendLink",
+        "tags": ["Admin Friend Link Management"]
+      }
+    },
+    "/api/v1/admin/friend-links/{id}/status": {
+      "patch": {
+        "operationId": "moderateFriendLink",
+        "tags": ["Admin Friend Link Management"]
+      }
+    },
+    "/api/v1/admin/github/sync": {
+      "post": {
+        "operationId": "triggerSync",
+        "tags": ["Admin GitHub"]
+      }
+    },
+    "/api/v1/admin/kanban": {
+      "get": {
+        "operationId": "retrieveBoard",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/columns": {
+      "post": {
+        "operationId": "createColumn",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/columns/sequence": {
+      "post": {
+        "operationId": "adjustColumnSequence",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/columns/{id}": {
+      "put": {
+        "operationId": "updateColumn",
+        "tags": ["Admin Kanban"]
+      },
+      "delete": {
+        "operationId": "deleteColumn",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/tasks": {
+      "post": {
+        "operationId": "createTask",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/tasks/relocate": {
+      "post": {
+        "operationId": "relocateTask",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/tasks/{id}": {
+      "put": {
+        "operationId": "updateTask",
+        "tags": ["Admin Kanban"]
+      },
+      "delete": {
+        "operationId": "deleteTask",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/tasks/{id}/assignees": {
+      "put": {
+        "operationId": "assignTaskAssignees",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/tasks/{id}/duplicate": {
+      "post": {
+        "operationId": "duplicateTask",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/tasks/{taskId}/checklist": {
+      "get": {
+        "operationId": "retrieveChecklistItems",
+        "tags": ["Admin Kanban"]
+      },
+      "post": {
+        "operationId": "createChecklistItem",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/tasks/{taskId}/checklist/sequence": {
+      "post": {
+        "operationId": "adjustChecklistItemSequence",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/tasks/{taskId}/checklist/{checklistItemId}": {
+      "put": {
+        "operationId": "updateChecklistItem",
+        "tags": ["Admin Kanban"]
+      },
+      "delete": {
+        "operationId": "deleteChecklistItem",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/kanban/tasks/{taskId}/checklist/{checklistItemId}/completion": {
+      "patch": {
+        "operationId": "completeChecklistItem",
+        "tags": ["Admin Kanban"]
+      }
+    },
+    "/api/v1/admin/life-list/categories": {
+      "get": {
+        "operationId": "getCategories",
+        "tags": ["Admin Life List"]
+      },
+      "post": {
+        "operationId": "createCategory",
+        "tags": ["Admin Life List"]
+      }
+    },
+    "/api/v1/admin/life-list/categories/{id}": {
+      "put": {
+        "operationId": "updateCategory",
+        "tags": ["Admin Life List"]
+      },
+      "delete": {
+        "operationId": "deleteCategory",
+        "tags": ["Admin Life List"]
+      }
+    },
+    "/api/v1/admin/life-list/items": {
+      "get": {
+        "operationId": "getItems",
+        "tags": ["Admin Life List"]
+      },
+      "post": {
+        "operationId": "createItem",
+        "tags": ["Admin Life List"]
+      }
+    },
+    "/api/v1/admin/life-list/items/{id}": {
+      "get": {
+        "operationId": "getItem",
+        "tags": ["Admin Life List"]
+      },
+      "put": {
+        "operationId": "updateItem",
+        "tags": ["Admin Life List"]
+      },
+      "delete": {
+        "operationId": "deleteItem",
+        "tags": ["Admin Life List"]
+      }
+    },
+    "/api/v1/admin/life-list/items/{id}/archive": {
+      "post": {
+        "operationId": "archiveItem",
+        "tags": ["Admin Life List"]
+      }
+    },
+    "/api/v1/admin/life-list/items/{id}/memories": {
+      "post": {
+        "operationId": "createMemory",
+        "tags": ["Admin Life List"]
+      }
+    },
+    "/api/v1/admin/life-list/items/{id}/restore": {
+      "post": {
+        "operationId": "restoreItem",
+        "tags": ["Admin Life List"]
+      }
+    },
+    "/api/v1/admin/life-list/items/{id}/status": {
+      "patch": {
+        "operationId": "changeStatus",
+        "tags": ["Admin Life List"]
+      }
+    },
+    "/api/v1/admin/life-list/memories/{id}": {
+      "put": {
+        "operationId": "updateMemory",
+        "tags": ["Admin Life List"]
+      },
+      "delete": {
+        "operationId": "deleteMemory",
+        "tags": ["Admin Life List"]
+      }
+    },
+    "/api/v1/admin/links/broken": {
+      "get": {
+        "operationId": "getBrokenLinks",
+        "tags": ["Admin Link Health Management"]
+      }
+    },
+    "/api/v1/admin/links/logs": {
+      "delete": {
+        "operationId": "clearLogs_1",
+        "tags": ["Admin Link Health Management"]
+      }
+    },
+    "/api/v1/admin/links/scan": {
+      "post": {
+        "operationId": "triggerManualScan",
+        "tags": ["Admin Link Health Management"]
+      }
+    },
+    "/api/v1/admin/logs": {
+      "get": {
+        "operationId": "getLogs",
+        "tags": ["Admin Log Management"]
+      }
+    },
+    "/api/v1/admin/logs/clear": {
+      "delete": {
+        "operationId": "clearLogs",
+        "tags": ["Admin Log Management"]
+      }
+    },
+    "/api/v1/admin/menus": {
+      "post": {
+        "operationId": "createMenu",
+        "tags": ["Admin Menu Management"]
+      }
+    },
+    "/api/v1/admin/menus/current": {
+      "get": {
+        "operationId": "retrieveAuthenticatedUserMenus",
+        "tags": ["Admin Menu Management"]
+      }
+    },
+    "/api/v1/admin/menus/tree": {
+      "get": {
+        "operationId": "retrieveMenuTree",
+        "tags": ["Admin Menu Management"]
+      }
+    },
+    "/api/v1/admin/menus/{id}": {
+      "put": {
+        "operationId": "updateMenu",
+        "tags": ["Admin Menu Management"]
+      },
+      "delete": {
+        "operationId": "deleteMenu",
+        "tags": ["Admin Menu Management"]
+      }
+    },
+    "/api/v1/admin/moments": {
+      "get": {
+        "operationId": "getAllMoments",
+        "tags": ["Admin Moment Management"]
+      },
+      "post": {
+        "operationId": "createMoment",
+        "tags": ["Admin Moment Management"]
+      }
+    },
+    "/api/v1/admin/moments/{id}": {
+      "get": {
+        "operationId": "getMomentById",
+        "tags": ["Admin Moment Management"]
+      },
+      "put": {
+        "operationId": "updateMoment",
+        "tags": ["Admin Moment Management"]
+      },
+      "delete": {
+        "operationId": "deleteMoment",
+        "tags": ["Admin Moment Management"]
+      }
+    },
+    "/api/v1/admin/newsletter/deliveries": {
+      "get": {
+        "operationId": "getRecentDeliveries",
+        "tags": ["Admin Newsletter"]
+      }
+    },
+    "/api/v1/admin/newsletter/deliveries/{batchId}": {
+      "get": {
+        "operationId": "getBatchDeliveries",
+        "tags": ["Admin Newsletter"]
+      }
+    },
+    "/api/v1/admin/newsletter/overview": {
+      "get": {
+        "operationId": "getOverview_1",
+        "tags": ["Admin Newsletter"]
+      }
+    },
+    "/api/v1/admin/newsletter/subscribers": {
+      "get": {
+        "operationId": "getSubscribers",
+        "tags": ["Admin Newsletter"]
+      }
+    },
+    "/api/v1/admin/notifications/deliveries": {
+      "get": {
+        "operationId": "list",
+        "tags": ["Admin Notification Delivery"]
+      }
+    },
+    "/api/v1/admin/notifications/deliveries/overview": {
+      "get": {
+        "operationId": "overview",
+        "tags": ["Admin Notification Delivery"]
+      }
+    },
+    "/api/v1/admin/notifications/deliveries/{id}": {
+      "get": {
+        "operationId": "detail",
+        "tags": ["Admin Notification Delivery"]
+      }
+    },
+    "/api/v1/admin/notifications/deliveries/{id}/retries": {
+      "get": {
+        "operationId": "retries",
+        "tags": ["Admin Notification Delivery"]
+      }
+    },
+    "/api/v1/admin/notifications/deliveries/{id}/retry": {
+      "post": {
+        "operationId": "retry",
+        "tags": ["Admin Notification Delivery"]
+      }
+    },
+    "/api/v1/admin/observability/snapshot": {
+      "get": {
+        "operationId": "getSystemSnapshot",
+        "tags": ["Admin Observability"]
+      }
+    },
+    "/api/v1/admin/posts": {
+      "get": {
+        "operationId": "searchPosts",
+        "tags": ["Admin Post Management"]
+      },
+      "post": {
+        "operationId": "createPost",
+        "tags": ["Admin Post Management"]
+      },
+      "delete": {
+        "operationId": "deletePosts",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/autosave": {
+      "post": {
+        "operationId": "autosavePost",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/autosave/{identifier}": {
+      "get": {
+        "operationId": "retrieveAutosave",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/rebuild-metadata": {
+      "post": {
+        "operationId": "rebuildPostMetadata",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/regenerate-static": {
+      "post": {
+        "operationId": "regenerateStaticHtml",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/reports": {
+      "get": {
+        "operationId": "getPostReports",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/reports/{postId}/{reporterId}": {
+      "patch": {
+        "operationId": "resolvePostReport",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}": {
+      "get": {
+        "operationId": "retrievePost",
+        "tags": ["Admin Post Management"]
+      },
+      "put": {
+        "operationId": "updatePost",
+        "tags": ["Admin Post Management"]
+      },
+      "delete": {
+        "operationId": "deletePost",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/archive": {
+      "post": {
+        "operationId": "archivePost",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/copy": {
+      "post": {
+        "operationId": "copyPost",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/preview-token": {
+      "post": {
+        "operationId": "createPreviewToken",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/restore": {
+      "post": {
+        "operationId": "restoreArchivedPost",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/review": {
+      "post": {
+        "operationId": "reviewPost",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/revisions": {
+      "get": {
+        "operationId": "retrieveRevisions",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/revisions/compare": {
+      "get": {
+        "operationId": "compareRevisions",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/revisions/summary": {
+      "get": {
+        "operationId": "retrieveRevisionSummaries",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/revisions/{revisionId}": {
+      "get": {
+        "operationId": "retrieveRevision",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/revisions/{revisionId}/revert": {
+      "post": {
+        "operationId": "revertToRevision",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/schedule": {
+      "post": {
+        "operationId": "schedulePost",
+        "tags": ["Admin Post Management"]
+      },
+      "delete": {
+        "operationId": "cancelScheduledPost",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/submit": {
+      "post": {
+        "operationId": "submitForReview",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/{id}/withdraw": {
+      "post": {
+        "operationId": "withdrawFromReview",
+        "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/projects": {
+      "get": {
+        "operationId": "getAllProjects",
+        "tags": ["Admin Project Management"]
+      },
+      "post": {
+        "operationId": "createProject",
+        "tags": ["Admin Project Management"]
+      }
+    },
+    "/api/v1/admin/projects/{id}": {
+      "get": {
+        "operationId": "getProjectById",
+        "tags": ["Admin Project Management"]
+      },
+      "put": {
+        "operationId": "updateProject",
+        "tags": ["Admin Project Management"]
+      },
+      "delete": {
+        "operationId": "deleteProject",
+        "tags": ["Admin Project Management"]
+      }
+    },
+    "/api/v1/admin/roles": {
+      "get": {
+        "operationId": "getAllRoles",
+        "tags": ["Admin Role Management"]
+      },
+      "post": {
+        "operationId": "createRole",
+        "tags": ["Admin Role Management"]
+      }
+    },
+    "/api/v1/admin/roles/{id}": {
+      "put": {
+        "operationId": "updateRole",
+        "tags": ["Admin Role Management"]
+      },
+      "delete": {
+        "operationId": "deleteRole",
+        "tags": ["Admin Role Management"]
+      }
+    },
+    "/api/v1/admin/roles/{id}/menus": {
+      "get": {
+        "operationId": "getRoleMenus",
+        "tags": ["Admin Role Management"]
+      },
+      "post": {
+        "operationId": "assignMenus",
+        "tags": ["Admin Role Management"]
+      }
+    },
+    "/api/v1/admin/search/rebuild": {
+      "post": {
+        "operationId": "rebuildIndex",
+        "tags": ["Admin Search Management"]
+      }
+    },
+    "/api/v1/admin/series": {
+      "get": {
+        "operationId": "retrieveAllSeries",
+        "tags": ["Admin Post Series Management"]
+      },
+      "post": {
+        "operationId": "createSeries",
+        "tags": ["Admin Post Series Management"]
+      }
+    },
+    "/api/v1/admin/series/{id}": {
+      "get": {
+        "operationId": "retrieveSeries",
+        "tags": ["Admin Post Series Management"]
+      },
+      "put": {
+        "operationId": "updateSeries",
+        "tags": ["Admin Post Series Management"]
+      },
+      "delete": {
+        "operationId": "deleteSeries",
+        "tags": ["Admin Post Series Management"]
+      }
+    },
+    "/api/v1/admin/tags": {
+      "get": {
+        "operationId": "getAllTags",
+        "tags": ["Admin Tag Management"]
+      },
+      "post": {
+        "operationId": "createTag",
+        "tags": ["Admin Tag Management"]
+      }
+    },
+    "/api/v1/admin/tags/{id}": {
+      "put": {
+        "operationId": "updateTag",
+        "tags": ["Admin Tag Management"]
+      },
+      "delete": {
+        "operationId": "deleteTag",
+        "tags": ["Admin Tag Management"]
+      }
+    },
+    "/api/v1/admin/users": {
+      "get": {
+        "operationId": "getAllUsers",
+        "tags": ["Admin User Management"]
+      }
+    },
+    "/api/v1/admin/users/{id}": {
+      "get": {
+        "operationId": "getUserById",
+        "tags": ["Admin User Management"]
+      },
+      "delete": {
+        "operationId": "deleteUser",
+        "tags": ["Admin User Management"]
+      }
+    },
+    "/api/v1/admin/users/{id}/audit": {
+      "post": {
+        "operationId": "auditUser",
+        "tags": ["Admin User Management"]
+      }
+    },
+    "/api/v1/admin/users/{id}/disable": {
+      "put": {
+        "operationId": "disableUser",
+        "tags": ["Admin User Management"]
+      }
+    },
+    "/api/v1/admin/users/{id}/enable": {
+      "put": {
+        "operationId": "enableUser",
+        "tags": ["Admin User Management"]
+      }
+    },
+    "/api/v1/admin/users/{id}/roles": {
+      "post": {
+        "operationId": "assignRoles",
+        "tags": ["Admin User Management"]
+      },
+      "put": {
+        "operationId": "assignRoles_1",
+        "tags": ["Admin User Management"]
+      }
+    },
+    "/api/v1/admin/users/{id}/status": {
+      "patch": {
+        "operationId": "updateUserStatus",
+        "tags": ["Admin User Management"]
+      }
+    },
+    "/api/v1/admin/webhooks": {
+      "get": {
+        "operationId": "listWebhooks",
+        "tags": ["Admin Webhook Management"]
+      },
+      "post": {
+        "operationId": "createWebhook",
+        "tags": ["Admin Webhook Management"]
+      }
+    },
+    "/api/v1/admin/webhooks/logs/{deliveryId}/redeliver": {
+      "post": {
+        "operationId": "redeliverWebhookLog",
+        "tags": ["Admin Webhook Management"]
+      }
+    },
+    "/api/v1/admin/webhooks/{id}": {
+      "put": {
+        "operationId": "updateWebhook",
+        "tags": ["Admin Webhook Management"]
+      },
+      "delete": {
+        "operationId": "deleteWebhook",
+        "tags": ["Admin Webhook Management"]
+      }
+    },
+    "/api/v1/admin/webhooks/{id}/logs": {
+      "get": {
+        "operationId": "getWebhookLogs",
+        "tags": ["Admin Webhook Management"]
+      }
+    },
+    "/api/v1/admin/webhooks/{id}/test": {
+      "post": {
+        "operationId": "testWebhook",
+        "tags": ["Admin Webhook Management"]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "authenticate",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/auth/oauth2/exchange": {
+      "post": {
+        "operationId": "exchangeOAuthCode",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/auth/otp/login": {
+      "post": {
+        "operationId": "loginWithOtp",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/auth/otp/send": {
+      "post": {
+        "operationId": "sendOtp",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/auth/password/reset/confirm": {
+      "post": {
+        "operationId": "confirmPasswordReset",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/auth/password/reset/request": {
+      "post": {
+        "operationId": "requestPasswordReset",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "refresh",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "operationId": "register",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/public/analytics/content-events": {
+      "post": {
+        "operationId": "recordContentEvent",
+        "tags": ["Public Analytics"]
+      }
+    },
+    "/api/v1/public/analytics/pageviews": {
+      "post": {
+        "operationId": "recordPageView",
+        "tags": ["Public Analytics"]
+      }
+    },
+    "/api/v1/public/blog/archive": {
+      "get": {
+        "operationId": "retrieveArchive",
+        "tags": ["Public Blog API"]
+      }
+    },
+    "/api/v1/public/blog/discovery": {
+      "get": {
+        "operationId": "retrieveDiscovery",
+        "tags": ["Public Blog API"]
+      }
+    },
+    "/api/v1/public/blog/facets": {
+      "get": {
+        "operationId": "retrieveFacets",
+        "tags": ["Public Blog API"]
+      }
+    },
+    "/api/v1/public/blog/posts": {
+      "get": {
+        "operationId": "searchPosts_2",
+        "tags": ["Public Blog API"]
+      }
+    },
+    "/api/v1/public/blog/posts/digest": {
+      "get": {
+        "operationId": "searchPostDigests",
+        "tags": ["Public Blog API"]
+      }
+    },
+    "/api/v1/public/blog/posts/featured": {
+      "get": {
+        "operationId": "retrieveFeaturedPosts",
+        "tags": ["Public Blog API"]
+      }
+    },
+    "/api/v1/public/blog/posts/{id}/report": {
+      "post": {
+        "operationId": "reportPost",
+        "tags": ["Public Blog API"]
+      }
+    },
+    "/api/v1/public/blog/posts/{slug}": {
+      "get": {
+        "operationId": "retrievePost_1",
+        "tags": ["Public Blog API"]
+      }
+    },
+    "/api/v1/public/blog/posts/{slug}/related": {
+      "get": {
+        "operationId": "retrieveRelatedPosts",
+        "tags": ["Public Blog API"]
+      }
+    },
+    "/api/v1/public/blog/preview/{token}": {
+      "get": {
+        "operationId": "retrievePreview",
+        "tags": ["Public Blog API"]
+      }
+    },
+    "/api/v1/public/categories": {
+      "get": {
+        "operationId": "retrieveCategories_1",
+        "tags": ["Public Metadata API"]
+      }
+    },
+    "/api/v1/public/columns": {
+      "get": {
+        "operationId": "listColumns_1",
+        "tags": ["Public Columns"]
+      }
+    },
+    "/api/v1/public/columns/{slug}": {
+      "get": {
+        "operationId": "getColumn_1",
+        "tags": ["Public Columns"]
+      }
+    },
+    "/api/v1/public/comments": {
+      "post": {
+        "operationId": "publishComment_1",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/moment": {
+      "post": {
+        "operationId": "publishMomentComment",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/moment/{momentId}/new": {
+      "get": {
+        "operationId": "retrieveNewMomentRootComments",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/moment/{momentId}/new-count": {
+      "get": {
+        "operationId": "countNewMomentRootComments",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/moment/{momentId}/roots": {
+      "get": {
+        "operationId": "retrieveMomentRootComments",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/moment/{momentId}/roots/cursor": {
+      "get": {
+        "operationId": "retrieveMomentRootCommentsCursor",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/moment/{momentId}/roots/hot": {
+      "get": {
+        "operationId": "retrieveHotMomentRootComments",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/post/{postId}": {
+      "get": {
+        "operationId": "retrieveComments_1",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/post/{postId}/new": {
+      "get": {
+        "operationId": "retrieveNewRootComments_1",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/post/{postId}/new-count": {
+      "get": {
+        "operationId": "countNewRootComments_1",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/post/{postId}/roots": {
+      "get": {
+        "operationId": "retrieveRootComments_1",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/post/{postId}/roots/cursor": {
+      "get": {
+        "operationId": "retrieveRootCommentsCursor_1",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/post/{postId}/roots/hot": {
+      "get": {
+        "operationId": "retrieveHotRootComments_1",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/{commentId}/context": {
+      "get": {
+        "operationId": "retrieveCommentAnchorContext",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/{id}/report": {
+      "post": {
+        "operationId": "reportComment",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/{parentId}/replies": {
+      "get": {
+        "operationId": "retrieveReplies",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/comments/{parentId}/replies/cursor": {
+      "get": {
+        "operationId": "retrieveRepliesCursor",
+        "tags": ["Public Comment API"]
+      }
+    },
+    "/api/v1/public/configs": {
+      "get": {
+        "operationId": "getPublicConfigs",
+        "tags": ["Public System Config"]
+      }
+    },
+    "/api/v1/public/configs/{key}": {
+      "get": {
+        "operationId": "getConfigByKey",
+        "tags": ["Public System Config"]
+      }
+    },
+    "/api/v1/public/friend-links": {
+      "get": {
+        "operationId": "retrieveFriendLinks",
+        "tags": ["Public Friend Links"]
+      }
+    },
+    "/api/v1/public/friend-links/apply": {
+      "post": {
+        "operationId": "applyForFriendLink",
+        "tags": ["Public Friend Links"]
+      }
+    },
+    "/api/v1/public/github/activity": {
+      "get": {
+        "operationId": "retrieveActivity",
+        "tags": ["Public GitHub"]
+      }
+    },
+    "/api/v1/public/github/stats": {
+      "get": {
+        "operationId": "retrieveStats",
+        "tags": ["Public GitHub"]
+      }
+    },
+    "/api/v1/public/guestbook": {
+      "get": {
+        "operationId": "retrieveComments",
+        "tags": ["Public Guestbook"]
+      },
+      "post": {
+        "operationId": "publishComment",
+        "tags": ["Public Guestbook"]
+      }
+    },
+    "/api/v1/public/guestbook/new": {
+      "get": {
+        "operationId": "retrieveNewRootComments",
+        "tags": ["Public Guestbook"]
+      }
+    },
+    "/api/v1/public/guestbook/new-count": {
+      "get": {
+        "operationId": "countNewRootComments",
+        "tags": ["Public Guestbook"]
+      }
+    },
+    "/api/v1/public/guestbook/roots": {
+      "get": {
+        "operationId": "retrieveRootComments",
+        "tags": ["Public Guestbook"]
+      }
+    },
+    "/api/v1/public/guestbook/roots/cursor": {
+      "get": {
+        "operationId": "retrieveRootCommentsCursor",
+        "tags": ["Public Guestbook"]
+      }
+    },
+    "/api/v1/public/guestbook/roots/hot": {
+      "get": {
+        "operationId": "retrieveHotRootComments",
+        "tags": ["Public Guestbook"]
+      }
+    },
+    "/api/v1/public/interactions/comments/{commentId}/like": {
+      "post": {
+        "operationId": "likeComment",
+        "tags": ["User Interactions"]
+      }
+    },
+    "/api/v1/public/interactions/comments/{commentId}/unlike": {
+      "post": {
+        "operationId": "unlikeComment",
+        "tags": ["User Interactions"]
+      }
+    },
+    "/api/v1/public/interactions/posts/{postId}/favorite": {
+      "post": {
+        "operationId": "favoritePost",
+        "tags": ["User Interactions"]
+      }
+    },
+    "/api/v1/public/interactions/posts/{postId}/like": {
+      "post": {
+        "operationId": "likePost",
+        "tags": ["User Interactions"]
+      }
+    },
+    "/api/v1/public/interactions/posts/{postId}/unfavorite": {
+      "post": {
+        "operationId": "unfavoritePost",
+        "tags": ["User Interactions"]
+      }
+    },
+    "/api/v1/public/interactions/posts/{postId}/unlike": {
+      "post": {
+        "operationId": "unlikePost",
+        "tags": ["User Interactions"]
+      }
+    },
+    "/api/v1/public/life-list": {
+      "get": {
+        "operationId": "getItems_1",
+        "tags": ["Public Life List"]
+      }
+    },
+    "/api/v1/public/life-list/categories": {
+      "get": {
+        "operationId": "getCategories_1",
+        "tags": ["Public Life List"]
+      }
+    },
+    "/api/v1/public/life-list/{number}": {
+      "get": {
+        "operationId": "getItem_1",
+        "tags": ["Public Life List"]
+      }
+    },
+    "/api/v1/public/market/indices": {
+      "get": {
+        "operationId": "getIndices",
+        "tags": ["Public Market Data"]
+      }
+    },
+    "/api/v1/public/market/indices/{symbol}": {
+      "get": {
+        "operationId": "getIndex",
+        "tags": ["Public Market Data"]
+      }
+    },
+    "/api/v1/public/market/stocks/search": {
+      "get": {
+        "operationId": "searchStocks",
+        "tags": ["Public Market Data"]
+      }
+    },
+    "/api/v1/public/market/stocks/{symbol}/trend": {
+      "get": {
+        "operationId": "getStockTrend",
+        "tags": ["Public Market Data"]
+      }
+    },
+    "/api/v1/public/menus/navigation": {
+      "get": {
+        "operationId": "retrieveNavigation",
+        "tags": ["Public Navigation"]
+      }
+    },
+    "/api/v1/public/moments": {
+      "get": {
+        "operationId": "getPublicMoments",
+        "tags": ["Public Moments"]
+      }
+    },
+    "/api/v1/public/moments/cadence": {
+      "get": {
+        "operationId": "getPublicCadence",
+        "tags": ["Public Moments"]
+      }
+    },
+    "/api/v1/public/moments/liked": {
+      "get": {
+        "operationId": "getLikedMomentIds",
+        "tags": ["Public Moments"]
+      }
+    },
+    "/api/v1/public/moments/topics": {
+      "get": {
+        "operationId": "getPublicTopics",
+        "tags": ["Public Moments"]
+      }
+    },
+    "/api/v1/public/moments/{id}/like": {
+      "post": {
+        "operationId": "likeMoment",
+        "tags": ["Public Moments"]
+      },
+      "delete": {
+        "operationId": "unlikeMoment",
+        "tags": ["Public Moments"]
+      }
+    },
+    "/api/v1/public/newsletter/subscribe": {
+      "post": {
+        "operationId": "subscribe",
+        "tags": ["Newsletter"]
+      }
+    },
+    "/api/v1/public/newsletter/unsubscribe": {
+      "get": {
+        "operationId": "unsubscribe",
+        "tags": ["Newsletter"]
+      }
+    },
+    "/api/v1/public/newsletter/verify": {
+      "get": {
+        "operationId": "verify",
+        "tags": ["Newsletter"]
+      }
+    },
+    "/api/v1/public/projects": {
+      "get": {
+        "operationId": "getPublicProjects",
+        "tags": ["Public Projects"]
+      }
+    },
+    "/api/v1/public/search/posts": {
+      "get": {
+        "operationId": "searchPosts_1",
+        "tags": ["Public Search"]
+      }
+    },
+    "/api/v1/public/search/quick": {
+      "get": {
+        "operationId": "quickSearch",
+        "tags": ["Public Search"]
+      }
+    },
+    "/api/v1/public/search/suggestions": {
+      "get": {
+        "operationId": "getSuggestions",
+        "tags": ["Public Search"]
+      }
+    },
+    "/api/v1/public/search/unified": {
+      "get": {
+        "operationId": "unifiedSearch",
+        "tags": ["Public Search"]
+      }
+    },
+    "/api/v1/public/seo/feed.xml": {
+      "get": {
+        "operationId": "retrieveRssFeed",
+        "tags": ["Public SEO & Feeds"]
+      }
+    },
+    "/api/v1/public/seo/robots.txt": {
+      "get": {
+        "operationId": "retrieveRobotsTxt",
+        "tags": ["Public SEO & Feeds"]
+      }
+    },
+    "/api/v1/public/seo/sitemap.xml": {
+      "get": {
+        "operationId": "retrieveSitemap",
+        "tags": ["Public SEO & Feeds"]
+      }
+    },
+    "/api/v1/public/series": {
+      "get": {
+        "operationId": "retrievePublicSeries",
+        "tags": ["Public Post Series"]
+      }
+    },
+    "/api/v1/public/series/{slug}": {
+      "get": {
+        "operationId": "retrieveSeriesWithPosts",
+        "tags": ["Public Post Series"]
+      }
+    },
+    "/api/v1/public/series/{slug}/tree": {
+      "get": {
+        "operationId": "retrieveSeriesTree",
+        "tags": ["Public Post Series"]
+      }
+    },
+    "/api/v1/public/stats": {
+      "get": {
+        "operationId": "getPublicStatistics",
+        "tags": ["Public Statistics"]
+      }
+    },
+    "/api/v1/public/stats/trending": {
+      "get": {
+        "operationId": "getTrending",
+        "tags": ["Public Statistics"]
+      }
+    },
+    "/api/v1/public/tags": {
+      "get": {
+        "operationId": "getAllTags_1",
+        "tags": ["Public Metadata API"]
+      }
+    },
+    "/api/v1/user/comments": {
+      "get": {
+        "operationId": "retrieveMyComments",
+        "tags": ["User Comments"]
+      }
+    },
+    "/api/v1/user/comments/{id}": {
+      "put": {
+        "operationId": "updateMyComment",
+        "tags": ["User Comments"]
+      },
+      "delete": {
+        "operationId": "deleteMyComment",
+        "tags": ["User Comments"]
+      }
+    },
+    "/api/v1/user/library/collections": {
+      "get": {
+        "operationId": "getCollections",
+        "tags": ["Personal Library"]
+      },
+      "post": {
+        "operationId": "createCollection",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/collections/{collectionId}": {
+      "put": {
+        "operationId": "updateCollection",
+        "tags": ["Personal Library"]
+      },
+      "delete": {
+        "operationId": "deleteCollection",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/collections/{collectionId}/posts": {
+      "get": {
+        "operationId": "getCollectionPosts",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/collections/{collectionId}/posts/{postId}": {
+      "post": {
+        "operationId": "addPostToCollection",
+        "tags": ["Personal Library"]
+      },
+      "delete": {
+        "operationId": "removePostFromCollection",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/favorites": {
+      "get": {
+        "operationId": "getFavorites",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/following": {
+      "get": {
+        "operationId": "getFollowingFeed",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/history": {
+      "get": {
+        "operationId": "getReadingHistory",
+        "tags": ["Personal Library"]
+      },
+      "delete": {
+        "operationId": "clearReadingHistory",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/history/{postId}": {
+      "delete": {
+        "operationId": "deleteReadingHistory",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/likes": {
+      "get": {
+        "operationId": "getLikedPosts",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/overview": {
+      "get": {
+        "operationId": "getOverview",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/posts/{postId}/progress": {
+      "put": {
+        "operationId": "recordReadingProgress",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/preferences": {
+      "get": {
+        "operationId": "getContentPreferences",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/preferences/categories/{categoryId}": {
+      "put": {
+        "operationId": "followCategory",
+        "tags": ["Personal Library"]
+      },
+      "delete": {
+        "operationId": "unfollowCategory",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/preferences/hidden-posts": {
+      "delete": {
+        "operationId": "clearHiddenRecommendations",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/preferences/hidden-posts/{postId}": {
+      "put": {
+        "operationId": "hideRecommendation",
+        "tags": ["Personal Library"]
+      },
+      "delete": {
+        "operationId": "restoreRecommendation",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/reading-list": {
+      "get": {
+        "operationId": "getReadingList",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/library/reading-list/{postId}": {
+      "put": {
+        "operationId": "addToReadingList",
+        "tags": ["Personal Library"]
+      },
+      "delete": {
+        "operationId": "removeFromReadingList",
+        "tags": ["Personal Library"]
+      }
+    },
+    "/api/v1/user/me": {
+      "get": {
+        "operationId": "getCurrentUser",
+        "tags": ["User Profile"]
+      }
+    },
+    "/api/v1/user/notifications": {
+      "get": {
+        "operationId": "getMyNotifications",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/notifications/preferences": {
+      "get": {
+        "operationId": "getMyPreferences",
+        "tags": ["Notification API"]
+      },
+      "put": {
+        "operationId": "updateMyPreferences",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/notifications/preferences/categories": {
+      "get": {
+        "operationId": "getMyCategoryPreferences",
+        "tags": ["Notification API"]
+      },
+      "put": {
+        "operationId": "replaceMyCategoryPreferences",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/notifications/read": {
+      "delete": {
+        "operationId": "clearReadNotifications",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/notifications/read-all": {
+      "patch": {
+        "operationId": "markAllAsRead",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/notifications/unread/count": {
+      "get": {
+        "operationId": "getUnreadCount",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/notifications/{id}": {
+      "delete": {
+        "operationId": "deleteNotification",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/notifications/{id}/done": {
+      "patch": {
+        "operationId": "markAsDone",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/notifications/{id}/read": {
+      "patch": {
+        "operationId": "markAsRead",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/notifications/{id}/reopen": {
+      "patch": {
+        "operationId": "reopen",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/notifications/{id}/saved": {
+      "patch": {
+        "operationId": "setSaved",
+        "tags": ["Notification API"]
+      }
+    },
+    "/api/v1/user/password": {
+      "put": {
+        "operationId": "changePassword",
+        "tags": ["User Profile"]
+      }
+    },
+    "/api/v1/user/profile": {
+      "put": {
+        "operationId": "updateProfile",
+        "tags": ["User Profile"]
+      }
+    },
+    "/api/v1/users/mentions": {
+      "get": {
+        "operationId": "searchMentions",
+        "tags": ["Users"]
+      }
+    }
+  }
+}

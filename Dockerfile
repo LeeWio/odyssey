@@ -61,8 +61,10 @@ FROM library/node:24-alpine AS runner-prebuilt
 
 WORKDIR /app
 
+ARG BUILD_REVISION
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV ODYSSEY_REVISION=${BUILD_REVISION}
 
 # 创建无特权生产运行账号
 RUN addgroup --system --gid 1001 nodejs \
@@ -80,5 +82,7 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=6 \
+  CMD node -e "fetch('http://127.0.0.1:3000/healthz/odyssey').then(async r => { if (!r.ok || (await r.text()) !== process.env.ODYSSEY_REVISION) process.exit(1) }).catch(() => process.exit(1))"
 
+CMD ["node", "server.js"]

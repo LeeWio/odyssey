@@ -1,3 +1,5 @@
+export const ENDPOINT_METHODS = ["get", "post", "put", "patch", "delete"];
+
 export const normalizeApiPath = (value) =>
   value
     .replace(/\$\{([^}]+)\}/g, (_match, expression) => `{${expression.split(".").at(-1)}}`)

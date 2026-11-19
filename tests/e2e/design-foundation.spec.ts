@@ -1,40 +1,5 @@
+import { designArticle as article } from "./fixtures/articles";
 import { expect, test } from "@playwright/test";
-
-const article = {
-  id: 804,
-  slug: "design-foundation",
-  title: "A consistent space for reading and exploring",
-  summary: "An article for checking the shared reading layout.",
-  contentType: "JSON",
-  content: JSON.stringify({
-    type: "doc",
-    content: [
-      { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Reading rhythm" }] },
-      ...Array.from({ length: 12 }, () => ({
-        type: "paragraph",
-        content: [
-          {
-            type: "text",
-            text: "Content comes first. Shared spacing and typography keep the reading experience predictable across screen sizes and themes.",
-          },
-        ],
-      })),
-    ],
-  }),
-  status: "PUBLISHED",
-  isFeatured: true,
-  views: 12,
-  likesCount: 0,
-  favoritesCount: 0,
-  authorName: "Odyssey",
-  category: null,
-  series: null,
-  seriesOrder: null,
-  tags: [],
-  publishedAt: "2026-10-01T00:00:00Z",
-  createdAt: "2026-10-01T00:00:00Z",
-  updatedAt: "2026-10-01T00:00:00Z",
-};
 
 test.use({ locale: "en-US" });
 

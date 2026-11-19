@@ -1,61 +1,8 @@
-import type { JSONContent } from "@tiptap/core";
-import { RICH_TEXT_DOCUMENT_FIXTURE } from "../../components/rich-text/testing/rich-text-document.fixture";
 import { expect, test, type Page } from "@playwright/test";
 
-const paragraphs = Array.from({ length: 80 }, (_, index) => ({
-  type: "paragraph",
-  content: [{ type: "text", text: `Paragraph ${index + 1}. Read once, reveal once.` }],
-}));
-
-async function openArticle(page: Page, content: JSONContent[] = paragraphs) {
-  await page.route("**/api/v1/public/blog/posts/entrance-regression/related**", (route) =>
-    route.fulfill({ json: { code: 200, message: "OK", data: [] } })
-  );
-  await page.route("**/api/v1/public/blog/posts/featured**", (route) =>
-    route.fulfill({
-      json: {
-        code: 200,
-        message: "OK",
-        data: { list: [], total: 0, page: 0, size: 5, totalPages: 0 },
-      },
-    })
-  );
-  await page.route("**/api/v1/public/blog/posts/entrance-regression", (route) => {
-    if (route.request().url().includes("/related")) {
-      return route.fallback();
-    }
-    return route.fulfill({
-      json: {
-        code: 200,
-        message: "OK",
-        data: {
-          id: 987654,
-          slug: "entrance-regression",
-          title: "Reader entrance regression",
-          contentType: "JSON",
-          content: JSON.stringify({
-            type: "doc",
-            content,
-          }),
-          status: "PUBLISHED",
-          isFeatured: false,
-          views: 0,
-          likesCount: 0,
-          favoritesCount: 0,
-          category: null,
-          series: null,
-          seriesOrder: null,
-          createdAt: "2026-09-14T00:00:00Z",
-          updatedAt: "2026-09-14T00:00:00Z",
-        },
-      },
-    });
-  });
-
-  await page.goto("/single/entrance-regression");
-  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible({
-    timeout: 30_000,
-  });
+async function openArticle(page: Page, slug = "entrance-regression") {
+  await page.goto(`/single/${slug}`);
+  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
 }
 
 test("scrolling preserves the reader and does not replay revealed blocks", async ({ page }) => {
@@ -100,13 +47,10 @@ test("nested reading units wait for the viewport without animating parent and ch
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  const fixture = RICH_TEXT_DOCUMENT_FIXTURE.content!.filter((node) =>
-    ["bulletList", "taskList", "table", "columns", "details", "image"].includes(node.type!)
-  );
-  await openArticle(page, [...paragraphs, ...fixture, ...paragraphs]);
+  await openArticle(page, "entrance-nested");
   const editor = page.locator('.ProseMirror[contenteditable="false"]');
   const row = editor.locator("tr").first();
-  const listItem = editor.locator('ul[data-type="bulletList"] > li').first();
+  const listItem = editor.locator("ul:not([data-type]) > li").first();
   const task = editor.locator("li.node-taskItem").first();
   const columnParagraph = editor.locator('[data-type="column"] p').first();
   const details = editor.locator(".odyssey-details");
@@ -122,7 +66,7 @@ test("nested reading units wait for the viewport without animating parent and ch
   for (const target of [listItem, task, row, columnParagraph, details, image]) {
     await target.scrollIntoViewIfNeeded();
     await expect(target).toHaveCSS("opacity", "1");
-    await expect(target).toHaveCSS("transform", "none");
+    await expect(target).toHaveCSS("transform", /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
   }
 });
 
@@ -140,7 +84,6 @@ test("reduced motion reveals pending content immediately and never re-hides it",
   await expect(last).toHaveCSS("opacity", "1");
 
   await page.emulateMedia({ reducedMotion: "reduce" });
-  // Prefer goto over reload so client mocks stay authoritative under CI load.
   await page.goto("/single/entrance-regression");
   await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible({
     timeout: 30_000,
@@ -150,14 +93,8 @@ test("reduced motion reveals pending content immediately and never re-hides it",
 
 test("a block taller than the viewport still reveals on entry", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await openArticle(page, [
-    ...paragraphs,
-    {
-      type: "codeBlock",
-      content: [{ type: "text", text: "A very long code block\n".repeat(1500) }],
-    },
-  ]);
-  const block = page.locator(".ProseMirror .node-codeBlock").last();
+  await openArticle(page, "entrance-tall");
+  const block = page.locator(".ProseMirror pre").last();
   await expect(block).toHaveCSS("opacity", "1");
   await block.evaluate((element) => element.scrollIntoView({ block: "start" }));
   await expect(block).toHaveCSS("opacity", "1");
@@ -172,13 +109,7 @@ test("code blocks expose a copy action", async ({ page }) => {
       },
     });
   });
-  await openArticle(page, [
-    {
-      type: "codeBlock",
-      attrs: { language: "typescript" },
-      content: [{ type: "text", text: "const answer = 42;" }],
-    },
-  ]);
+  await openArticle(page, "entrance-copy");
 
   const codeBlock = page.locator("[data-node-view-wrapper]");
   await expect(codeBlock.getByRole("button", { name: "Copy code" })).toBeVisible();

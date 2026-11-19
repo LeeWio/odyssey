@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { mobileArticle } from "./fixtures/articles";
+import { expect, test, type Page } from "@playwright/test";
 
 const envelope = (data: unknown) => ({ code: 200, message: "OK", data });
-const code = "const result = " + '"'.repeat(80) + ";";
 
 test.use({ locale: "en-US" });
 
@@ -21,56 +21,7 @@ test.beforeEach(async ({ page }) => {
     const path = new URL(route.request().url()).pathname;
     if (path === "/api/v1/public/blog/posts/mobile-reading") {
       return route.fulfill({
-        json: envelope({
-          id: 321,
-          title: "Mobile reading article",
-          slug: "mobile-reading",
-          summary: "A compact article used for mobile reading regression coverage.",
-          contentType: "JSON",
-          content: JSON.stringify({
-            type: "doc",
-            content: [
-              {
-                type: "heading",
-                attrs: { level: 2 },
-                content: [{ type: "text", text: "Chapter one" }],
-              },
-              { type: "paragraph", content: [{ type: "text", text: "Opening paragraph." }] },
-              {
-                type: "codeBlock",
-                attrs: { language: "typescript" },
-                content: [{ type: "text", text: code }],
-              },
-              {
-                type: "image",
-                attrs: {
-                  src: "https://images.example.com/mobile-reading.jpg",
-                  alt: "Reading detail",
-                  caption: "A reading detail",
-                  widthPercent: 100,
-                  alignment: "center",
-                },
-              },
-            ],
-          }),
-          status: "PUBLISHED",
-          isFeatured: false,
-          views: 12,
-          likesCount: 2,
-          favoritesCount: 1,
-          isLiked: false,
-          isFavorited: false,
-          authorName: "Odyssey",
-          authorAvatar: "",
-          category: null,
-          series: null,
-          seriesOrder: null,
-          tags: [],
-          publishedAt: "2026-09-20T00:00:00Z",
-          createdAt: "2026-09-20T00:00:00Z",
-          updatedAt: "2026-09-20T00:00:00Z",
-          navigation: null,
-        }),
+        json: envelope(mobileArticle),
       });
     }
     if (path.endsWith("/related")) return route.fulfill({ json: envelope([]) });
@@ -83,6 +34,17 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+test("renders a readable article on mobile @smoke", async ({ page }) => {
+  await page.goto("/single/mobile-reading");
+  await expect(page.getByRole("heading", { name: mobileArticle.title, exact: true })).toBeVisible();
+  await expect(
+    page
+      .locator("[data-reading-content]")
+      .getByRole("heading", { name: "Chapter one", exact: true })
+  ).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 test("keeps article reading usable on a narrow viewport", async ({ page }) => {
   await page.goto("/single/mobile-reading");
 
@@ -93,94 +55,56 @@ test("keeps article reading usable on a narrow viewport", async ({ page }) => {
   await expect(page.locator("[data-reading-content]")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
-  const codeBlock = page.locator(".node-codeBlock").first();
-  await expect(codeBlock.getByRole("button", { name: "Copy code" })).toBeVisible();
-  expect(
-    await codeBlock
-      .locator("[data-node-view-content-react]")
-      .evaluate((element) => element.scrollWidth > element.clientWidth)
-  ).toBe(true);
+  const codeBlock = page.locator(".ProseMirror pre").first();
+  await expect(codeBlock).toBeVisible();
+  expect(await codeBlock.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
+    true
+  );
 
-  const image = page.getByRole("img", { name: "Reading detail" });
-  const imageTrigger = page.getByRole("button", {
-    name: "Open Reading detail in full-screen preview",
-  });
-  await image.click();
-  await expect(page.getByRole("dialog", { name: "Image preview" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Close image preview" })).toBeFocused();
-  await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Close image preview" })).toBeFocused();
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog", { name: "Image preview" })).toHaveCount(0);
-  await expect(imageTrigger).toBeFocused();
-
-  await page.evaluate(() => window.scrollTo(0, 500));
-  await page.evaluate(() => window.scrollTo(0, 200));
+  const figure = page.getByRole("figure", { name: "A reading detail" });
+  await expect(figure.getByRole("img", { name: "Reading detail" })).toBeVisible();
+  await expect(figure.getByText("A reading detail", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "More article actions" })).toBeVisible();
 });
 
-test("uses Web Share when the browser provides it", async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "share", {
-      configurable: true,
-      value: async (data: ShareData) => {
-        window.sessionStorage.setItem("shared-article", JSON.stringify(data));
-      },
-    });
-  });
-
+async function openShareDialog(page: Page) {
   await page.goto("/single/mobile-reading");
-  await expect(
-    page.getByRole("heading", { name: "Mobile reading article", exact: true })
-  ).toBeVisible();
-  await page.evaluate(() => window.scrollTo(0, 500));
-  await page.evaluate(() => window.scrollTo(0, 200));
-  await page.getByRole("button", { name: "More article actions" }).click();
-  await page.getByRole("button", { name: "Share article" }).click();
+  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+  await page.getByRole("button", { name: "Share article", exact: true }).press("Enter");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
 
-  await expect
-    .poll(() => page.evaluate(() => window.sessionStorage.getItem("shared-article")))
-    .toBe(
-      JSON.stringify({
-        title: "Mobile reading article",
-        text: "A compact article used for mobile reading regression coverage.",
-        url: "http://127.0.0.1:3100/single/mobile-reading",
-      })
-    );
-  await expect(page.getByText("Article shared.", { exact: true })).toBeVisible();
+test("offers share destinations for the current article", async ({ page, baseURL }) => {
+  const dialog = await openShareDialog(page);
+  const url = new URL("/single/mobile-reading", baseURL).href;
+  const email = dialog.getByRole("link", { name: "Email", exact: true });
+  await expect(email).toHaveAttribute(
+    "href",
+    `mailto:?subject=${encodeURIComponent(mobileArticle.title)}&body=${encodeURIComponent(url)}`
+  );
 });
 
-test("copies the article link when Web Share is unavailable", async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "share", {
-      configurable: true,
-      value: undefined,
-    });
-  });
-
-  await page.goto("/single/mobile-reading");
-  await expect(
-    page.getByRole("heading", { name: "Mobile reading article", exact: true })
-  ).toBeVisible();
-  await page.evaluate(() => window.scrollTo(0, 500));
-  await page.evaluate(() => window.scrollTo(0, 200));
-  await page.getByRole("button", { name: "More article actions" }).click();
-  await page.getByRole("button", { name: "Share article" }).click();
-
+test("copies the current article URL from the share dialog", async ({ page, baseURL }) => {
+  const dialog = await openShareDialog(page);
+  await dialog.getByRole("button", { name: "Copy link", exact: true }).press("Enter");
   await expect
     .poll(() => page.evaluate(() => window.sessionStorage.getItem("copied-article-link")))
-    .toBe("http://127.0.0.1:3100/single/mobile-reading");
+    .toBe(new URL("/single/mobile-reading", baseURL).href);
   await expect(page.getByText("Article link copied.", { exact: true })).toBeVisible();
 });
 
 test("places a heading anchor below the site navigation", async ({ page }) => {
   await page.goto("/single/mobile-reading");
-  const heading = page.getByRole("heading", { name: "Chapter one", exact: true });
-  await expect(heading).toBeVisible();
-  const headingId = await heading.evaluate((element) => element.id);
-  expect(headingId).not.toBe("");
+  const heading = page
+    .locator(".ProseMirror")
+    .getByRole("heading", { name: "Chapter one", exact: true });
+  await expect(heading).toHaveAttribute("id", "chapter-one");
 
-  await page.goto(`/single/mobile-reading#${headingId}`);
+  await page.getByRole("button", { name: "On this page", exact: true }).press("Enter");
+  await page.getByRole("option", { name: "Chapter one", exact: true }).press("Enter");
+  await expect(page).toHaveURL(/#chapter-one$/);
   await expect
     .poll(async () =>
       heading.evaluate((element) => {

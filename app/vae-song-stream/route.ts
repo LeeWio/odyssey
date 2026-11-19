@@ -34,7 +34,6 @@ export async function GET(request: Request) {
     const playableUrl = payload?.data?.play_url;
 
     if (!playableUrl) {
-      console.warn(`No playable Bodia CDN stream found for: ${title}`);
       return NextResponse.json(
         { error: "Resource not available on Bodia catalog." },
         { status: 404 }
@@ -47,17 +46,12 @@ export async function GET(request: Request) {
       "https://car-lv.kuwo.cn"
     );
 
-    console.log(
-      `[Vae Song Battle API] Successfully resolved stream for ${title}. Redirecting 302 to: ${securedPlayableUrl}`
-    );
-
     // High Performance 302 Redirect directly to the Kuwo Enterprise CDN over secure HTTPS
     return NextResponse.redirect(securedPlayableUrl, {
       status: 302,
     });
-  } catch (err) {
-    const errMsg = err instanceof Error ? err.message : String(err);
-    console.error(`Failed to resolve dynamic audio for ${title}:`, err);
-    return NextResponse.json({ error: errMsg }, { status: 500 });
+  } catch {
+    console.error("Failed to resolve a Bodia audio stream");
+    return NextResponse.json({ error: "Unable to resolve audio stream." }, { status: 500 });
   }
 }
