@@ -84,9 +84,30 @@ function normalizeMarks(marks: JSONContent["marks"]): JSONContent["marks"] {
 
 /**
  * Creates a safe copy of a Tiptap document for rendering or persistence.
- * Heading IDs are managed by Tiptap's Table of Contents extension.
+ * Heading IDs are deterministic and shared with Nexus metadata generation.
  */
 export function normalizeRichTextDocument(content: JSONContent): JSONContent {
+  const anchorCounts = new Map<string, number>();
+
+  const headingAnchor = (node: JSONContent) => {
+    const text = (node.content ?? [])
+      .map((child) => (child.type === "text" ? (child.text ?? "") : headingText(child)))
+      .join("")
+      .trim();
+    const base =
+      text
+        .normalize("NFKD")
+        .toLocaleLowerCase()
+        .replace(/[^\p{L}\p{N}\p{Script=Han}]+/gu, "-")
+        .replace(/^-+|-+$/g, "") || "section";
+    const count = (anchorCounts.get(base) ?? 0) + 1;
+    anchorCounts.set(base, count);
+    return count === 1 ? base : `${base}-${count}`;
+  };
+
+  const headingText = (node: JSONContent): string =>
+    node.type === "text" ? (node.text ?? "") : (node.content ?? []).map(headingText).join("");
+
   const normalizeNode = (node: JSONContent): JSONContent => {
     const normalizedContent = node.content?.map(normalizeNode);
     const normalizedMarks = normalizeMarks(node.marks);
@@ -94,9 +115,13 @@ export function normalizeRichTextDocument(content: JSONContent): JSONContent {
 
     if (node.type === "heading") {
       const level = clampHeadingLevel(Number(attrs?.level));
+      const anchor =
+        typeof attrs?.["data-toc-id"] === "string" && attrs["data-toc-id"]
+          ? attrs["data-toc-id"]
+          : headingAnchor(node);
       return {
         ...node,
-        attrs: { ...attrs, level },
+        attrs: { ...attrs, level, id: anchor, "data-toc-id": anchor },
         ...(normalizedMarks ? { marks: normalizedMarks } : {}),
         ...(normalizedContent ? { content: normalizedContent } : {}),
       };
