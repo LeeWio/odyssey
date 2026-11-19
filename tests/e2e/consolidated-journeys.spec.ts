@@ -280,3 +280,94 @@ test("webhooks can be managed, retried and tested with a matching delivery", asy
   await expect(deliveries.getByText("Test queued. Waiting for a delivery record…")).toBeVisible();
   await expect(deliveries.getByText("The test was delivered successfully.")).toBeVisible();
 });
+
+test("notification delivery operations filter, inspect and retry a failed email", async ({
+  page,
+}) => {
+  await signIn(page, "admin", "ROLE_ADMIN");
+  let retried = false;
+  let retryRequest: Record<string, unknown> | null = null;
+  const delivery = (status: "FAILED" | "QUEUED") => ({
+    id: 7,
+    notificationId: 4,
+    channel: "EMAIL",
+    status,
+    attempts: 2,
+    maxAttempts: status === "FAILED" ? 5 : 10,
+    lastError: status === "FAILED" ? "SMTP timeout" : null,
+    nextAttemptAt: status === "FAILED" ? null : "2026-11-19T08:01:00Z",
+    deliveredAt: null,
+    createdAt: "2026-11-19T08:00:00Z",
+    retryable: status === "FAILED",
+    context: null,
+  });
+
+  await page.route("**/api/v1/user/me", (route) =>
+    route.fulfill({ json: envelope({ id: 1, username: "admin", nickname: "Administrator" }) })
+  );
+  await page.route("**/api/v1/admin/notifications/deliveries**", async (route) => {
+    const request = route.request();
+    const pathname = new URL(request.url()).pathname;
+    if (request.method() === "POST" && pathname.endsWith("/retry")) {
+      retryRequest = request.postDataJSON();
+      retried = true;
+      return route.fulfill({ json: envelope(delivery("QUEUED")) });
+    }
+    if (pathname.endsWith("/overview")) {
+      return route.fulfill({
+        json: envelope({
+          counts: {
+            QUEUED: retried ? 1 : 0,
+            SENDING: 0,
+            FAILED: retried ? 0 : 1,
+            DELIVERED: 0,
+            ABANDONED: 0,
+          },
+          pending: retried ? 1 : 0,
+          overdue: retried ? 0 : 1,
+          oldestPendingAt: retried ? "2026-11-19T08:01:00Z" : null,
+          observedAt: "2026-11-19T08:00:00Z",
+        }),
+      });
+    }
+    if (pathname.endsWith("/retries")) {
+      return route.fulfill({
+        json: envelope({ list: [], total: 0, page: 1, size: 20, totalPages: 0 }),
+      });
+    }
+    if (/\/deliveries\/7$/.test(pathname)) {
+      return route.fulfill({ json: envelope(delivery(retried ? "QUEUED" : "FAILED")) });
+    }
+    return route.fulfill({
+      json: envelope({
+        list: [delivery(retried ? "QUEUED" : "FAILED")],
+        total: 1,
+        page: 1,
+        size: 20,
+        totalPages: 1,
+      }),
+    });
+  });
+
+  await page.goto("/single");
+  await page.getByRole("button", { name: "Open account menu" }).click();
+  await page.getByRole("menuitem", { name: "Dashboard", exact: true }).press("Enter");
+  const dashboard = page.getByRole("dialog", { name: "Dashboard Overlay" });
+  await dashboard.getByRole("row", { name: "Notification delivery", exact: true }).press("Enter");
+  await expect(
+    dashboard.getByRole("heading", { name: "Notification delivery", exact: true })
+  ).toBeVisible();
+  await expect(dashboard.getByText("Delivery #7", { exact: true })).toBeVisible();
+  await dashboard.getByRole("button", { name: "Details", exact: true }).click();
+  const details = page.getByRole("dialog", { name: "Delivery #7" });
+  await expect(details.getByText("SMTP timeout", { exact: true })).toBeVisible();
+  await details.getByRole("button", { name: "Retry delivery", exact: true }).click();
+  const retryDialog = page.getByRole("dialog", { name: "Retry notification delivery" });
+  await retryDialog.getByRole("textbox", { name: "Reason" }).fill("Provider health check passed.");
+  await retryDialog.getByRole("button", { name: "Retry delivery", exact: true }).click();
+  await expect.poll(() => retryRequest).toMatchObject({ reason: "Provider health check passed." });
+  expect((retryRequest as unknown as Record<string, unknown>).requestId).toEqual(
+    expect.any(String)
+  );
+  await expect(details.getByText("Queued", { exact: true })).toBeVisible();
+});
