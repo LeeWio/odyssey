@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.250.0](https://github.com/LeeWio/odyssey/compare/v1.249.0...v1.250.0) (2026-11-19)
+
+
+### Features
+
+* **admin:** manage notification delivery operations ([#35](https://github.com/LeeWio/odyssey/issues/35)) ([6fb8c02](https://github.com/LeeWio/odyssey/commit/6fb8c02d9c17bf68e4013f60616528139b4198ac))
+
 ## [1.249.0](https://github.com/LeeWio/odyssey/compare/v1.248.0...v1.249.0) (2026-11-19)
 
 
