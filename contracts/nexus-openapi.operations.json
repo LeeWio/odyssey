@@ -1,5 +1,5 @@
 {
-  "nexusRevision": "6638cbd68d95bbf5bdb1c8d619c8ff4ca260765c",
+  "nexusRevision": "1f367bd54b0049b51d540db290a42a97f5e71579",
   "paths": {
     "/api/v1/admin/analytics/content-funnel": {
       "get": {
@@ -1625,6 +1625,34 @@
       "get": {
         "operationId": "getCurrentUser",
         "tags": ["User Profile"]
+      }
+    },
+    "/api/v1/user/moments/saved": {
+      "get": {
+        "operationId": "getSavedMoments",
+        "tags": ["Moment Bookmarks"]
+      }
+    },
+    "/api/v1/user/moments/saved/ids": {
+      "get": {
+        "operationId": "getSavedMomentIds",
+        "tags": ["Moment Bookmarks"]
+      }
+    },
+    "/api/v1/user/moments/saved/import": {
+      "post": {
+        "operationId": "importMomentBookmarks",
+        "tags": ["Moment Bookmarks"]
+      }
+    },
+    "/api/v1/user/moments/saved/{id}": {
+      "put": {
+        "operationId": "saveMomentBookmark",
+        "tags": ["Moment Bookmarks"]
+      },
+      "delete": {
+        "operationId": "removeMomentBookmark",
+        "tags": ["Moment Bookmarks"]
       }
     },
     "/api/v1/user/notifications": {
