@@ -84,6 +84,13 @@ export const libraryApi = baseApi.injectEndpoints({
       transformErrorResponse: transformApiError,
       providesTags: [{ type: "Library", id: "READING_LIST" }],
     }),
+    getReadingListMembership: builder.query<boolean, { username: string; postId: number }>({
+      query: ({ postId }) => `/api/v1/user/library/reading-list/${postId}`,
+      rawResponseSchema: apiResponseSchema(z.boolean()),
+      transformResponse: (response: ApiResponse<boolean>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (_result, _error, { postId }) => [{ type: "Post", id: postId }],
+    }),
     getPostCollections: builder.query<PostCollectionResponse[], void>({
       query: () => "/api/v1/user/library/collections",
       rawResponseSchema: apiResponseSchema(z.array(PostCollectionResponseSchema)),
@@ -389,6 +396,7 @@ export const {
   useGetFollowingFeedQuery,
   useGetFavoritePostsQuery,
   useGetReadingListQuery,
+  useGetReadingListMembershipQuery,
   useGetPostCollectionsQuery,
   useGetCollectionPostsQuery,
   useRecordReadingProgressMutation,

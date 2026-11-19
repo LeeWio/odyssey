@@ -40,7 +40,7 @@ const endpoint = "**/api/v1/public/blog/posts?**";
 const latest = (page: Page) => page.getByRole("region", { name: "Search results", exact: true });
 const signIn = (page: Page) =>
   page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "journal-test",
@@ -112,23 +112,29 @@ test("journal bookmarks save, remove and restore state on reload", async ({ page
     route.fulfill({ json: result([article(1, "Reading article", saved)]) })
   );
   await page.route("**/api/v1/user/library/reading-list/1", (route) => {
-    methods.push(route.request().method());
-    saved = route.request().method() === "PUT";
+    const method = route.request().method();
+    if (method === "GET") return route.fulfill({ json: envelope(saved) });
+    methods.push(method);
+    saved = method === "PUT";
     return route.fulfill({ json: envelope(null) });
   });
   await page.goto("/single?q=reading");
   const card = latest(page).getByRole("article", { name: "Reading article", exact: true });
-  const save = card.getByRole("button", { name: "Save for later", exact: true });
+  const actions = card.getByRole("button", { name: "More article actions", exact: true });
+  const save = page.getByRole("menuitem", { name: "Save for later", exact: true });
+  const remove = page.getByRole("menuitem", { name: "Remove from reading list", exact: true });
+  await actions.press("Enter");
+  await expect(save).toBeEnabled();
   await save.press("Enter");
-  const remove = card.getByRole("button", { name: "Saved for later", exact: true });
-  await expect(remove).toBeEnabled();
-  await expect(remove).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(() => methods).toEqual(["PUT"]);
   await expect(page).toHaveURL(/\/single\?q=reading$/);
   await page.reload();
+  await actions.press("Enter");
   await expect(remove).toBeEnabled();
   await remove.click();
+  await expect.poll(() => methods).toEqual(["PUT", "DELETE"]);
+  await actions.press("Enter");
   await expect(save).toBeEnabled();
-  await expect(save).toHaveAttribute("aria-pressed", "false");
   expect(methods).toEqual(["PUT", "DELETE"]);
 });
 
@@ -152,7 +158,8 @@ test("guest journal bookmarks prompt login without nested controls or mobile ove
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(
     false
   );
-  await card.getByRole("button", { name: "Save for later", exact: true }).press("Enter");
+  await card.getByRole("button", { name: "More article actions", exact: true }).press("Enter");
+  await page.getByRole("menuitem", { name: "Save for later", exact: true }).press("Enter");
   await expect(page.getByRole("dialog")).toBeVisible();
   expect(writes).toBe(0);
 });
@@ -166,6 +173,7 @@ test("journal saves block duplicate writes and allow retry after failure", async
     route.fulfill({ json: result([article(1, "Retry article", saved)]) })
   );
   await page.route("**/api/v1/user/library/reading-list/1", async (route) => {
+    if (route.request().method() === "GET") return route.fulfill({ json: envelope(saved) });
     writes += 1;
     if (writes === 1) {
       await release.promise;
@@ -176,19 +184,24 @@ test("journal saves block duplicate writes and allow retry after failure", async
   });
   try {
     await page.goto("/single?q=retry");
-    const button = latest(page).getByRole("button", { name: "Save for later", exact: true });
-    await button.click();
+    const actions = latest(page).getByRole("button", { name: "More article actions", exact: true });
+    const save = page.getByRole("menuitem", { name: "Save for later", exact: true });
+    await actions.click();
+    await expect(save).toBeEnabled();
+    await save.click();
     await expect.poll(() => writes).toBe(1);
-    await expect(button).toBeDisabled();
-    await button.press("Enter");
+    await actions.click();
+    await expect(save).toBeDisabled();
+    await save.press("Enter");
     expect(writes).toBe(1);
     release.resolve();
-    await expect(button).toBeEnabled();
-    await button.press("Enter");
+    await expect(save).toBeEnabled();
+    await save.press("Enter");
+    await expect.poll(() => writes).toBe(2);
+    await actions.click();
     await expect(
-      latest(page).getByRole("button", { name: "Saved for later", exact: true })
+      page.getByRole("menuitem", { name: "Remove from reading list", exact: true })
     ).toBeEnabled();
-    expect(writes).toBe(2);
   } finally {
     release.resolve();
   }

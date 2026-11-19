@@ -126,3 +126,15 @@ one-based page selection stored in the URL. API requests use zero-based pages.
 `tests/e2e/archive.spec.ts` covers delayed year changes, failed-page recovery,
 out-of-order period responses, and obsolete links to populated or empty archives.
 All API responses are mocked.
+
+## Article card actions
+
+The list card opens article titles through the Next.js router and copies the
+absolute article URL. Clipboard rejection shows failure feedback. The card
+loads the signed-in account's reading-list membership only when its actions
+menu opens. It shares the add/remove behavior with the reader and uses the
+dedicated membership endpoint so opening the menu does not count as a view.
+
+Public discovery uses `/robots.txt` and `/sitemap.xml`. The sitemap proxy
+serves the XML produced by Nexus with canonical Odyssey paths and returns a
+retryable error if Nexus is unavailable.

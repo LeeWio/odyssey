@@ -41,7 +41,7 @@ test("shows the later-reading queue and removes an entry with its own pending st
   let removeCalls = 0;
 
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "reading-list-test",

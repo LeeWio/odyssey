@@ -112,7 +112,27 @@ export const momentApi = baseApi.injectEndpoints({
       async onQueryStarted(_arg, { queryFulfilled }) {
         await notifyMutation(queryFulfilled, { error: "Couldn't update moment reaction." });
       },
-      invalidatesTags: (_result, _error, id) => [{ type: "Moment", id }],
+      invalidatesTags: (_result, error, id) =>
+        error
+          ? []
+          : [
+              { type: "Moment", id },
+              { type: "Moment", id: "LIKED" },
+            ],
+    }),
+
+    getLikedMoments: builder.query<PageResult<MomentResponse>, { username: string; page: number }>({
+      query: ({ page }) => ({
+        url: "/api/v1/user/moments/liked",
+        params: { page, size: 12 },
+      }),
+      rawResponseSchema: apiResponseSchema(pageResultSchema(MomentResponseSchema)),
+      transformResponse: (response: ApiResponse<PageResult<MomentResponse>>) => response.data,
+      transformErrorResponse: transformApiError,
+      providesTags: (result) => [
+        { type: "Moment", id: "LIKED" },
+        ...(result?.list.map(({ id }) => ({ type: "Moment" as const, id })) ?? []),
+      ],
     }),
 
     getLikedMomentIds: builder.query<number[], number[]>({
@@ -135,7 +155,13 @@ export const momentApi = baseApi.injectEndpoints({
       async onQueryStarted(_arg, { queryFulfilled }) {
         await notifyMutation(queryFulfilled, { error: "Couldn't update moment reaction." });
       },
-      invalidatesTags: (_result, _error, id) => [{ type: "Moment", id }],
+      invalidatesTags: (_result, error, id) =>
+        error
+          ? []
+          : [
+              { type: "Moment", id },
+              { type: "Moment", id: "LIKED" },
+            ],
     }),
 
     /**
@@ -299,6 +325,7 @@ export const {
   useGetPublicMomentsQuery,
   useLazyGetPublicMomentsQuery,
   useGetLikedMomentIdsQuery,
+  useGetLikedMomentsQuery,
   useLikeMomentMutation,
   useUnlikeMomentMutation,
   useGetAllMomentsQuery,

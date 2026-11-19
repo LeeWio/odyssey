@@ -258,3 +258,10 @@ home cards against mocked APIs, without publishing content.
 The original reduced-motion hydration mismatch in the home page's Hello SVG is
 covered by the visitor-home regressions. See [Home](home.md) for the shared motion
 preference behavior and loading-error recovery.
+
+## Liked Moments and public topics
+
+The liked collection requests one authenticated page at a time, in newest-like
+order. Nexus filters private and deleted Moments before pagination. The topics
+index uses the same public topic counts as the feed widget. Both routes load
+their own data without scanning the public timeline.
