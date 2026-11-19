@@ -1,419 +1,323 @@
 "use client";
 
-import { AlertDialog, Button, Spinner, Tooltip, toast } from "@heroui/react";
+import {
+  AlertDialog,
+  Button,
+  Input,
+  Label,
+  Spinner,
+  TextField,
+  Tooltip,
+  toast,
+} from "@heroui/react";
 import { DropZone, useDropZonePickerContext } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { useClipboard, useTimeout } from "@mantine/hooks";
-import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
+import { useClipboard } from "@mantine/hooks";
+import { useEffect, useState } from "react";
 
-import { useDeleteFileMutation, useUploadFileMutation } from "@/lib/features/file";
+import {
+  type FileResponse,
+  useDeleteFileMutation,
+  useSearchFilesQuery,
+  useUploadFileMutation,
+} from "@/lib/features/file";
 
 import { StorageHealth } from "./storage-health";
 
-interface UploadFile {
-  id: string;
-  name: string;
-  size: number;
-  status: "uploading" | "complete" | "failed";
-  progress: number;
-  url?: string;
-  fileName?: string;
-}
+const PAGE_SIZE = 20;
+type Upload = { id: string; file: File; status: "uploading" | "failed" };
 
-// Format file size helper (using tabular-nums)
-const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
-};
-
-function getExtension(name: string): string {
-  const dot = name.lastIndexOf(".");
-  return dot > 0 ? name.slice(dot + 1) : "";
-}
-
-type FileFormatColor = "blue" | "gray" | "green" | "orange" | "purple" | "red";
-
-function getFormatColor(ext: string): FileFormatColor {
-  const map: Record<string, FileFormatColor> = {
-    csv: "green",
-    doc: "blue",
-    docx: "blue",
-    fig: "purple",
-    jpeg: "blue",
-    jpg: "blue",
-    json: "orange",
-    mp4: "purple",
-    pdf: "red",
-    png: "green",
-    svg: "green",
-    ts: "blue",
-    tsx: "blue",
-    txt: "gray",
-    xlsx: "green",
-    zip: "orange",
-  };
-  return map[ext.toLowerCase()] ?? "gray";
+function formatFileSize(bytes: number) {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const unit = Math.min(
+    units.length - 1,
+    Math.floor(Math.log(Math.max(bytes, 1)) / Math.log(1024))
+  );
+  const amount = bytes / 1024 ** unit;
+  return `${amount.toLocaleString("en-US", { maximumFractionDigits: 1 })} ${units[unit]}`;
 }
 
 function UploadTrigger() {
   const { openFilePicker } = useDropZonePickerContext();
   return (
-    <Button variant="primary" onPress={openFilePicker} size="sm" className="mt-2">
-      Add Asset File
+    <Button size="sm" variant="primary" onPress={openFilePicker}>
+      Add asset
     </Button>
   );
 }
 
 export function FilesPage() {
-  const [files, setFiles] = useState<UploadFile[]>([]);
-  const [copiedFileName, setCopiedFileName] = useState<string | null>(null);
-  const [fileToDelete, setFileToDelete] = useState<UploadFile | null>(null);
+  const [uploads, setUploads] = useState<Upload[]>([]);
+  const [keyword, setKeyword] = useState("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [fileToDelete, setFileToDelete] = useState<FileResponse | null>(null);
 
+  const files = useSearchFilesQuery(
+    { keyword: search || undefined, page, size: PAGE_SIZE, sort: ["createdAt,desc", "id,desc"] },
+    { refetchOnMountOrArgChange: true }
+  );
   const [uploadFile] = useUploadFileMutation();
   const [deleteFile, { isLoading: isDeleting }] = useDeleteFileMutation();
-  const clipboard = useClipboard({ timeout: 2000 });
-
-  const timersRef = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
-
-  // Initialize uploaded assets from localStorage for persistence in admin panel
-  useTimeout(
-    () => {
-      const saved = localStorage.getItem("odyssey_dashboard_files");
-      if (!saved) return;
-
-      try {
-        setFiles(JSON.parse(saved));
-      } catch {
-        // Ignore malformed local dashboard data.
-      }
-    },
-    0,
-    { autoInvoke: true }
-  );
+  const clipboard = useClipboard();
 
   useEffect(() => {
-    const ref = timersRef.current;
-    return () => {
-      ref.forEach((timer) => clearInterval(timer));
-      ref.clear();
-    };
-  }, []);
+    if (clipboard.error) toast.danger("Couldn’t copy the file link.");
+    else if (clipboard.copied) toast.success("File link copied.");
+  }, [clipboard.error, clipboard.copied]);
 
-  useEffect(() => {
-    if (clipboard.error) {
-      toast.danger("Couldn't copy the file link.");
+  async function executeUpload(file: File, retryId?: string) {
+    const id = retryId ?? crypto.randomUUID();
+    const upload: Upload = { id, file, status: "uploading" };
+    setUploads((current) =>
+      retryId ? current.map((item) => (item.id === id ? upload : item)) : [...current, upload]
+    );
+    try {
+      await uploadFile(file).unwrap();
+      setUploads((current) => current.filter((item) => item.id !== id));
+      toast.success("Asset uploaded.");
+    } catch {
+      setUploads((current) =>
+        current.map((item) => (item.id === id ? { ...item, status: "failed" } : item))
+      );
     }
-  }, [clipboard.error]);
+  }
 
-  useEffect(() => {
-    if (clipboard.copied && copiedFileName) toast.success("File link copied.");
-  }, [clipboard.copied, copiedFileName]);
-
-  const saveFilesToLocal = useCallback((updatedFiles: UploadFile[]) => {
-    setFiles(updatedFiles);
-    localStorage.setItem("odyssey_dashboard_files", JSON.stringify(updatedFiles));
-  }, []);
-
-  // Execute file upload
-  const executeUpload = useCallback(
-    async (file: File) => {
-      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const newFile: UploadFile = {
-        id,
-        name: file.name,
-        size: file.size,
-        status: "uploading",
-        progress: 0,
-      };
-
-      setFiles((prev) => [newFile, ...prev]);
-
-      // Simulate progress bar increments
-      const timer = setInterval(() => {
-        setFiles((prev) =>
-          prev.map((f) => {
-            if (f.id !== id || f.status !== "uploading") return f;
-            const next = Math.min(f.progress + Math.floor(Math.random() * 15) + 5, 90);
-            return { ...f, progress: next };
-          })
-        );
-      }, 200);
-
-      timersRef.current.set(id, timer);
-
-      try {
-        const res = await uploadFile(file).unwrap();
-
-        const t = timersRef.current.get(id);
-        if (t) clearInterval(t);
-        timersRef.current.delete(id);
-
-        setFiles((prev) => {
-          const updated = prev.map((f) => {
-            if (f.id === id) {
-              return {
-                ...f,
-                status: "complete" as const,
-                progress: 100,
-                url: res.fileUrl,
-                fileName: res.fileName,
-              };
-            }
-            return f;
-          });
-          saveFilesToLocal(updated);
-          return updated;
-        });
-      } catch {
-        const t = timersRef.current.get(id);
-        if (t) clearInterval(t);
-        timersRef.current.delete(id);
-
-        setFiles((prev) => {
-          const updated = prev.map((f) => {
-            if (f.id === id) {
-              return { ...f, status: "failed" as const, progress: 0 };
-            }
-            return f;
-          });
-          saveFilesToLocal(updated);
-          return updated;
-        });
+  async function confirmDelete() {
+    if (!fileToDelete) return;
+    try {
+      await deleteFile(fileToDelete.fileName).unwrap();
+      setFileToDelete(null);
+      if (page > 0 && files.currentData?.list.length === 1) {
+        const refreshed = await files.refetch().unwrap();
+        const lastPage = Math.max(0, refreshed.totalPages - 1);
+        setPage((current) => (current === page ? Math.min(current, lastPage) : current));
       }
-    },
-    [uploadFile, saveFilesToLocal]
-  );
-
-  // 1. Handle DropZone drop upload
-  const handleDrop = useCallback(
-    async (e: { items: Array<{ kind: string; getFile?: () => Promise<File> }> }) => {
-      const dropped: File[] = [];
-      for (const item of e.items) {
-        if (item.kind === "file" && item.getFile) {
-          dropped.push(await item.getFile());
-        }
-      }
-      if (dropped.length > 0) {
-        await executeUpload(dropped[0]);
-      }
-    },
-    [executeUpload]
-  );
-
-  // 2. Handle DropZone input selection upload
-  const handleSelect = useCallback(
-    async (fileList: FileList) => {
-      if (fileList?.[0]) {
-        await executeUpload(fileList[0]);
-      }
-    },
-    [executeUpload]
-  );
-
-  // Retry upload
-  const handleRetry = async (fileItem: UploadFile) => {
-    setFiles((prev) => prev.filter((f) => f.id !== fileItem.id));
-  };
-
-  // Remove file (open confirmation dialog)
-  const handleRemoveClick = (fileItem: UploadFile) => {
-    setFileToDelete(fileItem);
-  };
-
-  // Delete confirmation
-  const handleDeleteConfirm = async () => {
-    if (fileToDelete) {
-      try {
-        const nameToDelete = fileToDelete.fileName || fileToDelete.name;
-        await deleteFile(nameToDelete).unwrap();
-        const updated = files.filter((f) => f.id !== fileToDelete.id);
-        saveFilesToLocal(updated);
-        setFileToDelete(null);
-      } catch {
-        // Handled globally
-      }
+    } catch {
+      // The mutation and list query show their own error states.
     }
-  };
+  }
 
-  // Copy URL link
-  const handleCopyLink = (file: UploadFile) => {
-    if (!file.url) return;
-
-    setCopiedFileName(file.name);
-    clipboard.copy(file.url);
-  };
+  const result = files.currentData;
+  const totalPages = result?.totalPages ?? 0;
 
   return (
     <div className="animate-fade-in mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
-      {/* Header */}
-      <div className="border-border flex flex-col gap-2 border-b pb-4">
-        <h1 className="text-foreground text-2xl font-bold tracking-tight">Static Assets Library</h1>
-        <p className="text-muted mt-1 text-sm">
-          Upload, organize, and preview your media assets. Generated CDN/external links can be used
-          as post covers and rich-text illustrations.
-        </p>
-      </div>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">Static Assets Library</h1>
 
       <StorageHealth />
 
-      {/* Official DropZone UI */}
       <DropZone className="w-full">
         <DropZone.Area
-          onDrop={handleDrop as unknown as ComponentProps<typeof DropZone.Area>["onDrop"]}
+          onDrop={async (event) => {
+            const file = event.items.find((item) => item.kind === "file");
+            if (!file) return;
+            try {
+              await executeUpload(await file.getFile());
+            } catch {
+              toast.danger("Couldn’t read the dropped file.");
+            }
+          }}
         >
           <DropZone.Icon />
-          <DropZone.Label>Drag assets here or click to browse</DropZone.Label>
-          <DropZone.Description>
-            Supports JPEG, PNG, or PDF formats up to 10 MB.
-          </DropZone.Description>
+          <DropZone.Label>Drag an asset here or browse files</DropZone.Label>
+          <DropZone.Description>Images or PDFs up to 10 MB.</DropZone.Description>
           <UploadTrigger />
         </DropZone.Area>
-        <DropZone.Input accept="image/*,application/pdf" onSelect={handleSelect} />
-
-        {/* Official standard DropZone.FileList rendering */}
-        {files.length > 0 && (
+        <DropZone.Input
+          accept="image/*,application/pdf"
+          onSelect={(selected) => {
+            if (selected[0]) void executeUpload(selected[0]);
+          }}
+        />
+        {uploads.length > 0 && (
           <DropZone.FileList>
-            {files.map((file) => {
-              const ext = getExtension(file.name).toUpperCase();
-              const isCopied = clipboard.copied && copiedFileName === file.name;
-
-              return (
-                <DropZone.FileItem key={file.id} status={file.status}>
-                  <DropZone.FileFormatIcon color={getFormatColor(ext.toLowerCase())} format={ext} />
-                  <DropZone.FileInfo>
-                    <DropZone.FileName>{file.name}</DropZone.FileName>
-                    <DropZone.FileMeta>
-                      {formatFileSize(file.size)}
-                      {file.status === "uploading" && ` | Uploading... ${file.progress}%`}
-                      {file.status === "complete" && (
-                        <span className="text-success inline-flex items-center gap-1">
-                          {" | "}
-                          <Icon
-                            icon="gravity-ui:circle-check-fill"
-                            className="text-success inline size-3"
-                            aria-hidden="true"
-                          />
-                          {" Success"}
-                        </span>
-                      )}
-                      {file.status === "failed" && (
-                        <span className="text-danger inline-flex items-center gap-1">
-                          {" | "}
-                          <Icon
-                            icon="gravity-ui:circle-xmark-fill"
-                            className="text-danger inline size-3"
-                            aria-hidden="true"
-                          />
-                          {" Failed"}
-                        </span>
-                      )}
-                    </DropZone.FileMeta>
-
-                    {/* Upload progress bar */}
-                    {(file.status === "uploading" || file.status === "complete") && (
-                      <DropZone.FileProgress value={file.progress}>
-                        <DropZone.FileProgressTrack>
-                          <DropZone.FileProgressFill />
-                        </DropZone.FileProgressTrack>
-                      </DropZone.FileProgress>
-                    )}
-
-                    {/* Failed retry trigger */}
-                    {file.status === "failed" && (
-                      <Button
-                        className="mt-2 -ml-1 text-xs"
-                        size="sm"
-                        variant="danger-soft"
-                        onPress={() => handleRetry(file)}
-                      >
-                        Try Again
-                      </Button>
-                    )}
-                  </DropZone.FileInfo>
-
-                  {/* Actions (Copy Link / New Tab Preview) */}
-                  {file.status === "complete" && file.url && (
-                    <div className="mr-1 flex items-center gap-1">
-                      <Tooltip delay={0}>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="ghost"
-                          onPress={() => void handleCopyLink(file)}
-                          aria-label="Copy Link"
-                          className="size-7"
-                        >
-                          <Icon
-                            icon={isCopied ? "gravity-ui:check" : "gravity-ui:copy"}
-                            className={`size-3.5 ${isCopied ? "text-success" : "text-muted"}`}
-                            aria-hidden="true"
-                          />
-                        </Button>
-                        <Tooltip.Content>
-                          {isCopied ? "Link Copied!" : "Copy External Link"}
-                        </Tooltip.Content>
-                      </Tooltip>
-                      <Tooltip delay={0}>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="ghost"
-                          onPress={() => window.open(file.url, "_blank")}
-                          aria-label="Preview"
-                          className="size-7"
-                        >
-                          <Icon
-                            icon="gravity-ui:arrow-up-right-from-square"
-                            className="text-muted size-3.5"
-                            aria-hidden="true"
-                          />
-                        </Button>
-                        <Tooltip.Content>Open in New Tab</Tooltip.Content>
-                      </Tooltip>
-                    </div>
-                  )}
-
-                  <DropZone.FileRemoveTrigger
-                    aria-label={`Remove ${file.name}`}
-                    onPress={() => handleRemoveClick(file)}
-                  />
-                </DropZone.FileItem>
-              );
-            })}
+            {uploads.map(({ id, file, status }) => (
+              <DropZone.FileItem key={id} status={status}>
+                <DropZone.FileInfo>
+                  <DropZone.FileName>{file.name}</DropZone.FileName>
+                  <DropZone.FileMeta>
+                    {status === "uploading" ? "Uploading…" : "Upload failed"}
+                  </DropZone.FileMeta>
+                </DropZone.FileInfo>
+                {status === "uploading" ? (
+                  <Spinner size="sm" aria-label={`Uploading ${file.name}`} />
+                ) : (
+                  <>
+                    <Button size="sm" variant="secondary" onPress={() => executeUpload(file, id)}>
+                      Retry upload
+                    </Button>
+                    <DropZone.FileRemoveTrigger
+                      aria-label={`Dismiss failed upload ${file.name}`}
+                      onPress={() =>
+                        setUploads((current) => current.filter((item) => item.id !== id))
+                      }
+                    />
+                  </>
+                )}
+              </DropZone.FileItem>
+            ))}
           </DropZone.FileList>
         )}
       </DropZone>
 
-      {/* Delete Confirmation Alert */}
+      <section aria-labelledby="asset-list-title" className="flex flex-col gap-3">
+        <h2 id="asset-list-title" className="text-lg font-semibold">
+          Asset files
+        </h2>
+        <form
+          role="search"
+          aria-label="Search asset files"
+          className="flex flex-wrap items-end gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setSearch(keyword.trim());
+            setPage(0);
+          }}
+        >
+          <TextField className="min-w-32 flex-1" value={keyword} onChange={setKeyword}>
+            <Label>Filename</Label>
+            <Input placeholder="Search by filename" />
+          </TextField>
+          <Button type="submit" variant="secondary">
+            Search
+          </Button>
+          {search && (
+            <Button
+              variant="ghost"
+              onPress={() => {
+                setKeyword("");
+                setSearch("");
+                setPage(0);
+              }}
+            >
+              Clear
+            </Button>
+          )}
+        </form>
+
+        {files.isError ? (
+          <div className="flex items-center gap-3" role="status">
+            <p className="text-muted text-sm">Couldn’t load asset files.</p>
+            <Button size="sm" variant="secondary" onPress={() => files.refetch()}>
+              Retry list
+            </Button>
+          </div>
+        ) : files.isFetching ? (
+          <div role="status" className="flex items-center gap-2 py-3">
+            <Spinner size="sm" />
+            <span className="text-muted text-sm">Loading asset files…</span>
+          </div>
+        ) : result?.list.length ? (
+          <ul className="divide-border border-border divide-y rounded-xl border">
+            {result.list.map((file) => (
+              <li key={file.fileName} className="flex items-center gap-3 p-3">
+                <Icon icon="gravity-ui:file" className="text-muted size-5 shrink-0" aria-hidden />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium" title={file.originalName}>
+                    {file.originalName}
+                  </p>
+                  <p className="text-muted text-xs tabular-nums">{formatFileSize(file.fileSize)}</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Tooltip>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="ghost"
+                      aria-label={`Copy link for ${file.originalName}`}
+                      onPress={() => clipboard.copy(file.fileUrl)}
+                    >
+                      <Icon icon="gravity-ui:copy" aria-hidden />
+                    </Button>
+                    <Tooltip.Content>Copy link</Tooltip.Content>
+                  </Tooltip>
+                  <Tooltip>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="ghost"
+                      aria-label={`Preview ${file.originalName}`}
+                      onPress={() => window.open(file.fileUrl, "_blank", "noopener,noreferrer")}
+                    >
+                      <Icon icon="gravity-ui:arrow-up-right-from-square" aria-hidden />
+                    </Button>
+                    <Tooltip.Content>Open in a new tab</Tooltip.Content>
+                  </Tooltip>
+                  <Tooltip>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="ghost"
+                      aria-label={`Delete ${file.originalName}`}
+                      onPress={() => setFileToDelete(file)}
+                    >
+                      <Icon icon="gravity-ui:trash-bin" aria-hidden />
+                    </Button>
+                    <Tooltip.Content>Delete asset</Tooltip.Content>
+                  </Tooltip>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p role="status" className="text-muted py-3 text-sm">
+            {search ? "No assets match this filename." : "No assets on this page."}
+          </p>
+        )}
+        {(page > 0 || totalPages > 1) && (
+          <nav aria-label="Asset pages" className="flex flex-wrap items-center gap-2">
+            <Button
+              isDisabled={page === 0 || files.isFetching}
+              onPress={() => setPage((current) => current - 1)}
+              size="sm"
+              variant="secondary"
+            >
+              Previous
+            </Button>
+            <span className="text-muted text-sm">
+              Page {page + 1}
+              {totalPages > page ? ` of ${totalPages}` : ""}
+            </span>
+            <Button
+              isDisabled={page + 1 >= totalPages || files.isFetching}
+              onPress={() => setPage((current) => current + 1)}
+              size="sm"
+              variant="secondary"
+            >
+              Next
+            </Button>
+          </nav>
+        )}
+      </section>
+
       <AlertDialog>
         <AlertDialog.Backdrop
-          isOpen={!!fileToDelete}
-          onOpenChange={(open) => !open && setFileToDelete(null)}
+          isOpen={fileToDelete !== null}
+          onOpenChange={(open) => {
+            if (!open && !isDeleting) setFileToDelete(null);
+          }}
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md" aria-label="Alert dialog">
-              <AlertDialog.CloseTrigger />
+            <AlertDialog.Dialog className="sm:max-w-md">
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Delete Asset?</AlertDialog.Heading>
+                <AlertDialog.Heading>Delete asset?</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                Are you sure you want to permanently delete the asset{" "}
-                <span className="text-foreground font-semibold">
-                  &ldquo;{fileToDelete?.name}&rdquo;
-                </span>{" "}
-                from the server? This action cannot be undone and all posts referenced by this URL
-                will break.
+                Delete <strong>{fileToDelete?.originalName}</strong>? Removing its last reference
+                permanently deletes the file, and pages using it may lose access.
               </AlertDialog.Body>
               <AlertDialog.Footer>
-                <Button variant="ghost" onPress={() => setFileToDelete(null)}>
+                <Button
+                  isDisabled={isDeleting}
+                  variant="ghost"
+                  onPress={() => setFileToDelete(null)}
+                >
                   Cancel
                 </Button>
-                <Button variant="danger" onPress={handleDeleteConfirm} isDisabled={isDeleting}>
-                  {isDeleting ? <Spinner size="sm" className="text-white" /> : "Delete"}
+                <Button variant="danger" onPress={confirmDelete} isDisabled={isDeleting}>
+                  {isDeleting ? "Deleting…" : "Delete"}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

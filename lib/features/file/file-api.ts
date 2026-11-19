@@ -35,7 +35,7 @@ export const fileApi = baseApi.injectEndpoints({
       rawResponseSchema: apiResponseSchema(FileResponseSchema),
       transformResponse: (response: ApiResponse<FileResponse>) => response.data,
       transformErrorResponse: transformApiError,
-      invalidatesTags: ["File"],
+      invalidatesTags: (_result, error) => (error ? [] : ["File"]),
     }),
 
     /**
@@ -43,7 +43,7 @@ export const fileApi = baseApi.injectEndpoints({
      */
     deleteFile: builder.mutation<void, string>({
       query: (fileName) => ({
-        url: `/api/v1/admin/files/${fileName}`,
+        url: `/api/v1/admin/files/${encodeURIComponent(fileName)}`,
         method: "DELETE",
       }),
       rawResponseSchema: apiResponseSchema(z.unknown()),
@@ -52,10 +52,10 @@ export const fileApi = baseApi.injectEndpoints({
       async onQueryStarted(_arg, { queryFulfilled }) {
         await notifyMutation(queryFulfilled, {
           error: "Failed to delete file.",
-          success: "File deleted successfully.",
+          success: "Asset removal processed.",
         });
       },
-      invalidatesTags: ["File"],
+      invalidatesTags: (_result, error) => (error ? [] : ["File"]),
     }),
   }),
   overrideExisting: false,
