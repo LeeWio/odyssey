@@ -193,13 +193,11 @@ export interface PostSearchQuery extends Pageable {
   authorName?: string;
 }
 
-export interface PostAutosaveRequest {
-  /** Post ID (for existing) or client-generated UUID (for new) */
-  identifier: string;
-  content: Record<string, unknown>;
-}
+export const PostEditorDraftSchema = z.object({
+  content: z.unknown(),
+  postData: z.record(z.string(), z.unknown()),
+  revision: z.string().nullable(),
+  savedAt: z.string().nullable(),
+});
 
-export interface PostAutosaveResponse {
-  identifier: string;
-  content: Record<string, unknown>;
-}
+export type PostEditorDraft = z.infer<typeof PostEditorDraftSchema>;

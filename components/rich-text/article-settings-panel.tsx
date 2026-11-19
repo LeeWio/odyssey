@@ -11,9 +11,7 @@ import { RevisionHistoryDialog } from "./revision-history-dialog";
 import { RichTextForm } from "./rich-text-form";
 
 export function ArticleSettingsPanel({
-  autosaveError,
   data,
-  isAutosaving,
   isDisabled,
   isExistingPost,
   isOpen,
@@ -21,7 +19,6 @@ export function ArticleSettingsPanel({
   isPending,
   mediaWarning,
   onChange,
-  onRetryAutosave,
   onRetrySave,
   onSave,
   onWorkflowCompleted,
@@ -29,9 +26,7 @@ export function ArticleSettingsPanel({
   saveError,
   scheduledAt,
 }: {
-  autosaveError: string | null;
   data: Partial<PostRequest>;
-  isAutosaving: boolean;
   isDisabled: boolean;
   isExistingPost: boolean;
   isWorkflowDisabled: boolean;
@@ -39,7 +34,6 @@ export function ArticleSettingsPanel({
   isPending: boolean;
   mediaWarning: string | null;
   onChange: (data: Partial<PostRequest>) => void;
-  onRetryAutosave: () => void;
   onRetrySave: () => void;
   onSave: (status: "DRAFT" | "PUBLISHED") => void;
   onWorkflowCompleted: () => Promise<void>;
@@ -55,16 +49,13 @@ export function ArticleSettingsPanel({
         <SettingsMotion
           hasBlockingMedia={hasBlockingMedia}
           {...{
-            autosaveError,
             data,
-            isAutosaving,
             isDisabled,
             isExistingPost,
             isWorkflowDisabled,
             isPending,
             mediaWarning,
             onChange,
-            onRetryAutosave,
             onRetrySave,
             onSave,
             onWorkflowCompleted,
@@ -79,17 +70,14 @@ export function ArticleSettingsPanel({
 }
 
 function SettingsMotion({
-  autosaveError,
   data,
   hasBlockingMedia,
-  isAutosaving,
   isDisabled,
   isExistingPost,
   isPending,
   isWorkflowDisabled,
   mediaWarning,
   onChange,
-  onRetryAutosave,
   onRetrySave,
   onSave,
   onWorkflowCompleted,
@@ -191,19 +179,6 @@ function SettingsMotion({
             </Alert.Content>
           </Alert>
         ) : null}
-        {autosaveError ? (
-          <Alert status="warning">
-            <Alert.Content>
-              <Alert.Title>Server autosave unavailable</Alert.Title>
-              <Alert.Description>
-                <span>{autosaveError} Local draft recovery remains available.</span>
-                <Button className="mt-2" size="sm" variant="tertiary" onPress={onRetryAutosave}>
-                  Retry autosave
-                </Button>
-              </Alert.Description>
-            </Alert.Content>
-          </Alert>
-        ) : null}
         {mediaWarning ? (
           <Alert status="warning">
             <Alert.Content>
@@ -242,11 +217,6 @@ function SettingsMotion({
             )}
           </Button>
         </div>
-        {isAutosaving ? (
-          <p aria-live="polite" className="text-muted text-xs">
-            Saving a server draft…
-          </p>
-        ) : null}
       </motion.div>
     </motion.section>
   );

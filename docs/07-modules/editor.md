@@ -12,7 +12,14 @@ Readers never get this editor. Article pages render saved JSON through the readi
 
 ## What it edits
 
-Images, attachments, audio, video, tables, mathematics, and a table of contents are extensions under `components/rich-text/extensions`. Draft text for the test route is stored locally by `components/rich-text/utils/editor-draft`.
+Images, attachments, audio, video, tables, mathematics, and a table of contents are extensions under `components/rich-text/extensions`. The article editor keeps one private, automatically saved draft per account and
+article, plus a draft for an article being created. Reopening the editor resumes
+it. The footer reports whether recent changes have been saved and offers a retry
+when a save fails. Closing waits for current edits to save. Discarding removes the
+working draft. Saving or publishing the article clears that draft as part of the
+article write.
+
+The standalone editor test route uses its own browser fixtures.
 
 ## What it does not own
 

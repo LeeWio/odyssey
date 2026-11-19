@@ -1,5 +1,5 @@
 {
-  "nexusRevision": "4c59b64d7bf18d7c44bb439e1a4e66ec066f8e23",
+  "nexusRevision": "b890ffd909ad6a992e7a1b17a4a12620efa447b0",
   "paths": {
     "/api/v1/admin/analytics/content-funnel": {
       "get": {
@@ -619,6 +619,20 @@
       "get": {
         "operationId": "retrieveAutosave",
         "tags": ["Admin Post Management"]
+      }
+    },
+    "/api/v1/admin/posts/editor-drafts/{identifier}": {
+      "get": {
+        "operationId": "retrieve",
+        "tags": ["post-editor-draft-controller"]
+      },
+      "put": {
+        "operationId": "save",
+        "tags": ["post-editor-draft-controller"]
+      },
+      "delete": {
+        "operationId": "discard",
+        "tags": ["post-editor-draft-controller"]
       }
     },
     "/api/v1/admin/posts/rebuild-metadata": {

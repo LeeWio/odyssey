@@ -107,7 +107,7 @@ test("compares saved versions in the editor and handles retry and baseline chang
     }
     if (pathname === "/api/v1/user/me") return fulfill({ id: 1, username: "owner" });
     if (pathname.endsWith("/unread/count")) return fulfill(0);
-    if (pathname.includes("/autosave/")) return fulfill(null);
+    if (pathname.includes("/editor-drafts/")) return fulfill(null);
     return route.fallback();
   });
 
@@ -171,7 +171,7 @@ test("blocks a stale restore and requires a fresh confirmation", async ({ page }
     }
     if (pathname === "/api/v1/user/me") return fulfill({ id: 1, username: "owner" });
     if (pathname.endsWith("/unread/count")) return fulfill(0);
-    if (pathname.includes("/autosave/")) return fulfill(null);
+    if (pathname.includes("/editor-drafts/")) return fulfill(null);
     return route.fallback();
   });
 
