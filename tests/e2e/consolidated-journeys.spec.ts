@@ -179,13 +179,21 @@ test("robots and sitemap are available at the standard routes", async ({ request
   expect(await sitemap.text()).toContain("/single/design-foundation");
 });
 
-test("webhooks can be created, edited, paused and tested with a matching delivery", async ({
-  page,
-}) => {
+test("webhooks can be managed, retried and tested with a matching delivery", async ({ page }) => {
   await signIn(page, "admin", "ROLE_ADMIN");
   const hooks: Record<string, unknown>[] = [];
   let submitted = false;
   let checked = 0;
+  let attempts = 1;
+  const earlierDelivery = () => ({
+    deliveryId: "earlier",
+    event: "POST_PUBLISHED",
+    responseCode: attempts === 3 ? 204 : 502,
+    isSuccess: attempts === 3,
+    attemptCount: attempts,
+    inProgress: false,
+    createdAt: "2026-11-18T08:30:00Z",
+  });
   await page.route("**/api/v1/user/me", (route) =>
     route.fulfill({ json: envelope({ id: 1, username: "admin", nickname: "Administrator" }) })
   );
@@ -195,6 +203,13 @@ test("webhooks can be created, edited, paused and tested with a matching deliver
     if (method === "POST" && pathname.endsWith("/test")) {
       submitted = true;
       return route.fulfill({ json: envelope({ deliveryId: "fresh-test" }) });
+    }
+    if (method === "POST" && pathname.endsWith("/logs/earlier/redeliver")) {
+      expect(new URL(route.request().url()).searchParams.get("attemptCount")).toBe(
+        String(attempts)
+      );
+      attempts += 1;
+      return route.fulfill({ json: envelope(earlierDelivery()) });
     }
     if (pathname.endsWith("/logs")) {
       const list =
@@ -209,15 +224,7 @@ test("webhooks can be created, edited, paused and tested with a matching deliver
                 createdAt: "2026-11-19T08:30:00Z",
               },
             ]
-          : [
-              {
-                deliveryId: "earlier",
-                event: "POST_PUBLISHED",
-                responseCode: 200,
-                isSuccess: true,
-                createdAt: "2026-11-18T08:30:00Z",
-              },
-            ];
+          : [earlierDelivery()];
       return route.fulfill({
         json: envelope({ list, total: list.length, page: 1, size: 10, totalPages: 1 }),
       });
@@ -260,6 +267,15 @@ test("webhooks can be created, edited, paused and tested with a matching deliver
   await expect(dashboard.getByText("Active", { exact: true })).toBeVisible();
   await dashboard.getByRole("button", { name: "Deliveries", exact: true }).click();
   const deliveries = page.getByRole("dialog", { name: "Deliveries for Edited hook" });
+  const retry = deliveries.getByRole("button", { name: "Retry", exact: true });
+  await expect(deliveries.getByText("1 attempt")).toBeVisible();
+  await retry.click();
+  await expect(deliveries.getByText("The delivery failed again.")).toBeVisible();
+  await expect(deliveries.getByText("2 attempts")).toBeVisible();
+  await retry.click();
+  await expect(deliveries.getByText("The retry was delivered.")).toBeVisible();
+  await expect(deliveries.getByText("3 attempts")).toBeVisible();
+  await expect(retry).toHaveCount(0);
   await deliveries.getByRole("button", { name: "Send test" }).click();
   await expect(deliveries.getByText("Test queued. Waiting for a delivery record…")).toBeVisible();
   await expect(deliveries.getByText("The test was delivered successfully.")).toBeVisible();

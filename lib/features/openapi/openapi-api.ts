@@ -431,22 +431,6 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
-    redeliverWebhookLog: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
-      { deliveryId: string }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/webhooks/logs/${arg.deliveryId}/redeliver`,
-        method: "POST",
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
     auditUser: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
       { id: number; approved: boolean }
@@ -1387,7 +1371,6 @@ export const {
   useListWebhooksQuery,
   useCreateWebhookMutation,
   useTestWebhookMutation,
-  useRedeliverWebhookLogMutation,
   useAuditUserMutation,
   useRetrieveAllSeriesQuery,
   useCreateSeriesMutation,
