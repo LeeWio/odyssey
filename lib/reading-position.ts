@@ -6,13 +6,10 @@ function decodeAnchor(value: string): string | null {
   }
 }
 
-const LEGACY_ARTICLE_POSITION_PATTERN = /^article-\d+$/;
-
 export function getReadingPositionId(value: string | null | undefined): string | null {
   if (typeof value !== "string") return null;
 
   const id = value.startsWith("#") ? decodeAnchor(value.slice(1)) : value;
-  if (id && !value.startsWith("#") && !LEGACY_ARTICLE_POSITION_PATTERN.test(id)) return null;
   if (!id || id.length > 500 || /[\u0000-\u001F\u007F]/.test(id)) return null;
 
   return id;

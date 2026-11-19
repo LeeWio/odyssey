@@ -51,11 +51,24 @@ test("article cards copy a full URL and use client navigation", async ({ page })
   await page.evaluate(() => {
     document.documentElement.dataset.navigationTest = "preserved";
   });
-  await card.getByRole("link", { name: designArticle.title }).click();
+  await card.getByRole("link", { name: designArticle.title }).press("Enter");
   await expect(page).toHaveURL(new RegExp(`/single/${designArticle.slug}$`), { timeout: 18000 });
   expect(await page.evaluate(() => document.documentElement.dataset.navigationTest)).toBe(
     "preserved"
   );
+});
+
+test("article card opens the author's articles with the keyboard", async ({ page }) => {
+  await page.goto("/single?q=foundation");
+  const card = page.getByRole("article", { name: designArticle.title, exact: true }).first();
+  await card
+    .getByRole("button", { name: `View ${designArticle.authorName}’s profile` })
+    .press("Enter");
+  const link = page.getByRole("link", { name: "View author articles", exact: true });
+  const path = `/single/authors/${encodeURIComponent(designArticle.authorName)}`;
+  await expect(link).toHaveAttribute("href", path);
+  await link.press("Enter");
+  await expect(page).toHaveURL(new RegExp(`${path}$`), { timeout: 18000 });
 });
 
 test("article card prompts guests to sign in before saving", async ({ page }) => {

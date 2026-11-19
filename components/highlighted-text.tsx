@@ -10,17 +10,18 @@ interface HighlightedTextProps {
 
 export function HighlightedText({ text, query, className = "" }: HighlightedTextProps) {
   const parts = useMemo(() => {
-    if (!query.trim() || !text) {
+    const keyword = query.trim();
+    if (!keyword || !text) {
       return [{ text, isHighlight: false }];
     }
 
     // Escape regex special characters to prevent errors and create case-insensitive regex
-    const safeQuery = query.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+    const safeQuery = keyword.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
     const regex = new RegExp(`(${safeQuery})`, "gi");
 
-    return text.split(regex).map((part) => ({
+    return text.split(regex).map((part, index) => ({
       text: part,
-      isHighlight: regex.test(part),
+      isHighlight: index % 2 === 1,
     }));
   }, [text, query]);
 

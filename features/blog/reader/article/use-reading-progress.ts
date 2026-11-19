@@ -38,13 +38,15 @@ export function useReadingProgress({
   const [recordProgress] = useRecordReadingProgressMutation();
   const outlineRef = useRef(outline);
   const progressRef = useRef(progress);
+  const requestCheckpointRef = useRef<(() => void) | null>(null);
   const sentRef = useRef<ReadingCheckpoint | null>(null);
   const failedRef = useRef<ReadingCheckpoint | null>(null);
 
   useEffect(() => {
     outlineRef.current = outline;
     progressRef.current = progress;
-  });
+    requestCheckpointRef.current?.();
+  }, [outline, progress]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -147,6 +149,7 @@ export function useReadingProgress({
       });
     };
 
+    requestCheckpointRef.current = remember;
     remember();
     window.addEventListener("scroll", remember, { passive: true });
     const flush = () => {
@@ -157,6 +160,7 @@ export function useReadingProgress({
 
     return () => {
       active = false;
+      requestCheckpointRef.current = null;
       if (frame !== 0) window.cancelAnimationFrame(frame);
       window.removeEventListener("scroll", remember);
       window.removeEventListener("pagehide", flush);

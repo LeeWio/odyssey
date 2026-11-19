@@ -297,6 +297,9 @@
     }
   },
   "ArticleCard": {
+    "unknownAuthor": "未知作者",
+    "authorProfile": "查看{author}的资料",
+    "authorArticles": "查看作者文章",
     "share": "分享文章",
     "copied": "已复制文章链接",
     "actions": "更多文章操作",

@@ -297,6 +297,9 @@
     }
   },
   "ArticleCard": {
+    "unknownAuthor": "Unknown author",
+    "authorProfile": "View {author}’s profile",
+    "authorArticles": "View author articles",
     "share": "Share article",
     "copied": "Article link copied",
     "actions": "More article actions",

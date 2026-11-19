@@ -23,6 +23,7 @@ import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/p
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
+import { getReadingPositionId } from "@/lib/reading-position";
 
 const READING_SCROLL_KEY = "odyssey-reading-scroll";
 
@@ -41,6 +42,19 @@ interface SinglePageProps {
   initialArticle: PostResponse;
   readingHtml: string;
   slug: string;
+}
+
+function ReadingProgressTracker({
+  enabled,
+  postId,
+  progress,
+}: {
+  enabled: boolean;
+  postId: number;
+  progress: number;
+}) {
+  useReadingProgress({ enabled, postId, progress });
+  return null;
 }
 
 export default function SinglePage({ initialArticle, readingHtml, slug }: SinglePageProps) {
@@ -91,9 +105,8 @@ export default function SinglePage({ initialArticle, readingHtml, slug }: Single
 
   useLayoutEffect(() => {
     if (!article) return;
-    const hash = window.location.hash.slice(1);
-    if (hash) {
-      const id = decodeURIComponent(hash);
+    const id = getReadingPositionId(window.location.hash);
+    if (id) {
       let attempts = 0;
       let frame = 0;
       const place = () => {
@@ -117,11 +130,6 @@ export default function SinglePage({ initialArticle, readingHtml, slug }: Single
     };
   }, [article]);
 
-  useReadingProgress({
-    enabled: isAuthenticated && Boolean(article),
-    postId: article?.id ?? 0,
-    progress: readingProgress,
-  });
   const isUnavailable = !article;
 
   if (isError && !fetchedArticle) {
@@ -160,6 +168,11 @@ export default function SinglePage({ initialArticle, readingHtml, slug }: Single
 
   return (
     <ArticleOutlineProvider>
+      <ReadingProgressTracker
+        enabled={isAuthenticated}
+        postId={article.id}
+        progress={readingProgress}
+      />
       <ArticleLayout
         body={
           <ArticleBody
