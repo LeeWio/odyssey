@@ -15,3 +15,24 @@ export const FileResponseSchema = z.object({
 });
 
 export type FileResponse = z.infer<typeof FileResponseSchema>;
+
+export const AssetUsageSchema = z.object({
+  total: z.number().int().nonnegative(),
+  locations: z.array(
+    z.object({
+      kind: z.enum([
+        "ARTICLE_COVER",
+        "ARTICLE_CONTENT",
+        "ARTICLE_SUMMARY",
+        "COMMENT",
+        "USER_AVATAR",
+        "PROJECT_COVER",
+        "MOMENT",
+      ]),
+      id: z.number(),
+      label: z.string().nullish(),
+    })
+  ),
+});
+
+export type AssetUsage = z.infer<typeof AssetUsageSchema>;

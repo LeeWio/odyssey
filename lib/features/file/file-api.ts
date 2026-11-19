@@ -2,7 +2,12 @@ import { z } from "zod";
 import type { ApiResponse, Pageable, PageResult } from "@/lib/api";
 import { apiResponseSchema, baseApi, pageResultSchema, transformApiError } from "@/lib/api";
 import { notifyMutation } from "@/lib/toast";
-import { FileResponseSchema, type FileResponse } from "./file-contracts";
+import {
+  AssetUsageSchema,
+  FileResponseSchema,
+  type AssetUsage,
+  type FileResponse,
+} from "./file-contracts";
 
 export const fileApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -15,6 +20,15 @@ export const fileApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<PageResult<FileResponse>>) => response.data,
       transformErrorResponse: transformApiError,
       providesTags: ["File"],
+    }),
+
+    getFileUsage: builder.query<AssetUsage, string>({
+      query: (fileName) => ({
+        url: `/api/v1/admin/files/${encodeURIComponent(fileName)}/usage`,
+      }),
+      rawResponseSchema: apiResponseSchema(AssetUsageSchema),
+      transformResponse: (response: ApiResponse<AssetUsage>) => response.data,
+      transformErrorResponse: transformApiError,
     }),
 
     /**
@@ -61,4 +75,9 @@ export const fileApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useSearchFilesQuery, useUploadFileMutation, useDeleteFileMutation } = fileApi;
+export const {
+  useSearchFilesQuery,
+  useGetFileUsageQuery,
+  useUploadFileMutation,
+  useDeleteFileMutation,
+} = fileApi;

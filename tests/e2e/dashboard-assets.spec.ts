@@ -90,6 +90,9 @@ async function prepare(page: Page) {
       }
       return fulfill(null);
     }
+    if (pathname.startsWith(`${filesPath}/`) && pathname.endsWith("/usage")) {
+      return fulfill({ total: 0, locations: [] });
+    }
     if (pathname === `${filesPath}/inventory`) {
       return fulfill({ providerType: "local", assetCount: state.assets.length });
     }
@@ -165,4 +168,39 @@ test("retries the same file and refreshes the server-backed list", async ({ page
   expect(await files.evaluate((section) => section.scrollWidth)).toBeLessThanOrEqual(
     await files.evaluate((section) => section.clientWidth)
   );
+});
+
+test("keeps deletion disabled when the usage check fails or finds a reference", async ({
+  page,
+}) => {
+  const state = await prepare(page);
+  let attempts = 0;
+  await page.route("**/api/v1/admin/files/stored-21.pdf/usage", async (route) => {
+    attempts += 1;
+    if (attempts === 1) {
+      return route.fulfill({ status: 503, json: { code: 503, message: "Unavailable" } });
+    }
+    return route.fulfill({
+      json: {
+        code: 200,
+        message: "OK",
+        data: {
+          total: 1,
+          locations: [{ kind: "ARTICLE_COVER", id: 17, label: "A published article" }],
+        },
+      },
+    });
+  });
+  const files = await openAssets(page);
+  await files.getByRole("button", { name: "Delete Asset 21.pdf", exact: true }).click();
+  const dialog = page.getByRole("alertdialog", { name: "Delete asset?" });
+  const remove = dialog.getByRole("button", { name: "Delete", exact: true });
+  await expect(dialog.getByText("Couldn’t check usage.", { exact: false })).toBeVisible();
+  await expect(remove).toBeDisabled();
+  await dialog.getByRole("button", { name: "Retry usage check" }).click();
+  await expect(
+    dialog.getByText("Article cover · A published article", { exact: true })
+  ).toBeVisible();
+  await expect(remove).toBeDisabled();
+  expect(state.removals).toBe(0);
 });

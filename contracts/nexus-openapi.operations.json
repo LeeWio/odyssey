@@ -1,5 +1,5 @@
 {
-  "nexusRevision": "2798438bd94478e6b329ec4a5c4f4bb09ed79022",
+  "nexusRevision": "6638cbd68d95bbf5bdb1c8d619c8ff4ca260765c",
   "paths": {
     "/api/v1/admin/analytics/content-funnel": {
       "get": {
@@ -236,6 +236,12 @@
     "/api/v1/admin/files/{fileName}": {
       "delete": {
         "operationId": "deleteFile",
+        "tags": ["Admin File Management"]
+      }
+    },
+    "/api/v1/admin/files/{fileName}/usage": {
+      "get": {
+        "operationId": "getFileUsage",
         "tags": ["Admin File Management"]
       }
     },
