@@ -89,6 +89,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { href: "/settings", icon: Gear, label: "Settings" },
       { href: "/webhooks", icon: Thunderbolt, label: "Webhooks" },
+      { href: "/notification-deliveries", icon: Thunderbolt, label: "Notification delivery" },
     ],
   },
 ] as const;
