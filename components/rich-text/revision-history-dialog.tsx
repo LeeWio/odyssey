@@ -1,8 +1,19 @@
 "use client";
 
-import { Alert, AlertDialog, Button, Modal, Spinner, toast } from "@heroui/react";
+import {
+  Alert,
+  AlertDialog,
+  Button,
+  Label,
+  ListBox,
+  Modal,
+  Select,
+  Spinner,
+  toast,
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useMemo, useState } from "react";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { useId, useState } from "react";
 
 import {
   useGetPostRevisionsQuery,
@@ -10,6 +21,8 @@ import {
   type PostRevision,
 } from "@/lib/features/post";
 import { getApiErrorMessage } from "@/lib/api/errors";
+import { useCompareRevisionsQuery } from "@/lib/features/openapi/openapi-api";
+import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 
 interface RevisionHistoryDialogProps {
   postId: number;
@@ -27,16 +40,83 @@ function formatRevisionDate(value: string) {
   }).format(date);
 }
 
+const comparisonFields = [
+  { key: "title", label: "Title" },
+  { key: "summary", label: "Summary" },
+  { key: "content", label: "Body source" },
+] as const;
+
+function formatBodySource(value: string) {
+  // Tiptap documents are stored as JSON. Line breaks make the source readable
+  // without interpreting any saved markup or mounting an editor.
+  try {
+    const parsed = JSON.parse(value);
+    if (parsed?.type === "doc") return JSON.stringify(parsed, null, 2);
+  } catch {
+    // Markdown and HTML are already source text.
+  }
+  return value;
+}
+
+function RevisionComparison({
+  diff,
+  baseVersion,
+  targetVersion,
+}: {
+  diff: OpenApiComponents["schemas"]["PostDiffResponse"];
+  baseVersion: number;
+  targetVersion: number;
+}) {
+  const changedFields = comparisonFields.filter(({ key }) => diff[key]?.changed);
+
+  if (changedFields.length === 0) {
+    return <p className="text-muted text-sm">The title, summary, and body match.</p>;
+  }
+
+  return (
+    <div className="grid min-w-0 gap-4">
+      {changedFields.map(({ key, label }) => {
+        const field = diff[key];
+        const versions = [
+          { title: `From version ${baseVersion}`, value: field?.original ?? "" },
+          { title: `To version ${targetVersion}`, value: field?.revised ?? "" },
+        ];
+
+        return (
+          <section key={key} aria-label={label} className="grid min-w-0 gap-2">
+            <h3 className="text-foreground text-sm font-semibold">{label}</h3>
+            <div className="grid min-w-0 gap-2 md:grid-cols-2">
+              {versions.map(({ title, value }) => (
+                <div key={title} className="border-separator min-w-0 rounded-xl border p-3">
+                  <h4 className="text-muted mb-2 text-xs font-medium">{title}</h4>
+                  {value ? (
+                    <pre className="text-foreground font-mono text-xs leading-relaxed wrap-anywhere whitespace-pre-wrap">
+                      {key === "content" ? formatBodySource(value) : value}
+                    </pre>
+                  ) : (
+                    <p className="text-muted text-xs">Empty</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 export function RevisionHistoryDialog({
   postId,
   isDisabled = false,
   onRestored,
 }: RevisionHistoryDialogProps) {
+  const comparisonId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [restoreError, setRestoreError] = useState<string | null>(null);
   const [revisionToRestore, setRevisionToRestore] = useState<PostRevision | null>(null);
   const {
-    data: revisions = [],
+    currentData: revisions = [],
     isFetching,
     isError,
     refetch,
@@ -45,14 +125,29 @@ export function RevisionHistoryDialog({
   });
   const [revertPostRevision, { isLoading: isReverting }] = useRevertPostRevisionMutation();
 
-  const selectedRevision = useMemo(() => revisions[0] ?? null, [revisions]);
   const [selectedRevisionId, setSelectedRevisionId] = useState<number | null>(null);
+  const [baselineId, setBaselineId] = useState<number | null>(null);
+  const [isComparing, setIsComparing] = useState(false);
   const activeRevision =
-    revisions.find((revision) => revision.id === selectedRevisionId) ?? selectedRevision;
+    revisions.find((revision) => revision.id === selectedRevisionId) ?? revisions[0];
+  const baselineOptions = revisions.filter((revision) => revision.id !== activeRevision?.id);
+  const baselineRevision =
+    baselineOptions.find((revision) => revision.id === baselineId) ??
+    baselineOptions.find(
+      (revision) => revision.versionNumber < (activeRevision?.versionNumber ?? 0)
+    ) ??
+    baselineOptions[0];
+  const comparison = useCompareRevisionsQuery(
+    isOpen && isComparing && activeRevision && baselineRevision
+      ? { id: postId, baseId: baselineRevision.id, targetId: activeRevision.id }
+      : skipToken
+  );
 
   const openDialog = () => {
     setRestoreError(null);
     setSelectedRevisionId(null);
+    setBaselineId(null);
+    setIsComparing(false);
     setIsOpen(true);
   };
 
@@ -110,10 +205,10 @@ export function RevisionHistoryDialog({
               <Modal.Header>
                 <Modal.Heading>Version history</Modal.Heading>
               </Modal.Header>
-              <Modal.Body className="min-h-0 gap-4 overflow-hidden p-0 sm:grid sm:grid-cols-[minmax(13rem,17rem)_minmax(0,1fr)]">
+              <Modal.Body className="flex min-h-0 flex-1 flex-col gap-0 overflow-hidden p-0 sm:grid sm:grid-cols-[minmax(13rem,17rem)_minmax(0,1fr)]">
                 <section
                   aria-label="Saved versions"
-                  className="border-default-200 min-h-0 overflow-y-auto border-b p-4 sm:border-r sm:border-b-0"
+                  className="border-default-200 max-h-44 min-h-0 shrink-0 overflow-y-auto border-b p-4 sm:max-h-none sm:border-r sm:border-b-0"
                 >
                   {isFetching ? (
                     <div className="flex min-h-32 items-center justify-center">
@@ -163,9 +258,9 @@ export function RevisionHistoryDialog({
                   )}
                 </section>
 
-                <section className="min-h-0 overflow-hidden">
+                <section aria-label="Selected version" className="min-h-0 flex-1 overflow-y-auto">
                   {activeRevision ? (
-                    <div className="flex h-full min-h-0 flex-col gap-6 p-5 sm:p-6">
+                    <div className="flex min-w-0 flex-col gap-5 p-5 sm:p-6">
                       <div className="space-y-2">
                         <p className="text-muted text-xs font-medium tracking-normal uppercase">
                           Selected version
@@ -187,6 +282,88 @@ export function RevisionHistoryDialog({
                           <p className="text-muted text-sm leading-6">{activeRevision.summary}</p>
                         ) : null}
                       </div>
+
+                      {baselineRevision ? (
+                        <div className="grid min-w-0 gap-4">
+                          <div>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              aria-expanded={isComparing}
+                              aria-controls={isComparing ? comparisonId : undefined}
+                              onPress={() => setIsComparing((current) => !current)}
+                            >
+                              {isComparing ? "Hide comparison" : "Compare versions"}
+                            </Button>
+                          </div>
+                          {isComparing ? (
+                            <section
+                              id={comparisonId}
+                              aria-label="Version comparison"
+                              className="grid min-w-0 gap-4"
+                            >
+                              <Select
+                                value={baselineRevision.id}
+                                onChange={(key) => setBaselineId(key == null ? null : Number(key))}
+                              >
+                                <Label>Compare from</Label>
+                                <Select.Trigger>
+                                  <Select.Value />
+                                  <Select.Indicator />
+                                </Select.Trigger>
+                                <Select.Popover>
+                                  <ListBox>
+                                    {baselineOptions.map((revision) => (
+                                      <ListBox.Item
+                                        key={revision.id}
+                                        id={revision.id}
+                                        textValue={`Version ${revision.versionNumber}`}
+                                      >
+                                        Version {revision.versionNumber}
+                                        <ListBox.ItemIndicator />
+                                      </ListBox.Item>
+                                    ))}
+                                  </ListBox>
+                                </Select.Popover>
+                              </Select>
+                              <p className="text-muted text-sm">
+                                Version {baselineRevision.versionNumber} → version{" "}
+                                {activeRevision.versionNumber}
+                              </p>
+                              {comparison.isFetching ? (
+                                <div
+                                  role="status"
+                                  className="text-muted flex items-center gap-2 text-sm"
+                                >
+                                  <Spinner size="sm" />
+                                  Loading comparison…
+                                </div>
+                              ) : comparison.isError || !comparison.currentData ? (
+                                <Alert status="danger">
+                                  <Alert.Content>
+                                    <Alert.Title>Unable to compare versions</Alert.Title>
+                                    <Alert.Description>
+                                      <Button
+                                        size="sm"
+                                        variant="tertiary"
+                                        onPress={() => void comparison.refetch()}
+                                      >
+                                        Retry comparison
+                                      </Button>
+                                    </Alert.Description>
+                                  </Alert.Content>
+                                </Alert>
+                              ) : (
+                                <RevisionComparison
+                                  diff={comparison.currentData}
+                                  baseVersion={baselineRevision.versionNumber}
+                                  targetVersion={activeRevision.versionNumber}
+                                />
+                              )}
+                            </section>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <div className="text-muted flex h-full min-h-48 items-center justify-center p-6 text-center text-sm">
@@ -209,7 +386,7 @@ export function RevisionHistoryDialog({
                 </Button>
                 <Button
                   variant="primary"
-                  onPress={() => setRevisionToRestore(activeRevision)}
+                  onPress={() => setRevisionToRestore(activeRevision ?? null)}
                   isDisabled={!activeRevision || isReverting}
                 >
                   Restore selected version

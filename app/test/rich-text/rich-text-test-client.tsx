@@ -39,10 +39,12 @@ export default function RichTextTestClient({
   typography = false,
   outline = false,
   modal = false,
+  postId,
 }: {
   typography?: boolean;
   outline?: boolean;
   modal?: boolean;
+  postId?: string;
 }) {
   const initialContent = useMemo<JSONContent>(
     () =>
@@ -116,7 +118,7 @@ export default function RichTextTestClient({
   }
 
   if (modal) {
-    return <RichTextModalTestClient />;
+    return <RichTextModalTestClient postId={postId} />;
   }
 
   return (
