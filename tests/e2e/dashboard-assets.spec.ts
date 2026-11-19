@@ -185,8 +185,11 @@ test("keeps deletion disabled when the usage check fails or finds a reference", 
         code: 200,
         message: "OK",
         data: {
-          total: 1,
-          locations: [{ kind: "ARTICLE_COVER", id: 17, label: "A published article" }],
+          total: 2,
+          locations: [
+            { kind: "SERIES_COVER", id: 17, label: "A draft column" },
+            { kind: "FRIEND_LINK_AVATAR", id: 18, label: "A site" },
+          ],
         },
       },
     });
@@ -198,9 +201,8 @@ test("keeps deletion disabled when the usage check fails or finds a reference", 
   await expect(dialog.getByText("Couldn’t check usage.", { exact: false })).toBeVisible();
   await expect(remove).toBeDisabled();
   await dialog.getByRole("button", { name: "Retry usage check" }).click();
-  await expect(
-    dialog.getByText("Article cover · A published article", { exact: true })
-  ).toBeVisible();
+  await expect(dialog.getByText("Column cover · A draft column", { exact: true })).toBeVisible();
+  await expect(dialog.getByText("Friend link avatar · A site", { exact: true })).toBeVisible();
   await expect(remove).toBeDisabled();
   expect(state.removals).toBe(0);
 });

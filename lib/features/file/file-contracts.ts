@@ -27,6 +27,8 @@ export const AssetUsageSchema = z.object({
         "COMMENT",
         "USER_AVATAR",
         "PROJECT_COVER",
+        "SERIES_COVER",
+        "FRIEND_LINK_AVATAR",
         "MOMENT",
       ]),
       id: z.number(),
