@@ -26,6 +26,14 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.244.1](https://github.com/LeeWio/odyssey/compare/v1.244.0...v1.244.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **files:** show article revision asset usage ([#18](https://github.com/LeeWio/odyssey/issues/18)) ([e23687a](https://github.com/LeeWio/odyssey/commit/e23687a0686a2a43e5b67d4b045dae7469126aa3))
+* **files:** show column and friend link asset usage ([#16](https://github.com/LeeWio/odyssey/issues/16)) ([b6b0c42](https://github.com/LeeWio/odyssey/commit/b6b0c42f36fa251f3a7ebfccb095708d5d222478))
+
 ## [1.244.0](https://github.com/LeeWio/odyssey/compare/v1.243.1...v1.244.0) (2026-11-19)
 
 
