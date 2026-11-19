@@ -402,24 +402,24 @@ export const postApi = baseApi.injectEndpoints({
     /**
      * Admin: Revert a post to a specific revision
      */
-    revertPostRevision: builder.mutation<PostResponse, { id: number; revisionId: number }>({
-      query: ({ id, revisionId }) => ({
+    revertPostRevision: builder.mutation<
+      PostResponse,
+      { id: number; revisionId: number; expectedRevision: number }
+    >({
+      query: ({ id, revisionId, expectedRevision }) => ({
         url: `/api/v1/admin/posts/${id}/revisions/${revisionId}/revert`,
         method: "POST",
+        headers: { "If-Match": `"revision-${expectedRevision}"` },
       }),
       rawResponseSchema: apiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, {
-          error: "Failed to revert post.",
-          success: "Post reverted to the selected revision.",
-        });
-      },
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Post", id },
-        { type: "Post", id: "LIST" },
-      ],
+      invalidatesTags: (result, _error, { id }) =>
+        result
+          ? [
+              { type: "Post", id },
+              { type: "Post", id: "LIST" },
+            ]
+          : [],
     }),
 
     /**
