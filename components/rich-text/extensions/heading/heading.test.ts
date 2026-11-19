@@ -57,4 +57,20 @@ describe("heading extension", () => {
     );
     expect(roundTripped.content?.[0]?.attrs?.level).toBe(1);
   });
+
+  it("persists deterministic, duplicate-safe table-of-contents anchors", () => {
+    const normalized = normalizeRichTextDocument({
+      type: "doc",
+      content: [
+        { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Intro" }] },
+        { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Intro" }] },
+      ],
+    });
+
+    expect(normalized.content?.map((node) => node.attrs?.["data-toc-id"])).toEqual([
+      "intro",
+      "intro-2",
+    ]);
+    expect(normalized.content?.map((node) => node.attrs?.id)).toEqual(["intro", "intro-2"]);
+  });
 });

@@ -17,6 +17,11 @@ operations APIs. The next product increment should finish and verify this
 cross-repository workflow before adding another notification family or a new
 content module.
 
+The delivery operations surface, Tiptap metadata contract, and browser-level
+notification delivery journey are now implemented. Remaining work focuses on
+real category and destination verification, reading-loop return paths, and
+operational retention rather than adding new notification types.
+
 Quality checks run during planning on October 9, 2026:
 
 - Odyssey `bun run preflight`: passed; 236 unit tests passed.
