@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.250.1](https://github.com/LeeWio/odyssey/compare/v1.250.0...v1.250.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **reader:** unify persisted heading anchors ([#39](https://github.com/LeeWio/odyssey/issues/39)) ([7618f1e](https://github.com/LeeWio/odyssey/commit/7618f1e7c8336cf1c2662066728e3df3d7d1d553))
+
 ## [1.250.0](https://github.com/LeeWio/odyssey/compare/v1.249.0...v1.250.0) (2026-11-19)
 
 
