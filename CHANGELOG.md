@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.247.0](https://github.com/LeeWio/odyssey/compare/v1.246.0...v1.247.0) (2026-11-19)
+
+
+### Features
+
+* improve article cards, discovery and webhook administration ([#27](https://github.com/LeeWio/odyssey/issues/27)) ([fd3ac5c](https://github.com/LeeWio/odyssey/commit/fd3ac5ca4f55ef4f6c0bc1230ab69783e3c2683e))
+
 ## [1.246.0](https://github.com/LeeWio/odyssey/compare/v1.245.0...v1.246.0) (2026-11-19)
 
 
