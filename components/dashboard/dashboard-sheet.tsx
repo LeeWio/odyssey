@@ -30,6 +30,7 @@ import { FriendLinksPage } from "./views/friend-links-page";
 import { HelpPage } from "./views/help-page";
 import { LifeListAdminPage, LifeListNestedSheets } from "./views/life-list-page";
 import { MomentsPage } from "./views/moments-page";
+import { NotificationDeliveriesPage } from "./views/notification-deliveries-page";
 import { OrdersPage } from "./views/orders-page";
 import { PermissionsPage } from "./views/permissions-page";
 import { PostsPage } from "./views/posts-page";
@@ -156,6 +157,8 @@ export function DashboardSheet() {
         return <SettingsPage />;
       case "/webhooks":
         return <WebhooksPage />;
+      case "/notification-deliveries":
+        return <NotificationDeliveriesPage />;
       case "/help":
         return <HelpPage />;
       default:
