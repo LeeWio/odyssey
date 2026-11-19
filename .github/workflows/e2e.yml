@@ -1,0 +1,40 @@
+name: Full Browser E2E
+
+on:
+  schedule:
+    - cron: "17 19 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-e2e:
+    name: Browser E2E Tests
+    timeout-minutes: 150
+    runs-on: ubuntu-latest
+    env:
+      HEROUI_AUTH_TOKEN: ${{ secrets.HEROUI_AUTH_TOKEN }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Setup Project
+        uses: ./.github/actions/setup-project
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run Playwright E2E Suite
+        run: bun run test:e2e
+
+      - name: Upload Playwright Reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-full
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

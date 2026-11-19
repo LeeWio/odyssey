@@ -25,8 +25,13 @@ jobs:
       - name: Run Preflight Checks
         run: bun run preflight
 
-  browser-e2e:
-    name: Browser E2E Tests
+  browser-smoke:
+    name: Browser Smoke Tests
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 10
+    concurrency:
+      group: odyssey-browser-smoke-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     env:
       HEROUI_AUTH_TOKEN: ${{ secrets.HEROUI_AUTH_TOKEN }}
@@ -40,8 +45,19 @@ jobs:
       - name: Install Chromium
         run: bunx playwright install --with-deps chromium
 
-      - name: Run Playwright E2E Suite
-        run: bun run test:e2e
+      - name: Run Playwright Smoke Tests
+        run: bun run test:e2e:smoke
+
+      - name: Upload Playwright Reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-smoke
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
 
   build-and-audit:
     name: Production Build & Web Vitals Audit

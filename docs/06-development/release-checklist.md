@@ -11,6 +11,12 @@ Run development checks locally before transferring the patch to the production c
 
 Do not commit `.env` or credentials. Sync the work to the server, then commit there.
 
+## Browser checks
+
+- `bun run test:e2e:smoke` runs the tagged critical browser journeys with no retries. GitHub runs it on pull requests with a ten-minute job limit.
+- `bun run test:e2e` runs the full suite. GitHub runs it nightly at 19:17 UTC and supports manual runs from **Full Browser E2E**. Download its Playwright report or `e2e-timing.json` to compare failures, retries and durations. The full suite runs independently of deployment.
+- An ordinary local or CI run starts a loopback-only API fixture before Next.js. Use the shared article fixtures for server-rendered routes and retain browser route mocks for scenario-specific client reads and writes. If you set `PLAYWRIGHT_BASE_URL` to reuse a running app, start the fixture with `bun tests/e2e/fixtures/api.ts` and set `API_URL=http://127.0.0.1:3181` when starting the app.
+
 ## Release and deployment
 
 - Release Please opens or updates a version PR from `main`. The repository's **Allow GitHub Actions to create and approve pull requests** setting permits the bot to open its PR. The workflow only creates and updates PRs. A human with repository permission reviews and merges them.

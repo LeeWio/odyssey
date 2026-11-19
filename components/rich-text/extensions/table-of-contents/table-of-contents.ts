@@ -31,9 +31,9 @@ const OutlineScrollOffset = Extension.create({
     if (!this.editor.storage.tableOfContents || typeof window === "undefined") return;
 
     const onScroll = () => {
-      const items = this.editor.storage.tableOfContents?.content as
-        TableOfContentDataItem[] | undefined;
-      if (!items || items.length === 0) return;
+      const outline = this.editor.storage.tableOfContents;
+      if (!outline?.content.length) return;
+      const items = outline.content;
 
       const position = readingScrollOffset() + ARTICLE_OUTLINE_TOP_OFFSET;
       let activeId = items[0]?.id ?? null;
@@ -53,27 +53,24 @@ const OutlineScrollOffset = Extension.create({
           item.isActive !== (item.id === activeId) ||
           item.isScrolledOver !== scrolledOver.has(item.id)
       );
-      this.editor.storage.tableOfContents.scrollPosition = position;
+      outline.scrollPosition = position;
       if (!changed) return;
 
       for (const item of items) {
         item.isActive = item.id === activeId;
         item.isScrolledOver = scrolledOver.has(item.id);
       }
-      this.editor.storage.tableOfContents.content = items;
       window.dispatchEvent(new CustomEvent("odyssey-outline-scroll"));
     };
 
-    const start = () => {
-      if (this.editor.storage.tableOfContents.content.length === 0) {
-        requestAnimationFrame(start);
-        return;
-      }
-      onScroll();
-    };
-    requestAnimationFrame(start);
+    // Tiptap populates the outline during editor creation. Heading-free
+    // documents can stay empty for their entire lifetime.
+    const frame = window.requestAnimationFrame(onScroll);
     window.addEventListener("scroll", onScroll, { passive: true });
-    this.editor.on("destroy", () => window.removeEventListener("scroll", onScroll));
+    this.editor.on("destroy", () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    });
   },
 });
 

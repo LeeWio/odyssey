@@ -34,7 +34,7 @@ const endpoint = "**/api/v1/user/notifications?**";
 test.use({ locale: "en-US" });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "notification-list-test",
@@ -57,7 +57,9 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test("switching views hides the previous list and pagination while loading", async ({ page }) => {
+test("switching views hides the previous list and pagination while loading @smoke", async ({
+  page,
+}) => {
   const response = Promise.withResolvers<void>();
   await page.route(endpoint, async (route) => {
     const view = new URL(route.request().url()).searchParams.get("view");
@@ -163,7 +165,7 @@ test("the popover unread filter hides read messages and previous totals until it
   try {
     await page.goto("/notifications");
     await page.getByRole("button", { name: "1 unread notifications", exact: true }).press("Enter");
-    const dialog = page.getByRole("dialog", { name: "Notifications", exact: true });
+    const dialog = page.getByRole("dialog", { name: "Not Seen Yet", exact: true });
     await expect(dialog.getByText("Read message", { exact: true })).toBeVisible();
     await dialog.getByRole("button", { name: "Unread", exact: true }).press("Enter");
     await expect(dialog.getByText("Read message", { exact: true })).toHaveCount(0);
@@ -204,7 +206,7 @@ test("a category tab requests that category and hides the previous rows", async 
 
 test("an admin review notification opens the matching dashboard view", async ({ page }) => {
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "notification-admin-test",
@@ -254,7 +256,7 @@ test("a guestbook moderation notification can be approved before it is completed
   page,
 }) => {
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "guestbook-notification-admin-test",
@@ -307,7 +309,7 @@ test("a guestbook moderation notification can be approved before it is completed
 
 test("a failed moderation decision leaves the notification actionable", async ({ page }) => {
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "guestbook-notification-admin-failure-test",
@@ -359,7 +361,7 @@ test("a post review notification uses the post review contract before completion
   page,
 }) => {
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "post-notification-admin-test",
@@ -520,7 +522,7 @@ test("the popover preserves another pending read when one read fails", async ({ 
   try {
     await page.goto("/notifications");
     await page.getByRole("button", { name: "1 unread notifications", exact: true }).press("Enter");
-    const dialog = page.getByRole("dialog", { name: "Notifications", exact: true });
+    const dialog = page.getByRole("dialog", { name: "Not Seen Yet", exact: true });
     const firstButton = dialog.getByRole("button", { name: /First message/ });
     const secondButton = dialog.getByRole("button", { name: /Second message/ });
     await firstButton.press("Enter");
@@ -628,7 +630,7 @@ for (const surface of ["center", "popover"] as const) {
       }
       const container =
         surface === "popover"
-          ? page.getByRole("dialog", { name: "Notifications", exact: true })
+          ? page.getByRole("dialog", { name: "Not Seen Yet", exact: true })
           : page.locator("main");
       const markAll = container.getByRole("button", {
         name: surface === "popover" ? "Mark all notifications as read" : "Mark all read",

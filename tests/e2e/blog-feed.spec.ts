@@ -38,9 +38,18 @@ const result = (list: unknown[], page = 0, total = list.length) =>
   });
 const endpoint = "**/api/v1/public/blog/posts?**";
 
+async function selectFeedTab(page: Page) {
+  // Theme controls are rendered after hydration. A server-rendered tab can
+  // otherwise receive a click before its React Aria handlers are attached.
+  await expect(page.getByRole("radiogroup", { name: "Color mode" })).toBeAttached();
+  const tab = page.getByRole("tab", { name: "Read through", exact: true });
+  await tab.press("Enter");
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+}
+
 async function openFeed(page: Page, query = "") {
   await page.goto(`/chronicle${query}`);
-  await page.getByRole("tab", { name: "Orbit Feed", exact: true }).click();
+  await selectFeedTab(page);
 }
 
 test.use({ locale: "en-US" });
@@ -61,12 +70,14 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
-test("saves an article from the feed without navigating away", async ({ page }, testInfo) => {
+test("saves an article from the feed without navigating away @smoke", async ({
+  page,
+}, testInfo) => {
   let saveCalls = 0;
   let removeCalls = 0;
   let saved = false;
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "blog-feed-reading-list-test",
@@ -92,7 +103,9 @@ test("saves an article from the feed without navigating away", async ({ page }, 
     await route.fulfill({ json: envelope(null) });
   });
   await page.route(endpoint, (route) =>
-    route.fulfill({ json: result([{ ...post(123, "Saveable article"), isInReadingList: saved }]) })
+    route.fulfill({
+      json: result([{ ...post(123, "Saveable article"), isInReadingList: saved }]),
+    })
   );
 
   await openFeed(page);
@@ -118,7 +131,7 @@ test("saves an article from the feed without navigating away", async ({ page }, 
     articleCard.getByRole("button", { name: "Save for later", exact: true })
   ).toBeVisible();
   await page.reload();
-  await page.getByRole("tab", { name: "Orbit Feed", exact: true }).click();
+  await selectFeedTab(page);
   await expect(
     articleCard.getByRole("button", { name: "Save for later", exact: true })
   ).toBeVisible();
@@ -162,7 +175,7 @@ test("pending saves prevent duplicates, and failed saves can be retried", async 
   let writes = 0;
   let saved = false;
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "pending-reading-list-test",
@@ -297,7 +310,7 @@ test("search filters and page are restored from the URL after reload", async ({ 
   await expect.poll(() => requests.at(-1)).toBe("systems:1:1");
 
   await page.reload();
-  await page.getByRole("tab", { name: "Orbit Feed", exact: true }).click();
+  await selectFeedTab(page);
   await expect(page.getByRole("searchbox", { name: "Search articles" })).toHaveValue("systems");
   await expect(results.getByText("Systems article", { exact: true })).toBeVisible();
   await expect.poll(() => requests.length).toBeGreaterThanOrEqual(2);
