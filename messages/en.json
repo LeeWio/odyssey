@@ -334,6 +334,7 @@
     "continueReading": "Continue reading",
     "keepReadingHint": "Previous and next follow publication time.",
     "keepReadingColumnHint": "Previous and next stay inside this column.",
+    "alsoLikeTitle": "You May Also Like",
     "alsoLikeCount": "{count} related pieces",
     "sameSubject": "Same subject",
     "sameSubjectHint": "Other pieces close to this subject.",

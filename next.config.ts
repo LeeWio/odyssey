@@ -13,7 +13,6 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["happy-dom"],
 
   experimental: {
-    viewTransition: true,
     optimizePackageImports: [
       "@heroui/react",
       "@heroui-pro/react",

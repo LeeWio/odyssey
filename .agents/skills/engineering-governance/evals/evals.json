@@ -1,0 +1,38 @@
+{
+  "skill_name": "engineering-governance",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "在 Odyssey 中修复一个文章页面的响应式导航 bug。请先检查仓库和工作区，给出需求、设计和实现计划，然后实施、验证并准备 PR。",
+      "expected_output": "保护既有修改，使用隔离分支和可追溯需求，遵循 HeroUI/Tailwind/AGENTS.md 约定，运行适用的 Bun 检查和浏览器验证，提供 PR 与独立 AI Review 记录，并停在人工批准前。",
+      "files": [],
+      "expectations": [
+        "不会直接在 main 上开发",
+        "用户可见改动包含 E2E 或明确的 BLOCKED/N/A 说明",
+        "明确 AI Review 不等同于人工批准且不自行合并"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Odyssey 要修改一个 HeroUI Card 的交互和动画。请按项目流程处理。",
+      "expected_output": "先查询 HeroUI MCP，检查项目设计规则和可访问性，记录动画、响应式、reduced-motion 和回滚策略。",
+      "files": [],
+      "expectations": [
+        "在变更前遵循 HeroUI MCP 要求",
+        "质量记录包含真实 Bun 命令和 PASS/FAIL/BLOCKED/N/A",
+        "PR 描述包含视觉/可访问性证据或诚实的未验证说明"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "只修改 Odyssey 的工程治理 Skill 文档。是否可以跳过 PR 和测试？",
+      "expected_output": "说明治理文件本身也必须走独立 PR，并按适用性记录文档与脚本验证，不伪造未执行检查。",
+      "files": [],
+      "expectations": [
+        "不把文档变更当作 PR 豁免",
+        "不建议修改分支保护来绕过流程",
+        "明确哪些检查为 N/A 或 BLOCKED 及原因"
+      ]
+    }
+  ]
+}

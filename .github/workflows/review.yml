@@ -21,7 +21,7 @@ jobs:
       HEROUI_AUTH_TOKEN: ${{ secrets.HEROUI_AUTH_TOKEN }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # 1. Setup Bun and dependencies (Reviewdog needs eslint to be installed to run it)
       - name: Setup Project
@@ -29,7 +29,7 @@ jobs:
 
       # 2. Run Reviewdog ESLint to automatically comment on PR changes
       - name: Run ESLint with Reviewdog
-        uses: reviewdog/action-eslint@v1
+        uses: reviewdog/action-eslint@6dad10dc50476699ad1ddbbb19bf55d36f311a39 # v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # Post comments directly on the PR line-by-line diff as a review

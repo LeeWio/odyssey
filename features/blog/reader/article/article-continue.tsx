@@ -8,6 +8,7 @@ import { useEffect, useId, useRef, useState, type ComponentProps } from "react";
 import { useTranslations } from "next-intl";
 
 import { EASE_OUT } from "@/lib/motion/ease";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { ArticleCover } from "@/components/card/article-cover";
 
@@ -30,7 +31,7 @@ function revealFrom(index: number) {
 export function useContinueReading(article: PostResponse) {
   const neighbors = useArticleNeighbors(article);
   const related = useGetRelatedPostsQuery({ size: ALSO_LIKE_LIMIT, slug: article.slug });
-  const sameSubject = sameSubjectPosts(article, related.data);
+  const sameSubject = sameSubjectPosts(article, related.currentData);
   return {
     isLoading: neighbors.isLoading || related.isLoading,
     next: neighbors.next,
@@ -44,39 +45,36 @@ export function useContinueReading(article: PostResponse) {
 /** Sticky continuation beside the article. Calls back once it knows whether the rail exists. */
 export function ArticleContinue({
   article,
+  isRailAvailable,
   onAvailability,
 }: {
   article: PostResponse;
+  isRailAvailable: boolean;
   onAvailability?: (available: boolean) => void;
 }) {
   const t = useTranslations("Article");
   const titleId = useId();
   const { isLoading, sameSubject } = useContinueReading(article);
   const items = sameSubject;
-  const [playReveal] = useState(
-    () =>
-      typeof window === "undefined" ||
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
+  const playReveal = !useReducedMotionPreference();
   const [revealReady, setRevealReady] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const panel = panelRef.current;
-    if (!panel || !playReveal) return;
-    let frame = 0;
-    const start = () => {
-      const box = panel.getBoundingClientRect();
-      const placed = box.left > window.innerWidth * 0.55 && box.width > 160;
-      if (!placed) {
-        frame = window.requestAnimationFrame(start);
-        return;
-      }
-      setRevealReady(true);
+    if (!panel || !playReveal || !isRailAvailable || revealReady) return;
+
+    const revealIfVisible = () => {
+      if (getComputedStyle(panel).visibility === "visible") setRevealReady(true);
     };
-    frame = window.requestAnimationFrame(start);
-    return () => window.cancelAnimationFrame(frame);
-  }, [playReveal]);
+
+    const frame = window.requestAnimationFrame(revealIfVisible);
+    window.addEventListener("resize", revealIfVisible);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", revealIfVisible);
+    };
+  }, [isRailAvailable, playReveal, revealReady]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -88,7 +86,7 @@ export function ArticleContinue({
       {items.length === 0 ? null : (
         <Widget className="max-h-[calc(100dvh-8rem)] w-full">
           <Widget.Header>
-            <Widget.Title id={titleId}>You May Also Like</Widget.Title>
+            <Widget.Title id={titleId}>{t("alsoLikeTitle")}</Widget.Title>
             <Chip aria-label={t("alsoLikeCount", { count: items.length })} size="sm" variant="soft">
               <Chip.Label>{items.length}</Chip.Label>
             </Chip>

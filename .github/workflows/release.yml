@@ -8,9 +8,11 @@ on:
       - "docs/**"
       - "plans/**"
       - ".gitignore"
+  workflow_dispatch:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
 
 concurrency:
@@ -20,10 +22,11 @@ concurrency:
 jobs:
   release-pr:
     name: Create or update release PR
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Create or update release PR
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
