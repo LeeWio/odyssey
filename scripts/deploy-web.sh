@@ -16,7 +16,7 @@ cd "${SERVER_PROJECT_PATH}"
 rollback_image="${WEB_LATEST_IMAGE%:*}:rollback"
 previous_id=""
 restore_on_failure=false
-registry_logged_in=false
+deployment_docker_config=""
 
 wait_for_container() {
   local image_id="$1"
@@ -56,12 +56,22 @@ on_exit() {
       echo "Automatic rollback failed. The previous image is tagged ${rollback_image}." >&2
     fi
   fi
-  if [[ ${registry_logged_in} == true ]]; then
-    docker logout "${ALIYUN_REGISTRY}" >/dev/null 2>&1 || true
+  if [[ -n ${deployment_docker_config} ]] && ! rm -rf -- "${deployment_docker_config}"; then
+    echo "Could not remove the temporary Docker configuration" >&2
+    status=1
   fi
   exit "${status}"
 }
 trap on_exit EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+# Isolate registry authentication from the production user's Docker configuration.
+deployment_docker_config="$(mktemp -d)"
+export DOCKER_CONFIG="${deployment_docker_config}"
+# An explicit registry entry prevents automatic discovery of the user's credential helper.
+printf '{"auths":{"%s":{}}}\n' "${ALIYUN_REGISTRY}" >"${DOCKER_CONFIG}/config.json"
 
 current_container="$(docker compose ps --all --quiet web)"
 if [[ -n ${current_container} ]]; then
@@ -70,7 +80,6 @@ fi
 
 printf '%s' "${ALIYUN_REGISTRY_PASSWORD}" |
   docker login "${ALIYUN_REGISTRY}" --username "${ALIYUN_REGISTRY_USER}" --password-stdin
-registry_logged_in=true
 
 # A digest pull verifies manifest identity before the Compose alias is changed.
 candidate="${ALIYUN_IMAGE}@${EXPECTED_IMAGE_DIGEST}"

@@ -141,12 +141,23 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Require the production SSH host fingerprint
+        shell: bash
+        env:
+          SERVER_SSH_FINGERPRINT: ${{ secrets.SERVER_SSH_FINGERPRINT }}
+        run: |
+          if [[ ! ${SERVER_SSH_FINGERPRINT} =~ ^SHA256:[A-Za-z0-9+/]{43}$ ]]; then
+            echo "Configure the trusted production SSH host fingerprint before deploying." >&2
+            exit 1
+          fi
+
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@2ead5e36573f08b82fbfce1504f1a4b05a647c6f # v1.2.2
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
+          fingerprint: ${{ secrets.SERVER_SSH_FINGERPRINT }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           envs: HEALTHCHECK_URL,ALIYUN_REGISTRY,ALIYUN_REGISTRY_USER,ALIYUN_REGISTRY_PASSWORD,ALIYUN_IMAGE,WEB_LATEST_IMAGE,EXPECTED_IMAGE_DIGEST,EXPECTED_REVISION,SERVER_PROJECT_PATH
           command_timeout: 15m
