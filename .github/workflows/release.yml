@@ -1,4 +1,4 @@
-name: Release
+name: Release PR
 
 on:
   push:
@@ -11,65 +11,20 @@ on:
 
 permissions:
   contents: write
-  issues: write
   pull-requests: write
 
-# A second push while this job is cutting a release makes the version commit
-# a non-fast-forward. Queue releases instead of letting two of them push main.
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-pr-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Semantic Release
+  release-pr:
+    name: Create or update release PR
     runs-on: ubuntu-latest
-    env:
-      HEROUI_AUTH_TOKEN: ${{ secrets.HEROUI_AUTH_TOKEN }}
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Create or update release PR
+        uses: googleapis/release-please-action@v4
         with:
-          fetch-depth: 0
-          # semantic-release/git pushes the changelog and release tag back to the
-          # current branch. Keep checkout's token-backed remote available.
-          persist-credentials: true
-
-      - name: Setup Project
-        uses: ./.github/actions/setup-project
-
-      - name: Run Semantic Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          log="$(mktemp)"
-          for attempt in 1 2 3; do
-            set +e
-            bun x semantic-release 2>&1 | tee "$log"
-            status="${PIPESTATUS[0]}"
-            set -e
-            if [ "$status" -eq 0 ]; then
-              exit 0
-            fi
-            if [ "$attempt" -lt 3 ] && grep -q "HEAD -> main (fetch first)" "$log"; then
-              echo "main moved while cutting the release; retrying from origin/main"
-              git fetch origin main --tags --prune --prune-tags --force
-              git checkout -B main origin/main
-              continue
-            fi
-            # A rewritten main can leave an old version tag behind. Remove it
-            # only when it no longer points at this branch, then cut the release again.
-            if [ "$attempt" -lt 3 ] && grep -q "already exists" "$log"; then
-              tag="$(grep -oE "tag 'v[^']+'" "$log" | head -1 | tr -d "'")"
-              tag="${tag#tag }"
-              if [ -n "$tag" ] && git rev-parse -q --verify "refs/tags/$tag" >/dev/null && ! git merge-base --is-ancestor "$tag" HEAD; then
-                echo "removing stale tag $tag that is not on this branch"
-                git push origin ":refs/tags/$tag"
-                git tag -d "$tag"
-                continue
-              fi
-            fi
-            exit "$status"
-          done
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
