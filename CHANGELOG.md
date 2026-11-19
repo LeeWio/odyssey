@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.249.0](https://github.com/LeeWio/odyssey/compare/v1.248.0...v1.249.0) (2026-11-19)
+
+
+### Features
+
+* **webhooks:** retry failed deliveries from the dashboard ([#33](https://github.com/LeeWio/odyssey/issues/33)) ([4ed4ef9](https://github.com/LeeWio/odyssey/commit/4ed4ef9b9127d19d1f6d335a1ee9b16f3c27bd37))
+
 ## [1.248.0](https://github.com/LeeWio/odyssey/compare/v1.247.1...v1.248.0) (2026-11-19)
 
 
