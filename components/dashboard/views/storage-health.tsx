@@ -5,9 +5,14 @@ import { EmptyState } from "@heroui-pro/react";
 import { useState } from "react";
 
 import {
+  openapiApi,
   useGetStorageInventoryQuery,
   useVerifyStorageIntegrityQuery,
 } from "@/lib/features/openapi/openapi-api";
+
+openapiApi.enhanceEndpoints({
+  endpoints: { getStorageInventory: { providesTags: ["OpenApi", "File"] } },
+});
 
 type StorageInventory = {
   providerType?: string;
