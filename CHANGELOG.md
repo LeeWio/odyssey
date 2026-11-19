@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.243.1](https://github.com/LeeWio/odyssey/compare/v1.243.0...v1.243.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **ci:** harden odyssey engineering delivery ([#9](https://github.com/LeeWio/odyssey/issues/9)) ([bdef3de](https://github.com/LeeWio/odyssey/commit/bdef3de4209b5c0022c920a2363cd9be6fbae323))
+
 ## [1.239.16](https://github.com/LeeWio/odyssey/compare/v1.239.15...v1.239.16) (2026-11-17)
 
 
