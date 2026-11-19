@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { getApiErrorMessage } from "@/lib/api";
 import {
   useGetAdminWebhookLogsQuery,
+  useRetryAdminWebhookDeliveryMutation,
   useSendAdminWebhookTestMutation,
   type Webhook,
 } from "@/lib/features/dashboard/webhook-api";
@@ -26,6 +27,9 @@ export function WebhookDeliveries({
   const [deliveryId, setDeliveryId] = useState<string | null>(null);
   const [polling, setPolling] = useState(false);
   const [error, setError] = useState("");
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [retryStatus, setRetryStatus] = useState("");
+  const [retryDelivery] = useRetryAdminWebhookDeliveryMutation();
   const [send, sending] = useSendAdminWebhookTestMutation();
   const logs = useGetAdminWebhookLogsQuery(
     { id: webhook.id, page },
@@ -38,13 +42,17 @@ export function WebhookDeliveries({
 
   useEffect(() => {
     if (!polling) return;
-    const timer = window.setTimeout(() => setPolling(false), testResult ? 0 : 30000);
+    const timer = window.setTimeout(
+      () => setPolling(false),
+      testResult && !testResult.inProgress ? 0 : 30000
+    );
     return () => window.clearTimeout(timer);
   }, [polling, deliveryId, testResult]);
 
   async function sendTest() {
-    if (sending.isLoading || polling) return;
+    if (sending.isLoading || polling || retryingId) return;
     setError("");
+    setRetryStatus("");
     try {
       const receipt = await send(webhook.id).unwrap();
       setPage(0);
@@ -55,6 +63,30 @@ export function WebhookDeliveries({
     }
   }
 
+  async function retry(deliveryId: string, attemptCount: number) {
+    if (retryingId) return;
+    setRetryingId(deliveryId);
+    setRetryStatus("");
+    setError("");
+    setDeliveryId(null);
+    setPolling(false);
+    try {
+      const result = await retryDelivery({ deliveryId, attemptCount }).unwrap();
+      setRetryStatus(result.isSuccess ? t("retryDelivered") : t("retryDeliveryFailed"));
+    } catch (failure) {
+      const changed =
+        typeof failure === "object" &&
+        failure !== null &&
+        "status" in failure &&
+        failure.status === 409;
+      setError(t(changed ? "deliveryChanged" : "retryFailed"));
+    } finally {
+      await logs.refetch();
+      setRetryingId(null);
+    }
+  }
+
+  const busy = sending.isLoading || retryingId !== null;
   const lastPage = Math.max(0, (data?.totalPages ?? 1) - 1);
 
   return (
@@ -62,10 +94,10 @@ export function WebhookDeliveries({
       <Modal.Backdrop
         isOpen
         onOpenChange={(open) => {
-          if (!open && !sending.isLoading) close();
+          if (!open && !busy) close();
         }}
-        isDismissable={!sending.isLoading}
-        isKeyboardDismissDisabled={sending.isLoading}
+        isDismissable={!busy}
+        isKeyboardDismissDisabled={busy}
         UNSTABLE_portalContainer={portal}
       >
         <Modal.Container size="md">
@@ -78,7 +110,7 @@ export function WebhookDeliveries({
                 <Button
                   size="sm"
                   isPending={sending.isLoading}
-                  isDisabled={!webhook.isActive || polling}
+                  isDisabled={!webhook.isActive || polling || retryingId !== null}
                   onPress={() => void sendTest()}
                 >
                   {t("sendTest")}
@@ -86,7 +118,7 @@ export function WebhookDeliveries({
                 <Button
                   size="sm"
                   variant="secondary"
-                  isDisabled={logs.isFetching}
+                  isDisabled={logs.isFetching || retryingId !== null}
                   onPress={() => void logs.refetch()}
                 >
                   {t("refresh")}
@@ -95,13 +127,18 @@ export function WebhookDeliveries({
               {!webhook.isActive ? <p className="text-muted text-sm">{t("enableToTest")}</p> : null}
               {deliveryId && page === 0 ? (
                 <p role="status" className="text-sm">
-                  {testResult
+                  {testResult && !testResult.inProgress
                     ? testResult.isSuccess
                       ? t("testDelivered")
                       : t("testDeliveryFailed")
                     : polling
                       ? t("testQueued")
                       : t("testWaiting")}
+                </p>
+              ) : null}
+              {retryStatus ? (
+                <p role="status" className="text-sm">
+                  {retryStatus}
                 </p>
               ) : null}
               {error ? (
@@ -119,32 +156,64 @@ export function WebhookDeliveries({
                 <p className="text-muted text-sm">{t("noDeliveries")}</p>
               ) : (
                 <ul className="divide-separator divide-y">
-                  {data.list.map((entry) => (
-                    <li
-                      key={entry.deliveryId}
-                      className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
-                    >
-                      <div className="flex flex-col gap-1">
-                        <span>{entry.event === "ping" ? t("testEvent") : entry.event}</span>
-                        <time className="text-muted" dateTime={entry.createdAt}>
-                          {format.dateTime(new Date(entry.createdAt), {
-                            dateStyle: "short",
-                            timeStyle: "short",
-                          })}
-                        </time>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        {entry.responseCode ? <span>HTTP {entry.responseCode}</span> : null}
-                        <Chip
-                          size="sm"
-                          color={entry.isSuccess ? "success" : "danger"}
-                          variant="soft"
-                        >
-                          {entry.isSuccess ? t("delivered") : t("failed")}
-                        </Chip>
-                      </div>
-                    </li>
-                  ))}
+                  {data.list.map((entry) => {
+                    const attemptCount = entry.attemptCount;
+                    return (
+                      <li
+                        key={entry.deliveryId}
+                        className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <span>{entry.event === "ping" ? t("testEvent") : entry.event}</span>
+                          {attemptCount != null ? (
+                            <span className="text-muted">
+                              {t("attempts", { count: attemptCount })}
+                            </span>
+                          ) : null}
+                          <time className="text-muted" dateTime={entry.createdAt}>
+                            {format.dateTime(new Date(entry.createdAt), {
+                              dateStyle: "short",
+                              timeStyle: "short",
+                            })}
+                          </time>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {entry.responseCode ? <span>HTTP {entry.responseCode}</span> : null}
+                          <Chip
+                            size="sm"
+                            color={
+                              entry.inProgress ? "default" : entry.isSuccess ? "success" : "danger"
+                            }
+                            variant="soft"
+                          >
+                            {entry.inProgress
+                              ? t("inProgress")
+                              : entry.isSuccess
+                                ? t("delivered")
+                                : t("failed")}
+                          </Chip>
+                          {webhook.isActive &&
+                          !entry.isSuccess &&
+                          !entry.inProgress &&
+                          attemptCount != null ? (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              isPending={retryingId === entry.deliveryId}
+                              isDisabled={
+                                (retryingId !== null && retryingId !== entry.deliveryId) ||
+                                sending.isLoading ||
+                                polling
+                              }
+                              onPress={() => void retry(entry.deliveryId, attemptCount)}
+                            >
+                              {t("retryDelivery")}
+                            </Button>
+                          ) : null}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
               {lastPage > 0 ? (
@@ -155,7 +224,7 @@ export function WebhookDeliveries({
                   <Button
                     size="sm"
                     variant="secondary"
-                    isDisabled={page === 0 || logs.isFetching || polling}
+                    isDisabled={page === 0 || logs.isFetching || polling || retryingId !== null}
                     onPress={() => setPage(page - 1)}
                   >
                     {t("previous")}
@@ -164,7 +233,9 @@ export function WebhookDeliveries({
                   <Button
                     size="sm"
                     variant="secondary"
-                    isDisabled={page >= lastPage || logs.isFetching || polling}
+                    isDisabled={
+                      page >= lastPage || logs.isFetching || polling || retryingId !== null
+                    }
                     onPress={() => setPage(page + 1)}
                   >
                     {t("next")}
@@ -173,7 +244,7 @@ export function WebhookDeliveries({
               ) : null}
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" isDisabled={sending.isLoading} onPress={close}>
+              <Button variant="secondary" isDisabled={busy} onPress={close}>
                 {t("close")}
               </Button>
             </Modal.Footer>

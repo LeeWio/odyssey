@@ -32,6 +32,7 @@ const LogSchema = z.object({
   isSuccess: z.boolean().nullish(),
   attemptCount: z.number().nullish(),
   createdAt: z.string(),
+  inProgress: z.boolean().optional(),
 });
 const ReceiptSchema = z.object({ deliveryId: z.string() });
 
@@ -69,6 +70,18 @@ export const webhookApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<WebhookReceipt>) => response.data,
       invalidatesTags: (_data, error, id) => (error ? [] : [logsTag(id)]),
     }),
+    retryAdminWebhookDelivery: builder.mutation<
+      WebhookLog,
+      { deliveryId: string; attemptCount: number }
+    >({
+      query: ({ deliveryId, attemptCount }) => ({
+        url: `/api/v1/admin/webhooks/logs/${encodeURIComponent(deliveryId)}/redeliver`,
+        method: "POST",
+        params: { attemptCount },
+      }),
+      rawResponseSchema: apiResponseSchema(LogSchema),
+      transformResponse: (response: ApiResponse<WebhookLog>) => response.data,
+    }),
     getAdminWebhookLogs: builder.query<PageResult<WebhookLog>, { id: number; page: number }>({
       query: ({ id, page }) => ({
         url: `/api/v1/admin/webhooks/${id}/logs`,
@@ -87,4 +100,5 @@ export const {
   useUpdateAdminWebhookMutation,
   useSendAdminWebhookTestMutation,
   useGetAdminWebhookLogsQuery,
+  useRetryAdminWebhookDeliveryMutation,
 } = webhookApi;
