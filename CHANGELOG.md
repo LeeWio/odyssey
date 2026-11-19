@@ -26,6 +26,15 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.244.0](https://github.com/LeeWio/odyssey/compare/v1.243.1...v1.244.0) (2026-11-19)
+
+
+### Features
+
+* **files:** browse and manage server assets ([#11](https://github.com/LeeWio/odyssey/issues/11)) ([07f948d](https://github.com/LeeWio/odyssey/commit/07f948dcee233506ccf8af04c84bc25a42d29139))
+* **files:** show usage before allowing deletion ([#14](https://github.com/LeeWio/odyssey/issues/14)) ([b02a4c3](https://github.com/LeeWio/odyssey/commit/b02a4c3ac2f10f9fcc618f7b166270605582e55a))
+* **library:** paginate saved writing ([#13](https://github.com/LeeWio/odyssey/issues/13)) ([0c6835d](https://github.com/LeeWio/odyssey/commit/0c6835d28a901dc8526a68bcbdf3da52330a6893))
+
 ## [1.243.1](https://github.com/LeeWio/odyssey/compare/v1.243.0...v1.243.1) (2026-11-19)
 
 
