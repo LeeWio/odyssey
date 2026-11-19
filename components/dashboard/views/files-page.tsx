@@ -37,6 +37,8 @@ const usageLabels: Record<AssetUsage["locations"][number]["kind"], string> = {
   COMMENT: "Comment",
   USER_AVATAR: "User avatar",
   PROJECT_COVER: "Project cover",
+  SERIES_COVER: "Column cover",
+  FRIEND_LINK_AVATAR: "Friend link avatar",
   MOMENT: "Moment",
 };
 
