@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.248.0](https://github.com/LeeWio/odyssey/compare/v1.247.1...v1.248.0) (2026-11-19)
+
+
+### Features
+
+* **editor:** resume a single saved article draft ([#31](https://github.com/LeeWio/odyssey/issues/31)) ([e27f4c2](https://github.com/LeeWio/odyssey/commit/e27f4c2306153fa1775251460561beae7bbac60a))
+
 ## [1.247.1](https://github.com/LeeWio/odyssey/compare/v1.247.0...v1.247.1) (2026-11-19)
 
 
