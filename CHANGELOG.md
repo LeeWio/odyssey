@@ -26,6 +26,18 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.245.0](https://github.com/LeeWio/odyssey/compare/v1.244.1...v1.245.0) (2026-11-19)
+
+
+### Features
+
+* **editor:** compare saved article revisions ([#19](https://github.com/LeeWio/odyssey/issues/19)) ([8b3a18e](https://github.com/LeeWio/odyssey/commit/8b3a18e59763fc8a87fe040665e563e9db47505b))
+
+
+### Bug Fixes
+
+* **editor:** guard against stale article restores ([#21](https://github.com/LeeWio/odyssey/issues/21)) ([0086b24](https://github.com/LeeWio/odyssey/commit/0086b2483304fc5aebfe40d002a982dca16234d9))
+
 ## [1.244.1](https://github.com/LeeWio/odyssey/compare/v1.244.0...v1.244.1) (2026-11-19)
 
 
