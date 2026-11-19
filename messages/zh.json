@@ -367,6 +367,8 @@
     "nothingInProgressHint": "打开一篇文章后，阅读位置会保存在这里。",
     "savedTitle": "保存的文章",
     "savedDescription": "你标记过、想再看的文章。",
+    "savedCount": "已保存 {count} 篇文章",
+    "savedPages": "已保存文章分页",
     "savedUnavailable": "保存的文章暂时不可用",
     "noSaved": "还没有保存的文章",
     "noSavedHint": "在文章里使用收藏，把它留在手边。",
