@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.246.0](https://github.com/LeeWio/odyssey/compare/v1.245.0...v1.246.0) (2026-11-19)
+
+
+### Features
+
+* **moments:** sync bookmarks across devices ([#22](https://github.com/LeeWio/odyssey/issues/22)) ([f443b6e](https://github.com/LeeWio/odyssey/commit/f443b6ead5f82b44fc55910a9d19cd9314cd840e))
+
 ## [1.245.0](https://github.com/LeeWio/odyssey/compare/v1.244.1...v1.245.0) (2026-11-19)
 
 
