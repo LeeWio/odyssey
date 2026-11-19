@@ -114,7 +114,11 @@ export function RevisionHistoryDialog({
   const comparisonId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [restoreError, setRestoreError] = useState<string | null>(null);
-  const [revisionToRestore, setRevisionToRestore] = useState<PostRevision | null>(null);
+  const [restoreConflict, setRestoreConflict] = useState(false);
+  const [restoreRequest, setRestoreRequest] = useState<{
+    revision: PostRevision;
+    expectedRevision: number;
+  } | null>(null);
   const {
     currentData: revisions = [],
     isFetching,
@@ -122,6 +126,7 @@ export function RevisionHistoryDialog({
     refetch,
   } = useGetPostRevisionsQuery(postId, {
     skip: !isOpen,
+    refetchOnMountOrArgChange: true,
   });
   const [revertPostRevision, { isLoading: isReverting }] = useRevertPostRevisionMutation();
 
@@ -145,6 +150,7 @@ export function RevisionHistoryDialog({
 
   const openDialog = () => {
     setRestoreError(null);
+    setRestoreConflict(false);
     setSelectedRevisionId(null);
     setBaselineId(null);
     setIsComparing(false);
@@ -154,22 +160,45 @@ export function RevisionHistoryDialog({
   const closeDialog = () => {
     if (isReverting) return;
     setIsOpen(false);
-    setRevisionToRestore(null);
+    setRestoreRequest(null);
     setRestoreError(null);
   };
 
-  const restoreRevision = async () => {
-    if (!revisionToRestore) return;
+  const latestRevision = revisions[0];
+  const canConfirmRestore = !!activeRevision && !!latestRevision && !isFetching && !isError;
 
+  const confirmRestore = () => {
+    if (!canConfirmRestore) return;
+    setRestoreError(null);
+    setRestoreConflict(false);
+    setRestoreRequest({ revision: activeRevision, expectedRevision: latestRevision.versionNumber });
+  };
+
+  const restoreRevision = async () => {
+    if (!restoreRequest || isReverting) return;
+
+    const { revision, expectedRevision } = restoreRequest;
     setRestoreError(null);
     try {
-      await revertPostRevision({ id: postId, revisionId: revisionToRestore.id }).unwrap();
-      await onRestored?.();
-      toast.success(`Version ${revisionToRestore.versionNumber} restored.`);
-      setRevisionToRestore(null);
-      setIsOpen(false);
+      await revertPostRevision({ id: postId, revisionId: revision.id, expectedRevision }).unwrap();
     } catch (error) {
+      if (error && typeof error === "object" && "status" in error && error.status === 409) {
+        setRestoreRequest(null);
+        setRestoreConflict(true);
+        void refetch();
+        return;
+      }
       setRestoreError(getApiErrorMessage(error, "The selected version could not be restored."));
+      return;
+    }
+
+    setRestoreRequest(null);
+    setIsOpen(false);
+    toast.success(`Version ${revision.versionNumber} restored.`);
+    try {
+      await onRestored?.();
+    } catch {
+      toast.danger("The version was restored. Reload the editor to see it.");
     }
   };
 
@@ -372,11 +401,13 @@ export function RevisionHistoryDialog({
                   )}
                 </section>
               </Modal.Body>
-              {restoreError ? (
-                <Alert className="mx-5 mb-4 sm:mx-6" status="danger">
+              {restoreConflict ? (
+                <Alert className="mx-5 mb-4 sm:mx-6" status="warning">
                   <Alert.Content>
-                    <Alert.Title>Restore failed</Alert.Title>
-                    <Alert.Description>{restoreError}</Alert.Description>
+                    <Alert.Title>A newer version was saved</Alert.Title>
+                    <Alert.Description>
+                      Review the latest saved version before confirming the restore again.
+                    </Alert.Description>
                   </Alert.Content>
                 </Alert>
               ) : null}
@@ -386,8 +417,8 @@ export function RevisionHistoryDialog({
                 </Button>
                 <Button
                   variant="primary"
-                  onPress={() => setRevisionToRestore(activeRevision ?? null)}
-                  isDisabled={!activeRevision || isReverting}
+                  onPress={confirmRestore}
+                  isDisabled={!canConfirmRestore || isReverting}
                 >
                   Restore selected version
                 </Button>
@@ -399,11 +430,11 @@ export function RevisionHistoryDialog({
 
       <AlertDialog>
         <AlertDialog.Backdrop
-          isOpen={revisionToRestore !== null}
+          isOpen={restoreRequest !== null}
           variant="blur"
           isKeyboardDismissDisabled={isReverting}
           onOpenChange={(nextIsOpen) => {
-            if (!nextIsOpen && !isReverting) setRevisionToRestore(null);
+            if (!nextIsOpen && !isReverting) setRestoreRequest(null);
           }}
         >
           <AlertDialog.Container>
@@ -414,15 +445,24 @@ export function RevisionHistoryDialog({
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="text-sm">
-                  The current article will be replaced with version{" "}
-                  {revisionToRestore?.versionNumber}. Unsaved editor changes will be discarded.
+                  Restore version {restoreRequest?.revision.versionNumber} over the current saved
+                  version {restoreRequest?.expectedRevision}. Unsaved editor changes will be
+                  discarded.
                 </p>
+                {restoreError ? (
+                  <Alert status="danger">
+                    <Alert.Content>
+                      <Alert.Title>Restore failed</Alert.Title>
+                      <Alert.Description>{restoreError}</Alert.Description>
+                    </Alert.Content>
+                  </Alert>
+                ) : null}
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button
                   size="sm"
                   variant="tertiary"
-                  onPress={() => setRevisionToRestore(null)}
+                  onPress={() => setRestoreRequest(null)}
                   isDisabled={isReverting}
                 >
                   Cancel

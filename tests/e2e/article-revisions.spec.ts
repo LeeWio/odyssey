@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const postId = 417;
 const postPath = `/api/v1/admin/posts/${postId}`;
@@ -26,13 +26,7 @@ const article = {
 
 test.use({ locale: "en-US", actionTimeout: 10_000 });
 
-test("compares saved versions in the editor and handles retry and baseline changes", async ({
-  page,
-}) => {
-  let defaultAttempts = 0;
-  let writes = 0;
-  const comparisons: string[][] = [];
-
+test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 1680, height: 1000 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
@@ -47,6 +41,41 @@ test("compares saved versions in the editor and handles retry and baseline chang
       })
     );
   });
+});
+
+function savedVersions(latestVersion: number) {
+  return Array.from({ length: latestVersion }, (_, index) => {
+    const versionNumber = latestVersion - index;
+    return {
+      id: 500 + versionNumber,
+      postId,
+      title: article.title,
+      summary: null,
+      content: "",
+      versionNumber,
+      createdBy: "owner",
+      createdAt: date,
+    };
+  });
+}
+
+async function openVersionHistory(page: Page) {
+  await page.goto(`/test/rich-text?modal=1&postId=${postId}`);
+  await page.getByRole("button", { name: "Open editor", exact: true }).click();
+
+  const editor = page.getByRole("dialog", { name: "Edit article", exact: true });
+  await editor.getByRole("button", { name: "Open settings" }).click();
+  await editor.getByRole("button", { name: "Version history", exact: true }).click();
+  return page.getByRole("dialog", { name: "Version history", exact: true });
+}
+
+test("compares saved versions in the editor and handles retry and baseline changes", async ({
+  page,
+}) => {
+  let defaultAttempts = 0;
+  let writes = 0;
+  const comparisons: string[][] = [];
+
   await page.route("**/api/v1/**", async (route) => {
     const request = route.request();
     const { pathname, searchParams } = new URL(request.url());
@@ -57,18 +86,7 @@ test("compares saved versions in the editor and handles retry and baseline chang
     }
     if (pathname === postPath) return fulfill(article);
     if (pathname === `${postPath}/revisions`) {
-      return fulfill(
-        [3, 2, 1].map((versionNumber) => ({
-          id: 500 + versionNumber,
-          postId,
-          title: article.title,
-          summary: null,
-          content: "",
-          versionNumber,
-          createdBy: "owner",
-          createdAt: date,
-        }))
-      );
+      return fulfill(savedVersions(3));
     }
     if (pathname === `${postPath}/revisions/compare`) {
       const baseId = searchParams.get("baseId") ?? "";
@@ -93,13 +111,7 @@ test("compares saved versions in the editor and handles retry and baseline chang
     return route.fallback();
   });
 
-  await page.goto(`/test/rich-text?modal=1&postId=${postId}`);
-  await page.getByRole("button", { name: "Open editor", exact: true }).click();
-
-  const editor = page.getByRole("dialog", { name: "Edit article", exact: true });
-  await editor.getByRole("button", { name: "Open settings" }).click();
-  await editor.getByRole("button", { name: "Version history", exact: true }).click();
-  const history = page.getByRole("dialog", { name: "Version history", exact: true });
+  const history = await openVersionHistory(page);
   await expect(history.getByRole("button", { name: "Compare versions" })).toBeVisible();
   expect(comparisons).toHaveLength(0);
   await history.getByRole("button", { name: "Compare versions" }).click();
@@ -130,4 +142,60 @@ test("compares saved versions in the editor and handles retry and baseline chang
     await history.evaluate((element) => element.clientWidth)
   );
   expect(writes).toBe(0);
+});
+
+test("blocks a stale restore and requires a fresh confirmation", async ({ page }) => {
+  let latestVersion = 3;
+  let refreshFails = false;
+  const restoreRequests: (string | undefined)[] = [];
+
+  await page.route("**/api/v1/**", async (route) => {
+    const request = route.request();
+    const { pathname } = new URL(request.url());
+    const fulfill = (data: unknown) => route.fulfill({ json: { code: 200, message: "OK", data } });
+    if (pathname === postPath) return fulfill(article);
+    if (pathname === `${postPath}/revisions`) {
+      if (refreshFails) {
+        return route.fulfill({ status: 503, json: { code: 503, message: "Try again" } });
+      }
+      return fulfill(savedVersions(latestVersion));
+    }
+    if (pathname === `${postPath}/revisions/501/revert`) {
+      const expectedVersion = request.headers()["if-match"];
+      restoreRequests.push(expectedVersion);
+      if (expectedVersion !== `"revision-${latestVersion}"`) {
+        refreshFails = true;
+        return route.fulfill({ status: 409, json: { code: 409, message: "Stale version" } });
+      }
+      return fulfill(article);
+    }
+    if (pathname === "/api/v1/user/me") return fulfill({ id: 1, username: "owner" });
+    if (pathname.endsWith("/unread/count")) return fulfill(0);
+    if (pathname.includes("/autosave/")) return fulfill(null);
+    return route.fallback();
+  });
+
+  const history = await openVersionHistory(page);
+  await history.getByRole("button", { name: /^Version 1/ }).click();
+  const restore = history.getByRole("button", { name: "Restore selected version" });
+  await restore.click();
+  const confirmation = page.getByRole("alertdialog", { name: "Restore this version?" });
+  await expect(confirmation.getByText(/version 1 over the current saved version 3/)).toBeVisible();
+
+  latestVersion = 4;
+  await confirmation.getByRole("button", { name: "Restore version", exact: true }).click();
+  await expect(confirmation).toBeHidden();
+  await expect(history.getByText("A newer version was saved")).toBeVisible();
+  await expect(history.getByText("Unable to load versions")).toBeVisible();
+  await expect(restore).toBeDisabled();
+  expect(restoreRequests).toEqual(['"revision-3"']);
+
+  refreshFails = false;
+  await history.getByRole("button", { name: "Retry", exact: true }).click();
+  await expect(history.getByRole("button", { name: /^Version 4/ })).toBeVisible();
+  await restore.click();
+  await expect(confirmation.getByText(/version 1 over the current saved version 4/)).toBeVisible();
+  await confirmation.getByRole("button", { name: "Restore version", exact: true }).click();
+  await expect(history).toBeHidden();
+  expect(restoreRequests).toEqual(['"revision-3"', '"revision-4"']);
 });
