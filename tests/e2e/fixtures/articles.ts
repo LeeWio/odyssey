@@ -146,6 +146,30 @@ const paragraphs = Array.from({ length: 80 }, (_, index) => ({
   content: [{ type: "text", text: `Paragraph ${index + 1}. Read once, reveal once.` }],
 }));
 
+export const resumeArticle = {
+  ...designArticle,
+  id: 805,
+  slug: "resume-reading",
+  title: "A guide to focused reading",
+  content: JSON.stringify({
+    type: "doc",
+    content: [
+      {
+        type: "heading",
+        attrs: { level: 2, id: "chapter-one", "data-toc-id": "chapter-one" },
+        content: [{ type: "text", text: "Chapter one" }],
+      },
+      ...paragraphs.slice(0, 25),
+      {
+        type: "heading",
+        attrs: { level: 2, id: "chapter-two", "data-toc-id": "chapter-two" },
+        content: [{ type: "text", text: "Chapter two" }],
+      },
+      ...paragraphs.slice(25, 50),
+    ],
+  }),
+};
+
 function entranceArticle(slug: string, content: JSONContent[]) {
   return {
     ...designArticle,
@@ -167,6 +191,7 @@ const fixtures = [
   collectionArticle,
   readingListArticle,
   designArticle,
+  resumeArticle,
   entranceArticle("entrance-regression", paragraphs),
   entranceArticle("entrance-nested", [...paragraphs, ...nestedBlocks, ...paragraphs]),
   entranceArticle("entrance-tall", [

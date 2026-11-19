@@ -3,7 +3,7 @@
 import { Icon } from "@iconify/react";
 import { Avatar, Button, Card, Chip, Dropdown, Label, Popover, toast } from "@heroui/react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { ArticleCover } from "@/components/card/article-cover";
@@ -51,52 +51,42 @@ function ArticleAuthor({
   post: ArticleCardPost;
   publishedAt: string | null;
 }) {
-  const [isFollowing, setIsFollowing] = useState(false);
-  const author = post.authorName || "Anonymous";
+  const t = useTranslations("ArticleCard");
+  const article = useTranslations("Article");
+  const locale = useLocale();
+  const name = post.authorName?.trim();
+  const author = name || t("unknownAuthor");
   const initials = author.slice(0, 2).toUpperCase();
+  const date = formatDate(publishedAt, locale, article("recentlyPublished"));
+  const byline = (
+    <div className="flex items-center gap-2">
+      <Avatar size="sm">
+        {post.authorAvatar ? <Avatar.Image alt={author} src={post.authorAvatar} /> : null}
+        <Avatar.Fallback>{initials}</Avatar.Fallback>
+      </Avatar>
+      <div className="flex flex-col">
+        <p className="text-sm font-medium">{author}</p>
+        <time className="text-muted text-xs" dateTime={publishedAt || undefined}>
+          {date}
+        </time>
+      </div>
+    </div>
+  );
+
+  if (!name) return byline;
 
   return (
     <Popover>
-      <Popover.Trigger aria-label={`View ${author}'s profile`}>
-        <div className="flex items-center gap-2">
-          <Avatar size="sm">
-            {post.authorAvatar ? <Avatar.Image alt={author} src={post.authorAvatar} /> : null}
-            <Avatar.Fallback>{initials}</Avatar.Fallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <p className="text-sm font-medium">{author}</p>
-            <time className="text-muted text-xs" dateTime={publishedAt || undefined}>
-              {formatDate(publishedAt, "en-US", "Recently published")}
-            </time>
-          </div>
-        </div>
-      </Popover.Trigger>
+      <Popover.Trigger aria-label={t("authorProfile", { author })}>{byline}</Popover.Trigger>
       <Popover.Content className="w-80 max-w-[calc(100vw-2rem)]">
         <Popover.Dialog>
-          <Popover.Heading>
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <Avatar size="md">
-                  {post.authorAvatar ? <Avatar.Image alt={author} src={post.authorAvatar} /> : null}
-                  <Avatar.Fallback>{initials}</Avatar.Fallback>
-                </Avatar>
-                <div>
-                  <p className="font-semibold">{author}</p>
-                  <p className="text-muted text-sm">
-                    {formatDate(publishedAt, "en-US", "Recently published")}
-                  </p>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant={isFollowing ? "tertiary" : "primary"}
-                onPress={() => setIsFollowing((following) => !following)}
-              >
-                {isFollowing ? "Following" : "Follow"}
-              </Button>
-            </div>
-          </Popover.Heading>
-          <p className="text-muted mt-3 text-sm">Discover more writing from {author}.</p>
+          <Popover.Heading>{author}</Popover.Heading>
+          <Link
+            className="text-accent mt-2 inline-block text-sm"
+            href={`/single/authors/${encodeURIComponent(name)}`}
+          >
+            {t("authorArticles")}
+          </Link>
         </Popover.Dialog>
       </Popover.Content>
     </Popover>

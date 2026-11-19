@@ -1,4 +1,6 @@
 import { expect, test as base, type Page } from "@playwright/test";
+
+import { resumeArticle } from "./fixtures/articles";
 const test = base.extend<{ browserErrors: string[] }>({
   browserErrors: [
     async ({ page }, use) => {
@@ -24,15 +26,17 @@ const result = (title: string) => ({
   },
 });
 const endpoint = "**/api/v1/public/search/unified?**";
-async function openSearch(page: Page) {
-  await page.goto("/newsletter/verify");
+const envelope = (data: unknown) => ({ code: 200, message: "OK", data });
+async function openSearch(page: Page, route = "/newsletter/verify") {
+  await page.goto(route);
+  await expect(page.getByRole("radiogroup", { name: "Color mode" })).toBeAttached();
   await page.getByRole("button", { name: /Search, keyboard shortcut/ }).press("Enter");
-  const input = page.getByPlaceholder("Search or jump to");
+  const input = page.getByRole("searchbox", { name: "Search commands" });
   await expect(input).toBeVisible();
   await page.getByRole("radio", { name: "Search", exact: true }).press("Space");
   return input;
 }
-test.use({ locale: "en-US" });
+test.use({ locale: "en-US", contextOptions: { reducedMotion: "reduce" } });
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/**", (route) =>
     route.fulfill({ status: 503, json: { message: "Unmocked API request" } })
@@ -114,4 +118,134 @@ test("a late older search cannot replace the current results", async ({ page }) 
   } finally {
     old.resolve();
   }
+});
+
+test("finds an article, records a chapter, and resumes at it from the library", async ({
+  page,
+}) => {
+  const post = resumeArticle;
+  let checkpoint = { progressPercent: 0, positionAnchor: "" };
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "odyssey_auth",
+      JSON.stringify({
+        accessToken: "search-library-fixture",
+        username: "reader",
+        roles: ["ROLE_USER"],
+        permissions: [],
+        isAuthenticated: true,
+      })
+    )
+  );
+  await page.route("**/api/v1/**", (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (path === "/api/v1/user/me")
+      return route.fulfill({ json: envelope({ id: 1, username: "reader" }) });
+    if (path === `/api/v1/public/blog/posts/${post.slug}`)
+      return route.fulfill({ json: envelope(post) });
+    if (path === `/api/v1/user/library/posts/${post.id}/progress` && request.method() === "PUT") {
+      checkpoint = request.postDataJSON();
+      return route.fulfill({
+        json: envelope({ post, ...checkpoint, lastReadAt: "2026-11-19T08:00:00Z" }),
+      });
+    }
+    if (path === "/api/v1/user/library/overview") {
+      return route.fulfill({
+        json: envelope({
+          continueReading: [{ post, ...checkpoint, lastReadAt: "2026-11-19T08:00:00Z" }],
+          recentFavorites: [],
+          recommendations: [],
+        }),
+      });
+    }
+    return route.fallback();
+  });
+  await page.route(endpoint, (route) =>
+    route.fulfill({
+      json: envelope({
+        groups: [
+          {
+            type: "POST",
+            label: "Articles",
+            items: [{ title: post.title, url: `/single/${post.slug}` }],
+          },
+        ],
+      }),
+    })
+  );
+
+  const search = await openSearch(page);
+  await search.fill("  reading  ");
+  const result = page.getByRole("menuitem", { name: post.title });
+  await expect(result.locator("mark")).toHaveText("reading");
+  await result.press("Enter");
+  await expect(page).toHaveURL(new RegExp(`/single/${post.slug}$`), { timeout: 18000 });
+  const chapter = page.getByRole("heading", { name: "Chapter two", exact: true });
+  await expect(chapter).toHaveAttribute("id", "chapter-two");
+  await expect(page.getByRole("button", { name: "On this page", exact: true })).toBeVisible();
+  await chapter.evaluate((heading) =>
+    window.scrollTo(0, window.scrollY + heading.getBoundingClientRect().top - 100)
+  );
+  await expect
+    .poll(() => ({
+      anchor: checkpoint.positionAnchor,
+      inProgress: checkpoint.progressPercent > 0 && checkpoint.progressPercent < 100,
+    }))
+    .toEqual({ anchor: "chapter-two", inProgress: true });
+
+  await page.goto("/library");
+  const resume = page
+    .getByRole("region", { name: "Continue reading", exact: true })
+    .getByRole("link", { name: new RegExp(post.title) });
+  await expect(resume).toHaveAttribute("href", `/single/${post.slug}#chapter-two`);
+  await resume.press("Enter");
+  await expect(page).toHaveURL(new RegExp(`/single/${post.slug}#chapter-two$`));
+  await expect
+    .poll(() => chapter.evaluate((heading) => Math.abs(heading.getBoundingClientRect().top - 112)))
+    .toBeLessThan(2);
+});
+
+test("opens the existing filtered project listing from a project result", async ({ page }) => {
+  await page.route(endpoint, (route) =>
+    route.fulfill({
+      json: envelope({
+        groups: [
+          {
+            type: "PROJECT",
+            label: "Projects",
+            items: [{ title: "Reader tools", url: "/projects?q=reader-tools" }],
+          },
+        ],
+      }),
+    })
+  );
+  await page.route("**/api/v1/public/projects", (route) =>
+    route.fulfill({
+      json: envelope([
+        {
+          id: 1,
+          name: "Reader tools",
+          slug: "reader-tools",
+          sortOrder: 1,
+          isPublished: true,
+          createdAt: "2026-11-19T08:00:00Z",
+        },
+        {
+          id: 2,
+          name: "Other project",
+          slug: "other-project",
+          sortOrder: 2,
+          isPublished: true,
+          createdAt: "2026-11-19T08:00:00Z",
+        },
+      ]),
+    })
+  );
+  const search = await openSearch(page);
+  await search.fill("reader");
+  await page.getByRole("menuitem", { name: "Reader tools" }).press("Enter");
+  await expect(page).toHaveURL(/\/projects\?q=reader-tools$/);
+  await expect(page.getByRole("heading", { name: "Reader tools", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Other project", exact: true })).toHaveCount(0);
 });

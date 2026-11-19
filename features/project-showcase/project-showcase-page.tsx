@@ -204,11 +204,11 @@ function ProjectCard({
   );
 }
 
-export function ProjectShowcasePage() {
+export function ProjectShowcasePage({ initialSearch = "" }: { initialSearch?: string }) {
   const t = useTranslations("Projects");
   const locale = useLocale();
   const { data: projects = [], error, isLoading, refetch } = useGetPublicProjectsQuery();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [availability, setAvailability] = useState<ProjectAvailability>("all");
   const [sort, setSort] = useState<ProjectSort>("featured");
   const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase());
