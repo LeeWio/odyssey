@@ -367,6 +367,8 @@
     "nothingInProgressHint": "Start an article and your place will be saved here.",
     "savedTitle": "Saved writing",
     "savedDescription": "Articles you marked to revisit.",
+    "savedCount": "{count} saved articles",
+    "savedPages": "Saved article pages",
     "savedUnavailable": "Saved writing is unavailable",
     "noSaved": "No saved articles yet",
     "noSavedHint": "Use the favorite action on an article to keep it close.",
