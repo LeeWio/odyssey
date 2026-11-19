@@ -1,16 +1,14 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Card, Skeleton, toast, AlertDialog, Button, Typography } from "@heroui/react";
 import type { JSONContent } from "@tiptap/core";
 import dynamic from "next/dynamic";
 import { Icon } from "@iconify/react";
 
 import { getApiErrorMessage } from "@/lib/api/errors";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { selectCurrentUser, selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
-import { readMomentBookmarks, toggleMomentBookmark } from "@/lib/features/moment";
-import { setLoginOpen } from "@/lib/features/ui";
+import { useAppSelector } from "@/lib/hooks";
+import { selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
 import { useGetCurrentUserQuery } from "@/lib/features/user/user-api";
 import {
   type MomentResponse,
@@ -23,6 +21,7 @@ import { motion } from "motion/react";
 import { momentLayoutTransition, useMomentMotion } from "../feed-motion";
 
 import { parseMomentContent } from "../../utils/content-parser";
+import { useMomentBookmark } from "../../hooks/use-moment-bookmarks";
 import { useMomentLike } from "../../hooks/use-moment-like";
 import { CardHeader } from "./card-header";
 import { CardContent } from "./card-content";
@@ -79,9 +78,7 @@ export const MomentCard = ({
   const formatRelativeTime = useRelativeTime();
   const t = useTranslations("Moments");
   const { enabled, reduced } = useMomentMotion();
-  const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const username = useAppSelector(selectCurrentUser);
   const isAdmin = useAppSelector(selectIsAdmin);
 
   // If no propMoment is passed, fetch the latest public moment (Self-fetching mode)
@@ -132,8 +129,11 @@ export const MomentCard = ({
     setHasOpenedCarousel(true);
   }
 
-  // Bookmarking state
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const {
+    isBookmarked,
+    isPending: isBookmarkPending,
+    toggleBookmark,
+  } = useMomentBookmark(interactive ? moment?.id : undefined);
 
   // Likes hook
   const { isLiked, likesCount, isLiking, toggleLike } = useMomentLike(
@@ -141,23 +141,6 @@ export const MomentCard = ({
     moment?.likesCount,
     knownLikedMomentIds
   );
-
-  useEffect(() => {
-    if (!moment?.id) return;
-    const bookmarks = readMomentBookmarks(isAuthenticated ? username : null);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsBookmarked(bookmarks.includes(moment.id));
-  }, [isAuthenticated, moment?.id, username]);
-
-  const handleBookmarkToggle = () => {
-    if (!moment?.id) return false;
-    if (!isAuthenticated || !username) {
-      dispatch(setLoginOpen(true));
-      return false;
-    }
-    setIsBookmarked(toggleMomentBookmark(username, moment.id));
-    return true;
-  };
 
   const handleDeleteConfirm = async () => {
     if (!moment?.id) return;
@@ -247,7 +230,8 @@ export const MomentCard = ({
             enableComments && moment?.id ? () => setIsCommentsOpen((open) => !open) : undefined
           }
           isBookmarked={isBookmarked}
-          onBookmarkToggle={handleBookmarkToggle}
+          isBookmarkPending={isBookmarkPending}
+          onBookmarkToggle={toggleBookmark}
         />
       ) : null}
 

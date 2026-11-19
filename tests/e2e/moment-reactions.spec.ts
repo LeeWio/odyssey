@@ -30,24 +30,54 @@ async function showFixtureFeed(page: Page) {
   await page.getByRole("radio", { name: "List", exact: true }).click();
 }
 
-async function prepare(page: Page, { guest = false, reduced = false } = {}) {
+const savedPath = "/api/v1/user/moments/saved";
+type BookmarkAccounts = Map<string, Map<number, boolean>>;
+
+async function prepare(
+  page: Page,
+  {
+    guest = false,
+    reduced = false,
+    username = "reader",
+    accounts = new Map() as BookmarkAccounts,
+    path = "/moments",
+    legacyIds,
+    failImport = false,
+  }: {
+    guest?: boolean;
+    reduced?: boolean;
+    username?: string;
+    accounts?: BookmarkAccounts;
+    path?: string;
+    legacyIds?: number[];
+    failImport?: boolean;
+  } = {}
+) {
   await page.emulateMedia({ reducedMotion: reduced ? "reduce" : "no-preference" });
   await page.addInitScript(
-    ({ guest }) => {
+    ({ guest, username }) => {
       if (guest) return;
       localStorage.setItem(
         "odyssey_auth",
         JSON.stringify({
-          accessToken: "moment-reactions-test",
-          username: "reader",
+          accessToken: `moment-reactions-${username}`,
+          username,
           roles: ["ROLE_USER"],
           permissions: [],
           isAuthenticated: true,
         })
       );
     },
-    { guest }
+    { guest, username }
   );
+  if (legacyIds) {
+    await page.addInitScript(
+      ({ username, ids }) => {
+        localStorage.setItem(`moments_bookmarks:${username}`, JSON.stringify(ids));
+      },
+      { username, ids: legacyIds }
+    );
+  }
   await page.route(
     /https:\/\/api\.(iconify\.design|simplesvg\.com|unisvg\.com)\//,
     async (route) => {
@@ -84,6 +114,30 @@ async function prepare(page: Page, { guest = false, reduced = false } = {}) {
   );
   const liked = new Set<number>();
   const writes: string[] = [];
+  const bookmarks = accounts.get(username) ?? new Map<number, boolean>();
+  accounts.set(username, bookmarks);
+  const savedIds = () => [...bookmarks].filter(([, saved]) => saved).map(([id]) => id);
+  const savedRequests: string[] = [];
+  const timelineRequests: string[] = [];
+  const moment = (id: number) => ({
+    id,
+    content: `Reaction test moment ${id}`,
+    likesCount: (id === 100 ? 8 : 0) + (liked.has(id) ? 1 : 0),
+    commentsCount: 0,
+    visibility: "public",
+    authorName: "author",
+    images: [],
+    topics: [],
+    createdAt: "2026-11-13T06:00:00Z",
+    updatedAt: "2026-11-13T06:00:00Z",
+  });
+  const momentPage = (ids: number[]) => ({
+    list: ids.map(moment),
+    total: ids.length,
+    page: 1,
+    size: 12,
+    totalPages: ids.length ? 1 : 0,
+  });
   await page.route("**/api/v1/**", async (route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
@@ -95,7 +149,27 @@ async function prepare(page: Page, { guest = false, reduced = false } = {}) {
       else liked.delete(id);
       return fulfill(null);
     }
-    if (path === "/api/v1/user/me") return fulfill({ id: 1, username: "reader" });
+    if (path === savedPath || path.startsWith(`${savedPath}/`)) {
+      savedRequests.push(`${request.method()} ${path}`);
+      if (request.headers().authorization !== `Bearer moment-reactions-${username}`) {
+        return route.fulfill({ status: 401, json: { message: "Unauthorized" } });
+      }
+      if (path === `${savedPath}/ids`) return fulfill(savedIds());
+      if (path === savedPath) return fulfill(momentPage(savedIds()));
+      if (path === `${savedPath}/import`) {
+        if (failImport) {
+          failImport = false;
+          return route.fulfill({ status: 503, json: { message: "Temporary import failure" } });
+        }
+        for (const id of (request.postDataJSON() as { ids: number[] }).ids) {
+          if (!bookmarks.has(id)) bookmarks.set(id, true);
+        }
+      } else {
+        bookmarks.set(Number(path.split("/").at(-1)), request.method() === "PUT");
+      }
+      return fulfill(null);
+    }
+    if (path === "/api/v1/user/me") return fulfill({ id: 1, username });
     if (path.endsWith("/new-count") || path.endsWith("/unread/count")) return fulfill(0);
     if (path === "/api/v1/public/moments/liked") return fulfill([...liked]);
     if (path === "/api/v1/public/moments/topics") return fulfill([]);
@@ -106,32 +180,17 @@ async function prepare(page: Page, { guest = false, reduced = false } = {}) {
         month: { start: "2026-11-01", days: 30, offset: 0, active: [12] },
         year: { year: 2026, active: [45] },
       });
-    if (path === "/api/v1/public/moments")
-      return fulfill({
-        list: [100, 99].map((id) => ({
-          id,
-          content: `Reaction test moment ${id}`,
-          likesCount: (id === 100 ? 8 : 0) + (liked.has(id) ? 1 : 0),
-          commentsCount: 0,
-          visibility: "public",
-          authorName: "author",
-          images: [],
-          topics: [],
-          createdAt: "2026-11-13T06:00:00Z",
-          updatedAt: "2026-11-13T06:00:00Z",
-        })),
-        total: 2,
-        page: 1,
-        size: 12,
-        totalPages: 1,
-      });
+    if (path === "/api/v1/public/moments") {
+      timelineRequests.push(path);
+      return fulfill(momentPage([100, 99]));
+    }
     return route.fulfill({ status: 503, json: { message: "Unmocked API request" } });
   });
-  await page.goto("/moments");
-  await showFixtureFeed(page);
+  await page.goto(path);
+  if (path === "/moments") await showFixtureFeed(page);
   if (!guest)
     await expect(page.getByRole("button", { name: "Sign in", exact: true })).toHaveCount(0);
-  return { liked, writes };
+  return { liked, writes, savedIds, savedRequests, timelineRequests };
 }
 
 test("uses controlled native buttons, locks only the pending like, and preserves feed state", async ({
@@ -216,7 +275,7 @@ test("cancels the pulse on failed likes and restores liked state after failed un
 });
 
 test("guest actions only open login without mutating counts or storage", async ({ page }) => {
-  const { writes } = await prepare(page, { guest: true });
+  const { writes, savedRequests } = await prepare(page, { guest: true });
   const card = page.locator("#moment-100");
   for (const label of ["Like moment, 8", "Save moment"]) {
     const button = card.getByRole("button", { name: label, exact: true });
@@ -228,18 +287,22 @@ test("guest actions only open login without mutating counts or storage", async (
     await expect(page.getByRole("dialog")).toHaveCount(0);
   }
   expect(writes).toEqual([]);
+  expect(savedRequests).toEqual([]);
   expect(await page.evaluate(() => localStorage.getItem("moments_bookmarks:reader"))).toBeNull();
 });
 
 test("persists bookmarks and hydrates both reactions without replaying feedback", async ({
   page,
 }) => {
-  await prepare(page, { reduced: true });
+  const { savedIds } = await prepare(page, { reduced: true });
   const card = page.locator("#moment-100");
   await card.getByRole("button", { name: "Like moment, 8", exact: true }).press("Enter");
   await expect(card.getByRole("button", { name: "Unlike moment, 9", exact: true })).toBeEnabled();
-  await card.getByRole("button", { name: "Save moment", exact: true }).press("Space");
-  expect(await page.evaluate(() => localStorage.getItem("moments_bookmarks:reader"))).toBe("[100]");
+  const save = card.getByRole("button", { name: "Save moment", exact: true });
+  await expect(save).toBeEnabled();
+  await save.press("Space");
+  await expect.poll(savedIds).toEqual([100]);
+  await expect(card.getByRole("button", { name: "Remove from saved", exact: true })).toBeEnabled();
   await page.reload();
   await showFixtureFeed(page);
   for (const label of ["Unlike moment, 9", "Remove from saved"]) {
@@ -247,14 +310,16 @@ test("persists bookmarks and hydrates both reactions without replaying feedback"
     await expect(button).toHaveAttribute("aria-pressed", "true");
     await expect(button).not.toHaveAttribute("data-running");
   }
-  await card.getByRole("button", { name: "Remove from saved", exact: true }).press("Enter");
-  expect(await page.evaluate(() => localStorage.getItem("moments_bookmarks:reader"))).toBe("[]");
+  const remove = card.getByRole("button", { name: "Remove from saved", exact: true });
+  await expect(remove).toBeEnabled();
+  await remove.press("Enter");
+  await expect.poll(savedIds).toEqual([]);
 });
 
 test("handles zero counts and interrupts bookmark feedback on a rapid reversal", async ({
   page,
 }) => {
-  await prepare(page);
+  const { savedIds } = await prepare(page);
   const card = page.locator("#moment-99");
   const like = card.getByRole("button", { name: "Like moment", exact: true });
   await expect(like).toHaveClass(/button--icon-only/);
@@ -269,13 +334,81 @@ test("handles zero counts and interrupts bookmark feedback on a rapid reversal",
   await card.getByRole("button", { name: "Save moment", exact: true }).click();
   const saved = card.getByRole("button", { name: "Remove from saved", exact: true });
   await expect(saved).toHaveAttribute("data-running", "");
-  // Keyboard interruption bypasses the pointer pulse and must settle immediately.
+  // Once the write completes, keyboard reversal can interrupt the pointer pulse.
+  await expect(saved).toBeEnabled();
   await saved.press("Enter");
   const save = card.getByRole("button", { name: "Save moment", exact: true });
   await expect(save).toHaveAttribute("aria-pressed", "false");
   await expect(save).not.toHaveAttribute("data-running");
   await expect(save).toHaveClass(/button--ghost/);
-  expect(await page.evaluate(() => localStorage.getItem("moments_bookmarks:reader"))).toBe("[]");
+  await expect.poll(savedIds).toEqual([]);
+});
+
+test("retries legacy import and syncs the account across fresh browser contexts", async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  const accounts: BookmarkAccounts = new Map();
+  const path = "/moments/saved";
+  const { savedIds, savedRequests, timelineRequests } = await prepare(page, {
+    accounts,
+    path,
+    legacyIds: [100],
+    failImport: true,
+  });
+  const legacy = () => page.evaluate(() => localStorage.getItem("moments_bookmarks:reader"));
+  await expect(
+    page.getByText("Saved moments could not be synced. Please try again.")
+  ).toBeVisible();
+  expect(await legacy()).toBe("[100]");
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(page.getByText("Reaction test moment 100", { exact: true })).toBeVisible();
+  await expect.poll(legacy).toBeNull();
+  expect(savedRequests.filter((request) => request === `POST ${savedPath}/import`)).toHaveLength(2);
+  expect(timelineRequests).toEqual([]);
+
+  const secondDevice = await browser.newPage({ baseURL, locale: "en-US" });
+  const otherAccount = await browser.newPage({ baseURL, locale: "en-US" });
+  try {
+    await prepare(secondDevice, { accounts, path });
+    await expect(secondDevice.getByText("Reaction test moment 100", { exact: true })).toBeVisible();
+    expect(
+      await secondDevice.evaluate(() => localStorage.getItem("moments_bookmarks:reader"))
+    ).toBeNull();
+    await prepare(otherAccount, { accounts, path, username: "other" });
+    await expect(otherAccount.getByText("No saved moments yet")).toBeVisible();
+
+    await secondDevice.getByRole("button", { name: "Remove from saved", exact: true }).click();
+    await expect(secondDevice.getByText("No saved moments yet")).toBeVisible();
+    await expect.poll(savedIds).toEqual([]);
+    await page.reload();
+    // Reload seeds the old browser list again, simulating a second legacy import after removal.
+    await expect(page.getByText("No saved moments yet")).toBeVisible();
+    await expect.poll(legacy).toBeNull();
+  } finally {
+    await secondDevice.close();
+    await otherAccount.close();
+  }
+});
+
+test("reverts a failed bookmark write while keeping the card interactive", async ({ page }) => {
+  const { savedIds } = await prepare(page);
+  await page.route(`**${savedPath}/100`, (route) =>
+    route.fulfill({ status: 503, json: { message: "Temporary write failure" } })
+  );
+  const card = page.locator("#moment-100");
+  const save = card.getByRole("button", { name: "Save moment", exact: true });
+  await save.click();
+  await expect(
+    page.getByText("The bookmark could not be updated. Please try again.")
+  ).toBeVisible();
+  await expect(save).toBeEnabled();
+  await expect(save).toHaveAttribute("aria-pressed", "false");
+  expect(savedIds()).toEqual([]);
+  await page.unroute(`**${savedPath}/100`);
+  await save.click();
+  await expect.poll(savedIds).toEqual([100]);
 });
 
 for (const width of [360, 768, 1440]) {
@@ -316,6 +449,7 @@ for (const width of [360, 768, 1440]) {
       width
     );
     await like.press("Enter");
+    await expect(save).toBeEnabled();
     await save.press("Enter");
     const selectedColors: string[] = [];
     for (const button of [

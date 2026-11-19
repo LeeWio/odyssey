@@ -1,32 +1,25 @@
-const EVENT = "moments_bookmarks_changed";
-
 function storageKey(username: string) {
   return `moments_bookmarks:${username}`;
 }
 
-export function readMomentBookmarks(username: string | null) {
-  if (!username || typeof window === "undefined") return [];
+export function readLegacyMomentBookmarks(username: string) {
   try {
-    const parsed = JSON.parse(localStorage.getItem(storageKey(username)) || "[]") as unknown;
-    return Array.isArray(parsed) ? parsed.filter((id) => Number.isInteger(id)) : [];
+    const snapshot = localStorage.getItem(storageKey(username));
+    const parsed: unknown = JSON.parse(snapshot ?? "[]");
+    const ids = Array.isArray(parsed)
+      ? [...new Set(parsed.filter((id): id is number => Number.isSafeInteger(id) && id > 0))]
+      : [];
+    return { snapshot, ids };
   } catch {
-    return [];
+    return { snapshot: null, ids: [] };
   }
 }
 
-export function toggleMomentBookmark(username: string, id: number) {
-  const current = readMomentBookmarks(username);
-  const next = current.includes(id) ? current.filter((item) => item !== id) : [id, ...current];
-  localStorage.setItem(storageKey(username), JSON.stringify(next));
-  window.dispatchEvent(new Event(EVENT));
-  return next.includes(id);
-}
-
-export function subscribeMomentBookmarks(onChange: () => void) {
-  window.addEventListener(EVENT, onChange);
-  window.addEventListener("storage", onChange);
-  return () => {
-    window.removeEventListener(EVENT, onChange);
-    window.removeEventListener("storage", onChange);
-  };
+export function clearImportedMomentBookmarks(username: string, snapshot: string) {
+  try {
+    const key = storageKey(username);
+    if (localStorage.getItem(key) === snapshot) localStorage.removeItem(key);
+  } catch {
+    // The account copy has been imported. Repeating the import is harmless.
+  }
 }

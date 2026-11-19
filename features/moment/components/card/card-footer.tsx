@@ -17,7 +17,8 @@ interface CardFooterProps {
   isCommentsOpen?: boolean;
   onCommentToggle?: () => void;
   isBookmarked?: boolean;
-  onBookmarkToggle?: () => boolean;
+  isBookmarkPending?: boolean;
+  onBookmarkToggle?: (selected: boolean) => boolean;
 }
 
 export const CardFooter = ({
@@ -29,6 +30,7 @@ export const CardFooter = ({
   isCommentsOpen = false,
   onCommentToggle,
   isBookmarked = false,
+  isBookmarkPending = false,
   onBookmarkToggle,
 }: CardFooterProps) => {
   const t = useTranslations("Moments");
@@ -85,7 +87,8 @@ export const CardFooter = ({
           idleColor="inherit"
           selectedVariant="secondary"
           selectedColor="warning"
-          onSelectedChange={() => onBookmarkToggle?.() ?? false}
+          onSelectedChange={(selected) => onBookmarkToggle?.(selected) ?? false}
+          isPending={isBookmarkPending}
           isDisabled={!onBookmarkToggle}
           animationEnabled={enabled && !reduced}
           label={isBookmarked ? t("unsaveMoment") : t("saveMoment")}
