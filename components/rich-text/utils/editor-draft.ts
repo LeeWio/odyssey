@@ -30,7 +30,7 @@ function getDraftKey(activeId: string): string {
   return `${DRAFT_STORAGE_PREFIX}${activeId}`;
 }
 
-function sanitizePostData(value: unknown): Partial<PostRequest> | null {
+export function sanitizePostData(value: unknown): Partial<PostRequest> | null {
   if (!isRecord(value)) return null;
 
   const data: Partial<PostRequest> = {};

@@ -17,8 +17,8 @@ import {
   PostRevision,
   PostRequest,
   PostSearchQuery,
-  PostAutosaveRequest,
-  PostAutosaveResponse,
+  PostEditorDraftSchema,
+  type PostEditorDraft,
 } from "./post-contracts";
 
 export const postApi = baseApi.injectEndpoints({
@@ -57,11 +57,12 @@ export const postApi = baseApi.injectEndpoints({
     /**
      * Admin: Create post
      */
-    createPost: builder.mutation<PostResponse, PostRequest>({
-      query: (body) => ({
+    createPost: builder.mutation<PostResponse, { body: PostRequest; draftRevision: string }>({
+      query: ({ body, draftRevision }) => ({
         url: "/api/v1/admin/posts",
         method: "POST",
         body,
+        headers: { "X-Editor-Draft-Revision": draftRevision },
       }),
       rawResponseSchema: apiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
@@ -78,11 +79,15 @@ export const postApi = baseApi.injectEndpoints({
     /**
      * Admin: Update post
      */
-    updatePost: builder.mutation<PostResponse, { id: number; body: PostRequest }>({
-      query: ({ id, body }) => ({
+    updatePost: builder.mutation<
+      PostResponse,
+      { id: number; body: PostRequest; draftRevision?: string }
+    >({
+      query: ({ id, body, draftRevision }) => ({
         url: `/api/v1/admin/posts/${id}`,
         method: "PUT",
         body,
+        headers: draftRevision ? { "X-Editor-Draft-Revision": draftRevision } : undefined,
       }),
       rawResponseSchema: apiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
@@ -422,26 +427,35 @@ export const postApi = baseApi.injectEndpoints({
           : [],
     }),
 
-    /**
-     * Admin: Temporarily save post content (Redis-backed)
-     */
-    autosavePost: builder.mutation<void, PostAutosaveRequest>({
-      query: (body) => ({
-        url: "/api/v1/admin/posts/autosave",
-        method: "POST",
+    getEditorDraft: builder.query<PostEditorDraft | null, string>({
+      query: (identifier) => `/api/v1/admin/posts/editor-drafts/${identifier}`,
+      rawResponseSchema: apiResponseSchema(PostEditorDraftSchema.nullable()),
+      transformResponse: (response: ApiResponse<PostEditorDraft | null>) => response.data,
+    }),
+    saveEditorDraft: builder.mutation<
+      PostEditorDraft,
+      {
+        identifier: string;
+        content: object;
+        postData: Partial<PostRequest>;
+        revision: string | null;
+      }
+    >({
+      query: ({ identifier, ...body }) => ({
+        url: `/api/v1/admin/posts/editor-drafts/${identifier}`,
+        method: "PUT",
         body,
       }),
-      transformErrorResponse: transformApiError,
+      rawResponseSchema: apiResponseSchema(PostEditorDraftSchema),
+      transformResponse: (response: ApiResponse<PostEditorDraft>) => response.data,
     }),
-
-    /**
-     * Admin: Retrieve autosaved content
-     */
-    getAutosave: builder.query<PostAutosaveResponse, string>({
-      query: (identifier) => `/api/v1/admin/posts/autosave/${identifier}`,
-      rawResponseSchema: apiResponseSchema(z.any()),
-      transformResponse: (response: ApiResponse<PostAutosaveResponse>) => response.data,
-      transformErrorResponse: transformApiError,
+    discardEditorDraft: builder.mutation<void, { identifier: string; revision: string | null }>({
+      query: ({ identifier, revision }) => ({
+        url: `/api/v1/admin/posts/editor-drafts/${identifier}`,
+        method: "DELETE",
+        params: revision ? { revision } : undefined,
+      }),
+      transformResponse: (response: ApiResponse<void>) => response.data,
     }),
   }),
   overrideExisting: false,
@@ -466,6 +480,7 @@ export const {
   useFavoritePostMutation,
   useGetPostRevisionsQuery,
   useRevertPostRevisionMutation,
-  useAutosavePostMutation,
-  useGetAutosaveQuery,
+  useGetEditorDraftQuery,
+  useSaveEditorDraftMutation,
+  useDiscardEditorDraftMutation,
 } = postApi;

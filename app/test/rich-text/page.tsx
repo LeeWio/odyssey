@@ -16,7 +16,13 @@ export default async function RichTextTestPage({
       typography={params.typography === "1"}
       outline={params.outline === "1"}
       modal={params.modal === "1"}
-      postId={params.postId && /^\d+$/.test(params.postId) ? params.postId : undefined}
+      postId={
+        params.postId === "new"
+          ? "new"
+          : params.postId && /^\d+$/.test(params.postId)
+            ? params.postId
+            : undefined
+      }
     />
   );
 }

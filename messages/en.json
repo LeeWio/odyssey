@@ -296,6 +296,26 @@
       "MOMENT_DELETED": "Moment deleted"
     }
   },
+  "EditorDraft": {
+    "saving": "Saving draft…",
+    "saved": "Draft saved",
+    "error": "Draft could not be saved. Keep this editor open and retry.",
+    "retry": "Retry",
+    "discard": "Discard draft",
+    "discardHeading": "Discard this draft?",
+    "discardDescription": "The draft will be removed. Any saved version of the article will remain.",
+    "discardFailed": "Could not discard the draft. Refresh to check for changes and try again.",
+    "keepEditing": "Keep editing",
+    "close": "Close editor",
+    "closeUnsavedHeading": "Close without saving the latest changes?",
+    "closeUnsavedDescription": "Any previously saved draft will still be available.",
+    "closeUnsaved": "Close without saving",
+    "resumeHeading": "Resume unfinished draft?",
+    "resumeDescription": "You have unfinished edits for this article.",
+    "resume": "Resume draft",
+    "loadFailed": "Could not load the draft. Try again to continue editing.",
+    "unreadable": "The draft is incompatible with this editor."
+  },
   "ArticleCard": {
     "unknownAuthor": "Unknown author",
     "authorProfile": "View {author}’s profile",

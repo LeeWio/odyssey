@@ -296,6 +296,26 @@
       "MOMENT_DELETED": "动态删除"
     }
   },
+  "EditorDraft": {
+    "saving": "正在保存草稿…",
+    "saved": "草稿已保存",
+    "error": "草稿保存失败。请保持编辑器打开并重试。",
+    "retry": "重试",
+    "discard": "丢弃草稿",
+    "discardHeading": "丢弃这份草稿？",
+    "discardDescription": "草稿将被删除，已经保存的文章版本会保留。",
+    "discardFailed": "无法丢弃草稿。请刷新检查是否有更新后重试。",
+    "keepEditing": "继续编辑",
+    "close": "关闭编辑器",
+    "closeUnsavedHeading": "关闭并放弃最近的修改？",
+    "closeUnsavedDescription": "此前已保存的草稿仍可继续编辑。",
+    "closeUnsaved": "不保存并关闭",
+    "resumeHeading": "继续编辑未完成的草稿？",
+    "resumeDescription": "这篇文章还有未完成的修改。",
+    "resume": "继续编辑草稿",
+    "loadFailed": "无法加载草稿，请重试后继续编辑。",
+    "unreadable": "草稿与当前编辑器不兼容。"
+  },
   "ArticleCard": {
     "unknownAuthor": "未知作者",
     "authorProfile": "查看{author}的资料",

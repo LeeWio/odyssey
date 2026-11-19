@@ -5,7 +5,8 @@ import { Icon } from "@iconify/react";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { Editor } from "@tiptap/react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 import { getApiErrorMessage } from "@/lib/api/errors";
@@ -15,12 +16,7 @@ import { MotionButton } from "@/components/ui";
 import { closeRichText, selectRichTextState } from "@/lib/features";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { microEaseOut } from "@/lib/motion";
-import {
-  clearRichTextDraft,
-  type RichTextDraft,
-  readRichTextDraft,
-  saveRichTextDraft,
-} from "./utils/editor-draft";
+import { clearRichTextDraft, readRichTextDraft, sanitizePostData } from "./utils/editor-draft";
 import {
   getMediaValidationIssues,
   hasPendingMediaUploads,
@@ -30,9 +26,10 @@ import {
   removeTemporaryMediaAttributes,
 } from "./utils/document-normalizer";
 import {
-  useAutosavePostMutation,
+  useDiscardEditorDraftMutation,
+  useSaveEditorDraftMutation,
   useCreatePostMutation,
-  useGetAutosaveQuery,
+  useGetEditorDraftQuery,
   useGetAdminPostByIdQuery,
   useUpdatePostMutation,
   type PostResponse,
@@ -82,6 +79,10 @@ function serializeDocument(content: ProseMirrorNode | ReturnType<typeof normaliz
   );
 }
 
+function draftFingerprint(content: ReturnType<Editor["getJSON"]>, postData: Partial<PostRequest>) {
+  return serializeDocument(removeTemporaryMediaAttributes(content)) + serializePostData(postData);
+}
+
 function areMediaIssuesEqual(
   currentIssues: ReturnType<typeof getMediaValidationIssues>,
   nextIssues: ReturnType<typeof getMediaValidationIssues>
@@ -97,7 +98,12 @@ function areMediaIssuesEqual(
 
 export function RichTextModal() {
   const { isOpen, activeId } = useAppSelector(selectRichTextState);
+  return isOpen && activeId ? <ArticleEditorSession key={activeId} activeId={activeId} /> : null;
+}
+
+function ArticleEditorSession({ activeId }: { activeId: string }) {
   const dispatch = useAppDispatch();
+  const t = useTranslations("EditorDraft");
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const editorRef = useRef<Editor | null>(null);
@@ -106,13 +112,21 @@ export function RichTextModal() {
   const [isContentDirty, setIsContentDirty] = useState(false);
   const [isMetadataDirty, setIsMetadataDirty] = useState(false);
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
-  const [isDraftRecoveryDialogOpen, setIsDraftRecoveryDialogOpen] = useState(false);
-  const [recoveryDraft, setRecoveryDraft] = useState<RichTextDraft | null>(null);
-  const [recoverySource, setRecoverySource] = useState<"browser" | "server" | null>(null);
-  const [isEditorReady, setIsEditorReady] = useState(false);
+  const [confirmClose, setConfirmClose] = useState(false);
+  const [legacyDraft, setLegacyDraft] = useState<{
+    content: ReturnType<typeof normalizeJSONContent>;
+    postData: Partial<PostRequest>;
+  } | null>(null);
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftState, setDraftState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [isFinalizing, setIsFinalizing] = useState(false);
+  const draftRevisionRef = useRef<string | null>(null);
+  const savedDraftRef = useRef("");
+  const draftRequestRef = useRef<Promise<boolean> | null>(null);
+  const latestPostDataRef = useRef(EMPTY_POST_DATA);
+  const [readyEditor, setReadyEditor] = useState<Editor | null>(null);
   const [editorInstanceVersion, setEditorInstanceVersion] = useState(0);
   const [isPostDataReady, setIsPostDataReady] = useState(false);
-  const [isCoverUploading, setIsCoverUploading] = useState(false);
   const [mediaIssues, setMediaIssues] = useState(() =>
     getMediaValidationIssues(normalizeJSONContent(undefined))
   );
@@ -121,17 +135,7 @@ export function RichTextModal() {
     message: string;
   } | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [autosaveError, setAutosaveError] = useState<string | null>(null);
-  const [isAutosaving, setIsAutosaving] = useState(false);
   const lastSaveStatusRef = useRef<PostRequest["status"]>("DRAFT");
-  const autosaveSequenceRef = useRef(0);
-
-  useEffect(() => {
-    if (isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSettingsOpen(false);
-    }
-  }, [isOpen, activeId]);
 
   // Form State
   const [postData, setPostData] = useState<Partial<PostRequest>>(EMPTY_POST_DATA);
@@ -139,53 +143,72 @@ export function RichTextModal() {
   // API Mutations
   const [createPost, { isLoading: isCreating }] = useCreatePostMutation();
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation();
-  const [autosavePost] = useAutosavePostMutation();
-
-  const isPending = isCreating || isUpdating || isCoverUploading;
+  const [saveEditorDraft] = useSaveEditorDraftMutation();
+  const [discardEditorDraft] = useDiscardEditorDraftMutation();
+  const isExistingPost = /^[1-9]\d*$/.test(activeId);
+  const supportsDraft = isExistingPost || activeId === "new";
+  const isPending = isCreating || isUpdating || isFinalizing;
   const hasContentSchemaError = contentSchemaError?.activeId === activeId;
-  const isExistingPost = Boolean(activeId && !Number.isNaN(Number(activeId)));
 
-  const saveDraft = useDebouncedCallback(
-    (
-      draftId: string | null,
-      editor: Editor | null,
-      data: Partial<PostRequest>,
-      isEnabled: boolean
-    ) => {
-      if (!isEnabled || !draftId || !editor || editor.isDestroyed) return;
+  async function syncDraft() {
+    if (!supportsDraft || !draftReady || hasContentSchemaError) return false;
+    while (draftRequestRef.current) await draftRequestRef.current;
 
-      const content = editor.getJSON();
-      if (hasPendingMediaUploads(content)) return;
+    const editor = editorRef.current;
+    if (!editor || editor.isDestroyed) return false;
+    const content = editor.getJSON();
+    if (hasPendingMediaUploads(content)) {
+      setDraftState("error");
+      return false;
+    }
 
-      saveRichTextDraft(draftId, content, data);
-    },
-    750
-  );
-  const saveServerDraft = useDebouncedCallback(
-    async (draftId: string | null, editor: Editor | null, isEnabled: boolean) => {
-      if (!isEnabled || !isExistingPost || !draftId || !editor || editor.isDestroyed) return;
+    const data = latestPostDataRef.current;
+    const postData = sanitizePostData(data) ?? {};
+    const fingerprint = draftFingerprint(content, postData);
+    if (fingerprint === savedDraftRef.current) {
+      setDraftState(draftRevisionRef.current ? "saved" : "idle");
+      return true;
+    }
 
-      const content = editor.getJSON();
-      if (hasPendingMediaUploads(content)) return;
+    setDraftState("saving");
+    const request = saveEditorDraft({
+      identifier: activeId,
+      content: normalizeRichTextDocument(removeTemporaryMediaAttributes(content)),
+      postData,
+      revision: draftRevisionRef.current,
+    })
+      .unwrap()
+      .then(
+        (draft) => {
+          draftRevisionRef.current = draft.revision;
+          savedDraftRef.current = fingerprint;
+          clearRichTextDraft(activeId);
+          if (
+            !editor.isDestroyed &&
+            draftFingerprint(editor.getJSON(), latestPostDataRef.current) === fingerprint
+          ) {
+            setDraftState("saved");
+          }
+          return true;
+        },
+        () => {
+          setDraftState("error");
+          return false;
+        }
+      );
+    draftRequestRef.current = request;
+    const result = await request;
+    draftRequestRef.current = null;
+    return result;
+  }
 
-      const sequence = ++autosaveSequenceRef.current;
-      setIsAutosaving(true);
-      setAutosaveError(null);
+  const scheduleDraft = useDebouncedCallback(() => void syncDraft(), 900);
+  const scheduleAutosave = () => {
+    if (!supportsDraft || !draftReady || isFinalizing || hasContentSchemaError) return;
+    setDraftState("saving");
+    scheduleDraft();
+  };
 
-      try {
-        await autosavePost({
-          identifier: draftId,
-          content: content as Record<string, unknown>,
-        }).unwrap();
-        if (sequence === autosaveSequenceRef.current) setIsAutosaving(false);
-      } catch (error) {
-        if (sequence !== autosaveSequenceRef.current) return;
-        setIsAutosaving(false);
-        setAutosaveError(getApiErrorMessage(error, "Server autosave failed. Try again."));
-      }
-    },
-    1200
-  );
   const updateMediaIssues = useDebouncedCallback((editor: Editor) => {
     if (editor.isDestroyed) return;
 
@@ -204,10 +227,11 @@ export function RichTextModal() {
     isLoading: isFetching,
     refetch: refetchExistingPost,
   } = useGetAdminPostByIdQuery(Number(activeId), {
-    skip: !isExistingPost || !isOpen,
+    skip: !isExistingPost,
   });
-  const { data: serverAutosave } = useGetAutosaveQuery(activeId ?? "", {
-    skip: !isExistingPost || !isOpen,
+  const serverDraft = useGetEditorDraftQuery(activeId, {
+    skip: !supportsDraft,
+    refetchOnMountOrArgChange: true,
   });
   const existingContentIsEditable = useMemo(() => {
     if (!existingPost) return true;
@@ -217,191 +241,186 @@ export function RichTextModal() {
     () => normalizeJSONContent(existingPost?.content),
     [existingPost?.content]
   );
-  const serverAutosaveContent = useMemo(
-    () => (serverAutosave ? parseJSONContent(serverAutosave.content) : null),
-    [serverAutosave]
+  const applyDraft = useCallback(
+    (content: ReturnType<typeof normalizeJSONContent>, data: Partial<PostRequest>) => {
+      const editor = editorRef.current;
+      if (!editor) return false;
+      try {
+        editor.commands.setContent(content, { emitUpdate: false, errorOnInvalidContent: true });
+      } catch {
+        setContentSchemaError({ activeId, message: t("unreadable") });
+        return false;
+      }
+      latestPostDataRef.current = data;
+      setPostData(data);
+      setIsContentDirty(!initialEditorDocumentRef.current?.eq(editor.state.doc));
+      setIsMetadataDirty(serializePostData(data) !== initialPostDataRef.current);
+      setMediaIssues(getMediaValidationIssues(editor.getJSON()));
+      return true;
+    },
+    [activeId, t]
   );
 
   useEffect(() => {
-    editorRef.current = null;
-    initialEditorDocumentRef.current = null;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsEditorReady(false);
-    setEditorInstanceVersion(0);
-    setIsPostDataReady(false);
-    setIsCoverUploading(false);
-    setIsContentDirty(false);
-    setIsMetadataDirty(false);
-    setIsDraftRecoveryDialogOpen(false);
-    setRecoveryDraft(null);
-    setRecoverySource(null);
-    setContentSchemaError(null);
-    setSaveError(null);
-    setAutosaveError(null);
-    setIsAutosaving(false);
-    setMediaIssues([]);
-  }, [activeId, isOpen]);
+    if (!readyEditor || !isPostDataReady || draftReady || legacyDraft) return;
+    if (supportsDraft && (serverDraft.isFetching || !serverDraft.isSuccess)) return;
+    const editor = readyEditor;
+    if (editor.isDestroyed) return;
 
-  useEffect(() => {
-    if (!isOpen || !activeId || !isPostDataReady || !existingContentIsEditable) return;
+    const current = serverDraft.currentData;
+    const storedContent = current ? parseJSONContent(current.content) : null;
+    const initial = latestPostDataRef.current;
+    const data = current?.revision
+      ? { ...EMPTY_POST_DATA, ...sanitizePostData(current.postData) }
+      : initial;
+    const local = current?.revision ? null : readRichTextDraft(activeId);
+    const baseline = draftFingerprint(editor.getJSON(), initial);
 
-    const localDraft = readRichTextDraft(activeId);
-    const serverDraft =
-      existingPost &&
-      serverAutosaveContent &&
-      serializeDocument(serverAutosaveContent) !== serializeDocument(editorContent)
-        ? {
-            content: serverAutosaveContent,
-            postData: toPostData(existingPost),
-            savedAt: Date.now(),
-            version: 1 as const,
-          }
-        : null;
-    const draft = localDraft ?? serverDraft;
     const timer = window.setTimeout(() => {
-      setRecoveryDraft(draft);
-      setRecoverySource(localDraft ? "browser" : serverDraft ? "server" : null);
-      setIsDraftRecoveryDialogOpen(Boolean(draft));
+      if (editor.isDestroyed) return;
+      savedDraftRef.current = baseline;
+      if (current?.revision) {
+        draftRevisionRef.current = current.revision;
+        if (!storedContent || !applyDraft(storedContent, data)) {
+          setContentSchemaError({ activeId, message: t("unreadable") });
+          setDraftState("error");
+          setDraftReady(true);
+          return;
+        }
+        savedDraftRef.current = draftFingerprint(editor.getJSON(), data);
+        clearRichTextDraft(activeId);
+        setDraftState("saved");
+      } else if (supportsDraft && (local || storedContent)) {
+        setLegacyDraft(
+          local ?? (storedContent ? { content: storedContent, postData: data } : null)
+        );
+        return;
+      }
+      setDraftReady(true);
     }, 0);
-
     return () => window.clearTimeout(timer);
   }, [
     activeId,
-    editorContent,
-    existingContentIsEditable,
-    existingPost,
-    isOpen,
+    applyDraft,
+    draftReady,
+    readyEditor,
     isPostDataReady,
-    serverAutosaveContent,
+    legacyDraft,
+    serverDraft.currentData,
+    serverDraft.isFetching,
+    serverDraft.isSuccess,
+    supportsDraft,
+    t,
   ]);
 
   // Initialize form with existing post data
   useEffect(() => {
-    if (!isOpen) return;
-
     const nextPostData = existingPost
       ? toPostData(existingPost)
-      : activeId && !isExistingPost
+      : !isExistingPost
         ? EMPTY_POST_DATA
         : null;
     if (!nextPostData) return;
 
     initialPostDataRef.current = serializePostData(nextPostData);
     const timer = window.setTimeout(() => {
+      latestPostDataRef.current = nextPostData;
       setPostData(nextPostData);
       setIsMetadataDirty(false);
       setIsPostDataReady(true);
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [existingPost, activeId, isExistingPost, isOpen]);
+  }, [existingPost, isExistingPost]);
 
   const isDirty = isContentDirty || isMetadataDirty;
 
   const handlePostDataChange = (nextPostData: Partial<PostRequest>) => {
+    latestPostDataRef.current = nextPostData;
     setPostData(nextPostData);
     setSaveError(null);
     setIsMetadataDirty(serializePostData(nextPostData) !== initialPostDataRef.current);
-    saveDraft(
-      activeId,
-      editorRef.current,
-      nextPostData,
-      Boolean(isOpen && activeId && isPostDataReady && !hasContentSchemaError)
-    );
-    saveServerDraft(
-      activeId,
-      editorRef.current,
-      Boolean(isOpen && activeId && isPostDataReady && !hasContentSchemaError)
-    );
+    scheduleAutosave();
   };
 
   useEffect(() => {
     return () => {
-      saveDraft.cancel();
-      saveServerDraft.cancel();
+      scheduleDraft.cancel();
       updateMediaIssues.cancel();
     };
-  }, [activeId, hasContentSchemaError, isOpen, saveDraft, saveServerDraft, updateMediaIssues]);
+  }, [scheduleDraft, updateMediaIssues]);
 
   useEffect(() => {
-    if (!isOpen || !isDirty) return;
-
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    if (draftState !== "saving" && draftState !== "error") return;
+    const beforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = "";
     };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty, isOpen]);
+    const online = () => scheduleDraft();
+    window.addEventListener("beforeunload", beforeUnload);
+    window.addEventListener("online", online);
+    return () => {
+      window.removeEventListener("beforeunload", beforeUnload);
+      window.removeEventListener("online", online);
+    };
+  }, [draftState, scheduleDraft]);
 
   const closeEditor = () => {
-    saveDraft.cancel();
-    saveServerDraft.cancel();
+    scheduleDraft.cancel();
     dispatch(closeRichText());
     setSettingsOpen(false);
     setIsDiscardDialogOpen(false);
-    setIsDraftRecoveryDialogOpen(false);
-    setRecoveryDraft(null);
-    setRecoverySource(null);
-    setContentSchemaError(null);
+    setConfirmClose(false);
     setSaveError(null);
-    setAutosaveError(null);
-    setIsAutosaving(false);
   };
 
-  const requestClose = () => {
+  const requestClose = async () => {
     if (isPending) return;
-
-    if (isDirty) {
+    if (!supportsDraft && isDirty) {
       setIsDiscardDialogOpen(true);
       return;
     }
-
-    closeEditor();
-  };
-
-  const discardLocalDraft = () => {
-    clearRichTextDraft(activeId);
-    setRecoveryDraft(null);
-    setIsDraftRecoveryDialogOpen(false);
-    setRecoverySource(null);
-  };
-
-  const discardChanges = () => {
-    clearRichTextDraft(activeId);
-    closeEditor();
-  };
-
-  const restoreDraft = () => {
-    if (!recoveryDraft || !editorRef.current || hasContentSchemaError) return;
-
-    try {
-      editorRef.current.commands.setContent(recoveryDraft.content, {
-        emitUpdate: false,
-        errorOnInvalidContent: true,
-      });
-    } catch (error) {
-      setContentSchemaError({
-        activeId: activeId || "unknown",
-        message: error instanceof Error ? error.message : "The recovered draft is incompatible.",
-      });
+    if (!draftReady || !supportsDraft || draftState === "idle" || draftState === "saved") {
+      closeEditor();
       return;
     }
+    setIsFinalizing(true);
+    scheduleDraft.cancel();
+    try {
+      if (await syncDraft()) closeEditor();
+      else setConfirmClose(true);
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
 
-    const restoredPostData = recoveryDraft.postData;
-    setPostData(restoredPostData);
-    setIsContentDirty(
-      initialEditorDocumentRef.current
-        ? !initialEditorDocumentRef.current.eq(editorRef.current.state.doc)
-        : true
-    );
-    setIsMetadataDirty(serializePostData(restoredPostData) !== initialPostDataRef.current);
-    saveDraft(activeId, editorRef.current, restoredPostData, Boolean(isOpen && activeId));
-    saveServerDraft(activeId, editorRef.current, Boolean(isOpen && activeId && isExistingPost));
-    setRecoveryDraft(null);
-    setIsDraftRecoveryDialogOpen(false);
-    setRecoverySource(null);
+  const discardChanges = async () => {
+    if (isPending) return;
+    setIsFinalizing(true);
+    scheduleDraft.cancel();
+    try {
+      await draftRequestRef.current;
+      if (supportsDraft) {
+        await discardEditorDraft({
+          identifier: activeId,
+          revision: draftRevisionRef.current,
+        }).unwrap();
+      }
+      clearRichTextDraft(activeId);
+      closeEditor();
+    } catch {
+      toast.danger(t("discardFailed"));
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
+
+  const resumeLegacyDraft = () => {
+    if (!legacyDraft || !applyDraft(legacyDraft.content, legacyDraft.postData)) return;
+    setLegacyDraft(null);
+    setDraftReady(true);
+    setDraftState("saving");
+    scheduleDraft();
   };
 
   const handleSave = async (statusOverride?: PostRequest["status"]) => {
@@ -458,43 +477,46 @@ export function RichTextModal() {
       status: requestedStatus,
     };
 
+    setIsFinalizing(true);
+    scheduleDraft.cancel();
     try {
+      await draftRequestRef.current;
+      const draftRevision = draftRevisionRef.current ?? "none";
       if (isExistingPost) {
-        await updatePost({ id: Number(activeId), body: payload }).unwrap();
+        await updatePost({ id: Number(activeId), body: payload, draftRevision }).unwrap();
       } else {
-        await createPost(payload).unwrap();
+        await createPost({ body: payload, draftRevision }).unwrap();
       }
-      saveServerDraft.cancel();
-      setAutosaveError(null);
       clearRichTextDraft(activeId);
       closeEditor();
     } catch (error) {
       setSaveError(getApiErrorMessage(error, "The article could not be saved. Try again."));
+      scheduleAutosave();
+    } finally {
+      setIsFinalizing(false);
     }
   };
 
   const handleRevisionRestored = async () => {
     clearRichTextDraft(activeId);
-    saveDraft.cancel();
-    saveServerDraft.cancel();
+    scheduleDraft.cancel();
     setIsContentDirty(false);
     setIsMetadataDirty(false);
     setSaveError(null);
-    setAutosaveError(null);
-    setIsEditorReady(false);
+    setReadyEditor(null);
     setEditorInstanceVersion((version) => version + 1);
     await refetchExistingPost();
   };
 
   return (
     <>
-      <Modal key={activeId}>
+      <Modal>
         <Modal.Backdrop
           isDismissable={false}
           isKeyboardDismissDisabled={isPending}
-          isOpen={isOpen}
+          isOpen
           onOpenChange={(nextIsOpen) => {
-            if (!nextIsOpen) requestClose();
+            if (!nextIsOpen) void requestClose();
           }}
         >
           <Modal.Container size="cover">
@@ -557,7 +579,14 @@ export function RichTextModal() {
               </MotionButton>
 
               <Modal.Body className="relative min-h-0 flex-1 overflow-hidden">
-                {isFetching ? (
+                {serverDraft.isError && !draftReady ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-3">
+                    <p role="alert">{t("loadFailed")}</p>
+                    <Button onPress={() => void serverDraft.refetch()} size="sm">
+                      {t("retry")}
+                    </Button>
+                  </div>
+                ) : isFetching || (supportsDraft && !draftReady && serverDraft.isFetching) ? (
                   <div className="flex h-full w-full items-center justify-center">
                     <Spinner size="lg" />
                   </div>
@@ -579,7 +608,9 @@ export function RichTextModal() {
                         <RichText
                           key={`${activeId}-${existingPost?.updatedAt || "new"}-${editorInstanceVersion}`}
                           content={editorContent}
-                          isDisabled={hasContentSchemaError}
+                          isDisabled={
+                            hasContentSchemaError || (supportsDraft && !draftReady) || isPending
+                          }
                           showTableOfContents
                           onReady={(editor) => {
                             editorRef.current = editor;
@@ -589,7 +620,7 @@ export function RichTextModal() {
                               if (editor.isDestroyed) return;
                               setIsContentDirty(false);
                               setMediaIssues(getMediaValidationIssues(content));
-                              setIsEditorReady(true);
+                              setReadyEditor(editor);
                             });
                           }}
                           onContentError={(error) => {
@@ -600,21 +631,7 @@ export function RichTextModal() {
                           }}
                           onUpdate={(editor) => {
                             setSaveError(null);
-                            saveDraft(
-                              activeId,
-                              editor,
-                              postData,
-                              Boolean(
-                                isOpen && activeId && isPostDataReady && !hasContentSchemaError
-                              )
-                            );
-                            saveServerDraft(
-                              activeId,
-                              editor,
-                              Boolean(
-                                isOpen && activeId && isPostDataReady && !hasContentSchemaError
-                              )
-                            );
+                            scheduleAutosave();
                             updateMediaIssues(editor);
 
                             queueMicrotask(() => {
@@ -647,11 +664,13 @@ export function RichTextModal() {
                       )}
                     </motion.div>
                     <ArticleSettingsPanel
-                      autosaveError={autosaveError}
                       data={postData}
-                      isAutosaving={isAutosaving}
-                      isDisabled={isPending || hasContentSchemaError}
-                      isWorkflowDisabled={isPending || hasContentSchemaError || isDirty}
+                      isDisabled={
+                        isPending || hasContentSchemaError || (supportsDraft && !draftReady)
+                      }
+                      isWorkflowDisabled={
+                        isPending || hasContentSchemaError || isDirty || draftState !== "idle"
+                      }
                       isExistingPost={isExistingPost}
                       isOpen={settingsOpen}
                       isPending={isPending}
@@ -669,7 +688,6 @@ export function RichTextModal() {
                       saveError={saveError}
                       scheduledAt={existingPost?.scheduledAt ?? undefined}
                       onChange={handlePostDataChange}
-                      onRetryAutosave={() => saveServerDraft(activeId, editorRef.current, true)}
                       onRetrySave={() => void handleSave(lastSaveStatusRef.current)}
                       onSave={(status) => void handleSave(status)}
                       onWorkflowCompleted={handleRevisionRestored}
@@ -677,71 +695,105 @@ export function RichTextModal() {
                   </div>
                 )}
               </Modal.Body>
+              {supportsDraft ? (
+                <Modal.Footer className="flex-wrap items-center justify-between">
+                  <p role="status" className="text-muted text-sm">
+                    {draftReady && draftState !== "idle" ? t(draftState) : null}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {draftState === "error" ? (
+                      <Button
+                        size="sm"
+                        variant="tertiary"
+                        isDisabled={isPending}
+                        onPress={() => void syncDraft()}
+                      >
+                        {t("retry")}
+                      </Button>
+                    ) : null}
+                    {draftReady && draftState !== "idle" ? (
+                      <Button
+                        size="sm"
+                        variant="tertiary"
+                        isDisabled={isPending}
+                        onPress={() => setIsDiscardDialogOpen(true)}
+                      >
+                        {t("discard")}
+                      </Button>
+                    ) : null}
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      isDisabled={isPending}
+                      onPress={() => void requestClose()}
+                    >
+                      {t("close")}
+                    </Button>
+                  </div>
+                </Modal.Footer>
+              ) : null}
             </Modal.Dialog>
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>
       <AlertDialog>
         <AlertDialog.Backdrop
-          isOpen={isDiscardDialogOpen}
-          onOpenChange={setIsDiscardDialogOpen}
+          isOpen={isDiscardDialogOpen || confirmClose || Boolean(legacyDraft)}
+          onOpenChange={(open) => {
+            if (!open && !legacyDraft && !isFinalizing) {
+              setIsDiscardDialogOpen(false);
+              setConfirmClose(false);
+            }
+          }}
           variant="blur"
         >
           <AlertDialog.Container>
             <AlertDialog.Dialog className="sm:max-w-md">
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Discard unsaved changes?</AlertDialog.Heading>
-              </AlertDialog.Header>
-              <AlertDialog.Body>
-                <p className="text-sm">Your article changes have not been saved.</p>
-              </AlertDialog.Body>
-              <AlertDialog.Footer>
-                <Button slot="close" size="sm" variant="tertiary">
-                  Keep editing
-                </Button>
-                <Button size="sm" variant="danger" onPress={discardChanges}>
-                  Discard changes
-                </Button>
-              </AlertDialog.Footer>
-            </AlertDialog.Dialog>
-          </AlertDialog.Container>
-        </AlertDialog.Backdrop>
-      </AlertDialog>
-      <AlertDialog>
-        <AlertDialog.Backdrop
-          isOpen={isDraftRecoveryDialogOpen}
-          onOpenChange={setIsDraftRecoveryDialogOpen}
-          variant="blur"
-        >
-          <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md">
-              <AlertDialog.Header>
-                <AlertDialog.Icon status="warning" />
-                <AlertDialog.Heading>Recover unsaved draft?</AlertDialog.Heading>
+                <AlertDialog.Heading>
+                  {t(
+                    confirmClose
+                      ? "closeUnsavedHeading"
+                      : legacyDraft
+                        ? "resumeHeading"
+                        : "discardHeading"
+                  )}
+                </AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="text-sm">
-                  A {recoverySource === "server" ? "server autosave" : "locally saved draft"} is
-                  {recoverySource === "server"
-                    ? " available for this article."
-                    : " available from "}
-                  {recoverySource !== "server" && recoveryDraft
-                    ? new Date(recoveryDraft.savedAt).toLocaleString()
-                    : null}
+                  {t(
+                    confirmClose
+                      ? "closeUnsavedDescription"
+                      : legacyDraft
+                        ? "resumeDescription"
+                        : "discardDescription"
+                  )}
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>
-                <Button size="sm" variant="tertiary" onPress={discardLocalDraft}>
-                  Discard draft
-                </Button>
+                {legacyDraft ? (
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    isDisabled={isPending}
+                    onPress={resumeLegacyDraft}
+                  >
+                    {t("resume")}
+                  </Button>
+                ) : (
+                  <Button slot="close" size="sm" variant="tertiary" isDisabled={isPending}>
+                    {t("keepEditing")}
+                  </Button>
+                )}
                 <Button
                   size="sm"
-                  variant="primary"
-                  onPress={restoreDraft}
-                  isDisabled={!isEditorReady || hasContentSchemaError}
+                  variant="danger"
+                  isPending={isFinalizing}
+                  onPress={confirmClose ? closeEditor : () => void discardChanges()}
                 >
-                  Restore draft
+                  {t(confirmClose ? "closeUnsaved" : "discard")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>
