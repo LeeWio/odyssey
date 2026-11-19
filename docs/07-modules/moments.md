@@ -1,5 +1,21 @@
 # Moments
 
+## Account bookmarks
+
+The star on a Moment and `/moments/saved` share account-scoped bookmark state.
+The saved page fetches a dedicated collection ordered by most recent save.
+Returning to a tab refreshes its account state. Guests open the sign-in prompt
+from the star.
+
+On authenticated use, Odyssey imports browser-only bookmarks in batches and
+clears the legacy list after Nexus confirms the import and returns the current
+account snapshot. A failed import keeps the local list available for retry.
+Nexus preserves explicit removals when another browser imports older data and
+omits Moments that the signed-in account can no longer see.
+
+`tests/e2e/moment-reactions.spec.ts` covers migration retry, a fresh browser,
+account isolation, save failure recovery, and the existing star interaction.
+
 ## In-feed Editing
 
 Administrators can edit a Moment from its card menu on `/moments`. The page owns
