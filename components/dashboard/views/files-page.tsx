@@ -13,11 +13,14 @@ import {
 import { DropZone, useDropZonePickerContext } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useClipboard } from "@mantine/hooks";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useEffect, useState } from "react";
 
 import {
+  type AssetUsage,
   type FileResponse,
   useDeleteFileMutation,
+  useGetFileUsageQuery,
   useSearchFilesQuery,
   useUploadFileMutation,
 } from "@/lib/features/file";
@@ -26,6 +29,16 @@ import { StorageHealth } from "./storage-health";
 
 const PAGE_SIZE = 20;
 type Upload = { id: string; file: File; status: "uploading" | "failed" };
+
+const usageLabels: Record<AssetUsage["locations"][number]["kind"], string> = {
+  ARTICLE_COVER: "Article cover",
+  ARTICLE_CONTENT: "Article body",
+  ARTICLE_SUMMARY: "Article summary",
+  COMMENT: "Comment",
+  USER_AVATAR: "User avatar",
+  PROJECT_COVER: "Project cover",
+  MOMENT: "Moment",
+};
 
 function formatFileSize(bytes: number) {
   const units = ["B", "KB", "MB", "GB", "TB"];
@@ -60,6 +73,11 @@ export function FilesPage() {
   const [uploadFile] = useUploadFileMutation();
   const [deleteFile, { isLoading: isDeleting }] = useDeleteFileMutation();
   const clipboard = useClipboard();
+  const usage = useGetFileUsageQuery(fileToDelete?.fileName ?? skipToken, {
+    refetchOnMountOrArgChange: true,
+  });
+  const locations = usage.currentData;
+  const canDelete = !usage.isFetching && !usage.isError && locations?.total === 0;
 
   useEffect(() => {
     if (clipboard.error) toast.danger("Couldn’t copy the file link.");
@@ -84,17 +102,20 @@ export function FilesPage() {
   }
 
   async function confirmDelete() {
-    if (!fileToDelete) return;
+    if (!fileToDelete || !canDelete || isDeleting) return;
     try {
       await deleteFile(fileToDelete.fileName).unwrap();
-      setFileToDelete(null);
-      if (page > 0 && files.currentData?.list.length === 1) {
-        const refreshed = await files.refetch().unwrap();
-        const lastPage = Math.max(0, refreshed.totalPages - 1);
+    } catch {
+      void usage.refetch();
+      return;
+    }
+    setFileToDelete(null);
+    if (page > 0 && files.currentData?.list.length === 1) {
+      const refreshed = await files.refetch();
+      if (refreshed.data) {
+        const lastPage = Math.max(0, refreshed.data.totalPages - 1);
         setPage((current) => (current === page ? Math.min(current, lastPage) : current));
       }
-    } catch {
-      // The mutation and list query show their own error states.
     }
   }
 
@@ -305,8 +326,36 @@ export function FilesPage() {
                 <AlertDialog.Heading>Delete asset?</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                Delete <strong>{fileToDelete?.originalName}</strong>? Removing its last reference
-                permanently deletes the file, and pages using it may lose access.
+                <p className="font-semibold">{fileToDelete?.originalName}</p>
+                {usage.isFetching ? (
+                  <p role="status">Checking where this asset is used…</p>
+                ) : usage.isError ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p role="status">Couldn’t check usage. The asset cannot be deleted yet.</p>
+                    <Button size="sm" variant="secondary" onPress={() => usage.refetch()}>
+                      Retry usage check
+                    </Button>
+                  </div>
+                ) : locations?.total ? (
+                  <div className="flex min-w-0 flex-col gap-2">
+                    <p role="status">This asset is in use and cannot be deleted.</p>
+                    <ul
+                      className="max-h-48 list-disc space-y-1 overflow-y-auto pl-5"
+                      aria-label="Usage locations"
+                    >
+                      {locations.locations.map(({ kind, id, label }) => (
+                        <li key={`${kind}-${id}`} className="break-words">
+                          {usageLabels[kind]} · {label || `#${id}`}
+                        </li>
+                      ))}
+                    </ul>
+                    {locations.total > locations.locations.length && (
+                      <p>And {locations.total - locations.locations.length} more.</p>
+                    )}
+                  </div>
+                ) : locations ? (
+                  <p>Removing the last reference permanently deletes the file.</p>
+                ) : null}
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button
@@ -316,7 +365,11 @@ export function FilesPage() {
                 >
                   Cancel
                 </Button>
-                <Button variant="danger" onPress={confirmDelete} isDisabled={isDeleting}>
+                <Button
+                  variant="danger"
+                  onPress={confirmDelete}
+                  isDisabled={isDeleting || !canDelete}
+                >
                   {isDeleting ? "Deleting…" : "Delete"}
                 </Button>
               </AlertDialog.Footer>
