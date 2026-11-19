@@ -18,8 +18,19 @@ createServer((request, response) => {
 
   if (request.method === "POST" && pathname === analyticsPageviews) return send(200);
   if (request.method !== "GET") return send(405);
+  if (pathname === "/api/v1/public/seo/sitemap.xml") {
+    response.writeHead(200, { "Content-Type": "application/xml" });
+    response.end(
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://easylove.top/single/design-foundation</loc></url></urlset>'
+    );
+    return;
+  }
   if (pathname === "/health") return send(200, { ready: true });
-  if (pathname === `${blogPosts}/featured` || pathname === `${blogPosts}/digest`) {
+  if (
+    pathname === blogPosts ||
+    pathname === `${blogPosts}/featured` ||
+    pathname === `${blogPosts}/digest`
+  ) {
     return send(200, {
       list: [designArticle],
       total: 1,

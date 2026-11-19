@@ -1,5 +1,5 @@
 {
-  "nexusRevision": "1f367bd54b0049b51d540db290a42a97f5e71579",
+  "nexusRevision": "4c59b64d7bf18d7c44bb439e1a4e66ec066f8e23",
   "paths": {
     "/api/v1/admin/analytics/content-funnel": {
       "get": {
@@ -1612,6 +1612,10 @@
       }
     },
     "/api/v1/user/library/reading-list/{postId}": {
+      "get": {
+        "operationId": "isInReadingList",
+        "tags": ["Personal Library"]
+      },
       "put": {
         "operationId": "addToReadingList",
         "tags": ["Personal Library"]
@@ -1625,6 +1629,12 @@
       "get": {
         "operationId": "getCurrentUser",
         "tags": ["User Profile"]
+      }
+    },
+    "/api/v1/user/moments/liked": {
+      "get": {
+        "operationId": "getLikedMoments",
+        "tags": ["Moment Likes"]
       }
     },
     "/api/v1/user/moments/saved": {

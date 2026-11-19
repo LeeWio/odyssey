@@ -3,25 +3,19 @@
 import { EmptyState } from "@heroui-pro/react";
 import { Button, Link, Skeleton, Typography } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { MomentCard } from "@/features/moment/components/card";
-import { useGetLikedMomentIdsQuery, usePublishedMoments } from "@/lib/features/moment";
-import { selectIsAuthenticated } from "@/lib/features/auth";
+import { useMomentBookmarkAccount } from "@/features/moment/hooks/use-moment-bookmarks";
+import { useGetLikedMomentsQuery } from "@/lib/features/moment";
 import { setLoginOpen } from "@/lib/features/ui";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useAppDispatch } from "@/lib/hooks";
 import { PageFrame } from "@/components/layout/page-frame";
 
 export default function LikedMomentsPage() {
   const t = useTranslations("Moments");
   const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const catalog = usePublishedMoments();
-  const ids = catalog.moments.map((moment) => moment.id);
-  const liked = useGetLikedMomentIdsQuery(ids, {
-    skip: !isAuthenticated || ids.length === 0,
-  });
-  const likedIds = new Set(liked.data ?? []);
-  const moments = catalog.moments.filter((moment) => likedIds.has(moment.id));
+  const username = useMomentBookmarkAccount();
 
   return (
     <PageFrame className="bg-background">
@@ -36,7 +30,7 @@ export default function LikedMomentsPage() {
           <Typography color="muted">{t("likedDescription")}</Typography>
         </header>
 
-        {!isAuthenticated ? (
+        {!username ? (
           <EmptyState>
             <EmptyState.Header>
               <EmptyState.Title>{t("likedSignInTitle")}</EmptyState.Title>
@@ -46,49 +40,101 @@ export default function LikedMomentsPage() {
               <Button onPress={() => dispatch(setLoginOpen(true))}>{t("signIn")}</Button>
             </EmptyState.Content>
           </EmptyState>
-        ) : catalog.isLoading || liked.isLoading ? (
-          <div className="flex flex-col gap-4">
-            {Array.from({ length: 3 }, (_, index) => (
-              <Skeleton key={index} className="h-40 w-full rounded-2xl" />
-            ))}
-          </div>
-        ) : catalog.isError || liked.isError ? (
-          <EmptyState>
-            <EmptyState.Header>
-              <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
-              <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
-            </EmptyState.Header>
-            <EmptyState.Content>
-              <Button
-                size="sm"
-                variant="secondary"
-                onPress={() => {
-                  catalog.retry();
-                  void liked.refetch();
-                }}
-              >
-                {t("tryAgain")}
-              </Button>
-            </EmptyState.Content>
-          </EmptyState>
-        ) : moments.length === 0 ? (
-          <EmptyState>
-            <EmptyState.Header>
-              <EmptyState.Title>{t("likedEmpty")}</EmptyState.Title>
-              <EmptyState.Description>{t("likedEmptyHint")}</EmptyState.Description>
-            </EmptyState.Header>
-            <EmptyState.Content>
-              <Link href="/moments">{t("backToMoments")}</Link>
-            </EmptyState.Content>
-          </EmptyState>
         ) : (
-          <div className="flex flex-col gap-6">
-            {moments.map((moment) => (
-              <MomentCard key={moment.id} moment={moment} />
-            ))}
-          </div>
+          <LikedMoments key={username} username={username} />
         )}
       </div>
     </PageFrame>
+  );
+}
+
+function LikedMoments({ username }: { username: string }) {
+  const t = useTranslations("Moments");
+  const [page, setPage] = useState(0);
+  const liked = useGetLikedMomentsQuery(
+    { username, page },
+    {
+      refetchOnFocus: true,
+      refetchOnMountOrArgChange: true,
+    }
+  );
+  const data = liked.currentData;
+  const lastPage = Math.max(0, (data?.totalPages ?? 1) - 1);
+  const isAdjustingPage = !!data && !liked.isFetching && !liked.isError && page > lastPage;
+  if (isAdjustingPage) setPage(lastPage);
+
+  const hasError = liked.isError;
+  const isLoading = !hasError && (!data || isAdjustingPage);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-4" aria-busy="true">
+        {Array.from({ length: 3 }, (_, index) => (
+          <Skeleton key={index} className="h-40 w-full rounded-2xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <EmptyState>
+        <EmptyState.Header>
+          <EmptyState.Title>{t("unavailable")}</EmptyState.Title>
+          <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
+        </EmptyState.Header>
+        <EmptyState.Content>
+          <Button size="sm" variant="secondary" onPress={() => void liked.refetch()}>
+            {t("tryAgain")}
+          </Button>
+        </EmptyState.Content>
+      </EmptyState>
+    );
+  }
+
+  if (!data?.list.length) {
+    return (
+      <EmptyState>
+        <EmptyState.Header>
+          <EmptyState.Title>{t("likedEmpty")}</EmptyState.Title>
+          <EmptyState.Description>{t("likedEmptyHint")}</EmptyState.Description>
+        </EmptyState.Header>
+        <EmptyState.Content>
+          <Link href="/moments">{t("backToMoments")}</Link>
+        </EmptyState.Content>
+      </EmptyState>
+    );
+  }
+
+  const likedIds = data.list.map(({ id }) => id);
+  return (
+    <div className="flex flex-col gap-6" aria-busy={liked.isFetching}>
+      {data.list.map((moment) => (
+        <MomentCard key={moment.id} moment={moment} knownLikedMomentIds={likedIds} />
+      ))}
+      {lastPage > 0 && (
+        <nav aria-label={t("likedTitle")} className="flex items-center justify-between gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            isDisabled={page === 0 || liked.isFetching}
+            onPress={() => setPage(page - 1)}
+          >
+            {t("previousPage")}
+          </Button>
+          <Typography color="muted" aria-live="polite">
+            {t("pageLabel", { page: page + 1 })}
+          </Typography>
+          <Button
+            size="sm"
+            variant="secondary"
+            isDisabled={page >= lastPage || liked.isFetching}
+            onPress={() => setPage(page + 1)}
+          >
+            {t("nextPage")}
+          </Button>
+        </nav>
+      )}
+    </div>
   );
 }

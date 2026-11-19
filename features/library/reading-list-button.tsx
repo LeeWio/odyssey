@@ -26,31 +26,8 @@ export function ReadingListButton(props: ReadingListButtonProps) {
 
 function ReadingListAction({ isRefreshing = false, isSaved, postId }: ReadingListButtonProps) {
   const t = useTranslations("Article");
-  const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const inFlight = useRef(false);
-  const [add, { isLoading: isAdding }] = useAddToReadingListMutation();
-  const [remove, { isLoading: isRemoving }] = useRemoveFromReadingListMutation();
-  const saved = isAuthenticated && isSaved;
-  const pending = isAdding || isRemoving;
-  const busy = pending || (isAuthenticated && isRefreshing);
+  const { saved, pending, busy, toggle } = useReadingListAction({ isRefreshing, isSaved, postId });
   const label = saved ? t("savedForLater") : t("saveForLater");
-
-  const toggle = async () => {
-    if (!isAuthenticated) {
-      dispatch(setLoginOpen(true));
-      return;
-    }
-    if (inFlight.current || pending || isRefreshing) return;
-    inFlight.current = true;
-    try {
-      await (saved ? remove(postId) : add(postId)).unwrap();
-    } catch {
-      // API mutations own feedback; keep displaying the authoritative server state.
-    } finally {
-      inFlight.current = false;
-    }
-  };
 
   return (
     <Tooltip>
@@ -77,4 +54,37 @@ function ReadingListAction({ isRefreshing = false, isSaved, postId }: ReadingLis
       <Tooltip.Content>{label}</Tooltip.Content>
     </Tooltip>
   );
+}
+
+export function useReadingListAction({
+  isRefreshing = false,
+  isSaved,
+  postId,
+}: Omit<ReadingListButtonProps, "postId"> & { postId?: number }) {
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const inFlight = useRef(false);
+  const [add, { isLoading: isAdding }] = useAddToReadingListMutation();
+  const [remove, { isLoading: isRemoving }] = useRemoveFromReadingListMutation();
+  const saved = isAuthenticated && isSaved;
+  const pending = isAdding || isRemoving;
+  const busy = pending || (isAuthenticated && isRefreshing);
+
+  const toggle = async () => {
+    if (!isAuthenticated) {
+      dispatch(setLoginOpen(true));
+      return;
+    }
+    if (postId === undefined || inFlight.current || pending || isRefreshing) return;
+    inFlight.current = true;
+    try {
+      await (saved ? remove(postId) : add(postId)).unwrap();
+    } catch {
+      // API mutations own feedback; keep displaying the authoritative server state.
+    } finally {
+      inFlight.current = false;
+    }
+  };
+
+  return { saved, pending, busy, toggle };
 }

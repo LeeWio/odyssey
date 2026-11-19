@@ -4,14 +4,14 @@ import { EmptyState, NumberValue } from "@heroui-pro/react";
 import { Button, Card, Link, Skeleton, Typography } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { collectMomentTopics, usePublishedMoments } from "@/lib/features/moment";
+import { useGetPublicMomentTopicsQuery } from "@/lib/features/moment";
 import { PageFrame } from "@/components/layout/page-frame";
 
 export default function MomentTopicsPage() {
   const t = useTranslations("Moments");
   const locale = useLocale();
-  const catalog = usePublishedMoments();
-  const topics = collectMomentTopics(catalog.moments);
+  const catalog = useGetPublicMomentTopicsQuery();
+  const topics = catalog.data ?? [];
 
   return (
     <PageFrame className="bg-background">
@@ -39,7 +39,7 @@ export default function MomentTopicsPage() {
               <EmptyState.Description>{t("unavailableHint")}</EmptyState.Description>
             </EmptyState.Header>
             <EmptyState.Content>
-              <Button size="sm" variant="secondary" onPress={catalog.retry}>
+              <Button size="sm" variant="secondary" onPress={() => void catalog.refetch()}>
                 {t("tryAgain")}
               </Button>
             </EmptyState.Content>
