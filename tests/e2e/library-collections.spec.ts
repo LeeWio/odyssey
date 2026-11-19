@@ -545,3 +545,45 @@ test("cancelled deletion leaves data intact and deleting another collection pres
   ).toHaveCount(0);
   expect(deleted).toEqual([2]);
 });
+
+test("shows saved writing beyond six articles and retries the requested page", async ({ page }) => {
+  let secondPageRequests = 0;
+  const pending = Promise.withResolvers<void>();
+  await page.route("**/api/v1/user/library/favorites?**", async (route) => {
+    const { searchParams } = new URL(route.request().url());
+    const index = Number(searchParams.get("page"));
+    expect(searchParams.get("size")).toBe("6");
+    expect(searchParams.has("sort")).toBe(false);
+    if (index === 1 && ++secondPageRequests === 1) {
+      await pending.promise;
+      return route.fulfill({ status: 503, json: { message: "Unavailable" } });
+    }
+    const list = (index === 0 ? firstPage.slice(0, 6) : [entry(7)]).map(({ post }) => ({
+      favoritedAt: date,
+      post,
+    }));
+    return route.fulfill({
+      json: envelope({ list, page: index + 1, total: 7, size: 6, totalPages: 2 }),
+    });
+  });
+
+  try {
+    await page.goto("/library");
+    const saved = page.getByRole("region", { name: "Saved writing", exact: true });
+    await expect(saved.getByText("7 saved articles", { exact: true })).toBeVisible();
+    await expect(saved.getByRole("link", { name: /^Article 1\b/ })).toBeVisible();
+    await saved.getByRole("button", { name: "Next", exact: true }).press("Enter");
+    await expect(saved.getByRole("link", { name: /^Article 1\b/ })).toHaveCount(0);
+    pending.resolve();
+    await expect(saved.getByText("Saved writing is unavailable", { exact: true })).toBeVisible();
+    await saved.getByRole("button", { name: "Try again", exact: true }).press("Enter");
+    await expect(saved.getByRole("link", { name: /^Article 7\b/ })).toBeVisible();
+    await expect(saved.getByText("Page 2 of 2", { exact: true })).toBeVisible();
+    await expect(saved.getByRole("button", { name: "Next", exact: true })).toBeDisabled();
+    await saved.getByRole("button", { name: "Previous", exact: true }).press("Enter");
+    await expect(saved.getByRole("link", { name: /^Article 1\b/ })).toBeVisible();
+    expect(secondPageRequests).toBe(2);
+  } finally {
+    pending.resolve();
+  }
+});
