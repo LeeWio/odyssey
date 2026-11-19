@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.247.1](https://github.com/LeeWio/odyssey/compare/v1.247.0...v1.247.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **reader:** connect search, chapters and author pages ([#29](https://github.com/LeeWio/odyssey/issues/29)) ([5190712](https://github.com/LeeWio/odyssey/commit/51907120c5cbebb683551f2de490ac93b08c5c26))
+
 ## [1.247.0](https://github.com/LeeWio/odyssey/compare/v1.246.0...v1.247.0) (2026-11-19)
 
 
