@@ -18,7 +18,6 @@ import {
   Typography,
 } from "@heroui/react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -30,6 +29,7 @@ import type { PostResponse } from "@/lib/features/post";
 import { useGetPublicPostsQuery } from "@/lib/features/post";
 import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 
 const PAGE_SIZE = 9;
 const EXPLORE_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-5";
@@ -204,8 +204,7 @@ function ExploreSearchField({
 export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("Explore");
   const locale = useLocale();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const selectedCategoryId = parsePositiveInteger(searchParams.get("category"));
   const selectedTagId = parsePositiveInteger(searchParams.get("tag"));
@@ -246,18 +245,7 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
   const hasActiveFilters = Boolean(selectedCategoryId || selectedTagId || normalizedQuery);
 
   const updateSearch = (changes: Record<string, string | undefined>) => {
-    const next = new URLSearchParams(searchParams.toString());
-
-    Object.entries(changes).forEach(([key, value]) => {
-      if (value) {
-        next.set(key, value);
-      } else {
-        next.delete(key);
-      }
-    });
-
-    const serialized = next.toString();
-    router.replace(serialized ? `/explore?${serialized}` : "/explore", { scroll: false });
+    updateQuery(changes, { pathname: "/explore", scroll: false });
   };
 
   const handleCategoryChange = (keys: "all" | Set<React.Key>) => {
