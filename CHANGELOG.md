@@ -26,6 +26,14 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.259.0](https://github.com/LeeWio/odyssey/compare/v1.258.0...v1.259.0) (2026-11-20)
+
+
+### Features
+
+* **analytics:** add shared dashboard range controls ([#77](https://github.com/LeeWio/odyssey/issues/77)) ([d28f87d](https://github.com/LeeWio/odyssey/commit/d28f87dfa019199e382baabd619ad89c0f486d9a))
+* **i18n:** localize dashboard workspace ([#74](https://github.com/LeeWio/odyssey/issues/74)) ([c62afa5](https://github.com/LeeWio/odyssey/commit/c62afa54bc14d08e86e13026e7d91392571893d3))
+
 ## [1.258.0](https://github.com/LeeWio/odyssey/compare/v1.257.0...v1.258.0) (2026-11-20)
 
 
