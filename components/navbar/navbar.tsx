@@ -23,8 +23,9 @@ import { useGetCurrentUserQuery } from "@/lib/features/user";
 import { useGetUnreadNotificationCountQuery } from "@/lib/features/notification";
 import { UserAvatar } from "@/components/user-avatar";
 import { LocaleSwitcher } from "@/components/locale-switcher";
-import { selectAuthMode, setAuthMode, toggleDashboard } from "@/lib/features/ui";
+import { selectAuthMode, setAuthMode } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useDashboardNavigation } from "@/lib/hooks/use-dashboard-navigation";
 import { commentDebug } from "@/lib/comment-debug";
 import { SearchIcon } from "../icons";
 
@@ -57,6 +58,7 @@ export const Navbar = () => {
   const os = useOs();
   const reduceMotion = useReducedMotionPreference();
   const dispatch = useAppDispatch();
+  const { toggleDashboard } = useDashboardNavigation();
   const [logout] = useLogoutMutation();
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -705,7 +707,7 @@ export const Navbar = () => {
                   <Dropdown.Menu
                     aria-label={t("accountActions")}
                     onAction={(key) => {
-                      if (key === "dashboard") dispatch(toggleDashboard());
+                      if (key === "dashboard") toggleDashboard();
                       if (key === "library") router.push("/library");
                       if (key === "notifications") router.push("/notifications");
                       if (key === "logout") handleLogout();

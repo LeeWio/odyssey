@@ -3,18 +3,11 @@
 import { Xmark } from "@gravity-ui/icons";
 import { Sheet } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { LifeListItemResponse, LifeListStatus } from "@/lib/features/life-list";
 import { selectIsAdmin, useLogoutMutation } from "@/lib/features/auth";
-import {
-  selectDashboardPath,
-  selectIsDashboardOpen,
-  openDashboardAtPath,
-  setDashboardOpen,
-  setDashboardPath,
-  toggleDashboard,
-} from "@/lib/features/ui";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useAppSelector } from "@/lib/hooks";
+import { useDashboardNavigation } from "@/lib/hooks/use-dashboard-navigation";
 import { useQueryState } from "@/lib/hooks/use-query-state";
 
 import { AppShell } from "./app-shell";
@@ -48,44 +41,20 @@ import { WebhooksPage } from "./views/webhooks-page";
 const DASHBOARD_PATHS = new Set(NAV_ITEMS.map((item) => item.href));
 
 export function DashboardSheet() {
-  const isOpen = useAppSelector(selectIsDashboardOpen);
-  const requestedPath = useAppSelector(selectDashboardPath);
   const isAdmin = useAppSelector(selectIsAdmin);
-  const dispatch = useAppDispatch();
-  const { searchParams, updateQuery } = useQueryState();
+  const { updateQuery } = useQueryState();
+  const { dashboardPath, isDashboardOpen, closeDashboard } = useDashboardNavigation();
   const [logout] = useLogoutMutation();
   const t = useTranslations("Dashboard");
-  const currentPath = requestedPath;
   const [lifeListItem, setLifeListItem] = useState<LifeListItemResponse | null>(null);
   const [createWishOpen, setCreateWishOpen] = useState(false);
   const [createWishStatus, setCreateWishStatus] = useState<LifeListStatus>("planned");
   const [suppressOutsideClose, setSuppressOutsideClose] = useState(false);
-  const hasHydratedUrlRef = useRef(false);
-  const lastDashboardParamRef = useRef<string | null>(null);
-
-  const dashboardParam = searchParams.get("dashboard");
+  const currentPath = dashboardPath && DASHBOARD_PATHS.has(dashboardPath) ? dashboardPath : "/";
 
   useEffect(() => {
-    if (!isAdmin) return;
-
-    if (!hasHydratedUrlRef.current) {
-      hasHydratedUrlRef.current = true;
-      lastDashboardParamRef.current = dashboardParam;
-      if (dashboardParam && DASHBOARD_PATHS.has(dashboardParam)) {
-        dispatch(openDashboardAtPath(dashboardParam));
-      }
-      return;
-    }
-
-    if (dashboardParam === lastDashboardParamRef.current) return;
-    lastDashboardParamRef.current = dashboardParam;
-
-    if (dashboardParam && DASHBOARD_PATHS.has(dashboardParam)) {
-      dispatch(openDashboardAtPath(dashboardParam));
-    } else {
-      dispatch(setDashboardOpen(false));
-    }
-  }, [dashboardParam, dispatch, isAdmin]);
+    if (dashboardPath && !DASHBOARD_PATHS.has(dashboardPath)) closeDashboard();
+  }, [closeDashboard, dashboardPath]);
 
   const handleOpenChange = (open: boolean) => {
     // The press that opens a nested sheet is also reported as an outside close.
@@ -95,7 +64,6 @@ export function DashboardSheet() {
       return;
     }
     updateQuery({ dashboard: open ? currentPath : null }, { mode: open ? "push" : "replace" });
-    dispatch(setDashboardOpen(open));
   };
 
   const openWish = (item: LifeListItemResponse) => {
@@ -106,11 +74,10 @@ export function DashboardSheet() {
   const handleNavigate = (href: string) => {
     if (href === "/logout") {
       void logout();
-      dispatch(toggleDashboard());
+      closeDashboard();
       return;
     }
 
-    dispatch(setDashboardPath(href));
     updateQuery({ dashboard: href }, { mode: "push" });
   };
 
@@ -209,7 +176,7 @@ export function DashboardSheet() {
   };
 
   return (
-    <Sheet isOpen={isOpen} onOpenChange={handleOpenChange} isDetached>
+    <Sheet isOpen={isDashboardOpen} onOpenChange={handleOpenChange} isDetached>
       <Sheet.Backdrop isExiting variant="blur">
         <Sheet.Content>
           <>

@@ -5,7 +5,6 @@ import overlayReducer, {
   setMomentPublisherOpen,
   setSignUpOpen,
 } from "./overlay-slice";
-import shellReducer, { openDashboardAtPath } from "./shell-slice";
 
 describe("auth dialog compatibility", () => {
   it("keeps legacy entry points mutually exclusive", () => {
@@ -46,15 +45,6 @@ describe("moment publisher", () => {
     expect(opened.momentPublisher).toEqual({ isOpen: true });
     expect(overlayReducer(opened, setMomentPublisherOpen(false)).momentPublisher).toEqual({
       isOpen: false,
-    });
-  });
-});
-
-describe("dashboard navigation", () => {
-  it("opens the dashboard at a requested view", () => {
-    expect(shellReducer(undefined, openDashboardAtPath("/comments")).dashboard).toEqual({
-      isOpen: true,
-      path: "/comments",
     });
   });
 });

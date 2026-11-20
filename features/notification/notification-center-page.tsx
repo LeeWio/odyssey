@@ -24,8 +24,9 @@ import {
   useSetNotificationSavedMutation,
 } from "@/lib/features/notification";
 import { getNotificationDestination } from "@/lib/notification-presentation";
-import { openDashboardAtPath, setLoginOpen } from "@/lib/features/ui";
+import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useDashboardNavigation } from "@/lib/hooks/use-dashboard-navigation";
 import { useQueryState } from "@/lib/hooks/use-query-state";
 import { NotificationCategoryFilter } from "./notification-category-filter";
 import { NotificationCategoryList } from "./notification-category-list";
@@ -132,6 +133,7 @@ function NotificationEmptyState({
 export function NotificationCenterPage() {
   const t = useTranslations("Notifications");
   const dispatch = useAppDispatch();
+  const { openDashboard } = useDashboardNavigation();
   const router = useRouter();
   const { searchParams, updateQuery } = useQueryState();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -205,7 +207,7 @@ export function NotificationCenterPage() {
     if (!destination) return;
 
     if (destination.kind === "dashboard") {
-      dispatch(openDashboardAtPath(destination.path));
+      openDashboard(destination.path);
     } else if (destination.kind === "reader") {
       router.push(destination.href);
     } else {
