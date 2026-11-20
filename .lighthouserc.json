@@ -1,8 +1,13 @@
 {
   "ci": {
     "collect": {
-      "startServerCommand": "bun run start",
-      "url": ["http://localhost:3000/"],
+      "startServerCommand": "bun scripts/start-lighthouse-server.mjs",
+      "url": [
+        "http://localhost:3000/",
+        "http://localhost:3000/single",
+        "http://localhost:3000/single/design-foundation",
+        "http://localhost:3000/moments"
+      ],
       "numberOfRuns": 3
     },
     "assert": {
