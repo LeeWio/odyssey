@@ -9,6 +9,7 @@ import {
   LifeListMemoryResponseSchema,
   LifeListPageResponseSchema,
   type LifeListCategoryResponse,
+  type LifeListCategoryRequest,
   type LifeListItemRequest,
   type LifeListItemResponse,
   type LifeListMemoryRequest,
@@ -89,6 +90,72 @@ export const lifeListApi = baseApi.injectEndpoints({
       transformResponse: (response: ApiResponse<LifeListCategoryResponse[]>) => response.data,
       transformErrorResponse: transformApiError,
       providesTags: [{ type: "LifeList", id: "CATEGORIES" }],
+    }),
+
+    createLifeListCategory: builder.mutation<LifeListCategoryResponse, LifeListCategoryRequest>({
+      query: (body) => ({
+        url: "/api/v1/admin/life-list/categories",
+        method: "POST",
+        body,
+      }),
+      rawResponseSchema: apiResponseSchema(LifeListCategoryResponseSchema),
+      transformResponse: (response: ApiResponse<LifeListCategoryResponse>) => response.data,
+      transformErrorResponse: transformApiError,
+      invalidatesTags: [
+        { type: "LifeList", id: "CATEGORIES" },
+        { type: "LifeList", id: "ADMIN" },
+        { type: "LifeList", id: "PUBLIC" },
+      ],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          success: "Category created.",
+          error: "Couldn't create this category.",
+        });
+      },
+    }),
+
+    updateLifeListCategory: builder.mutation<
+      LifeListCategoryResponse,
+      { id: number; body: LifeListCategoryRequest }
+    >({
+      query: ({ id, body }) => ({
+        url: `/api/v1/admin/life-list/categories/${id}`,
+        method: "PUT",
+        body,
+      }),
+      rawResponseSchema: apiResponseSchema(LifeListCategoryResponseSchema),
+      transformResponse: (response: ApiResponse<LifeListCategoryResponse>) => response.data,
+      transformErrorResponse: transformApiError,
+      invalidatesTags: [
+        { type: "LifeList", id: "CATEGORIES" },
+        { type: "LifeList", id: "ADMIN" },
+        { type: "LifeList", id: "PUBLIC" },
+      ],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          success: "Category updated.",
+          error: "Couldn't update this category.",
+        });
+      },
+    }),
+
+    deleteLifeListCategory: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/api/v1/admin/life-list/categories/${id}`,
+        method: "DELETE",
+      }),
+      transformErrorResponse: transformApiError,
+      invalidatesTags: [
+        { type: "LifeList", id: "CATEGORIES" },
+        { type: "LifeList", id: "ADMIN" },
+        { type: "LifeList", id: "PUBLIC" },
+      ],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, {
+          success: "Category removed.",
+          error: "Couldn't remove this category.",
+        });
+      },
     }),
 
     createLifeListItem: builder.mutation<LifeListItemResponse, LifeListItemRequest>({
@@ -257,6 +324,9 @@ export const {
   useGetPublicLifeListItemQuery,
   useGetAdminLifeListQuery,
   useGetAdminLifeListCategoriesQuery,
+  useCreateLifeListCategoryMutation,
+  useUpdateLifeListCategoryMutation,
+  useDeleteLifeListCategoryMutation,
   useCreateLifeListItemMutation,
   useUpdateLifeListItemMutation,
   useChangeLifeListStatusMutation,

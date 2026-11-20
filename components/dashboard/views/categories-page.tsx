@@ -20,11 +20,11 @@ import {
   Modal,
   SearchField,
   Spinner,
-  TextArea,
   TextField,
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { type FormEvent, useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import {
   type CategoryRequest,
@@ -35,10 +35,17 @@ import {
   useUpdateCategoryMutation,
 } from "@/lib/features/category";
 import { toUrlSlug, validateUrlSlug } from "@/lib/utils/slug";
+import {
+  TranslationFields,
+  type TranslationValues,
+  compactTranslations,
+  translationValues,
+} from "../translation-fields";
 import { IconButton } from "../icon-button";
 import { usePortalContainer } from "../use-portal-container";
 
 export function CategoriesPage() {
+  const t = useTranslations("ContentTranslations");
   const portalContainer = usePortalContainer();
 
   const { data: categories = [], isLoading, error } = useGetCategoriesQuery();
@@ -65,6 +72,21 @@ export function CategoriesPage() {
   const [formSlug, setFormSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const [formDescription, setFormDescription] = useState("");
+  const [formTranslations, setFormTranslations] = useState<TranslationValues>({ en: {} });
+  const [translationLocale, setTranslationLocale] = useState<"zh" | "en">("zh");
+
+  const translationFields = useMemo(
+    () => [
+      { key: "name", label: t("name"), placeholder: t("namePlaceholder"), required: true },
+      {
+        key: "description",
+        label: t("descriptionField"),
+        placeholder: t("descriptionPlaceholder"),
+        multiline: true,
+      },
+    ],
+    [t]
+  );
 
   const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
@@ -115,18 +137,25 @@ export function CategoriesPage() {
     setFormSlug("");
     setSlugTouched(false);
     setFormDescription("");
+    setFormTranslations({ en: {} });
+    setTranslationLocale("zh");
     setIsFormModalOpen(true);
   };
 
   // Open Form Modal for Edit
-  const handleEditClick = useCallback((category: CategoryResponse) => {
-    setSelectedCategory(category);
-    setFormName(category.name);
-    setFormSlug(category.slug);
-    setSlugTouched(true);
-    setFormDescription(category.description || "");
-    setIsFormModalOpen(true);
-  }, []);
+  const handleEditClick = useCallback(
+    (category: CategoryResponse) => {
+      setSelectedCategory(category);
+      setFormName(category.name);
+      setFormSlug(category.slug);
+      setSlugTouched(true);
+      setFormDescription(category.description || "");
+      setFormTranslations(translationValues(category.translations, translationFields));
+      setTranslationLocale("zh");
+      setIsFormModalOpen(true);
+    },
+    [translationFields]
+  );
 
   // Open Delete Confirmation
   const handleDeleteClick = useCallback((category: CategoryResponse) => {
@@ -152,6 +181,10 @@ export function CategoriesPage() {
       name: formName.trim(),
       slug,
       description: formDescription.trim(),
+      translations: compactTranslations(
+        formTranslations,
+        "name"
+      ) as CategoryRequest["translations"],
     };
 
     try {
@@ -356,17 +389,26 @@ export function CategoriesPage() {
                   </p>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4">
-                  <TextField
-                    isRequired
-                    name="name"
-                    type="text"
-                    value={formName}
-                    onChange={handleNameChange}
-                  >
-                    <Label className="text-sm font-medium">Name</Label>
-                    <Input variant="secondary" placeholder="e.g. Technology" />
-                    <FieldError />
-                  </TextField>
+                  <TranslationFields
+                    fields={translationFields}
+                    locale={translationLocale}
+                    values={{
+                      zh: { name: formName, description: formDescription },
+                      ...formTranslations,
+                    }}
+                    onChange={(locale, field, value) => {
+                      if (locale === "zh") {
+                        if (field === "name") handleNameChange(value);
+                        if (field === "description") setFormDescription(value);
+                        return;
+                      }
+                      setFormTranslations((current) => ({
+                        ...current,
+                        [locale]: { ...current[locale], [field]: value },
+                      }));
+                    }}
+                    onLocaleChange={setTranslationLocale}
+                  />
 
                   <TextField
                     isRequired
@@ -381,20 +423,6 @@ export function CategoriesPage() {
                   >
                     <Label className="text-sm font-medium">Slug</Label>
                     <Input variant="secondary" placeholder="e.g. technology" />
-                    <FieldError />
-                  </TextField>
-
-                  <TextField
-                    name="description"
-                    value={formDescription}
-                    onChange={setFormDescription}
-                  >
-                    <Label className="text-sm font-medium">Description</Label>
-                    <TextArea
-                      variant="secondary"
-                      placeholder="Describe this category..."
-                      className="min-h-20"
-                    />
                     <FieldError />
                   </TextField>
                 </Modal.Body>

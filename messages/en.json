@@ -1886,5 +1886,33 @@
       "DELIVERED": "Delivered",
       "ABANDONED": "Abandoned"
     }
+  },
+  "ContentTranslations": {
+    "title": "Localized content",
+    "description": "Maintain the original and translated fields explicitly. Empty translations are not saved.",
+    "language": "Content language",
+    "source": "Source",
+    "translation": "Translation",
+    "locale": {
+      "zh": "中文",
+      "en": "English"
+    },
+    "name": "Name",
+    "descriptionField": "Description",
+    "titleField": "Title",
+    "summaryField": "Summary",
+    "namePlaceholder": "Enter a name",
+    "descriptionPlaceholder": "Describe this content...",
+    "titlePlaceholder": "Write a clear title",
+    "summaryPlaceholder": "Summarize this article...",
+    "category": "Category",
+    "tag": "Tag",
+    "lifeListCategory": "Life-list category",
+    "createCategory": "Create category",
+    "editCategory": "Edit category",
+    "createTag": "Create tag",
+    "editTag": "Edit tag",
+    "createLifeListCategory": "Create life-list category",
+    "editLifeListCategory": "Edit life-list category"
   }
 }

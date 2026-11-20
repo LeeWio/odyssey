@@ -4,6 +4,7 @@ import { Alert, Button, Card, Spinner } from "@heroui/react";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "motion/react";
 
 import { ShaderBackgroundPreview } from "@/components/shader-background/shader-background-preview";
+import type { AppLocale } from "@/i18n/config";
 import type { PostRequest } from "@/lib/features/post";
 
 import { PublishingWorkflow } from "./publishing-workflow";
@@ -12,6 +13,7 @@ import { RichTextForm } from "./rich-text-form";
 
 export function ArticleSettingsPanel({
   data,
+  locale,
   isDisabled,
   isExistingPost,
   isOpen,
@@ -19,6 +21,7 @@ export function ArticleSettingsPanel({
   isPending,
   mediaWarning,
   onChange,
+  onLocaleChange,
   onRetrySave,
   onSave,
   onWorkflowCompleted,
@@ -27,6 +30,7 @@ export function ArticleSettingsPanel({
   scheduledAt,
 }: {
   data: Partial<PostRequest>;
+  locale: AppLocale;
   isDisabled: boolean;
   isExistingPost: boolean;
   isWorkflowDisabled: boolean;
@@ -34,6 +38,7 @@ export function ArticleSettingsPanel({
   isPending: boolean;
   mediaWarning: string | null;
   onChange: (data: Partial<PostRequest>) => void;
+  onLocaleChange: (locale: AppLocale) => void;
   onRetrySave: () => void;
   onSave: (status: "DRAFT" | "PUBLISHED") => void;
   onWorkflowCompleted: () => Promise<void>;
@@ -50,12 +55,14 @@ export function ArticleSettingsPanel({
           hasBlockingMedia={hasBlockingMedia}
           {...{
             data,
+            locale,
             isDisabled,
             isExistingPost,
             isWorkflowDisabled,
             isPending,
             mediaWarning,
             onChange,
+            onLocaleChange,
             onRetrySave,
             onSave,
             onWorkflowCompleted,
@@ -76,8 +83,10 @@ function SettingsMotion({
   isExistingPost,
   isPending,
   isWorkflowDisabled,
+  locale,
   mediaWarning,
   onChange,
+  onLocaleChange,
   onRetrySave,
   onSave,
   onWorkflowCompleted,
@@ -124,10 +133,22 @@ function SettingsMotion({
           variants={columnVariants(reducedMotion)}
         >
           <SettingsSection className="order-1 xl:order-none">
-            <RichTextForm data={data} step="article" onChange={onChange} />
+            <RichTextForm
+              data={data}
+              locale={locale}
+              onLocaleChange={onLocaleChange}
+              step="article"
+              onChange={onChange}
+            />
           </SettingsSection>
           <SettingsSection className="order-3 xl:order-none">
-            <RichTextForm data={data} step="organize" onChange={onChange} />
+            <RichTextForm
+              data={data}
+              locale={locale}
+              onLocaleChange={onLocaleChange}
+              step="organize"
+              onChange={onChange}
+            />
           </SettingsSection>
         </motion.div>
         <motion.div
@@ -141,7 +162,13 @@ function SettingsMotion({
             />
           </SettingsSection>
           <SettingsSection className="order-4 xl:order-none">
-            <RichTextForm data={data} step="publish" onChange={onChange} />
+            <RichTextForm
+              data={data}
+              locale={locale}
+              onLocaleChange={onLocaleChange}
+              step="publish"
+              onChange={onChange}
+            />
             {isExistingPost && postId ? (
               <div className="border-separator mt-4 flex flex-col gap-4 border-t pt-4">
                 <RevisionHistoryDialog

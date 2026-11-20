@@ -13,6 +13,7 @@ import { getApiErrorMessage } from "@/lib/api/errors";
 import { RichText } from "@/components/rich-text/rich-text";
 import { ArticleSettingsPanel } from "@/components/rich-text/article-settings-panel";
 import { MotionButton } from "@/components/ui";
+import type { AppLocale } from "@/i18n/config";
 import { closeRichText, selectRichTextState } from "@/lib/features";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { microEaseOut } from "@/lib/motion";
@@ -34,6 +35,7 @@ import {
   useUpdatePostMutation,
   type PostResponse,
   type PostRequest,
+  type PostTranslation,
 } from "@/lib/features/post";
 
 const EMPTY_POST_DATA: Partial<PostRequest> = {
@@ -45,6 +47,7 @@ function toPostData(post: PostResponse): Partial<PostRequest> {
   return {
     title: post.title,
     slug: post.slug,
+    content: post.content || "",
     summary: post.summary || "",
     status: post.status,
     coverImage: post.coverImage || "",
@@ -54,6 +57,18 @@ function toPostData(post: PostResponse): Partial<PostRequest> {
     seriesId: post.series?.id,
     seriesOrder: post.seriesOrder ?? 0,
     tagIds: post.tags?.map((tag) => tag.id) || [],
+    translations: Object.fromEntries(
+      Object.entries(post.translations ?? {}).map(([locale, translation]) => [
+        locale,
+        {
+          title: translation.title ?? "",
+          summary: translation.summary ?? "",
+          content: translation.content ?? "",
+          autoSummary: translation.autoSummary ?? "",
+          toc: translation.toc ?? "",
+        },
+      ])
+    ),
   };
 }
 
@@ -70,7 +85,50 @@ function serializePostData(data: Partial<PostRequest>): string {
     seriesId: data.seriesId ?? null,
     seriesOrder: data.seriesOrder ?? 0,
     tagIds: [...(data.tagIds || [])].sort((a, b) => a - b),
+    translations: Object.fromEntries(
+      Object.entries(data.translations ?? {})
+        .sort(([first], [second]) => first.localeCompare(second))
+        .map(([locale, translation]) => [locale, translation])
+    ),
   });
+}
+
+function withLocaleContent(
+  data: Partial<PostRequest>,
+  locale: AppLocale,
+  content: string
+): Partial<PostRequest> {
+  if (locale === "zh") return { ...data, content };
+
+  return {
+    ...data,
+    translations: {
+      ...data.translations,
+      [locale]: {
+        title: data.translations?.[locale]?.title ?? "",
+        ...data.translations?.[locale],
+        content,
+      },
+    },
+  };
+}
+
+function compactPostTranslations(translations?: Record<string, PostTranslation>) {
+  const result: Record<string, PostTranslation> = {};
+  for (const [locale, translation] of Object.entries(translations ?? {})) {
+    const next = {
+      ...translation,
+      title: translation.title?.trim() ?? "",
+      summary: translation.summary?.trim() || undefined,
+      content: translation.content?.trim() || undefined,
+      autoSummary: translation.autoSummary?.trim() || undefined,
+      toc: translation.toc?.trim() || undefined,
+    };
+    if (next.title || next.summary || next.content || next.autoSummary || next.toc) {
+      result[locale] = next;
+    }
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 function serializeDocument(content: ProseMirrorNode | ReturnType<typeof normalizeJSONContent>) {
@@ -106,6 +164,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   const t = useTranslations("EditorDraft");
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [editingLocale, setEditingLocale] = useState<AppLocale>("zh");
   const editorRef = useRef<Editor | null>(null);
   const initialEditorDocumentRef = useRef<ProseMirrorNode | null>(null);
   const initialPostDataRef = useRef(serializePostData(EMPTY_POST_DATA));
@@ -234,12 +293,17 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     refetchOnMountOrArgChange: true,
   });
   const existingContentIsEditable = useMemo(() => {
-    if (!existingPost) return true;
+    if (!existingPost || editingLocale !== "zh") return true;
     return existingPost.contentType === "JSON" && parseJSONContent(existingPost.content) !== null;
-  }, [existingPost]);
+  }, [editingLocale, existingPost]);
   const editorContent = useMemo(
-    () => normalizeJSONContent(existingPost?.content),
-    [existingPost?.content]
+    () =>
+      normalizeJSONContent(
+        editingLocale === "zh"
+          ? postData.content || existingPost?.content
+          : postData.translations?.[editingLocale]?.content
+      ),
+    [editingLocale, existingPost?.content, postData.content, postData.translations]
   );
   const applyDraft = useCallback(
     (content: ReturnType<typeof normalizeJSONContent>, data: Partial<PostRequest>) => {
@@ -341,6 +405,29 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     setSaveError(null);
     setIsMetadataDirty(serializePostData(nextPostData) !== initialPostDataRef.current);
     scheduleAutosave();
+  };
+
+  const syncCurrentEditorContent = (editor: Editor) => {
+    if (editor.isDestroyed) return latestPostDataRef.current;
+    const content = JSON.stringify(
+      normalizeRichTextDocument(removeTemporaryMediaAttributes(editor.getJSON()))
+    );
+    const nextPostData = withLocaleContent(latestPostDataRef.current, editingLocale, content);
+    latestPostDataRef.current = nextPostData;
+    setPostData(nextPostData);
+    setIsMetadataDirty(serializePostData(nextPostData) !== initialPostDataRef.current);
+    return nextPostData;
+  };
+
+  const handleLocaleChange = (nextLocale: AppLocale) => {
+    if (nextLocale === editingLocale) return;
+    const editor = editorRef.current;
+    if (editor && !editor.isDestroyed) syncCurrentEditorContent(editor);
+    setContentSchemaError(null);
+    setReadyEditor(null);
+    setIsContentDirty(false);
+    setMediaIssues(getMediaValidationIssues(normalizeJSONContent(undefined)));
+    setEditingLocale(nextLocale);
   };
 
   useEffect(() => {
@@ -468,13 +555,20 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
       return;
     }
 
+    const postDataWithContent = editorRef.current
+      ? syncCurrentEditorContent(editorRef.current)
+      : postData;
     const payload: PostRequest = {
-      ...(postData as PostRequest),
+      ...(postDataWithContent as PostRequest),
       title,
       slug,
-      content: JSON.stringify(normalizeRichTextDocument(removeTemporaryMediaAttributes(content))),
+      content:
+        editingLocale === "zh"
+          ? JSON.stringify(normalizeRichTextDocument(removeTemporaryMediaAttributes(content)))
+          : postDataWithContent.content || existingPost?.content || "",
       contentType: "JSON",
       status: requestedStatus,
+      translations: compactPostTranslations(postDataWithContent.translations),
     };
 
     setIsFinalizing(true);
@@ -606,7 +700,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                     >
                       <div className="relative min-h-0 flex-1">
                         <RichText
-                          key={`${activeId}-${existingPost?.updatedAt || "new"}-${editorInstanceVersion}`}
+                          key={`${activeId}-${existingPost?.updatedAt || "new"}-${editingLocale}-${editorInstanceVersion}`}
                           content={editorContent}
                           isDisabled={
                             hasContentSchemaError || (supportsDraft && !draftReady) || isPending
@@ -631,6 +725,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                           }}
                           onUpdate={(editor) => {
                             setSaveError(null);
+                            syncCurrentEditorContent(editor);
                             scheduleAutosave();
                             updateMediaIssues(editor);
 
@@ -665,6 +760,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                     </motion.div>
                     <ArticleSettingsPanel
                       data={postData}
+                      locale={editingLocale}
                       isDisabled={
                         isPending || hasContentSchemaError || (supportsDraft && !draftReady)
                       }
@@ -688,6 +784,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                       saveError={saveError}
                       scheduledAt={existingPost?.scheduledAt ?? undefined}
                       onChange={handlePostDataChange}
+                      onLocaleChange={handleLocaleChange}
                       onRetrySave={() => void handleSave(lastSaveStatusRef.current)}
                       onSave={(status) => void handleSave(status)}
                       onWorkflowCompleted={handleRevisionRestored}

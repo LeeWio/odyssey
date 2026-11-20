@@ -79,6 +79,19 @@ export const PostResponseSchema = z.object({
   scheduledAt: z.string().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  translations: z
+    .record(
+      z.string(),
+      z.object({
+        locale: z.string().optional(),
+        title: z.string().optional(),
+        summary: z.string().optional(),
+        content: z.string().optional(),
+        autoSummary: z.string().optional(),
+        toc: z.string().optional(),
+      })
+    )
+    .optional(),
   navigation: PostNavigationSchema.nullable().optional().default(null),
 });
 
@@ -170,6 +183,14 @@ export type UnifiedSearchItem = z.infer<typeof UnifiedSearchItemSchema>;
 export type UnifiedSearchGroup = z.infer<typeof UnifiedSearchGroupSchema>;
 export type UnifiedSearchResponse = z.infer<typeof UnifiedSearchResponseSchema>;
 
+export interface PostTranslation {
+  title: string;
+  summary?: string;
+  content?: string;
+  autoSummary?: string;
+  toc?: string;
+}
+
 export interface PostRequest {
   title: string;
   slug: string;
@@ -184,6 +205,7 @@ export interface PostRequest {
   seriesId?: number;
   seriesOrder?: number;
   tagIds?: number[];
+  translations?: Record<string, PostTranslation>;
 }
 
 export interface PostSearchQuery extends Pageable {

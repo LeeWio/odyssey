@@ -8,6 +8,9 @@ export const LifeListCategoryResponseSchema = z.object({
   name: z.string(),
   slug: z.string(),
   sortOrder: z.number(),
+  translations: z
+    .record(z.string(), z.object({ locale: z.string().optional(), name: z.string().optional() }))
+    .optional(),
 });
 
 export const LifeListMemoryResponseSchema = z.object({
@@ -76,6 +79,17 @@ export const LifeListMemoryRequestSchema = z.object({
   location: z.string().max(160).nullable().optional(),
   visibility: LifeListVisibilitySchema,
 });
+
+export interface LifeListCategoryTranslation {
+  name: string;
+}
+
+export interface LifeListCategoryRequest {
+  name: string;
+  slug?: string;
+  sortOrder?: number;
+  translations?: Record<string, LifeListCategoryTranslation>;
+}
 
 export type LifeListStatus = z.infer<typeof LifeListStatusSchema>;
 export type LifeListVisibility = z.infer<typeof LifeListVisibilitySchema>;
