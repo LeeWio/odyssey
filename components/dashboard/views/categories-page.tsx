@@ -24,7 +24,7 @@ import {
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { type FormEvent, useCallback, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import {
   type CategoryRequest,
@@ -46,6 +46,8 @@ import { usePortalContainer } from "../use-portal-container";
 
 export function CategoriesPage() {
   const t = useTranslations("ContentTranslations");
+  const dashboardT = useTranslations("Dashboard");
+  const locale = useLocale();
   const portalContainer = usePortalContainer();
 
   const { data: categories = [], isLoading, error } = useGetCategoriesQuery();
@@ -220,7 +222,7 @@ export function CategoriesPage() {
             <span className="font-medium tabular-nums">{item.id}</span>
             <Button
               isIconOnly
-              aria-label="Copy ID"
+              aria-label={dashboardT("common.copyId")}
               size="sm"
               variant="ghost"
               onPress={() => void navigator.clipboard.writeText(String(item.id))}
@@ -229,7 +231,7 @@ export function CategoriesPage() {
             </Button>
           </div>
         ),
-        header: "ID",
+        header: dashboardT("common.id"),
         id: "id",
         isRowHeader: true,
         minWidth: 80,
@@ -238,7 +240,7 @@ export function CategoriesPage() {
         accessorKey: "name",
         allowsSorting: true,
         cell: (item) => <span className="text-xs font-medium">{item.name}</span>,
-        header: "Name",
+        header: dashboardT("common.name"),
         id: "name",
         minWidth: 160,
       },
@@ -246,7 +248,7 @@ export function CategoriesPage() {
         accessorKey: "slug",
         allowsSorting: true,
         cell: (item) => item.slug,
-        header: "Slug",
+        header: dashboardT("common.slug"),
         id: "slug",
         minWidth: 160,
       },
@@ -254,7 +256,7 @@ export function CategoriesPage() {
         accessorKey: "description",
         allowsSorting: false,
         cell: (item) => <span className="text-muted text-xs">{item.description || "-"}</span>,
-        header: "Description",
+        header: dashboardT("common.description"),
         id: "description",
         minWidth: 260,
       },
@@ -263,14 +265,14 @@ export function CategoriesPage() {
         allowsSorting: true,
         cell: (item) => (
           <span className="text-muted text-xs tabular-nums">
-            {new Date(item.createdAt).toLocaleDateString("en-US", {
+            {new Date(item.createdAt).toLocaleDateString(locale, {
               day: "numeric",
               month: "short",
               year: "numeric",
             })}
           </span>
         ),
-        header: "Created At",
+        header: dashboardT("common.createdAt"),
         id: "createdAt",
         minWidth: 140,
       },
@@ -279,7 +281,7 @@ export function CategoriesPage() {
         cell: (item) => (
           <div className="flex items-center justify-end gap-0.5">
             <IconButton
-              label="Edit Category"
+              label={dashboardT("categories.edit")}
               size="sm"
               variant="tertiary"
               onPress={() => handleEditClick(item)}
@@ -287,7 +289,7 @@ export function CategoriesPage() {
               <Pencil className="size-4" />
             </IconButton>
             <IconButton
-              label="Delete Category"
+              label={dashboardT("categories.delete")}
               size="sm"
               variant="danger-soft"
               onPress={() => handleDeleteClick(item)}
@@ -296,12 +298,12 @@ export function CategoriesPage() {
             </IconButton>
           </div>
         ),
-        header: "Actions",
+        header: dashboardT("common.actions"),
         id: "actions",
         minWidth: 120,
       },
     ],
-    [handleEditClick, handleDeleteClick]
+    [dashboardT, handleEditClick, handleDeleteClick, locale]
   );
 
   return (
@@ -309,7 +311,9 @@ export function CategoriesPage() {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-foreground text-base font-semibold">All Categories</span>
+            <span className="text-foreground text-base font-semibold">
+              {dashboardT("categories.all")}
+            </span>
             <Chip size="sm" variant="soft">
               {categories.length}
             </Chip>
@@ -318,19 +322,19 @@ export function CategoriesPage() {
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" variant="tertiary">
                 <Sliders className="size-4" />
-                Filter
+                {dashboardT("categories.filter")}
               </Button>
               <Button size="sm" variant="tertiary">
                 <BarsDescendingAlignCenter className="size-4" />
-                Sort
+                {dashboardT("categories.sort")}
               </Button>
               <Button size="sm" variant="tertiary">
                 <LayoutColumns3 className="size-4" />
-                Columns
+                {dashboardT("categories.columns")}
               </Button>
               <Button size="sm" onPress={handleCreateOpen}>
                 <CirclePlus className="size-4" />
-                Add Category
+                {dashboardT("categories.add")}
               </Button>
             </div>
             <SearchField
@@ -341,7 +345,7 @@ export function CategoriesPage() {
             >
               <SearchField.Group>
                 <SearchField.SearchIcon />
-                <SearchField.Input placeholder="Search..." />
+                <SearchField.Input placeholder={dashboardT("categories.search")} />
                 <SearchField.ClearButton />
               </SearchField.Group>
             </SearchField>
@@ -351,11 +355,11 @@ export function CategoriesPage() {
 
       {error ? (
         <div className="bg-danger-soft/10 border-danger/20 mt-4 flex flex-col items-center justify-center rounded-2xl border p-12 text-center">
-          <p className="text-danger font-semibold">Failed to load categories</p>
+          <p className="text-danger font-semibold">{dashboardT("categories.failed")}</p>
         </div>
       ) : (
         <DataGrid
-          aria-label="Categories"
+          aria-label={dashboardT("categories.table")}
           columns={columns}
           contentClassName="min-w-[700px]"
           data={sortedCategories}
@@ -375,17 +379,19 @@ export function CategoriesPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <Modal.Container size="sm">
-            <Modal.Dialog className="sm:max-w-md" aria-label="Modal dialog">
+            <Modal.Dialog className="sm:max-w-md" aria-label={dashboardT("categories.modal")}>
               <Modal.CloseTrigger />
               <Form onSubmit={handleFormSubmit}>
                 <Modal.Header>
                   <Modal.Heading>
-                    {selectedCategory ? "Edit Category" : "Create Category"}
+                    {selectedCategory
+                      ? dashboardT("categories.edit")
+                      : dashboardT("categories.create")}
                   </Modal.Heading>
                   <p className="text-muted text-sm">
                     {selectedCategory
-                      ? "Update existing category details. Slug should be URL-safe."
-                      : "Add a new category to group related blog posts."}
+                      ? dashboardT("categories.editDescription")
+                      : dashboardT("categories.createDescription")}
                   </p>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4">
@@ -421,18 +427,20 @@ export function CategoriesPage() {
                       setFormSlug(value);
                     }}
                   >
-                    <Label className="text-sm font-medium">Slug</Label>
-                    <Input variant="secondary" placeholder="e.g. technology" />
+                    <Label className="text-sm font-medium">{dashboardT("common.slug")}</Label>
+                    <Input variant="secondary" placeholder={dashboardT("categories.slugExample")} />
                     <FieldError />
                   </TextField>
                 </Modal.Body>
                 <Modal.Footer>
                   <Button slot="close" variant="tertiary" size="sm">
-                    Cancel
+                    {dashboardT("common.cancel")}
                   </Button>
                   <Button type="submit" size="sm" isDisabled={isCreating || isUpdating}>
                     {(isCreating || isUpdating) && <Spinner size="sm" className="mr-1" />}
-                    {selectedCategory ? "Save Changes" : "Create"}
+                    {selectedCategory
+                      ? dashboardT("categories.save")
+                      : dashboardT("categories.create")}
                   </Button>
                 </Modal.Footer>
               </Form>
@@ -450,22 +458,24 @@ export function CategoriesPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md" aria-label="Alert dialog">
+            <AlertDialog.Dialog
+              className="sm:max-w-md"
+              aria-label={dashboardT("categories.deleteQuestion")}
+            >
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Delete Category?</AlertDialog.Heading>
+                <AlertDialog.Heading>{dashboardT("categories.deleteQuestion")}</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="text-sm">
-                  Are you sure you want to delete the category{" "}
+                  {dashboardT("categories.deleteDescription")}{" "}
                   <strong className="text-foreground">&quot;{selectedCategory?.name}&quot;</strong>?
-                  This action cannot be undone.
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button slot="close" variant="tertiary" size="sm">
-                  Cancel
+                  {dashboardT("common.cancel")}
                 </Button>
                 <Button
                   variant="danger"
@@ -474,7 +484,7 @@ export function CategoriesPage() {
                   isDisabled={isDeleting}
                 >
                   {isDeleting && <Spinner size="sm" className="mr-1" />}
-                  Delete
+                  {dashboardT("common.delete")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

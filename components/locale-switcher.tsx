@@ -27,7 +27,7 @@ export function LocaleSwitcher() {
 
   return (
     <Dropdown>
-      <Dropdown.Trigger aria-label={t("switchLanguage")} className="rounded-xl p-1.5">
+      <Dropdown.Trigger aria-label={t("switchLanguage")}>
         <Icon aria-hidden="true" icon="lucide:languages" className="size-4" />
       </Dropdown.Trigger>
       <Dropdown.Popover className="min-w-44">

@@ -30,66 +30,66 @@ import {
 
 export type NavItem = {
   readonly href: string;
-  readonly label: string;
+  readonly labelKey: string;
   readonly icon: ComponentType<{ className?: string }>;
   readonly badge?: string;
 };
 
 export type NavGroup = {
-  readonly label: string;
+  readonly labelKey: string;
   readonly items: readonly NavItem[];
 };
 
 export const NAV_GROUPS: readonly NavGroup[] = [
   {
-    label: "Overview",
+    labelKey: "overview",
     items: [
-      { href: "/", icon: House, label: "Dashboard" },
-      { badge: "New", href: "/tracker", icon: ListCheck, label: "Tracker" },
-      { href: "/analytics", icon: ChartColumn, label: "Analytics" },
-      { href: "/schedule", icon: Calendar, label: "Editorial calendar" },
+      { href: "/", icon: House, labelKey: "dashboard" },
+      { badge: "new", href: "/tracker", icon: ListCheck, labelKey: "tracker" },
+      { href: "/analytics", icon: ChartColumn, labelKey: "analytics" },
+      { href: "/schedule", icon: Calendar, labelKey: "editorialCalendar" },
     ],
   },
   {
-    label: "Content",
+    labelKey: "content",
     items: [
-      { href: "/posts", icon: FileText, label: "Posts" },
-      { href: "/columns", icon: Book, label: "Columns" },
-      { href: "/categories", icon: Folder, label: "Categories" },
-      { href: "/tags", icon: Tag, label: "Tags" },
-      { href: "/comments", icon: Comment, label: "Comments" },
-      { href: "/moments", icon: Sparkles, label: "Moments" },
-      { href: "/life-list", icon: ListCheck, label: "Life list" },
+      { href: "/posts", icon: FileText, labelKey: "posts" },
+      { href: "/columns", icon: Book, labelKey: "columns" },
+      { href: "/categories", icon: Folder, labelKey: "categories" },
+      { href: "/tags", icon: Tag, labelKey: "tags" },
+      { href: "/comments", icon: Comment, labelKey: "comments" },
+      { href: "/moments", icon: Sparkles, labelKey: "moments" },
+      { href: "/life-list", icon: ListCheck, labelKey: "lifeList" },
     ],
   },
   {
-    label: "Resources",
+    labelKey: "resources",
     items: [
-      { href: "/files", icon: Picture, label: "Materials" },
-      { href: "/links", icon: LinkIcon, label: "Friend Links" },
-      { href: "/broken-links", icon: LinkSlash, label: "Broken Links" },
-      { href: "/orders", icon: Receipt, label: "Orders" },
+      { href: "/files", icon: Picture, labelKey: "materials" },
+      { href: "/links", icon: LinkIcon, labelKey: "friendLinks" },
+      { href: "/broken-links", icon: LinkSlash, labelKey: "brokenLinks" },
+      { href: "/orders", icon: Receipt, labelKey: "orders" },
     ],
   },
   {
-    label: "Users & Access",
+    labelKey: "usersAccess",
     items: [
-      { href: "/users", icon: Person, label: "Users" },
-      { href: "/audience", icon: Persons, label: "Audience" },
-      { href: "/groups", icon: Persons, label: "Groups" },
-      { href: "/roles", icon: PersonGear, label: "Roles" },
-      { href: "/permissions", icon: Shield, label: "Permissions" },
-      { href: "/access-policies", icon: ShieldCheck, label: "Access Policies" },
-      { href: "/service-accounts", icon: Key, label: "Service Accounts" },
-      { href: "/audit-logs", icon: ClockArrowRotateLeft, label: "Audit Logs" },
+      { href: "/users", icon: Person, labelKey: "users" },
+      { href: "/audience", icon: Persons, labelKey: "audience" },
+      { href: "/groups", icon: Persons, labelKey: "groups" },
+      { href: "/roles", icon: PersonGear, labelKey: "roles" },
+      { href: "/permissions", icon: Shield, labelKey: "permissions" },
+      { href: "/access-policies", icon: ShieldCheck, labelKey: "accessPolicies" },
+      { href: "/service-accounts", icon: Key, labelKey: "serviceAccounts" },
+      { href: "/audit-logs", icon: ClockArrowRotateLeft, labelKey: "auditLogs" },
     ],
   },
   {
-    label: "System",
+    labelKey: "system",
     items: [
-      { href: "/settings", icon: Gear, label: "Settings" },
-      { href: "/webhooks", icon: Thunderbolt, label: "Webhooks" },
-      { href: "/notification-deliveries", icon: Thunderbolt, label: "Notification delivery" },
+      { href: "/settings", icon: Gear, labelKey: "settings" },
+      { href: "/webhooks", icon: Thunderbolt, labelKey: "webhooks" },
+      { href: "/notification-deliveries", icon: Thunderbolt, labelKey: "notificationDelivery" },
     ],
   },
 ] as const;
@@ -97,6 +97,6 @@ export const NAV_GROUPS: readonly NavGroup[] = [
 export const NAV_ITEMS: readonly NavItem[] = NAV_GROUPS.flatMap((group) => group.items);
 
 export const FOOTER_ITEMS: readonly NavItem[] = [
-  { href: "/help", icon: CircleQuestion, label: "Help & Information" },
-  { href: "/logout", icon: ArrowRightFromSquare, label: "Log out" },
+  { href: "/help", icon: CircleQuestion, labelKey: "help" },
+  { href: "/logout", icon: ArrowRightFromSquare, labelKey: "logout" },
 ] as const;

@@ -25,6 +25,7 @@ import {
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { type FormEvent, useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import {
   type RoleRequest,
@@ -38,6 +39,7 @@ import { IconButton } from "../icon-button";
 import { usePortalContainer } from "../use-portal-container";
 
 export function RolesPage() {
+  const t = useTranslations("Dashboard");
   const portalContainer = usePortalContainer();
 
   const { data: roles = [], isLoading, error } = useGetAllRolesQuery();
@@ -185,7 +187,7 @@ export function RolesPage() {
             <span className="font-medium tabular-nums">{item.id}</span>
             <Button
               isIconOnly
-              aria-label="Copy ID"
+              aria-label={t("common.copyId")}
               size="sm"
               variant="ghost"
               onPress={() => void navigator.clipboard.writeText(String(item.id))}
@@ -194,7 +196,7 @@ export function RolesPage() {
             </Button>
           </div>
         ),
-        header: "ID",
+        header: t("common.id"),
         id: "id",
         isRowHeader: true,
         minWidth: 80,
@@ -203,7 +205,7 @@ export function RolesPage() {
         accessorKey: "name",
         allowsSorting: true,
         cell: (item) => <span className="text-xs font-medium">{item.name}</span>,
-        header: "Name",
+        header: t("common.name"),
         id: "name",
         minWidth: 160,
       },
@@ -211,7 +213,7 @@ export function RolesPage() {
         accessorKey: "code",
         allowsSorting: true,
         cell: (item) => item.code,
-        header: "Security Code",
+        header: t("roles.securityCode"),
         id: "code",
         minWidth: 180,
       },
@@ -219,7 +221,7 @@ export function RolesPage() {
         accessorKey: "description",
         allowsSorting: false,
         cell: (item) => <span className="text-muted text-xs">{item.description || "-"}</span>,
-        header: "Description",
+        header: t("common.description"),
         id: "description",
         minWidth: 260,
       },
@@ -231,7 +233,7 @@ export function RolesPage() {
           return (
             <div className="flex items-center justify-end gap-0.5">
               <IconButton
-                label="Edit Role"
+                label={t("roles.edit")}
                 size="sm"
                 variant="tertiary"
                 onPress={() => handleEditClick(item)}
@@ -240,7 +242,7 @@ export function RolesPage() {
               </IconButton>
               <IconButton
                 isDisabled={isSystemRole}
-                label={isSystemRole ? "System protected role" : "Delete Role"}
+                label={isSystemRole ? t("roles.systemProtected") : t("common.delete")}
                 size="sm"
                 variant="danger-soft"
                 onPress={() => handleDeleteClick(item)}
@@ -250,12 +252,12 @@ export function RolesPage() {
             </div>
           );
         },
-        header: "Actions",
+        header: t("common.actions"),
         id: "actions",
         minWidth: 120,
       },
     ],
-    [handleEditClick, handleDeleteClick]
+    [handleEditClick, handleDeleteClick, t]
   );
 
   return (
@@ -263,7 +265,7 @@ export function RolesPage() {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-foreground text-base font-semibold">All Roles</span>
+            <span className="text-foreground text-base font-semibold">{t("roles.all")}</span>
             <Chip size="sm" variant="soft">
               {roles.length}
             </Chip>
@@ -272,19 +274,19 @@ export function RolesPage() {
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" variant="tertiary">
                 <Sliders className="size-4" />
-                Filter
+                {t("categories.filter")}
               </Button>
               <Button size="sm" variant="tertiary">
                 <BarsDescendingAlignCenter className="size-4" />
-                Sort
+                {t("categories.sort")}
               </Button>
               <Button size="sm" variant="tertiary">
                 <LayoutColumns3 className="size-4" />
-                Columns
+                {t("roles.columns")}
               </Button>
               <Button size="sm" onPress={handleCreateOpen}>
                 <CirclePlus className="size-4" />
-                Add Role
+                {t("roles.add")}
               </Button>
             </div>
             <SearchField
@@ -295,7 +297,7 @@ export function RolesPage() {
             >
               <SearchField.Group>
                 <SearchField.SearchIcon />
-                <SearchField.Input placeholder="Search..." />
+                <SearchField.Input placeholder={t("roles.search")} />
                 <SearchField.ClearButton />
               </SearchField.Group>
             </SearchField>
@@ -305,11 +307,11 @@ export function RolesPage() {
 
       {error ? (
         <div className="bg-danger-soft/10 border-danger/20 mt-4 flex flex-col items-center justify-center rounded-2xl border p-12 text-center">
-          <p className="text-danger font-semibold">Failed to load roles</p>
+          <p className="text-danger font-semibold">{t("roles.failed")}</p>
         </div>
       ) : (
         <DataGrid
-          aria-label="Roles"
+          aria-label={t("nav.roles")}
           columns={columns}
           contentClassName="min-w-[700px]"
           data={sortedRoles}
@@ -329,15 +331,15 @@ export function RolesPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <Modal.Container size="sm">
-            <Modal.Dialog className="sm:max-w-md" aria-label="Role Form">
+            <Modal.Dialog className="sm:max-w-md" aria-label={t("roles.form")}>
               <Modal.CloseTrigger />
               <Form onSubmit={handleFormSubmit}>
                 <Modal.Header>
-                  <Modal.Heading>{selectedRole ? "Edit Role" : "Create Role"}</Modal.Heading>
+                  <Modal.Heading>
+                    {selectedRole ? t("roles.edit") : t("roles.create")}
+                  </Modal.Heading>
                   <p className="text-muted text-sm">
-                    {selectedRole
-                      ? "Update the role attributes. The code must be compliant with Security standards."
-                      : "Define a new security role to bundle permissions."}
+                    {selectedRole ? t("roles.description") : t("roles.createDescription")}
                   </p>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4">
@@ -349,8 +351,8 @@ export function RolesPage() {
                     onChange={setFormName}
                     onBlur={handleNameBlur}
                   >
-                    <Label className="text-sm font-medium">Role Name</Label>
-                    <Input variant="secondary" placeholder="e.g. Content Editor" />
+                    <Label className="text-sm font-medium">{t("roles.roleName")}</Label>
+                    <Input variant="secondary" placeholder={t("roles.roleNameExample")} />
                     <FieldError />
                   </TextField>
 
@@ -367,7 +369,7 @@ export function RolesPage() {
                     }}
                     onChange={setFormCode}
                   >
-                    <Label className="text-sm font-medium">Security Code</Label>
+                    <Label className="text-sm font-medium">{t("roles.securityCode")}</Label>
                     <Input variant="secondary" placeholder="e.g. ROLE_EDITOR" />
                     <FieldError />
                   </TextField>
@@ -377,10 +379,10 @@ export function RolesPage() {
                     value={formDescription}
                     onChange={setFormDescription}
                   >
-                    <Label className="text-sm font-medium">Description</Label>
+                    <Label className="text-sm font-medium">{t("common.description")}</Label>
                     <TextArea
                       variant="secondary"
-                      placeholder="e.g. Bundles publishing, drafting and editing rights."
+                      placeholder={t("roles.descriptionPlaceholder")}
                       className="min-h-20"
                     />
                     <FieldError />
@@ -388,11 +390,11 @@ export function RolesPage() {
                 </Modal.Body>
                 <Modal.Footer>
                   <Button slot="close" variant="tertiary" size="sm">
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                   <Button type="submit" size="sm" isDisabled={isCreating || isUpdating}>
                     {(isCreating || isUpdating) && <Spinner size="sm" className="mr-1" />}
-                    {selectedRole ? "Save Changes" : "Create"}
+                    {selectedRole ? t("common.saveChanges") : t("roles.create")}
                   </Button>
                 </Modal.Footer>
               </Form>
@@ -410,22 +412,21 @@ export function RolesPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md" aria-label="Confirm Deletion">
+            <AlertDialog.Dialog className="sm:max-w-md" aria-label={t("roles.deleteQuestion")}>
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Delete Role?</AlertDialog.Heading>
+                <AlertDialog.Heading>{t("roles.deleteQuestion")}</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="text-sm">
-                  Are you sure you want to delete the role{" "}
-                  <strong className="text-foreground">&quot;{selectedRole?.name}&quot;</strong>?
-                  This will revoke this role from all assigned users and groups.
+                  {t("roles.deleteDescription")}{" "}
+                  <strong className="text-foreground">&quot;{selectedRole?.name}&quot;</strong>
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button slot="close" variant="tertiary" size="sm">
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="danger"
@@ -434,7 +435,7 @@ export function RolesPage() {
                   isDisabled={isDeleting}
                 >
                   {isDeleting && <Spinner size="sm" className="mr-1" />}
-                  Delete
+                  {t("common.delete")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

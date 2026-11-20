@@ -61,12 +61,7 @@ import { toUrlSlug, validateUrlSlug } from "@/lib/utils/slug";
 
 const COLUMNS: readonly LifeListStatus[] = ["planned", "in_progress", "completed", "abandoned"];
 
-const COLUMN_LABEL: Record<LifeListStatus, string> = {
-  abandoned: "Changed my mind",
-  completed: "Completed",
-  in_progress: "In progress",
-  planned: "Planned",
-};
+type DashboardTranslations = ReturnType<typeof useTranslations>;
 
 const COLUMN_COLOR: Record<LifeListStatus, string> = {
   abandoned: "var(--muted)",
@@ -90,8 +85,24 @@ function toRequest(item: LifeListItemResponse, status: LifeListStatus): LifeList
   };
 }
 
+function columnLabel(status: LifeListStatus, t: DashboardTranslations) {
+  return t(
+    `lifeList.${
+      (
+        {
+          abandoned: "abandoned",
+          completed: "completed",
+          in_progress: "inProgress",
+          planned: "planned",
+        } as const
+      )[status]
+    }`
+  );
+}
+
 function LifeListCategoryManager() {
   const t = useTranslations("ContentTranslations");
+  const dashboardT = useTranslations("Dashboard");
   const { data: categories = [] } = useGetAdminLifeListCategoriesQuery();
   const [createCategory, { isLoading: isCreating }] = useCreateLifeListCategoryMutation();
   const [updateCategory, { isLoading: isUpdating }] = useUpdateLifeListCategoryMutation();
@@ -239,7 +250,7 @@ function LifeListCategoryManager() {
                       setSlug(value);
                     }}
                   >
-                    <Label>Slug</Label>
+                    <Label>{dashboardT("common.slug")}</Label>
                     <Input placeholder="travel" />
                   </TextField>
                   <TextField
@@ -248,17 +259,17 @@ function LifeListCategoryManager() {
                     value={sortOrder}
                     onChange={setSortOrder}
                   >
-                    <Label>Sort order</Label>
+                    <Label>{dashboardT("lifeList.sortOrder")}</Label>
                     <Input min={0} />
                   </TextField>
                 </Modal.Body>
                 <Modal.Footer>
                   <Button slot="close" size="sm" variant="tertiary">
-                    Cancel
+                    {dashboardT("common.cancel")}
                   </Button>
                   <Button type="submit" size="sm" isDisabled={isCreating || isUpdating}>
                     {(isCreating || isUpdating) && <Spinner size="sm" />}
-                    Save
+                    {dashboardT("common.save")}
                   </Button>
                 </Modal.Footer>
               </Form>
@@ -273,14 +284,16 @@ function LifeListCategoryManager() {
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Remove category?</AlertDialog.Heading>
+                <AlertDialog.Heading>
+                  {dashboardT("lifeList.removeCategoryQuestion")}
+                </AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                {selected?.name} will no longer be available for new wishes.
+                {selected?.name} · {dashboardT("lifeList.uncategorized")}
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button slot="close" size="sm" variant="tertiary">
-                  Cancel
+                  {dashboardT("common.cancel")}
                 </Button>
                 <Button
                   size="sm"
@@ -294,7 +307,7 @@ function LifeListCategoryManager() {
                   }}
                 >
                   {isDeleting && <Spinner size="sm" />}
-                  Remove
+                  {dashboardT("common.remove")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>
@@ -355,17 +368,18 @@ export function LifeListAdminPage({
   onCreate: (status: LifeListStatus) => void;
   onOpen: (item: LifeListItemResponse) => void;
 }) {
+  const t = useTranslations("Dashboard");
   const query = useGetAdminLifeListQuery({ archived: true, page: 0, size: 200 });
 
   if (query.isLoading) {
-    return <p className="text-muted px-5 pt-6 text-sm">Loading the list…</p>;
+    return <p className="text-muted px-5 pt-6 text-sm">{t("lifeList.loading")}</p>;
   }
   if (query.isError || !query.data) {
     return (
       <EmptyState>
-        <EmptyState.Title>The list could not be loaded.</EmptyState.Title>
+        <EmptyState.Title>{t("lifeList.loadFailed")}</EmptyState.Title>
         <Button variant="outline" onPress={() => query.refetch()}>
-          Try again
+          {t("common.retry")}
         </Button>
       </EmptyState>
     );
@@ -399,6 +413,7 @@ function LifeListBoard({
   onRefresh: () => void;
   total: number;
 }) {
+  const t = useTranslations("Dashboard");
   const active = useMemo(() => items.filter((item) => !item.archivedAt), [items]);
   const kanban = useKanban<BoardItem>({
     getColumn: (item) => item.status,
@@ -442,11 +457,11 @@ function LifeListBoard({
       </div>
       <div className="text-muted flex shrink-0 items-center justify-between gap-3 px-1 text-xs">
         <span>
-          {active.length} wishes · {completed} / {total} completed
+          {active.length} · {completed} / {total} {t("lifeList.completed")}
         </span>
         <span className="inline-flex items-center gap-2">
           <span className="w-24">
-            <WishMeter label={`${percent}% completed`} value={percent} />
+            <WishMeter label={`${percent}% ${t("lifeList.completed")}`} value={percent} />
           </span>
           <span className="tabular-nums">{percent}%</span>
         </span>
@@ -466,6 +481,7 @@ function LifeListColumn({
   onOpen: (item: BoardItem) => void;
   status: LifeListStatus;
 }) {
+  const t = useTranslations("Dashboard");
   const { renderDropIndicator } = useKanbanCardPlaceholder({
     renderIndicator: (target) => <Kanban.DropIndicator target={target} />,
   });
@@ -477,18 +493,18 @@ function LifeListColumn({
     <Kanban.Column className="h-full min-h-0 border-0 shadow-none ring-0 outline-none">
       <Kanban.ColumnHeader>
         <Kanban.ColumnIndicator style={{ backgroundColor: COLUMN_COLOR[status] }} />
-        <Kanban.ColumnTitle>{COLUMN_LABEL[status]}</Kanban.ColumnTitle>
+        <Kanban.ColumnTitle>{columnLabel(status, t)}</Kanban.ColumnTitle>
         <Kanban.ColumnCount>{column.items.length}</Kanban.ColumnCount>
         <span className="text-muted ml-auto text-xs tabular-nums">{memories}</span>
       </Kanban.ColumnHeader>
       <Kanban.ColumnBody className="min-h-0 flex-1 border-0 shadow-none ring-0 outline-none">
         <Kanban.ScrollShadow className="mb-0 min-h-0 flex-1 overflow-y-auto">
           <Kanban.CardList
-            aria-label={`${COLUMN_LABEL[status]} wishes`}
+            aria-label={`${columnLabel(status, t)} ${t("lifeList.wish")}`}
             className="min-h-0 flex-1 pb-0"
             dragAndDropHooks={column.dragAndDropHooks}
             items={column.items}
-            renderEmptyState={() => "No wishes in this stage."}
+            renderEmptyState={() => t("lifeList.noWishesInStage")}
           >
             {(item) => <WishCard id={String(item.id)} item={item} onAction={() => onOpen(item)} />}
           </Kanban.CardList>
@@ -502,10 +518,10 @@ function LifeListColumn({
             onPress={onCreate}
           >
             <Plus className="size-3" />
-            Create wish
+            {t("lifeList.createWish")}
           </Button>
           <div className="text-muted flex items-center justify-between px-2 text-xs">
-            <span>Stage total</span>
+            <span>{t("lifeList.stageTotal")}</span>
             <span className="font-medium tabular-nums">{column.items.length}</span>
           </div>
         </div>
@@ -515,6 +531,7 @@ function LifeListColumn({
 }
 
 function WishCard({ id, item, onAction }: { id: string; item: BoardItem; onAction: () => void }) {
+  const t = useTranslations("Dashboard");
   const progress = STATUS_PROGRESS[item.status];
   const subtitle = [String(item.number).padStart(3, "0"), item.category?.name]
     .filter(Boolean)
@@ -538,13 +555,13 @@ function WishCard({ id, item, onAction }: { id: string; item: BoardItem; onActio
           size="sm"
           variant="soft"
         >
-          {item.visibility === "private" ? "Private" : "Public"}
+          {item.visibility === "private" ? t("lifeList.private") : t("lifeList.public")}
         </Chip>
       </div>
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold tabular-nums">{item.memoryCount}</span>
         <span className="text-muted max-w-28 truncate text-[11px]">
-          {item.memoryCount === 1 ? "1 memory" : `${item.memoryCount} memories`}
+          {item.memoryCount} {t("lifeList.memories")}
         </span>
       </div>
       <div className="flex items-center gap-2">
@@ -554,8 +571,10 @@ function WishCard({ id, item, onAction }: { id: string; item: BoardItem; onActio
         <span className="text-muted text-xs tabular-nums">{progress}%</span>
       </div>
       <div className="text-muted flex justify-between text-[11px]">
-        <span>{item.completedAt ? `Done ${item.completedAt}` : "Open"}</span>
-        <span>{COLUMN_LABEL[item.status]}</span>
+        <span>
+          {item.completedAt ? `${t("lifeList.done")} ${item.completedAt}` : t("lifeList.open")}
+        </span>
+        <span>{columnLabel(item.status, t)}</span>
       </div>
     </Kanban.Card>
   );
@@ -574,6 +593,7 @@ function LifeListSheet({
   onOpenChange: (open: boolean) => void;
   onRefresh: () => void;
 }) {
+  const t = useTranslations("Dashboard");
   const { data: categories = [] } = useGetAdminLifeListCategoriesQuery();
   const [updateItem, { isLoading }] = useUpdateLifeListItemMutation();
   const [archiveItem] = useArchiveLifeListItemMutation();
@@ -605,7 +625,7 @@ function LifeListSheet({
           <Sheet.Dialog className="h-[85vh]">
             <Sheet.CloseTrigger />
             <Sheet.Header>
-              <Sheet.Heading>{item?.title ?? "Wish"}</Sheet.Heading>
+              <Sheet.Heading>{item?.title ?? t("lifeList.wish")}</Sheet.Heading>
             </Sheet.Header>
             <Sheet.Body className="flex flex-col gap-5">
               {item && form ? (
@@ -613,35 +633,42 @@ function LifeListSheet({
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-medium">
-                        {item.category?.name ?? "Uncategorized"}
+                        {item.category?.name ?? t("lifeList.uncategorized")}
                       </p>
                       <p className="text-muted mt-1 text-xs">
-                        No. {String(item.number).padStart(3, "0")}
-                        {item.completedAt ? ` · Done ${item.completedAt}` : ""}
+                        {t("lifeList.number", { number: String(item.number).padStart(3, "0") })}
+                        {item.completedAt ? ` · ${t("lifeList.done")} ${item.completedAt}` : ""}
                       </p>
                     </div>
                     <Chip
                       color={form.visibility === "private" ? "default" : "success"}
                       variant="soft"
                     >
-                      {form.visibility === "private" ? "Private" : "Public"}
+                      {form.visibility === "private" ? t("lifeList.private") : t("lifeList.public")}
                     </Chip>
                   </div>
 
                   <section className="border-separator border-t pt-4">
-                    <SectionLabel>Progress</SectionLabel>
+                    <SectionLabel>{t("lifeList.progress")}</SectionLabel>
                     <div className="mt-3 grid grid-cols-2 gap-3">
-                      <Metric label="Status" value={COLUMN_LABEL[form.status]} />
-                      <Metric label="Memories" value={String(item.memoryCount)} />
-                      <Metric label="Progress" value={`${STATUS_PROGRESS[form.status]}%`} />
+                      <Metric label={t("lifeList.status")} value={columnLabel(form.status, t)} />
+                      <Metric label={t("lifeList.memories")} value={String(item.memoryCount)} />
                       <Metric
-                        label="Visibility"
-                        value={form.visibility === "private" ? "Private" : "Public"}
+                        label={t("lifeList.progress")}
+                        value={`${STATUS_PROGRESS[form.status]}%`}
+                      />
+                      <Metric
+                        label={t("lifeList.visibility")}
+                        value={
+                          form.visibility === "private"
+                            ? t("lifeList.private")
+                            : t("lifeList.public")
+                        }
                       />
                     </div>
                     <div className="mt-4">
                       <div className="mb-2 flex justify-between text-xs">
-                        <span className="text-muted">Confidence</span>
+                        <span className="text-muted">{t("lifeList.confidence")}</span>
                         <span className="font-medium tabular-nums">
                           {STATUS_PROGRESS[form.status]}%
                         </span>
@@ -654,7 +681,7 @@ function LifeListSheet({
                   </section>
 
                   <section className="border-separator border-t pt-4">
-                    <SectionLabel>Wish</SectionLabel>
+                    <SectionLabel>{t("lifeList.wish")}</SectionLabel>
                     <div className="mt-3 flex flex-col gap-3">
                       <TextField
                         name="title"
@@ -662,7 +689,7 @@ function LifeListSheet({
                         variant="secondary"
                         onChange={(title) => setDraft({ ...form, title })}
                       >
-                        <Label>Title</Label>
+                        <Label>{t("lifeList.title")}</Label>
                         <Input maxLength={160} />
                       </TextField>
                       <TextField
@@ -671,7 +698,7 @@ function LifeListSheet({
                         variant="secondary"
                         onChange={(description) => setDraft({ ...form, description })}
                       >
-                        <Label>Description</Label>
+                        <Label>{t("lifeList.description")}</Label>
                         <TextArea rows={3} />
                       </TextField>
                       <TextField
@@ -680,7 +707,7 @@ function LifeListSheet({
                         variant="secondary"
                         onChange={(motivation) => setDraft({ ...form, motivation })}
                       >
-                        <Label>Why this matters</Label>
+                        <Label>{t("lifeList.why")}</Label>
                         <TextArea rows={3} />
                       </TextField>
                       <div className="grid grid-cols-2 gap-3">
@@ -692,7 +719,7 @@ function LifeListSheet({
                               setDraft({ ...form, status: String(value) as LifeListStatus });
                           }}
                         >
-                          <Label>Status</Label>
+                          <Label>{t("lifeList.status")}</Label>
                           <Select.Trigger>
                             <Select.Value />
                             <Select.Indicator />
@@ -703,9 +730,9 @@ function LifeListSheet({
                                 <ListBox.Item
                                   key={status}
                                   id={status}
-                                  textValue={COLUMN_LABEL[status]}
+                                  textValue={columnLabel(status, t)}
                                 >
-                                  {COLUMN_LABEL[status]}
+                                  {columnLabel(status, t)}
                                   <ListBox.ItemIndicator />
                                 </ListBox.Item>
                               ))}
@@ -723,19 +750,19 @@ function LifeListSheet({
                               });
                           }}
                         >
-                          <Label>Visibility</Label>
+                          <Label>{t("lifeList.visibility")}</Label>
                           <Select.Trigger>
                             <Select.Value />
                             <Select.Indicator />
                           </Select.Trigger>
                           <Select.Popover>
                             <ListBox>
-                              <ListBox.Item id="public" textValue="Public">
-                                Public
+                              <ListBox.Item id="public" textValue={t("lifeList.public")}>
+                                {t("lifeList.public")}
                                 <ListBox.ItemIndicator />
                               </ListBox.Item>
-                              <ListBox.Item id="private" textValue="Private">
-                                Private
+                              <ListBox.Item id="private" textValue={t("lifeList.private")}>
+                                {t("lifeList.private")}
                                 <ListBox.ItemIndicator />
                               </ListBox.Item>
                             </ListBox>
@@ -752,15 +779,15 @@ function LifeListSheet({
                           })
                         }
                       >
-                        <Label>Category</Label>
+                        <Label>{t("common.category")}</Label>
                         <Select.Trigger>
                           <Select.Value />
                           <Select.Indicator />
                         </Select.Trigger>
                         <Select.Popover>
                           <ListBox>
-                            <ListBox.Item id="none" textValue="Uncategorized">
-                              Uncategorized
+                            <ListBox.Item id="none" textValue={t("lifeList.uncategorized")}>
+                              {t("lifeList.uncategorized")}
                               <ListBox.ItemIndicator />
                             </ListBox.Item>
                             {categories.map((category) => (
@@ -784,7 +811,7 @@ function LifeListSheet({
                           variant="secondary"
                           onChange={(completedAt) => setDraft({ ...form, completedAt })}
                         >
-                          <Label>Completed on</Label>
+                          <Label>{t("lifeList.completedOn")}</Label>
                           <Input />
                         </TextField>
                       ) : null}
@@ -792,10 +819,8 @@ function LifeListSheet({
                   </section>
 
                   <section className="border-separator border-t pt-4">
-                    <SectionLabel>Memory</SectionLabel>
-                    <p className="text-muted mt-2 text-sm">
-                      Saving a note does not change the status. Notes start private.
-                    </p>
+                    <SectionLabel>{t("lifeList.memory")}</SectionLabel>
+                    <p className="text-muted mt-2 text-sm">{t("lifeList.notePrivacy")}</p>
                     <div className="mt-3 flex gap-2">
                       <TextField
                         className="min-w-0 flex-1"
@@ -804,8 +829,8 @@ function LifeListSheet({
                         variant="secondary"
                         onChange={setMemory}
                       >
-                        <Label className="sr-only">Memory</Label>
-                        <Input placeholder="What happened" />
+                        <Label className="sr-only">{t("lifeList.memory")}</Label>
+                        <Input placeholder={t("lifeList.whatHappened")} />
                       </TextField>
                       <Button
                         isDisabled={isSavingMemory || !memory.trim()}
@@ -826,7 +851,7 @@ function LifeListSheet({
                             });
                         }}
                       >
-                        Save
+                        {t("common.save")}
                       </Button>
                     </div>
                     {item.memories.length > 0 ? (
@@ -837,7 +862,9 @@ function LifeListSheet({
                             className="bg-surface-secondary rounded-xl p-3 text-sm"
                           >
                             <p className="text-muted text-[11px] tracking-wide uppercase">
-                              {entry.visibility === "private" ? "Private" : "Public"}
+                              {entry.visibility === "private"
+                                ? t("lifeList.private")
+                                : t("lifeList.public")}
                               {entry.occurredAt ? ` · ${entry.occurredAt}` : ""}
                             </p>
                             <p className="mt-1">{entry.content}</p>
@@ -855,7 +882,7 @@ function LifeListSheet({
                   variant="ghost"
                   onPress={() => void restoreItem(item.id).unwrap().then(onRefresh)}
                 >
-                  Restore
+                  {t("lifeList.restore")}
                 </Button>
               ) : (
                 <Button
@@ -870,7 +897,7 @@ function LifeListSheet({
                       });
                   }}
                 >
-                  Archive
+                  {t("lifeList.archive")}
                 </Button>
               )}
               <Button
@@ -885,13 +912,13 @@ function LifeListSheet({
                     });
                 }}
               >
-                Remove
+                {t("common.remove")}
               </Button>
               <Button isDisabled={isLoading} variant="outline" onPress={() => onOpenChange(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button isDisabled={isLoading} onPress={() => void save()}>
-                Save changes
+                {t("common.saveChanges")}
               </Button>
             </Sheet.Footer>
           </Sheet.Dialog>
@@ -914,6 +941,7 @@ function CreateWishSheet({
   onStatusChange: (status: LifeListStatus) => void;
   status: LifeListStatus;
 }) {
+  const t = useTranslations("Dashboard");
   const [title, setTitle] = useState("");
   const [createItem, { isLoading }] = useCreateLifeListItemMutation();
   const query = useGetAdminLifeListQuery({ archived: true, page: 0, size: 200 });
@@ -939,16 +967,16 @@ function CreateWishSheet({
               <Modal.Icon className="bg-surface-secondary text-foreground">
                 <ListCheck className="size-4" />
               </Modal.Icon>
-              <Modal.Heading>Create wish</Modal.Heading>
+              <Modal.Heading>{t("lifeList.createWish")}</Modal.Heading>
             </Modal.Header>
             <Modal.Body className="flex flex-col gap-3 overflow-visible">
               <TextField autoFocus value={title} variant="secondary" onChange={setTitle}>
-                <Label>Wish</Label>
-                <Input maxLength={160} placeholder="One thing worth doing" />
+                <Label>{t("lifeList.wish")}</Label>
+                <Input maxLength={160} placeholder={t("lifeList.oneThingWorthDoing")} />
               </TextField>
               {matches.length > 0 ? (
                 <ListBox
-                  aria-label="Matching wishes"
+                  aria-label={t("lifeList.matchingWishes")}
                   className="max-h-72 overflow-y-auto p-0"
                   selectionMode="none"
                   onAction={(key) => {
@@ -971,7 +999,8 @@ function CreateWishSheet({
                       <div className="flex min-w-0 flex-col">
                         <Label>{item.title}</Label>
                         <Description>
-                          {String(item.number).padStart(3, "0")} · {COLUMN_LABEL[item.status]}
+                          {t("lifeList.number", { number: String(item.number).padStart(3, "0") })} ·{" "}
+                          {columnLabel(item.status, t)}
                         </Description>
                       </div>
                     </ListBox.Item>
@@ -985,7 +1014,7 @@ function CreateWishSheet({
                   if (value) onStatusChange(String(value) as LifeListStatus);
                 }}
               >
-                <Label>Stage</Label>
+                <Label>{t("lifeList.stage")}</Label>
                 <Select.Trigger>
                   <Select.Value />
                   <Select.Indicator />
@@ -993,8 +1022,8 @@ function CreateWishSheet({
                 <Select.Popover>
                   <ListBox>
                     {COLUMNS.map((item) => (
-                      <ListBox.Item key={item} id={item} textValue={COLUMN_LABEL[item]}>
-                        {COLUMN_LABEL[item]}
+                      <ListBox.Item key={item} id={item} textValue={columnLabel(item, t)}>
+                        {columnLabel(item, t)}
                         <ListBox.ItemIndicator />
                       </ListBox.Item>
                     ))}
@@ -1019,11 +1048,13 @@ function CreateWishSheet({
                       onOpenChange(false);
                       onCreated(item);
                     })
-                    .catch(() => toast.danger("Couldn't create the wish."));
+                    .catch(() => toast.danger(t("lifeList.createFailed")));
                 }}
               >
                 <Plus className="size-4" />
-                {trimmed ? `Create "${trimmed}" manually` : "Create manually"}
+                {trimmed
+                  ? t("lifeList.manualCreateNamed", { title: trimmed })
+                  : t("lifeList.manualCreate")}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

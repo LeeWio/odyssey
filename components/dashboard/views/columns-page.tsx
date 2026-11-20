@@ -25,6 +25,7 @@ import {
   type DataGridSortDescriptor,
 } from "@heroui-pro/react";
 import { type FormEvent, useCallback, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   type ColumnRequest,
   type ColumnResponse,
@@ -67,6 +68,8 @@ type ColumnGridRow = {
 };
 
 export function ColumnsPage() {
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
   const portalContainer = usePortalContainer();
   const { data: columns = [], error, isLoading } = useGetColumnsQuery();
   const [createColumn, { isLoading: isCreating }] = useCreateEditorialColumnMutation();
@@ -224,7 +227,7 @@ export function ColumnsPage() {
             </div>
           );
         },
-        header: "Column",
+        header: t("nav.columns"),
         id: "name",
         isRowHeader: true,
         minWidth: 240,
@@ -235,7 +238,7 @@ export function ColumnsPage() {
         allowsResizing: true,
         allowsSorting: true,
         cell: (row) => <span className="text-muted tabular-nums">{row.count}</span>,
-        header: "Essays / Views",
+        header: t("columns.essaysViews"),
         id: "postsCount",
         minWidth: 100,
       },
@@ -245,10 +248,10 @@ export function ColumnsPage() {
         allowsSorting: true,
         cell: (row) => (
           <Chip color={row.isPublished ? "success" : "warning"} size="sm" variant="soft">
-            {row.isPublished ? "Published" : "Draft"}
+            {row.isPublished ? t("common.published") : t("columns.draft")}
           </Chip>
         ),
-        header: "Visibility",
+        header: t("columns.visibility"),
         id: "isPublished",
         minWidth: 130,
       },
@@ -257,9 +260,11 @@ export function ColumnsPage() {
         allowsResizing: true,
         allowsSorting: true,
         cell: (row) => (
-          <span className="text-muted text-sm">{new Date(row.createdAt).toLocaleDateString()}</span>
+          <span className="text-muted text-sm">
+            {new Date(row.createdAt).toLocaleDateString(locale)}
+          </span>
         ),
-        header: "Created",
+        header: t("common.createdAt"),
         id: "createdAt",
         minWidth: 140,
       },
@@ -273,7 +278,7 @@ export function ColumnsPage() {
                 <Button
                   isDisabled={!row.source.isPublished}
                   isIconOnly
-                  aria-label="Preview public column"
+                  aria-label={t("columns.preview")}
                   onPress={() => previewColumn(row.source!)}
                   size="sm"
                   variant="tertiary"
@@ -281,65 +286,61 @@ export function ColumnsPage() {
                   <Icon icon="gravity-ui:eye" className="size-4" />
                 </Button>
                 <Tooltip.Content>
-                  {row.source.isPublished
-                    ? "Preview public column"
-                    : "Publish the column to preview it"}
+                  {row.source.isPublished ? t("columns.preview") : t("columns.publishToPreview")}
                 </Tooltip.Content>
               </Tooltip>
               <Tooltip delay={0}>
                 <Button
                   isIconOnly
-                  aria-label="Edit column"
+                  aria-label={t("columns.edit")}
                   onPress={() => openEdit(row.source!)}
                   size="sm"
                   variant="tertiary"
                 >
                   <Icon icon="gravity-ui:pencil" className="size-4" />
                 </Button>
-                <Tooltip.Content>Edit column</Tooltip.Content>
+                <Tooltip.Content>{t("columns.edit")}</Tooltip.Content>
               </Tooltip>
               <Tooltip delay={0}>
                 <Button
                   isIconOnly
-                  aria-label="Delete column"
+                  aria-label={t("columns.delete")}
                   onPress={() => openDelete(row.source!)}
                   size="sm"
                   variant="danger-soft"
                 >
                   <Icon icon="gravity-ui:trash-bin" className="size-4" />
                 </Button>
-                <Tooltip.Content>Delete column</Tooltip.Content>
+                <Tooltip.Content>{t("columns.delete")}</Tooltip.Content>
               </Tooltip>
             </div>
           ) : null,
-        header: "Actions",
+        header: t("common.actions"),
         id: "actions",
         pinned: "end",
         width: 168,
       },
     ],
-    [expandedKeys, openDelete, openEdit, previewColumn]
+    [expandedKeys, locale, openDelete, openEdit, previewColumn, t]
   );
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <h2 className="text-foreground text-base font-semibold">Column Management</h2>
+          <h2 className="text-foreground text-base font-semibold">{t("columns.title")}</h2>
           {!isLoading && (
             <Chip size="sm" variant="soft">
               {columns.length}
             </Chip>
           )}
         </div>
-        <p className="text-muted text-sm">
-          Create focused reading paths and curate the articles within them.
-        </p>
+        <p className="text-muted text-sm">{t("columns.description")}</p>
       </div>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button onPress={openCreate} size="sm">
           <Icon icon="gravity-ui:circle-plus" className="size-4" />
-          New Column
+          {t("columns.new")}
         </Button>
         <SearchField
           className="w-full sm:w-65"
@@ -349,19 +350,19 @@ export function ColumnsPage() {
         >
           <SearchField.Group>
             <SearchField.SearchIcon />
-            <SearchField.Input placeholder="Search columns..." />
+            <SearchField.Input placeholder={t("columns.search")} />
             <SearchField.ClearButton />
           </SearchField.Group>
         </SearchField>
       </div>
       {error ? (
         <div className="bg-danger-soft/10 border-danger/20 text-danger flex justify-center rounded-lg border p-10 text-sm">
-          Failed to load columns.
+          {t("columns.failed")}
         </div>
       ) : (
         <DataGrid
           allowsColumnResize
-          aria-label="Columns"
+          aria-label={t("columns.table")}
           columns={columnsDefinition}
           contentClassName="min-w-[808px]"
           data={gridRows}
@@ -384,17 +385,19 @@ export function ColumnsPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <Modal.Container size="sm">
-            <Modal.Dialog className="sm:max-w-md" aria-label="Modal dialog">
+            <Modal.Dialog className="sm:max-w-md" aria-label={t("columns.form")}>
               <Modal.CloseTrigger />
               <Form onSubmit={submit}>
                 <Modal.Header>
-                  <Modal.Heading>{selectedColumn ? "Edit Column" : "Create Column"}</Modal.Heading>
+                  <Modal.Heading>
+                    {selectedColumn ? t("columns.edit") : t("columns.new")}
+                  </Modal.Heading>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4">
                   <TextField isRequired name="name">
-                    <Label>Name</Label>
+                    <Label>{t("common.name")}</Label>
                     <Input
-                      placeholder="e.g. Building durable software"
+                      placeholder={t("columns.namePlaceholder")}
                       value={form.name}
                       onChange={(event) => {
                         const name = event.target.value;
@@ -408,9 +411,9 @@ export function ColumnsPage() {
                     <FieldError />
                   </TextField>
                   <TextField isRequired name="slug" validate={(value) => validateUrlSlug(value)}>
-                    <Label>Slug</Label>
+                    <Label>{t("common.slug")}</Label>
                     <Input
-                      placeholder="durable-software"
+                      placeholder={t("columns.slugPlaceholder")}
                       value={form.slug}
                       onChange={(event) => {
                         setSlugTouched(true);
@@ -420,9 +423,9 @@ export function ColumnsPage() {
                     <FieldError />
                   </TextField>
                   <TextField name="description">
-                    <Label>Description</Label>
+                    <Label>{t("common.description")}</Label>
                     <TextArea
-                      placeholder="What connects these essays?"
+                      placeholder={t("columns.descriptionPlaceholder")}
                       rows={3}
                       value={form.description || ""}
                       onChange={(event) =>
@@ -431,9 +434,9 @@ export function ColumnsPage() {
                     />
                   </TextField>
                   <TextField name="coverImage">
-                    <Label>Cover image URL</Label>
+                    <Label>{t("columns.coverImage")}</Label>
                     <Input
-                      placeholder="https://..."
+                      placeholder={t("columns.coverImagePlaceholder")}
                       value={form.coverImage || ""}
                       onChange={(event) =>
                         setForm((current) => ({ ...current, coverImage: event.target.value }))
@@ -448,19 +451,19 @@ export function ColumnsPage() {
                       <Switch.Control>
                         <Switch.Thumb />
                       </Switch.Control>
-                      <span className="text-sm font-medium">Published</span>
+                      <span className="text-sm font-medium">{t("common.published")}</span>
                     </Switch.Content>
                   </Switch>
                 </Modal.Body>
                 <Modal.Footer>
                   <Button slot="close" size="sm" variant="tertiary">
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                   <Button isPending={isCreating || isUpdating} size="sm" type="submit">
                     {({ isPending }) => (
                       <>
                         {isPending && <Spinner color="current" size="sm" />}
-                        {selectedColumn ? "Save changes" : "Create column"}
+                        {selectedColumn ? t("common.saveChanges") : t("columns.new")}
                       </>
                     )}
                   </Button>
@@ -479,24 +482,23 @@ export function ColumnsPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md" aria-label="Alert dialog">
+            <AlertDialog.Dialog className="sm:max-w-md" aria-label={t("columns.deleteQuestion")}>
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Delete column?</AlertDialog.Heading>
+                <AlertDialog.Heading>{t("columns.deleteQuestion")}</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="text-sm">
-                  Articles will remain in the archive, but they will no longer be associated with{" "}
-                  <strong>{selectedColumn?.name}</strong>.
+                  {t("columns.deleteDescription", { name: selectedColumn?.name ?? "" })}
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button slot="close" size="sm" variant="tertiary">
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button isPending={isDeleting} onPress={confirmDelete} size="sm" variant="danger">
-                  Delete
+                  {t("common.delete")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

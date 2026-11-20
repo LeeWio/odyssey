@@ -25,6 +25,7 @@ import {
 } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useCallback, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useGetAllRolesQuery } from "@/lib/features/role";
 import {
   type UserResponse,
@@ -40,9 +41,9 @@ const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   year: "numeric",
 };
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, locale: string): string {
   if (!iso) return "-";
-  return new Date(iso).toLocaleDateString("en-US", DATE_FORMAT_OPTIONS);
+  return new Date(iso).toLocaleDateString(locale, DATE_FORMAT_OPTIONS);
 }
 
 const STATUS_COLORS: Record<string, "success" | "warning" | "default" | "danger"> = {
@@ -54,6 +55,7 @@ const STATUS_COLORS: Record<string, "success" | "warning" | "default" | "danger"
 };
 
 function UsersRowActions({ user }: { user: UserResponse }) {
+  const t = useTranslations("Dashboard");
   const portalContainer = usePortalContainer();
   const { data: rolesList = [] } = useGetAllRolesQuery();
   const [updateStatus, { isLoading: isStatusUpdating }] = useUpdateUserStatusMutation();
@@ -83,7 +85,7 @@ function UsersRowActions({ user }: { user: UserResponse }) {
     if (keys === "all") return;
     const selectedIds = Array.from(keys as Set<string>).map(Number);
     if (selectedIds.length === 0) {
-      toast.warning("A user must have at least one security role.");
+      toast.warning(t("overview.assignRoles"));
       return;
     }
     try {
@@ -97,7 +99,7 @@ function UsersRowActions({ user }: { user: UserResponse }) {
     <div className="flex items-center justify-end gap-1.5" data-user-id={user.id}>
       {/* Direct quick action for Deactivate/Activate */}
       <Tooltip delay={0}>
-        <Tooltip.Trigger aria-label={isActive ? "Deactivate user" : "Activate user"}>
+        <Tooltip.Trigger aria-label={isActive ? t("users.deactivate") : t("users.activate")}>
           <Button
             isIconOnly
             size="sm"
@@ -114,13 +116,13 @@ function UsersRowActions({ user }: { user: UserResponse }) {
             )}
           </Button>
         </Tooltip.Trigger>
-        <Tooltip.Content>{isActive ? "Deactivate user" : "Activate user"}</Tooltip.Content>
+        <Tooltip.Content>{isActive ? t("users.deactivate") : t("users.activate")}</Tooltip.Content>
       </Tooltip>
 
       {/* Dropdown for role assignments and other actions */}
       <Dropdown>
         <Tooltip delay={0}>
-          <Tooltip.Trigger aria-label="More actions">
+          <Tooltip.Trigger aria-label={t("common.actions")}>
             <Button isIconOnly size="sm" variant="tertiary">
               {isRolesUpdating ? (
                 <Spinner size="sm" />
@@ -129,7 +131,7 @@ function UsersRowActions({ user }: { user: UserResponse }) {
               )}
             </Button>
           </Tooltip.Trigger>
-          <Tooltip.Content>More actions</Tooltip.Content>
+          <Tooltip.Content>{t("common.actions")}</Tooltip.Content>
         </Tooltip>
         <Dropdown.Popover
           placement="bottom end"
@@ -139,11 +141,11 @@ function UsersRowActions({ user }: { user: UserResponse }) {
             <Dropdown.Section>
               <Dropdown.Item
                 id="view-user"
-                textValue="View details"
+                textValue={t("users.viewDetails")}
                 onAction={() => toast.success(`User: ${user.username} (${user.email})`)}
               >
                 <Icon icon="gravity-ui:eye" className="size-4" />
-                <Label>View Details</Label>
+                <Label>{t("users.viewDetails")}</Label>
               </Dropdown.Item>
             </Dropdown.Section>
 
@@ -152,7 +154,7 @@ function UsersRowActions({ user }: { user: UserResponse }) {
               selectedKeys={userRoleIds}
               onSelectionChange={handleRolesChange}
             >
-              <Header>Assign Roles</Header>
+              <Header>{t("users.assignRoles")}</Header>
               {rolesList.map((role) => (
                 <Dropdown.Item key={role.id} id={role.id.toString()} textValue={role.name}>
                   <Dropdown.ItemIndicator />
@@ -168,6 +170,8 @@ function UsersRowActions({ user }: { user: UserResponse }) {
 }
 
 export function UsersPage() {
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
   const portalContainer = usePortalContainer();
   const { data: users = [], isLoading } = useGetAllUsersQuery();
   const [updateUserStatus, { isLoading: isBulkUpdating }] = useUpdateUserStatusMutation();
@@ -278,7 +282,7 @@ export function UsersPage() {
           user.email,
           user.status,
           user.roles.join("; "),
-          formatDate(user.createdAt),
+          formatDate(user.createdAt, locale),
         ]
           .map(escapeCsv)
           .join(",")
@@ -291,7 +295,7 @@ export function UsersPage() {
     link.href = url;
     link.click();
     URL.revokeObjectURL(url);
-  }, [selectedUsers]);
+  }, [locale, selectedUsers]);
 
   const handleRowAction = useCallback(
     (key: string | number) => {
@@ -308,7 +312,7 @@ export function UsersPage() {
         allowsResizing: true,
         allowsSorting: true,
         cell: (item) => <span className="font-medium tabular-nums">{item.id}</span>,
-        header: "ID",
+        header: t("common.id"),
         id: "id",
         minWidth: 80,
         width: columnWidths.get("id") ?? 80,
@@ -318,7 +322,7 @@ export function UsersPage() {
         allowsResizing: true,
         allowsSorting: true,
         id: "member",
-        header: "Member",
+        header: t("users.member"),
         isRowHeader: true,
         cell: (item) => {
           const name = item.nickname || item.username;
@@ -344,10 +348,10 @@ export function UsersPage() {
         allowsSorting: true,
         cell: (item) => (
           <Chip color={STATUS_COLORS[item.status]} size="sm" variant="soft">
-            {item.status}
+            {t(`users.${item.status.toLowerCase()}`)}
           </Chip>
         ),
-        header: "Status",
+        header: t("users.status"),
         id: "status",
         minWidth: 120,
         width: columnWidths.get("status") ?? 120,
@@ -355,7 +359,7 @@ export function UsersPage() {
       {
         allowsResizing: true,
         id: "roles",
-        header: "Roles",
+        header: t("users.roles"),
         cell: (item) => (
           <div className="flex min-w-0 gap-1 overflow-hidden">
             {item.roles.map((role) => (
@@ -373,9 +377,9 @@ export function UsersPage() {
         allowsResizing: true,
         allowsSorting: true,
         cell: (item) => (
-          <span className="text-muted tabular-nums">{formatDate(item.createdAt)}</span>
+          <span className="text-muted tabular-nums">{formatDate(item.createdAt, locale)}</span>
         ),
-        header: "Joined Date",
+        header: t("users.joined"),
         id: "createdAt",
         minWidth: 140,
         width: columnWidths.get("createdAt") ?? 140,
@@ -384,13 +388,13 @@ export function UsersPage() {
         align: "end",
         allowsResizing: false,
         cell: (item) => <UsersRowActions user={item} />,
-        header: "Actions",
+        header: t("users.actions"),
         id: "actions",
         pinned: "end",
         width: 140,
       },
     ],
-    [columnWidths]
+    [columnWidths, locale, t]
   );
 
   const selectionCount = selectedKeys === "all" ? selectedIds.size : selectedIds.size;
@@ -399,14 +403,14 @@ export function UsersPage() {
     <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-8 pb-10">
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <h2 className="text-foreground text-base font-semibold">User Management</h2>
+          <h2 className="text-foreground text-base font-semibold">{t("users.title")}</h2>
           {!isLoading && (
             <Chip size="sm" variant="soft">
               {users.length}
             </Chip>
           )}
         </div>
-        <p className="text-muted text-sm">Manage your system users, roles, and statuses.</p>
+        <p className="text-muted text-sm">{t("users.description")}</p>
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -414,7 +418,7 @@ export function UsersPage() {
           <Dropdown>
             <Button size="sm" variant="secondary">
               <Icon icon="gravity-ui:funnel" className="size-4" />
-              Status
+              {t("users.status")}
             </Button>
             <Dropdown.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
               <Dropdown.Menu
@@ -425,28 +429,28 @@ export function UsersPage() {
                   setStatusFilter(key ?? "all");
                 }}
               >
-                <Dropdown.Item id="all" textValue="All Statuses">
-                  <Label>All Statuses</Label>
+                <Dropdown.Item id="all" textValue={t("users.allStatuses")}>
+                  <Label>{t("users.allStatuses")}</Label>
                   <Dropdown.ItemIndicator />
                 </Dropdown.Item>
-                <Dropdown.Item id="ACTIVE" textValue="Active">
-                  <Label>Active</Label>
+                <Dropdown.Item id="ACTIVE" textValue={t("users.active")}>
+                  <Label>{t("users.active")}</Label>
                   <Dropdown.ItemIndicator />
                 </Dropdown.Item>
-                <Dropdown.Item id="INACTIVE" textValue="Inactive">
-                  <Label>Inactive</Label>
+                <Dropdown.Item id="INACTIVE" textValue={t("users.inactive")}>
+                  <Label>{t("users.inactive")}</Label>
                   <Dropdown.ItemIndicator />
                 </Dropdown.Item>
-                <Dropdown.Item id="PENDING" textValue="Pending">
-                  <Label>Pending</Label>
+                <Dropdown.Item id="PENDING" textValue={t("users.pending")}>
+                  <Label>{t("users.pending")}</Label>
                   <Dropdown.ItemIndicator />
                 </Dropdown.Item>
-                <Dropdown.Item id="BANNED" textValue="Banned">
-                  <Label>Banned</Label>
+                <Dropdown.Item id="BANNED" textValue={t("users.banned")}>
+                  <Label>{t("users.banned")}</Label>
                   <Dropdown.ItemIndicator />
                 </Dropdown.Item>
-                <Dropdown.Item id="DELETED" textValue="Deleted">
-                  <Label>Deleted</Label>
+                <Dropdown.Item id="DELETED" textValue={t("users.deleted")}>
+                  <Label>{t("users.deleted")}</Label>
                   <Dropdown.ItemIndicator />
                 </Dropdown.Item>
               </Dropdown.Menu>
@@ -462,7 +466,7 @@ export function UsersPage() {
         >
           <SearchField.Group>
             <SearchField.SearchIcon />
-            <SearchField.Input placeholder="Search users..." />
+            <SearchField.Input placeholder={t("users.search")} />
             <SearchField.ClearButton />
           </SearchField.Group>
         </SearchField>
@@ -470,7 +474,7 @@ export function UsersPage() {
 
       <DataGrid
         allowsColumnResize
-        aria-label="Users"
+        aria-label={t("nav.users")}
         columns={columns}
         contentClassName="min-w-[980px]"
         data={sortedUsers}
@@ -480,7 +484,7 @@ export function UsersPage() {
         renderEmptyState={() => (
           <EmptyState size="sm">
             <EmptyState.Header>
-              <EmptyState.Title>No users found</EmptyState.Title>
+              <EmptyState.Title>{t("users.noUsers")}</EmptyState.Title>
               <EmptyState.Description>
                 Adjust the search or status filter to continue.
               </EmptyState.Description>
@@ -502,7 +506,7 @@ export function UsersPage() {
         onSortChange={setSortDescriptor}
       />
 
-      <ActionBar aria-label="Bulk user actions" isOpen={selectionCount > 0}>
+      <ActionBar aria-label={t("users.bulkActions")} isOpen={selectionCount > 0}>
         <ActionBar.Prefix>
           <Chip className="tabular-nums" size="sm">
             {selectionCount}
@@ -511,42 +515,42 @@ export function UsersPage() {
         <Separator />
         <ActionBar.Content>
           <Button
-            aria-label="Activate selected users"
+            aria-label={t("users.activate")}
             isDisabled={isBulkUpdating}
             size="sm"
             variant="ghost"
             onPress={() => void handleBulkStatusChange("ACTIVE")}
           >
             <Icon icon="gravity-ui:circle-play" className="size-4" />
-            <span className="action-bar__label">Activate</span>
+            <span className="action-bar__label">{t("users.activate")}</span>
           </Button>
           <Button
-            aria-label="Deactivate selected users"
+            aria-label={t("users.deactivate")}
             isDisabled={isBulkUpdating}
             size="sm"
             variant="ghost"
             onPress={() => void handleBulkStatusChange("INACTIVE")}
           >
             <Icon icon="gravity-ui:trash-bin" className="size-4" />
-            <span className="action-bar__label">Deactivate</span>
+            <span className="action-bar__label">{t("users.deactivate")}</span>
           </Button>
           <Button
-            aria-label="Export selected users"
+            aria-label={t("users.export")}
             size="sm"
             variant="ghost"
             onPress={handleExportSelected}
           >
             <Icon icon="gravity-ui:arrow-down-to-line" className="size-4" />
-            <span className="action-bar__label">Export</span>
+            <span className="action-bar__label">{t("users.export")}</span>
           </Button>
         </ActionBar.Content>
         <Separator />
         <ActionBar.Suffix>
           <Tooltip delay={0}>
-            <Tooltip.Trigger aria-label="Clear selection">
+            <Tooltip.Trigger aria-label={t("users.clearSelection")}>
               <Button
                 isIconOnly
-                aria-label="Clear selection"
+                aria-label={t("users.clearSelection")}
                 size="sm"
                 variant="ghost"
                 onPress={() => setSelectedKeys(new Set())}
@@ -554,7 +558,7 @@ export function UsersPage() {
                 <Icon icon="gravity-ui:xmark" className="size-4" />
               </Button>
             </Tooltip.Trigger>
-            <Tooltip.Content>Clear selection</Tooltip.Content>
+            <Tooltip.Content>{t("users.clearSelection")}</Tooltip.Content>
           </Tooltip>
         </ActionBar.Suffix>
       </ActionBar>

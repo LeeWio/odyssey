@@ -5,6 +5,7 @@ import type { DataGridColumn, DataGridSortDescriptor } from "@heroui-pro/react";
 import { BarsDescendingAlignCenter, Copy, LayoutColumns3, Sliders } from "@gravity-ui/icons";
 import { Avatar, Button, Chip, SearchField } from "@heroui/react";
 import { DataGrid } from "@heroui-pro/react";
+import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 
 import { useGetAllUsersQuery, type UserResponse } from "@/lib/features/user";
@@ -23,6 +24,7 @@ type MemberRow = {
 };
 
 export function EmployeesTable() {
+  const t = useTranslations("Dashboard");
   const { data: users = [] } = useGetAllUsersQuery();
   const members = useMemo<MemberRow[]>(
     () =>
@@ -31,12 +33,12 @@ export function EmployeesTable() {
         email: user.email,
         id: String(user.id),
         name: user.nickname || user.username,
-        role: user.roles[0] ?? "Member",
+        role: user.roles[0] ?? t("overview.member"),
         user,
         workerId: `#${user.id}`,
         workerType: user.status,
       })),
-    [users]
+    [t, users]
   );
   const [search, setSearch] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState<DataGridSortDescriptor>({
@@ -82,12 +84,12 @@ export function EmployeesTable() {
         cell: (item) => (
           <div className="flex items-center gap-2">
             <span className="font-medium tabular-nums">{item.workerId}</span>
-            <Button isIconOnly aria-label="Copy ID" size="sm" variant="ghost">
+            <Button isIconOnly aria-label={t("common.copyId")} size="sm" variant="ghost">
               <Copy className="text-muted size-3.5" />
             </Button>
           </div>
         ),
-        header: "Worker ID",
+        header: t("overview.workerId"),
         id: "workerId",
         isRowHeader: true,
         minWidth: 140,
@@ -112,40 +114,42 @@ export function EmployeesTable() {
             </div>
           </div>
         ),
-        header: "Member",
+        header: t("overview.member"),
         id: "name",
         minWidth: 220,
       },
       {
         accessorKey: "role",
         allowsSorting: true,
-        header: "Role",
+        header: t("overview.role"),
         id: "role",
         minWidth: 200,
       },
       {
         accessorKey: "workerType",
         allowsSorting: true,
-        header: "Worker Type",
+        header: t("overview.workerType"),
         id: "workerType",
         minWidth: 120,
       },
       {
         align: "end",
         cell: (item) => <RowActions user={item.user} />,
-        header: "Actions",
+        header: t("common.actions"),
         id: "actions",
         minWidth: 140,
       },
     ],
-    []
+    [t]
   );
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-foreground text-base font-semibold">All Employees</span>
+          <span className="text-foreground text-base font-semibold">
+            {t("overview.allEmployees")}
+          </span>
           <Chip size="sm" variant="soft">
             {members.length}
           </Chip>
@@ -154,15 +158,15 @@ export function EmployeesTable() {
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" variant="tertiary">
               <Sliders className="size-4" />
-              Filter
+              {t("common.search")}
             </Button>
             <Button size="sm" variant="tertiary">
               <BarsDescendingAlignCenter className="size-4" />
-              Sort
+              {t("common.actions")}
             </Button>
             <Button size="sm" variant="tertiary">
               <LayoutColumns3 className="size-4" />
-              Columns
+              {t("overview.columns")}
             </Button>
           </div>
           <SearchField
@@ -172,7 +176,7 @@ export function EmployeesTable() {
           >
             <SearchField.Group>
               <SearchField.SearchIcon />
-              <SearchField.Input placeholder="Search..." />
+              <SearchField.Input placeholder={t("overview.searchEmployees")} />
               <SearchField.ClearButton />
             </SearchField.Group>
           </SearchField>
@@ -180,7 +184,7 @@ export function EmployeesTable() {
       </div>
 
       <DataGrid
-        aria-label="All employees"
+        aria-label={t("overview.employeesTable")}
         columns={columns}
         contentClassName="min-w-[700px]"
         data={sortedEmployees}

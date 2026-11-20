@@ -2,6 +2,7 @@
 
 import { Button, Card, Chip } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { useGetContentOperationsOverviewQuery } from "@/lib/features/dashboard";
 
@@ -12,6 +13,8 @@ const SEVERITY_COLOR = {
 } as const;
 
 export function ContentOperationsCard() {
+  const locale = useLocale();
+  const t = useTranslations("Dashboard");
   const { data, isError, isLoading, refetch } = useGetContentOperationsOverviewQuery();
   const summary = data?.summary;
   const attention = data?.attentionItems ?? [];
@@ -19,30 +22,42 @@ export function ContentOperationsCard() {
   return (
     <Card>
       <Card.Header className="items-start gap-2">
-        <Card.Title className="text-base">Content operations</Card.Title>
-        <Card.Description>Publishing, comments, and subscribers right now.</Card.Description>
+        <Card.Title className="text-base">{t("widgets.contentOperations")}</Card.Title>
+        <Card.Description>{t("widgets.contentOperationsDescription")}</Card.Description>
       </Card.Header>
       <Card.Content>
         {isLoading ? (
-          <p className="text-muted text-sm">Loading operations.</p>
+          <p className="text-muted text-sm">{t("widgets.loadingOperations")}</p>
         ) : isError ? (
           <EmptyState>
             <EmptyState.Header>
-              <EmptyState.Title>Operations are unavailable</EmptyState.Title>
+              <EmptyState.Title>{t("widgets.operationsUnavailable")}</EmptyState.Title>
             </EmptyState.Header>
             <EmptyState.Content>
               <Button onPress={() => refetch()} size="sm" variant="secondary">
-                Try again
+                {t("common.retry")}
               </Button>
             </EmptyState.Content>
           </EmptyState>
         ) : (
           <div className="flex flex-col gap-4">
             <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-              <Stat label="Published" value={summary?.publishedPosts ?? 0} />
-              <Stat label="Moments" value={summary?.moments ?? 0} />
-              <Stat label="Comments waiting" value={summary?.pendingComments ?? 0} />
-              <Stat label="Subscribers" value={summary?.activeSubscribers ?? 0} />
+              <Stat
+                label={t("widgets.published")}
+                value={summary?.publishedPosts ?? 0}
+                locale={locale}
+              />
+              <Stat label={t("widgets.moments")} value={summary?.moments ?? 0} locale={locale} />
+              <Stat
+                label={t("widgets.commentsWaiting")}
+                value={summary?.pendingComments ?? 0}
+                locale={locale}
+              />
+              <Stat
+                label={t("widgets.subscribers")}
+                value={summary?.activeSubscribers ?? 0}
+                locale={locale}
+              />
             </dl>
             {attention.length > 0 ? (
               <ul className="flex flex-col gap-2">
@@ -59,7 +74,7 @@ export function ContentOperationsCard() {
                 ))}
               </ul>
             ) : (
-              <p className="text-muted text-sm">Nothing needs attention.</p>
+              <p className="text-muted text-sm">{t("widgets.nothingNeedsAttention")}</p>
             )}
           </div>
         )}
@@ -68,11 +83,11 @@ export function ContentOperationsCard() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, locale, value }: { label: string; locale: string; value: number }) {
   return (
     <div className="flex flex-col gap-1">
       <dt className="text-muted text-xs">{label}</dt>
-      <dd className="tabular-nums">{value.toLocaleString("en-US")}</dd>
+      <dd className="tabular-nums">{value.toLocaleString(locale)}</dd>
     </div>
   );
 }

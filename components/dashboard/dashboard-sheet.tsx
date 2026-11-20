@@ -2,6 +2,7 @@
 
 import { Xmark } from "@gravity-ui/icons";
 import { Sheet } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { LifeListItemResponse, LifeListStatus } from "@/lib/features/life-list";
 import { selectIsAdmin, useLogoutMutation } from "@/lib/features/auth";
@@ -47,6 +48,7 @@ export function DashboardSheet() {
   const isAdmin = useAppSelector(selectIsAdmin);
   const dispatch = useAppDispatch();
   const [logout] = useLogoutMutation();
+  const t = useTranslations("Dashboard");
   const currentPath = requestedPath;
   const [lifeListItem, setLifeListItem] = useState<LifeListItemResponse | null>(null);
   const [createWishOpen, setCreateWishOpen] = useState(false);
@@ -127,8 +129,10 @@ export function DashboardSheet() {
       case "/groups":
         return (
           <AccessPlaceholderPage
-            title="User Groups"
-            description="Organize members across departments, teams, and temporary collaborations."
+            title={t("placeholders.userGroups")}
+            description={t("placeholders.notConnectedDescription", {
+              title: t("placeholders.userGroups"),
+            })}
           />
         );
       case "/roles":
@@ -138,15 +142,19 @@ export function DashboardSheet() {
       case "/access-policies":
         return (
           <AccessPlaceholderPage
-            title="Access Policies"
-            description="Define security requirements for sign-in, sessions, devices, and network access."
+            title={t("placeholders.accessPolicies")}
+            description={t("placeholders.notConnectedDescription", {
+              title: t("placeholders.accessPolicies"),
+            })}
           />
         );
       case "/service-accounts":
         return (
           <AccessPlaceholderPage
-            title="Service Accounts"
-            description="Manage non-human identities and the scoped access they use for automation."
+            title={t("placeholders.serviceAccounts")}
+            description={t("placeholders.notConnectedDescription", {
+              title: t("placeholders.serviceAccounts"),
+            })}
           />
         );
       case "/audit-logs":
@@ -171,9 +179,9 @@ export function DashboardSheet() {
       <Sheet.Backdrop isExiting variant="blur">
         <Sheet.Content>
           <>
-            <Sheet.Dialog id="dashboard-sheet-container" aria-label="Dashboard Overlay">
+            <Sheet.Dialog id="dashboard-sheet-container" aria-label={t("shell.dashboardOverlay")}>
               <Sheet.Handle />
-              <Sheet.CloseTrigger aria-label="Close dashboard" className="z-20">
+              <Sheet.CloseTrigger aria-label={t("shell.closeDashboard")} className="z-20">
                 <Xmark className="size-4" />
               </Sheet.CloseTrigger>
               <AppShell pathname={currentPath} onNavigate={handleNavigate}>

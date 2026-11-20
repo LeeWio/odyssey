@@ -2,6 +2,7 @@
 
 import { Button, Card, Chip } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
+import { useTranslations } from "next-intl";
 
 import { useGetContentWorkflowQuery } from "@/lib/features/dashboard";
 
@@ -12,6 +13,7 @@ const PRIORITY_COLOR = {
 } as const;
 
 export function ContentWorkflowCard() {
+  const t = useTranslations("Dashboard");
   const { data, isError, isLoading, refetch } = useGetContentWorkflowQuery();
   const summary = data?.summary;
   const items = data?.items ?? [];
@@ -19,41 +21,41 @@ export function ContentWorkflowCard() {
   return (
     <Card>
       <Card.Header className="items-start gap-2">
-        <Card.Title className="text-base">Editorial queue</Card.Title>
-        <Card.Description>Posts waiting on a publishing decision.</Card.Description>
+        <Card.Title className="text-base">{t("widgets.editorialQueue")}</Card.Title>
+        <Card.Description>{t("widgets.editorialQueueDescription")}</Card.Description>
         {summary ? (
           <div className="flex flex-wrap gap-2">
             <Chip size="sm" variant="soft">
-              Review {summary.needsReview}
+              {t("common.status")} {summary.needsReview}
             </Chip>
             <Chip size="sm" variant="soft">
-              Scheduled {summary.scheduled}
+              {t("widgets.published")} {summary.scheduled}
             </Chip>
             <Chip size="sm" variant="soft">
-              Drafts {summary.drafts}
+              {t("posts.article")} {summary.drafts}
             </Chip>
             <Chip size="sm" variant="soft">
-              Rejected {summary.rejected}
+              {t("widgets.failed")} {summary.rejected}
             </Chip>
           </div>
         ) : null}
       </Card.Header>
       <Card.Content>
         {isLoading ? (
-          <p className="text-muted text-sm">Loading the queue.</p>
+          <p className="text-muted text-sm">{t("widgets.loadingQueue")}</p>
         ) : isError ? (
           <EmptyState>
             <EmptyState.Header>
-              <EmptyState.Title>Queue is unavailable</EmptyState.Title>
+              <EmptyState.Title>{t("widgets.queueUnavailable")}</EmptyState.Title>
             </EmptyState.Header>
             <EmptyState.Content>
               <Button onPress={() => refetch()} size="sm" variant="secondary">
-                Try again
+                {t("common.retry")}
               </Button>
             </EmptyState.Content>
           </EmptyState>
         ) : items.length === 0 ? (
-          <p className="text-muted text-sm">Nothing is waiting.</p>
+          <p className="text-muted text-sm">{t("widgets.nothingWaiting")}</p>
         ) : (
           <ul className="flex flex-col gap-3">
             {items.slice(0, 6).map((item) => (

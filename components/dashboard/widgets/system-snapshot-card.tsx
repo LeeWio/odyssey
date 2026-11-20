@@ -2,6 +2,7 @@
 
 import { Button, Card } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { useGetSystemSnapshotQuery } from "@/lib/features/openapi/openapi-api";
 
@@ -15,37 +16,51 @@ type SystemSnapshot = {
 };
 
 export function SystemSnapshotCard() {
+  const locale = useLocale();
+  const t = useTranslations("Dashboard");
   const query = useGetSystemSnapshotQuery();
   const snapshot = query.data as SystemSnapshot | undefined;
 
   return (
     <Card>
       <Card.Header className="items-start gap-1">
-        <Card.Title className="text-base">System snapshot</Card.Title>
-        <Card.Description>JVM, HTTP, cache, and queue counters from this process.</Card.Description>
+        <Card.Title className="text-base">{t("widgets.systemSnapshot")}</Card.Title>
+        <Card.Description>{t("widgets.systemSnapshotDescription")}</Card.Description>
       </Card.Header>
       <Card.Content>
         {query.isLoading ? (
-          <p className="text-muted text-sm">Loading the snapshot.</p>
+          <p className="text-muted text-sm">{t("widgets.loadingSnapshot")}</p>
         ) : query.isError || !snapshot ? (
           <EmptyState>
             <EmptyState.Header>
-              <EmptyState.Title>Snapshot is unavailable</EmptyState.Title>
+              <EmptyState.Title>{t("widgets.snapshotUnavailable")}</EmptyState.Title>
             </EmptyState.Header>
             <EmptyState.Content>
               <Button onPress={() => query.refetch()} size="sm" variant="secondary">
-                Try again
+                {t("common.retry")}
               </Button>
             </EmptyState.Content>
           </EmptyState>
         ) : (
           <dl className="grid grid-cols-2 gap-3 text-sm">
-            <Stat label="Memory" value={memory(snapshot.jvm)} />
-            <Stat label="Threads" value={number(snapshot.jvm?.liveThreads)} />
-            <Stat label="HTTP requests" value={number(snapshot.http?.totalRequests)} />
-            <Stat label="Avg response" value={`${number(snapshot.http?.avgResponseTimeMs)} ms`} />
-            <Stat label="Cache hit rate" value={`${number(snapshot.cache?.l1HitRate)}%`} />
-            <Stat label="Queue errors" value={number(snapshot.mq?.canalProcessingErrors)} />
+            <Stat label={t("widgets.memory")} value={memory(snapshot.jvm, locale)} />
+            <Stat label={t("widgets.threads")} value={number(snapshot.jvm?.liveThreads, locale)} />
+            <Stat
+              label={t("widgets.httpRequests")}
+              value={number(snapshot.http?.totalRequests, locale)}
+            />
+            <Stat
+              label={t("widgets.averageResponse")}
+              value={`${number(snapshot.http?.avgResponseTimeMs, locale)} ms`}
+            />
+            <Stat
+              label={t("widgets.cacheHitRate")}
+              value={`${number(snapshot.cache?.l1HitRate, locale)}%`}
+            />
+            <Stat
+              label={t("widgets.queueErrors")}
+              value={number(snapshot.mq?.canalProcessingErrors, locale)}
+            />
           </dl>
         )}
       </Card.Content>
@@ -53,13 +68,13 @@ export function SystemSnapshotCard() {
   );
 }
 
-function memory(jvm: SnapshotGroup | undefined) {
+function memory(jvm: SnapshotGroup | undefined, locale: string) {
   if (!jvm) return "—";
-  return `${number(jvm.memoryUsedMb)} / ${number(jvm.memoryMaxMb)} MB`;
+  return `${number(jvm.memoryUsedMb, locale)} / ${number(jvm.memoryMaxMb, locale)} MB`;
 }
 
-function number(value: number | undefined) {
-  return (value ?? 0).toLocaleString("en-US");
+function number(value: number | undefined, locale: string) {
+  return (value ?? 0).toLocaleString(locale);
 }
 
 function Stat({ label, value }: { label: string; value: string }) {

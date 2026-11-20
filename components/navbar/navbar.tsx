@@ -684,7 +684,7 @@ export const Navbar = () => {
             {mounted && isAuthenticated ? (
               <Dropdown>
                 <Tooltip delay={500} closeDelay={100}>
-                  <Dropdown.Trigger aria-label={t("openAccount")} className="rounded-xl p-1.5">
+                  <Dropdown.Trigger aria-label={t("openAccount")}>
                     <UserAvatar
                       size="sm"
                       className="size-8"

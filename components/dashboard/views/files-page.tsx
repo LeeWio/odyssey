@@ -15,6 +15,7 @@ import { Icon } from "@iconify/react";
 import { useClipboard } from "@mantine/hooks";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import {
   type AssetUsage,
@@ -44,26 +45,29 @@ const usageLabels: Record<AssetUsage["locations"][number]["kind"], string> = {
   MOMENT: "Moment",
 };
 
-function formatFileSize(bytes: number) {
+function formatFileSize(bytes: number, locale: string) {
   const units = ["B", "KB", "MB", "GB", "TB"];
   const unit = Math.min(
     units.length - 1,
     Math.floor(Math.log(Math.max(bytes, 1)) / Math.log(1024))
   );
   const amount = bytes / 1024 ** unit;
-  return `${amount.toLocaleString("en-US", { maximumFractionDigits: 1 })} ${units[unit]}`;
+  return `${amount.toLocaleString(locale, { maximumFractionDigits: 1 })} ${units[unit]}`;
 }
 
 function UploadTrigger() {
+  const t = useTranslations("Dashboard");
   const { openFilePicker } = useDropZonePickerContext();
   return (
     <Button size="sm" variant="primary" onPress={openFilePicker}>
-      Add asset
+      {t("files.add")}
     </Button>
   );
 }
 
 export function FilesPage() {
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [keyword, setKeyword] = useState("");
   const [search, setSearch] = useState("");
@@ -128,7 +132,7 @@ export function FilesPage() {
 
   return (
     <div className="animate-fade-in mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
-      <h1 className="text-foreground text-2xl font-bold tracking-tight">Static Assets Library</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">{t("files.title")}</h1>
 
       <StorageHealth />
 
@@ -145,8 +149,8 @@ export function FilesPage() {
           }}
         >
           <DropZone.Icon />
-          <DropZone.Label>Drag an asset here or browse files</DropZone.Label>
-          <DropZone.Description>Images or PDFs up to 10 MB.</DropZone.Description>
+          <DropZone.Label>{t("files.dropLabel")}</DropZone.Label>
+          <DropZone.Description>{t("files.dropDescription")}</DropZone.Description>
           <UploadTrigger />
         </DropZone.Area>
         <DropZone.Input
@@ -162,7 +166,7 @@ export function FilesPage() {
                 <DropZone.FileInfo>
                   <DropZone.FileName>{file.name}</DropZone.FileName>
                   <DropZone.FileMeta>
-                    {status === "uploading" ? "Uploading…" : "Upload failed"}
+                    {status === "uploading" ? t("files.uploading") : t("files.uploadFailed")}
                   </DropZone.FileMeta>
                 </DropZone.FileInfo>
                 {status === "uploading" ? (
@@ -170,10 +174,10 @@ export function FilesPage() {
                 ) : (
                   <>
                     <Button size="sm" variant="secondary" onPress={() => executeUpload(file, id)}>
-                      Retry upload
+                      {t("files.retryUpload")}
                     </Button>
                     <DropZone.FileRemoveTrigger
-                      aria-label={`Dismiss failed upload ${file.name}`}
+                      aria-label={t("files.dismissFailed", { name: file.name })}
                       onPress={() =>
                         setUploads((current) => current.filter((item) => item.id !== id))
                       }
@@ -188,11 +192,11 @@ export function FilesPage() {
 
       <section aria-labelledby="asset-list-title" className="flex flex-col gap-3">
         <h2 id="asset-list-title" className="text-lg font-semibold">
-          Asset files
+          {t("files.assetFiles")}
         </h2>
         <form
           role="search"
-          aria-label="Search asset files"
+          aria-label={t("files.search")}
           className="flex flex-wrap items-end gap-2"
           onSubmit={(event) => {
             event.preventDefault();
@@ -201,11 +205,11 @@ export function FilesPage() {
           }}
         >
           <TextField className="min-w-32 flex-1" value={keyword} onChange={setKeyword}>
-            <Label>Filename</Label>
-            <Input placeholder="Search by filename" />
+            <Label>{t("files.filename")}</Label>
+            <Input placeholder={t("files.searchPlaceholder")} />
           </TextField>
           <Button type="submit" variant="secondary">
-            Search
+            {t("common.search")}
           </Button>
           {search && (
             <Button
@@ -216,22 +220,22 @@ export function FilesPage() {
                 setPage(0);
               }}
             >
-              Clear
+              {t("common.clear")}
             </Button>
           )}
         </form>
 
         {files.isError ? (
           <div className="flex items-center gap-3" role="status">
-            <p className="text-muted text-sm">Couldn’t load asset files.</p>
+            <p className="text-muted text-sm">{t("files.loadFailed")}</p>
             <Button size="sm" variant="secondary" onPress={() => files.refetch()}>
-              Retry list
+              {t("files.retryList")}
             </Button>
           </div>
         ) : files.isFetching ? (
           <div role="status" className="flex items-center gap-2 py-3">
             <Spinner size="sm" />
-            <span className="text-muted text-sm">Loading asset files…</span>
+            <span className="text-muted text-sm">{t("files.loading")}</span>
           </div>
         ) : result?.list.length ? (
           <ul className="divide-border border-border divide-y rounded-xl border">
@@ -242,7 +246,9 @@ export function FilesPage() {
                   <p className="truncate text-sm font-medium" title={file.originalName}>
                     {file.originalName}
                   </p>
-                  <p className="text-muted text-xs tabular-nums">{formatFileSize(file.fileSize)}</p>
+                  <p className="text-muted text-xs tabular-nums">
+                    {formatFileSize(file.fileSize, locale)}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1">
                   <Tooltip>
@@ -250,36 +256,36 @@ export function FilesPage() {
                       isIconOnly
                       size="sm"
                       variant="ghost"
-                      aria-label={`Copy link for ${file.originalName}`}
+                      aria-label={t("files.copyFor", { name: file.originalName })}
                       onPress={() => clipboard.copy(file.fileUrl)}
                     >
                       <Icon icon="gravity-ui:copy" aria-hidden />
                     </Button>
-                    <Tooltip.Content>Copy link</Tooltip.Content>
+                    <Tooltip.Content>{t("files.copyLink")}</Tooltip.Content>
                   </Tooltip>
                   <Tooltip>
                     <Button
                       isIconOnly
                       size="sm"
                       variant="ghost"
-                      aria-label={`Preview ${file.originalName}`}
+                      aria-label={t("files.previewFor", { name: file.originalName })}
                       onPress={() => window.open(file.fileUrl, "_blank", "noopener,noreferrer")}
                     >
                       <Icon icon="gravity-ui:arrow-up-right-from-square" aria-hidden />
                     </Button>
-                    <Tooltip.Content>Open in a new tab</Tooltip.Content>
+                    <Tooltip.Content>{t("files.openNewTab")}</Tooltip.Content>
                   </Tooltip>
                   <Tooltip>
                     <Button
                       isIconOnly
                       size="sm"
                       variant="ghost"
-                      aria-label={`Delete ${file.originalName}`}
+                      aria-label={t("files.deleteFor", { name: file.originalName })}
                       onPress={() => setFileToDelete(file)}
                     >
                       <Icon icon="gravity-ui:trash-bin" aria-hidden />
                     </Button>
-                    <Tooltip.Content>Delete asset</Tooltip.Content>
+                    <Tooltip.Content>{t("files.deleteAsset")}</Tooltip.Content>
                   </Tooltip>
                 </div>
               </li>
@@ -287,30 +293,27 @@ export function FilesPage() {
           </ul>
         ) : (
           <p role="status" className="text-muted py-3 text-sm">
-            {search ? "No assets match this filename." : "No assets on this page."}
+            {search ? t("files.noMatch") : t("files.noAssets")}
           </p>
         )}
         {(page > 0 || totalPages > 1) && (
-          <nav aria-label="Asset pages" className="flex flex-wrap items-center gap-2">
+          <nav aria-label={t("files.pages")} className="flex flex-wrap items-center gap-2">
             <Button
               isDisabled={page === 0 || files.isFetching}
               onPress={() => setPage((current) => current - 1)}
               size="sm"
               variant="secondary"
             >
-              Previous
+              {t("common.previous")}
             </Button>
-            <span className="text-muted text-sm">
-              Page {page + 1}
-              {totalPages > page ? ` of ${totalPages}` : ""}
-            </span>
+            <span className="text-muted text-sm">{t("common.page", { page: page + 1 })}</span>
             <Button
               isDisabled={page + 1 >= totalPages || files.isFetching}
               onPress={() => setPage((current) => current + 1)}
               size="sm"
               variant="secondary"
             >
-              Next
+              {t("common.next")}
             </Button>
           </nav>
         )}
@@ -327,25 +330,25 @@ export function FilesPage() {
             <AlertDialog.Dialog className="sm:max-w-md">
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Delete asset?</AlertDialog.Heading>
+                <AlertDialog.Heading>{t("files.deleteQuestion")}</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="font-semibold">{fileToDelete?.originalName}</p>
                 {usage.isFetching ? (
-                  <p role="status">Checking where this asset is used…</p>
+                  <p role="status">{t("files.checkingUsage")}</p>
                 ) : usage.isError ? (
                   <div className="flex flex-wrap items-center gap-2">
-                    <p role="status">Couldn’t check usage. The asset cannot be deleted yet.</p>
+                    <p role="status">{t("files.usageFailed")}</p>
                     <Button size="sm" variant="secondary" onPress={() => usage.refetch()}>
-                      Retry usage check
+                      {t("files.retryUsage")}
                     </Button>
                   </div>
                 ) : locations?.total ? (
                   <div className="flex min-w-0 flex-col gap-2">
-                    <p role="status">This asset is in use and cannot be deleted.</p>
+                    <p role="status">{t("files.inUse")}</p>
                     <ul
                       className="max-h-48 list-disc space-y-1 overflow-y-auto pl-5"
-                      aria-label="Usage locations"
+                      aria-label={t("files.usageLocations")}
                     >
                       {locations.locations.map(({ kind, id, label }) => (
                         <li key={`${kind}-${id}`} className="break-words">
@@ -354,11 +357,15 @@ export function FilesPage() {
                       ))}
                     </ul>
                     {locations.total > locations.locations.length && (
-                      <p>And {locations.total - locations.locations.length} more.</p>
+                      <p>
+                        {t("files.andMore", {
+                          count: locations.total - locations.locations.length,
+                        })}
+                      </p>
                     )}
                   </div>
                 ) : locations ? (
-                  <p>Removing the last reference permanently deletes the file.</p>
+                  <p>{t("files.permanentDelete")}</p>
                 ) : null}
               </AlertDialog.Body>
               <AlertDialog.Footer>
@@ -367,14 +374,14 @@ export function FilesPage() {
                   variant="ghost"
                   onPress={() => setFileToDelete(null)}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="danger"
                   onPress={confirmDelete}
                   isDisabled={isDeleting || !canDelete}
                 >
-                  {isDeleting ? "Deleting…" : "Delete"}
+                  {isDeleting ? t("common.loading") : t("files.delete")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

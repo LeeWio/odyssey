@@ -5,6 +5,7 @@ import type { NavItem } from "./nav-items";
 import { LayoutSideContentLeft } from "@gravity-ui/icons";
 import { Chip } from "@heroui/react";
 import { Sidebar, useSidebar } from "@heroui-pro/react";
+import { useTranslations } from "next-intl";
 
 import { IconButton } from "./icon-button";
 
@@ -63,13 +64,14 @@ function SidebarContents({
   pathname,
 }: SidebarContentsProps) {
   const { isOpen, toggleSidebar } = useSidebar();
+  const t = useTranslations("Dashboard");
 
   return (
     <>
       <Sidebar.Header>
         <div className="flex items-center px-1 py-1">
           <IconButton
-            label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
+            label={t(isOpen ? "shell.collapseSidebar" : "shell.expandSidebar")}
             size="sm"
             variant="tertiary"
             onPress={toggleSidebar}
@@ -80,9 +82,9 @@ function SidebarContents({
       </Sidebar.Header>
       <Sidebar.Content>
         {NAV_GROUPS.map((group) => (
-          <Sidebar.Group key={group.label}>
-            <Sidebar.GroupLabel>{group.label}</Sidebar.GroupLabel>
-            <Sidebar.Menu aria-label={`${group.label} navigation`}>
+          <Sidebar.Group key={group.labelKey}>
+            <Sidebar.GroupLabel>{t(`nav.${group.labelKey}`)}</Sidebar.GroupLabel>
+            <Sidebar.Menu aria-label={`${t(`nav.${group.labelKey}`)} navigation`}>
               {group.items.map((item) => (
                 <SidebarNavItem
                   key={item.href}
@@ -99,7 +101,7 @@ function SidebarContents({
         ))}
       </Sidebar.Content>
       <Sidebar.Footer>
-        <Sidebar.Menu aria-label="Account">
+        <Sidebar.Menu aria-label={t("shell.account")}>
           {FOOTER_ITEMS.map((item) => (
             <SidebarNavItem
               key={item.href}
@@ -135,6 +137,8 @@ function SidebarNavItem({
   pathname,
 }: SidebarNavItemProps) {
   const Icon = item.icon;
+  const t = useTranslations("Dashboard");
+  const label = t(`nav.${item.labelKey}`);
   const fullHref = basePath + item.href;
   const isCurrent =
     item.href === "/"
@@ -146,17 +150,17 @@ function SidebarNavItem({
       href={disableNavigation || onNavigate ? undefined : fullHref}
       id={`${idPrefix}${item.href}`}
       isCurrent={isCurrent}
-      textValue={item.label}
+      textValue={label}
       onAction={onNavigate ? () => onNavigate(item.href) : undefined}
     >
       <Sidebar.MenuIcon>
         <Icon className="size-4" />
       </Sidebar.MenuIcon>
-      <Sidebar.MenuLabel>{item.label}</Sidebar.MenuLabel>
+      <Sidebar.MenuLabel>{label}</Sidebar.MenuLabel>
       {item.badge ? (
         <Sidebar.MenuChip>
           <Chip color="success" size="sm" variant="soft">
-            {item.badge}
+            {t(`shell.${item.badge}`)}
           </Chip>
         </Sidebar.MenuChip>
       ) : null}
