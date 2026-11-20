@@ -147,13 +147,27 @@ test("finds an article, records a chapter, and resumes at it from the library", 
     if (path === `/api/v1/user/library/posts/${post.id}/progress` && request.method() === "PUT") {
       checkpoint = request.postDataJSON();
       return route.fulfill({
-        json: envelope({ post, ...checkpoint, lastReadAt: "2026-11-19T08:00:00Z" }),
+        json: envelope({
+          post,
+          currentProgressPercent: checkpoint.progressPercent,
+          furthestProgressPercent: checkpoint.progressPercent,
+          positionAnchor: checkpoint.positionAnchor,
+          lastReadAt: "2026-11-19T08:00:00Z",
+        }),
       });
     }
     if (path === "/api/v1/user/library/overview") {
       return route.fulfill({
         json: envelope({
-          continueReading: [{ post, ...checkpoint, lastReadAt: "2026-11-19T08:00:00Z" }],
+          continueReading: [
+            {
+              post,
+              currentProgressPercent: checkpoint.progressPercent,
+              furthestProgressPercent: checkpoint.progressPercent,
+              positionAnchor: checkpoint.positionAnchor,
+              lastReadAt: "2026-11-19T08:00:00Z",
+            },
+          ],
           recentFavorites: [],
           recommendations: [],
         }),

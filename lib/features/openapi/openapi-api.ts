@@ -25,47 +25,6 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
-    getMyPreferences: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseNotificationPreferenceResponse"]>,
-      void
-    >({
-      query: () => ({ url: `/api/v1/user/notifications/preferences` }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
-    updateMyPreferences: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseNotificationPreferenceResponse"]>,
-      { body: OpenApiComponents["schemas"]["NotificationPreferenceRequest"] }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/user/notifications/preferences`,
-        method: "PUT",
-        body: arg.body,
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
-    updateWebhook: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseWebhookResponse"]>,
-      { id: number; body: OpenApiComponents["schemas"]["WebhookRequest"] }
-    >({
-      query: (arg) => ({ url: `/api/v1/admin/webhooks/${arg.id}`, method: "PUT", body: arg.body }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
     deleteWebhook: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
       { id: number }
@@ -142,16 +101,23 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
-    updateChecklistItem: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanChecklistItemResponse"]>,
-      {
-        taskId: number;
-        checklistItemId: number;
-        body: OpenApiComponents["schemas"]["KanbanChecklistItemRequest"];
-      }
+    getItem: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseLifeListItemResponse"]>,
+      { id: number }
+    >({
+      query: (arg) => ({ url: `/api/v1/admin/life-list/items/${arg.id}` }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
+    updateCategoryForAdminLifeListCategories: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseLifeListCategoryResponse"]>,
+      { id: number; body: OpenApiComponents["schemas"]["LifeListCategoryRequest"] }
     >({
       query: (arg) => ({
-        url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist/${arg.checklistItemId}`,
+        url: `/api/v1/admin/life-list/categories/${arg.id}`,
         method: "PUT",
         body: arg.body,
       }),
@@ -163,44 +129,11 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
-    deleteChecklistItem: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
-      { taskId: number; checklistItemId: number }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist/${arg.checklistItemId}`,
-        method: "DELETE",
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
-    updateTask: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanItemResponse"]>,
-      { id: number; body: OpenApiComponents["schemas"]["KanbanItemRequest"] }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/kanban/tasks/${arg.id}`,
-        method: "PUT",
-        body: arg.body,
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
-    deleteTask: builder.mutation<
+    deleteCategoryForAdminLifeListCategories: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
       { id: number }
     >({
-      query: (arg) => ({ url: `/api/v1/admin/kanban/tasks/${arg.id}`, method: "DELETE" }),
+      query: (arg) => ({ url: `/api/v1/admin/life-list/categories/${arg.id}`, method: "DELETE" }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
@@ -343,6 +276,23 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
+    recordPageView: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
+      { body: OpenApiComponents["schemas"]["PageViewRequest"] }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/public/analytics/pageviews`,
+        method: "POST",
+        body: arg.body,
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        await notifyMutation(queryFulfilled, { error: "Request failed." });
+      },
+      invalidatesTags: ["OpenApi"],
+    }),
+
     recordContentEvent: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
       { body: OpenApiComponents["schemas"]["ContentAnalyticsEventRequest"] }
@@ -394,43 +344,6 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
-    listWebhooks: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseListWebhookResponse"]>,
-      void
-    >({
-      query: () => ({ url: `/api/v1/admin/webhooks` }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
-    createWebhook: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseWebhookResponse"]>,
-      { body: OpenApiComponents["schemas"]["WebhookRequest"] }
-    >({
-      query: (arg) => ({ url: `/api/v1/admin/webhooks`, method: "POST", body: arg.body }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
-    testWebhook: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
-      { id: number }
-    >({
-      query: (arg) => ({ url: `/api/v1/admin/webhooks/${arg.id}/test`, method: "POST" }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
     auditUser: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
       { id: number; approved: boolean }
@@ -445,7 +358,7 @@ export const openapiApi = baseApi.injectEndpoints({
       async onQueryStarted(_arg, { queryFulfilled }) {
         await notifyMutation(queryFulfilled, { error: "Request failed." });
       },
-      invalidatesTags: ["OpenApi", "Notification"],
+      invalidatesTags: ["OpenApi"],
     }),
 
     retrieveAllSeries: builder.query<
@@ -641,10 +554,14 @@ export const openapiApi = baseApi.injectEndpoints({
     }),
 
     rebuildPostMetadata: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseInteger"]>,
-      void
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePostMetadataRebuildResponse"]>,
+      { batchSize?: number; dryRun?: boolean }
     >({
-      query: () => ({ url: `/api/v1/admin/posts/rebuild-metadata`, method: "POST" }),
+      query: (arg) => ({
+        url: `/api/v1/admin/posts/rebuild-metadata`,
+        method: "POST",
+        params: { batchSize: arg.batchSize, dryRun: arg.dryRun },
+      }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
       async onQueryStarted(_arg, { queryFulfilled }) {
@@ -666,36 +583,12 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
-    createTask: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanItemResponse"]>,
-      { body: OpenApiComponents["schemas"]["KanbanItemRequest"] }
-    >({
-      query: (arg) => ({ url: `/api/v1/admin/kanban/tasks`, method: "POST", body: arg.body }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
-    retrieveChecklistItems: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseListKanbanChecklistItemResponse"]>,
-      { taskId: number }
-    >({
-      query: (arg) => ({ url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist` }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
-    createChecklistItem: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanChecklistItemResponse"]>,
-      { taskId: number; body: OpenApiComponents["schemas"]["KanbanChecklistItemRequest"] }
+    createCategoryForAdminLifeListCategories: builder.mutation<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseLifeListCategoryResponse"]>,
+      { body: OpenApiComponents["schemas"]["LifeListCategoryRequest"] }
     >({
       query: (arg) => ({
-        url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist`,
+        url: `/api/v1/admin/life-list/categories`,
         method: "POST",
         body: arg.body,
       }),
@@ -713,36 +606,6 @@ export const openapiApi = baseApi.injectEndpoints({
     >({
       query: (arg) => ({
         url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist/sequence`,
-        method: "POST",
-        body: arg.body,
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
-    duplicateTask: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanItemResponse"]>,
-      { id: number }
-    >({
-      query: (arg) => ({ url: `/api/v1/admin/kanban/tasks/${arg.id}/duplicate`, method: "POST" }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
-    relocateTask: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
-      { body: OpenApiComponents["schemas"]["KanbanItemMoveRequest"] }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/kanban/tasks/relocate`,
         method: "POST",
         body: arg.body,
       }),
@@ -821,8 +684,6 @@ export const openapiApi = baseApi.injectEndpoints({
       invalidatesTags: ["OpenApi"],
     }),
 
-    // Comment governance endpoints live in lib/features/comment (avoid injectEndpoints clashes).
-
     resolvePostReport: builder.mutation<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>,
       {
@@ -833,27 +694,6 @@ export const openapiApi = baseApi.injectEndpoints({
     >({
       query: (arg) => ({
         url: `/api/v1/admin/posts/reports/${arg.postId}/${arg.reporterId}`,
-        method: "PATCH",
-        body: arg.body,
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        await notifyMutation(queryFulfilled, { error: "Request failed." });
-      },
-      invalidatesTags: ["OpenApi"],
-    }),
-
-    completeChecklistItem: builder.mutation<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseKanbanChecklistItemResponse"]>,
-      {
-        taskId: number;
-        checklistItemId: number;
-        body: OpenApiComponents["schemas"]["KanbanChecklistItemCompletionRequest"];
-      }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/kanban/tasks/${arg.taskId}/checklist/${arg.checklistItemId}/completion`,
         method: "PATCH",
         body: arg.body,
       }),
@@ -1049,36 +889,6 @@ export const openapiApi = baseApi.injectEndpoints({
       providesTags: ["OpenApi"],
     }),
 
-    searchPostDigests: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePageResultPostDigestResponse"]>,
-      {
-        categoryId?: number;
-        tagId?: number;
-        keyword?: string;
-        featuredOnly?: boolean;
-        hasCover?: boolean;
-        contentType?: "JSON" | "MDX";
-        pageable: OpenApiComponents["schemas"]["Pageable"];
-      }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/public/blog/posts/digest`,
-        params: {
-          categoryId: arg.categoryId,
-          tagId: arg.tagId,
-          keyword: arg.keyword,
-          featuredOnly: arg.featuredOnly,
-          hasCover: arg.hasCover,
-          contentType: arg.contentType,
-          pageable: arg.pageable,
-        },
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
     retrieveFacets: builder.query<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponseBlogFacetResponse"]>,
       void
@@ -1108,20 +918,6 @@ export const openapiApi = baseApi.injectEndpoints({
       query: (arg) => ({
         url: `/api/v1/public/blog/archive`,
         params: { year: arg.year, month: arg.month, pageable: arg.pageable },
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
-    getWebhookLogs: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePageResultWebhookLog"]>,
-      { id: number; pageable: OpenApiComponents["schemas"]["Pageable"] }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/webhooks/${arg.id}/logs`,
-        params: { pageable: arg.pageable },
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
@@ -1224,51 +1020,11 @@ export const openapiApi = baseApi.injectEndpoints({
       providesTags: ["OpenApi"],
     }),
 
-    getLogs: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponsePageResultOperationLog"]>,
-      {
-        username?: string;
-        operation?: string;
-        status?: number;
-        pageable: OpenApiComponents["schemas"]["Pageable"];
-      }
-    >({
-      query: (arg) => ({
-        url: `/api/v1/admin/logs`,
-        params: {
-          username: arg.username,
-          operation: arg.operation,
-          status: arg.status,
-          page: arg.pageable.page,
-          size: arg.pageable.size,
-          sort: arg.pageable.sort,
-        },
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
     getBrokenLinks: builder.query<
       OpenApiData<OpenApiComponents["schemas"]["ApiResponsePageResultLinkCheckLog"]>,
       { pageable: OpenApiComponents["schemas"]["Pageable"] }
     >({
-      query: (arg) => ({
-        url: `/api/v1/admin/links/broken`,
-        params: { page: arg.pageable.page, size: arg.pageable.size, sort: arg.pageable.sort },
-      }),
-      transformResponse: (response: { data: unknown }) => response.data as never,
-      transformErrorResponse: transformApiError,
-
-      providesTags: ["OpenApi"],
-    }),
-
-    retrieveBoard: builder.query<
-      OpenApiData<OpenApiComponents["schemas"]["ApiResponseListKanbanColumnResponse"]>,
-      void
-    >({
-      query: () => ({ url: `/api/v1/admin/kanban` }),
+      query: (arg) => ({ url: `/api/v1/admin/links/broken`, params: { pageable: arg.pageable } }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
 
@@ -1292,7 +1048,21 @@ export const openapiApi = baseApi.injectEndpoints({
     >({
       query: (arg) => ({
         url: `/api/v1/admin/files/integrity`,
-        params: { page: arg.pageable.page, size: arg.pageable.size, sort: arg.pageable.sort },
+        params: { pageable: arg.pageable },
+      }),
+      transformResponse: (response: { data: unknown }) => response.data as never,
+      transformErrorResponse: transformApiError,
+
+      providesTags: ["OpenApi"],
+    }),
+
+    getVisitorTimeline: builder.query<
+      OpenApiData<OpenApiComponents["schemas"]["ApiResponseListVisitorTimelineResponse"]>,
+      { visitorHash: string; days?: number; includeOwner?: boolean; includeBots?: boolean }
+    >({
+      query: (arg) => ({
+        url: `/api/v1/admin/analytics/visitors/${arg.visitorHash}`,
+        params: { days: arg.days, includeOwner: arg.includeOwner, includeBots: arg.includeBots },
       }),
       transformResponse: (response: { data: unknown }) => response.data as never,
       transformErrorResponse: transformApiError,
@@ -1310,8 +1080,6 @@ export const openapiApi = baseApi.injectEndpoints({
 
       providesTags: ["OpenApi"],
     }),
-
-    // Content funnel lives in lib/features/dashboard (avoid injectEndpoints clashes).
 
     clearLogs: builder.mutation<OpenApiData<OpenApiComponents["schemas"]["ApiResponseVoid"]>, void>(
       {
@@ -1343,19 +1111,15 @@ export const openapiApi = baseApi.injectEndpoints({
 
 export const {
   useAssignRolesMutation,
-  useGetMyPreferencesQuery,
-  useUpdateMyPreferencesMutation,
-  useUpdateWebhookMutation,
   useDeleteWebhookMutation,
   useEnableUserMutation,
   useDisableUserMutation,
   useRetrieveSeriesQuery,
   useUpdateSeriesMutation,
   useDeleteSeriesMutation,
-  useUpdateChecklistItemMutation,
-  useDeleteChecklistItemMutation,
-  useUpdateTaskMutation,
-  useDeleteTaskMutation,
+  useGetItemQuery,
+  useUpdateCategoryForAdminLifeListCategoriesMutation,
+  useDeleteCategoryForAdminLifeListCategoriesMutation,
   useAssignTaskAssigneesMutation,
   useUpdateColumnMutation,
   useDeleteColumnMutation,
@@ -1365,12 +1129,10 @@ export const {
   useSubscribeMutation,
   useUnfavoritePostMutation,
   useReportPostMutation,
+  useRecordPageViewMutation,
   useRecordContentEventMutation,
   useRequestPasswordResetMutation,
   useConfirmPasswordResetMutation,
-  useListWebhooksQuery,
-  useCreateWebhookMutation,
-  useTestWebhookMutation,
   useAuditUserMutation,
   useRetrieveAllSeriesQuery,
   useCreateSeriesMutation,
@@ -1388,19 +1150,14 @@ export const {
   useRegenerateStaticHtmlMutation,
   useRebuildPostMetadataMutation,
   useTriggerManualScanMutation,
-  useCreateTaskMutation,
-  useRetrieveChecklistItemsQuery,
-  useCreateChecklistItemMutation,
+  useCreateCategoryForAdminLifeListCategoriesMutation,
   useAdjustChecklistItemSequenceMutation,
-  useDuplicateTaskMutation,
-  useRelocateTaskMutation,
   useCreateColumnMutation,
   useAdjustColumnSequenceMutation,
   useTriggerSyncMutation,
   useGetAllConfigsQuery,
   useCreateConfigMutation,
   useResolvePostReportMutation,
-  useCompleteChecklistItemMutation,
   useGetLikedPostsQuery,
   useGetPublicStatisticsQuery,
   useGetTrendingQuery,
@@ -1418,11 +1175,9 @@ export const {
   useGetPublicConfigsQuery,
   useGetConfigByKeyQuery,
   useRetrievePreviewQuery,
-  useSearchPostDigestsQuery,
   useRetrieveFacetsQuery,
   useRetrieveDiscoveryQuery,
   useRetrieveArchiveQuery,
-  useGetWebhookLogsQuery,
   useGetUserByIdQuery,
   useDeleteUserMutation,
   useRetrieveRevisionQuery,
@@ -1430,11 +1185,10 @@ export const {
   useCompareRevisionsQuery,
   useGetPostReportsQuery,
   useGetSystemSnapshotQuery,
-  useGetLogsQuery,
   useGetBrokenLinksQuery,
-  useRetrieveBoardQuery,
   useGetStorageInventoryQuery,
   useVerifyStorageIntegrityQuery,
+  useGetVisitorTimelineQuery,
   useGetTrending1Query,
   useClearLogsMutation,
   useClearLogs1Mutation,

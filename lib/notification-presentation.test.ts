@@ -47,6 +47,16 @@ it("routes report reviews to the same authorized dashboard surfaces", () => {
   ).toEqual({ kind: "dashboard", path: "/posts" });
 });
 
+it("routes rejected post edits back to the editor queue", () => {
+  expect(
+    getNotificationDestination({
+      type: "POST_REJECTED",
+      link: "/posts?id=9",
+      context: { objectType: "POST", objectId: 9, action: "EDIT" },
+    })
+  ).toEqual({ kind: "dashboard", path: "/posts" });
+});
+
 it("keeps public and external notification links separate", () => {
   expect(
     getNotificationDestination({

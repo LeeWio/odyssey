@@ -82,7 +82,11 @@ export function getNotificationDestination(
   notification: Pick<NotificationResponseLike, "link" | "type" | "context">
 ): NotificationDestination | null {
   const context = notification.context;
-  if (context?.action === "REVIEW" || context?.action === "REVIEW_REPORT") {
+  if (
+    context?.action === "REVIEW" ||
+    context?.action === "EDIT" ||
+    context?.action === "REVIEW_REPORT"
+  ) {
     const path = REVIEW_DESTINATION_PATHS[context.objectType];
     if (path) return { kind: "dashboard", path };
   }

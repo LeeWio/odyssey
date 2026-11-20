@@ -105,7 +105,7 @@ export function RecommendedCard({
 export function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
   const t = useTranslations("Library");
   const formatRelativeTime = useRelativeTime();
-  const { lastReadAt, post, positionAnchor, progressPercent } = entry;
+  const { lastReadAt, post, positionAnchor, currentProgressPercent } = entry;
   const href = getReadingPositionHref(post.slug, positionAnchor);
 
   return (
@@ -122,7 +122,7 @@ export function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
               <span />
             )}
             <span className="text-muted shrink-0 font-mono text-xs tabular-nums">
-              {progressPercent}%
+              {currentProgressPercent}%
             </span>
           </div>
           <Card.Title className="line-clamp-2 text-lg">{post.title}</Card.Title>
@@ -135,7 +135,7 @@ export function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
             aria-label={t("readingProgress", { title: post.title })}
             color="accent"
             size="sm"
-            value={progressPercent}
+            value={currentProgressPercent}
           >
             <ProgressBar.Track>
               <ProgressBar.Fill />

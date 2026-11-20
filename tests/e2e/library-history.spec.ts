@@ -21,7 +21,8 @@ const entry = (id: number) => ({
     views: 0,
     likesCount: 0,
   },
-  progressPercent: 50,
+  currentProgressPercent: 50,
+  furthestProgressPercent: 50,
   positionAnchor: "#chapter-one",
   lastReadAt: "2026-09-20T00:00:00Z",
 });
@@ -46,7 +47,7 @@ const remove = (page: Page, id: number) =>
 test.use({ locale: "en-US", contextOptions: { reducedMotion: "reduce" } });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "history-test",
