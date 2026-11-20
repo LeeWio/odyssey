@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.252.0](https://github.com/LeeWio/odyssey/compare/v1.251.0...v1.252.0) (2026-11-20)
+
+
+### Features
+
+* **library:** organize reading workspace ([8fa2acb](https://github.com/LeeWio/odyssey/commit/8fa2acbf8be85fd5850410dc59cf24c334553f95))
+
 ## [1.251.0](https://github.com/LeeWio/odyssey/compare/v1.250.1...v1.251.0) (2026-11-20)
 
 
