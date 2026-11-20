@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-import type { PageResult } from "@/lib/api";
-import { pageResultSchema } from "@/lib/api";
+import { appendApiParams, pageResultSchema, type PageResult } from "@/lib/api";
 import { fetchServerApiJson } from "@/lib/api/server-client";
 import type { AppLocale } from "@/i18n/locale";
 
@@ -33,11 +32,11 @@ export async function getPublicJournalInitialData({
 } = {}): Promise<PublicJournalInitialData> {
   const [featured, latest] = await Promise.all([
     readPage(
-      `/api/v1/public/blog/posts/featured?page=0&size=${featuredSize}`,
+      appendApiParams("/api/v1/public/blog/posts/featured", { page: 0, size: featuredSize }),
       pageResultSchema(PostDigestResponseSchema)
     ),
     readPage(
-      `/api/v1/public/blog/posts/digest?page=0&size=${latestSize}`,
+      appendApiParams("/api/v1/public/blog/posts/digest", { page: 0, size: latestSize }),
       pageResultSchema(PostDigestResponseSchema)
     ),
   ]);

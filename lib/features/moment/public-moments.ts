@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-import type { PageResult } from "@/lib/api";
-import { pageResultSchema } from "@/lib/api";
+import { appendApiParams, pageResultSchema, type PageResult } from "@/lib/api";
 import { fetchServerApiJson } from "@/lib/api/server-client";
 
 import {
@@ -30,14 +29,14 @@ export async function getPublicMomentsInitialData(
   }
 
   const requestedPage = Number.isSafeInteger(page) && page > 0 ? page : 1;
-  const query = new URLSearchParams({ page: String(requestedPage - 1), size: String(size) });
-  if (topic) query.set("topic", topic);
+  const path = appendApiParams("/api/v1/public/moments", {
+    page: requestedPage - 1,
+    size,
+    topic,
+  });
 
   const [momentsPage, cadence] = await Promise.all([
-    readPublicData(
-      `/api/v1/public/moments?${query.toString()}`,
-      pageResultSchema(MomentResponseSchema)
-    ),
+    readPublicData(path, pageResultSchema(MomentResponseSchema)),
     readPublicData(`/api/v1/public/moments/cadence`, MomentCadenceResponseSchema),
   ]);
 

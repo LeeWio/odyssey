@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { appendApiParams } from "@/lib/api";
 import { fetchServerApiJson } from "@/lib/api/server-client";
 
 import {
@@ -32,7 +33,10 @@ export async function getPublicLifeListInitialData(): Promise<PublicLifeListInit
     return { page: null, categories: [] };
   }
   const [page, categories] = await Promise.all([
-    readPublicData("/api/v1/public/life-list?page=0&size=100", LifeListPageResponseSchema),
+    readPublicData(
+      appendApiParams("/api/v1/public/life-list", { page: 0, size: 100 }),
+      LifeListPageResponseSchema
+    ),
     readPublicData("/api/v1/public/life-list/categories", z.array(LifeListCategoryResponseSchema)),
   ]);
 
