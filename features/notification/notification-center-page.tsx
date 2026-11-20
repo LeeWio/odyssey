@@ -3,15 +3,16 @@
 import { EmptyState } from "@heroui-pro/react";
 import { AlertDialog, Button, Card, Chip, Skeleton, Tabs, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   type NotificationCategory,
   type NotificationResponse,
   type NotificationView,
+  NOTIFICATION_CATEGORIES,
   useClearReadNotificationsMutation,
   useDeleteNotificationMutation,
   useGetMyNotificationsQuery,
@@ -31,6 +32,32 @@ import { useNotificationActions } from "./use-notification-actions";
 import { PageFrame } from "@/components/layout/page-frame";
 
 const NOTIFICATIONS_PAGE_SIZE = 20;
+const NOTIFICATION_VIEWS: NotificationView[] = ["inbox", "saved", "done"];
+
+type NotificationQueryPatch = {
+  category?: NotificationCategory;
+  page?: number;
+  unreadOnly?: boolean;
+  view?: NotificationView;
+};
+
+function parseNotificationView(value: string | null): NotificationView {
+  return NOTIFICATION_VIEWS.includes(value as NotificationView)
+    ? (value as NotificationView)
+    : "inbox";
+}
+
+function parseNotificationCategory(value: string | null): NotificationCategory | undefined {
+  return NOTIFICATION_CATEGORIES.includes(value as NotificationCategory)
+    ? (value as NotificationCategory)
+    : undefined;
+}
+
+function parseNotificationPage(value: string | null): number {
+  if (!value || !/^\d+$/.test(value)) return 0;
+  const page = Number(value);
+  return Number.isSafeInteger(page) ? page : 0;
+}
 
 function NotificationSkeleton() {
   const t = useTranslations("Notifications");
@@ -105,11 +132,39 @@ export function NotificationCenterPage() {
   const t = useTranslations("Notifications");
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const [view, setView] = useState<NotificationView>("inbox");
-  const [category, setCategory] = useState<NotificationCategory>();
-  const [unreadOnly, setUnreadOnly] = useState(false);
-  const [page, setPage] = useState(0);
+  const view = parseNotificationView(searchParams.get("view"));
+  const category = parseNotificationCategory(searchParams.get("category"));
+  const unreadOnly = searchParams.get("unread") === "1";
+  const page = parseNotificationPage(searchParams.get("page"));
+  const updateQuery = useCallback(
+    (patch: NotificationQueryPatch) => {
+      const nextParams = new URLSearchParams(searchParams.toString());
+
+      if ("view" in patch) {
+        if (!patch.view || patch.view === "inbox") nextParams.delete("view");
+        else nextParams.set("view", patch.view);
+      }
+      if ("category" in patch) {
+        if (!patch.category) nextParams.delete("category");
+        else nextParams.set("category", patch.category);
+      }
+      if ("unreadOnly" in patch) {
+        if (patch.unreadOnly) nextParams.set("unread", "1");
+        else nextParams.delete("unread");
+      }
+      if ("page" in patch) {
+        if (!patch.page) nextParams.delete("page");
+        else nextParams.set("page", String(Math.max(0, Math.floor(patch.page ?? 0))));
+      }
+
+      const query = nextParams.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
   const { pendingActions, pendingBulkAction, run, runBulk, isBulkRunning } =
     useNotificationActions();
   const isClearingRead = pendingBulkAction === "clear-read";
@@ -144,9 +199,11 @@ export function NotificationCenterPage() {
   const lastPage = Math.max(0, (currentPage?.totalPages ?? 1) - 1);
   const isAdjustingPage =
     notifications.isSuccess && !notifications.isFetching && !!currentPage && page > lastPage;
+  useEffect(() => {
+    if (isAdjustingPage) updateQuery({ page: lastPage });
+  }, [isAdjustingPage, lastPage, updateQuery]);
   // Removing the last row can shrink the collection below the current page.
   // Adjust only after a successful response for these exact query arguments.
-  if (isAdjustingPage) setPage(lastPage);
   const isLoadingPage =
     isAdjustingPage || notifications.isLoading || (notifications.isFetching && !currentPage);
 
@@ -189,7 +246,7 @@ export function NotificationCenterPage() {
   const handleClearReadNotifications = () =>
     runBulk("clear-read", async () => {
       await clearReadNotifications().unwrap();
-      setPage(0);
+      updateQuery({ page: 0 });
       setIsClearReadOpen(false);
     });
 
@@ -240,8 +297,7 @@ export function NotificationCenterPage() {
               size="sm"
               variant={unreadOnly ? "secondary" : "ghost"}
               onPress={() => {
-                setUnreadOnly((current) => !current);
-                setPage(0);
+                updateQuery({ page: 0, unreadOnly: !unreadOnly });
               }}
             >
               {t("unreadTab")}
@@ -285,8 +341,10 @@ export function NotificationCenterPage() {
         <Tabs
           selectedKey={view}
           onSelectionChange={(key) => {
-            setView(key === "saved" || key === "done" ? key : "inbox");
-            setPage(0);
+            updateQuery({
+              page: 0,
+              view: key === "saved" || key === "done" ? key : "inbox",
+            });
           }}
         >
           <Tabs.ListContainer>
@@ -311,8 +369,7 @@ export function NotificationCenterPage() {
           <NotificationCategoryFilter
             category={category}
             onCategoryChange={(next) => {
-              setCategory(next);
-              setPage(0);
+              updateQuery({ category: next, page: 0 });
             }}
           />
         </div>
@@ -336,9 +393,7 @@ export function NotificationCenterPage() {
             <NotificationEmptyState
               category={category}
               onClearFilters={() => {
-                setCategory(undefined);
-                setUnreadOnly(false);
-                setPage(0);
+                updateQuery({ category: undefined, page: 0, unreadOnly: false });
               }}
               unreadOnly={unreadOnly}
               view={view}
@@ -372,7 +427,7 @@ export function NotificationCenterPage() {
                 isDisabled={page === 0 || notifications.isFetching}
                 size="sm"
                 variant="secondary"
-                onPress={() => setPage((current) => Math.max(0, current - 1))}
+                onPress={() => updateQuery({ page: Math.max(0, page - 1) })}
               >
                 {t("previous")}
               </Button>
@@ -380,7 +435,7 @@ export function NotificationCenterPage() {
                 isDisabled={notifications.isFetching || !currentPage || page >= lastPage}
                 size="sm"
                 variant="secondary"
-                onPress={() => setPage((current) => current + 1)}
+                onPress={() => updateQuery({ page: page + 1 })}
               >
                 {t("next")}
               </Button>
