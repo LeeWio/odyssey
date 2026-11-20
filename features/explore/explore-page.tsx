@@ -4,7 +4,7 @@ import { createPageReveal, pageEaseOut } from "@/lib/motion";
 
 import { Icon } from "@iconify/react";
 
-import { EmptyState } from "@heroui-pro/react";
+import { EmptyState, Segment } from "@heroui-pro/react";
 import {
   Button,
   Card,
@@ -29,9 +29,13 @@ import { PageFrame } from "@/components/layout/page-frame";
 import type { PostResponse } from "@/lib/features/post";
 import { useGetPublicPostsQuery } from "@/lib/features/post";
 import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
+import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 
 const PAGE_SIZE = 9;
 const EXPLORE_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-5";
+const EXPLORE_LIST = "grid gap-4";
+
+type ExploreView = "grid" | "list";
 
 type Facet = {
   id: number;
@@ -85,52 +89,61 @@ function normalizeFacets(
   });
 }
 
-function ExplorePostCard({ post }: { post: PostResponse }) {
+function ExplorePostCard({ post, view }: { post: PostResponse; view: ExploreView }) {
   const t = useTranslations("Explore");
   const locale = useLocale();
+  const isList = view === "list";
   return (
     <Link className="group block h-full no-underline" href={`/single/${post.slug}`}>
       <Card
         variant="secondary"
-        className="h-full overflow-hidden p-0 transition-transform duration-200 group-hover:-translate-y-1"
+        className={`h-full overflow-hidden p-0 transition-transform duration-200 group-hover:-translate-y-1 ${
+          isList ? "flex-row" : ""
+        }`}
       >
         <SmartColorSurface
           seed={`explore-${post.slug}`}
           tone={getSmartColorTone({ categoryName: post.category?.name, title: post.title })}
+          className={isList ? "min-h-36 w-32 shrink-0 sm:min-h-40 sm:w-56" : undefined}
         >
-          <div aria-hidden="true" className="aspect-[16/9] w-full" />
+          <div
+            aria-hidden="true"
+            className={isList ? "h-full min-h-36 w-full" : "aspect-[16/9] w-full"}
+          />
         </SmartColorSurface>
-        <Card.Header>
-          <div className="flex flex-wrap items-center gap-2">
-            {post.category?.name ? (
-              <Chip size="sm" variant="soft">
-                {post.category.name}
-              </Chip>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Card.Header>
+            <div className="flex flex-wrap items-center gap-2">
+              {post.category?.name ? (
+                <Chip size="sm" variant="soft">
+                  {post.category.name}
+                </Chip>
+              ) : null}
+              {(post.tags ?? []).slice(0, 2).map((tag) => (
+                <span key={tag.id} className="text-muted text-xs">
+                  #{tag.name}
+                </span>
+              ))}
+            </div>
+            <Card.Title className="line-clamp-2 text-lg wrap-anywhere">{post.title}</Card.Title>
+            {post.summary ? (
+              <Card.Description className="line-clamp-2">{post.summary}</Card.Description>
             ) : null}
-            {(post.tags ?? []).slice(0, 2).map((tag) => (
-              <span key={tag.id} className="text-muted text-xs">
-                #{tag.name}
-              </span>
-            ))}
-          </div>
-          <Card.Title className="line-clamp-2 text-lg wrap-anywhere">{post.title}</Card.Title>
-          {post.summary ? (
-            <Card.Description className="line-clamp-2">{post.summary}</Card.Description>
-          ) : null}
-        </Card.Header>
-        <Card.Footer className="mt-auto justify-between gap-3">
-          <Typography color="muted" type="body-xs">
-            {formatDate(post.createdAt, locale, t("recently"))}
-          </Typography>
-          <Typography
-            color="muted"
-            type="body-xs"
-            className="flex shrink-0 items-center gap-1.5 tabular-nums"
-          >
-            <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
-            {post.views.toLocaleString(locale)}
-          </Typography>
-        </Card.Footer>
+          </Card.Header>
+          <Card.Footer className="mt-auto justify-between gap-3">
+            <Typography color="muted" type="body-xs">
+              {formatDate(post.createdAt, locale, t("recently"))}
+            </Typography>
+            <Typography
+              color="muted"
+              type="body-xs"
+              className="flex shrink-0 items-center gap-1.5 tabular-nums"
+            >
+              <Icon icon="gravity-ui:eye" aria-hidden="true" className="size-3.5" />
+              {post.views.toLocaleString(locale)}
+            </Typography>
+          </Card.Footer>
+        </div>
       </Card>
     </Link>
   );
@@ -197,6 +210,7 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
   const selectedCategoryId = parsePositiveInteger(searchParams.get("category"));
   const selectedTagId = parsePositiveInteger(searchParams.get("tag"));
   const page = Math.max(0, (parsePositiveInteger(searchParams.get("page")) ?? 1) - 1);
+  const view: ExploreView = searchParams.get("view") === "list" ? "list" : "grid";
   const queryFromUrl = searchParams.get("q") ?? "";
   const normalizedQuery = queryFromUrl.trim();
   const facetsQuery = useRetrieveFacetsQuery();
@@ -207,6 +221,10 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
     size: PAGE_SIZE,
     tagId: selectedTagId,
   });
+  useNormalizePageParam(
+    page + 1,
+    postsQuery.currentData && !postsQuery.isFetching ? postsQuery.currentData.totalPages : undefined
+  );
 
   const categories = useMemo(
     () => normalizeFacets(facetsQuery.data?.categories).filter((facet) => facet.count > 0),
@@ -263,6 +281,11 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
     document
       .getElementById("explore-results")
       ?.scrollIntoView({ behavior: "auto", block: "start" });
+  };
+
+  const handleViewChange = (key: React.Key) => {
+    if (key !== "grid" && key !== "list") return;
+    updateSearch({ view: key });
   };
 
   const clearFilters = () => {
@@ -453,12 +476,29 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
                   : t("searching")}
               </Typography>
             </div>
-            {hasActiveFilters ? (
-              <Button size="sm" variant="ghost" onPress={clearFilters}>
-                <Icon icon="gravity-ui:xmark" aria-hidden="true" className="size-4" />
-                {t("clearFilters")}
-              </Button>
-            ) : null}
+            <div className="flex flex-wrap items-center gap-3">
+              <Segment
+                aria-label={t("viewMode")}
+                selectedKey={view}
+                size="sm"
+                onSelectionChange={handleViewChange}
+              >
+                <Segment.Item id="grid">
+                  <Icon icon="gravity-ui:rectangles-4" aria-hidden="true" />
+                  <span className="sr-only sm:not-sr-only">{t("gridView")}</span>
+                </Segment.Item>
+                <Segment.Item id="list">
+                  <Icon icon="gravity-ui:list-ul" aria-hidden="true" />
+                  <span className="sr-only sm:not-sr-only">{t("listView")}</span>
+                </Segment.Item>
+              </Segment>
+              {hasActiveFilters ? (
+                <Button size="sm" variant="ghost" onPress={clearFilters}>
+                  <Icon icon="gravity-ui:xmark" aria-hidden="true" className="size-4" />
+                  {t("clearFilters")}
+                </Button>
+              ) : null}
+            </div>
           </div>
 
           {postsQuery.isLoading ? <ExploreSkeleton /> : null}
@@ -501,7 +541,11 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
           ) : null}
 
           {!postsQuery.isLoading && !postsQuery.isError && posts.length > 0 ? (
-            <div className={EXPLORE_GRID} data-testid="explore-results-grid">
+            <div
+              className={view === "list" ? EXPLORE_LIST : EXPLORE_GRID}
+              data-testid="explore-results"
+              data-view={view}
+            >
               {posts.map((post, index) => (
                 <motion.div
                   key={post.id}
@@ -514,7 +558,7 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
                     ease: pageEaseOut,
                   }}
                 >
-                  <ExplorePostCard post={post} />
+                  <ExplorePostCard post={post} view={view} />
                 </motion.div>
               ))}
             </div>

@@ -909,6 +909,9 @@
     "showing": "显示第 {start}–{end} 篇，共 {total} 篇",
     "previous": "上一页",
     "next": "下一页",
+    "viewMode": "结果视图",
+    "gridView": "网格",
+    "listView": "列表",
     "preferColumn": "更想要一条有引导的顺序？可以从头到尾读完一个专栏。",
     "browseColumns": "浏览专栏"
   },
