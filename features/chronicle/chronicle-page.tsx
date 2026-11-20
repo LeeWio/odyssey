@@ -4,6 +4,7 @@ import { createPageReveal } from "@/lib/motion";
 
 import { Icon } from "@iconify/react";
 
+import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import { Tabs, Card, Chip, Skeleton, Typography } from "@heroui/react";
@@ -13,12 +14,6 @@ import Link from "next/link";
 import { PageFrame } from "@/components/layout/page-frame";
 import { ArticleCover } from "@/components/card/article-cover";
 
-// Sub-components from our modular features
-import BlogFeed from "@/features/blog/feed/blog-feed";
-import { ColumnsIndex } from "@/features/column";
-import { ArchivePage } from "@/features/archive";
-import { ExplorePage } from "@/features/explore";
-
 // API hooks to fetch fresh content for the featured tab
 import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
 import type { PublicJournalInitialData } from "@/lib/features/post/server";
@@ -26,6 +21,38 @@ import { useQueryState } from "@/lib/hooks/use-query-state";
 
 const CHRONICLE_SECTIONS = ["featured", "explore", "orbit", "columns", "archive"] as const;
 type ChronicleSection = (typeof CHRONICLE_SECTIONS)[number];
+
+function ChroniclePanelFallback() {
+  return (
+    <div aria-busy="true" className="mt-8 grid min-h-80 gap-5 md:grid-cols-2 xl:grid-cols-3">
+      {Array.from({ length: 3 }, (_, index) => (
+        <Card key={index} variant="secondary">
+          <Card.Header>
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-8 w-4/5" />
+            <Skeleton className="h-4 w-full" />
+          </Card.Header>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+const ChronicleExplorePanel = dynamic(
+  () => import("@/features/explore").then((module) => module.ExplorePage),
+  { loading: ChroniclePanelFallback }
+);
+const ChronicleOrbitPanel = dynamic(() => import("@/features/blog/feed/blog-feed"), {
+  loading: ChroniclePanelFallback,
+});
+const ChronicleColumnsPanel = dynamic(
+  () => import("@/features/column").then((module) => module.ColumnsIndex),
+  { loading: ChroniclePanelFallback }
+);
+const ChronicleArchivePanel = dynamic(
+  () => import("@/features/archive").then((module) => module.ArchivePage),
+  { loading: ChroniclePanelFallback }
+);
 
 function getChronicleSection(value: string | null): ChronicleSection {
   return CHRONICLE_SECTIONS.includes(value as ChronicleSection)
@@ -258,28 +285,28 @@ export function ChroniclePage({ initialData }: { initialData: PublicJournalIniti
             {/* Panel 2: Explore & Filters */}
             <Tabs.Panel id="explore">
               <motion.div {...reveal(0.05, 10)}>
-                <ExplorePage embedded />
+                <ChronicleExplorePanel embedded />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 3: Orbit Logs Feed */}
             <Tabs.Panel id="orbit">
               <motion.div {...reveal(0.05, 10)}>
-                <BlogFeed embedded />
+                <ChronicleOrbitPanel embedded />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 4: Columns index */}
             <Tabs.Panel id="columns">
               <motion.div {...reveal(0.05, 10)}>
-                <ColumnsIndex embedded />
+                <ChronicleColumnsPanel embedded />
               </motion.div>
             </Tabs.Panel>
 
             {/* Panel 5: Timeline Archive */}
             <Tabs.Panel id="archive">
               <motion.div {...reveal(0.05, 10)}>
-                <ArchivePage embedded />
+                <ChronicleArchivePanel embedded />
               </motion.div>
             </Tabs.Panel>
           </Tabs>
