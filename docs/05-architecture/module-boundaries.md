@@ -100,7 +100,7 @@
 
 ### Dashboard
 
-位置：`components/dashboard`、`lib/features/dashboard` 及相关 admin features
+位置：`features/dashboard`、`lib/features/dashboard` 及相关 admin features
 
 职责：
 

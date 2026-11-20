@@ -55,7 +55,7 @@ import {
   type TranslationValues,
   compactTranslations,
   translationValues,
-} from "@/components/dashboard/translation-fields";
+} from "@/components/content-translations/translation-fields";
 import { STATUS_PROGRESS, StatusMeter } from "@/components/life-list/progress-meter";
 import { toUrlSlug, validateUrlSlug } from "@/lib/utils/slug";
 

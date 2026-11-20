@@ -27,33 +27,33 @@ import { type FormEvent, useCallback, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import {
-  type CategoryRequest,
-  type CategoryResponse,
-  useCreateCategoryMutation,
-  useDeleteCategoryMutation,
-  useGetCategoriesQuery,
-  useUpdateCategoryMutation,
-} from "@/lib/features/category";
+  type TagRequest,
+  type TagResponse,
+  useCreateTagMutation,
+  useDeleteTagMutation,
+  useGetAllTagsQuery,
+  useUpdateTagMutation,
+} from "@/lib/features/tag";
 import { toUrlSlug, validateUrlSlug } from "@/lib/utils/slug";
 import {
   TranslationFields,
   type TranslationValues,
   compactTranslations,
   translationValues,
-} from "../translation-fields";
+} from "@/components/content-translations/translation-fields";
 import { IconButton } from "../icon-button";
 import { usePortalContainer } from "../use-portal-container";
 
-export function CategoriesPage() {
+export function TagsPage() {
   const t = useTranslations("ContentTranslations");
   const dashboardT = useTranslations("Dashboard");
   const locale = useLocale();
   const portalContainer = usePortalContainer();
 
-  const { data: categories = [], isLoading, error } = useGetCategoriesQuery();
-  const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
-  const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
-  const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
+  const { data: tags = [], isLoading, error } = useGetAllTagsQuery();
+  const [createTag, { isLoading: isCreating }] = useCreateTagMutation();
+  const [updateTag, { isLoading: isUpdating }] = useUpdateTagMutation();
+  const [deleteTag, { isLoading: isDeleting }] = useDeleteTagMutation();
 
   // Search & Filter State
   const [search, setSearch] = useState("");
@@ -67,26 +67,17 @@ export function CategoriesPage() {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
   // Editing State
-  const [selectedCategory, setSelectedCategory] = useState<CategoryResponse | null>(null);
+  const [selectedTag, setSelectedTag] = useState<TagResponse | null>(null);
 
   // Form Fields
   const [formName, setFormName] = useState("");
   const [formSlug, setFormSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
-  const [formDescription, setFormDescription] = useState("");
   const [formTranslations, setFormTranslations] = useState<TranslationValues>({ en: {} });
   const [translationLocale, setTranslationLocale] = useState<"zh" | "en">("zh");
 
   const translationFields = useMemo(
-    () => [
-      { key: "name", label: t("name"), placeholder: t("namePlaceholder"), required: true },
-      {
-        key: "description",
-        label: t("descriptionField"),
-        placeholder: t("descriptionPlaceholder"),
-        multiline: true,
-      },
-    ],
+    () => [{ key: "name", label: t("name"), placeholder: t("namePlaceholder"), required: true }],
     [t]
   );
 
@@ -94,29 +85,26 @@ export function CategoriesPage() {
     setSearch(value);
   }, []);
 
-  // Filter Categories
-  const filteredCategories = useMemo(() => {
-    let result = [...categories];
+  // Filter Tags
+  const filteredTags = useMemo(() => {
+    let result = [...tags];
 
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(
-        (cat) =>
-          cat.name.toLowerCase().includes(q) ||
-          cat.slug.toLowerCase().includes(q) ||
-          cat.description?.toLowerCase().includes(q)
+        (tag) => tag.name.toLowerCase().includes(q) || tag.slug.toLowerCase().includes(q)
       );
     }
 
     return result;
-  }, [categories, search]);
+  }, [tags, search]);
 
-  // Sort Categories
-  const sortedCategories = useMemo(() => {
-    if (!sortDescriptor.column) return filteredCategories;
-    const col = sortDescriptor.column as keyof CategoryResponse;
+  // Sort Tags
+  const sortedTags = useMemo(() => {
+    if (!sortDescriptor.column) return filteredTags;
+    const col = sortDescriptor.column as keyof TagResponse;
 
-    return [...filteredCategories].sort((a, b) => {
+    return [...filteredTags].sort((a, b) => {
       const first = a[col];
       const second = b[col];
 
@@ -130,15 +118,14 @@ export function CategoriesPage() {
       const direction = sortDescriptor.direction === "descending" ? -1 : 1;
       return cmp * direction;
     });
-  }, [filteredCategories, sortDescriptor]);
+  }, [filteredTags, sortDescriptor]);
 
   // Open Form Modal for Create
   const handleCreateOpen = () => {
-    setSelectedCategory(null);
+    setSelectedTag(null);
     setFormName("");
     setFormSlug("");
     setSlugTouched(false);
-    setFormDescription("");
     setFormTranslations({ en: {} });
     setTranslationLocale("zh");
     setIsFormModalOpen(true);
@@ -146,13 +133,12 @@ export function CategoriesPage() {
 
   // Open Form Modal for Edit
   const handleEditClick = useCallback(
-    (category: CategoryResponse) => {
-      setSelectedCategory(category);
-      setFormName(category.name);
-      setFormSlug(category.slug);
+    (tag: TagResponse) => {
+      setSelectedTag(tag);
+      setFormName(tag.name);
+      setFormSlug(tag.slug);
       setSlugTouched(true);
-      setFormDescription(category.description || "");
-      setFormTranslations(translationValues(category.translations, translationFields));
+      setFormTranslations(translationValues(tag.translations, translationFields));
       setTranslationLocale("zh");
       setIsFormModalOpen(true);
     },
@@ -160,13 +146,14 @@ export function CategoriesPage() {
   );
 
   // Open Delete Confirmation
-  const handleDeleteClick = useCallback((category: CategoryResponse) => {
-    setSelectedCategory(category);
+  const handleDeleteClick = useCallback((tag: TagResponse) => {
+    setSelectedTag(tag);
     setIsDeleteAlertOpen(true);
   }, []);
 
   const handleNameChange = (value: string) => {
     setFormName(value);
+    // Keep slug in sync while typing so Create does not validate an empty field.
     if (!slugTouched) {
       setFormSlug(toUrlSlug(value));
     }
@@ -179,21 +166,17 @@ export function CategoriesPage() {
     if (!slugTouched && slug !== formSlug) {
       setFormSlug(slug);
     }
-    const body: CategoryRequest = {
+    const body: TagRequest = {
       name: formName.trim(),
       slug,
-      description: formDescription.trim(),
-      translations: compactTranslations(
-        formTranslations,
-        "name"
-      ) as CategoryRequest["translations"],
+      translations: compactTranslations(formTranslations, "name") as TagRequest["translations"],
     };
 
     try {
-      if (selectedCategory) {
-        await updateCategory({ id: selectedCategory.id, body }).unwrap();
+      if (selectedTag) {
+        await updateTag({ id: selectedTag.id, body }).unwrap();
       } else {
-        await createCategory(body).unwrap();
+        await createTag(body).unwrap();
       }
       setIsFormModalOpen(false);
     } catch {
@@ -201,18 +184,18 @@ export function CategoriesPage() {
     }
   };
 
-  // Delete Category
+  // Delete Tag
   const handleDeleteConfirm = async () => {
-    if (!selectedCategory) return;
+    if (!selectedTag) return;
     try {
-      await deleteCategory(selectedCategory.id).unwrap();
+      await deleteTag(selectedTag.id).unwrap();
       setIsDeleteAlertOpen(false);
     } catch {
       // Handled globally/in slice
     }
   };
 
-  const columns = useMemo<DataGridColumn<CategoryResponse>[]>(
+  const columns = useMemo<DataGridColumn<TagResponse>[]>(
     () => [
       {
         accessorKey: "id",
@@ -242,7 +225,7 @@ export function CategoriesPage() {
         cell: (item) => <span className="text-xs font-medium">{item.name}</span>,
         header: dashboardT("common.name"),
         id: "name",
-        minWidth: 160,
+        minWidth: 180,
       },
       {
         accessorKey: "slug",
@@ -250,15 +233,7 @@ export function CategoriesPage() {
         cell: (item) => item.slug,
         header: dashboardT("common.slug"),
         id: "slug",
-        minWidth: 160,
-      },
-      {
-        accessorKey: "description",
-        allowsSorting: false,
-        cell: (item) => <span className="text-muted text-xs">{item.description || "-"}</span>,
-        header: dashboardT("common.description"),
-        id: "description",
-        minWidth: 260,
+        minWidth: 180,
       },
       {
         accessorKey: "createdAt",
@@ -274,14 +249,14 @@ export function CategoriesPage() {
         ),
         header: dashboardT("common.createdAt"),
         id: "createdAt",
-        minWidth: 140,
+        minWidth: 200,
       },
       {
         align: "end",
         cell: (item) => (
           <div className="flex items-center justify-end gap-0.5">
             <IconButton
-              label={dashboardT("categories.edit")}
+              label={dashboardT("tags.edit")}
               size="sm"
               variant="tertiary"
               onPress={() => handleEditClick(item)}
@@ -289,7 +264,7 @@ export function CategoriesPage() {
               <Pencil className="size-4" />
             </IconButton>
             <IconButton
-              label={dashboardT("categories.delete")}
+              label={dashboardT("tags.delete")}
               size="sm"
               variant="danger-soft"
               onPress={() => handleDeleteClick(item)}
@@ -312,40 +287,40 @@ export function CategoriesPage() {
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-foreground text-base font-semibold">
-              {dashboardT("categories.all")}
+              {dashboardT("tags.all")}
             </span>
             <Chip size="sm" variant="soft">
-              {categories.length}
+              {tags.length}
             </Chip>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" variant="tertiary">
                 <Sliders className="size-4" />
-                {dashboardT("categories.filter")}
+                {dashboardT("tags.filter")}
               </Button>
               <Button size="sm" variant="tertiary">
                 <BarsDescendingAlignCenter className="size-4" />
-                {dashboardT("categories.sort")}
+                {dashboardT("tags.sort")}
               </Button>
               <Button size="sm" variant="tertiary">
                 <LayoutColumns3 className="size-4" />
-                {dashboardT("categories.columns")}
+                {dashboardT("tags.columns")}
               </Button>
               <Button size="sm" onPress={handleCreateOpen}>
                 <CirclePlus className="size-4" />
-                {dashboardT("categories.add")}
+                {dashboardT("tags.add")}
               </Button>
             </div>
             <SearchField
-              className="w-full sm:w-55"
-              name="category-search"
+              className="w-full sm:w-[220px]"
+              name="tag-search"
               value={search}
               onChange={handleSearchChange}
             >
               <SearchField.Group>
                 <SearchField.SearchIcon />
-                <SearchField.Input placeholder={dashboardT("categories.search")} />
+                <SearchField.Input placeholder={dashboardT("tags.search")} />
                 <SearchField.ClearButton />
               </SearchField.Group>
             </SearchField>
@@ -355,14 +330,14 @@ export function CategoriesPage() {
 
       {error ? (
         <div className="bg-danger-soft/10 border-danger/20 mt-4 flex flex-col items-center justify-center rounded-2xl border p-12 text-center">
-          <p className="text-danger font-semibold">{dashboardT("categories.failed")}</p>
+          <p className="text-danger font-semibold">{dashboardT("tags.failed")}</p>
         </div>
       ) : (
         <DataGrid
-          aria-label={dashboardT("categories.table")}
+          aria-label={dashboardT("tags.table")}
           columns={columns}
           contentClassName="min-w-[700px]"
-          data={sortedCategories}
+          data={sortedTags}
           getRowId={(item) => item.id}
           isLoadingMore={isLoading}
           sortDescriptor={sortDescriptor}
@@ -379,33 +354,27 @@ export function CategoriesPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <Modal.Container size="sm">
-            <Modal.Dialog className="sm:max-w-md" aria-label={dashboardT("categories.modal")}>
+            <Modal.Dialog className="sm:max-w-md" aria-label={dashboardT("tags.modal")}>
               <Modal.CloseTrigger />
               <Form onSubmit={handleFormSubmit}>
                 <Modal.Header>
                   <Modal.Heading>
-                    {selectedCategory
-                      ? dashboardT("categories.edit")
-                      : dashboardT("categories.create")}
+                    {selectedTag ? dashboardT("tags.edit") : dashboardT("tags.create")}
                   </Modal.Heading>
                   <p className="text-muted text-sm">
-                    {selectedCategory
-                      ? dashboardT("categories.editDescription")
-                      : dashboardT("categories.createDescription")}
+                    {selectedTag
+                      ? dashboardT("tags.editDescription")
+                      : dashboardT("tags.createDescription")}
                   </p>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4">
                   <TranslationFields
                     fields={translationFields}
                     locale={translationLocale}
-                    values={{
-                      zh: { name: formName, description: formDescription },
-                      ...formTranslations,
-                    }}
+                    values={{ zh: { name: formName }, ...formTranslations }}
                     onChange={(locale, field, value) => {
                       if (locale === "zh") {
                         if (field === "name") handleNameChange(value);
-                        if (field === "description") setFormDescription(value);
                         return;
                       }
                       setFormTranslations((current) => ({
@@ -428,7 +397,7 @@ export function CategoriesPage() {
                     }}
                   >
                     <Label className="text-sm font-medium">{dashboardT("common.slug")}</Label>
-                    <Input variant="secondary" placeholder={dashboardT("categories.slugExample")} />
+                    <Input variant="secondary" placeholder={dashboardT("tags.slugExample")} />
                     <FieldError />
                   </TextField>
                 </Modal.Body>
@@ -438,9 +407,7 @@ export function CategoriesPage() {
                   </Button>
                   <Button type="submit" size="sm" isDisabled={isCreating || isUpdating}>
                     {(isCreating || isUpdating) && <Spinner size="sm" className="mr-1" />}
-                    {selectedCategory
-                      ? dashboardT("categories.save")
-                      : dashboardT("categories.create")}
+                    {selectedTag ? dashboardT("tags.save") : dashboardT("tags.create")}
                   </Button>
                 </Modal.Footer>
               </Form>
@@ -460,17 +427,17 @@ export function CategoriesPage() {
           <AlertDialog.Container>
             <AlertDialog.Dialog
               className="sm:max-w-md"
-              aria-label={dashboardT("categories.deleteQuestion")}
+              aria-label={dashboardT("tags.deleteQuestion")}
             >
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>{dashboardT("categories.deleteQuestion")}</AlertDialog.Heading>
+                <AlertDialog.Heading>{dashboardT("tags.deleteQuestion")}</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="text-sm">
-                  {dashboardT("categories.deleteDescription")}{" "}
-                  <strong className="text-foreground">&quot;{selectedCategory?.name}&quot;</strong>?
+                  {dashboardT("tags.deleteDescription")}{" "}
+                  <strong className="text-foreground">&quot;{selectedTag?.name}&quot;</strong>? This
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>

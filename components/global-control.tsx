@@ -18,7 +18,7 @@ const Cockpit = dynamic(() => import("@/components/cockpit").then((mod) => mod.C
 });
 
 const DashboardSheet = dynamic(
-  () => import("@/components/dashboard/dashboard-sheet").then((mod) => mod.DashboardSheet),
+  () => import("@/features/dashboard").then((mod) => mod.DashboardSheet),
   { ssr: false }
 );
 
@@ -70,7 +70,7 @@ function DashboardGate() {
   useEffect(() => {
     if (!isAdmin) return;
     let cancelled = false;
-    void import("@/components/dashboard/dashboard-sheet").then(() => {
+    void import("@/features/dashboard").then(() => {
       if (!cancelled) setReady(true);
     });
     return () => {
