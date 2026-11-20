@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.254.0](https://github.com/LeeWio/odyssey/compare/v1.253.0...v1.254.0) (2026-11-20)
+
+
+### Features
+
+* **explore:** add shareable result views ([#59](https://github.com/LeeWio/odyssey/issues/59)) ([65a9ddc](https://github.com/LeeWio/odyssey/commit/65a9ddc6899004f3ae2cce4757e1a582ad1f5d76))
+
 ## [1.253.0](https://github.com/LeeWio/odyssey/compare/v1.252.2...v1.253.0) (2026-11-20)
 
 
