@@ -2,13 +2,15 @@
 
 import { Xmark } from "@gravity-ui/icons";
 import { Sheet } from "@heroui/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { LifeListItemResponse, LifeListStatus } from "@/lib/features/life-list";
 import { selectIsAdmin, useLogoutMutation } from "@/lib/features/auth";
 import {
   selectDashboardPath,
   selectIsDashboardOpen,
+  openDashboardAtPath,
   setDashboardOpen,
   setDashboardPath,
   toggleDashboard,
@@ -16,6 +18,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 import { AppShell } from "./app-shell";
+import { NAV_ITEMS } from "./nav-items";
 import { AccessPlaceholderPage } from "./views/access-placeholder-page";
 import { AnalyticsPage } from "./views/analytics-page";
 import { AudiencePage } from "./views/audience-page";
@@ -42,11 +45,16 @@ import { TrackerPage } from "./views/tracker-page";
 import { UsersPage } from "./views/users-page";
 import { WebhooksPage } from "./views/webhooks-page";
 
+const DASHBOARD_PATHS = new Set(NAV_ITEMS.map((item) => item.href));
+
 export function DashboardSheet() {
   const isOpen = useAppSelector(selectIsDashboardOpen);
   const requestedPath = useAppSelector(selectDashboardPath);
   const isAdmin = useAppSelector(selectIsAdmin);
   const dispatch = useAppDispatch();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [logout] = useLogoutMutation();
   const t = useTranslations("Dashboard");
   const currentPath = requestedPath;
@@ -54,6 +62,44 @@ export function DashboardSheet() {
   const [createWishOpen, setCreateWishOpen] = useState(false);
   const [createWishStatus, setCreateWishStatus] = useState<LifeListStatus>("planned");
   const [suppressOutsideClose, setSuppressOutsideClose] = useState(false);
+  const hasHydratedUrlRef = useRef(false);
+  const lastDashboardParamRef = useRef<string | null>(null);
+
+  const updateDashboardUrl = useCallback(
+    (path: string | null, mode: "push" | "replace") => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (path) params.set("dashboard", path);
+      else params.delete("dashboard");
+      const query = params.toString();
+      const url = query ? `${pathname}?${query}` : pathname;
+      router[mode](url, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+
+  const dashboardParam = searchParams.get("dashboard");
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    if (!hasHydratedUrlRef.current) {
+      hasHydratedUrlRef.current = true;
+      lastDashboardParamRef.current = dashboardParam;
+      if (dashboardParam && DASHBOARD_PATHS.has(dashboardParam)) {
+        dispatch(openDashboardAtPath(dashboardParam));
+      }
+      return;
+    }
+
+    if (dashboardParam === lastDashboardParamRef.current) return;
+    lastDashboardParamRef.current = dashboardParam;
+
+    if (dashboardParam && DASHBOARD_PATHS.has(dashboardParam)) {
+      dispatch(openDashboardAtPath(dashboardParam));
+    } else {
+      dispatch(setDashboardOpen(false));
+    }
+  }, [dashboardParam, dispatch, isAdmin]);
 
   const handleOpenChange = (open: boolean) => {
     // The press that opens a nested sheet is also reported as an outside close.
@@ -62,6 +108,7 @@ export function DashboardSheet() {
       setSuppressOutsideClose(false);
       return;
     }
+    updateDashboardUrl(open ? currentPath : null, open ? "push" : "replace");
     dispatch(setDashboardOpen(open));
   };
 
@@ -78,6 +125,7 @@ export function DashboardSheet() {
     }
 
     dispatch(setDashboardPath(href));
+    updateDashboardUrl(href, "push");
   };
 
   if (!isAdmin) {

@@ -3,6 +3,8 @@
 import { ArrowsRotateLeft, Calendar, ChevronDown } from "@gravity-ui/icons";
 import { Button, ButtonGroup, Dropdown, Label, Tabs } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { baseApi } from "@/lib/api";
+import { useAppDispatch } from "@/lib/hooks";
 
 import { useSheetPortal } from "../use-sheet-portal";
 import { IconButton } from "../icon-button";
@@ -10,6 +12,7 @@ import { IconButton } from "../icon-button";
 export function DashboardToolbar() {
   const portalContainer = useSheetPortal();
   const t = useTranslations("Dashboard");
+  const dispatch = useAppDispatch();
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -32,7 +35,12 @@ export function DashboardToolbar() {
         </Tabs.ListContainer>
       </Tabs>
       <div className="flex flex-wrap items-center gap-2">
-        <IconButton label={t("common.refresh")} size="sm" variant="tertiary">
+        <IconButton
+          label={t("common.refresh")}
+          size="sm"
+          variant="tertiary"
+          onPress={() => dispatch(baseApi.util.invalidateTags(["Dashboard"]))}
+        >
           <ArrowsRotateLeft className="size-4" />
         </IconButton>
         <ButtonGroup size="sm" variant="tertiary">
