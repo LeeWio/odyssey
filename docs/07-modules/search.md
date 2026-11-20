@@ -10,6 +10,8 @@ shortcut.
 - Keep local commands available when content search is unavailable.
 - Keep visible results and executable commands aligned with the current keyword
   and selected scope.
+- Route commands to existing product surfaces instead of presenting dead-end
+  actions when a destination already exists.
 
 ## Search lifecycle
 

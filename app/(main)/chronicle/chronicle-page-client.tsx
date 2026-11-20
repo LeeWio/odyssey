@@ -5,12 +5,12 @@ import { createPageReveal } from "@/lib/motion";
 import { Icon } from "@iconify/react";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Tabs, Card, Chip, Skeleton, Typography } from "@heroui/react";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PageFrame } from "@/components/layout/page-frame";
 import { ArticleCover } from "@/components/card/article-cover";
 
@@ -23,6 +23,15 @@ import { ExplorePage } from "@/features/explore";
 // API hooks to fetch fresh content for the featured tab
 import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
 import type { PublicJournalInitialData } from "@/lib/features/post/public-journal";
+
+const CHRONICLE_SECTIONS = ["featured", "explore", "orbit", "columns", "archive"] as const;
+type ChronicleSection = (typeof CHRONICLE_SECTIONS)[number];
+
+function getChronicleSection(value: string | null): ChronicleSection {
+  return CHRONICLE_SECTIONS.includes(value as ChronicleSection)
+    ? (value as ChronicleSection)
+    : "featured";
+}
 
 function formatDate(value: string | null | undefined, locale: string, fallback: string) {
   if (!value) return fallback;
@@ -37,9 +46,12 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
   const t = useTranslations("Blog");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotion() ?? false;
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { reveal } = createPageReveal(shouldReduceMotion);
-  const [activeTab, setActiveTab] = useState<string>("featured");
+  const activeTab = getChronicleSection(searchParams.get("section"));
 
   const { data: featuredData, isLoading: isFeaturedLoading } = useGetFeaturedPostsQuery(
     {
@@ -58,6 +70,15 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
 
   const featuredPost = (initialData.featured ?? featuredData)?.list?.[0];
   const recentPosts = (initialData.latest ?? recentData)?.list ?? [];
+
+  const handleSectionChange = (key: React.Key) => {
+    const section = getChronicleSection(String(key));
+    const nextParams = new URLSearchParams(searchParams.toString());
+    if (section === "featured") nextParams.delete("section");
+    else nextParams.set("section", section);
+    const query = nextParams.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
 
   return (
     <PageFrame className="bg-background">
@@ -128,7 +149,7 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
         <div className="mt-12">
           <Tabs
             selectedKey={activeTab}
-            onSelectionChange={(key) => setActiveTab(key as string)}
+            onSelectionChange={handleSectionChange}
             className="w-full"
             variant="secondary"
           >
