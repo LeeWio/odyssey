@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
+import { cookies } from "next/headers";
 import Script from "next/script";
 import {
   fontBrutalismBody,
@@ -14,7 +14,7 @@ import { isRTL } from "@heroui/react";
 // import { Navbar } from "@/components/navbar";
 import { getMessages } from "next-intl/server";
 import { siteConfig } from "@/config/site";
-import { resolveAppLocale } from "@/i18n/locale";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getInitialTheme } from "@/lib/theme";
 import { getThemeInitScript } from "@/lib/theme-init-script";
 import { Providers } from "./providers";
@@ -48,9 +48,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const requestHeaders = await headers();
-  const lang = resolveAppLocale(requestHeaders.get("accept-language"));
-  const initialTheme = getInitialTheme(requestHeaders.get("cookie"));
+  const lang = await getRequestLocale();
+  const initialTheme = getInitialTheme((await cookies()).toString());
 
   const messages = await getMessages({ locale: lang });
 
