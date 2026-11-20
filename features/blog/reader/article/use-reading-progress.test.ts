@@ -15,6 +15,14 @@ vi.mock("@/lib/features/library/library-api", () => ({
   useRecordReadingProgressMutation: () => [recordProgress],
 }));
 
+vi.mock("@/lib/features/auth", () => ({
+  selectCurrentUser: "selectCurrentUser",
+}));
+
+vi.mock("@/lib/hooks", () => ({
+  useAppSelector: () => "reader",
+}));
+
 function deferred<T>() {
   let resolve: (value: T) => void = () => {};
   let reject: (reason?: unknown) => void = () => {};
@@ -77,8 +85,13 @@ describe("useReadingProgress", () => {
 
   it("submits a stored checkpoint before the current scroll step", async () => {
     sessionStorage.setItem(
-      "odyssey_reading_progress",
-      JSON.stringify({ postId: 7, progressPercent: 20, positionAnchor: "saved" })
+      "odyssey_reading_progress:reader:7",
+      JSON.stringify({
+        postId: 7,
+        progressPercent: 20,
+        positionAnchor: "saved",
+        observedAt: "2026-11-19T12:00:00.000Z",
+      })
     );
     const pending = deferred<unknown>();
     recordProgress.mockImplementationOnce(() => ({ unwrap: () => pending.promise }));
@@ -88,7 +101,11 @@ describe("useReadingProgress", () => {
     expect(recordProgress).toHaveBeenCalledTimes(1);
     expect(recordProgress).toHaveBeenCalledWith({
       postId: 7,
-      body: { progressPercent: 20, positionAnchor: "saved" },
+      body: {
+        progressPercent: 20,
+        positionAnchor: "saved",
+        observedAt: "2026-11-19T12:00:00.000Z",
+      },
     });
 
     await act(async () => {
@@ -96,10 +113,12 @@ describe("useReadingProgress", () => {
       await pending.promise;
     });
 
-    expect(recordProgress).toHaveBeenLastCalledWith({
-      postId: 7,
-      body: { progressPercent: 40 },
-    });
+    expect(recordProgress).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        postId: 7,
+        body: expect.objectContaining({ progressPercent: 40, observedAt: expect.any(String) }),
+      })
+    );
   });
 
   it("keeps a failed checkpoint and retries it from the toast", async () => {
@@ -113,7 +132,7 @@ describe("useReadingProgress", () => {
       await Promise.resolve();
     });
 
-    expect(sessionStorage.getItem("odyssey_reading_progress")).toEqual(
+    expect(sessionStorage.getItem("odyssey_reading_progress:reader:7")).toEqual(
       expect.stringContaining('"progressPercent":40')
     );
     expect(toast.danger).toHaveBeenCalledWith(
@@ -132,7 +151,7 @@ describe("useReadingProgress", () => {
       action.actionProps.onPress();
     });
 
-    expect(sessionStorage.getItem("odyssey_reading_progress")).toBeNull();
+    expect(sessionStorage.getItem("odyssey_reading_progress:reader:7")).toBeNull();
   });
 
   it("drops a late response after the article changes", async () => {
@@ -148,9 +167,9 @@ describe("useReadingProgress", () => {
       pending.resolve({});
     });
 
-    const saved = sessionStorage.getItem("odyssey_reading_progress") ?? "";
+    const saved = sessionStorage.getItem("odyssey_reading_progress:reader:8") ?? "";
     expect(saved === "" || saved.includes('"postId":8')).toBe(true);
-    expect(saved.includes('"postId":7')).toBe(false);
+    expect(sessionStorage.getItem("odyssey_reading_progress:reader:7")).toContain('"postId":7');
   });
 
   it("does not call the library endpoint for a guest", async () => {

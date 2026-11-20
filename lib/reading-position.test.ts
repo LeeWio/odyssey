@@ -21,43 +21,47 @@ describe("reading position links", () => {
 });
 
 describe("pending reading progress", () => {
+  const username = "reader";
+  const key = "odyssey_reading_progress:reader:7";
+  const checkpoint = {
+    postId: 7,
+    progressPercent: 40,
+    positionAnchor: "#chapter-two",
+    observedAt: "2026-11-19T12:00:00.000Z",
+  };
+
   afterEach(() => {
     sessionStorage.clear();
   });
 
   it("keeps a failed checkpoint for the same article", () => {
-    writePendingReadingProgress({
-      postId: 7,
-      progressPercent: 40,
-      positionAnchor: "#chapter-two",
-    });
+    writePendingReadingProgress(username, checkpoint);
 
-    expect(readPendingReadingProgress(7)).toEqual({
-      postId: 7,
-      progressPercent: 40,
-      positionAnchor: "#chapter-two",
-    });
-    expect(readPendingReadingProgress(8)).toBeNull();
+    expect(readPendingReadingProgress(username, 7)).toEqual(checkpoint);
+    expect(readPendingReadingProgress("another-user", 7)).toBeNull();
   });
 
   it("drops the checkpoint after a successful save for that article", () => {
-    writePendingReadingProgress({
-      postId: 7,
-      progressPercent: 40,
-      positionAnchor: "#chapter-two",
-    });
+    writePendingReadingProgress(username, checkpoint);
 
-    clearPendingReadingProgress(7);
+    clearPendingReadingProgress(username, checkpoint);
 
-    expect(readPendingReadingProgress(7)).toBeNull();
+    expect(readPendingReadingProgress(username, 7)).toBeNull();
+  });
+
+  it("keeps a newer checkpoint when an older save finishes", () => {
+    writePendingReadingProgress(username, checkpoint);
+    const newer = { ...checkpoint, progressPercent: 50, positionAnchor: "#chapter-three" };
+    writePendingReadingProgress(username, newer);
+
+    clearPendingReadingProgress(username, checkpoint);
+
+    expect(readPendingReadingProgress(username, 7)).toEqual(newer);
   });
 
   it("rejects a checkpoint outside the progress range", () => {
-    sessionStorage.setItem(
-      "odyssey_reading_progress",
-      JSON.stringify({ postId: 7, progressPercent: 140, positionAnchor: "#chapter" })
-    );
+    sessionStorage.setItem(key, JSON.stringify({ ...checkpoint, progressPercent: 140 }));
 
-    expect(readPendingReadingProgress(7)).toBeNull();
+    expect(readPendingReadingProgress(username, 7)).toBeNull();
   });
 });

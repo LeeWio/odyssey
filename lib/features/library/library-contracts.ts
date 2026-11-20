@@ -6,11 +6,13 @@ import { PostDigestResponseSchema } from "@/lib/features/post";
 export const ReadingProgressRequestSchema = z.object({
   progressPercent: z.number().int().min(0).max(100),
   positionAnchor: z.string().max(500).optional(),
+  observedAt: z.string().datetime({ offset: true }),
 });
 
 export const ReadingHistoryResponseSchema = z.object({
   post: PostDigestResponseSchema,
-  progressPercent: z.number().int(),
+  currentProgressPercent: z.number().int().min(0).max(100),
+  furthestProgressPercent: z.number().int().min(0).max(100),
   positionAnchor: z.string().nullable().optional(),
   lastReadAt: z.string(),
   completedAt: z.string().nullable().optional(),

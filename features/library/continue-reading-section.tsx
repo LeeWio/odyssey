@@ -11,7 +11,7 @@ export function ContinueReadingSection() {
   const t = useTranslations("Library");
   const overview = useGetLibraryOverviewQuery();
   const continueReading = (overview.data?.continueReading ?? []).filter(
-    (entry) => entry.progressPercent < 100
+    (entry) => entry.furthestProgressPercent < 100
   );
 
   return (

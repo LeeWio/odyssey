@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 import { useRecordReadingProgressMutation } from "@/lib/features/library/library-api";
+import { selectCurrentUser } from "@/lib/features/auth";
+import { useAppSelector } from "@/lib/hooks";
 import {
   clearPendingReadingProgress,
   readPendingReadingProgress,
@@ -34,6 +36,7 @@ export function useReadingProgress({
   progress: number;
 }) {
   const t = useTranslations("Article");
+  const username = useAppSelector(selectCurrentUser);
   const outline = useArticleOutline();
   const [recordProgress] = useRecordReadingProgressMutation();
   const outlineRef = useRef(outline);
@@ -49,7 +52,7 @@ export function useReadingProgress({
   }, [outline, progress]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !username) return;
 
     const articleId = postId;
     let active = true;
@@ -64,6 +67,7 @@ export function useReadingProgress({
       return {
         postId: articleId,
         progressPercent: quantizeReadingProgress(progressRef.current),
+        observedAt: new Date().toISOString(),
         ...(positionAnchor ? { positionAnchor } : {}),
       };
     };
@@ -82,11 +86,13 @@ export function useReadingProgress({
 
         sentRef.current = next;
         inFlight = true;
-        writePendingReadingProgress({
+        const pendingCheckpoint = {
           postId: next.postId,
           progressPercent: next.progressPercent,
           positionAnchor: next.positionAnchor ?? "",
-        });
+          observedAt: next.observedAt,
+        };
+        writePendingReadingProgress(username, pendingCheckpoint);
 
         let saved = false;
         try {
@@ -95,6 +101,7 @@ export function useReadingProgress({
             body: {
               progressPercent: next.progressPercent,
               ...(next.positionAnchor ? { positionAnchor: next.positionAnchor } : {}),
+              observedAt: next.observedAt,
             },
           }).unwrap();
           saved = true;
@@ -106,7 +113,7 @@ export function useReadingProgress({
 
         if (!active) break;
         if (saved) {
-          clearPendingReadingProgress(articleId);
+          clearPendingReadingProgress(username, pendingCheckpoint);
           failedRef.current = null;
           continue;
         }
@@ -127,13 +134,14 @@ export function useReadingProgress({
       draining = false;
     };
 
-    const pending = readPendingReadingProgress(articleId);
+    const pending = readPendingReadingProgress(username, articleId);
     if (pending) {
       // The stored checkpoint is the last attempt. Newer scroll progress waits
       // until this one settles, so a failed save is not replaced by a guess.
       enqueue({
         postId: pending.postId,
         progressPercent: pending.progressPercent,
+        observedAt: pending.observedAt,
         ...(pending.positionAnchor ? { positionAnchor: pending.positionAnchor } : {}),
       });
     }
@@ -167,18 +175,20 @@ export function useReadingProgress({
       if (failedRef.current || inFlight) return;
       const next = checkpoint();
       if (!shouldReportReadingProgress(sentRef.current, next)) return;
-      writePendingReadingProgress({
+      writePendingReadingProgress(username, {
         postId: next.postId,
         progressPercent: next.progressPercent,
         positionAnchor: next.positionAnchor ?? "",
+        observedAt: next.observedAt,
       });
       void recordProgress({
         postId: next.postId,
         body: {
           progressPercent: next.progressPercent,
           ...(next.positionAnchor ? { positionAnchor: next.positionAnchor } : {}),
+          observedAt: next.observedAt,
         },
       });
     };
-  }, [enabled, postId, recordProgress, t]);
+  }, [enabled, postId, recordProgress, t, username]);
 }

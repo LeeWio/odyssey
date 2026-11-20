@@ -249,7 +249,7 @@ function ContinueReading({
       </div>
       <div className={compact ? "grid gap-3" : "grid gap-3 md:grid-cols-3"}>
         <AnimatePresence initial={false} mode="popLayout">
-          {entries.map(({ lastReadAt, post, positionAnchor, progressPercent }, index) => (
+          {entries.map(({ lastReadAt, post, positionAnchor, currentProgressPercent }, index) => (
             <motion.div
               key={post.id}
               layout={!shouldReduceMotion}
@@ -280,7 +280,7 @@ function ContinueReading({
                       <span />
                     )}
                     <span className="text-muted shrink-0 font-mono text-xs tabular-nums">
-                      {progressPercent}%
+                      {currentProgressPercent}%
                     </span>
                   </div>
                   <Card.Title className="line-clamp-2 text-base">{post.title}</Card.Title>
@@ -289,7 +289,7 @@ function ContinueReading({
                   aria-label={t("readingProgress", { title: post.title })}
                   color="accent"
                   size="sm"
-                  value={progressPercent}
+                  value={currentProgressPercent}
                 >
                   <ProgressBar.Track>
                     <ProgressBar.Fill />

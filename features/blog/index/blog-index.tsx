@@ -437,7 +437,7 @@ function ContinueReading({ entries }: { entries: ReadingHistoryResponse[] }) {
         </Link>
       </div>
       <div className="flex flex-col gap-2">
-        {entries.slice(0, 4).map(({ lastReadAt, post, positionAnchor, progressPercent }) => (
+        {entries.slice(0, 4).map(({ lastReadAt, post, positionAnchor, currentProgressPercent }) => (
           <ItemCard key={post.id} variant="transparent">
             <ItemCard.Content>
               <ItemCard.Title>
@@ -454,7 +454,7 @@ function ContinueReading({ entries }: { entries: ReadingHistoryResponse[] }) {
               <Meter
                 aria-label={t("readingProgress", { title: post.title })}
                 size="sm"
-                value={progressPercent}
+                value={currentProgressPercent}
               >
                 <Meter.Track>
                   <Meter.Fill />

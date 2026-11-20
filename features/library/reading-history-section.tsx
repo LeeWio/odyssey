@@ -138,9 +138,9 @@ export function ReadingHistorySection() {
           {historyEntries.map((entry) => {
             const href = getReadingPositionHref(entry.post.slug, entry.positionAnchor);
             const status =
-              entry.progressPercent >= 100
+              entry.furthestProgressPercent >= 100
                 ? t("finished")
-                : t("percentRead", { progress: entry.progressPercent });
+                : t("percentRead", { progress: entry.currentProgressPercent });
 
             return (
               <article key={entry.post.id} className="flex gap-4 py-5 sm:items-center">

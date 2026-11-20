@@ -29,15 +29,21 @@ export interface PendingReadingProgress {
   postId: number;
   progressPercent: number;
   positionAnchor: string;
+  observedAt: string;
 }
 
 const READING_PROGRESS_STORAGE_KEY = "odyssey_reading_progress";
+const readingProgressStorageKey = (username: string, postId: number) =>
+  `${READING_PROGRESS_STORAGE_KEY}:${encodeURIComponent(username)}:${postId}`;
 
-export function readPendingReadingProgress(postId: number): PendingReadingProgress | null {
+export function readPendingReadingProgress(
+  username: string,
+  postId: number
+): PendingReadingProgress | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = sessionStorage.getItem(READING_PROGRESS_STORAGE_KEY);
+    const raw = sessionStorage.getItem(readingProgressStorageKey(username, postId));
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return null;
@@ -48,7 +54,9 @@ export function readPendingReadingProgress(postId: number): PendingReadingProgre
       !Number.isInteger(record.progressPercent) ||
       record.progressPercent < 0 ||
       record.progressPercent > 100 ||
-      typeof record.positionAnchor !== "string"
+      typeof record.positionAnchor !== "string" ||
+      typeof record.observedAt !== "string" ||
+      Number.isNaN(Date.parse(record.observedAt))
     ) {
       return null;
     }
@@ -57,27 +65,39 @@ export function readPendingReadingProgress(postId: number): PendingReadingProgre
       postId,
       progressPercent: record.progressPercent,
       positionAnchor: record.positionAnchor,
+      observedAt: record.observedAt,
     };
   } catch {
     return null;
   }
 }
 
-export function writePendingReadingProgress(progress: PendingReadingProgress) {
+export function writePendingReadingProgress(username: string, progress: PendingReadingProgress) {
   if (typeof window === "undefined") return;
   try {
-    sessionStorage.setItem(READING_PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+    sessionStorage.setItem(
+      readingProgressStorageKey(username, progress.postId),
+      JSON.stringify(progress)
+    );
   } catch {
     // Private mode can reject storage. The in-memory retry still runs.
   }
 }
 
-export function clearPendingReadingProgress(postId: number) {
+export function clearPendingReadingProgress(username: string, expected: PendingReadingProgress) {
   if (typeof window === "undefined") return;
-  const pending = readPendingReadingProgress(postId);
-  if (!pending) return;
+  const pending = readPendingReadingProgress(username, expected.postId);
+  if (
+    !pending ||
+    pending.postId !== expected.postId ||
+    pending.progressPercent !== expected.progressPercent ||
+    pending.positionAnchor !== expected.positionAnchor ||
+    pending.observedAt !== expected.observedAt
+  ) {
+    return;
+  }
   try {
-    sessionStorage.removeItem(READING_PROGRESS_STORAGE_KEY);
+    sessionStorage.removeItem(readingProgressStorageKey(username, expected.postId));
   } catch {
     // Ignore storage failures; the successful request is already recorded.
   }

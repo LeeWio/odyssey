@@ -8,6 +8,7 @@ export interface ReadingCheckpoint {
   postId: number;
   progressPercent: number;
   positionAnchor?: string;
+  observedAt: string;
 }
 
 /** Collapse a scroll percentage onto the 10-point steps the library stores. */

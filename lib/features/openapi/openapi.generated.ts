@@ -17,6 +17,9 @@ export interface OpenApiComponents {
       commentNotificationsEnabled: boolean;
       categoryPostNotificationsEnabled: boolean;
       systemNotificationsEnabled: boolean;
+      commentEmailNotificationsEnabled?: boolean;
+      categoryPostEmailNotificationsEnabled?: boolean;
+      systemEmailNotificationsEnabled?: boolean;
     };
     ApiResponseNotificationPreferenceResponse: {
       code?: number;
@@ -28,8 +31,28 @@ export interface OpenApiComponents {
       commentNotificationsEnabled?: boolean;
       categoryPostNotificationsEnabled?: boolean;
       systemNotificationsEnabled?: boolean;
+      commentEmailNotificationsEnabled?: boolean;
+      categoryPostEmailNotificationsEnabled?: boolean;
+      systemEmailNotificationsEnabled?: boolean;
     };
-    ReadingProgressRequest: { progressPercent: number; positionAnchor?: string };
+    Channels: { inAppEnabled: boolean; emailEnabled: boolean };
+    NotificationCategoryPreferenceRequest: {
+      overrides: { [key: string]: OpenApiComponents["schemas"]["Channels"] };
+    };
+    ApiResponseNotificationCategoryPreferenceResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["NotificationCategoryPreferenceResponse"];
+      traceId?: string;
+    };
+    NotificationCategoryPreferenceResponse: {
+      categories?: { [key: string]: OpenApiComponents["schemas"]["Channels"] };
+    };
+    ReadingProgressRequest: {
+      progressPercent: number;
+      positionAnchor?: string;
+      observedAt: string;
+    };
     ApiResponseReadingHistoryResponse: {
       code?: number;
       message?: string;
@@ -56,11 +79,13 @@ export interface OpenApiComponents {
       category?: OpenApiComponents["schemas"]["CategoryResponse"];
       views?: number;
       likesCount?: number;
+      commentsCount?: number;
       publishedAt?: string;
     };
     ReadingHistoryResponse: {
       post?: OpenApiComponents["schemas"]["PostDigestResponse"];
-      progressPercent?: number;
+      currentProgressPercent?: number;
+      furthestProgressPercent?: number;
       positionAnchor?: string;
       lastReadAt?: string;
       completedAt?: string;
@@ -81,11 +106,18 @@ export interface OpenApiComponents {
       updatedAt?: string;
     };
     CommentUpdateRequest: { content: string };
-    WebhookRequest: {
+    WebhookUpdateRequest: {
       name: string;
       url: string;
-      secret: string;
-      events: Array<"POST_PUBLISHED" | "POST_ARCHIVED" | "POST_DELETED" | "COMMENT_SUBMITTED">;
+      secret?: string;
+      events: Array<
+        | "POST_PUBLISHED"
+        | "POST_ARCHIVED"
+        | "POST_DELETED"
+        | "COMMENT_SUBMITTED"
+        | "MOMENT_PUBLISHED"
+        | "MOMENT_DELETED"
+      >;
       isActive: boolean;
     };
     ApiResponseWebhookResponse: {
@@ -98,7 +130,14 @@ export interface OpenApiComponents {
       id?: number;
       name?: string;
       url?: string;
-      events?: Array<"POST_PUBLISHED" | "POST_ARCHIVED" | "POST_DELETED" | "COMMENT_SUBMITTED">;
+      events?: Array<
+        | "POST_PUBLISHED"
+        | "POST_ARCHIVED"
+        | "POST_DELETED"
+        | "COMMENT_SUBMITTED"
+        | "MOMENT_PUBLISHED"
+        | "MOMENT_DELETED"
+      >;
       isActive?: boolean;
       createdAt?: string;
     };
@@ -158,6 +197,7 @@ export interface OpenApiComponents {
       toc?: string;
       isLiked?: boolean;
       isFavorited?: boolean;
+      isInReadingList?: boolean;
       authorName?: string;
       authorAvatar?: string;
       category?: OpenApiComponents["schemas"]["CategoryResponse"];
@@ -190,15 +230,6 @@ export interface OpenApiComponents {
       isPublished?: boolean;
       postsCount?: number;
       posts?: Array<OpenApiComponents["schemas"]["PostResponse"]>;
-      createdAt?: string;
-    };
-    SeriesSummaryResponse: {
-      id?: number;
-      name?: string;
-      slug?: string;
-      description?: string;
-      coverImage?: string;
-      postsCount?: number;
       createdAt?: string;
     };
     RoleRequest: { name: string; code: string; description?: string };
@@ -264,12 +295,31 @@ export interface OpenApiComponents {
       data?: OpenApiComponents["schemas"]["PostResponse"];
       traceId?: string;
     };
+    SaveDraft: {
+      content: { [key: string]: unknown };
+      postData: { [key: string]: unknown };
+      revision?: string;
+    };
+    ApiResponseSnapshot: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["Snapshot"];
+      traceId?: string;
+    };
+    Snapshot: {
+      content?: unknown;
+      postData?: { [key: string]: unknown };
+      revision?: string;
+      savedAt?: string;
+    };
     MomentImageRequest: { fileId: number; altText: string };
     MomentRequest: {
       content: string;
       visibility: "public" | "followers" | "private";
       images?: Array<OpenApiComponents["schemas"]["MomentImageRequest"]>;
       topicSlugs?: Array<string>;
+      stockSymbol?: string;
+      shareToX?: boolean;
     };
     ApiResponseMomentResponse: {
       code?: number;
@@ -291,7 +341,9 @@ export interface OpenApiComponents {
     MomentResponse: {
       id?: number;
       content?: string;
+      stockSymbol?: string;
       likesCount?: number;
+      commentsCount?: number;
       visibility?: "public" | "followers" | "private";
       authorName?: string;
       authorAvatar?: string;
@@ -299,8 +351,17 @@ export interface OpenApiComponents {
       topics?: Array<OpenApiComponents["schemas"]["MomentTopicResponse"]>;
       createdAt?: string;
       updatedAt?: string;
+      xSync?: OpenApiComponents["schemas"]["MomentXSyncResponse"];
     };
     MomentTopicResponse: { id?: number; slug?: string };
+    MomentXSyncResponse: {
+      status?: "PENDING" | "POSTED" | "FAILED" | "SKIPPED";
+      xPostId?: string;
+      url?: string;
+      error?: string;
+      attempts?: number;
+      postedAt?: string;
+    };
     MenuRequest: {
       name: string;
       parentId: number;
@@ -332,6 +393,69 @@ export interface OpenApiComponents {
       createdAt?: string;
       children?: Array<OpenApiComponents["schemas"]["MenuResponse"]>;
     };
+    LifeListMemoryRequest: {
+      occurredAt?: string;
+      content: string;
+      location?: string;
+      visibility: "public" | "private";
+    };
+    ApiResponseLifeListMemoryResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["LifeListMemoryResponse"];
+      traceId?: string;
+    };
+    LifeListMemoryResponse: {
+      id?: number;
+      itemId?: number;
+      occurredAt?: string;
+      content?: string;
+      location?: string;
+      visibility?: "public" | "private";
+      createdAt?: string;
+      updatedAt?: string;
+    };
+    LifeListItemRequest: {
+      title: string;
+      description?: string;
+      motivation?: string;
+      categoryId?: number;
+      status: "planned" | "in_progress" | "completed" | "abandoned";
+      visibility: "public" | "private";
+      sortOrder?: number;
+      completedAt?: string;
+    };
+    ApiResponseLifeListItemResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["LifeListItemResponse"];
+      traceId?: string;
+    };
+    LifeListCategoryResponse: { id?: number; name?: string; slug?: string; sortOrder?: number };
+    LifeListItemResponse: {
+      id?: number;
+      number?: number;
+      title?: string;
+      description?: string;
+      motivation?: string;
+      category?: OpenApiComponents["schemas"]["LifeListCategoryResponse"];
+      status?: "planned" | "in_progress" | "completed" | "abandoned";
+      visibility?: "public" | "private";
+      sortOrder?: number;
+      completedAt?: string;
+      archivedAt?: string;
+      memoryCount?: number;
+      memories?: Array<OpenApiComponents["schemas"]["LifeListMemoryResponse"]>;
+      createdAt?: string;
+      updatedAt?: string;
+    };
+    LifeListCategoryRequest: { name: string; slug?: string; sortOrder?: number };
+    ApiResponseLifeListCategoryResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["LifeListCategoryResponse"];
+      traceId?: string;
+    };
     KanbanChecklistItemRequest: { title: string; completed: boolean; orderIndex?: number };
     ApiResponseKanbanChecklistItemResponse: {
       code?: number;
@@ -352,6 +476,8 @@ export interface OpenApiComponents {
       title: string;
       content?: string;
       priority: "LOW" | "MEDIUM" | "HIGH";
+      epic?: string;
+      size?: "S" | "M" | "L" | "XL";
       columnId: number;
       orderIndex?: number;
       reminderAt?: string;
@@ -370,6 +496,8 @@ export interface OpenApiComponents {
       title?: string;
       content?: string;
       priority?: "LOW" | "MEDIUM" | "HIGH";
+      epic?: string;
+      size?: "S" | "M" | "L" | "XL";
       orderIndex?: number;
       columnId?: number;
       reminderAt?: string;
@@ -455,6 +583,7 @@ export interface OpenApiComponents {
       data?: OpenApiComponents["schemas"]["CategoryResponse"];
       traceId?: string;
     };
+    MomentBookmarkImportRequest: { ids: Array<number> };
     ApiResponsePostInteractionResponse: {
       code?: number;
       message?: string;
@@ -475,7 +604,20 @@ export interface OpenApiComponents {
       traceId?: string;
     };
     CommentInteractionResponse: { commentId?: number; liked?: boolean; likesCount?: number };
-    GuestbookRequest: { content: string; parentId?: number };
+    GuestbookRequest: {
+      content: string;
+      parentId?: number;
+      guestName?: string;
+      guestEmail?: string;
+      guestWebsite?: string;
+    };
+    ApiResponseCommentPublishResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["CommentPublishResponse"];
+      traceId?: string;
+    };
+    CommentPublishResponse: { id?: number; status?: "PENDING" | "APPROVED" | "REJECTED" | "SPAM" };
     FriendLinkApplicationRequest: {
       name: string;
       url: string;
@@ -483,9 +625,26 @@ export interface OpenApiComponents {
       description?: string;
       email: string;
     };
-    CommentRequest: { content: string; postId: number; parentId?: number };
+    CommentRequest: {
+      content: string;
+      postId?: number;
+      momentId?: number;
+      parentId?: number;
+      guestName?: string;
+      guestEmail?: string;
+      guestWebsite?: string;
+    };
     CommentReportRequest: { reason: string; description?: string };
+    MomentCommentRequest: {
+      content: string;
+      momentId: number;
+      parentId?: number;
+      guestName?: string;
+      guestEmail?: string;
+      guestWebsite?: string;
+    };
     PostReportRequest: { reason: string; description?: string };
+    PageViewRequest: { path: string; referrer?: string; title?: string };
     ContentAnalyticsEventRequest: {
       action: "IMPRESSION" | "CLICK" | "READING_PROGRESS";
       postId: number;
@@ -513,14 +672,83 @@ export interface OpenApiComponents {
     PasswordResetConfirmRequest: { email: string; code: string; newPassword: string };
     OtpSendRequest: { email: string };
     OtpLoginRequest: { email: string; code: string };
+    OAuthExchangeRequest: { code: string };
     LoginRequest: { username: string; password: string };
+    WebhookRequest: {
+      name: string;
+      url: string;
+      secret: string;
+      events: Array<
+        | "POST_PUBLISHED"
+        | "POST_ARCHIVED"
+        | "POST_DELETED"
+        | "COMMENT_SUBMITTED"
+        | "MOMENT_PUBLISHED"
+        | "MOMENT_DELETED"
+      >;
+      isActive: boolean;
+    };
+    ApiResponseWebhookTestResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["WebhookTestResponse"];
+      traceId?: string;
+    };
+    WebhookTestResponse: { deliveryId?: string };
+    ApiResponseWebhookLogResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["WebhookLogResponse"];
+      traceId?: string;
+    };
+    WebhookLogResponse: {
+      deliveryId?: string;
+      event?: string;
+      responseCode?: number;
+      isSuccess?: boolean;
+      attemptCount?: number;
+      createdAt?: string;
+      inProgress?: boolean;
+    };
     AssignMenuRequest: { menuIds: Array<number> };
     PostScheduleRequest: { scheduledAt: string };
     PostReviewRequest: { approved: boolean; reviewComment?: string };
     ApiResponseString: { code?: number; message?: string; data?: string; traceId?: string };
     PostArchiveRequest: { reason: string };
-    ApiResponseInteger: { code?: number; message?: string; data?: number; traceId?: string };
-    PostAutosaveRequest: { identifier: string; content: unknown; contentType?: "JSON" | "MDX" };
+    ApiResponsePostMetadataRebuildResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["PostMetadataRebuildResponse"];
+      traceId?: string;
+    };
+    PostMetadataRebuildResponse: { processed?: number; updated?: number; dryRun?: boolean };
+    NotificationDeliveryRetryRequest: { requestId: string; reason: string };
+    ApiResponseNotificationDeliveryResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["NotificationDeliveryResponse"];
+      traceId?: string;
+    };
+    NotificationContext: {
+      objectType?: "POST" | "COMMENT" | "FRIEND_LINK" | "USER";
+      objectId?: number;
+      actorId?: number;
+      action?: "VIEW" | "REVIEW" | "EDIT" | "REVIEW_REPORT";
+    };
+    NotificationDeliveryResponse: {
+      id?: number;
+      notificationId?: number;
+      channel?: string;
+      status?: "QUEUED" | "SENDING" | "FAILED" | "DELIVERED" | "ABANDONED";
+      attempts?: number;
+      maxAttempts?: number;
+      lastError?: string;
+      nextAttemptAt?: string;
+      deliveredAt?: string;
+      createdAt?: string;
+      retryable?: boolean;
+      context?: OpenApiComponents["schemas"]["NotificationContext"];
+    };
     KanbanItemMoveRequest: { itemId: number; targetColumnId: number; targetOrderIndex: number };
     ApiResponseFileResponse: {
       code?: number;
@@ -540,6 +768,7 @@ export interface OpenApiComponents {
       fileType?: string;
       createdAt?: string;
     };
+    ApiResponseInteger: { code?: number; message?: string; data?: number; traceId?: string };
     BatchModerateCommentRequest: {
       ids: Array<number>;
       status: "PENDING" | "APPROVED" | "REJECTED" | "SPAM";
@@ -548,7 +777,22 @@ export interface OpenApiComponents {
       status: "OPEN" | "ACTIONED" | "DISMISSED";
       resolutionNote?: string;
     };
+    LifeListStatusRequest: {
+      status: "planned" | "in_progress" | "completed" | "abandoned";
+      completedAt?: string;
+    };
     KanbanChecklistItemCompletionRequest: { completed: boolean };
+    CommentReportResolutionRequest: {
+      status: "OPEN" | "ACTIONED" | "DISMISSED";
+      resolutionNote?: string;
+    };
+    UserMentionResponse: { id?: number; username?: string; nickname?: string; avatar?: string };
+    ApiResponseListUserMentionResponse: {
+      code?: number;
+      message?: string;
+      data?: Array<OpenApiComponents["schemas"]["UserMentionResponse"]>;
+      traceId?: string;
+    };
     Pageable: { page?: number; size?: number; sort?: Array<string> };
     ApiResponsePageResultNotificationResponse: {
       code?: number;
@@ -562,9 +806,12 @@ export interface OpenApiComponents {
       content?: string;
       type?: string;
       read?: boolean;
+      saved?: boolean;
       readAt?: string;
+      completedAt?: string;
       link?: string;
       createdAt?: string;
+      context?: OpenApiComponents["schemas"]["NotificationContext"];
     };
     PageResultNotificationResponse: {
       list?: Array<OpenApiComponents["schemas"]["NotificationResponse"]>;
@@ -574,6 +821,25 @@ export interface OpenApiComponents {
       totalPages?: number;
     };
     ApiResponseLong: { code?: number; message?: string; data?: number; traceId?: string };
+    ApiResponsePageResultMomentResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["PageResultMomentResponse"];
+      traceId?: string;
+    };
+    PageResultMomentResponse: {
+      list?: Array<OpenApiComponents["schemas"]["MomentResponse"]>;
+      total?: number;
+      page?: number;
+      size?: number;
+      totalPages?: number;
+    };
+    ApiResponseListLong: {
+      code?: number;
+      message?: string;
+      data?: Array<number>;
+      traceId?: string;
+    };
     ApiResponseUserInfoResponse: {
       code?: number;
       message?: string;
@@ -588,6 +854,24 @@ export interface OpenApiComponents {
       roles?: Array<string>;
       permissions?: Array<string>;
     };
+    ApiResponsePageResultReadingListPostResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["PageResultReadingListPostResponse"];
+      traceId?: string;
+    };
+    PageResultReadingListPostResponse: {
+      list?: Array<OpenApiComponents["schemas"]["ReadingListPostResponse"]>;
+      total?: number;
+      page?: number;
+      size?: number;
+      totalPages?: number;
+    };
+    ReadingListPostResponse: {
+      post?: OpenApiComponents["schemas"]["PostDigestResponse"];
+      addedAt?: string;
+    };
+    ApiResponseBoolean: { code?: number; message?: string; data?: boolean; traceId?: string };
     ApiResponseContentPreferenceResponse: {
       code?: number;
       message?: string;
@@ -711,6 +995,8 @@ export interface OpenApiComponents {
       username?: string;
       nickname?: string;
       avatar?: string;
+      anonymous?: boolean;
+      website?: string;
       status?: "PENDING" | "APPROVED" | "REJECTED" | "SPAM";
       postId?: number;
       postTitle?: string;
@@ -718,6 +1004,7 @@ export interface OpenApiComponents {
       likesCount?: number;
       reportsCount?: number;
       replyCount?: number;
+      children?: Array<OpenApiComponents["schemas"]["CommentResponse"]>;
       likedByCurrentUser?: boolean;
       viewerCanEdit?: boolean;
       viewerCanDelete?: boolean;
@@ -726,10 +1013,6 @@ export interface OpenApiComponents {
       deletedPlaceholder?: boolean;
       createdAt?: string;
       editedAt?: string;
-    };
-    CommentReportResolutionRequest: {
-      status: "OPEN" | "ACTIONED" | "DISMISSED";
-      resolutionNote?: string;
     };
     PageResultCommentResponse: {
       list?: Array<OpenApiComponents["schemas"]["CommentResponse"]>;
@@ -777,9 +1060,9 @@ export interface OpenApiComponents {
     TreeLong: {
       name?: { empty?: boolean };
       id?: number;
+      config?: OpenApiComponents["schemas"]["TreeNodeConfig"];
       weight?: unknown;
       parentId?: number;
-      config?: OpenApiComponents["schemas"]["TreeNodeConfig"];
       empty?: boolean;
       [key: string]: unknown;
     };
@@ -869,20 +1152,51 @@ export interface OpenApiComponents {
       data?: Array<OpenApiComponents["schemas"]["ProjectResponse"]>;
       traceId?: string;
     };
-    ApiResponsePageResultMomentResponse: {
+    ApiResponseListMomentTopicCountResponse: {
       code?: number;
       message?: string;
-      data?: OpenApiComponents["schemas"]["PageResultMomentResponse"];
+      data?: Array<OpenApiComponents["schemas"]["MomentTopicCountResponse"]>;
       traceId?: string;
     };
-    PageResultMomentResponse: {
-      list?: Array<OpenApiComponents["schemas"]["MomentResponse"]>;
-      total?: number;
-      page?: number;
-      size?: number;
-      totalPages?: number;
-    };
+    MomentTopicCountResponse: { slug?: string; count?: number };
     ApiResponseSetLong: { code?: number; message?: string; data?: Array<number>; traceId?: string };
+    ApiResponseMomentCadenceResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["MomentCadenceResponse"];
+      traceId?: string;
+    };
+    DayCadence: { start?: string; active?: Array<number> };
+    MomentCadenceResponse: {
+      zone?: string;
+      day?: OpenApiComponents["schemas"]["DayCadence"];
+      month?: OpenApiComponents["schemas"]["MonthCadence"];
+      year?: OpenApiComponents["schemas"]["YearCadence"];
+    };
+    MonthCadence: { start?: string; days?: number; offset?: number; active?: Array<number> };
+    YearCadence: { year?: number; active?: Array<number> };
+    ApiResponseStockTrendResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["StockTrendResponse"];
+      traceId?: string;
+    };
+    StockTrendResponse: {
+      name?: string;
+      symbol?: string;
+      current?: number;
+      changePct?: number;
+      isOpen?: boolean;
+      trendPoints?: Array<OpenApiComponents["schemas"]["TrendPoint"]>;
+    };
+    TrendPoint: { date?: string; price?: number };
+    ApiResponseListStockSearchResponse: {
+      code?: number;
+      message?: string;
+      data?: Array<OpenApiComponents["schemas"]["StockSearchResponse"]>;
+      traceId?: string;
+    };
+    StockSearchResponse: { name?: string; code?: string; symbol?: string; market?: string };
     ApiResponseListMarketIndexResponse: {
       code?: number;
       message?: string;
@@ -903,6 +1217,27 @@ export interface OpenApiComponents {
       data?: OpenApiComponents["schemas"]["MarketIndexResponse"];
       traceId?: string;
     };
+    ApiResponseLifeListPageResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["LifeListPageResponse"];
+      traceId?: string;
+    };
+    LifeListPageResponse: {
+      list?: Array<OpenApiComponents["schemas"]["LifeListItemResponse"]>;
+      total?: number;
+      page?: number;
+      size?: number;
+      totalPages?: number;
+      summary?: OpenApiComponents["schemas"]["LifeListSummaryResponse"];
+    };
+    LifeListSummaryResponse: { completed?: number; total?: number; includesPrivate?: boolean };
+    ApiResponseListLifeListCategoryResponse: {
+      code?: number;
+      message?: string;
+      data?: Array<OpenApiComponents["schemas"]["LifeListCategoryResponse"]>;
+      traceId?: string;
+    };
     ApiResponseCursorPageResponseCommentResponse: {
       code?: number;
       message?: string;
@@ -913,6 +1248,7 @@ export interface OpenApiComponents {
       list?: Array<OpenApiComponents["schemas"]["CommentResponse"]>;
       nextCursor?: number;
       hasMore?: boolean;
+      total?: number;
     };
     ApiResponseGitHubStatsResponse: {
       code?: number;
@@ -1089,55 +1425,33 @@ export interface OpenApiComponents {
       latestPublishedAt?: string;
       score?: number;
     };
+    SeriesSummaryResponse: {
+      id?: number;
+      name?: string;
+      slug?: string;
+      description?: string;
+      coverImage?: string;
+      postsCount?: number;
+      createdAt?: string;
+    };
     ApiResponseListWebhookResponse: {
       code?: number;
       message?: string;
       data?: Array<OpenApiComponents["schemas"]["WebhookResponse"]>;
       traceId?: string;
     };
-    ApiResponsePageResultWebhookLog: {
+    ApiResponsePageResultWebhookLogResponse: {
       code?: number;
       message?: string;
-      data?: OpenApiComponents["schemas"]["PageResultWebhookLog"];
+      data?: OpenApiComponents["schemas"]["PageResultWebhookLogResponse"];
       traceId?: string;
     };
-    PageResultWebhookLog: {
-      list?: Array<OpenApiComponents["schemas"]["WebhookLog"]>;
+    PageResultWebhookLogResponse: {
+      list?: Array<OpenApiComponents["schemas"]["WebhookLogResponse"]>;
       total?: number;
       page?: number;
       size?: number;
       totalPages?: number;
-    };
-    Webhook: {
-      id?: number;
-      createdBy?: string;
-      createdAt?: string;
-      lastModifiedBy?: string;
-      updatedAt?: string;
-      isDeleted?: boolean;
-      name?: string;
-      url?: string;
-      secret?: string;
-      events?: string;
-      isActive?: boolean;
-    };
-    WebhookLog: {
-      id?: number;
-      createdBy?: string;
-      createdAt?: string;
-      lastModifiedBy?: string;
-      updatedAt?: string;
-      isDeleted?: boolean;
-      deliveryId?: string;
-      webhook?: OpenApiComponents["schemas"]["Webhook"];
-      event?: string;
-      url?: string;
-      requestPayload?: string;
-      responsePayload?: string;
-      responseCode?: number;
-      isSuccess?: boolean;
-      errorMessage?: string;
-      attemptCount?: number;
     };
     ApiResponseListUserResponse: {
       code?: number;
@@ -1165,12 +1479,6 @@ export interface OpenApiComponents {
       code?: number;
       message?: string;
       data?: Array<OpenApiComponents["schemas"]["RoleResponse"]>;
-      traceId?: string;
-    };
-    ApiResponseListLong: {
-      code?: number;
-      message?: string;
-      data?: Array<number>;
       traceId?: string;
     };
     ApiResponsePageResultProjectResponse: {
@@ -1232,6 +1540,7 @@ export interface OpenApiComponents {
       title?: string;
       slug?: string;
       coverImage?: string;
+      shaderPreset?: string;
       summary?: string;
       content?: string;
       contentType?: "JSON" | "MDX";
@@ -1306,13 +1615,6 @@ export interface OpenApiComponents {
       resolutionNote?: string;
       createdAt?: string;
     };
-    ApiResponsePostAutosaveResponse: {
-      code?: number;
-      message?: string;
-      data?: OpenApiComponents["schemas"]["PostAutosaveResponse"];
-      traceId?: string;
-    };
-    PostAutosaveResponse: { content?: unknown; contentType?: "JSON" | "MDX" };
     ApiResponseDict: {
       code?: number;
       message?: string;
@@ -1320,6 +1622,126 @@ export interface OpenApiComponents {
       traceId?: string;
     };
     Dict: { empty?: boolean; [key: string]: unknown };
+    ApiResponsePageResultNotificationDeliveryResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["PageResultNotificationDeliveryResponse"];
+      traceId?: string;
+    };
+    PageResultNotificationDeliveryResponse: {
+      list?: Array<OpenApiComponents["schemas"]["NotificationDeliveryResponse"]>;
+      total?: number;
+      page?: number;
+      size?: number;
+      totalPages?: number;
+    };
+    ApiResponsePageResultNotificationDeliveryRetryResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["PageResultNotificationDeliveryRetryResponse"];
+      traceId?: string;
+    };
+    NotificationDeliveryRetryResponse: {
+      id?: number;
+      requestId?: string;
+      requestedBy?: string;
+      reason?: string;
+      previousStatus?: string;
+      previousMaxAttempts?: number;
+      newMaxAttempts?: number;
+      attemptsAtRetry?: number;
+      createdAt?: string;
+    };
+    PageResultNotificationDeliveryRetryResponse: {
+      list?: Array<OpenApiComponents["schemas"]["NotificationDeliveryRetryResponse"]>;
+      total?: number;
+      page?: number;
+      size?: number;
+      totalPages?: number;
+    };
+    ApiResponseNotificationDeliveryOverviewResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["NotificationDeliveryOverviewResponse"];
+      traceId?: string;
+    };
+    NotificationDeliveryOverviewResponse: {
+      counts?: { [key: string]: number };
+      pending?: number;
+      overdue?: number;
+      oldestPendingAt?: string;
+      observedAt?: string;
+    };
+    ApiResponsePageResultNewsletterSubscriberResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["PageResultNewsletterSubscriberResponse"];
+      traceId?: string;
+    };
+    NewsletterSubscriberResponse: {
+      id?: number;
+      email?: string;
+      status?: "PENDING" | "ACTIVE" | "UNSUBSCRIBED";
+      createdAt?: string;
+      verifiedAt?: string;
+    };
+    PageResultNewsletterSubscriberResponse: {
+      list?: Array<OpenApiComponents["schemas"]["NewsletterSubscriberResponse"]>;
+      total?: number;
+      page?: number;
+      size?: number;
+      totalPages?: number;
+    };
+    ApiResponseNewsletterAudienceOverviewResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["NewsletterAudienceOverviewResponse"];
+      traceId?: string;
+    };
+    NewsletterAudienceOverviewResponse: {
+      activeSubscribers?: number;
+      pendingSubscribers?: number;
+      unsubscribedSubscribers?: number;
+      verifiedLast30Days?: number;
+    };
+    ApiResponseListNewsletterDeliveryBatchResponse: {
+      code?: number;
+      message?: string;
+      data?: Array<OpenApiComponents["schemas"]["NewsletterDeliveryBatchResponse"]>;
+      traceId?: string;
+    };
+    NewsletterDeliveryBatchResponse: {
+      id?: number;
+      status?: string;
+      recipientCount?: number;
+      queuedCount?: number;
+      deliveredCount?: number;
+      failedCount?: number;
+      startedAt?: string;
+      completedAt?: string;
+    };
+    ApiResponsePageResultNewsletterDeliveryResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["PageResultNewsletterDeliveryResponse"];
+      traceId?: string;
+    };
+    NewsletterDeliveryResponse: {
+      id?: number;
+      subscriberId?: number;
+      status?: string;
+      attempts?: number;
+      lastError?: string;
+      deliveredAt?: string;
+      createdAt?: string;
+    };
+    PageResultNewsletterDeliveryResponse: {
+      list?: Array<OpenApiComponents["schemas"]["NewsletterDeliveryResponse"]>;
+      total?: number;
+      page?: number;
+      size?: number;
+      totalPages?: number;
+    };
     ApiResponsePageResultOperationLog: {
       code?: number;
       message?: string;
@@ -1420,6 +1842,32 @@ export interface OpenApiComponents {
       size?: number;
       totalPages?: number;
     };
+    ApiResponseAssetUsageResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["AssetUsageResponse"];
+      traceId?: string;
+    };
+    AssetUsageResponse: {
+      total?: number;
+      locations?: Array<OpenApiComponents["schemas"]["Location"]>;
+    };
+    Location: {
+      kind?:
+        | "ARTICLE_COVER"
+        | "ARTICLE_CONTENT"
+        | "ARTICLE_SUMMARY"
+        | "COMMENT"
+        | "USER_AVATAR"
+        | "PROJECT_COVER"
+        | "MOMENT"
+        | "SERIES_COVER"
+        | "FRIEND_LINK_AVATAR"
+        | "ARTICLE_REVISION"
+        | "EDITOR_DRAFT";
+      id?: number;
+      label?: string;
+    };
     ApiResponseStorageInventoryResponse: {
       code?: number;
       message?: string;
@@ -1463,6 +1911,92 @@ export interface OpenApiComponents {
       totalComments?: number;
       pendingComments?: number;
       totalViews?: number;
+    };
+    ApiResponseEditorialCalendarResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["EditorialCalendarResponse"];
+      traceId?: string;
+    };
+    EditorialCalendarResponse: {
+      from?: string;
+      to?: string;
+      entries?: Array<OpenApiComponents["schemas"]["Entry"]>;
+    };
+    Entry: {
+      id?: string;
+      type?: string;
+      title?: string;
+      date?: string;
+      timestamp?: string;
+      status?: "DRAFT" | "PENDING_REVIEW" | "SCHEDULED" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
+      href?: string;
+    };
+    ApiResponseContentWorkflowResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["ContentWorkflowResponse"];
+      traceId?: string;
+    };
+    ContentWorkflowResponse: {
+      items?: Array<OpenApiComponents["schemas"]["Item"]>;
+      summary?: OpenApiComponents["schemas"]["Summary"];
+    };
+    Item: {
+      id?: string;
+      type?: string;
+      title?: string;
+      description?: string;
+      action?: string;
+      priority?: "HIGH" | "MEDIUM" | "LOW";
+      status?: "DRAFT" | "PENDING_REVIEW" | "SCHEDULED" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
+      relevantAt?: string;
+      href?: string;
+    };
+    Summary: {
+      needsReview?: number;
+      scheduled?: number;
+      drafts?: number;
+      rejected?: number;
+      total?: number;
+    };
+    ActivityItem: {
+      id?: string;
+      type?: string;
+      title?: string;
+      occurredAt?: string;
+      href?: string;
+    };
+    ApiResponseContentOperationsOverviewResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["ContentOperationsOverviewResponse"];
+      traceId?: string;
+    };
+    AttentionItem: {
+      id?: string;
+      type?: string;
+      title?: string;
+      description?: string;
+      href?: string;
+      severity?: "INFO" | "WARNING" | "CRITICAL";
+      count?: number;
+    };
+    ContentOperationsOverviewResponse: {
+      summary?: OpenApiComponents["schemas"]["Summary"];
+      attentionItems?: Array<OpenApiComponents["schemas"]["AttentionItem"]>;
+      editorialQueue?: Array<OpenApiComponents["schemas"]["QueueItem"]>;
+      recentActivity?: Array<OpenApiComponents["schemas"]["ActivityItem"]>;
+      generatedAt?: string;
+    };
+    QueueItem: {
+      id?: string;
+      type?: string;
+      title?: string;
+      excerpt?: string;
+      status?: "DRAFT" | "PENDING_REVIEW" | "SCHEDULED" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
+      updatedAt?: string;
+      href?: string;
     };
     ApiResponsePageResultCommentReportResponse: {
       code?: number;
@@ -1581,6 +2115,50 @@ export interface OpenApiComponents {
       page?: number;
       size?: number;
       totalPages?: number;
+    };
+    ApiResponsePageResultVisitorSummaryResponse: {
+      code?: number;
+      message?: string;
+      data?: OpenApiComponents["schemas"]["PageResultVisitorSummaryResponse"];
+      traceId?: string;
+    };
+    PageResultVisitorSummaryResponse: {
+      list?: Array<OpenApiComponents["schemas"]["VisitorSummaryResponse"]>;
+      total?: number;
+      page?: number;
+      size?: number;
+      totalPages?: number;
+    };
+    VisitorSummaryResponse: {
+      visitorHash?: string;
+      ipAddress?: string;
+      country?: string;
+      region?: string;
+      city?: string;
+      clientName?: string;
+      osName?: string;
+      deviceType?: string;
+      firstSeen?: string;
+      lastSeen?: string;
+      views?: number;
+      sessions?: number;
+      pages?: number;
+    };
+    ApiResponseListVisitorTimelineResponse: {
+      code?: number;
+      message?: string;
+      data?: Array<OpenApiComponents["schemas"]["VisitorTimelineResponse"]>;
+      traceId?: string;
+    };
+    VisitorTimelineResponse: {
+      viewedAt?: string;
+      path?: string;
+      title?: string;
+      clientName?: string;
+      deviceType?: string;
+      sourceChannel?: string;
+      referrerHost?: string;
+      ipAddress?: string;
     };
     ApiResponseTrafficStatsResponse: {
       code?: number;

@@ -1,5 +1,5 @@
 {
-  "nexusRevision": "fe50456da10f63920d0dbecca8392501b5577681",
+  "nexusRevision": "4f8ec5dc1ff2f3418280919c1a54fe869297ca0b",
   "paths": {
     "/api/v1/admin/analytics/content-funnel": {
       "get": {
@@ -606,18 +606,6 @@
       },
       "delete": {
         "operationId": "deletePosts",
-        "tags": ["Admin Post Management"]
-      }
-    },
-    "/api/v1/admin/posts/autosave": {
-      "post": {
-        "operationId": "autosavePost",
-        "tags": ["Admin Post Management"]
-      }
-    },
-    "/api/v1/admin/posts/autosave/{identifier}": {
-      "get": {
-        "operationId": "retrieveAutosave",
         "tags": ["Admin Post Management"]
       }
     },

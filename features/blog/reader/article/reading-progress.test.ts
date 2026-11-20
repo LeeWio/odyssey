@@ -10,6 +10,7 @@ const saved: ReadingCheckpoint = {
   postId: 7,
   progressPercent: 40,
   positionAnchor: "chapter-one",
+  observedAt: "2026-11-19T12:00:00.000Z",
 };
 
 describe("reading progress checkpoints", () => {
