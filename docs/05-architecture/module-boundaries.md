@@ -134,12 +134,13 @@
 
 ### Theme / UI Shell
 
-位置：`app/layout.tsx`、`app/providers.tsx`、`lib/theme*`、`lib/features/ui`
+位置：`app/layout.tsx`、`app/providers.tsx`、`components/providers`、`lib/theme*`、`lib/features/ui`
 
 职责：
 
 - 全局主题、语言、导航、footer、控制面板、弹层开关。
 - 主题首屏初始化和持久化同步。
+- `components/providers` 按国际化、store、主题和 Toast 职责拆分运行时 Provider；`app/providers.tsx` 只负责编排顺序。
 
 边界：
 

@@ -103,9 +103,6 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
           typeof persistedAuth.accessToken === "string" &&
           persistedAuth.accessToken.length > 0,
       };
-
-      // Drop a copy left in sessionStorage by the previous tab-scoped login.
-      writeAuthStorage(auth);
     }
     if (draftId) {
       preloadedState.overlay = {

@@ -3,6 +3,7 @@ import { type AppLocale } from "@/i18n/locale";
 import { localizeApiPayload } from "@/lib/i18n/api-localization";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
+import { getServerApiOrigin, joinApiPath } from "./api-config";
 import { SERVER_PREFETCH_HEADER } from "./client-device";
 import { apiResponseSchema } from "./contracts";
 
@@ -29,18 +30,10 @@ export interface ServerApiResult<T> {
   status: number;
 }
 
-function getServerApiOrigin(): string | null {
-  const configured =
-    process.env.API_URL?.replace(/\/$/, "") ||
-    process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "");
-  if (configured) return configured;
-  return process.env.NODE_ENV === "development" ? "http://127.0.0.1:8080" : null;
-}
-
 function serverApiUrl(path: string): string | null {
   const origin = getServerApiOrigin();
   if (!origin) return null;
-  return `${origin}/${path.replace(/^\//, "")}`;
+  return joinApiPath(origin, path);
 }
 
 export async function fetchServerApiJson<T>(

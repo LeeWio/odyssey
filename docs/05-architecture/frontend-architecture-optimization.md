@@ -65,9 +65,15 @@ app/components/features -> components/ui
 
 ### P3：Provider 与副作用收敛
 
-- 将主题、媒体、Toast、Redux 和 i18n Provider 拆成职责明确的 runtime provider。
+- 已将主题、媒体、Toast、Redux 和 i18n Provider 拆成职责明确的 runtime provider；`app/providers.tsx` 只负责组合运行时层，不再承载具体 Provider 实现。
 - 应用入口不再修改全局 `console.error`；开发警告必须在具体依赖或组件边界处理。
-- 统一持久化副作用的初始化、hydration 和失效策略。
+- 统一持久化副作用的初始化、hydration 和失效策略；状态预加载保持纯函数，不在 hydration 阶段写入 storage。
+
+### P3：API transport 单一来源
+
+- 客户端与 RSC 统一从 `lib/api/api-config.ts` 获取 API origin 和路径拼接策略。
+- 查询参数序列化集中在 `lib/api/query-params.ts`，分页对象、数组和空值拥有唯一实现。
+- 领域 API 不直接解析后端地址，也不重复实现 transport 细节。
 
 ### P4：契约与可观测性
 
