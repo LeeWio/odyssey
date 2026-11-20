@@ -22,7 +22,7 @@ export function CollectionContents({ collection }: { collection: PostCollectionR
   const [pendingRemovals, setPendingRemovals] = useState<ReadonlySet<number>>(new Set());
   const [removePost] = useRemovePostFromCollectionMutation();
   const query = useGetCollectionPostsQuery(
-    { collectionId: collection.id, page, size: 20, sort: ["addedAt,desc"] },
+    { collectionId: collection.id, page, size: 20 },
     { refetchOnMountOrArgChange: true }
   );
   const data = query.currentData;

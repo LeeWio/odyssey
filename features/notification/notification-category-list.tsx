@@ -15,11 +15,7 @@ import {
   useMarkNotificationAsDoneMutation,
 } from "@/lib/features/notification";
 import { useAuditUserMutation, useReviewPostMutation } from "@/lib/features/openapi/openapi-api";
-import {
-  getNotificationIcon,
-  getNotificationDestination,
-  getNotificationTypeLabel,
-} from "@/lib/notification-presentation";
+import { getNotificationIcon, getNotificationTypeLabel } from "@/lib/notification-presentation";
 import { useRelativeTime } from "@/lib/relative-time";
 import { useAppSelector } from "@/lib/hooks";
 
@@ -175,7 +171,6 @@ function NotificationRow({
 }) {
   const t = useTranslations("Notifications");
   const formatRelativeTime = useRelativeTime();
-  const destination = getNotificationDestination(notification);
   const rowLocked = disabled || pending !== undefined;
 
   return (
@@ -195,7 +190,7 @@ function NotificationRow({
             isPending={pending === "read"}
             isDisabled={rowLocked}
             variant="ghost"
-            onPress={() => destination && onOpen(notification)}
+            onPress={() => onOpen(notification)}
           >
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2">

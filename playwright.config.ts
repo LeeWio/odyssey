@@ -3,6 +3,8 @@ import { defineConfig, devices } from "@playwright/test";
 const externalBaseUrl = process.env.PLAYWRIGHT_BASE_URL;
 const baseURL = externalBaseUrl ?? "http://127.0.0.1:3100";
 const fixtureOrigin = "http://127.0.0.1:3181";
+const realBackend = process.env.PLAYWRIGHT_REAL_BACKEND === "1";
+const backendOrigin = process.env.PLAYWRIGHT_API_URL ?? "http://127.0.0.1:18080";
 const ci = Boolean(process.env.CI);
 
 export default defineConfig({
@@ -40,16 +42,20 @@ export default defineConfig({
   webServer: externalBaseUrl
     ? undefined
     : [
-        {
-          command: "bun tests/e2e/fixtures/api.ts",
-          env: { E2E_FIXTURE_ORIGIN: fixtureOrigin },
-          url: `${fixtureOrigin}/health`,
-          timeout: 10_000,
-        },
+        ...(realBackend
+          ? []
+          : [
+              {
+                command: "bun tests/e2e/fixtures/api.ts",
+                env: { E2E_FIXTURE_ORIGIN: fixtureOrigin },
+                url: `${fixtureOrigin}/health`,
+                timeout: 10_000,
+              },
+            ]),
         {
           command: "bun run dev --hostname 127.0.0.1 --port 3100",
           env: {
-            API_URL: fixtureOrigin,
+            API_URL: realBackend ? backendOrigin : fixtureOrigin,
             NEXT_PUBLIC_API_BASE_URL: "",
             NEXT_DIST_DIR: ".next-e2e",
             ENABLE_AUTH_TEST_ROUTE: "1",

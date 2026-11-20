@@ -86,6 +86,17 @@ curl --fail --max-time 15 http://127.0.0.1:8080/v3/api-docs -o /tmp/nexus-openap
 
 Nexus 的 `docker-compose.yml` 还提供 MySQL、Redis、RabbitMQ、Elasticsearch、Mailpit 等服务定义。宿主机映射端口分别包含 MySQL 3307、Redis 6380、RabbitMQ 5672、Elasticsearch 9200 和 SMTP 1025。启动之前检查并设置数据库、消息服务和邮件配置；不要直接沿用其他环境的凭据。
 
+## 真实通知与阅读闭环
+
+跨仓库验证使用 Nexus 的独立 disposable Compose 环境，不复用本地开发数据卷，也不连接生产服务：
+
+```bash
+cd ../nexus
+./scripts/run-notification-reading-e2e.sh
+```
+
+该命令会启动 MySQL 8.4、Redis、RabbitMQ、Mailpit 和 Nexus，写入仅用于测试的用户与分类关注关系，然后以真实 API 运行 Odyssey 的通知到阅读库 Playwright 用例。命令结束后会删除容器、网络和数据卷。后端镜像、迁移和 Maven 质量门均在 Docker 中执行。
+
 前端仓库不包含核心业务数据库和后端服务。要验证登录、评论、文章、文件上传、市场数据和后台管理，需要先启动兼容的 Odyssey API 服务，并确认：
 
 - API 基础路径为 `/api/v1`

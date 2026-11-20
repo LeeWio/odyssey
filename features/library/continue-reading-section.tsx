@@ -1,6 +1,6 @@
 "use client";
 
-import { Link, Typography } from "@heroui/react";
+import { Typography } from "@heroui/react";
 
 import { useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { useTranslations } from "next-intl";
@@ -25,9 +25,6 @@ export function ContinueReadingSection() {
             {t("continueDescription")}
           </Typography>
         </div>
-        <Link className="text-accent text-sm font-medium no-underline" href="/single">
-          {t("browseAllWriting")}
-        </Link>
       </div>
       {overview.isLoading ? (
         <LibrarySkeleton />

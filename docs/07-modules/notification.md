@@ -25,6 +25,9 @@ Notifications provide a reader's inbox, saved/completed activity, and delivery p
 
 A notification opens only when its link points at a reader route: an essay, moments, the guestbook, or the notification center. Review queues such as `/comments` and `/posts` stay in the inbox and show the suggested action from the notification context. External `http` and `https` links still open in a new tab. The popover stays open when the selected notification has no reader destination.
 
+- A notification without a destination is still an actionable inbox row: opening it marks the notification as read without attempting navigation. This keeps review and informational updates readable even when their suggested action is handled inline.
+- Empty results caused by an unread or category filter offer a nearby Clear filters action in both the center and popover, returning the reader to the unfiltered inbox without changing the server state.
+
 ## Row actions
 
 - The center and popover use `use-notification-actions` to track pending work by notification ID within each mounted surface. Claims happen synchronously, preventing repeated events before the next render.

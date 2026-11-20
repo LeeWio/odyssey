@@ -18,9 +18,19 @@ cross-repository workflow before adding another notification family or a new
 content module.
 
 The delivery operations surface, Tiptap metadata contract, and browser-level
-notification delivery journey are now implemented. Remaining work focuses on
-real category and destination verification, reading-loop return paths, and
-operational retention rather than adding new notification types.
+notification delivery journey are now implemented. This phase also closes the
+real category, reading-loop return, and MySQL retention verification gap rather
+than adding another notification type.
+
+The repositories now also provide a disposable Docker-backed cross-repository
+journey. It seeds a followed category, publishes through the real Nexus API,
+and verifies the persisted notification reaches the canonical reader before
+the user returns through the reading library.
+
+The next frontend increment now treats those return paths as first-class
+workspaces: the notification center can consume informational rows without a
+route, and the personal library opens on reading tasks before exposing
+discovery, organization, and history as URL-addressable sections.
 
 Quality checks run during planning on October 9, 2026:
 
