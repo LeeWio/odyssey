@@ -54,4 +54,8 @@ test("article comment sheet opens from the reader toolbar", { tag: "@smoke" }, a
   const sheet = page.getByRole("dialog", { name: /^Comments\b/ });
   await expect(sheet.getByRole("heading", { name: "Comments 1", exact: true })).toBeVisible();
   await expect(sheet.getByText(reply, { exact: true })).toBeVisible();
+  const close = sheet.getByRole("button", { name: "Close", exact: true });
+  await expect(close).toBeVisible();
+  await close.click();
+  await expect(page.locator('[data-slot="sheet-overlay"]')).toHaveAttribute("data-exiting", "true");
 });

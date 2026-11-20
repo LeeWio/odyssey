@@ -29,13 +29,7 @@ export function CommentSheet({ postId, momentId, isOpen, onOpenChange }: Comment
   );
 
   return (
-    <Sheet
-      isDetached
-      isOpen={isOpen}
-      placement="bottom"
-      snapPoints={["min(560px,72dvh)", "min(640px,78dvh)"]}
-      onOpenChange={onOpenChange}
-    >
+    <Sheet isDetached isOpen={isOpen} placement="bottom" onOpenChange={onOpenChange}>
       <Sheet.Backdrop isExiting variant="blur">
         <Sheet.Content className={SHEET_CONTENT_SIZE}>
           <Sheet.Dialog>
@@ -92,6 +86,7 @@ function CommentSheetContent({
           isLoadingNew={isLoadingNew}
           onLoadNew={onLoadNew}
         />
+        <Sheet.CloseTrigger aria-label={t("close")} />
       </Sheet.Header>
       <Sheet.Body>{commentList}</Sheet.Body>
       <Sheet.Footer>
