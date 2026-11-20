@@ -24,7 +24,7 @@ import { useGetCategoriesQuery } from "@/lib/features/category";
 import { useGetColumnsQuery } from "@/lib/features/column";
 import { useGetAllTagsQuery } from "@/lib/features/tag";
 import type { PostRequest } from "@/lib/features/post";
-import { TranslationFields } from "@/components/dashboard/translation-fields";
+import { TranslationFields } from "@/components/content-translations/translation-fields";
 
 interface RichTextFormProps {
   data: Partial<PostRequest>;

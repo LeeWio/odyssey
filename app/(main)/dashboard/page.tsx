@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardPage } from "@/components/dashboard/views/dashboard-page";
+import { DashboardPage } from "@/features/dashboard/route-entries";
 import { useMounted } from "@mantine/hooks";
 import { Skeleton } from "@heroui/react";
 import { PageContainer } from "@/components/layout/page-container";

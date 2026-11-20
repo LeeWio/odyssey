@@ -11,12 +11,12 @@ Handles discussion and interaction around content (posts, moments, guestbook).
 
 ## Ownership
 
-| Layer         | Path                                                                | Owns                                                                                                          |
-| ------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| UI            | `components/comment/`                                               | Composer, list, sheet, context, client orchestration hooks                                                    |
-| Data          | `lib/features/comment/`                                             | Zod contracts, RTK Query endpoints, Comment cache tags                                                        |
-| Admin surface | `components/dashboard/views/comments-page.tsx` + `comments/` panels | Governance console (moderate / reports / high-risk / logs / preview); must not fork a second public thread UI |
-| Feature pages | guestbook / blog reader / moment card / article sheet               | Configure `CommentSystem` / `CommentSheet` only                                                               |
+| Layer         | Path                                                              | Owns                                                                                                          |
+| ------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| UI            | `components/comment/`                                             | Composer, list, sheet, context, client orchestration hooks                                                    |
+| Data          | `lib/features/comment/`                                           | Zod contracts, RTK Query endpoints, Comment cache tags                                                        |
+| Admin surface | `features/dashboard/views/comments-page.tsx` + `comments/` panels | Governance console (moderate / reports / high-risk / logs / preview); must not fork a second public thread UI |
+| Feature pages | guestbook / blog reader / moment card / article sheet             | Configure `CommentSystem` / `CommentSheet` only                                                               |
 
 Feature-specific entry points may wrap or configure `CommentSystem`, but must **not** implement another composer, query flow, or recursive comment card.
 

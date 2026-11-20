@@ -15,7 +15,7 @@ summary, and rich-text content cannot be accidentally mixed.
 
 ## Frontend contract
 
-`components/dashboard/translation-fields.tsx` owns the shared HeroUI language
+`components/content-translations/translation-fields.tsx` owns the shared HeroUI language
 tabs and field composition. Feature contracts preserve the API translation maps
 so admin forms can load existing values and submit them without a compatibility
 layer.

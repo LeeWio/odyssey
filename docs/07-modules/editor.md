@@ -4,7 +4,7 @@ The editor is the Tiptap surface in `components/rich-text`. Publishing state sta
 
 ## Where it opens
 
-- Admin posts call `openRichText` from `components/dashboard/views/posts-page.tsx`.
+- Admin posts call `openRichText` from `features/dashboard/views/posts-page.tsx`.
 - `components/global-control.tsx` mounts `RichTextModal` when that UI flag is set.
 - `/test/rich-text` exists only when `ENABLE_RICH_TEXT_TEST_ROUTE=1`.
 
