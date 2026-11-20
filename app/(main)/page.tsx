@@ -1,5 +1,5 @@
 import Home from "./home-client";
-import { getPublicMomentsInitialData } from "@/lib/features/moment/public-moments";
+import { getPublicMomentsInitialData } from "@/lib/features/moment/server";
 import { MOMENTS_SHOWCASE_LIMIT } from "@/features/home/moments-showcase";
 
 export default async function HomePage() {

@@ -9,10 +9,10 @@ import { Button, Card, Chip, Link, Surface, Tabs, Typography } from "@heroui/rea
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import Image from "next/image";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { PageFrame } from "@/components/layout/page-frame";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 import { FootprintsMap } from "./footprints-map";
 import {
   getFootprintMetaLabel,
@@ -87,9 +87,7 @@ export function FootprintsPage() {
   const t = useTranslations("Footprints");
   const shouldReduceMotion = useReducedMotionPreference();
   const { reveal } = createPageReveal(shouldReduceMotion);
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const years = getFootprintYears();
   const selectedYear = getSelectedYear(searchParams.get("year"), years);
   const requestedId = searchParams.get("place");
@@ -109,17 +107,12 @@ export function FootprintsPage() {
     visibleFootprints.find((footprint) => footprint.id === activeId) ?? null;
 
   const updateLocation = (changes: { place?: string; year?: string }) => {
-    const nextParams = new URLSearchParams(searchParams.toString());
-    if (changes.year !== undefined) {
-      if (changes.year === ALL_YEARS) nextParams.delete("year");
-      else nextParams.set("year", changes.year);
-    }
-    if (changes.place !== undefined) {
-      if (changes.place) nextParams.set("place", changes.place);
-      else nextParams.delete("place");
-    }
-    const query = nextParams.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    updateQuery({
+      ...(changes.year === undefined
+        ? {}
+        : { year: changes.year === ALL_YEARS ? null : changes.year }),
+      ...(changes.place === undefined ? {} : { place: changes.place }),
+    });
   };
 
   const selectFootprint = (footprint: Footprint) => updateLocation({ place: footprint.id });

@@ -3,12 +3,12 @@
 import { EmptyState } from "@heroui-pro/react";
 import { Button, Chip, Link, Tabs, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Key } from "react";
 
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 import { useTranslations } from "next-intl";
 
 import { CollectionsSection } from "./collections-section";
@@ -33,18 +33,12 @@ export function LibraryPage() {
   const t = useTranslations("Library");
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const activeView = getLibraryView(searchParams.get("view"));
 
   const handleViewChange = (key: Key) => {
     const nextView = getLibraryView(String(key));
-    const nextParams = new URLSearchParams(searchParams.toString());
-    if (nextView === "reading") nextParams.delete("view");
-    else nextParams.set("view", nextView);
-    const query = nextParams.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    updateQuery({ view: nextView === "reading" ? null : nextView });
   };
 
   const renderLibraryView = () => {

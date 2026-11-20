@@ -57,17 +57,19 @@ describe("getPublicArticle", () => {
 
   it("encodes the slug once and returns public content without viewer state", async () => {
     vi.stubEnv("NEXT_PUBLIC_API_BASE_URL", "https://api.example.test/");
-    const fetchMock = vi.fn().mockResolvedValue(response(200, { data: article }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(response(200, { code: 200, message: "OK", data: article }));
     vi.stubGlobal("fetch", fetchMock);
 
     const result = await getPublicArticle("cached essay");
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.example.test/api/v1/public/blog/posts/cached%20essay",
-      {
+      expect.objectContaining({
         headers: { "x-odyssey-prefetch": "1" },
         next: { revalidate: 60, tags: ["article:cached essay"] },
-      }
+      })
     );
     expect(result).toMatchObject({
       status: "ok",
@@ -83,17 +85,19 @@ describe("getPublicArticle", () => {
   it("uses the local API when the public base URL is empty in development", async () => {
     vi.stubEnv("NEXT_PUBLIC_API_BASE_URL", "");
     vi.stubEnv("NODE_ENV", "development");
-    const fetchMock = vi.fn().mockResolvedValue(response(200, { data: article }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(response(200, { code: 200, message: "OK", data: article }));
     vi.stubGlobal("fetch", fetchMock);
 
     await getPublicArticle("cached essay");
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://127.0.0.1:8080/api/v1/public/blog/posts/cached%20essay",
-      {
+      expect.objectContaining({
         headers: { "x-odyssey-prefetch": "1" },
         next: { revalidate: 60, tags: ["article:cached essay"] },
-      }
+      })
     );
   });
 

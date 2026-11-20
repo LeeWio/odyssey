@@ -1,12 +1,12 @@
 import type { Action, ThunkAction } from "@reduxjs/toolkit";
 import { combineSlices, configureStore } from "@reduxjs/toolkit";
-import { authSlice, localeSlice, uiSlice } from "./features";
+import { authSlice, localeSlice, overlaySlice, shellSlice } from "./features";
 import { baseApi } from "./api";
 import { loadPersistedState, persistenceMiddleware } from "./middleware/persistence";
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.
-const rootReducer = combineSlices(localeSlice, authSlice, uiSlice, baseApi);
+const rootReducer = combineSlices(localeSlice, authSlice, shellSlice, overlaySlice, baseApi);
 // Infer the `RootState` type from the root reducer
 export type RootState = ReturnType<typeof rootReducer>;
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { siteConfig } from "@/config/site";
-import { getPublicArticle } from "@/lib/features/post/public-article";
+import { getPublicArticle } from "@/lib/features/post/server";
 
 export async function generateMetadata({
   params,

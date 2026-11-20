@@ -18,7 +18,7 @@ import { MomentMotionProvider, MomentState } from "@/features/moment/components/
 import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
 import { useMomentAnchor } from "@/features/moment/hooks/use-moment-anchor";
 import { PageFrame } from "@/components/layout/page-frame";
-import type { PublicMomentsInitialData } from "@/lib/features/moment/public-moments";
+import type { PublicMomentsInitialData } from "@/lib/features/moment/server";
 import { useGetLikedMomentIdsQuery, type MomentResponse } from "@/lib/features/moment";
 import { selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";

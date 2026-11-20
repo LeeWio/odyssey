@@ -10,7 +10,6 @@ import { Tabs, Card, Chip, Skeleton, Typography } from "@heroui/react";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PageFrame } from "@/components/layout/page-frame";
 import { ArticleCover } from "@/components/card/article-cover";
 
@@ -22,7 +21,8 @@ import { ExplorePage } from "@/features/explore";
 
 // API hooks to fetch fresh content for the featured tab
 import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
-import type { PublicJournalInitialData } from "@/lib/features/post/public-journal";
+import type { PublicJournalInitialData } from "@/lib/features/post/server";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 
 const CHRONICLE_SECTIONS = ["featured", "explore", "orbit", "columns", "archive"] as const;
 type ChronicleSection = (typeof CHRONICLE_SECTIONS)[number];
@@ -46,9 +46,7 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
   const t = useTranslations("Blog");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
 
   const { reveal } = createPageReveal(shouldReduceMotion);
   const activeTab = getChronicleSection(searchParams.get("section"));
@@ -73,11 +71,7 @@ export default function ChroniclePage({ initialData }: { initialData: PublicJour
 
   const handleSectionChange = (key: React.Key) => {
     const section = getChronicleSection(String(key));
-    const nextParams = new URLSearchParams(searchParams.toString());
-    if (section === "featured") nextParams.delete("section");
-    else nextParams.set("section", section);
-    const query = nextParams.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    updateQuery({ section: section === "featured" ? null : section });
   };
 
   return (

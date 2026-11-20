@@ -2,9 +2,8 @@
 
 import { Xmark } from "@gravity-ui/icons";
 import { Sheet } from "@heroui/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { LifeListItemResponse, LifeListStatus } from "@/lib/features/life-list";
 import { selectIsAdmin, useLogoutMutation } from "@/lib/features/auth";
 import {
@@ -16,6 +15,7 @@ import {
   toggleDashboard,
 } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 
 import { AppShell } from "./app-shell";
 import { NAV_ITEMS } from "./nav-items";
@@ -52,9 +52,7 @@ export function DashboardSheet() {
   const requestedPath = useAppSelector(selectDashboardPath);
   const isAdmin = useAppSelector(selectIsAdmin);
   const dispatch = useAppDispatch();
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const [logout] = useLogoutMutation();
   const t = useTranslations("Dashboard");
   const currentPath = requestedPath;
@@ -64,18 +62,6 @@ export function DashboardSheet() {
   const [suppressOutsideClose, setSuppressOutsideClose] = useState(false);
   const hasHydratedUrlRef = useRef(false);
   const lastDashboardParamRef = useRef<string | null>(null);
-
-  const updateDashboardUrl = useCallback(
-    (path: string | null, mode: "push" | "replace") => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (path) params.set("dashboard", path);
-      else params.delete("dashboard");
-      const query = params.toString();
-      const url = query ? `${pathname}?${query}` : pathname;
-      router[mode](url, { scroll: false });
-    },
-    [pathname, router, searchParams]
-  );
 
   const dashboardParam = searchParams.get("dashboard");
 
@@ -108,7 +94,7 @@ export function DashboardSheet() {
       setSuppressOutsideClose(false);
       return;
     }
-    updateDashboardUrl(open ? currentPath : null, open ? "push" : "replace");
+    updateQuery({ dashboard: open ? currentPath : null }, { mode: open ? "push" : "replace" });
     dispatch(setDashboardOpen(open));
   };
 
@@ -125,7 +111,7 @@ export function DashboardSheet() {
     }
 
     dispatch(setDashboardPath(href));
-    updateDashboardUrl(href, "push");
+    updateQuery({ dashboard: href }, { mode: "push" });
   };
 
   if (!isAdmin) {

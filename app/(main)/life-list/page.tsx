@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { getPublicLifeListInitialData } from "@/lib/features/life-list/public-life-list";
+import { getPublicLifeListInitialData } from "@/lib/features/life-list/server";
 
 import { LifeListPageClient } from "./life-list-page-client";
 

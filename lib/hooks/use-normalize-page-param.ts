@@ -1,29 +1,20 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 import { clampPageToTotal } from "@/lib/utils/pagination";
+import { useQueryState } from "./use-query-state";
 
 export function useNormalizePageParam(page: number, totalPages?: number) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const queryString = searchParams.toString();
 
   useEffect(() => {
     if (totalPages === undefined) return;
 
     const normalizedPage = clampPageToTotal(page, totalPages);
-    const query = new URLSearchParams(queryString);
-    if (normalizedPage === 1) query.delete("page");
-    else query.set("page", String(normalizedPage));
-
-    const normalizedQuery = query.toString();
-    if (normalizedQuery === queryString) return;
-
-    router.replace(`${pathname}${normalizedQuery ? `?${normalizedQuery}` : ""}`, {
-      scroll: false,
-    });
-  }, [page, pathname, queryString, router, totalPages]);
+    const expectedPage = normalizedPage === 1 ? null : String(normalizedPage);
+    if ((searchParams.get("page") ?? null) === expectedPage) return;
+    updateQuery({ page: expectedPage }, { scroll: false });
+  }, [page, queryString, searchParams, totalPages, updateQuery]);
 }

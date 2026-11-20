@@ -1,4 +1,4 @@
-import { getPublicMomentsInitialData } from "@/lib/features/moment/public-moments";
+import { getPublicMomentsInitialData } from "@/lib/features/moment/server";
 import { parsePageParam } from "@/lib/utils/pagination";
 
 import MomentsPageClient from "./moments-page-client";

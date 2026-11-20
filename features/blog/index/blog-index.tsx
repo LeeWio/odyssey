@@ -47,7 +47,7 @@ import { parsePageParam } from "@/lib/utils/pagination";
 import { PageContainer } from "@/components/layout/page-container";
 import { ArticleCard } from "@/components/card/article-card";
 import { ArticleCover } from "@/components/card/article-cover";
-import type { PublicJournalInitialData } from "@/lib/features/post/public-journal";
+import type { PublicJournalInitialData } from "@/lib/features/post/server";
 import {
   formatJournalDate,
   journalPageNumbers,

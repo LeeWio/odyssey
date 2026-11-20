@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import { SERVER_PREFETCH_HEADER } from "@/lib/api/client-device";
-import { apiResponseSchema } from "@/lib/api";
-import { type AppLocale } from "@/i18n/locale";
-import { localizeApiPayload } from "@/lib/i18n/api-localization";
-import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { fetchServerApiJson } from "@/lib/api/server-client";
 
 import {
   LifeListCategoryResponseSchema,
@@ -17,32 +13,13 @@ import {
 
 const REVALIDATE_SECONDS = 60;
 
-function apiOrigin() {
-  const configured =
-    process.env.API_URL?.replace(/\/$/, "") ||
-    process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "");
-  if (configured) return configured;
-  return process.env.NODE_ENV === "development" ? "http://127.0.0.1:8080" : null;
-}
-
-async function readPublicData<T>(
-  url: string,
-  schema: z.ZodType<T>,
-  locale: AppLocale
-): Promise<T | null> {
-  try {
-    const response = await fetch(url, {
-      headers: { [SERVER_PREFETCH_HEADER]: "1", "accept-language": locale },
-      signal: AbortSignal.timeout(3_000),
-      next: { revalidate: REVALIDATE_SECONDS, tags: ["public-life-list"] },
-    });
-    if (!response.ok) return null;
-    const payload: unknown = await response.json();
-    const parsed = apiResponseSchema(schema).safeParse(localizeApiPayload(payload, locale));
-    return parsed.success ? (parsed.data.data as T) : null;
-  } catch {
-    return null;
-  }
+async function readPublicData<T>(path: string, schema: z.ZodType<T>): Promise<T | null> {
+  return (
+    await fetchServerApiJson(path, schema, {
+      revalidate: REVALIDATE_SECONDS,
+      tags: ["public-life-list"],
+    })
+  ).data;
 }
 
 export interface PublicLifeListInitialData {
@@ -54,21 +31,9 @@ export async function getPublicLifeListInitialData(): Promise<PublicLifeListInit
   if (process.env.NEXT_PHASE === "phase-production-build") {
     return { page: null, categories: [] };
   }
-  const origin = apiOrigin();
-  if (!origin) return { page: null, categories: [] };
-  const locale = await getRequestLocale();
-
   const [page, categories] = await Promise.all([
-    readPublicData(
-      `${origin}/api/v1/public/life-list?page=0&size=100`,
-      LifeListPageResponseSchema,
-      locale
-    ),
-    readPublicData(
-      `${origin}/api/v1/public/life-list/categories`,
-      z.array(LifeListCategoryResponseSchema),
-      locale
-    ),
+    readPublicData("/api/v1/public/life-list?page=0&size=100", LifeListPageResponseSchema),
+    readPublicData("/api/v1/public/life-list/categories", z.array(LifeListCategoryResponseSchema)),
   ]);
 
   return { page, categories: categories ?? [] };
@@ -76,12 +41,5 @@ export async function getPublicLifeListInitialData(): Promise<PublicLifeListInit
 
 export async function getPublicLifeListItem(number: number): Promise<LifeListItemResponse | null> {
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
-  const origin = apiOrigin();
-  if (!origin) return null;
-  const locale = await getRequestLocale();
-  return readPublicData(
-    `${origin}/api/v1/public/life-list/${number}`,
-    LifeListItemResponseSchema,
-    locale
-  );
+  return readPublicData(`/api/v1/public/life-list/${number}`, LifeListItemResponseSchema);
 }

@@ -19,26 +19,6 @@ import {
   THEME_MODE_STORAGE_KEY,
 } from "@/lib/theme";
 
-// next-themes renders an inline <script> to prevent theme flicker on SSR.
-// React 19 strictly warns about script tags inside components during client-side render.
-// This warning is a false-positive — the script runs correctly during SSR.
-if (process.env.NODE_ENV === "development") {
-  const origError = console.error;
-  console.error = (...args: unknown[]) => {
-    if (
-      typeof args[0] === "string" &&
-      (args[0].includes("Encountered a script tag while rendering React component") ||
-        args[0].includes("Scripts inside React components are never executed") ||
-        args[0].includes("params are being enumerated") ||
-        args[0].includes("The keys of searchParams were accessed directly") ||
-        args[0].includes("sync-dynamic-apis"))
-    ) {
-      return;
-    }
-    origError.apply(console, args);
-  };
-}
-
 function ThemeRootSync() {
   const { resolvedTheme, theme } = useTheme();
 

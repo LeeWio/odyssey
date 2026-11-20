@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getPublicLifeListItem } from "@/lib/features/life-list/public-life-list";
+import { getPublicLifeListItem } from "@/lib/features/life-list/server";
 
 import { LifeListDetailClient } from "./life-list-detail-client";
 
