@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.255.0](https://github.com/LeeWio/odyssey/compare/v1.254.0...v1.255.0) (2026-11-20)
+
+
+### Features
+
+* **i18n:** localize API content responses ([#62](https://github.com/LeeWio/odyssey/issues/62)) ([69e028d](https://github.com/LeeWio/odyssey/commit/69e028df1e4f3fd2611c19ff4955f23d00ac4596))
+
 ## [1.254.0](https://github.com/LeeWio/odyssey/compare/v1.253.0...v1.254.0) (2026-11-20)
 
 
