@@ -172,6 +172,20 @@ function NotificationRow({
   const t = useTranslations("Notifications");
   const formatRelativeTime = useRelativeTime();
   const rowLocked = disabled || pending !== undefined;
+  const title =
+    notification.titleKey && t.has(notification.titleKey)
+      ? t(notification.titleKey, notification.messageArgs as Record<string, string | number | Date>)
+      : notification.title || t("typeFallback");
+  const content =
+    notification.contentKey && t.has(notification.contentKey)
+      ? t(
+          notification.contentKey,
+          notification.messageArgs as Record<string, string | number | Date>
+        )
+      : notification.content || t("genericContent");
+  const typeLabel = t.has(`type.${notification.type}`)
+    ? t(`type.${notification.type}`)
+    : getNotificationTypeLabel(notification.type, t("typeFallback"));
 
   return (
     <li className={notification.read ? "px-4 py-3" : "bg-accent/5 px-4 py-3"}>
@@ -194,9 +208,7 @@ function NotificationRow({
           >
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2">
-                <span className="text-foreground line-clamp-1 text-sm font-semibold">
-                  {notification.title}
-                </span>
+                <span className="text-foreground line-clamp-1 text-sm font-semibold">{title}</span>
                 {!notification.read ? (
                   <span
                     aria-label={t("unread")}
@@ -205,7 +217,7 @@ function NotificationRow({
                 ) : null}
               </span>
               <span className="text-muted mt-1 line-clamp-3 block text-sm leading-5 whitespace-pre-wrap">
-                {notification.content}
+                {content}
               </span>
             </span>
           </Button>
@@ -219,7 +231,7 @@ function NotificationRow({
               </Chip>
             ) : null}
             <Chip size="sm" variant="soft">
-              {getNotificationTypeLabel(notification.type, t("typeFallback"))}
+              {typeLabel}
             </Chip>
           </span>
           {actions}
@@ -246,7 +258,7 @@ function NotificationRow({
               <Tooltip>
                 <Button
                   isIconOnly
-                  aria-label={t("reopenNamed", { title: notification.title })}
+                  aria-label={t("reopenNamed", { title })}
                   isPending={pending === "reopen"}
                   isDisabled={rowLocked}
                   size="sm"
@@ -261,7 +273,7 @@ function NotificationRow({
               <Tooltip>
                 <Button
                   isIconOnly
-                  aria-label={t("completeNamed", { title: notification.title })}
+                  aria-label={t("completeNamed", { title })}
                   isPending={pending === "complete"}
                   isDisabled={rowLocked}
                   size="sm"
@@ -276,7 +288,7 @@ function NotificationRow({
             <Tooltip>
               <Button
                 isIconOnly
-                aria-label={t("deleteNamed", { title: notification.title })}
+                aria-label={t("deleteNamed", { title })}
                 isPending={pending === "delete"}
                 isDisabled={rowLocked}
                 size="sm"

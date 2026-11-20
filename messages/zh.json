@@ -642,6 +642,141 @@
     "activityInbox": "你的动态收件箱",
     "viewAll": "查看全部",
     "typeFallback": "更新",
+    "genericContent": "你的动态收件箱里有一条新更新。",
+    "notification": {
+      "COMMENT_APPROVED": {
+        "title": "评论已通过",
+        "content": "你的评论已经通过审核并公开显示。"
+      },
+      "COMMENT_REJECTED": {
+        "title": "评论未发布",
+        "content": "你的评论不符合发布要求。"
+      },
+      "COMMENT_REPLY": {
+        "title": "有人回复了你的评论",
+        "content": "有人回复了你的评论。"
+      },
+      "POST_COMMENT": {
+        "title": "文章有新评论",
+        "content": "有人评论了你的文章。"
+      },
+      "MOMENT_COMMENT": {
+        "title": "动态有新评论",
+        "content": "有人评论了你的动态。"
+      },
+      "GUESTBOOK_COMMENT": {
+        "title": "留言板有新留言",
+        "content": "有人在你的留言板留下了消息。"
+      },
+      "COMMENT_PENDING_REVIEW": {
+        "title": "评论待审核",
+        "content": "有一条评论正在等待审核。"
+      },
+      "COMMENT_FLAGGED": {
+        "title": "评论被标记",
+        "content": "有一条评论被标记，需要你审核。"
+      },
+      "COMMENT_REPORT_RECEIVED": {
+        "title": "收到评论举报",
+        "content": "有一条评论举报正在等待你处理。"
+      },
+      "COMMENT_REPORT_RESOLVED": {
+        "title": "评论举报已处理",
+        "content": "一条评论举报已经处理完成。"
+      },
+      "CATEGORY_POST": {
+        "title": "你关注的分类有新文章",
+        "content": "你关注的分类发布了一篇新文章。"
+      },
+      "POST_PENDING_REVIEW": {
+        "title": "文章待审核",
+        "content": "有一篇文章正在等待编辑审核。"
+      },
+      "POST_REJECTED": {
+        "title": "文章需要修改",
+        "content": "你的文章暂未通过发布审核。"
+      },
+      "POST_PUBLISHED": {
+        "title": "文章已发布",
+        "content": "你的文章现在已经公开可见。"
+      },
+      "POST_SCHEDULED": {
+        "title": "文章已安排发布",
+        "content": "你的文章已经安排了发布时间。"
+      },
+      "POST_SCHEDULE_CANCELED": {
+        "title": "文章定时发布已取消",
+        "content": "你的文章定时发布时间已经取消。"
+      },
+      "POST_ARCHIVED": {
+        "title": "文章已归档",
+        "content": "你的文章已归档，不再公开显示。"
+      },
+      "POST_REPORT_RECEIVED": {
+        "title": "收到文章举报",
+        "content": "有一条文章举报正在等待你处理。"
+      },
+      "POST_REPORT_RESOLVED": {
+        "title": "文章举报已处理",
+        "content": "一条文章举报已经处理完成。"
+      },
+      "FRIEND_LINK_APPLICATION": {
+        "title": "收到友链申请",
+        "content": "有一条友链申请正在等待你审核。"
+      },
+      "FRIEND_LINK_APPROVED": {
+        "title": "友链申请已通过",
+        "content": "你的友链申请已经通过。"
+      },
+      "FRIEND_LINK_REJECTED": {
+        "title": "友链申请未通过",
+        "content": "你的友链申请未通过审核。"
+      },
+      "USER_PENDING_REVIEW": {
+        "title": "账号待审核",
+        "content": "有一个新账号正在等待你审核。"
+      },
+      "SYSTEM": {
+        "title": "系统更新",
+        "content": "你的动态收件箱里有一条系统更新。"
+      },
+      "HEALTH_CHECK": {
+        "title": "健康检查更新",
+        "content": "有一条新的健康检查更新。"
+      },
+      "WIKI": {
+        "title": "Wiki 更新",
+        "content": "有一条新的 Wiki 更新。"
+      }
+    },
+    "type": {
+      "COMMENT_APPROVED": "评论已通过",
+      "COMMENT_REJECTED": "评论未通过",
+      "COMMENT_REPLY": "评论回复",
+      "POST_COMMENT": "文章评论",
+      "MOMENT_COMMENT": "动态评论",
+      "GUESTBOOK_COMMENT": "留言板",
+      "COMMENT_PENDING_REVIEW": "评论审核",
+      "COMMENT_FLAGGED": "被标记的评论",
+      "COMMENT_REPORT_RECEIVED": "评论举报",
+      "COMMENT_REPORT_RESOLVED": "已处理的评论举报",
+      "CATEGORY_POST": "关注的分类",
+      "POST_PENDING_REVIEW": "文章审核",
+      "POST_REJECTED": "文章修改",
+      "POST_PUBLISHED": "文章发布",
+      "POST_SCHEDULED": "文章定时发布",
+      "POST_SCHEDULE_CANCELED": "取消定时发布",
+      "POST_ARCHIVED": "文章归档",
+      "POST_REPORT_RECEIVED": "文章举报",
+      "POST_REPORT_RESOLVED": "已处理的文章举报",
+      "FRIEND_LINK_APPLICATION": "友链审核",
+      "FRIEND_LINK_APPROVED": "友链已通过",
+      "FRIEND_LINK_REJECTED": "友链未通过",
+      "USER_PENDING_REVIEW": "账号审核",
+      "SYSTEM": "系统",
+      "HEALTH_CHECK": "健康检查",
+      "WIKI": "Wiki"
+    },
     "staysInInbox": "保留在收件箱",
     "action": {
       "VIEW": "打开",

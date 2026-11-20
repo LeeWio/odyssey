@@ -642,6 +642,141 @@
     "activityInbox": "Your activity inbox",
     "viewAll": "View all",
     "typeFallback": "Update",
+    "genericContent": "There is a new update in your activity inbox.",
+    "notification": {
+      "COMMENT_APPROVED": {
+        "title": "Comment approved",
+        "content": "Your comment was approved and is now visible."
+      },
+      "COMMENT_REJECTED": {
+        "title": "Comment not published",
+        "content": "Your comment did not meet the publication requirements."
+      },
+      "COMMENT_REPLY": {
+        "title": "New reply to your comment",
+        "content": "Someone replied to your comment."
+      },
+      "POST_COMMENT": {
+        "title": "New comment on your article",
+        "content": "A reader left a comment on your article."
+      },
+      "MOMENT_COMMENT": {
+        "title": "New comment on your moment",
+        "content": "Someone commented on your moment."
+      },
+      "GUESTBOOK_COMMENT": {
+        "title": "New guestbook message",
+        "content": "Someone left a message in your guestbook."
+      },
+      "COMMENT_PENDING_REVIEW": {
+        "title": "Comment needs review",
+        "content": "A comment is waiting for moderation."
+      },
+      "COMMENT_FLAGGED": {
+        "title": "Comment flagged",
+        "content": "A comment was flagged and needs your review."
+      },
+      "COMMENT_REPORT_RECEIVED": {
+        "title": "Comment report received",
+        "content": "A comment report is waiting for your review."
+      },
+      "COMMENT_REPORT_RESOLVED": {
+        "title": "Comment report resolved",
+        "content": "A comment report has been resolved."
+      },
+      "CATEGORY_POST": {
+        "title": "New article in a category you follow",
+        "content": "A new article is available in a category you follow."
+      },
+      "POST_PENDING_REVIEW": {
+        "title": "Article needs review",
+        "content": "An article is waiting for editorial review."
+      },
+      "POST_REJECTED": {
+        "title": "Article needs revision",
+        "content": "Your article was not approved for publication."
+      },
+      "POST_PUBLISHED": {
+        "title": "Article published",
+        "content": "Your article is now publicly available."
+      },
+      "POST_SCHEDULED": {
+        "title": "Article scheduled",
+        "content": "Your article has been scheduled for publication."
+      },
+      "POST_SCHEDULE_CANCELED": {
+        "title": "Article schedule canceled",
+        "content": "The scheduled publication for your article was canceled."
+      },
+      "POST_ARCHIVED": {
+        "title": "Article archived",
+        "content": "Your article was archived and is no longer publicly visible."
+      },
+      "POST_REPORT_RECEIVED": {
+        "title": "Article report received",
+        "content": "An article report is waiting for your review."
+      },
+      "POST_REPORT_RESOLVED": {
+        "title": "Article report resolved",
+        "content": "An article report has been resolved."
+      },
+      "FRIEND_LINK_APPLICATION": {
+        "title": "Friend link application",
+        "content": "A friend link application is waiting for your review."
+      },
+      "FRIEND_LINK_APPROVED": {
+        "title": "Friend link approved",
+        "content": "Your friend link application was approved."
+      },
+      "FRIEND_LINK_REJECTED": {
+        "title": "Friend link not approved",
+        "content": "Your friend link application was not approved."
+      },
+      "USER_PENDING_REVIEW": {
+        "title": "Account needs review",
+        "content": "A new account is waiting for your review."
+      },
+      "SYSTEM": {
+        "title": "System update",
+        "content": "There is a new system update in your activity inbox."
+      },
+      "HEALTH_CHECK": {
+        "title": "Health check update",
+        "content": "There is a new health check update."
+      },
+      "WIKI": {
+        "title": "Wiki update",
+        "content": "There is a new wiki update."
+      }
+    },
+    "type": {
+      "COMMENT_APPROVED": "Comment approved",
+      "COMMENT_REJECTED": "Comment rejected",
+      "COMMENT_REPLY": "Comment reply",
+      "POST_COMMENT": "Article comment",
+      "MOMENT_COMMENT": "Moment comment",
+      "GUESTBOOK_COMMENT": "Guestbook",
+      "COMMENT_PENDING_REVIEW": "Comment review",
+      "COMMENT_FLAGGED": "Flagged comment",
+      "COMMENT_REPORT_RECEIVED": "Comment report",
+      "COMMENT_REPORT_RESOLVED": "Resolved comment report",
+      "CATEGORY_POST": "Followed category",
+      "POST_PENDING_REVIEW": "Article review",
+      "POST_REJECTED": "Article revision",
+      "POST_PUBLISHED": "Article published",
+      "POST_SCHEDULED": "Article scheduled",
+      "POST_SCHEDULE_CANCELED": "Schedule canceled",
+      "POST_ARCHIVED": "Article archived",
+      "POST_REPORT_RECEIVED": "Article report",
+      "POST_REPORT_RESOLVED": "Resolved article report",
+      "FRIEND_LINK_APPLICATION": "Friend link review",
+      "FRIEND_LINK_APPROVED": "Friend link approved",
+      "FRIEND_LINK_REJECTED": "Friend link rejected",
+      "USER_PENDING_REVIEW": "Account review",
+      "SYSTEM": "System",
+      "HEALTH_CHECK": "Health check",
+      "WIKI": "Wiki"
+    },
     "staysInInbox": "Kept in your inbox",
     "action": {
       "VIEW": "Open",

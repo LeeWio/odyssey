@@ -1,6 +1,9 @@
 import { cache } from "react";
+import { headers } from "next/headers";
 
 import { SERVER_PREFETCH_HEADER } from "@/lib/api/client-device";
+import { resolveAppLocale, type AppLocale } from "@/i18n/locale";
+import { localizeApiPayload } from "@/lib/i18n/api-localization";
 
 import { PostResponseSchema, type PostResponse } from "./post-contracts";
 
@@ -38,31 +41,44 @@ export function stripViewerState(article: PostResponse): PostResponse {
   };
 }
 
-export const getPublicArticle = cache(async (slug: string): Promise<PublicArticleResult> => {
-  const url = publicPostUrl(slug);
-  if (!url) return { status: "error" };
+const getPublicArticleForLocale = cache(
+  async (slug: string, locale?: AppLocale): Promise<PublicArticleResult> => {
+    const url = publicPostUrl(slug);
+    if (!url) return { status: "error" };
 
-  try {
-    const response = await fetch(url, {
-      headers: { [SERVER_PREFETCH_HEADER]: "1" },
-      next: {
-        revalidate: REVALIDATE_SECONDS,
-        tags: [`article:${slug}`],
-      },
-    });
-    if (response.status === 404) return { status: "not-found" };
-    if (!response.ok) return { status: "error" };
+    try {
+      const requestHeaders: Record<string, string> = { [SERVER_PREFETCH_HEADER]: "1" };
+      if (locale) requestHeaders["accept-language"] = locale;
+      const response = await fetch(url, {
+        headers: requestHeaders,
+        next: {
+          revalidate: REVALIDATE_SECONDS,
+          tags: [`article:${slug}`],
+        },
+      });
+      if (response.status === 404) return { status: "not-found" };
+      if (!response.ok) return { status: "error" };
 
-    const payload: unknown = await response.json();
-    if (!payload || typeof payload !== "object" || !("data" in payload)) {
+      const payload: unknown = await response.json();
+      if (!payload || typeof payload !== "object" || !("data" in payload)) {
+        return { status: "error" };
+      }
+
+      const parsed = PostResponseSchema.safeParse(localizeApiPayload(payload.data, locale));
+      if (!parsed.success) return { status: "error" };
+
+      return { status: "ok", article: stripViewerState(parsed.data) };
+    } catch {
       return { status: "error" };
     }
-
-    const parsed = PostResponseSchema.safeParse(payload.data);
-    if (!parsed.success) return { status: "error" };
-
-    return { status: "ok", article: stripViewerState(parsed.data) };
-  } catch {
-    return { status: "error" };
   }
-});
+);
+
+export async function getPublicArticle(slug: string): Promise<PublicArticleResult> {
+  try {
+    const requestHeaders = await headers();
+    return getPublicArticleForLocale(slug, resolveAppLocale(requestHeaders.get("accept-language")));
+  } catch {
+    return getPublicArticleForLocale(slug);
+  }
+}

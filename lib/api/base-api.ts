@@ -5,6 +5,7 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
+import { getRuntimeLocale, localizeApiPayload } from "@/lib/i18n/api-localization";
 
 interface AuthState {
   auth: {
@@ -65,12 +66,19 @@ const rawBaseQuery = fetchBaseQuery({
       headers.delete("authorization");
     }
     headers.set("accept", "application/json");
+    headers.set("accept-language", getRuntimeLocale());
     if (typeof navigator !== "undefined" && navigator.userAgent) {
       headers.set("x-odyssey-client-ua", navigator.userAgent);
     }
     return headers;
   },
 });
+
+const localizedBaseQuery = async (...args: Parameters<typeof rawBaseQuery>) => {
+  const result = await rawBaseQuery(...args);
+  if (result.data === undefined) return result;
+  return { ...result, data: localizeApiPayload(result.data) };
+};
 
 type Credentials = AuthState["auth"];
 type QueryResult = Awaited<ReturnType<typeof rawBaseQuery>>;
@@ -106,7 +114,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   extraOptions
 ) => {
   const requestCredentials = (api.getState() as AuthState).auth;
-  const result = await rawBaseQuery(args, api, extraOptions);
+  const result = await localizedBaseQuery(args, api, extraOptions);
   if (result.error?.status !== 401) return result;
 
   const requestUrl = typeof args === "string" ? args : args.url;
@@ -127,7 +135,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
       const newAttempt: RefreshAttempt = {
         credentials: requestCredentials,
         promise: Promise.resolve(
-          rawBaseQuery(
+          localizedBaseQuery(
             {
               url: "/api/v1/auth/refresh",
               method: "POST",
@@ -167,7 +175,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 
     if (isRefreshPayload(refreshedCredentials)) {
       if (hasSameCredentials(currentCredentials(), refreshedCredentials) && !api.signal.aborted) {
-        return rawBaseQuery(args, api, extraOptions);
+        return localizedBaseQuery(args, api, extraOptions);
       }
     } else if (
       refreshResult.error &&

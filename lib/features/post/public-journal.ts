@@ -1,10 +1,13 @@
 import { z } from "zod";
+import { headers } from "next/headers";
 
 import type { PageResult } from "@/lib/api";
 import { SERVER_PREFETCH_HEADER } from "@/lib/api/client-device";
 import { apiResponseSchema, pageResultSchema } from "@/lib/api";
 
 import { PostDigestResponseSchema, type PostDigestResponse } from "./post-contracts";
+import { resolveAppLocale, type AppLocale } from "@/i18n/locale";
+import { localizeApiPayload } from "@/lib/i18n/api-localization";
 
 const JOURNAL_REVALIDATE_SECONDS = 60;
 
@@ -21,17 +24,17 @@ function apiOrigin() {
   return process.env.NODE_ENV === "development" ? "http://127.0.0.1:8080" : null;
 }
 
-async function readPage<T>(url: string, schema: z.ZodType<T>) {
+async function readPage<T>(url: string, schema: z.ZodType<T>, locale: AppLocale) {
   try {
     const response = await fetch(url, {
-      headers: { [SERVER_PREFETCH_HEADER]: "1" },
+      headers: { [SERVER_PREFETCH_HEADER]: "1", "accept-language": locale },
       signal: AbortSignal.timeout(3_000),
       next: { revalidate: JOURNAL_REVALIDATE_SECONDS, tags: ["public-journal"] },
     });
     if (!response.ok) return null;
 
     const payload: unknown = await response.json();
-    const parsed = apiResponseSchema(schema).safeParse(payload);
+    const parsed = apiResponseSchema(schema).safeParse(localizeApiPayload(payload, locale));
     return parsed.success ? parsed.data.data : null;
   } catch {
     return null;
@@ -47,15 +50,18 @@ export async function getPublicJournalInitialData({
 } = {}): Promise<PublicJournalInitialData> {
   const origin = apiOrigin();
   if (!origin) return { featured: null, latest: null };
+  const locale = resolveAppLocale((await headers()).get("accept-language"));
 
   const [featured, latest] = await Promise.all([
     readPage(
       `${origin}/api/v1/public/blog/posts/featured?page=0&size=${featuredSize}`,
-      pageResultSchema(PostDigestResponseSchema)
+      pageResultSchema(PostDigestResponseSchema),
+      locale
     ),
     readPage(
       `${origin}/api/v1/public/blog/posts/digest?page=0&size=${latestSize}`,
-      pageResultSchema(PostDigestResponseSchema)
+      pageResultSchema(PostDigestResponseSchema),
+      locale
     ),
   ]);
 
