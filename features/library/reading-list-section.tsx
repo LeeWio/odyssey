@@ -17,7 +17,7 @@ export function ReadingListSection() {
   const inFlight = useRef(new Set<number>());
   const [removeFromReadingList] = useRemoveFromReadingListMutation();
   const query = useGetReadingListQuery(
-    { page, size: READING_LIST_PAGE_SIZE, sort: ["addedAt,desc"] },
+    { page, size: READING_LIST_PAGE_SIZE },
     { refetchOnMountOrArgChange: true }
   );
   const data = query.currentData;

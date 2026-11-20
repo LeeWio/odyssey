@@ -54,13 +54,16 @@ function NotificationPopoverSkeleton() {
 
 function NotificationPopoverEmptyState({
   category,
+  onClearFilters,
   unreadOnly,
 }: {
   category?: NotificationCategory;
+  onClearFilters?: () => void;
   unreadOnly: boolean;
 }) {
   const t = useTranslations("Notifications");
   const categoryLabel = category ? t(`category.${category}`) : undefined;
+  const hasFilters = category !== undefined || unreadOnly;
   const title = categoryLabel
     ? unreadOnly
       ? t("emptyCategoryUnread", { category: categoryLabel })
@@ -82,6 +85,13 @@ function NotificationPopoverEmptyState({
         <EmptyState.Title>{title}</EmptyState.Title>
         <EmptyState.Description>{description}</EmptyState.Description>
       </EmptyState.Header>
+      {hasFilters && onClearFilters ? (
+        <EmptyState.Content>
+          <Button size="sm" variant="secondary" onPress={onClearFilters}>
+            {t("clearFilters")}
+          </Button>
+        </EmptyState.Content>
+      ) : null}
     </EmptyState>
   );
 }
@@ -223,7 +233,14 @@ export function NotificationPopover() {
                 </EmptyState>
               ) : null}
               {!isLoadingList && !notifications.isError && notificationEntries.length === 0 ? (
-                <NotificationPopoverEmptyState category={category} unreadOnly={unreadOnly} />
+                <NotificationPopoverEmptyState
+                  category={category}
+                  onClearFilters={() => {
+                    setCategory(undefined);
+                    setUnreadOnly(false);
+                  }}
+                  unreadOnly={unreadOnly}
+                />
               ) : null}
               {!isLoadingList && !notifications.isError && notificationEntries.length > 0 ? (
                 <NotificationCategoryList

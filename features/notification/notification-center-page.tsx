@@ -1,7 +1,7 @@
 "use client";
 
 import { EmptyState } from "@heroui-pro/react";
-import { AlertDialog, Button, Card, Chip, Tabs, Typography } from "@heroui/react";
+import { AlertDialog, Button, Card, Chip, Skeleton, Tabs, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -39,11 +39,11 @@ function NotificationSkeleton() {
       {Array.from({ length: 5 }, (_, index) => (
         <Card key={index} variant="secondary">
           <Card.Header>
-            <div className="bg-default-200 h-4 w-24 animate-pulse rounded" />
-            <div className="bg-default-200 h-5 w-2/3 animate-pulse rounded" />
+            <Skeleton className="h-4 w-24 rounded-lg" />
+            <Skeleton className="h-5 w-2/3 rounded-lg" />
           </Card.Header>
           <Card.Content>
-            <div className="bg-default-200 h-4 w-full animate-pulse rounded" />
+            <Skeleton className="h-4 w-full rounded-lg" />
           </Card.Content>
         </Card>
       ))}
@@ -53,15 +53,18 @@ function NotificationSkeleton() {
 
 function NotificationEmptyState({
   category,
+  onClearFilters,
   unreadOnly,
   view,
 }: {
   category?: NotificationCategory;
+  onClearFilters?: () => void;
   unreadOnly: boolean;
   view: NotificationView;
 }) {
   const t = useTranslations("Notifications");
   const categoryLabel = category ? t(`category.${category}`) : undefined;
+  const hasFilters = category !== undefined || unreadOnly;
   const title = categoryLabel
     ? unreadOnly
       ? t("emptyCategoryUnread", { category: categoryLabel })
@@ -87,6 +90,13 @@ function NotificationEmptyState({
         <EmptyState.Title>{title}</EmptyState.Title>
         <EmptyState.Description>{description}</EmptyState.Description>
       </EmptyState.Header>
+      {hasFilters && onClearFilters ? (
+        <EmptyState.Content>
+          <Button size="sm" variant="secondary" onPress={onClearFilters}>
+            {t("clearFilters")}
+          </Button>
+        </EmptyState.Content>
+      ) : null}
     </EmptyState>
   );
 }
@@ -323,7 +333,16 @@ export function NotificationCenterPage() {
               </Card.Footer>
             </Card>
           ) : notificationEntries.length === 0 ? (
-            <NotificationEmptyState category={category} unreadOnly={unreadOnly} view={view} />
+            <NotificationEmptyState
+              category={category}
+              onClearFilters={() => {
+                setCategory(undefined);
+                setUnreadOnly(false);
+                setPage(0);
+              }}
+              unreadOnly={unreadOnly}
+              view={view}
+            />
           ) : (
             <NotificationCategoryList
               category={category}

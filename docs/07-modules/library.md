@@ -1,6 +1,14 @@
 # Personal Library
 
-The `/library` page uses HeroUI cards, buttons, dialogs, and loading states for reading history, recommendations, followed categories, favorites, reading lists, and collections.
+The `/library` page uses HeroUI cards, buttons, dialogs, tabs, and loading states for reading history, recommendations, followed categories, favorites, reading lists, and collections.
+
+## Library workspace
+
+- The first view is the reading workspace: Continue reading and Read later are the only sections loaded on entry, so the next reading action is visible without a dashboard wall of unrelated modules.
+- Discover groups followed-topic articles, recommendations, and topic preferences. Organize groups favorites and collections. History owns the complete reading-history workflow.
+- The active section is stored in the `view` query parameter. The default Reading section omits the parameter, and switching sections uses a client navigation without a full page reload or data refetch caused by viewport changes.
+- Each section remains responsible for its own loading, error, empty, pagination, and mutation states; switching sections unmounts inactive sections and avoids requests for content the reader has not asked to inspect.
+- The page header keeps one primary route action to browse all writing, while the tab list provides the local information architecture and remains horizontally scrollable on narrow screens.
 
 ## Reading list
 
