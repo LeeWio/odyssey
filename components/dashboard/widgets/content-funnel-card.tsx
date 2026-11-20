@@ -6,10 +6,10 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { useGetContentFunnelQuery } from "@/lib/features/dashboard";
 
-export function ContentFunnelCard() {
+export function ContentFunnelCard({ days = 30 }: { days?: number }) {
   const locale = useLocale();
   const t = useTranslations("Dashboard");
-  const { data, isError, isLoading, refetch } = useGetContentFunnelQuery(30);
+  const { data, isError, isLoading, refetch } = useGetContentFunnelQuery(days);
   const steps = data
     ? [
         { count: data.impressions, label: t("widgets.impressions") },

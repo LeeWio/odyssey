@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { Card } from "@heroui/react";
 import { ChartTooltip } from "@heroui-pro/react";
 import { PieChart } from "@heroui-pro/react/pie-chart";
+import { useTranslations } from "next-intl";
 
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
 
@@ -46,8 +47,9 @@ function DeviceTooltip({ active, payload }: DeviceTooltipProps) {
   );
 }
 
-export function DeviceBreakdownCard() {
-  const { data } = useGetTrafficAnalyticsQuery(30);
+export function DeviceBreakdownCard({ days = 30 }: { days?: number }) {
+  const t = useTranslations("Dashboard");
+  const { data } = useGetTrafficAnalyticsQuery(days);
   const counts = new Map((data?.devices ?? []).map((device) => [device.name, device.views]));
   const devices = DEVICE_ORDER.map((name) => ({
     name,
@@ -60,8 +62,8 @@ export function DeviceBreakdownCard() {
   return (
     <Card className="h-full">
       <Card.Header>
-        <Card.Title className="text-base">Traffic by device</Card.Title>
-        <Card.Description>How visitors are reaching your site.</Card.Description>
+        <Card.Title className="text-base">{t("widgets.trafficByDevice")}</Card.Title>
+        <Card.Description>{t("widgets.trafficByDeviceDescription")}</Card.Description>
       </Card.Header>
       <Card.Content className="flex-1 items-center justify-center gap-6">
         <div className="relative">
@@ -87,7 +89,7 @@ export function DeviceBreakdownCard() {
             <span className="text-foreground text-2xl font-semibold tabular-nums">
               {formattedTotal}
             </span>
-            <span className="text-muted text-xs">Sessions</span>
+            <span className="text-muted text-xs">{t("widgets.sessions")}</span>
           </div>
         </div>
         <DeviceLegend devices={devices} total={total} />

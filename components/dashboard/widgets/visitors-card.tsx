@@ -14,10 +14,10 @@ function placeOf(visitor: {
   return [visitor.city, visitor.region, visitor.country].filter(Boolean).join(" · ") || "—";
 }
 
-export function VisitorsCard() {
+export function VisitorsCard({ days = 7 }: { days?: number }) {
   const t = useTranslations("Dashboard");
   const [includeOwner, setIncludeOwner] = useState(false);
-  const { data, isFetching } = useGetVisitorsQuery({ days: 7, includeOwner });
+  const { data, isFetching } = useGetVisitorsQuery({ days, includeOwner });
   const visitors = data?.list ?? [];
 
   return (
@@ -26,7 +26,7 @@ export function VisitorsCard() {
         <div className="flex flex-col gap-1">
           <Card.Title className="text-base">{t("widgets.visitors")}</Card.Title>
           <Card.Description>
-            {t("widgets.lastSevenDays")} · {data?.total ?? 0}{" "}
+            {t("analytics.lastDays", { days })} · {data?.total ?? 0}{" "}
             {t("widgets.visitors").toLocaleLowerCase()}
             {isFetching ? ` · ${t("widgets.refreshing")}` : ""}
           </Card.Description>

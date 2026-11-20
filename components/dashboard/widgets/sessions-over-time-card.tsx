@@ -3,6 +3,7 @@
 import { Card } from "@heroui/react";
 import { NumberValue, TrendChip } from "@heroui-pro/react";
 import { LineChart } from "@heroui-pro/react/line-chart";
+import { useLocale, useTranslations } from "next-intl";
 
 import { useMemo } from "react";
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
@@ -11,18 +12,20 @@ function formatThousands(value: number): string {
   return value >= 1000 ? `${(value / 1000).toFixed(1)}k` : `${value}`;
 }
 
-export function SessionsOverTimeCard() {
-  const { data } = useGetTrafficAnalyticsQuery(30);
+export function SessionsOverTimeCard({ days = 30 }: { days?: number }) {
+  const locale = useLocale();
+  const t = useTranslations("Dashboard");
+  const { data } = useGetTrafficAnalyticsQuery(days);
   const points = useMemo(
     () =>
       data?.timeSeries.map((point) => ({
         day: /^\d{4}-\d{2}-\d{2}/.test(point.date)
           ? point.date.slice(5)
-          : new Date(point.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          : new Date(point.date).toLocaleDateString(locale, { month: "short", day: "numeric" }),
         sessions: point.sessions,
         users: point.users,
       })) ?? [],
-    [data]
+    [data, locale]
   );
   const total = data?.summary.sessions.numericValue ?? 0;
   const growth = data?.summary.sessions.growthRate ?? 0;
@@ -31,7 +34,7 @@ export function SessionsOverTimeCard() {
     <Card>
       <Card.Header className="flex-row items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <Card.Title className="text-base">Sessions over time</Card.Title>
+          <Card.Title className="text-base">{t("widgets.sessionsOverTime")}</Card.Title>
           <div className="flex items-baseline gap-2">
             <NumberValue
               className="text-foreground text-2xl font-semibold tabular-nums"
@@ -42,11 +45,11 @@ export function SessionsOverTimeCard() {
               {Math.abs(growth).toFixed(1)}%
             </TrendChip>
           </div>
-          <span className="text-muted text-xs">vs. previous 30 days</span>
+          <span className="text-muted text-xs">{t("analytics.lastDays", { days })}</span>
         </div>
         <div className="flex items-center gap-4">
-          <LegendDot color="var(--chart-2)" label="Sessions" />
-          <LegendDot color="var(--chart-4)" label="Users" />
+          <LegendDot color="var(--chart-2)" label={t("widgets.sessions")} />
+          <LegendDot color="var(--chart-4)" label={t("widgets.users")} />
         </div>
       </Card.Header>
       <Card.Content>
@@ -57,7 +60,7 @@ export function SessionsOverTimeCard() {
           <LineChart.Line
             dataKey="sessions"
             dot={false}
-            name="Sessions"
+            name={t("widgets.sessions")}
             stroke="var(--chart-2)"
             strokeWidth={2}
             type="monotone"
@@ -65,7 +68,7 @@ export function SessionsOverTimeCard() {
           <LineChart.Line
             dataKey="users"
             dot={false}
-            name="Users"
+            name={t("widgets.users")}
             stroke="var(--chart-4)"
             strokeWidth={2}
             type="monotone"
