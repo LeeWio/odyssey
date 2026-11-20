@@ -1083,19 +1083,9 @@
     "explorer": "Explorer · {time}"
   },
   "Gallery": {
-    "eyebrow": "Out There",
-    "title": "Pictures From the Road",
-    "description": "Places, weather, and whatever the camera kept.",
-    "viewFull": "View {title} full screen",
-    "fromTheFrame": "From the frame",
-    "location": "Location",
-    "camera": "Camera",
-    "film": "Film",
-    "frame": "Frame",
-    "frameCountLabel": "frames",
-    "format": "format",
-    "viewer": "{title} full screen viewer",
-    "frameCount": "Frame {current} / {total}"
+    "eyebrow": "Future development",
+    "title": "The gallery is coming later",
+    "description": "This space is reserved for a future visual archive while the gallery experience is being redesigned."
   },
   "Newsletter": {
     "formLabel": "Newsletter subscription",
