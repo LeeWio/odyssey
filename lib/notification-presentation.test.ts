@@ -73,3 +73,13 @@ it("keeps public and external notification links separate", () => {
     })
   ).toEqual({ kind: "external", href: "https://example.com" });
 });
+
+it("accepts category publication links on the canonical article route", () => {
+  expect(
+    getNotificationDestination({
+      type: "CATEGORY_POST",
+      link: "/single/designing-reliable-services",
+      context: null,
+    })
+  ).toEqual({ kind: "reader", href: "/single/designing-reliable-services" });
+});

@@ -204,6 +204,38 @@ test("a category tab requests that category and hides the previous rows", async 
   }
 });
 
+test("a category publication notification opens the canonical reader route", async ({ page }) => {
+  let read = false;
+  await page.route(endpoint, async (route) => {
+    await route.fulfill({
+      json: pageResult([
+        {
+          ...notification(51, "New article in a followed category"),
+          content: "A followed category published a new article.",
+          type: "CATEGORY_POST",
+          link: "/single/design-foundation",
+          context: null,
+        },
+      ]),
+    });
+  });
+  await page.route("**/api/v1/user/notifications/51/read", async (route) => {
+    expect(route.request().method()).toBe("PATCH");
+    read = true;
+    await route.fulfill({ json: envelope(null) });
+  });
+
+  await page.goto("/notifications");
+  const row = page.getByRole("listitem").filter({ hasText: "New article in a followed category" });
+  await row.getByRole("button").first().press("Enter");
+
+  await expect.poll(() => read).toBe(true);
+  await expect(page).toHaveURL(/\/single\/design-foundation$/);
+  await expect(
+    page.getByRole("heading", { name: "A consistent space for reading and exploring" })
+  ).toBeVisible();
+});
+
 test("an admin review notification opens the matching dashboard view", async ({ page }) => {
   await page.addInitScript(() =>
     localStorage.setItem(

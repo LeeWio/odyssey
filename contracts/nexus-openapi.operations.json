@@ -1,5 +1,5 @@
 {
-  "nexusRevision": "4f8ec5dc1ff2f3418280919c1a54fe869297ca0b",
+  "nexusRevision": "a021656b76e49767b572ebfdddbad81467853ed6",
   "paths": {
     "/api/v1/admin/analytics/content-funnel": {
       "get": {
