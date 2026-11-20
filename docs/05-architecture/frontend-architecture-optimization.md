@@ -55,7 +55,7 @@ app/components/features -> components/ui
 - 能由 URL 表达的筛选、分页、工作区、弹层全部移出 Redux。
 - 仅保留跨页面共享且没有路由语义的 UI 状态。
 
-页面 query 更新统一通过 `lib/hooks/use-query-state.ts`，负责保留无关参数、统一空值删除和 replace/push 行为。
+页面 query 更新统一通过 `lib/hooks/use-query-state.ts`，目前覆盖 Library、Chronicle、Footprints、Notifications、Blog Feed、Dashboard 和分页归一化；它负责保留无关参数、统一空值删除和 replace/push 行为。
 
 ### P2：领域模块归属收敛
 
