@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { readingHtml } from "@/components/rich-text/reading-html";
-import { getPublicArticle } from "@/lib/features/post/public-article";
+import { getPublicArticle } from "@/lib/features/post/server";
 
 import ArticlePageClient from "./article-page-client";
 

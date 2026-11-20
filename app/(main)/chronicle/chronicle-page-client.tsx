@@ -22,7 +22,7 @@ import { ExplorePage } from "@/features/explore";
 
 // API hooks to fetch fresh content for the featured tab
 import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
-import type { PublicJournalInitialData } from "@/lib/features/post/public-journal";
+import type { PublicJournalInitialData } from "@/lib/features/post/server";
 
 const CHRONICLE_SECTIONS = ["featured", "explore", "orbit", "columns", "archive"] as const;
 type ChronicleSection = (typeof CHRONICLE_SECTIONS)[number];

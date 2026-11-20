@@ -1,4 +1,4 @@
-import { getPublicJournalInitialData } from "@/lib/features/post/public-journal";
+import { getPublicJournalInitialData } from "@/lib/features/post/server";
 
 import ChroniclePageClient from "./chronicle-page-client";
 
