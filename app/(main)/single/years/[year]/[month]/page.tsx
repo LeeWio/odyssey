@@ -2,12 +2,12 @@
 
 import { EmptyState, NumberValue } from "@heroui-pro/react";
 import { Button, Link, Skeleton, Typography } from "@heroui/react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 
 import { useRetrieveArchiveQuery } from "@/lib/features/openapi";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 import { EssayGrid, EssayPagination } from "@/features/blog/catalog-entries";
 import { parsePageParam } from "@/lib/utils/pagination";
 import { PageFrame } from "@/components/layout/page-frame";
@@ -39,8 +39,7 @@ export default function MonthPage({
   const valid = isYear(year) && isMonth(month);
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const page = parsePageParam(searchParams.get("page"));
   const archive = useRetrieveArchiveQuery(
     {
@@ -108,10 +107,7 @@ export default function MonthPage({
             <EssayGrid posts={posts} />
             <EssayPagination
               onPageChange={(nextPage) => {
-                const query = new URLSearchParams(searchParams.toString());
-                if (nextPage <= 1) query.delete("page");
-                else query.set("page", String(nextPage));
-                router.replace(`?${query.toString()}`, { scroll: true });
+                updateQuery({ page: nextPage <= 1 ? null : String(nextPage) }, { scroll: true });
               }}
               page={page}
               pages={totalPages}

@@ -2,7 +2,6 @@
 
 import { EmptyState, NumberValue } from "@heroui-pro/react";
 import { Button, Link, Skeleton } from "@heroui/react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 import { PageContainer } from "@/components/layout/page-container";
@@ -12,6 +11,7 @@ import { ESSAY_GRID, EssayGrid, EssayPagination } from "@/features/blog/catalog-
 import { useGetPublicCategoriesQuery } from "@/lib/features/category";
 import { useGetPublicPostsQuery } from "@/lib/features/post";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 
 import { parsePageParam } from "@/lib/utils/pagination";
 
@@ -21,8 +21,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   const { slug } = use(params);
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const page = parsePageParam(searchParams.get("page"));
   const categories = useGetPublicCategoriesQuery();
   const category = (categories.data ?? []).find((item) => item.slug === decodeURIComponent(slug));
@@ -91,10 +90,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
           <EssayGrid posts={posts.data?.list ?? []} />
           <EssayPagination
             onPageChange={(nextPage) => {
-              const query = new URLSearchParams(searchParams.toString());
-              if (nextPage <= 1) query.delete("page");
-              else query.set("page", String(nextPage));
-              router.replace(`?${query.toString()}`, { scroll: true });
+              updateQuery({ page: nextPage <= 1 ? null : String(nextPage) }, { scroll: true });
             }}
             page={page}
             pages={totalPages}

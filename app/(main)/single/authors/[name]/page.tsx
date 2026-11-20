@@ -2,7 +2,6 @@
 
 import { EmptyState, ItemCard, NumberValue } from "@heroui-pro/react";
 import { Avatar, Button, Card, Link, Separator, Skeleton, Typography } from "@heroui/react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 
@@ -10,6 +9,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { type PostResponse, useGetPublicPostsQuery } from "@/lib/features/post";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 import { ArticleCover } from "@/components/card/article-cover";
 
 import { EssayPagination } from "@/features/blog/catalog-entries";
@@ -85,8 +85,7 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
   const author = decodeURIComponent(name);
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const page = parsePageParam(searchParams.get("page"));
   const posts = useGetPublicPostsQuery({ authorName: author, page: page - 1, size: 8 });
   useNormalizePageParam(page, posts.currentData ? (posts.currentData.totalPages ?? 0) : undefined);
@@ -163,13 +162,10 @@ export default function AuthorPage({ params }: { params: Promise<{ name: string 
               </ul>
               <EssayPagination
                 onPageChange={(nextPage) => {
-                  const query = new URLSearchParams(searchParams.toString());
-                  if (nextPage <= 1) query.delete("page");
-                  else query.set("page", String(nextPage));
-                  const suffix = query.toString();
-                  router.replace(
-                    `/single/authors/${encodeURIComponent(author)}${suffix ? `?${suffix}` : ""}`,
+                  updateQuery(
+                    { page: nextPage <= 1 ? null : String(nextPage) },
                     {
+                      pathname: `/single/authors/${encodeURIComponent(author)}`,
                       scroll: true,
                     }
                   );

@@ -55,7 +55,7 @@ app/components/features -> components/ui
 - 能由 URL 表达的筛选、分页、工作区、弹层全部移出 Redux。
 - 仅保留跨页面共享且没有路由语义的 UI 状态。
 
-页面 query 更新统一通过 `lib/hooks/use-query-state.ts`，目前覆盖 Library、Chronicle、Footprints、Notifications、Blog Feed、Dashboard 和分页归一化；它负责保留无关参数、统一空值删除和 replace/push 行为。
+页面 query 更新统一通过 `lib/hooks/use-query-state.ts`，目前覆盖 Library、Chronicle、Footprints、Notifications、Blog Feed、Dashboard、文章目录分页、Moments 分页和分页归一化；它负责保留无关参数、统一空值删除和 replace/push 行为。
 
 ### P2：领域模块归属收敛
 
@@ -78,7 +78,8 @@ app/components/features -> components/ui
 
 ### P4：契约与可观测性
 
-- 统一客户端与 RSC 的错误模型、traceId 和用户可见错误映射。
+- 已统一客户端与 RSC 的结构化错误模型；`status`、`code`、`message` 和 `traceId` 在 `lib/api/errors.ts` 归一化，RSC 不再静默丢弃错误上下文。
+- 用户可见错误仍通过统一 fallback 映射生成，业务层可以继续覆盖具体场景文案。
 - 将分页、排序、筛选参数定义为领域查询对象，避免字符串散落在页面。
 - 在架构边界上增加静态依赖检查和构建产物体积检查。
 

@@ -6,6 +6,7 @@ import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getServerApiOrigin, joinApiPath } from "./api-config";
 import { SERVER_PREFETCH_HEADER } from "./client-device";
 import { apiResponseSchema } from "./contracts";
+import { createApiError, getApiErrorPayload, type NormalizedApiError } from "./errors";
 
 const DEFAULT_TIMEOUT_MS = 3_000;
 
@@ -27,6 +28,7 @@ export interface ServerApiFetchOptions {
 
 export interface ServerApiResult<T> {
   data: T | null;
+  error?: NormalizedApiError;
   status: number;
 }
 
@@ -42,7 +44,9 @@ export async function fetchServerApiJson<T>(
   options: ServerApiFetchOptions = {}
 ): Promise<ServerApiResult<T>> {
   const url = serverApiUrl(path);
-  if (!url) return { data: null, status: 0 };
+  if (!url) {
+    return { data: null, error: createApiError("FETCH_ERROR"), status: 0 };
+  }
 
   try {
     let locale = options.locale;
@@ -69,18 +73,40 @@ export async function fetchServerApiJson<T>(
     }
 
     const response = await fetch(url, init);
-    if (!response.ok) return { data: null, status: response.status };
+    if (!response.ok) {
+      let errorPayload;
+      try {
+        errorPayload = getApiErrorPayload(await response.json());
+      } catch {
+        errorPayload = undefined;
+      }
+      return {
+        data: null,
+        error: createApiError(response.status, errorPayload),
+        status: response.status,
+      };
+    }
 
     const payload: unknown = await response.json();
     const parsed = apiResponseSchema(schema).safeParse(
       options.localize === false ? payload : localizeApiPayload(payload, locale)
     );
 
+    if (!parsed.success) {
+      return {
+        data: null,
+        error: createApiError("PARSING_ERROR"),
+        status: response.status,
+      };
+    }
+
     return {
-      data: parsed.success ? parsed.data.data : null,
+      data: parsed.data.data,
       status: response.status,
     };
-  } catch {
-    return { data: null, status: 0 };
+  } catch (error) {
+    const status =
+      error instanceof Error && error.name === "TimeoutError" ? "TIMEOUT_ERROR" : "FETCH_ERROR";
+    return { data: null, error: createApiError(status), status: 0 };
   }
 }
