@@ -41,7 +41,7 @@ const select = (page: Page, name: string) =>
   page.getByRole("button", { name: `View collection: ${name}`, exact: true }).press("Enter");
 
 async function openAlpha(page: Page) {
-  await page.goto("/library");
+  await page.goto("/library?view=organize");
   await select(page, "Alpha");
   await expect(contents(page)).toBeVisible();
 }
@@ -340,7 +340,7 @@ test("creating a collection validates names, locks submission and dismissal, and
     await route.fulfill({ json: envelope(collection) });
   });
   try {
-    await page.goto("/library");
+    await page.goto("/library?view=organize");
     await page.getByRole("button", { name: "New collection", exact: true }).press("Enter");
     const dialog = page.getByRole("dialog", { name: "Create collection", exact: true });
     const name = dialog.getByRole("textbox", { name: /Name/ });
@@ -400,7 +400,7 @@ test("editing locks the selected collection and retries the retained draft witho
     await route.fulfill({ json: envelope(state.collections[0]) });
   });
   try {
-    await page.goto("/library");
+    await page.goto("/library?view=organize");
     await page.getByRole("button", { name: "Edit Alpha", exact: true }).press("Enter");
     const dialog = page.getByRole("dialog", { name: "Edit collection", exact: true });
     const name = dialog.getByRole("textbox", { name: /Name/ });
@@ -444,7 +444,7 @@ test("closing a failed edit resets errors and drafts for subsequent edit and cre
   await page.route("**/api/v1/user/library/collections/1", (route) =>
     route.fulfill({ status: 503, json: { message: "Update unavailable" } })
   );
-  await page.goto("/library");
+  await page.goto("/library?view=organize");
   await page.getByRole("button", { name: "Edit Alpha", exact: true }).press("Enter");
   const edit = page.getByRole("dialog", { name: "Edit collection", exact: true });
   await edit.getByRole("textbox", { name: /Name/ }).fill("Unfinished Alpha");
@@ -568,7 +568,7 @@ test("shows saved writing beyond six articles and retries the requested page", a
   });
 
   try {
-    await page.goto("/library");
+    await page.goto("/library?view=organize");
     const saved = page.getByRole("region", { name: "Saved writing", exact: true });
     await expect(saved.getByText("7 saved articles", { exact: true })).toBeVisible();
     await expect(saved.getByRole("link", { name: /^Article 1\b/ })).toBeVisible();
