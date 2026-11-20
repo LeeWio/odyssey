@@ -24,6 +24,7 @@ import {
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { type FormEvent, useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import {
   type TagRequest,
@@ -34,10 +35,17 @@ import {
   useUpdateTagMutation,
 } from "@/lib/features/tag";
 import { toUrlSlug, validateUrlSlug } from "@/lib/utils/slug";
+import {
+  TranslationFields,
+  type TranslationValues,
+  compactTranslations,
+  translationValues,
+} from "../translation-fields";
 import { IconButton } from "../icon-button";
 import { usePortalContainer } from "../use-portal-container";
 
 export function TagsPage() {
+  const t = useTranslations("ContentTranslations");
   const portalContainer = usePortalContainer();
 
   const { data: tags = [], isLoading, error } = useGetAllTagsQuery();
@@ -63,6 +71,13 @@ export function TagsPage() {
   const [formName, setFormName] = useState("");
   const [formSlug, setFormSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
+  const [formTranslations, setFormTranslations] = useState<TranslationValues>({ en: {} });
+  const [translationLocale, setTranslationLocale] = useState<"zh" | "en">("zh");
+
+  const translationFields = useMemo(
+    () => [{ key: "name", label: t("name"), placeholder: t("namePlaceholder"), required: true }],
+    [t]
+  );
 
   const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
@@ -109,17 +124,24 @@ export function TagsPage() {
     setFormName("");
     setFormSlug("");
     setSlugTouched(false);
+    setFormTranslations({ en: {} });
+    setTranslationLocale("zh");
     setIsFormModalOpen(true);
   };
 
   // Open Form Modal for Edit
-  const handleEditClick = useCallback((tag: TagResponse) => {
-    setSelectedTag(tag);
-    setFormName(tag.name);
-    setFormSlug(tag.slug);
-    setSlugTouched(true);
-    setIsFormModalOpen(true);
-  }, []);
+  const handleEditClick = useCallback(
+    (tag: TagResponse) => {
+      setSelectedTag(tag);
+      setFormName(tag.name);
+      setFormSlug(tag.slug);
+      setSlugTouched(true);
+      setFormTranslations(translationValues(tag.translations, translationFields));
+      setTranslationLocale("zh");
+      setIsFormModalOpen(true);
+    },
+    [translationFields]
+  );
 
   // Open Delete Confirmation
   const handleDeleteClick = useCallback((tag: TagResponse) => {
@@ -145,6 +167,7 @@ export function TagsPage() {
     const body: TagRequest = {
       name: formName.trim(),
       slug,
+      translations: compactTranslations(formTranslations, "name") as TagRequest["translations"],
     };
 
     try {
@@ -339,17 +362,22 @@ export function TagsPage() {
                   </p>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4">
-                  <TextField
-                    isRequired
-                    name="name"
-                    type="text"
-                    value={formName}
-                    onChange={handleNameChange}
-                  >
-                    <Label className="text-sm font-medium">Name</Label>
-                    <Input variant="secondary" placeholder="e.g. Next.js" />
-                    <FieldError />
-                  </TextField>
+                  <TranslationFields
+                    fields={translationFields}
+                    locale={translationLocale}
+                    values={{ zh: { name: formName }, ...formTranslations }}
+                    onChange={(locale, field, value) => {
+                      if (locale === "zh") {
+                        if (field === "name") handleNameChange(value);
+                        return;
+                      }
+                      setFormTranslations((current) => ({
+                        ...current,
+                        [locale]: { ...current[locale], [field]: value },
+                      }));
+                    }}
+                    onLocaleChange={setTranslationLocale}
+                  />
 
                   <TextField
                     isRequired

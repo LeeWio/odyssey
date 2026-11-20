@@ -2,17 +2,20 @@
 
 import type { UseKanbanReturn } from "@heroui-pro/react";
 
-import { ListCheck, Plus } from "@gravity-ui/icons";
+import { CirclePlus, ListCheck, Pencil, Plus, TrashBin } from "@gravity-ui/icons";
 import {
+  AlertDialog,
   Button,
   Chip,
   Description,
+  Form,
   Input,
   Label,
   ListBox,
   Modal,
   Select,
   Sheet,
+  Spinner,
   TextArea,
   TextField,
   toast,
@@ -24,24 +27,37 @@ import {
   useKanbanCardPlaceholder,
   useKanbanColumn,
 } from "@heroui-pro/react";
-import { useMemo, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import {
   useArchiveLifeListItemMutation,
   useChangeLifeListStatusMutation,
+  useCreateLifeListCategoryMutation,
   useCreateLifeListItemMutation,
   useCreateLifeListMemoryMutation,
+  useDeleteLifeListCategoryMutation,
   useDeleteLifeListItemMutation,
   useGetAdminLifeListCategoriesQuery,
   useGetAdminLifeListQuery,
   useRestoreLifeListItemMutation,
+  useUpdateLifeListCategoryMutation,
   useUpdateLifeListItemMutation,
+  type LifeListCategoryRequest,
   type LifeListItemRequest,
   type LifeListItemResponse,
   type LifeListStatus,
   type LifeListVisibility,
 } from "@/lib/features/life-list";
+import { type AppLocale } from "@/i18n/config";
+import {
+  TranslationFields,
+  type TranslationValues,
+  compactTranslations,
+  translationValues,
+} from "@/components/dashboard/translation-fields";
 import { STATUS_PROGRESS, StatusMeter } from "@/components/life-list/progress-meter";
+import { toUrlSlug, validateUrlSlug } from "@/lib/utils/slug";
 
 const COLUMNS: readonly LifeListStatus[] = ["planned", "in_progress", "completed", "abandoned"];
 
@@ -72,6 +88,221 @@ function toRequest(item: LifeListItemResponse, status: LifeListStatus): LifeList
     sortOrder: item.sortOrder,
     completedAt: status === "completed" ? (item.completedAt ?? today()) : null,
   };
+}
+
+function LifeListCategoryManager() {
+  const t = useTranslations("ContentTranslations");
+  const { data: categories = [] } = useGetAdminLifeListCategoriesQuery();
+  const [createCategory, { isLoading: isCreating }] = useCreateLifeListCategoryMutation();
+  const [updateCategory, { isLoading: isUpdating }] = useUpdateLifeListCategoryMutation();
+  const [deleteCategory, { isLoading: isDeleting }] = useDeleteLifeListCategoryMutation();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selected, setSelected] = useState<(typeof categories)[number] | null>(null);
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [sortOrder, setSortOrder] = useState("0");
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [locale, setLocale] = useState<AppLocale>("zh");
+  const [translations, setTranslations] = useState<TranslationValues>({ en: {} });
+  const translationFields = [
+    { key: "name", label: t("name"), placeholder: t("namePlaceholder"), required: true },
+  ];
+
+  const reset = () => {
+    setSelected(null);
+    setName("");
+    setSlug("");
+    setSortOrder("0");
+    setSlugTouched(false);
+    setLocale("zh");
+    setTranslations({ en: {} });
+  };
+
+  const openCreate = () => {
+    reset();
+    setIsOpen(true);
+  };
+
+  const openEdit = (category: (typeof categories)[number]) => {
+    setSelected(category);
+    setName(category.name);
+    setSlug(category.slug);
+    setSortOrder(String(category.sortOrder));
+    setSlugTouched(true);
+    setLocale("zh");
+    setTranslations(translationValues(category.translations, translationFields));
+    setIsOpen(true);
+  };
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextSlug = slug.trim() || toUrlSlug(name);
+    const body = {
+      name: name.trim(),
+      slug: nextSlug,
+      sortOrder: Number(sortOrder) || 0,
+      translations: compactTranslations(
+        translations,
+        "name"
+      ) as LifeListCategoryRequest["translations"],
+    };
+    try {
+      if (selected) await updateCategory({ id: selected.id, body }).unwrap();
+      else await createCategory(body).unwrap();
+      setIsOpen(false);
+    } catch {
+      // Mutation toast communicates the API failure.
+    }
+  };
+
+  return (
+    <>
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 px-1 pb-1">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold">{t("lifeListCategory")}</span>
+          <Chip size="sm" variant="soft">
+            {categories.length}
+          </Chip>
+        </div>
+        <Button size="sm" variant="tertiary" onPress={openCreate}>
+          <CirclePlus className="size-4" />
+          {t("createLifeListCategory")}
+        </Button>
+      </div>
+      {categories.length > 0 ? (
+        <div className="flex shrink-0 gap-2 overflow-x-auto px-1 pb-2">
+          {categories.map((category) => (
+            <div key={category.id} className="flex shrink-0 items-center gap-1">
+              <Chip variant="soft">{category.name}</Chip>
+              <Button
+                isIconOnly
+                aria-label={`${t("editLifeListCategory")}: ${category.name}`}
+                size="sm"
+                variant="ghost"
+                onPress={() => openEdit(category)}
+              >
+                <Pencil className="size-3" />
+              </Button>
+              <Button
+                isIconOnly
+                aria-label={`${t("lifeListCategory")}: ${category.name}`}
+                size="sm"
+                variant="ghost"
+                onPress={() => {
+                  setSelected(category);
+                  setIsDeleteOpen(true);
+                }}
+              >
+                <TrashBin className="size-3" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      <Modal>
+        <Modal.Backdrop isOpen={isOpen} onOpenChange={setIsOpen} variant="blur">
+          <Modal.Container>
+            <Modal.Dialog className="sm:max-w-md">
+              <Modal.CloseTrigger />
+              <Form onSubmit={submit}>
+                <Modal.Header>
+                  <Modal.Heading>
+                    {selected ? t("editLifeListCategory") : t("createLifeListCategory")}
+                  </Modal.Heading>
+                </Modal.Header>
+                <Modal.Body className="flex flex-col gap-4">
+                  <TranslationFields
+                    fields={translationFields}
+                    locale={locale}
+                    values={{ zh: { name }, ...translations }}
+                    onChange={(changedLocale, field, value) => {
+                      if (changedLocale === "zh") {
+                        setName(value);
+                        if (!slugTouched) setSlug(toUrlSlug(value));
+                      } else {
+                        setTranslations((current) => ({
+                          ...current,
+                          [changedLocale]: { ...current[changedLocale], [field]: value },
+                        }));
+                      }
+                    }}
+                    onLocaleChange={setLocale}
+                  />
+                  <TextField
+                    isRequired
+                    name="slug"
+                    value={slug}
+                    validate={(value) => validateUrlSlug(value)}
+                    onChange={(value) => {
+                      setSlugTouched(true);
+                      setSlug(value);
+                    }}
+                  >
+                    <Label>Slug</Label>
+                    <Input placeholder="travel" />
+                  </TextField>
+                  <TextField
+                    name="sortOrder"
+                    type="number"
+                    value={sortOrder}
+                    onChange={setSortOrder}
+                  >
+                    <Label>Sort order</Label>
+                    <Input min={0} />
+                  </TextField>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button slot="close" size="sm" variant="tertiary">
+                    Cancel
+                  </Button>
+                  <Button type="submit" size="sm" isDisabled={isCreating || isUpdating}>
+                    {(isCreating || isUpdating) && <Spinner size="sm" />}
+                    Save
+                  </Button>
+                </Modal.Footer>
+              </Form>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+      <AlertDialog>
+        <AlertDialog.Backdrop isOpen={isDeleteOpen} onOpenChange={setIsDeleteOpen} variant="blur">
+          <AlertDialog.Container>
+            <AlertDialog.Dialog>
+              <AlertDialog.CloseTrigger />
+              <AlertDialog.Header>
+                <AlertDialog.Icon status="danger" />
+                <AlertDialog.Heading>Remove category?</AlertDialog.Heading>
+              </AlertDialog.Header>
+              <AlertDialog.Body>
+                {selected?.name} will no longer be available for new wishes.
+              </AlertDialog.Body>
+              <AlertDialog.Footer>
+                <Button slot="close" size="sm" variant="tertiary">
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  isDisabled={isDeleting}
+                  onPress={() => {
+                    if (!selected) return;
+                    void deleteCategory(selected.id)
+                      .unwrap()
+                      .then(() => setIsDeleteOpen(false));
+                  }}
+                >
+                  {isDeleting && <Spinner size="sm" />}
+                  Remove
+                </Button>
+              </AlertDialog.Footer>
+            </AlertDialog.Dialog>
+          </AlertDialog.Container>
+        </AlertDialog.Backdrop>
+      </AlertDialog>
+    </>
+  );
 }
 
 export function LifeListNestedSheets({
@@ -195,17 +426,20 @@ function LifeListBoard({
 
   return (
     <div className="flex h-[calc(100svh-8rem)] min-h-96 flex-col gap-2 overflow-hidden px-4 pt-4 pb-4">
-      <Kanban hideScrollBar className="min-h-0 flex-1 items-stretch" size="md">
-        {COLUMNS.map((status) => (
-          <LifeListColumn
-            key={status}
-            kanban={kanban}
-            status={status}
-            onCreate={() => onCreate(status)}
-            onOpen={onOpen}
-          />
-        ))}
-      </Kanban>
+      <LifeListCategoryManager />
+      <div className="min-h-0 flex-1">
+        <Kanban hideScrollBar className="h-full min-h-0 items-stretch" size="md">
+          {COLUMNS.map((status) => (
+            <LifeListColumn
+              key={status}
+              kanban={kanban}
+              status={status}
+              onCreate={() => onCreate(status)}
+              onOpen={onOpen}
+            />
+          ))}
+        </Kanban>
+      </div>
       <div className="text-muted flex shrink-0 items-center justify-between gap-3 px-1 text-xs">
         <span>
           {active.length} wishes · {completed} / {total} completed

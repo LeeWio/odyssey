@@ -1,6 +1,6 @@
 import type { JSONContent } from "@tiptap/react";
 
-import type { PostRequest, PostStatus } from "@/lib/features/post";
+import type { PostRequest, PostStatus, PostTranslation } from "@/lib/features/post";
 import { parseJSONContent } from "./document-normalizer";
 
 const DRAFT_STORAGE_PREFIX = "odyssey_rich_text_draft:";
@@ -34,7 +34,14 @@ export function sanitizePostData(value: unknown): Partial<PostRequest> | null {
   if (!isRecord(value)) return null;
 
   const data: Partial<PostRequest> = {};
-  const stringFields = ["title", "slug", "summary", "coverImage", "shaderPreset"] as const;
+  const stringFields = [
+    "title",
+    "slug",
+    "summary",
+    "coverImage",
+    "shaderPreset",
+    "content",
+  ] as const;
 
   for (const field of stringFields) {
     if (typeof value[field] === "string") data[field] = value[field];
@@ -54,6 +61,22 @@ export function sanitizePostData(value: unknown): Partial<PostRequest> | null {
 
   if (Array.isArray(value.tagIds) && value.tagIds.every((id) => typeof id === "number")) {
     data.tagIds = value.tagIds.filter(Number.isFinite);
+  }
+
+  if (isRecord(value.translations)) {
+    const translations: Record<string, PostTranslation> = {};
+    for (const [locale, translation] of Object.entries(value.translations)) {
+      if (!isRecord(translation) || typeof translation.title !== "string") continue;
+      translations[locale] = {
+        title: translation.title,
+        summary: typeof translation.summary === "string" ? translation.summary : undefined,
+        content: typeof translation.content === "string" ? translation.content : undefined,
+        autoSummary:
+          typeof translation.autoSummary === "string" ? translation.autoSummary : undefined,
+        toc: typeof translation.toc === "string" ? translation.toc : undefined,
+      };
+    }
+    if (Object.keys(translations).length > 0) data.translations = translations;
   }
 
   return data;

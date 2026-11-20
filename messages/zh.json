@@ -1886,5 +1886,33 @@
       "DELIVERED": "已投递",
       "ABANDONED": "已放弃"
     }
+  },
+  "ContentTranslations": {
+    "title": "多语言内容",
+    "description": "分别维护原文和译文，空的翻译不会被保存。",
+    "language": "内容语言",
+    "source": "原文",
+    "translation": "译文",
+    "locale": {
+      "zh": "中文",
+      "en": "English"
+    },
+    "name": "名称",
+    "descriptionField": "描述",
+    "titleField": "标题",
+    "summaryField": "摘要",
+    "namePlaceholder": "输入名称",
+    "descriptionPlaceholder": "描述这项内容……",
+    "titlePlaceholder": "写一个清晰的标题",
+    "summaryPlaceholder": "概括这篇文章……",
+    "category": "分类",
+    "tag": "标签",
+    "lifeListCategory": "人生清单分类",
+    "createCategory": "创建分类",
+    "editCategory": "编辑分类",
+    "createTag": "创建标签",
+    "editTag": "编辑标签",
+    "createLifeListCategory": "创建人生清单分类",
+    "editLifeListCategory": "编辑人生清单分类"
   }
 }

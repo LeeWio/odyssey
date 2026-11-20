@@ -11,30 +11,49 @@ import {
   Switch,
   Tag,
   TagGroup,
-  TextArea,
   TextField,
   Typography,
   useFilter,
 } from "@heroui/react";
 import { type Key, useCallback } from "react";
+import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
+import { type AppLocale, locales } from "@/i18n/config";
 import { useGetCategoriesQuery } from "@/lib/features/category";
 import { useGetColumnsQuery } from "@/lib/features/column";
 import { useGetAllTagsQuery } from "@/lib/features/tag";
 import type { PostRequest } from "@/lib/features/post";
+import { TranslationFields } from "@/components/dashboard/translation-fields";
 
 interface RichTextFormProps {
   data: Partial<PostRequest>;
+  locale: AppLocale;
+  onLocaleChange: (locale: AppLocale) => void;
   onChange: (data: Partial<PostRequest>) => void;
   step: "article" | "organize" | "publish";
 }
 
-export function RichTextForm({ data, onChange, step }: RichTextFormProps) {
+export function RichTextForm({ data, locale, onLocaleChange, onChange, step }: RichTextFormProps) {
+  const t = useTranslations("ContentTranslations");
   const { data: categories = [] } = useGetCategoriesQuery();
   const { data: columns = [] } = useGetColumnsQuery();
   const { data: tags = [] } = useGetAllTagsQuery();
 
   const { contains } = useFilter({ sensitivity: "base" });
+
+  const translationFields = useMemo(
+    () => [
+      { key: "title", label: t("titleField"), placeholder: t("titlePlaceholder"), required: true },
+      {
+        key: "summary",
+        label: t("summaryField"),
+        placeholder: t("summaryPlaceholder"),
+        multiline: true,
+      },
+    ],
+    [t]
+  );
 
   const handleFieldChange = useCallback(
     (field: keyof PostRequest, value: string | number | boolean | number[] | undefined) => {
@@ -58,15 +77,36 @@ export function RichTextForm({ data, onChange, step }: RichTextFormProps) {
   if (step === "article") {
     return (
       <div className="flex flex-col gap-6">
-        <TextField
-          isRequired
-          className="w-full"
-          value={data.title || ""}
-          onChange={(value) => handleFieldChange("title", value)}
-        >
-          <Label>Title</Label>
-          <Input placeholder="The art of design..." />
-        </TextField>
+        <TranslationFields
+          fields={translationFields}
+          locale={locale}
+          values={{
+            zh: { title: data.title, summary: data.summary },
+            ...Object.fromEntries(
+              locales
+                .filter((item) => item !== "zh")
+                .map((item) => [item, data.translations?.[item] ?? {}])
+            ),
+          }}
+          onChange={(changedLocale, field, value) => {
+            if (changedLocale === "zh") {
+              handleFieldChange(field as "title" | "summary", value);
+              return;
+            }
+            onChange({
+              ...data,
+              translations: {
+                ...data.translations,
+                [changedLocale]: {
+                  title: data.translations?.[changedLocale]?.title ?? "",
+                  ...data.translations?.[changedLocale],
+                  [field]: value,
+                },
+              },
+            });
+          }}
+          onLocaleChange={onLocaleChange}
+        />
 
         <TextField
           isRequired
@@ -76,16 +116,6 @@ export function RichTextForm({ data, onChange, step }: RichTextFormProps) {
         >
           <Label>Slug</Label>
           <Input placeholder="art-of-design" />
-        </TextField>
-
-        <TextField fullWidth>
-          <Label>Summary</Label>
-          <TextArea
-            placeholder="In this article, we explore..."
-            rows={3}
-            value={data.summary || ""}
-            onChange={(e) => handleFieldChange("summary", e.target.value)}
-          />
         </TextField>
       </div>
     );
