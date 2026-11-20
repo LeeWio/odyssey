@@ -89,6 +89,10 @@ during refresh. `tests/e2e/journal.spec.ts` covers the canonical route and actio
 - Search text is normalized before requesting. While React defers the new keyword,
   previous results and counts are hidden and no request is made for the old keyword
   with the newly reset page. Search and topic changes return to page one.
+- The committed keyword is read through `useQueryState`; the input keeps only
+  transient untrimmed text locally, while external URL changes such as browser
+  back/forward restore the controlled value without a feature-local history
+  listener.
 - The list and its reading statistics use `currentData`. Results and pagination
   animation boundaries are keyed by the active input, topic, and page, so an old
   card cannot remain clickable during an exit animation after selection changes.
