@@ -26,12 +26,12 @@ import {
 } from "@heroui/react";
 import { AnimatePresence, animate as animateMotion, motion, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { ReadingListButton } from "@/features/library/reading-list-button";
 import { useAppSelector } from "@/lib/hooks";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { PageFrame } from "@/components/layout/page-frame";
 import { useRelativeTime } from "@/lib/relative-time";
@@ -523,9 +523,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("Blog");
   const shouldReduceMotion = useReducedMotion() ?? false;
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const page = Math.max(0, (parsePositiveInteger(searchParams.get("page")) ?? 1) - 1);
   const categoryId = parsePositiveInteger(searchParams.get("categoryId"));
   const selectedCategoryId = categoryId;
@@ -533,17 +531,9 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
   const scrollAnimationRef = useRef<{ stop: () => void } | null>(null);
   const updateSearch = useCallback(
     (changes: Record<string, string | undefined>) => {
-      const next = new URLSearchParams(searchParams.toString());
-
-      Object.entries(changes).forEach(([key, value]) => {
-        if (value) next.set(key, value);
-        else next.delete(key);
-      });
-
-      const query = next.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      updateQuery(changes);
     },
-    [pathname, router, searchParams]
+    [updateQuery]
   );
 
   useEffect(() => {

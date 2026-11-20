@@ -3,7 +3,7 @@
 import { EmptyState } from "@heroui-pro/react";
 import { AlertDialog, Button, Card, Chip, Skeleton, Tabs, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 
@@ -26,6 +26,7 @@ import {
 import { getNotificationDestination } from "@/lib/notification-presentation";
 import { openDashboardAtPath, setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 import { NotificationCategoryFilter } from "./notification-category-filter";
 import { NotificationCategoryList } from "./notification-category-list";
 import { useNotificationActions } from "./use-notification-actions";
@@ -132,38 +133,30 @@ export function NotificationCenterPage() {
   const t = useTranslations("Notifications");
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const view = parseNotificationView(searchParams.get("view"));
   const category = parseNotificationCategory(searchParams.get("category"));
   const unreadOnly = searchParams.get("unread") === "1";
   const page = parseNotificationPage(searchParams.get("page"));
-  const updateQuery = useCallback(
+  const updateNotificationQuery = useCallback(
     (patch: NotificationQueryPatch) => {
-      const nextParams = new URLSearchParams(searchParams.toString());
-
+      const changes: Record<string, string | number | null> = {};
       if ("view" in patch) {
-        if (!patch.view || patch.view === "inbox") nextParams.delete("view");
-        else nextParams.set("view", patch.view);
+        changes.view = !patch.view || patch.view === "inbox" ? null : patch.view;
       }
       if ("category" in patch) {
-        if (!patch.category) nextParams.delete("category");
-        else nextParams.set("category", patch.category);
+        changes.category = patch.category || null;
       }
       if ("unreadOnly" in patch) {
-        if (patch.unreadOnly) nextParams.set("unread", "1");
-        else nextParams.delete("unread");
+        changes.unread = patch.unreadOnly ? "1" : null;
       }
       if ("page" in patch) {
-        if (!patch.page) nextParams.delete("page");
-        else nextParams.set("page", String(Math.max(0, Math.floor(patch.page ?? 0))));
+        changes.page = patch.page ? Math.max(0, Math.floor(patch.page ?? 0)) : null;
       }
-
-      const query = nextParams.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      updateQuery(changes);
     },
-    [pathname, router, searchParams]
+    [updateQuery]
   );
   const { pendingActions, pendingBulkAction, run, runBulk, isBulkRunning } =
     useNotificationActions();
@@ -200,8 +193,8 @@ export function NotificationCenterPage() {
   const isAdjustingPage =
     notifications.isSuccess && !notifications.isFetching && !!currentPage && page > lastPage;
   useEffect(() => {
-    if (isAdjustingPage) updateQuery({ page: lastPage });
-  }, [isAdjustingPage, lastPage, updateQuery]);
+    if (isAdjustingPage) updateNotificationQuery({ page: lastPage });
+  }, [isAdjustingPage, lastPage, updateNotificationQuery]);
   // Removing the last row can shrink the collection below the current page.
   // Adjust only after a successful response for these exact query arguments.
   const isLoadingPage =
@@ -246,7 +239,7 @@ export function NotificationCenterPage() {
   const handleClearReadNotifications = () =>
     runBulk("clear-read", async () => {
       await clearReadNotifications().unwrap();
-      updateQuery({ page: 0 });
+      updateNotificationQuery({ page: 0 });
       setIsClearReadOpen(false);
     });
 
@@ -297,7 +290,7 @@ export function NotificationCenterPage() {
               size="sm"
               variant={unreadOnly ? "secondary" : "ghost"}
               onPress={() => {
-                updateQuery({ page: 0, unreadOnly: !unreadOnly });
+                updateNotificationQuery({ page: 0, unreadOnly: !unreadOnly });
               }}
             >
               {t("unreadTab")}
@@ -341,7 +334,7 @@ export function NotificationCenterPage() {
         <Tabs
           selectedKey={view}
           onSelectionChange={(key) => {
-            updateQuery({
+            updateNotificationQuery({
               page: 0,
               view: key === "saved" || key === "done" ? key : "inbox",
             });
@@ -369,7 +362,7 @@ export function NotificationCenterPage() {
           <NotificationCategoryFilter
             category={category}
             onCategoryChange={(next) => {
-              updateQuery({ category: next, page: 0 });
+              updateNotificationQuery({ category: next, page: 0 });
             }}
           />
         </div>
@@ -393,7 +386,7 @@ export function NotificationCenterPage() {
             <NotificationEmptyState
               category={category}
               onClearFilters={() => {
-                updateQuery({ category: undefined, page: 0, unreadOnly: false });
+                updateNotificationQuery({ category: undefined, page: 0, unreadOnly: false });
               }}
               unreadOnly={unreadOnly}
               view={view}
@@ -427,7 +420,7 @@ export function NotificationCenterPage() {
                 isDisabled={page === 0 || notifications.isFetching}
                 size="sm"
                 variant="secondary"
-                onPress={() => updateQuery({ page: Math.max(0, page - 1) })}
+                onPress={() => updateNotificationQuery({ page: Math.max(0, page - 1) })}
               >
                 {t("previous")}
               </Button>
@@ -435,7 +428,7 @@ export function NotificationCenterPage() {
                 isDisabled={notifications.isFetching || !currentPage || page >= lastPage}
                 size="sm"
                 variant="secondary"
-                onPress={() => updateQuery({ page: page + 1 })}
+                onPress={() => updateNotificationQuery({ page: page + 1 })}
               >
                 {t("next")}
               </Button>

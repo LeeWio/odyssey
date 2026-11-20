@@ -51,9 +51,11 @@ app/components/features -> components/ui
 
 ### P1：状态边界收敛
 
-- 将 `ui-slice` 拆为 `shell-slice`、`overlay-slice` 和领域级 URL 状态。
+- 已将 `ui-slice` 拆为 `shell-slice` 与 `overlay-slice`；下一步继续迁移领域级 URL 状态。
 - 能由 URL 表达的筛选、分页、工作区、弹层全部移出 Redux。
 - 仅保留跨页面共享且没有路由语义的 UI 状态。
+
+页面 query 更新统一通过 `lib/hooks/use-query-state.ts`，负责保留无关参数、统一空值删除和 replace/push 行为。
 
 ### P2：领域模块归属收敛
 
@@ -64,7 +66,7 @@ app/components/features -> components/ui
 ### P3：Provider 与副作用收敛
 
 - 将主题、媒体、Toast、Redux 和 i18n Provider 拆成职责明确的 runtime provider。
-- 移除应用入口对 `console.error` 的全局 monkey patch，改为针对具体开发警告的边界处理。
+- 应用入口不再修改全局 `console.error`；开发警告必须在具体依赖或组件边界处理。
 - 统一持久化副作用的初始化、hydration 和失效策略。
 
 ### P4：契约与可观测性
