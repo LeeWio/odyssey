@@ -4,7 +4,6 @@ import { EmptyState, NumberValue } from "@heroui-pro/react";
 import { Button, Link, Skeleton, Typography } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
-import { useSearchParams } from "next/navigation";
 
 import { MomentCard } from "@/features/moment/components/card";
 import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
@@ -12,6 +11,7 @@ import { PageFrame } from "@/components/layout/page-frame";
 import { MomentsPagination } from "@/features/moment/components/moments-pagination";
 import { parsePageParam } from "@/lib/utils/pagination";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 
 function isYear(value: string) {
   return /^\d{4}$/.test(value);
@@ -32,7 +32,7 @@ export default function MomentMonthPage({
   const valid = isYear(year) && isMonth(month);
   const t = useTranslations("Moments");
   const locale = useLocale();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const page = parsePageParam(searchParams.get("page"));
   const catalog = useMomentFeed(
     20,
@@ -108,10 +108,10 @@ export default function MomentMonthPage({
               pages={catalog.totalPages}
               isDisabled={catalog.isFetchingPage}
               onPageChange={(nextPage) => {
-                const url = new URL(window.location.href);
-                if (nextPage === 1) url.searchParams.delete("page");
-                else url.searchParams.set("page", String(nextPage));
-                window.history.pushState(null, "", `${url.pathname}${url.search}`);
+                updateQuery(
+                  { page: nextPage === 1 ? null : String(nextPage) },
+                  { mode: "push", scroll: false }
+                );
                 window.scrollTo({ top: 0, behavior: "instant" });
               }}
             />

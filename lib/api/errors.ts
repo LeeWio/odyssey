@@ -1,9 +1,16 @@
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
+export type ApiErrorStatus = FetchBaseQueryError["status"];
+
 export interface ApiErrorPayload {
   code?: number;
   message?: string;
   traceId?: string;
+}
+
+export interface NormalizedApiError extends ApiErrorPayload {
+  message: string;
+  status: ApiErrorStatus;
 }
 
 export const getApiErrorPayload = (error: unknown): ApiErrorPayload | undefined => {
@@ -21,11 +28,8 @@ export const getApiErrorPayload = (error: unknown): ApiErrorPayload | undefined 
   };
 };
 
-export const transformApiError = (error: FetchBaseQueryError): string => {
-  const payload = getApiErrorPayload(error);
-  if (payload?.message) return payload.message;
-
-  switch (error.status) {
+export const getApiErrorFallbackMessage = (status: ApiErrorStatus, detail?: string): string => {
+  switch (status) {
     case 400:
       return "Invalid request.";
     case 401:
@@ -49,17 +53,40 @@ export const transformApiError = (error: FetchBaseQueryError): string => {
     case "TIMEOUT_ERROR":
       return "Request timed out. Please try again.";
     case "CUSTOM_ERROR":
-      return error.error || "Request failed.";
+      return detail || "Request failed.";
     default:
       return "An unexpected error occurred.";
   }
 };
 
+export const createApiError = (
+  status: ApiErrorStatus,
+  payload: ApiErrorPayload = {},
+  detail?: string
+): NormalizedApiError => ({
+  status,
+  code: payload.code,
+  message: payload.message ?? getApiErrorFallbackMessage(status, detail),
+  traceId: payload.traceId,
+});
+
+export const normalizeApiError = (error: FetchBaseQueryError): NormalizedApiError => {
+  const payload = getApiErrorPayload(error);
+  const detail = error.status === "CUSTOM_ERROR" ? error.error : undefined;
+  return createApiError(error.status, payload, detail);
+};
+
+export const transformApiError = normalizeApiError;
+
+export const getApiErrorTraceId = (error: unknown): string | undefined =>
+  getApiErrorPayload(error)?.traceId;
+
 export const getApiErrorMessage = (error: unknown, fallback: string): string => {
   if (typeof error === "string") return error;
   if (!error || typeof error !== "object") return fallback;
 
-  const value = error as { error?: unknown };
+  const value = error as { error?: unknown; message?: unknown };
+  if (typeof value.message === "string") return value.message;
   if (typeof value.error === "string") return value.error;
   if (value.error && value.error !== error) return getApiErrorMessage(value.error, fallback);
 
