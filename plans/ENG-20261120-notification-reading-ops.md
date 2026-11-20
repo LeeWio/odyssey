@@ -32,7 +32,7 @@ not access, repair or rewrite the production database.
 - `bun run preflight`: PASS — 87 test files and 455 tests passed.
 - `bun run build`: PASS — 51 routes generated successfully.
 - `OPENAPI_FILE=contracts/nexus-openapi.operations.json bun run api:coverage`:
-  PASS — 313/313 operations matched at Nexus revision `94ed2e4`.
+  PASS — 313/313 operations matched at merged Nexus revision `a021656`.
 - Generated Nexus OpenAPI projection comparison: PASS — 313 operations match
   the pinned contract projection exactly.
 - `bunx playwright test tests/e2e/notification-lists.spec.ts --project=chromium`:
