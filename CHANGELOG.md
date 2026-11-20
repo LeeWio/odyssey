@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.252.1](https://github.com/LeeWio/odyssey/compare/v1.252.0...v1.252.1) (2026-11-20)
+
+
+### Bug Fixes
+
+* **reader:** persist progress during navigation ([#51](https://github.com/LeeWio/odyssey/issues/51)) ([266fb2f](https://github.com/LeeWio/odyssey/commit/266fb2f25e142d6e0f4cb1cd07bc27f2f08d3141))
+
 ## [1.252.0](https://github.com/LeeWio/odyssey/compare/v1.251.0...v1.252.0) (2026-11-20)
 
 
