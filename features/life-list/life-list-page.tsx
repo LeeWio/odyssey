@@ -40,7 +40,7 @@ function FilterButton({
   );
 }
 
-export function LifeListPageClient({
+export function LifeListPage({
   initialPage,
   initialCategories,
 }: {

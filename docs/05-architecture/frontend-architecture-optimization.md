@@ -59,9 +59,10 @@ app/components/features -> components/ui
 
 ### P2：领域模块归属收敛
 
+- 已将 Home、Chronicle、Moments、Life List、文章阅读器及文章目录卡片/分页等页面业务 UI 收敛到对应的 `features/<domain>`。
 - 将仍位于 `components/*` 的完整业务模块按用户能力迁入 `features/<domain>`。
 - `components/*` 只保留跨领域组合组件、HeroUI 适配和编辑器基础设施。
-- 通过领域 barrel 暴露公共 API，禁止页面依赖领域私有文件。
+- 通过领域 barrel 暴露公共 API；当前迁移的路由只依赖 `features` 入口，不再依赖路由目录下的客户端业务文件。RSC 路由使用 `route-entries.ts`，避免把客户端 hook 混入服务端模块图。
 
 ### P3：Provider 与副作用收敛
 

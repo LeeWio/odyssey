@@ -8,7 +8,7 @@ import { use } from "react";
 import { useGetTrendingQuery, useRetrieveDiscoveryQuery } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 
-import { EssayGrid } from "../../components/essay-grid";
+import { EssayGrid } from "@/features/blog/catalog-entries";
 import { PageFrame } from "@/components/layout/page-frame";
 
 type Digest = OpenApiComponents["schemas"]["PostDigestResponse"];

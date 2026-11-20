@@ -6,7 +6,7 @@ import { Button, Card, Link, Skeleton } from "@heroui/react";
 import { useLocale, useTranslations } from "next-intl";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
-import { TAXONOMY_GRID } from "../components/grid-classes";
+import { TAXONOMY_GRID } from "@/features/blog/catalog-entries";
 
 import { useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import { useGetPublicTagsQuery } from "@/lib/features/tag";

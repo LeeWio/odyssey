@@ -1,9 +1,8 @@
 import { getPublicMomentsInitialData } from "@/lib/features/moment/server";
 import { parsePageParam } from "@/lib/utils/pagination";
+import { MomentsPage } from "@/features/moment/route-entries";
 
-import MomentsPageClient from "./moments-page-client";
-
-export default async function MomentsPage({
+export default async function MomentsRoute({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string | string[]; topic?: string | string[] }>;
@@ -12,5 +11,5 @@ export default async function MomentsPage({
   const page = parsePageParam((Array.isArray(params.page) ? params.page[0] : params.page) ?? null);
   const topic = (Array.isArray(params.topic) ? params.topic[0] : params.topic) || undefined;
   const initialData = await getPublicMomentsInitialData(12, page, topic);
-  return <MomentsPageClient initialData={initialData} />;
+  return <MomentsPage initialData={initialData} />;
 }

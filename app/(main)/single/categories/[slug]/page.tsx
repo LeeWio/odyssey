@@ -7,14 +7,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { use } from "react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
-import { ESSAY_GRID } from "../../components/grid-classes";
+import { ESSAY_GRID, EssayGrid, EssayPagination } from "@/features/blog/catalog-entries";
 
 import { useGetPublicCategoriesQuery } from "@/lib/features/category";
 import { useGetPublicPostsQuery } from "@/lib/features/post";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 
-import { EssayGrid } from "../../components/essay-grid";
-import { EssayPagination } from "../../components/essay-pagination";
 import { parsePageParam } from "@/lib/utils/pagination";
 
 const PAGE_SIZE = 8;

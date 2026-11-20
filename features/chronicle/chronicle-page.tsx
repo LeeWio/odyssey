@@ -42,7 +42,7 @@ function formatDate(value: string | null | undefined, locale: string, fallback: 
   }).format(new Date(value));
 }
 
-export default function ChroniclePage({ initialData }: { initialData: PublicJournalInitialData }) {
+export function ChroniclePage({ initialData }: { initialData: PublicJournalInitialData }) {
   const t = useTranslations("Blog");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotion() ?? false;

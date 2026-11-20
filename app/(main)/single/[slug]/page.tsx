@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { readingHtml } from "@/components/rich-text/reading-html";
+import { ArticlePageClient } from "@/features/blog/route-entries";
 import { getPublicArticle } from "@/lib/features/post/server";
-
-import ArticlePageClient from "./article-page-client";
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
