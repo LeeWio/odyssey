@@ -6,6 +6,8 @@ import {
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import { getRuntimeLocale, localizeApiPayload } from "@/lib/i18n/api-localization";
+import { getClientApiOrigin } from "./api-config";
+import { serializeApiParams } from "./query-params";
 
 interface AuthState {
   auth: {
@@ -28,35 +30,10 @@ interface RefreshEnvelope {
 }
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "",
+  baseUrl: getClientApiOrigin(),
   credentials: "include",
   timeout: 15_000,
-  paramsSerializer: (params) => {
-    const searchParams = new URLSearchParams();
-
-    for (const [key, value] of Object.entries(params)) {
-      if (value === undefined || value === null || value === "") continue;
-      if (key === "pageable" && typeof value === "object" && !Array.isArray(value)) {
-        for (const [pageableKey, pageableValue] of Object.entries(value)) {
-          if (pageableValue === undefined || pageableValue === null || pageableValue === "")
-            continue;
-          if (Array.isArray(pageableValue)) {
-            pageableValue.forEach((item) => searchParams.append(pageableKey, String(item)));
-          } else {
-            searchParams.set(pageableKey, String(pageableValue));
-          }
-        }
-        continue;
-      }
-      if (Array.isArray(value)) {
-        value.forEach((item) => searchParams.append(key, String(item)));
-      } else {
-        searchParams.set(key, String(value));
-      }
-    }
-
-    return searchParams.toString();
-  },
+  paramsSerializer: serializeApiParams,
   prepareHeaders: (headers, { getState, arg }) => {
     const token = (getState() as AuthState).auth.accessToken;
     const requestUrl = typeof arg === "string" ? arg : arg.url;
