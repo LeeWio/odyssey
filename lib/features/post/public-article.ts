@@ -42,13 +42,15 @@ export function stripViewerState(article: PostResponse): PostResponse {
 }
 
 const getPublicArticleForLocale = cache(
-  async (slug: string, locale: AppLocale): Promise<PublicArticleResult> => {
+  async (slug: string, locale?: AppLocale): Promise<PublicArticleResult> => {
     const url = publicPostUrl(slug);
     if (!url) return { status: "error" };
 
     try {
+      const requestHeaders: Record<string, string> = { [SERVER_PREFETCH_HEADER]: "1" };
+      if (locale) requestHeaders["accept-language"] = locale;
       const response = await fetch(url, {
-        headers: { [SERVER_PREFETCH_HEADER]: "1", "accept-language": locale },
+        headers: requestHeaders,
         next: {
           revalidate: REVALIDATE_SECONDS,
           tags: [`article:${slug}`],
@@ -73,6 +75,10 @@ const getPublicArticleForLocale = cache(
 );
 
 export async function getPublicArticle(slug: string): Promise<PublicArticleResult> {
-  const requestHeaders = await headers();
-  return getPublicArticleForLocale(slug, resolveAppLocale(requestHeaders.get("accept-language")));
+  try {
+    const requestHeaders = await headers();
+    return getPublicArticleForLocale(slug, resolveAppLocale(requestHeaders.get("accept-language")));
+  } catch {
+    return getPublicArticleForLocale(slug);
+  }
 }
