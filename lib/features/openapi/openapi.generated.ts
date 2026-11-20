@@ -66,7 +66,9 @@ export interface OpenApiComponents {
       description?: string;
       icon?: string;
       createdAt?: string;
+      translations?: { [key: string]: OpenApiComponents["schemas"]["CategoryTranslationResponse"] };
     };
+    CategoryTranslationResponse: { locale?: string; name?: string; description?: string };
     PostDigestResponse: {
       id?: number;
       title?: string;
@@ -81,7 +83,11 @@ export interface OpenApiComponents {
       likesCount?: number;
       commentsCount?: number;
       publishedAt?: string;
+      translations?: {
+        [key: string]: OpenApiComponents["schemas"]["PostDigestTranslationResponse"];
+      };
     };
+    PostDigestTranslationResponse: { locale?: string; title?: string; summary?: string };
     ReadingHistoryResponse: {
       post?: OpenApiComponents["schemas"]["PostDigestResponse"];
       currentProgressPercent?: number;
@@ -141,14 +147,26 @@ export interface OpenApiComponents {
       isActive?: boolean;
       createdAt?: string;
     };
-    TagRequest: { name: string; slug: string };
+    TagRequest: {
+      name: string;
+      slug: string;
+      translations?: { [key: string]: OpenApiComponents["schemas"]["TagTranslationRequest"] };
+    };
+    TagTranslationRequest: { name: string };
     ApiResponseTagResponse: {
       code?: number;
       message?: string;
       data?: OpenApiComponents["schemas"]["TagResponse"];
       traceId?: string;
     };
-    TagResponse: { id?: number; name?: string; slug?: string; createdAt?: string };
+    TagResponse: {
+      id?: number;
+      name?: string;
+      slug?: string;
+      createdAt?: string;
+      translations?: { [key: string]: OpenApiComponents["schemas"]["TagTranslationResponse"] };
+    };
+    TagTranslationResponse: { locale?: string; name?: string };
     SeriesRequest: {
       name: string;
       slug: string;
@@ -211,6 +229,15 @@ export interface OpenApiComponents {
       breadcrumbs?: Array<OpenApiComponents["schemas"]["Breadcrumb"]>;
       seo?: OpenApiComponents["schemas"]["SeoMetadata"];
       navigation?: OpenApiComponents["schemas"]["Navigation"];
+      translations?: { [key: string]: OpenApiComponents["schemas"]["PostTranslationResponse"] };
+    };
+    PostTranslationResponse: {
+      locale?: string;
+      title?: string;
+      summary?: string;
+      content?: string;
+      autoSummary?: string;
+      toc?: string;
     };
     SeoMetadata: {
       ogTitle?: string;
@@ -288,6 +315,14 @@ export interface OpenApiComponents {
       seriesOrder?: number;
       parentId?: number;
       tagIds?: Array<number>;
+      translations?: { [key: string]: OpenApiComponents["schemas"]["PostTranslationRequest"] };
+    };
+    PostTranslationRequest: {
+      title: string;
+      summary?: string;
+      content?: string;
+      autoSummary?: string;
+      toc?: string;
     };
     ApiResponsePostResponse: {
       code?: number;
@@ -431,7 +466,16 @@ export interface OpenApiComponents {
       data?: OpenApiComponents["schemas"]["LifeListItemResponse"];
       traceId?: string;
     };
-    LifeListCategoryResponse: { id?: number; name?: string; slug?: string; sortOrder?: number };
+    LifeListCategoryResponse: {
+      id?: number;
+      name?: string;
+      slug?: string;
+      sortOrder?: number;
+      translations?: {
+        [key: string]: OpenApiComponents["schemas"]["LifeListCategoryTranslationResponse"];
+      };
+    };
+    LifeListCategoryTranslationResponse: { locale?: string; name?: string };
     LifeListItemResponse: {
       id?: number;
       number?: number;
@@ -449,7 +493,15 @@ export interface OpenApiComponents {
       createdAt?: string;
       updatedAt?: string;
     };
-    LifeListCategoryRequest: { name: string; slug?: string; sortOrder?: number };
+    LifeListCategoryRequest: {
+      name: string;
+      slug?: string;
+      sortOrder?: number;
+      translations?: {
+        [key: string]: OpenApiComponents["schemas"]["LifeListCategoryTranslationRequest"];
+      };
+    };
+    LifeListCategoryTranslationRequest: { name: string };
     ApiResponseLifeListCategoryResponse: {
       code?: number;
       message?: string;
@@ -576,7 +628,14 @@ export interface OpenApiComponents {
       createdAt?: string;
       updatedAt?: string;
     };
-    CategoryRequest: { name: string; slug: string; description?: string; icon?: string };
+    CategoryRequest: {
+      name: string;
+      slug: string;
+      description?: string;
+      icon?: string;
+      translations?: { [key: string]: OpenApiComponents["schemas"]["CategoryTranslationRequest"] };
+    };
+    CategoryTranslationRequest: { name: string; description?: string };
     ApiResponseCategoryResponse: {
       code?: number;
       message?: string;
@@ -804,6 +863,9 @@ export interface OpenApiComponents {
       id?: number;
       title?: string;
       content?: string;
+      titleKey?: string;
+      contentKey?: string;
+      messageArgs?: { [key: string]: unknown };
       type?: string;
       read?: boolean;
       saved?: boolean;
@@ -1060,9 +1122,9 @@ export interface OpenApiComponents {
     TreeLong: {
       name?: { empty?: boolean };
       id?: number;
-      config?: OpenApiComponents["schemas"]["TreeNodeConfig"];
       weight?: unknown;
       parentId?: number;
+      config?: OpenApiComponents["schemas"]["TreeNodeConfig"];
       empty?: boolean;
       [key: string]: unknown;
     };

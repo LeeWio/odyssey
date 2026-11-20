@@ -1,7 +1,10 @@
 import { z } from "zod";
+import { headers } from "next/headers";
 
 import { SERVER_PREFETCH_HEADER } from "@/lib/api/client-device";
 import { apiResponseSchema } from "@/lib/api";
+import { resolveAppLocale, type AppLocale } from "@/i18n/locale";
+import { localizeApiPayload } from "@/lib/i18n/api-localization";
 
 import {
   LifeListCategoryResponseSchema,
@@ -22,16 +25,20 @@ function apiOrigin() {
   return process.env.NODE_ENV === "development" ? "http://127.0.0.1:8080" : null;
 }
 
-async function readPublicData<T>(url: string, schema: z.ZodType<T>): Promise<T | null> {
+async function readPublicData<T>(
+  url: string,
+  schema: z.ZodType<T>,
+  locale: AppLocale
+): Promise<T | null> {
   try {
     const response = await fetch(url, {
-      headers: { [SERVER_PREFETCH_HEADER]: "1" },
+      headers: { [SERVER_PREFETCH_HEADER]: "1", "accept-language": locale },
       signal: AbortSignal.timeout(3_000),
       next: { revalidate: REVALIDATE_SECONDS, tags: ["public-life-list"] },
     });
     if (!response.ok) return null;
     const payload: unknown = await response.json();
-    const parsed = apiResponseSchema(schema).safeParse(payload);
+    const parsed = apiResponseSchema(schema).safeParse(localizeApiPayload(payload, locale));
     return parsed.success ? (parsed.data.data as T) : null;
   } catch {
     return null;
@@ -49,12 +56,18 @@ export async function getPublicLifeListInitialData(): Promise<PublicLifeListInit
   }
   const origin = apiOrigin();
   if (!origin) return { page: null, categories: [] };
+  const locale = resolveAppLocale((await headers()).get("accept-language"));
 
   const [page, categories] = await Promise.all([
-    readPublicData(`${origin}/api/v1/public/life-list?page=0&size=100`, LifeListPageResponseSchema),
+    readPublicData(
+      `${origin}/api/v1/public/life-list?page=0&size=100`,
+      LifeListPageResponseSchema,
+      locale
+    ),
     readPublicData(
       `${origin}/api/v1/public/life-list/categories`,
-      z.array(LifeListCategoryResponseSchema)
+      z.array(LifeListCategoryResponseSchema),
+      locale
     ),
   ]);
 
@@ -65,5 +78,10 @@ export async function getPublicLifeListItem(number: number): Promise<LifeListIte
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
   const origin = apiOrigin();
   if (!origin) return null;
-  return readPublicData(`${origin}/api/v1/public/life-list/${number}`, LifeListItemResponseSchema);
+  const locale = resolveAppLocale((await headers()).get("accept-language"));
+  return readPublicData(
+    `${origin}/api/v1/public/life-list/${number}`,
+    LifeListItemResponseSchema,
+    locale
+  );
 }

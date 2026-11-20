@@ -9,8 +9,11 @@ export const NotificationContextSchema = z.object({
 
 export const NotificationResponseSchema = z.object({
   id: z.number(),
-  title: z.string(),
-  content: z.string(),
+  title: z.string().nullable().optional(),
+  content: z.string().nullable().optional(),
+  titleKey: z.string().nullable().optional(),
+  contentKey: z.string().nullable().optional(),
+  messageArgs: z.record(z.string(), z.unknown()).nullable().optional(),
   type: z.string(),
   read: z.boolean(),
   saved: z.boolean(),
