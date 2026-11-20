@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { headers } from "next/headers";
 
 import type { PageResult } from "@/lib/api";
 import { SERVER_PREFETCH_HEADER } from "@/lib/api/client-device";
 import { apiResponseSchema, pageResultSchema } from "@/lib/api";
 
 import { PostDigestResponseSchema, type PostDigestResponse } from "./post-contracts";
-import { resolveAppLocale, type AppLocale } from "@/i18n/locale";
+import { type AppLocale } from "@/i18n/locale";
 import { localizeApiPayload } from "@/lib/i18n/api-localization";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 const JOURNAL_REVALIDATE_SECONDS = 60;
 
@@ -50,7 +50,7 @@ export async function getPublicJournalInitialData({
 } = {}): Promise<PublicJournalInitialData> {
   const origin = apiOrigin();
   if (!origin) return { featured: null, latest: null };
-  const locale = resolveAppLocale((await headers()).get("accept-language"));
+  const locale = await getRequestLocale();
 
   const [featured, latest] = await Promise.all([
     readPage(

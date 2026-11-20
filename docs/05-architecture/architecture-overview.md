@@ -83,7 +83,7 @@ LocalStorage、Cookie、主题同步、鉴权持久化等副作用应集中在 p
 
 ### 首屏加载
 
-请求进入 `app/layout.tsx` 后，系统读取请求头和 Cookie，推导语言方向、主题模式和主题变体；随后注入主题初始化脚本，并在客户端通过 `Providers` 挂载国际化、Redux、主题和 Toast 能力。
+请求进入 `app/layout.tsx` 后，系统优先读取语言 Cookie、再回退请求头，推导语言方向、主题模式和主题变体；随后注入主题初始化脚本，并在客户端通过 `Providers` 挂载国际化、Redux、主题和 Toast 能力。
 
 ### 数据请求
 

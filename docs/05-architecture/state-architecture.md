@@ -15,16 +15,16 @@
 
 ## 状态存放规则
 
-| 类型            | 存放位置                         | 示例                             |
-| --------------- | -------------------------------- | -------------------------------- |
-| 服务端列表/详情 | RTK Query cache                  | 文章、评论、用户、标签           |
-| 鉴权会话        | auth slice + LocalStorage        | token、username、roles           |
-| 全局 UI         | ui slice                         | dashboard、sheet、rich text 弹层 |
-| 主题偏好        | ui slice + Cookie + LocalStorage | theme variant、mode              |
-| 语言偏好        | locale slice + LocalStorage      | locale                           |
-| 表单输入        | 组件局部 state                   | 发布设置、评论输入               |
-| 编辑器文档      | Tiptap editor state              | JSONContent                      |
-| 页面定位        | URL / route params               | slug、分页、筛选                 |
+| 类型            | 存放位置                             | 示例                             |
+| --------------- | ------------------------------------ | -------------------------------- |
+| 服务端列表/详情 | RTK Query cache                      | 文章、评论、用户、标签           |
+| 鉴权会话        | auth slice + LocalStorage            | token、username、roles           |
+| 全局 UI         | ui slice                             | dashboard、sheet、rich text 弹层 |
+| 主题偏好        | ui slice + Cookie + LocalStorage     | theme variant、mode              |
+| 语言偏好        | locale slice + Cookie + LocalStorage | locale                           |
+| 表单输入        | 组件局部 state                       | 发布设置、评论输入               |
+| 编辑器文档      | Tiptap editor state                  | JSONContent                      |
+| 页面定位        | URL / route params                   | slug、分页、筛选                 |
 
 ## Redux Store
 
@@ -103,9 +103,7 @@ ui slice 管理：
 
 ## Locale State
 
-locale slice 表达用户语言偏好。当前 layout 仍从请求头推导初始语言，客户端 provider 接收该语言和消息。
-
-后续若引入语言路由，应重新定义 locale state、URL 和 middleware 的权责。
+locale slice 表达客户端语言偏好；`odyssey_locale` Cookie 是 SSR、next-intl、服务端预取和 API `Accept-Language` 的共享来源。导航栏的 `LocaleSwitcher` 更新 Cookie、Redux 状态并刷新路由，确保首屏和后续请求使用同一语言。
 
 ## 持久化策略
 

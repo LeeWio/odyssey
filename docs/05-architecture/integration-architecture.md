@@ -78,13 +78,13 @@ Redux Toolkit 提供全局状态模型，RTK Query 提供服务端状态缓存�
 
 当前流程：
 
-- layout 从 `accept-language` 解析语言。
+- layout 优先从 `odyssey_locale` Cookie 解析语言，没有显式选择时才回退到 `accept-language`。
 - `getMessages` 获取消息。
 - `NextIntlClientProvider` 向客户端提供翻译上下文。
 - HeroUI `I18nProvider` 接收 locale。
 - html `dir` 根据语言判断 RTL/LTR。
-
-后续如果引入显式语言路由，应同步更新路由结构、middleware 和文档。
+- `lib/i18n/request-locale.ts` 为 SSR 页面和服务端 API 预取提供统一 locale 解析。
+- `baseApi` 使用 `document.documentElement.lang` 设置 API `Accept-Language`，切换语言时清空旧 API cache。
 
 ## 主题集成
 

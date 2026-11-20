@@ -22,6 +22,7 @@ import {
 import { useGetCurrentUserQuery } from "@/lib/features/user";
 import { useGetUnreadNotificationCountQuery } from "@/lib/features/notification";
 import { UserAvatar } from "@/components/user-avatar";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { selectAuthMode, setAuthMode, toggleDashboard } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { commentDebug } from "@/lib/comment-debug";
@@ -675,6 +676,8 @@ export const Navbar = () => {
                 </Kbd>
               </Button>
             </div>
+
+            <LocaleSwitcher />
 
             {mounted && isAuthenticated ? <NotificationPopover /> : null}
 

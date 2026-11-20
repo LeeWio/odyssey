@@ -1,9 +1,8 @@
 import { cache } from "react";
-import { headers } from "next/headers";
-
 import { SERVER_PREFETCH_HEADER } from "@/lib/api/client-device";
-import { resolveAppLocale, type AppLocale } from "@/i18n/locale";
+import { type AppLocale } from "@/i18n/locale";
 import { localizeApiPayload } from "@/lib/i18n/api-localization";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 import { PostResponseSchema, type PostResponse } from "./post-contracts";
 
@@ -76,8 +75,7 @@ const getPublicArticleForLocale = cache(
 
 export async function getPublicArticle(slug: string): Promise<PublicArticleResult> {
   try {
-    const requestHeaders = await headers();
-    return getPublicArticleForLocale(slug, resolveAppLocale(requestHeaders.get("accept-language")));
+    return getPublicArticleForLocale(slug, await getRequestLocale());
   } catch {
     return getPublicArticleForLocale(slug);
   }

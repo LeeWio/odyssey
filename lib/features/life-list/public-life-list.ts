@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { headers } from "next/headers";
 
 import { SERVER_PREFETCH_HEADER } from "@/lib/api/client-device";
 import { apiResponseSchema } from "@/lib/api";
-import { resolveAppLocale, type AppLocale } from "@/i18n/locale";
+import { type AppLocale } from "@/i18n/locale";
 import { localizeApiPayload } from "@/lib/i18n/api-localization";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 import {
   LifeListCategoryResponseSchema,
@@ -56,7 +56,7 @@ export async function getPublicLifeListInitialData(): Promise<PublicLifeListInit
   }
   const origin = apiOrigin();
   if (!origin) return { page: null, categories: [] };
-  const locale = resolveAppLocale((await headers()).get("accept-language"));
+  const locale = await getRequestLocale();
 
   const [page, categories] = await Promise.all([
     readPublicData(
@@ -78,7 +78,7 @@ export async function getPublicLifeListItem(number: number): Promise<LifeListIte
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
   const origin = apiOrigin();
   if (!origin) return null;
-  const locale = resolveAppLocale((await headers()).get("accept-language"));
+  const locale = await getRequestLocale();
   return readPublicData(
     `${origin}/api/v1/public/life-list/${number}`,
     LifeListItemResponseSchema,

@@ -1,10 +1,8 @@
-import { headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
-import { resolveAppLocale } from "./locale";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 
-export default getRequestConfig(async ({ requestLocale }) => {
-  const requestHeaders = await headers();
-  const locale = resolveAppLocale(requestHeaders.get("accept-language") ?? (await requestLocale));
+export default getRequestConfig(async () => {
+  const locale = await getRequestLocale();
 
   return {
     locale,
