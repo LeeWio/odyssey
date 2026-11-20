@@ -1,62 +1,9 @@
-"use client";
-
-import { pageEaseOut } from "@/lib/motion";
-
-import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
-import { motion } from "motion/react";
-
-import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
-import Image from "next/image";
-import type { EmblaCarouselType } from "embla-carousel";
-import { Carousel } from "@heroui-pro/react/carousel";
-import { Button, Card, Chip, Modal, Typography } from "@heroui/react";
+import { EmptyState } from "@heroui-pro/react";
+import { Chip } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { PageFrame } from "@/components/layout/page-frame";
+import { useTranslations } from "next-intl";
 
-// Real artist portfolio assets mapping
-const GALLERY_ITEMS = [
-  {
-    src: "/IMG_4958.WEBP",
-    alt: "Silent Snowfall over the Peaks",
-    title: "Silent Snowfall over the Peaks",
-    location: "Mount Rainier, WA",
-    camera: "Hasselblad 500C/M",
-    film: "Kodak Portra 400",
-    description:
-      "Capturing the stillness of early morning clouds rolling over glaciers, highlighting geometry and quiet weather boundaries.",
-  },
-  {
-    src: "/IMG_5332.JPG",
-    alt: "Urban Geometry & Intersections",
-    title: "Urban Geometry & Intersections",
-    location: "Shinjuku, Tokyo",
-    camera: "Hasselblad 500C/M",
-    film: "Ilford HP5 Plus 400",
-    description:
-      "Dissecting clean lines, stark shadows, and architectural leading lines in the Tokyo high-rise district.",
-  },
-  {
-    src: "/IMG_2232.JPG",
-    alt: "Shadows in the Forest Core",
-    title: "Shadows in the Forest Core",
-    location: "Redwoods National Park, CA",
-    camera: "Hasselblad 500C/M",
-    film: "Kodak Ektar 100",
-    description:
-      "A slow exposure deep within dense redwood canopies, mapping organic spatial depth and vibrant green contrasts.",
-  },
-  {
-    src: "/IMG_2260.JPG",
-    alt: "Coastline Sentinel",
-    title: "Coastline Sentinel",
-    location: "Cannon Beach, PNW",
-    camera: "Hasselblad 500C/M",
-    film: "Kodak Portra 160",
-    description:
-      "The moody meeting of heavy maritime fog and basalt sea stacks on a cold, overcast afternoon.",
-  },
-];
+import { PageFrame } from "@/components/layout/page-frame";
 
 interface GalleryPageProps {
   compact?: boolean;
@@ -64,238 +11,26 @@ interface GalleryPageProps {
 
 export function GalleryPage({ compact = false }: GalleryPageProps) {
   const t = useTranslations("Gallery");
-  const [api, setApi] = useState<EmblaCarouselType>();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const shouldReduceMotion = useReducedMotionPreference();
-
-  // Sync state with Embla programmatic selection
-  useEffect(() => {
-    if (!api) return;
-
-    const onSelect = () => {
-      setCurrentIndex(api.selectedScrollSnap());
-    };
-
-    onSelect();
-    api.on("select", onSelect);
-    api.on("reInit", onSelect);
-
-    return () => {
-      api.off("select", onSelect);
-      api.off("reInit", onSelect);
-    };
-  }, [api]);
-
-  const activePhoto = GALLERY_ITEMS[currentIndex] || GALLERY_ITEMS[0];
 
   return (
     <PageFrame className={compact ? "min-h-0 w-full p-0" : "w-full"}>
-      {!compact ? (
-        <motion.header
-          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: pageEaseOut }}
-          className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between"
-        >
-          <div className="max-w-xl">
-            <Chip color="accent" size="sm" variant="soft">
-              {t("eyebrow")}
-            </Chip>
-            <Typography
-              type="h1"
-              weight="bold"
-              className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
-            >
-              {t("title")}
-            </Typography>
-            <Typography color="muted" type="body" className="mt-4 max-w-md leading-7 text-balance">
-              {t("description")}
-            </Typography>
-          </div>
-          <div className="grid grid-cols-2 gap-5 lg:min-w-56">
-            <div className="border-default-200 border-l pl-3">
-              <Typography className="font-mono text-3xl tabular-nums" type="body">
-                {String(GALLERY_ITEMS.length).padStart(2, "0")}
-              </Typography>
-              <Typography color="muted" type="body-xs" className="mt-1 leading-5">
-                {t("frameCountLabel")}
-              </Typography>
-            </div>
-            <div className="border-default-200 border-l pl-3">
-              <Typography className="font-mono text-3xl tabular-nums" type="body">
-                6×6
-              </Typography>
-              <Typography color="muted" type="body-xs" className="mt-1 leading-5">
-                {t("format")}
-              </Typography>
-            </div>
-          </div>
-        </motion.header>
-      ) : null}
-
-      <motion.section
-        initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.65, ease: pageEaseOut, delay: shouldReduceMotion ? 0 : 0.08 }}
-        className={[
-          compact ? null : "mt-10",
-          "grid items-stretch gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(18rem,0.45fr)]",
-        ]
-          .filter(Boolean)
-          .join(" ")}
+      <EmptyState
+        className="border-default-200 bg-default-50/50 min-h-[min(32rem,70dvh)] rounded-3xl border border-dashed px-6 py-16"
+        size="lg"
       >
-        <Carousel setApi={setApi} opts={{ loop: true }} type="in-place" className="w-full">
-          <Carousel.Content>
-            {GALLERY_ITEMS.map((item) => (
-              <Carousel.Item key={item.src}>
-                <Card className="overflow-hidden p-0" variant="transparent">
-                  <div className="group relative aspect-[16/9] min-h-[52vh] lg:aspect-auto lg:h-[68vh]">
-                    <Image
-                      fill
-                      alt={item.alt}
-                      className="object-cover select-none"
-                      draggable={false}
-                      sizes="100vw"
-                      src={item.src}
-                    />
-                    <Button
-                      isIconOnly
-                      aria-label={t("viewFull", { title: item.title })}
-                      className="absolute right-4 bottom-4 bg-black/55 text-white opacity-0 shadow-lg backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-                      size="sm"
-                      variant="ghost"
-                      onPress={() => setIsLightboxOpen(true)}
-                    >
-                      <Icon aria-hidden="true" icon="lucide:expand" className="size-4" />
-                    </Button>
-                  </div>
-                </Card>
-              </Carousel.Item>
-            ))}
-          </Carousel.Content>
-          <Carousel.Previous className="left-4" />
-          <Carousel.Next className="right-4" />
-          <Carousel.Dots className="mt-4" />
-          <Carousel.Thumbnails className="mt-6">
-            {GALLERY_ITEMS.map((item, index) => (
-              <Carousel.Thumbnail key={item.src} index={index} src={item.src} alt={item.alt} />
-            ))}
-          </Carousel.Thumbnails>
-        </Carousel>
-
-        <Card className="h-full" variant="secondary">
-          <Card.Header>
-            <Typography color="muted" type="body-xs" className="font-mono tracking-wide">
-              {t("fromTheFrame")}
-            </Typography>
-            <Card.Title className="mt-2 text-balance">{activePhoto.title}</Card.Title>
-            <Card.Description className="mt-3 line-clamp-3 leading-relaxed">
-              {activePhoto.description}
-            </Card.Description>
-          </Card.Header>
-          <Card.Content>
-            <dl className="flex flex-col gap-5">
-              {[
-                [t("location"), activePhoto.location],
-                [t("camera"), activePhoto.camera],
-                [t("film"), activePhoto.film],
-              ].map(([label, value]) => (
-                <div key={label} className="flex flex-col gap-1">
-                  <dt>
-                    <Typography color="muted" type="body-xs" className="font-mono tracking-wide">
-                      {label}
-                    </Typography>
-                  </dt>
-                  <dd>
-                    <Typography type="body" weight="medium">
-                      {value}
-                    </Typography>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </Card.Content>
-          <Card.Footer className="mt-auto flex items-center justify-between">
-            <Typography color="muted" type="body-xs" className="font-mono tracking-wide">
-              {t("frame")}
-            </Typography>
-            <Typography type="body-sm" weight="medium" className="tabular-nums">
-              {String(currentIndex + 1).padStart(2, "0")} /{" "}
-              {String(GALLERY_ITEMS.length).padStart(2, "0")}
-            </Typography>
-          </Card.Footer>
-        </Card>
-      </motion.section>
-
-      <Modal>
-        <Modal.Backdrop isOpen={isLightboxOpen} onOpenChange={setIsLightboxOpen} variant="blur">
-          <Modal.Container size="cover">
-            <Modal.Dialog aria-label={t("viewer", { title: activePhoto.title })}>
-              <Modal.CloseTrigger className="z-20" />
-              <Modal.Body className="grid min-h-0 gap-6 overflow-y-auto p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
-                <div className="relative min-h-[55vh] overflow-hidden rounded-2xl bg-black/30 lg:min-h-[70vh]">
-                  <Image
-                    fill
-                    alt={activePhoto.alt}
-                    className="object-contain select-none"
-                    draggable={false}
-                    sizes="(max-width: 1024px) 100vw, calc(100vw - 24rem)"
-                    src={activePhoto.src}
-                  />
-                </div>
-                <div className="flex flex-col gap-5 px-2 pb-2 lg:px-0">
-                  <div>
-                    <Typography
-                      color="muted"
-                      type="body-xs"
-                      className="font-mono tracking-wide uppercase"
-                    >
-                      {t("frameCount", {
-                        current: String(currentIndex + 1).padStart(2, "0"),
-                        total: String(GALLERY_ITEMS.length).padStart(2, "0"),
-                      })}
-                    </Typography>
-                    <Typography type="h2" weight="semibold" className="mt-2 text-balance">
-                      {activePhoto.title}
-                    </Typography>
-                  </div>
-                  <Typography color="muted" type="body-sm" className="leading-6">
-                    {activePhoto.description}
-                  </Typography>
-                  <dl className="border-default-200 grid grid-cols-2 gap-4 border-t pt-5">
-                    <div>
-                      <dt>
-                        <Typography color="muted" type="body-xs">
-                          {t("location")}
-                        </Typography>
-                      </dt>
-                      <dd className="mt-1">
-                        <Typography type="body-sm" weight="medium">
-                          {activePhoto.location}
-                        </Typography>
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>
-                        <Typography color="muted" type="body-xs">
-                          {t("film")}
-                        </Typography>
-                      </dt>
-                      <dd className="mt-1">
-                        <Typography type="body-sm" weight="medium">
-                          {activePhoto.film}
-                        </Typography>
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+        <EmptyState.Header>
+          <EmptyState.Media variant="icon">
+            <Icon aria-hidden="true" className="size-6" icon="lucide:construction" />
+          </EmptyState.Media>
+          <Chip color="accent" size="sm" variant="soft">
+            {t("eyebrow")}
+          </Chip>
+          <EmptyState.Title>{t("title")}</EmptyState.Title>
+          <EmptyState.Description className="max-w-md text-pretty">
+            {t("description")}
+          </EmptyState.Description>
+        </EmptyState.Header>
+      </EmptyState>
     </PageFrame>
   );
 }

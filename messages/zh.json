@@ -1083,19 +1083,9 @@
     "explorer": "访客 · {time}"
   },
   "Gallery": {
-    "eyebrow": "在路上",
-    "title": "路上的光",
-    "description": "地方、天气，以及相机不肯删的几张。",
-    "viewFull": "全屏查看 {title}",
-    "fromTheFrame": "来自这一帧",
-    "location": "地点",
-    "camera": "相机",
-    "film": "胶片",
-    "frame": "帧",
-    "frameCountLabel": "张照片",
-    "format": "画幅",
-    "viewer": "{title} 全屏查看",
-    "frameCount": "第 {current} / {total} 帧"
+    "eyebrow": "后续开发",
+    "title": "相册将在后续开发",
+    "description": "这里将用于呈现摄影作品。相册体验正在重新设计，当前暂不开放。"
   },
   "Newsletter": {
     "formLabel": "通讯订阅",
