@@ -108,12 +108,20 @@ export const loadPersistedState = (): Partial<RootState> | undefined => {
       writeAuthStorage(auth);
     }
     if (draftId) {
-      preloadedState.ui = {
+      preloadedState.overlay = {
         authDialogs: { authMode: null, isLoginOpen: false, isSignUpOpen: false },
+        richText: {
+          isOpen: false,
+          activeId: draftId || null,
+          initialValue: null,
+          isReadOnly: false,
+        },
+        momentPublisher: { isOpen: false },
+      };
+      preloadedState.shell = {
         sheet: { isOpen: false },
         miniPlayer: { isOpen: false },
-        dashboard: { isOpen: false },
-        richText: { isOpen: false, activeId: draftId || null },
+        dashboard: { isOpen: false, path: "/" },
       };
     }
     if (locale) preloadedState.locale = { value: locale };
