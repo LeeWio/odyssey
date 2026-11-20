@@ -16,13 +16,13 @@ import {
   Typography,
 } from "@heroui/react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect } from "react";
 
 import { useRetrieveArchiveQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import { PageFrame } from "@/components/layout/page-frame";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 
 const PAGE_SIZE = 10;
 
@@ -234,8 +234,7 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
 export function ArchivePage({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("Archive");
   const locale = useLocale();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const selectedYear = parseYear(searchParams.get("year"));
   const selectedMonth = selectedYear ? parseMonth(searchParams.get("month")) : undefined;
@@ -269,12 +268,11 @@ export function ArchivePage({ embedded = false }: { embedded?: boolean }) {
   // Correct obsolete bookmarked pages only after a successful response for this period.
   useEffect(() => {
     if (!isAdjustingPage) return;
-    const next = new URLSearchParams(searchParams.toString());
-    if (lastPage === 0) next.delete("page");
-    else next.set("page", String(lastPage + 1));
-    const query = next.toString();
-    router.replace(query ? `/archive?${query}` : "/archive", { scroll: false });
-  }, [isAdjustingPage, lastPage, router, searchParams]);
+    updateQuery(
+      { page: lastPage === 0 ? undefined : String(lastPage + 1) },
+      { pathname: "/archive", scroll: false }
+    );
+  }, [isAdjustingPage, lastPage, updateQuery]);
 
   const posts = normalizePosts(currentPage?.list);
   const total = currentPage?.total ?? 0;
@@ -283,18 +281,7 @@ export function ArchivePage({ embedded = false }: { embedded?: boolean }) {
   const startItem = currentPage && total > 0 ? page * resultSize + 1 : 0;
   const endItem = currentPage ? Math.min((page + 1) * resultSize, total) : 0;
   const updateSearch = (changes: Record<string, string | undefined>) => {
-    const next = new URLSearchParams(searchParams.toString());
-
-    Object.entries(changes).forEach(([key, value]) => {
-      if (value) {
-        next.set(key, value);
-      } else {
-        next.delete(key);
-      }
-    });
-
-    const serialized = next.toString();
-    router.replace(serialized ? `/archive?${serialized}` : "/archive", { scroll: false });
+    updateQuery(changes, { pathname: "/archive", scroll: false });
   };
 
   const handleYearChange = (value: React.Key | null) => {

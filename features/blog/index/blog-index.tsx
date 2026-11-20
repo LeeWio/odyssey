@@ -23,7 +23,7 @@ import {
   Typography,
 } from "@heroui/react";
 import type { Key } from "react-aria-components/Breadcrumbs";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useDebouncedCallback } from "use-debounce";
 import { useEffect, useState } from "react";
@@ -40,6 +40,7 @@ import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated
 import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
 import { ColumnArticleStack } from "@/features/column/column-article-stack";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
@@ -490,8 +491,7 @@ function JournalSkeleton() {
 export function BlogIndex({ initialData }: { initialData: PublicJournalInitialData }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const normalizedQuery = (searchParams.get("q") ?? "").trim();
   const [searchDraft, setSearchDraft] = useState(() => ({
@@ -553,13 +553,7 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
   const libraryQuery = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
 
   const updateArchiveSearch = (changes: Record<string, string | undefined>) => {
-    const query = new URLSearchParams(searchParams.toString());
-    Object.entries(changes).forEach(([key, value]) => {
-      if (value) query.set(key, value);
-      else query.delete(key);
-    });
-    const serialized = query.toString();
-    router.replace(serialized ? `/single?${serialized}` : "/single", { scroll: false });
+    updateQuery(changes, { pathname: "/single", scroll: false });
   };
   const updateSearch = useDebouncedCallback((value: string) => {
     updateArchiveSearch({ q: value.trim() || undefined, page: undefined });
@@ -827,13 +821,10 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
                     pages={Math.max(1, latestData?.totalPages ?? 1)}
                     isDisabled={latestQuery.isFetching}
                     onPageChange={(page) => {
-                      const query = new URLSearchParams(searchParams.toString());
-                      if (page <= 1) query.delete("page");
-                      else query.set("page", String(page));
-                      const serialized = query.toString();
-                      router.replace(serialized ? `/single?${serialized}` : "/single", {
-                        scroll: true,
-                      });
+                      updateQuery(
+                        { page: page <= 1 ? undefined : String(page) },
+                        { pathname: "/single", scroll: true }
+                      );
                     }}
                   />
                 </div>
