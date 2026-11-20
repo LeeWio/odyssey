@@ -3,6 +3,7 @@
 import type { ComponentProps } from "react";
 
 import { KPI } from "@heroui-pro/react/kpi";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useGetTrafficAnalyticsQuery } from "@/lib/features/dashboard";
 
@@ -27,8 +28,9 @@ function formatTrend(value: number): string {
   return `${Math.abs(value).toFixed(1)}%`;
 }
 
-export function AnalyticsKpiRow() {
-  const { data } = useGetTrafficAnalyticsQuery(30);
+export function AnalyticsKpiRow({ days }: { days: number }) {
+  const t = useTranslations("Dashboard");
+  const { data } = useGetTrafficAnalyticsQuery(days);
   const summary = data?.summary;
   const sessions = useMemo(
     () => data?.timeSeries.map((point) => ({ value: point.sessions })) ?? [],
@@ -42,7 +44,7 @@ export function AnalyticsKpiRow() {
     {
       chartColor: "var(--color-accent)",
       chartData: sessions,
-      label: "Sessions",
+      label: t("widgets.sessions"),
       numberProps: { maximumFractionDigits: 0, value: summary?.sessions.numericValue ?? 0 },
       trend: trendOf(summary?.sessions.growthRate ?? 0),
       trendValue: formatTrend(summary?.sessions.growthRate ?? 0),
@@ -50,7 +52,7 @@ export function AnalyticsKpiRow() {
     {
       chartColor: "var(--color-success)",
       chartData: users,
-      label: "Unique users",
+      label: t("widgets.users"),
       numberProps: { maximumFractionDigits: 0, value: summary?.users.numericValue ?? 0 },
       trend: trendOf(summary?.users.growthRate ?? 0),
       trendValue: formatTrend(summary?.users.growthRate ?? 0),
@@ -58,7 +60,7 @@ export function AnalyticsKpiRow() {
     {
       chartColor: "var(--color-muted)",
       chartData: sessions,
-      label: "Bounce rate",
+      label: t("widgets.bounce"),
       numberProps: {
         maximumFractionDigits: 1,
         style: "percent" as const,
@@ -88,7 +90,7 @@ export function AnalyticsKpiRow() {
           />
         </KPI>
       ))}
-      <DurationKpi />
+      <DurationKpi days={days} t={t} />
     </div>
   );
 }
@@ -98,8 +100,8 @@ export function AnalyticsKpiRow() {
  * render prop (minutes + seconds), which `KPI.Value` doesn't express
  * cleanly as a plain number.
  */
-function DurationKpi() {
-  const { data } = useGetTrafficAnalyticsQuery(30);
+function DurationKpi({ days, t }: { days: number; t: ReturnType<typeof useTranslations> }) {
+  const { data } = useGetTrafficAnalyticsQuery(days);
   const avgSeconds = data?.summary.avgSession.numericValue ?? 0;
   const growth = data?.summary.avgSession.growthRate ?? 0;
   const sparkline = data?.timeSeries.map((point) => ({ value: point.sessions })) ?? [];
@@ -107,7 +109,7 @@ function DurationKpi() {
   return (
     <KPI>
       <KPI.Header>
-        <KPI.Title>Avg. session</KPI.Title>
+        <KPI.Title>{t("widgets.averageSession")}</KPI.Title>
       </KPI.Header>
       <KPI.Content>
         <span className="text-foreground text-2xl font-semibold tabular-nums">

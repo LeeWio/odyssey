@@ -2043,6 +2043,17 @@
       "noEmployees": "No employees found",
       "noUsers": "No users found"
     },
+    "analytics": {
+      "title": "Admin analytics",
+      "description": "Reader page views, devices, channels, and visitors. Your own signed-in visits and detected crawlers stay out of these numbers.",
+      "range": "Analytics range",
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "last90Days": "Last 90 days",
+      "last365Days": "Last 365 days",
+      "lastDays": "Last {days} days",
+      "rangeHint": "All analytics cards use the selected range."
+    },
     "widgets": {
       "contentOperations": "Content operations",
       "contentOperationsDescription": "Publishing, comments, and subscribers right now.",
@@ -2114,6 +2125,7 @@
       "topPagesDescription": "Most-viewed pages over the selected period.",
       "path": "Path",
       "averageTime": "Avg. time",
+      "averageSession": "Avg. session",
       "bounce": "Bounce",
       "trend": "Trend",
       "impressions": "Impressions",

@@ -2043,6 +2043,17 @@
       "noEmployees": "没有找到员工",
       "noUsers": "没有找到用户"
     },
+    "analytics": {
+      "title": "管理分析",
+      "description": "查看阅读页面、设备、渠道和访客数据。已登录用户自己的访问与识别出的爬虫不会计入统计。",
+      "range": "分析周期",
+      "last7Days": "过去 7 天",
+      "last30Days": "过去 30 天",
+      "last90Days": "过去 90 天",
+      "last365Days": "过去 365 天",
+      "lastDays": "过去 {days} 天",
+      "rangeHint": "所有分析卡片都会使用当前选择的周期。"
+    },
     "widgets": {
       "contentOperations": "内容运营",
       "contentOperationsDescription": "当前发布、评论与订阅者概况。",
@@ -2114,6 +2125,7 @@
       "topPagesDescription": "所选周期内浏览最多的页面。",
       "path": "路径",
       "averageTime": "平均时长",
+      "averageSession": "平均会话",
       "bounce": "跳出率",
       "trend": "趋势",
       "impressions": "曝光",
