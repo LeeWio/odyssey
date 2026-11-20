@@ -28,8 +28,7 @@ import {
 import { NotificationCategoryFilter } from "./notification-category-filter";
 import { NotificationCategoryList } from "./notification-category-list";
 import { getNotificationDestination } from "@/lib/notification-presentation";
-import { openDashboardAtPath } from "@/lib/features/ui";
-import { useAppDispatch } from "@/lib/hooks";
+import { useDashboardNavigation } from "@/lib/hooks/use-dashboard-navigation";
 import { useNotificationActions } from "./use-notification-actions";
 
 const POPOVER_PAGE_SIZE = 8;
@@ -100,7 +99,7 @@ export function NotificationPopover() {
   const t = useTranslations("Notifications");
   const locale = useLocale();
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const { openDashboard } = useDashboardNavigation();
   const [isOpen, setIsOpen] = useState(false);
   const [category, setCategory] = useState<NotificationCategory>();
   const [unreadOnly, setUnreadOnly] = useState(false);
@@ -129,7 +128,7 @@ export function NotificationPopover() {
     if (!destination) return;
 
     if (destination.kind === "dashboard") {
-      dispatch(openDashboardAtPath(destination.path));
+      openDashboard(destination.path);
     } else if (destination.kind === "reader") {
       router.push(destination.href);
     } else {

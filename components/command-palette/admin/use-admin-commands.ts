@@ -4,8 +4,9 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { ChartColumnIcon, FileTextIcon } from "@/components/icons";
 import { selectIsAdmin } from "@/lib/features/auth";
-import { toggleDashboard, toggleRichText } from "@/lib/features/ui";
+import { toggleRichText } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useDashboardNavigation } from "@/lib/hooks/use-dashboard-navigation";
 import { createActionCommand } from "../command-model";
 import { CommandIntent, type CommandItem } from "../types";
 
@@ -13,6 +14,7 @@ export const useAdminCommands = (): CommandItem[] => {
   const t = useTranslations("Search");
   const isAdmin = useAppSelector(selectIsAdmin);
   const dispatch = useAppDispatch();
+  const { toggleDashboard } = useDashboardNavigation();
 
   return useMemo(() => {
     if (!isAdmin) {
@@ -43,7 +45,7 @@ export const useAdminCommands = (): CommandItem[] => {
         intent: CommandIntent.EXECUTE,
         payload: {
           action: () => {
-            dispatch(toggleDashboard());
+            toggleDashboard();
           },
           closeOnExecute: true,
         },
@@ -79,5 +81,5 @@ export const useAdminCommands = (): CommandItem[] => {
         defaultVisible: true,
       }),
     ];
-  }, [dispatch, isAdmin, t]);
+  }, [dispatch, isAdmin, t, toggleDashboard]);
 };

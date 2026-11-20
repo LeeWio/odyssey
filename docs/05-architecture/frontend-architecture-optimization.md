@@ -54,6 +54,7 @@ app/components/features -> components/ui
 - 已将 `ui-slice` 拆为 `shell-slice` 与 `overlay-slice`；下一步继续迁移领域级 URL 状态。
 - 能由 URL 表达的筛选、分页、工作区、弹层全部移出 Redux。
 - 仅保留跨页面共享且没有路由语义的 UI 状态。
+- Dashboard workspace 已改为 URL 单一事实源；Sheet 的打开状态和当前视图不再复制到 Redux，也不再通过 hydration effect 双向同步。
 
 页面 query 更新统一通过 `lib/hooks/use-query-state.ts`，目前覆盖 Library、Chronicle、Footprints、Notifications、Blog Feed、Dashboard、文章目录分页、Moments 分页和分页归一化；它负责保留无关参数、统一空值删除和 replace/push 行为。
 
