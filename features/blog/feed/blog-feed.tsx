@@ -527,7 +527,9 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
   const page = Math.max(0, (parsePositiveInteger(searchParams.get("page")) ?? 1) - 1);
   const categoryId = parsePositiveInteger(searchParams.get("categoryId"));
   const selectedCategoryId = categoryId;
-  const [searchValue, setSearchValue] = useState(() => searchParams.get("keyword") ?? "");
+  const keywordParam = searchParams.get("keyword") ?? "";
+  const [searchValue, setSearchValue] = useState(() => keywordParam);
+  const lastWrittenKeyword = useRef(keywordParam);
   const scrollAnimationRef = useRef<{ stop: () => void } | null>(null);
   const updateSearch = useCallback(
     (changes: Record<string, string | undefined>) => {
@@ -537,13 +539,10 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
   );
 
   useEffect(() => {
-    const syncKeywordFromHistory = () => {
-      setSearchValue(new URLSearchParams(window.location.search).get("keyword") ?? "");
-    };
-
-    window.addEventListener("popstate", syncKeywordFromHistory);
-    return () => window.removeEventListener("popstate", syncKeywordFromHistory);
-  }, []);
+    if (lastWrittenKeyword.current === keywordParam) return;
+    lastWrittenKeyword.current = keywordParam;
+    setSearchValue(keywordParam);
+  }, [keywordParam]);
 
   const normalizedKeyword = searchValue.trim();
   const keyword = useDeferredValue(normalizedKeyword);
@@ -605,6 +604,7 @@ export default function BlogFeed({ embedded = false }: { embedded?: boolean }) {
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
+    lastWrittenKeyword.current = value.trim();
     updateSearch({ keyword: value.trim() || undefined, page: undefined });
   };
 
