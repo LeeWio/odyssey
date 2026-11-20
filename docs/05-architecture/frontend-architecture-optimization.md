@@ -76,6 +76,7 @@ app/components/features -> components/ui
 - 客户端与 RSC 统一从 `lib/api/api-config.ts` 获取 API origin 和路径拼接策略。
 - 查询参数序列化集中在 `lib/api/query-params.ts`，分页对象、数组和空值拥有唯一实现。
 - 领域 API 不直接解析后端地址，也不重复实现 transport 细节。
+- RSS 与 Sitemap route handler 已接入 `lib/api/server-client.ts`，不再自行读取 API origin、拼接 transport 请求或解析 JSON 响应。
 
 ### P4：契约与可观测性
 

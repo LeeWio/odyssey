@@ -1,4 +1,7 @@
+import { z } from "zod";
 import { siteConfig } from "@/config/site";
+import { appendApiParams } from "@/lib/api";
+import { fetchServerApiJson } from "@/lib/api/server-client";
 
 interface FeedPost {
   title: string;
@@ -7,11 +10,16 @@ interface FeedPost {
   publishedAt?: string | null;
 }
 
-interface PostsResponse {
-  data?: {
-    list?: FeedPost[];
-  };
-}
+const feedPostsSchema = z.object({
+  list: z.array(
+    z.object({
+      title: z.string(),
+      slug: z.string(),
+      summary: z.string().nullable().optional(),
+      publishedAt: z.string().nullable().optional(),
+    })
+  ),
+});
 
 const escapeXml = (value: string) =>
   value.replace(/[<>&'\"]/g, (character) => {
@@ -43,24 +51,12 @@ const toPublishedDate = (value?: string | null) => {
 
 export async function GET(request: Request) {
   const origin = getCanonicalOrigin(request);
-  const apiOrigin =
-    process.env.API_URL?.replace(/\/$/, "") ||
-    process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
-    origin;
-  let posts: FeedPost[] = [];
-
-  try {
-    const response = await fetch(`${apiOrigin}/api/v1/public/blog/posts?page=0&size=50`, {
-      next: { revalidate: 3600 },
-    });
-
-    if (response.ok) {
-      const payload = (await response.json()) as PostsResponse;
-      posts = payload.data?.list ?? [];
-    }
-  } catch {
-    // Keep the feed valid while the content API is temporarily unavailable.
-  }
+  const result = await fetchServerApiJson(
+    appendApiParams("/api/v1/public/blog/posts", { page: 0, size: 50 }),
+    feedPostsSchema,
+    { locale: "en", revalidate: 3600 }
+  );
+  const posts: FeedPost[] = result.data?.list ?? [];
 
   const items = posts
     .map((post) => {

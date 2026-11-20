@@ -27,3 +27,9 @@ export function serializeApiParams(params: Record<string, unknown>): string {
 
   return searchParams.toString();
 }
+
+export function appendApiParams(path: string, params: Record<string, unknown>): string {
+  const query = serializeApiParams(params);
+  if (!query) return path;
+  return `${path}${path.includes("?") ? "&" : "?"}${query}`;
+}
