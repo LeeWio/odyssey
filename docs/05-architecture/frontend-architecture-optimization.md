@@ -56,7 +56,9 @@ app/components/features -> components/ui
 - 仅保留跨页面共享且没有路由语义的 UI 状态。
 - Dashboard workspace 已改为 URL 单一事实源；Sheet 的打开状态和当前视图不再复制到 Redux，也不再通过 hydration effect 双向同步。
 
-页面 query 更新统一通过 `lib/hooks/use-query-state.ts`，目前覆盖 Library、Chronicle、Footprints、Notifications、Blog Feed、Dashboard、Explore、Archive、Journal、文章目录分页、Moments 分页和分页归一化；它负责保留无关参数、统一空值删除和 replace/push 行为。
+页面 query 更新统一通过 `lib/hooks/use-query-state.ts`，目前覆盖 Library、Chronicle、Footprints、Notifications、Blog Feed、Dashboard、Explore、Archive、Journal、Moments、文章目录分页和分页归一化；它负责保留无关参数、统一空值删除、replace/push 行为以及显式的 hash 保留。
+
+查询 hook 不隐式读取或修改 fragment：需要在分页锚点恢复、布局切换等场景保留当前 fragment 时，由交互边界显式传入 `hash`；传入空字符串则明确清除 fragment。这样 query 仍由 Next Router 管理，hash 的浏览器定位语义也不会被隐藏在通用 hook 中。
 
 ### P2：领域模块归属收敛
 

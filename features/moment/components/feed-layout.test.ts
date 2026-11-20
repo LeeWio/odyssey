@@ -17,6 +17,14 @@ vi.mock("next/navigation", async () => {
     };
   };
   return {
+    usePathname: () => window.location.pathname,
+    useRouter: () => ({
+      push: (href: string) => window.history.pushState(null, "", href),
+      replace: (href: string) => {
+        window.history.replaceState(null, "", href);
+        window.dispatchEvent(new Event("test-search-params"));
+      },
+    }),
     useSearchParams: () =>
       new URLSearchParams(
         useSyncExternalStore(

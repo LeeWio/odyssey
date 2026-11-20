@@ -3,11 +3,11 @@
 import { Segment } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import { LayoutGroup, motion, useAnimate } from "motion/react";
 import { useEffect, useId, type ReactNode } from "react";
 
 import { pageEaseOut } from "@/lib/motion";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 import { momentLayoutTransition, useMomentMotion } from "./feed-motion";
 
 export function MomentFeedLayout({
@@ -19,7 +19,7 @@ export function MomentFeedLayout({
 }) {
   const t = useTranslations("Moments");
   const { reduced } = useMomentMotion();
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const viewMode = searchParams.get("view") === "grid" ? "grid" : "list";
   const layoutId = useId();
   const [scope, animate] = useAnimate<HTMLDivElement>();
@@ -45,9 +45,7 @@ export function MomentFeedLayout({
             size="sm"
             onSelectionChange={(key) => {
               if (key === "list" || key === "grid") {
-                const url = new URL(window.location.href);
-                url.searchParams.set("view", key);
-                window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+                updateQuery({ view: key }, { mode: "replace", hash: window.location.hash });
               }
             }}
           >

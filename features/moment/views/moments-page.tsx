@@ -3,7 +3,6 @@
 import { Button } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Icon } from "@iconify/react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -22,6 +21,7 @@ import type { PublicMomentsInitialData } from "@/lib/features/moment/server";
 import { useGetLikedMomentIdsQuery, type MomentResponse } from "@/lib/features/moment";
 import { selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
+import { useQueryState } from "@/lib/hooks/use-query-state";
 import { clampPageToTotal, parsePageParam } from "@/lib/utils/pagination";
 
 const MomentPublisher = dynamic(
@@ -33,21 +33,34 @@ const MomentPublisher = dynamic(
 );
 
 export function MomentsPage({ initialData }: { initialData: PublicMomentsInitialData }) {
-  const searchParams = useSearchParams();
+  const { searchParams, updateQuery } = useQueryState();
   const topic = searchParams.get("topic") || undefined;
+  const pageParam = searchParams.get("page");
   const page = parsePageParam(searchParams.get("page"));
-  return <MomentsContent initialData={initialData} page={page} topic={topic} />;
+  return (
+    <MomentsContent
+      initialData={initialData}
+      page={page}
+      pageParam={pageParam}
+      topic={topic}
+      updateQuery={updateQuery}
+    />
+  );
 }
 
 // URL-only presentation changes should not rerender data hooks, the sidebar or cards.
 const MomentsContent = memo(function MomentsContent({
   initialData,
   page,
+  pageParam,
   topic,
+  updateQuery,
 }: {
   initialData: PublicMomentsInitialData;
   page: number;
+  pageParam: string | null;
   topic?: string;
+  updateQuery: ReturnType<typeof useQueryState>["updateQuery"];
 }) {
   const t = useTranslations("Moments");
   const feedRef = useRef<HTMLElement>(null);
@@ -83,38 +96,40 @@ const MomentsContent = memo(function MomentsContent({
     },
     [page]
   );
-  const closeEditor = useCallback((open: boolean) => {
-    if (open) return;
-    setEditingMoment(null);
-    requestAnimationFrame(() => {
-      const element = document.getElementById(`moment-${editingId.current}`);
-      const card = element?.hasAttribute("inert") ? null : element;
-      const trigger = card?.querySelector<HTMLButtonElement>("[data-moment-menu]");
-      (trigger ?? card ?? feedRef.current)?.focus({ preventScroll: true });
-      if (
-        parsePageParam(new URLSearchParams(window.location.search).get("page")) ===
-        editingScroll.current.page
-      ) {
-        window.scrollTo({
-          left: editingScroll.current.x,
-          top: editingScroll.current.y,
-          behavior: "instant",
-        });
-      }
-    });
-  }, []);
+  const closeEditor = useCallback(
+    (open: boolean) => {
+      if (open) return;
+      setEditingMoment(null);
+      requestAnimationFrame(() => {
+        const element = document.getElementById(`moment-${editingId.current}`);
+        const card = element?.hasAttribute("inert") ? null : element;
+        const trigger = card?.querySelector<HTMLButtonElement>("[data-moment-menu]");
+        (trigger ?? card ?? feedRef.current)?.focus({ preventScroll: true });
+        if (parsePageParam(pageParam) === editingScroll.current.page) {
+          window.scrollTo({
+            left: editingScroll.current.x,
+            top: editingScroll.current.y,
+            behavior: "instant",
+          });
+        }
+      });
+    },
+    [pageParam]
+  );
 
-  const changePage = useCallback((nextPage: number, keepAnchor = false) => {
-    if (!Number.isSafeInteger(nextPage) || nextPage < 1) return;
-    const params = new URLSearchParams(window.location.search);
-    if (nextPage === 1) params.delete("page");
-    else params.set("page", String(nextPage));
-    const query = params.toString();
-    const hash = keepAnchor ? window.location.hash : "";
-    const url = `${query ? `/moments?${query}` : "/moments"}${hash}`;
-    if (keepAnchor) window.history.replaceState(null, "", url);
-    else window.history.pushState(null, "", url);
-  }, []);
+  const changePage = useCallback(
+    (nextPage: number, keepAnchor = false) => {
+      if (!Number.isSafeInteger(nextPage) || nextPage < 1) return;
+      updateQuery(
+        { page: nextPage === 1 ? null : nextPage },
+        {
+          mode: keepAnchor ? "replace" : "push",
+          hash: keepAnchor ? window.location.hash : "",
+        }
+      );
+    },
+    [updateQuery]
+  );
   const resolveAnchor = useCallback((nextPage: number) => changePage(nextPage, true), [changePage]);
 
   const anchor = useMomentAnchor({
@@ -132,13 +147,11 @@ const MomentsContent = memo(function MomentsContent({
   useEffect(() => {
     if (resolvedTotalPages === undefined) return;
     const normalizedPage = clampPageToTotal(page, resolvedTotalPages);
-    const url = new URL(window.location.href);
-    if (normalizedPage === 1) url.searchParams.delete("page");
-    else url.searchParams.set("page", String(normalizedPage));
-    if (url.search !== window.location.search) {
-      window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    const normalizedParam = normalizedPage === 1 ? null : String(normalizedPage);
+    if (pageParam !== normalizedParam) {
+      updateQuery({ page: normalizedParam }, { mode: "replace", hash: window.location.hash });
     }
-  }, [page, resolvedTotalPages, topic]);
+  }, [page, pageParam, resolvedTotalPages, topic, updateQuery]);
 
   useEffect(() => {
     if (isLoading || isRefreshing || isError || isRefreshError || displayedPage !== page) return;
@@ -150,14 +163,12 @@ const MomentsContent = memo(function MomentsContent({
     }
   }, [displayKey, displayedPage, page, isLoading, isRefreshing, isError, isRefreshError]);
 
-  const selectTopic = (slug?: string) => {
-    const params = new URLSearchParams(window.location.search);
-    if (slug) params.set("topic", slug);
-    else params.delete("topic");
-    params.delete("page");
-    const query = params.toString();
-    window.history.pushState(null, "", query ? `/moments?${query}` : "/moments");
-  };
+  const selectTopic = useCallback(
+    (slug?: string) => {
+      updateQuery({ topic: slug || null, page: null }, { mode: "push", hash: "" });
+    },
+    [updateQuery]
+  );
   const likedMomentIdsQuery = useGetLikedMomentIdsQuery(
     moments.map((moment) => moment.id),
     { skip: !isAuthenticated || moments.length === 0 }
