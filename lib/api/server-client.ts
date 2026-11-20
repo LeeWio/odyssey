@@ -52,12 +52,18 @@ export async function fetchServerApiJson<T>(
   if (!url) return { data: null, status: 0 };
 
   try {
-    const locale = options.locale ?? (await getRequestLocale());
+    let locale = options.locale;
+    if (!locale) {
+      try {
+        locale = await getRequestLocale();
+      } catch {
+        locale = undefined;
+      }
+    }
+    const headers: Record<string, string> = { [SERVER_PREFETCH_HEADER]: "1" };
+    if (locale) headers["accept-language"] = locale;
     const init: NextFetchInit = {
-      headers: {
-        [SERVER_PREFETCH_HEADER]: "1",
-        "accept-language": locale,
-      },
+      headers,
       signal: AbortSignal.timeout(options.timeoutMs ?? DEFAULT_TIMEOUT_MS),
     };
 

@@ -1,8 +1,6 @@
 import { z } from "zod";
 
 import { fetchServerApiJson } from "@/lib/api/server-client";
-import { type AppLocale } from "@/i18n/locale";
-import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 import {
   LifeListCategoryResponseSchema,
@@ -15,14 +13,9 @@ import {
 
 const REVALIDATE_SECONDS = 60;
 
-async function readPublicData<T>(
-  path: string,
-  schema: z.ZodType<T>,
-  locale: AppLocale
-): Promise<T | null> {
+async function readPublicData<T>(path: string, schema: z.ZodType<T>): Promise<T | null> {
   return (
     await fetchServerApiJson(path, schema, {
-      locale,
       revalidate: REVALIDATE_SECONDS,
       tags: ["public-life-list"],
     })
@@ -38,15 +31,9 @@ export async function getPublicLifeListInitialData(): Promise<PublicLifeListInit
   if (process.env.NEXT_PHASE === "phase-production-build") {
     return { page: null, categories: [] };
   }
-  const locale = await getRequestLocale();
-
   const [page, categories] = await Promise.all([
-    readPublicData("/api/v1/public/life-list?page=0&size=100", LifeListPageResponseSchema, locale),
-    readPublicData(
-      "/api/v1/public/life-list/categories",
-      z.array(LifeListCategoryResponseSchema),
-      locale
-    ),
+    readPublicData("/api/v1/public/life-list?page=0&size=100", LifeListPageResponseSchema),
+    readPublicData("/api/v1/public/life-list/categories", z.array(LifeListCategoryResponseSchema)),
   ]);
 
   return { page, categories: categories ?? [] };
@@ -54,6 +41,5 @@ export async function getPublicLifeListInitialData(): Promise<PublicLifeListInit
 
 export async function getPublicLifeListItem(number: number): Promise<LifeListItemResponse | null> {
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
-  const locale = await getRequestLocale();
-  return readPublicData(`/api/v1/public/life-list/${number}`, LifeListItemResponseSchema, locale);
+  return readPublicData(`/api/v1/public/life-list/${number}`, LifeListItemResponseSchema);
 }
