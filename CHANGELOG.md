@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.258.0](https://github.com/LeeWio/odyssey/compare/v1.257.0...v1.258.0) (2026-11-20)
+
+
+### Features
+
+* **i18n:** add explicit locale switching ([#71](https://github.com/LeeWio/odyssey/issues/71)) ([282b951](https://github.com/LeeWio/odyssey/commit/282b951078df104987578f91171ac6fc33a30626))
+
 ## [1.257.0](https://github.com/LeeWio/odyssey/compare/v1.256.0...v1.257.0) (2026-11-20)
 
 
