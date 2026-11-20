@@ -6,9 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useReadingProgress } from "./use-reading-progress";
 
 const recordProgress = vi.hoisted(() => vi.fn());
+const translate = vi.hoisted(() => (key: string) => key);
 
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: () => translate,
 }));
 
 vi.mock("@/lib/features/library/library-api", () => ({
@@ -53,6 +54,16 @@ function Switcher() {
     null,
     createElement("button", { onClick: () => setPostId(8), type: "button" }, "switch"),
     createElement(Harness, { postId, progress: 40 })
+  );
+}
+
+function ProgressHarness() {
+  const [progress, setProgress] = useState(20);
+  return createElement(
+    "div",
+    null,
+    createElement("button", { onClick: () => setProgress(80), type: "button" }, "advance"),
+    createElement(Harness, { postId: 7, progress })
   );
 }
 
@@ -170,6 +181,34 @@ describe("useReadingProgress", () => {
     const saved = sessionStorage.getItem("odyssey_reading_progress:reader:8") ?? "";
     expect(saved === "" || saved.includes('"postId":8')).toBe(true);
     expect(sessionStorage.getItem("odyssey_reading_progress:reader:7")).toContain('"postId":7');
+  });
+
+  it("keeps the newest checkpoint when the article unmounts during an older request", async () => {
+    const pending = deferred<unknown>();
+    recordProgress.mockImplementationOnce(() => ({ unwrap: () => pending.promise }));
+
+    await render(createElement(ProgressHarness));
+    await act(async () => {
+      host.querySelector("button")?.click();
+      await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+    });
+
+    await act(async () => {
+      root.unmount();
+    });
+
+    expect(sessionStorage.getItem("odyssey_reading_progress:reader:7")).toContain(
+      '"progressPercent":80'
+    );
+
+    await act(async () => {
+      pending.resolve({});
+      await pending.promise;
+    });
+
+    expect(sessionStorage.getItem("odyssey_reading_progress:reader:7")).toContain(
+      '"progressPercent":80'
+    );
   });
 
   it("does not call the library endpoint for a guest", async () => {

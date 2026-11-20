@@ -112,6 +112,7 @@ export function useReadingProgress({
         }
 
         if (!active) break;
+
         if (saved) {
           clearPendingReadingProgress(username, pendingCheckpoint);
           failedRef.current = null;
@@ -172,15 +173,16 @@ export function useReadingProgress({
       if (frame !== 0) window.cancelAnimationFrame(frame);
       window.removeEventListener("scroll", remember);
       window.removeEventListener("pagehide", flush);
-      if (failedRef.current || inFlight) return;
       const next = checkpoint();
       if (!shouldReportReadingProgress(sentRef.current, next)) return;
-      writePendingReadingProgress(username, {
+      const pendingCheckpoint = {
         postId: next.postId,
         progressPercent: next.progressPercent,
         positionAnchor: next.positionAnchor ?? "",
         observedAt: next.observedAt,
-      });
+      };
+      writePendingReadingProgress(username, pendingCheckpoint);
+      if (failedRef.current || inFlight) return;
       void recordProgress({
         postId: next.postId,
         body: {
@@ -188,7 +190,10 @@ export function useReadingProgress({
           ...(next.positionAnchor ? { positionAnchor: next.positionAnchor } : {}),
           observedAt: next.observedAt,
         },
-      });
+      })
+        .unwrap()
+        .then(() => clearPendingReadingProgress(username, pendingCheckpoint))
+        .catch(() => undefined);
     };
   }, [enabled, postId, recordProgress, t, username]);
 }
