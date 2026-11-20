@@ -134,7 +134,7 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     ],
     intent: CommandIntent.NAVIGATE,
     payload: { href: "/schedule" },
-    defaultVisible: false,
+    defaultVisible: true,
   }),
   createNavigationCommand({
     id: "navigate-explorer",
@@ -298,25 +298,6 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     },
     defaultVisible: true,
   }),
-  createActionCommand({
-    id: "smart-schedule-standup",
-    title: "Schedule a standup meeting",
-    description: "Find a time and invite members",
-    icon: SparklesIcon,
-    category: "AI",
-    source: "ai",
-    order: 4,
-    keywords: ["meeting", "sync", "standup", "schedule", "daily sync"],
-    intent: CommandIntent.EXECUTE,
-    payload: {
-      action: () => {
-        toast.info("Standup scheduling is coming soon.");
-      },
-      closeOnExecute: true,
-    },
-    defaultVisible: true,
-  }),
-
   // Management category
   createActionCommand({
     id: "result-view-activity",
@@ -336,53 +317,17 @@ export const STATIC_COMMANDS: readonly CommandItem[] = [
     },
     defaultVisible: true,
   }),
-  createActionCommand({
-    id: "result-project-roadmap",
-    title: "Open project roadmap",
-    description: "Visualize goals and milestones",
-    icon: FileTextIcon,
-    category: "Management",
-    source: "system",
-    order: 11,
-    keywords: ["roadmap", "plan", "timeline", "roadmap view"],
-    intent: CommandIntent.EXECUTE,
-    payload: {
-      action: () => {
-        toast.info("Project roadmap is coming soon.");
-      },
-      closeOnExecute: true,
-    },
-    defaultVisible: true,
-  }),
-  createActionCommand({
-    id: "result-team-directory",
-    title: "Browse team directory",
-    description: "Connect with your coworkers",
-    icon: PersonsIcon,
-    category: "Management",
-    source: "system",
-    order: 12,
-    keywords: ["people", "members", "coworkers", "team members"],
-    intent: CommandIntent.EXECUTE,
-    payload: {
-      action: () => {
-        toast.info("The team directory is coming soon.");
-      },
-      closeOnExecute: true,
-    },
-    defaultVisible: true,
-  }),
   createNavigationCommand({
     id: "result-workspace-settings",
-    title: "Manage workspace settings",
-    description: "Configure your collaborative environment",
+    title: "Open workspace dashboard",
+    description: "Review the current workspace overview",
     icon: GearIcon,
     category: "Management",
     source: "system",
-    order: 13,
-    keywords: ["preferences", "config", "settings", "workspace"],
+    order: 11,
+    keywords: ["dashboard", "workspace", "overview", "management"],
     intent: CommandIntent.NAVIGATE,
-    payload: { href: "/" },
+    payload: { href: "/dashboard" },
     defaultVisible: true,
   }),
 ];

@@ -16,3 +16,9 @@ Reading history in `/library` is per-article progress. It is not a timeline modu
 ## Rule
 
 A new timeline must say which of these it extends. Footprints stays the travel record. The product timeline stays unbuilt until it has an owner, a source of events, and a link back to the underlying article or project.
+
+## Shareable state
+
+- Chronicle sections use `/chronicle?section=explore` (or `orbit`, `columns`, and `archive`); the featured section uses the clean `/chronicle` URL.
+- Footprints uses `/footprints?year=2025&place=huizhou` to preserve a year filter and selected memory for refresh, browser history, and sharing.
+- Invalid section, year, or place values fall back to the first available view without making the page unusable.

@@ -9,8 +9,8 @@ import { Button, Card, Chip, Link, Surface, Tabs, Typography } from "@heroui/rea
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import Image from "next/image";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
 
 import { PageFrame } from "@/components/layout/page-frame";
 import { FootprintsMap } from "./footprints-map";
@@ -22,6 +22,12 @@ import {
 } from "./footprints-data";
 
 const ALL_YEARS = "all";
+
+function getSelectedYear(value: string | null, years: number[]) {
+  if (!value || value === ALL_YEARS) return ALL_YEARS;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && years.includes(parsed) ? value : ALL_YEARS;
+}
 
 function FootprintDetail({ footprint }: { footprint: Footprint | null }) {
   const t = useTranslations("Footprints");
@@ -81,25 +87,42 @@ export function FootprintsPage() {
   const t = useTranslations("Footprints");
   const shouldReduceMotion = useReducedMotionPreference();
   const { reveal } = createPageReveal(shouldReduceMotion);
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const years = getFootprintYears();
-  const [selectedYear, setSelectedYear] = useState<string>(ALL_YEARS);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedYear = getSelectedYear(searchParams.get("year"), years);
+  const requestedId = searchParams.get("place");
 
-  const visibleFootprints = useMemo(() => {
+  const visibleFootprints = (() => {
     const sorted = getSortedFootprints();
     if (selectedYear === ALL_YEARS) return sorted;
     return sorted.filter((footprint) => footprint.year === Number(selectedYear));
-  }, [selectedYear]);
+  })();
 
   const activeId =
-    selectedId && visibleFootprints.some((footprint) => footprint.id === selectedId)
-      ? selectedId
+    requestedId && visibleFootprints.some((footprint) => footprint.id === requestedId)
+      ? requestedId
       : (visibleFootprints[0]?.id ?? null);
 
   const selectedFootprint =
     visibleFootprints.find((footprint) => footprint.id === activeId) ?? null;
 
-  const selectFootprint = (footprint: Footprint) => setSelectedId(footprint.id);
+  const updateLocation = (changes: { place?: string; year?: string }) => {
+    const nextParams = new URLSearchParams(searchParams.toString());
+    if (changes.year !== undefined) {
+      if (changes.year === ALL_YEARS) nextParams.delete("year");
+      else nextParams.set("year", changes.year);
+    }
+    if (changes.place !== undefined) {
+      if (changes.place) nextParams.set("place", changes.place);
+      else nextParams.delete("place");
+    }
+    const query = nextParams.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
+
+  const selectFootprint = (footprint: Footprint) => updateLocation({ place: footprint.id });
 
   return (
     <Surface variant="transparent" className="bg-background min-h-[100dvh] w-full">
@@ -171,8 +194,7 @@ export function FootprintsPage() {
             className="mt-7 w-full"
             selectedKey={selectedYear}
             onSelectionChange={(key) => {
-              setSelectedYear(String(key));
-              setSelectedId(null);
+              updateLocation({ year: String(key), place: "" });
             }}
             variant="secondary"
           >
