@@ -12,7 +12,7 @@ import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 import { ArticleCover } from "@/components/card/article-cover";
 
-import { EssayPagination } from "../../components/essay-pagination";
+import { EssayPagination } from "@/features/blog/catalog-entries";
 import { parsePageParam } from "@/lib/utils/pagination";
 
 function initials(name: string) {

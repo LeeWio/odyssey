@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getPublicLifeListItem } from "@/lib/features/life-list/server";
-
-import { LifeListDetailClient } from "./life-list-detail-client";
+import { LifeListDetailPage } from "@/features/life-list";
 
 export async function generateMetadata({
   params,
@@ -20,7 +19,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function LifeListDetailPage({
+export default async function LifeListDetailRoute({
   params,
 }: {
   params: Promise<{ number: string }>;
@@ -29,5 +28,5 @@ export default async function LifeListDetailPage({
   const parsed = Number(number);
   if (!Number.isInteger(parsed) || parsed < 1) notFound();
   const item = await getPublicLifeListItem(parsed);
-  return <LifeListDetailClient number={parsed} initialItem={item} />;
+  return <LifeListDetailPage number={parsed} initialItem={item} />;
 }

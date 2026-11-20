@@ -30,7 +30,7 @@ function formatDate(value: string | null, locale: string) {
   }).format(date);
 }
 
-export function LifeListDetailClient({
+export function LifeListDetailPage({
   number,
   initialItem,
 }: {

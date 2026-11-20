@@ -57,7 +57,7 @@ function ReadingProgressTracker({
   return null;
 }
 
-export default function SinglePage({ initialArticle, readingHtml, slug }: SinglePageProps) {
+export function ArticlePageClient({ initialArticle, readingHtml, slug }: SinglePageProps) {
   const t = useTranslations("Article");
   const router = useRouter();
   const articleEndRef = useRef<HTMLDivElement>(null);

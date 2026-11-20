@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { getPublicLifeListInitialData } from "@/lib/features/life-list/server";
-
-import { LifeListPageClient } from "./life-list-page-client";
+import { LifeListPage } from "@/features/life-list";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("LifeList");
@@ -13,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function LifeListPage() {
+export default async function LifeListRoute() {
   const initial = await getPublicLifeListInitialData();
-  return <LifeListPageClient initialPage={initial.page} initialCategories={initial.categories} />;
+  return <LifeListPage initialPage={initial.page} initialCategories={initial.categories} />;
 }

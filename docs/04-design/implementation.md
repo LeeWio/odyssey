@@ -68,7 +68,7 @@ Category and tag indexes now use HeroUI Card, Typography, Link and NumberValue a
 
 Category and tag directories and their detail routes use PageContainer with the same full-width boundaries and edge padding as the other migrated pages. Back links, article counts, filtering, eight-item pagination and API contracts are unchanged.
 
-`app/(main)/single/components/grid-classes.ts` defines Tailwind auto-fill grids for taxonomy entries (18rem minimum tracks) and essays (22rem). Loading placeholders reuse the corresponding grid. EssayGrid also serves existing year, month and reading-list routes, so it adapts to their available content width without changing their page containers. Sparse results keep normal card widths. Long taxonomy labels and essay titles wrap inside their links rather than overlapping adjacent cards.
+`features/blog/index/components/grid-classes.ts` defines Tailwind auto-fill grids for taxonomy entries (18rem minimum tracks) and essays (22rem). Loading placeholders reuse the corresponding grid. EssayGrid also serves existing year, month and reading-list routes, so it adapts to their available content width without changing their page containers. Sparse results keep normal card widths. Long taxonomy labels and essay titles wrap inside their links rather than overlapping adjacent cards.
 
 `tests/e2e/taxonomy-design.spec.ts` covers category and tag navigation, five viewport widths, long unbroken labels, sparse results, pagination, no resize-triggered refetch, loading, API failures and retry to an empty state.
 

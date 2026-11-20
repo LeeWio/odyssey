@@ -60,7 +60,7 @@ const faqIcons = [
   "lucide:pen-line",
 ];
 
-export default function Home({ moments = [] }: { moments?: MomentResponse[] }) {
+export function HomePage({ moments = [] }: { moments?: MomentResponse[] }) {
   const t = useTranslations("Home");
   const mounted = useMounted();
   const shouldReduceMotion = useReducedMotionPreference();

@@ -8,8 +8,7 @@ import { use } from "react";
 
 import { useRetrieveArchiveQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
-import { EssayGrid } from "../../components/essay-grid";
-import { EssayPagination } from "../../components/essay-pagination";
+import { EssayGrid, EssayPagination } from "@/features/blog/catalog-entries";
 import { parsePageParam } from "@/lib/utils/pagination";
 import { PageFrame } from "@/components/layout/page-frame";
 

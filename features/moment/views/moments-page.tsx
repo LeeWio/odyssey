@@ -32,7 +32,7 @@ const MomentPublisher = dynamic(
   { ssr: false }
 );
 
-export default function MomentsPage({ initialData }: { initialData: PublicMomentsInitialData }) {
+export function MomentsPage({ initialData }: { initialData: PublicMomentsInitialData }) {
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic") || undefined;
   const page = parsePageParam(searchParams.get("page"));

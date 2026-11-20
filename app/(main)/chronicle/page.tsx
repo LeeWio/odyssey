@@ -1,8 +1,7 @@
 import { getPublicJournalInitialData } from "@/lib/features/post/server";
+import { ChroniclePage } from "@/features/chronicle";
 
-import ChroniclePageClient from "./chronicle-page-client";
-
-export default async function ChroniclePage() {
+export default async function ChronicleRoute() {
   const initialData = await getPublicJournalInitialData({ featuredSize: 1, latestSize: 3 });
-  return <ChroniclePageClient initialData={initialData} />;
+  return <ChroniclePage initialData={initialData} />;
 }
