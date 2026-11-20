@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.252.2](https://github.com/LeeWio/odyssey/compare/v1.252.1...v1.252.2) (2026-11-20)
+
+
+### Bug Fixes
+
+* **comments:** make sheet dismissal reliable ([#52](https://github.com/LeeWio/odyssey/issues/52)) ([2e18226](https://github.com/LeeWio/odyssey/commit/2e182265bff5f901f7bf3c8cf65006894a3f7519))
+
 ## [1.252.1](https://github.com/LeeWio/odyssey/compare/v1.252.0...v1.252.1) (2026-11-20)
 
 
