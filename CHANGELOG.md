@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.251.0](https://github.com/LeeWio/odyssey/compare/v1.250.1...v1.251.0) (2026-11-20)
+
+
+### Features
+
+* **reading:** align reading and notification journeys ([e654109](https://github.com/LeeWio/odyssey/commit/e654109b6fe3f210e5437687e5d5ab2f83c33c08))
+
 ## [1.250.1](https://github.com/LeeWio/odyssey/compare/v1.250.0...v1.250.1) (2026-11-19)
 
 
