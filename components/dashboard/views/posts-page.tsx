@@ -30,6 +30,7 @@ import {
 } from "@heroui/react";
 import { ActionBar, DataGrid, EmptyState } from "@heroui-pro/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { NEW_RICH_TEXT_DRAFT_ID } from "@/components/rich-text/utils/editor-draft";
 import {
@@ -89,6 +90,8 @@ const COLUMN_OPTIONS = [
 ] as const;
 
 export function PostsPage() {
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
   const portalContainer = usePortalContainer();
   const dispatch = useAppDispatch();
   const pageSize = 30;
@@ -109,6 +112,53 @@ export function PostsPage() {
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation();
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<PostResponse | null>(null);
+  const statusOptions = useMemo(
+    () =>
+      STATUS_OPTIONS.map((option) => ({
+        ...option,
+        label: t(
+          `posts.${
+            (
+              {
+                all: "allStages",
+                DRAFT: "draft",
+                PENDING_REVIEW: "review",
+                SCHEDULED: "scheduled",
+                PUBLISHED: "published",
+                REJECTED: "rejected",
+                ARCHIVED: "archived",
+              } as Record<string, string>
+            )[option.id]
+          }`
+        ),
+      })),
+    [t]
+  );
+  const columnOptions = useMemo(
+    () =>
+      COLUMN_OPTIONS.map((option) => ({
+        ...option,
+        label: t(
+          `posts.${
+            (
+              {
+                title: "article",
+                status: "status",
+                category: "category",
+                series: "column",
+                authorName: "author",
+                views: "views",
+                likesCount: "likes",
+                createdAt: "published",
+                updatedAt: "updated",
+                actions: "rowActions",
+              } as Record<string, string>
+            )[option.id]
+          }`
+        ),
+      })),
+    [t]
+  );
 
   const loadPage = useCallback(
     async (page: number, replace = false) => {
@@ -218,7 +268,7 @@ export function PostsPage() {
             </Tooltip.Content>
           </Tooltip>
         ),
-        header: "Article",
+        header: t("posts.article"),
         headerClassName: "whitespace-nowrap",
         id: "title",
         isRowHeader: true,
@@ -236,10 +286,10 @@ export function PostsPage() {
             size="sm"
             variant="soft"
           >
-            {statusLabel(post.status)}
+            {statusLabel(post.status, statusOptions)}
           </Chip>
         ),
-        header: "Status",
+        header: t("posts.status"),
         headerClassName: "whitespace-nowrap",
         id: "status",
         minWidth: 88,
@@ -254,11 +304,11 @@ export function PostsPage() {
                 {post.category.name}
               </Chip>
             ) : (
-              <span className="text-muted text-xs">None</span>
+              <span className="text-muted text-xs">{t("posts.none")}</span>
             )}
           </div>
         ),
-        header: "Category",
+        header: t("posts.category"),
         headerClassName: "whitespace-nowrap",
         id: "category",
         minWidth: 120,
@@ -270,9 +320,9 @@ export function PostsPage() {
           post.series ? (
             <span className="block truncate text-xs">{post.series.name}</span>
           ) : (
-            <span className="text-muted text-xs">None</span>
+            <span className="text-muted text-xs">{t("posts.none")}</span>
           ),
-        header: "Column",
+        header: t("posts.column"),
         headerClassName: "whitespace-nowrap",
         id: "series",
         minWidth: 96,
@@ -286,16 +336,16 @@ export function PostsPage() {
           <div className="flex items-center gap-2">
             <Avatar className="size-5" size="sm">
               {post.authorAvatar ? (
-                <Avatar.Image alt={post.authorName || "Author"} src={post.authorAvatar} />
+                <Avatar.Image alt={post.authorName || t("posts.author")} src={post.authorAvatar} />
               ) : null}
               <Avatar.Fallback className="text-[9px]">
                 {initials(post.authorName || "A")}
               </Avatar.Fallback>
             </Avatar>
-            <span className="text-xs">{post.authorName || "Anonymous"}</span>
+            <span className="text-xs">{post.authorName || t("ArticleCard.unknownAuthor")}</span>
           </div>
         ),
-        header: "Author",
+        header: t("posts.author"),
         headerClassName: "whitespace-nowrap",
         id: "authorName",
         minWidth: 140,
@@ -307,7 +357,7 @@ export function PostsPage() {
         allowsResizing: true,
         allowsSorting: true,
         cell: (post) => <span className="font-medium tabular-nums">{post.views}</span>,
-        header: "Views",
+        header: t("posts.views"),
         headerClassName: "whitespace-nowrap",
         id: "views",
         minWidth: 80,
@@ -319,7 +369,7 @@ export function PostsPage() {
         allowsResizing: true,
         allowsSorting: true,
         cell: (post) => <span className="tabular-nums">{post.likesCount}</span>,
-        header: "Likes",
+        header: t("posts.likes"),
         headerClassName: "whitespace-nowrap",
         id: "likesCount",
         minWidth: 72,
@@ -331,14 +381,14 @@ export function PostsPage() {
         allowsSorting: true,
         cell: (post) => (
           <span className="text-muted text-xs whitespace-nowrap">
-            {new Date(post.createdAt).toLocaleDateString("en-US", {
+            {new Date(post.createdAt).toLocaleDateString(locale, {
               day: "numeric",
               month: "short",
               year: "numeric",
             })}
           </span>
         ),
-        header: "Published",
+        header: t("posts.published"),
         headerClassName: "whitespace-nowrap",
         id: "createdAt",
         minWidth: 100,
@@ -350,14 +400,14 @@ export function PostsPage() {
         allowsSorting: true,
         cell: (post) => (
           <span className="text-muted text-xs whitespace-nowrap">
-            {new Date(post.updatedAt).toLocaleDateString("en-US", {
+            {new Date(post.updatedAt).toLocaleDateString(locale, {
               day: "numeric",
               month: "short",
               year: "numeric",
             })}
           </span>
         ),
-        header: "Updated",
+        header: t("posts.updated"),
         headerClassName: "whitespace-nowrap",
         id: "updatedAt",
         minWidth: 100,
@@ -375,6 +425,7 @@ export function PostsPage() {
               setIsDeleteAlertOpen(true);
             }}
             onEdit={() => openEditor(post)}
+            t={t}
           />
         ),
         header: "",
@@ -386,7 +437,7 @@ export function PostsPage() {
     ];
 
     return allColumns.filter((column) => visibleColumnSet.has(column.id));
-  }, [openEditor, portalContainer, visibleColumns]);
+  }, [locale, openEditor, portalContainer, statusOptions, t, visibleColumns]);
 
   const exportPosts = (records: readonly PostResponse[]) => {
     downloadCsv("posts.csv", [
@@ -402,13 +453,13 @@ export function PostsPage() {
     <>
       <main className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col gap-3 overflow-hidden px-6 pt-4 pb-4">
         <div className="flex flex-wrap items-center gap-2">
-          <FilterSearch portalContainer={portalContainer} query={query} onChange={setQuery} />
+          <FilterSearch portalContainer={portalContainer} query={query} t={t} onChange={setQuery} />
           <FilterMenu
             icon={<BarsDescendingAlignCenter className="size-4" />}
-            label="Sort: Published"
+            label={t("posts.sortPublished")}
             options={[
-              { id: "descending", label: "Newest first" },
-              { id: "ascending", label: "Oldest first" },
+              { id: "descending", label: t("posts.newestFirst") },
+              { id: "ascending", label: t("posts.oldestFirst") },
             ]}
             portalContainer={portalContainer}
             selected={sortDescriptor.direction}
@@ -421,17 +472,19 @@ export function PostsPage() {
           />
           <FilterMenu
             icon={<Funnel className="size-4" />}
-            label={statusFilter === "all" ? "Stage" : statusLabel(statusFilter)}
-            options={STATUS_OPTIONS}
+            label={
+              statusFilter === "all" ? t("posts.stage") : statusLabel(statusFilter, statusOptions)
+            }
+            options={statusOptions}
             portalContainer={portalContainer}
             selected={statusFilter}
             onChange={(value) => setStatusFilter(value as PostStatus | "all")}
           />
           <FilterMenu
             icon={<Funnel className="size-4" />}
-            label={categoryFilter === "all" ? "Category" : categoryFilter}
+            label={categoryFilter === "all" ? t("posts.category") : categoryFilter}
             options={[
-              { id: "all", label: "All categories" },
+              { id: "all", label: t("posts.allCategories") },
               ...categories.map((category) => ({ id: category, label: category })),
             ]}
             portalContainer={portalContainer}
@@ -441,16 +494,16 @@ export function PostsPage() {
           <div className="ml-auto flex items-center gap-2">
             <Button size="sm" onPress={() => openEditor()}>
               <CirclePlus className="size-4" />
-              New Article
+              {t("posts.newArticle")}
             </Button>
             <Button size="sm" variant="ghost" onPress={() => exportPosts(filteredPosts)}>
               <ArrowDownToLine className="size-4" />
-              Export CSV
+              {t("posts.exportCsv")}
             </Button>
             <Dropdown>
               <Button size="sm" variant="tertiary">
                 <LayoutColumns3 className="size-4" />
-                Display
+                {t("posts.display")}
               </Button>
               <Dropdown.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
                 <Dropdown.Menu
@@ -459,7 +512,7 @@ export function PostsPage() {
                   selectionMode="multiple"
                   onSelectionChange={setVisibleColumns}
                 >
-                  {COLUMN_OPTIONS.map((option) => (
+                  {columnOptions.map((option) => (
                     <Dropdown.Item key={option.id} id={option.id} textValue={option.label}>
                       <Label>{option.label}</Label>
                       <Dropdown.ItemIndicator />
@@ -475,7 +528,7 @@ export function PostsPage() {
           <DataGrid
             allowsColumnResize
             showSelectionCheckboxes
-            aria-label="Posts"
+            aria-label={t("posts.table")}
             className="min-h-0 max-w-full min-w-0 flex-1 [&_.table__column]:sticky [&_.table__column]:top-0 [&_.table__column]:z-[3]"
             columns={columns}
             contentClassName="w-full min-w-full"
@@ -498,10 +551,8 @@ export function PostsPage() {
                     <EmptyState.Media variant="icon">
                       <Magnifier />
                     </EmptyState.Media>
-                    <EmptyState.Title>No posts found</EmptyState.Title>
-                    <EmptyState.Description>
-                      Adjust the search or clear filters to restore the article list.
-                    </EmptyState.Description>
+                    <EmptyState.Title>{t("posts.noPosts")}</EmptyState.Title>
+                    <EmptyState.Description>{t("posts.clearFilters")}</EmptyState.Description>
                   </EmptyState.Header>
                   <EmptyState.Content>
                     <Button
@@ -513,7 +564,7 @@ export function PostsPage() {
                         setCategoryFilter("all");
                       }}
                     >
-                      Clear filters
+                      {t("posts.clearFilters")}
                     </Button>
                   </EmptyState.Content>
                 </EmptyState>
@@ -525,23 +576,25 @@ export function PostsPage() {
           />
           <div className="text-muted flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs">
             <span>
-              {filteredPosts.length} of {totalPosts} posts
+              {t("posts.countSummary", { visible: filteredPosts.length, total: totalPosts })}
             </span>
-            <span>Views {totalViews.toLocaleString("en-US")}</span>
+            <span>
+              {t("posts.views")} {totalViews.toLocaleString(locale)}
+            </span>
           </div>
         </div>
       </main>
 
-      <ActionBar aria-label="Post bulk actions" isOpen={selectedCount > 0}>
+      <ActionBar aria-label={t("posts.bulkActions")} isOpen={selectedCount > 0}>
         <ActionBar.Prefix>
           <Chip className="shrink-0 tabular-nums" size="sm">
-            {selectedCount} selected
+            {t("users.selected", { count: selectedCount })}
           </Chip>
         </ActionBar.Prefix>
         <Separator />
         <ActionBar.Content>
           <Button
-            aria-label="Export"
+            aria-label={t("posts.export")}
             size="sm"
             variant="ghost"
             onPress={() =>
@@ -549,10 +602,10 @@ export function PostsPage() {
             }
           >
             <ArrowDownToLine />
-            <span>Export</span>
+            <span>{t("posts.export")}</span>
           </Button>
           <Button
-            aria-label="Delete"
+            aria-label={t("common.delete")}
             size="sm"
             variant="danger-soft"
             onPress={() => {
@@ -563,14 +616,14 @@ export function PostsPage() {
             }}
           >
             <TrashBin />
-            <span>Delete</span>
+            <span>{t("common.delete")}</span>
           </Button>
         </ActionBar.Content>
         <Separator />
         <ActionBar.Suffix>
           <Button
             isIconOnly
-            aria-label="Clear selection"
+            aria-label={t("posts.clearSelection")}
             size="sm"
             variant="ghost"
             onPress={() => setSelectedKeys(new Set())}
@@ -588,11 +641,11 @@ export function PostsPage() {
           onOpenChange={setIsDeleteAlertOpen}
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog aria-label="Delete article" className="sm:max-w-md">
+            <AlertDialog.Dialog aria-label={t("posts.deleteArticle")} className="sm:max-w-md">
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Delete Article?</AlertDialog.Heading>
+                <AlertDialog.Heading>{t("posts.deleteArticleQuestion")}</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="text-sm">
@@ -603,7 +656,7 @@ export function PostsPage() {
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button slot="close" size="sm" variant="tertiary">
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   isDisabled={isDeleting}
@@ -620,7 +673,7 @@ export function PostsPage() {
                   }}
                 >
                   {isDeleting ? <Spinner size="sm" className="mr-1" /> : null}
-                  Delete
+                  {t("common.delete")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>
@@ -635,16 +688,18 @@ function FilterSearch({
   onChange,
   portalContainer,
   query,
+  t,
 }: {
   onChange: (value: string) => void;
   portalContainer: HTMLElement | null;
   query: string;
+  t: ReturnType<typeof useTranslations>;
 }) {
   return (
     <Dropdown>
       <Button size="sm" variant="tertiary">
         <Funnel className="size-4" />
-        {query || "Filter"}
+        {query || t("posts.filterSearch")}
       </Button>
       <Dropdown.Popover
         className="min-w-[220px]"
@@ -652,9 +707,9 @@ function FilterSearch({
       >
         <div className="px-2 pt-2">
           <input
-            aria-label="Filter posts"
+            aria-label={t("posts.filterSearch")}
             className="border-border bg-surface text-foreground w-full rounded-lg border px-3 py-2 text-sm outline-none"
-            placeholder="Search posts"
+            placeholder={t("posts.search")}
             value={query}
             onChange={(event) => onChange(event.target.value)}
           />
@@ -665,8 +720,8 @@ function FilterSearch({
             if (key === "clear") onChange("");
           }}
         >
-          <Dropdown.Item id="clear" textValue="Clear search">
-            <Label>Clear search</Label>
+          <Dropdown.Item id="clear" textValue={t("common.clear")}>
+            <Label>{t("common.clear")}</Label>
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown.Popover>
@@ -722,35 +777,42 @@ function PostRowMenu({
   onDelete,
   onEdit,
   portalContainer,
+  t,
 }: {
   onCopy: () => void;
   onDelete: () => void;
   onEdit: () => void;
   portalContainer: HTMLElement | null;
+  t: ReturnType<typeof useTranslations>;
 }) {
   return (
     <Dropdown>
-      <Button isIconOnly aria-label="Article actions" size="sm" variant="ghost">
+      <Button isIconOnly aria-label={t("posts.articleActions")} size="sm" variant="ghost">
         <EllipsisVertical className="size-4" />
       </Button>
       <Dropdown.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
         <Dropdown.Menu>
-          <Dropdown.Item id="open" textValue="Open article" onAction={onEdit}>
+          <Dropdown.Item id="open" textValue={t("posts.openArticle")} onAction={onEdit}>
             <Eye className="size-4" />
-            <Label>Open article</Label>
+            <Label>{t("posts.openArticle")}</Label>
           </Dropdown.Item>
-          <Dropdown.Item id="edit" textValue="Edit article" onAction={onEdit}>
+          <Dropdown.Item id="edit" textValue={t("posts.editArticle")} onAction={onEdit}>
             <Pencil className="size-4" />
-            <Label>Edit article</Label>
+            <Label>{t("posts.editArticle")}</Label>
           </Dropdown.Item>
-          <Dropdown.Item id="copy" textValue="Copy slug" onAction={onCopy}>
+          <Dropdown.Item id="copy" textValue={t("posts.copySlug")} onAction={onCopy}>
             <Copy className="size-4" />
-            <Label>Copy slug</Label>
+            <Label>{t("posts.copySlug")}</Label>
           </Dropdown.Item>
           <Separator />
-          <Dropdown.Item id="delete" textValue="Delete" variant="danger" onAction={onDelete}>
+          <Dropdown.Item
+            id="delete"
+            textValue={t("common.delete")}
+            variant="danger"
+            onAction={onDelete}
+          >
             <TrashBin className="size-4" />
-            <Label>Delete</Label>
+            <Label>{t("common.delete")}</Label>
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown.Popover>
@@ -777,6 +839,6 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-function statusLabel(status: string): string {
-  return STATUS_OPTIONS.find((option) => option.id === status)?.label ?? status;
+function statusLabel(status: string, options: readonly { id: string; label: string }[]): string {
+  return options.find((option) => option.id === status)?.label ?? status;
 }

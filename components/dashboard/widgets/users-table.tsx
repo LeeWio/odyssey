@@ -5,10 +5,13 @@ import { Icon } from "@iconify/react";
 import { Avatar, Button, Chip, SearchField, toast } from "@heroui/react";
 import type { DataGridColumn, DataGridSortDescriptor } from "@heroui-pro/react";
 import { DataGrid } from "@heroui-pro/react";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { useGetAllUsersQuery, type UserResponse } from "@/lib/features/user";
 
 export function UsersTable() {
+  const locale = useLocale();
+  const t = useTranslations("Dashboard");
   const { data: users = [], isLoading, isFetching } = useGetAllUsersQuery();
 
   const [search, setSearch] = useState("");
@@ -43,14 +46,17 @@ export function UsersTable() {
     setSearch(value);
   }, []);
 
-  const handleCopyId = useCallback(async (id: number) => {
-    try {
-      await navigator.clipboard.writeText(id.toString());
-      toast.success("User ID copied.");
-    } catch {
-      toast.danger("Couldn't copy the user ID.");
-    }
-  }, []);
+  const handleCopyId = useCallback(
+    async (id: number) => {
+      try {
+        await navigator.clipboard.writeText(id.toString());
+        toast.success(t("common.copyId"));
+      } catch {
+        toast.danger(t("common.loadFailed"));
+      }
+    },
+    [t]
+  );
 
   const columns = useMemo<DataGridColumn<UserResponse>[]>(
     () => [
@@ -62,7 +68,7 @@ export function UsersTable() {
             <span className="font-medium tabular-nums">{item.id}</span>
             <Button
               isIconOnly
-              aria-label="Copy ID"
+              aria-label={t("common.copyId")}
               size="sm"
               variant="ghost"
               onPress={() => void handleCopyId(item.id)}
@@ -71,7 +77,7 @@ export function UsersTable() {
             </Button>
           </div>
         ),
-        header: "ID",
+        header: t("common.id"),
         id: "id",
         isRowHeader: true,
         minWidth: 100,
@@ -92,7 +98,7 @@ export function UsersTable() {
             </div>
           </div>
         ),
-        header: "User",
+        header: t("overview.systemUsers"),
         id: "username",
         minWidth: 220,
       },
@@ -109,11 +115,11 @@ export function UsersTable() {
           };
           return (
             <Chip size="sm" variant="soft" color={colors[item.status]}>
-              {item.status}
+              {t(`users.${item.status.toLowerCase()}`)}
             </Chip>
           );
         },
-        header: "Status",
+        header: t("users.status"),
         id: "status",
         minWidth: 120,
       },
@@ -129,7 +135,7 @@ export function UsersTable() {
             ))}
           </div>
         ),
-        header: "Roles",
+        header: t("users.roles"),
         id: "roles",
         minWidth: 200,
       },
@@ -138,22 +144,24 @@ export function UsersTable() {
         allowsSorting: true,
         cell: (item) => (
           <span className="text-muted text-xs tabular-nums">
-            {new Date(item.createdAt).toLocaleDateString()}
+            {new Date(item.createdAt).toLocaleDateString(locale)}
           </span>
         ),
-        header: "Joined",
+        header: t("users.joined"),
         id: "createdAt",
         minWidth: 120,
       },
     ],
-    [handleCopyId]
+    [handleCopyId, locale, t]
   );
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-foreground text-base font-semibold">System Users</span>
+          <span className="text-foreground text-base font-semibold">
+            {t("overview.systemUsers")}
+          </span>
           {!isLoading && (
             <Chip size="sm" variant="soft">
               {users.length}
@@ -164,7 +172,7 @@ export function UsersTable() {
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" variant="tertiary">
               <Icon icon="gravity-ui:sliders" className="size-4" />
-              Filter
+              {t("users.filter")}
             </Button>
           </div>
           <SearchField
@@ -174,7 +182,7 @@ export function UsersTable() {
           >
             <SearchField.Group>
               <SearchField.SearchIcon />
-              <SearchField.Input placeholder="Search users..." />
+              <SearchField.Input placeholder={t("users.search")} />
               <SearchField.ClearButton />
             </SearchField.Group>
           </SearchField>
@@ -182,7 +190,7 @@ export function UsersTable() {
       </div>
 
       <DataGrid
-        aria-label="All users"
+        aria-label={t("overview.usersTable")}
         columns={columns}
         contentClassName="min-w-[700px]"
         data={sortedUsers}

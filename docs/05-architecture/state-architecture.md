@@ -105,6 +105,8 @@ ui slice 管理：
 
 locale slice 表达客户端语言偏好；`odyssey_locale` Cookie 是 SSR、next-intl、服务端预取和 API `Accept-Language` 的共享来源。导航栏的 `LocaleSwitcher` 更新 Cookie、Redux 状态并刷新路由，确保首屏和后续请求使用同一语言。
 
+管理端 UI 文案属于 `messages/{locale}.json` 的 `Dashboard` 命名空间。Dashboard 导航、仪表盘 widget、内容管理表格、筛选器、空态、确认弹窗和可访问名称都从当前 locale 读取；业务实体名称仍由 API 的内容翻译字段提供。日期和数字展示使用当前 locale 格式化，避免在管理端重新引入固定的 `en-US`。
+
 ## 持久化策略
 
 持久化由 `lib/middleware/persistence.ts` 和主题同步逻辑处理。

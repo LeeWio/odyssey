@@ -15,6 +15,7 @@ import {
   toast,
 } from "@heroui/react";
 import { useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { useGetAllRolesQuery } from "@/lib/features/role";
 import {
@@ -31,6 +32,8 @@ export interface RowActionsProps {
 }
 
 export function RowActions({ user }: RowActionsProps) {
+  const locale = useLocale();
+  const t = useTranslations("Dashboard");
   const portalContainer = useSheetPortal();
   const { data: rolesList = [] } = useGetAllRolesQuery();
   const [updateStatus, { isLoading: isStatusUpdating }] = useUpdateUserStatusMutation();
@@ -54,7 +57,7 @@ export function RowActions({ user }: RowActionsProps) {
     if (keys === "all") return;
     const roleIds = [...keys].map(Number);
     if (roleIds.length === 0) {
-      toast.warning("A user must have at least one role.");
+      toast.warning(t("users.assignRoles"));
       return;
     }
     await updateRoles({ id: user.id, roleIds }).unwrap();
@@ -63,11 +66,21 @@ export function RowActions({ user }: RowActionsProps) {
 
   return (
     <div className="flex items-center justify-end gap-0.5">
-      <IconButton label="View" size="sm" variant="tertiary" onPress={() => setIsProfileOpen(true)}>
+      <IconButton
+        label={t("overview.view")}
+        size="sm"
+        variant="tertiary"
+        onPress={() => setIsProfileOpen(true)}
+      >
         <Eye className="size-4" />
       </IconButton>
       <Dropdown isOpen={isRolesOpen} onOpenChange={setIsRolesOpen}>
-        <IconButton isDisabled={isRolesUpdating} label="Edit roles" size="sm" variant="tertiary">
+        <IconButton
+          isDisabled={isRolesUpdating}
+          label={t("overview.editRoles")}
+          size="sm"
+          variant="tertiary"
+        >
           {isRolesUpdating ? <Spinner size="sm" /> : <Pencil className="size-4" />}
         </IconButton>
         <Dropdown.Popover
@@ -80,7 +93,7 @@ export function RowActions({ user }: RowActionsProps) {
             onSelectionChange={(keys) => void saveRoles(keys)}
           >
             <Dropdown.Section>
-              <Header>Assign Roles</Header>
+              <Header>{t("overview.assignRoles")}</Header>
               {rolesList.map((role) => (
                 <Dropdown.Item key={role.id} id={String(role.id)} textValue={role.name}>
                   <Dropdown.ItemIndicator />
@@ -93,7 +106,7 @@ export function RowActions({ user }: RowActionsProps) {
       </Dropdown>
       <IconButton
         isDisabled={isStatusUpdating || user.status === "DELETED"}
-        label={isActive ? "Deactivate" : "Activate"}
+        label={isActive ? t("users.deactivate") : t("users.activate")}
         size="sm"
         variant="danger-soft"
         onPress={() => setIsStatusOpen(true)}
@@ -116,17 +129,18 @@ export function RowActions({ user }: RowActionsProps) {
               <Modal.Body>
                 <Description>{user.email}</Description>
                 <dl className="grid grid-cols-[7rem_1fr] gap-y-2 text-sm">
-                  <dt className="text-muted">Username</dt>
+                  <dt className="text-muted">{t("overview.username")}</dt>
                   <dd>{user.username}</dd>
-                  <dt className="text-muted">Status</dt>
+                  <dt className="text-muted">{t("users.status")}</dt>
                   <dd>{user.status}</dd>
-                  <dt className="text-muted">Roles</dt>
+                  <dt className="text-muted">{t("users.roles")}</dt>
                   <dd>
-                    {user.roles.map((role) => role.replace("ROLE_", "")).join(", ") || "None"}
+                    {user.roles.map((role) => role.replace("ROLE_", "")).join(", ") ||
+                      t("common.none")}
                   </dd>
                   <dt className="text-muted">Joined</dt>
                   <dd>
-                    {new Date(user.createdAt).toLocaleDateString("en-US", {
+                    {new Date(user.createdAt).toLocaleDateString(locale, {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
@@ -136,7 +150,7 @@ export function RowActions({ user }: RowActionsProps) {
               </Modal.Body>
               <Modal.Footer>
                 <Button size="sm" variant="tertiary" onPress={() => setIsProfileOpen(false)}>
-                  Close
+                  {t("common.close")}
                 </Button>
               </Modal.Footer>
             </Modal.Dialog>
@@ -156,15 +170,16 @@ export function RowActions({ user }: RowActionsProps) {
               <AlertDialog.Header>
                 <AlertDialog.Icon status={isActive ? "danger" : "success"} />
                 <AlertDialog.Heading>
-                  {isActive ? "Deactivate this member?" : "Activate this member?"}
+                  {isActive ? t("users.deactivate") : t("users.activate")}
                 </AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
-                {user.nickname || user.username} will be marked {isActive ? "inactive" : "active"}.
+                {user.nickname || user.username} ·{" "}
+                {isActive ? t("users.inactive") : t("users.active")}
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button slot="close" size="sm" variant="tertiary">
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   isDisabled={isStatusUpdating}
@@ -178,7 +193,7 @@ export function RowActions({ user }: RowActionsProps) {
                     setIsStatusOpen(false);
                   }}
                 >
-                  {isActive ? "Deactivate" : "Activate"}
+                  {isActive ? t("users.deactivate") : t("users.activate")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>

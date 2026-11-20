@@ -2,33 +2,37 @@
 
 import { Skeleton } from "@heroui/react";
 import type { CommentGovernanceOverviewResponse } from "@/lib/features/comment";
+import { useTranslations } from "next-intl";
 
 interface OverviewCardsProps {
   overview?: CommentGovernanceOverviewResponse;
   isLoading: boolean;
 }
 
-const CARDS: Array<{
+const CARD_KEYS: Array<{
   key: keyof CommentGovernanceOverviewResponse;
-  label: string;
 }> = [
-  { key: "totalComments", label: "Total" },
-  { key: "pendingComments", label: "Pending" },
-  { key: "openReports", label: "Open reports" },
-  { key: "reportsLast24Hours", label: "Reports 24h" },
-  { key: "autoFlaggedLast24Hours", label: "Auto-flagged 24h" },
-  { key: "spamComments", label: "Spam" },
+  { key: "totalComments" },
+  { key: "pendingComments" },
+  { key: "openReports" },
+  { key: "reportsLast24Hours" },
+  { key: "autoFlaggedLast24Hours" },
+  { key: "spamComments" },
 ];
 
 export function CommentOverviewCards({ overview, isLoading }: OverviewCardsProps) {
+  const t = useTranslations("Dashboard");
+  const labels = ["comments", "pending", "reports", "reports24h", "autoFlagged24h", "spam"];
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      {CARDS.map((card) => (
+      {CARD_KEYS.map((card, index) => (
         <div
           key={card.key}
           className="bg-surface border-border rounded-2xl border px-4 py-3 shadow-sm"
         >
-          <p className="text-muted text-xs font-medium tracking-wide uppercase">{card.label}</p>
+          <p className="text-muted text-xs font-medium tracking-wide uppercase">
+            {t(`comments.${labels[index]}`)}
+          </p>
           {isLoading ? (
             <Skeleton className="mt-2 h-7 w-16 rounded-md" />
           ) : (

@@ -4,6 +4,7 @@ import { Card, Label, ListBox, Select } from "@heroui/react";
 import { NumberValue, TrendChip } from "@heroui-pro/react";
 import { BarChart } from "@heroui-pro/react/bar-chart";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useGetAnalyticsOverviewQuery } from "@/lib/features/dashboard";
 
 import { useSheetPortal } from "../use-sheet-portal";
@@ -18,6 +19,7 @@ const RANGE_DAYS = {
 type SalesRange = keyof typeof RANGE_DAYS;
 
 export function SalesPerformanceCard() {
+  const t = useTranslations("Dashboard");
   const portalContainer = useSheetPortal();
   const [range, setRange] = useState<SalesRange>("last-2-weeks");
   const { data } = useGetAnalyticsOverviewQuery();
@@ -32,17 +34,17 @@ export function SalesPerformanceCard() {
   const total = chartData.reduce((sum, point) => sum + point.sales, 0);
   const growth = data?.pvGrowthRate ?? 0;
   const miniKpis = [
-    { label: "Today PV", value: data?.todayPv ?? 0 },
-    { label: "Today UV", value: data?.todayUv ?? 0 },
-    { label: "Period PV", value: total },
+    { label: t("widgets.todayPv"), value: data?.todayPv ?? 0 },
+    { label: t("widgets.todayUv"), value: data?.todayUv ?? 0 },
+    { label: t("widgets.periodPv"), value: total },
   ];
 
   return (
     <Card>
       <Card.Header className="flex-row items-center justify-between">
-        <Card.Title className="text-base">Sales Performance</Card.Title>
+        <Card.Title className="text-base">{t("widgets.salesPerformance")}</Card.Title>
         <Select
-          aria-label="Sales period"
+          aria-label={t("widgets.salesPeriod")}
           className="w-[140px]"
           value={range}
           variant="secondary"
@@ -50,27 +52,27 @@ export function SalesPerformanceCard() {
             if (value && value in RANGE_DAYS) setRange(value as SalesRange);
           }}
         >
-          <Label className="sr-only">Sales period</Label>
+          <Label className="sr-only">{t("widgets.salesPeriod")}</Label>
           <Select.Trigger className="text-xs font-medium">
             <Select.Value />
             <Select.Indicator className="size-3.5" />
           </Select.Trigger>
           <Select.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
             <ListBox>
-              <ListBox.Item id="last-week" textValue="Last week">
-                <Label>Last week</Label>
+              <ListBox.Item id="last-week" textValue={t("widgets.lastWeek")}>
+                <Label>{t("widgets.lastWeek")}</Label>
                 <ListBox.ItemIndicator />
               </ListBox.Item>
-              <ListBox.Item id="last-2-weeks" textValue="Last 2 weeks">
-                <Label>Last 2 weeks</Label>
+              <ListBox.Item id="last-2-weeks" textValue={t("widgets.lastTwoWeeks")}>
+                <Label>{t("widgets.lastTwoWeeks")}</Label>
                 <ListBox.ItemIndicator />
               </ListBox.Item>
-              <ListBox.Item id="last-month" textValue="Last month">
-                <Label>Last month</Label>
+              <ListBox.Item id="last-month" textValue={t("widgets.lastMonth")}>
+                <Label>{t("widgets.lastMonth")}</Label>
                 <ListBox.ItemIndicator />
               </ListBox.Item>
-              <ListBox.Item id="last-3-months" textValue="Last 3 months">
-                <Label>Last 3 months</Label>
+              <ListBox.Item id="last-3-months" textValue={t("widgets.lastThreeMonths")}>
+                <Label>{t("widgets.lastThreeMonths")}</Label>
                 <ListBox.ItemIndicator />
               </ListBox.Item>
             </ListBox>

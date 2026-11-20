@@ -3,12 +3,14 @@
 import type { DataGridColumn } from "@heroui-pro/react";
 
 import { DataGrid, NumberValue, TrendChip } from "@heroui-pro/react";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useGetTopPagesQuery, type TopPageResponse } from "@/lib/features/dashboard";
 
 type PageRow = TopPageResponse & { id: string; trendDirection: "up" | "down" | "neutral" };
 
 export function TopPagesCard() {
+  const t = useTranslations("Dashboard");
   const { data: pages = [] } = useGetTopPagesQuery();
   const rows = useMemo<PageRow[]>(
     () =>
@@ -29,7 +31,7 @@ export function TopPagesCard() {
         accessorKey: "path",
         allowsSorting: true,
         cell: (item) => <span className="font-medium">{item.path}</span>,
-        header: "Path",
+        header: t("widgets.path"),
         id: "path",
         isRowHeader: true,
         minWidth: 220,
@@ -40,7 +42,7 @@ export function TopPagesCard() {
         cell: (item) => (
           <NumberValue className="tabular-nums" maximumFractionDigits={0} value={item.views} />
         ),
-        header: "Views",
+        header: t("widgets.views"),
         id: "views",
         minWidth: 120,
       },
@@ -48,7 +50,7 @@ export function TopPagesCard() {
         accessorKey: "avs.time",
         allowsSorting: true,
         cell: (item) => <span className="text-muted tabular-nums">{item["avs.time"] ?? "-"}</span>,
-        header: "Avg. time",
+        header: t("widgets.averageTime"),
         id: "avs.time",
         minWidth: 120,
       },
@@ -63,7 +65,7 @@ export function TopPagesCard() {
             value={item.bounce / 100}
           />
         ),
-        header: "Bounce",
+        header: t("widgets.bounce"),
         id: "bounce",
         minWidth: 100,
       },
@@ -73,22 +75,22 @@ export function TopPagesCard() {
             {(item.trend ?? "0%").replace(/^[+-]/, "")}
           </TrendChip>
         ),
-        header: "Trend",
+        header: t("widgets.trend"),
         id: "trend",
         minWidth: 100,
       },
     ],
-    []
+    [t]
   );
 
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h2 className="text-foreground text-base font-semibold">Top pages</h2>
-        <p className="text-muted text-xs">Most-viewed pages over the selected period.</p>
+        <h2 className="text-foreground text-base font-semibold">{t("widgets.topPages")}</h2>
+        <p className="text-muted text-xs">{t("widgets.topPagesDescription")}</p>
       </div>
       <DataGrid
-        aria-label="Top pages"
+        aria-label={t("widgets.topPages")}
         columns={columns}
         contentClassName="min-w-[640px]"
         data={rows}

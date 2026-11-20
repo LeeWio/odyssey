@@ -1,20 +1,37 @@
 "use client";
 
 import { KPI } from "@heroui-pro/react/kpi";
+import { useTranslations } from "next-intl";
 import { useGetDashboardStatsQuery } from "@/lib/features/dashboard";
 
 export function KpiRow() {
+  const t = useTranslations("Dashboard");
   const { data: stats } = useGetDashboardStatsQuery();
   const cards = [
-    { label: "Users", trend: "up" as const, trendValue: "Live", value: stats?.totalUsers ?? 0 },
-    { label: "Posts", trend: "up" as const, trendValue: "Live", value: stats?.totalPosts ?? 0 },
     {
-      label: "Comments",
+      label: t("overview.systemUsers"),
       trend: "up" as const,
-      trendValue: "Live",
+      trendValue: t("widgets.realtime"),
+      value: stats?.totalUsers ?? 0,
+    },
+    {
+      label: t("nav.posts"),
+      trend: "up" as const,
+      trendValue: t("widgets.realtime"),
+      value: stats?.totalPosts ?? 0,
+    },
+    {
+      label: t("nav.comments"),
+      trend: "up" as const,
+      trendValue: t("widgets.realtime"),
       value: stats?.totalComments ?? 0,
     },
-    { label: "Views", trend: "up" as const, trendValue: "Live", value: stats?.totalViews ?? 0 },
+    {
+      label: t("common.views"),
+      trend: "up" as const,
+      trendValue: t("widgets.realtime"),
+      value: stats?.totalViews ?? 0,
+    },
   ];
 
   return (

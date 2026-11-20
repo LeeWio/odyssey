@@ -3,18 +3,17 @@
 import { Button, Card, Chip } from "@heroui/react";
 import { EmptyState } from "@heroui-pro/react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 
 import { useGetNotificationDeliveryOverviewQuery } from "@/lib/features/notification/notification-delivery-api";
 
-const DELIVERY_LABELS = {
-  QUEUED: "Queued",
-  SENDING: "Sending",
-  FAILED: "Failed",
-  DELIVERED: "Delivered",
-  ABANDONED: "Abandoned",
-} as const;
+const DELIVERY_LABEL_KEYS = ["QUEUED", "SENDING", "FAILED", "DELIVERED", "ABANDONED"] as const;
 
 export function NotificationDeliveryCard() {
+  const locale = useLocale();
+  const t = useTranslations("Dashboard");
+  const tDelivery = useTranslations("NotificationDelivery");
+  const tNav = useTranslations("Nav");
   const router = useRouter();
   const query = useGetNotificationDeliveryOverviewQuery(undefined, {
     pollingInterval: 30_000,
@@ -28,42 +27,42 @@ export function NotificationDeliveryCard() {
       <Card.Header className="items-start gap-2">
         <div className="flex w-full items-center justify-between gap-3">
           <div>
-            <Card.Title className="text-base">Notification delivery</Card.Title>
-            <Card.Description>Operational status for account email delivery.</Card.Description>
+            <Card.Title className="text-base">{t("widgets.notificationDelivery")}</Card.Title>
+            <Card.Description>{t("widgets.notificationDeliveryDescription")}</Card.Description>
           </div>
           {query.data ? (
             <Chip color={failed > 0 ? "warning" : "success"} size="sm" variant="soft">
-              {failed > 0 ? `${failed} need attention` : "Healthy"}
+              {failed > 0 ? `${failed} · ${t("widgets.commentsWaiting")}` : t("widgets.realtime")}
             </Chip>
           ) : null}
         </div>
       </Card.Header>
       <Card.Content>
         {query.isLoading ? (
-          <p className="text-muted text-sm">Loading delivery status.</p>
+          <p className="text-muted text-sm">{t("widgets.loadingDelivery")}</p>
         ) : query.isError || !query.data ? (
           <EmptyState>
             <EmptyState.Header>
-              <EmptyState.Title>Delivery status is unavailable</EmptyState.Title>
+              <EmptyState.Title>{t("widgets.deliveryUnavailable")}</EmptyState.Title>
             </EmptyState.Header>
             <EmptyState.Content>
               <Button onPress={() => query.refetch()} size="sm" variant="secondary">
-                Try again
+                {t("common.retry")}
               </Button>
             </EmptyState.Content>
           </EmptyState>
         ) : (
           <div className="flex flex-col gap-4">
             <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-              <Stat label="Pending" value={query.data.pending} />
-              <Stat label="Overdue" value={query.data.overdue} />
-              <Stat label="Failed" value={failed} />
-              <Stat label="Delivered" value={counts.DELIVERED ?? 0} />
+              <Stat label={t("widgets.pending")} value={query.data.pending} locale={locale} />
+              <Stat label={t("widgets.overdue")} value={query.data.overdue} locale={locale} />
+              <Stat label={t("widgets.failed")} value={failed} locale={locale} />
+              <Stat label={t("widgets.delivered")} value={counts.DELIVERED ?? 0} locale={locale} />
             </dl>
             <div className="flex flex-wrap gap-2">
-              {Object.entries(DELIVERY_LABELS).map(([status, label]) => (
+              {DELIVERY_LABEL_KEYS.map((status) => (
                 <Chip key={status} size="sm" variant="soft">
-                  {label}: {counts[status] ?? 0}
+                  {tDelivery(`status.${status}`)}: {(counts[status] ?? 0).toLocaleString(locale)}
                 </Chip>
               ))}
             </div>
@@ -73,7 +72,7 @@ export function NotificationDeliveryCard() {
               variant="ghost"
               onPress={() => router.push("/notifications")}
             >
-              Open notifications
+              {tNav("notifications")}
             </Button>
           </div>
         )}
@@ -82,11 +81,11 @@ export function NotificationDeliveryCard() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, locale, value }: { label: string; locale: string; value: number }) {
   return (
     <div className="flex flex-col gap-1">
       <dt className="text-muted text-xs">{label}</dt>
-      <dd className="tabular-nums">{value.toLocaleString("en-US")}</dd>
+      <dd className="tabular-nums">{value.toLocaleString(locale)}</dd>
     </div>
   );
 }

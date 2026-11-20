@@ -24,7 +24,7 @@ import {
 } from "@heroui/react";
 import { DataGrid, type DataGridColumn, type DataGridSortDescriptor } from "@heroui-pro/react";
 import { type FormEvent, useCallback, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import {
   type TagRequest,
@@ -46,6 +46,8 @@ import { usePortalContainer } from "../use-portal-container";
 
 export function TagsPage() {
   const t = useTranslations("ContentTranslations");
+  const dashboardT = useTranslations("Dashboard");
+  const locale = useLocale();
   const portalContainer = usePortalContainer();
 
   const { data: tags = [], isLoading, error } = useGetAllTagsQuery();
@@ -203,7 +205,7 @@ export function TagsPage() {
             <span className="font-medium tabular-nums">{item.id}</span>
             <Button
               isIconOnly
-              aria-label="Copy ID"
+              aria-label={dashboardT("common.copyId")}
               size="sm"
               variant="ghost"
               onPress={() => void navigator.clipboard.writeText(String(item.id))}
@@ -212,7 +214,7 @@ export function TagsPage() {
             </Button>
           </div>
         ),
-        header: "ID",
+        header: dashboardT("common.id"),
         id: "id",
         isRowHeader: true,
         minWidth: 80,
@@ -221,7 +223,7 @@ export function TagsPage() {
         accessorKey: "name",
         allowsSorting: true,
         cell: (item) => <span className="text-xs font-medium">{item.name}</span>,
-        header: "Name",
+        header: dashboardT("common.name"),
         id: "name",
         minWidth: 180,
       },
@@ -229,7 +231,7 @@ export function TagsPage() {
         accessorKey: "slug",
         allowsSorting: true,
         cell: (item) => item.slug,
-        header: "Slug",
+        header: dashboardT("common.slug"),
         id: "slug",
         minWidth: 180,
       },
@@ -238,14 +240,14 @@ export function TagsPage() {
         allowsSorting: true,
         cell: (item) => (
           <span className="text-muted text-xs tabular-nums">
-            {new Date(item.createdAt).toLocaleDateString("en-US", {
+            {new Date(item.createdAt).toLocaleDateString(locale, {
               day: "numeric",
               month: "short",
               year: "numeric",
             })}
           </span>
         ),
-        header: "Created At",
+        header: dashboardT("common.createdAt"),
         id: "createdAt",
         minWidth: 200,
       },
@@ -254,7 +256,7 @@ export function TagsPage() {
         cell: (item) => (
           <div className="flex items-center justify-end gap-0.5">
             <IconButton
-              label="Edit Tag"
+              label={dashboardT("tags.edit")}
               size="sm"
               variant="tertiary"
               onPress={() => handleEditClick(item)}
@@ -262,7 +264,7 @@ export function TagsPage() {
               <Pencil className="size-4" />
             </IconButton>
             <IconButton
-              label="Delete Tag"
+              label={dashboardT("tags.delete")}
               size="sm"
               variant="danger-soft"
               onPress={() => handleDeleteClick(item)}
@@ -271,12 +273,12 @@ export function TagsPage() {
             </IconButton>
           </div>
         ),
-        header: "Actions",
+        header: dashboardT("common.actions"),
         id: "actions",
         minWidth: 120,
       },
     ],
-    [handleEditClick, handleDeleteClick]
+    [dashboardT, handleEditClick, handleDeleteClick, locale]
   );
 
   return (
@@ -284,7 +286,9 @@ export function TagsPage() {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-foreground text-base font-semibold">All Tags</span>
+            <span className="text-foreground text-base font-semibold">
+              {dashboardT("tags.all")}
+            </span>
             <Chip size="sm" variant="soft">
               {tags.length}
             </Chip>
@@ -293,19 +297,19 @@ export function TagsPage() {
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" variant="tertiary">
                 <Sliders className="size-4" />
-                Filter
+                {dashboardT("tags.filter")}
               </Button>
               <Button size="sm" variant="tertiary">
                 <BarsDescendingAlignCenter className="size-4" />
-                Sort
+                {dashboardT("tags.sort")}
               </Button>
               <Button size="sm" variant="tertiary">
                 <LayoutColumns3 className="size-4" />
-                Columns
+                {dashboardT("tags.columns")}
               </Button>
               <Button size="sm" onPress={handleCreateOpen}>
                 <CirclePlus className="size-4" />
-                Add Tag
+                {dashboardT("tags.add")}
               </Button>
             </div>
             <SearchField
@@ -316,7 +320,7 @@ export function TagsPage() {
             >
               <SearchField.Group>
                 <SearchField.SearchIcon />
-                <SearchField.Input placeholder="Search..." />
+                <SearchField.Input placeholder={dashboardT("tags.search")} />
                 <SearchField.ClearButton />
               </SearchField.Group>
             </SearchField>
@@ -326,11 +330,11 @@ export function TagsPage() {
 
       {error ? (
         <div className="bg-danger-soft/10 border-danger/20 mt-4 flex flex-col items-center justify-center rounded-2xl border p-12 text-center">
-          <p className="text-danger font-semibold">Failed to load tags</p>
+          <p className="text-danger font-semibold">{dashboardT("tags.failed")}</p>
         </div>
       ) : (
         <DataGrid
-          aria-label="Tags"
+          aria-label={dashboardT("tags.table")}
           columns={columns}
           contentClassName="min-w-[700px]"
           data={sortedTags}
@@ -350,15 +354,17 @@ export function TagsPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <Modal.Container size="sm">
-            <Modal.Dialog className="sm:max-w-md" aria-label="Modal dialog">
+            <Modal.Dialog className="sm:max-w-md" aria-label={dashboardT("tags.modal")}>
               <Modal.CloseTrigger />
               <Form onSubmit={handleFormSubmit}>
                 <Modal.Header>
-                  <Modal.Heading>{selectedTag ? "Edit Tag" : "Create Tag"}</Modal.Heading>
+                  <Modal.Heading>
+                    {selectedTag ? dashboardT("tags.edit") : dashboardT("tags.create")}
+                  </Modal.Heading>
                   <p className="text-muted text-sm">
                     {selectedTag
-                      ? "Update existing tag details. Slug should be URL-safe."
-                      : "Add a new tag to label and index blog posts."}
+                      ? dashboardT("tags.editDescription")
+                      : dashboardT("tags.createDescription")}
                   </p>
                 </Modal.Header>
                 <Modal.Body className="flex flex-col gap-4">
@@ -390,18 +396,18 @@ export function TagsPage() {
                       setFormSlug(value);
                     }}
                   >
-                    <Label className="text-sm font-medium">Slug</Label>
-                    <Input variant="secondary" placeholder="e.g. next-js" />
+                    <Label className="text-sm font-medium">{dashboardT("common.slug")}</Label>
+                    <Input variant="secondary" placeholder={dashboardT("tags.slugExample")} />
                     <FieldError />
                   </TextField>
                 </Modal.Body>
                 <Modal.Footer>
                   <Button slot="close" variant="tertiary" size="sm">
-                    Cancel
+                    {dashboardT("common.cancel")}
                   </Button>
                   <Button type="submit" size="sm" isDisabled={isCreating || isUpdating}>
                     {(isCreating || isUpdating) && <Spinner size="sm" className="mr-1" />}
-                    {selectedTag ? "Save Changes" : "Create"}
+                    {selectedTag ? dashboardT("tags.save") : dashboardT("tags.create")}
                   </Button>
                 </Modal.Footer>
               </Form>
@@ -419,22 +425,24 @@ export function TagsPage() {
           UNSTABLE_portalContainer={portalContainer || undefined}
         >
           <AlertDialog.Container>
-            <AlertDialog.Dialog className="sm:max-w-md" aria-label="Alert dialog">
+            <AlertDialog.Dialog
+              className="sm:max-w-md"
+              aria-label={dashboardT("tags.deleteQuestion")}
+            >
               <AlertDialog.CloseTrigger />
               <AlertDialog.Header>
                 <AlertDialog.Icon status="danger" />
-                <AlertDialog.Heading>Delete Tag?</AlertDialog.Heading>
+                <AlertDialog.Heading>{dashboardT("tags.deleteQuestion")}</AlertDialog.Heading>
               </AlertDialog.Header>
               <AlertDialog.Body>
                 <p className="text-sm">
-                  Are you sure you want to delete the tag{" "}
+                  {dashboardT("tags.deleteDescription")}{" "}
                   <strong className="text-foreground">&quot;{selectedTag?.name}&quot;</strong>? This
-                  action cannot be undone.
                 </p>
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button slot="close" variant="tertiary" size="sm">
-                  Cancel
+                  {dashboardT("common.cancel")}
                 </Button>
                 <Button
                   variant="danger"
@@ -443,7 +451,7 @@ export function TagsPage() {
                   isDisabled={isDeleting}
                 >
                   {isDeleting && <Spinner size="sm" className="mr-1" />}
-                  Delete
+                  {dashboardT("common.delete")}
                 </Button>
               </AlertDialog.Footer>
             </AlertDialog.Dialog>
