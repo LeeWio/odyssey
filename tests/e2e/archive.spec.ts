@@ -62,8 +62,7 @@ test("changing the year hides previous articles and counts until the selected pe
   try {
     await page.goto("/archive");
     await expect(page.getByText("Recent article", { exact: true })).toBeVisible();
-    await page.getByRole("button", { name: /Year/ }).press("Enter");
-    await page.getByRole("option", { name: "2025", exact: true }).press("Enter");
+    await page.getByRole("row", { name: "2025", exact: true }).click();
     await expect(page).toHaveURL(/year=2025/);
     await expect(page.getByRole("heading", { name: "2025", exact: true })).toBeVisible();
     await expect(page.getByText("Recent article", { exact: true })).toHaveCount(0);

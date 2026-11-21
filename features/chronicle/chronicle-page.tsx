@@ -73,7 +73,7 @@ export function ChroniclePage({ initialData }: { initialData: PublicJournalIniti
   const t = useTranslations("Blog");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const { searchParams, updateQuery } = useQueryState();
+  const { searchParams, updateQuery } = useQueryState({ clientOnly: true });
 
   const { reveal } = createPageReveal(shouldReduceMotion);
   const activeTab = getChronicleSection(searchParams.get("section"));
@@ -98,7 +98,22 @@ export function ChroniclePage({ initialData }: { initialData: PublicJournalIniti
 
   const handleSectionChange = (key: React.Key) => {
     const section = getChronicleSection(String(key));
-    updateQuery({ section: section === "featured" ? null : section });
+    if (section === activeTab) return;
+    updateQuery(
+      {
+        section: section === "featured" ? null : section,
+        page: null,
+        q: null,
+        category: null,
+        tag: null,
+        view: null,
+        categoryId: null,
+        keyword: null,
+        year: null,
+        month: null,
+      },
+      { mode: "push" }
+    );
   };
 
   return (

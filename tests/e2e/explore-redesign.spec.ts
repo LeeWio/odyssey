@@ -40,7 +40,7 @@ test("explore uses a full-width responsive discovery layout", async ({ page }) =
   for (const [index, width] of [390, 820, 1440, 1920].entries()) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/explore");
-    const grid = page.getByTestId("explore-results-grid");
+    const grid = page.getByTestId("explore-results");
     await expect(grid.locator(":scope > div")).toHaveCount(9);
     const container = page.locator("main > div").first();
     await expect(container).toHaveCSS("max-width", "none");
