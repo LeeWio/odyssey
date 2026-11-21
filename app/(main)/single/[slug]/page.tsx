@@ -30,7 +30,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         document?.headings.length ? { label: t("onThisPage"), items: document.headings } : null
       }
       readingMinutes={document?.minutes ?? null}
-      body={<ArticleReadingDocument document={document} fallback={t("unsupportedContent")} />}
+      body={
+        <ArticleReadingDocument key={slug} document={document} fallback={t("unsupportedContent")} />
+      }
       slug={slug}
     />
   );

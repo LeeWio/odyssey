@@ -23,6 +23,7 @@ import { isSafeLinkUrl } from "@/components/rich-text/utils/link-utils";
 import { RemoteMedia } from "@/components/ui/remote-media";
 import type { ArticleHeading } from "./article-outline";
 import { ReadingContent } from "./reading-content";
+import { READING_OPENING_SCRIPT } from "./reading-opening";
 import { CopyReadingCode } from "./copy-reading-code";
 
 function textContent(node: JSONContent): string {
@@ -212,5 +213,10 @@ export function ArticleReadingDocument({
     },
   });
 
-  return <ReadingContent className={RICH_TEXT_PROSE_CLASS_NAME}>{content}</ReadingContent>;
+  return (
+    <ReadingContent className={RICH_TEXT_PROSE_CLASS_NAME}>
+      <script dangerouslySetInnerHTML={{ __html: READING_OPENING_SCRIPT }} />
+      {content}
+    </ReadingContent>
+  );
 }
