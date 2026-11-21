@@ -13,6 +13,7 @@ set -Eeuo pipefail
   }
 
 cd "${SERVER_PROJECT_PATH}"
+deployment_check_storage "${ALIYUN_IMAGE}" "${EXPECTED_IMAGE_DIGEST}" "${SERVER_PROJECT_PATH}"
 rollback_image="${WEB_LATEST_IMAGE%:*}:rollback"
 previous_id=""
 restore_on_failure=false
