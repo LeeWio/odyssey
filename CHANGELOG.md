@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.260.6](https://github.com/LeeWio/odyssey/compare/v1.260.5...v1.260.6) (2026-11-21)
+
+
+### Bug Fixes
+
+* **moments:** restore full-width photos and the home gallery ([#107](https://github.com/LeeWio/odyssey/issues/107)) ([0124acb](https://github.com/LeeWio/odyssey/commit/0124acbf756b19831f3e34a3ddb0b246a238157a))
+
 ## [1.260.5](https://github.com/LeeWio/odyssey/compare/v1.260.4...v1.260.5) (2026-11-21)
 
 
