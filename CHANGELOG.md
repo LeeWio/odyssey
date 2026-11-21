@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.260.2](https://github.com/LeeWio/odyssey/compare/v1.260.1...v1.260.2) (2026-11-21)
+
+
+### Performance Improvements
+
+* **odyssey:** streamline public reading critical paths ([#92](https://github.com/LeeWio/odyssey/issues/92)) ([ee1a4af](https://github.com/LeeWio/odyssey/commit/ee1a4aff002a8ab9bd11ddb8e7044323d7de71c2))
+
 ## [1.260.1](https://github.com/LeeWio/odyssey/compare/v1.260.0...v1.260.1) (2026-11-21)
 
 
