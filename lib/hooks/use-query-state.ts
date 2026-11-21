@@ -12,7 +12,7 @@ export type UpdateQueryOptions = {
   hash?: string;
 };
 
-export function useQueryState() {
+export function useQueryState({ clientOnly = false }: { clientOnly?: boolean } = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -25,7 +25,11 @@ export function useQueryState() {
 
   const updateQuery = useCallback(
     (changes: Record<string, QueryValue>, options: UpdateQueryOptions = {}) => {
-      const nextParams = new URLSearchParams(queryStringRef.current);
+      if (clientOnly && !options.pathname && pathname !== window.location.pathname) return;
+      const inPlace = clientOnly && !options.pathname && !options.scroll;
+      const nextParams = new URLSearchParams(
+        inPlace ? window.location.search : queryStringRef.current
+      );
 
       for (const [key, value] of Object.entries(changes)) {
         if (value === undefined || value === null || value === "") {
@@ -44,9 +48,16 @@ export function useQueryState() {
         : "";
       queryStringRef.current = nextParams.toString();
       const href = `${query ? `${nextPathname}?${query}` : nextPathname}${hash}`;
+      if (inPlace) {
+        const liveHref = window.location.pathname + window.location.search + window.location.hash;
+        if (href !== liveHref) {
+          window.history[options.mode === "push" ? "pushState" : "replaceState"](null, "", href);
+        }
+        return;
+      }
       router[options.mode ?? "replace"](href, { scroll: options.scroll ?? false });
     },
-    [pathname, router]
+    [clientOnly, pathname, router]
   );
 
   return { searchParams, updateQuery };

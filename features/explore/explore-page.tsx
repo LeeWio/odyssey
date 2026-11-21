@@ -19,7 +19,7 @@ import {
 } from "@heroui/react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { motion, useReducedMotion } from "motion/react";
 
@@ -168,17 +168,13 @@ function ExploreSkeleton() {
 }
 
 function ExploreSearchField({
-  initialQuery,
-  onQueryChange,
+  query,
+  onChange,
 }: {
-  initialQuery: string;
-  onQueryChange: (query: string) => void;
+  query: string;
+  onChange: (query: string) => void;
 }) {
   const t = useTranslations("Explore");
-  const [query, setQuery] = useState(initialQuery);
-  const updateUrl = useDebouncedCallback(onQueryChange, 300);
-
-  useEffect(() => () => updateUrl.cancel(), [updateUrl]);
 
   return (
     <SearchField
@@ -186,10 +182,7 @@ function ExploreSearchField({
       className="max-w-xl"
       name="explore-search"
       value={query}
-      onChange={(value) => {
-        setQuery(value);
-        updateUrl(value.trim());
-      }}
+      onChange={onChange}
     >
       <Label className="sr-only">{t("searchLabel")}</Label>
       <SearchField.Group>
@@ -204,7 +197,7 @@ function ExploreSearchField({
 export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("Explore");
   const locale = useLocale();
-  const { searchParams, updateQuery } = useQueryState();
+  const { searchParams, updateQuery: updateSearch } = useQueryState({ clientOnly: true });
   const shouldReduceMotion = useReducedMotion() ?? false;
   const selectedCategoryId = parsePositiveInteger(searchParams.get("category"));
   const selectedTagId = parsePositiveInteger(searchParams.get("tag"));
@@ -212,6 +205,38 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
   const view: ExploreView = searchParams.get("view") === "list" ? "list" : "grid";
   const queryFromUrl = searchParams.get("q") ?? "";
   const normalizedQuery = queryFromUrl.trim();
+  const [searchDraft, setSearchDraft] = useState(queryFromUrl);
+  const lastWrittenQuery = useRef(queryFromUrl);
+  const commitQuery = useDebouncedCallback((draft: string) => {
+    const locationQuery = new URLSearchParams(window.location.search);
+    if (embedded && locationQuery.get("section") !== "explore") return;
+    const query = draft.trim();
+    if ((locationQuery.get("q") ?? "") === query) return;
+    lastWrittenQuery.current = query;
+    updateSearch({ page: undefined, q: query || undefined });
+  }, 300);
+
+  useEffect(() => {
+    if (lastWrittenQuery.current === queryFromUrl) return;
+    commitQuery.cancel();
+    lastWrittenQuery.current = queryFromUrl;
+    setSearchDraft(queryFromUrl);
+  }, [commitQuery, queryFromUrl]);
+
+  useEffect(() => {
+    const restoreQuery = () => {
+      commitQuery.cancel();
+      const query = new URLSearchParams(window.location.search).get("q") ?? "";
+      lastWrittenQuery.current = query;
+      setSearchDraft(query);
+    };
+    window.addEventListener("popstate", restoreQuery);
+    return () => {
+      window.removeEventListener("popstate", restoreQuery);
+      commitQuery.cancel();
+    };
+  }, [commitQuery]);
+
   const facetsQuery = useRetrieveFacetsQuery();
   const postsQuery = useGetPublicPostsQuery({
     categoryId: selectedCategoryId,
@@ -222,7 +247,10 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
   });
   useNormalizePageParam(
     page + 1,
-    postsQuery.currentData && !postsQuery.isFetching ? postsQuery.currentData.totalPages : undefined
+    postsQuery.currentData && !postsQuery.isFetching
+      ? postsQuery.currentData.totalPages
+      : undefined,
+    { clientOnly: true }
   );
 
   const categories = useMemo(
@@ -235,18 +263,13 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
   );
   const selectedCategory = categories.find((category) => category.id === selectedCategoryId);
   const selectedTag = tags.find((tag) => tag.id === selectedTagId);
-  const posts = postsQuery.data?.list ?? [];
-  const totalPages = postsQuery.data?.totalPages ?? 0;
-  const startItem =
-    postsQuery.data && postsQuery.data.total > 0 ? page * postsQuery.data.size + 1 : 0;
-  const endItem = postsQuery.data
-    ? Math.min((page + 1) * postsQuery.data.size, postsQuery.data.total)
-    : 0;
+  const results = postsQuery.currentData;
+  const isLoading = postsQuery.isLoading || (postsQuery.isFetching && !results);
+  const posts = results?.list ?? [];
+  const totalPages = results?.totalPages ?? 0;
+  const startItem = results && results.total > 0 ? page * results.size + 1 : 0;
+  const endItem = results ? Math.min((page + 1) * results.size, results.total) : 0;
   const hasActiveFilters = Boolean(selectedCategoryId || selectedTagId || normalizedQuery);
-
-  const updateSearch = (changes: Record<string, string | undefined>) => {
-    updateQuery(changes, { pathname: "/explore", scroll: false });
-  };
 
   const handleCategoryChange = (keys: "all" | Set<React.Key>) => {
     if (keys === "all") return;
@@ -277,6 +300,9 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
   };
 
   const clearFilters = () => {
+    commitQuery.cancel();
+    lastWrittenQuery.current = "";
+    setSearchDraft("");
     updateSearch({ category: undefined, page: undefined, q: undefined, tag: undefined });
   };
 
@@ -332,9 +358,11 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
           {...revealInView(0.18, 16)}
         >
           <ExploreSearchField
-            key={queryFromUrl}
-            initialQuery={queryFromUrl}
-            onQueryChange={(query) => updateSearch({ page: undefined, q: query || undefined })}
+            query={searchDraft}
+            onChange={(value) => {
+              setSearchDraft(value);
+              commitQuery(value);
+            }}
           />
 
           <div className="mt-7 grid gap-7">
@@ -459,8 +487,8 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
                 {resultsTitle}
               </Typography>
               <Typography aria-live="polite" color="muted" type="body-sm" className="mt-1">
-                {postsQuery.data
-                  ? t("articlesFound", { count: postsQuery.data.total.toLocaleString(locale) })
+                {results
+                  ? t("articlesFound", { count: results.total.toLocaleString(locale) })
                   : t("searching")}
               </Typography>
             </div>
@@ -489,9 +517,9 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
             </div>
           </div>
 
-          {postsQuery.isLoading ? <ExploreSkeleton /> : null}
+          {isLoading ? <ExploreSkeleton /> : null}
 
-          {!postsQuery.isLoading && postsQuery.isError ? (
+          {!isLoading && postsQuery.isError ? (
             <EmptyState size="lg">
               <EmptyState.Header>
                 <EmptyState.Media variant="icon">
@@ -509,7 +537,7 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
             </EmptyState>
           ) : null}
 
-          {!postsQuery.isLoading && !postsQuery.isError && posts.length === 0 ? (
+          {!isLoading && !postsQuery.isError && posts.length === 0 ? (
             <EmptyState size="lg">
               <EmptyState.Header>
                 <EmptyState.Media variant="icon">
@@ -528,7 +556,7 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
             </EmptyState>
           ) : null}
 
-          {!postsQuery.isLoading && !postsQuery.isError && posts.length > 0 ? (
+          {!isLoading && !postsQuery.isError && posts.length > 0 ? (
             <div
               className={view === "list" ? EXPLORE_LIST : EXPLORE_GRID}
               data-testid="explore-results"
@@ -552,13 +580,13 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
             </div>
           ) : null}
 
-          {!postsQuery.isLoading && !postsQuery.isError && totalPages > 1 ? (
+          {!isLoading && !postsQuery.isError && totalPages > 1 ? (
             <Pagination className="mt-12 w-full" size="sm">
               <Pagination.Summary>
                 {t("showing", {
                   start: startItem,
                   end: endItem,
-                  total: postsQuery.data?.total ?? 0,
+                  total: results?.total ?? 0,
                 })}
               </Pagination.Summary>
               <Pagination.Content>

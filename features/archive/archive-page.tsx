@@ -234,7 +234,7 @@ function ArchivePostItem({ post }: { post: ArchivePost }) {
 export function ArchivePage({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("Archive");
   const locale = useLocale();
-  const { searchParams, updateQuery } = useQueryState();
+  const { searchParams, updateQuery: updateSearch } = useQueryState({ clientOnly: true });
   const shouldReduceMotion = useReducedMotion() ?? false;
   const selectedYear = parseYear(searchParams.get("year"));
   const selectedMonth = selectedYear ? parseMonth(searchParams.get("month")) : undefined;
@@ -268,11 +268,9 @@ export function ArchivePage({ embedded = false }: { embedded?: boolean }) {
   // Correct obsolete bookmarked pages only after a successful response for this period.
   useEffect(() => {
     if (!isAdjustingPage) return;
-    updateQuery(
-      { page: lastPage === 0 ? undefined : String(lastPage + 1) },
-      { pathname: "/archive", scroll: false }
-    );
-  }, [isAdjustingPage, lastPage, updateQuery]);
+    if (searchParams.toString() !== new URLSearchParams(window.location.search).toString()) return;
+    updateSearch({ page: lastPage === 0 ? undefined : String(lastPage + 1) });
+  }, [isAdjustingPage, lastPage, searchParams, updateSearch]);
 
   const posts = normalizePosts(currentPage?.list);
   const total = currentPage?.total ?? 0;
@@ -280,10 +278,6 @@ export function ArchivePage({ embedded = false }: { embedded?: boolean }) {
   const resultSize = currentPage?.size ?? PAGE_SIZE;
   const startItem = currentPage && total > 0 ? page * resultSize + 1 : 0;
   const endItem = currentPage ? Math.min((page + 1) * resultSize, total) : 0;
-  const updateSearch = (changes: Record<string, string | undefined>) => {
-    updateQuery(changes, { pathname: "/archive", scroll: false });
-  };
-
   const handleYearChange = (value: React.Key | null) => {
     const year = value === "all" || !value ? undefined : String(value);
     updateSearch({ month: undefined, page: undefined, year });
