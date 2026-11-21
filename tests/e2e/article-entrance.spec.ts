@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { designArticle } from "./fixtures/articles";
 
 async function openArticle(page: Page, slug = "entrance-regression") {
   await page.goto(`/single/${slug}`);
@@ -164,3 +165,39 @@ test("a failed viewer refresh does not replace the server article", async ({ pag
   await request;
   await expect(page.locator("[data-article-body] code")).toHaveText("const answer = 42;");
 });
+
+for (const width of [390, 1600]) {
+  test(`continuation fetches follow the visible reading surface at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    let catalogRequests = 0;
+    let relatedRequests = 0;
+    await page.route("**/api/v1/public/blog/posts/digest?**", (route) => {
+      catalogRequests++;
+      return route.fallback();
+    });
+    await page.route("**/api/v1/public/blog/posts/entrance-regression/related?**", (route) => {
+      relatedRequests++;
+      return route.fulfill({ json: { code: 200, message: "OK", data: [designArticle] } });
+    });
+    await openArticle(page);
+    const footer = page.locator('section[aria-labelledby="article-same-subject"]');
+    const rail = page.locator("[data-article-continue]");
+    const relatedLink = { name: new RegExp(designArticle.title) };
+    if (width >= 1536) {
+      await expect(rail.getByRole("option", relatedLink)).toBeVisible();
+      expect(relatedRequests).toBe(1);
+    } else {
+      await expect(rail).toBeHidden();
+      expect(relatedRequests).toBe(0);
+    }
+    expect(catalogRequests).toBe(0);
+
+    await footer.scrollIntoViewIfNeeded();
+    await expect(footer.getByRole("link", relatedLink)).toBeVisible();
+    await expect.poll(() => catalogRequests).toBe(1);
+    expect(relatedRequests).toBe(1);
+  });
+}

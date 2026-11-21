@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
 import { getFootprintMetaLabel, getFootprintYears, type Footprint } from "./footprints-data";
+import { FootprintsMapFrame } from "./footprints-map-frame";
 import { footprintMapStyles, footprintMapWorkerUrl } from "./map-styles";
 
 const SOURCE_ID = "footprints-coverage-zones-source";
@@ -174,10 +175,7 @@ export function FootprintsMap({
     : (footprints.find((footprint) => footprint.id === selectedId) ?? null);
 
   return (
-    <div
-      data-testid="footprints-map-frame"
-      className={`relative w-full overflow-hidden ${compact ? "h-[clamp(28rem,60svh,44rem)]" : "h-[72vh] min-h-[32rem] rounded-3xl"}`}
-    >
+    <FootprintsMapFrame compact={compact}>
       <Map
         aria-label={t("mapLabel")}
         center={[114.3, 30.6]}
@@ -288,6 +286,6 @@ export function FootprintsMap({
           </Card.Content>
         </Card>
       ) : null}
-    </div>
+    </FootprintsMapFrame>
   );
 }

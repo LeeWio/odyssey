@@ -19,7 +19,6 @@ import { FootprintsShowcase } from "@/features/home/footprints-showcase";
 import { FriendLinksShowcase } from "@/features/home/friend-links-showcase";
 import { GalleryShowcase } from "@/features/home/gallery-showcase";
 import { HelloApple } from "@/features/home/hello-apple";
-import { HomeOrientation } from "@/features/home/home-orientation";
 import { ProjectsShowcase } from "@/features/home/projects-showcase";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import { useState, type ReactNode } from "react";
@@ -95,7 +94,7 @@ const faqIcons = [
   "lucide:pen-line",
 ];
 
-export function HomePage({ moments }: { moments: ReactNode }) {
+export function HomePage({ moments, orientation }: { moments: ReactNode; orientation: ReactNode }) {
   const t = useTranslations("Home");
   const mounted = useMounted();
   const shouldReduceMotion = useReducedMotionPreference();
@@ -153,7 +152,7 @@ export function HomePage({ moments }: { moments: ReactNode }) {
           </div>
         </PageContainer>
 
-        <HomeOrientation />
+        {orientation}
 
         <div id="explore-odyssey">
           <ExploreOdyssey />

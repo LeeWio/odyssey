@@ -158,7 +158,7 @@ export function ArticlePageClient({
         showContext={articleHasContext(article)}
         showContinue={showContinue}
         endRef={articleEndRef}
-        footer={<ArticleFooter article={article} />}
+        footer={<ArticleFooter key={article.id} article={article} />}
         hero={<ArticleHero article={article} />}
         label={t("onThisPage")}
       />

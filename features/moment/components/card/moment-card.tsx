@@ -21,6 +21,7 @@ import { motion } from "motion/react";
 import { momentLayoutTransition, useMomentMotion } from "../feed-motion";
 
 import { parseMomentContent } from "../../utils/content-parser";
+import { getMomentImagePreviews } from "../../utils/image-previews";
 import { useMomentBookmark } from "../../hooks/use-moment-bookmarks";
 import { useMomentLike } from "../../hooks/use-moment-like";
 import { CardHeader } from "./card-header";
@@ -167,21 +168,7 @@ export const MomentCard = ({
   }, [moment]);
 
   // Image URLs and structural formatting for Carousel Modal
-  const imagePreviews = useMemo(
-    () =>
-      (moment?.images ?? []).slice(0, 8).map((image) => {
-        const hasDimensions = (image.width ?? 0) > 0 && (image.height ?? 0) > 0;
-        return {
-          url: image.thumbnailUrl || image.fileUrl,
-          originalUrl:
-            image.thumbnailUrl && image.thumbnailUrl !== image.fileUrl ? image.fileUrl : undefined,
-          alt: image.altText,
-          width: hasDimensions ? (image.width ?? undefined) : undefined,
-          height: hasDimensions ? (image.height ?? undefined) : undefined,
-        };
-      }),
-    [moment]
-  );
+  const imagePreviews = useMemo(() => getMomentImagePreviews(moment?.images), [moment?.images]);
 
   const carouselImages = useMemo(() => {
     return (

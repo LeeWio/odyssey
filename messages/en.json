@@ -1100,6 +1100,7 @@
     "deleteFailed": "This moment could not be deleted.",
     "recently": "Recently",
     "imageAlt": "Moment image",
+    "openMoment": "Open moment by {author} · {time}",
     "openImage": "Open image {index} of {total}",
     "imageViewer": "Image viewer",
     "viewerMode": "Image display",

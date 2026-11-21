@@ -1100,6 +1100,7 @@
     "deleteFailed": "这条动态没有删除成功。",
     "recently": "刚刚",
     "imageAlt": "动态图片",
+    "openMoment": "查看 {author} 的动态 · {time}",
     "openImage": "查看第 {index} 张图片，共 {total} 张",
     "imageViewer": "图片查看器",
     "viewerMode": "图片展示方式",

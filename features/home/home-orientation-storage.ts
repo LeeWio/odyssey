@@ -1,24 +1,12 @@
-export const HOME_ORIENTATION_STORAGE_KEY = "odyssey_home_orientation_dismissed";
-
-export function isHomeOrientationDismissed(
-  storage: Pick<Storage, "getItem"> | null | undefined = globalThis.localStorage
-): boolean {
-  if (!storage) return false;
-
-  try {
-    return storage.getItem(HOME_ORIENTATION_STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
+export const HOME_ORIENTATION_COOKIE = "odyssey_home_orientation_dismissed";
 
 export function dismissHomeOrientation(
-  storage: Pick<Storage, "setItem"> | null | undefined = globalThis.localStorage
+  target: Pick<Document, "cookie"> | null | undefined = globalThis.document
 ): void {
-  if (!storage) return;
+  if (!target) return;
 
   try {
-    storage.setItem(HOME_ORIENTATION_STORAGE_KEY, "1");
+    target.cookie = `${HOME_ORIENTATION_COOKIE}=1; Path=/; Max-Age=31536000; SameSite=Lax`;
   } catch {
     // Private mode or blocked storage should not break the page.
   }

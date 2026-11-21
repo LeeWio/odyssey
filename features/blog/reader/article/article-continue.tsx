@@ -1,6 +1,7 @@
 "use client";
 
 import { FileText } from "@gravity-ui/icons";
+import { useMediaQuery } from "@mantine/hooks";
 import { Widget } from "@heroui-pro/react";
 import { Chip, Description, Label, ListBox, ScrollShadow } from "@heroui/react";
 import { motion } from "motion/react";
@@ -14,9 +15,7 @@ import { ArticleCover } from "@/components/card/article-cover";
 
 import type { PostResponse } from "@/lib/features/post";
 
-import { ALSO_LIKE_LIMIT, continueReadingRail, sameSubjectPosts } from "./recommendations";
-import { useArticleNeighbors } from "./neighbors/use-article-neighbors";
-import { useGetRelatedPostsQuery } from "@/lib/features/post";
+import { useSameSubject } from "./use-same-subject";
 
 const REVEAL_EASE = EASE_OUT;
 const REVEAL_DURATION = 0.7;
@@ -26,20 +25,6 @@ function revealFrom(index: number) {
   return index % 2 === 0
     ? { opacity: 0, x: -12, y: 24, scale: 0.97 }
     : { opacity: 0, x: 12, y: 18, scale: 0.97 };
-}
-
-export function useContinueReading(article: PostResponse) {
-  const neighbors = useArticleNeighbors(article);
-  const related = useGetRelatedPostsQuery({ size: ALSO_LIKE_LIMIT, slug: article.slug });
-  const sameSubject = sameSubjectPosts(article, related.currentData);
-  return {
-    isLoading: neighbors.isLoading || related.isLoading,
-    next: neighbors.next,
-    order: neighbors.order,
-    previous: neighbors.previous,
-    rail: continueReadingRail(neighbors.next, sameSubject),
-    sameSubject,
-  };
 }
 
 /** Sticky continuation beside the article. Calls back once it knows whether the rail exists. */
@@ -54,8 +39,8 @@ export function ArticleContinue({
 }) {
   const t = useTranslations("Article");
   const titleId = useId();
-  const { isLoading, sameSubject } = useContinueReading(article);
-  const items = sameSubject;
+  const showsRail = useMediaQuery("(min-width: 96rem)", false);
+  const { isLoading, items } = useSameSubject(article, showsRail);
   const playReveal = !useReducedMotionPreference();
   const [revealReady, setRevealReady] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -77,9 +62,9 @@ export function ArticleContinue({
   }, [isRailAvailable, playReveal, revealReady]);
 
   useEffect(() => {
-    if (isLoading) return;
-    onAvailability?.(items.length > 0);
-  }, [isLoading, items.length, onAvailability]);
+    if (showsRail && isLoading) return;
+    onAvailability?.(showsRail && items.length > 0);
+  }, [isLoading, items.length, onAvailability, showsRail]);
 
   return (
     <div ref={panelRef}>

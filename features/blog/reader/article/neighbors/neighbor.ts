@@ -33,7 +33,7 @@ export function resolveArticleNeighbors({
     next: fromNavigation(article.navigation?.next),
     previous: fromNavigation(article.navigation?.prev),
   };
-  if (fromApi.previous || fromApi.next) {
+  if (article.navigation) {
     return { ...fromApi, order: article.series ? "column" : "time" };
   }
 
