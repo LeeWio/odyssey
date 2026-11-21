@@ -157,7 +157,7 @@ function CadenceDotView({ dot }: { dot: CadenceCell }) {
 
 function CadenceTip({ label }: { label: string }) {
   return (
-    <Tooltip.Content showArrow className="px-2 py-1 text-xs" placement="top" shouldFlip>
+    <Tooltip.Content showArrow placement="top" shouldFlip>
       <Tooltip.Arrow />
       <p>{label}</p>
     </Tooltip.Content>

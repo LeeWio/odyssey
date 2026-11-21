@@ -262,7 +262,7 @@ export function PostsPage() {
                 <span className="text-muted block w-full truncate text-[11px]">/{post.slug}</span>
               </div>
             </div>
-            <Tooltip.Content className="max-w-xs">
+            <Tooltip.Content>
               <p className="text-sm font-medium">{post.title}</p>
               <p className="text-muted text-xs">/{post.slug}</p>
             </Tooltip.Content>
@@ -701,10 +701,7 @@ function FilterSearch({
         <Funnel className="size-4" />
         {query || t("posts.filterSearch")}
       </Button>
-      <Dropdown.Popover
-        className="min-w-[220px]"
-        UNSTABLE_portalContainer={portalContainer || undefined}
-      >
+      <Dropdown.Popover UNSTABLE_portalContainer={portalContainer || undefined}>
         <div className="px-2 pt-2">
           <input
             aria-label={t("posts.filterSearch")}

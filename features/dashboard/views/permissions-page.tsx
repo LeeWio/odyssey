@@ -198,7 +198,7 @@ export function PermissionsPage() {
           <div className="relative min-h-[300px]">
             {isRoleMenusLoading && (
               <div className="bg-background/40 absolute inset-0 z-25 flex items-center justify-center rounded-3xl backdrop-blur-[1px]">
-                <Spinner size="md" />
+                <Spinner />
               </div>
             )}
 
@@ -216,38 +216,34 @@ export function PermissionsPage() {
               </div>
             ) : (
               /* 100% Native HeroUI Accordion */
-              <Accordion
-                variant="surface"
-                allowsMultipleExpanded
-                className="flex flex-col gap-3 p-0"
-              >
+              <Accordion variant="surface" allowsMultipleExpanded>
                 {menuTree.map((root) => {
                   const isChecked = checkedIds.has(root.id);
                   const subMenus = root.children?.filter((c) => c.type !== 2) || [];
 
                   return (
                     <Accordion.Item key={root.id} id={root.id.toString()}>
-                      <Accordion.Heading>
-                        <Accordion.Trigger>
-                          <div
-                            className="flex items-center gap-3 select-none"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Checkbox
-                              isSelected={isChecked}
-                              onChange={(checked) => handleNodeToggle(root.id, checked)}
-                            >
-                              <span className="text-foreground flex items-center gap-1.5 text-sm font-bold">
-                                {root.icon && (
-                                  <Icon icon={root.icon} className="text-primary size-4" />
-                                )}
-                                {root.name}
-                              </span>
-                            </Checkbox>
-                          </div>
-                          <Accordion.Indicator />
-                        </Accordion.Trigger>
-                      </Accordion.Heading>
+                      <div className="flex items-center">
+                        <Checkbox
+                          aria-label={root.name}
+                          className="ms-4"
+                          isSelected={isChecked}
+                          onChange={(checked) => handleNodeToggle(root.id, checked)}
+                        >
+                          <Checkbox.Control>
+                            <Checkbox.Indicator />
+                          </Checkbox.Control>
+                        </Checkbox>
+                        <Accordion.Heading className="min-w-0 flex-1">
+                          <Accordion.Trigger>
+                            <span className="flex min-w-0 items-center gap-2">
+                              {root.icon && <Icon aria-hidden="true" icon={root.icon} />}
+                              {root.name}
+                            </span>
+                            <Accordion.Indicator />
+                          </Accordion.Trigger>
+                        </Accordion.Heading>
+                      </div>
                       <Accordion.Panel>
                         <Accordion.Body className="flex flex-col gap-4 px-1 py-2">
                           {subMenus.length > 0 ? (
@@ -256,11 +252,8 @@ export function PermissionsPage() {
                               const actions = subMenu.children?.filter((c) => c.type === 2) || [];
 
                               return (
-                                <Card
-                                  key={subMenu.id}
-                                  className="bg-default-50/50 border-default-100 rounded-xl border p-4 shadow-none"
-                                >
-                                  <Card.Header className="border-default-100 flex items-center justify-between border-b p-0 pb-2 select-none">
+                                <Card key={subMenu.id} variant="secondary">
+                                  <Card.Header className="border-separator flex items-center justify-between border-b pb-2 select-none">
                                     <Checkbox
                                       isSelected={isSubChecked}
                                       onChange={(checked) => handleNodeToggle(subMenu.id, checked)}

@@ -320,9 +320,7 @@ export function ExplorePage({ embedded = false }: { embedded?: boolean }) {
         <header className="border-separator grid gap-8 border-b pb-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="min-w-0">
             <motion.div {...revealInView(0, 10)}>
-              <Chip color="default" size="sm" variant="secondary">
-                {t("eyebrow")}
-              </Chip>
+              <Chip size="sm">{t("eyebrow")}</Chip>
             </motion.div>
             <motion.div {...revealInView(0.06)}>
               <Typography

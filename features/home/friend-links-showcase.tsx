@@ -117,9 +117,7 @@ export function FriendLinksShowcase() {
     <Section id="friend-links-showcase" aria-labelledby="friend-links-showcase-title">
       <header className={HOME_SECTION_HEADER_CENTERED}>
         <motion.div {...revealInView(0, 10)}>
-          <Chip color="default" size="sm" variant="secondary">
-            {t("links.eyebrow")}
-          </Chip>
+          <Chip size="sm">{t("links.eyebrow")}</Chip>
         </motion.div>
         <motion.div {...revealInView(0.06)}>
           <Typography

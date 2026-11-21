@@ -30,16 +30,11 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
     }));
   }, [data]);
 
+  const cardClassName = cn("w-full", variant === "transparent" && "p-0", className);
+
   if (isLoading) {
     return (
-      <Card
-        className={cn(
-          "w-full rounded-2xl p-4",
-          variant === "transparent" && "border-none bg-transparent p-0 shadow-none",
-          className
-        )}
-        variant={variant}
-      >
+      <Card className={cardClassName} variant={variant}>
         <div className="flex w-full items-center justify-between pb-2">
           <Skeleton className="h-5 w-16 rounded-md" />
           <Skeleton className="h-5 w-14 rounded-md" />
@@ -67,8 +62,8 @@ export function StockTrendCard({ symbol, className, variant = "default" }: Stock
   const strokeColor = isUp ? "var(--color-success, #17c964)" : "var(--color-danger, #f31260)";
 
   return (
-    <Card className={cn("w-full", className)} variant={variant}>
-      <Card.Header className="flex-row items-start justify-between pb-0">
+    <Card className={cardClassName} variant={variant}>
+      <Card.Header className="flex-row items-start justify-between">
         <div className="flex flex-col">
           <Tooltip delay={0} closeDelay={100}>
             <Tooltip.Trigger aria-label="Stock Symbol">

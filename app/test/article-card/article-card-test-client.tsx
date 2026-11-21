@@ -139,7 +139,7 @@ function ArticleAuthorPopover() {
           <Popover.Heading>
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                <Avatar size="md">
+                <Avatar>
                   <Avatar.Image
                     alt="Sarah Johnson"
                     src="https://img.heroui.chat/image/avatar?w=400&h=400&u=1"
@@ -215,7 +215,7 @@ function ScienceArticleAuthor() {
           <Popover.Heading>
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                <Avatar size="md">
+                <Avatar>
                   <Avatar.Image
                     alt="Sarah Johnson"
                     src="https://img.heroui.chat/image/avatar?w=400&h=400&u=1"

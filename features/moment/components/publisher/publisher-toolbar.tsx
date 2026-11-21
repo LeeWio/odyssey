@@ -137,12 +137,10 @@ export const PublisherToolbar = ({
           if (tool.id === "topic") {
             return (
               <Popover key={tool.id}>
-                <Popover.Trigger>
-                  <Button size="sm" variant="tertiary" isDisabled={tool.disabled}>
-                    <Icon icon={tool.icon} className="size-5" />
-                    {tool.label}
-                  </Button>
-                </Popover.Trigger>
+                <Button size="sm" variant="tertiary" isDisabled={tool.disabled}>
+                  <Icon aria-hidden="true" icon={tool.icon} className="size-5" />
+                  {tool.label}
+                </Button>
                 <Popover.Content placement="bottom" className="w-75">
                   <Popover.Dialog>
                     <Popover.Heading>Attach Topics</Popover.Heading>

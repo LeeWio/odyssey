@@ -1,7 +1,15 @@
 "use client";
 
-import { Button, FieldError, Input, ProgressBar, ScrollShadow, TextField } from "@heroui/react";
-import { Icon } from "@iconify/react";
+import {
+  Button,
+  CloseButton,
+  FieldError,
+  Input,
+  ProgressBar,
+  ScrollShadow,
+  TextField,
+  Tooltip,
+} from "@heroui/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { RemoteMedia } from "@/components/ui/remote-media";
@@ -87,16 +95,14 @@ export const PublisherGallery = ({
                   </div>
                 ) : null}
 
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="ghost"
-                  className="hover:bg-danger absolute top-1 right-1 z-20 size-5 min-w-1.25 opacity-90 transition-all duration-200 hover:text-white active:scale-90 md:opacity-0 md:group-hover:opacity-100"
-                  onPress={() => onRemove(item.id)}
-                  aria-label={`Remove ${item.altText || `attachment ${index + 1}`}`}
-                >
-                  <Icon icon="gravity-ui:xmark" className="size-2.5" />
-                </Button>
+                <Tooltip>
+                  <CloseButton
+                    className="absolute end-1 top-1 z-20"
+                    onPress={() => onRemove(item.id)}
+                    aria-label={`Remove ${item.altText || `attachment ${index + 1}`}`}
+                  />
+                  <Tooltip.Content>Remove attachment</Tooltip.Content>
+                </Tooltip>
               </div>
 
               <TextField

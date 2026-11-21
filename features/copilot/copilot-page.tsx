@@ -257,7 +257,7 @@ Feel free to pick one of the suggestions below, or type your own question!`;
               {messages.map((message) =>
                 message.role === "user" ? (
                   <ChatMessage.User key={message.id}>
-                    <ChatMessage.Bubble className="bg-default-100 border-default-200/50 border">
+                    <ChatMessage.Bubble>
                       <ChatMessage.Content className="text-foreground text-sm leading-relaxed">
                         {message.text}
                       </ChatMessage.Content>
@@ -314,7 +314,7 @@ Feel free to pick one of the suggestions below, or type your own question!`;
                 {SUGGESTIONS.map(({ icon: suggestionIcon, label, query }) => (
                   <PromptSuggestion.Item
                     key={label}
-                    className="bg-surface-secondary border-default-200/60 hover:bg-default-100/50 group h-auto items-center justify-start rounded-xl border p-3 text-left transition-all duration-200"
+                    className="group items-center justify-start"
                     showEndIcon={false}
                     onPress={() => {
                       setValue(query);
@@ -344,14 +344,10 @@ Feel free to pick one of the suggestions below, or type your own question!`;
           onStop={handleStop}
           onValueChange={setValue}
           className="w-full"
-          size="md"
         >
-          <PromptInput.Shell className="border-default-200 bg-surface-secondary/40 focus-within:border-accent/40 rounded-2xl border shadow-sm">
+          <PromptInput.Shell>
             <PromptInput.Content>
-              <PromptInput.TextArea
-                placeholder="Ask about design philosophy, hardware setup, system cores..."
-                className="placeholder:text-muted/50 text-sm"
-              />
+              <PromptInput.TextArea placeholder="Ask about design philosophy, hardware setup, system cores..." />
             </PromptInput.Content>
             <PromptInput.Toolbar>
               <PromptInput.ToolbarStart>
@@ -363,9 +359,7 @@ Feel free to pick one of the suggestions below, or type your own question!`;
                 </div>
               </PromptInput.ToolbarStart>
               <PromptInput.ToolbarEnd>
-                <PromptInput.Send className="bg-accent/10 hover:bg-accent/20 text-accent flex size-8 items-center justify-center rounded-xl p-0">
-                  <Icon icon="gravity-ui:arrow-up" className="size-4" />
-                </PromptInput.Send>
+                <PromptInput.Send />
               </PromptInput.ToolbarEnd>
             </PromptInput.Toolbar>
           </PromptInput.Shell>

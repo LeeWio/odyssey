@@ -101,7 +101,7 @@ export default function CategoriesPage() {
                   </Card.Description>
                 </Card.Header>
                 {category.description ? (
-                  <Card.Content className="pt-0">
+                  <Card.Content>
                     <p className="text-muted line-clamp-3 text-sm leading-5">
                       {category.description}
                     </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Dropdown, Label } from "@heroui/react";
+import { Button, Dropdown, Label, Tooltip } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -27,10 +27,13 @@ export function LocaleSwitcher() {
 
   return (
     <Dropdown>
-      <Dropdown.Trigger aria-label={t("switchLanguage")}>
-        <Icon aria-hidden="true" icon="lucide:languages" className="size-4" />
-      </Dropdown.Trigger>
-      <Dropdown.Popover className="min-w-44">
+      <Tooltip>
+        <Button aria-label={t("switchLanguage")} isIconOnly variant="ghost">
+          <Icon aria-hidden="true" icon="lucide:languages" className="size-4" />
+        </Button>
+        <Tooltip.Content>{t("switchLanguage")}</Tooltip.Content>
+      </Tooltip>
+      <Dropdown.Popover>
         <Dropdown.Menu
           aria-label={t("language")}
           selectedKeys={new Set([currentLocale])}

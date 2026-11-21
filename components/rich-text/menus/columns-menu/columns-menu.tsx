@@ -114,7 +114,6 @@ export function ColumnsMenu() {
           aria-label="Column count"
           selectedKey={columnCount ? String(columnCount) : null}
           size="sm"
-          variant="default"
           onSelectionChange={(key) => {
             const count = Number(key);
 

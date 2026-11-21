@@ -188,7 +188,7 @@ export function LatelySection() {
           className="border-separator relative min-h-[34rem] border px-7 py-8 lg:col-span-5 lg:px-8"
           {...revealInView(0.14, 28)}
         >
-          <Card.Header className="p-0">
+          <Card.Header>
             <Typography color="muted" type="body-xs" className="font-mono tracking-normal">
               {t("lately.fieldSignal")}
             </Typography>
@@ -312,7 +312,7 @@ export function LatelySection() {
               </>
             ) : githubActivity?.available ? (
               <>
-                <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
+                <KPI>
                   <KPI.Header>
                     <KPI.Title className="text-muted font-mono text-xs font-bold tracking-normal uppercase">
                       {t("lately.commits")}
@@ -331,7 +331,7 @@ export function LatelySection() {
                   </KPI.Content>
                 </KPI>
 
-                <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
+                <KPI>
                   <KPI.Header>
                     <KPI.Title className="text-muted font-mono text-xs font-bold tracking-normal uppercase">
                       {t("lately.repositories")}
@@ -350,7 +350,7 @@ export function LatelySection() {
                   </KPI.Content>
                 </KPI>
 
-                <KPI className="bg-background/40 rounded-2xl p-5 shadow-sm">
+                <KPI>
                   <KPI.Header>
                     <KPI.Title className="text-muted font-mono text-xs font-bold tracking-normal uppercase">
                       {t("lately.reviews")}

@@ -128,9 +128,7 @@ export function FootprintsShowcase() {
       <PageContainer>
         <header className={HOME_SECTION_HEADER_CENTERED}>
           <motion.div {...revealInView(0, 10)}>
-            <Chip size="sm" variant="secondary">
-              {t("footprints.eyebrow")}
-            </Chip>
+            <Chip size="sm">{t("footprints.eyebrow")}</Chip>
           </motion.div>
           <motion.div {...revealInView(0.06)}>
             <Typography

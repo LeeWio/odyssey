@@ -48,7 +48,7 @@ function FootprintDetail({ footprint }: { footprint: Footprint | null }) {
   return (
     <Card aria-label={t("selectedMemory")} className="overflow-hidden" variant="secondary">
       {footprint.image ? (
-        <Card.Content className="p-0">
+        <Card.Content>
           <div className="relative aspect-[16/9] w-full">
             <Image
               fill
@@ -166,9 +166,7 @@ export function FootprintsPage() {
         <section aria-labelledby="footprints-timeline-title" className="mt-20">
           <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <Chip size="sm" variant="secondary">
-                {t("routeNotes")}
-              </Chip>
+              <Chip size="sm">{t("routeNotes")}</Chip>
               <Typography
                 id="footprints-timeline-title"
                 type="h2"
@@ -212,7 +210,7 @@ export function FootprintsPage() {
 
           <div className="mt-8 grid gap-4 lg:grid-cols-2">
             {visibleFootprints.length === 0 ? (
-              <EmptyState size="md">
+              <EmptyState>
                 <EmptyState.Header>
                   <EmptyState.Title>{t("noStops")}</EmptyState.Title>
                   <EmptyState.Description>{t("noStopsHint")}</EmptyState.Description>

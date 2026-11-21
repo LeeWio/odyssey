@@ -114,8 +114,8 @@ export function ArticleCard({
       aria-label={title}
       className={
         layout === "tile"
-          ? "h-full w-full overflow-hidden p-0 shadow-sm"
-          : "w-full max-w-xl overflow-hidden shadow-sm md:flex-row md:items-stretch"
+          ? "h-full w-full overflow-hidden p-0"
+          : "w-full max-w-xl overflow-hidden md:flex-row md:items-stretch"
       }
       role="article"
     >

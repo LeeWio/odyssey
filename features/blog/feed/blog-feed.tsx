@@ -207,7 +207,7 @@ function FeedSkeleton() {
       className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
     >
       {Array.from({ length: 4 }, (_, index) => (
-        <Card key={index} variant="secondary" className="gap-8 p-5 sm:p-6">
+        <Card key={index} variant="secondary" className="gap-8">
           <Card.Header className="gap-4 p-0">
             <Skeleton className="h-6 w-28 rounded-lg" />
             <Skeleton className="h-8 w-4/5 rounded-lg" />
@@ -287,7 +287,6 @@ function ContinueReading({
                 </Card.Header>
                 <ProgressBar
                   aria-label={t("readingProgress", { title: post.title })}
-                  color="accent"
                   size="sm"
                   value={currentProgressPercent}
                 >
@@ -361,13 +360,13 @@ function ArchiveRail({
 
   return (
     <div className="flex flex-col gap-4">
-      <Card variant="tertiary" className="gap-5 p-5 sm:p-6">
+      <Card variant="tertiary" className="gap-5">
         <Card.Header className="gap-2 p-0">
           <Card.Title>{t("glanceTitle")}</Card.Title>
           <Card.Description>{t("glanceDescription")}</Card.Description>
         </Card.Header>
 
-        <Card.Content className="p-0">
+        <Card.Content>
           <dl className="grid grid-cols-2 gap-3">
             <div className="border-default/40 rounded-xl border p-3">
               <dt className="text-muted text-xs">{t("published")}</dt>
@@ -384,7 +383,7 @@ function ArchiveRail({
           </dl>
         </Card.Content>
 
-        <Card.Footer className="p-0">
+        <Card.Footer>
           <MotionLink
             className="text-accent inline-flex cursor-[var(--cursor-interactive)] items-center gap-2 text-sm font-medium no-underline"
             href="/columns"
@@ -402,12 +401,12 @@ function ArchiveRail({
       </Card>
 
       {popularCategories.length > 0 ? (
-        <Card variant="secondary" className="gap-4 p-5 sm:p-6">
+        <Card variant="secondary" className="gap-4">
           <Card.Header className="gap-1 p-0">
             <Card.Title className="text-base">{t("popularTopics")}</Card.Title>
             <Card.Description>{t("popularTopicsHint")}</Card.Description>
           </Card.Header>
-          <Card.Content className="p-0">
+          <Card.Content>
             <ul className="flex flex-col gap-3">
               {popularCategories.map((category) => (
                 <li key={category.name} className="flex items-center justify-between gap-3 text-sm">
@@ -422,12 +421,12 @@ function ArchiveRail({
         </Card>
       ) : null}
 
-      <Card variant="secondary" className="gap-4 p-5 sm:p-6">
+      <Card variant="secondary" className="gap-4">
         <Card.Header className="gap-1 p-0">
           <Card.Title className="text-base">{t("readingSignals")}</Card.Title>
           <Card.Description>{t("readingSignalsHint")}</Card.Description>
         </Card.Header>
-        <Card.Content className="p-0">
+        <Card.Content>
           <dl className="flex flex-col gap-3 text-sm">
             <div className="flex items-center justify-between gap-3">
               <dt className="text-muted">{t("averageViews")}</dt>
@@ -467,12 +466,12 @@ function ArchiveRail({
               ease: pageEaseOut,
             }}
           >
-            <Card variant="secondary" className="gap-4 p-5 sm:p-6">
+            <Card variant="secondary" className="gap-4">
               <Card.Header className="gap-1 p-0">
                 <Card.Title className="text-base">{t("columnsInView")}</Card.Title>
                 <Card.Description>{t("columnsInViewHint")}</Card.Description>
               </Card.Header>
-              <Card.Content className="p-0">
+              <Card.Content>
                 <ul className="flex flex-col gap-3">
                   {activeSeries.map(([name, count]) => (
                     <li key={name} className="flex items-center justify-between gap-3 text-sm">

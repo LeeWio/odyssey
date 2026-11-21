@@ -157,7 +157,7 @@ export function EditorialCalendarPage() {
                   {isFetching ? "Refreshing this month" : "The content planned for this day"}
                 </Widget.Description>
               </div>
-              <Chip color="default" size="sm" variant="soft">
+              <Chip size="sm" variant="soft">
                 {selectedEntries.length} {selectedEntries.length === 1 ? "entry" : "entries"}
               </Chip>
             </Widget.Header>

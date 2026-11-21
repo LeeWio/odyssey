@@ -171,7 +171,7 @@ export function NotificationPopover() {
           className="w-[min(26rem,calc(100vw-1.5rem))] overflow-hidden"
           placement="bottom end"
         >
-          <Popover.Dialog className="flex max-h-[min(32rem,80dvh)] flex-col gap-3 overflow-hidden p-3">
+          <Popover.Dialog className="flex max-h-[min(32rem,80dvh)] flex-col gap-3 overflow-hidden">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <Popover.Heading className="text-base">{t("title")}</Popover.Heading>

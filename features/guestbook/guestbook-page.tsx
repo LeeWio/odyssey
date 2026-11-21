@@ -27,9 +27,7 @@ export function GuestbookPage() {
         <header className="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
           <div>
             <motion.div className="flex flex-wrap gap-2" {...reveal(0, 10)}>
-              <Chip size="sm" variant="secondary">
-                {t("eyebrow")}
-              </Chip>
+              <Chip size="sm">{t("eyebrow")}</Chip>
               <Chip size="sm" variant="soft">
                 {t("moderated")}
               </Chip>

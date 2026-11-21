@@ -381,7 +381,7 @@ export function CommentInput({
         <Popover.Dialog>
           <Popover.Heading>
             <div className="flex items-center gap-3">
-              <Avatar size="md" variant="soft">
+              <Avatar variant="soft">
                 <SignatureAvatarImage
                   name={signatureName}
                   avatar={signatureAvatar}
@@ -619,7 +619,7 @@ export function CommentInput({
       )}
 
       <Modal.Backdrop isOpen={modalIsOpen} onOpenChange={setModalOpen}>
-        <Modal.Container placement="auto" size="md">
+        <Modal.Container placement="auto">
           <Modal.Dialog className="sm:max-w-lg">
             <Modal.CloseTrigger />
             <Modal.Header>

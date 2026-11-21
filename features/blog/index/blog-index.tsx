@@ -389,7 +389,7 @@ function CategoryList({
           {t("allCategories")}
         </Link>
       </Card.Header>
-      <Card.Content className="p-0">
+      <Card.Content>
         <ScrollShadow className="max-h-80">
           <ListBox
             aria-label={t("topics")}
@@ -987,7 +987,7 @@ function YearList({ archives }: { archives: Array<ArchiveFacet & { year: number 
       <Card.Header>
         <Card.Title className="text-sm">{t("years")}</Card.Title>
       </Card.Header>
-      <Card.Content className="p-0">
+      <Card.Content>
         <ListBox
           aria-label={t("years")}
           selectionMode="none"

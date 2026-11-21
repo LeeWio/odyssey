@@ -300,7 +300,7 @@ export const MomentCardSkeleton = ({
   animationType?: "none" | "pulse" | "shimmer";
 }) => {
   return (
-    <Card className="w-full" variant="default">
+    <Card className="w-full">
       <Card.Header className="flex flex-row items-center justify-between">
         <div className="flex min-w-0 flex-row items-center gap-3">
           <Skeleton animationType={animationType} className="size-10 rounded-full" />

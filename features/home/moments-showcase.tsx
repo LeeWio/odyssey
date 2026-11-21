@@ -23,9 +23,7 @@ export function MomentsShowcase({ children }: { children: ReactNode }) {
     <Section id="moments-showcase" aria-labelledby="moments-showcase-title">
       <header className={HOME_SECTION_HEADER_CENTERED}>
         <motion.div {...revealInView(0, 10)}>
-          <Chip color="default" size="sm" variant="secondary">
-            {t("moments.eyebrow")}
-          </Chip>
+          <Chip size="sm">{t("moments.eyebrow")}</Chip>
         </motion.div>
         <motion.div {...revealInView(0.06)}>
           <Typography

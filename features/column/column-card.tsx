@@ -26,10 +26,7 @@ export function ColumnCard({ column }: { column: ColumnResponse }) {
       className="group focus-visible:outline-accent block h-full min-w-0 rounded-lg no-underline focus-visible:outline-2 focus-visible:outline-offset-4"
       href={`/columns/${column.slug}`}
     >
-      <Card
-        variant="secondary"
-        className="border-separator h-full min-h-64 overflow-hidden rounded-lg border p-0"
-      >
+      <Card variant="secondary" className="h-full min-h-64 overflow-hidden p-0">
         {visual ? <div className="relative aspect-[16/9] overflow-hidden">{visual}</div> : null}
         <Card.Header className="gap-4 p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">

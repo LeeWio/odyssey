@@ -68,7 +68,7 @@ export function WebhookEditor({
         }}
         UNSTABLE_portalContainer={portal}
       >
-        <Modal.Container size="md">
+        <Modal.Container>
           <Modal.Dialog>
             <Form className="flex min-h-0 flex-1 flex-col" onSubmit={save}>
               <Modal.Header>

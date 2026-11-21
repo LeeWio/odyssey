@@ -129,7 +129,7 @@ export function UsersTable() {
         cell: (item) => (
           <div className="flex flex-wrap gap-1">
             {item.roles.map((role) => (
-              <Chip key={role} size="sm" variant="secondary">
+              <Chip key={role} size="sm">
                 {role.replace("ROLE_", "")}
               </Chip>
             ))}

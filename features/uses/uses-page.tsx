@@ -191,9 +191,7 @@ export function UsesPage({ compact = false }: UsesPageProps) {
           <header className="border-default-200 grid gap-8 border-b pb-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="max-w-3xl">
               <motion.div {...reveal(0, 10)}>
-                <Chip size="sm" variant="secondary">
-                  {t("eyebrow")}
-                </Chip>
+                <Chip size="sm">{t("eyebrow")}</Chip>
               </motion.div>
               <motion.div {...reveal(0.06)}>
                 <Typography

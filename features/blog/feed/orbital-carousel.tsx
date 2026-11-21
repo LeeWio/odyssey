@@ -150,7 +150,7 @@ export function OrbitalCarousel() {
             },
           }}
         >
-          <Chip color="accent" size="lg" variant="secondary">
+          <Chip color="accent" size="lg">
             Everyday Essentials
           </Chip>
         </motion.div>
@@ -234,9 +234,7 @@ export function OrbitalCarousel() {
                 />
               </div>
               <Card.Header className="gap-2">
-                <Chip size="sm" variant="secondary">
-                  Workstation
-                </Chip>
+                <Chip size="sm">Workstation</Chip>
                 <Card.Title className="text-foreground text-lg leading-snug font-bold tracking-tight sm:text-xl">
                   MacBook Pro (M1 Max)
                 </Card.Title>
@@ -309,7 +307,7 @@ export function OrbitalCarousel() {
                     initialIndex={2}
                   />
                 </Card.Title>
-                <TagGroup aria-label="Product platforms" size="md" variant="surface">
+                <TagGroup aria-label="Product platforms" variant="surface">
                   <TagGroup.List>
                     <Tag>
                       <Icon icon="mdi:apple" className="size-4" />
@@ -331,7 +329,7 @@ export function OrbitalCarousel() {
               </Card.Header>
 
               <Card.Footer className="absolute inset-x-5 bottom-5 z-40 flex items-center justify-between">
-                <Chip variant="soft" size="md" color="warning">
+                <Chip variant="soft" color="warning">
                   A18 Pro silicon
                 </Chip>
 
@@ -377,9 +375,7 @@ export function OrbitalCarousel() {
                 />
               </div>
               <Card.Header className="gap-2">
-                <Chip size="sm" variant="secondary">
-                  Gaming Console
-                </Chip>
+                <Chip size="sm">Gaming Console</Chip>
                 <Card.Title className="text-foreground text-lg leading-snug font-bold tracking-tight sm:text-xl">
                   PlayStation 5
                 </Card.Title>
@@ -437,9 +433,7 @@ export function OrbitalCarousel() {
                 />
               </div>
               <Card.Header className="gap-2">
-                <Chip size="sm" variant="secondary">
-                  Handheld Gaming
-                </Chip>
+                <Chip size="sm">Handheld Gaming</Chip>
                 <Card.Title className="text-foreground text-lg leading-snug font-bold tracking-tight sm:text-xl">
                   Nintendo Switch
                 </Card.Title>
@@ -500,9 +494,7 @@ export function OrbitalCarousel() {
                 />
               </div>
               <Card.Header className="gap-2">
-                <Chip size="sm" variant="secondary">
-                  Audio
-                </Chip>
+                <Chip size="sm">Audio</Chip>
                 <Card.Title className="text-foreground text-lg leading-snug font-bold tracking-tight sm:text-xl">
                   AirPods Pro
                 </Card.Title>
@@ -548,7 +540,6 @@ export function OrbitalCarousel() {
           isIconOnly
           aria-label="Previous slide"
           variant="tertiary"
-          size="md"
           onPress={handlePrev}
           isDisabled={activeIndex === 0}
         >
@@ -576,7 +567,6 @@ export function OrbitalCarousel() {
           isIconOnly
           aria-label="Next slide"
           variant="tertiary"
-          size="md"
           onPress={handleNext}
           isDisabled={activeIndex === 4}
         >

@@ -281,7 +281,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
             size="sm"
             variant={profile === "systems" ? "primary" : "outline"}
             onPress={() => setProfile("systems")}
-            className="shrink-0 gap-2"
+            className="shrink-0"
           >
             <Icon icon="gravity-ui:cpu" className="size-4" />
             Systems & Kernel Engineer
@@ -290,7 +290,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
             size="sm"
             variant={profile === "frontend" ? "primary" : "outline"}
             onPress={() => setProfile("frontend")}
-            className="shrink-0 gap-2"
+            className="shrink-0"
           >
             <Icon icon="gravity-ui:layout-cells-large" className="size-4" />
             UI & Design Systems Engineer
@@ -299,7 +299,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
             size="sm"
             variant={profile === "creative" ? "primary" : "outline"}
             onPress={() => setProfile("creative")}
-            className="shrink-0 gap-2"
+            className="shrink-0"
           >
             <Icon icon="gravity-ui:sparkles" className="size-4" />
             Creative Tech Polymath
@@ -309,10 +309,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
         {/* Compatibility and Match Dashboard Panel */}
         <div className="mb-10 grid items-stretch gap-6 md:grid-cols-12">
           {/* Fit score Card */}
-          <Card
-            variant="secondary"
-            className="border-default-200/50 bg-accent/5 justify-between rounded-2xl border p-6 md:col-span-4"
-          >
+          <Card variant="secondary" className="justify-between md:col-span-4">
             <div>
               <span className="text-muted/60 mb-2 block font-mono text-[9px] font-bold tracking-wider uppercase">
                 COMPATIBILITY INDEX
@@ -341,10 +338,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
           </Card>
 
           {/* Detailed Alignment Assessment Report */}
-          <Card
-            variant="secondary"
-            className="border-default-200/50 bg-surface-secondary/20 justify-between rounded-2xl border p-6 shadow-sm md:col-span-8"
-          >
+          <Card variant="secondary" className="justify-between md:col-span-8">
             <div>
               <span className="text-muted/60 mb-2 block font-mono text-[9px] font-bold tracking-wider uppercase">
                 CANDIDATE FIT ASSESSMENT REPORT
@@ -375,10 +369,7 @@ export function RecruiterPage({ compact = false }: RecruiterPageProps) {
           </span>
           <div className="grid gap-4 sm:grid-cols-3">
             {kpis.map((kpi) => (
-              <KPI
-                key={kpi.title}
-                className="bg-surface-secondary/20 border-default-200/50 rounded-2xl border p-5"
-              >
+              <KPI key={kpi.title}>
                 <KPI.Header>
                   <KPI.Title className="text-muted/80 text-xs font-semibold">{kpi.title}</KPI.Title>
                 </KPI.Header>

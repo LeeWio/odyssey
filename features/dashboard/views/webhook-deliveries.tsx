@@ -100,7 +100,7 @@ export function WebhookDeliveries({
         isKeyboardDismissDisabled={busy}
         UNSTABLE_portalContainer={portal}
       >
-        <Modal.Container size="md">
+        <Modal.Container>
           <Modal.Dialog>
             <Modal.Header>
               <Modal.Heading>{t("deliveriesFor", { name: webhook.name })}</Modal.Heading>

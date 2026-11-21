@@ -50,9 +50,7 @@ export function AboutPage({ compact = false }: AboutPageProps) {
           {...reveal(0.06, 16)}
         >
           <div>
-            <Chip size="sm" variant="secondary">
-              Play
-            </Chip>
+            <Chip size="sm">Play</Chip>
             <Typography
               id="about-play-title"
               type="h2"

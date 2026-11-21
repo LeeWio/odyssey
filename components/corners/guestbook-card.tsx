@@ -46,9 +46,9 @@ const GuestbookCard = React.forwardRef<HTMLDivElement, GuestbookCardProps>(
           variant="default"
           {...props}
           className={cn(
-            "shadow-small flex origin-center cursor-pointer flex-col",
-            "ease-out-quint transition-all duration-350",
-            "hover:shadow-medium hover:-translate-y-0.5",
+            "origin-center cursor-pointer",
+            "ease-out-quint transition-transform duration-350 motion-reduce:transition-none",
+            "hover:-translate-y-0.5",
             "active:translate-y-0 active:scale-[0.97] active:duration-100",
             className
           )}

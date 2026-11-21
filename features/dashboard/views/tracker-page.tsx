@@ -514,7 +514,6 @@ function TrackerCardContent({ task }: { task: LiveTrackerTask }) {
           <ProgressBar
             aria-label="Subtasks"
             className="flex-1"
-            color="accent"
             size="sm"
             value={(task.subtasks.completed / task.subtasks.total) * 100}
           >
