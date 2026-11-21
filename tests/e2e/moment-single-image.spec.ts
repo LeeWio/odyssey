@@ -1,5 +1,4 @@
 import { expect, test, type Page } from "@playwright/test";
-import sharp from "sharp";
 
 const photos = {
   long: { width: 1200, height: 4800 },
@@ -56,6 +55,31 @@ async function prepare(page: Page, motion: "reduce" | "no-preference" = "reduce"
   return errors;
 }
 
+test("the home single-photo preview fills the content and opens the original", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await prepare(page);
+  await page.goto("/");
+  const card = page.locator('#moments-showcase [data-slot="card"]').filter({
+    hasText: "Single image fixture: long",
+  });
+  const photo = card.getByAltText("long photo 1", { exact: true });
+  await photo.scrollIntoViewIfNeeded();
+  await expect.poll(() => photo.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBe(1200);
+  const imageBox = (await photo.boundingBox())!;
+  const contentBox = (await card.locator('[data-slot="card-content"]').boundingBox())!;
+  expect(imageBox.x).toBeCloseTo(contentBox.x, 0);
+  expect(imageBox.width).toBeCloseTo(contentBox.width, 0);
+  await expect(photo).toHaveCSS("object-fit", "cover");
+
+  const trigger = card.getByRole("button", { name: "Open image 1 of 1" });
+  await trigger.click();
+  const viewer = page.getByRole("dialog", { name: "Image viewer" });
+  await expect(viewer.getByRole("region", { name: "Image reading area" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(viewer).toBeHidden();
+  await expect(trigger).toBeFocused();
+});
+
 for (const viewport of [
   { width: 1440, height: 1000 },
   { width: 390, height: 844 },
@@ -63,7 +87,7 @@ for (const viewport of [
   { width: 320, height: 640 },
   { width: 820, height: 900 },
 ]) {
-  test(`single-image previews retain proportions and respect height budgets at ${viewport.width}px`, async ({
+  test(`single-image previews fill the card content width and respect height budgets at ${viewport.width}px`, async ({
     page,
   }, testInfo) => {
     await page.setViewportSize(viewport);
@@ -87,10 +111,12 @@ for (const viewport of [
         .poll(() => photo.evaluate((el) => el.getBoundingClientRect().height))
         .toBeCloseTo(budget, 0);
       const box = (await photo.boundingBox())!;
-      expect(box.height / box.width).toBeCloseTo(4, 2);
-      const card = (await page.locator("#moment-301").boundingBox())!;
-      expect(box.x).toBeGreaterThanOrEqual(card.x);
-      expect(box.x + box.width).toBeLessThanOrEqual(card.x + card.width);
+      const content = (await page
+        .locator('#moment-301 [data-slot="moment-content"]')
+        .boundingBox())!;
+      expect(box.x).toBeCloseTo(content.x, 0);
+      expect(box.width).toBeCloseTo(content.width, 0);
+      await expect(photo).toHaveCSS("object-fit", "cover");
       expect(
         await imageNode?.evaluate(
           (node) => node === document.querySelector('#moment-301 img[alt="long photo 1"]')
@@ -103,30 +129,21 @@ for (const viewport of [
         .poll(() => landscape.evaluate((element) => element.getBoundingClientRect().height))
         .toBeLessThanOrEqual(budget + 1);
       const landscapeBox = (await landscape.boundingBox())!;
-      expect(landscapeBox.height / landscapeBox.width).toBeCloseTo(2 / 3, 2);
+      expect(landscapeBox.height).toBeCloseTo(Math.min(landscapeBox.width * (2 / 3), budget), 0);
       expect(landscapeBox.height).toBeLessThanOrEqual(budget + 1);
       const small = (await page
         .locator("#moment-303")
         .getByAltText("small photo 1")
         .boundingBox())!;
-      expect(small.width).toBe(160);
-      expect(small.height).toBe(120);
+      const smallContent = (await page
+        .locator('#moment-303 [data-slot="moment-content"]')
+        .boundingBox())!;
+      expect(small.x).toBeCloseTo(smallContent.x, 0);
+      expect(small.width).toBeCloseTo(smallContent.width, 0);
+      expect(small.height).toBeCloseTo(Math.min(small.width * (3 / 4), budget), 0);
       const pair = page.locator("#moment-304").getByAltText("pair photo 1", { exact: true });
       expect(await pair.evaluate((el) => getComputedStyle(el).maxHeight)).toBe("none");
       await photo.scrollIntoViewIfNeeded();
-      const preview = await photo.screenshot();
-      const { data, info } = await sharp(preview)
-        .removeAlpha()
-        .raw()
-        .toBuffer({ resolveWithObject: true });
-      const pixel = (fraction: number) => {
-        const offset =
-          (Math.floor(info.height * fraction) * info.width + Math.floor(info.width / 2)) *
-          info.channels;
-        return Array.from(data.subarray(offset, offset + 3));
-      };
-      expect(pixel(0.125)).toEqual([190, 18, 60]);
-      expect(pixel(0.875)).toEqual([15, 118, 110]);
       await page.screenshot({
         path: testInfo.outputPath(`single-image-${mode.toLowerCase()}.png`),
       });

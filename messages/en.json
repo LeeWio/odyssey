@@ -1101,6 +1101,7 @@
     "recently": "Recently",
     "imageAlt": "Moment image",
     "openMoment": "Open moment by {author} · {time}",
+    "viewMoment": "Open moment",
     "openImage": "Open image {index} of {total}",
     "imageViewer": "Image viewer",
     "viewerMode": "Image display",
@@ -1255,6 +1256,7 @@
   },
   "Footprints": {
     "mapLabel": "Personal travel footprints map",
+    "mapUnavailable": "The interactive map is unavailable on this device.",
     "mapTitle": "Footprints",
     "mapDescription": "Places kept on the map",
     "places": "Places",

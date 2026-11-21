@@ -43,15 +43,14 @@ export function NaturalImage({
       alt={alt}
       width={width}
       height={height}
-      className={
+      className={`relative block h-auto w-full rounded-lg ${
         bounded
-          ? "mx-auto block h-auto max-h-[min(55svh,420px)] w-auto max-w-full rounded-lg object-contain lg:max-h-[min(60svh,560px)] lg:group-data-[view=grid]/moment-feed:max-h-[min(50svh,360px)]"
-          : "block h-auto w-full rounded-lg"
-      }
+          ? "max-h-[min(55svh,420px)] object-cover lg:max-h-[min(60svh,560px)] lg:group-data-[view=grid]/moment-feed:max-h-[min(50svh,360px)]"
+          : ""
+      } ${interactive ? "pointer-events-none" : ""}`}
       initial={false}
       layout={enabled ? true : undefined}
       animate={controls}
-      whileTap={enabled && !reduced && interactive ? { scale: 0.99 } : undefined}
       transition={{
         duration: 0.1,
         ease: pageEaseOut,

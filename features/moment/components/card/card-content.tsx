@@ -1,25 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Button, Link, Skeleton, Tag, TagGroup } from "@heroui/react";
+import { Link, Tag, TagGroup } from "@heroui/react";
 import type { MomentTopicResponse } from "@/lib/features/moment";
 import type { JSONContent } from "@tiptap/core";
 import { getTransformStyles } from "../../utils/transform-styles";
+import type { MomentImagePreview } from "../../utils/image-previews";
 import { MomentContent } from "../moment-content";
 import { useTranslations } from "next-intl";
-import { NaturalImage } from "./natural-image";
+import { MomentPhotos } from "./moment-photos";
 import { motion } from "motion/react";
 import { momentLayoutTransition, useMomentMotion } from "../feed-motion";
-import { DeferredContent } from "@/components/layout/deferred-content";
-
-const CircularGallery = dynamic(() => import("@/components/ui/circular-gallery"), {
-  ssr: false,
-  loading: GalleryPlaceholder,
-});
-
-function GalleryPlaceholder() {
-  return <Skeleton className="h-full w-full" aria-hidden />;
-}
 
 const BounceCards = dynamic(() => import("@/components/ui/bounce-cards"), {
   ssr: false,
@@ -33,14 +24,6 @@ const StockTrendCard = dynamic(
     loading: () => <div className="bg-surface-secondary h-24 w-full rounded-2xl" aria-hidden />,
   }
 );
-
-export interface MomentImagePreview {
-  url: string;
-  originalUrl?: string;
-  alt?: string | null;
-  width?: number;
-  height?: number;
-}
 
 interface CardContentProps {
   parsedContent: JSONContent;
@@ -116,48 +99,8 @@ export const CardContent = ({
         </TagGroup>
       )}
 
-      {count >= 4 && onCardClick ? (
-        <DeferredContent className="h-80 w-full" fallback={<GalleryPlaceholder />}>
-          <CircularGallery
-            expandOnOpen
-            items={images.map(({ url, originalUrl, alt }) => ({
-              image: url,
-              originalImage: originalUrl,
-              alt: alt || t("imageAlt"),
-            }))}
-          />
-        </DeferredContent>
-      ) : count > 0 && (mediaLayout === "natural" || !onCardClick) ? (
-        <div
-          className={count >= 4 ? "grid min-w-0 grid-cols-2 gap-3" : "flex min-w-0 flex-col gap-3"}
-        >
-          {images.map(({ url, alt, width, height }, index) => {
-            const image = (
-              <NaturalImage
-                src={url}
-                alt={alt || t("imageAlt")}
-                width={width}
-                height={height}
-                interactive={Boolean(onCardClick)}
-                bounded={count === 1}
-              />
-            );
-
-            return onCardClick ? (
-              <Button
-                key={`${url}-${index}`}
-                aria-label={t("openImage", { index: index + 1, total: count })}
-                className="block h-auto w-full min-w-0 overflow-visible"
-                variant="ghost"
-                onPress={() => onCardClick(index)}
-              >
-                {image}
-              </Button>
-            ) : (
-              <div key={`${url}-${index}`}>{image}</div>
-            );
-          })}
-        </div>
+      {count >= 4 || mediaLayout === "natural" || !onCardClick ? (
+        <MomentPhotos images={images} onOpen={onCardClick} />
       ) : count > 0 ? (
         <div className="flex w-full justify-center">
           <BounceCards

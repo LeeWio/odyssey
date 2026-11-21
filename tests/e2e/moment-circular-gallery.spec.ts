@@ -138,6 +138,72 @@ async function prepare(page: Page, missingPhoto = false, thumbnails = false) {
   return imageRequests;
 }
 
+test("the home gallery draws thumbnails and expands the same canvas when opened", async ({
+  page,
+}) => {
+  const requests = await prepare(page, false, true);
+  await page.goto("/");
+  const showcase = page.locator("#moments-showcase");
+  await showcase.scrollIntoViewIfNeeded();
+  const canvas = showcase.locator("canvas");
+  await canvas.scrollIntoViewIfNeeded();
+  const galleryStats = () =>
+    canvas.evaluate((node) => {
+      const entry = window.circularGalleryChecks.find(({ canvas }) => canvas === node);
+      return { uploaded: entry?.uploaded.length ?? 0, draws: entry?.draws ?? 0 };
+    });
+  await expect.poll(async () => (await galleryStats()).uploaded).toBe(4);
+  await expect.poll(async () => (await galleryStats()).draws).toBeGreaterThan(0);
+  expect(requests).toHaveLength(4);
+  expect(requests.every((url) => url.includes("-thumb-"))).toBe(true);
+
+  const original = await canvas.elementHandle();
+  await canvas.click();
+  const dialog = page.getByRole("dialog", { name: "Image gallery", exact: true });
+  await expect(dialog.locator("canvas")).toBeVisible();
+  expect(await original?.evaluate((node) => node.closest('[role="dialog"]') !== null)).toBe(true);
+  await expect
+    .poll(() => requests.filter((url) => !url.includes("-thumb-")))
+    .toEqual(["/api/v1/public/files/circular-0.jpg"]);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(showcase.locator('[data-gallery-list] [aria-current="true"]')).toBeFocused();
+  await showcase.getByRole("link", { name: /^Open moment by/ }).click();
+  await expect(page).toHaveURL(/\/moments#moment-944$/);
+});
+
+for (const path of ["/", "/moments?topic=circular-fixture"]) {
+  test(`photos can still be opened without WebGL at ${path}`, async ({ page }) => {
+    await prepare(page, false, true);
+    await page.addInitScript(() => {
+      const getContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (
+        this: HTMLCanvasElement,
+        kind: string,
+        options?: unknown
+      ) {
+        return kind === "webgl2" ? null : getContext.call(this, kind, options);
+      } as typeof getContext;
+    });
+    await page.goto(path);
+    const card = page.locator(path === "/" ? "#moments-showcase" : "#moment-944");
+    await card.scrollIntoViewIfNeeded();
+    const trigger = card.getByRole("button", { name: "Open image 1 of 4", exact: true });
+    const thumbnail = card.getByAltText("Photo 1", { exact: true });
+    await expect
+      .poll(() => thumbnail.evaluate((node: HTMLImageElement) => node.naturalWidth))
+      .toBe(320);
+    await expect(card.locator("canvas")).toHaveCount(0);
+    await trigger.press("Enter");
+    const viewer = page.getByRole("dialog", { name: "Image viewer" });
+    await expect(viewer).toBeVisible();
+    await expect(viewer.locator('[data-slot="carousel-thumbnail"]')).toHaveCount(4);
+    await page.keyboard.press("Escape");
+    await expect(viewer).toBeHidden();
+    await expect(trigger).toBeFocused();
+  });
+}
+
 for (const width of [390, 1440]) {
   test(`uploaded photos reach a live WebGL canvas in both layouts at ${width}px`, async ({
     page,

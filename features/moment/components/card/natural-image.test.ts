@@ -47,9 +47,8 @@ async function render(bounded = false) {
 
 it("bounds single-image previews with CSS without assigning an aspect ratio or dimensions", async () => {
   const image = await render(true);
-  expect(image.className).toContain("object-contain");
-  expect(image.className).toContain("w-auto");
-  expect(image.className).toContain("max-w-full");
+  expect(image.className).toContain("object-cover");
+  expect(image.className).toContain("w-full");
   expect(image.className).toContain("max-h-[min(55svh,420px)]");
   expect(image.className).toContain("lg:max-h-[min(60svh,560px)]");
   expect(image.className).toContain("group-data-[view=grid]/moment-feed:max-h-[min(50svh,360px)]");
