@@ -26,6 +26,14 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.260.5](https://github.com/LeeWio/odyssey/compare/v1.260.4...v1.260.5) (2026-11-21)
+
+
+### Bug Fixes
+
+* **discovery:** keep Chronicle queries in place and preserve search focus ([#104](https://github.com/LeeWio/odyssey/issues/104)) ([119cb75](https://github.com/LeeWio/odyssey/commit/119cb7500dd0f56d0aeda8ab06cb185b0a743a28))
+* **reader:** restore ordered article reveals without a first-paint flash ([#101](https://github.com/LeeWio/odyssey/issues/101)) ([251bec6](https://github.com/LeeWio/odyssey/commit/251bec63f6bdee8f7c25219daed2a260ac3c201e))
+
 ## [1.260.4](https://github.com/LeeWio/odyssey/compare/v1.260.3...v1.260.4) (2026-11-21)
 
 
