@@ -170,6 +170,7 @@ Client Component 只包住需要 state、effect、浏览器 API、事件和动�
 - Moments 登录用户的点赞状态改为列表级批量查询，避免每张卡片产生独立请求。
 - 非核心字体关闭全局 preload，避免 Mono、Display 和 Brutalism 字体在公共首屏抢占请求。
 - `/chronicle` 的 featured 和 recent 首屏数据改为服务端提供，客户端跳过重复第一页请求。
+- `/chronicle` 的 Explore、Orbit、Columns 和 Archive 面板改为按 Tab 动态拆包，首屏只加载当前 Featured 面板所需代码；HeroUI Tabs 仍负责 inactive panel 的惰性挂载。
 
 ## 专题衡量维度
 
