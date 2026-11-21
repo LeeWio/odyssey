@@ -230,9 +230,11 @@ export function PermissionsPage() {
                           isSelected={isChecked}
                           onChange={(checked) => handleNodeToggle(root.id, checked)}
                         >
-                          <Checkbox.Control>
-                            <Checkbox.Indicator />
-                          </Checkbox.Control>
+                          <Checkbox.Content>
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                          </Checkbox.Content>
                         </Checkbox>
                         <Accordion.Heading className="min-w-0 flex-1">
                           <Accordion.Trigger>
@@ -258,15 +260,21 @@ export function PermissionsPage() {
                                       isSelected={isSubChecked}
                                       onChange={(checked) => handleNodeToggle(subMenu.id, checked)}
                                     >
-                                      <span className="text-foreground flex items-center gap-1.5 text-xs font-bold md:text-sm">
-                                        {subMenu.icon && (
-                                          <Icon
-                                            icon={subMenu.icon}
-                                            className="text-muted-foreground size-3.5"
-                                          />
-                                        )}
-                                        {subMenu.name}
-                                      </span>
+                                      <Checkbox.Content>
+                                        <Checkbox.Control>
+                                          <Checkbox.Indicator />
+                                        </Checkbox.Control>
+                                        <Label className="flex items-center gap-1.5">
+                                          {subMenu.icon && (
+                                            <Icon
+                                              aria-hidden="true"
+                                              icon={subMenu.icon}
+                                              className="size-3.5"
+                                            />
+                                          )}
+                                          {subMenu.name}
+                                        </Label>
+                                      </Checkbox.Content>
                                     </Checkbox>
                                   </Card.Header>
                                   <Card.Content>
@@ -281,18 +289,18 @@ export function PermissionsPage() {
                                               onChange={(checked) =>
                                                 handleNodeToggle(action.id, checked)
                                               }
-                                              className="select-none"
                                             >
-                                              <div className="flex flex-col items-start gap-0.5">
-                                                <span className="text-foreground text-xs font-semibold">
-                                                  {action.name}
-                                                </span>
-                                                {action.permission && (
-                                                  <span className="text-muted-foreground font-mono text-[9px] leading-none">
-                                                    {action.permission}
-                                                  </span>
-                                                )}
-                                              </div>
+                                              <Checkbox.Content>
+                                                <Checkbox.Control>
+                                                  <Checkbox.Indicator />
+                                                </Checkbox.Control>
+                                                <Label>{action.name}</Label>
+                                              </Checkbox.Content>
+                                              {action.permission && (
+                                                <Description className="font-mono">
+                                                  {action.permission}
+                                                </Description>
+                                              )}
                                             </Checkbox>
                                           );
                                         })

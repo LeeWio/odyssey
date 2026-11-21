@@ -257,7 +257,7 @@ export function FindReplacePopover() {
               isSelected={findState?.useRegex ?? false}
               onChange={(selected) => editor?.commands.setUseRegex(selected)}
             >
-              <Switch.Content className="flex w-full items-center justify-between rounded-xl px-2 py-2 text-sm font-medium">
+              <Switch.Content className="w-full justify-between">
                 Use regular expression
                 <Switch.Control>
                   <Switch.Thumb />

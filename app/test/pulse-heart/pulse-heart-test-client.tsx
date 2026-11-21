@@ -183,10 +183,10 @@ function SettingSwitch({
 }) {
   return (
     <Switch isSelected={selected} onChange={onChange} size="sm">
-      <Switch.Control>
-        <Switch.Thumb />
-      </Switch.Control>
       <Switch.Content>
+        <Switch.Control>
+          <Switch.Thumb />
+        </Switch.Control>
         <Label>{label}</Label>
       </Switch.Content>
     </Switch>

@@ -107,18 +107,22 @@ export function WebhookEditor({
                         )
                       }
                     >
-                      <Checkbox.Control>
-                        <Checkbox.Indicator />
-                      </Checkbox.Control>
-                      <Checkbox.Content>{t(`events.${event}`)}</Checkbox.Content>
+                      <Checkbox.Content>
+                        <Checkbox.Control>
+                          <Checkbox.Indicator />
+                        </Checkbox.Control>
+                        <Label>{t(`events.${event}`)}</Label>
+                      </Checkbox.Content>
                     </Checkbox>
                   ))}
                 </fieldset>
                 <Checkbox isSelected={isActive} onChange={setActive}>
-                  <Checkbox.Control>
-                    <Checkbox.Indicator />
-                  </Checkbox.Control>
-                  <Checkbox.Content>{t("enabled")}</Checkbox.Content>
+                  <Checkbox.Content>
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                    <Label>{t("enabled")}</Label>
+                  </Checkbox.Content>
                 </Checkbox>
                 {error ? (
                   <p role="alert" className="text-danger text-sm">
