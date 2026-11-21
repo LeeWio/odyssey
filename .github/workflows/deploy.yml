@@ -151,6 +151,15 @@ jobs:
             exit 1
           fi
 
+      - name: Prepare remote deployment script
+        shell: bash
+        run: |
+          {
+            printf '%s\n' "bash -s <<'PRODUCTION_DEPLOY_SCRIPT'"
+            cat .github/scripts/deploy-storage.sh scripts/deploy-web.sh
+            printf '%s\n' PRODUCTION_DEPLOY_SCRIPT
+          } > "$RUNNER_TEMP/production-deploy.sh"
+
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@2ead5e36573f08b82fbfce1504f1a4b05a647c6f # v1.2.2
         with:
@@ -161,7 +170,7 @@ jobs:
           port: ${{ secrets.SERVER_PORT || 22 }}
           envs: HEALTHCHECK_URL,ALIYUN_REGISTRY,ALIYUN_REGISTRY_USER,ALIYUN_REGISTRY_PASSWORD,ALIYUN_IMAGE,WEB_LATEST_IMAGE,EXPECTED_IMAGE_DIGEST,EXPECTED_REVISION,SERVER_PROJECT_PATH
           command_timeout: 15m
-          script_path: scripts/deploy-web.sh
+          script_path: ${{ runner.temp }}/production-deploy.sh
         env:
           HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL || 'https://easylove.top/healthz/odyssey' }}
           ALIYUN_REGISTRY: crpi-jljp0dhu73tl5aot.cn-shenzhen.personal.cr.aliyuncs.com
