@@ -1,14 +1,10 @@
 "use client";
 
-import { EmptyState } from "@heroui-pro/react";
-import { Button } from "@heroui/react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import {
   ArticleActionBar,
-  ArticleBody,
   ArticleContinue,
   ArticleFooter,
   ArticleHero,
@@ -16,6 +12,7 @@ import {
   ArticleOutlineProvider,
   ArticleSidebar,
 } from "@/features/blog/reader/article";
+import type { ArticleOutline } from "@/features/blog/reader/article/article-outline";
 import { scrollReadingAnchorIntoView } from "@/features/blog/reader/article/reading-anchor";
 import { useReadingProgress } from "@/features/blog/reader/article/use-reading-progress";
 import { articleHasContext } from "@/features/blog/reader/article/article-sidebar";
@@ -31,16 +28,21 @@ function savedReadingScroll(path: string) {
   const navigation = performance.getEntriesByType("navigation")[0] as
     PerformanceNavigationTiming | undefined;
   if (navigation?.type !== "reload") return null;
-  const raw = sessionStorage.getItem(READING_SCROLL_KEY);
-  if (!raw) return null;
-  const saved = JSON.parse(raw) as { path?: string; y?: number };
-  if (saved.path !== path || typeof saved.y !== "number") return null;
-  return saved.y;
+  try {
+    const raw = sessionStorage.getItem(READING_SCROLL_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as { path?: string; y?: number };
+    return saved.path === path && Number.isFinite(saved.y) ? (saved.y ?? null) : null;
+  } catch {
+    return null;
+  }
 }
 
 interface SinglePageProps {
   initialArticle: PostResponse;
-  readingHtml: string;
+  body: ReactNode;
+  outline: ArticleOutline | null;
+  readingMinutes: number | null;
   slug: string;
 }
 
@@ -57,65 +59,69 @@ function ReadingProgressTracker({
   return null;
 }
 
-export function ArticlePageClient({ initialArticle, readingHtml, slug }: SinglePageProps) {
+export function ArticlePageClient({
+  initialArticle,
+  body,
+  outline,
+  readingMinutes,
+  slug,
+}: SinglePageProps) {
   const t = useTranslations("Article");
-  const router = useRouter();
   const articleEndRef = useRef<HTMLDivElement>(null);
   const [readingProgress, setReadingProgress] = useState(0);
   const [showContinue, setShowContinue] = useState(false);
 
   useEffect(() => {
     const path = window.location.pathname;
-    let frame = 0;
-    const remember = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const save = () => {
+      clearTimeout(timer);
+      timer = undefined;
+      try {
         sessionStorage.setItem(READING_SCROLL_KEY, JSON.stringify({ path, y: window.scrollY }));
-      });
+      } catch {}
+    };
+    const remember = () => {
+      timer ??= setTimeout(save, 250);
     };
     remember();
     window.addEventListener("scroll", remember, { passive: true });
-    window.addEventListener("pagehide", remember);
-    window.addEventListener("beforeunload", remember);
+    window.addEventListener("pagehide", save);
     return () => {
-      cancelAnimationFrame(frame);
+      clearTimeout(timer);
       window.removeEventListener("scroll", remember);
-      window.removeEventListener("pagehide", remember);
-      window.removeEventListener("beforeunload", remember);
+      window.removeEventListener("pagehide", save);
     };
-  }, []);
+  }, [slug]);
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const {
-    currentData: fetchedArticle,
-    isError,
-    isFetching,
-    refetch,
-  } = useGetPublicPostBySlugQuery(slug, {
+  const { currentData: fetchedArticle, isFetching } = useGetPublicPostBySlugQuery(slug, {
     // Anonymous visitors already have the public article. Signed-in visitors
     // need one credentialed request for like, favorite, and reading-list state.
     skip: !isAuthenticated,
   });
-  const article = fetchedArticle ?? initialArticle;
-  const [continueSlug, setContinueSlug] = useState(article?.slug);
-  if (article?.slug !== continueSlug) {
-    setContinueSlug(article?.slug);
+  const viewer = isAuthenticated ? fetchedArticle : undefined;
+  const article = viewer
+    ? {
+        ...initialArticle,
+        isLiked: viewer.isLiked,
+        isFavorited: viewer.isFavorited,
+        isInReadingList: viewer.isInReadingList,
+        likesCount: viewer.likesCount,
+        favoritesCount: viewer.favoritesCount,
+      }
+    : initialArticle;
+  const [continueSlug, setContinueSlug] = useState(slug);
+  if (slug !== continueSlug) {
+    setContinueSlug(slug);
     setShowContinue(false);
   }
 
   useLayoutEffect(() => {
-    if (!article) return;
     const id = getReadingPositionId(window.location.hash);
     if (id) {
-      let attempts = 0;
-      let frame = 0;
-      const place = () => {
-        attempts += 1;
-        if (scrollReadingAnchorIntoView(id) || attempts > 20) return;
-        frame = window.requestAnimationFrame(place);
-      };
-      place();
-      return () => window.cancelAnimationFrame(frame);
+      scrollReadingAnchorIntoView(id);
+      return;
     }
     const y = savedReadingScroll(window.location.pathname);
     if (y === null) return;
@@ -128,62 +134,17 @@ export function ArticlePageClient({ initialArticle, readingHtml, slug }: SingleP
     return () => {
       scroller.style.minHeight = "";
     };
-  }, [article]);
-
-  const isUnavailable = !article;
-
-  if (isError && !fetchedArticle) {
-    return (
-      <div className="flex min-h-[70dvh] items-center justify-center px-6">
-        <div className="flex max-w-md flex-col items-center gap-4 text-center">
-          <h1 className="text-xl font-semibold">{t("loadFailedTitle")}</h1>
-          <p className="text-muted text-sm">{t("loadFailedDescription")}</p>
-          <Button size="sm" variant="secondary" onPress={() => refetch()}>
-            {t("tryAgain")}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (isUnavailable) {
-    return (
-      <div className="flex min-h-[70dvh] items-center justify-center px-6">
-        <EmptyState className="max-w-md">
-          <EmptyState.Header>
-            <EmptyState.Title>{t("notFoundTitle")}</EmptyState.Title>
-            <EmptyState.Description>{t("notFoundDescription")}</EmptyState.Description>
-          </EmptyState.Header>
-          <EmptyState.Content>
-            <Button size="sm" variant="secondary" onPress={() => router.push("/single")}>
-              {t("backToJournal")}
-            </Button>
-          </EmptyState.Content>
-        </EmptyState>
-      </div>
-    );
-  }
-
-  if (!article) return null;
+  }, [slug]);
 
   return (
-    <ArticleOutlineProvider>
+    <ArticleOutlineProvider initialOutline={outline} initialMinutes={readingMinutes}>
       <ReadingProgressTracker
         enabled={isAuthenticated}
         postId={article.id}
         progress={readingProgress}
       />
       <ArticleLayout
-        body={
-          <ArticleBody
-            content={article.content}
-            contentKey={`${article.id}:${article.updatedAt}`}
-            contentType={article.contentType}
-            outlineLabel={t("onThisPage")}
-            readingHtml={article.id === initialArticle.id ? readingHtml : undefined}
-            showTableOfContents={false}
-          />
-        }
+        body={body}
         continueAside={
           <ArticleContinue
             key={article.id}

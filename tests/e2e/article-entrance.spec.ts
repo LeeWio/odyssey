@@ -2,13 +2,14 @@ import { expect, test, type Page } from "@playwright/test";
 
 async function openArticle(page: Page, slug = "entrance-regression") {
   await page.goto(`/single/${slug}`);
-  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+  await expect(page.locator("[data-article-body]")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Share article", exact: true })).toBeVisible();
 }
 
 test("scrolling preserves the reader and does not replay revealed blocks", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await openArticle(page);
-  const editor = page.locator('.ProseMirror[contenteditable="false"]');
+  const editor = page.locator("[data-article-body]");
   await expect(editor.locator(":scope > p")).toHaveCount(80);
   const originalEditor = await editor.elementHandle();
   if (!originalEditor) throw new Error("Reader was not mounted");
@@ -48,13 +49,13 @@ test("nested reading units wait for the viewport without animating parent and ch
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await openArticle(page, "entrance-nested");
-  const editor = page.locator('.ProseMirror[contenteditable="false"]');
+  const editor = page.locator("[data-article-body]");
   const row = editor.locator("tr").first();
   const listItem = editor.locator("ul:not([data-type]) > li").first();
-  const task = editor.locator("li.node-taskItem").first();
+  const task = editor.locator('li[data-type="taskItem"]').first();
   const columnParagraph = editor.locator('[data-type="column"] p').first();
   const details = editor.locator(".odyssey-details");
-  const image = editor.locator(".react-renderer.node-image");
+  const image = editor.locator("figure img");
 
   for (const target of [listItem, task, row, columnParagraph, details, image]) {
     await expect(target).toHaveCSS("opacity", "1");
@@ -75,7 +76,7 @@ test("reduced motion reveals pending content immediately and never re-hides it",
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await openArticle(page);
-  const last = page.locator(".ProseMirror > p").last();
+  const last = page.locator("[data-article-body] > p").last();
   await expect(last).toHaveCSS("opacity", "1");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(last).toHaveCSS("opacity", "1");
@@ -85,16 +86,16 @@ test("reduced motion reveals pending content immediately and never re-hides it",
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/single/entrance-regression");
-  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible({
+  await expect(page.locator("[data-article-body]")).toBeVisible({
     timeout: 30_000,
   });
-  await expect(page.locator(".ProseMirror > p").last()).toHaveCSS("opacity", "1");
+  await expect(page.locator("[data-article-body] > p").last()).toHaveCSS("opacity", "1");
 });
 
 test("a block taller than the viewport still reveals on entry", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await openArticle(page, "entrance-tall");
-  const block = page.locator(".ProseMirror pre").last();
+  const block = page.locator("[data-article-body] pre").last();
   await expect(block).toHaveCSS("opacity", "1");
   await block.evaluate((element) => element.scrollIntoView({ block: "start" }));
   await expect(block).toHaveCSS("opacity", "1");
@@ -111,11 +112,55 @@ test("code blocks expose a copy action", async ({ page }) => {
   });
   await openArticle(page, "entrance-copy");
 
-  const codeBlock = page.locator("[data-node-view-wrapper]");
+  const codeBlock = page.locator("[data-reading-code]");
   await expect(codeBlock.getByRole("button", { name: "Copy code" })).toBeVisible();
   await codeBlock.getByRole("button", { name: "Copy code" }).click();
   await expect(page.getByText("Code copied.", { exact: true })).toBeVisible();
   await expect
     .poll(() => page.evaluate(() => window.localStorage.getItem("copied-code")))
     .toBe("const answer = 42;");
+});
+
+test("the document and stored anchors are readable without browser JavaScript", async ({
+  browser,
+  baseURL,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, baseURL, locale: "en-US" });
+  try {
+    const page = await context.newPage();
+    await page.goto("/single/mobile-reading");
+    await expect(page.getByRole("heading", { name: "Chapter one", exact: true })).toHaveAttribute(
+      "id",
+      "chapter-one"
+    );
+    await expect(page.locator("[data-article-body] pre").first()).toBeVisible();
+    await expect(page.locator("[data-article-body] [contenteditable]")).toHaveCount(0);
+  } finally {
+    await context.close();
+  }
+});
+
+test("a failed viewer refresh does not replace the server article", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "odyssey_auth",
+      JSON.stringify({
+        accessToken: "reader-fixture",
+        username: "reader",
+        roles: ["ROLE_USER"],
+        permissions: [],
+        isAuthenticated: true,
+      })
+    );
+  });
+  const path = "/api/v1/public/blog/posts/entrance-copy";
+  await page.route(`**${path}`, (route) =>
+    route.fulfill({ status: 503, json: { message: "Viewer unavailable" } })
+  );
+  const request = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === path && response.status() === 503
+  );
+  await openArticle(page, "entrance-copy");
+  await request;
+  await expect(page.locator("[data-article-body] code")).toHaveText("const answer = 42;");
 });

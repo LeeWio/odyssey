@@ -62,7 +62,7 @@ async function openCreate(page: Page) {
   await expect(
     page.getByRole("heading", { name: "Collection test article", exact: true })
   ).toBeVisible();
-  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+  await expect(page.locator("[data-article-body]")).toBeVisible();
   await page.getByRole("button", { name: "More article actions", exact: true }).press("Enter");
   await page.getByRole("button", { name: "Create collection", exact: true }).press("Enter");
   const dialog = page.getByRole("dialog", { name: "Create collection", exact: true });

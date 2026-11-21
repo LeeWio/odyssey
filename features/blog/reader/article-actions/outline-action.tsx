@@ -5,10 +5,7 @@ import { Icon } from "@iconify/react";
 import { useScrollIntoView } from "@mantine/hooks";
 import { useEffect, useRef, useState } from "react";
 
-import {
-  ARTICLE_OUTLINE_TOP_OFFSET,
-  readingScrollOffset,
-} from "@/components/rich-text/extensions/table-of-contents";
+import { ARTICLE_OUTLINE_TOP_OFFSET, readingScrollOffset } from "@/lib/reading-scroll";
 import {
   currentHeadingId,
   headingElement,
@@ -82,7 +79,7 @@ export function OutlineAction({ report }: { report: Report }) {
         <Tooltip.Content>{label}</Tooltip.Content>
       </Tooltip>
       <Sheet isDetached isOpen={isOpen} placement="bottom" onOpenChange={setIsOpen}>
-        <Sheet.Backdrop isExiting variant="blur">
+        <Sheet.Backdrop variant="blur">
           <Sheet.Content className="mx-auto max-h-[min(70dvh,32rem)] w-[min(32rem,calc(100vw-1rem))]">
             <Sheet.Dialog className="max-h-[min(70dvh,32rem)]">
               <Sheet.Handle />

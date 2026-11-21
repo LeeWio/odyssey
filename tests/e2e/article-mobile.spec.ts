@@ -51,11 +51,11 @@ test("keeps article reading usable on a narrow viewport", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Mobile reading article", exact: true })
   ).toBeVisible();
-  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+  await expect(page.locator("[data-article-body]")).toBeVisible();
   await expect(page.locator("[data-reading-content]")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
-  const codeBlock = page.locator(".ProseMirror pre").first();
+  const codeBlock = page.locator("[data-article-body] pre").first();
   await expect(codeBlock).toBeVisible();
   expect(await codeBlock.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
     true
@@ -69,7 +69,7 @@ test("keeps article reading usable on a narrow viewport", async ({ page }) => {
 
 async function openShareDialog(page: Page) {
   await page.goto("/single/mobile-reading");
-  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+  await expect(page.locator("[data-article-body]")).toBeVisible();
   await page.getByRole("button", { name: "Share article", exact: true }).press("Enter");
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
@@ -98,7 +98,7 @@ test("copies the current article URL from the share dialog", async ({ page, base
 test("places a heading anchor below the site navigation", async ({ page }) => {
   await page.goto("/single/mobile-reading");
   const heading = page
-    .locator(".ProseMirror")
+    .locator("[data-article-body]")
     .getByRole("heading", { name: "Chapter one", exact: true });
   await expect(heading).toHaveAttribute("id", "chapter-one");
 

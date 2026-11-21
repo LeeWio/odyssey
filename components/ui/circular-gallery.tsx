@@ -12,6 +12,7 @@ import { CircularGalleryViewport } from "./circular-gallery-viewport";
 
 export type GalleryItem = {
   image: string;
+  originalImage?: string;
   text?: string;
   description?: string;
   alt?: string;
@@ -575,7 +576,7 @@ const CircularGallery = ({
       }
       image.decoding = "async";
       image.onload = () => {
-        if (disposed || !textures.has(url)) return;
+        if (disposed || textures.get(url) !== entry) return;
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -600,7 +601,7 @@ const CircularGallery = ({
     };
 
     const prune = (list: GalleryItem[]) => {
-      const keep = new Set(list.map((item) => item.image));
+      const keep = new Set(list.flatMap((item) => [item.image, item.originalImage]));
       textures.forEach((entry, url) => {
         if (keep.has(url)) return;
         if (entry.texture) gl.deleteTexture(entry.texture);
@@ -673,7 +674,12 @@ const CircularGallery = ({
       for (let slot = first; slot <= lastSlot; slot++) {
         const index = wrap(slot, count);
         const item = list[index];
-        const entry = textureFor(item.image);
+        const preview = textureFor(item.image);
+        const original =
+          state.openTarget > 0 && slot === state.active && item.originalImage
+            ? textureFor(item.originalImage)
+            : null;
+        const entry = original?.ready === 1 ? original : preview;
         const focus = ease(state.focus.get(slot) || 0);
         let x = slot * spacing - scroll;
         x += Math.sign(x - activeX) * state.open * (1 - focus) * spread;

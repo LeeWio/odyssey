@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import messages from "../../messages/en.json";
+import messages from "../../messages/home/en.json";
 
 const retryLabel = (subject: string) =>
   messages.Home.errors.retryLabel.replace("{subject}", subject);

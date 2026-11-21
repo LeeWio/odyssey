@@ -1,7 +1,10 @@
 import type { Action, ThunkAction } from "@reduxjs/toolkit";
 import { combineSlices, configureStore } from "@reduxjs/toolkit";
-import { authSlice, localeSlice, overlaySlice, shellSlice } from "./features";
-import { baseApi } from "./api";
+import { authSlice } from "./features/auth/auth-slice";
+import { localeSlice } from "./features/locale/locale-slice";
+import { overlaySlice } from "./features/ui/overlay-slice";
+import { shellSlice } from "./features/ui/shell-slice";
+import { baseApi } from "./api/base-api";
 import { loadPersistedState, persistenceMiddleware } from "./middleware/persistence";
 
 // `combineSlices` automatically combines the reducers using

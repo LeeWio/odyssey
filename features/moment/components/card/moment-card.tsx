@@ -167,9 +167,21 @@ export const MomentCard = ({
   }, [moment]);
 
   // Image URLs and structural formatting for Carousel Modal
-  const imageUrls = useMemo(() => {
-    return moment?.images?.slice(0, 8).map((img) => img.fileUrl) || [];
-  }, [moment]);
+  const imagePreviews = useMemo(
+    () =>
+      (moment?.images ?? []).slice(0, 8).map((image) => {
+        const hasDimensions = (image.width ?? 0) > 0 && (image.height ?? 0) > 0;
+        return {
+          url: image.thumbnailUrl || image.fileUrl,
+          originalUrl:
+            image.thumbnailUrl && image.thumbnailUrl !== image.fileUrl ? image.fileUrl : undefined,
+          alt: image.altText,
+          width: hasDimensions ? (image.width ?? undefined) : undefined,
+          height: hasDimensions ? (image.height ?? undefined) : undefined,
+        };
+      }),
+    [moment]
+  );
 
   const carouselImages = useMemo(() => {
     return (
@@ -207,10 +219,8 @@ export const MomentCard = ({
 
       {/* 2. Card Content */}
       <CardContent
-        momentId={moment?.id ?? "default"}
         parsedContent={parsedContent}
-        imageUrls={imageUrls}
-        imageAltTexts={moment?.images?.map((image) => image.altText)}
+        images={imagePreviews}
         mediaLayout={mediaLayout}
         linkTopics={interactive}
         topics={moment?.topics ?? []}

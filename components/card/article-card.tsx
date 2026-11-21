@@ -94,7 +94,7 @@ function ArticleAuthor({
 }
 
 export function ArticleCard({
-  animatedCover = true,
+  animatedCover = false,
   layout = "row",
   post,
 }: {
@@ -126,7 +126,12 @@ export function ArticleCard({
             : "relative isolate min-h-56 w-full shrink-0 overflow-hidden rounded-2xl sm:min-h-64 md:min-h-0 md:w-48 lg:w-52"
         }
       >
-        <ArticleCover animated={animatedCover} presetId={post.shaderPreset} seed={seed} />
+        <ArticleCover
+          animated={animatedCover}
+          presetId={post.shaderPreset}
+          seed={seed}
+          src={post.coverImage}
+        />
         {post.category?.name ? (
           <Chip className="absolute top-3 left-3" size="sm">
             {post.category.name}

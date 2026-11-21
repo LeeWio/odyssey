@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 
 import { articles, designArticle } from "./articles";
+import { featured, stories } from "./journal";
 
 const origin = new URL(process.env.E2E_FIXTURE_ORIGIN ?? "http://127.0.0.1:3181");
 const blogPosts = "/api/v1/public/blog/posts";
@@ -31,12 +32,22 @@ createServer((request, response) => {
     pathname === `${blogPosts}/featured` ||
     pathname === `${blogPosts}/digest`
   ) {
+    const keyword = url.searchParams.get("keyword")?.toLowerCase();
+    const categoryId = url.searchParams.get("categoryId");
+    const page = Number(url.searchParams.get("page")) || 0;
+    const size = Number(url.searchParams.get("size")) || 12;
+    const pool = pathname.endsWith("/featured") ? featured : [...stories, designArticle];
+    const matching = pool.filter(
+      (post) =>
+        (!keyword || `${post.title} ${post.slug}`.toLowerCase().includes(keyword)) &&
+        (!categoryId || String(post.category?.id) === categoryId)
+    );
     return send(200, {
-      list: [designArticle],
-      total: 1,
-      page: 0,
-      size: Number(url.searchParams.get("size")) || 12,
-      totalPages: 1,
+      list: matching.slice(page * size, (page + 1) * size),
+      total: matching.length,
+      page,
+      size,
+      totalPages: Math.ceil(matching.length / size),
     });
   }
   if (pathname.startsWith(`${blogPosts}/`)) {

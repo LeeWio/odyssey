@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Button, Link, Tag, TagGroup } from "@heroui/react";
+import { Button, Link, Skeleton, Tag, TagGroup } from "@heroui/react";
 import type { MomentTopicResponse } from "@/lib/features/moment";
 import type { JSONContent } from "@tiptap/core";
 import { getTransformStyles } from "../../utils/transform-styles";
@@ -10,8 +10,16 @@ import { useTranslations } from "next-intl";
 import { NaturalImage } from "./natural-image";
 import { motion } from "motion/react";
 import { momentLayoutTransition, useMomentMotion } from "../feed-motion";
+import { DeferredContent } from "@/components/layout/deferred-content";
 
-const CircularGallery = dynamic(() => import("@/components/ui/circular-gallery"), { ssr: false });
+const CircularGallery = dynamic(() => import("@/components/ui/circular-gallery"), {
+  ssr: false,
+  loading: GalleryPlaceholder,
+});
+
+function GalleryPlaceholder() {
+  return <Skeleton className="h-full w-full" aria-hidden />;
+}
 
 const BounceCards = dynamic(() => import("@/components/ui/bounce-cards"), {
   ssr: false,
@@ -26,11 +34,17 @@ const StockTrendCard = dynamic(
   }
 );
 
+export interface MomentImagePreview {
+  url: string;
+  originalUrl?: string;
+  alt?: string | null;
+  width?: number;
+  height?: number;
+}
+
 interface CardContentProps {
-  momentId: string | number;
   parsedContent: JSONContent;
-  imageUrls: string[];
-  imageAltTexts?: string[];
+  images: MomentImagePreview[];
   mediaLayout?: "stacked" | "natural";
   topics: MomentTopicResponse[];
   onCardClick?: (index: number) => void;
@@ -73,8 +87,7 @@ const getDynamicContainerHeight = (count: number) => {
 
 export const CardContent = ({
   parsedContent,
-  imageUrls,
-  imageAltTexts,
+  images,
   mediaLayout = "stacked",
   topics,
   onCardClick,
@@ -83,7 +96,7 @@ export const CardContent = ({
 }: CardContentProps) => {
   const t = useTranslations("Moments");
   const { enabled, reduced } = useMomentMotion();
-  const count = imageUrls.length;
+  const count = images.length;
 
   return (
     <motion.div
@@ -103,23 +116,28 @@ export const CardContent = ({
         </TagGroup>
       )}
 
-      {count >= 4 ? (
-        <div className="h-80 w-full">
+      {count >= 4 && onCardClick ? (
+        <DeferredContent className="h-80 w-full" fallback={<GalleryPlaceholder />}>
           <CircularGallery
             expandOnOpen
-            items={imageUrls.map((image, index) => ({
-              image,
-              alt: imageAltTexts?.[index] || t("imageAlt"),
+            items={images.map(({ url, originalUrl, alt }) => ({
+              image: url,
+              originalImage: originalUrl,
+              alt: alt || t("imageAlt"),
             }))}
           />
-        </div>
-      ) : count > 0 && mediaLayout === "natural" ? (
-        <div className="flex min-w-0 flex-col gap-3">
-          {imageUrls.map((url, index) => {
+        </DeferredContent>
+      ) : count > 0 && (mediaLayout === "natural" || !onCardClick) ? (
+        <div
+          className={count >= 4 ? "grid min-w-0 grid-cols-2 gap-3" : "flex min-w-0 flex-col gap-3"}
+        >
+          {images.map(({ url, alt, width, height }, index) => {
             const image = (
               <NaturalImage
                 src={url}
-                alt={imageAltTexts?.[index] || t("imageAlt")}
+                alt={alt || t("imageAlt")}
+                width={width}
+                height={height}
                 interactive={Boolean(onCardClick)}
                 bounded={count === 1}
               />
@@ -129,7 +147,7 @@ export const CardContent = ({
               <Button
                 key={`${url}-${index}`}
                 aria-label={t("openImage", { index: index + 1, total: count })}
-                className="block h-auto w-full min-w-0 overflow-visible rounded-lg p-0"
+                className="block h-auto w-full min-w-0 overflow-visible"
                 variant="ghost"
                 onPress={() => onCardClick(index)}
               >
@@ -143,7 +161,7 @@ export const CardContent = ({
       ) : count > 0 ? (
         <div className="flex w-full justify-center">
           <BounceCards
-            images={imageUrls}
+            images={images.map(({ url }) => url)}
             cardSize={getDynamicCardSize(count)}
             containerWidth={280}
             containerHeight={getDynamicContainerHeight(count)}

@@ -1,4 +1,4 @@
-import { ARTICLE_OUTLINE_TOP_OFFSET } from "@/components/rich-text/extensions/table-of-contents";
+import { ARTICLE_OUTLINE_TOP_OFFSET } from "@/lib/reading-scroll";
 
 /** Place a library or outline heading just below the sticky site header. */
 export function scrollReadingAnchorIntoView(id: string) {

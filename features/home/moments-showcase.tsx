@@ -12,26 +12,25 @@ import {
   HOME_SECTION_DESCRIPTION,
   HOME_SECTION_HEADER_CENTERED,
   HOME_SECTION_TITLE,
+  MOMENTS_SHOWCASE_LIMIT,
 } from "./layout";
 
 import { MomentsMasonry } from "./moments-masonry";
+import { SectionLoadError } from "./section-load-error";
 
-export const MOMENTS_SHOWCASE_LIMIT = 18;
-
-export function MomentsShowcase({ moments }: { moments: MomentResponse[] }) {
+export function MomentsShowcase({ moments }: { moments: MomentResponse[] | null }) {
   const t = useTranslations("Home");
   const shouldReduceMotion = useReducedMotionPreference();
   const { revealInView } = createPageReveal(shouldReduceMotion);
   const query = useGetPublicMomentsQuery(
     { page: 0, size: MOMENTS_SHOWCASE_LIMIT },
-    { skip: moments.length > 0 }
+    { skip: moments !== null }
   );
-  const recentMoments = (moments.length > 0 ? moments : (query.data?.list ?? [])).slice(
-    0,
-    MOMENTS_SHOWCASE_LIMIT
-  );
+  const recentMoments = (moments ?? query.data?.list ?? []).slice(0, MOMENTS_SHOWCASE_LIMIT);
 
-  if (recentMoments.length === 0) return null;
+  const showError =
+    query.isError || (query.isFetching && !query.isLoading && !recentMoments.length);
+  if (recentMoments.length === 0 && !showError) return null;
 
   return (
     <Section id="moments-showcase" aria-labelledby="moments-showcase-title">
@@ -61,7 +60,15 @@ export function MomentsShowcase({ moments }: { moments: MomentResponse[] }) {
       </header>
 
       <div className={HOME_SECTION_CONTENT}>
-        <MomentsMasonry moments={recentMoments} />
+        {showError ? (
+          <SectionLoadError
+            subject="moments"
+            hasContent={recentMoments.length > 0}
+            isRetrying={query.isFetching}
+            onRetry={() => void query.refetch()}
+          />
+        ) : null}
+        {recentMoments.length ? <MomentsMasonry moments={recentMoments} /> : null}
       </div>
     </Section>
   );

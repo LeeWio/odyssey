@@ -18,7 +18,7 @@ declare global {
 
 const fixture = readFileSync("public/zelda-landscape.jpg");
 
-async function prepare(page: Page, missingPhoto = false) {
+async function prepare(page: Page, missingPhoto = false, thumbnails = false) {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
     window.circularGalleryChecks = [];
@@ -71,6 +71,7 @@ async function prepare(page: Page, missingPhoto = false) {
     } as typeof original;
   });
   const imageRequests: string[] = [];
+  const preview = thumbnails ? await sharp(fixture).resize(320).jpeg().toBuffer() : fixture;
   await page.route("**/api/v1/**", (route) => {
     const path = new URL(route.request().url()).pathname;
     if (path.startsWith("/api/v1/public/files/circular-")) {
@@ -81,7 +82,10 @@ async function prepare(page: Page, missingPhoto = false) {
         return route.fulfill({ status: 403, body: "Invalid CORS request" });
       if (missingPhoto && path.endsWith("-2.jpg"))
         return route.fulfill({ status: 404, body: "File missing" });
-      return route.fulfill({ contentType: "image/jpeg", body: fixture });
+      return route.fulfill({
+        contentType: "image/jpeg",
+        body: path.includes("-thumb-") ? preview : fixture,
+      });
     }
     const data =
       path === "/api/v1/public/moments"
@@ -100,7 +104,9 @@ async function prepare(page: Page, missingPhoto = false) {
                   fileId: index + 1,
                   originalName: `photo-${index}.jpg`,
                   fileUrl: `/api/v1/public/files/circular-${index}.jpg`,
-                  thumbnailUrl: null,
+                  thumbnailUrl: thumbnails
+                    ? `/api/v1/public/files/circular-thumb-${index}.jpg`
+                    : null,
                   width: 1200,
                   height: 800,
                   altText: `Photo ${index + 1}`,
@@ -238,7 +244,7 @@ for (const width of [390, 1440]) {
       await inline.scrollIntoViewIfNeeded();
       const before = await inline.boundingBox();
       const scroll = await page.evaluate(() => scrollY);
-      await inline.click({ position: { x: before!.width / 2, y: before!.height / 2 } });
+      await inline.click();
       const dialog = page.getByRole("dialog", { name: "Image gallery", exact: true });
       const expanded = dialog.locator("canvas");
       await expect(dialog).toBeVisible();
@@ -303,11 +309,13 @@ test("keyboard opening, close-button dismissal, arc and wave rendering keep the 
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await prepare(page);
+  const requests = await prepare(page, false, true);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/moments?topic=circular-fixture&view=grid");
   const canvas = page.locator("#moment-944 canvas");
   await expect(canvas).toBeVisible();
+  await expect.poll(() => requests.length).toBe(4);
+  expect(requests.every((url) => url.includes("-thumb-"))).toBe(true);
   await expect
     .poll(() => page.evaluate(() => window.circularGalleryChecks[0]?.peakAngle))
     .toBeGreaterThan(0);
@@ -317,6 +325,9 @@ test("keyboard opening, close-button dismissal, arc and wave rendering keep the 
   await page.keyboard.press("Enter");
   const dialog = page.getByRole("dialog", { name: "Image gallery", exact: true });
   await expect(dialog.locator("canvas")).toBeVisible();
+  await expect
+    .poll(() => requests.filter((url) => !url.includes("-thumb-")))
+    .toEqual(["/api/v1/public/files/circular-0.jpg"]);
   await page.evaluate(() => {
     window.circularGalleryChecks[0].peakWave = 0;
   });

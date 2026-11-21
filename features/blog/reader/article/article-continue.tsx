@@ -138,11 +138,7 @@ export function ArticleContinue({
                             style={{ backgroundImage: `url("${item.coverImage}")` }}
                           />
                         ) : item.shaderPreset ? (
-                          <ArticleCover
-                            presetId={item.shaderPreset}
-                            scheduled={false}
-                            seed={item.slug}
-                          />
+                          <ArticleCover presetId={item.shaderPreset} seed={item.slug} />
                         ) : (
                           <FileText className="text-muted size-4" />
                         )}

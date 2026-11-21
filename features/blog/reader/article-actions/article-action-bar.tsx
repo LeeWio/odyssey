@@ -3,6 +3,7 @@
 import { ActionBar as Bar } from "@heroui-pro/react";
 import { Separator } from "@heroui/react";
 import { useTranslations } from "next-intl";
+import { useMounted } from "@mantine/hooks";
 import { useEffect, useRef, useState, type RefObject } from "react";
 
 import { CollectionMenu } from "./collection-menu";
@@ -15,17 +16,24 @@ import type { Target } from "./target";
 import { useEngagement } from "./use-engagement";
 import { useVisibility } from "./use-visibility";
 
-export function ArticleActionBar({
-  article,
-  articleEndRef,
-  isRefreshing = false,
-  onProgress,
-}: {
+interface ArticleActionBarProps {
   article: Target;
   articleEndRef: RefObject<HTMLElement | null>;
   isRefreshing?: boolean;
   onProgress?: (progress: number) => void;
-}) {
+}
+
+export function ArticleActionBar(props: ArticleActionBarProps) {
+  const mounted = useMounted();
+  return mounted ? <ReadingActions {...props} /> : null;
+}
+
+function ReadingActions({
+  article,
+  articleEndRef,
+  isRefreshing = false,
+  onProgress,
+}: ArticleActionBarProps) {
   const t = useTranslations("Article");
   const rootRef = useRef<HTMLDivElement>(null);
   const [isFocusWithin, setIsFocusWithin] = useState(false);

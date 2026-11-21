@@ -1,29 +1,23 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import {
+  articleCoverBackdrop,
   presetForSeed,
   resolveArticleShaderPreset,
 } from "@/components/shader-background/article-shader-presets";
+import { ArticleAmbientBackground } from "./article-ambient-background";
 
 describe("ArticleAmbientBackground", () => {
-  it("keeps a blurred shader behind the reading page", () => {
-    const source = readFileSync(
-      join(dirname(fileURLToPath(import.meta.url)), "article-ambient-background.tsx"),
-      "utf8"
-    );
-    expect(source).toContain("<ShaderBackground");
-    expect(source).toContain("speed * 0.4");
-    expect(source).toContain("[&_canvas]:[filter:blur(64px)_saturate(1.5)]");
-    expect(source).toContain("bg-background/72");
-    expect(source).toContain(
-      "radial-gradient(ellipse at center, var(--background) 0%, transparent 68%)"
-    );
-    expect(source).not.toContain("bg-[radial-gradient");
-    expect(source).not.toContain("ShaderBackgroundView");
-    expect(source).not.toContain("preset.swatch");
+  it("paints the selected backdrop and contrast layer without a canvas", () => {
+    const slug = "memories-of-grandpa";
+    const presetId = "mesh-aurora";
+    const preset = resolveArticleShaderPreset(presetId, slug);
+    const html = renderToStaticMarkup(createElement(ArticleAmbientBackground, { slug, presetId }));
+    expect(html).toContain(articleCoverBackdrop(preset));
+    expect(html).toContain("bg-background/72");
+    expect(html).not.toContain("<canvas");
   });
 });
 

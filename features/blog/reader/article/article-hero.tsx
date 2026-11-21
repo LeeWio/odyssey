@@ -2,45 +2,11 @@
 
 import { Calendar, Clock } from "@gravity-ui/icons";
 import { Avatar, Chip, Link, Typography } from "@heroui/react";
-import { motion, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import type { ReactNode } from "react";
 import { ArticleAmbientBackground } from "@/features/blog/reader/article-ambient-background";
 import { type PostResponse } from "@/lib/features/post";
 import { getPostPublishedAt } from "@/lib/features/post/post-dates";
 import { useArticleReadingMinutes } from "./article-outline";
-
-const REVEAL_EASE = [0.16, 1, 0.3, 1] as const;
-const REVEAL_DURATION = 0.8;
-const REVEAL_GAP = 0.1;
-
-function MaskReveal({
-  children,
-  className,
-  index,
-}: {
-  children: ReactNode;
-  className?: string;
-  index: number;
-}) {
-  const reduced = useReducedMotion();
-
-  return (
-    <div className={`overflow-hidden pb-[0.08em] ${className ?? ""}`}>
-      <motion.div
-        initial={reduced ? false : { y: "110%", opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={
-          reduced
-            ? { duration: 0 }
-            : { duration: REVEAL_DURATION, delay: index * REVEAL_GAP, ease: REVEAL_EASE }
-        }
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
-}
 
 function formatDate(value: string | null, locale: string, fallback: string) {
   if (!value) return fallback;
@@ -74,40 +40,32 @@ export function ArticleHero({ article }: { article: PostResponse }) {
 
   const publishedLabel = formatDate(publishedAt, locale, t("recentlyPublished"));
 
-  const titleIndex = category ? 1 : 0;
-  const summaryIndex = titleIndex + (article.summary ? 1 : 0);
-  const metaIndex = summaryIndex + 1;
-
   return (
     <header className="relative mb-12 w-full max-w-none md:mb-16">
       <ArticleAmbientBackground presetId={article.shaderPreset} slug={article.slug} />
 
       <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center pt-28 pb-8 text-center md:pt-32">
         {category ? (
-          <MaskReveal index={0}>
-            <Chip size="sm" variant="soft">
-              <Link href={`/single/categories/${encodeURIComponent(category.slug)}`}>
-                {category.name}
-              </Link>
-            </Chip>
-          </MaskReveal>
+          <Chip size="sm" variant="soft">
+            <Link href={`/single/categories/${encodeURIComponent(category.slug)}`}>
+              {category.name}
+            </Link>
+          </Chip>
         ) : null}
 
-        <MaskReveal className="mt-6" index={titleIndex}>
-          <h1 className="max-w-3xl text-4xl leading-[1.15] font-semibold text-balance wrap-break-word sm:text-5xl">
-            {article.title}
-          </h1>
-        </MaskReveal>
+        <h1 className="mt-6 max-w-3xl text-4xl leading-[1.15] font-semibold text-balance wrap-break-word sm:text-5xl">
+          {article.title}
+        </h1>
 
         {article.summary ? (
-          <MaskReveal className="mt-5" index={summaryIndex}>
+          <div className="mt-5">
             <p className="text-muted max-w-3xl text-base leading-7 text-pretty sm:text-lg">
               {article.summary}
             </p>
-          </MaskReveal>
+          </div>
         ) : null}
 
-        <MaskReveal className="mt-8" index={metaIndex}>
+        <div className="mt-8">
           <div className="flex flex-col items-center gap-3">
             {article.authorName?.trim() ? (
               <Link
@@ -138,19 +96,17 @@ export function ArticleHero({ article }: { article: PostResponse }) {
                 <time dateTime={publishedAt ?? undefined}>{publishedLabel}</time>
               </span>
               {minutes == null ? null : (
-                <MaskReveal index={0}>
-                  <span className="inline-flex items-center gap-2">
-                    <span aria-hidden="true">·</span>
-                    <span className="inline-flex items-center gap-1.5 tabular-nums">
-                      <Clock className="size-3.5" />
-                      {t("minRead", { count: minutes })}
-                    </span>
+                <span className="inline-flex items-center gap-2">
+                  <span aria-hidden="true">·</span>
+                  <span className="inline-flex items-center gap-1.5 tabular-nums">
+                    <Clock className="size-3.5" />
+                    {t("minRead", { count: minutes })}
                   </span>
-                </MaskReveal>
+                </span>
               )}
             </div>
           </div>
-        </MaskReveal>
+        </div>
       </div>
     </header>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardPage } from "@/features/dashboard/route-entries";
+import { DashboardMessages } from "@/features/dashboard/dashboard-messages";
 import { useMounted } from "@mantine/hooks";
 import { Skeleton } from "@heroui/react";
 import { PageContainer } from "@/components/layout/page-container";
@@ -21,7 +22,9 @@ export default function DedicatedDashboardRoute() {
 
   return (
     <div className="bg-background min-h-[100dvh] w-full pt-20 pb-16">
-      <DashboardPage />
+      <DashboardMessages>
+        <DashboardPage />
+      </DashboardMessages>
     </div>
   );
 }

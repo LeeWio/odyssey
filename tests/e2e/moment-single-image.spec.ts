@@ -99,6 +99,9 @@ for (const viewport of [
       const landscape = page
         .locator("#moment-302")
         .getByAltText("landscape photo 1", { exact: true });
+      await expect
+        .poll(() => landscape.evaluate((element) => element.getBoundingClientRect().height))
+        .toBeLessThanOrEqual(budget + 1);
       const landscapeBox = (await landscape.boundingBox())!;
       expect(landscapeBox.height / landscapeBox.width).toBeCloseTo(2 / 3, 2);
       expect(landscapeBox.height).toBeLessThanOrEqual(budget + 1);

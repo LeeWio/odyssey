@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 
-import { readingHtml } from "@/components/rich-text/reading-html";
+import { getTranslations } from "next-intl/server";
+import {
+  ArticleReadingDocument,
+  prepareArticleReading,
+} from "@/features/blog/reader/article/article-reading-document";
 import { ArticlePageClient } from "@/features/blog/route-entries";
 import { getPublicArticle } from "@/lib/features/post/server";
 
@@ -17,10 +21,16 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     throw new Error("Article request failed");
   }
 
+  const t = await getTranslations("Article");
+  const document = prepareArticleReading(result.article.content, result.article.contentType);
   return (
     <ArticlePageClient
-      initialArticle={result.article}
-      readingHtml={readingHtml(result.article.content, result.article.contentType)}
+      initialArticle={{ ...result.article, content: null, translations: undefined }}
+      outline={
+        document?.headings.length ? { label: t("onThisPage"), items: document.headings } : null
+      }
+      readingMinutes={document?.minutes ?? null}
+      body={<ArticleReadingDocument document={document} fallback={t("unsupportedContent")} />}
       slug={slug}
     />
   );

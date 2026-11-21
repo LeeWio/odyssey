@@ -1,0 +1,231 @@
+{
+  "Home": {
+    "hero": {
+      "helloLabel": "你好"
+    },
+    "orientation": {
+      "regionLabel": "站点入口",
+      "eyebrow": "从这里开始",
+      "dismiss": "关闭入口提示",
+      "title": "三扇诚实的门",
+      "description": "写作、地方，以及桌上的工具。",
+      "writing": "读文章",
+      "footprints": "看足迹",
+      "tools": "看工具"
+    },
+    "explore": {
+      "eyebrow": "探索",
+      "title": "找到你的 Odyssey 路线。",
+      "description": "写作、动态、项目、地方，以及那些值得再次回来的内容。",
+      "viewArchive": "浏览归档",
+      "writing": {
+        "title": "所思所写",
+        "description": "有些想法，值得多写几行。"
+      },
+      "moments": {
+        "title": "闲言碎语",
+        "description": "想到哪里，就说到哪里。"
+      },
+      "projects": {
+        "title": "项目",
+        "description": "已经交付的工具与实验。"
+      },
+      "gallery": {
+        "title": "图库",
+        "description": "照片、地方和视觉碎片。"
+      },
+      "footprints": {
+        "title": "足迹",
+        "description": "一张记录留下痕迹之处的地图。"
+      },
+      "library": {
+        "title": "阅读书架",
+        "description": "收藏、整理，再次回到好内容。"
+      }
+    },
+    "writing": {
+      "recently": "最近",
+      "readEssay": "阅读",
+      "eyebrow": "写作",
+      "title": "所思所写",
+      "description": "有些想法，值得多写几行。",
+      "browseAll": "查看全部",
+      "fallbackSummary": "来自归档的一则笔记。",
+      "fallbackCategory": "随笔"
+    },
+    "moments": {
+      "eyebrow": "动态",
+      "title": "闲言碎语",
+      "description": "想到哪里，就说到哪里。"
+    },
+    "projects": {
+      "coverAlt": "{name} 的封面",
+      "fallbackDescription": "一次放出来的实践。",
+      "openProject": "打开项目",
+      "source": "源码",
+      "eyebrow": "项目",
+      "title": "已经交出去的东西",
+      "description": "工具、实验，以及离开笔记本的作品。",
+      "exploreAll": "查看全部",
+      "loading": "正在加载项目",
+      "errorTitle": "项目暂时安静了一下。",
+      "errorDescription": "现在加载不出来。",
+      "retry": "重试"
+    },
+    "page": {
+      "eyebrow": "一本私人的野外日志",
+      "title": "一本还在动的笔记。",
+      "subtitle": "软件、市场、音乐，以及塑造这些作品的习惯。",
+      "readWriting": "阅读所思所写",
+      "exploreField": "探索这里",
+      "prologue": "序章 · 01",
+      "prologueBody": "从手边的东西开始。一首还在放的歌，一个还在动的市场，一个还没写完的想法。"
+    },
+    "guestbook": {
+      "decorationAlt": "留言装饰动画",
+      "openComposer": "打开留言编辑器",
+      "eyebrow": "留言",
+      "open": "打开留言簿",
+      "lineOne": "既然你来了，",
+      "lineTwo": "告诉我你在想什么。",
+      "signInTitle": "登录后可以留言",
+      "signInDescription": "阅读对所有人开放。登录后可以留下笔记或回复。",
+      "signInToWrite": "登录后书写",
+      "signTitle": "签下留言",
+      "signHint": "在墙上留一句话，记下这次到访。阅读对所有人开放，书写需要先登录。",
+      "close": "关闭",
+      "beforeYouGo": "离开之前",
+      "messageLabel": "留言内容",
+      "placeholder": "写给下一个来的人……",
+      "characters": "字数：{count} / 280",
+      "cancel": "取消",
+      "posting": "发送中...",
+      "submit": "提交",
+      "postFailed": "留言没有发出去，请再试一次。"
+    },
+    "faq": {
+      "eyebrow": "问答",
+      "title": "几个常被问到的问题。",
+      "description": "把容易出现的问题先回答在这里。",
+      "finished": {
+        "title": "这个网站做完了吗？",
+        "subtitle": "大概永远不会，这正是它的意思",
+        "content": "这个站点是一场持续的实验。我会不断打磨交互、加入新想法，也会在尝试新东西时偶尔弄坏一点。"
+      },
+      "reply": {
+        "title": "回复有多快？",
+        "subtitle": "通常几天之内",
+        "content": "每条消息我都会自己看。回复可能要一点时间，但通常几天之内会回到你。"
+      },
+      "building": {
+        "title": "喜欢做什么样的东西？",
+        "subtitle": "设计、技术，以及两者之间",
+        "content": "我被那些把设计、技术和叙事放在一起的数字体验吸引，尤其是还留有实验余地的想法。"
+      },
+      "desk": {
+        "title": "桌上有什么？",
+        "subtitle": "一套设备，少一些转接头",
+        "content": "桌子上是一整套 Apple：Mac、iPhone、AirPods。安静本身就是工具。聊天可以等，关上门才能把事情做完。"
+      },
+      "trace": {
+        "title": "怎么留下痕迹？",
+        "subtitle": "去留言簿签个名",
+        "content": "阅读对所有人开放。如果想记下这次到访，登录后在留言墙上留一句短话。每条我都会看。"
+      }
+    },
+    "footprints": {
+      "eyebrow": "一路走来",
+      "title": "记忆地图",
+      "description": "走过的地方，留下的时光。",
+      "cardTitle": "足迹",
+      "cardDescription": "留在地图上的地方",
+      "places": "地方",
+      "years": "年份",
+      "latest": "最近"
+    },
+    "links": {
+      "eyebrow": "同道",
+      "title": "有朋自远方",
+      "description": "各在一方，亦有共鸣。",
+      "loading": "正在加载友链",
+      "visitSite": "访问{name}（在新窗口打开）",
+      "unavailable": "暂时无法加载友链。",
+      "retry": "重试",
+      "empty": "暂时还没有公开的友链。"
+    },
+    "persona": {
+      "eyebrow": "近来",
+      "title": "手头的事",
+      "description": "人、桌子、工作，还有墙上的句子。",
+      "sections": "近来的几块",
+      "about": "人",
+      "tools": "桌子",
+      "work": "工作",
+      "guestbook": "墙上",
+      "guestbookTitle": "留在墙上的",
+      "guestbookLine": "来过的人写的短句。"
+    },
+    "lately": {
+      "sectionLabel": "近况",
+      "sectionTitle": "此时此刻",
+      "sectionDescription": "一些近况，一些日常",
+      "trackBadge": "循环播放",
+      "trackEyebrow": "最近喜欢",
+      "listeningLabel": "正在听",
+      "trackTitle": "一首想留下的歌。",
+      "trackDescription": "来自我的常听曲目。当前页面暂不提供播放。",
+      "streamingStatus": "暂不提供播放",
+      "fieldSignal": "现场信号 · 实时",
+      "marketTitle": "看着，但不着急。",
+      "marketDescription": "一个小的市场信号，放在上下文里看，而不是单独看。",
+      "loadingMarket": "正在加载纳斯达克行情",
+      "today": "今日",
+      "marketUnavailable": "行情数据暂不可用",
+      "marketUnavailableHint": "暂时无法获取最新的纳斯达克指数。",
+      "trainingEyebrow": "公开构建",
+      "trainingTitle": "网站背后的工作",
+      "trainingDescription": "近期公开的 GitHub 动态，包括提交、仓库和代码审查。",
+      "trainingQuote": "记录改动、已经交付的内容，以及仍在进行中的工作。",
+      "commits": "提交",
+      "repositories": "仓库",
+      "reviews": "审查",
+      "periodFallback": "本周期",
+      "repositoriesWithCommits": "有提交的仓库",
+      "codeReviews": "代码审查",
+      "telemetryUnavailable": "GitHub 动态暂不可用",
+      "telemetryUnavailableHint": "现在无法加载提交和审查数量。",
+      "developmentLog": "开发记录",
+      "activityCommitCount": "{count} 次提交",
+      "activityCommittedAcross": "在 {count} 个项目中提交了代码",
+      "activityCommentCount": "{count} 条评论",
+      "activityMergedPullRequest": "在 {repository} 合并了一个拉取请求",
+      "activityIssueCount": "{count} 个问题",
+      "activityOpenedIssues": "在 {repositories} 个项目中创建了 {count} 个问题",
+      "activityReviewCount": "{count} 次审查",
+      "activityReviewedPullRequests": "在 {repositories} 个项目中审查了 {count} 个拉取请求",
+      "activityIssueOpened": "新建 {count}",
+      "activityIssueClosed": "已关闭 {count}",
+      "activityIssueOpen": "未关闭 {count}",
+      "buildTitle": "手头在做的事",
+      "buildDescription": "Code is cheap. Show me the talk.",
+      "loadingGithub": "正在加载 GitHub 仓库动态",
+      "githubUnavailable": "GitHub 动态暂时不可用",
+      "githubUnavailableHint": "公开动态现在加载不出来。"
+    },
+    "globe": {
+      "label": "世界各地的地方和人",
+      "activeNow": "正在活动"
+    },
+    "errors": {
+      "writing": "文章",
+      "moments": "动态",
+      "refresh": "无法刷新{subject}。",
+      "load": "无法加载{subject}。",
+      "browseBelow": "下面的内容仍然可以浏览。",
+      "tryLater": "请稍后再试。",
+      "retryLabel": "重新加载{subject}",
+      "trying": "正在重试…",
+      "retry": "重试"
+    }
+  }
+}

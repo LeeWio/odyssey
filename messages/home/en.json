@@ -1,0 +1,231 @@
+{
+  "Home": {
+    "hero": {
+      "helloLabel": "Hello"
+    },
+    "orientation": {
+      "regionLabel": "Site orientation",
+      "eyebrow": "Start here",
+      "dismiss": "Dismiss orientation",
+      "title": "Three honest doors",
+      "description": "Writing, places, and the tools on the desk.",
+      "writing": "Read writing",
+      "footprints": "Open footprints",
+      "tools": "See tools"
+    },
+    "explore": {
+      "eyebrow": "Explore",
+      "title": "Find your way through Odyssey.",
+      "description": "Writing, moments, projects, places, and the things worth returning to.",
+      "viewArchive": "Browse the archive",
+      "writing": {
+        "title": "Essays & Notes",
+        "description": "Ideas given a little more room."
+      },
+      "moments": {
+        "title": "This & That",
+        "description": "Bits and pieces of everyday life."
+      },
+      "projects": {
+        "title": "Projects",
+        "description": "Tools and experiments that shipped."
+      },
+      "gallery": {
+        "title": "Gallery",
+        "description": "Images, places, and visual fragments."
+      },
+      "footprints": {
+        "title": "Footprints",
+        "description": "A map of places that left a mark."
+      },
+      "library": {
+        "title": "Reading library",
+        "description": "Save, collect, and return to good work."
+      }
+    },
+    "writing": {
+      "recently": "Recently",
+      "readEssay": "Read",
+      "eyebrow": "Writing",
+      "title": "Essays & Notes",
+      "description": "Ideas given a little more room.",
+      "browseAll": "Browse all",
+      "fallbackSummary": "A note from the archive.",
+      "fallbackCategory": "Essay"
+    },
+    "moments": {
+      "eyebrow": "Moments",
+      "title": "This & That",
+      "description": "Bits and pieces of everyday life."
+    },
+    "projects": {
+      "coverAlt": "Cover for {name}",
+      "fallbackDescription": "A practical experiment, released into the open.",
+      "openProject": "Open project",
+      "source": "Source",
+      "eyebrow": "Projects",
+      "title": "Things I have shipped",
+      "description": "Tools, experiments, and work that left the notebook.",
+      "exploreAll": "Explore all",
+      "loading": "Loading projects",
+      "errorTitle": "Projects are taking a quiet moment.",
+      "errorDescription": "They could not be loaded right now.",
+      "retry": "Try again"
+    },
+    "page": {
+      "eyebrow": "A personal field journal",
+      "title": "A living notebook, kept in motion.",
+      "subtitle": "Software, markets, music, and the habits that shape the work.",
+      "readWriting": "Read essays and notes",
+      "exploreField": "Explore the field",
+      "prologue": "Prologue · 01",
+      "prologueBody": "Begin with what is close at hand. A song still playing, a market moving, a thought not yet finished."
+    },
+    "guestbook": {
+      "decorationAlt": "Guestbook decorative animation",
+      "openComposer": "Open guestbook composer",
+      "eyebrow": "Guestbook",
+      "open": "Open the guestbook",
+      "lineOne": "Since you're here,",
+      "lineTwo": "tell me what's on your mind.",
+      "signInTitle": "Sign in to add an entry",
+      "signInDescription": "Reading is open to everyone. Sign in to leave a note or reply.",
+      "signInToWrite": "Sign in to write",
+      "signTitle": "Sign the Guestbook",
+      "signHint": "Leave a message on the wall to mark your visit. Reading is open to everyone, but writing requires a quick sign-in.",
+      "close": "Close",
+      "beforeYouGo": "Before You Go",
+      "messageLabel": "Guestbook message",
+      "placeholder": "Write something for the next explorer...",
+      "characters": "Characters: {count} / 280",
+      "cancel": "Cancel",
+      "posting": "Posting...",
+      "submit": "Submit",
+      "postFailed": "Unable to post your guestbook entry. Please try again."
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Questions, answered.",
+      "description": "Some answers to questions that tend to come up.",
+      "finished": {
+        "title": "Is This Website Finished?",
+        "subtitle": "Probably never — and that’s the point",
+        "content": "This site is an ongoing experiment. I’m constantly refining interactions, adding new ideas, and occasionally breaking things while trying something new."
+      },
+      "reply": {
+        "title": "How Fast Do You Reply?",
+        "subtitle": "Usually within a few days",
+        "content": "I read every message myself. Replies may take a little time, but I’ll usually get back to you within a few days."
+      },
+      "building": {
+        "title": "What Do You Like Building?",
+        "subtitle": "Design, technology, and everything in between",
+        "content": "I’m drawn to digital experiences where thoughtful design, technology, and storytelling come together — especially ideas that leave room for experimentation."
+      },
+      "desk": {
+        "title": "What’s on the Desk?",
+        "subtitle": "One stack, fewer adapters",
+        "content": "Apple is the whole desk — Mac, iPhone, AirPods. Quiet is a tool. Chat noise waits; a closed door is how the work gets finished."
+      },
+      "trace": {
+        "title": "How Do I Leave a Trace?",
+        "subtitle": "Sign the guestbook",
+        "content": "Reading is open to everyone. If you want to mark your visit, sign in and leave a short note on the guestbook wall — I read every message."
+      }
+    },
+    "footprints": {
+      "eyebrow": "Footprints",
+      "title": "Along the Way",
+      "description": "Every step leaves something behind.",
+      "cardTitle": "Footprints",
+      "cardDescription": "Places kept on the map",
+      "places": "Places",
+      "years": "Years",
+      "latest": "Latest"
+    },
+    "links": {
+      "eyebrow": "Friends",
+      "title": "Near & Far",
+      "description": "Good company knows no distance.",
+      "loading": "Loading friends",
+      "visitSite": "Visit {name} (opens in a new window)",
+      "unavailable": "The links couldn't be loaded right now.",
+      "retry": "Try again",
+      "empty": "No public links just yet."
+    },
+    "persona": {
+      "eyebrow": "Lately",
+      "title": "These Days",
+      "description": "Notes from the days in between",
+      "sections": "Pieces of lately",
+      "about": "Person",
+      "tools": "Desk",
+      "work": "Work",
+      "guestbook": "Wall",
+      "guestbookTitle": "Notes on the wall",
+      "guestbookLine": "Short lines from people who stopped by."
+    },
+    "lately": {
+      "sectionLabel": "Lately",
+      "sectionTitle": "What I've been up to",
+      "sectionDescription": "A song on repeat, a market snapshot, and recent work from GitHub.",
+      "trackBadge": "On repeat",
+      "trackEyebrow": "CURRENT FAVORITE",
+      "listeningLabel": "Listening",
+      "trackTitle": "A song worth keeping.",
+      "trackDescription": "A favorite from the listening shelf. Playback is not available on this page.",
+      "streamingStatus": "Not streaming",
+      "fieldSignal": "FIELD SIGNAL · LIVE",
+      "marketTitle": "Watching without rushing.",
+      "marketDescription": "A small market signal, observed in context rather than isolation.",
+      "loadingMarket": "Loading NASDAQ market data",
+      "today": "today",
+      "marketUnavailable": "Market data unavailable",
+      "marketUnavailableHint": "The latest NASDAQ reading could not be loaded.",
+      "trainingEyebrow": "BUILDING IN PUBLIC",
+      "trainingTitle": "The work behind the site",
+      "trainingDescription": "Recent public GitHub activity across commits, repositories, and code reviews.",
+      "trainingQuote": "A record of what changed, what shipped, and what is still in progress.",
+      "commits": "Commits",
+      "repositories": "Repositories",
+      "reviews": "Reviews",
+      "periodFallback": "this period",
+      "repositoriesWithCommits": "with activity",
+      "codeReviews": "code reviews",
+      "telemetryUnavailable": "GitHub activity unavailable",
+      "telemetryUnavailableHint": "Commit and review counts could not be loaded right now.",
+      "developmentLog": "Development log",
+      "activityCommitCount": "{count} commits",
+      "activityCommittedAcross": "Committed across {count} product workspaces",
+      "activityCommentCount": "{count} comments",
+      "activityMergedPullRequest": "Merged a pull request in {repository}",
+      "activityIssueCount": "{count} issues",
+      "activityOpenedIssues": "Opened {count} issues across {repositories} workspaces",
+      "activityReviewCount": "{count} reviews",
+      "activityReviewedPullRequests": "Reviewed {count} pull requests in {repositories} workspaces",
+      "activityIssueOpened": "{count} opened",
+      "activityIssueClosed": "{count} closed",
+      "activityIssueOpen": "{count} open",
+      "buildTitle": "What's Being Built",
+      "buildDescription": "Code is cheap. Show me the talk.",
+      "loadingGithub": "Loading GitHub repository activity",
+      "githubUnavailable": "GitHub activity is unavailable",
+      "githubUnavailableHint": "The public activity feed could not be loaded right now."
+    },
+    "globe": {
+      "label": "Places and people around the world",
+      "activeNow": "Active now"
+    },
+    "errors": {
+      "writing": "writing",
+      "moments": "moments",
+      "refresh": "Couldn't refresh {subject}.",
+      "load": "Couldn't load {subject}.",
+      "browseBelow": "You can still browse the items below.",
+      "tryLater": "Please try again in a moment.",
+      "retryLabel": "Try loading {subject} again",
+      "trying": "Trying again…",
+      "retry": "Try again"
+    }
+  }
+}

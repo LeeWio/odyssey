@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useHotkeys } from "@mantine/hooks";
+import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { selectIsAdmin } from "@/lib/features/auth";
 import {
@@ -65,22 +66,25 @@ function CockpitGate() {
 
 function DashboardGate() {
   const isAdmin = useAppSelector(selectIsAdmin);
-  const [ready, setReady] = useState(false);
+  const locale = useLocale();
+  const [readyLocale, setReadyLocale] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAdmin) return;
     let cancelled = false;
-    void import("@/features/dashboard").then(() => {
-      if (!cancelled) setReady(true);
-    });
+    void import("@/features/dashboard")
+      .then((module) => module.preloadDashboardMessages(locale))
+      .then(() => {
+        if (!cancelled) setReadyLocale(locale);
+      });
     return () => {
       cancelled = true;
     };
-  }, [isAdmin]);
+  }, [isAdmin, locale]);
 
   // Mount while closed. Opening on the same frame as the first mount replays the
   // entrance and looks like the dashboard flashes.
-  if (!isAdmin || !ready) return null;
+  if (!isAdmin || readyLocale !== locale) return null;
   return <DashboardSheet />;
 }
 

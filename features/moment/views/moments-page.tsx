@@ -17,7 +17,7 @@ import { MomentMotionProvider, MomentState } from "@/features/moment/components/
 import { useMomentFeed } from "@/features/moment/hooks/use-moment-feed";
 import { useMomentAnchor } from "@/features/moment/hooks/use-moment-anchor";
 import { PageFrame } from "@/components/layout/page-frame";
-import type { PublicMomentsInitialData } from "@/lib/features/moment/server";
+import type { PageResult } from "@/lib/api";
 import { useGetLikedMomentIdsQuery, type MomentResponse } from "@/lib/features/moment";
 import { selectIsAuthenticated, selectIsAdmin } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
@@ -32,14 +32,14 @@ const MomentPublisher = dynamic(
   { ssr: false }
 );
 
-export function MomentsPage({ initialData }: { initialData: PublicMomentsInitialData }) {
+export function MomentsPage({ initialPage }: { initialPage: PageResult<MomentResponse> | null }) {
   const { searchParams, updateQuery } = useQueryState();
   const topic = searchParams.get("topic") || undefined;
   const pageParam = searchParams.get("page");
   const page = parsePageParam(searchParams.get("page"));
   return (
     <MomentsContent
-      initialData={initialData}
+      initialPage={initialPage}
       page={page}
       pageParam={pageParam}
       topic={topic}
@@ -50,13 +50,13 @@ export function MomentsPage({ initialData }: { initialData: PublicMomentsInitial
 
 // URL-only presentation changes should not rerender data hooks, the sidebar or cards.
 const MomentsContent = memo(function MomentsContent({
-  initialData,
+  initialPage,
   page,
   pageParam,
   topic,
   updateQuery,
 }: {
-  initialData: PublicMomentsInitialData;
+  initialPage: PageResult<MomentResponse> | null;
   page: number;
   pageParam: string | null;
   topic?: string;
@@ -85,7 +85,7 @@ const MomentsContent = memo(function MomentsContent({
     removeMoment,
     updateMoment,
     refetch,
-  } = useMomentFeed(12, initialData.page, topic, undefined, { retainPreviousData: true }, page);
+  } = useMomentFeed(12, initialPage, topic, undefined, { retainPreviousData: true }, page);
   const visibleMoments = moments;
 
   const editMoment = useCallback(
@@ -185,7 +185,6 @@ const MomentsContent = memo(function MomentsContent({
               labels={{ day: t("cadenceDay"), month: t("cadenceMonth"), year: t("cadenceYear") }}
               retryLabel={t("tryAgain")}
               unavailable={t("cadenceUnavailable")}
-              initialData={initialData.cadence}
             />
             <MomentTopicWidget selected={topic} onSelect={selectTopic} />
           </nav>
