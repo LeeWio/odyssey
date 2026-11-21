@@ -95,7 +95,7 @@ for (const viewport of [
   test(`reading supports every theme at ${viewport.width}px`, async ({ page }, testInfo) => {
     await page.setViewportSize(viewport);
     await page.goto("/single/design-foundation");
-    const reader = page.locator("[data-reading-content] .ProseMirror");
+    const reader = page.locator("[data-article-body]");
     await expect(reader.locator(":scope > p")).toHaveCount(12);
     await expect(reader.getByRole("heading", { name: "Reading rhythm" })).toBeVisible();
     expect((await page.locator("[data-reading-content]").boundingBox())!.width).toBeLessThanOrEqual(

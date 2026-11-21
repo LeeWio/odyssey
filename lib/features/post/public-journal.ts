@@ -5,6 +5,7 @@ import { fetchServerApiJson } from "@/lib/api/server-client";
 import type { AppLocale } from "@/i18n/locale";
 
 import { PostDigestResponseSchema, type PostDigestResponse } from "./post-contracts";
+import type { parseJournalQuery } from "./journal-query";
 
 const JOURNAL_REVALIDATE_SECONDS = 60;
 
@@ -26,17 +27,21 @@ async function readPage<T>(url: string, schema: z.ZodType<T>, locale?: AppLocale
 export async function getPublicJournalInitialData({
   featuredSize = 8,
   latestSize = 12,
+  query,
 }: {
   featuredSize?: number;
   latestSize?: number;
+  query?: ReturnType<typeof parseJournalQuery>;
 } = {}): Promise<PublicJournalInitialData> {
   const [featured, latest] = await Promise.all([
+    query && (query.keyword || query.categoryId || query.page > 0)
+      ? null
+      : readPage(
+          appendApiParams("/api/v1/public/blog/posts/featured", { page: 0, size: featuredSize }),
+          pageResultSchema(PostDigestResponseSchema)
+        ),
     readPage(
-      appendApiParams("/api/v1/public/blog/posts/featured", { page: 0, size: featuredSize }),
-      pageResultSchema(PostDigestResponseSchema)
-    ),
-    readPage(
-      appendApiParams("/api/v1/public/blog/posts/digest", { page: 0, size: latestSize }),
+      appendApiParams("/api/v1/public/blog/posts/digest", query ?? { page: 0, size: latestSize }),
       pageResultSchema(PostDigestResponseSchema)
     ),
   ]);

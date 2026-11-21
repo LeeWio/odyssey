@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { Home } from "../../messages/home/en.json";
 
 test.use({ launchOptions: { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] } });
 
@@ -37,20 +38,21 @@ for (const width of [390, 1440]) {
     await page.goto("/");
     const section = page.locator("#footprints-showcase");
     const map = section.locator('[data-slot="map"]');
-    await section.scrollIntoViewIfNeeded();
-    await expect(map).toHaveAttribute("data-loaded", "true");
-    await expect(section.getByRole("heading", { name: "A Map of Memories" })).toBeVisible();
-    await expect(
-      section.getByText("Not just places on a map, but moments along the way.")
-    ).toBeVisible();
+    await expect(map).toHaveCount(0);
+    const mapFrame = section.getByTestId("footprints-map-frame");
+    const placeholderHeight = (await mapFrame.boundingBox())?.height;
+    await mapFrame.scrollIntoViewIfNeeded();
+    await expect(map).toHaveAttribute("data-loaded", "true", { timeout: 30_000 });
+    await expect(section.getByRole("heading", { name: Home.footprints.title })).toBeVisible();
+    await expect(section.getByText(Home.footprints.description, { exact: true })).toBeVisible();
     await expect(section.getByText("Footprints", { exact: true }).first()).toBeVisible();
-    await expect(section.getByRole("link", { name: "A Map of Memories" })).toHaveAttribute(
+    await expect(section.getByRole("link", { name: Home.footprints.title })).toHaveAttribute(
       "href",
       "/footprints"
     );
     await expect(section.getByRole("link")).toHaveCount(1);
     await expect(section.getByText("Open the atlas", { exact: true })).toHaveCount(0);
-    const mapFrame = section.getByTestId("footprints-map-frame");
+    expect((await mapFrame.boundingBox())?.height).toBe(placeholderHeight);
     await expect(mapFrame.getByText("Hubei")).toBeVisible();
     const overlay = section.getByTestId("footprints-map-overlay");
     const summary = section.getByTestId("footprints-mobile-summary");

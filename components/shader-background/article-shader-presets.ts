@@ -1,5 +1,24 @@
 import type { ShaderBackgroundProps } from "@/components/background/shader-background";
 
+export function articleCoverBackdrop(preset: ArticleShaderPreset) {
+  const config = preset.config as {
+    colorBack?: string;
+    colorFill?: string;
+    colorFront?: string;
+    colors?: readonly string[];
+  };
+  const colors = [
+    config.colorBack,
+    ...(config.colors ?? []),
+    config.colorFront,
+    config.colorFill,
+    preset.swatch,
+  ].filter((color): color is string => Boolean(color));
+  const unique = [...new Set(colors)].slice(0, 4);
+  if (unique.length < 2) return unique[0] ?? preset.swatch;
+  return `linear-gradient(145deg, ${unique.join(", ")})`;
+}
+
 export type ShaderPresetGroupId = "mesh" | "grain" | "field" | "pattern";
 
 export type ArticleShaderPreset = {

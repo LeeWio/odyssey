@@ -149,7 +149,7 @@ export function createReaderExtensionKit(options: ExtensionKitOptions = {}) {
  * Extensions used by non-editor content conversion helpers.
  * RichTextEditor injects these base extensions itself at runtime.
  */
-export function createConversionExtensions() {
+export function createConversionExtensions(options?: ExtensionKitOptions) {
   return [
     StarterKit.configure({
       bulletList: false,
@@ -157,6 +157,6 @@ export function createConversionExtensions() {
       listItem: false,
       orderedList: false,
     }),
-    ...createExtensionKit(),
+    ...createExtensionKit(options),
   ];
 }

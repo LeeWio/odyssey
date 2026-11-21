@@ -1,29 +1,8 @@
 import { expect, test } from "@playwright/test";
 import messages from "../../messages/en.json";
+import { story } from "./fixtures/journal";
 
 const envelope = (data: unknown) => ({ code: 200, message: "OK", data });
-const story = (id: number) => ({
-  id,
-  title:
-    id === 4 ? "AnUnbrokenArticleTitle".repeat(4) : `Notes on building thoughtful software ${id}`,
-  slug: `design-story-${id}`,
-  summary: "A closer look at the decisions, experiments and small details behind the work.",
-  coverImage: id % 3 === 0 ? "" : "/IMG_5332.JPG",
-  authorName: "Odyssey",
-  status: "PUBLISHED",
-  isFeatured: id > 20,
-  views: 124,
-  likesCount: 8,
-  favoritesCount: 0,
-  isInReadingList: false,
-  category: { id: 1, name: "Engineering", slug: "engineering", createdAt: "2026-10-01T00:00:00Z" },
-  series: null,
-  seriesOrder: null,
-  createdAt: "2026-10-01T00:00:00Z",
-  updatedAt: "2026-10-01T00:00:00Z",
-});
-const stories = Array.from({ length: 12 }, (_, index) => story(index + 1));
-const featured = [story(22), story(23), story(24), story(25)];
 const columns = ["Field notes", "Working systems"].map((name, index) => ({
   id: index + 1,
   name,
@@ -41,20 +20,7 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/**", (route) => {
     const url = new URL(route.request().url());
     let data: unknown;
-    if (url.pathname.endsWith("/posts/featured")) {
-      data = { list: featured, page: 0, size: 8, total: 4, totalPages: 1 };
-    } else if (url.pathname.endsWith("/blog/posts")) {
-      expect(url.searchParams.get("size")).toBe("12");
-      const noResults = url.searchParams.get("keyword") === "no-matching-entry";
-      const index = Number(url.searchParams.get("page"));
-      data = {
-        list: noResults ? [] : index > 0 ? [story(13)] : stories,
-        page: index,
-        size: 12,
-        total: noResults ? 0 : 13,
-        totalPages: noResults ? 0 : 2,
-      };
-    } else if (url.pathname.endsWith("/blog/facets")) {
+    if (url.pathname.endsWith("/blog/facets")) {
       data = {
         totalPublishedCount: 13,
         categories: [{ id: 1, name: "Engineering", slug: "engineering", count: 13 }],
@@ -90,17 +56,21 @@ test("editorial hierarchy adapts across screens without overlapping text or losi
   await expect(heading).toBeVisible();
   await expect(grid.getByRole("article")).toHaveCount(12);
   await expect(companions).toHaveCount(2);
-  await expect(lead.locator("canvas")).toBeVisible();
+  await expect(lead.locator("canvas")).toHaveCount(0);
 
   for (const width of [390, 820, 1440, 1920, 2560]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
     const leadBox = (await lead.boundingBox())!;
     const secondaryBox = (await companions.first().boundingBox())!;
+    expect(secondaryBox.y).toBeGreaterThanOrEqual(leadBox.y + leadBox.height);
+    const leadMedia = lead
+      .locator('a > div[aria-hidden="true"], a > div:has(> [aria-hidden="true"])')
+      .first();
+    await expect(leadMedia).toBeVisible();
     if (width >= 1024) {
-      expect(leadBox.width).toBeGreaterThan(secondaryBox.width * 1.5);
-      expect(secondaryBox.x).toBeGreaterThan(leadBox.x + leadBox.width);
-    } else {
-      expect(secondaryBox.y).toBeGreaterThanOrEqual(leadBox.y + leadBox.height);
+      const media = (await leadMedia.boundingBox())!;
+      const title = (await lead.getByRole("heading").boundingBox())!;
+      expect(title.x).toBeGreaterThan(media.x + media.width);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true
@@ -121,17 +91,29 @@ test("editorial hierarchy adapts across screens without overlapping text or losi
       .boundingBox())!;
     const gridBox = (await grid.boundingBox())!;
     expect(paginationBox.y).toBeGreaterThanOrEqual(gridBox.y + gridBox.height);
-    const columnsBox = (await page
-      .locator('section[aria-labelledby="columns-title"]')
-      .boundingBox())!;
-    expect(columnsBox.y).toBeGreaterThan(paginationBox.y);
+    await page.locator('section[aria-labelledby="latest-title"] nav').scrollIntoViewIfNeeded();
+    const columns = page.locator('section[aria-labelledby="columns-title"]');
+    await expect(columns).toBeVisible();
+    expect(
+      await columns.evaluate((element) => {
+        const navigation = document.querySelector('section[aria-labelledby="latest-title"] nav');
+        return (
+          !!navigation &&
+          element.getBoundingClientRect().top > navigation.getBoundingClientRect().bottom
+        );
+      })
+    ).toBe(true);
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: testInfo.outputPath(`journal-${width}.png`) });
     await grid.scrollIntoViewIfNeeded();
     await page.screenshot({ path: testInfo.outputPath(`journal-list-${width}.png`) });
   }
   await page.getByRole("button", { name: /Working systems/ }).click();
-  await expect(page.getByRole("heading", { name: "Working systems", exact: true })).toBeVisible();
+  await expect(
+    page
+      .locator('section[aria-labelledby="columns-title"]')
+      .getByRole("link", { name: messages.Journal.viewColumn })
+  ).toHaveAttribute("href", "/columns/series-2");
 });
 
 test("search prioritizes results and reset restores the editorial opening", async ({ page }) => {
@@ -198,21 +180,11 @@ test("text-only lead and normal motion keep reading links accessible", async ({
   page,
 }, testInfo) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.route("**/api/v1/public/blog/posts/featured?**", (route) =>
-    route.fulfill({
-      json: envelope({
-        list: [{ ...story(24), summary: "" }],
-        page: 0,
-        size: 8,
-        total: 1,
-        totalPages: 1,
-      }),
-    })
-  );
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/single");
   const lead = page.getByTestId("journal-lead");
   await expect(lead).toBeVisible();
+  await expect(lead.locator("canvas")).toHaveCount(0);
   await expect(lead.locator("img")).toHaveCount(0);
   await expect(lead).toHaveCSS("opacity", "1");
   await expect(lead.getByRole("heading")).toBeVisible();

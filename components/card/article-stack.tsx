@@ -66,7 +66,7 @@ function ArticleCardFace({
   item,
   children,
   showCover = true,
-  animatedCover = true,
+  animatedCover = false,
   ...props
 }: {
   item: ArticleStackItem;
@@ -98,12 +98,7 @@ function ArticleCardFace({
           className="relative isolate h-18 w-24 shrink-0 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgb(255_255_255/0.12)] sm:h-20 sm:w-32"
         >
           {showCover ? (
-            <ArticleCover
-              animated={animatedCover}
-              presetId={item.shaderPreset}
-              scheduled={false}
-              seed={item.id}
-            />
+            <ArticleCover animated={animatedCover} presetId={item.shaderPreset} seed={item.id} />
           ) : null}
         </Surface>
       </Card.Header>
@@ -288,7 +283,7 @@ export function ArticleStack({
               <ArticleCardFace
                 key={item.id}
                 item={item}
-                animatedCover={isExpanded ? index < 4 : index === 0}
+                animatedCover={isExpanded && index === 0}
                 layout="position"
                 initial={false}
                 animate={{

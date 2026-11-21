@@ -1,6 +1,4 @@
-import type { TableOfContentData } from "@tiptap/extension-table-of-contents";
-
-import { currentHeadingId } from "./article-outline";
+import { currentHeadingId, type ArticleHeading } from "./article-outline";
 
 export const READING_PROGRESS_STEP = 10;
 
@@ -19,7 +17,7 @@ export function quantizeReadingProgress(progress: number) {
 }
 
 /** The heading in view, stored without a hash so library links can add one. */
-export function readingPositionAnchor(items: TableOfContentData): string | undefined {
+export function readingPositionAnchor(items: readonly ArticleHeading[]): string | undefined {
   if (items.length === 0 || typeof document === "undefined") return undefined;
   const id = currentHeadingId(items);
   return id || undefined;

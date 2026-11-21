@@ -93,7 +93,7 @@ test("article save for later uses the library queue and returns there", async ({
   await expect(
     page.getByRole("heading", { name: "Reading loop article", exact: true })
   ).toBeVisible();
-  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+  await expect(page.locator("[data-article-body]")).toBeVisible();
   await page.getByRole("button", { name: "More article actions", exact: true }).press("Enter");
   const save = page.getByRole("button", { name: "Save for later", exact: true });
   await save.press("Enter");

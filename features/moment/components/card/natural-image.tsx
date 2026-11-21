@@ -12,11 +12,15 @@ const MotionMedia = motion.create(RemoteMedia);
 export function NaturalImage({
   src,
   alt,
+  width,
+  height,
   interactive,
   bounded = false,
 }: {
   src: string;
   alt: string;
+  width?: number;
+  height?: number;
   interactive: boolean;
   bounded?: boolean;
 }) {
@@ -37,6 +41,8 @@ export function NaturalImage({
       }}
       src={src}
       alt={alt}
+      width={width}
+      height={height}
       className={
         bounded
           ? "mx-auto block h-auto max-h-[min(55svh,420px)] w-auto max-w-full rounded-lg object-contain lg:max-h-[min(60svh,560px)] lg:group-data-[view=grid]/moment-feed:max-h-[min(50svh,360px)]"

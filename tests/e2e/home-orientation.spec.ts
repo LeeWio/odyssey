@@ -19,14 +19,11 @@ async function mockQuietHome(page: Page) {
 }
 
 test.describe("home orientation", () => {
-  test("shows three honest doors for a first visit and dismisses permanently", async ({ page }) => {
+  test("shows three honest doors for a first visit and persists dismissal", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await mockQuietHome(page);
-    await page.addInitScript(() => {
-      window.localStorage.removeItem("odyssey_home_orientation_dismissed");
-    });
-
-    await page.goto("/");
+    const initial = await page.goto("/");
+    expect(await initial?.text()).toContain('aria-label="Site orientation"');
     const orientation = page.getByRole("region", { name: "Site orientation" });
     await expect(orientation).toBeVisible();
     await expect(orientation.getByRole("heading", { name: "Three honest doors" })).toBeVisible();
@@ -46,17 +43,14 @@ test.describe("home orientation", () => {
     await orientation.getByRole("button", { name: "Dismiss orientation" }).click();
     await expect(orientation).toHaveCount(0);
 
-    await page.reload();
+    const returning = await page.reload();
+    expect(await returning?.text()).not.toContain('aria-label="Site orientation"');
     await expect(page.getByRole("region", { name: "Site orientation" })).toHaveCount(0);
   });
 
   test("stays usable on a narrow viewport", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await mockQuietHome(page);
-    await page.addInitScript(() => {
-      window.localStorage.removeItem("odyssey_home_orientation_dismissed");
-    });
-
     await page.goto("/");
     const orientation = page.getByRole("region", { name: "Site orientation" });
     await expect(orientation).toBeVisible();
@@ -68,10 +62,6 @@ test.describe("home orientation", () => {
 
   test("following a door dismisses the card for the next visit", async ({ page }) => {
     await mockQuietHome(page);
-    await page.addInitScript(() => {
-      window.localStorage.removeItem("odyssey_home_orientation_dismissed");
-    });
-
     await page.goto("/");
     await page
       .getByRole("region", { name: "Site orientation" })

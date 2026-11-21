@@ -26,40 +26,22 @@ export function MomentCadenceCard({
   labels,
   unavailable,
   retryLabel,
-  initialData = null,
 }: {
   label: string;
   labels: Record<CadencePeriod, string>;
   unavailable: string;
   retryLabel: string;
-  initialData?: MomentCadenceResponse | null;
 }) {
-  const query = useGetMomentCadenceQuery(undefined, { skip: Boolean(initialData) });
+  const query = useGetMomentCadenceQuery();
   const [period, setPeriod] = useState<CadencePeriod>("day");
-  const data = initialData ?? query.data;
-
-  if (!initialData && query.isError) {
-    return (
-      <Card className="w-full" role="alert">
-        <Typography type="body-sm">{unavailable}</Typography>
-        <Button
-          className="self-start"
-          size="sm"
-          variant="secondary"
-          onPress={() => query.refetch()}
-        >
-          {retryLabel}
-        </Button>
-      </Card>
-    );
-  }
+  const data = query.data;
 
   return (
-    <Card aria-busy={!initialData && query.isLoading} className="w-full gap-4 p-4">
+    <Card aria-busy={query.isLoading} className="w-full gap-4">
       <div className="flex items-center justify-between gap-3">
         <Segment
           aria-label={label}
-          isDisabled={(!initialData && query.isLoading) || data == null}
+          isDisabled={data == null}
           selectedKey={period}
           size="sm"
           onSelectionChange={(key: Key) => {
@@ -79,8 +61,15 @@ export function MomentCadenceCard({
         <div className="min-h-28">
           <CadenceDots key={period} cadence={data} period={period} />
         </div>
+      ) : query.isError ? (
+        <div className="flex min-h-28 flex-col items-start gap-2" role="status">
+          <Typography type="body-sm">{unavailable}</Typography>
+          <Button size="sm" variant="secondary" onPress={() => void query.refetch()}>
+            {retryLabel}
+          </Button>
+        </div>
       ) : (
-        <Skeleton animationType="shimmer" className="h-[110px] w-full rounded-xl" />
+        <Skeleton animationType="shimmer" className="h-28 w-full" />
       )}
     </Card>
   );

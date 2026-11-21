@@ -71,13 +71,13 @@ export function LatelySection() {
   const shouldReduceMotion = useReducedMotionPreference();
   const { data: nasdaqData, isLoading: isNasdaqLoading } = useGetMarketIndexBySymbolQuery(
     { symbol: ".ixic", period: "1D" },
-    { pollingInterval: 300000 }
+    { pollingInterval: 300000, skipPollingIfUnfocused: true }
   );
   const isPositive = nasdaqData ? nasdaqData.changePct >= 0 : false;
   const sparklineData = useMemo(() => mapSparkline(nasdaqData?.sparkline), [nasdaqData?.sparkline]);
   const { data: githubActivity, isLoading: isGitHubActivityLoading } = useGetGitHubActivityQuery(
     undefined,
-    { pollingInterval: 3600000 }
+    { pollingInterval: 3600000, skipPollingIfUnfocused: true }
   );
   const githubPeriodLabel = githubActivity
     ? formatActivityPeriod(githubActivity.month, locale, githubActivity.periodLabel)

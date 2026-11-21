@@ -8,9 +8,15 @@ import type { PostResponse } from "@/lib/features/post";
 import { NeighborCard } from "./neighbor-card";
 import { useArticleNeighbors } from "./use-article-neighbors";
 
-export function ArticleNeighbors({ article }: { article: PostResponse }) {
+export function ArticleNeighbors({
+  article,
+  enabled = true,
+}: {
+  article: PostResponse;
+  enabled?: boolean;
+}) {
   const t = useTranslations("Article");
-  const { next, order, previous } = useArticleNeighbors(article);
+  const { next, order, previous, isLoading } = useArticleNeighbors(article, enabled);
 
   return (
     <section aria-label={t("keepReading")} className="mx-auto w-full max-w-3xl">
@@ -23,8 +29,8 @@ export function ArticleNeighbors({ article }: { article: PostResponse }) {
         </Typography>
       </header>
       <div className="grid items-stretch gap-4 sm:grid-cols-2">
-        <NeighborCard direction="previous" neighbor={previous} />
-        <NeighborCard direction="next" neighbor={next} />
+        <NeighborCard direction="previous" neighbor={previous} isLoading={isLoading} />
+        <NeighborCard direction="next" neighbor={next} isLoading={isLoading} />
       </div>
     </section>
   );

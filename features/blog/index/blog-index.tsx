@@ -37,14 +37,15 @@ import {
 import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/features/library";
 import { useRetrieveDiscoveryQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
-import { useGetFeaturedPostsQuery, useGetPublicPostsQuery } from "@/lib/features/post";
+import { useGetFeaturedPostsQuery, useGetPublicPostDigestsQuery } from "@/lib/features/post";
+import { JOURNAL_PAGE_SIZE, parseJournalQuery } from "@/lib/features/post/journal-query";
+import { useNearViewport } from "@/hooks/use-near-viewport";
 import { ColumnArticleStack } from "@/features/column/column-article-stack";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 import { useQueryState } from "@/lib/hooks/use-query-state";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
-import { parsePageParam } from "@/lib/utils/pagination";
 import { PageContainer } from "@/components/layout/page-container";
 import { ArticleCard } from "@/components/card/article-card";
 import { ArticleCover } from "@/components/card/article-cover";
@@ -59,7 +60,6 @@ import {
 } from "./journal-story";
 
 const JOURNAL_STORY_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4";
-const LATEST_PAGE_SIZE = 12;
 
 type ArchiveFacet = OpenApiComponents["schemas"]["ArchiveFacet"];
 type CategoryFacet = OpenApiComponents["schemas"]["CategoryFacet"];
@@ -108,7 +108,7 @@ function FeatureCard({
       >
         {featured ? (
           <div className="absolute inset-0 lg:relative lg:col-start-1 lg:row-start-1 lg:min-h-[36rem]">
-            <ArticleCover animated={false} presetId={post.shaderPreset} seed={seed} />
+            <ArticleCover presetId={post.shaderPreset} seed={seed} src={post.coverImage} />
           </div>
         ) : null}
         <div
@@ -144,7 +144,7 @@ function FeatureCard({
         </div>
         {!featured ? (
           <div className="relative isolate aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-md sm:w-32">
-            <ArticleCover animated={false} presetId={post.shaderPreset} seed={seed} />
+            <ArticleCover presetId={post.shaderPreset} seed={seed} src={post.coverImage} />
           </div>
         ) : null}
       </Link>
@@ -165,12 +165,6 @@ function FeatureMosaic({ lead, companions }: { lead: Story; companions: Story[] 
       ) : null}
     </div>
   );
-}
-
-function parsePositiveInteger(value: string | null) {
-  if (!value) return undefined;
-  const parsed = Number(value);
-  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 function LatestPagination({
@@ -493,7 +487,9 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
   const locale = useLocale();
   const { searchParams, updateQuery } = useQueryState();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const normalizedQuery = (searchParams.get("q") ?? "").trim();
+  const query = parseJournalQuery((key) => searchParams.get(key));
+  const { categoryId: selectedCategoryId, page: latestPage } = query;
+  const normalizedQuery = query.keyword ?? "";
   const [searchDraft, setSearchDraft] = useState(() => ({
     source: normalizedQuery,
     value: normalizedQuery,
@@ -503,38 +499,27 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
   }
   const searchValue = searchDraft.source === normalizedQuery ? searchDraft.value : normalizedQuery;
   const isDebouncingSearch = searchValue.trim() !== normalizedQuery;
-  const selectedCategoryId = parsePositiveInteger(searchParams.get("category"));
-  const requestedLatestPage = parsePageParam(searchParams.get("page"));
-  const latestPage = requestedLatestPage - 1;
-  const hasInitialLatest =
-    !normalizedQuery && !selectedCategoryId && latestPage === 0 && Boolean(initialData.latest);
-  const hasInitialFeatured =
-    !normalizedQuery && !selectedCategoryId && Boolean(initialData.featured);
-  const discoveryQuery = useRetrieveDiscoveryQuery();
+  const requestedLatestPage = latestPage + 1;
+  const hasArchiveFilters = Boolean(normalizedQuery || selectedCategoryId || isDebouncingSearch);
+  const hasInitialLatest = Boolean(initialData.latest);
+  const hasInitialFeatured = !hasArchiveFilters && Boolean(initialData.featured);
+  const { ref: discoveryRef, isNear: isDiscoveryNear } = useNearViewport<HTMLDivElement>();
+  const discoveryQuery = useRetrieveDiscoveryQuery(undefined, { skip: !isDiscoveryNear });
   const facetsQuery = useRetrieveFacetsQuery();
   const featuredQuery = useGetFeaturedPostsQuery(
     { page: 0, size: 8 },
-    { skip: hasInitialFeatured }
+    { skip: hasArchiveFilters || hasInitialFeatured || (latestPage > 0 && !isDiscoveryNear) }
   );
-  const latestQuery = useGetPublicPostsQuery(
-    {
-      categoryId: selectedCategoryId,
-      keyword: normalizedQuery || undefined,
-      page: latestPage,
-      size: LATEST_PAGE_SIZE,
-    },
-    {
-      skip: isDebouncingSearch || hasInitialLatest,
-      refetchOnMountOrArgChange: true,
-    }
-  );
+  const latestQuery = useGetPublicPostDigestsQuery(query, {
+    skip: isDebouncingSearch || hasInitialLatest,
+    refetchOnMountOrArgChange: true,
+  });
   const latestData = hasInitialLatest
     ? initialData.latest
     : isDebouncingSearch
       ? undefined
       : latestQuery.currentData;
   const isAdjustingPage =
-    latestQuery.isSuccess &&
     !latestQuery.isFetching &&
     !!latestData &&
     requestedLatestPage > Math.max(1, latestData.totalPages);
@@ -545,11 +530,11 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
     (latestQuery.isFetching && !latestData);
   useNormalizePageParam(
     requestedLatestPage,
-    latestData && !latestQuery.isFetching && latestQuery.isSuccess
-      ? latestData.totalPages
-      : undefined
+    latestData && !latestQuery.isFetching ? latestData.totalPages : undefined
   );
-  const columnsQuery = useGetPublicColumnsQuery();
+  const columnsQuery = useGetPublicColumnsQuery(undefined, {
+    skip: hasArchiveFilters || !isDiscoveryNear,
+  });
   const libraryQuery = useGetLibraryOverviewQuery(undefined, { skip: !isAuthenticated });
 
   const updateArchiveSearch = (changes: Record<string, string | undefined>) => {
@@ -561,7 +546,7 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
 
   useEffect(() => () => updateSearch.cancel(), [normalizedQuery, updateSearch]);
 
-  const discovery = discoveryQuery.data;
+  const discoveryData = discoveryQuery.data;
   const featuredPosts = hasInitialFeatured
     ? (initialData.featured?.list ?? [])
     : (featuredQuery.data?.list ?? []);
@@ -578,12 +563,11 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
     (facet): facet is ArchiveFacet & { year: number } =>
       typeof facet.year === "number" && (facet.count ?? 0) > 0
   );
-  const hasArchiveFilters = Boolean(normalizedQuery || selectedCategoryId || isDebouncingSearch);
   const essayCount = hasArchiveFilters
     ? (latestData?.total ?? 0)
     : (facetsQuery.data?.totalPublishedCount ?? latestData?.total ?? 0);
-  const trending = discovery?.trending ?? [];
-  const mostRead = discovery?.mostRead ?? [];
+  const trending = discoveryData?.trending ?? [];
+  const mostRead = discoveryData?.mostRead ?? [];
   const hasDiscoveryRail =
     categories.length + tags.length + archives.length + trending.length + mostRead.length > 0;
   const openingSource =
@@ -733,7 +717,7 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
           ) : null}
         </section>
 
-        {discoveryQuery.isError && featuredQuery.isError ? (
+        {!hasArchiveFilters && featuredQuery.isError ? (
           <Alert status="danger">
             <Alert.Indicator />
             <Alert.Content>
@@ -775,7 +759,7 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
               </div>
               {latestLoading && !openingLoading ? (
                 <div role="status" aria-label={t("loadingStories")} className={JOURNAL_STORY_GRID}>
-                  {Array.from({ length: LATEST_PAGE_SIZE }, (_, index) => (
+                  {Array.from({ length: JOURNAL_PAGE_SIZE }, (_, index) => (
                     <Skeleton key={index} className="aspect-[16/10] w-full rounded-lg" />
                   ))}
                 </div>
@@ -844,6 +828,8 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
 
             <ContinueReading entries={libraryQuery.data?.continueReading ?? []} />
 
+            <div ref={discoveryRef} />
+
             {!hasArchiveFilters ? (
               <div data-journal-reveal="">
                 <ColumnDecks
@@ -854,7 +840,7 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
 
             {!hasArchiveFilters ? (
               <div data-journal-reveal="">
-                <CategoryShelves groups={discovery?.categoryGroups ?? []} />
+                <CategoryShelves groups={discoveryData?.categoryGroups ?? []} />
               </div>
             ) : null}
           </div>

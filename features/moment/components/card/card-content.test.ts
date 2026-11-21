@@ -4,6 +4,9 @@ import { expect, it, vi } from "vitest";
 
 import { CardContent } from "./card-content";
 
+vi.mock("@/components/layout/deferred-content", () => ({
+  DeferredContent: ({ children }: { children: React.ReactNode }) => children,
+}));
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("next/dynamic", () => ({
   default:
@@ -38,11 +41,11 @@ for (const mediaLayout of ["natural", "stacked"] as const) {
     (count) => {
       const html = renderToStaticMarkup(
         createElement(CardContent, {
-          momentId: 1,
           parsedContent: { type: "doc", content: [] },
-          imageUrls: Array.from({ length: count }, (_, index) => `/photo-${index}.jpg`),
+          images: Array.from({ length: count }, (_, index) => ({ url: `/photo-${index}.jpg` })),
           topics: [],
           mediaLayout,
+          onCardClick: () => undefined,
         })
       );
       expect(html).toContain("Preserved content");

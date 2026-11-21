@@ -4,8 +4,8 @@ import { Section } from "@/components/layout/section";
 import { createPageReveal } from "@/lib/motion";
 import { Chip, Link, Typography } from "@heroui/react";
 import { motion } from "motion/react";
+import type { ReactNode } from "react";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
-import { useGetPublicMomentsQuery, type MomentResponse } from "@/lib/features/moment";
 import { useTranslations } from "next-intl";
 import {
   HOME_SECTION_CONTENT,
@@ -14,24 +14,10 @@ import {
   HOME_SECTION_TITLE,
 } from "./layout";
 
-import { MomentsMasonry } from "./moments-masonry";
-
-export const MOMENTS_SHOWCASE_LIMIT = 18;
-
-export function MomentsShowcase({ moments }: { moments: MomentResponse[] }) {
+export function MomentsShowcase({ children }: { children: ReactNode }) {
   const t = useTranslations("Home");
   const shouldReduceMotion = useReducedMotionPreference();
   const { revealInView } = createPageReveal(shouldReduceMotion);
-  const query = useGetPublicMomentsQuery(
-    { page: 0, size: MOMENTS_SHOWCASE_LIMIT },
-    { skip: moments.length > 0 }
-  );
-  const recentMoments = (moments.length > 0 ? moments : (query.data?.list ?? [])).slice(
-    0,
-    MOMENTS_SHOWCASE_LIMIT
-  );
-
-  if (recentMoments.length === 0) return null;
 
   return (
     <Section id="moments-showcase" aria-labelledby="moments-showcase-title">
@@ -60,9 +46,7 @@ export function MomentsShowcase({ moments }: { moments: MomentResponse[] }) {
         </motion.div>
       </header>
 
-      <div className={HOME_SECTION_CONTENT}>
-        <MomentsMasonry moments={recentMoments} />
-      </div>
+      <div className={HOME_SECTION_CONTENT}>{children}</div>
     </Section>
   );
 }

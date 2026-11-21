@@ -1,25 +1,40 @@
 "use client";
 
 import { PageContainer } from "@/components/layout/page-container";
+import { DeferredContent } from "@/components/layout/deferred-content";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { createPageReveal } from "@/lib/motion";
 
-import { Card, Chip, Link, Typography } from "@heroui/react";
+import { Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
+import dynamic from "next/dynamic";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 
 import {
   FOOTPRINTS,
-  FootprintsMap,
   getFeaturedFootprints,
   getFootprintYears,
   type Footprint,
-} from "@/features/footprints";
+} from "@/features/footprints/footprints-data";
+import { FootprintsMapFrame } from "@/features/footprints/footprints-map-frame";
 import {
   HOME_SECTION_DESCRIPTION,
   HOME_SECTION_HEADER_CENTERED,
   HOME_SECTION_TITLE,
 } from "./layout";
+
+const CompactFootprintsMap = dynamic(
+  () => import("@/features/footprints/footprints-map").then((module) => module.FootprintsMap),
+  { ssr: false, loading: MapPlaceholder }
+);
+
+function MapPlaceholder() {
+  return (
+    <FootprintsMapFrame compact>
+      <Skeleton aria-hidden className="h-full w-full" />
+    </FootprintsMapFrame>
+  );
+}
 
 function FootprintCounts({
   yearCount,
@@ -138,7 +153,9 @@ export function FootprintsShowcase() {
       </PageContainer>
 
       <div className="relative mt-9 w-full overflow-hidden md:mt-10">
-        <FootprintsMap footprints={FOOTPRINTS} compact />
+        <DeferredContent fallback={<MapPlaceholder />}>
+          <CompactFootprintsMap footprints={FOOTPRINTS} compact />
+        </DeferredContent>
 
         <div className="absolute top-4 left-4 z-10 hidden w-[260px] @min-[64rem]/home-section:block">
           <Card data-testid="footprints-map-overlay">

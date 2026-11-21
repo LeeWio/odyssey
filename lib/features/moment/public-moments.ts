@@ -3,29 +3,19 @@ import { z } from "zod";
 import { appendApiParams, pageResultSchema, type PageResult } from "@/lib/api";
 import { fetchServerApiJson } from "@/lib/api/server-client";
 
-import {
-  MomentCadenceResponseSchema,
-  MomentResponseSchema,
-  type MomentCadenceResponse,
-  type MomentResponse,
-} from "./moment-contracts";
-
-export interface PublicMomentsInitialData {
-  page: PageResult<MomentResponse> | null;
-  cadence: MomentCadenceResponse | null;
-}
+import { MomentResponseSchema, type MomentResponse } from "./moment-contracts";
 
 async function readPublicData<T>(path: string, schema: z.ZodType<T>): Promise<T | null> {
   return (await fetchServerApiJson(path, schema, { cache: "no-store" })).data;
 }
 
-export async function getPublicMomentsInitialData(
+export async function getPublicMomentsInitialPage(
   size = 12,
   page = 1,
   topic?: string
-): Promise<PublicMomentsInitialData> {
+): Promise<PageResult<MomentResponse> | null> {
   if (process.env.NEXT_PHASE === "phase-production-build") {
-    return { page: null, cadence: null };
+    return null;
   }
 
   const requestedPage = Number.isSafeInteger(page) && page > 0 ? page : 1;
@@ -35,14 +25,5 @@ export async function getPublicMomentsInitialData(
     topic,
   });
 
-  const [momentsPage, cadence] = await Promise.all([
-    readPublicData(path, pageResultSchema(MomentResponseSchema)),
-    readPublicData(`/api/v1/public/moments/cadence`, MomentCadenceResponseSchema),
-  ]);
-
-  return { page: momentsPage, cadence };
-}
-
-export async function getPublicMomentsInitialPage(): Promise<PageResult<MomentResponse> | null> {
-  return (await getPublicMomentsInitialData()).page;
+  return readPublicData(path, pageResultSchema(MomentResponseSchema));
 }

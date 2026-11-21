@@ -1,6 +1,7 @@
 "use client";
 
 import { Xmark } from "@gravity-ui/icons";
+import { useMounted } from "@mantine/hooks";
 import { Sheet } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -11,6 +12,7 @@ import { useDashboardNavigation } from "@/lib/hooks/use-dashboard-navigation";
 import { useQueryState } from "@/lib/hooks/use-query-state";
 
 import { AppShell } from "./app-shell";
+import { DashboardMessages } from "./dashboard-messages";
 import { NAV_ITEMS } from "./nav-items";
 import { AccessPlaceholderPage } from "./views/access-placeholder-page";
 import { AnalyticsPage } from "./views/analytics-page";
@@ -41,6 +43,15 @@ import { WebhooksPage } from "./views/webhooks-page";
 const DASHBOARD_PATHS = new Set(NAV_ITEMS.map((item) => item.href));
 
 export function DashboardSheet() {
+  return (
+    <DashboardMessages>
+      <DashboardWorkspace />
+    </DashboardMessages>
+  );
+}
+
+function DashboardWorkspace() {
+  const mounted = useMounted();
   const isAdmin = useAppSelector(selectIsAdmin);
   const { updateQuery } = useQueryState();
   const { dashboardPath, isDashboardOpen, closeDashboard } = useDashboardNavigation();
@@ -176,8 +187,8 @@ export function DashboardSheet() {
   };
 
   return (
-    <Sheet isOpen={isDashboardOpen} onOpenChange={handleOpenChange} isDetached>
-      <Sheet.Backdrop isExiting variant="blur">
+    <Sheet isOpen={mounted && isDashboardOpen} onOpenChange={handleOpenChange} isDetached>
+      <Sheet.Backdrop variant="blur">
         <Sheet.Content>
           <>
             <Sheet.Dialog id="dashboard-sheet-container" aria-label={t("shell.dashboardOverlay")}>

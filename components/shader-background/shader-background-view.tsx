@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { ShaderBackground } from "@/components/background/shader-background";
 import { cn } from "@/lib/utils";
 
-import type { ArticleShaderPreset } from "./article-shader-presets";
+import { articleCoverBackdrop, type ArticleShaderPreset } from "./article-shader-presets";
 
 const MAX_LIVE_SHADERS = 8;
 const VIEWPORT_MARGIN = 80;
@@ -24,12 +24,12 @@ let reconcileFrame = 0;
 let listenersAttached = false;
 
 export function selectLiveCoverIds(
-  items: { distance: number; eligible: boolean; id: string; live: boolean }[],
+  items: { distance: number; eligible: boolean; id: string | symbol; live: boolean }[],
   limit: number,
   swapThreshold: number
 ) {
   const eligible = items.filter((item) => item.eligible).sort((a, b) => a.distance - b.distance);
-  const next = new Set<string>();
+  const next = new Set<string | symbol>();
 
   for (const item of eligible) {
     if (next.size >= limit) break;
@@ -84,7 +84,7 @@ function reconcile() {
         rect.bottom > -VIEWPORT_MARGIN &&
         rect.top < viewportHeight + VIEWPORT_MARGIN,
       entry,
-      id: String(entry.id),
+      id: entry.id,
       live: live.has(entry.id),
     };
   });
@@ -145,25 +145,6 @@ function registerCover(entry: CoverEntry) {
       scheduleReconcile();
     }
   };
-}
-
-function backdrop(preset: ArticleShaderPreset) {
-  const config = preset.config as {
-    colorBack?: string;
-    colorFill?: string;
-    colorFront?: string;
-    colors?: readonly string[];
-  };
-  const colors = [
-    config.colorBack,
-    ...(config.colors ?? []),
-    config.colorFront,
-    config.colorFill,
-    preset.swatch,
-  ].filter((color): color is string => Boolean(color));
-  const unique = [...new Set(colors)].slice(0, 4);
-  if (unique.length < 2) return unique[0] ?? preset.swatch;
-  return `linear-gradient(145deg, ${unique.join(", ")})`;
 }
 
 export function ShaderBackgroundView({
@@ -231,7 +212,7 @@ export function ShaderBackgroundView({
 
       className={cn("h-full w-full overflow-hidden", className)}
     >
-      <div className="absolute inset-0" style={{ background: backdrop(preset) }} />
+      <div className="absolute inset-0" style={{ background: articleCoverBackdrop(preset) }} />
       {mounted ? null : <canvas data-shader-frame="" className="absolute inset-0 h-full w-full" />}
       {mounted ? (
         <ShaderBackground

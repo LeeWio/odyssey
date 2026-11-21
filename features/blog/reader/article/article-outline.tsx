@@ -1,30 +1,17 @@
 "use client";
 
-import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
-import type {
-  TableOfContentData,
-  TableOfContentDataItem,
-} from "@tiptap/extension-table-of-contents";
-import {
-  createContext,
-  use,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type ReactNode,
-} from "react";
+import { createContext, use, useState, type ReactNode } from "react";
+import { ARTICLE_OUTLINE_TOP_OFFSET, readingScrollOffset } from "@/lib/reading-scroll";
 
-import {
-  ARTICLE_OUTLINE_TOP_OFFSET,
-  readingScrollOffset,
-} from "@/components/rich-text/extensions/table-of-contents";
-
-const EMPTY_OUTLINE: TableOfContentData = [];
+export interface ArticleHeading {
+  id: string;
+  level: number;
+  textContent: string;
+  dom?: HTMLElement;
+}
 
 export interface ArticleOutline {
-  items: TableOfContentData;
+  items: readonly ArticleHeading[];
   label: string;
 }
 
@@ -33,16 +20,25 @@ const SetArticleOutlineContext = createContext<(outline: ArticleOutline | null) 
 const ArticleReadingMinutesContext = createContext<number | null>(null);
 const SetArticleReadingMinutesContext = createContext<(minutes: number | null) => void>(() => {});
 
-export function ArticleOutlineProvider({ children }: { children: ReactNode }) {
+export function ArticleOutlineProvider({
+  children,
+  initialOutline = null,
+  initialMinutes = null,
+}: {
+  children: ReactNode;
+  initialOutline?: ArticleOutline | null;
+  initialMinutes?: number | null;
+}) {
   const [outline, setOutline] = useState<ArticleOutline | null>(null);
   const [minutes, setMinutes] = useState<number | null>(null);
-  const publish = useCallback((next: ArticleOutline | null) => setOutline(next), []);
 
   return (
     <SetArticleReadingMinutesContext value={setMinutes}>
-      <ArticleReadingMinutesContext value={minutes}>
-        <SetArticleOutlineContext value={publish}>
-          <ArticleOutlineContext value={outline}>{children}</ArticleOutlineContext>
+      <ArticleReadingMinutesContext value={initialMinutes ?? minutes}>
+        <SetArticleOutlineContext value={setOutline}>
+          <ArticleOutlineContext value={initialOutline ?? outline}>
+            {children}
+          </ArticleOutlineContext>
         </SetArticleOutlineContext>
       </ArticleReadingMinutesContext>
     </SetArticleReadingMinutesContext>
@@ -57,80 +53,15 @@ export function useArticleOutline() {
   return use(ArticleOutlineContext);
 }
 
-function outlineSignature(items: TableOfContentData) {
-  return items.map((item) => `${item.id}:${item.isActive ? 1 : 0}`).join("|");
+export function useArticleReadingMinutesPublisher() {
+  return use(SetArticleReadingMinutesContext);
 }
 
-function subscribeToReadingPosition(onChange: () => void) {
-  window.addEventListener("odyssey-outline-scroll", onChange);
-  return () => window.removeEventListener("odyssey-outline-scroll", onChange);
+export function useArticleOutlinePublisher() {
+  return use(SetArticleOutlineContext);
 }
 
-const CHARACTERS_PER_MINUTE = 260;
-
-/** Publishes HeroUI's character count as reading minutes for the article hero. */
-export function ArticleReadingTimeSource() {
-  const publish = use(SetArticleReadingMinutesContext);
-  const characterCount = useRichTextEditorState((state) => {
-    const count = state.editor.storage.characterCount?.characters?.();
-    return count && count > 0 ? count : null;
-  });
-
-  useEffect(() => {
-    publish(characterCount ? Math.max(1, Math.ceil(characterCount / CHARACTERS_PER_MINUTE)) : null);
-    return () => publish(null);
-  }, [characterCount, publish]);
-
-  return null;
-}
-
-/**
- * The heading list lives in the editor. This publishes it when the headings
- * or the active section change, so the action bar can open the list.
- */
-export function ArticleOutlineSource({
-  label,
-  maxHeadingLevel = 3,
-}: {
-  label: string;
-  maxHeadingLevel?: number;
-}) {
-  const publish = use(SetArticleOutlineContext);
-  const { editor } = useRichTextEditor();
-  const items =
-    useRichTextEditorState((state) => {
-      const content =
-        (state.editor.storage.tableOfContents?.content as TableOfContentData | undefined) ??
-        EMPTY_OUTLINE;
-
-      return !editor || content.length === 0
-        ? EMPTY_OUTLINE
-        : content.filter((item) => item.originalLevel <= maxHeadingLevel);
-    }) ?? EMPTY_OUTLINE;
-  const activeSignature = useSyncExternalStore(
-    subscribeToReadingPosition,
-    () => outlineSignature(items),
-    () => ""
-  );
-  const published = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (published.current === activeSignature) return;
-    published.current = activeSignature;
-    publish(!editor || !activeSignature ? null : { items, label });
-  }, [activeSignature, editor, items, label, publish]);
-
-  useEffect(() => {
-    return () => {
-      published.current = null;
-      publish(null);
-    };
-  }, [publish]);
-
-  return null;
-}
-
-export function currentHeadingId(items: TableOfContentData) {
+export function currentHeadingId(items: readonly ArticleHeading[]) {
   const position = readingScrollOffset() + ARTICLE_OUTLINE_TOP_OFFSET;
   let activeId = items[0]?.id ?? "";
 
@@ -144,15 +75,15 @@ export function currentHeadingId(items: TableOfContentData) {
   return activeId;
 }
 
-export function headingElement(item: TableOfContentDataItem) {
+export function headingElement(item: ArticleHeading) {
   const heading = document.getElementById(item.id) ?? item.dom;
   if (!heading) return null;
   heading.setAttribute("tabindex", "-1");
   return heading;
 }
 
-export function writeHeadingHash(item: TableOfContentDataItem) {
+export function writeHeadingHash(item: ArticleHeading) {
   if (window.history.pushState) {
-    window.history.pushState(null, "", `#${item.id}`);
+    window.history.pushState(null, "", `#${encodeURIComponent(item.id)}`);
   }
 }

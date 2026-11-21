@@ -12,6 +12,15 @@ const moments = Array.from({ length: 12 }, (_, index) => ({
             type: "text",
             text: `Moment ${index + 1}. ${"A note with variable height. ".repeat((index % 5) + 1)}`,
           },
+          ...(index === 0
+            ? [
+                {
+                  type: "text",
+                  text: "Open writing",
+                  marks: [{ type: "link", attrs: { href: "/single", target: "_self" } }],
+                },
+              ]
+            : []),
         ],
       },
     ],
@@ -60,11 +69,19 @@ for (const viewport of [
 
     await page.goto("/");
     const showcase = page.locator("#moments-showcase");
-    await expect(showcase.locator("#moments-showcase-title")).toBeVisible();
+    await expect(showcase.locator("#moments-showcase-title")).toBeVisible({ timeout: 20_000 });
     const masonry = showcase.getByTestId("moments-masonry");
     const cards = masonry.locator(":scope > div");
     await expect(cards).toHaveCount(moments.length, { timeout: 10_000 });
     await expect(cards.first().locator('[data-slot="moment-content"]')).toBeVisible();
+    const first = cards.first();
+    await expect(first.getByRole("link", { name: /^Open moment by Reader/ })).toHaveAttribute(
+      "href",
+      "/moments#moment-1"
+    );
+    const contentLink = first.getByRole("link", { name: "Open writing", exact: true });
+    await expect(contentLink).toHaveAttribute("href", "/single");
+    await expect(first.locator("a a")).toHaveCount(0);
 
     const layout = await cards.evaluateAll((elements) => {
       const boxes = elements.map((element) => {
@@ -92,5 +109,9 @@ for (const viewport of [
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true
     );
+    if (viewport.name === "mobile") {
+      await contentLink.click();
+      await expect(page).toHaveURL(/\/single$/);
+    }
   });
 }

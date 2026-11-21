@@ -12,12 +12,16 @@ import { useTranslations } from "next-intl";
 import { Icon } from "@iconify/react";
 import type { CarouselCard } from "@/components/card/minimal-carousel";
 import { ModeSwitch } from "./theme-switch";
+import { DeferredContent } from "./layout/deferred-content";
+
+const NewsletterFallback = <Skeleton className="h-10 w-full max-w-lg" />;
+const CarouselFallback = <Skeleton className="h-40 w-full" />;
 
 const MinimalCarousel = dynamic(
   () => import("@/components/card/minimal-carousel").then((mod) => mod.MinimalCarousel),
   {
     ssr: false,
-    loading: () => <Skeleton className="h-40 w-full rounded-3xl" />,
+    loading: () => CarouselFallback,
   }
 );
 
@@ -28,7 +32,7 @@ const NewsletterSubscribeForm = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <Skeleton className="h-10 w-full max-w-lg rounded-xl" />,
+    loading: () => NewsletterFallback,
   }
 );
 
@@ -162,20 +166,24 @@ export function Footer() {
             </Card.Header>
             <Card.Content>
               <div className="max-w-lg">
-                <NewsletterSubscribeForm variant="inline" />
+                <DeferredContent fallback={NewsletterFallback}>
+                  <NewsletterSubscribeForm variant="inline" />
+                </DeferredContent>
               </div>
             </Card.Content>
           </Card>
         </motion.div>
 
         <motion.div {...reveal(0.08)} className="mx-auto w-full max-w-105">
-          <MinimalCarousel
-            cards={cards}
-            copyLabel={t("copy")}
-            actionLabel={t("visit")}
-            onCopyClick={handleCopy}
-            onCustomizeClick={handleVisit}
-          />
+          <DeferredContent fallback={CarouselFallback}>
+            <MinimalCarousel
+              cards={cards}
+              copyLabel={t("copy")}
+              actionLabel={t("visit")}
+              onCopyClick={handleCopy}
+              onCustomizeClick={handleVisit}
+            />
+          </DeferredContent>
         </motion.div>
 
         <motion.div

@@ -18,3 +18,5 @@ export const HOME_SECTION_TITLE =
 export const HOME_SECTION_DESCRIPTION = "mt-3 max-w-xl leading-6";
 
 export const HOME_SECTION_CONTENT = "mt-9 md:mt-10";
+
+export const MOMENTS_SHOWCASE_LIMIT = 18;

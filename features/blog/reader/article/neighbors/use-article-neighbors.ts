@@ -5,21 +5,25 @@ import { type PostResponse, useGetPublicPostDigestsQuery } from "@/lib/features/
 
 import { resolveArticleNeighbors } from "./neighbor";
 
-export function useArticleNeighbors(article: PostResponse) {
+export function useArticleNeighbors(article: PostResponse, enabled: boolean) {
   const seriesSlug = article.series?.slug;
-  const column = useGetPublicColumnBySlugQuery(seriesSlug ?? "", { skip: !seriesSlug });
+  const hasNavigation = article.navigation != null;
+  const needsLookup = enabled && !hasNavigation;
+  const column = useGetPublicColumnBySlugQuery(seriesSlug ?? "", {
+    skip: !needsLookup || !seriesSlug,
+  });
   const journal = useGetPublicPostDigestsQuery(
     { page: 0, size: 100 },
-    { skip: Boolean(seriesSlug) }
+    { skip: !needsLookup || Boolean(seriesSlug) }
   );
   const neighbors = resolveArticleNeighbors({
     article,
-    columnPosts: column.data?.posts ?? [],
-    journalPosts: journal.data?.list ?? [],
+    columnPosts: column.currentData?.posts ?? [],
+    journalPosts: journal.currentData?.list ?? [],
   });
 
   return {
     ...neighbors,
-    isLoading: Boolean(seriesSlug) ? column.isLoading : journal.isLoading,
+    isLoading: !hasNavigation && (!enabled || (seriesSlug ? column.isLoading : journal.isLoading)),
   };
 }

@@ -49,7 +49,7 @@ test("article comment sheet opens from the reader toolbar", { tag: "@smoke" }, a
   );
 
   await page.goto(`/single/${designArticle.slug}`);
-  await expect(page.locator('.ProseMirror[contenteditable="false"]')).toBeVisible();
+  await expect(page.locator("[data-article-body]")).toBeVisible();
   await page.getByRole("button", { name: "Open comments", exact: true }).press("Enter");
   const sheet = page.getByRole("dialog", { name: /^Comments\b/ });
   await expect(sheet.getByRole("heading", { name: "Comments 1", exact: true })).toBeVisible();

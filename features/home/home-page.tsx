@@ -2,6 +2,7 @@
 
 import { createPageReveal } from "@/lib/motion";
 import { PageContainer } from "@/components/layout/page-container";
+import { DeferredContent } from "@/components/layout/deferred-content";
 import { Section } from "@/components/layout/section";
 import {
   HOME_SECTION_CONTENT,
@@ -18,17 +19,14 @@ import { FootprintsShowcase } from "@/features/home/footprints-showcase";
 import { FriendLinksShowcase } from "@/features/home/friend-links-showcase";
 import { GalleryShowcase } from "@/features/home/gallery-showcase";
 import { HelloApple } from "@/features/home/hello-apple";
-import { HomeOrientation } from "@/features/home/home-orientation";
-import { LatelySection } from "@/features/home/lately-section";
-import { MomentsShowcase } from "@/features/home/moments-showcase";
-import type { MomentResponse } from "@/lib/features/moment";
 import { ProjectsShowcase } from "@/features/home/projects-showcase";
-import GuestbookBoard from "@/components/corners/guestbook-board";
 import { MotionChip, MotionTypography } from "@/components/ui";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import {
   Button,
   Card,
+  Chip,
   Link,
   buttonVariants,
   cn,
@@ -36,6 +34,8 @@ import {
   TextArea,
   Description,
   Accordion,
+  Skeleton,
+  Typography,
   toast,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
@@ -50,6 +50,40 @@ import { setLoginOpen } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 const MotionAccordion = motion.create(Accordion);
+const LatelySection = dynamic(
+  () => import("./lately-section").then((module) => module.LatelySection),
+  {
+    loading: LatelyPlaceholder,
+  }
+);
+const GuestbookBoard = dynamic(() => import("@/components/corners/guestbook-board"), {
+  loading: () => <Skeleton className="h-64 w-full" />,
+});
+
+function LatelyPlaceholder() {
+  const t = useTranslations("Home");
+  return (
+    <Section id="lately" aria-labelledby="lately-title">
+      <header className={HOME_SECTION_HEADER_CENTERED}>
+        <Chip size="sm" variant="secondary">
+          {t("lately.sectionLabel")}
+        </Chip>
+        <Typography id="lately-title" type="h2" weight="bold" className={HOME_SECTION_TITLE}>
+          {t("lately.sectionTitle")}
+        </Typography>
+        <Typography color="muted" type="body" className={HOME_SECTION_DESCRIPTION}>
+          {t("lately.sectionDescription")}
+        </Typography>
+      </header>
+      <div className={`${HOME_SECTION_CONTENT} grid gap-5 lg:grid-cols-12 lg:gap-6`}>
+        <Skeleton className="h-[34rem] lg:col-span-7" />
+        <Skeleton className="h-[34rem] lg:col-span-5" />
+        <Skeleton className="h-[30rem] lg:col-span-12" />
+      </div>
+      <Skeleton className="mx-auto mt-20 h-72 w-full max-w-[620px]" />
+    </Section>
+  );
+}
 
 const faqKeys = ["finished", "reply", "building", "desk", "trace"] as const;
 const faqIcons = [
@@ -60,7 +94,7 @@ const faqIcons = [
   "lucide:pen-line",
 ];
 
-export function HomePage({ moments = [] }: { moments?: MomentResponse[] }) {
+export function HomePage({ moments, orientation }: { moments: ReactNode; orientation: ReactNode }) {
   const t = useTranslations("Home");
   const mounted = useMounted();
   const shouldReduceMotion = useReducedMotionPreference();
@@ -69,7 +103,7 @@ export function HomePage({ moments = [] }: { moments?: MomentResponse[] }) {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  const { revealInView, presence } = createPageReveal(shouldReduceMotion);
+  const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
     <>
@@ -79,7 +113,7 @@ export function HomePage({ moments = [] }: { moments?: MomentResponse[] }) {
           aria-labelledby="home-hero-title"
           className="relative isolate flex min-h-[min(680px,calc(100dvh-3rem))] flex-col items-center justify-center overflow-hidden pt-24 pb-12 text-center"
         >
-          <MotionChip color="accent" size="sm" variant="soft" {...presence(0, 10)}>
+          <MotionChip color="accent" size="sm" variant="soft">
             {t("page.eyebrow")}
           </MotionChip>
 
@@ -92,24 +126,15 @@ export function HomePage({ moments = [] }: { moments?: MomentResponse[] }) {
             type="h1"
             weight="bold"
             className="max-w-2xl text-4xl leading-[1.05] tracking-normal text-balance break-words sm:text-5xl lg:text-6xl"
-            {...presence()}
           >
             {t("page.title")}
           </MotionTypography>
 
-          <MotionTypography
-            color="muted"
-            type="body"
-            className="mt-4 max-w-lg leading-7"
-            {...presence(0.04, 14)}
-          >
+          <MotionTypography color="muted" type="body" className="mt-4 max-w-lg leading-7">
             {t("page.subtitle")}
           </MotionTypography>
 
-          <motion.div
-            className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
-            {...presence(0.08, 12)}
-          >
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/chronicle"
               className={cn(buttonVariants({ variant: "primary" }), "no-underline")}
@@ -124,22 +149,24 @@ export function HomePage({ moments = [] }: { moments?: MomentResponse[] }) {
               {t("page.exploreField")}
               <Icon aria-hidden="true" icon="lucide:arrow-down" className="size-4" />
             </Link>
-          </motion.div>
+          </div>
         </PageContainer>
 
-        <HomeOrientation />
+        {orientation}
 
         <div id="explore-odyssey">
           <ExploreOdyssey />
         </div>
 
-        <LatelySection />
+        <DeferredContent fallback={<LatelyPlaceholder />}>
+          <LatelySection />
+        </DeferredContent>
 
         <FeaturedWriting />
         <ProjectsShowcase />
         <GalleryShowcase />
         <FootprintsShowcase />
-        <MomentsShowcase moments={moments} />
+        {moments}
         <FriendLinksShowcase />
 
         <Section id="guestbook" aria-labelledby="guestbook-title" className="relative">
@@ -186,7 +213,9 @@ export function HomePage({ moments = [] }: { moments?: MomentResponse[] }) {
           </header>
 
           <motion.div className={`${HOME_SECTION_CONTENT} w-full`} {...revealInView(0.12, 20)}>
-            <GuestbookBoard />
+            <DeferredContent fallback={<Skeleton className="h-64 w-full" />}>
+              <GuestbookBoard />
+            </DeferredContent>
           </motion.div>
 
           <div className="mx-auto mt-12 flex w-full max-w-3xl flex-col gap-8">

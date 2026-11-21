@@ -9,7 +9,7 @@ import { RichTextTableOfContents } from "@/components/rich-text/table-of-content
 import {
   ArticleOutlineSource,
   ArticleReadingTimeSource,
-} from "@/features/blog/reader/article/article-outline";
+} from "@/features/blog/reader/article/article-editor-outline";
 import {
   normalizeRichTextDocument,
   parseJSONContent,
