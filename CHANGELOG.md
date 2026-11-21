@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.260.3](https://github.com/LeeWio/odyssey/compare/v1.260.2...v1.260.3) (2026-11-21)
+
+
+### Bug Fixes
+
+* **deploy:** guard Odyssey production disk capacity ([#98](https://github.com/LeeWio/odyssey/issues/98)) ([922ea70](https://github.com/LeeWio/odyssey/commit/922ea708f7d568e192f8a06ce8a3e1881b380756))
+
 ## [1.260.2](https://github.com/LeeWio/odyssey/compare/v1.260.1...v1.260.2) (2026-11-21)
 
 
