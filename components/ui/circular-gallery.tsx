@@ -42,6 +42,7 @@ export interface CircularGalleryProps extends Omit<HTMLAttributes<HTMLDivElement
   intro?: boolean;
   onItemClick?: (item: GalleryItem, index: number) => void;
   onActiveChange?: (index: number) => void;
+  onUnavailable?: () => void;
   dpr?: number;
   style?: CSSProperties;
 }
@@ -67,6 +68,7 @@ type Settings = {
   intro: boolean;
   onItemClick?: (item: GalleryItem, index: number) => void;
   onActiveChange?: (index: number) => void;
+  onUnavailable?: () => void;
   dpr?: number;
 };
 
@@ -356,7 +358,12 @@ const link = (gl: WebGL2RenderingContext): Program | null => {
   const vertex = compile(gl, gl.VERTEX_SHADER, VERTEX);
   const fragment = compile(gl, gl.FRAGMENT_SHADER, FRAGMENT);
   const program = gl.createProgram();
-  if (!vertex || !fragment || !program) return null;
+  if (!vertex || !fragment || !program) {
+    if (vertex) gl.deleteShader(vertex);
+    if (fragment) gl.deleteShader(fragment);
+    if (program) gl.deleteProgram(program);
+    return null;
+  }
   gl.attachShader(program, vertex);
   gl.attachShader(program, fragment);
   gl.bindAttribLocation(program, 0, "aPosition");
@@ -400,6 +407,7 @@ const CircularGallery = ({
   intro = true,
   onItemClick,
   onActiveChange,
+  onUnavailable,
   dpr,
   className = "",
   style,
@@ -436,6 +444,7 @@ const CircularGallery = ({
     intro,
     onItemClick,
     onActiveChange,
+    onUnavailable,
     dpr,
   };
   const settingsRef = useRef(settings);
@@ -468,10 +477,20 @@ const CircularGallery = ({
       depth: false,
       stencil: false,
     });
-    if (!container || !canvas || !labelLayer || !caption || !gl) return undefined;
+    if (!container || !canvas || !labelLayer || !caption) return undefined;
+
+    const reportUnavailable = () => settingsRef.current.onUnavailable?.();
+    if (!gl) {
+      reportUnavailable();
+      return undefined;
+    }
 
     const program = link(gl);
-    if (!program) return undefined;
+    if (!program) {
+      reportUnavailable();
+      return undefined;
+    }
+    canvas.addEventListener("webglcontextlost", reportUnavailable);
     const u = program.uniforms;
 
     const vertices: number[] = [];
@@ -1202,6 +1221,7 @@ const CircularGallery = ({
 
     return () => {
       disposed = true;
+      canvas.removeEventListener("webglcontextlost", reportUnavailable);
       cancelAnimationFrame(raf);
       clearTimeout(snapTimer);
       engineRef.current = null;

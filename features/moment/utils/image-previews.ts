@@ -1,6 +1,16 @@
 import type { MomentImageResponse } from "@/lib/features/moment";
 
-export function getMomentImagePreviews(images: readonly MomentImageResponse[] = []) {
+export interface MomentImagePreview {
+  url: string;
+  originalUrl?: string;
+  alt?: string | null;
+  width?: number;
+  height?: number;
+}
+
+export function getMomentImagePreviews(
+  images: readonly MomentImageResponse[] = []
+): MomentImagePreview[] {
   return images.slice(0, 8).map((image) => {
     const hasDimensions = (image.width ?? 0) > 0 && (image.height ?? 0) > 0;
     return {

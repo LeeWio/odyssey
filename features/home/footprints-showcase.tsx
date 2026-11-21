@@ -9,6 +9,7 @@ import { Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import {
   FOOTPRINTS,
@@ -32,6 +33,27 @@ function MapPlaceholder() {
   return (
     <FootprintsMapFrame compact>
       <Skeleton aria-hidden className="h-full w-full" />
+    </FootprintsMapFrame>
+  );
+}
+
+function HomeFootprintsMap() {
+  const t = useTranslations("Footprints");
+  const [hasWebGL] = useState(() => {
+    const context = document.createElement("canvas").getContext("webgl2");
+    context?.getExtension("WEBGL_lose_context")?.loseContext();
+    return context !== null;
+  });
+
+  if (hasWebGL) return <CompactFootprintsMap footprints={FOOTPRINTS} compact />;
+
+  return (
+    <FootprintsMapFrame compact>
+      <div className="bg-surface-secondary grid h-full place-items-center">
+        <Typography color="muted" type="body-sm">
+          {t("mapUnavailable")}
+        </Typography>
+      </div>
     </FootprintsMapFrame>
   );
 }
@@ -152,7 +174,7 @@ export function FootprintsShowcase() {
 
       <div className="relative mt-9 w-full overflow-hidden md:mt-10">
         <DeferredContent fallback={<MapPlaceholder />}>
-          <CompactFootprintsMap footprints={FOOTPRINTS} compact />
+          <HomeFootprintsMap />
         </DeferredContent>
 
         <div className="absolute top-4 left-4 z-10 hidden w-[260px] @min-[64rem]/home-section:block">

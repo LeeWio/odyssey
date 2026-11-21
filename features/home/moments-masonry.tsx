@@ -1,11 +1,11 @@
 import { Avatar, Card, Chip, Link, Typography } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import { RemoteMedia } from "@/components/ui/remote-media";
 import { MomentContent } from "@/features/moment/components/moment-content";
 import { parseMomentContent } from "@/features/moment/utils/content-parser";
 import { getMomentImagePreviews } from "@/features/moment/utils/image-previews";
 import { useRelativeTime } from "@/lib/relative-time";
 import type { MomentResponse } from "@/lib/features/moment";
+import { MomentPreviewPhotos } from "./moment-preview-photos";
 
 function MomentPreview({ moment }: { moment: MomentResponse }) {
   const t = useTranslations("Moments");
@@ -15,7 +15,7 @@ function MomentPreview({ moment }: { moment: MomentResponse }) {
   const images = getMomentImagePreviews(moment.images);
 
   return (
-    <Card className="relative h-full">
+    <Card className="h-full">
       <Card.Header className="flex-row items-center gap-2">
         <Avatar>
           {moment.authorAvatar ? <Avatar.Image alt="" src={moment.authorAvatar} /> : null}
@@ -31,10 +31,7 @@ function MomentPreview({ moment }: { moment: MomentResponse }) {
         </div>
       </Card.Header>
       <Card.Content>
-        <MomentContent
-          content={parseMomentContent(moment.content)}
-          className="[&_a]:relative [&_a]:z-10"
-        />
+        <MomentContent content={parseMomentContent(moment.content)} />
         {moment.topics.length || moment.stockSymbol ? (
           <div className="flex flex-wrap gap-1.5">
             {moment.topics.map((topic) => (
@@ -49,30 +46,13 @@ function MomentPreview({ moment }: { moment: MomentResponse }) {
             ) : null}
           </div>
         ) : null}
-        {images.length ? (
-          <div className={images.length >= 4 ? "grid grid-cols-2 items-start gap-3" : "grid gap-3"}>
-            {images.map((image, index) => (
-              <RemoteMedia
-                key={`${image.url}-${index}`}
-                alt={image.alt || t("imageAlt")}
-                className={
-                  images.length === 1
-                    ? "mx-auto h-auto max-h-[min(55svh,420px)] w-auto max-w-full rounded-lg object-contain"
-                    : "h-auto w-full rounded-lg"
-                }
-                height={image.height}
-                src={image.url}
-                width={image.width}
-              />
-            ))}
-          </div>
-        ) : null}
+        {images.length ? <MomentPreviewPhotos images={images} /> : null}
       </Card.Content>
-      <Link
-        aria-label={t("openMoment", { author, time })}
-        className="absolute inset-0"
-        href={`/moments#moment-${moment.id}`}
-      />
+      <Card.Footer>
+        <Link aria-label={t("openMoment", { author, time })} href={`/moments#moment-${moment.id}`}>
+          {t("viewMoment")}
+        </Link>
+      </Card.Footer>
     </Card>
   );
 }

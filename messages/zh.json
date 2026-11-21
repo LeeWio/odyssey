@@ -1100,7 +1100,8 @@
     "deleteFailed": "这条动态没有删除成功。",
     "recently": "刚刚",
     "imageAlt": "动态图片",
-    "openMoment": "查看 {author} 的动态 · {time}",
+    "openMoment": "查看动态 · {author} · {time}",
+    "viewMoment": "查看动态",
     "openImage": "查看第 {index} 张图片，共 {total} 张",
     "imageViewer": "图片查看器",
     "viewerMode": "图片展示方式",
@@ -1255,6 +1256,7 @@
   },
   "Footprints": {
     "mapLabel": "个人旅行足迹地图",
+    "mapUnavailable": "当前设备无法显示交互地图。",
     "mapTitle": "足迹",
     "mapDescription": "留在地图上的地方",
     "places": "地点",
