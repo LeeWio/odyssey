@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.260.4](https://github.com/LeeWio/odyssey/compare/v1.260.3...v1.260.4) (2026-11-21)
+
+
+### Performance Improvements
+
+* **odyssey:** defer offscreen homepage and reader requests ([#100](https://github.com/LeeWio/odyssey/issues/100)) ([03a3a3a](https://github.com/LeeWio/odyssey/commit/03a3a3ada5ba5c086e76bdc9152e982b53e89f80))
+
 ## [1.260.3](https://github.com/LeeWio/odyssey/compare/v1.260.2...v1.260.3) (2026-11-21)
 
 
