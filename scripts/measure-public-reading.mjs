@@ -1,11 +1,11 @@
-import { createServer } from "node:http";
+import { createServer, get } from "node:http";
 import { spawn } from "node:child_process";
 import { chromium } from "@playwright/test";
 import { setTimeout as wait } from "node:timers/promises";
 
 const port = 3188;
 const origin = "http://127.0.0.1:3189";
-const backend = "http://127.0.0.1:8080";
+const publicApiPrefix = "/api/v1/public/";
 const [distDir, slug, routeOnly] = process.argv.slice(2);
 if (!distDir || !slug) {
   throw new Error(
@@ -19,26 +19,42 @@ let delayList = 0;
 const calls = [];
 const serverCalls = [];
 const proxy = createServer(async (req, res) => {
-  const url = new URL(req.url, backend);
-  calls.push(url.pathname + url.search);
-  if (req.headers["x-odyssey-prefetch"]) serverCalls.push(url.pathname + url.search);
+  if (req.method !== "GET") return res.writeHead(405).end();
+  const requestTarget = req.url ?? "";
+  if (!requestTarget.startsWith(publicApiPrefix)) return res.writeHead(404).end();
+  const url = new URL(requestTarget, origin);
+  if (!url.pathname.startsWith(publicApiPrefix)) return res.writeHead(404).end();
+
+  const path = url.pathname + url.search;
+  calls.push(path);
+  if (req.headers["x-odyssey-prefetch"]) serverCalls.push(path);
   if (url.pathname === "/api/v1/public/moments/cadence") await wait(delayCadence);
   if (url.pathname === "/api/v1/public/moments") await wait(delayList);
-  try {
-    if (req.method !== "GET") return res.writeHead(405).end();
-    const headers = Object.fromEntries(
-      Object.entries(req.headers).filter(([name]) =>
-        /^(accept|accept-language|x-odyssey-prefetch)$/.test(name)
-      )
-    );
-    const response = await fetch(url, { headers, signal: AbortSignal.timeout(5000) });
-    res.writeHead(response.status, {
-      "content-type": response.headers.get("content-type") ?? "application/json",
-    });
-    res.end(Buffer.from(await response.arrayBuffer()));
-  } catch {
-    res.writeHead(502).end();
-  }
+  const headers = Object.fromEntries(
+    Object.entries(req.headers).filter(([name]) =>
+      /^(accept|accept-language|x-odyssey-prefetch)$/.test(name)
+    )
+  );
+  const upstream = get(
+    {
+      hostname: "127.0.0.1",
+      port: 8080,
+      path,
+      headers,
+      signal: AbortSignal.timeout(5000),
+    },
+    (response) => {
+      res.writeHead(response.statusCode ?? 502, {
+        "content-type": response.headers["content-type"] ?? "application/json",
+      });
+      response.once("error", () => res.destroy());
+      response.pipe(res);
+    }
+  );
+  upstream.once("error", () => {
+    if (res.headersSent) res.destroy();
+    else res.writeHead(502).end();
+  });
 });
 await new Promise((resolve) => proxy.listen(port, "127.0.0.1", resolve));
 const web = spawn(
@@ -125,11 +141,13 @@ try {
           const url = new URL(req.url());
           if (
             req.method() === "GET" &&
-            url.pathname.startsWith("/api/v1/") &&
+            url.pathname.startsWith(publicApiPrefix) &&
             url.origin !== origin
           ) {
             const upstream = await fetch("http://127.0.0.1:" + port + url.pathname + url.search, {
               headers: { "accept-language": "en" },
+              redirect: "error",
+              signal: AbortSignal.timeout(5000),
             });
             return route.fulfill({
               status: upstream.status,
