@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.260.1](https://github.com/LeeWio/odyssey/compare/v1.260.0...v1.260.1) (2026-11-21)
+
+
+### Performance Improvements
+
+* **chronicle:** split inactive tabs into demand chunks ([#91](https://github.com/LeeWio/odyssey/issues/91)) ([032b210](https://github.com/LeeWio/odyssey/commit/032b210bb29e781ee3f1b4fe5e5fc7f76e2377ce))
+
 ## [1.260.0](https://github.com/LeeWio/odyssey/compare/v1.259.0...v1.260.0) (2026-11-20)
 
 
