@@ -193,6 +193,18 @@ const fixtures = [
   designArticle,
   resumeArticle,
   entranceArticle("entrance-regression", paragraphs),
+  {
+    ...entranceArticle("entrance-series", paragraphs),
+    series: {
+      id: 17,
+      name: "Reading series",
+      slug: "reading-series",
+      isPublished: true,
+      postsCount: 5,
+      createdAt: "2026-09-20T00:00:00Z",
+    },
+    seriesOrder: 2,
+  },
   entranceArticle("entrance-nested", [...paragraphs, ...nestedBlocks, ...paragraphs]),
   entranceArticle("entrance-tall", [
     ...paragraphs,

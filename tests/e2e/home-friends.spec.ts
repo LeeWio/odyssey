@@ -57,6 +57,7 @@ test("HeroUI cards stay ordered, aligned and keyboard accessible across viewport
   });
   await page.goto("/");
   const section = page.locator("#friend-links-showcase");
+  await section.locator("h2").scrollIntoViewIfNeeded();
   const heading = section.getByRole("link", { name: "Near & Far", exact: true });
   const directory = section.getByRole("list", { name: "Friends" });
   await expect(heading).toHaveAttribute("href", "/links");
@@ -193,6 +194,7 @@ test("light theme retains visible keyboard focus with motion enabled", async ({
   await page.route(`**${endpoint}`, (route) => route.fulfill({ json: response(links) }));
   await page.goto("/");
   const section = page.locator("#friend-links-showcase");
+  await section.locator("h2").scrollIntoViewIfNeeded();
   await expect(page.locator("html")).toHaveClass(/light/);
   const first = section.getByRole("list").getByRole("link").first();
   await expect(first).toBeVisible();
@@ -214,6 +216,7 @@ test("loading uses HeroUI cards and empty results retain the title link", async 
   });
   await page.goto("/");
   const section = page.locator("#friend-links-showcase");
+  await section.locator("h2").scrollIntoViewIfNeeded();
   try {
     const skeleton = section.getByRole("status", { name: "Loading friends" });
     await expect(skeleton).toHaveAttribute("aria-busy", "true");
@@ -241,6 +244,7 @@ test("failure stays compact and an explicit retry restores the directory", async
   });
   await page.goto("/");
   const section = page.locator("#friend-links-showcase");
+  await section.locator("h2").scrollIntoViewIfNeeded();
   await expect(section.getByRole("status")).toHaveText("The links couldn't be loaded right now.");
   await expect(section.getByRole("link", { name: "Near & Far", exact: true })).toHaveAttribute(
     "href",
@@ -259,6 +263,7 @@ test.describe("Chinese", () => {
     await page.route(`**${endpoint}`, (route) => route.fulfill({ json: response(links) }));
     await page.goto("/");
     const section = page.locator("#friend-links-showcase");
+    await section.locator("h2").scrollIntoViewIfNeeded();
     await expect(section.getByRole("heading", { name: "有朋自远方", exact: true })).toBeVisible();
     await expect(section.getByText("各在一方，亦有共鸣。", { exact: true })).toBeVisible();
     await expect(section.getByRole("list", { name: "同道" })).toBeVisible();
@@ -268,6 +273,7 @@ test.describe("Chinese", () => {
     await section.screenshot({ path: testInfo.outputPath("friends-zh.png") });
     await page.unroute(`**${endpoint}`);
     await page.reload();
+    await section.locator("h2").scrollIntoViewIfNeeded();
     await expect(section.getByRole("status")).toHaveText("暂时无法加载友链。");
     await expect(section.getByRole("button", { name: "重试", exact: true })).toBeVisible();
   });

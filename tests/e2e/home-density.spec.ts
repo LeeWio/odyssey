@@ -58,13 +58,27 @@ test("home reveals more real content as its container grows without refetching",
   });
 
   await page.setViewportSize({ width: 390, height: 844 });
+  const pageview = page.waitForRequest(
+    (request) =>
+      request.url().endsWith("/api/v1/public/analytics/pageviews") && request.method() === "POST"
+  );
   await page.goto("/");
-  const projectGrid = page.getByTestId("home-projects-grid");
-  const linkGrid = page.getByTestId("home-links-grid");
-  await expect(projectGrid.locator(":scope > div")).toHaveCount(12);
-  await expect(linkGrid.getByRole("listitem", { includeHidden: true })).toHaveCount(6);
+  await pageview;
+  expect(requests).toEqual({ projects: 0, links: 0, writing: 0 });
+
   const slides = page.getByTestId("home-writing-slide");
+  await page.locator("#writing-title").scrollIntoViewIfNeeded();
   await expect(slides).toHaveCount(12);
+  expect(requests.writing).toBe(1);
+
+  const projectGrid = page.getByTestId("home-projects-grid");
+  await page.locator("#projects-showcase-title").scrollIntoViewIfNeeded();
+  await expect(projectGrid.locator(":scope > div")).toHaveCount(12);
+  expect(requests).toEqual({ projects: 1, links: 0, writing: 1 });
+
+  const linkGrid = page.getByTestId("home-links-grid");
+  await page.locator("#friend-links-showcase-title").scrollIntoViewIfNeeded();
+  await expect(linkGrid.getByRole("listitem", { includeHidden: true })).toHaveCount(6);
 
   for (const viewport of [
     { width: 390, columns: 1, preview: 3, carousel: 1, gallery: 3 },
