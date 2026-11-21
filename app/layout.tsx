@@ -52,6 +52,7 @@ export default async function RootLayout({
   const initialTheme = getInitialTheme((await cookies()).toString());
 
   const messages = await getMessages({ locale: lang });
+  const webVitalsEndpoint = process.env.WEB_VITALS_ENDPOINT?.trim();
 
   return (
     <html
@@ -83,7 +84,12 @@ export default async function RootLayout({
           strategy="beforeInteractive"
         />
         <Providers lang={lang} messages={messages}>
-          <WebVitals />
+          {webVitalsEndpoint ? (
+            <WebVitals
+              endpoint={webVitalsEndpoint}
+              revision={process.env.ODYSSEY_REVISION || "development"}
+            />
+          ) : null}
           {children}
         </Providers>
       </body>

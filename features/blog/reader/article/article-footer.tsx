@@ -60,7 +60,7 @@ export function ArticleFooter({ article }: { article: PostResponse }) {
 
       {articleHasContext(article) ? (
         <section className="mx-auto w-full max-w-3xl border-t border-current/10 pt-6 xl:sr-only">
-          <ArticleSidebar article={article} />
+          <ArticleSidebar article={article} placement="footer" nearFooter={isNear} />
         </section>
       ) : null}
     </div>

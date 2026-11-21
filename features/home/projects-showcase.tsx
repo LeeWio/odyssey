@@ -26,6 +26,7 @@ import {
   cn,
 } from "@heroui/react";
 import { motion } from "motion/react";
+import { useNearViewport } from "@/hooks/use-near-viewport";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { type ProjectResponse, useGetPublicProjectsQuery } from "@/lib/features/project";
@@ -160,17 +161,20 @@ function ProjectCard({
 
 export function ProjectsShowcase() {
   const t = useTranslations("Home");
+  const { ref, isNear } = useNearViewport<HTMLDivElement>();
   const shouldReduceMotion = useReducedMotionPreference();
   const {
     data: projects = [],
     error,
     isLoading,
+    isUninitialized,
     isFetching,
     refetch,
-  } = useGetPublicProjectsQuery();
+  } = useGetPublicProjectsQuery(undefined, { skip: !isNear });
+  const isPending = isUninitialized || isLoading;
   const visibleProjects = projects.slice(0, SHOWCASE_LIMIT);
 
-  if (!isLoading && !error && visibleProjects.length === 0) return null;
+  if (!isPending && !error && visibleProjects.length === 0) return null;
 
   return (
     <Section id="projects-showcase" aria-labelledby="projects-showcase-title">
@@ -201,8 +205,8 @@ export function ProjectsShowcase() {
 
       <Separator className="mt-7" />
 
-      <div className={HOME_SECTION_CONTENT}>
-        {isLoading ? (
+      <div ref={ref} className={HOME_SECTION_CONTENT}>
+        {isPending ? (
           <div
             aria-busy="true"
             aria-label={t("projects.loading")}

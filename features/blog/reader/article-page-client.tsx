@@ -153,7 +153,7 @@ export function ArticlePageClient({
           />
         }
         continueLabel={t("continueReading")}
-        context={<ArticleSidebar article={article} />}
+        context={<ArticleSidebar key={article.id} article={article} placement="rail" />}
         showContext={articleHasContext(article)}
         showContinue={showContinue}
         endRef={articleEndRef}

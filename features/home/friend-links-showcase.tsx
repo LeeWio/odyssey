@@ -13,6 +13,7 @@ import { createPageReveal } from "@/lib/motion";
 import { Avatar, Button, Card, Chip, Link, Skeleton, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
+import { useNearViewport } from "@/hooks/use-near-viewport";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 import { useGetPublicFriendLinksQuery, type FriendLinkResponse } from "@/lib/features/friend-link";
 import { useTranslations } from "next-intl";
@@ -96,15 +97,17 @@ function FriendCard({ link }: { link: FriendLinkResponse }) {
 
 export function FriendLinksShowcase() {
   const t = useTranslations("Home");
+  const { ref, isNear } = useNearViewport<HTMLDivElement>();
   const shouldReduceMotion = useReducedMotionPreference();
   const { revealInView } = createPageReveal(shouldReduceMotion);
   const {
     data: friendLinks = [],
     error,
     isLoading,
+    isUninitialized,
     isFetching,
     refetch,
-  } = useGetPublicFriendLinksQuery();
+  } = useGetPublicFriendLinksQuery(undefined, { skip: !isNear });
   const visibleLinks = friendLinks
     .filter((link) => Boolean(toSafeExternalUrl(link.url)))
     .sort((left, right) => left.sortOrder - right.sortOrder)
@@ -137,8 +140,8 @@ export function FriendLinksShowcase() {
         </motion.div>
       </header>
 
-      <div className={HOME_SECTION_CONTENT}>
-        {isLoading ? (
+      <div ref={ref} className={HOME_SECTION_CONTENT}>
+        {isUninitialized || isLoading ? (
           <div
             aria-busy="true"
             aria-label={t("links.loading")}

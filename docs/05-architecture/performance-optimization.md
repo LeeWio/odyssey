@@ -124,6 +124,14 @@ Client Component 只包住需要 state、effect、浏览器 API、事件和动�
 
 ## 验证方法
 
+### 公开页面的真实用户指标
+
+需要采集时，在 Odyssey Web 容器的运行环境设置 `WEB_VITALS_ENDPOINT`，指向已批准的 JSON POST 接收端。未设置时不挂载浏览器采集；生产镜像已有的 `ODYSSEY_REVISION` 自动标记版本，无需为采集重建镜像。跨源接收端需允许网站来源的 CORS 请求。
+
+接收端按 `revision`、`path` 和 `name` 汇总 LCP、CLS、INP、TTFB 与 FCP，按 `revision`、`name`、`id` 去重后比较第 75 百分位与样本量。采集仅覆盖首页、归档、文章、动态和 Chronicle 的文档导航；文章统一记为 `/single/[slug]`，不把站内软导航归为新页面采样，不传查询参数、凭据或来源页。未配置接收端前，不把合成测试读数当作真实用户数据。
+
+### 发布前检查
+
 每个优化阶段至少完成以下检查：
 
 - `npm run lint` 或项目对应的 lint 命令。

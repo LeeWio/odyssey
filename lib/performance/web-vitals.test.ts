@@ -1,49 +1,46 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import {
-  createMetricPayload,
-  getNavigationTimingValue,
-  getNavigationType,
-  reportMetric,
-} from "./web-vitals";
+import { createMetricPayload, getDocumentPath, reportMetric } from "./web-vitals";
+
+const metric = { id: "v4-42", name: "LCP", value: 42, navigationType: "reload" };
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("web vitals helpers", () => {
-  it("creates a stable payload for the current route", () => {
-    expect(
-      createMetricPayload(
-        { id: "lcp-42", name: "LCP", value: 42 },
-        { pathname: "/single/example" } as Location,
-        "reload"
-      )
-    ).toEqual({
-      id: "lcp-42",
-      name: "LCP",
-      navigationType: "reload",
-      path: "/single/example",
-      value: 42,
+  it("reports only the public route group and build revision", () => {
+    expect(createMetricPayload(metric, "/single/example", "commit-sha")).toEqual({
+      ...metric,
+      path: "/single/[slug]",
+      revision: "commit-sha",
     });
+    expect(createMetricPayload(metric, "/moments/saved", "commit-sha")).toBeNull();
+    expect(createMetricPayload({ ...metric, name: "FID" }, "/", "commit-sha")).toBeNull();
+    expect(createMetricPayload({ ...metric, value: NaN }, "/", "commit-sha")).toBeNull();
   });
 
-  it("uses Beacon when available", () => {
-    const sendBeacon = vi.fn(() => true);
-    vi.stubGlobal("navigator", { sendBeacon });
-    reportMetric("/metrics", {
-      id: "cls-1",
-      name: "CLS",
-      navigationType: "navigate",
-      path: "/single",
-      value: 0.12,
+  it("attributes a document metric to the initial navigation, not the current SPA path", () => {
+    vi.stubGlobal("performance", {
+      getEntriesByType: () => [{ name: "https://example.com/single/example?q=private#section" }],
     });
-    expect(sendBeacon).toHaveBeenCalledOnce();
+    vi.stubGlobal("window", { location: { pathname: "/" } });
+
+    expect(getDocumentPath()).toBe("/single/example");
   });
 
-  it("returns unknown when navigation timing is unavailable", () => {
-    vi.stubGlobal("performance", { getEntriesByType: () => [] });
-    expect(getNavigationType()).toBe("unknown");
-  });
+  it("sends a keepalive request without credentials or referrer", () => {
+    const submit = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("fetch", submit);
+    const payload = { ...metric, name: "LCP", path: "/", revision: "commit-sha" } as const;
 
-  it("calculates TTFB relative to navigation start", () => {
-    expect(getNavigationTimingValue("TTFB", { responseStart: 180, startTime: 20 })).toBe(160);
-    expect(getNavigationTimingValue("TTFB", { responseStart: 10, startTime: 20 })).toBe(0);
+    reportMetric("/metrics", payload);
+
+    expect(submit).toHaveBeenCalledWith("/metrics", {
+      body: JSON.stringify(payload),
+      credentials: "omit",
+      headers: { "content-type": "application/json" },
+      keepalive: true,
+      method: "POST",
+      referrerPolicy: "no-referrer",
+    });
   });
 });

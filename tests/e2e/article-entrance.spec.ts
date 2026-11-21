@@ -463,3 +463,46 @@ for (const width of [390, 1600]) {
     expect(relatedRequests).toBe(1);
   });
 }
+
+for (const width of [390, 1440]) {
+  test(`series detail follows the visible context at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    let requests = 0;
+    await page.route("**/api/v1/public/columns/reading-series", (route) => {
+      requests += 1;
+      return route.fulfill({
+        json: {
+          code: 200,
+          message: "OK",
+          data: {
+            id: 17,
+            name: "Reading series",
+            slug: "reading-series",
+            isPublished: true,
+            postsCount: 4,
+            posts: [],
+            createdAt: "2026-09-20T00:00:00Z",
+          },
+        },
+      });
+    });
+
+    const pageview = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/public/analytics/pageviews") &&
+        response.request().method() === "POST"
+    );
+    await openArticle(page, "entrance-series");
+    await pageview;
+    const rail = page.locator("[data-article-context]");
+    if (width === 390) {
+      await expect(rail).toBeHidden();
+      expect(requests).toBe(0);
+      await page.locator("#article-same-subject").scrollIntoViewIfNeeded();
+      await expect(page.getByText("Part 2 of 4", { exact: true })).toBeVisible();
+    } else {
+      await expect(rail.getByText("Part 2 of 4", { exact: true })).toBeVisible();
+    }
+    expect(requests).toBe(1);
+  });
+}
