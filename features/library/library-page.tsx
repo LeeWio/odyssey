@@ -100,9 +100,7 @@ export function LibraryPage() {
       <div className="flex w-full flex-col gap-16">
         <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-xl">
-            <Chip size="sm" variant="secondary">
-              {t("eyebrow")}
-            </Chip>
+            <Chip size="sm">{t("eyebrow")}</Chip>
             <Typography
               type="h1"
               weight="bold"

@@ -226,9 +226,7 @@ export function NotificationPreferencesPage() {
       <div className="flex w-full flex-col gap-10">
         <header className="flex flex-wrap items-end justify-between gap-5">
           <div className="max-w-xl">
-            <Chip size="sm" variant="secondary">
-              {t("deliveryControls")}
-            </Chip>
+            <Chip size="sm">{t("deliveryControls")}</Chip>
             <Typography
               type="h1"
               weight="bold"

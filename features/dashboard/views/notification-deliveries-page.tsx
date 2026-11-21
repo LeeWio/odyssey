@@ -387,7 +387,7 @@ function RetryDialog({
         }}
         isDismissable={!state.isLoading}
       >
-        <Modal.Container size="md">
+        <Modal.Container>
           <Modal.Dialog>
             <Modal.CloseTrigger />
             <Modal.Header>

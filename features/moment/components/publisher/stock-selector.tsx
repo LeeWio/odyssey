@@ -121,17 +121,14 @@ export function StockSelector({ onSelect, attachedStockSymbol }: StockSelectorPr
 
   return (
     <Popover isOpen={isOpen} onOpenChange={handleOpenChange}>
-      <Popover.Trigger>
-        <Button
-          size="sm"
-          variant={attachedStockSymbol ? "secondary" : "tertiary"}
-          aria-label="Attach Stock"
-          onPress={() => setIsOpen(true)}
-        >
-          <Icon icon="gravity-ui:chart-line" className="size-5" />
-          <span>{attachedStockSymbol ? "Stock Attached" : "Stock"}</span>
-        </Button>
-      </Popover.Trigger>
+      <Button
+        size="sm"
+        variant={attachedStockSymbol ? "secondary" : "tertiary"}
+        aria-label="Attach Stock"
+      >
+        <Icon aria-hidden="true" icon="gravity-ui:chart-line" className="size-5" />
+        <span>{attachedStockSymbol ? "Stock Attached" : "Stock"}</span>
+      </Button>
 
       <Popover.Content className="w-fit overflow-hidden" placement="top">
         <Popover.Dialog className="flex min-h-75 flex-col gap-3 overflow-hidden">
@@ -163,11 +160,7 @@ export function StockSelector({ onSelect, attachedStockSymbol }: StockSelectorPr
                   >
                     <SearchField.Group>
                       <SearchField.SearchIcon>
-                        {isFetching ? (
-                          <Spinner size="sm" color="accent" />
-                        ) : (
-                          <Icon icon="gravity-ui:magnifier" />
-                        )}
+                        {isFetching ? <Spinner size="sm" /> : <Icon icon="gravity-ui:magnifier" />}
                       </SearchField.SearchIcon>
                       <SearchField.Input
                         placeholder="Search by name or code (e.g. 茅台)..."
@@ -189,7 +182,7 @@ export function StockSelector({ onSelect, attachedStockSymbol }: StockSelectorPr
                         </EmptyState.Header>
                       </EmptyState>
                     ) : isFetching && stocks.length === 0 ? (
-                      <Spinner size="sm" color="accent" />
+                      <Spinner size="sm" />
                     ) : stocks.length > 0 ? (
                       <Virtualizer layout={ListLayout} layoutOptions={{ rowHeight: 50 }}>
                         <ListBox

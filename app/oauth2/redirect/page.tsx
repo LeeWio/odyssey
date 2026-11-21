@@ -182,7 +182,7 @@ function RedirectHandler() {
 
   return (
     <div className="bg-background flex h-screen w-screen flex-col items-center justify-center gap-4">
-      <Spinner size="lg" color="accent" />
+      <Spinner size="lg" />
       <TextShimmer className="text-muted text-sm font-medium">
         Syncing your digital sanctuary...
       </TextShimmer>

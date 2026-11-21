@@ -111,7 +111,7 @@ function NotificationEmptyState({
         done: t("emptyDoneDescription"),
       }[view];
   return (
-    <EmptyState size="md">
+    <EmptyState>
       <EmptyState.Header>
         <EmptyState.Media variant="icon">
           <Icon className="text-default-400" icon="solar:bell-off-linear" width={40} />
@@ -271,9 +271,7 @@ export function NotificationCenterPage() {
       <div className="flex w-full flex-col gap-8">
         <header className="flex flex-wrap items-end justify-between gap-5">
           <div className="max-w-xl">
-            <Chip size="sm" variant="secondary">
-              {t("eyebrow")}
-            </Chip>
+            <Chip size="sm">{t("eyebrow")}</Chip>
             <Typography
               type="h1"
               weight="bold"

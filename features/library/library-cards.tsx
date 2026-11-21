@@ -133,7 +133,6 @@ export function ReadingCard({ entry }: { entry: ReadingHistoryResponse }) {
         <Card.Footer className="mt-auto flex-col items-stretch gap-3">
           <ProgressBar
             aria-label={t("readingProgress", { title: post.title })}
-            color="accent"
             size="sm"
             value={currentProgressPercent}
           >
@@ -331,7 +330,7 @@ export function EmptyLibrarySection({
   title: string;
 }) {
   return (
-    <Card variant="secondary" className="items-start gap-2 p-7">
+    <Card variant="secondary" className="items-start gap-2">
       <Card.Header>
         <Card.Title>{title}</Card.Title>
         <Card.Description>{description}</Card.Description>
@@ -359,7 +358,7 @@ export function CollectionCard({
   return (
     <Card
       variant={isSelected ? "tertiary" : "secondary"}
-      className="h-full gap-4 p-5 transition-colors"
+      className="h-full gap-4 transition-colors"
     >
       <Card.Header className="gap-2 p-0">
         <div className="flex items-start justify-between gap-3">

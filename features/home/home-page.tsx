@@ -32,6 +32,9 @@ import {
   cn,
   Popover,
   TextArea,
+  TextField,
+  Form,
+  Tooltip,
   Description,
   Accordion,
   Skeleton,
@@ -65,9 +68,7 @@ function LatelyPlaceholder() {
   return (
     <Section id="lately" aria-labelledby="lately-title">
       <header className={HOME_SECTION_HEADER_CENTERED}>
-        <Chip size="sm" variant="secondary">
-          {t("lately.sectionLabel")}
-        </Chip>
+        <Chip size="sm">{t("lately.sectionLabel")}</Chip>
         <Typography id="lately-title" type="h2" weight="bold" className={HOME_SECTION_TITLE}>
           {t("lately.sectionTitle")}
         </Typography>
@@ -169,19 +170,21 @@ export function HomePage({ moments, orientation }: { moments: ReactNode; orienta
         {moments}
         <FriendLinksShowcase />
 
-        <Section id="guestbook" aria-labelledby="guestbook-title" className="relative">
-          <header className={HOME_SECTION_HEADER_CENTERED}>
+        <Section id="guestbook" aria-labelledby="guestbook-title">
+          <header className={`${HOME_SECTION_HEADER_CENTERED} relative`}>
             <Popover isOpen={isGuestbookPopoverOpen} onOpenChange={setIsGuestbookPopoverOpen}>
-              <Popover.Trigger
-                aria-label={t("guestbook.openComposer")}
-                className="text-muted hover:text-foreground absolute top-0 right-0 inline-flex size-9 items-center justify-center rounded-full transition-colors"
-              >
-                <Icon aria-hidden="true" icon="lucide:pen-line" className="size-4" />
-              </Popover.Trigger>
-              <Popover.Content
-                className="border-default-200/50 bg-surface/90 w-80 border shadow-xl backdrop-blur-md"
-                placement="bottom end"
-              >
+              <Tooltip>
+                <Button
+                  aria-label={t("guestbook.openComposer")}
+                  className="absolute end-0 top-0"
+                  isIconOnly
+                  variant="ghost"
+                >
+                  <Icon aria-hidden="true" icon="lucide:pen-line" className="size-4" />
+                </Button>
+                <Tooltip.Content>{t("guestbook.openComposer")}</Tooltip.Content>
+              </Tooltip>
+              <Popover.Content className="w-80" placement="bottom end">
                 <Popover.Dialog>
                   <Popover.Arrow />
                   <GuestbookQuickForm onClose={() => setIsGuestbookPopoverOpen(false)} />
@@ -273,12 +276,9 @@ export function HomePage({ moments, orientation }: { moments: ReactNode; orienta
             {...revealInView(0.18, 20)}
           >
             {faqKeys.map((key, index) => (
-              <Accordion.Item
-                key={key}
-                className="group/item first:**:data-[slot=accordion-trigger]:rounded-t-2xl last:[&:not(:has([data-slot=accordion-trigger][aria-expanded='true']))_[data-slot=accordion-trigger]]:rounded-b-2xl"
-              >
+              <Accordion.Item key={key}>
                 <Accordion.Heading>
-                  <Accordion.Trigger className="group hover:bg-surface gap-2 transition-transform duration-200 ease-[cubic-bezier(0.16,1.08,0.3,1)]">
+                  <Accordion.Trigger className="gap-2">
                     <span className="bg-accent/10 text-accent flex size-9 shrink-0 items-center justify-center rounded-lg">
                       <Icon aria-hidden="true" icon={faqIcons[index]} className="size-4" />
                     </span>
@@ -288,15 +288,11 @@ export function HomePage({ moments, orientation }: { moments: ReactNode; orienta
                         {t(`faq.${key}.subtitle`)}
                       </span>
                     </div>
-                    <Accordion.Indicator className="text-muted/50">
-                      <Icon icon="gravity-ui:chevron-down" />
-                    </Accordion.Indicator>
+                    <Accordion.Indicator />
                   </Accordion.Trigger>
                 </Accordion.Heading>
                 <Accordion.Panel>
-                  <Accordion.Body className="text-muted/80 text-start">
-                    {t(`faq.${key}.content`)}
-                  </Accordion.Body>
+                  <Accordion.Body className="text-start">{t(`faq.${key}.content`)}</Accordion.Body>
                 </Accordion.Panel>
               </Accordion.Item>
             ))}
@@ -361,7 +357,7 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 text-start">
+    <Form onSubmit={handleSubmit} className="flex flex-col gap-3 text-start">
       <div className="flex items-center gap-2">
         <span className="text-accent text-base">✨</span>
         <Popover.Heading className="text-sm font-semibold tracking-normal">
@@ -369,20 +365,16 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
         </Popover.Heading>
       </div>
 
-      <div className="flex w-full flex-col gap-2">
-        <TextArea
-          aria-label={t("guestbook.messageLabel")}
-          placeholder={t("guestbook.placeholder")}
-          rows={3}
-          maxLength={280}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          disabled={isLoading}
-        />
-        <Description id="textarea-controlled-description">
-          {t("guestbook.characters", { count: content.length })}
-        </Description>
-      </div>
+      <TextField
+        aria-label={t("guestbook.messageLabel")}
+        fullWidth
+        isDisabled={isLoading}
+        onChange={setContent}
+        value={content}
+      >
+        <TextArea placeholder={t("guestbook.placeholder")} rows={3} maxLength={280} />
+        <Description>{t("guestbook.characters", { count: content.length })}</Description>
+      </TextField>
 
       <div className="flex items-center justify-between gap-4">
         <Button size="sm" fullWidth variant="ghost" onPress={onClose} isDisabled={isLoading}>
@@ -392,8 +384,8 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
           type="submit"
           fullWidth
           size="sm"
-          variant="primary"
-          isDisabled={!content.trim() || isLoading}
+          isDisabled={!content.trim()}
+          isPending={isLoading}
         >
           {isLoading ? (
             <>
@@ -408,6 +400,6 @@ function GuestbookQuickForm({ onClose }: GuestbookQuickFormProps) {
           )}
         </Button>
       </div>
-    </form>
+    </Form>
   );
 }

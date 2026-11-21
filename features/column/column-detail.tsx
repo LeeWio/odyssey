@@ -52,7 +52,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
   if (error || !column) {
     return (
       <PageFrame className="bg-background flex items-center justify-center">
-        <Card variant="secondary" className="max-w-md items-start gap-5 p-7">
+        <Card variant="secondary" className="max-w-md items-start gap-5">
           <Card.Header>
             <Card.Title>{t("notFound")}</Card.Title>
             <Card.Description>{t("notFoundHint")}</Card.Description>
@@ -101,7 +101,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
           <div className="absolute inset-0">{cover}</div>
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(10_14_24/0.1),rgb(10_14_24/0.82))]" />
           <div className="relative flex min-h-[52vh] max-w-3xl flex-col justify-end gap-5 p-7 sm:p-10 lg:p-14">
-            <Chip className="w-fit bg-white/14 text-white" size="sm" variant="soft">
+            <Chip className="bg-white/14 text-white" size="sm" variant="soft">
               {t("editorial")}
             </Chip>
             <Typography
@@ -125,7 +125,7 @@ export function ColumnDetail({ slug }: { slug: string }) {
 
         <section aria-label={t("inThisColumn")} className="mt-12 w-full">
           {column.posts.length === 0 ? (
-            <Card variant="secondary" className="items-start gap-2 p-6">
+            <Card variant="secondary" className="items-start gap-2">
               <Card.Header>
                 <Card.Title>{t("noEssays")}</Card.Title>
                 <Card.Description>{t("noEssaysHint")}</Card.Description>

@@ -176,10 +176,7 @@ export function ApiConsolePage() {
             </Card>
 
             {/* Parameters & Send triggers panel */}
-            <Card
-              variant="secondary"
-              className="border-default-200/50 bg-surface-secondary/20 gap-5 rounded-2xl border p-5 shadow-sm"
-            >
+            <Card variant="secondary" className="gap-5">
               <div>
                 <span className="text-muted/60 mb-1 block font-mono text-[9px] font-bold tracking-wider uppercase">
                   说明
@@ -202,7 +199,7 @@ export function ApiConsolePage() {
                               {param.required && <span className="text-danger ml-0.5">*</span>}
                             </span>
                           </HoverCard.Trigger>
-                          <HoverCard.Content className="bg-background border-default-200 w-64 rounded-xl border p-3 shadow-lg">
+                          <HoverCard.Content className="w-64">
                             <HoverCard.Arrow />
                             <div className="flex flex-col gap-1.5 text-xs">
                               <div className="text-muted/60 flex items-center justify-between font-mono text-[10px] font-bold uppercase">

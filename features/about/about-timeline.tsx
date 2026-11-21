@@ -9,9 +9,7 @@ export function AboutTimeline() {
   return (
     <section aria-labelledby="about-taste-title" className="flex flex-col gap-6">
       <div>
-        <Chip size="sm" variant="secondary">
-          Taste
-        </Chip>
+        <Chip size="sm">Taste</Chip>
         <Typography
           id="about-taste-title"
           type="h2"

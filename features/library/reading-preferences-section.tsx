@@ -86,7 +86,7 @@ export function ReadingPreferencesSection() {
       </div>
 
       {preferences.isLoading ? (
-        <Card variant="secondary" className="gap-4 p-6">
+        <Card variant="secondary" className="gap-4">
           <Skeleton className="h-5 w-36 rounded-lg" />
           <div className="flex gap-2">
             {Array.from({ length: 4 }, (_, index) => (
@@ -97,7 +97,7 @@ export function ReadingPreferencesSection() {
       ) : preferences.isError ? (
         <EmptyLibrarySection title={t("preferencesUnavailable")} description={t("tryAgainHint")} />
       ) : preferenceCategories.length > 0 ? (
-        <Card variant="secondary" className="gap-5 p-6">
+        <Card variant="secondary" className="gap-5">
           <Card.Header className="gap-1 p-0">
             <Card.Title className="text-base">{t("topicsToFollow")}</Card.Title>
             <Card.Description>{t("topicsToFollowHint")}</Card.Description>

@@ -94,7 +94,7 @@ function ProjectCard({
       className="h-full min-w-0"
     >
       <Card className="h-full" variant="secondary">
-        <Card.Content className="p-0">
+        <Card.Content>
           <Surface
             className="relative aspect-[16/10] overflow-hidden rounded-t-[inherit]"
             variant="tertiary"

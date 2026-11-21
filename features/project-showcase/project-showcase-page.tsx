@@ -441,7 +441,7 @@ export function ProjectShowcasePage({ initialSearch = "" }: { initialSearch?: st
                   ) : null}
                 </div>
               ) : (
-                <Card variant="secondary" className="mt-6 items-start gap-4 p-7">
+                <Card variant="secondary" className="mt-6 items-start gap-4">
                   <Card.Header>
                     <Chip size="sm" variant="soft">
                       {t("noMatches")}

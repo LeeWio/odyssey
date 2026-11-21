@@ -51,9 +51,7 @@ export function GalleryShowcase() {
     <Section aria-labelledby="gallery-showcase-title">
       <header className={HOME_SECTION_HEADER}>
         <div className="max-w-xl">
-          <Chip color="default" size="sm" variant="secondary">
-            Gallery
-          </Chip>
+          <Chip size="sm">Gallery</Chip>
           <Typography
             id="gallery-showcase-title"
             type="h2"
@@ -91,7 +89,7 @@ export function GalleryShowcase() {
             }}
           >
             <Card className="group h-full overflow-hidden p-0" variant="secondary">
-              <Card.Content className="p-0">
+              <Card.Content>
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <Image
                     fill

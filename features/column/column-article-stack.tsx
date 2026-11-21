@@ -77,7 +77,6 @@ export function ColumnArticleStack({ title, posts }: { title: string; posts: Col
               size="sm"
               variant="soft"
               aria-label={t("articleCountLabel", { count: posts.length })}
-              className="pointer-events-none h-6 min-w-6 justify-center px-1.5"
             >
               <Chip.Label>{posts.length.toLocaleString(locale)}</Chip.Label>
             </Chip>

@@ -77,7 +77,7 @@ function FriendLinkSkeleton() {
   return (
     <div aria-busy="true" aria-label={t("loading")} className={FRIEND_LINK_GRID} role="status">
       {Array.from({ length: 6 }, (_, index) => (
-        <Card key={index} variant="secondary" className="min-h-44 gap-4 p-5">
+        <Card key={index} variant="secondary" className="min-h-44 gap-4">
           <div className="flex items-center gap-3">
             <Skeleton className="size-11 rounded-full" />
             <div className="space-y-2">
@@ -112,7 +112,7 @@ function FriendLinkCard({ link }: { link: FriendLinkResponse }) {
         className="group-hover:bg-surface-secondary h-full transition-colors"
       >
         <Card.Header className="flex-row items-center gap-3">
-          <Avatar className="border-default-200 shrink-0 border" size="md" variant="soft">
+          <Avatar className="shrink-0" variant="soft">
             {avatar ? (
               <Avatar.Image alt={t("avatarAlt", { name: link.name })} src={avatar} />
             ) : null}
@@ -226,9 +226,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
             <header className="border-default-200 grid gap-8 border-b pb-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div className="max-w-3xl">
                 <motion.div {...reveal(0, 10)}>
-                  <Chip size="sm" variant="secondary">
-                    {t("eyebrow")}
-                  </Chip>
+                  <Chip size="sm">{t("eyebrow")}</Chip>
                 </motion.div>
                 <motion.div {...reveal(0.06)}>
                   <Typography
@@ -328,7 +326,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
           ) : null}
 
           {!isLoading && !error && validLinks.length > 0 && visibleLinks.length === 0 ? (
-            <EmptyState size="md">
+            <EmptyState>
               <EmptyState.Header>
                 <EmptyState.Media variant="icon">
                   <Icon icon="gravity-ui:circle-link" aria-hidden="true" />
@@ -359,9 +357,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
             className="mt-12 grid gap-8 lg:grid-cols-[minmax(16rem,0.6fr)_minmax(0,1.2fr)] lg:items-start"
           >
             <div>
-              <Chip size="sm" variant="secondary">
-                {t("exchange")}
-              </Chip>
+              <Chip size="sm">{t("exchange")}</Chip>
               <Typography
                 id="friend-link-exchange-title"
                 type="h2"
@@ -378,7 +374,7 @@ export function FriendLinksPage({ compact = false }: FriendLinksPageProps) {
               </Chip>
             </div>
 
-            <Card variant="secondary" className="p-5 sm:p-6">
+            <Card variant="secondary">
               <Form className="gap-5" validationBehavior="native" onSubmit={handleSubmit}>
                 <TextField
                   fullWidth

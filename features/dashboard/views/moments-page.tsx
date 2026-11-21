@@ -218,7 +218,7 @@ function TimelineItem({ moment }: TimelineItemProps) {
           onOpenChange={(open) => !open && setActiveImageIndex(null)}
           variant="blur"
         >
-          <Modal.Container size="md">
+          <Modal.Container>
             <Modal.Dialog
               aria-label="Moment image viewer"
               className="max-w-md border-none bg-transparent p-0 shadow-none"
@@ -449,7 +449,7 @@ export function MomentsPage() {
             and logical deletion.
           </p>
         </div>
-        <Button size="md" onPress={handleCreateOpen}>
+        <Button onPress={handleCreateOpen}>
           <Icon icon="gravity-ui:circle-plus" className="size-4" aria-hidden="true" />
           Add Moment
         </Button>

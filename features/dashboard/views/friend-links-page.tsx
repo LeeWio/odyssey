@@ -332,6 +332,7 @@ export function FriendLinksPage() {
         allowsSorting: true,
         cell: (item) => (
           <Switch
+            aria-label={`Public visibility for ${item.name}`}
             isSelected={item.isPublished}
             size="sm"
             onChange={(val) => {
@@ -350,7 +351,13 @@ export function FriendLinksPage() {
                 },
               });
             }}
-          />
+          >
+            <Switch.Content>
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch.Content>
+          </Switch>
         ),
         header: "Visible",
         id: "isPublished",
@@ -587,7 +594,7 @@ export function FriendLinksPage() {
                     </div>
                   </div>
 
-                  <div className="bg-surface-secondary ring-border/50 flex items-center justify-between rounded-xl p-4 ring-1">
+                  <div className="flex items-center justify-between gap-4">
                     <div className="flex flex-col gap-0.5">
                       <Typography className="text-sm" weight="semibold">
                         Publicly Visible
@@ -597,9 +604,16 @@ export function FriendLinksPage() {
                       </Typography>
                     </div>
                     <Switch
+                      aria-label="Publicly visible"
                       isSelected={formData.isPublished}
                       onChange={(val) => setFormData({ ...formData, isPublished: val })}
-                    />
+                    >
+                      <Switch.Content>
+                        <Switch.Control>
+                          <Switch.Thumb />
+                        </Switch.Control>
+                      </Switch.Content>
+                    </Switch>
                   </div>
                 </Modal.Body>
                 <Modal.Footer>

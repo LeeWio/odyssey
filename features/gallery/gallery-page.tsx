@@ -14,10 +14,7 @@ export function GalleryPage({ compact = false }: GalleryPageProps) {
 
   return (
     <PageFrame className={compact ? "min-h-0 w-full p-0" : "w-full"}>
-      <EmptyState
-        className="border-default-200 bg-default-50/50 min-h-[min(32rem,70dvh)] rounded-3xl border border-dashed px-6 py-16"
-        size="lg"
-      >
+      <EmptyState className="min-h-[min(32rem,70dvh)]" size="lg">
         <EmptyState.Header>
           <EmptyState.Media variant="icon">
             <Icon aria-hidden="true" className="size-6" icon="lucide:construction" />

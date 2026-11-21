@@ -52,10 +52,10 @@ function FeaturedArticle({
       <div className="relative z-10 flex h-full flex-col">
         <Card.Header>
           <div className="flex items-center justify-between gap-3">
-            <Chip color="accent" size="sm" variant="soft" className="bg-background/70">
+            <Chip color="accent" size="sm" variant="soft">
               {category}
             </Chip>
-            <Chip color="default" size="sm" variant="soft" className="bg-background/70">
+            <Chip size="sm" variant="soft">
               <Icon icon="gravity-ui:calendar" aria-hidden="true" className="size-3" />
               {formatDate(publishedAt, locale, t("writing.recently"))}
             </Chip>

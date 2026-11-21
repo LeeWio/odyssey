@@ -213,7 +213,6 @@ export const InlineEmojiPicker = forwardRef<InlineEmojiPickerHandle, InlineEmoji
         key={skinTone}
         aria-label="Inline Emoji"
         selectedKey={null}
-        size="md"
         onSelectionChange={(key: Key | null) => {
           if (key !== null) onSelect(String(key));
         }}

@@ -68,7 +68,7 @@ export function WebhookEditor({
         }}
         UNSTABLE_portalContainer={portal}
       >
-        <Modal.Container size="md">
+        <Modal.Container>
           <Modal.Dialog>
             <Form className="flex min-h-0 flex-1 flex-col" onSubmit={save}>
               <Modal.Header>
@@ -107,18 +107,22 @@ export function WebhookEditor({
                         )
                       }
                     >
-                      <Checkbox.Control>
-                        <Checkbox.Indicator />
-                      </Checkbox.Control>
-                      <Checkbox.Content>{t(`events.${event}`)}</Checkbox.Content>
+                      <Checkbox.Content>
+                        <Checkbox.Control>
+                          <Checkbox.Indicator />
+                        </Checkbox.Control>
+                        <Label>{t(`events.${event}`)}</Label>
+                      </Checkbox.Content>
                     </Checkbox>
                   ))}
                 </fieldset>
                 <Checkbox isSelected={isActive} onChange={setActive}>
-                  <Checkbox.Control>
-                    <Checkbox.Indicator />
-                  </Checkbox.Control>
-                  <Checkbox.Content>{t("enabled")}</Checkbox.Content>
+                  <Checkbox.Content>
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                    <Label>{t("enabled")}</Label>
+                  </Checkbox.Content>
                 </Checkbox>
                 {error ? (
                   <p role="alert" className="text-danger text-sm">

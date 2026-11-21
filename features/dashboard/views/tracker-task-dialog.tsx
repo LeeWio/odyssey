@@ -217,14 +217,15 @@ export function TrackerTaskDialog({
                     {checklist.data?.map((item) => (
                       <div className="flex items-center gap-2" key={item.id}>
                         <Checkbox
+                          aria-label={item.title}
                           isSelected={item.completed}
                           onChange={(selected) => void toggleChecklist(item.id, selected)}
                         >
-                          <Checkbox.Control>
-                            <Checkbox.Indicator>
-                              <Icon icon="gravity-ui:check" />
-                            </Checkbox.Indicator>
-                          </Checkbox.Control>
+                          <Checkbox.Content>
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                          </Checkbox.Content>
                         </Checkbox>
                         <Input
                           aria-label="Checklist item"

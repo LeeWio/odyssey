@@ -40,7 +40,7 @@ Custom Component
 ```tsx
 import { Button } from "@heroui/react";
 
-<Button color="primary">Publish</Button>;
+<Button>Publish</Button>;
 ```
 
 不要在已有组件能够满足需求时重新实现：
@@ -73,7 +73,7 @@ function DeleteArticleButton() {
   return (
     <Tooltip>
       <Tooltip.Trigger>
-        <Button isIconOnly color="danger" aria-label="Delete article">
+        <Button isIconOnly variant="danger-soft" aria-label="Delete article">
           <TrashIcon />
         </Button>
       </Tooltip.Trigger>
@@ -305,8 +305,8 @@ Page Component 通常不作为通用组件复用。
 ```tsx
 function ArticleCard() {
   return (
-    <Card className="p-5">
-      <Card.Content className="space-y-3">
+    <Card>
+      <Card.Content>
         <ArticleTitle />
         <ArticleSummary />
       </Card.Content>
@@ -742,14 +742,14 @@ function IconButton({ label, children, ...props }: IconButtonProps) {
 
 ### 优先保留默认样式
 
-HeroUI 组件应先使用默认样式。
+HeroUI 组件应先使用默认样式。使用对应的 `size`、`variant`、`color` 等公开属性表达语义，只传入与默认行为不同且有明确用途的值。
 
-只有当默认实现无法满足明确的产品需求时，才进行覆盖。
+组件自身的圆角、内边距、边框、阴影以及交互状态由 HeroUI 负责。使用方可用 Tailwind 指定布局，如网格位置、宽度和媒体裁切。确实需要改变组件外观时，先对照 HeroUI MCP 的 API 和默认 CSS；如果 MCP 缺少条目，查阅项目锁定版本的类型与样式。
 
 推荐：
 
 ```tsx
-<Button color="primary">Publish</Button>
+<Button>Publish</Button>
 ```
 
 不要一开始就重写：
@@ -787,7 +787,7 @@ Custom Component
 先判断能否通过组件已有 Props 完成：
 
 ```tsx
-<Button size="lg" variant="secondary" color="primary" />
+<Button variant="secondary">Cancel</Button>
 ```
 
 再考虑覆盖 `className`。

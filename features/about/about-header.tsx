@@ -16,9 +16,7 @@ export function AboutHeader({ compact = false }: AboutHeaderProps) {
             <Breadcrumbs.Item href="/">Home</Breadcrumbs.Item>
             <Breadcrumbs.Item>About</Breadcrumbs.Item>
           </Breadcrumbs>
-          <Chip size="sm" variant="secondary">
-            About
-          </Chip>
+          <Chip size="sm">About</Chip>
         </>
       ) : null}
 

@@ -151,7 +151,7 @@ export function ChroniclePage({ initialData }: { initialData: PublicJournalIniti
               <Link className="group block no-underline" href={`/single/${featuredPost.slug}`}>
                 <Card
                   variant="secondary"
-                  className="grid overflow-hidden p-0 transition-shadow duration-300 hover:shadow-xl lg:grid-cols-[minmax(0,1.3fr)_minmax(16rem,0.7fr)]"
+                  className="grid overflow-hidden p-0 lg:grid-cols-[minmax(0,1.3fr)_minmax(16rem,0.7fr)]"
                 >
                   <div className="relative aspect-[16/9] min-h-64 overflow-hidden lg:aspect-auto">
                     <ArticleCover
@@ -249,10 +249,7 @@ export function ChroniclePage({ initialData }: { initialData: PublicJournalIniti
                           className="group block no-underline"
                           href={`/single/${post.slug}`}
                         >
-                          <Card
-                            variant="secondary"
-                            className="h-full overflow-hidden p-0 transition-shadow duration-300 hover:shadow-lg"
-                          >
+                          <Card variant="secondary" className="h-full overflow-hidden p-0">
                             <div className="bg-default-100 relative aspect-video w-full overflow-hidden">
                               <Image
                                 alt=""

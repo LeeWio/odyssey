@@ -94,7 +94,7 @@ export function TourPage() {
         {/* Multi-step controlled workspace grid */}
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(16rem,0.7fr)_minmax(0,1.3fr)]">
           {/* Left Column: Vertical Stepper Navigation */}
-          <Card variant="secondary" className="min-h-[24rem] p-6">
+          <Card variant="secondary" className="min-h-[24rem]">
             <Stepper
               currentStep={activeStep}
               orientation="vertical"
@@ -121,7 +121,7 @@ export function TourPage() {
           </Card>
 
           {/* Right Column: Dynamic Screen Content */}
-          <Card variant="secondary" className="min-h-[24rem] justify-between p-6 md:p-8">
+          <Card variant="secondary" className="min-h-[24rem] justify-between">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeStep}

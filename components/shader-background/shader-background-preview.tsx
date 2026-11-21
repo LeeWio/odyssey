@@ -105,7 +105,6 @@ export function ShaderBackgroundPreview({
         key={groupId}
         aria-label="Shader presets"
         className="w-full flex-nowrap overflow-x-auto"
-        size="md"
         value={preset.swatch}
         variant="square"
         onChange={(color) => {

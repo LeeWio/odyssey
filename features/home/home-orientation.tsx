@@ -24,11 +24,9 @@ export function HomeOrientation() {
 
   return (
     <PageContainer as="section" aria-label={t("orientation.regionLabel")} className="pb-4 md:pb-8">
-      <Card variant="secondary" className="border-accent/20 bg-surface-secondary/55 relative">
+      <Card variant="secondary">
         <Card.Header className="gap-2 pe-12 md:gap-3">
-          <Chip size="sm" variant="secondary">
-            {t("orientation.eyebrow")}
-          </Chip>
+          <Chip size="sm">{t("orientation.eyebrow")}</Chip>
           <CloseButton
             aria-label={t("orientation.dismiss")}
             className="absolute end-3 top-3"

@@ -144,7 +144,7 @@ export function ExplorerPage() {
         {/* Split Explorer Pane */}
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]">
           {/* Left Panel: The File Tree */}
-          <Card variant="secondary" className="h-[70vh] min-h-[28rem] overflow-y-auto p-5">
+          <Card variant="secondary" className="h-[70vh] min-h-[28rem] overflow-y-auto">
             <FileTree
               aria-label="Repository File Tree"
               size="sm"
@@ -252,7 +252,7 @@ export function ExplorerPage() {
           </Card>
 
           {/* Right Panel: File Metadata Preview Inspector */}
-          <Card variant="secondary" className="min-h-[70vh] p-6 md:p-8">
+          <Card variant="secondary" className="min-h-[70vh]">
             <div className="flex h-full flex-col justify-between">
               {activeFile ? (
                 <div className="flex flex-col gap-6">

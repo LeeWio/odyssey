@@ -443,7 +443,7 @@ function LifeListBoard({
     <div className="flex h-[calc(100svh-8rem)] min-h-96 flex-col gap-2 overflow-hidden px-4 pt-4 pb-4">
       <LifeListCategoryManager />
       <div className="min-h-0 flex-1">
-        <Kanban hideScrollBar className="h-full min-h-0 items-stretch" size="md">
+        <Kanban hideScrollBar className="h-full min-h-0 items-stretch">
           {COLUMNS.map((status) => (
             <LifeListColumn
               key={status}

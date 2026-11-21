@@ -314,7 +314,7 @@ export function AudiencePage() {
           </Card>
         ) : null}
         {subscribers.isError ? (
-          <EmptyState size="md">
+          <EmptyState>
             <EmptyState.Header>
               <EmptyState.Media variant="icon">
                 <Icon icon="gravity-ui:envelope" aria-hidden="true" />
