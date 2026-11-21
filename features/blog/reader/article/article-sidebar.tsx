@@ -4,6 +4,7 @@ import { Link, Tag, TagGroup } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
+import { useNearViewport } from "@/hooks/use-near-viewport";
 import { useGetPublicColumnBySlugQuery } from "@/lib/features/column";
 import { type PostResponse } from "@/lib/features/post";
 
@@ -12,12 +13,24 @@ export function articleHasContext(article: PostResponse) {
   return Boolean(article.series || (article.tags?.length ?? 0) > 0 || article.updatedAt);
 }
 
-export function ArticleSidebar({ article }: { article: PostResponse }) {
+export function ArticleSidebar({
+  article,
+  placement,
+  nearFooter = false,
+}: {
+  article: PostResponse;
+  placement: "rail" | "footer";
+  nearFooter?: boolean;
+}) {
   const locale = useLocale();
   const router = useRouter();
   const t = useTranslations("Article");
+  const { ref, isNear } = useNearViewport<HTMLDivElement>();
   const series = article.series;
-  const column = useGetPublicColumnBySlugQuery(series?.slug ?? "", { skip: !series?.slug });
+  const shouldLoadColumn = placement === "rail" ? isNear : nearFooter;
+  const column = useGetPublicColumnBySlugQuery(series?.slug ?? "", {
+    skip: !shouldLoadColumn || !series?.slug,
+  });
   const tags = article.tags ?? [];
   const updated = article.updatedAt ? new Date(article.updatedAt) : null;
   const updatedLabel =
@@ -30,7 +43,7 @@ export function ArticleSidebar({ article }: { article: PostResponse }) {
   if (!articleHasContext(article)) return null;
 
   return (
-    <div className="flex flex-col gap-6 text-sm">
+    <div ref={placement === "rail" ? ref : undefined} className="flex flex-col gap-6 text-sm">
       <p className="text-muted text-xs tracking-wide uppercase">{t("aboutThisPiece")}</p>
       {series ? (
         <div className="flex flex-col gap-1">

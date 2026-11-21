@@ -66,6 +66,7 @@ for (const viewport of [
     await expect(hello.locator("path")).toHaveAttribute("stroke-dasharray", "99 1");
     await expect(hello.locator("stop").first()).toHaveCSS("animation-name", "none");
     await expect(page.locator("#moments-showcase")).toHaveCount(0);
+    await page.locator("#writing-title").scrollIntoViewIfNeeded();
     await expect(page.locator("#writing")).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true
@@ -102,6 +103,8 @@ for (const scenario of [
     });
     await page.goto("/");
     const section = page.locator(scenario.section);
+    if (scenario.subject === "writing")
+      await page.locator("#writing-title").scrollIntoViewIfNeeded();
     await expect(
       section.getByText(`Couldn't load ${scenario.subject}.`, { exact: true })
     ).toBeVisible();
@@ -172,6 +175,8 @@ for (const scenario of [
     });
     await page.goto("/");
     const section = page.locator(scenario.section);
+    if (scenario.subject === "writing")
+      await page.locator("#writing-title").scrollIntoViewIfNeeded();
     await expect(section.getByText(scenario.text, { exact: true })).toBeVisible({
       timeout: 30_000,
     });

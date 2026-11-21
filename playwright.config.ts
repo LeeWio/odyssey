@@ -60,7 +60,7 @@ export default defineConfig({
             NEXT_DIST_DIR: ".next-e2e",
             ENABLE_AUTH_TEST_ROUTE: "1",
             ENABLE_RICH_TEXT_TEST_ROUTE: "1",
-            NEXT_PUBLIC_WEB_VITALS_ENDPOINT: `${baseURL}/__test/web-vitals`,
+            WEB_VITALS_ENDPOINT: `${baseURL}/__test/web-vitals`,
           },
           timeout: 120_000,
           url: `${baseURL}/test/rich-text`,
