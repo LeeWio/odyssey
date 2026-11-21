@@ -31,8 +31,9 @@ import { SearchIcon } from "../icons";
 
 import { getVisibleFocusableElements } from "./focus";
 import { MegaPanelContent } from "./mega-panel-content";
+import { MobileNavigation } from "./mobile-navigation";
 import { activeIndicatorSpring, enterEase, exitEase, navigationSpring } from "./motion";
-import { getNavigationItem } from "./navigation-data";
+import { DESKTOP_NAVIGATION_MEDIA, getNavigationItem } from "./navigation-data";
 import type { NavigationId } from "./types";
 
 const AuthDialog = dynamic(() => import("../auth").then((mod) => mod.AuthDialog), {
@@ -81,7 +82,6 @@ export const Navbar = () => {
 
   const [activeNavigation, setActiveNavigation] = useState<NavigationId | null>(null);
   const [isLocked, setIsLocked] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [hasOpenedSearch, setHasOpenedSearch] = useState(false);
   const [hasOpenedAuth, setHasOpenedAuth] = useState(false);
@@ -131,7 +131,6 @@ export const Navbar = () => {
     cancelPreview();
     setActiveNavigation(null);
     setIsLocked(false);
-    setIsMobileMenuOpen(false);
     window.requestAnimationFrame(() => lastTriggerRef.current?.focus());
   };
 
@@ -173,18 +172,17 @@ export const Navbar = () => {
   };
 
   useEffect(() => {
-    if (!activeNavigation && !isMobileMenuOpen) return;
+    if (!activeNavigation) return;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         cancelClose();
         cancelPreview();
         setActiveNavigation(null);
         setIsLocked(false);
-        setIsMobileMenuOpen(false);
         window.requestAnimationFrame(() => lastTriggerRef.current?.focus());
       }
 
-      if (event.key !== "Tab" || (!isLocked && !isMobileMenuOpen)) return;
+      if (event.key !== "Tab" || !isLocked) return;
       const focusable = getVisibleFocusableElements(panelRef.current);
       if (!focusable.length) return;
       const first = focusable[0];
@@ -199,10 +197,10 @@ export const Navbar = () => {
     };
     window.addEventListener("keydown", handleKeyDown, true);
     return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, [activeNavigation, cancelClose, cancelPreview, isLocked, isMobileMenuOpen]);
+  }, [activeNavigation, cancelClose, cancelPreview, isLocked]);
 
   useEffect(() => {
-    if (!isLocked && !isMobileMenuOpen) return;
+    if (!isLocked) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     let focusFrame = window.requestAnimationFrame(() => {
@@ -215,7 +213,20 @@ export const Navbar = () => {
       window.cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
     };
-  }, [isLocked, isMobileMenuOpen]);
+  }, [isLocked]);
+
+  useEffect(() => {
+    const viewport = window.matchMedia(DESKTOP_NAVIGATION_MEDIA);
+    const closeDesktopNavigation = ({ matches }: MediaQueryListEvent) => {
+      if (matches) return;
+      cancelClose();
+      cancelPreview();
+      setActiveNavigation(null);
+      setIsLocked(false);
+    };
+    viewport.addEventListener("change", closeDesktopNavigation);
+    return () => viewport.removeEventListener("change", closeDesktopNavigation);
+  }, [cancelClose, cancelPreview]);
 
   useEffect(
     () => () => {
@@ -319,18 +330,12 @@ export const Navbar = () => {
     void logout();
   };
 
-  const openAuthFromMobileMenu = (mode: "login" | "signup") => {
-    cancelClose();
-    cancelPreview();
-    setActiveNavigation(null);
-    setIsLocked(false);
-    setIsMobileMenuOpen(false);
-
+  const openAuth = (mode: "login" | "signup") => {
     setHasOpenedAuth(true);
     dispatch(setAuthMode(mode));
   };
 
-  const isNavigationOpen = Boolean(activeItem || isMobileMenuOpen);
+  const isNavigationOpen = Boolean(activeItem);
   const hasGlassSurface = isCompact || isNavigationOpen;
   const glassBackground =
     resolvedTheme === "light" ? "rgba(255, 255, 255, 0.34)" : "rgba(12, 10, 18, 0.22)";
@@ -421,9 +426,9 @@ export const Navbar = () => {
       <motion.div
         ref={panelRef}
         data-compact={isCompact}
-        role={isLocked || isMobileMenuOpen ? "dialog" : undefined}
-        aria-modal={isLocked || isMobileMenuOpen ? true : undefined}
-        aria-label={isLocked || isMobileMenuOpen ? t("dialogLabel") : undefined}
+        role={isLocked ? "dialog" : undefined}
+        aria-modal={isLocked || undefined}
+        aria-label={isLocked ? t("dialogLabel") : undefined}
         className="fixed inset-x-0 top-0 z-50 mx-auto w-full overflow-hidden rounded-2xl border"
         initial={false}
         animate={{
@@ -454,7 +459,7 @@ export const Navbar = () => {
         <motion.nav
           ref={navigationRef}
           aria-label={t("primary")}
-          className="grid w-full grid-cols-[auto_auto_auto] items-center justify-between gap-3 px-2.5 py-0.5"
+          className="grid w-full grid-cols-[auto_1fr] items-center justify-between gap-3 px-2.5 py-0.5 lg:grid-cols-[auto_auto_auto]"
         >
           <motion.div
             ref={brandRef}
@@ -474,7 +479,7 @@ export const Navbar = () => {
           </motion.div>
 
           {/* Static unrolled main navigation items */}
-          <motion.div ref={navigationItemsRef} className="hidden items-center gap-1 md:flex">
+          <motion.div ref={navigationItemsRef} className="hidden items-center gap-1 lg:flex">
             {/* Item 1: Chronicle */}
             <div
               className="relative"
@@ -735,65 +740,17 @@ export const Navbar = () => {
               <Button
                 size="sm"
                 variant="ghost"
-                className="hidden sm:flex"
-                onPress={() => {
-                  setHasOpenedAuth(true);
-                  dispatch(setAuthMode("login"));
-                }}
+                className="hidden lg:flex"
+                onPress={() => openAuth("login")}
               >
                 {t("signIn")}
               </Button>
             )}
 
-            <div className="md:hidden">
-              <Tooltip delay={500} closeDelay={100}>
-                <Button
-                  isIconOnly
-                  variant="ghost"
-                  aria-label={isMobileMenuOpen ? t("closeMenu") : t("openMenu")}
-                  aria-haspopup="dialog"
-                  aria-expanded={isMobileMenuOpen}
-                  aria-controls="odyssey-mega-navigation"
-                  onFocus={(event) => {
-                    lastTriggerRef.current = event.currentTarget as HTMLElement;
-                  }}
-                  onPress={() => {
-                    if (isMobileMenuOpen) closeNavigation();
-                    else {
-                      setActiveNavigation(null);
-                      setIsLocked(false);
-                      setIsMobileMenuOpen(true);
-                    }
-                  }}
-                >
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={isMobileMenuOpen ? "close" : "menu"}
-                      initial={
-                        reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: -45, scale: 0.9 }
-                      }
-                      animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                      exit={{
-                        opacity: 0,
-                        ...(reduceMotion ? {} : { rotate: 45, scale: 0.9 }),
-                        transition: { duration: reduceMotion ? 0 : 0.1, ease: exitEase },
-                      }}
-                      transition={{ duration: 0.15, ease: enterEase }}
-                      className="flex"
-                    >
-                      <Icon
-                        aria-hidden="true"
-                        icon={isMobileMenuOpen ? "lucide:x" : "lucide:menu"}
-                        className="size-5"
-                      />
-                    </motion.span>
-                  </AnimatePresence>
-                </Button>
-                <Tooltip.Content placement="bottom" offset={8}>
-                  {isMobileMenuOpen ? t("closeMenu") : t("openMenu")}
-                </Tooltip.Content>
-              </Tooltip>
-            </div>
+            <MobileNavigation
+              showGuestActions={mounted && !isAuthenticated}
+              onOpenAuth={openAuth}
+            />
           </motion.div>
         </motion.nav>
 
@@ -819,172 +776,6 @@ export const Navbar = () => {
               transition={{ duration: reduceMotion ? 0 : 0.22, ease: enterEase }}
             >
               <div className="px-5 py-7 sm:px-8 md:px-12 md:py-9 xl:px-16 2xl:px-20">
-                <div className="md:hidden">
-                  {!activeItem ? (
-                    <motion.div
-                      key="mobile-index"
-                      initial={reduceMotion ? undefined : { opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -12 }}
-                      className="pb-3"
-                    >
-                      <p className="text-muted mb-2 text-xs font-semibold tracking-[0.14em] uppercase">
-                        {t("explore")}
-                      </p>
-
-                      {/* Static unrolled mobile menu index triggers */}
-                      <div className="grid gap-1">
-                        {/* Mobile 1: Chronicle */}
-                        <motion.div
-                          initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0, duration: 0.16, ease: enterEase }}
-                        >
-                          <Button
-                            fullWidth
-                            variant="ghost"
-                            className="h-auto justify-between px-2 py-3 text-left"
-                            onPress={() => setActiveNavigation("chronicle")}
-                          >
-                            <span>
-                              <span className="block text-base font-semibold">
-                                {t("items.chronicle.label")}
-                              </span>
-                              <span className="text-muted mt-0.5 block text-xs font-normal">
-                                {t("items.chronicle.eyebrow")}
-                              </span>
-                            </span>
-                            <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-4" />
-                          </Button>
-                        </motion.div>
-
-                        {/* Mobile 2: Orbit */}
-                        <motion.div
-                          initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.04, duration: 0.16, ease: enterEase }}
-                        >
-                          <Button
-                            fullWidth
-                            variant="ghost"
-                            className="h-auto justify-between px-2 py-3 text-left"
-                            onPress={() => setActiveNavigation("daily")}
-                          >
-                            <span>
-                              <span className="block text-base font-semibold">
-                                {t("items.orbit.label")}
-                              </span>
-                              <span className="text-muted mt-0.5 block text-xs font-normal">
-                                {t("items.orbit.eyebrow")}
-                              </span>
-                            </span>
-                            <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-4" />
-                          </Button>
-                        </motion.div>
-
-                        {/* Mobile 3: Travelogue */}
-                        <motion.div
-                          initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.08, duration: 0.16, ease: enterEase }}
-                        >
-                          <Button
-                            fullWidth
-                            variant="ghost"
-                            className="h-auto justify-between px-2 py-3 text-left"
-                            onPress={() => setActiveNavigation("travelogue")}
-                          >
-                            <span>
-                              <span className="block text-base font-semibold">
-                                {t("items.travelogue.label")}
-                              </span>
-                              <span className="text-muted mt-0.5 block text-xs font-normal">
-                                {t("items.travelogue.eyebrow")}
-                              </span>
-                            </span>
-                            <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-4" />
-                          </Button>
-                        </motion.div>
-
-                        {/* Mobile 4: Archive */}
-                        <motion.div
-                          initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.12, duration: 0.16, ease: enterEase }}
-                        >
-                          <Button
-                            fullWidth
-                            variant="ghost"
-                            className="h-auto justify-between px-2 py-3 text-left"
-                            onPress={() => setActiveNavigation("more")}
-                          >
-                            <span>
-                              <span className="block text-base font-semibold">
-                                {t("items.archive.label")}
-                              </span>
-                              <span className="text-muted mt-0.5 block text-xs font-normal">
-                                {t("items.archive.mobileEyebrow")}
-                              </span>
-                            </span>
-                            <Icon aria-hidden="true" icon="lucide:arrow-right" className="size-4" />
-                          </Button>
-                        </motion.div>
-                      </div>
-
-                      <HeroLink
-                        className="mt-3 flex items-center justify-between rounded-xl px-2 py-3 text-left no-underline"
-                        href="https://www.travellings.cn/go.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={t("travellingsAria")}
-                        onPress={closeNavigation}
-                      >
-                        <span className="flex items-center gap-2">
-                          <Icon
-                            aria-hidden="true"
-                            icon="lucide:train-front"
-                            className="text-accent size-4"
-                          />
-                          <span>
-                            <span className="block text-base font-semibold">
-                              {t("travellings")}
-                            </span>
-                            <span className="text-muted mt-0.5 block text-xs font-normal">
-                              {t("travellingsHint")}
-                            </span>
-                          </span>
-                        </span>
-                        <Icon aria-hidden="true" icon="lucide:arrow-up-right" className="size-4" />
-                      </HeroLink>
-
-                      {mounted && !isAuthenticated && (
-                        <div className="mt-5 grid grid-cols-2 gap-2">
-                          <Button
-                            fullWidth
-                            variant="secondary"
-                            onPress={() => openAuthFromMobileMenu("login")}
-                          >
-                            {t("signIn")}
-                          </Button>
-                          <Button fullWidth onPress={() => openAuthFromMobileMenu("signup")}>
-                            {t("createAccount")}
-                          </Button>
-                        </div>
-                      )}
-                    </motion.div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="mb-5 -ml-2"
-                      onPress={() => setActiveNavigation(null)}
-                    >
-                      <Icon aria-hidden="true" icon="lucide:arrow-left" className="size-4" />
-                      {t("allSections")}
-                    </Button>
-                  )}
-                </div>
-
                 {activeItem && (
                   <AnimatePresence mode="popLayout" initial={false} propagate>
                     <motion.div

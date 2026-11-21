@@ -1,0 +1,10 @@
+# Visitor navigation and discovery — UI-20261121-NAV
+
+Status: READY_FOR_REVIEW (local). Baseline: `f044827` (HeroUI component audit).
+
+- Discovery: the 390 px Chromium baseline required two levels for article navigation, had no direct article link on the initial menu panel, and retained bright content behind its translucent navigation. The homepage anchor also targeted a wrapper without the section scroll offset.
+- Design: use the native right-side Sheet with direct links and independent focus management below 1024 px. Keep desktop previews and existing auth, search, theme, locale, and reader behavior. Share the native ItemCard link composition with the homepage Explore index; do not change the hero or route inventory.
+- Acceptance: 320–1440 px views have no horizontal overflow; short viewports can scroll to all links. Touch and keyboard can open, dismiss, and follow links. Opening auth closes the sheet first, breakpoint changes dismiss the old navigation surface, and the homepage anchor focuses the Explore heading below the fixed navbar.
+- Dependencies and risk: no new packages, assets, network requests, server contracts, or CSS files. HeroUI MCP supplied Button and ItemCard docs and styles; missing OSS Sheet, Link, Tooltip and Typography references were checked in the installed declarations, implementation and CSS. Rollback is isolated to this change.
+- Verification: `bun run preflight` (453 unit tests), `bun run build`, and 16 focused Chromium homepage and auth tests passed. Additional browser checks covered 320, 390, 820, and 1440 px; English and Chinese; light and dark; first- and second-tier client navigation; navigation focus containment and restoration; touch dismissal; and both directions of the navigation breakpoint.
+- AI self-review: the change removes the mobile branch from the desktop panel without changing its existing desktop previews. The login and registration handoff runs after the native sheet exit. No commit, PR, or production operation was performed.

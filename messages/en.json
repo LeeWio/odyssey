@@ -1418,6 +1418,14 @@
     "travellings": "Travellings",
     "travellingsHint": "Friend-link relay",
     "travellingsAria": "Travellings friend-link relay (opens in a new window)",
+    "mobile": {
+      "description": "Find something to read or somewhere to go.",
+      "more": "More to explore",
+      "projects": "Projects",
+      "projectsDescription": "Tools and experiments I’ve shipped.",
+      "footprints": "Footprints",
+      "footprintsDescription": "Places that left a mark."
+    },
     "items": {
       "chronicle": {
         "label": "Essays & Notes",
