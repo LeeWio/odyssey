@@ -20,6 +20,8 @@ The home page now shares section header and content offsets through `features/ho
 
 The homepage closing modules keep the same hierarchy: Guestbook is a social action surface with one clear composer control, and FAQ uses local icon glyphs with text-first accordion rows. Decorative gradient headings and remote 3D icon assets are intentionally avoided so the closing sequence stays quiet and readable.
 
+The homepage Explore link targets and focuses the section heading below the fixed navigation. Explore and the compact site navigation use the same HeroUI ItemCard link composition, with locally bundled icons and visible keyboard focus. Below the desktop navigation breakpoint, a native HeroUI Sheet puts reading, moments, projects, and footprints one tap away and keeps the other destinations and guest account actions in the same panel. The desktop previews and homepage hero remain unchanged.
+
 The Lately listening surface follows the same media rule as articles: the track is represented by a static shader field with readable metadata instead of album-cover imagery. Real photography remains reserved for gallery and place-based content where the image itself is the subject.
 
 ## Responsive Content Density

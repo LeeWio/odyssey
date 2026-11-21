@@ -1,5 +1,7 @@
 import type { NavigationId } from "./types";
 
+export const DESKTOP_NAVIGATION_MEDIA = "(min-width: 64rem)";
+
 type NavigationTranslator = (key: string) => string;
 
 const NAVIGATION_COPY: Record<

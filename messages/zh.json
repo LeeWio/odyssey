@@ -1418,6 +1418,14 @@
     "travellings": "开往",
     "travellingsHint": "友链接力",
     "travellingsAria": "开往友链接力（在新窗口打开）",
+    "mobile": {
+      "description": "找篇文章读读，或去别处逛逛。",
+      "more": "更多去处",
+      "projects": "项目",
+      "projectsDescription": "做过的工具和实验。",
+      "footprints": "足迹",
+      "footprintsDescription": "留下印记的地方。"
+    },
     "items": {
       "chronicle": {
         "label": "所思所写",

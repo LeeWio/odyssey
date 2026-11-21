@@ -1,6 +1,7 @@
 "use client";
 
 import { Section } from "@/components/layout/section";
+import { DestinationLink } from "@/components/ui/destination-link";
 import {
   HOME_SECTION_CONTENT,
   HOME_SECTION_DESCRIPTION,
@@ -8,7 +9,15 @@ import {
   HOME_SECTION_TITLE,
 } from "./layout";
 
-import { Icon } from "@iconify/react";
+import {
+  ArrowUpRight,
+  BookOpen,
+  Camera,
+  Comment,
+  Hammer,
+  MapPin,
+  Bookmark,
+} from "@gravity-ui/icons";
 import { Chip, Link, Typography } from "@heroui/react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
@@ -17,12 +26,12 @@ import { createPageReveal } from "@/lib/motion";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 const DESTINATIONS = [
-  { key: "writing", href: "/single", icon: "lucide:book-open-text" },
-  { key: "moments", href: "/moments", icon: "lucide:sparkles" },
-  { key: "projects", href: "/projects", icon: "lucide:hammer" },
-  { key: "gallery", href: "/gallery", icon: "lucide:images" },
-  { key: "footprints", href: "/footprints", icon: "lucide:map" },
-  { key: "library", href: "/library", icon: "lucide:library" },
+  { key: "writing", href: "/single", icon: BookOpen },
+  { key: "moments", href: "/moments", icon: Comment },
+  { key: "projects", href: "/projects", icon: Hammer },
+  { key: "gallery", href: "/gallery", icon: Camera },
+  { key: "footprints", href: "/footprints", icon: MapPin },
+  { key: "library", href: "/library", icon: Bookmark },
 ] as const;
 
 export function ExploreOdyssey() {
@@ -31,17 +40,18 @@ export function ExploreOdyssey() {
   const { revealInView } = createPageReveal(shouldReduceMotion);
 
   return (
-    <Section aria-labelledby="explore-odyssey-title">
+    <Section aria-labelledby="explore-odyssey">
       <header className={HOME_SECTION_HEADER}>
         <motion.div {...revealInView(0, 10)}>
           <Chip color="accent" size="sm" variant="soft">
             {t("eyebrow")}
           </Chip>
           <Typography
-            id="explore-odyssey-title"
+            id="explore-odyssey"
+            tabIndex={-1}
             type="h2"
             weight="bold"
-            className={HOME_SECTION_TITLE}
+            className={`${HOME_SECTION_TITLE} scroll-mt-24`}
           >
             {t("title")}
           </Typography>
@@ -50,40 +60,27 @@ export function ExploreOdyssey() {
           </Typography>
         </motion.div>
         <motion.div {...revealInView(0.08, 14)}>
-          <Link href="/archive" className="no-underline">
+          <Link href="/archive">
             {t("viewArchive")}
             <Link.Icon aria-hidden="true">
-              <Icon icon="lucide:arrow-up-right" />
+              <ArrowUpRight />
             </Link.Icon>
           </Link>
         </motion.div>
       </header>
 
       <div
-        className={`${HOME_SECTION_CONTENT} grid gap-x-12 md:grid-cols-2`}
+        className={`${HOME_SECTION_CONTENT} grid gap-x-8 gap-y-1 md:grid-cols-2`}
         data-testid="home-explore-grid"
       >
-        {DESTINATIONS.map((destination) => (
-          <div key={destination.key}>
-            <Link
-              href={destination.href}
-              className="group border-separator focus-visible:outline-accent flex min-h-24 items-center gap-4 border-t py-5 no-underline focus-visible:outline-2 focus-visible:outline-offset-4"
-            >
-              <span className="text-muted group-hover:text-accent flex size-9 shrink-0 items-center justify-center transition-colors">
-                <Icon aria-hidden="true" icon={destination.icon} className="size-5" />
-              </span>
-              <span className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="text-foreground font-medium">{t(`${destination.key}.title`)}</span>
-                <span className="text-muted text-sm leading-5">
-                  {t(`${destination.key}.description`)}
-                </span>
-              </span>
-              <Icon
-                aria-hidden="true"
-                icon="lucide:arrow-up-right"
-                className="text-muted/60 size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              />
-            </Link>
+        {DESTINATIONS.map(({ key, href, icon: Icon }) => (
+          <div key={key}>
+            <DestinationLink
+              description={t(`${key}.description`)}
+              href={href}
+              icon={<Icon />}
+              title={t(`${key}.title`)}
+            />
           </div>
         ))}
       </div>

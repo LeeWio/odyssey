@@ -155,9 +155,7 @@ export function HomePage({ moments, orientation }: { moments: ReactNode; orienta
 
         {orientation}
 
-        <div id="explore-odyssey">
-          <ExploreOdyssey />
-        </div>
+        <ExploreOdyssey />
 
         <DeferredContent fallback={<LatelyPlaceholder />}>
           <LatelySection />
