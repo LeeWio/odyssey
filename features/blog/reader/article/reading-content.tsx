@@ -1,7 +1,8 @@
 "use client";
 
-import { animate } from "motion/mini";
 import { useEffect, useRef, type ReactNode } from "react";
+import { bindReadingMotion } from "./reading-motion";
+import { READING_OPENING_ATTRIBUTE, READING_OPENING_SETTLED } from "./reading-opening";
 
 export function ReadingContent({
   children,
@@ -14,47 +15,29 @@ export function ReadingContent({
 
   useEffect(() => {
     const root = ref.current;
-    if (!root || !("IntersectionObserver" in window)) return;
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (motion.matches) return;
-
-    const running = new Set<ReturnType<typeof animate>>();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          observer.unobserve(entry.target);
-          if (motion.matches) continue;
-          const animation = animate(
-            entry.target,
-            { transform: ["translateY(8px)", "none"] },
-            { duration: 0.32, ease: "easeOut" }
-          );
-          running.add(animation);
-          void animation.then(() => running.delete(animation));
-        }
-      },
-      { rootMargin: "0px 0px 80px" }
-    );
-    for (const block of root.children) {
-      if (block.getBoundingClientRect().top > window.innerHeight + 80) observer.observe(block);
-    }
-    const stop = () => {
-      if (!motion.matches) return;
-      for (const animation of running) animation.cancel();
-      running.clear();
-      observer.disconnect();
-    };
-    motion.addEventListener("change", stop);
+    if (!root) return;
+    let dispose: (() => void) | undefined;
+    const frame = requestAnimationFrame(() => {
+      const opening = root.hasAttribute(READING_OPENING_ATTRIBUTE);
+      try {
+        dispose = bindReadingMotion(root, opening && getComputedStyle(root).opacity === "0");
+      } finally {
+        if (opening) root.dispatchEvent(new Event(READING_OPENING_SETTLED));
+      }
+    });
     return () => {
-      motion.removeEventListener("change", stop);
-      observer.disconnect();
-      for (const animation of running) animation.cancel();
+      cancelAnimationFrame(frame);
+      dispose?.();
     };
   }, []);
 
   return (
-    <div ref={ref} data-article-body="" className={className}>
+    <div
+      ref={ref}
+      data-article-body=""
+      suppressHydrationWarning
+      className={`${className} motion-safe:data-[reading-opening]:opacity-0 [&_[data-reading-pending]]:opacity-0 [&>script:first-child+*]:mt-0!`}
+    >
       {children}
     </div>
   );

@@ -21,8 +21,7 @@ import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/p
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionId } from "@/lib/reading-position";
-
-const READING_SCROLL_KEY = "odyssey-reading-scroll";
+import { READING_SCROLL_KEY } from "@/lib/reading-scroll";
 
 function savedReadingScroll(path: string) {
   const navigation = performance.getEntriesByType("navigation")[0] as
