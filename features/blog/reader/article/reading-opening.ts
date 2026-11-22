@@ -17,18 +17,17 @@ export function restoreReloadPosition(root: HTMLElement) {
 
 export const READING_OPENING_SCRIPT = `(() => {
   const root = document.currentScript?.parentElement;
-  if (!root || location.hash) return;
+  if (!root) return;
 
   const navigation = performance.getEntriesByType("navigation")[0]?.type;
-  if (navigation === "back_forward") return;
-  if (navigation === "reload") {
+  const reloading = navigation === "reload";
+  if (navigation === "back_forward" || (!reloading && location.hash)) return;
+  if (reloading && !location.hash) {
     let saved;
     try {
       saved = JSON.parse(sessionStorage.getItem(${JSON.stringify(READING_SCROLL_KEY)}));
     } catch {}
-    if (saved?.path === location.pathname && Number.isFinite(saved.y) && saved.y > 0) {
-      if (scrollY !== 0) return;
-
+    if (scrollY === 0 && saved?.path === location.pathname && Number.isFinite(saved.y) && saved.y > 0) {
       const listeners = new AbortController();
       const options = { signal: listeners.signal };
       function cancelResume() {
@@ -45,11 +44,10 @@ export const READING_OPENING_SCRIPT = `(() => {
       addEventListener("pagehide", cancelResume, options);
       root.addEventListener("${READING_RESUME_SETTLED}", cancelResume, options);
       root.setAttribute("${READING_RESUME_ATTRIBUTE}", String(saved.y));
-      return;
     }
   }
 
-  if (scrollY !== 0 || !("IntersectionObserver" in window) || typeof root.animate !== "function") return;
+  if ((!reloading && scrollY !== 0) || !("IntersectionObserver" in window)) return;
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
   if (motion.matches) return;
 
@@ -62,7 +60,14 @@ export const READING_OPENING_SCRIPT = `(() => {
     clearTimeout(timer);
   }
 
-  addEventListener("scroll", () => { if (scrollY !== 0) release(); }, { ...options, passive: true });
+  if (!reloading) {
+    addEventListener("scroll", () => { if (scrollY !== 0) release(); }, { ...options, passive: true });
+  }
+  addEventListener("wheel", release, { ...options, passive: true });
+  addEventListener("touchmove", release, { ...options, passive: true });
+  addEventListener("keydown", (event) => {
+    if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) release();
+  }, options);
   addEventListener("hashchange", release, options);
   addEventListener("pagehide", release, options);
   root.addEventListener("focusin", release, options);

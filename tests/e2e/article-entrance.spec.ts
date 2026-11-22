@@ -10,12 +10,13 @@ async function openArticle(page: Page, slug = "entrance-regression") {
 declare global {
   interface Window {
     readingMotionSamples: Array<{
-      target: Element;
+      target: HTMLElement;
       startedAt: number;
-      duration?: number;
-      opacity?: number[];
-      filter?: string[];
-      transform?: string[];
+      opacity: number;
+      blur: number;
+      y: number;
+      scale: number;
+      readableWhileMoving: boolean;
     }>;
   }
 }
@@ -23,23 +24,41 @@ declare global {
 async function trackReadingMotion(page: Page) {
   await page.addInitScript(() => {
     window.readingMotionSamples = [];
-    const animate = Element.prototype.animate;
-    Element.prototype.animate = function (keyframes, options) {
-      if (this.closest("[data-article-body]") && keyframes && !Array.isArray(keyframes)) {
-        const duration = typeof options === "number" ? options : options?.duration;
-        window.readingMotionSamples.push({
-          target: this,
-          startedAt: performance.now(),
-          duration: typeof duration === "number" ? duration : undefined,
-          opacity: Array.isArray(keyframes.opacity) ? keyframes.opacity.map(Number) : undefined,
-          filter: Array.isArray(keyframes.filter) ? keyframes.filter.map(String) : undefined,
-          transform: Array.isArray(keyframes.transform)
-            ? keyframes.transform.map(String)
-            : undefined,
-        });
+    const active = new WeakMap<HTMLElement, (typeof window.readingMotionSamples)[number]>();
+    new MutationObserver((records) => {
+      for (const { target } of records) {
+        if (!(target instanceof HTMLElement)) continue;
+        const { filter, opacity } = target.style;
+        if (opacity === "" && !filter.startsWith("blur(")) {
+          active.delete(target);
+          continue;
+        }
+        if (!target.closest("[data-article-body]")) continue;
+
+        const blur = filter.startsWith("blur(") ? Number.parseFloat(filter.slice(5)) : 0;
+        const sample = active.get(target);
+        const readable = Number(opacity) >= 0.94 && blur <= 0.75;
+        if (sample?.readableWhileMoving || (sample && !readable)) continue;
+
+        const transform = getComputedStyle(target).transform;
+        const matrix = new DOMMatrixReadOnly(transform === "none" ? undefined : transform);
+        if (sample) {
+          sample.readableWhileMoving = matrix.m42 > 2;
+        } else {
+          const start = {
+            target,
+            startedAt: performance.now(),
+            opacity: Number(opacity),
+            blur,
+            y: matrix.m42,
+            scale: matrix.m11,
+            readableWhileMoving: false,
+          };
+          active.set(target, start);
+          window.readingMotionSamples.push(start);
+        }
       }
-      return animate.call(this, keyframes, options);
-    };
+    }).observe(document, { attributes: true, attributeFilter: ["style"], subtree: true });
   });
 }
 
@@ -47,13 +66,7 @@ function sampleFor(target: Locator) {
   return target.evaluate((element) =>
     window.readingMotionSamples
       .filter((sample) => sample.target === element)
-      .map(({ startedAt, duration, opacity, filter, transform }) => ({
-        startedAt,
-        duration,
-        opacity,
-        filter,
-        transform,
-      }))
+      .map(({ startedAt, opacity, blur, y, scale }) => ({ startedAt, opacity, blur, y, scale }))
   );
 }
 
@@ -84,12 +97,7 @@ test("opens the server document in order and reveals paragraphs once on a normal
   const [firstReveal] = await sampleFor(first);
   const [secondReveal] = await sampleFor(second);
   const [thirdReveal] = await sampleFor(third);
-  expect(firstReveal).toMatchObject({
-    opacity: [0, 1],
-    filter: ["blur(8px)", "blur(0px)"],
-    transform: ["translate3d(0, 18px, 0) scale(0.99)", "translate3d(0, 0, 0) scale(1)"],
-    duration: 680,
-  });
+  expect(firstReveal).toMatchObject({ opacity: 0, blur: 7, y: 16, scale: 1 });
   expect(secondReveal!.startedAt - firstReveal!.startedAt).toBeGreaterThanOrEqual(85);
   expect(thirdReveal!.startedAt - secondReveal!.startedAt).toBeGreaterThanOrEqual(85);
   expect(await sampleFor(body)).toEqual([]);
@@ -103,8 +111,16 @@ test("opens the server document in order and reveals paragraphs once on a normal
   await approachReadingUnit(paragraph);
   await expect.poll(async () => (await sampleFor(paragraph)).length).toBe(1);
   const started = await sampleFor(paragraph);
-  expect(started[0]).toMatchObject({ opacity: [0, 1], filter: ["blur(8px)", "blur(0px)"] });
+  expect(started[0]).toMatchObject({ opacity: 0, blur: 7, y: 16, scale: 1 });
+  await expect(paragraph).toHaveCSS("filter", "none");
+  await expect(paragraph).toHaveCSS("transform", "none");
   await expect(paragraph).toHaveCSS("opacity", "1");
+  expect(
+    await paragraph.evaluate(
+      (element) =>
+        window.readingMotionSamples.find(({ target }) => element === target)?.readableWhileMoving
+    )
+  ).toBe(true);
   await page.evaluate(() => window.scrollTo(0, 0));
   await paragraph.scrollIntoViewIfNeeded();
   expect(await sampleFor(paragraph)).toEqual(started);
@@ -227,7 +243,99 @@ test("plays new reveals across desktop wheel steps after a mid-article reload @s
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 240);
 });
 
-test("reveals every visible paragraph in order during consecutive scroll frames @smoke", async ({
+test("a mid-article reload reveals every visible paragraph including the clipped first one @smoke", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await trackReadingMotion(page);
+  await openArticle(page);
+  const paragraphs = page.locator("[data-article-body] > p");
+  const firstIndex = 27;
+  const offset = await paragraphs.nth(firstIndex).evaluate((element) => {
+    window.scrollTo(0, Math.round(element.getBoundingClientRect().top + scrollY + 9));
+    return scrollY;
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() => JSON.parse(sessionStorage.getItem("odyssey-reading-scroll") ?? "null")?.y)
+    )
+    .toBe(offset);
+
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(offset);
+  const visible = await paragraphs.evaluateAll((blocks) =>
+    blocks.flatMap((block, index) => {
+      const rect = block.getBoundingClientRect();
+      const transform = getComputedStyle(block).transform;
+      const y = new DOMMatrixReadOnly(transform === "none" ? undefined : transform).m42;
+      return rect.bottom - y > 0 && rect.top - y < innerHeight ? [index] : [];
+    })
+  );
+  expect(visible[0]).toBe(firstIndex);
+  expect(visible.length).toBeGreaterThan(10);
+
+  await expect
+    .poll(() =>
+      paragraphs.evaluateAll((blocks, expected) => {
+        const visible = new Set(expected);
+        return window.readingMotionSamples
+          .map(({ target }) => blocks.indexOf(target))
+          .filter((index) => visible.has(index));
+      }, visible)
+    )
+    .toEqual(visible);
+  await expect(paragraphs.nth(visible.at(-1)!)).toHaveCSS("transform", "none");
+});
+
+test("a mid-article reload waits for a nearby image before choosing the visible reveal order", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await trackReadingMotion(page);
+  let holdImage = false;
+  let releaseImage = () => {};
+  const imageReady = new Promise<void>((resolve) => {
+    releaseImage = resolve;
+  });
+  await page.route("**/odyssey-hero.webp", async (route) => {
+    if (holdImage) await imageReady;
+    await route.continue();
+  });
+  await openArticle(page, "entrance-nested");
+  const body = page.locator("[data-article-body]");
+  const image = body.getByRole("img", { name: "Schema fixture" });
+  await image.scrollIntoViewIfNeeded();
+  await expect
+    .poll(() => image.evaluate((node) => (node as HTMLImageElement).naturalHeight))
+    .toBeGreaterThan(0);
+  const paragraphs = body.locator(":scope > p");
+  const first = paragraphs.nth(84);
+  const last = paragraphs.nth(92);
+  const offset = await savePositionBefore(first, -550);
+  holdImage = true;
+  try {
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(offset);
+    await expect(body).toHaveAttribute("data-reading-opening", "");
+    await page.waitForTimeout(250);
+    expect(await page.evaluate(() => window.readingMotionSamples.length)).toBe(0);
+  } finally {
+    releaseImage();
+  }
+  await expect.poll(async () => (await sampleFor(first)).length).toBe(1);
+  await expect.poll(async () => (await sampleFor(last)).length).toBe(1);
+  const starts = await paragraphs.evaluateAll((blocks) =>
+    window.readingMotionSamples.map(({ target }) => blocks.indexOf(target))
+  );
+  expect(starts.filter((index) => index >= 84 && index <= 92)).toEqual(
+    Array.from({ length: 9 }, (_, index) => 84 + index)
+  );
+  await expect(body).not.toHaveAttribute("data-reading-opening");
+});
+
+test("reveals every visible paragraph in order during regular wheel steps @smoke", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 1000 });
@@ -241,12 +349,12 @@ test("reveals every visible paragraph in order during consecutive scroll frames 
   await page.reload();
   await expect(first).toHaveAttribute("data-reading-pending", "");
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(y);
-  await page.evaluate(async () => {
-    for (let step = 0; step < 6; step += 1) {
-      await new Promise(requestAnimationFrame);
-      window.scrollBy(0, 120);
-    }
-  });
+  await page.mouse.move(640, 850);
+  for (let step = 1; step <= 6; step += 1) {
+    await page.mouse.wheel(0, 120);
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + step * 120);
+    await page.waitForTimeout(185);
+  }
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 720);
   await expect(first).toBeInViewport();
   await expect(paragraphs.nth(46)).toBeInViewport();
@@ -261,6 +369,58 @@ test("reveals every visible paragraph in order during consecutive scroll frames 
       })
     )
     .toEqual(Array.from({ length: 12 }, (_, index) => index));
+});
+
+test("a fast scroll reveals each visible paragraph in order and leaves the viewport settled", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await trackReadingMotion(page);
+  await openArticle(page);
+  const paragraphs = page.locator("[data-article-body] > p");
+  const first = paragraphs.nth(35);
+  const y = await savePositionBefore(first, 40);
+
+  await page.reload();
+  await expect(first).toHaveAttribute("data-reading-pending", "");
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y);
+  const afterBurst = await page.evaluate(async () => {
+    for (let step = 0; step < 6; step += 1) {
+      await new Promise(requestAnimationFrame);
+      window.scrollBy(0, 120);
+    }
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    return performance.now();
+  });
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 720);
+  await expect(paragraphs.nth(35)).toBeInViewport();
+  await expect(paragraphs.nth(46)).toBeInViewport();
+  await expect
+    .poll(() =>
+      paragraphs.evaluateAll((blocks) => {
+        const measured = blocks.slice(35, 47);
+        return window.readingMotionSamples
+          .map(({ target }) => measured.indexOf(target))
+          .filter((index) => index >= 0);
+      })
+    )
+    .toEqual(Array.from({ length: 12 }, (_, index) => index));
+  const [last] = await sampleFor(paragraphs.nth(46));
+  expect(last!.startedAt - afterBurst).toBeLessThan(180);
+  await expect(paragraphs.nth(46)).toHaveCSS("opacity", "1");
+  await expect(paragraphs.nth(46)).toHaveCSS("filter", "none");
+  await expect(paragraphs.nth(46)).toHaveCSS("transform", "none");
+
+  await page.waitForTimeout(200);
+  const nextIndex = await paragraphs.evaluateAll((blocks) =>
+    blocks.findIndex((block) => block.hasAttribute("data-reading-pending"))
+  );
+  expect(nextIndex).toBeGreaterThan(46);
+  await page.mouse.move(640, 850);
+  await page.mouse.wheel(0, 120);
+  await expect.poll(async () => (await sampleFor(paragraphs.nth(nextIndex))).length).toBe(1);
 });
 
 test("reveals the next paragraph when scrolling on the first frame after restoring a position", async ({
@@ -421,12 +581,9 @@ for (const [unit, descendant] of [
     await approachReadingUnit(target);
     await expect.poll(async () => (await sampleFor(target)).length).toBe(1);
     if (unit === "figure") {
-      expect((await sampleFor(target))[0]).toMatchObject({
-        opacity: [0, 1],
-        filter: ["blur(6px)", "blur(0px)"],
-        transform: ["scale(1.025)", "scale(1)"],
-        duration: 780,
-      });
+      const [figureReveal] = await sampleFor(target);
+      expect(figureReveal).toMatchObject({ opacity: 0, blur: 6, y: 8 });
+      expect(figureReveal?.scale).toBeCloseTo(1.025, 3);
     }
     expect(await sampleFor(target.locator(descendant).first())).toEqual([]);
     await expect(target).toHaveCSS("opacity", "1");
@@ -441,11 +598,10 @@ test("an active reveal cancels immediately on reduced motion and direct anchors 
   await openArticle(page);
   const paragraph = page.locator("[data-article-body] > p").nth(35);
   await approachReadingUnit(paragraph);
-  await expect
-    .poll(() => paragraph.evaluate((element) => element.getAnimations().length))
-    .toBeGreaterThan(0);
+  await expect(paragraph).toHaveCSS("filter", /^blur\(/);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect.poll(() => paragraph.evaluate((element) => element.getAnimations().length)).toBe(0);
+  await expect(paragraph).toHaveCSS("filter", "none");
+  await expect(paragraph).toHaveCSS("transform", "none");
   await expect(paragraph).toHaveCSS("opacity", "1");
 
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -455,9 +611,14 @@ test("an active reveal cancels immediately on reduced motion and direct anchors 
   await expect(chapter).toHaveCSS("opacity", "1");
   expect(await sampleFor(page.locator("[data-article-body]"))).toEqual([]);
   expect(await sampleFor(chapter)).toEqual([]);
+
+  await page.reload();
+  await expect(chapter).toBeInViewport();
+  await expect.poll(async () => (await sampleFor(chapter)).length).toBe(1);
+  await expect(chapter).toHaveCSS("opacity", "1");
 });
 
-test("a fast jump and settled reload keep the saved reading position visible", async ({ page }) => {
+test("a fast jump and reload reveal the settled reading position", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await trackReadingMotion(page);
@@ -477,7 +638,7 @@ test("a fast jump and settled reload keep the saved reading position visible", a
       })
     )
     .toBeGreaterThan(600);
-  expect(await sampleFor(chapter)).toEqual([]);
+  await expect.poll(async () => (await sampleFor(chapter)).length).toBe(1);
 
   const scrollBeforeReload = await page.evaluate(() => scrollY);
   await page.reload();
@@ -487,7 +648,7 @@ test("a fast jump and settled reload keep the saved reading position visible", a
     .toBeLessThan(3);
   await expect(chapter).toHaveCSS("opacity", "1");
   expect(await sampleFor(body)).toEqual([]);
-  expect(await sampleFor(chapter)).toEqual([]);
+  await expect.poll(async () => (await sampleFor(chapter)).length).toBe(1);
 });
 
 test("scrolling preserves the reader and does not replay revealed blocks", async ({ page }) => {
@@ -510,7 +671,7 @@ test("scrolling preserves the reader and does not replay revealed blocks", async
     const observer = new MutationObserver(() => {
       if (getComputedStyle(block).opacity !== "1") record.replayed = true;
     });
-    observer.observe(block, { attributeFilter: ["data-reading-pending"] });
+    observer.observe(block, { attributeFilter: ["data-reading-pending", "style"] });
     return { record, observer };
   });
 
@@ -576,15 +737,19 @@ test("reduced motion reveals pending content immediately and never re-hides it",
   await expect(page.locator("[data-article-body] > p").last()).toHaveCSS("opacity", "1");
 });
 
-test("a tall block remains readable without blurring the entire surface", async ({ page }) => {
+test("a tall block fades in without blurring the entire surface", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await trackReadingMotion(page);
   await openArticle(page, "entrance-tall");
   const block = page.locator("[data-article-body] [data-reading-code]").last();
   await expect(block).toHaveCSS("opacity", "0");
   await approachReadingUnit(block);
+  await expect.poll(async () => (await sampleFor(block)).length).toBe(1);
+  const [reveal] = await sampleFor(block);
+  expect(reveal).toMatchObject({ opacity: 0.65, blur: 0, y: 0, scale: 1 });
   await expect(block).toHaveCSS("opacity", "1");
-  expect(await sampleFor(block)).toEqual([]);
+  await expect(block).toHaveCSS("filter", "none");
+  await expect(block).toHaveCSS("transform", "none");
 });
 
 test("code blocks expose a copy action", async ({ page }) => {

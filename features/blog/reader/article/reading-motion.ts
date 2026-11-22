@@ -1,4 +1,4 @@
-import { EASE_OUT_CSS } from "@/lib/motion/ease";
+import gsap from "gsap";
 import { READING_JUMP_EVENT, readingScrollOffset } from "@/lib/reading-scroll";
 
 const READING_UNITS = [
@@ -11,22 +11,31 @@ const READING_UNITS = [
 
 const PENDING = "data-reading-pending";
 const REVEAL_GAP_MS = 90;
-const MIN_REVEAL_GAP_MS = 16;
-const VISIBLE_REVEAL_WINDOW_MS = REVEAL_GAP_MS * 4;
+const VISIBLE_REVEAL_WINDOW_MS = 270;
 const LEAD_PX = 80;
+const FAST_SCROLL_WINDOW_MS = 160;
+const FAST_SCROLL_DISTANCE_PX = 360;
+const FAST_START_PROGRESS = 0.15;
+const FAST_TIME_SCALE = 2.25;
 const TEXT_REVEAL = {
-  duration: 680,
-  filter: ["blur(8px)", "blur(0px)"],
-  transform: ["translate3d(0, 18px, 0) scale(0.99)", "translate3d(0, 0, 0) scale(1)"],
+  fadeSeconds: 0.34,
+  blurFrom: "blur(7px)",
+  focusSeconds: 0.39,
+  travelFrom: { y: 16 },
+  travelTo: { y: 0 },
+  settleSeconds: 0.68,
 };
 const IMAGE_REVEAL = {
-  duration: 780,
-  filter: ["blur(6px)", "blur(0px)"],
-  transform: ["scale(1.025)", "scale(1)"],
+  fadeSeconds: 0.46,
+  blurFrom: "blur(6px)",
+  focusSeconds: 0.5,
+  travelFrom: { y: 8, scale: 1.025 },
+  travelTo: { y: 0, scale: 1 },
+  settleSeconds: 0.82,
 };
 
 export function bindReadingMotion(root: HTMLElement, opening: boolean) {
-  if (!("IntersectionObserver" in window) || typeof root.animate !== "function") return;
+  if (!("IntersectionObserver" in window)) return;
   const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
   if (preference.matches) return;
 
@@ -36,17 +45,20 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
   });
   if (!units.length) return;
 
-  const running = new Set<Animation>();
+  const running = new Set<gsap.core.Timeline>();
+  const forwardScroll: Array<{ time: number; top: number }> = [];
   let viewportTop = readingScrollOffset();
   let viewportHeight = window.innerHeight;
-  const revealOpening =
-    opening && !window.location.hash && viewportTop === 0 && !root.contains(document.activeElement);
+  const revealOpening = opening && !root.contains(document.activeElement);
   let cursor = 0;
-  let lead = revealOpening ? LEAD_PX : 0;
+  let lead = revealOpening && viewportTop === 0 ? LEAD_PX : 0;
   let observed: HTMLElement | undefined;
   let frame: number | undefined;
-  let timer: ReturnType<typeof setTimeout> | undefined;
+  let scheduledEnd = 0;
+  let nextStartAt = 0;
+  let startGap = REVEAL_GAP_MS;
   let lastStartedAt = -Infinity;
+  let fastUntil = -Infinity;
 
   // Catch layout changes that bring a block into view while the reader is stationary.
   const observer = new IntersectionObserver((entries) => {
@@ -79,18 +91,53 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
     });
   }
 
-  function play(element: HTMLElement, now: number) {
-    lastStartedAt = now;
-    const { duration, filter, transform } = element.matches("figure") ? IMAGE_REVEAL : TEXT_REVEAL;
-    const animation = element.animate(
-      { opacity: [0, 1], filter, transform },
-      { duration, easing: EASE_OUT_CSS, fill: "both" }
+  function play(element: HTMLElement, tall: boolean, fast: boolean) {
+    const reveal = element.matches("figure") ? IMAGE_REVEAL : TEXT_REVEAL;
+    const timeline = gsap.timeline({
+      paused: true,
+      defaults: { ease: "power2.out", immediateRender: true },
+      onComplete() {
+        running.delete(timeline);
+        timeline.revert();
+      },
+    });
+
+    timeline.fromTo(
+      element,
+      { opacity: tall ? 0.65 : 0 },
+      { opacity: 1, duration: tall ? 0.28 : reveal.fadeSeconds },
+      0
     );
-    running.add(animation);
-    animation.onfinish = () => {
-      running.delete(animation);
-      animation.cancel();
-    };
+    if (!tall) {
+      timeline
+        .fromTo(
+          element,
+          { filter: reveal.blurFrom },
+          { filter: "blur(0px)", duration: reveal.focusSeconds },
+          0
+        )
+        .fromTo(
+          element,
+          reveal.travelFrom,
+          { ...reveal.travelTo, duration: reveal.settleSeconds, ease: "power3.out" },
+          0
+        );
+    }
+
+    running.add(timeline);
+    if (fast) timeline.progress(FAST_START_PROGRESS).timeScale(FAST_TIME_SCALE);
+    timeline.play();
+  }
+
+  function scrolledQuickly(previousTop: number, now: number) {
+    if (viewportTop < previousTop) forwardScroll.length = 0;
+    if (viewportTop <= previousTop) return false;
+
+    while (forwardScroll[0] && now - forwardScroll[0].time > FAST_SCROLL_WINDOW_MS) {
+      forwardScroll.shift();
+    }
+    forwardScroll.push({ time: now, top: previousTop });
+    return viewportTop - forwardScroll[0]!.top >= FAST_SCROLL_DISTANCE_PX;
   }
 
   function advance() {
@@ -98,79 +145,82 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
     const previousHeight = viewportHeight;
     viewportTop = readingScrollOffset();
     viewportHeight = window.innerHeight;
-    if (
-      viewportTop !== previousTop &&
-      (viewportTop >= previousTop + previousHeight || viewportTop + viewportHeight <= previousTop)
-    ) {
-      settleThrough(viewportHeight);
-      return;
+    const now = performance.now();
+    if (scrolledQuickly(previousTop, now) || viewportTop >= previousTop + previousHeight) {
+      if (now > fastUntil) {
+        for (const timeline of running) timeline.timeScale(FAST_TIME_SCALE);
+      }
+      fastUntil = now + FAST_SCROLL_WINDOW_MS;
     }
     if (viewportTop > previousTop) lead = LEAD_PX;
-    clearTimeout(timer);
-    timer = undefined;
 
-    const limit = viewportHeight + lead;
-    const now = performance.now();
+    const fast = now <= fastUntil;
+    const limit = viewportHeight + (fast ? 0 : lead);
+    const ready: Array<{ index: number; tall: boolean }> = [];
     let end = cursor;
-    let next: HTMLElement | undefined;
-    let delay = 0;
-    let gap = REVEAL_GAP_MS;
-    let toPlay: HTMLElement | undefined;
-
-    while ((next = units[end])) {
-      const rect = next.getBoundingClientRect();
+    for (; end < units.length; end += 1) {
+      const rect = units[end]!.getBoundingClientRect();
       if (rect.top > limit) break;
-
-      if (!rect.width || !rect.height || rect.bottom <= 0 || rect.height > viewportHeight * 2) {
-        end += 1;
-        continue;
+      if (rect.width && rect.height && rect.bottom > 0) {
+        ready.push({ index: end, tall: rect.height > viewportHeight * 2 });
       }
-
-      if (!revealOpening || viewportTop !== 0) {
-        // Speed up the sequence as more pending blocks enter the viewport.
-        const visibleWaiting = Math.max(1, firstBeyond(viewportHeight) - end);
-        gap = Math.max(
-          MIN_REVEAL_GAP_MS,
-          Math.min(REVEAL_GAP_MS, VISIBLE_REVEAL_WINDOW_MS / visibleWaiting)
-        );
-      }
-      delay = lastStartedAt + gap - now;
-      if (delay > 0) break;
-
-      toPlay = next;
-      next = units[++end];
-      break;
     }
 
+    const first = ready[0];
+    showThrough(first?.index ?? end);
+    if (!first) {
+      scheduledEnd = cursor;
+      watch(units[cursor]);
+      return;
+    }
+
+    const openingAtTop = revealOpening && viewportTop === 0;
+    const gap = openingAtTop
+      ? REVEAL_GAP_MS
+      : Math.min(REVEAL_GAP_MS, VISIBLE_REVEAL_WINDOW_MS / Math.max(1, ready.length - 1));
+
+    if (fast) {
+      // A rapidly moving viewport can carry a short paragraph away in one frame.
+      startGap = 0;
+      nextStartAt = now;
+    } else if (cursor >= scheduledEnd) {
+      startGap = gap;
+      nextStartAt = Math.max(now, lastStartedAt + startGap);
+    } else if (end !== scheduledEnd && gap < startGap) {
+      startGap = gap;
+      nextStartAt = Math.min(nextStartAt, lastStartedAt + startGap);
+    }
+    scheduledEnd = end;
+
+    // A single frame loop advances the document cursor. New arrivals can shorten a pending
+    // interval while blocks already waiting keep their place in the sequence.
+    watch();
+    for (const { index, tall } of ready) {
+      if (now < nextStartAt) {
+        showThrough(index);
+        schedule();
+        return;
+      }
+      showThrough(index + 1);
+      play(units[index]!, tall, fast);
+      lastStartedAt = now;
+      nextStartAt = openingAtTop ? now + startGap : nextStartAt + startGap;
+    }
     showThrough(end);
-    if (toPlay) play(toPlay, now);
-
-    if (next && (toPlay || delay > 0)) {
-      watch();
-      timer = setTimeout(
-        () => {
-          timer = undefined;
-          advance();
-        },
-        toPlay ? gap : delay
-      );
-    } else {
-      watch(next);
-    }
+    watch(units[cursor]);
   }
 
   function cancelRunning() {
-    for (const animation of running) animation.cancel();
+    for (const timeline of running) timeline.revert();
     running.clear();
   }
 
   function settleThrough(limit: number) {
-    clearTimeout(timer);
-    timer = undefined;
     lastStartedAt = -Infinity;
     lead = 0;
     cancelRunning();
     showThrough(firstBeyond(limit));
+    scheduledEnd = cursor;
     watch(units[cursor]);
   }
 
@@ -189,7 +239,6 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
 
   function dispose() {
     if (frame !== undefined) cancelAnimationFrame(frame);
-    clearTimeout(timer);
     watch();
     observer.disconnect();
     cancelRunning();
@@ -206,8 +255,12 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
     if (preference.matches) dispose();
   }
 
-  // Content already painted by the server stays readable when the opening was skipped.
-  if (!revealOpening) cursor = firstBeyond(viewportHeight);
+  if (revealOpening) {
+    while (units[cursor] && units[cursor]!.getBoundingClientRect().bottom <= 0) cursor += 1;
+  } else {
+    // A timed-out or interrupted startup leaves already painted content readable.
+    cursor = firstBeyond(viewportHeight);
+  }
   for (let index = cursor; index < units.length; index += 1) {
     units[index]!.setAttribute(PENDING, "");
   }
