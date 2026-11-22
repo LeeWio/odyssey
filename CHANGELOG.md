@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.260.8](https://github.com/LeeWio/odyssey/compare/v1.260.7...v1.260.8) (2026-11-22)
+
+
+### Bug Fixes
+
+* **reader:** keep reveals working after reload ([#111](https://github.com/LeeWio/odyssey/issues/111)) ([c4cc0c7](https://github.com/LeeWio/odyssey/commit/c4cc0c7d346c9657fc4f14693a29a4d2aa967d65))
+
 ## [1.260.7](https://github.com/LeeWio/odyssey/compare/v1.260.6...v1.260.7) (2026-11-22)
 
 
