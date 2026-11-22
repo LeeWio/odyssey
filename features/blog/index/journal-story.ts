@@ -30,6 +30,7 @@ export function formatJournalDate(
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: "UTC",
   }).format(date);
 }
 

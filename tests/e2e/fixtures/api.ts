@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 
 import { articles, designArticle } from "./articles";
-import { featured, stories } from "./journal";
+import { featured, journalFallbackPrefix, stories } from "./journal";
 
 const origin = new URL(process.env.E2E_FIXTURE_ORIGIN ?? "http://127.0.0.1:3181");
 const blogPosts = "/api/v1/public/blog/posts";
@@ -47,6 +47,10 @@ createServer((request, response) => {
     pathname === `${blogPosts}/digest`
   ) {
     const keyword = url.searchParams.get("keyword")?.toLowerCase();
+    // These journeys exercise the journal's browser query after an SSR fetch fails.
+    if (pathname.endsWith("/digest") && keyword?.startsWith(journalFallbackPrefix)) {
+      return send(503);
+    }
     const categoryId = url.searchParams.get("categoryId");
     const page = Number(url.searchParams.get("page")) || 0;
     const size = Number(url.searchParams.get("size")) || 12;

@@ -1,9 +1,9 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-import { Carousel } from "@heroui-pro/react/carousel";
+import { ArrowRight, ArrowRotateLeft } from "@gravity-ui/icons";
 import { EmptyState, ItemCard, NumberValue, Segment } from "@heroui-pro/react";
 import {
+  Accordion,
   Alert,
   Button,
   Card,
@@ -15,6 +15,7 @@ import {
   Meter,
   Pagination,
   SearchField,
+  Select,
   ScrollShadow,
   Separator,
   Skeleton,
@@ -22,12 +23,11 @@ import {
   TagGroup,
   Typography,
 } from "@heroui/react";
-import type { Key } from "react-aria-components/Breadcrumbs";
+import { RouterProvider, type Key } from "react-aria-components";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useDebouncedCallback } from "use-debounce";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useGetPublicColumnBySlugQuery,
@@ -38,134 +38,35 @@ import { type ReadingHistoryResponse, useGetLibraryOverviewQuery } from "@/lib/f
 import { useRetrieveDiscoveryQuery, useRetrieveFacetsQuery } from "@/lib/features/openapi";
 import type { OpenApiComponents } from "@/lib/features/openapi/openapi.generated";
 import { useGetFeaturedPostsQuery, useGetPublicPostDigestsQuery } from "@/lib/features/post";
-import { JOURNAL_PAGE_SIZE, parseJournalQuery } from "@/lib/features/post/journal-query";
+import { parseJournalQuery } from "@/lib/features/post/journal-query";
 import { useNearViewport } from "@/hooks/use-near-viewport";
-import { ColumnArticleStack } from "@/features/column/column-article-stack";
 import { useNormalizePageParam } from "@/lib/hooks/use-normalize-page-param";
 import { useQueryState } from "@/lib/hooks/use-query-state";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionHref } from "@/lib/reading-position";
 import { useRelativeTime } from "@/lib/relative-time";
 import { PageContainer } from "@/components/layout/page-container";
-import { ArticleCard } from "@/components/card/article-card";
-import { ArticleCover } from "@/components/card/article-cover";
 import type { PublicJournalInitialData } from "@/lib/features/post/server";
+import {
+  JournalHighlights,
+  JournalHighlightSkeleton,
+  JournalMasthead,
+  JournalStoryList,
+  JournalStoryListSkeleton,
+} from "./journal-editorial";
 import {
   formatJournalDate,
   journalPageNumbers,
-  journalStoryDate,
   journalStoryHref,
   journalStoryKey,
   type JournalStory,
 } from "./journal-story";
-
-const JOURNAL_STORY_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4";
 
 type ArchiveFacet = OpenApiComponents["schemas"]["ArchiveFacet"];
 type CategoryFacet = OpenApiComponents["schemas"]["CategoryFacet"];
 type CategoryGroup = OpenApiComponents["schemas"]["CategoryGroup"];
 type TagFacet = OpenApiComponents["schemas"]["TagFacet"];
 type Story = JournalStory;
-
-function FeatureCard({
-  delay = 0,
-  featured = false,
-  post,
-}: {
-  delay?: number;
-  featured?: boolean;
-  post: Story;
-}) {
-  const t = useTranslations("Journal");
-  const locale = useLocale();
-  const meta = [
-    post.category?.name,
-    formatJournalDate(journalStoryDate(post), locale, t("recentlyPublished")),
-  ]
-    .filter(Boolean)
-    .join(" · ");
-  const title = post.title || t("untitledStory");
-  const seed = String(post.id ?? post.slug ?? title);
-
-  return (
-    <article
-      data-journal-reveal=""
-      data-journal-order={delay > 0 ? "2" : "1"}
-      className={
-        featured
-          ? "min-w-0"
-          : "border-separator min-w-0 border-t py-6 first:border-t-0 first:pt-0 last:pb-0"
-      }
-      data-testid={featured ? "journal-lead" : "journal-companion"}
-    >
-      <Link
-        className={
-          featured
-            ? "group grid min-h-[28rem] w-full overflow-hidden rounded-lg text-white no-underline lg:min-h-[36rem] lg:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.7fr)]"
-            : "group text-foreground flex w-full items-start gap-5 no-underline"
-        }
-        href={journalStoryHref(post)}
-      >
-        {featured ? (
-          <div className="absolute inset-0 lg:relative lg:col-start-1 lg:row-start-1 lg:min-h-[36rem]">
-            <ArticleCover presetId={post.shaderPreset} seed={seed} src={post.coverImage} />
-          </div>
-        ) : null}
-        <div
-          className={
-            featured
-              ? "relative z-10 flex min-w-0 flex-col justify-end gap-3 bg-gradient-to-t from-black/90 via-black/65 to-transparent p-6 pt-20 sm:p-8 lg:col-start-2 lg:row-start-1 lg:bg-black lg:p-10"
-              : "flex min-w-0 flex-1 flex-col gap-3"
-          }
-        >
-          <span className="text-xs text-white/80">{meta}</span>
-          <Typography
-            type="h3"
-            weight="semibold"
-            className={
-              featured
-                ? "line-clamp-3 text-3xl leading-[1.05] tracking-[-0.03em] wrap-anywhere text-white sm:text-5xl"
-                : "group-hover:text-accent line-clamp-3 text-xl leading-snug tracking-normal wrap-anywhere"
-            }
-          >
-            {title}
-          </Typography>
-          {post.summary ? (
-            <Typography
-              type="body-sm"
-              className={`line-clamp-2 leading-6 ${featured ? "text-white/85" : "text-muted"}`}
-            >
-              {post.summary}
-            </Typography>
-          ) : null}
-          <span className={`mt-1 text-xs ${featured ? "text-white/75" : "text-muted"}`}>
-            {post.authorName || t("recentlyPublished")}
-          </span>
-        </div>
-        {!featured ? (
-          <div className="relative isolate aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-md sm:w-32">
-            <ArticleCover presetId={post.shaderPreset} seed={seed} src={post.coverImage} />
-          </div>
-        ) : null}
-      </Link>
-    </article>
-  );
-}
-
-function FeatureMosaic({ lead, companions }: { lead: Story; companions: Story[] }) {
-  return (
-    <div className="grid min-w-0 gap-8" data-testid="journal-feature-layout">
-      <FeatureCard featured post={lead} />
-      {companions.length > 0 ? (
-        <div className="flex min-w-0 flex-col justify-center">
-          {companions.map((post, index) => (
-            <FeatureCard key={post.id ?? post.slug} delay={0.06 * (index + 1)} post={post} />
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
 
 function LatestPagination({
   onPageChange,
@@ -182,8 +83,8 @@ function LatestPagination({
   if (pages <= 1) return null;
 
   return (
-    <div className="w-full overflow-x-auto">
-      <Pagination className="justify-center" size="sm">
+    <div className="w-full">
+      <Pagination aria-label={t("indexPagination")} className="justify-center" size="sm">
         <Pagination.Content>
           <Pagination.Item>
             <Pagination.Previous
@@ -194,13 +95,18 @@ function LatestPagination({
               <span>{t("previous")}</span>
             </Pagination.Previous>
           </Pagination.Item>
+          <Pagination.Item className="px-2 sm:hidden">
+            <Typography color="muted" type="body-xs" className="tabular-nums">
+              {t("pageOf", { page, pages })}
+            </Typography>
+          </Pagination.Item>
           {journalPageNumbers(page, pages).map((item, index) =>
             item === "ellipsis" ? (
-              <Pagination.Item key={`ellipsis-${index}`}>
+              <Pagination.Item className="hidden sm:flex" key={`ellipsis-${index}`}>
                 <Pagination.Ellipsis />
               </Pagination.Item>
             ) : (
-              <Pagination.Item key={item}>
+              <Pagination.Item className="hidden sm:flex" key={item}>
                 <Pagination.Link
                   isDisabled={isDisabled}
                   isActive={item === page}
@@ -223,149 +129,6 @@ function LatestPagination({
         </Pagination.Content>
       </Pagination>
     </div>
-  );
-}
-
-function StoryRow({ post }: { post: Story }) {
-  return <ArticleCard animatedCover={false} layout="tile" post={post} />;
-}
-
-function columnUpdatedAt(column: ColumnResponse) {
-  const stamps = column.posts
-    .map((post) => post.publishedAt)
-    .filter((value): value is string => Boolean(value));
-  if (stamps.length === 0) return column.createdAt || null;
-  return stamps.reduce((latest, value) => (value > latest ? value : latest));
-}
-
-function columnCadence(column: ColumnResponse, t: (key: string) => string) {
-  const stamps = column.posts
-    .map((post) => (post.publishedAt ? new Date(post.publishedAt).getTime() : Number.NaN))
-    .filter((value) => !Number.isNaN(value))
-    .sort((a, b) => a - b);
-  if (stamps.length < 2) return t("occasional");
-  const spanDays = (stamps[stamps.length - 1]! - stamps[0]!) / 86_400_000;
-  const gap = spanDays / (stamps.length - 1);
-  if (gap <= 10) return t("weekly");
-  if (gap <= 40) return t("monthly");
-  return t("occasional");
-}
-
-function ColumnDeck({ column }: { column: ColumnResponse }) {
-  const t = useTranslations("Journal");
-  const locale = useLocale();
-  if (column.posts.length === 0) return null;
-
-  const updated = columnUpdatedAt(column);
-
-  return (
-    <article className="flex min-w-0 flex-col gap-3">
-      <p className="text-muted text-xs">
-        {[
-          column.description,
-          t("essays", { count: column.postsCount.toLocaleString(locale) }),
-          columnCadence(column, t),
-          updated ? t("updated", { date: formatJournalDate(updated, locale, "") }) : null,
-        ]
-          .filter(Boolean)
-          .join(" · ")}
-      </p>
-      <ColumnArticleStack posts={column.posts} title={column.name || t("untitledColumn")} />
-      <Link className="w-fit text-sm no-underline" href={`/columns/${column.slug}`}>
-        {t("viewColumn")}
-        <Link.Icon />
-      </Link>
-    </article>
-  );
-}
-
-function ColumnDeckPreview({ column }: { column: ColumnResponse }) {
-  const detail = useGetPublicColumnBySlugQuery(column.slug);
-  const reduce = useReducedMotion() ?? false;
-  const resolved = detail.data ?? column;
-  if (detail.isLoading && resolved.posts.length === 0) {
-    return <Skeleton className="h-80 w-full rounded-lg" />;
-  }
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={resolved.slug}
-        initial={reduce ? undefined : { opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={reduce ? undefined : { opacity: 0, y: -8 }}
-        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <ColumnDeck column={resolved} />
-      </motion.div>
-    </AnimatePresence>
-  );
-}
-
-function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
-  const t = useTranslations("Journal");
-  const locale = useLocale();
-  const decks = columns.filter((column) => column.postsCount > 0 || column.posts.length > 0);
-  const [selected, setSelected] = useState(decks[0]?.slug ?? "");
-  const active = decks.find((column) => column.slug === selected) ?? decks[0];
-  const rest = decks.filter((column) => column.slug !== active?.slug);
-  if (!active) return null;
-
-  return (
-    <section aria-labelledby="columns-title" className="flex flex-col gap-8">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <div className="max-w-xl">
-          <Typography
-            id="columns-title"
-            type="h2"
-            weight="bold"
-            className="text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.05] tracking-[-0.03em]"
-          >
-            {t("columns")}
-          </Typography>
-          <Typography className="mt-2" color="muted" type="body-sm">
-            {t("columnsLine")}
-          </Typography>
-        </div>
-        <Link className="text-sm no-underline" href="/columns">
-          {t("viewAllColumns")}
-          <Link.Icon />
-        </Link>
-      </div>
-      <div className="grid min-w-0 items-start gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.85fr)]">
-        <ColumnDeckPreview column={active} />
-        {rest.length > 0 ? (
-          <div className="flex flex-col gap-2 lg:sticky lg:top-24">
-            <Typography color="muted" type="body-xs">
-              {t("nextColumn")}
-            </Typography>
-            {rest.map((column) => {
-              const updated = columnUpdatedAt(column);
-              return (
-                <Button
-                  key={column.slug}
-                  className="h-auto items-start justify-start px-3 py-3 text-start"
-                  variant="tertiary"
-                  onPress={() => setSelected(column.slug)}
-                >
-                  <span className="text-sm font-semibold">{column.name}</span>
-                  <span className="text-muted line-clamp-2 text-xs">{column.description}</span>
-                  <span className="text-muted text-xs">
-                    {[
-                      t("essays", { count: column.postsCount.toLocaleString(locale) }),
-                      updated
-                        ? t("updated", { date: formatJournalDate(updated, locale, "") })
-                        : null,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </span>
-                </Button>
-              );
-            })}
-          </div>
-        ) : null}
-      </div>
-    </section>
   );
 }
 
@@ -463,28 +226,10 @@ function ContinueReading({ entries }: { entries: ReadingHistoryResponse[] }) {
   );
 }
 
-function JournalSkeleton() {
-  const t = useTranslations("Journal");
-
-  return (
-    <div
-      aria-busy="true"
-      aria-label={t("loadingStories")}
-      className="grid gap-8 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]"
-      role="status"
-    >
-      <Skeleton className="h-80 w-full rounded-lg sm:h-96 2xl:h-112" />
-      <div className="flex flex-col justify-center gap-6">
-        <Skeleton className="h-36 w-full rounded-lg" />
-        <Skeleton className="h-36 w-full rounded-lg" />
-      </div>
-    </div>
-  );
-}
-
 export function BlogIndex({ initialData }: { initialData: PublicJournalInitialData }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
+  const router = useRouter();
   const { searchParams, updateQuery } = useQueryState();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const query = parseJournalQuery((key) => searchParams.get(key));
@@ -504,7 +249,9 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
   const hasInitialLatest = Boolean(initialData.latest);
   const hasInitialFeatured = !hasArchiveFilters && Boolean(initialData.featured);
   const { ref: discoveryRef, isNear: isDiscoveryNear } = useNearViewport<HTMLDivElement>();
-  const discoveryQuery = useRetrieveDiscoveryQuery(undefined, { skip: !isDiscoveryNear });
+  const discoveryQuery = useRetrieveDiscoveryQuery(undefined, {
+    skip: hasArchiveFilters || !isDiscoveryNear,
+  });
   const facetsQuery = useRetrieveFacetsQuery();
   const featuredQuery = useGetFeaturedPostsQuery(
     { page: 0, size: 8 },
@@ -581,9 +328,7 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
   const shownSlugs = new Set(
     [lead, ...companions].flatMap((post) => (post?.slug ? [post.slug] : []))
   );
-  const latestPosts = hasArchiveFilters
-    ? latestPool
-    : latestPool.filter((post) => !post.slug || !shownSlugs.has(post.slug));
+  const latestPosts = latestPool.filter((post) => !post.slug || !shownSlugs.has(post.slug));
   const openingLoading =
     !hasArchiveFilters &&
     latestPage === 0 &&
@@ -592,61 +337,18 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
     !openingLoading && !latestLoading && !latestQuery.isError && !lead && latestPosts.length === 0;
 
   return (
-    <div className="bg-background min-h-dvh w-full pt-28 pb-24 lg:pt-32">
-      <PageContainer className="flex flex-col gap-10 md:gap-12">
-        <header className="border-separator flex min-w-0 flex-col gap-6 border-b pb-8 md:flex-row md:items-end md:justify-between">
-          <div className="flex min-w-0 flex-col gap-4">
-            <Typography
-              type="h1"
-              weight="bold"
-              className="text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em]"
-            >
-              {t("title")}
-            </Typography>
-            <Typography color="muted" className="max-w-xl text-pretty">
-              {t("description")}
-            </Typography>
-          </div>
-          <nav
-            aria-label={t("browseArchive")}
-            className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm"
-          >
-            <Link className="text-foreground no-underline" href="/single/categories">
-              {t("topics")}
-              <Link.Icon />
-            </Link>
-            <Link className="text-foreground no-underline" href="/single/authors">
-              {t("authors")}
-              <Link.Icon />
-            </Link>
-            <Link className="text-foreground no-underline" href="/archive">
-              {t("archive")}
-              <Link.Icon />
-            </Link>
-          </nav>
-        </header>
+    <RouterProvider navigate={router.push}>
+      <PageContainer className="mx-auto flex min-h-dvh max-w-[76rem] flex-col gap-6 pt-19 pb-20 sm:gap-8 sm:pt-24 md:gap-9 lg:pt-28">
+        <JournalMasthead />
 
-        {openingLoading ? <JournalSkeleton /> : null}
-        {!openingLoading && lead ? (
-          <section aria-labelledby="journal-featured-title" className="flex min-w-0 flex-col gap-5">
-            <Typography
-              id="journal-featured-title"
-              type="h2"
-              className="text-muted text-sm font-medium tracking-normal"
-            >
-              {t("featuredStories")}
-            </Typography>
-            <FeatureMosaic companions={companions} lead={lead} />
-          </section>
-        ) : null}
-
-        <section
-          aria-label={t("browseArchive")}
-          className="border-separator flex w-full min-w-0 flex-col gap-5 border-y py-5"
+        <div
+          role="search"
+          aria-label={t("searchArticles")}
+          className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3"
         >
-          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_7.5rem] gap-2 sm:max-w-2xl sm:grid-cols-[minmax(0,1fr)_12rem] sm:gap-3">
             <SearchField
-              className="w-full sm:w-96"
+              className="min-w-0"
               name="article-search"
               value={searchValue}
               onChange={(value) => {
@@ -655,67 +357,69 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
               }}
             >
               <Label className="sr-only">{t("searchArticles")}</Label>
-              <SearchField.Group>
+              <SearchField.Group className="min-h-11">
                 <SearchField.SearchIcon />
-                <SearchField.Input placeholder={t("searchPlaceholder")} />
-                <SearchField.ClearButton aria-label={t("clearSearch")} />
+                <SearchField.Input className="min-w-0" placeholder={t("searchArticles")} />
+                {searchValue ? <SearchField.ClearButton aria-label={t("clearSearch")} /> : null}
               </SearchField.Group>
             </SearchField>
-            {hasArchiveFilters ? (
-              <Button
-                size="sm"
-                variant="tertiary"
-                onPress={() => {
-                  updateSearch.cancel();
-                  setSearchDraft({ source: normalizedQuery, value: "" });
-                  updateArchiveSearch({ q: undefined, category: undefined, page: undefined });
-                }}
-              >
-                <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
-                {t("clearFilters")}
-              </Button>
-            ) : (
-              <Link className="w-fit shrink-0 text-sm no-underline" href="/library">
-                {t("library")}
-                <Link.Icon />
-              </Link>
-            )}
-          </div>
-
-          {categories.length > 0 ? (
-            <ScrollShadow hideScrollBar orientation="horizontal" className="-mx-1 px-1">
-              <TagGroup
-                aria-label={t("filterTopics")}
-                className="w-max min-w-full xl:w-full"
-                selectedKeys={new Set([selectedCategoryId ? String(selectedCategoryId) : "all"])}
-                selectionMode="single"
-                size="sm"
-                onSelectionChange={(keys) => {
-                  if (keys === "all") return;
-                  const [key] = Array.from(keys);
-                  updateSearch.cancel();
-                  updateArchiveSearch({
-                    q: searchValue.trim() || undefined,
-                    category: key && String(key) !== "all" ? String(key) : undefined,
-                    page: undefined,
-                  });
-                }}
-              >
-                <TagGroup.List className="flex-nowrap pr-8 xl:flex-wrap xl:pr-0">
-                  <Tag id="all" textValue={t("allTopics")}>
-                    {t("allTopics")}
-                  </Tag>
+            <Select
+              className="min-w-0"
+              isDisabled={categories.length === 0}
+              placeholder={t("allTopics")}
+              value={selectedCategoryId ? String(selectedCategoryId) : "all"}
+              onChange={(key) => {
+                updateSearch.cancel();
+                updateArchiveSearch({
+                  q: searchValue.trim() || undefined,
+                  category: key && key !== "all" ? String(key) : undefined,
+                  page: undefined,
+                });
+              }}
+            >
+              <Label className="sr-only">{t("filterTopics")}</Label>
+              <Select.Trigger className="min-h-11 items-center">
+                <Select.Value className="min-w-0 truncate" />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover className="min-w-52" placement="bottom end">
+                <ListBox>
+                  <ListBox.Item id="all" textValue={t("allTopics")}>
+                    <Label>{t("allTopics")}</Label>
+                  </ListBox.Item>
                   {categories.map((category) => (
-                    <Tag key={category.id} id={String(category.id)} textValue={category.name}>
-                      {category.name}
-                      <span className="text-muted text-xs tabular-nums">{category.count}</span>
-                    </Tag>
+                    <ListBox.Item
+                      key={category.id}
+                      id={String(category.id)}
+                      textValue={category.name}
+                    >
+                      <Label className="min-w-0 wrap-anywhere">{category.name}</Label>
+                      <Chip size="sm" variant="soft" className="ms-auto shrink-0">
+                        {category.count?.toLocaleString(locale)}
+                      </Chip>
+                    </ListBox.Item>
                   ))}
-                </TagGroup.List>
-              </TagGroup>
-            </ScrollShadow>
+                </ListBox>
+              </Select.Popover>
+            </Select>
+          </div>
+          {hasArchiveFilters ? (
+            <Button
+              className="min-h-10"
+              variant="ghost"
+              onPress={() => {
+                updateSearch.cancel();
+                setSearchDraft({ source: normalizedQuery, value: "" });
+                updateArchiveSearch({ q: undefined, category: undefined, page: undefined });
+              }}
+            >
+              {t("clearFilters")}
+            </Button>
           ) : null}
-        </section>
+        </div>
+
+        {openingLoading ? <JournalHighlightSkeleton /> : null}
+        {!openingLoading && lead ? <JournalHighlights lead={lead} companions={companions} /> : null}
 
         {!hasArchiveFilters && featuredQuery.isError ? (
           <Alert status="danger">
@@ -730,19 +434,19 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
           </Alert>
         ) : null}
 
-        <div className="flex min-w-0 flex-col gap-16">
-          <div className="flex min-w-0 flex-col gap-12">
+        <div className="flex min-w-0 flex-col gap-12 sm:gap-16">
+          <div className="flex min-w-0 flex-col gap-11 sm:gap-14">
             <section
               aria-labelledby="latest-title"
               aria-busy={latestLoading || latestQuery.isFetching}
-              className="flex min-w-0 flex-col gap-6"
+              className="relative flex min-w-0 flex-col gap-3"
             >
               <div className="flex items-baseline justify-between gap-4">
                 <Typography
                   id="latest-title"
                   type="h2"
                   weight="semibold"
-                  className="min-w-0 text-2xl tracking-normal wrap-anywhere"
+                  className="min-w-0 text-2xl tracking-tight wrap-anywhere"
                 >
                   {normalizedQuery
                     ? t("searchResults")
@@ -751,18 +455,18 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
                         t("latest"))
                       : t("latest")}
                 </Typography>
-                <span className="text-muted text-xs tabular-nums">
-                  <NumberValue locale={locale} value={essayCount}>
-                    {(formatted) => t("essays", { count: formatted })}
-                  </NumberValue>
-                </span>
+                {!latestLoading && !latestQuery.isError ? (
+                  <Typography
+                    aria-live="polite"
+                    type="body-xs"
+                    className="text-foreground/75 shrink-0 tabular-nums"
+                  >
+                    {t("indexArticleCount", { count: essayCount })}
+                  </Typography>
+                ) : null}
               </div>
-              {latestLoading && !openingLoading ? (
-                <div role="status" aria-label={t("loadingStories")} className={JOURNAL_STORY_GRID}>
-                  {Array.from({ length: JOURNAL_PAGE_SIZE }, (_, index) => (
-                    <Skeleton key={index} className="aspect-[16/10] w-full rounded-lg" />
-                  ))}
-                </div>
+              {latestLoading ? (
+                <JournalStoryListSkeleton />
               ) : latestQuery.isError ? (
                 <Alert status="danger">
                   <Alert.Indicator />
@@ -775,7 +479,7 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
                     variant="outline"
                     onPress={() => void latestQuery.refetch()}
                   >
-                    <Icon icon="gravity-ui:arrow-rotate-left" aria-hidden="true" />
+                    <ArrowRotateLeft aria-hidden="true" className="size-4" />
                     {t("tryAgain")}
                   </Button>
                   {latestPage > 0 ? (
@@ -791,15 +495,9 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
                     </Button>
                   ) : null}
                 </Alert>
-              ) : latestPosts.length > 0 ? (
-                <div className="flex min-w-0 flex-col gap-6">
-                  <div className={JOURNAL_STORY_GRID} data-testid="journal-latest-grid">
-                    {latestPosts.map((post) => (
-                      <div key={post.id ?? post.slug} className="min-w-0" data-journal-reveal="">
-                        <StoryRow post={post} />
-                      </div>
-                    ))}
-                  </div>
+              ) : latestPool.length > 0 ? (
+                <div className="flex min-w-0 flex-col gap-4">
+                  <JournalStoryList posts={latestPosts.length > 0 ? latestPosts : latestPool} />
                   <LatestPagination
                     page={latestPage + 1}
                     pages={Math.max(1, latestData?.totalPages ?? 1)}
@@ -824,52 +522,50 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
                   </EmptyState.Header>
                 </EmptyState>
               ) : null}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
+                ref={discoveryRef}
+              />
             </section>
 
             <ContinueReading entries={libraryQuery.data?.continueReading ?? []} />
 
-            <div ref={discoveryRef} />
-
             {!hasArchiveFilters ? (
-              <div data-journal-reveal="">
+              <>
                 <ColumnDecks
                   columns={(columnsQuery.data ?? []).filter((column) => column.isPublished)}
                 />
-              </div>
-            ) : null}
-
-            {!hasArchiveFilters ? (
-              <div data-journal-reveal="">
                 <CategoryShelves groups={discoveryData?.categoryGroups ?? []} />
-              </div>
+              </>
             ) : null}
           </div>
 
-          {hasDiscoveryRail ? (
+          {!hasArchiveFilters && hasDiscoveryRail ? (
             <aside
               aria-label={t("exploreWriting")}
-              className="border-separator grid min-w-0 gap-8 border-t pt-8 sm:grid-cols-2 lg:grid-cols-4"
+              className="border-separator grid min-w-0 gap-8 border-t pt-8 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]"
             >
               <Typography type="h2" className="sr-only">
                 {t("exploreWriting")}
               </Typography>
               {mostRead.length + trending.length > 0 ? (
-                <div data-journal-reveal="">
+                <div className="min-w-0">
                   <AttentionCard mostRead={mostRead} trending={trending} />
                 </div>
               ) : null}
               {categories.length > 0 ? (
-                <div data-journal-reveal="">
+                <div className="min-w-0">
                   <CategoryList categories={categories} />
                 </div>
               ) : null}
               {tags.length > 0 ? (
-                <div data-journal-reveal="">
+                <div className="min-w-0">
                   <TagList tags={tags} />
                 </div>
               ) : null}
               {archives.length > 0 ? (
-                <div data-journal-reveal="">
+                <div className="min-w-0">
                   <YearList archives={archives} />
                 </div>
               ) : null}
@@ -881,15 +577,15 @@ export function BlogIndex({ initialData }: { initialData: PublicJournalInitialDa
         featuredPosts.some((post) => post.slug && !shownSlugs.has(post.slug)) ? (
           <>
             <Separator />
-            <div data-journal-reveal="">
-              <FeaturedCarousel
+            <div className="min-w-0">
+              <MoreFeaturedStories
                 posts={featuredPosts.filter((post) => !post.slug || !shownSlugs.has(post.slug))}
               />
             </div>
           </>
         ) : null}
       </PageContainer>
-    </div>
+    </RouterProvider>
   );
 }
 
@@ -907,7 +603,7 @@ function AttentionCard({ mostRead, trending }: { mostRead: Story[]; trending: St
 
   return (
     <Card variant="transparent" className="min-w-0 gap-4 rounded-none p-0">
-      <Card.Header className="flex-row items-center justify-between gap-3">
+      <Card.Header className="flex-row flex-wrap items-center justify-between gap-3">
         <Segment
           aria-label={t("attention")}
           selectedKey={selected}
@@ -1050,96 +746,167 @@ function TagList({ tags }: { tags: Array<TagFacet & { id: number; name: string }
   );
 }
 
-function CategoryShelf({ group }: { group: CategoryGroup }) {
+function StoryLinks({ posts }: { posts: Story[] }) {
+  const t = useTranslations("Journal");
+  return (
+    <ul className="flex min-w-0 list-none flex-col">
+      {posts.map((post) => (
+        <li key={journalStoryKey(post)} className="min-w-0">
+          <Link
+            className="text-foreground hover:text-accent flex min-h-10 w-full items-center justify-between gap-3 text-sm no-underline"
+            href={journalStoryHref(post)}
+          >
+            <span className="min-w-0 wrap-anywhere">{post.title || t("untitledStory")}</span>
+            <Link.Icon aria-hidden="true">
+              <ArrowRight />
+            </Link.Icon>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ColumnDecks({ columns }: { columns: ColumnResponse[] }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
-  const category = group.category;
-  const name = category?.name;
-  if (!name) return null;
-  const posts = [group.heroPost, ...(group.supportingPosts ?? group.posts ?? [])].filter(
-    (post): post is NonNullable<typeof post> => Boolean(post?.slug)
-  );
-  const unique = posts.filter(
-    (post, index) => posts.findIndex((item) => item.slug === post.slug) === index
-  );
-  if (unique.length === 0) return null;
+  const decks = columns.filter((column) => column.postsCount > 0 || column.posts.length > 0);
+  const [selected, setSelected] = useState<Key>(decks[0]?.slug ?? "");
+  const active = decks.find((column) => column.slug === selected) ?? decks[0];
+  const detail = useGetPublicColumnBySlugQuery(active?.slug ?? "", { skip: !active });
+  if (!active) return null;
+
+  const column = detail.currentData ?? active;
+  const updated = column.posts
+    .map((post) => post.publishedAt)
+    .reduce<string | null>(
+      (latest, value) => (value && (!latest || value > latest) ? value : latest),
+      null
+    );
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-baseline gap-3">
-        <Typography type="body-sm" weight="semibold">
-          {name}
+    <section aria-labelledby="columns-title" className="flex min-w-0 flex-col gap-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <Typography id="columns-title" type="h2" weight="semibold" className="text-2xl">
+          {t("indexColumns")}
         </Typography>
-        <span className="text-muted text-xs tabular-nums">
-          <NumberValue locale={locale} value={group.totalPublishedCount ?? unique.length}>
-            {(formatted) => t("categoryEssays", { count: formatted })}
-          </NumberValue>
-        </span>
-        <Link
-          className="text-sm no-underline"
-          href={
-            category?.slug
-              ? `/single/categories/${encodeURIComponent(category.slug)}`
-              : "/single/categories"
-          }
-        >
-          {t("archive")}
+        <Link className="text-sm no-underline" href="/columns">
+          {t("viewAllColumns")}
           <Link.Icon />
         </Link>
       </div>
-      <div className={JOURNAL_STORY_GRID}>
-        {unique.slice(0, 4).map((post) => (
-          <StoryRow key={post.id ?? post.slug} post={post} />
-        ))}
-      </div>
-    </div>
+      {decks.length > 1 ? (
+        <ScrollShadow hideScrollBar orientation="horizontal">
+          <Segment
+            aria-label={t("indexColumns")}
+            className="w-max"
+            selectedKey={active.slug}
+            onSelectionChange={setSelected}
+          >
+            {decks.map((deck) => (
+              <Segment.Item id={deck.slug} key={deck.slug}>
+                {deck.name}
+              </Segment.Item>
+            ))}
+          </Segment>
+        </ScrollShadow>
+      ) : null}
+      <Card variant="secondary" className="gap-4 p-5 sm:p-6">
+        <Card.Header className="gap-2">
+          <Card.Title className="text-lg font-semibold">
+            {column.name || t("untitledColumn")}
+          </Card.Title>
+          {column.description ? <Card.Description>{column.description}</Card.Description> : null}
+          <Typography type="body-xs" color="muted">
+            {[
+              t("essays", { count: column.postsCount.toLocaleString(locale) }),
+              updated ? t("updated", { date: formatJournalDate(updated, locale, "") }) : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </Typography>
+        </Card.Header>
+        {column.posts.length > 0 ? (
+          <Card.Content className="gap-0">
+            <Separator />
+            <StoryLinks posts={column.posts.slice(0, 4)} />
+          </Card.Content>
+        ) : detail.isLoading ? (
+          <Skeleton className="h-16 w-full" aria-label={t("loadingStories")} />
+        ) : null}
+        <Card.Footer>
+          <Link
+            className="text-sm no-underline"
+            href={"/columns/" + encodeURIComponent(column.slug)}
+          >
+            {t("viewColumn")}
+            <Link.Icon />
+          </Link>
+        </Card.Footer>
+      </Card>
+    </section>
   );
 }
 
 function CategoryShelves({ groups }: { groups: CategoryGroup[] }) {
   const t = useTranslations("Journal");
-  const ready = groups.filter(
-    (group) => group.category?.name && (group.heroPost || group.posts?.length)
-  );
-  if (ready.length === 0) return null;
+  const shelves = groups.flatMap((group) => {
+    if (!group.category?.name || !group.category.slug) return [];
+    const posts = [group.heroPost, ...(group.supportingPosts ?? group.posts ?? [])].flatMap(
+      (post) => (post?.slug ? [post] : [])
+    );
+    const unique = posts.filter(
+      (post, index) => posts.findIndex((item) => item.slug === post.slug) === index
+    );
+    return unique.length
+      ? [{ name: group.category.name, slug: group.category.slug, posts: unique }]
+      : [];
+  });
+  if (shelves.length === 0) return null;
 
   return (
-    <section aria-labelledby="archive-shelves-title" className="flex flex-col gap-4">
-      <Typography id="archive-shelves-title" type="h2" weight="semibold">
+    <section aria-labelledby="archive-shelves-title" className="flex min-w-0 flex-col gap-3">
+      <Typography id="archive-shelves-title" type="h2" weight="semibold" className="text-2xl">
         {t("fromTheArchive")}
       </Typography>
-      {ready.slice(0, 4).map((group) => (
-        <CategoryShelf key={group.category?.id ?? group.category?.slug} group={group} />
-      ))}
+      <Accordion>
+        {shelves.slice(0, 4).map(({ name, slug, posts }) => (
+          <Accordion.Item id={slug} key={slug}>
+            <Accordion.Heading>
+              <Accordion.Trigger>
+                <span className="min-w-0 wrap-anywhere">{name}</span>
+                <Accordion.Indicator />
+              </Accordion.Trigger>
+            </Accordion.Heading>
+            <Accordion.Panel>
+              <Accordion.Body>
+                <StoryLinks posts={posts.slice(0, 4)} />
+                <Link
+                  className="mt-2 w-fit text-sm no-underline"
+                  href={"/single/categories/" + encodeURIComponent(slug)}
+                >
+                  {t("browseCategory", { name })}
+                  <Link.Icon />
+                </Link>
+              </Accordion.Body>
+            </Accordion.Panel>
+          </Accordion.Item>
+        ))}
+      </Accordion>
     </section>
   );
 }
 
-function FeaturedCarousel({ posts }: { posts: Story[] }) {
+function MoreFeaturedStories({ posts }: { posts: Story[] }) {
   const t = useTranslations("Journal");
   if (posts.length === 0) return null;
 
   return (
-    <section aria-labelledby="featured-band-title" className="@container flex flex-col gap-4">
-      <Typography id="featured-band-title" type="h2" weight="semibold">
-        {t("featuredStories")}
+    <section aria-labelledby="featured-band-title" className="flex min-w-0 flex-col gap-3">
+      <Typography id="featured-band-title" type="h2" weight="semibold" className="text-2xl">
+        {t("moreFeaturedStories")}
       </Typography>
-      <Carousel opts={{ align: "start" }}>
-        <Carousel.Content>
-          {posts.slice(0, 12).map((post) => (
-            <Carousel.Item
-              key={journalStoryKey(post)}
-              className="basis-full @min-[36rem]:basis-1/2 @min-[52rem]:basis-1/3 @min-[68rem]:basis-1/4 @min-[84rem]:basis-1/5"
-            >
-              <div className="pe-3">
-                <FeatureCard post={post} />
-              </div>
-            </Carousel.Item>
-          ))}
-        </Carousel.Content>
-        <Carousel.Previous />
-        <Carousel.Next />
-      </Carousel>
+      <StoryLinks posts={posts.slice(0, 12)} />
     </section>
   );
 }

@@ -84,16 +84,14 @@ Library, Guestbook, Notifications, notification preferences, Schedule and Roadma
 
 ## Journal Editorial Redesign
 
-The journal is an editorial index rather than a dashboard or a marketing landing page. Its existing routes, article links, topic selection, bookmarks and URL-driven search remain intact. The redesign changes composition, not just container width:
+The journal uses a compact editorial opening, followed by a single chronological reading list. Search and topic selection share a row on phone and desktop. The masthead links to topics, authors, archive and the reader's library.
 
-- A visible Journal heading and description establish the page, with quiet links to topics, authors and the archive.
-- The opening pairs one prominent shader story with two smaller, text-led recommendations. Summaries are visible rather than available only on hover. Articles do not render cover images; `ArticleCover` provides a deterministic shader visual when a media surface is useful.
-- Search and topic filters form an unframed, full-width toolbar. Search hides the editorial opening and supplementary columns so results take priority. No-match copy differs from an empty publication, and reset clears the query, category and page together.
-- Latest articles use transparent HeroUI Cards, restrained top rules, larger titles, readable summaries and deterministic shader media where a thumbnail surface is useful. Tailwind auto-fill tracks increase density with available space. The API requests 12 articles per page; pagination sits below the whole grid rather than occupying one of its tracks.
-- Continue reading and columns follow the latest results. Discovery occupies a quiet, unframed rail on desktop and follows the article content on mobile. An absent rail does not reserve an empty column.
-- Featured media has stable responsive heights. Overlaid titles remain white in all themes, with a dark scrim for readability. Section entrances use 280ms, 12px movement and reduced-motion support; column autoplay is disabled for reduced motion.
+- One secondary HeroUI Card carries the lead title and summary. Two recommendations sit beside it on desktop and stack on narrow screens. Authored covers are optional and sit alongside the text when there is room.
+- Transparent HeroUI Cards group each article's date, title, summary and byline. On phones the date sits above the title. A HeroUI Dropdown holds saving and copying, and HeroUI Toast confirms a successful copy. Pagination follows the list and shows a compact page count on phones.
+- An active search or topic prioritizes results. HeroUI Skeleton, Alert and EmptyState handle loading, service failure and no matches. Reset clears the search, topic and page together.
+- Signed-in readers can continue from their saved position. A HeroUI Segment switches between column previews and a HeroUI Accordion reveals articles from each archive shelf. Discovery starts loading near the end of the list.
 
-`tests/e2e/journal-redesign.spec.ts` covers hierarchy and media loading at 390, 820, 1440, 1920 and 2560px, text bounds, pagination placement, column switching, no-match recovery, later pages, all theme variants and text-only recommendations with standard motion. `tests/e2e/journal.spec.ts` retains the existing search, URL restoration, authentication and bookmark regression coverage. Screenshots are generated for desktop/mobile and theme states; geometry and computed-style assertions provide automated layout checks.
+`tests/e2e/journal-redesign.spec.ts` checks layout from 320 to 2560 px, text bounds, contrast across theme variants, authored thumbnails, keyboard focus, column switching and archive disclosure. `tests/e2e/journal.spec.ts` covers URL restoration, delayed results and reading-list actions.
 
 ## Columns Directory
 

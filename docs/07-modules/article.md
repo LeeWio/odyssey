@@ -13,15 +13,14 @@ Action Bar 的滚动可见性、文章顶部/结尾位置策略、交互锁定�
 
 ## Read later
 
-The `/single` journal exposes standalone bookmark buttons on its latest article
-cards, using `features/library/reading-list-button.tsx`. The embedded Chronicle
-feed reuses the same action. Neither nests a button in an anchor. Guests open the sign-in dialog
-without issuing a reading-list mutation. Authenticated readers use the existing
-PUT/DELETE reading-list endpoints. The button reflects the server response rather
-than a separate persistent local toggle; pending writes and article refreshes
-block duplicate submissions. Failed writes retain the previous server state and
-can be retried. Successful writes invalidate the reading list, overview, and the
-affected Post tag so subscribed list and detail queries stay in sync.
+The `/single` journal offers bookmarking from each latest article's HeroUI
+action menu. The embedded Chronicle feed and reader share the mutation logic in
+`features/library/reading-list-button.tsx`. Guests open the sign-in dialog.
+Authenticated readers use the existing PUT/DELETE reading-list endpoints.
+The action reflects the server response, and pending writes and membership
+refreshes block duplicate submissions. Failed writes retain the previous server
+state and can be retried. Successful writes invalidate the reading list, overview,
+and affected Post tag so subscribed list and detail queries stay in sync.
 
 Regression coverage includes keyboard and pointer interaction, guest sign-in,
 failed-save retry, duplicate prevention, reload, and list/detail cache refresh.
@@ -75,12 +74,12 @@ and `category` while preserving pagination. Internal navigation, recovery links,
 newsletter status actions, and library browse links point directly to `/single`.
 Backend `/api/v1/public/blog/...` routes are unchanged.
 
-The latest journal cards use the existing full-post query (six per page), because
-digest responses do not provide viewer-specific reading-list state. This avoids
-per-card detail requests and guessed bookmark membership. Loading, debounce, and
-page correction suppress stale cards and empty-state flashes. Search fields stay
-controlled without remounting on every URL update, and pagination is disabled
-during refresh. `tests/e2e/journal.spec.ts` covers the canonical route and actions.
+The latest journal list reads 12 post digests per API page. The route loads them
+on the server with a browser query as a fallback. Bookmark membership is read
+when a signed-in reader opens an action menu. Loading, debounce, and page
+correction suppress stale results and empty-state flashes. The controlled search
+field stays mounted during URL changes, and pagination is disabled during
+refresh. `tests/e2e/journal.spec.ts` covers the canonical route and actions.
 
 ## Embedded Article Feed
 

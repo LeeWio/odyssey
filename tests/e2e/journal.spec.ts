@@ -1,4 +1,6 @@
 import { expect, test as base, type Page } from "@playwright/test";
+import { JOURNAL_PAGE_SIZE } from "../../lib/features/post/journal-query";
+import { journalFallbackPrefix } from "./fixtures/journal";
 
 const test = base.extend<{ browserErrors: string[] }>({
   browserErrors: [
@@ -25,6 +27,7 @@ const article = (id: number, title: string, saved = false) => ({
   category: null,
   series: null,
   seriesOrder: null,
+  publishedAt: "2026-09-01T00:00:00Z",
   createdAt: "2026-09-01T00:00:00Z",
   updatedAt: "2026-09-01T00:00:00Z",
 });
@@ -32,11 +35,12 @@ const result = (list: unknown[], page = 0, total = list.length) =>
   envelope({
     list,
     page,
-    size: 6,
+    size: JOURNAL_PAGE_SIZE,
     total,
-    totalPages: Math.ceil(total / 6),
+    totalPages: Math.ceil(total / JOURNAL_PAGE_SIZE),
   });
-const endpoint = "**/api/v1/public/blog/posts?**";
+const endpoint = "**/api/v1/public/blog/posts/digest?**";
+const keyword = (text: string) => `${journalFallbackPrefix}${text}`;
 const latest = (page: Page) => page.getByRole("region", { name: "Search results", exact: true });
 const signIn = (page: Page) =>
   page.addInitScript(() =>
@@ -84,22 +88,22 @@ test("retired blog links permanently redirect to the journal with their filters"
   let parameters: URLSearchParams | undefined;
   await page.route(endpoint, (route) => {
     parameters = new URL(route.request().url()).searchParams;
-    return route.fulfill({ json: result([article(1, "Migrated article")], 1, 12) });
+    return route.fulfill({ json: result([article(1, "Migrated article")], 1, 24) });
   });
   const response = await page.request.get("/blog", { maxRedirects: 0 });
   expect(response.status()).toBe(308);
   expect(response.headers().location).toBe("/single");
-  await page.goto("/blog?keyword=notes&categoryId=1&page=2&source=old-link");
+  await page.goto(`/blog?keyword=${keyword("notes")}&categoryId=1&page=2&source=old-link`);
   await expect(
     latest(page).getByRole("link", { name: "Migrated article", exact: true })
   ).toBeVisible();
   const url = new URL(page.url());
   expect(url.pathname).toBe("/single");
-  expect(url.searchParams.get("q")).toBe("notes");
+  expect(url.searchParams.get("q")).toBe(keyword("notes"));
   expect(url.searchParams.get("category")).toBe("1");
   expect(url.searchParams.get("page")).toBe("2");
   expect(url.searchParams.get("source")).toBe("old-link");
-  expect(parameters?.get("keyword")).toBe("notes");
+  expect(parameters?.get("keyword")).toBe(keyword("notes"));
   expect(parameters?.get("categoryId")).toBe("1");
   expect(parameters?.get("page")).toBe("1");
 });
@@ -118,7 +122,7 @@ test("journal bookmarks save, remove and restore state on reload", async ({ page
     saved = method === "PUT";
     return route.fulfill({ json: envelope(null) });
   });
-  await page.goto("/single?q=reading");
+  await page.goto(`/single?q=${keyword("reading")}`);
   const card = latest(page).getByRole("article", { name: "Reading article", exact: true });
   const actions = card.getByRole("button", { name: "More article actions", exact: true });
   const save = page.getByRole("menuitem", { name: "Save for later", exact: true });
@@ -127,7 +131,7 @@ test("journal bookmarks save, remove and restore state on reload", async ({ page
   await expect(save).toBeEnabled();
   await save.press("Enter");
   await expect.poll(() => methods).toEqual(["PUT"]);
-  await expect(page).toHaveURL(/\/single\?q=reading$/);
+  await expect(page).toHaveURL(new RegExp(`/single\\?q=${keyword("reading")}$`));
   await page.reload();
   await actions.press("Enter");
   await expect(remove).toBeEnabled();
@@ -150,7 +154,7 @@ test("guest journal bookmarks prompt login without nested controls or mobile ove
     writes += 1;
     return route.fulfill({ json: envelope(null) });
   });
-  await page.goto("/single?q=reading");
+  await page.goto(`/single?q=${keyword("reading")}`);
   const card = latest(page).getByRole("article", { name: "Mobile reading article", exact: true });
   await expect(card).toBeVisible();
   expect(await card.locator("a button").count()).toBe(0);
@@ -183,7 +187,7 @@ test("journal saves block duplicate writes and allow retry after failure", async
     return route.fulfill({ json: envelope(null) });
   });
   try {
-    await page.goto("/single?q=retry");
+    await page.goto(`/single?q=${keyword("retry")}`);
     const actions = latest(page).getByRole("button", { name: "More article actions", exact: true });
     const save = page.getByRole("menuitem", { name: "Save for later", exact: true });
     await actions.click();
@@ -212,18 +216,25 @@ test("search immediately hides stale cards through debounce and delayed results"
 }) => {
   const release = Promise.withResolvers<void>();
   await page.route(endpoint, async (route) => {
-    const keyword = new URL(route.request().url()).searchParams.get("keyword");
-    if (keyword === "beta") await release.promise;
+    const query = new URL(route.request().url()).searchParams.get("keyword");
+    if (query === keyword("beta")) await release.promise;
     return route.fulfill({
-      json: result([article(keyword === "beta" ? 2 : 1, `${keyword} article`)]),
+      json: result([
+        article(
+          query === keyword("beta") ? 2 : 1,
+          `${query?.slice(journalFallbackPrefix.length)} article`
+        ),
+      ]),
     });
   });
   try {
-    await page.goto("/single?q=alpha");
+    await page.goto(`/single?q=${keyword("alpha")}`);
     await expect(
       latest(page).getByRole("link", { name: "alpha article", exact: true })
     ).toBeVisible();
-    await page.getByRole("searchbox", { name: "Search articles", exact: true }).fill("beta");
+    await page
+      .getByRole("searchbox", { name: "Search articles", exact: true })
+      .fill(keyword("beta"));
     expect(await page.getByRole("link", { name: "alpha article", exact: true }).count()).toBe(0);
     await expect(page.getByRole("status", { name: "Loading stories", exact: true })).toBeVisible();
     await expect(page.getByText("No published stories yet", { exact: true })).toHaveCount(0);
@@ -232,7 +243,7 @@ test("search immediately hides stale cards through debounce and delayed results"
       latest(page).getByRole("link", { name: "beta article", exact: true })
     ).toBeVisible();
     await expect(page.getByRole("searchbox", { name: "Search articles", exact: true })).toHaveValue(
-      "beta"
+      keyword("beta")
     );
   } finally {
     release.resolve();
@@ -249,14 +260,12 @@ test("a delayed topic change displays loading rather than empty results", async 
     });
   });
   try {
-    await page.goto("/single?q=reading");
+    await page.goto(`/single?q=${keyword("reading")}`);
     await expect(
       latest(page).getByRole("link", { name: "Original article", exact: true })
     ).toBeVisible();
-    await page
-      .getByRole("row", { name: /Systems/ })
-      .first()
-      .press("Space");
+    await page.getByRole("button", { name: /Filter articles by topic/ }).press("Enter");
+    await page.getByRole("option", { name: /Systems/ }).press("Enter");
     await expect(page.getByRole("status", { name: "Loading stories", exact: true })).toBeVisible();
     await expect(page.getByText("No published stories yet", { exact: true })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Original article", exact: true })).toHaveCount(0);
@@ -272,18 +281,23 @@ test("returning to an earlier URL restores its input rather than a stale search 
   page,
 }) => {
   await page.route(endpoint, (route) => {
-    const keyword = new URL(route.request().url()).searchParams.get("keyword");
-    return route.fulfill({ json: result([article(1, `${keyword} article`)]) });
+    const query = new URL(route.request().url()).searchParams.get("keyword");
+    return route.fulfill({
+      json: result([article(1, `${query?.slice(journalFallbackPrefix.length)} article`)]),
+    });
   });
-  await page.goto("/single?q=alpha");
+  await page.goto(`/single?q=${keyword("alpha")}`);
   const input = page.getByRole("searchbox", { name: "Search articles", exact: true });
   await expect(
     latest(page).getByRole("link", { name: "alpha article", exact: true })
   ).toBeVisible();
-  await input.fill("beta");
+  await input.fill(keyword("beta"));
   await expect(latest(page).getByRole("link", { name: "beta article", exact: true })).toBeVisible();
-  await page.evaluate(() => window.history.pushState(null, "", "/single?q=alpha"));
-  await expect(input).toHaveValue("alpha");
+  await page.evaluate(
+    (url) => window.history.pushState(null, "", url),
+    `/single?q=${keyword("alpha")}`
+  );
+  await expect(input).toHaveValue(keyword("alpha"));
   await expect(
     latest(page).getByRole("link", { name: "alpha article", exact: true })
   ).toBeVisible();
@@ -298,11 +312,11 @@ test("a failed later journal page offers Previous without discarding the search"
       ? route.fulfill({ status: 503, json: { message: "Unavailable" } })
       : route.fulfill({ json: result([article(1, "First page article")], 0, 12) });
   });
-  await page.goto("/single?q=reading&page=2");
+  await page.goto(`/single?q=${keyword("reading")}&page=2`);
   await expect(page.getByText("Latest stories could not be loaded", { exact: true })).toBeVisible();
   await latest(page).getByRole("button", { name: "Previous", exact: true }).press("Enter");
   await expect(
     latest(page).getByRole("link", { name: "First page article", exact: true })
   ).toBeVisible();
-  await expect(page).toHaveURL(/\/single\?q=reading$/);
+  await expect(page).toHaveURL(new RegExp(`/single\\?q=${keyword("reading")}$`));
 });

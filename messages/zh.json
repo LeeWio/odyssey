@@ -244,7 +244,12 @@
     "readingWeekDescription": "这一周被打开过的文章。",
     "readingMost": "最多阅读",
     "readingMostDescription": "阅读次数最多的文章。",
-    "readingEmpty": "这份列表里还没有文章。"
+    "readingEmpty": "这份列表里还没有文章。",
+    "readStory": "阅读文章",
+    "indexColumns": "专栏",
+    "indexArticleCount": "{count, number} 篇文章",
+    "moreFeaturedStories": "更多精选",
+    "indexPagination": "文章分页"
   },
   "EditorDraft": {
     "saving": "正在保存草稿…",
