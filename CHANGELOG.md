@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.260.7](https://github.com/LeeWio/odyssey/compare/v1.260.6...v1.260.7) (2026-11-22)
+
+
+### Bug Fixes
+
+* **moments:** preserve feed state and adapt its controls ([#109](https://github.com/LeeWio/odyssey/issues/109)) ([2ed2149](https://github.com/LeeWio/odyssey/commit/2ed214931c715e2b8872207f89c51911a0ff962b))
+
 ## [1.260.6](https://github.com/LeeWio/odyssey/compare/v1.260.5...v1.260.6) (2026-11-21)
 
 
