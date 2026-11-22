@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.261.2](https://github.com/LeeWio/odyssey/compare/v1.261.1...v1.261.2) (2026-11-22)
+
+
+### Bug Fixes
+
+* **reader:** reveal article blocks in order after reload ([#122](https://github.com/LeeWio/odyssey/issues/122)) ([8335f3c](https://github.com/LeeWio/odyssey/commit/8335f3cd2472886a2eedcfc77b3eb01cb2fbfc30))
+
 ## [1.261.1](https://github.com/LeeWio/odyssey/compare/v1.261.0...v1.261.1) (2026-11-22)
 
 
