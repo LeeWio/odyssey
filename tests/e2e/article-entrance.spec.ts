@@ -183,6 +183,194 @@ test("when startup times out the first viewport stays readable even after script
   expect(await sampleFor(first)).toEqual([]);
 });
 
+async function savePositionBefore(target: Locator, gap: number) {
+  const y = await target.evaluate((element, bottomGap) => {
+    window.scrollTo(
+      0,
+      Math.floor(element.getBoundingClientRect().top + scrollY - innerHeight - bottomGap)
+    );
+    return scrollY;
+  }, gap);
+  expect(y).toBeGreaterThan(0);
+  await expect
+    .poll(() =>
+      target
+        .page()
+        .evaluate(() => JSON.parse(sessionStorage.getItem("odyssey-reading-scroll") ?? "null")?.y)
+    )
+    .toBe(y);
+  return y;
+}
+
+test("plays new reveals across desktop wheel steps after a mid-article reload @smoke", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await trackReadingMotion(page);
+  await openArticle(page);
+  const paragraphs = page.locator("[data-article-body] > p");
+  const next = paragraphs.nth(35);
+  const later = paragraphs.nth(39);
+  const y = await savePositionBefore(next, 40);
+
+  await page.reload();
+  await expect(next).toHaveAttribute("data-reading-pending", "");
+  expect(await sampleFor(next)).toEqual([]);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y);
+  await page.mouse.move(640, 850);
+
+  await page.mouse.wheel(0, 120);
+  await expect.poll(async () => (await sampleFor(next)).length).toBe(1);
+  await page.mouse.wheel(0, 120);
+  await expect.poll(async () => (await sampleFor(later)).length).toBe(1);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 240);
+});
+
+test("reveals the next paragraph when scrolling on the first frame after restoring a position", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await trackReadingMotion(page);
+  await openArticle(page);
+  const next = page.locator("[data-article-body] > p").nth(35);
+  const y = await savePositionBefore(next, 100);
+  await page.addInitScript(() => {
+    if (
+      (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming)?.type !==
+      "reload"
+    )
+      return;
+    const observer = new MutationObserver((records) => {
+      if (!records.some(({ attributeName }) => attributeName === "data-reading-pending")) return;
+      observer.disconnect();
+      window.scrollBy(0, 60);
+    });
+    observer.observe(document, { attributes: true, subtree: true });
+  });
+
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 60);
+  await expect.poll(async () => (await sampleFor(next)).length).toBe(1);
+});
+
+test("reveals a pending paragraph brought into view by layout after reload", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await trackReadingMotion(page);
+  await openArticle(page);
+  const next = page.locator("[data-article-body] > p").nth(35);
+  const y = await savePositionBefore(next, 40);
+
+  await page.reload();
+  await expect(next).toHaveAttribute("data-reading-pending", "");
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y);
+  await next.evaluate((element) => {
+    element.style.position = "relative";
+    element.style.top = "-70px";
+  });
+
+  await expect.poll(async () => (await sampleFor(next)).length).toBe(1);
+  expect(await page.evaluate(() => scrollY)).toBe(y);
+});
+
+test("uses a positive saved offset when the browser leaves the article at the top", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openArticle(page);
+  const next = page.locator("[data-article-body] > p").nth(35);
+  const y = await savePositionBefore(next, 100);
+  await page.evaluate(() => {
+    history.scrollRestoration = "manual";
+  });
+
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y);
+  await expect(page.locator("[data-article-body]")).not.toHaveAttribute("data-reading-resume-y");
+  await expect(next).toHaveAttribute("data-reading-pending", "");
+});
+
+for (const savedY of [0, 800]) {
+  test(`keeps a scroll made before hydration on reload with a saved offset of ${savedY}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await openArticle(page);
+    const body = page.locator("[data-article-body]");
+    const last = body.locator(":scope > p").last();
+    await expect(last).toHaveAttribute("data-reading-pending", "");
+    await page.evaluate((y) => {
+      history.scrollRestoration = "manual";
+      window.scrollTo(0, y);
+    }, savedY);
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => JSON.parse(sessionStorage.getItem("odyssey-reading-scroll") ?? "null")?.y
+        )
+      )
+      .toBe(savedY);
+
+    const release = await holdReaderScripts(page);
+    try {
+      await page.reload({ waitUntil: "commit" });
+      if (savedY) await expect(body).toHaveAttribute("data-reading-resume-y", String(savedY));
+      else await expect(body).toHaveAttribute("data-reading-opening", "");
+      await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+      await page.mouse.move(640, 850);
+      await page.mouse.wheel(0, 120);
+      await expect.poll(() => page.evaluate(() => scrollY)).toBe(120);
+      await expect(body).not.toHaveAttribute("data-reading-opening");
+      await expect(body).not.toHaveAttribute("data-reading-resume-y");
+    } finally {
+      release();
+    }
+
+    await expect(last).toHaveAttribute("data-reading-pending", "");
+    expect(await page.evaluate(() => scrollY)).toBe(120);
+  });
+}
+
+test.describe("touch reading motion", () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+
+  test("reveals new content during a touch swipe after a mid-article reload", async ({
+    page,
+    context,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await trackReadingMotion(page);
+    await openArticle(page);
+    const next = page.locator("[data-article-body] > p").nth(35);
+    const y = await savePositionBefore(next, 100);
+
+    await page.reload();
+    await expect(next).toHaveAttribute("data-reading-pending", "");
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(y);
+
+    const input = await context.newCDPSession(page);
+    try {
+      await input.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x: 195, y: 730 }],
+      });
+      await input.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: 195, y: 590 }],
+      });
+      // Keep the finger down until the reveal starts so a fling cannot skip the target.
+      await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(y + 100);
+      await expect.poll(async () => (await sampleFor(next)).length).toBe(1);
+    } finally {
+      await input.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await input.detach();
+    }
+  });
+});
+
 for (const [unit, descendant] of [
   ["ul:not([data-type]) > li", "p"],
   ["tr", "p"],
