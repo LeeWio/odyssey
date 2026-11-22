@@ -57,6 +57,14 @@ async function prepare(page: Page, reducedMotion: "reduce" | "no-preference" = "
   return requests;
 }
 
+async function chooseTopic(page: Page, name: string) {
+  await page.getByRole("button", { name: "Topics", exact: true }).click();
+  await page
+    .getByRole("menuitemradio")
+    .filter({ has: page.getByText(name, { exact: true }) })
+    .click();
+}
+
 async function sampleLayoutChange(page: Page, control: Locator) {
   await page.evaluate(() => {
     const card = document.getElementById("moment-99")!;
@@ -244,7 +252,7 @@ for (const mode of ["List", "Grid"] as const) {
   });
 }
 
-for (const width of [390, 1440]) {
+for (const width of [1024, 1440]) {
   test(`Motion view switching is interruptible and isolated at ${width}px`, async ({
     page,
   }, testInfo) => {
@@ -259,7 +267,7 @@ for (const width of [390, 1440]) {
     const segment = feed.getByRole("radiogroup", { name: "Moment view" });
     const grid = segment.getByRole("radio", { name: "Grid", exact: true });
     const list = segment.getByRole("radio", { name: "List", exact: true });
-    const sidebar = page.getByRole("navigation", { name: "Moments feed" });
+    const sidebar = page.getByRole("complementary", { name: "Publishing cadence" });
     await expect(feed.locator("ol > li")).toHaveCount(12);
     await expect(body).toHaveCSS("opacity", "1");
     await expect(body).toHaveCSS("transform", "none");
@@ -292,11 +300,10 @@ for (const width of [390, 1440]) {
     await expect(grid).toBeChecked();
     await expect(layout).toHaveAttribute("data-view", "grid");
     await expect(body).toHaveCSS("opacity", "1");
-    await expect(segment.locator('[data-slot="segment-indicator"]')).toBeHidden();
-    await expect(segment.locator('[data-slot="moment-view-indicator"]')).toBeVisible();
+    await expect(segment.locator('[data-slot="segment-indicator"]')).toBeVisible();
     await sampleLayoutChange(page, list);
-    await grid.click({ force: true });
-    await list.click({ force: true });
+    await grid.click();
+    await list.click();
     await expect(list).toBeChecked();
     await expect(layout).toHaveAttribute("data-view", "list");
     await expect(body).toHaveCSS("opacity", "1");
@@ -415,7 +422,7 @@ test("refreshed content with known IDs does not replay card entrances", async ({
     sample();
     setTimeout(() => observer.disconnect(), 2000);
   });
-  await page.getByRole("navigation", { name: "Moments feed" }).getByText("revisit").click();
+  await chooseTopic(page, "revisit");
   await expect(page.locator("#moment-100")).toContainText("Updated existing note");
   await expect(page.locator("#moment-100")).toHaveCSS("opacity", "1");
   await expect(page.locator("#moment-100")).toHaveCSS("transform", "none");
@@ -461,7 +468,7 @@ test("filter requests preserve the old feed, current layout and sidebar state", 
         data: {
           list,
           total: list.length,
-          page: 0,
+          page: 1,
           size: 12,
           totalPages: list.length ? 1 : 0,
         },
@@ -471,12 +478,12 @@ test("filter requests preserve the old feed, current layout and sidebar state", 
   await page.goto("/moments?topic=daily");
   const feed = page.getByRole("region", { name: "Moments feed" });
   const body = feed.locator('[data-slot="moment-feed-body"]');
-  const sidebar = page.getByRole("navigation", { name: "Moments feed" });
+  const sidebar = page.getByRole("complementary", { name: "Publishing cadence" });
   await expect(feed.locator("ol > li")).toHaveCount(12);
   const card = await page.locator("#moment-100").elementHandle();
   const month = sidebar.getByRole("radio", { name: "Month", exact: true });
   await month.click();
-  await sidebar.getByText("slow").click();
+  await chooseTopic(page, "slow");
   await expect(body).toHaveAttribute("aria-busy", "true");
   await expect(body).toHaveCSS("opacity", "0.72");
   expect(await card?.evaluate((node) => node.isConnected)).toBe(true);
@@ -489,10 +496,16 @@ test("filter requests preserve the old feed, current layout and sidebar state", 
   await expect(body).toHaveCSS("opacity", "1");
   await expect(month).toBeChecked();
   await expect(feed.getByRole("radio", { name: "Grid", exact: true })).toBeChecked();
-  await sidebar.getByText("empty").click();
+  await chooseTopic(page, "empty");
   await expect(feed.locator("ol > li")).toHaveCount(0);
+  await expect(feed.getByText("No moments in this topic.")).toBeVisible();
   await expect(body).toHaveCSS("opacity", "1");
   await expect(month).toBeChecked();
+  await page.mouse.move(1, 400);
+  await page.keyboard.press("Escape");
+  await feed.getByRole("button", { name: "Show all notes", exact: true }).click();
+  await expect(feed.locator("ol > li")).toHaveCount(12);
+  await expect(page).toHaveURL(/\/moments\?view=grid$/);
 });
 
 test("failed topic changes keep readable cards and retry only the requested topic", async ({
@@ -524,7 +537,7 @@ test("failed topic changes keep readable cards and retry only the requested topi
         data: {
           list: [{ ...moments[0], id: 444, content: "Retry succeeded" }],
           total: 1,
-          page: 0,
+          page: 1,
           size: 12,
           totalPages: 1,
         },
@@ -535,7 +548,7 @@ test("failed topic changes keep readable cards and retry only the requested topi
   const feed = page.getByRole("region", { name: "Moments feed" });
   await expect(feed.locator("ol > li")).toHaveCount(12);
   const card = await page.locator("#moment-100").elementHandle();
-  await page.getByRole("navigation", { name: "Moments feed" }).getByText("retry-topic").click();
+  await chooseTopic(page, "retry-topic");
   await expect(
     feed.getByText("The feed could not be loaded right now. Please try again.")
   ).toBeVisible();
@@ -551,7 +564,7 @@ test("failed topic changes keep readable cards and retry only the requested topi
   expect(attempts).toBe(2);
 });
 
-for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
+for (const width of [820, 1024, 1440, 1920, 2560, 3440]) {
   test(`List/Grid only reflows existing cards at ${width}px`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     const errors: string[] = [];
@@ -564,7 +577,7 @@ for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
     const segment = feed.getByRole("radiogroup", { name: "Moment view" });
     const listButton = segment.getByRole("radio", { name: "List", exact: true });
     const gridButton = segment.getByRole("radio", { name: "Grid", exact: true });
-    const sidebar = page.getByRole("navigation", { name: "Moments feed" });
+    const sidebar = page.getByRole("complementary", { name: "Publishing cadence" });
     const month = sidebar.getByRole("radio", { name: "Month", exact: true });
 
     await expect(cards).toHaveCount(12);
@@ -576,9 +589,10 @@ for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
     await expect(list).toHaveCSS("column-width", "auto");
     await expect(list).toHaveCSS("display", "block");
 
+    if (width < 1024) await sidebar.getByRole("button", { name: /Publishing cadence/ }).click();
     await month.click();
     await expect(month).toBeChecked();
-    await expect(sidebar.getByText("daily")).toBeVisible();
+    await expect(feed.getByText("daily", { exact: true })).toBeVisible();
     const photo = cards.nth(1).getByAltText("Photo 1");
     await expect(photo).toBeVisible();
     await expect
@@ -603,15 +617,9 @@ for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
     await gridButton.click();
     await expect(gridButton).toBeChecked();
     await expect(list).toHaveCSS("display", "block");
-    const singleColumn = width === 390 || width === 1024;
-    if (singleColumn) {
-      await expect(list).toHaveCSS("column-count", "auto");
-      await expect(list).toHaveCSS("column-width", "auto");
-    } else {
-      await expect(list).toHaveCSS("column-width", "320px");
-      await expect(list).toHaveCSS("column-count", "4");
-      await expect(list).toHaveCSS("column-gap", "16px");
-    }
+    await expect(list).toHaveCSS("column-width", "320px");
+    await expect(list).toHaveCSS("column-count", "4");
+    await expect(list).toHaveCSS("column-gap", "16px");
     const fullWidth = await list.evaluate((node) => ({
       content: node.getBoundingClientRect().width,
       available: node.parentElement!.getBoundingClientRect().width,
@@ -624,35 +632,39 @@ for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
       })
     );
     const columns = [...new Set(positions.map(({ x }) => x))];
-    const cardGap = columns.length > 1 ? 16 : 24;
     if (width >= 1920) {
       // A tall unbreakable image card can leave the last balanced column unused.
       expect(columns.length).toBeGreaterThanOrEqual(3);
       expect(columns.length).toBeLessThanOrEqual(4);
       expect(positions[0].width * 4 + 3 * 16).toBeCloseTo(fullWidth.content, 0);
     } else {
-      expect(columns).toHaveLength(width === 390 || width === 1024 ? 1 : width === 820 ? 2 : 3);
+      expect(columns).toHaveLength(width <= 1024 ? 2 : 3);
     }
     for (const x of columns) {
       const column = positions.filter((position) => position.x === x);
       for (let index = 1; index < column.length; index += 1) {
-        expect(column[index].y - column[index - 1].bottom).toBeCloseTo(cardGap, 0);
+        expect(column[index].y - column[index - 1].bottom).toBeCloseTo(16, 0);
       }
     }
     expect(positions[0].height).not.toBeCloseTo(positions[1].height, 0);
     const imageSizing = await photo.evaluate((element) => {
       const image = element as HTMLImageElement;
+      const style = getComputedStyle(image);
       return {
-        displayedRatio: image.clientHeight / image.clientWidth,
-        naturalRatio: image.naturalHeight / image.naturalWidth,
-        explicitSize: image.hasAttribute("width") || image.hasAttribute("height"),
-        aspectRatio: getComputedStyle(image).aspectRatio,
+        width: image.clientWidth,
+        height: image.clientHeight,
+        containerWidth: image.parentElement?.clientWidth,
+        expectedHeight: Math.min(
+          (image.clientWidth * image.naturalHeight) / image.naturalWidth,
+          Number.parseFloat(style.maxHeight)
+        ),
+        objectFit: style.objectFit,
         fullyVisible: (image.parentElement?.clientHeight ?? 0) >= image.clientHeight,
       };
     });
-    expect(imageSizing.displayedRatio).toBeCloseTo(imageSizing.naturalRatio, 2);
-    expect(imageSizing.explicitSize).toBe(false);
-    expect(imageSizing.aspectRatio).toBe("auto");
+    expect(imageSizing.width).toBe(imageSizing.containerWidth);
+    expect(Math.abs(imageSizing.height - imageSizing.expectedHeight)).toBeLessThanOrEqual(1);
+    expect(imageSizing.objectFit).toBe("cover");
     expect(imageSizing.fullyVisible).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true
@@ -688,6 +700,46 @@ for (const width of [390, 820, 1024, 1440, 1920, 2560, 3440]) {
     expect(errors).toEqual([]);
   });
 }
+
+test("shows compact filters and keeps the Grid preference on narrow screens @smoke", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await prepare(page);
+  await page.goto("/moments?topic=daily&view=grid");
+  const feed = page.getByRole("region", { name: "Moments feed" });
+  const cadence = page.getByRole("complementary", { name: "Publishing cadence" });
+  const disclosure = cadence.getByRole("button", { name: /Publishing cadence/ });
+  const periods = cadence.getByRole("radiogroup", { name: "Publishing cadence" });
+  const view = feed.locator('[data-slot="moment-feed-view"]');
+  const list = feed.locator("ol");
+  const first = list.locator("li").first();
+
+  await expect(first).toBeVisible();
+  expect((await first.boundingBox())!.y).toBeLessThan(280);
+  await expect(disclosure).toHaveAttribute("aria-expanded", "false");
+  await expect(periods).toBeHidden();
+  await disclosure.press("Enter");
+  await expect(disclosure).toHaveAttribute("aria-expanded", "true");
+  await expect(periods).toBeVisible();
+  await disclosure.press("Enter");
+  await expect(periods).toBeHidden();
+
+  await expect(view).toBeHidden();
+  await expect(list).toHaveCSS("column-count", "auto");
+  await expect(feed.getByText("daily", { exact: true })).toBeVisible();
+  await feed.getByRole("button", { name: "Clear topic" }).click();
+  await expect(page).toHaveURL(/\/moments\?view=grid$/);
+
+  await page.setViewportSize({ width: 1024, height: 844 });
+  await expect(disclosure).toBeHidden();
+  await expect(periods).toBeVisible();
+  await expect(view.getByRole("radio", { name: "Grid" })).toBeChecked();
+  await expect(list).toHaveCSS("column-width", "320px");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(view).toBeHidden();
+  await expect(page).toHaveURL(/\/moments\?view=grid$/);
+});
 
 test("view URLs survive reloads, filtering and browser history without refetching on selection", async ({
   page,
@@ -728,11 +780,13 @@ test("view URLs survive reloads, filtering and browser history without refetchin
   await expect(list).toBeChecked();
   await expect(layout).toHaveAttribute("data-view", "list");
 
+  const beforeTopicChange = [...serverRequests];
   await grid.click();
-  await page.getByRole("navigation", { name: "Moments feed" }).getByText("daily").click();
+  await chooseTopic(page, "All topics");
   await expect(page).toHaveURL(/\/moments\?view=grid$/);
   await expect(grid).toBeChecked();
   await expect(feed.locator("ol > li")).toHaveCount(12);
+  expect(serverRequests).toEqual(beforeTopicChange);
   await page.evaluate(() => {
     window.history.pushState(null, "", "/moments?view=list");
   });

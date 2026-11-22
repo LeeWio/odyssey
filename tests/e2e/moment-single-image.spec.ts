@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { setMomentView } from "./fixtures/moment-view";
+
 const photos = {
   long: { width: 1200, height: 4800 },
   landscape: { width: 1200, height: 800 },
@@ -100,7 +102,7 @@ for (const viewport of [
       .toBe(4800);
     const imageNode = await photo.elementHandle();
     for (const mode of ["List", "Grid"] as const) {
-      await page.getByRole("radio", { name: mode, exact: true }).click();
+      await setMomentView(page, mode, viewport.width >= 820);
       const desktop = viewport.width >= 1024;
       const budget = desktop
         ? mode === "List"

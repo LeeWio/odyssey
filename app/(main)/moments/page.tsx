@@ -11,5 +11,5 @@ export default async function MomentsRoute({
   const page = parsePageParam((Array.isArray(params.page) ? params.page[0] : params.page) ?? null);
   const topic = (Array.isArray(params.topic) ? params.topic[0] : params.topic) || undefined;
   const initialPage = await getPublicMomentsInitialPage(12, page, topic);
-  return <MomentsPage initialPage={initialPage} />;
+  return <MomentsPage initialPage={initialPage} initialTopic={topic} />;
 }

@@ -1,9 +1,13 @@
 "use client";
 
-import { Card, Skeleton, Tag, TagGroup, Typography } from "@heroui/react";
+import { Button, Chip, Dropdown, Label } from "@heroui/react";
+import { Icon } from "@iconify/react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { useGetPublicMomentTopicsQuery } from "@/lib/features/moment";
+
+const ALL_TOPICS = "all-topics";
+const TOPIC_PREFIX = "topic:";
 
 export function MomentTopicWidget({
   selected,
@@ -15,47 +19,57 @@ export function MomentTopicWidget({
   const t = useTranslations("Moments");
   const locale = useLocale();
   const query = useGetPublicMomentTopicsQuery();
-  const topics = query.data ?? [];
-
   return (
-    <Card className="w-full">
-      <Card.Header>
-        <Card.Title className="text-base">{t("topicsTitle")}</Card.Title>
-      </Card.Header>
-      <Card.Content className="flex flex-row flex-wrap gap-2">
-        {query.isLoading ? (
-          <Skeleton className="h-6 w-16 rounded-full" />
-        ) : query.isError ? (
-          <Typography color="muted" type="body-sm">
-            {t("topicsUnavailable")}
-          </Typography>
-        ) : (
-          <TagGroup
-            aria-label={t("topicsTitle")}
-            selectedKeys={selected ? [selected] : ["all"]}
+    <div className="flex max-w-full min-w-0 flex-wrap items-center gap-2">
+      <Dropdown>
+        <Button size="sm" variant="secondary" isDisabled={query.isLoading}>
+          {t("topics")}
+          <Icon aria-hidden="true" icon="lucide:chevron-down" />
+        </Button>
+        <Dropdown.Popover>
+          <Dropdown.Menu
+            aria-label={t("topics")}
+            selectedKeys={[selected ? `${TOPIC_PREFIX}${selected}` : ALL_TOPICS]}
             selectionMode="single"
-            size="sm"
+            disallowEmptySelection
             onSelectionChange={(keys) => {
+              if (keys === "all") return;
               const key = [...keys][0];
-              onSelect(key == null || key === "all" ? undefined : String(key));
+              if (typeof key !== "string") return;
+              onSelect(key === ALL_TOPICS ? undefined : key.slice(TOPIC_PREFIX.length));
             }}
           >
-            <TagGroup.List className="flex-wrap">
-              <Tag id="all">{t("allTopics")}</Tag>
-              {topics.map((topic) => (
-                <Tag key={topic.slug} id={topic.slug} textValue={topic.slug}>
-                  {topic.slug}
-                  {topic.count == null ? null : (
-                    <span className="text-muted tabular-nums">
-                      {topic.count.toLocaleString(locale)}
-                    </span>
-                  )}
-                </Tag>
-              ))}
-            </TagGroup.List>
-          </TagGroup>
-        )}
-      </Card.Content>
-    </Card>
+            <Dropdown.Item id={ALL_TOPICS} textValue={t("allTopics")}>
+              <Dropdown.ItemIndicator />
+              <Label>{t("allTopics")}</Label>
+            </Dropdown.Item>
+            {(query.data ?? []).map(({ slug, count }) => (
+              <Dropdown.Item key={slug} id={`${TOPIC_PREFIX}${slug}`} textValue={slug}>
+                <Dropdown.ItemIndicator />
+                <Label className="min-w-0 wrap-anywhere">{slug}</Label>
+                <span className="text-muted ml-auto tabular-nums">
+                  {count.toLocaleString(locale)}
+                </span>
+              </Dropdown.Item>
+            ))}
+            {query.isError ? (
+              <Dropdown.Item id="unavailable" isDisabled textValue={t("topicsUnavailable")}>
+                <Label>{t("topicsUnavailable")}</Label>
+              </Dropdown.Item>
+            ) : null}
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown>
+      {selected ? (
+        <div className="flex max-w-full min-w-0 items-center gap-1">
+          <Chip size="sm" variant="soft" className="min-w-0">
+            <Chip.Label className="truncate">{selected}</Chip.Label>
+          </Chip>
+          <Button size="sm" variant="ghost" className="shrink-0" onPress={() => onSelect()}>
+            {t("clearTopic")}
+          </Button>
+        </div>
+      ) : null}
+    </div>
   );
 }

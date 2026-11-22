@@ -73,7 +73,7 @@ for (const width of [390, 1440]) {
       await page.goto(`/moments?view=${view}`);
       const feed = page.getByRole("region", { name: "Moments feed" });
       const pagination = feed.getByRole("navigation", { name: "Moments pages" });
-      const sidebar = page.getByRole("navigation", { name: "Moments feed" });
+      const sidebar = page.getByRole("complementary", { name: "Publishing cadence" });
       await expect(feed.locator("ol > li")).toHaveCount(12);
       await expect(pagination.getByRole("button", { name: "Page 1", exact: true })).toHaveAttribute(
         "aria-current",
@@ -84,6 +84,9 @@ for (const width of [390, 1440]) {
       ).toBeDisabled();
       const canvas = await page.locator("#moment-30 canvas").elementHandle();
       const sidebarNode = await sidebar.elementHandle();
+      if (width < 1024) {
+        await sidebar.getByRole("button", { name: /Publishing cadence/ }).click();
+      }
       await sidebar.getByRole("radio", { name: "Month", exact: true }).click();
       const serverRequests: string[] = [];
       page.on("request", (request) => {
@@ -109,15 +112,18 @@ for (const width of [390, 1440]) {
       expect(serverRequests).toEqual([]);
       expect(requests.filter((url) => url.startsWith("/api/v1/public/moments?"))).toHaveLength(2);
 
-      const nextView = view === "list" ? "Grid" : "List";
-      const before = [...requests];
-      await feed.getByRole("radio", { name: nextView, exact: true }).click();
-      expect(new URL(page.url()).searchParams.get("page")).toBe("2");
-      expect(requests).toEqual(before);
+      let nextView = view;
+      if (width >= 1024) {
+        const before = [...requests];
+        nextView = view === "list" ? "grid" : "list";
+        await feed.getByRole("radio", { name: nextView === "grid" ? "Grid" : "List" }).click();
+        expect(new URL(page.url()).searchParams.get("page")).toBe("2");
+        expect(requests).toEqual(before);
+      }
       await page.reload();
       await expect(page.locator("#moment-18")).toBeAttached();
       await expect(feed.locator("ol > li")).toHaveCount(12);
-      await expect(feed.getByRole("radio", { name: nextView, exact: true })).toBeChecked();
+      await expect(feed.locator("[data-view]")).toHaveAttribute("data-view", nextView);
 
       await pagination.getByRole("button", { name: "Page 3", exact: true }).focus();
       await page.keyboard.press("Enter");
@@ -178,10 +184,8 @@ test("topic selection resets pagination but retains Grid, and a single page need
   await page.goto("/moments?page=3&topic=daily&view=grid");
   const feed = page.getByRole("region", { name: "Moments feed" });
   await expect(page.locator("#moment-6")).toBeAttached();
-  await page
-    .getByRole("navigation", { name: "Moments feed" })
-    .getByText("short", { exact: false })
-    .click();
+  await feed.getByRole("button", { name: "Topics", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "short 2", exact: true }).click();
   await expect(page).toHaveURL(/\/moments\?topic=short&view=grid$/);
   await expect(feed.locator("ol > li")).toHaveCount(2);
   await expect(feed.getByRole("radio", { name: "Grid", exact: true })).toBeChecked();

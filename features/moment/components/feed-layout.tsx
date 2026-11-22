@@ -4,7 +4,7 @@ import { Segment } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
 import { useTranslations } from "next-intl";
 import { LayoutGroup, motion, useAnimate } from "motion/react";
-import { useEffect, useId, type ReactNode } from "react";
+import { startTransition, useEffect, useId, useOptimistic, type ReactNode } from "react";
 
 import { pageEaseOut } from "@/lib/motion";
 import { useQueryState } from "@/lib/hooks/use-query-state";
@@ -13,14 +13,17 @@ import { momentLayoutTransition, useMomentMotion } from "./feed-motion";
 export function MomentFeedLayout({
   children,
   busy = false,
+  toolbar,
 }: {
   children?: ReactNode;
   busy?: boolean;
+  toolbar?: ReactNode;
 }) {
   const t = useTranslations("Moments");
   const { reduced } = useMomentMotion();
-  const { searchParams, updateQuery } = useQueryState();
-  const viewMode = searchParams.get("view") === "grid" ? "grid" : "list";
+  const { searchParams, updateQuery } = useQueryState({ clientOnly: true });
+  const savedViewMode = searchParams.get("view") === "grid" ? "grid" : "list";
+  const [viewMode, setViewMode] = useOptimistic<"grid" | "list">(savedViewMode);
   const layoutId = useId();
   const [scope, animate] = useAnimate<HTMLDivElement>();
 
@@ -38,26 +41,35 @@ export function MomentFeedLayout({
   return (
     <LayoutGroup id={layoutId} inherit={false}>
       <div className="group/moment-feed @container/moment-feed min-w-0" data-view={viewMode}>
-        <div className="mb-5 flex justify-end" data-slot="moment-feed-view">
-          <Segment
-            aria-label={t("viewMode")}
-            selectedKey={viewMode}
-            size="sm"
-            onSelectionChange={(key) => {
-              if (key === "list" || key === "grid") {
-                updateQuery({ view: key }, { mode: "replace", hash: window.location.hash });
-              }
-            }}
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {toolbar}
+          <div
+            className="ml-auto hidden shrink-0 @min-[41rem]/moment-feed:block"
+            data-slot="moment-feed-view"
           >
-            <Segment.Item id="list">
-              <Icon aria-hidden="true" icon="gravity-ui:list-ul" />
-              {t("listView")}
-            </Segment.Item>
-            <Segment.Item id="grid">
-              <Icon aria-hidden="true" icon="gravity-ui:rectangles-4" />
-              {t("gridView")}
-            </Segment.Item>
-          </Segment>
+            <Segment
+              aria-label={t("viewMode")}
+              selectedKey={viewMode}
+              size="sm"
+              onSelectionChange={(key) => {
+                if (key === "list" || key === "grid") {
+                  startTransition(() => {
+                    setViewMode(key);
+                    updateQuery({ view: key }, { mode: "replace", hash: window.location.hash });
+                  });
+                }
+              }}
+            >
+              <Segment.Item id="list">
+                <Icon aria-hidden="true" icon="gravity-ui:list-ul" />
+                {t("listView")}
+              </Segment.Item>
+              <Segment.Item id="grid">
+                <Icon aria-hidden="true" icon="gravity-ui:rectangles-4" />
+                {t("gridView")}
+              </Segment.Item>
+            </Segment>
+          </div>
         </div>
         <motion.div
           ref={scope}

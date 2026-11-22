@@ -1010,6 +1010,8 @@
     "retry": "Retry",
     "loadMore": "Load more moments",
     "empty": "No moments published yet.",
+    "emptyTopic": "No moments in this topic.",
+    "clearTopic": "Clear topic",
     "eyebrow": "Notes",
     "headline": "Notes",
     "headlineDescription": "",

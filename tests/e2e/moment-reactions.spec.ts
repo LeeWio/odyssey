@@ -17,9 +17,7 @@ const envelope = (data: unknown) => ({ code: 200, message: "OK", data });
 test.use({ locale: "en-US" });
 
 async function showFixtureFeed(page: Page) {
-  const grid = page.getByRole("radio", { name: "Grid", exact: true });
-  await grid.click();
-  await expect(grid).toBeChecked();
+  await expect(page.getByRole("button", { name: "Topics", exact: true })).toBeEnabled();
   // Change filters after hydration to avoid using server-prefetched live data.
   await page.evaluate(() => {
     const url = new URL(window.location.href);
@@ -27,7 +25,6 @@ async function showFixtureFeed(page: Page) {
     window.history.pushState(null, "", `${url.pathname}${url.search}`);
   });
   await expect(page.locator("#moment-100")).toBeVisible();
-  await page.getByRole("radio", { name: "List", exact: true }).click();
 }
 
 const savedPath = "/api/v1/user/moments/saved";

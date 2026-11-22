@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import sharp from "sharp";
 
+import { setMomentView } from "./fixtures/moment-view";
+
 interface GalleryCheck {
   canvas: HTMLCanvasElement;
   draws: number;
@@ -240,8 +242,8 @@ for (const width of [390, 1440]) {
     ).toBe(false);
     const node = await canvas.elementHandle();
     const before = [...requests];
-    for (const mode of ["List", "Grid"]) {
-      await page.getByRole("radio", { name: mode, exact: true }).click();
+    for (const mode of ["List", "Grid"] as const) {
+      await setMomentView(page, mode, width === 1440);
       await canvas.scrollIntoViewIfNeeded();
       const screenshot = await canvas.screenshot({
         path: testInfo.outputPath(`gallery-${width}-${mode}.png`),
@@ -305,8 +307,8 @@ for (const width of [390, 1440]) {
     const original = await inline.elementHandle();
     const beforeRequests = [...requests];
 
-    for (const mode of ["List", "Grid"]) {
-      await page.getByRole("radio", { name: mode, exact: true }).click();
+    for (const mode of ["List", "Grid"] as const) {
+      await setMomentView(page, mode, width === 1440);
       await inline.scrollIntoViewIfNeeded();
       const before = await inline.boundingBox();
       const scroll = await page.evaluate(() => scrollY);

@@ -91,6 +91,7 @@ export function useMomentAnchor({
       : null;
     if (target) {
       const frame = requestAnimationFrame(() => {
+        if (window.location.hash !== hash) return;
         // Resolve once, without smooth scrolling or refocusing after feed updates.
         target.scrollIntoView({ behavior: "instant", block: "start" });
         target.focus({ preventScroll: true });
@@ -117,7 +118,13 @@ export function useMomentAnchor({
     void fetchPage(nextPage)
       .catch(() => null)
       .then((result) => {
-        if (pending.current !== request || activeScope.current !== scope) return;
+        if (
+          pending.current !== request ||
+          activeScope.current !== scope ||
+          window.location.hash !== hash
+        ) {
+          return;
+        }
         const found = result?.list.some((moment) => moment.id === targetId);
         setProgress((current) => ({
           ...current,
