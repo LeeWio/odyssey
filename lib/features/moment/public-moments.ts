@@ -9,6 +9,12 @@ async function readPublicData<T>(path: string, schema: z.ZodType<T>): Promise<T 
   return (await fetchServerApiJson(path, schema, { cache: "no-store" })).data;
 }
 
+export function getPublicMoment(id: number) {
+  return fetchServerApiJson(`/api/v1/public/moments/${id}`, MomentResponseSchema, {
+    cache: "no-store",
+  });
+}
+
 export async function getPublicMomentsInitialPage(
   size = 12,
   page = 1,

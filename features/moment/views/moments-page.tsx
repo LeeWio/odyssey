@@ -8,6 +8,7 @@ import { Icon } from "@iconify/react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 import { MomentCadenceCard } from "@/features/moment/components/cadence-card";
+import { MomentSubscriptionDialog } from "@/features/moment/components/moment-subscription-dialog";
 import { MomentTopicWidget } from "@/features/moment/components/topic-widget";
 import { MomentFeedLayout } from "@/features/moment/components/feed-layout";
 import { MomentFeedList } from "@/features/moment/components/feed-list";
@@ -210,7 +211,12 @@ const MomentsContent = memo(function MomentsContent({
           >
             <MomentFeedLayout
               busy={isLoading || isRefreshing}
-              toolbar={<MomentTopicWidget selected={topic} onSelect={selectTopic} />}
+              toolbar={
+                <>
+                  <MomentTopicWidget selected={topic} onSelect={selectTopic} />
+                  <MomentSubscriptionDialog />
+                </>
+              }
             >
               {!isLoading && !isError && !["dismissed", "found"].includes(anchor.status) ? (
                 <MomentState>
