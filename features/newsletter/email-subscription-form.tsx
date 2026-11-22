@@ -54,7 +54,12 @@ export function EmailSubscriptionForm({
       // Only clear the submitted draft; edits made while waiting belong to the reader.
       if (draftRevision.current === submittedRevision) setEmail("");
       setFeedback({ kind: "success", email: normalizedEmail });
-      toast.success(isMoments ? t("requestAccepted") : t("checkInbox", { email: normalizedEmail }));
+      const confirmation = t("checkInbox", { email: normalizedEmail });
+      if (isMoments) {
+        toast.success(t("requestAccepted"), { description: confirmation });
+      } else {
+        toast.success(confirmation);
+      }
     } catch {
       setFeedback({ kind: "error", email: normalizedEmail });
       if (isMoments) toast.danger(t("requestUnavailable"));
