@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { bindReadingMotion } from "./reading-motion";
-import { READING_OPENING_ATTRIBUTE, READING_OPENING_SETTLED } from "./reading-opening";
+import {
+  READING_OPENING_ATTRIBUTE,
+  READING_OPENING_SETTLED,
+  restoreReloadPosition,
+} from "./reading-opening";
 
 export function ReadingContent({
   children,
@@ -12,6 +16,10 @@ export function ReadingContent({
   className: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (ref.current) restoreReloadPosition(ref.current);
+  }, []);
 
   useEffect(() => {
     const root = ref.current;

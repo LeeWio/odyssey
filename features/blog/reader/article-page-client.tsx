@@ -21,21 +21,7 @@ import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/p
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import { useAppSelector } from "@/lib/hooks";
 import { getReadingPositionId } from "@/lib/reading-position";
-import { READING_SCROLL_KEY } from "@/lib/reading-scroll";
-
-function savedReadingScroll(path: string) {
-  const navigation = performance.getEntriesByType("navigation")[0] as
-    PerformanceNavigationTiming | undefined;
-  if (navigation?.type !== "reload") return null;
-  try {
-    const raw = sessionStorage.getItem(READING_SCROLL_KEY);
-    if (!raw) return null;
-    const saved = JSON.parse(raw) as { path?: string; y?: number };
-    return saved.path === path && Number.isFinite(saved.y) ? (saved.y ?? null) : null;
-  } catch {
-    return null;
-  }
-}
+import { READING_SCROLL_KEY, readingScrollOffset } from "@/lib/reading-scroll";
 
 interface SinglePageProps {
   initialArticle: PostResponse;
@@ -77,7 +63,10 @@ export function ArticlePageClient({
       clearTimeout(timer);
       timer = undefined;
       try {
-        sessionStorage.setItem(READING_SCROLL_KEY, JSON.stringify({ path, y: window.scrollY }));
+        sessionStorage.setItem(
+          READING_SCROLL_KEY,
+          JSON.stringify({ path, y: Math.max(0, readingScrollOffset()) })
+        );
       } catch {}
     };
     const remember = () => {
@@ -118,21 +107,7 @@ export function ArticlePageClient({
 
   useLayoutEffect(() => {
     const id = getReadingPositionId(window.location.hash);
-    if (id) {
-      scrollReadingAnchorIntoView(id);
-      return;
-    }
-    const y = savedReadingScroll(window.location.pathname);
-    if (y === null) return;
-    const scroller = document.scrollingElement ?? document.documentElement;
-    if (!(scroller instanceof HTMLElement)) return;
-    if (scroller.scrollHeight - scroller.clientHeight + 1 < y) {
-      scroller.style.minHeight = `${y + scroller.clientHeight}px`;
-    }
-    window.scrollTo(0, y);
-    return () => {
-      scroller.style.minHeight = "";
-    };
+    if (id) scrollReadingAnchorIntoView(id);
   }, [slug]);
 
   return (

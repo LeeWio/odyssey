@@ -5,7 +5,11 @@ import { Icon } from "@iconify/react";
 import { useScrollIntoView } from "@mantine/hooks";
 import { useEffect, useRef, useState } from "react";
 
-import { ARTICLE_OUTLINE_TOP_OFFSET, readingScrollOffset } from "@/lib/reading-scroll";
+import {
+  announceReadingJump,
+  ARTICLE_OUTLINE_TOP_OFFSET,
+  readingScrollOffset,
+} from "@/lib/reading-scroll";
 import {
   currentHeadingId,
   headingElement,
@@ -53,9 +57,11 @@ export function OutlineAction({ report }: { report: Report }) {
     const heading = item ? headingElement(item) : null;
     if (!item || !heading) return;
     writeHeadingHash(item);
+    const headingTop = heading.getBoundingClientRect().top + readingScrollOffset();
+    announceReadingJump(headingTop - ARTICLE_OUTLINE_TOP_OFFSET);
     const anchor = document.createElement("div");
     anchor.style.position = "absolute";
-    anchor.style.top = `${heading.getBoundingClientRect().top + readingScrollOffset()}px`;
+    anchor.style.top = `${headingTop}px`;
     document.body.append(anchor);
     targetRef.current = anchor;
     scrollIntoView({ alignment: "start" });
