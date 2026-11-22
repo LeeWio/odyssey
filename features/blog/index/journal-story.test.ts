@@ -1,8 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { journalPageNumbers, journalStoryHref, journalStoryKey } from "./journal-story";
+import {
+  formatJournalDate,
+  journalPageNumbers,
+  journalStoryHref,
+  journalStoryKey,
+} from "./journal-story";
 
 describe("journal stories", () => {
+  it("formats API publication dates with or without an explicit offset", () => {
+    expect(formatJournalDate("2026-10-01T04:43:43", "en", "Unknown")).toBe("Oct 1, 2026");
+    expect(formatJournalDate("2026-10-01T04:43:43+08:00", "en", "Unknown")).toBe("Sep 30, 2026");
+    expect(formatJournalDate("not-a-date", "en", "Unknown")).toBe("Unknown");
+  });
+
   it("links a story by slug and falls back to the index", () => {
     expect(journalStoryHref({ slug: "field notes" })).toBe("/single/field notes");
     expect(journalStoryHref({})).toBe("/single");

@@ -17,7 +17,7 @@ export const story = (id: number) => ({
   category: { id: 1, name: "Engineering", slug: "engineering", createdAt: "2026-10-01T00:00:00Z" },
   series: null,
   seriesOrder: null,
-  publishedAt: "2026-10-01T00:00:00Z",
+  publishedAt: "2026-10-01T04:43:43",
   createdAt: "2026-10-01T00:00:00Z",
   updatedAt: "2026-10-01T00:00:00Z",
 });
