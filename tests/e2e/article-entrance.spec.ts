@@ -24,41 +24,53 @@ declare global {
 async function trackReadingMotion(page: Page) {
   await page.addInitScript(() => {
     window.readingMotionSamples = [];
-    const active = new WeakMap<HTMLElement, (typeof window.readingMotionSamples)[number]>();
-    new MutationObserver((records) => {
-      for (const { target } of records) {
-        if (!(target instanceof HTMLElement)) continue;
-        const { filter, opacity } = target.style;
-        if (opacity === "" && !filter.startsWith("blur(")) {
-          active.delete(target);
-          continue;
-        }
-        if (!target.closest("[data-article-body]")) continue;
-
-        const blur = filter.startsWith("blur(") ? Number.parseFloat(filter.slice(5)) : 0;
-        const sample = active.get(target);
-        const readable = Number(opacity) >= 0.94 && blur <= 0.75;
-        if (sample?.readableWhileMoving || (sample && !readable)) continue;
-
-        const transform = getComputedStyle(target).transform;
-        const matrix = new DOMMatrixReadOnly(transform === "none" ? undefined : transform);
-        if (sample) {
-          sample.readableWhileMoving = matrix.m42 > 2;
-        } else {
-          const start = {
-            target,
-            startedAt: performance.now(),
-            opacity: Number(opacity),
-            blur,
-            y: matrix.m42,
-            scale: matrix.m11,
-            readableWhileMoving: false,
-          };
-          active.set(target, start);
-          window.readingMotionSamples.push(start);
-        }
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (...args) {
+      const animation = animate.apply(this, args);
+      if (
+        !(this instanceof HTMLElement) ||
+        !this.closest("[data-article-body]") ||
+        !(animation.effect instanceof KeyframeEffect)
+      ) {
+        return animation;
       }
-    }).observe(document, { attributes: true, attributeFilter: ["style"], subtree: true });
+
+      const keyframes = animation.effect.getKeyframes();
+      const startOpacity = keyframes.find((frame) => frame.opacity !== undefined)?.opacity;
+      if (startOpacity === undefined) return animation;
+      const startFilter = keyframes.find((frame) => frame.filter !== undefined)?.filter;
+      const startTransform = keyframes.find((frame) => frame.transform !== undefined)?.transform;
+      const start = new DOMMatrixReadOnly(
+        typeof startTransform === "string" && startTransform !== "none" ? startTransform : undefined
+      );
+      const blurRadius = (filter: unknown) =>
+        typeof filter === "string" && filter.startsWith("blur(")
+          ? Number.parseFloat(filter.slice(5))
+          : 0;
+      const sample = {
+        target: this,
+        startedAt: performance.now(),
+        opacity: Number(startOpacity),
+        blur: blurRadius(startFilter),
+        y: start.m42,
+        scale: start.m11,
+        readableWhileMoving: false,
+      };
+      window.readingMotionSamples.push(sample);
+
+      function checkReadability() {
+        if (animation.playState !== "running") return;
+        const { opacity, filter, transform } = getComputedStyle(sample.target);
+        if (Number(opacity) >= 0.94 && blurRadius(filter) <= 0.75) {
+          const matrix = new DOMMatrixReadOnly(transform === "none" ? undefined : transform);
+          sample.readableWhileMoving = matrix.m42 > 2;
+          return;
+        }
+        requestAnimationFrame(checkReadability);
+      }
+      if (start.m42 > 2) requestAnimationFrame(checkReadability);
+      return animation;
+    };
   });
 }
 
