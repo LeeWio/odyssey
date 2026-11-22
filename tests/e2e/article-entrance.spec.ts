@@ -16,6 +16,9 @@ declare global {
       blur: number;
       y: number;
       scale: number;
+      viewportOverlap: number;
+      initialTime: number;
+      playbackRate: number;
       readableWhileMoving: boolean;
     }>;
   }
@@ -26,14 +29,12 @@ async function trackReadingMotion(page: Page) {
     window.readingMotionSamples = [];
     const animate = Element.prototype.animate;
     Element.prototype.animate = function (...args) {
-      const animation = animate.apply(this, args);
-      if (
-        !(this instanceof HTMLElement) ||
-        !this.closest("[data-article-body]") ||
-        !(animation.effect instanceof KeyframeEffect)
-      ) {
-        return animation;
+      if (!(this instanceof HTMLElement) || !this.closest("[data-article-body]")) {
+        return animate.apply(this, args);
       }
+      const { top, bottom } = this.getBoundingClientRect();
+      const animation = animate.apply(this, args);
+      if (!(animation.effect instanceof KeyframeEffect)) return animation;
 
       const keyframes = animation.effect.getKeyframes();
       const startOpacity = keyframes.find((frame) => frame.opacity !== undefined)?.opacity;
@@ -54,9 +55,17 @@ async function trackReadingMotion(page: Page) {
         blur: blurRadius(startFilter),
         y: start.m42,
         scale: start.m11,
+        viewportOverlap: Math.min(bottom, innerHeight) - Math.max(top, 0),
+        initialTime: -1,
+        playbackRate: 0,
         readableWhileMoving: false,
       };
       window.readingMotionSamples.push(sample);
+      // Read the live timeline after the scheduler has set any seek or rate.
+      queueMicrotask(() => {
+        sample.initialTime = Number(animation.currentTime ?? 0);
+        sample.playbackRate = animation.playbackRate;
+      });
 
       function checkReadability() {
         if (animation.playState !== "running") return;
@@ -78,7 +87,18 @@ function sampleFor(target: Locator) {
   return target.evaluate((element) =>
     window.readingMotionSamples
       .filter((sample) => sample.target === element)
-      .map(({ startedAt, opacity, blur, y, scale }) => ({ startedAt, opacity, blur, y, scale }))
+      .map(
+        ({ startedAt, opacity, blur, y, scale, viewportOverlap, initialTime, playbackRate }) => ({
+          startedAt,
+          opacity,
+          blur,
+          y,
+          scale,
+          viewportOverlap,
+          initialTime,
+          playbackRate,
+        })
+      )
   );
 }
 
@@ -88,9 +108,8 @@ async function approachReadingUnit(target: Locator) {
   });
   await expect
     .poll(() => target.evaluate((element) => element.getBoundingClientRect().top - innerHeight))
-    .toBeGreaterThan(80);
-  await target.page().waitForTimeout(220);
-  await target.evaluate(() => window.scrollBy(0, 70));
+    .toBeGreaterThan(100);
+  await target.evaluate(() => window.scrollBy(0, 155));
 }
 
 test("opens the server document in order and reveals paragraphs once on a normal scroll", async ({
@@ -229,6 +248,34 @@ async function savePositionBefore(target: Locator, gap: number) {
     .toBe(y);
   return y;
 }
+
+test("the compact navigation settles without shrinking the article's home link @smoke", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openArticle(page);
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+
+  const panel = page.locator("[data-compact]");
+  const logo = page.getByRole("link", { name: "Home", exact: true }).locator("img");
+  await expect(logo).toHaveCSS("width", "30px");
+  await page.evaluate(() => window.scrollTo(0, 850));
+  await expect(panel).toHaveAttribute("data-compact", "true");
+  await expect
+    .poll(() =>
+      panel.evaluate(async (element) => {
+        const widths: number[] = [];
+        for (let frame = 0; frame < 24; frame += 1) {
+          await new Promise(requestAnimationFrame);
+          widths.push(element.getBoundingClientRect().width);
+        }
+        return Math.max(...widths) - Math.min(...widths);
+      })
+    )
+    .toBeLessThan(1);
+  await expect(logo).toHaveCSS("width", "30px");
+});
 
 test("plays new reveals across desktop wheel steps after a mid-article reload @smoke", async ({
   page,
@@ -383,7 +430,45 @@ test("reveals every visible paragraph in order during regular wheel steps @smoke
     .toEqual(Array.from({ length: 12 }, (_, index) => index));
 });
 
-test("a fast scroll reveals each visible paragraph in order and leaves the viewport settled", async ({
+test("a slow wheel approach starts the reveal when the first line enters view @smoke", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await trackReadingMotion(page);
+  await openArticle(page);
+  const next = page.locator("[data-article-body] > p").nth(35);
+  const y = await savePositionBefore(next, 100);
+
+  await page.reload();
+  await expect(next).toHaveAttribute("data-reading-pending", "");
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y);
+  await page.mouse.move(640, 850);
+  await page.mouse.wheel(0, 30);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 30);
+
+  // A pause longer than the authored reveal used to let it finish below the fold.
+  await page.waitForTimeout(750);
+  expect(await sampleFor(next)).toEqual([]);
+  await expect(next).toHaveAttribute("data-reading-pending", "");
+
+  await page.mouse.wheel(0, 68);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 98);
+  for (let step = 1; step <= 6; step += 1) {
+    await page.mouse.wheel(0, 4);
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 98 + step * 4);
+  }
+
+  await expect.poll(async () => (await sampleFor(next)).length).toBe(1);
+  const [reveal] = await sampleFor(next);
+  expect(reveal).toMatchObject({ opacity: 0, blur: 7, y: 16, initialTime: 0, playbackRate: 1 });
+  expect(reveal!.viewportOverlap).toBeGreaterThanOrEqual(16);
+  expect(reveal!.viewportOverlap).toBeLessThanOrEqual(22);
+  await expect(next).toHaveCSS("opacity", "1");
+  await expect(next).toHaveCSS("filter", "none");
+});
+
+test("a fast scroll reveals each visible paragraph in order and leaves the viewport settled @smoke", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 1000 });
@@ -413,12 +498,24 @@ test("a fast scroll reveals each visible paragraph in order and leaves the viewp
     .poll(() =>
       paragraphs.evaluateAll((blocks) => {
         const measured = blocks.slice(35, 47);
-        return window.readingMotionSamples
-          .map(({ target }) => measured.indexOf(target))
-          .filter((index) => index >= 0);
+        return window.readingMotionSamples.flatMap(
+          ({ target, viewportOverlap, initialTime, playbackRate }) => {
+            const index = measured.indexOf(target);
+            return index < 0
+              ? []
+              : [{ index, inView: viewportOverlap > 0, initialTime, playbackRate }];
+          }
+        );
       })
     )
-    .toEqual(Array.from({ length: 12 }, (_, index) => index));
+    .toEqual(
+      Array.from({ length: 12 }, (_, index) => ({
+        index,
+        inView: true,
+        initialTime: 0,
+        playbackRate: 1,
+      }))
+    );
   const [last] = await sampleFor(paragraphs.nth(46));
   expect(last!.startedAt - afterBurst).toBeLessThan(180);
   await expect(paragraphs.nth(46)).toHaveCSS("opacity", "1");
@@ -453,13 +550,13 @@ test("reveals the next paragraph when scrolling on the first frame after restori
     const observer = new MutationObserver((records) => {
       if (!records.some(({ attributeName }) => attributeName === "data-reading-pending")) return;
       observer.disconnect();
-      window.scrollBy(0, 60);
+      window.scrollBy(0, 125);
     });
     observer.observe(document, { attributes: true, subtree: true });
   });
 
   await page.reload();
-  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 60);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 125);
   await expect.poll(async () => (await sampleFor(next)).length).toBe(1);
 });
 
