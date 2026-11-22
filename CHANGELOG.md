@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.260.9](https://github.com/LeeWio/odyssey/compare/v1.260.8...v1.260.9) (2026-11-22)
+
+
+### Bug Fixes
+
+* **reader:** play queued reveals in document order ([#113](https://github.com/LeeWio/odyssey/issues/113)) ([d8e6b2b](https://github.com/LeeWio/odyssey/commit/d8e6b2b8f824951a8582952492f5a7a2d383e8bf))
+
 ## [1.260.8](https://github.com/LeeWio/odyssey/compare/v1.260.7...v1.260.8) (2026-11-22)
 
 
