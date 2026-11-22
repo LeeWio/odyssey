@@ -26,6 +26,18 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.262.0](https://github.com/LeeWio/odyssey/compare/v1.261.3...v1.262.0) (2026-11-22)
+
+
+### Features
+
+* **journal:** redesign the article index ([#126](https://github.com/LeeWio/odyssey/issues/126)) ([4b238af](https://github.com/LeeWio/odyssey/commit/4b238af5e7e9f6c2f716de9326613be5fc8fc574))
+
+
+### Bug Fixes
+
+* **journal:** keep publication dates stable across time zones ([#128](https://github.com/LeeWio/odyssey/issues/128)) ([03f76ee](https://github.com/LeeWio/odyssey/commit/03f76ee4457f9c313bbe58912b554de54f889d9d))
+
 ## [1.261.3](https://github.com/LeeWio/odyssey/compare/v1.261.2...v1.261.3) (2026-11-22)
 
 
