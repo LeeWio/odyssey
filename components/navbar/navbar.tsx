@@ -265,21 +265,29 @@ export const Navbar = () => {
         return;
       }
 
+      const panel = panelRef.current;
+      const navigation = navigationRef.current;
+      if (!panel || !navigation) return;
+
       const brandWidth = brandRef.current?.offsetWidth ?? 0;
       const navigationItemsWidth = navigationItemsRef.current?.offsetWidth ?? 0;
       const actionsWidth = actionsRef.current?.offsetWidth ?? 0;
-      const navigationStyle = navigationRef.current
-        ? window.getComputedStyle(navigationRef.current)
-        : null;
+      const navigationStyle = window.getComputedStyle(navigation);
       const horizontalPadding =
-        Number.parseFloat(navigationStyle?.paddingLeft ?? "0") +
-        Number.parseFloat(navigationStyle?.paddingRight ?? "0");
-      const columnGap = Number.parseFloat(navigationStyle?.columnGap ?? "0");
+        Number.parseFloat(navigationStyle.paddingLeft) +
+        Number.parseFloat(navigationStyle.paddingRight);
+      const columnGap = Number.parseFloat(navigationStyle.columnGap) || 0;
+      const panelBorder = panel.offsetWidth - panel.clientWidth;
       const viewportWidth = document.documentElement.clientWidth;
       const panelWidth = Math.max(viewportWidth - 32, 0);
       const compactWidth = Math.min(
         Math.ceil(
-          brandWidth + navigationItemsWidth + actionsWidth + horizontalPadding + columnGap * 2
+          brandWidth +
+            navigationItemsWidth +
+            actionsWidth +
+            horizontalPadding +
+            columnGap * 2 +
+            panelBorder
         ),
         panelWidth
       );
@@ -305,12 +313,9 @@ export const Navbar = () => {
     };
 
     const resizeObserver = new ResizeObserver(measureNavigation);
-    const observedElements = [
-      navigationRef.current,
-      brandRef.current,
-      navigationItemsRef.current,
-      actionsRef.current,
-    ];
+    // The panel animates toward these measurements. Observe the content, so that
+    // intermediate widths do not feed back into the spring's destination.
+    const observedElements = [brandRef.current, navigationItemsRef.current, actionsRef.current];
 
     observedElements.forEach((element) => {
       if (element) resizeObserver.observe(element);
@@ -357,6 +362,7 @@ export const Navbar = () => {
   });
 
   useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
     const panel = panelRef.current;
     if (!panel) return;
 
@@ -459,7 +465,7 @@ export const Navbar = () => {
         <motion.nav
           ref={navigationRef}
           aria-label={t("primary")}
-          className="grid w-full grid-cols-[auto_1fr] items-center justify-between gap-3 px-2.5 py-0.5 lg:grid-cols-[auto_auto_auto]"
+          className="grid w-full grid-cols-[auto_1fr] items-center justify-between gap-3 px-2.5 py-0.5 lg:grid-cols-[max-content_max-content_max-content]"
         >
           <motion.div
             ref={brandRef}

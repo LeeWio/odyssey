@@ -12,11 +12,8 @@ const READING_UNITS = [
 const PENDING = "data-reading-pending";
 const REVEAL_GAP_MS = 90;
 const VISIBLE_REVEAL_WINDOW_MS = 270;
-const LEAD_PX = 80;
-const FAST_SCROLL_WINDOW_MS = 160;
-const FAST_SCROLL_DISTANCE_PX = 360;
-const FAST_START_PROGRESS = 0.15;
-const FAST_TIME_SCALE = 2.25;
+// Leave room for the first line to move up into view even if scrolling stops here.
+const REVEAL_INSET_PX = 16;
 
 export function bindReadingMotion(root: HTMLElement, opening: boolean) {
   if (!("IntersectionObserver" in window) || typeof root.animate !== "function") return;
@@ -31,26 +28,24 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
 
   const profiles = readingRevealProfiles();
   const running = new Set<Animation>();
-  const forwardScroll: Array<{ time: number; top: number }> = [];
-  let viewportTop = readingScrollOffset();
-  let viewportHeight = window.innerHeight;
   const revealOpening = opening && !root.contains(document.activeElement);
+  let openingTop = revealOpening ? readingScrollOffset() : undefined;
+  let openingGap: number | undefined;
+  let nextOpeningStart = 0;
   let cursor = 0;
-  let lead = revealOpening && viewportTop === 0 ? LEAD_PX : 0;
   let observed: HTMLElement | undefined;
   let frame: number | undefined;
-  let scheduledEnd = 0;
-  let nextStartAt = 0;
-  let startGap = REVEAL_GAP_MS;
-  let lastStartedAt = -Infinity;
-  let fastUntil = -Infinity;
+  let staggerTimer: number | undefined;
 
   // Catch layout changes that bring a block into view while the reader is stationary.
-  const observer = new IntersectionObserver((entries) => {
-    if (entries.some(({ target, isIntersecting }) => target === observed && isIntersecting)) {
-      schedule();
-    }
-  });
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries.some(({ target, isIntersecting }) => target === observed && isIntersecting)) {
+        schedule();
+      }
+    },
+    { rootMargin: `0px 0px -${REVEAL_INSET_PX}px 0px` }
+  );
 
   function watch(element?: HTMLElement) {
     if (element === observed) return;
@@ -70,13 +65,15 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
   }
 
   function schedule() {
+    window.clearTimeout(staggerTimer);
+    staggerTimer = undefined;
     frame ??= requestAnimationFrame(() => {
       frame = undefined;
       advance();
     });
   }
 
-  function play(element: HTMLElement, tall: boolean, fast: boolean) {
+  function play(element: HTMLElement, tall: boolean) {
     const { duration, keyframes } = tall
       ? profiles.tall
       : element.matches("figure")
@@ -88,90 +85,48 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
       running.delete(animation);
       animation.cancel();
     };
-    if (fast) {
-      animation.playbackRate = FAST_TIME_SCALE;
-      animation.currentTime = duration * FAST_START_PROGRESS;
-    }
-  }
-
-  function scrolledQuickly(previousTop: number, now: number) {
-    if (viewportTop < previousTop) forwardScroll.length = 0;
-    if (viewportTop <= previousTop) return false;
-
-    while (forwardScroll[0] && now - forwardScroll[0].time > FAST_SCROLL_WINDOW_MS) {
-      forwardScroll.shift();
-    }
-    forwardScroll.push({ time: now, top: previousTop });
-    return viewportTop - forwardScroll[0]!.top >= FAST_SCROLL_DISTANCE_PX;
   }
 
   function advance() {
-    const previousTop = viewportTop;
-    const previousHeight = viewportHeight;
-    viewportTop = readingScrollOffset();
-    viewportHeight = window.innerHeight;
-    const now = performance.now();
-    if (scrolledQuickly(previousTop, now) || viewportTop >= previousTop + previousHeight) {
-      if (now > fastUntil) {
-        for (const animation of running) animation.updatePlaybackRate(FAST_TIME_SCALE);
-      }
-      fastUntil = now + FAST_SCROLL_WINDOW_MS;
-    }
-    if (viewportTop > previousTop) lead = LEAD_PX;
-
-    const fast = now <= fastUntil;
-    const limit = viewportHeight + (fast ? 0 : lead);
+    if (openingTop !== undefined && readingScrollOffset() !== openingTop) openingTop = undefined;
+    const staggerOpening = openingTop !== undefined;
+    const viewportHeight = window.innerHeight;
+    const limit = viewportHeight - (staggerOpening ? 0 : REVEAL_INSET_PX);
     const ready: Array<{ index: number; tall: boolean }> = [];
     let end = cursor;
     for (; end < units.length; end += 1) {
       const rect = units[end]!.getBoundingClientRect();
-      if (rect.top > limit) break;
+      if (rect.top > limit || rect.top >= viewportHeight) break;
       if (rect.width && rect.height && rect.bottom > 0) {
         ready.push({ index: end, tall: rect.height > viewportHeight * 2 });
       }
     }
 
-    const first = ready[0];
-    showThrough(first?.index ?? end);
-    if (!first) {
-      scheduledEnd = cursor;
-      watch(units[cursor]);
-      return;
+    const now = performance.now();
+    if (staggerOpening && openingGap === undefined) {
+      openingGap =
+        openingTop === 0
+          ? REVEAL_GAP_MS
+          : Math.min(REVEAL_GAP_MS, VISIBLE_REVEAL_WINDOW_MS / Math.max(1, ready.length - 1));
+      nextOpeningStart = now;
     }
 
-    const openingAtTop = revealOpening && viewportTop === 0;
-    const gap = openingAtTop
-      ? REVEAL_GAP_MS
-      : Math.min(REVEAL_GAP_MS, VISIBLE_REVEAL_WINDOW_MS / Math.max(1, ready.length - 1));
-
-    if (fast) {
-      // A rapidly moving viewport can carry a short paragraph away in one frame.
-      startGap = 0;
-      nextStartAt = now;
-    } else if (cursor >= scheduledEnd) {
-      startGap = gap;
-      nextStartAt = Math.max(now, lastStartedAt + startGap);
-    } else if (end !== scheduledEnd && gap < startGap) {
-      startGap = gap;
-      nextStartAt = Math.min(nextStartAt, lastStartedAt + startGap);
-    }
-    scheduledEnd = end;
-
-    // A single frame loop advances the document cursor. New arrivals can shorten a pending
-    // interval while blocks already waiting keep their place in the sequence.
-    watch();
+    // Only the initial viewport uses a timed queue. Mark and start new scroll
+    // arrivals together, in document order, after all geometry reads are done.
     for (const { index, tall } of ready) {
-      if (now < nextStartAt) {
+      if (staggerOpening && now < nextOpeningStart) {
         showThrough(index);
-        schedule();
+        staggerTimer = window.setTimeout(schedule, nextOpeningStart - now);
         return;
       }
       showThrough(index + 1);
-      play(units[index]!, tall, fast);
-      lastStartedAt = now;
-      nextStartAt = openingAtTop ? now + startGap : nextStartAt + startGap;
+      play(units[index]!, tall);
+      if (staggerOpening) {
+        nextOpeningStart = (openingTop === 0 ? now : nextOpeningStart) + openingGap!;
+      }
     }
     showThrough(end);
+    openingTop = undefined;
     watch(units[cursor]);
   }
 
@@ -181,11 +136,11 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
   }
 
   function settleThrough(limit: number) {
-    lastStartedAt = -Infinity;
-    lead = 0;
+    window.clearTimeout(staggerTimer);
+    staggerTimer = undefined;
+    openingTop = undefined;
     cancelRunning();
     showThrough(firstBeyond(limit));
-    scheduledEnd = cursor;
     watch(units[cursor]);
   }
 
@@ -204,6 +159,7 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
 
   function dispose() {
     if (frame !== undefined) cancelAnimationFrame(frame);
+    window.clearTimeout(staggerTimer);
     watch();
     observer.disconnect();
     cancelRunning();
@@ -224,7 +180,7 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
     while (units[cursor] && units[cursor]!.getBoundingClientRect().bottom <= 0) cursor += 1;
   } else {
     // A timed-out or interrupted startup leaves already painted content readable.
-    cursor = firstBeyond(viewportHeight);
+    cursor = firstBeyond(window.innerHeight);
   }
   for (let index = cursor; index < units.length; index += 1) {
     units[index]!.setAttribute(PENDING, "");

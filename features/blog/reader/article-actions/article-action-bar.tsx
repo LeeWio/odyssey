@@ -4,7 +4,9 @@ import { ActionBar as Bar } from "@heroui-pro/react";
 import { Separator } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { useMounted } from "@mantine/hooks";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useRef, useState, type RefObject } from "react";
+
+import { useReadingProgress } from "../article/use-reading-progress";
 
 import { CollectionMenu } from "./collection-menu";
 import { CommentAction } from "./comment-action";
@@ -20,7 +22,7 @@ interface ArticleActionBarProps {
   article: Target;
   articleEndRef: RefObject<HTMLElement | null>;
   isRefreshing?: boolean;
-  onProgress?: (progress: number) => void;
+  trackProgress?: boolean;
 }
 
 export function ArticleActionBar(props: ArticleActionBarProps) {
@@ -32,7 +34,7 @@ function ReadingActions({
   article,
   articleEndRef,
   isRefreshing = false,
-  onProgress,
+  trackProgress = false,
 }: ArticleActionBarProps) {
   const t = useTranslations("Article");
   const rootRef = useRef<HTMLDivElement>(null);
@@ -45,9 +47,7 @@ function ReadingActions({
     isFocusWithin,
   });
 
-  useEffect(() => {
-    onProgress?.(progress);
-  }, [onProgress, progress]);
+  useReadingProgress({ enabled: trackProgress, postId: article.id, progress });
 
   return (
     <div

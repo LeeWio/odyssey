@@ -14,7 +14,6 @@ import {
 } from "@/features/blog/reader/article";
 import type { ArticleOutline } from "@/features/blog/reader/article/article-outline";
 import { scrollReadingAnchorIntoView } from "@/features/blog/reader/article/reading-anchor";
-import { useReadingProgress } from "@/features/blog/reader/article/use-reading-progress";
 import { articleHasContext } from "@/features/blog/reader/article/article-sidebar";
 import { type PostResponse, useGetPublicPostBySlugQuery } from "@/lib/features/post";
 
@@ -31,19 +30,6 @@ interface SinglePageProps {
   slug: string;
 }
 
-function ReadingProgressTracker({
-  enabled,
-  postId,
-  progress,
-}: {
-  enabled: boolean;
-  postId: number;
-  progress: number;
-}) {
-  useReadingProgress({ enabled, postId, progress });
-  return null;
-}
-
 export function ArticlePageClient({
   initialArticle,
   body,
@@ -53,7 +39,6 @@ export function ArticlePageClient({
 }: SinglePageProps) {
   const t = useTranslations("Article");
   const articleEndRef = useRef<HTMLDivElement>(null);
-  const [readingProgress, setReadingProgress] = useState(0);
   const [showContinue, setShowContinue] = useState(false);
 
   useEffect(() => {
@@ -112,11 +97,6 @@ export function ArticlePageClient({
 
   return (
     <ArticleOutlineProvider initialOutline={outline} initialMinutes={readingMinutes}>
-      <ReadingProgressTracker
-        enabled={isAuthenticated}
-        postId={article.id}
-        progress={readingProgress}
-      />
       <ArticleLayout
         body={body}
         continueAside={
@@ -140,7 +120,7 @@ export function ArticlePageClient({
         article={article}
         articleEndRef={articleEndRef}
         isRefreshing={isFetching}
-        onProgress={setReadingProgress}
+        trackProgress={isAuthenticated}
       />
     </ArticleOutlineProvider>
   );

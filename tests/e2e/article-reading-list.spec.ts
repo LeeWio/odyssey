@@ -49,6 +49,21 @@ test("article save for later uses the library queue and returns there", async ({
     if (path.endsWith("/unread/count")) return route.fulfill({ json: envelope(0) });
     if (path === "/api/v1/public/blog/posts/reading-loop")
       return route.fulfill({ json: envelope({ ...readingListArticle, isInReadingList: saved }) });
+    if (
+      path === `/api/v1/user/library/posts/${readingListArticle.id}/progress` &&
+      request.method() === "PUT"
+    ) {
+      const { observedAt, progressPercent, positionAnchor } = request.postDataJSON();
+      return route.fulfill({
+        json: envelope({
+          post: readingListArticle,
+          currentProgressPercent: progressPercent,
+          furthestProgressPercent: progressPercent,
+          positionAnchor,
+          lastReadAt: observedAt,
+        }),
+      });
+    }
     if (path.endsWith("/library/overview"))
       return route.fulfill({
         json: envelope({ continueReading: [], recentFavorites: [], recommendations: [] }),
