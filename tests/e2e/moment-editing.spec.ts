@@ -119,10 +119,10 @@ async function openEditor(page: Page, id = 100, beforeOpen?: (scroll: number) =>
 async function visitFeed(page: Page, view = "list", secondPage = false) {
   // Switch filters after hydration so SSR data cannot bypass the mocked API.
   await page.goto(`/moments?topic=fixture-boot&view=${view}`);
-  await page
-    .getByRole("navigation", { name: "Moments feed" })
-    .getByRole("gridcell", { name: "editing 13" })
-    .click();
+  await page.getByRole("button", { name: "Topics", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "editing 13", exact: true }).click();
+  await page.mouse.move(1, 400);
+  await page.keyboard.press("Escape");
   await expect(page.locator("#moment-100")).toBeVisible();
   if (secondPage) {
     await page
@@ -175,9 +175,7 @@ for (const [width, view] of [
       true
     );
     expect(page.url()).toBe(originalUrl);
-    await expect(
-      page.getByRole("radio", { name: view === "grid" ? "Grid" : "List", exact: true })
-    ).toBeChecked();
+    await expect(page.locator("[data-view]")).toHaveAttribute("data-view", view);
     expect(Math.abs((await page.evaluate(() => window.scrollY)) - originalScroll)).toBeLessThan(3);
     expect(state.writes).toHaveLength(1);
     expect(state.requests.filter((path) => /\/(topics|cadence)$/.test(path)).length).toBe(

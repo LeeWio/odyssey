@@ -2,13 +2,16 @@
 
 import { Button, Card, ColorSwatch, Meter, Skeleton, Tooltip, Typography } from "@heroui/react";
 import { Segment } from "@heroui-pro/react";
-import { useState } from "react";
+import { Icon } from "@iconify/react";
+import { useFormatter } from "next-intl";
+import { useId, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Key } from "react-aria-components";
 import { motion } from "motion/react";
 
-import { useGetMomentCadenceQuery, type MomentCadenceResponse } from "@/lib/features/moment";
+import { useGetMomentCadenceQuery } from "@/lib/features/moment";
 import { pageEaseOut } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 import { useMomentMotion } from "./feed-motion";
 
 import {
@@ -20,6 +23,7 @@ import {
 
 const PERIODS = ["day", "month", "year"] as const satisfies readonly CadencePeriod[];
 const DOT_COLUMNS = 12;
+const PERCENT_FORMAT = { maximumFractionDigits: 0, style: "percent" } as const;
 
 export function MomentCadenceCard({
   label,
@@ -32,65 +36,86 @@ export function MomentCadenceCard({
   unavailable: string;
   retryLabel: string;
 }) {
+  const format = useFormatter();
+  const detailsId = useId();
+  const [expanded, setExpanded] = useState(false);
   const query = useGetMomentCadenceQuery();
   const [period, setPeriod] = useState<CadencePeriod>("day");
   const data = query.data;
+  const rows = data ? cadenceRows(data, period) : null;
+  const progress = rows ? cadenceProgress(rows) : null;
 
   return (
-    <Card aria-busy={query.isLoading} className="w-full gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <Segment
-          aria-label={label}
-          isDisabled={data == null}
-          selectedKey={period}
-          size="sm"
-          onSelectionChange={(key: Key) => {
-            if (isPeriod(key)) setPeriod(key);
-          }}
-        >
-          {PERIODS.map((item) => (
-            <Segment.Item key={item} id={item}>
-              {labels[item]}
-            </Segment.Item>
-          ))}
-        </Segment>
-        {data ? <CadenceMeter cadence={data} label={labels[period]} period={period} /> : null}
+    <>
+      <Button
+        aria-controls={detailsId}
+        aria-expanded={expanded}
+        className="lg:hidden"
+        size="sm"
+        variant="ghost"
+        onPress={() => setExpanded((value) => !value)}
+      >
+        {label}
+        {progress ? (
+          <span className="text-muted tabular-nums">
+            {labels[period]} ·{" "}
+            {format.number(progress.value / Math.max(progress.total, 1), PERCENT_FORMAT)}
+          </span>
+        ) : null}
+        <Icon aria-hidden="true" icon={expanded ? "lucide:chevron-up" : "lucide:chevron-down"} />
+      </Button>
+      <div id={detailsId} className={cn("lg:mt-0 lg:block", expanded ? "mt-2" : "hidden")}>
+        <Card aria-busy={query.isLoading} className="w-full gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <Segment
+              aria-label={label}
+              isDisabled={data == null}
+              selectedKey={period}
+              size="sm"
+              onSelectionChange={(key: Key) => {
+                if (isPeriod(key)) setPeriod(key);
+              }}
+            >
+              {PERIODS.map((item) => (
+                <Segment.Item key={item} id={item}>
+                  {labels[item]}
+                </Segment.Item>
+              ))}
+            </Segment>
+            {progress ? <CadenceMeter label={labels[period]} progress={progress} /> : null}
+          </div>
+          {rows ? (
+            <div className="min-h-28">
+              <CadenceDots key={period} rows={rows} />
+            </div>
+          ) : query.isError ? (
+            <div className="flex min-h-28 flex-col items-start gap-2" role="status">
+              <Typography type="body-sm">{unavailable}</Typography>
+              <Button size="sm" variant="secondary" onPress={() => void query.refetch()}>
+                {retryLabel}
+              </Button>
+            </div>
+          ) : (
+            <Skeleton animationType="shimmer" className="h-28 w-full" />
+          )}
+        </Card>
       </div>
-
-      {data ? (
-        <div className="min-h-28">
-          <CadenceDots key={period} cadence={data} period={period} />
-        </div>
-      ) : query.isError ? (
-        <div className="flex min-h-28 flex-col items-start gap-2" role="status">
-          <Typography type="body-sm">{unavailable}</Typography>
-          <Button size="sm" variant="secondary" onPress={() => void query.refetch()}>
-            {retryLabel}
-          </Button>
-        </div>
-      ) : (
-        <Skeleton animationType="shimmer" className="h-28 w-full" />
-      )}
-    </Card>
+    </>
   );
 }
 
 function CadenceMeter({
-  cadence,
   label,
-  period,
+  progress,
 }: {
-  cadence: MomentCadenceResponse;
   label: string;
-  period: CadencePeriod;
+  progress: ReturnType<typeof cadenceProgress>;
 }) {
-  const progress = cadenceProgress(cadenceRows(cadence, period));
-
   return (
     <Meter
       aria-label={label}
       className="w-auto shrink-0"
-      formatOptions={{ maximumFractionDigits: 0, style: "percent" }}
+      formatOptions={PERCENT_FORMAT}
       maxValue={Math.max(progress.total, 1)}
       minValue={0}
       value={progress.value}
@@ -100,14 +125,7 @@ function CadenceMeter({
   );
 }
 
-function CadenceDots({
-  cadence,
-  period,
-}: {
-  cadence: MomentCadenceResponse;
-  period: CadencePeriod;
-}) {
-  const rows = cadenceRows(cadence, period);
+function CadenceDots({ rows }: { rows: CadenceCell[][] }) {
   const { reduced } = useMomentMotion();
 
   return (

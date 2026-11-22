@@ -32,14 +32,20 @@ const MomentPublisher = dynamic(
   { ssr: false }
 );
 
-export function MomentsPage({ initialPage }: { initialPage: PageResult<MomentResponse> | null }) {
-  const { searchParams, updateQuery } = useQueryState();
+export function MomentsPage({
+  initialPage,
+  initialTopic,
+}: {
+  initialPage: PageResult<MomentResponse> | null;
+  initialTopic?: string;
+}) {
+  const { searchParams, updateQuery } = useQueryState({ clientOnly: true });
   const topic = searchParams.get("topic") || undefined;
   const pageParam = searchParams.get("page");
-  const page = parsePageParam(searchParams.get("page"));
+  const page = parsePageParam(pageParam);
   return (
     <MomentsContent
-      initialPage={initialPage}
+      initialPage={topic === initialTopic ? initialPage : null}
       page={page}
       pageParam={pageParam}
       topic={topic}
@@ -120,6 +126,7 @@ const MomentsContent = memo(function MomentsContent({
   const changePage = useCallback(
     (nextPage: number, keepAnchor = false) => {
       if (!Number.isSafeInteger(nextPage) || nextPage < 1) return;
+      if (!keepAnchor && nextPage === page) return;
       updateQuery(
         { page: nextPage === 1 ? null : nextPage },
         {
@@ -128,7 +135,7 @@ const MomentsContent = memo(function MomentsContent({
         }
       );
     },
-    [updateQuery]
+    [page, updateQuery]
   );
   const resolveAnchor = useCallback((nextPage: number) => changePage(nextPage, true), [changePage]);
 
@@ -148,18 +155,25 @@ const MomentsContent = memo(function MomentsContent({
     if (resolvedTotalPages === undefined) return;
     const normalizedPage = clampPageToTotal(page, resolvedTotalPages);
     const normalizedParam = normalizedPage === 1 ? null : String(normalizedPage);
-    if (pageParam !== normalizedParam) {
-      updateQuery({ page: normalizedParam }, { mode: "replace", hash: window.location.hash });
-    }
+    if (pageParam === normalizedParam) return;
+    const liveParams = new URLSearchParams(window.location.search);
+    if (liveParams.get("page") !== pageParam || (liveParams.get("topic") || undefined) !== topic)
+      return;
+    updateQuery({ page: normalizedParam }, { mode: "replace", hash: window.location.hash });
   }, [page, pageParam, resolvedTotalPages, topic, updateQuery]);
 
   useEffect(() => {
     if (isLoading || isRefreshing || isError || isRefreshError || displayedPage !== page) return;
     const changed = previousDisplay.current !== null && previousDisplay.current !== displayKey;
     previousDisplay.current = displayKey;
-    if (changed && !window.location.hash) {
-      feedRef.current?.scrollIntoView({ behavior: "instant", block: "start" });
-      feedRef.current?.focus({ preventScroll: true });
+    const feed = feedRef.current;
+    if (changed && feed && !window.location.hash) {
+      const { top } = feed.getBoundingClientRect();
+      const topInset = Number.parseFloat(getComputedStyle(feed).scrollMarginTop);
+      if (top < topInset || top >= window.innerHeight - topInset) {
+        feed.scrollIntoView({ behavior: "instant", block: "start" });
+      }
+      feed.focus({ preventScroll: true });
     }
   }, [displayKey, displayedPage, page, isLoading, isRefreshing, isError, isRefreshError]);
 
@@ -178,16 +192,15 @@ const MomentsContent = memo(function MomentsContent({
   return (
     <MomentMotionProvider>
       <PageFrame className="bg-background">
-        <div className="grid w-full items-start gap-8 lg:grid-cols-[22rem_minmax(0,1fr)]">
-          <nav aria-label={t("feed")} className="flex flex-col gap-2 lg:sticky lg:top-24">
+        <div className="grid w-full items-start gap-3 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-8 xl:grid-cols-[20rem_minmax(0,1fr)]">
+          <aside aria-label={t("cadence")} className="min-w-0 lg:sticky lg:top-24">
             <MomentCadenceCard
               label={t("cadence")}
               labels={{ day: t("cadenceDay"), month: t("cadenceMonth"), year: t("cadenceYear") }}
               retryLabel={t("tryAgain")}
               unavailable={t("cadenceUnavailable")}
             />
-            <MomentTopicWidget selected={topic} onSelect={selectTopic} />
-          </nav>
+          </aside>
 
           <section
             ref={feedRef}
@@ -195,7 +208,10 @@ const MomentsContent = memo(function MomentsContent({
             className="w-full min-w-0 scroll-mt-28 outline-none"
             tabIndex={-1}
           >
-            <MomentFeedLayout busy={isLoading || isRefreshing}>
+            <MomentFeedLayout
+              busy={isLoading || isRefreshing}
+              toolbar={<MomentTopicWidget selected={topic} onSelect={selectTopic} />}
+            >
               {!isLoading && !isError && !["dismissed", "found"].includes(anchor.status) ? (
                 <MomentState>
                   <div className="border-separator mb-5 flex flex-wrap items-center gap-3 border-b pb-4">
@@ -264,12 +280,19 @@ const MomentsContent = memo(function MomentsContent({
                     }
                   />
 
-                  {visibleMoments.length === 0 ? (
+                  {visibleMoments.length === 0 && !isRefreshing && !isRefreshError ? (
                     <MomentState>
                       <EmptyState>
                         <EmptyState.Header>
-                          <EmptyState.Title>{t("empty")}</EmptyState.Title>
+                          <EmptyState.Title>{t(topic ? "emptyTopic" : "empty")}</EmptyState.Title>
                         </EmptyState.Header>
+                        {topic ? (
+                          <EmptyState.Content>
+                            <Button size="sm" variant="secondary" onPress={() => selectTopic()}>
+                              {t("showAll")}
+                            </Button>
+                          </EmptyState.Content>
+                        ) : null}
                       </EmptyState>
                     </MomentState>
                   ) : null}

@@ -39,21 +39,26 @@ empty last pages and administrator-only access using mocked API responses.
 
 ## Feed Layout
 
-`/moments` defaults to a plain single-column List without a date axis. A small,
-default-variant HeroUI Pro `Segment` switches to Grid, implemented with CSS Columns
-and a 20rem preferred column width with a maximum of four columns. Columns and the
-tighter 16px card gap apply only when the feed container is at least 41rem, two
-20rem columns plus the 16px column gap. Below that, Grid keeps the List
-stack: one column, `max-w-2xl`, and the 24px card rhythm from the spacing guide.
+`/moments` defaults to a single-column List. The view selector appears when
+the feed container is at least 41rem wide. Grid uses CSS Columns with a 20rem
+preferred column width, a 16px gap, and a maximum of four columns. A narrow
+container keeps the List stack and preserves the Grid preference in the URL.
+The sidebar starts at `lg` with a 16rem width, increasing to 20rem at `xl`.
+Both sidebar breakpoints leave room for at least two feed columns.
 The feed keeps the full available width once columns start, so wider screens expand
 cards rather than adding columns or constraining the content container. The browser
 adapts the column count; cards flow vertically without shared rows, row spans,
 position calculation, or height measurement. Numbered pagination sits outside the
 multicolumn container.
 
-`MomentFeedLayout` reads `view=list|grid` from the URL (missing/invalid values use
-List). Selection uses the native History `replaceState` API integrated with Next,
-preserving other query parameters and the hash without navigation or a server request.
+The topic menu sits above the feed. An active filter shows its topic and a
+clear action. Empty filtered results offer a return to all moments. Below
+`lg`, the publishing cadence card opens from a collapsed summary.
+
+`MomentFeedLayout` reads `view=list|grid` from the URL. Missing or invalid values
+default to List. The shared `useQueryState({ clientOnly: true })` reads the live
+URL and applies view selection through Next's native History integration.
+This preserves other query parameters and the hash without a server request.
 It changes `data-view`; Tailwind group variants reflow the existing children.
 Cards retain the same keyed DOM hierarchy in both modes, including image galleries
 and comment state. The page extracts the topic and page into a memoized content component,
@@ -118,8 +123,8 @@ pages normalize to the last available page.
 
 While a page is pending, the previous page remains readable and the pagination is
 disabled. A failure retains that page and exposes a local retry. A successful
-change replaces the cards atomically and scrolls/focuses the feed start, not the
-page header; old galleries unmount and release their resources. The existing ID
+change replaces the cards atomically, focuses the feed start, and scrolls it into
+view when needed. Old galleries unmount and release their resources. The existing ID
 registry skips repeated entrances when revisiting known cards. Manual pagination
 clears an old Moment hash; cross-page hash lookup searches in the background and
 only navigates to the matching page, preserving its hash and focusing the target.
@@ -164,9 +169,8 @@ placement or calculating image aspect ratios.
   remounts or data requests. Nested text regions correct parent scaling; images
   participate in layout projection and retain their natural ratio. Image buttons
   do not clip the projected image during resizing.
-- The default small HeroUI Segment keeps its semantics and styling. Only its
-  built-in selection indicator is hidden and replaced with a Motion shared-layout
-  background, scoped to this feed's group so other Segments are unaffected.
+- The small HeroUI Segment uses its default selection indicator. The active view
+  updates immediately while Next reconciles the URL.
 - Filter requests retain the entire previous feed, including appended pages, with
   opacity 0.72. Only `currentData` for the requested arguments commits a result.
   Successful results restore full opacity without replaying old cards; failures retain

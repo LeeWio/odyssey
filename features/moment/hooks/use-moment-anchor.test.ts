@@ -143,6 +143,17 @@ describe("moment anchor navigation", () => {
     expect(fetchPage).toHaveBeenCalledTimes(1);
   });
 
+  it("ignores a pending anchor result after a topic change clears the fragment", async () => {
+    const response = Promise.withResolvers<{ list: MomentResponse[] } | null>();
+    const fetchPage = vi.fn(() => response.promise);
+    await render({ fetchPage });
+    await act(async () => {
+      window.history.pushState(null, "", "/moments?topic=daily");
+      response.resolve({ list: [moment(18)] });
+    });
+    expect(options.onPageChange).not.toHaveBeenCalled();
+  });
+
   it("does not scan for malformed hashes", async () => {
     await navigate("#moment-0");
     await render();
