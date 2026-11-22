@@ -27,6 +27,20 @@ createServer((request, response) => {
     return;
   }
   if (pathname === "/health") return send(200, { ready: true });
+  if (pathname === "/api/v1/public/moments/809") {
+    return send(200, {
+      id: 809,
+      content: "An older Moment opened directly from an email.",
+      visibility: "public",
+      authorName: "Fixture author",
+      createdAt: "2026-10-01T00:00:00Z",
+      updatedAt: "2026-10-01T00:00:00Z",
+      likesCount: 0,
+      commentsCount: 0,
+      images: [],
+      topics: [],
+    });
+  }
   if (
     pathname === blogPosts ||
     pathname === `${blogPosts}/featured` ||

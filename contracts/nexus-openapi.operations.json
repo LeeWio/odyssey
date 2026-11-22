@@ -1,5 +1,5 @@
 {
-  "nexusRevision": "a021656b76e49767b572ebfdddbad81467853ed6",
+  "nexusRevision": "1e7f28b1b5601964a15cd1e7a2d76f0f6dae20b3",
   "paths": {
     "/api/v1/admin/analytics/content-funnel": {
       "get": {
@@ -1359,9 +1359,39 @@
         "tags": ["Public Moments"]
       }
     },
+    "/api/v1/public/moments/subscription/one-click": {
+      "post": {
+        "operationId": "unsubscribeFromMomentsOneClick",
+        "tags": ["Moment Subscriptions"]
+      }
+    },
+    "/api/v1/public/moments/subscription/subscribe": {
+      "post": {
+        "operationId": "subscribeToMoments",
+        "tags": ["Moment Subscriptions"]
+      }
+    },
+    "/api/v1/public/moments/subscription/unsubscribe": {
+      "post": {
+        "operationId": "unsubscribeFromMoments",
+        "tags": ["Moment Subscriptions"]
+      }
+    },
+    "/api/v1/public/moments/subscription/verify": {
+      "post": {
+        "operationId": "verifyMomentSubscription",
+        "tags": ["Moment Subscriptions"]
+      }
+    },
     "/api/v1/public/moments/topics": {
       "get": {
         "operationId": "getPublicTopics",
+        "tags": ["Public Moments"]
+      }
+    },
+    "/api/v1/public/moments/{id}": {
+      "get": {
+        "operationId": "getPublicMoment",
         "tags": ["Public Moments"]
       }
     },
