@@ -11,6 +11,8 @@ const READING_UNITS = [
 
 const PENDING = "data-reading-pending";
 const REVEAL_GAP_MS = 90;
+const MIN_REVEAL_GAP_MS = 16;
+const VISIBLE_REVEAL_WINDOW_MS = REVEAL_GAP_MS * 4;
 const LEAD_PX = 80;
 const TEXT_REVEAL = {
   duration: 680,
@@ -22,8 +24,6 @@ const IMAGE_REVEAL = {
   filter: ["blur(6px)", "blur(0px)"],
   transform: ["scale(1.025)", "scale(1)"],
 };
-// Give visible blocks at most one text reveal's worth of staggered starts.
-const MAX_VISIBLE_WAITING = Math.floor(TEXT_REVEAL.duration / REVEAL_GAP_MS);
 
 export function bindReadingMotion(root: HTMLElement, opening: boolean) {
   if (!("IntersectionObserver" in window) || typeof root.animate !== "function") return;
@@ -105,17 +105,16 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
       settleThrough(viewportHeight);
       return;
     }
-    if (viewportTop > previousTop) {
-      lead = LEAD_PX;
-      showThrough(firstBeyond(viewportHeight) - MAX_VISIBLE_WAITING);
-    }
-    if (timer !== undefined) return;
+    if (viewportTop > previousTop) lead = LEAD_PX;
+    clearTimeout(timer);
+    timer = undefined;
 
     const limit = viewportHeight + lead;
     const now = performance.now();
     let end = cursor;
     let next: HTMLElement | undefined;
     let delay = 0;
+    let gap = REVEAL_GAP_MS;
     let toPlay: HTMLElement | undefined;
 
     while ((next = units[end])) {
@@ -127,8 +126,16 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
         continue;
       }
 
-      delay = lastStartedAt + REVEAL_GAP_MS - now;
-      if (delay > 0 && rect.top >= 0) break;
+      if (!revealOpening || viewportTop !== 0) {
+        // Speed up the sequence as more pending blocks enter the viewport.
+        const visibleWaiting = Math.max(1, firstBeyond(viewportHeight) - end);
+        gap = Math.max(
+          MIN_REVEAL_GAP_MS,
+          Math.min(REVEAL_GAP_MS, VISIBLE_REVEAL_WINDOW_MS / visibleWaiting)
+        );
+      }
+      delay = lastStartedAt + gap - now;
+      if (delay > 0) break;
 
       toPlay = next;
       next = units[++end];
@@ -145,7 +152,7 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
           timer = undefined;
           advance();
         },
-        toPlay ? REVEAL_GAP_MS : delay
+        toPlay ? gap : delay
       );
     } else {
       watch(next);

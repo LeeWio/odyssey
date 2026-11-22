@@ -227,6 +227,42 @@ test("plays new reveals across desktop wheel steps after a mid-article reload @s
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 240);
 });
 
+test("reveals every visible paragraph in order during consecutive scroll frames @smoke", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await trackReadingMotion(page);
+  await openArticle(page);
+  const paragraphs = page.locator("[data-article-body] > p");
+  const first = paragraphs.nth(35);
+  const y = await savePositionBefore(first, 40);
+
+  await page.reload();
+  await expect(first).toHaveAttribute("data-reading-pending", "");
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y);
+  await page.evaluate(async () => {
+    for (let step = 0; step < 6; step += 1) {
+      await new Promise(requestAnimationFrame);
+      window.scrollBy(0, 120);
+    }
+  });
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(y + 720);
+  await expect(first).toBeInViewport();
+  await expect(paragraphs.nth(46)).toBeInViewport();
+
+  await expect
+    .poll(() =>
+      paragraphs.evaluateAll((blocks) => {
+        const visible: Element[] = blocks.slice(35, 47);
+        return window.readingMotionSamples
+          .map(({ target }) => visible.indexOf(target))
+          .filter((index) => index >= 0);
+      })
+    )
+    .toEqual(Array.from({ length: 12 }, (_, index) => index));
+});
+
 test("reveals the next paragraph when scrolling on the first frame after restoring a position", async ({
   page,
 }) => {
