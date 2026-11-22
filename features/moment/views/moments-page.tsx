@@ -9,7 +9,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 import { MomentCadenceCard } from "@/features/moment/components/cadence-card";
 import { MomentSubscriptionDialog } from "@/features/moment/components/moment-subscription-dialog";
-import { MomentTopicWidget } from "@/features/moment/components/topic-widget";
+import { MomentTopicWidget, SelectedMomentTopic } from "@/features/moment/components/topic-widget";
 import { MomentFeedLayout } from "@/features/moment/components/feed-layout";
 import { MomentFeedList } from "@/features/moment/components/feed-list";
 import { MomentFeedLoading } from "@/features/moment/components/feed-loading";
@@ -210,6 +210,9 @@ const MomentsContent = memo(function MomentsContent({
             tabIndex={-1}
           >
             <MomentFeedLayout
+              activeFilter={
+                topic ? <SelectedMomentTopic topic={topic} onClear={() => selectTopic()} /> : null
+              }
               busy={isLoading || isRefreshing}
               toolbar={
                 <>

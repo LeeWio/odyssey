@@ -1,6 +1,5 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
-import { MomentDetailPage } from "@/features/moment/views/moment-detail-page";
 import { getPublicMoment } from "@/lib/features/moment/server";
 
 export default async function MomentEntryRoute({ params }: { params: Promise<{ id: string }> }) {
@@ -10,5 +9,5 @@ export default async function MomentEntryRoute({ params }: { params: Promise<{ i
   const result = await getPublicMoment(momentId);
   if (result.status === 404) notFound();
   if (!result.data) throw new Error("Moment request failed");
-  return <MomentDetailPage moment={result.data} />;
+  redirect(`/moments#moment-${momentId}`);
 }

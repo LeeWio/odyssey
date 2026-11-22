@@ -13,10 +13,12 @@ import { momentLayoutTransition, useMomentMotion } from "./feed-motion";
 export function MomentFeedLayout({
   children,
   busy = false,
+  activeFilter,
   toolbar,
 }: {
   children?: ReactNode;
   busy?: boolean;
+  activeFilter?: ReactNode;
   toolbar?: ReactNode;
 }) {
   const t = useTranslations("Moments");
@@ -41,35 +43,38 @@ export function MomentFeedLayout({
   return (
     <LayoutGroup id={layoutId} inherit={false}>
       <div className="group/moment-feed @container/moment-feed min-w-0" data-view={viewMode}>
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          {toolbar}
-          <div
-            className="ml-auto hidden shrink-0 @min-[41rem]/moment-feed:block"
-            data-slot="moment-feed-view"
-          >
-            <Segment
-              aria-label={t("viewMode")}
-              selectedKey={viewMode}
-              size="sm"
-              onSelectionChange={(key) => {
-                if (key === "list" || key === "grid") {
-                  startTransition(() => {
-                    setViewMode(key);
-                    updateQuery({ view: key }, { mode: "replace", hash: window.location.hash });
-                  });
-                }
-              }}
+        <div className="mb-4 flex flex-col gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            {toolbar}
+            <div
+              className="ml-auto hidden shrink-0 @min-[41rem]/moment-feed:block"
+              data-slot="moment-feed-view"
             >
-              <Segment.Item id="list">
-                <Icon aria-hidden="true" icon="gravity-ui:list-ul" />
-                {t("listView")}
-              </Segment.Item>
-              <Segment.Item id="grid">
-                <Icon aria-hidden="true" icon="gravity-ui:rectangles-4" />
-                {t("gridView")}
-              </Segment.Item>
-            </Segment>
+              <Segment
+                aria-label={t("viewMode")}
+                selectedKey={viewMode}
+                size="sm"
+                onSelectionChange={(key) => {
+                  if (key === "list" || key === "grid") {
+                    startTransition(() => {
+                      setViewMode(key);
+                      updateQuery({ view: key }, { mode: "replace", hash: window.location.hash });
+                    });
+                  }
+                }}
+              >
+                <Segment.Item id="list">
+                  <Icon aria-hidden="true" icon="gravity-ui:list-ul" />
+                  {t("listView")}
+                </Segment.Item>
+                <Segment.Item id="grid">
+                  <Icon aria-hidden="true" icon="gravity-ui:rectangles-4" />
+                  {t("gridView")}
+                </Segment.Item>
+              </Segment>
+            </div>
           </div>
+          {activeFilter}
         </div>
         <motion.div
           ref={scope}
