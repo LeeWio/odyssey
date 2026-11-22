@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.261.1](https://github.com/LeeWio/odyssey/compare/v1.261.0...v1.261.1) (2026-11-22)
+
+
+### Bug Fixes
+
+* **moments:** refine the subscription flow ([#117](https://github.com/LeeWio/odyssey/issues/117)) ([555ebe3](https://github.com/LeeWio/odyssey/commit/555ebe3c1e0c5df3809db2892dfb54e177665f50))
+
 ## [1.261.0](https://github.com/LeeWio/odyssey/compare/v1.260.9...v1.261.0) (2026-11-22)
 
 
