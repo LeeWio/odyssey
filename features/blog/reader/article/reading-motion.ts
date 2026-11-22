@@ -1,5 +1,5 @@
-import gsap from "gsap";
 import { READING_JUMP_EVENT, readingScrollOffset } from "@/lib/reading-scroll";
+import { readingRevealProfiles } from "./reading-reveal-keyframes";
 
 const READING_UNITS = [
   "p:not(:empty)",
@@ -17,25 +17,9 @@ const FAST_SCROLL_WINDOW_MS = 160;
 const FAST_SCROLL_DISTANCE_PX = 360;
 const FAST_START_PROGRESS = 0.15;
 const FAST_TIME_SCALE = 2.25;
-const TEXT_REVEAL = {
-  fadeSeconds: 0.34,
-  blurFrom: "blur(7px)",
-  focusSeconds: 0.39,
-  travelFrom: { y: 16 },
-  travelTo: { y: 0 },
-  settleSeconds: 0.68,
-};
-const IMAGE_REVEAL = {
-  fadeSeconds: 0.46,
-  blurFrom: "blur(6px)",
-  focusSeconds: 0.5,
-  travelFrom: { y: 8, scale: 1.025 },
-  travelTo: { y: 0, scale: 1 },
-  settleSeconds: 0.82,
-};
 
 export function bindReadingMotion(root: HTMLElement, opening: boolean) {
-  if (!("IntersectionObserver" in window)) return;
+  if (!("IntersectionObserver" in window) || typeof root.animate !== "function") return;
   const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
   if (preference.matches) return;
 
@@ -45,7 +29,8 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
   });
   if (!units.length) return;
 
-  const running = new Set<gsap.core.Timeline>();
+  const profiles = readingRevealProfiles();
+  const running = new Set<Animation>();
   const forwardScroll: Array<{ time: number; top: number }> = [];
   let viewportTop = readingScrollOffset();
   let viewportHeight = window.innerHeight;
@@ -92,41 +77,21 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
   }
 
   function play(element: HTMLElement, tall: boolean, fast: boolean) {
-    const reveal = element.matches("figure") ? IMAGE_REVEAL : TEXT_REVEAL;
-    const timeline = gsap.timeline({
-      paused: true,
-      defaults: { ease: "power2.out", immediateRender: true },
-      onComplete() {
-        running.delete(timeline);
-        timeline.revert();
-      },
-    });
-
-    timeline.fromTo(
-      element,
-      { opacity: tall ? 0.65 : 0 },
-      { opacity: 1, duration: tall ? 0.28 : reveal.fadeSeconds },
-      0
-    );
-    if (!tall) {
-      timeline
-        .fromTo(
-          element,
-          { filter: reveal.blurFrom },
-          { filter: "blur(0px)", duration: reveal.focusSeconds },
-          0
-        )
-        .fromTo(
-          element,
-          reveal.travelFrom,
-          { ...reveal.travelTo, duration: reveal.settleSeconds, ease: "power3.out" },
-          0
-        );
+    const { duration, keyframes } = tall
+      ? profiles.tall
+      : element.matches("figure")
+        ? profiles.image
+        : profiles.text;
+    const animation = element.animate(keyframes, { duration, fill: "both" });
+    running.add(animation);
+    animation.onfinish = () => {
+      running.delete(animation);
+      animation.cancel();
+    };
+    if (fast) {
+      animation.playbackRate = FAST_TIME_SCALE;
+      animation.currentTime = duration * FAST_START_PROGRESS;
     }
-
-    running.add(timeline);
-    if (fast) timeline.progress(FAST_START_PROGRESS).timeScale(FAST_TIME_SCALE);
-    timeline.play();
   }
 
   function scrolledQuickly(previousTop: number, now: number) {
@@ -148,7 +113,7 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
     const now = performance.now();
     if (scrolledQuickly(previousTop, now) || viewportTop >= previousTop + previousHeight) {
       if (now > fastUntil) {
-        for (const timeline of running) timeline.timeScale(FAST_TIME_SCALE);
+        for (const animation of running) animation.updatePlaybackRate(FAST_TIME_SCALE);
       }
       fastUntil = now + FAST_SCROLL_WINDOW_MS;
     }
@@ -211,7 +176,7 @@ export function bindReadingMotion(root: HTMLElement, opening: boolean) {
   }
 
   function cancelRunning() {
-    for (const timeline of running) timeline.revert();
+    for (const animation of running) animation.cancel();
     running.clear();
   }
 

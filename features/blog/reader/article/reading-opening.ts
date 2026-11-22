@@ -47,7 +47,7 @@ export const READING_OPENING_SCRIPT = `(() => {
     }
   }
 
-  if ((!reloading && scrollY !== 0) || !("IntersectionObserver" in window)) return;
+  if ((!reloading && scrollY !== 0) || !("IntersectionObserver" in window) || typeof root.animate !== "function") return;
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
   if (motion.matches) return;
 
