@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.262.1](https://github.com/LeeWio/odyssey/compare/v1.262.0...v1.262.1) (2026-11-22)
+
+
+### Bug Fixes
+
+* **reader:** preserve paragraph reveals across scroll speeds ([#129](https://github.com/LeeWio/odyssey/issues/129)) ([95a792f](https://github.com/LeeWio/odyssey/commit/95a792f6610c5e23982d8844bcc74be641194c92))
+
 ## [1.262.0](https://github.com/LeeWio/odyssey/compare/v1.261.3...v1.262.0) (2026-11-22)
 
 
