@@ -1,3 +1,5 @@
+import { parseRelativeDate } from "@/lib/relative-time";
+
 export type JournalStory = {
   id?: number;
   title?: string | null;
@@ -21,10 +23,8 @@ export function formatJournalDate(
   locale: string,
   fallback: string
 ) {
-  if (!value) return fallback;
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return fallback;
+  const date = parseRelativeDate(value);
+  if (!date) return fallback;
 
   return new Intl.DateTimeFormat(locale, {
     day: "numeric",

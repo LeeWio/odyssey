@@ -15,7 +15,11 @@ const columns = ["Field notes", "Working systems"].map((name, index) => ({
   createdAt: "2026-10-01T00:00:00Z",
 }));
 
-test.use({ locale: "en-US", contextOptions: { reducedMotion: "reduce" } });
+test.use({
+  locale: "en-US",
+  timezoneId: "Asia/Shanghai",
+  contextOptions: { reducedMotion: "reduce" },
+});
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/**", (route) => {
@@ -241,11 +245,13 @@ test("editorial text remains readable in every theme and authored thumbnails ret
   }
 });
 
-test("text-only lead and normal motion keep reading links accessible", async ({
+test("a text-only lead keeps dates and reading links stable after hydration @smoke", async ({
   page,
 }, testInfo) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 390, height: 844 });
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/single");
   const lead = page.getByTestId("journal-lead");
   await expect(lead).toBeVisible();
@@ -261,5 +267,8 @@ test("text-only lead and normal motion keep reading links accessible", async ({
   await expect(filter).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(link).toBeFocused();
+  await expect(lead.locator("time")).toHaveAttribute("datetime", story(22).publishedAt);
+  await expect(lead.locator("time")).toHaveText("Oct 1, 2026");
+  expect(errors).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath("journal-text-only-lead.png") });
 });

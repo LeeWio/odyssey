@@ -31,3 +31,7 @@ The stacked-cover alternative gave featured media more space but depended on art
 | `OPENAPI_FILE=contracts/nexus-openapi.operations.json bun run api:coverage` | All 319 frontend operations matched the pinned contract.                                                                                        |
 
 The AI review checked query and pagination state, route navigation, the shared action menu, theme tokens, loading and mobile overflow against `989143d4`. Signed-in writes were exercised on Playwright fixtures. The production smoke uses public journeys.
+
+## Production follow-up
+
+The first production smoke found a hydration mismatch on the lead's date. Nexus returned `2026-10-13T04:43:43` with no offset. The server rendered October 13 and the Asia/Shanghai browser rendered October 12 because JavaScript parsed the value in the runtime's local time zone before formatting it in UTC. The journal uses the shared API timestamp parser to handle offset-free timestamps consistently and retain explicit offsets. Browser coverage uses a timestamp with the production format and checks the displayed date and page errors in Asia/Shanghai.
