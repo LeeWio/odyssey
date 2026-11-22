@@ -3,6 +3,7 @@ import messages from "../../messages/en.json";
 import { story } from "./fixtures/journal";
 
 const envelope = (data: unknown) => ({ code: 200, message: "OK", data });
+const category = { id: 1, name: "Engineering", slug: "engineering", count: 12 };
 const columns = ["Field notes", "Working systems"].map((name, index) => ({
   id: index + 1,
   name,
@@ -23,12 +24,16 @@ test.beforeEach(async ({ page }) => {
     if (url.pathname.endsWith("/blog/facets")) {
       data = {
         totalPublishedCount: 13,
-        categories: [{ id: 1, name: "Engineering", slug: "engineering", count: 13 }],
+        categories: [category],
         tags: [{ id: 1, name: "Design", slug: "design", count: 8 }],
         archives: [{ year: 2026, month: 10, count: 13 }],
       };
     } else if (url.pathname.endsWith("/blog/discovery")) {
-      data = { trending: [story(1), story(2)], mostRead: [story(3)], categoryGroups: [] };
+      data = {
+        trending: [story(1), story(2)],
+        mostRead: [story(3)],
+        categoryGroups: [{ category, heroPost: story(5), supportingPosts: [story(6)] }],
+      };
     } else if (url.pathname.endsWith("/columns")) {
       data = columns;
     } else if (url.pathname.includes("/columns/series-")) {
@@ -52,68 +57,77 @@ test("editorial hierarchy adapts across screens without overlapping text or losi
   });
   const lead = page.getByTestId("journal-lead").first();
   const companions = page.getByTestId("journal-feature-layout").getByTestId("journal-companion");
-  const grid = page.getByTestId("journal-latest-grid");
+  const list = page.getByTestId("journal-latest-list");
+  const toolbar = page.getByRole("search", { name: messages.Journal.searchArticles });
+  const search = toolbar.getByRole("searchbox");
+  const filter = toolbar.getByRole("button", { name: /Filter articles by topic/ });
   await expect(heading).toBeVisible();
-  await expect(grid.getByRole("article")).toHaveCount(12);
+  await expect(list.getByRole("article")).toHaveCount(12);
   await expect(companions).toHaveCount(2);
-  await expect(lead.locator("canvas")).toHaveCount(0);
+  await expect(filter).toBeEnabled();
+  await expect(lead.getByRole("link")).toHaveAttribute("href", "/single/design-story-22");
 
-  for (const width of [390, 820, 1440, 1920, 2560]) {
-    await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
+  for (const width of [320, 390, 820, 1024, 1440, 1920, 2560]) {
+    await page.setViewportSize({ width, height: width <= 390 ? 844 : 1000 });
+    await page.evaluate(() => window.scrollTo(0, 0));
     const leadBox = (await lead.boundingBox())!;
     const secondaryBox = (await companions.first().boundingBox())!;
-    expect(secondaryBox.y).toBeGreaterThanOrEqual(leadBox.y + leadBox.height);
-    const leadMedia = lead
-      .locator('a > div[aria-hidden="true"], a > div:has(> [aria-hidden="true"])')
-      .first();
-    await expect(leadMedia).toBeVisible();
     if (width >= 1024) {
-      const media = (await leadMedia.boundingBox())!;
-      const title = (await lead.getByRole("heading").boundingBox())!;
-      expect(title.x).toBeGreaterThan(media.x + media.width);
+      expect(secondaryBox.x).toBeGreaterThanOrEqual(leadBox.x + leadBox.width);
+      expect(secondaryBox.y).toBeLessThan(leadBox.y + leadBox.height);
+    } else {
+      expect(secondaryBox.y).toBeGreaterThanOrEqual(leadBox.y + leadBox.height);
     }
+    if (width === 390) await expect(page.getByRole("heading", { name: "Latest" })).toBeInViewport();
+    const title = await lead.getByRole("heading").evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { size: parseFloat(style.fontSize), lineHeight: parseFloat(style.lineHeight) };
+    });
+    expect(title.lineHeight).toBeGreaterThan(title.size);
+    const [searchBox, filterBox] = [(await search.boundingBox())!, (await filter.boundingBox())!];
+    expect(filterBox.x).toBeGreaterThan(searchBox.x + searchBox.width);
+    expect(Math.abs(filterBox.y - searchBox.y)).toBeLessThan(8);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true
     );
     expect(
-      await grid.evaluate((element) =>
-        [...element.querySelectorAll("article")].every((article) => {
+      await list.evaluate((element) =>
+        [...element.querySelectorAll('[role="article"]')].every((article) => {
           const box = article.getBoundingClientRect();
-          return [...article.querySelectorAll("a, button")].every((item) => {
+          return [...article.querySelectorAll("h3, a, button")].every((item) => {
             const bounds = item.getBoundingClientRect();
             return bounds.left >= box.left - 1 && bounds.right <= box.right + 1;
           });
         })
       )
     ).toBe(true);
-    const paginationBox = (await page
-      .locator('section[aria-labelledby="latest-title"] nav')
-      .boundingBox())!;
-    const gridBox = (await grid.boundingBox())!;
-    expect(paginationBox.y).toBeGreaterThanOrEqual(gridBox.y + gridBox.height);
-    await page.locator('section[aria-labelledby="latest-title"] nav').scrollIntoViewIfNeeded();
-    const columns = page.locator('section[aria-labelledby="columns-title"]');
-    await expect(columns).toBeVisible();
-    expect(
-      await columns.evaluate((element) => {
-        const navigation = document.querySelector('section[aria-labelledby="latest-title"] nav');
-        return (
-          !!navigation &&
-          element.getBoundingClientRect().top > navigation.getBoundingClientRect().bottom
-        );
-      })
-    ).toBe(true);
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await page.screenshot({ path: testInfo.outputPath(`journal-${width}.png`) });
-    await grid.scrollIntoViewIfNeeded();
-    await page.screenshot({ path: testInfo.outputPath(`journal-list-${width}.png`) });
+    const pagination = page.getByRole("navigation", { name: messages.Journal.indexPagination });
+    const paginationBox = (await pagination.boundingBox())!;
+    const listBox = (await list.boundingBox())!;
+    expect(paginationBox.y).toBeGreaterThanOrEqual(listBox.y + listBox.height);
+    if (width === 390 || width === 1440) {
+      await page.screenshot({ path: testInfo.outputPath(`journal-${width}.png`) });
+    }
   }
-  await page.getByRole("button", { name: /Working systems/ }).click();
+  const pagination = page.getByRole("navigation", { name: messages.Journal.indexPagination });
+  await pagination.scrollIntoViewIfNeeded();
+  const columnsSection = page.getByRole("region", { name: messages.Journal.indexColumns });
+  await expect(columnsSection).toBeVisible();
+  const columnsBox = (await columnsSection.boundingBox())!;
+  const paginationBox = (await pagination.boundingBox())!;
+  expect(columnsBox.y).toBeGreaterThanOrEqual(paginationBox.y + paginationBox.height);
+  await columnsSection.getByRole("radio", { name: "Working systems" }).click();
   await expect(
-    page
-      .locator('section[aria-labelledby="columns-title"]')
-      .getByRole("link", { name: messages.Journal.viewColumn })
+    columnsSection.getByRole("link", { name: messages.Journal.viewColumn })
   ).toHaveAttribute("href", "/columns/series-2");
+  const archive = page.getByRole("region", { name: messages.Journal.fromTheArchive });
+  const shelf = archive.getByRole("button", { name: "Engineering" });
+  await shelf.press("Enter");
+  await expect(shelf).toHaveAttribute("aria-expanded", "true");
+  await expect(archive.getByRole("link", { name: /Browse Engineering/ })).toHaveAttribute(
+    "href",
+    "/single/categories/engineering"
+  );
 });
 
 test("search prioritizes results and reset restores the editorial opening", async ({ page }) => {
@@ -131,27 +145,34 @@ test("search prioritizes results and reset restores the editorial opening", asyn
   await expect(search).toHaveValue("");
   await expect(page).toHaveURL(/\/single$/);
   await expect(page.getByTestId("journal-lead")).toHaveCount(1);
-  await expect(page.getByTestId("journal-latest-grid").getByRole("article")).toHaveCount(12);
+  await expect(page.getByTestId("journal-latest-list").getByRole("article")).toHaveCount(12);
   await page.getByRole("button", { name: messages.Journal.next, exact: true }).click();
   await expect(page).toHaveURL(/page=2/);
   await expect(page.getByTestId("journal-lead")).toHaveCount(0);
-  await expect(page.getByTestId("journal-latest-grid").getByRole("article")).toHaveCount(1);
+  await expect(page.getByTestId("journal-latest-list").getByRole("article")).toHaveCount(1);
+  await page.getByRole("button", { name: messages.Journal.previous, exact: true }).click();
+  await expect(page).toHaveURL(/\/single$/);
+  await expect(page.getByTestId("journal-lead")).toBeVisible();
 });
 
-test("featured text remains readable in every theme and media retains its dimensions", async ({
+test("editorial text remains readable in every theme and authored thumbnails retain their dimensions", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/single");
   const lead = page.getByTestId("journal-lead").first();
   await expect(lead).toBeVisible();
-  const bounds = (await lead.boundingBox())!;
-  for (const variant of ["mouve", "glass", "brutalism"]) {
+  const cover = page.getByTestId("journal-latest-list").getByRole("article").first().locator("img");
+  await expect(cover).toHaveAttribute("src", "/IMG_5332.JPG");
+  await expect
+    .poll(() => cover.evaluate((el: HTMLImageElement) => el.naturalWidth))
+    .toBeGreaterThan(0);
+  for (const variant of ["default", "mouve", "glass", "brutalism"]) {
     for (const mode of ["light", "dark"]) {
       await page.evaluate(
         ({ variant, mode }) => {
           const root = document.documentElement;
-          const themeName = `${variant}-${mode}`;
+          const themeName = variant === "default" ? mode : `${variant}-${mode}`;
           root.dataset.theme = themeName;
           for (const className of [
             "mouve-light",
@@ -169,8 +190,52 @@ test("featured text remains readable in every theme and media retains its dimens
         },
         { variant, mode }
       );
-      await expect(lead.getByRole("heading")).toHaveCSS("color", "rgb(255, 255, 255)");
-      expect((await lead.boundingBox())!.height).toBe(bounds.height);
+      const measureContrast = () =>
+        page.evaluate(() => {
+          const canvas = document.createElement("canvas");
+          canvas.width = canvas.height = 1;
+          const context = canvas.getContext("2d")!;
+          const paint = (color: string) => {
+            context.fillStyle = color;
+            context.fillRect(0, 0, 1, 1);
+          };
+          const brightness = () => {
+            const channels = [...context.getImageData(0, 0, 1, 1).data].slice(0, 3);
+            const [r, g, b] = channels.map((channel) => {
+              const value = channel / 255;
+              return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+            });
+            return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+          };
+          const articles = [
+            document.querySelector('[data-testid="journal-lead"]')!,
+            document.querySelector('[data-testid="journal-latest-list"] [role="article"]')!,
+          ];
+          return Math.min(
+            ...articles.flatMap((article) =>
+              Array.from(
+                article.querySelectorAll('h3 a, time, [data-slot="card-description"]'),
+                (text) => {
+                  context.clearRect(0, 0, 1, 1);
+                  paint(getComputedStyle(document.body).backgroundColor);
+                  paint(getComputedStyle(article).backgroundColor);
+                  const background = brightness();
+                  paint(getComputedStyle(text).color);
+                  const foreground = brightness();
+                  return (
+                    (Math.max(background, foreground) + 0.05) /
+                    (Math.min(background, foreground) + 0.05)
+                  );
+                }
+              )
+            )
+          );
+        });
+      await expect
+        .poll(measureContrast, { message: `${variant}-${mode}` })
+        .toBeGreaterThanOrEqual(4.5);
+      const bounds = (await cover.boundingBox())!;
+      expect(bounds.width / bounds.height).toBeCloseTo(1.5, 1);
       await page.screenshot({ path: testInfo.outputPath(`journal-${variant}-${mode}.png`) });
     }
   }
@@ -190,7 +255,11 @@ test("text-only lead and normal motion keep reading links accessible", async ({
   await expect(lead.getByRole("heading")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const link = lead.getByRole("link");
-  await link.focus();
+  const filter = page.getByRole("button", { name: /Filter articles by topic/ });
+  await expect(filter).toBeEnabled();
+  await filter.focus();
+  await expect(filter).toBeFocused();
+  await page.keyboard.press("Tab");
   await expect(link).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath("journal-text-only-lead.png") });
 });

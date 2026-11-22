@@ -36,18 +36,19 @@ test("article cards copy a full URL and use client navigation", async ({ page })
   });
   await page.goto("/single?q=foundation");
   const card = page.getByRole("article", { name: designArticle.title, exact: true }).first();
-  const share = card.getByRole("button", { name: "Share article", exact: true });
-  await share.click();
-  await expect(card.getByRole("button", { name: "Article link copied" })).toBeVisible();
+  const actions = card.getByRole("button", { name: "More article actions" });
+  const copy = page.getByRole("menuitem", { name: "Copy article link" });
+  await actions.click();
+  await copy.click();
+  await expect(page.getByText("Article link copied", { exact: true })).toBeVisible();
   expect(await page.evaluate(() => sessionStorage.getItem("copied-url"))).toBe(
     new URL(`/single/${designArticle.slug}`, page.url()).href
   );
 
   await page.evaluate(() => sessionStorage.setItem("reject-copy", "1"));
-  await card.getByRole("button", { name: "More article actions" }).click();
-  await page.getByRole("menuitem", { name: "Copy article link" }).click();
+  await actions.click();
+  await copy.click();
   await expect(page.getByText("Unable to copy article link.")).toBeVisible();
-  await expect(share).toBeVisible();
   await page.evaluate(() => {
     document.documentElement.dataset.navigationTest = "preserved";
   });
@@ -61,10 +62,7 @@ test("article cards copy a full URL and use client navigation", async ({ page })
 test("article card opens the author's articles with the keyboard", async ({ page }) => {
   await page.goto("/single?q=foundation");
   const card = page.getByRole("article", { name: designArticle.title, exact: true }).first();
-  await card
-    .getByRole("button", { name: `View ${designArticle.authorName}’s profile` })
-    .press("Enter");
-  const link = page.getByRole("link", { name: "View author articles", exact: true });
+  const link = card.getByRole("link", { name: designArticle.authorName, exact: true });
   const path = `/single/authors/${encodeURIComponent(designArticle.authorName)}`;
   await expect(link).toHaveAttribute("href", path);
   await link.press("Enter");
@@ -103,6 +101,7 @@ test("article card reads and updates the account reading-list status", async ({ 
     })
   );
   await page.goto("/single?q=foundation");
+  await expect(page.getByRole("button", { name: "Open account menu" })).toBeVisible();
   const card = page.getByRole("article", { name: designArticle.title, exact: true }).first();
   const actions = card.getByRole("button", { name: "More article actions" });
   await actions.click();
@@ -116,6 +115,7 @@ test("article card reads and updates the account reading-list status", async ({ 
     })
   ).toBeVisible();
   await page.goBack();
+  await expect(page.getByRole("button", { name: "Open account menu" })).toBeVisible();
   await actions.click();
   await page.getByRole("menuitem", { name: "Remove from reading list" }).click();
   await expect.poll(() => writes).toEqual(["PUT", "DELETE"]);
