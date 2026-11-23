@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.262.4](https://github.com/LeeWio/odyssey/compare/v1.262.3...v1.262.4) (2026-11-23)
+
+
+### Bug Fixes
+
+* remove the home gallery and repair Moment interactions ([#136](https://github.com/LeeWio/odyssey/issues/136)) ([a4785be](https://github.com/LeeWio/odyssey/commit/a4785be0cb298197c3ecaef2dfb51a5ed6b5d1fd))
+
 ## [1.262.3](https://github.com/LeeWio/odyssey/compare/v1.262.2...v1.262.3) (2026-11-23)
 
 
