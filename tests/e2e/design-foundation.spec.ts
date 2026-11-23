@@ -50,10 +50,11 @@ for (const viewport of [
     await page.setViewportSize(viewport);
     await page.goto("/");
     await expect(page.locator("#writing-title")).toBeVisible();
+    await expect(page.locator("#gallery-showcase-title")).toHaveCount(0);
     const sections = page.locator(
-      'section[aria-labelledby="explore-odyssey-title"], #writing, section[aria-labelledby="gallery-showcase-title"], #footprints-showcase, #guestbook, #faq'
+      'section[aria-labelledby="explore-odyssey"], #writing, #footprints-showcase > :has(> header), #guestbook, #faq'
     );
-    await expect(sections).toHaveCount(6);
+    await expect(sections).toHaveCount(5);
     const boundaries = await sections.evaluateAll((elements) =>
       elements.map((element) => {
         const rect = element.getBoundingClientRect();
