@@ -46,6 +46,12 @@ test("renders a readable article on mobile @smoke", async ({ page }) => {
 });
 
 test("keeps article reading usable on a narrow viewport", async ({ page }) => {
+  await page.route("**/emoji-datasource-apple/img/apple/64/1f603.png", (route) =>
+    route.fulfill({
+      contentType: "image/svg+xml",
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"></svg>',
+    })
+  );
   await page.goto("/single/mobile-reading");
 
   await expect(
@@ -55,6 +61,13 @@ test("keeps article reading usable on a narrow viewport", async ({ page }) => {
   await expect(page.locator("[data-reading-content]")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
+  const paragraph = page.locator("[data-article-body] p").filter({ hasText: "Opening paragraph." });
+  const emoji = paragraph.locator('[data-type="emoji"] > img');
+  await expect(emoji).toHaveCSS("display", "inline-block");
+  await expect(emoji).toHaveCSS("width", "16px");
+  await expect(emoji).toHaveCSS("height", "16px");
+  await expect(paragraph).toHaveCSS("height", "28px");
+
   const codeBlock = page.locator("[data-article-body] pre").first();
   await expect(codeBlock).toBeVisible();
   expect(await codeBlock.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
@@ -62,7 +75,9 @@ test("keeps article reading usable on a narrow viewport", async ({ page }) => {
   );
 
   const figure = page.getByRole("figure", { name: "A reading detail" });
-  await expect(figure.getByRole("img", { name: "Reading detail" })).toBeVisible();
+  const image = figure.getByRole("img", { name: "Reading detail" });
+  await expect(image).toBeVisible();
+  await expect(image).toHaveCSS("display", "block");
   await expect(figure.getByText("A reading detail", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "More article actions" })).toBeVisible();
 });

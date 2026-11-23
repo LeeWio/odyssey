@@ -17,7 +17,14 @@ export const mobileArticle = {
         attrs: { level: 2, id: "chapter-one", "data-toc-id": "chapter-one" },
         content: [{ type: "text", text: "Chapter one" }],
       },
-      { type: "paragraph", content: [{ type: "text", text: "Opening paragraph." }] },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Opening paragraph. " },
+          { type: "emoji", attrs: { name: "grinning_face_with_big_eyes" } },
+          { type: "text", text: " Still on one line." },
+        ],
+      },
       {
         type: "codeBlock",
         attrs: { language: "typescript" },

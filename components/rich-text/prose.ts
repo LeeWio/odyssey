@@ -26,6 +26,7 @@ export const RICH_TEXT_PROSE_CLASS_NAME = [
   "[&_.node-codeBlock>[data-node-view-content-react]]:block [&_.node-codeBlock>[data-node-view-content-react]]:max-w-full [&_.node-codeBlock>[data-node-view-content-react]]:overflow-x-auto [&_.node-codeBlock>[data-node-view-content-react]]:p-4 [&_.node-codeBlock>[data-node-view-content-react]]:whitespace-pre!",
   "[&_hr]:my-8! [&_hr]:border-separator",
   "[&_img]:m-0! [&_img]:h-auto [&_img]:max-w-full [&_figure]:m-0",
+  "[&_span[data-type=emoji]>img]:inline-block [&_span[data-type=emoji]>img]:size-[1em] [&_span[data-type=emoji]>img]:align-text-bottom [&_span[data-type=emoji]>img]:rounded-none",
   // Match HeroUI Table's theme-driven outer radius, including square-corner themes.
   "[&_.tableWrapper]:min-w-0 [&_.tableWrapper]:max-w-full [&_.tableWrapper]:overflow-x-auto [&_.tableWrapper]:rounded-[min(32px,calc(var(--radius)*2.5))]! [&_.tableWrapper]:border [&_.tableWrapper]:border-separator [&_.tableWrapper]:bg-surface",
   "[&_.tableWrapper_table]:m-0! [&_.tableWrapper_table]:w-full [&_.tableWrapper_table]:max-w-full [&_.tableWrapper_table]:table-fixed [&_.tableWrapper_table]:overflow-hidden [&_.tableWrapper_table]:border-collapse! [&_.tableWrapper_table]:border-hidden!",
