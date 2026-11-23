@@ -33,7 +33,8 @@ export function CommentSheet({ postId, momentId, isOpen, onOpenChange }: Comment
       <Sheet.Backdrop isExiting variant="blur">
         <Sheet.Content className={SHEET_CONTENT_SIZE}>
           <Sheet.Dialog>
-            <Sheet.Handle />
+            {/* Preserve HeroUI's pointer drag when the shared styles enable vertical panning. */}
+            <Sheet.Handle className="touch-none!" />
             <CommentSystem
               momentId={momentId}
               postId={postId}
@@ -105,7 +106,7 @@ function CommentSheetContent({
           <Sheet.Backdrop>
             <Sheet.Content className={SHEET_CONTENT_SIZE}>
               <Sheet.Dialog className={NESTED_DIALOG_HEIGHT}>
-                <Sheet.Handle />
+                <Sheet.Handle className="touch-none!" />
                 <CommentInput
                   embedded
                   formId={composerFormId}
@@ -189,7 +190,7 @@ function CommentEditSheet({
         <Sheet.Backdrop>
           <Sheet.Content className={SHEET_CONTENT_SIZE}>
             <Sheet.Dialog className={NESTED_DIALOG_HEIGHT}>
-              <Sheet.Handle />
+              <Sheet.Handle className="touch-none!" />
               <Sheet.Header>
                 <Sheet.Heading>{t("editComment")}</Sheet.Heading>
               </Sheet.Header>
