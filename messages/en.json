@@ -1065,6 +1065,7 @@
     "bookmarkUpdateFailed": "The bookmark could not be updated. Please try again.",
     "signIn": "Sign in",
     "backToMoments": "Moments",
+    "entryTitle": "Moment",
     "topicsUnavailable": "Topics could not be loaded.",
     "topicsTitle": "Topics",
     "topicsDescription": "Subjects that show up across the moments.",
