@@ -17,7 +17,6 @@ import { ExploreOdyssey } from "@/features/home/explore-odyssey";
 import { FeaturedWriting } from "@/features/home/featured-writing";
 import { FootprintsShowcase } from "@/features/home/footprints-showcase";
 import { FriendLinksShowcase } from "@/features/home/friend-links-showcase";
-import { GalleryShowcase } from "@/features/home/gallery-showcase";
 import { HelloApple } from "@/features/home/hello-apple";
 import { ProjectsShowcase } from "@/features/home/projects-showcase";
 import { MotionChip, MotionTypography } from "@/components/ui";
@@ -163,7 +162,6 @@ export function HomePage({ moments, orientation }: { moments: ReactNode; orienta
 
         <FeaturedWriting />
         <ProjectsShowcase />
-        <GalleryShowcase />
         <FootprintsShowcase />
         {moments}
         <FriendLinksShowcase />

@@ -27,11 +27,12 @@ createServer((request, response) => {
     return;
   }
   if (pathname === "/health") return send(200, { ready: true });
-  if (pathname === "/api/v1/public/moments/809") {
+  if (pathname === "/api/v1/public/moments/809" || pathname === "/api/v1/public/moments/810") {
+    const isPublic = pathname.endsWith("/809");
     return send(200, {
-      id: 809,
-      content: "An older Moment opened directly from an email.",
-      visibility: "public",
+      id: isPublic ? 809 : 810,
+      content: isPublic ? "An older Moment opened directly from an email." : "Private Moment.",
+      visibility: isPublic ? "public" : "private",
       authorName: "Fixture author",
       createdAt: "2026-10-01T00:00:00Z",
       updatedAt: "2026-10-01T00:00:00Z",

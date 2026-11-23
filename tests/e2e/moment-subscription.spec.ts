@@ -155,9 +155,7 @@ for (const action of ["verify", "unsubscribe"] as const) {
   });
 }
 
-test("email links locate the Moment in the timeline and unavailable entries return 404", async ({
-  page,
-}) => {
+test("legacy timeline hashes still locate an older Moment", async ({ page }) => {
   const entries = Array.from({ length: 13 }, (_, index) => ({
     id: 821 - index,
     content: `Email link fixture ${821 - index}`,
@@ -185,11 +183,42 @@ test("email links locate the Moment in the timeline and unavailable entries retu
       },
     });
   });
-  await page.goto("/moments/entry/809");
+  await page.goto("/moments#moment-809");
   await expect(page).toHaveURL(/\/moments\?page=2#moment-809$/);
   const target = page.getByRole("region", { name: "Moments feed" }).locator("#moment-809");
   await expect(target).toBeFocused();
   await expect(target).toBeInViewport();
-  const response = await page.goto("/moments/entry/999999");
-  expect(response?.status()).toBe(404);
+});
+
+for (const javaScriptEnabled of [true, false]) {
+  test.describe(`Moment email links with JavaScript ${javaScriptEnabled ? "on" : "off"}`, () => {
+    test.use({ javaScriptEnabled });
+
+    test("open the exact public entry without scanning the feed", async ({ page }) => {
+      const feedRequests: string[] = [];
+      page.on("request", (request) => {
+        if (new URL(request.url()).pathname === "/api/v1/public/moments") {
+          feedRequests.push(request.url());
+        }
+      });
+
+      const response = await page.goto("/moments/entry/809");
+      expect(response?.status()).toBe(200);
+      await expect(page).toHaveURL(/\/moments\/entry\/809$/);
+      const entry = page.locator("article#moment-809");
+      await expect(entry.getByText("An older Moment opened directly from an email.")).toBeVisible();
+      await expect(page.getByRole("region", { name: "Moments feed" })).toHaveCount(0);
+      expect(feedRequests).toEqual([]);
+      const back = page.getByRole("main").getByRole("link", { name: "Moments", exact: true });
+      await expect(back).toHaveAttribute("href", "/moments");
+    });
+  });
+}
+
+test("private, missing, and invalid Moment entry IDs return 404", async ({ page }) => {
+  for (const id of ["810", "999999", "not-a-moment"]) {
+    const response = await page.goto(`/moments/entry/${id}`);
+    expect(response?.status()).toBe(404);
+    await expect(page.getByText("Private Moment.")).toHaveCount(0);
+  }
 });

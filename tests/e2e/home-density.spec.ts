@@ -81,12 +81,12 @@ test("home reveals more real content as its container grows without refetching",
   await expect(linkGrid.getByRole("listitem", { includeHidden: true })).toHaveCount(6);
 
   for (const viewport of [
-    { width: 390, columns: 1, preview: 3, carousel: 1, gallery: 3 },
-    { width: 820, columns: 2, preview: 4, carousel: 2, gallery: 4 },
-    { width: 1440, columns: 4, preview: 8, carousel: 4, gallery: 4 },
-    { width: 1920, columns: 6, preview: 12, carousel: 6, gallery: 4 },
-    { width: 2560, columns: 8, preview: 12, carousel: 6, gallery: 4 },
-    { width: 390, columns: 1, preview: 3, carousel: 1, gallery: 3 },
+    { width: 390, columns: 1, preview: 3, carousel: 1 },
+    { width: 820, columns: 2, preview: 4, carousel: 2 },
+    { width: 1440, columns: 4, preview: 8, carousel: 4 },
+    { width: 1920, columns: 6, preview: 12, carousel: 6 },
+    { width: 2560, columns: 8, preview: 12, carousel: 6 },
+    { width: 390, columns: 1, preview: 3, carousel: 1 },
   ]) {
     await page.setViewportSize({ width: viewport.width, height: 900 });
     for (const grid of [projectGrid]) {
@@ -121,9 +121,6 @@ test("home reveals more real content as its container grows without refetching",
     await expect(linkGrid.locator(":scope > li:visible")).toHaveCount(viewport.width < 640 ? 4 : 6);
     await expect(page.getByTestId("home-explore-grid").locator(":scope > div:visible")).toHaveCount(
       6
-    );
-    await expect(page.getByTestId("home-gallery-grid").locator(":scope > div:visible")).toHaveCount(
-      viewport.gallery
     );
     await expect
       .poll(async () => {
