@@ -21,14 +21,14 @@ const TOUR_STEPS = [
     action: "去东鳞西爪",
   },
   {
-    title: "看路上的光",
-    description: "图库和足迹",
-    icon: "gravity-ui:picture",
-    heading: "照片和落过脚的地方",
-    body: "图库是相机不肯删的几张。足迹从湖北老家出去，点一个点，看那一程。",
+    title: "看足迹",
+    description: "路线笔记",
+    icon: "gravity-ui:location-pin",
+    heading: "落过脚的地方",
+    body: "从湖北老家出去，陕西、广州、深圳、重庆、安徽、河南。点一个点，看那一程。",
     badge: "看",
-    href: "/gallery",
-    action: "去看看",
+    href: "/footprints",
+    action: "看足迹",
   },
   {
     title: "看桌上",
@@ -87,7 +87,7 @@ export function TourPage() {
             从哪开始
           </Typography>
           <Typography color="muted" type="body" className="mt-4 leading-7">
-            读一篇，看几张照片，看桌上，或者留一句。
+            读一篇，看足迹，看桌上，或者留一句。
           </Typography>
         </motion.header>
 

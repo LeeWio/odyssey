@@ -3,13 +3,6 @@ import { siteConfig } from "@/config/site";
 import { appendApiParams } from "@/lib/api";
 import { fetchServerApiJson } from "@/lib/api/server-client";
 
-interface FeedPost {
-  title: string;
-  slug: string;
-  summary?: string | null;
-  publishedAt?: string | null;
-}
-
 const feedPostsSchema = z.object({
   list: z.array(
     z.object({
@@ -54,11 +47,17 @@ export async function GET(request: Request) {
   const result = await fetchServerApiJson(
     appendApiParams("/api/v1/public/blog/posts", { page: 0, size: 50 }),
     feedPostsSchema,
-    { locale: "en", revalidate: 3600 }
+    // Cache the validated feed so an invalid upstream response can recover on the next request.
+    { locale: "en", cache: "no-store" }
   );
-  const posts: FeedPost[] = result.data?.list ?? [];
+  if (!result.data) {
+    return new Response("RSS feed temporarily unavailable", {
+      status: 503,
+      headers: { "Cache-Control": "no-store", "Retry-After": "60" },
+    });
+  }
 
-  const items = posts
+  const items = result.data.list
     .map((post) => {
       const url = new URL(`/single/${encodeURIComponent(post.slug)}`, `${origin}/`).toString();
       const publishedAt = toPublishedDate(post.publishedAt);

@@ -9,15 +9,7 @@ import {
   HOME_SECTION_TITLE,
 } from "./layout";
 
-import {
-  ArrowUpRight,
-  BookOpen,
-  Camera,
-  Comment,
-  Hammer,
-  MapPin,
-  Bookmark,
-} from "@gravity-ui/icons";
+import { ArrowUpRight, BookOpen, Comment, Hammer, MapPin, Bookmark } from "@gravity-ui/icons";
 import { Chip, Link, Typography } from "@heroui/react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
@@ -29,7 +21,6 @@ const DESTINATIONS = [
   { key: "writing", href: "/single", icon: BookOpen },
   { key: "moments", href: "/moments", icon: Comment },
   { key: "projects", href: "/projects", icon: Hammer },
-  { key: "gallery", href: "/gallery", icon: Camera },
   { key: "footprints", href: "/footprints", icon: MapPin },
   { key: "library", href: "/library", icon: Bookmark },
 ] as const;

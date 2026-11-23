@@ -24,14 +24,6 @@ const NAVIGATION_COPY: Record<
     description: "items.orbit.description",
     cta: "items.orbit.cta",
   },
-  travelogue: {
-    href: "/gallery",
-    label: "items.travelogue.label",
-    eyebrow: "items.travelogue.eyebrow",
-    title: "items.travelogue.title",
-    description: "items.travelogue.description",
-    cta: "items.travelogue.cta",
-  },
   more: {
     href: "/archive",
     label: "items.archive.label",

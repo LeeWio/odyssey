@@ -44,7 +44,6 @@ const MORE_DESTINATIONS = [
   { href: "/columns", title: "mega.archive.columns" },
   { href: "/archive", title: "mega.archive.readByDate" },
   { href: "/persona", title: "items.orbit.label" },
-  { href: "/gallery", title: "items.travelogue.label" },
   { href: "/uses", title: "mega.archive.uses" },
   { href: "/library", title: "readingLibrary" },
 ] as const;

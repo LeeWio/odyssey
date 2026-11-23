@@ -119,9 +119,7 @@ test("home reveals more real content as its container grows without refetching",
       expect(layout.overlap).toBe(false);
     }
     await expect(linkGrid.locator(":scope > li:visible")).toHaveCount(viewport.width < 640 ? 4 : 6);
-    await expect(page.getByTestId("home-explore-grid").locator(":scope > div:visible")).toHaveCount(
-      6
-    );
+    await expect(page.getByTestId("home-explore-grid").getByRole("link")).toHaveCount(5);
     await expect
       .poll(async () => {
         const widths = await slides.first().evaluate((slide) => ({

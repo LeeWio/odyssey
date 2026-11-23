@@ -99,9 +99,10 @@ for (const viewport of [
     const reader = page.locator("[data-article-body]");
     await expect(reader.locator(":scope > p")).toHaveCount(12);
     await expect(reader.getByRole("heading", { name: "Reading rhythm" })).toBeVisible();
-    expect((await page.locator("[data-reading-content]").boundingBox())!.width).toBeLessThanOrEqual(
-      768
-    );
+    expect((await reader.boundingBox())!.width).toBeLessThanOrEqual(768);
+    const shell = (await page.locator("[data-reading-content]").boundingBox())!;
+    expect(shell.x).toBeGreaterThanOrEqual(0);
+    expect(shell.x + shell.width).toBeLessThanOrEqual(viewport.width);
 
     for (const variant of ["mouve", "glass", "brutalism"]) {
       for (const mode of ["light", "dark"]) {

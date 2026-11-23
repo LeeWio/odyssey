@@ -140,8 +140,6 @@
     "highlight": "Start here",
     "recentLogs": "Still warm",
     "recentLogsHint": "The pieces that just landed.",
-    "metaGalleryTitle": "Analog Photography Gallery | Odyssey",
-    "metaGalleryDescription": "Browse modular landscapes, geometric intersections, and cold coastal weather patterns framed on medium-format analog film.",
     "metaUsesTitle": "Uses | Odyssey",
     "metaUsesDescription": "The hardware, software, and tools I use on a daily basis.",
     "metaFootprintsTitle": "Footprints | Odyssey",
@@ -1174,6 +1172,7 @@
     "explorer": "Explorer · {time}"
   },
   "Gallery": {
+    "tabLabel": "Gallery (coming later)",
     "eyebrow": "Future development",
     "title": "The gallery is coming later",
     "description": "This space is reserved for a future visual archive while the gallery experience is being redesigned."
@@ -1306,7 +1305,6 @@
     "eyebrow": "Stops",
     "title": "Places I've Been",
     "description": "From Hubei outward. Shaanxi, Guangzhou, Shenzhen, Chongqing, Anhui, Henan. Pick a point.",
-    "seePhotos": "See the photographs",
     "routeNotes": "Route notes",
     "yearsInMotion": "A few years in motion.",
     "placesInView": "{count, plural, one {# place in view} other {# places in view}}",
@@ -1479,13 +1477,6 @@
         "description": "Focus, patience, movement, and the code still compiling.",
         "cta": "Open Lately"
       },
-      "travelogue": {
-        "label": "Out There",
-        "eyebrow": "Pictures",
-        "title": "Pictures From the Road",
-        "description": "Places, weather, and whatever the camera kept.",
-        "cta": "Open Out There"
-      },
       "archive": {
         "label": "All of It",
         "eyebrow": "In order",
@@ -1533,17 +1524,6 @@
         "compiledIn": "Compiled in 1.2s",
         "hydrationAudits": "Hydration audits",
         "openCode": "Open code"
-      },
-      "travelogue": {
-        "icelandAlt": "Iceland coastline",
-        "icelandTitle": "Iceland",
-        "icelandMeta": "Iceland · 64°08′N",
-        "copenhagenAlt": "Copenhagen street",
-        "copenhagenTitle": "Copenhagen",
-        "copenhagenMeta": "Copenhagen · 55°40′N",
-        "kyotoAlt": "Kyoto lane",
-        "kyotoTitle": "Kyoto",
-        "kyotoMeta": "Kyoto · 35°01′N"
       },
       "archive": {
         "moments": "Moments",
