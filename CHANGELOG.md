@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.262.5](https://github.com/LeeWio/odyssey/compare/v1.262.4...v1.262.5) (2026-11-23)
+
+
+### Bug Fixes
+
+* make RSS failures retryable and correct gallery discovery ([#142](https://github.com/LeeWio/odyssey/issues/142)) ([d7764ee](https://github.com/LeeWio/odyssey/commit/d7764eea59d4324646ae774043157ae7088f573c))
+
 ## [1.262.4](https://github.com/LeeWio/odyssey/compare/v1.262.3...v1.262.4) (2026-11-23)
 
 
