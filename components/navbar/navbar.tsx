@@ -562,45 +562,7 @@ export const Navbar = () => {
               </Button>
             </div>
 
-            {/* Item 3: Travelogue */}
-            <div
-              className="relative"
-              onMouseEnter={() => previewNavigation("travelogue")}
-              onMouseLeave={cancelPreview}
-            >
-              {activeNavigation === "travelogue" && (
-                <motion.div
-                  layoutId="navigation-active"
-                  className="bg-default absolute inset-0 rounded-xl"
-                  transition={reduceMotion ? { duration: 0 } : activeIndicatorSpring}
-                />
-              )}
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-haspopup="dialog"
-                aria-expanded={activeNavigation === "travelogue"}
-                aria-controls="odyssey-mega-navigation"
-                onFocus={(event) => {
-                  lastTriggerRef.current = event.currentTarget as HTMLElement;
-                }}
-                onKeyDown={(event) => {
-                  if (event.key !== "ArrowDown") return;
-                  event.preventDefault();
-                  openNavigationFromKeyboard("travelogue", event.currentTarget);
-                }}
-                onPress={() => toggleNavigation("travelogue")}
-              >
-                <span className="relative z-10 flex items-center gap-1.5">
-                  {t("items.travelogue.label")}
-                  {activeNavigation === "travelogue" && isLocked && (
-                    <span className="bg-accent size-1 rounded-full" aria-hidden="true" />
-                  )}
-                </span>
-              </Button>
-            </div>
-
-            {/* Item 4: Archive */}
+            {/* Item 3: Archive */}
             <div
               className="relative"
               onMouseEnter={() => previewNavigation("more")}

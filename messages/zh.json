@@ -140,8 +140,6 @@
     "highlight": "先读这篇",
     "recentLogs": "还没凉的",
     "recentLogsHint": "刚写完，还热着。",
-    "metaGalleryTitle": "胶片观察 | Odyssey",
-    "metaGalleryDescription": "浏览用中画幅胶片框住的风景、几何交线和冷海岸天气。",
     "metaUsesTitle": "工具 | Odyssey",
     "metaUsesDescription": "我每天使用的硬件、软件和工具。",
     "metaFootprintsTitle": "足迹 | Odyssey",
@@ -1174,6 +1172,7 @@
     "explorer": "访客 · {time}"
   },
   "Gallery": {
+    "tabLabel": "图库（筹备中）",
     "eyebrow": "后续开发",
     "title": "相册将在后续开发",
     "description": "这里将用于呈现摄影作品。相册体验正在重新设计，当前暂不开放。"
@@ -1306,7 +1305,6 @@
     "eyebrow": "落过脚",
     "title": "落过脚的地方",
     "description": "从湖北老家出去，陕西、广州、深圳、重庆、安徽、河南。点一个点，看那一程。",
-    "seePhotos": "看这些照片",
     "routeNotes": "路线笔记",
     "yearsInMotion": "走动的这几年。",
     "placesInView": "{count, plural, other {视野里有 # 个地方}}",
@@ -1479,13 +1477,6 @@
         "description": "专注、耐心、出汗，还有还在编译的代码。",
         "cta": "看看近来"
       },
-      "travelogue": {
-        "label": "在路上",
-        "eyebrow": "照片",
-        "title": "路上的光",
-        "description": "地方、天气，以及相机不肯删的几张。",
-        "cta": "去看看"
-      },
       "archive": {
         "label": "都在这",
         "eyebrow": "按顺序",
@@ -1533,17 +1524,6 @@
         "compiledIn": "用时 1.2 秒",
         "hydrationAudits": "水合检查",
         "openCode": "打开代码"
-      },
-      "travelogue": {
-        "icelandAlt": "冰岛海岸",
-        "icelandTitle": "冰岛",
-        "icelandMeta": "冰岛 · 64°08′N",
-        "copenhagenAlt": "哥本哈根街道",
-        "copenhagenTitle": "哥本哈根",
-        "copenhagenMeta": "哥本哈根 · 55°40′N",
-        "kyotoAlt": "京都小巷",
-        "kyotoTitle": "京都",
-        "kyotoMeta": "京都 · 35°01′N"
       },
       "archive": {
         "moments": "动态",

@@ -1,4 +1,4 @@
-export type NavigationId = "chronicle" | "daily" | "travelogue" | "more";
+export type NavigationId = "chronicle" | "daily" | "more";
 
 export type MegaPanelContentProps = {
   id: NavigationId;

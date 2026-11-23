@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Tabs } from "@heroui/react";
 import { MotionChip, MotionTypography } from "@/components/ui";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import { PageFrame } from "@/components/layout/page-frame";
 
 const UniverseView = dynamic(
@@ -33,6 +34,7 @@ const FriendLinksPage = dynamic(
 );
 
 export default function UniversePage() {
+  const t = useTranslations("Gallery");
   const shouldReduceMotion = useReducedMotion() ?? false;
 
   const { reveal } = createPageReveal(shouldReduceMotion);
@@ -59,7 +61,7 @@ export default function UniversePage() {
             className="mt-4 max-w-md leading-relaxed text-balance text-zinc-400"
             {...reveal(0.2, 12)}
           >
-            点一个点，去那篇文章。照片和隔壁的站点在旁边两格。
+            点一个点，去那篇文章。
           </MotionTypography>
         </header>
 
@@ -78,7 +80,7 @@ export default function UniversePage() {
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="atmosphere">
-                  路上的光
+                  {t("tabLabel")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="relations">

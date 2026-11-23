@@ -5,7 +5,7 @@ import { createPageReveal } from "@/lib/motion";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { EmptyState, Timeline } from "@heroui-pro/react";
-import { Button, Card, Chip, Link, Surface, Tabs, Typography } from "@heroui/react";
+import { Button, Card, Chip, Surface, Tabs, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -120,35 +120,25 @@ export function FootprintsPage() {
   return (
     <Surface variant="transparent" className="bg-background min-h-[100dvh] w-full">
       <PageFrame className="w-full">
-        <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl">
-            <motion.div {...reveal(0, 10)}>
-              <Chip color="accent" size="sm" variant="soft">
-                {t("eyebrow")}
-              </Chip>
-            </motion.div>
-            <motion.div {...reveal(0.06)}>
-              <Typography
-                type="h1"
-                weight="bold"
-                className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
-              >
-                {t("title")}
-              </Typography>
-            </motion.div>
-            <motion.div {...reveal(0.12, 14)}>
-              <Typography color="muted" type="body" className="mt-5 max-w-xl leading-7">
-                {t("description")}
-              </Typography>
-            </motion.div>
-          </div>
-          <motion.div {...reveal(0.1, 12)}>
-            <Link href="/gallery" className="shrink-0 text-sm no-underline">
-              {t("seePhotos")}
-              <Link.Icon aria-hidden="true">
-                <Icon icon="gravity-ui:arrow-up-right" />
-              </Link.Icon>
-            </Link>
+        <header className="max-w-2xl">
+          <motion.div {...reveal(0, 10)}>
+            <Chip color="accent" size="sm" variant="soft">
+              {t("eyebrow")}
+            </Chip>
+          </motion.div>
+          <motion.div {...reveal(0.06)}>
+            <Typography
+              type="h1"
+              weight="bold"
+              className="mt-4 text-[clamp(2.75rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.045em] text-balance"
+            >
+              {t("title")}
+            </Typography>
+          </motion.div>
+          <motion.div {...reveal(0.12, 14)}>
+            <Typography color="muted" type="body" className="mt-5 max-w-xl leading-7">
+              {t("description")}
+            </Typography>
           </motion.div>
         </header>
 
