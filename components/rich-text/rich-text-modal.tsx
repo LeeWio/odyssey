@@ -17,7 +17,12 @@ import type { AppLocale } from "@/i18n/config";
 import { closeRichText, selectRichTextState } from "@/lib/features";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { microEaseOut } from "@/lib/motion";
-import { clearRichTextDraft, readRichTextDraft, sanitizePostData } from "./utils/editor-draft";
+import {
+  clearRichTextDraft,
+  editablePostTranslations,
+  readRichTextDraft,
+  sanitizePostData,
+} from "./utils/editor-draft";
 import {
   getMediaValidationIssues,
   hasPendingMediaUploads,
@@ -57,18 +62,7 @@ function toPostData(post: PostResponse): Partial<PostRequest> {
     seriesId: post.series?.id,
     seriesOrder: post.seriesOrder ?? 0,
     tagIds: post.tags?.map((tag) => tag.id) || [],
-    translations: Object.fromEntries(
-      Object.entries(post.translations ?? {}).map(([locale, translation]) => [
-        locale,
-        {
-          title: translation.title ?? "",
-          summary: translation.summary ?? "",
-          content: translation.content ?? "",
-          autoSummary: translation.autoSummary ?? "",
-          toc: translation.toc ?? "",
-        },
-      ])
-    ),
+    translations: editablePostTranslations(post.translations),
   };
 }
 
@@ -115,7 +109,7 @@ function withLocaleContent(
 
 function compactPostTranslations(translations?: Record<string, PostTranslation>) {
   const result: Record<string, PostTranslation> = {};
-  for (const [locale, translation] of Object.entries(translations ?? {})) {
+  for (const [locale, translation] of Object.entries(editablePostTranslations(translations))) {
     const next = {
       ...translation,
       title: translation.title?.trim() ?? "",
