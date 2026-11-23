@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.262.3](https://github.com/LeeWio/odyssey/compare/v1.262.2...v1.262.3) (2026-11-23)
+
+
+### Bug Fixes
+
+* **rich-text:** keep emoji fallback images inline ([#134](https://github.com/LeeWio/odyssey/issues/134)) ([78195dc](https://github.com/LeeWio/odyssey/commit/78195dc6b76288f99b575091a37ec8b62aa63fb4))
+
 ## [1.262.2](https://github.com/LeeWio/odyssey/compare/v1.262.1...v1.262.2) (2026-11-23)
 
 
