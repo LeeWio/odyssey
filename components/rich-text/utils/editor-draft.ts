@@ -30,10 +30,10 @@ export function isSourcePostLocale(locale: string) {
   return locale === "zh";
 }
 
-export function editablePostTranslations(translations?: Record<string, PostTranslation>) {
+export function editablePostTranslations<T>(translations?: Record<string, T>) {
   return Object.fromEntries(
     Object.entries(translations ?? {}).filter(([locale]) => !isSourcePostLocale(locale))
-  );
+  ) as Record<string, T>;
 }
 
 function getDraftKey(activeId: string): string {

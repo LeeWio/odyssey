@@ -62,7 +62,18 @@ function toPostData(post: PostResponse): Partial<PostRequest> {
     seriesId: post.series?.id,
     seriesOrder: post.seriesOrder ?? 0,
     tagIds: post.tags?.map((tag) => tag.id) || [],
-    translations: editablePostTranslations(post.translations),
+    translations: Object.fromEntries(
+      Object.entries(editablePostTranslations(post.translations)).map(([locale, translation]) => [
+        locale,
+        {
+          title: translation.title ?? "",
+          summary: translation.summary ?? "",
+          content: translation.content ?? "",
+          autoSummary: translation.autoSummary ?? "",
+          toc: translation.toc ?? "",
+        },
+      ])
+    ),
   };
 }
 
