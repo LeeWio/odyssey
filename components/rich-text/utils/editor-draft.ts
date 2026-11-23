@@ -26,6 +26,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+export function isSourcePostLocale(locale: string) {
+  return locale === "zh";
+}
+
+export function editablePostTranslations<T>(translations?: Record<string, T>) {
+  return Object.fromEntries(
+    Object.entries(translations ?? {}).filter(([locale]) => !isSourcePostLocale(locale))
+  ) as Record<string, T>;
+}
+
 function getDraftKey(activeId: string): string {
   return `${DRAFT_STORAGE_PREFIX}${activeId}`;
 }
@@ -66,7 +76,12 @@ export function sanitizePostData(value: unknown): Partial<PostRequest> | null {
   if (isRecord(value.translations)) {
     const translations: Record<string, PostTranslation> = {};
     for (const [locale, translation] of Object.entries(value.translations)) {
-      if (!isRecord(translation) || typeof translation.title !== "string") continue;
+      if (
+        isSourcePostLocale(locale) ||
+        !isRecord(translation) ||
+        typeof translation.title !== "string"
+      )
+        continue;
       translations[locale] = {
         title: translation.title,
         summary: typeof translation.summary === "string" ? translation.summary : undefined,
