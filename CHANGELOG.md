@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.263.1](https://github.com/LeeWio/odyssey/compare/v1.263.0...v1.263.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* **reader:** restore article reveals and upgrade HeroUI Pro ([#150](https://github.com/LeeWio/odyssey/issues/150)) ([c1ee79a](https://github.com/LeeWio/odyssey/commit/c1ee79a054228418194a4b948993b0acd4744be3))
+
 ## [1.263.0](https://github.com/LeeWio/odyssey/compare/v1.262.5...v1.263.0) (2026-11-24)
 
 
