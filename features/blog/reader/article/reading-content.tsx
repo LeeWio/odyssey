@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { bindReadingMotion } from "./reading-motion";
 import {
   READING_OPENING_ATTRIBUTE,
   READING_OPENING_SETTLED,
   restoreReloadPosition,
 } from "./reading-opening";
+
+const subscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 export function ReadingContent({
   children,
@@ -16,14 +20,14 @@ export function ReadingContent({
   className: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const clientSnapshot = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
+  // Hydrated content still belongs to the opening script, even if it already let the reader through.
+  const [clientEntry] = useState(clientSnapshot);
 
   useLayoutEffect(() => {
-    if (ref.current) restoreReloadPosition(ref.current);
-  }, []);
-
-  useEffect(() => {
     const root = ref.current;
     if (!root) return;
+    restoreReloadPosition(root);
     let dispose: (() => void) | undefined;
     let frame: number;
     let measuredOffset = -1;
@@ -31,7 +35,7 @@ export function ReadingContent({
 
     const startMotion = () => {
       const opening = root.hasAttribute(READING_OPENING_ATTRIBUTE);
-      if (opening && window.scrollY > 0) {
+      if (!clientEntry && opening && window.scrollY > 0) {
         if (measuredOffset !== window.scrollY) {
           measuredOffset = window.scrollY;
           const height = window.innerHeight;
@@ -51,9 +55,15 @@ export function ReadingContent({
         }
       }
       try {
-        dispose = bindReadingMotion(root, opening && getComputedStyle(root).opacity === "0");
+        // By this frame the router has applied its scroll position for the new article.
+        const revealOpening =
+          opening &&
+          (!clientEntry || (window.scrollY === 0 && !window.location.hash)) &&
+          getComputedStyle(root).opacity === "0";
+        dispose = bindReadingMotion(root, revealOpening);
       } finally {
-        if (opening) root.dispatchEvent(new Event(READING_OPENING_SETTLED));
+        if (clientEntry) root.removeAttribute(READING_OPENING_ATTRIBUTE);
+        else if (opening) root.dispatchEvent(new Event(READING_OPENING_SETTLED));
       }
     };
     frame = requestAnimationFrame(startMotion);
@@ -61,12 +71,13 @@ export function ReadingContent({
       cancelAnimationFrame(frame);
       dispose?.();
     };
-  }, []);
+  }, [clientEntry]);
 
   return (
     <div
       ref={ref}
       data-article-body=""
+      data-reading-opening={clientEntry ? "" : undefined}
       suppressHydrationWarning
       className={`${className} motion-safe:data-[reading-opening]:opacity-0 [&_[data-reading-pending]]:opacity-0 [&>script:first-child+*]:mt-0!`}
     >

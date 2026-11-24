@@ -112,6 +112,34 @@ async function approachReadingUnit(target: Locator) {
   await target.evaluate(() => window.scrollBy(0, 155));
 }
 
+test("opens the first reading viewport in order from the journal @smoke", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await trackReadingMotion(page);
+  await page.goto("/single?page=2");
+  // The color mode controls mount after hydration, when React Aria can handle the link.
+  await expect(page.getByRole("radiogroup", { name: "Color mode" })).toBeAttached();
+  const timeOrigin = await page.evaluate(() => performance.timeOrigin);
+  await page
+    .getByTestId("journal-latest-list")
+    .getByRole("link", { name: designArticle.title, exact: true })
+    .click();
+  await page.waitForURL(`/single/${designArticle.slug}`);
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(timeOrigin);
+
+  const body = page.locator("[data-article-body]");
+  const heading = body.getByRole("heading", { name: "Reading rhythm" });
+  const first = body.locator(":scope > p").first();
+  await expect.poll(async () => (await sampleFor(first)).length).toBe(1);
+  const headingReveals = await sampleFor(heading);
+  expect(headingReveals).toHaveLength(1);
+  const [firstReveal] = await sampleFor(first);
+  expect(firstReveal).toMatchObject({ opacity: 0, blur: 7, y: 16 });
+  expect(firstReveal!.startedAt - headingReveals[0]!.startedAt).toBeGreaterThanOrEqual(85);
+  await expect(body).toHaveCSS("opacity", "1");
+  await expect(first).toHaveCSS("opacity", "1");
+});
+
 test("opens the server document in order and reveals paragraphs once on a normal scroll", async ({
   page,
 }) => {
