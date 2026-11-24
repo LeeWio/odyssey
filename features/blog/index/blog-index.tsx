@@ -25,7 +25,7 @@ import { RouterProvider, type Key } from "react-aria-components";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useDebouncedCallback } from "use-debounce";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { selectIsAuthenticated } from "@/lib/features/auth";
 import {
   useGetPublicColumnBySlugQuery,
@@ -175,7 +175,7 @@ export function BlogIndex({
   readingPicks,
 }: {
   initialData: PublicJournalInitialData;
-  readingPicks: JournalReadingPick[];
+  readingPicks: Promise<JournalReadingPick[]> | null;
 }) {
   const t = useTranslations("Journal");
   const locale = useLocale();
@@ -354,11 +354,21 @@ export function BlogIndex({
         </JournalMasthead>
 
         {!hasArchiveFilters && latestPage === 0 ? (
-          <JournalTopics
-            topics={topics}
-            readingPicks={readingPicks}
-            isLoading={facetsQuery.isLoading}
-          />
+          <Suspense
+            fallback={
+              <JournalTopics
+                topics={topics}
+                readingPicksPending
+                isLoading={facetsQuery.isLoading}
+              />
+            }
+          >
+            <JournalTopics
+              topics={topics}
+              readingPicks={readingPicks}
+              isLoading={facetsQuery.isLoading}
+            />
+          </Suspense>
         ) : null}
 
         <div className="flex min-w-0 flex-col gap-12 sm:gap-16">

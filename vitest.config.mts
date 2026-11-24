@@ -31,6 +31,7 @@ export default defineConfig({
     },
     include: [
       "app/**/route.test.ts",
+      "app/**/page.test.ts",
       "hooks/**/*.test.ts",
       "components/ui/**/*.test.ts",
       "components/reading/**/*.test.ts",

@@ -12,9 +12,9 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexPageProps
     const value = params[key];
     return (Array.isArray(value) ? value[0] : value) ?? null;
   });
-  const [initialData, readingPicks] = await Promise.all([
-    getPublicJournalInitialData({ query }),
-    !query.keyword && !query.categoryId && query.page === 0 ? getJournalReadingPicks() : [],
-  ]);
-  return <BlogIndex initialData={initialData} readingPicks={readingPicks} />;
+  const initialData = getPublicJournalInitialData({ query });
+  const readingPicks =
+    !query.keyword && !query.categoryId && query.page === 0 ? getJournalReadingPicks() : null;
+
+  return <BlogIndex initialData={await initialData} readingPicks={readingPicks} />;
 }
