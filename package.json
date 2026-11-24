@@ -27,7 +27,7 @@
   "dependencies": {
     "@gravity-ui/icons": "2.18.0",
     "@gsap/react": "^2.1.2",
-    "@heroui-pro/react": "1.0.0-beta.11",
+    "@heroui-pro/react": "^1.0.1",
     "@heroui/react": "^3.2.8",
     "@heroui/styles": "^3.2.8",
     "@iconify/react": "^6.0.2",
@@ -105,7 +105,7 @@
     "shiki": "^4.4.3",
     "streamdown": "^2.6.0",
     "tailwind-merge": ">=3.4.0",
-    "tailwind-variants": "^3.3.1",
+    "tailwind-variants": "^4.0.2",
     "three": "^0.185.1",
     "use-debounce": "^10.1.1",
     "zod": "^4.6.6"
