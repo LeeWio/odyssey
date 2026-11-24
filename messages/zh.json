@@ -204,6 +204,7 @@
     "trending": "本周",
     "yourReading": "你正在读",
     "attention": "正在被阅读的文章",
+    "discoverWriting": "发现文章",
     "topicsHint": "按分类浏览",
     "tagsHint": "跨分类的标签",
     "previous": "上一页",
@@ -213,6 +214,8 @@
     "comments": "{count} 条评论",
     "fromTheArchive": "按分类阅读",
     "categoryEssays": "{count} 篇",
+    "browseTopic": "浏览主题",
+    "viewArchive": "查看归档",
     "browseCategory": "浏览{name}",
     "authors": "作者",
     "authorEssays": "{count} 篇",
@@ -247,6 +250,32 @@
     "indexColumns": "专栏",
     "indexArticleCount": "{count, number} 篇文章",
     "moreFeaturedStories": "更多精选",
+    "readingPicks": {
+      "title": "选读",
+      "chapters": "{count, number} 章",
+      "minutes": "约 {count, number} 分钟",
+      "series": {
+        "label": "专栏",
+        "title": "读懂 MAX96781",
+        "summary": "从 DP 输入、GMSL2 传输读到寄存器配置。",
+        "read": "从第 1 章读起",
+        "more": "查看专栏目录"
+      },
+      "diagrams": {
+        "label": "图解",
+        "title": "SA8295P 显示管线",
+        "summary": "跟着一帧图像走过分层合成和显示输出。",
+        "read": "阅读架构图解",
+        "more": "DPU0 分层流程"
+      },
+      "essays": {
+        "label": "随笔",
+        "title": "后来，我开始写爷爷",
+        "summary": "写下那些关于爷爷的零散记忆。",
+        "read": "阅读随笔",
+        "more": "更多随笔"
+      }
+    },
     "indexPagination": "文章分页"
   },
   "EditorDraft": {
@@ -1106,8 +1135,6 @@
     "deleteFailed": "这条动态没有删除成功。",
     "recently": "刚刚",
     "imageAlt": "动态图片",
-    "openMoment": "查看动态 · {author} · {time}",
-    "viewMoment": "查看动态",
     "openImage": "查看第 {index} 张图片，共 {total} 张",
     "imageViewer": "图片查看器",
     "viewerMode": "图片展示方式",

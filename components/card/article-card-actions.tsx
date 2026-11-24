@@ -114,16 +114,15 @@ function ArticleCardMenu({
         <Tooltip>
           <Button
             aria-label={card("actions")}
-            className={compact ? "min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" : undefined}
             isIconOnly
-            size="sm"
+            size={compact ? undefined : "sm"}
             variant={compact ? "ghost" : "outline"}
           >
             <Ellipsis aria-hidden="true" className="size-4" />
           </Button>
           <Tooltip.Content>{card("actions")}</Tooltip.Content>
         </Tooltip>
-        <Dropdown.Popover>
+        <Dropdown.Popover placement={compact ? "bottom end" : undefined}>
           <Dropdown.Menu
             disabledKeys={disabledKeys}
             onAction={(key) => {

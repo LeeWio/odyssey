@@ -1,4 +1,4 @@
-import { Avatar, Card, Chip, Link, Typography } from "@heroui/react";
+import { Avatar, Card, Chip, Typography } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { MomentContent } from "@/features/moment/components/moment-content";
 import { parseMomentContent } from "@/features/moment/utils/content-parser";
@@ -48,11 +48,6 @@ function MomentPreview({ moment }: { moment: MomentResponse }) {
         ) : null}
         {images.length ? <MomentPreviewPhotos images={images} /> : null}
       </Card.Content>
-      <Card.Footer>
-        <Link aria-label={t("openMoment", { author, time })} href={`/moments#moment-${moment.id}`}>
-          {t("viewMoment")}
-        </Link>
-      </Card.Footer>
     </Card>
   );
 }
