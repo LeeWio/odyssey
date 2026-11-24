@@ -3,6 +3,7 @@
 import { Card, Link, Separator, Skeleton, Typography } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { use } from "react";
 
 import { useGetPublicPostDigestsQuery } from "@/lib/features/post";
 import type { JournalReadingPick } from "@/lib/features/post/server";
@@ -123,23 +124,26 @@ function TopicCard({ topic, inReadingGrid }: { topic: JournalTopic; inReadingGri
 export function JournalTopics({
   topics,
   readingPicks,
+  readingPicksPending = false,
   isLoading,
 }: {
   topics: JournalTopic[];
-  readingPicks: JournalReadingPick[];
+  readingPicks?: Promise<JournalReadingPick[]> | null;
+  readingPicksPending?: boolean;
   isLoading: boolean;
 }) {
   const t = useTranslations("Journal");
-  const hasReadingPicks = readingPicks.length > 0;
-  if (!hasReadingPicks && !isLoading && topics.length === 0) return null;
+  const picks = readingPicks ? use(readingPicks) : [];
+  const showReadingPicks = readingPicksPending || picks.length > 0;
+  if (!showReadingPicks && !isLoading && topics.length === 0) return null;
 
-  const useReadingGrid = hasReadingPicks && (topics.length === 3 || isLoading);
+  const useReadingGrid = showReadingPicks && (topics.length === 3 || isLoading);
 
   return (
     <section aria-labelledby="journal-topics-title" className="flex min-w-0 flex-col gap-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <Typography id="journal-topics-title" type="h2">
-          {t(hasReadingPicks ? "discoverWriting" : "topicsHint")}
+          {t(showReadingPicks ? "discoverWriting" : "topicsHint")}
         </Typography>
         <Link href="/single/categories">{t("allCategories")}</Link>
       </div>
@@ -147,7 +151,11 @@ export function JournalTopics({
         className={useReadingGrid ? READING_GRID : JOURNAL_TOPIC_GRID}
         data-testid="journal-topics"
       >
-        {hasReadingPicks ? <JournalReadingCard picks={readingPicks} /> : null}
+        {readingPicksPending ? (
+          <Skeleton aria-hidden="true" className="min-h-84 w-full max-w-md min-[375px]:min-h-64" />
+        ) : picks.length > 0 ? (
+          <JournalReadingCard picks={picks} />
+        ) : null}
         {isLoading && !topics.length
           ? [0, 1, 2].map((index) => (
               <Skeleton

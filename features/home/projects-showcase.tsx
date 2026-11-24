@@ -30,20 +30,10 @@ import { useNearViewport } from "@/hooks/use-near-viewport";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion-preference";
 
 import { type ProjectResponse, useGetPublicProjectsQuery } from "@/lib/features/project";
+import { toSafeProjectUrl } from "@/lib/features/project/project-url";
 import { useTranslations } from "next-intl";
 
 const SHOWCASE_LIMIT = 12;
-
-function toSafeExternalUrl(value?: string | null) {
-  if (!value?.trim()) return undefined;
-
-  try {
-    const url = new URL(value.trim());
-    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : undefined;
-  } catch {
-    return undefined;
-  }
-}
 
 function getTechnologyLabels(value?: string | null) {
   return (value ?? "")
@@ -77,8 +67,8 @@ function ProjectCard({
   reducedMotion: boolean;
 }) {
   const t = useTranslations("Home");
-  const previewUrl = toSafeExternalUrl(project.previewUrl);
-  const githubUrl = toSafeExternalUrl(project.githubUrl);
+  const previewUrl = toSafeProjectUrl(project.previewUrl);
+  const githubUrl = toSafeProjectUrl(project.githubUrl);
   const technologies = getTechnologyLabels(project.techStack);
 
   return (

@@ -25,22 +25,12 @@ import { useDeferredValue, useMemo, useState } from "react";
 
 import { PageFrame } from "@/components/layout/page-frame";
 import { type ProjectResponse, useGetPublicProjectsQuery } from "@/lib/features/project";
+import { toSafeProjectUrl } from "@/lib/features/project/project-url";
 
 type ProjectAvailability = "all" | "preview" | "source";
 type ProjectSort = "featured" | "most-starred" | "alphabetical";
 
 const PROJECT_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-5";
-
-function toSafeExternalUrl(value?: string | null) {
-  if (!value?.trim()) return undefined;
-
-  try {
-    const url = new URL(value.trim());
-    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : undefined;
-  } catch {
-    return undefined;
-  }
-}
 
 function getTechnologyLabels(value?: string | null) {
   return (value ?? "")
@@ -107,8 +97,8 @@ function ProjectCard({
 }) {
   const t = useTranslations("Projects");
   const locale = useLocale();
-  const githubUrl = toSafeExternalUrl(project.githubUrl);
-  const previewUrl = toSafeExternalUrl(project.previewUrl);
+  const githubUrl = toSafeProjectUrl(project.githubUrl);
+  const previewUrl = toSafeProjectUrl(project.previewUrl);
   const technologies = getTechnologyLabels(project.techStack);
   const starsCount = project.starsCount ?? 0;
   const forksCount = project.forksCount ?? 0;
@@ -218,8 +208,8 @@ export function ProjectShowcasePage({ initialSearch = "" }: { initialSearch?: st
       const matchesAvailability =
         availability === "all" ||
         (availability === "preview"
-          ? Boolean(toSafeExternalUrl(project.previewUrl))
-          : Boolean(toSafeExternalUrl(project.githubUrl)));
+          ? Boolean(toSafeProjectUrl(project.previewUrl))
+          : Boolean(toSafeProjectUrl(project.githubUrl)));
 
       return matchesAvailability && matchesProject(project, deferredSearch);
     });
@@ -239,10 +229,10 @@ export function ProjectShowcasePage({ initialSearch = "" }: { initialSearch?: st
   }, [availability, deferredSearch, projects, sort]);
 
   const previewCount = projects.filter((project) =>
-    Boolean(toSafeExternalUrl(project.previewUrl))
+    Boolean(toSafeProjectUrl(project.previewUrl))
   ).length;
   const sourceCount = projects.filter((project) =>
-    Boolean(toSafeExternalUrl(project.githubUrl))
+    Boolean(toSafeProjectUrl(project.githubUrl))
   ).length;
 
   const clearFilters = () => {
