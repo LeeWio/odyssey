@@ -117,12 +117,14 @@ test("opens the first reading viewport in order from the journal @smoke", async 
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await trackReadingMotion(page);
   await page.goto("/single?page=2");
+  // The color mode controls mount after hydration, when React Aria can handle the link.
+  await expect(page.getByRole("radiogroup", { name: "Color mode" })).toBeAttached();
   const timeOrigin = await page.evaluate(() => performance.timeOrigin);
   await page
     .getByTestId("journal-latest-list")
     .getByRole("link", { name: designArticle.title, exact: true })
     .click();
-  await expect(page).toHaveURL(`/single/${designArticle.slug}`);
+  await page.waitForURL(`/single/${designArticle.slug}`);
   expect(await page.evaluate(() => performance.timeOrigin)).toBe(timeOrigin);
 
   const body = page.locator("[data-article-body]");
