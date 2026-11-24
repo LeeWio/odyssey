@@ -9,7 +9,7 @@ export type JournalStory = {
   shaderPreset?: string | null;
   authorName?: string | null;
   authorAvatar?: string | null;
-  category?: { name?: string | null } | null;
+  category?: { name?: string | null; slug?: string | null } | null;
   views?: number;
   likesCount?: number;
   commentsCount?: number;

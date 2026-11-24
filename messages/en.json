@@ -204,6 +204,7 @@
     "trending": "This week",
     "yourReading": "Your reading",
     "attention": "Stories people are reading",
+    "discoverWriting": "Discover writing",
     "topicsHint": "Browse by category",
     "tagsHint": "Cross-cutting labels",
     "previous": "Previous",
@@ -213,6 +214,8 @@
     "comments": "{count} comments",
     "fromTheArchive": "From the archive",
     "categoryEssays": "{count} essays",
+    "browseTopic": "Browse topic",
+    "viewArchive": "View archive",
     "browseCategory": "Browse {name}",
     "authors": "Authors",
     "authorEssays": "{count} essays",
@@ -247,6 +250,32 @@
     "indexColumns": "Columns",
     "indexArticleCount": "{count, plural, one {# article} other {# articles}}",
     "moreFeaturedStories": "More featured stories",
+    "readingPicks": {
+      "title": "Reading picks",
+      "chapters": "{count, plural, one {# chapter} other {# chapters}}",
+      "minutes": "{count, plural, one {About # minute} other {About # minutes}}",
+      "series": {
+        "label": "Series",
+        "title": "Understanding MAX96781",
+        "summary": "From DP input and GMSL2 transmission to register configuration.",
+        "read": "Start chapter 1",
+        "more": "Series contents"
+      },
+      "diagrams": {
+        "label": "Diagrams",
+        "title": "SA8295P display pipeline",
+        "summary": "Follow a frame through composition and display output.",
+        "read": "Read the guide",
+        "more": "DPU0 layer flow"
+      },
+      "essays": {
+        "label": "Essays",
+        "title": "Writing about my grandfather",
+        "summary": "Putting my scattered memories of my grandfather into words.",
+        "read": "Read the essay",
+        "more": "More essays"
+      }
+    },
     "indexPagination": "Article pages"
   },
   "EditorDraft": {
@@ -1106,8 +1135,6 @@
     "deleteFailed": "This moment could not be deleted.",
     "recently": "Recently",
     "imageAlt": "Moment image",
-    "openMoment": "Open moment by {author} · {time}",
-    "viewMoment": "Open moment",
     "openImage": "Open image {index} of {total}",
     "imageViewer": "Image viewer",
     "viewerMode": "Image display",

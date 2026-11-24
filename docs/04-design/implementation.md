@@ -82,16 +82,15 @@ Moments secondary views (liked, saved, topics and month detail) and Journal seco
 
 Library, Guestbook, Notifications, notification preferences, Schedule and Roadmap also use `PageFrame`. Authentication-required empty states remain vertically centered inside the frame; authenticated content keeps its local `max-w-*` measure. This separates route rhythm from feature-specific surfaces such as notification cards, guestbook comments and the agenda canvas.
 
-## Journal Editorial Redesign
+## Journal Topic Library
 
-The journal uses a compact editorial opening, followed by a single chronological reading list. Search and topic selection share a row on phone and desktop. The masthead links to topics, authors, archive and the reader's library.
+The journal keeps a full-width page shell and places search and topic selection next to the masthead on wide screens. The first page groups the compact reading-picks card and up to three category cards in one discovery section. A full set forms a row on wide screens, two columns on tablets, and a stack on phones. Each category links to its directory page and previews up to two published articles. The category directory remains the entry to every topic.
 
-- One secondary HeroUI Card carries the lead title and summary. Two recommendations sit beside it on desktop and stack on narrow screens. Authored covers are optional and sit alongside the text when there is room.
-- Transparent HeroUI Cards group each article's date, title, summary and byline. On phones the date sits above the title. A HeroUI Dropdown holds saving and copying, and HeroUI Toast confirms a successful copy. Pagination follows the list and shows a compact page count on phones.
-- An active search or topic prioritizes results. HeroUI Skeleton, Alert and EmptyState handle loading, service failure and no matches. Reset clears the search, topic and page together.
-- Signed-in readers can continue from their saved position. A HeroUI Segment switches between column previews and a HeroUI Accordion reveals articles from each archive shelf. Discovery starts loading near the end of the list.
+- Recent articles follow in a responsive card grid. Authored thumbnails use their 3:2 treatment. A small subject illustration supplies a visual for articles without a cover. Cards keep the article date, author link, and save and copy actions.
+- Search and topic filters prioritize results and suppress the topic shelf. Pagination, retry, and reset use the existing URL and loading states.
+- Signed-in readers can resume reading. Column previews and the wider collection links sit below the article results.
 
-`tests/e2e/journal-redesign.spec.ts` checks layout from 320 to 2560 px, text bounds, contrast across theme variants, authored thumbnails, keyboard focus, column switching and archive disclosure. `tests/e2e/journal.spec.ts` covers URL restoration, delayed results and reading-list actions.
+`tests/e2e/journal-redesign.spec.ts` checks topic and article links, layout from 320 to 2560 px, contrast across themes, authored and fallback thumbnails, and the search-to-browse transition. `tests/e2e/journal.spec.ts` covers URL restoration, delayed results and reading-list actions.
 
 ## Columns Directory
 

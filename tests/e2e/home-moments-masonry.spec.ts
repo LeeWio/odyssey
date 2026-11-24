@@ -70,15 +70,16 @@ for (const viewport of [
     await page.goto("/");
     const showcase = page.locator("#moments-showcase");
     await expect(showcase.locator("#moments-showcase-title")).toBeVisible({ timeout: 20_000 });
+    await expect(showcase.getByRole("link", { name: "This & That", exact: true })).toHaveAttribute(
+      "href",
+      "/moments"
+    );
     const masonry = showcase.getByTestId("moments-masonry");
     const cards = masonry.locator(":scope > div");
     await expect(cards).toHaveCount(moments.length, { timeout: 10_000 });
     await expect(cards.first().locator('[data-slot="moment-content"]')).toBeVisible();
+    await expect(masonry.locator('a[href^="/moments#moment-"]')).toHaveCount(0);
     const first = cards.first();
-    await expect(first.getByRole("link", { name: /^Open moment by Reader/ })).toHaveAttribute(
-      "href",
-      "/moments#moment-1"
-    );
     const contentLink = first.getByRole("link", { name: "Open writing", exact: true });
     await expect(contentLink).toHaveAttribute("href", "/single");
     await expect(first.locator("a a")).toHaveCount(0);

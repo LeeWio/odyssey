@@ -47,22 +47,14 @@ async function prepare(page: Page, failNextPage = false) {
 }
 
 for (const width of [390, 1440]) {
-  test(`home card locates a second-page moment and survives refresh at ${width}px`, async ({
+  test(`a direct link locates a second-page moment and survives refresh at ${width}px`, async ({
     page,
   }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await prepare(page);
-    await page.goto("/");
-    const showcase = page.locator("#moments-showcase");
-    await expect(showcase.getByRole("heading", { name: "This & That" })).toBeVisible();
-    await expect(showcase.getByRole("link", { name: "This & That", exact: true })).toHaveAttribute(
-      "href",
-      "/moments"
-    );
-    const card = showcase.locator('a[href="/moments#moment-79"]');
-    await card.click();
+    await page.goto("/moments#moment-79");
     await expect(page).toHaveURL(/\/moments\?page=2#moment-79$/);
     const target = page.locator("#moment-79");
     await expect(target).toHaveAttribute("data-moment-target", "true");
@@ -165,6 +157,7 @@ test.describe("Chinese home", () => {
       "/footprints"
     );
     await expect(map.getByRole("link")).toHaveCount(1);
+    await page.locator("#lately").scrollIntoViewIfNeeded();
     await expect(page.getByText("Code is cheap. Show me the talk.", { exact: true })).toBeVisible();
     await showcase.scrollIntoViewIfNeeded();
     await page.screenshot({ path: testInfo.outputPath("moments-zh.png") });

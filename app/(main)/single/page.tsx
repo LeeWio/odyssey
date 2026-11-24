@@ -1,5 +1,5 @@
 import { BlogIndex } from "@/features/blog/index/blog-index";
-import { getPublicJournalInitialData } from "@/lib/features/post/server";
+import { getJournalReadingPicks, getPublicJournalInitialData } from "@/lib/features/post/server";
 import { parseJournalQuery } from "@/lib/features/post/journal-query";
 
 interface BlogIndexPageProps {
@@ -12,6 +12,9 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexPageProps
     const value = params[key];
     return (Array.isArray(value) ? value[0] : value) ?? null;
   });
-  const initialData = await getPublicJournalInitialData({ query });
-  return <BlogIndex initialData={initialData} />;
+  const [initialData, readingPicks] = await Promise.all([
+    getPublicJournalInitialData({ query }),
+    !query.keyword && !query.categoryId && query.page === 0 ? getJournalReadingPicks() : [],
+  ]);
+  return <BlogIndex initialData={initialData} readingPicks={readingPicks} />;
 }

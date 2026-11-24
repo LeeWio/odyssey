@@ -170,8 +170,6 @@ test("the home gallery draws thumbnails and expands the same canvas when opened"
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
   await expect(showcase.locator('[data-gallery-list] [aria-current="true"]')).toBeFocused();
-  await showcase.getByRole("link", { name: /^Open moment by/ }).click();
-  await expect(page).toHaveURL(/\/moments#moment-944$/);
 });
 
 for (const path of ["/", "/moments?topic=circular-fixture"]) {

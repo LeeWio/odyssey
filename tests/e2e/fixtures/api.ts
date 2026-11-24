@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 
 import { articles, designArticle } from "./articles";
-import { featured, journalFallbackPrefix, stories } from "./journal";
+import { featured, journalFallbackPrefix, stories, story } from "./journal";
 
 const origin = new URL(process.env.E2E_FIXTURE_ORIGIN ?? "http://127.0.0.1:3181");
 const blogPosts = "/api/v1/public/blog/posts";
@@ -69,10 +69,31 @@ createServer((request, response) => {
       totalPages: Math.ceil(matching.length / size),
     });
   }
+  if (pathname === "/api/v1/public/columns/understanding-max96781") {
+    return send(200, {
+      slug: "understanding-max96781",
+      isPublished: true,
+      postsCount: 9,
+      posts: [{ ...story(47), slug: "max96781-automotive-display-overview" }],
+    });
+  }
   if (pathname.startsWith(`${blogPosts}/`)) {
     const slug = pathname.slice(blogPosts.length + 1);
     if (slug.endsWith("/related")) return send(200, []);
     if (slug === "unavailable-article") return send(503);
+    if (slug === "sa8295p-display-architecture-features") {
+      return send(200, { ...story(29), slug, readingTimeMinutes: 23 });
+    }
+    if (slug === "dp0-dp02") return send(200, { ...story(30), slug });
+    if (slug === "memories-of-grandpa") {
+      return send(200, {
+        ...story(28),
+        slug,
+        readingTimeMinutes: 43,
+        category: { ...story(28).category, slug: "loose-thoughts" },
+      });
+    }
+
     const article = articles.get(slug);
     return article ? send(200, article) : send(404);
   }

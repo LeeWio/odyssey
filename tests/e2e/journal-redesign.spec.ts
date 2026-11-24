@@ -3,7 +3,12 @@ import messages from "../../messages/en.json";
 import { story } from "./fixtures/journal";
 
 const envelope = (data: unknown) => ({ code: 200, message: "OK", data });
-const category = { id: 1, name: "Engineering", slug: "engineering", count: 12 };
+const categories = [
+  { id: 1, name: "Engineering", slug: "engineering", count: 12 },
+  { id: 2, name: "Design", slug: "design", count: 9 },
+  { id: 3, name: "Loose Thoughts", slug: "loose-thoughts", count: 4 },
+];
+const topicGrid = (page: import("@playwright/test").Page) => page.getByTestId("journal-topics");
 const columns = ["Field notes", "Working systems"].map((name, index) => ({
   id: index + 1,
   name,
@@ -28,7 +33,7 @@ test.beforeEach(async ({ page }) => {
     if (url.pathname.endsWith("/blog/facets")) {
       data = {
         totalPublishedCount: 13,
-        categories: [category],
+        categories,
         tags: [{ id: 1, name: "Design", slug: "design", count: 8 }],
         archives: [{ year: 2026, month: 10, count: 13 }],
       };
@@ -36,7 +41,15 @@ test.beforeEach(async ({ page }) => {
       data = {
         trending: [story(1), story(2)],
         mostRead: [story(3)],
-        categoryGroups: [{ category, heroPost: story(5), supportingPosts: [story(6)] }],
+      };
+    } else if (url.pathname.endsWith("/posts/digest") && url.searchParams.get("size") === "2") {
+      const id = Number(url.searchParams.get("categoryId"));
+      data = {
+        list: [story(id * 2 + 3), story(id * 2 + 4)],
+        total: 2,
+        page: 0,
+        size: 2,
+        totalPages: 1,
       };
     } else if (url.pathname.endsWith("/columns")) {
       data = columns;
@@ -49,7 +62,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test("editorial hierarchy adapts across screens without overlapping text or losing content", async ({
+test("topic library adapts across screens without overflowing or losing content", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -59,35 +72,53 @@ test("editorial hierarchy adapts across screens without overlapping text or losi
     level: 1,
     exact: true,
   });
-  const lead = page.getByTestId("journal-lead").first();
-  const companions = page.getByTestId("journal-feature-layout").getByTestId("journal-companion");
+  const topics = topicGrid(page);
+  const topicCards = topics.getByRole("article");
+  const readingPicks = topics.getByTestId("journal-reading-picks");
   const list = page.getByTestId("journal-latest-list");
   const toolbar = page.getByRole("search", { name: messages.Journal.searchArticles });
   const search = toolbar.getByRole("searchbox");
   const filter = toolbar.getByRole("button", { name: /Filter articles by topic/ });
   await expect(heading).toBeVisible();
   await expect(list.getByRole("article")).toHaveCount(12);
-  await expect(companions).toHaveCount(2);
+  await expect(topicCards).toHaveCount(3);
+  await expect(readingPicks).toBeVisible();
   await expect(filter).toBeEnabled();
-  await expect(lead.getByRole("link")).toHaveAttribute("href", "/single/design-story-22");
+  await expect(
+    topicCards.first().getByRole("link", { name: "Browse Engineering" })
+  ).toHaveAttribute("href", "/single/categories/engineering");
+  await expect(topicCards.first().getByRole("link", { name: story(5).title })).toHaveAttribute(
+    "href",
+    "/single/design-story-5"
+  );
 
-  for (const width of [320, 390, 820, 1024, 1440, 1920, 2560]) {
+  for (const width of [320, 390, 820, 1024, 1152, 1440, 1920, 2560]) {
     await page.setViewportSize({ width, height: width <= 390 ? 844 : 1000 });
     await page.evaluate(() => window.scrollTo(0, 0));
-    const leadBox = (await lead.boundingBox())!;
-    const secondaryBox = (await companions.first().boundingBox())!;
-    if (width >= 1024) {
-      expect(secondaryBox.x).toBeGreaterThanOrEqual(leadBox.x + leadBox.width);
-      expect(secondaryBox.y).toBeLessThan(leadBox.y + leadBox.height);
-    } else {
-      expect(secondaryBox.y).toBeGreaterThanOrEqual(leadBox.y + leadBox.height);
+    const boxes = await topics.evaluate((grid) =>
+      Array.from(grid.children, (card) => {
+        const { x, y, width, height } = card.getBoundingClientRect();
+        return { x, y, width, height };
+      })
+    );
+    expect(boxes).toHaveLength(4);
+    const firstRow = boxes.filter(({ y }) => y === boxes[0].y);
+    expect(firstRow).toHaveLength(width >= 1152 ? 4 : width >= 640 ? 2 : 1);
+    expect(boxes[0].width).toBeLessThanOrEqual(448);
+    for (const [index, box] of firstRow.entries()) {
+      expect(box.height).toBeCloseTo(firstRow[0].height);
+      if (index > 0) {
+        const preceding = firstRow[index - 1];
+        expect(box.x - preceding.x - preceding.width).toBeCloseTo(16);
+      }
     }
-    if (width === 390) await expect(page.getByRole("heading", { name: "Latest" })).toBeInViewport();
-    const title = await lead.getByRole("heading").evaluate((element) => {
-      const style = getComputedStyle(element);
-      return { size: parseFloat(style.fontSize), lineHeight: parseFloat(style.lineHeight) };
-    });
-    expect(title.lineHeight).toBeGreaterThan(title.size);
+    if (width >= 1152) {
+      const last = firstRow.at(-1)!;
+      expect(last.x + last.width).toBeGreaterThan(width - 40);
+    }
+    expect((await list.boundingBox())!.y).toBeGreaterThan(
+      (await topics.boundingBox())!.y + (await topics.boundingBox())!.height
+    );
     const [searchBox, filterBox] = [(await search.boundingBox())!, (await filter.boundingBox())!];
     expect(filterBox.x).toBeGreaterThan(searchBox.x + searchBox.width);
     expect(Math.abs(filterBox.y - searchBox.y)).toBeLessThan(8);
@@ -124,48 +155,42 @@ test("editorial hierarchy adapts across screens without overlapping text or losi
   await expect(
     columnsSection.getByRole("link", { name: messages.Journal.viewColumn })
   ).toHaveAttribute("href", "/columns/series-2");
-  const archive = page.getByRole("region", { name: messages.Journal.fromTheArchive });
-  const shelf = archive.getByRole("button", { name: "Engineering" });
-  await shelf.press("Enter");
-  await expect(shelf).toHaveAttribute("aria-expanded", "true");
-  await expect(archive.getByRole("link", { name: /Browse Engineering/ })).toHaveAttribute(
-    "href",
-    "/single/categories/engineering"
-  );
+  await expect(
+    page.getByRole("link", { name: messages.Journal.viewArchive, exact: true })
+  ).toHaveAttribute("href", "/archive");
 });
 
-test("search prioritizes results and reset restores the editorial opening", async ({ page }) => {
+test("search prioritizes results and reset restores the topic library", async ({ page }) => {
   await page.goto("/single");
   const search = page.getByRole("searchbox", {
     name: messages.Journal.searchArticles,
     exact: true,
   });
-  await expect(page.getByTestId("journal-lead")).toHaveCount(1);
+  await expect(topicGrid(page)).toHaveCount(1);
   await search.fill("no-matching-entry");
-  await expect(page.getByTestId("journal-lead")).toHaveCount(0);
+  await expect(topicGrid(page)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: messages.Journal.noResultsTitle })).toBeVisible();
   await expect(page.locator('section[aria-labelledby="columns-title"]')).toHaveCount(0);
   await page.getByRole("button", { name: messages.Journal.clearFilters, exact: true }).click();
   await expect(search).toHaveValue("");
   await expect(page).toHaveURL(/\/single$/);
-  await expect(page.getByTestId("journal-lead")).toHaveCount(1);
+  await expect(topicGrid(page)).toHaveCount(1);
   await expect(page.getByTestId("journal-latest-list").getByRole("article")).toHaveCount(12);
   await page.getByRole("button", { name: messages.Journal.next, exact: true }).click();
   await expect(page).toHaveURL(/page=2/);
-  await expect(page.getByTestId("journal-lead")).toHaveCount(0);
+  await expect(topicGrid(page)).toHaveCount(0);
   await expect(page.getByTestId("journal-latest-list").getByRole("article")).toHaveCount(1);
   await page.getByRole("button", { name: messages.Journal.previous, exact: true }).click();
   await expect(page).toHaveURL(/\/single$/);
-  await expect(page.getByTestId("journal-lead")).toBeVisible();
+  await expect(topicGrid(page)).toBeVisible();
 });
 
-test("editorial text remains readable in every theme and authored thumbnails retain their dimensions", async ({
+test("topic and article text remain readable in every theme and authored thumbnails retain their dimensions", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/single");
-  const lead = page.getByTestId("journal-lead").first();
-  await expect(lead).toBeVisible();
+  await expect(topicGrid(page).getByRole("article")).toHaveCount(3);
   const cover = page.getByTestId("journal-latest-list").getByRole("article").first().locator("img");
   await expect(cover).toHaveAttribute("src", "/IMG_5332.JPG");
   await expect
@@ -212,13 +237,13 @@ test("editorial text remains readable in every theme and authored thumbnails ret
             return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
           };
           const articles = [
-            document.querySelector('[data-testid="journal-lead"]')!,
+            document.querySelector('[data-testid="journal-topics"] [role="article"]')!,
             document.querySelector('[data-testid="journal-latest-list"] [role="article"]')!,
           ];
           return Math.min(
             ...articles.flatMap((article) =>
               Array.from(
-                article.querySelectorAll('h3 a, time, [data-slot="card-description"]'),
+                article.querySelectorAll('h3, a, time, [data-slot="typography"]'),
                 (text) => {
                   context.clearRect(0, 0, 1, 1);
                   paint(getComputedStyle(document.body).backgroundColor);
@@ -245,30 +270,23 @@ test("editorial text remains readable in every theme and authored thumbnails ret
   }
 });
 
-test("a text-only lead keeps dates and reading links stable after hydration @smoke", async ({
+test("a story without a cover uses topic artwork and keeps its reading link and date @smoke", async ({
   page,
 }, testInfo) => {
-  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 390, height: 844 });
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/single");
-  const lead = page.getByTestId("journal-lead");
-  await expect(lead).toBeVisible();
-  await expect(lead.locator("canvas")).toHaveCount(0);
-  await expect(lead.locator("img")).toHaveCount(0);
-  await expect(lead).toHaveCSS("opacity", "1");
-  await expect(lead.getByRole("heading")).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  const link = lead.getByRole("link");
-  const filter = page.getByRole("button", { name: /Filter articles by topic/ });
-  await expect(filter).toBeEnabled();
-  await filter.focus();
-  await expect(filter).toBeFocused();
-  await page.keyboard.press("Tab");
+  const card = page
+    .getByTestId("journal-latest-list")
+    .getByRole("article", { name: story(3).title, exact: true });
+  const link = card.getByRole("link", { name: story(3).title, exact: true });
+  await expect(card.locator("img")).toHaveAttribute("src", /topic-engineering/);
+  await expect(link).toHaveAttribute("href", "/single/design-story-3");
+  await link.focus();
   await expect(link).toBeFocused();
-  await expect(lead.locator("time")).toHaveAttribute("datetime", story(22).publishedAt);
-  await expect(lead.locator("time")).toHaveText("Oct 1, 2026");
+  await expect(card.locator("time")).toHaveAttribute("datetime", story(3).publishedAt);
+  await expect(card.locator("time")).toHaveText("Oct 1, 2026");
   expect(errors).toEqual([]);
-  await page.screenshot({ path: testInfo.outputPath("journal-text-only-lead.png") });
+  await page.screenshot({ path: testInfo.outputPath("journal-topic-artwork.png") });
 });
