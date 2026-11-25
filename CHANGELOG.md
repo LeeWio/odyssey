@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.264.3](https://github.com/LeeWio/odyssey/compare/v1.264.2...v1.264.3) (2026-11-25)
+
+
+### Bug Fixes
+
+* **web:** open the article editor from the command palette ([#168](https://github.com/LeeWio/odyssey/issues/168)) ([b13fee1](https://github.com/LeeWio/odyssey/commit/b13fee19deeee263622d1c1f71765685cec3c7b4))
+
 ## [1.264.2](https://github.com/LeeWio/odyssey/compare/v1.264.1...v1.264.2) (2026-11-25)
 
 
