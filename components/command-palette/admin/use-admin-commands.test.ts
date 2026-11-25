@@ -1,9 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { act, createElement, useLayoutEffect, useState } from "react";
+import { act, createElement, useLayoutEffect } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Provider } from "react-redux";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
+import { RichTextModal } from "@/components/rich-text/rich-text-modal";
 import { authSlice, setCredentials } from "@/lib/features/auth/auth-slice";
 import { overlaySlice } from "@/lib/features/ui/overlay-slice";
 import { CommandIntent, type ActionCommand } from "../types";
@@ -80,19 +81,11 @@ it("opens a new article editor session from the command palette", async () => {
 });
 
 it("mounts the article editor only after the palette command sets an active id", async () => {
-  function EditorGate() {
-    const [state, setState] = useState(store.getState().overlay.richText);
-    useLayoutEffect(() => store.subscribe(() => setState(store.getState().overlay.richText)), []);
-    return state.isOpen && state.activeId
-      ? createElement("div", { role: "dialog", "aria-label": "Create article" })
-      : null;
-  }
-
   const container = document.createElement("div");
   document.body.append(container);
   const gate = createRoot(container);
   await act(async () => {
-    gate.render(createElement(EditorGate));
+    gate.render(createElement(Provider, { store, children: createElement(RichTextModal) }));
   });
   expect(container.querySelector("[role='dialog']")).toBeNull();
 
