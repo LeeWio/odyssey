@@ -7,11 +7,14 @@ import { useCallback } from "react";
 type BubbleMenuProps = Omit<ComponentProps<typeof RichTextEditor.BubbleMenu>, "appendTo">;
 
 export function BubbleMenu({ className, ...props }: BubbleMenuProps) {
-  const { editor } = useRichTextEditor();
+  const { editor, isDisabled, isReadOnly } = useRichTextEditor();
   const appendTo = useCallback(() => {
     // Keep the menu in the modal's focus scope, outside its glass backdrop root.
     return editor?.view.dom.closest<HTMLElement>("[data-slot='modal-container']") ?? document.body;
   }, [editor]);
+
+  // ProseMirror can rebuild menu views using the options from their original registration.
+  if (isDisabled || isReadOnly) return null;
 
   return (
     <RichTextEditor.BubbleMenu

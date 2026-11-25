@@ -222,6 +222,71 @@ test("article modal menus keep pointer and keyboard interactions inside the focu
   await expect(page.getByRole("dialog", { name: "Create article", exact: true })).toBeVisible();
 });
 
+test("restored article drafts show working text and image menus", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "odyssey_auth",
+      JSON.stringify({
+        accessToken: "editor-fixture",
+        username: "writer",
+        roles: ["ROLE_ADMIN"],
+        permissions: [],
+        isAuthenticated: true,
+      })
+    );
+  });
+  const draft = {
+    content: {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Format", marks: [{ type: "bold" }] }],
+        },
+        {
+          type: "image",
+          attrs: {
+            src: "/odyssey-hero.webp",
+            alt: "Draft image",
+            widthPercent: 35,
+            alignment: "left",
+          },
+        },
+      ],
+    },
+    postData: {},
+    revision: "revision-1",
+    savedAt: "2026-11-25T00:00:00Z",
+  };
+  await page.route("**/api/v1/user/me", (route) =>
+    route.fulfill({ json: { code: 200, message: "OK", data: { id: 1, username: "writer" } } })
+  );
+  await page.route("**/api/v1/admin/posts/editor-drafts/new", (route) =>
+    route.fulfill({ json: { code: 200, message: "OK", data: draft } })
+  );
+  await page.goto("/test/rich-text?modal=1&postId=new");
+  await page.getByRole("button", { name: "Open editor", exact: true }).press("Enter");
+  const editor = page.locator(editorSelector);
+  await expect(editor.locator("strong")).toHaveText("Format");
+
+  await editor.locator("strong").dblclick();
+  const textMenu = page.getByRole("toolbar", { name: "Selection formatting toolbar", exact: true });
+  await expect(textMenu).toBeVisible();
+  await textMenu.getByRole("button", { name: "Italic", exact: true }).click();
+  await expect(editor.locator("em")).toHaveText("Format");
+
+  await editor.getByRole("img", { name: "Draft image", exact: true }).click();
+  const imageMenu = page.getByRole("toolbar", { name: "Image actions", exact: true });
+  await expect(
+    imageMenu.getByRole("radio", { name: "Align image left", exact: true })
+  ).toBeChecked();
+  const centerAlignment = imageMenu.getByRole("radio", { name: "Align image center", exact: true });
+  await centerAlignment.click();
+  await expect(centerAlignment).toBeChecked();
+});
+
 test("glass modal blurs actual editor text, unlike the old dialog mount", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear();
