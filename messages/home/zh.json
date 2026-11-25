@@ -54,6 +54,32 @@
       "title": "闲言碎语",
       "description": "想到哪里，就说到哪里。"
     },
+    "siteRecord": {
+      "eyebrow": "站点记录",
+      "title": "这里留下了什么",
+      "description": "从写下的事，到走过的地方。",
+      "countUnavailable": "数量暂不可用",
+      "articles": {
+        "title": "所思所写",
+        "description": "已公开的文章与技术笔记。"
+      },
+      "moments": {
+        "title": "闲言碎语",
+        "description": "随手记下的近况和想法。"
+      },
+      "footprints": {
+        "title": "足迹",
+        "description": "在地图上留下记录的地方。"
+      },
+      "chart": {
+        "title": "写作轨迹",
+        "totalLabel": "公开文章",
+        "accessibleLabel": "公开文章按月累计趋势",
+        "empty": "写作轨迹会从第一篇公开文章开始。",
+        "unavailable": "暂时无法加载写作轨迹。",
+        "tooltipLabel": "累计发布（篇）"
+      }
+    },
     "projects": {
       "coverAlt": "{name} 的封面",
       "fallbackDescription": "一次放出来的实践。",

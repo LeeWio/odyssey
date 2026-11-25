@@ -94,7 +94,15 @@ const faqIcons = [
   "lucide:pen-line",
 ];
 
-export function HomePage({ moments, orientation }: { moments: ReactNode; orientation: ReactNode }) {
+export function HomePage({
+  moments,
+  orientation,
+  siteRecord,
+}: {
+  moments: ReactNode;
+  orientation: ReactNode;
+  siteRecord: ReactNode;
+}) {
   const t = useTranslations("Home");
   const mounted = useMounted();
   const shouldReduceMotion = useReducedMotionPreference();
@@ -164,6 +172,7 @@ export function HomePage({ moments, orientation }: { moments: ReactNode; orienta
         <ProjectsShowcase />
         <FootprintsShowcase />
         {moments}
+        {siteRecord}
         <FriendLinksShowcase />
 
         <Section id="guestbook" aria-labelledby="guestbook-title">

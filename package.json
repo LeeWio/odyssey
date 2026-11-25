@@ -30,6 +30,7 @@
     "@heroui-pro/react": "^1.0.1",
     "@heroui/react": "^3.2.8",
     "@heroui/styles": "^3.2.8",
+    "@iconify-icons/fluent-color": "2.0.1",
     "@iconify/react": "^6.0.2",
     "@internationalized/date": "3.12.4",
     "@mantine/hooks": "^9.4.1",
