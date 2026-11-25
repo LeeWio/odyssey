@@ -48,8 +48,10 @@ async function selectFeedTab(page: Page) {
 }
 
 async function openFeed(page: Page, query = "") {
-  await page.goto(`/chronicle${query}`, { waitUntil: "domcontentloaded" });
-  await selectFeedTab(page);
+  const params = new URLSearchParams(query);
+  params.set("section", "orbit");
+  await page.goto(`/chronicle?${params}`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("radiogroup", { name: "Color mode" })).toBeAttached();
 }
 
 test.use({ locale: "en-US" });
@@ -108,7 +110,7 @@ test("saves an article from the feed without navigating away @smoke", async ({
     })
   );
 
-  await page.goto("/chronicle?section=orbit", { waitUntil: "domcontentloaded" });
+  await openFeed(page);
   const articleCard = page.getByRole("article", { name: "Saveable article", exact: true });
   const save = articleCard.getByRole("button", { name: "Save for later", exact: true });
 
