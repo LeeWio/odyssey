@@ -508,14 +508,20 @@ test("filter requests preserve the old feed, current layout and sidebar state", 
   await expect(body).toHaveCSS("opacity", "0.72");
   expect(await card?.evaluate((node) => node.isConnected)).toBe(true);
   await expect(feed.locator("ol > li")).toHaveCount(12);
-  await feed.getByRole("radio", { name: "Grid", exact: true }).click();
+  const grid = feed.getByRole("radio", { name: "Grid", exact: true });
+  // Keep the pointer and the control clear of the fixed navigation while scrolling.
+  await page.mouse.move(1, 400);
+  await grid.evaluate((control) =>
+    control.scrollIntoView({ block: "center", behavior: "instant" })
+  );
+  await grid.click();
   await expect(feed.locator("[data-view]")).toHaveAttribute("data-view", "grid");
   release();
   await expect(page.locator("#moment-333")).toBeVisible();
   await expect(feed.locator("ol > li")).toHaveCount(1);
   await expect(body).toHaveCSS("opacity", "1");
   await expect(month).toBeChecked();
-  await expect(feed.getByRole("radio", { name: "Grid", exact: true })).toBeChecked();
+  await expect(grid).toBeChecked();
   await chooseTopic(page, "empty");
   await expect(feed.locator("ol > li")).toHaveCount(0);
   await expect(feed.getByText("No moments in this topic.")).toBeVisible();
