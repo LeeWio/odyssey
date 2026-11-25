@@ -10,6 +10,7 @@
         "@heroui-pro/react": "^1.0.1",
         "@heroui/react": "^3.2.8",
         "@heroui/styles": "^3.2.8",
+        "@iconify-icons/fluent-color": "2.0.1",
         "@iconify/react": "^6.0.2",
         "@internationalized/date": "3.12.4",
         "@mantine/hooks": "^9.4.1",
@@ -262,6 +263,8 @@
     "@humanwhocodes/module-importer": ["@humanwhocodes/module-importer@1.0.1", "", {}, "sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA=="],
 
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.3", "", {}, "sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ=="],
+
+    "@iconify-icons/fluent-color": ["@iconify-icons/fluent-color@2.0.1", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-au8LwlCDtXqRdRwx/39WUsCht67SVsGfPDJT0Us+WRVUh+/Q9uxruV2/OCG/TFKGjsaZLFbulq9VATnMAJ4vug=="],
 
     "@iconify/react": ["@iconify/react@6.0.2", "", { "dependencies": { "@iconify/types": "^2.0.0" }, "peerDependencies": { "react": ">=16" } }, "sha512-SMmC2sactfpJD427WJEDN6PMyznTFMhByK9yLW0gOTtnjzzbsi/Ke/XqsumsavFPwNiXs8jSiYeZTmLCLwO+Fg=="],
 

@@ -54,6 +54,32 @@
       "title": "This & That",
       "description": "Bits and pieces of everyday life."
     },
+    "siteRecord": {
+      "eyebrow": "Site record",
+      "title": "What I’ve left here",
+      "description": "From things I’ve written to places I’ve been.",
+      "countUnavailable": "Count unavailable",
+      "articles": {
+        "title": "Essays & Notes",
+        "description": "Published essays and technical notes."
+      },
+      "moments": {
+        "title": "Moments",
+        "description": "Passing thoughts and little updates."
+      },
+      "footprints": {
+        "title": "Footprints",
+        "description": "Places I’ve marked on the map."
+      },
+      "chart": {
+        "title": "A writing history",
+        "totalLabel": "Published articles",
+        "accessibleLabel": "Cumulative published articles by month",
+        "empty": "The timeline starts with the first published article.",
+        "unavailable": "The writing history is temporarily unavailable.",
+        "tooltipLabel": "Articles published"
+      }
+    },
     "projects": {
       "coverAlt": "Cover for {name}",
       "fallbackDescription": "A practical experiment, released into the open.",
