@@ -108,9 +108,15 @@ async function prepare(page: Page, role = "ROLE_ADMIN") {
 
 async function openEditor(page: Page, id = 100, beforeOpen?: (scroll: number) => void) {
   await page.locator(`#moment-${id}`).getByRole("button", { name: "More options" }).click();
-  await page.getByRole("menuitem", { name: "Edit moment", exact: true }).scrollIntoViewIfNeeded();
-  beforeOpen?.(await page.evaluate(() => window.scrollY));
-  await page.getByRole("menuitem", { name: "Edit moment", exact: true }).click();
+  const edit = page.getByRole("menuitem", { name: "Edit moment", exact: true });
+  if (beforeOpen) {
+    // Focus can scroll the page. Capture the position after focus and activate with the keyboard.
+    await edit.focus();
+    beforeOpen(await page.evaluate(() => window.scrollY));
+    await page.keyboard.press("Enter");
+  } else {
+    await edit.click();
+  }
   const dialog = page.getByRole("dialog", { name: "Edit moment", exact: true });
   await expect(dialog.locator('[contenteditable="true"]')).toBeVisible({ timeout: 20_000 });
   return dialog;
@@ -176,7 +182,9 @@ for (const [width, view] of [
     );
     expect(page.url()).toBe(originalUrl);
     await expect(page.locator("[data-view]")).toHaveAttribute("data-view", view);
-    expect(Math.abs((await page.evaluate(() => window.scrollY)) - originalScroll)).toBeLessThan(3);
+    await expect
+      .poll(() => page.evaluate((scroll) => Math.abs(window.scrollY - scroll), originalScroll))
+      .toBeLessThan(3);
     expect(state.writes).toHaveLength(1);
     expect(state.requests.filter((path) => /\/(topics|cadence)$/.test(path)).length).toBe(
       sidebarRequests

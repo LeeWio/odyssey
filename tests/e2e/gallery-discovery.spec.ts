@@ -58,7 +58,8 @@ test("the tour leads to Footprints and the Universe tab announces the gallery's 
 
   await page.goto("/universe");
   const galleryTab = page.getByRole("tab", { name: "Gallery (coming later)" });
-  await expect(galleryTab).toBeVisible();
+  await expect(page.getByRole("radiogroup", { name: "Color mode" })).toBeAttached();
   await galleryTab.click();
+  await expect(galleryTab).toHaveAttribute("aria-selected", "true");
   await expect(page.getByText("The gallery is coming later", { exact: true })).toBeVisible();
 });
