@@ -119,7 +119,7 @@ test("article save for later uses the library queue and returns there", async ({
   await page.getByRole("button", { name: "Dismiss", exact: true }).first().press("Enter");
   await expect(savedButton).toHaveCount(0);
   await page.getByRole("button", { name: "Reading library", exact: true }).click();
-  await expect(page).toHaveURL(/\/library$/);
+  await page.waitForURL(/\/library$/, { waitUntil: "commit" });
   const readingList = page.getByRole("region", { name: "Read later", exact: true });
   await expect(
     readingList.getByRole("link", { name: "Reading loop article", exact: true })

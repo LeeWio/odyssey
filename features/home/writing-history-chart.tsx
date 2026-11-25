@@ -3,29 +3,11 @@
 import { ChartTooltip } from "@heroui-pro/react";
 import { useMediaQuery } from "@mantine/hooks";
 import { useFormatter, useTranslations } from "next-intl";
-import { useEffect, useId, useState } from "react";
-import {
-  Area,
-  AreaChart,
-  ReferenceDot,
-  Tooltip,
-  XAxis,
-  YAxis,
-  useActiveTooltipLabel,
-} from "recharts";
+import { useId, useState } from "react";
+import { Area, AreaChart, ReferenceDot, ReferenceLine, Tooltip, XAxis, YAxis } from "recharts";
 import { writingMonthDate, writingMonthFormat, type WritingMonth } from "./writing-history";
 
 const pointColor = "var(--color-blue-500)";
-
-function ActiveChartMonth({ onChange }: { onChange: (month: string | null) => void }) {
-  const label = useActiveTooltipLabel();
-
-  useEffect(() => {
-    onChange(typeof label === "string" ? label : null);
-  }, [label, onChange]);
-
-  return null;
-}
 
 export function WritingHistoryChart({ months }: { months: WritingMonth[] }) {
   const t = useTranslations("Home.siteRecord.chart");
@@ -34,48 +16,73 @@ export function WritingHistoryChart({ months }: { months: WritingMonth[] }) {
   const isTouch = useMediaQuery("(hover: none)", false, { getInitialValueInEffect: false });
   const gradientId = useId();
   const instructionsId = useId();
-  const [keyboardFocus, setKeyboardFocus] = useState(false);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [showKeyboardSelection, setShowKeyboardSelection] = useState(false);
+  const lastIndex = months.length - 1;
+  const index = Math.min(selectedIndex, lastIndex);
   const latest = months.at(-1);
-  const activeMonth = keyboardFocus ? months.find((month) => month.id === activeId) : undefined;
+  const selected = months[index];
 
-  if (!latest) return null;
+  if (!latest || !selected) return null;
 
   const height = isWide ? 400 : 192;
   const ceiling = Math.max(1, latest.total * 1.12);
+  const marker = showKeyboardSelection ? selected : latest;
+  const monthLabel = (id: string) => format.dateTime(writingMonthDate(id), writingMonthFormat);
+
+  function renderTooltip(id: string, total: number) {
+    return (
+      <ChartTooltip className="min-w-44 gap-1.5 rounded-2xl px-3.5 py-2.5">
+        <ChartTooltip.Header>{monthLabel(id)}</ChartTooltip.Header>
+        <ChartTooltip.Item>
+          <ChartTooltip.Indicator color={pointColor} />
+          <ChartTooltip.Label>{t("tooltipLabel")}</ChartTooltip.Label>
+          <ChartTooltip.Value className="text-sm font-semibold">
+            {format.number(total)}
+          </ChartTooltip.Value>
+        </ChartTooltip.Item>
+      </ChartTooltip>
+    );
+  }
 
   return (
-    <>
-      <p role="status" aria-atomic="true" className="sr-only">
-        {activeMonth
-          ? t("monthAnnouncement", {
-              month: format.dateTime(writingMonthDate(activeMonth.id), writingMonthFormat),
-              total: t("monthTotal", { count: activeMonth.total }),
-            })
-          : ""}
-      </p>
+    <div className="relative">
       <p id={instructionsId} className="sr-only">
         {t("keyboardInstructions")}
       </p>
-      <div
-        className="[&_svg[role=application]:focus-visible]:outline-focus touch-pan-y [&_svg[role=application]:focus-visible]:outline-2 [&_svg[role=application]:focus-visible]:-outline-offset-2"
-        onFocus={(event) => setKeyboardFocus(event.target.matches(":focus-visible"))}
-        onBlur={() => setKeyboardFocus(false)}
-        onKeyDownCapture={(event) => {
-          if (event.key === "ArrowLeft" || event.key === "ArrowRight") setKeyboardFocus(true);
+      <input
+        type="range"
+        min={0}
+        max={lastIndex}
+        value={index}
+        aria-label={t("accessibleLabel")}
+        aria-describedby={instructionsId}
+        aria-valuetext={t("monthAnnouncement", {
+          month: monthLabel(selected.id),
+          total: t("monthTotal", { count: selected.total }),
+        })}
+        className="peer pointer-events-none absolute inset-0 m-0 size-full opacity-0"
+        onFocus={() => setShowKeyboardSelection(true)}
+        onBlur={() => setShowKeyboardSelection(false)}
+        onChange={(event) => {
+          setSelectedIndex(event.currentTarget.valueAsNumber);
+          setShowKeyboardSelection(true);
         }}
-        onPointerMoveCapture={() => setKeyboardFocus(false)}
-        onPointerDownCapture={() => setKeyboardFocus(false)}
+      />
+      <div
+        aria-hidden="true"
+        data-testid="writing-history-plot"
+        className="peer-focus-visible:outline-focus relative touch-pan-y peer-focus-visible:outline-2 peer-focus-visible:-outline-offset-2"
+        onPointerMoveCapture={() => setShowKeyboardSelection(false)}
+        onPointerDownCapture={() => setShowKeyboardSelection(false)}
       >
         <AreaChart
-          aria-label={t("accessibleLabel")}
-          aria-describedby={instructionsId}
+          accessibilityLayer={false}
           data={months}
           responsive
           style={{ width: "100%", height }}
           margin={{ top: 0, right: 0, bottom: 12, left: 0 }}
         >
-          <ActiveChartMonth onChange={setActiveId} />
           <defs>
             <linearGradient
               id={gradientId}
@@ -113,36 +120,30 @@ export function WritingHistoryChart({ months }: { months: WritingMonth[] }) {
             animationDuration={500}
             animationEasing="ease-out"
           />
-          <ReferenceDot x={latest.id} y={latest.total} r={3.5} fill={pointColor} stroke="none" />
+          {showKeyboardSelection && (
+            <ReferenceLine x={selected.id} stroke={pointColor} strokeOpacity={0.35} />
+          )}
+          <ReferenceDot x={marker.id} y={marker.total} r={3.5} fill={pointColor} stroke="none" />
           <Tooltip
+            active={showKeyboardSelection ? false : undefined}
             trigger={isTouch ? "click" : "hover"}
             offset={14}
             reverseDirection={{ y: true }}
             cursor={{ style: { stroke: pointColor, strokeDasharray: "none", strokeOpacity: 0.35 } }}
             content={({ active, label, payload }) => {
               const total = payload[0]?.value;
-              if (!active || typeof label !== "string" || typeof total !== "number") return null;
-
-              return (
-                <div aria-hidden="true">
-                  <ChartTooltip className="min-w-44 gap-1.5 rounded-2xl px-3.5 py-2.5">
-                    <ChartTooltip.Header>
-                      {format.dateTime(writingMonthDate(label), writingMonthFormat)}
-                    </ChartTooltip.Header>
-                    <ChartTooltip.Item>
-                      <ChartTooltip.Indicator color={pointColor} />
-                      <ChartTooltip.Label>{t("tooltipLabel")}</ChartTooltip.Label>
-                      <ChartTooltip.Value className="text-sm font-semibold">
-                        {format.number(total)}
-                      </ChartTooltip.Value>
-                    </ChartTooltip.Item>
-                  </ChartTooltip>
-                </div>
-              );
+              return active && typeof label === "string" && typeof total === "number"
+                ? renderTooltip(label, total)
+                : null;
             }}
           />
         </AreaChart>
+        {showKeyboardSelection && (
+          <div className="pointer-events-none absolute end-3 top-3">
+            {renderTooltip(selected.id, selected.total)}
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }

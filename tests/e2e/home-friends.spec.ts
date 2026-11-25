@@ -141,9 +141,20 @@ test("HeroUI cards stay ordered, aligned and keyboard accessible across viewport
       .toBeGreaterThan(0);
     await expect(entries.nth(2).locator('[data-slot="avatar-fallback"]')).toHaveText("F3");
     await expect(entries.nth(3).locator('[data-slot="card-description"]')).toHaveCount(0);
-    const before = await first.boundingBox();
+    const measureCard = () =>
+      first.evaluate((element) => {
+        const card = element.getBoundingClientRect();
+        const grid = element.closest("ul")!.getBoundingClientRect();
+        return {
+          x: card.x - grid.x,
+          y: card.y - grid.y,
+          width: card.width,
+          height: card.height,
+        };
+      });
+    const before = await measureCard();
     await first.hover();
-    expect(await first.boundingBox()).toEqual(before);
+    expect(await measureCard()).toEqual(before);
     await heading.focus();
     await page.keyboard.press("Tab");
     await expect(first).toBeFocused();
@@ -173,10 +184,10 @@ test("HeroUI cards stay ordered, aligned and keyboard accessible across viewport
       route.fulfill({ contentType: "text/html", body: "<title>Friend 1</title>" })
     );
   const first = directory.getByRole("link").first();
-  const bounds = await first.boundingBox();
-  const popupPromise = page.waitForEvent("popup");
-  await first.click({ position: { x: bounds!.width - 12, y: bounds!.height - 12 } });
-  const popup = await popupPromise;
+  const [popup] = await Promise.all([
+    page.waitForEvent("popup"),
+    first.locator('[data-slot="card-footer"]').click(),
+  ]);
   await expect(popup).toHaveURL("https://friend-1.example/");
   await popup.close();
   await heading.focus();

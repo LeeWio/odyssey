@@ -16,15 +16,12 @@ const test = base.extend<{ browserErrors: string[] }>({
 const envelope = (data: unknown) => ({ code: 200, message: "OK", data });
 test.use({ locale: "en-US" });
 
-async function showFixtureFeed(page: Page) {
-  await expect(page.getByRole("button", { name: "Topics", exact: true })).toBeEnabled();
-  // Change filters after hydration to avoid using server-prefetched live data.
-  await page.evaluate(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("topic", `reactions-test-${Date.now()}`);
-    window.history.pushState(null, "", `${url.pathname}${url.search}`);
-  });
-  await expect(page.locator("#moment-100")).toBeVisible();
+async function expectFixtureFeed(page: Page) {
+  await expect(page.getByText("Reaction test moment 100", { exact: true })).toBeVisible();
+  await expect(page.locator('[data-slot="moment-feed-body"]')).toHaveAttribute(
+    "aria-busy",
+    "false"
+  );
 }
 
 const savedPath = "/api/v1/user/moments/saved";
@@ -183,8 +180,8 @@ async function prepare(
     }
     return route.fulfill({ status: 503, json: { message: "Unmocked API request" } });
   });
-  await page.goto(path);
-  if (path === "/moments") await showFixtureFeed(page);
+  await page.goto(path === "/moments" ? "/moments?topic=reactions-test" : path);
+  if (path === "/moments") await expectFixtureFeed(page);
   if (!guest)
     await expect(page.getByRole("button", { name: "Sign in", exact: true })).toHaveCount(0);
   return { liked, writes, savedIds, savedRequests, timelineRequests };
@@ -226,6 +223,7 @@ test("uses controlled native buttons, locks only the pending like, and preserves
     await expect(pending).toHaveText("9");
     const grid = page.getByRole("radio", { name: "Grid", exact: true });
     await grid.click();
+    await expect(grid).toBeChecked();
     await expect(pending).toHaveAttribute("aria-pressed", "true");
     await expect(saved).toHaveAttribute("aria-pressed", "true");
     expect(await contentNode?.evaluate((node) => node.isConnected)).toBe(true);
@@ -301,7 +299,7 @@ test("persists bookmarks and hydrates both reactions without replaying feedback"
   await expect.poll(savedIds).toEqual([100]);
   await expect(card.getByRole("button", { name: "Remove from saved", exact: true })).toBeEnabled();
   await page.reload();
-  await showFixtureFeed(page);
+  await expectFixtureFeed(page);
   for (const label of ["Unlike moment, 9", "Remove from saved"]) {
     const button = card.getByRole("button", { name: label, exact: true });
     await expect(button).toHaveAttribute("aria-pressed", "true");

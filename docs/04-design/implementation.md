@@ -10,6 +10,8 @@
 
 Home content sections and their dynamic loading placeholders share the same boundary. The reading page uses that boundary while separately constraining the article to `max-w-3xl`. The dashboard uses the same container without adopting the home's display scale.
 
+The writing-history plot uses a native range input for keyboard month selection, with localized month and total values for screen readers. The plot serves as the visual track and shows the selected point when the range input is focused.
+
 Full-width page boundaries are the product's intentional exception to the bounded-container recommendation in `layout.md`. Navigation and footer also fill the viewport; compact navigation and individual text/media reading measures remain content-specific constraints, not page caps.
 
 Route pages use one outer rhythm and one inner content measure. Do not combine independent `px-6 sm:px-10`, `py-24 sm:py-32`, and `pt-28 lg:pt-32` shells on the same route. Rich index pages may use a wider `max-w-7xl` measure, while reading and utility views keep their narrower local measure. The Universe remains an intentional dark immersive exception, but it follows the same page-frame geometry.
