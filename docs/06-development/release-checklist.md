@@ -15,7 +15,7 @@ Do not commit `.env` or credentials. Sync the work to the server, then commit th
 
 - `bun run test:e2e:smoke` runs the tagged critical browser journeys with no retries. GitHub runs it on pull requests with a ten-minute job limit.
 - `bun run test:e2e` runs the full suite. GitHub runs it nightly at 19:17 UTC and supports manual runs from **Full Browser E2E**. Download its Playwright report or `e2e-timing.json` to compare failures, retries and durations. The full suite runs independently of deployment.
-- The GitHub full suite serves a production build so browser navigation and lazy panels use compiled assets throughout the run. Set `PLAYWRIGHT_PRODUCTION_BUILD=1` to use the same runtime locally.
+- The GitHub full-suite workflow runs four independent shards. Each shard uploads its HTML report and `e2e-timing.json` as an artifact.
 - An ordinary local or CI run starts a loopback-only API fixture before Next.js. Use the shared article fixtures for server-rendered routes and retain browser route mocks for scenario-specific client reads and writes. If you set `PLAYWRIGHT_BASE_URL` to reuse a running app, start the fixture with `bun tests/e2e/fixtures/api.ts` and set `API_URL=http://127.0.0.1:3181` when starting the app.
 
 ## Release and deployment
