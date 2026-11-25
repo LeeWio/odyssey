@@ -19,9 +19,9 @@ test.describe("guestbook page chrome", () => {
 
     await page.goto("/guestbook");
 
-    await expect(page.getByRole("heading", { name: "Leave a note before you go." })).toBeVisible();
-    await expect(page.getByText("Guestbook", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Moderated conversation", { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Leave a sentence" })).toBeVisible();
+    await expect(page.getByText("The wall", { exact: true })).toBeVisible();
+    await expect(page.getByText("Read before it stays", { exact: true })).toBeVisible();
     await expect(page.getByText("Visitor log")).toHaveCount(0);
 
     const invite = page.getByRole("heading", { name: "Sign in to add an entry" });

@@ -94,7 +94,7 @@ test("page changes hide previous rows and totals, retain a way back on failure, 
     );
   });
   try {
-    await page.goto("/library");
+    await page.goto("/library?view=history");
     const history = region(page);
     await expect(history.getByRole("article")).toHaveCount(10);
     await expect(history.getByRole("link", { name: "History 1", exact: true })).toHaveAttribute(
@@ -143,7 +143,7 @@ test("removing the last record on a final page returns to a refreshed valid page
     removed = true;
     await route.fulfill({ json: envelope(null) });
   });
-  await page.goto("/library");
+  await page.goto("/library?view=history");
   await region(page).getByRole("button", { name: "Next", exact: true }).press("Enter");
   await remove(page, 11).press("Enter");
   await expect(region(page).getByRole("article")).toHaveCount(10);
@@ -178,7 +178,7 @@ test("concurrent removals keep independent locks and block clearing until all re
     );
   });
   try {
-    await page.goto("/library");
+    await page.goto("/library?view=history");
     await remove(page, 1).press("Enter");
     await remove(page, 2).press("Enter");
     await expect.poll(() => calls).toEqual([1, 2]);
@@ -242,6 +242,11 @@ test("clearing locks dismissal and duplicate requests, retries failure, and rese
   });
   try {
     await page.goto("/library");
+    const continueReading = page.getByRole("region", { name: "Continue reading", exact: true });
+    await expect(
+      continueReading.getByRole("heading", { name: "History 1", exact: true })
+    ).toBeVisible();
+    await page.getByRole("tab", { name: "History", exact: true }).press("Enter");
     await region(page).getByRole("button", { name: "Next", exact: true }).press("Enter");
     await region(page).getByRole("button", { name: "Clear history", exact: true }).press("Enter");
     const dialog = confirm(page);
@@ -269,6 +274,7 @@ test("clearing locks dismissal and duplicate requests, retries failure, and rese
     await expect(region(page).getByRole("button", { name: "Previous", exact: true })).toHaveCount(
       0
     );
+    await page.getByRole("tab", { name: "Reading", exact: true }).press("Enter");
     await expect(
       page
         .getByRole("region", { name: "Continue reading", exact: true })
@@ -290,7 +296,7 @@ test("cancelling clear sends no request and reopening after failure resets its e
     attempts += 1;
     await route.fulfill({ status: 503, json: { message: "Clear unavailable" } });
   });
-  await page.goto("/library");
+  await page.goto("/library?view=history");
   await region(page).getByRole("button", { name: "Clear history", exact: true }).press("Enter");
   await confirm(page).getByRole("button", { name: "Cancel", exact: true }).press("Enter");
   await expect(confirm(page)).toHaveCount(0);

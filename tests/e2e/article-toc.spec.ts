@@ -25,19 +25,22 @@ for (const width of [390, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await openArticle(page);
     const editor = page.locator('.ProseMirror[contenteditable="false"]');
-    const bodyTop = await editor.evaluate(
-      (element) => element.getBoundingClientRect().top + scrollY
+    const target = editor.getByRole("heading", { name: "Section 4", exact: true });
+    const headingTop = await target.evaluate(
+      (heading) => heading.getBoundingClientRect().top + window.scrollY
     );
-    await page.evaluate((top) => window.scrollTo(0, top), bodyTop + 1500);
-    await page.evaluate(() => window.scrollBy(0, -160));
+    await page.evaluate((top) => window.scrollTo(0, top + 120), headingTop);
+    await expect(page.getByRole("button", { name: "On this page" })).toBeHidden();
+    await page.evaluate((top) => window.scrollTo(0, top - 80), headingTop);
     const list = await openOutline(page);
     await expect(list.getByRole("option", { name: "Section 4", exact: true })).toHaveAttribute(
       "aria-selected",
       "true"
     );
     await page.keyboard.press("Escape");
+    await expect(list).toBeHidden();
     await page.evaluate(() => window.scrollTo(0, 0));
-    const target = editor.getByRole("heading", { name: "Section 4", exact: true });
+    await openOutline(page);
     await list.getByRole("option", { name: "Section 4", exact: true }).click();
     await expect(page.getByRole("dialog", { name: "On this page" })).toBeHidden();
     await expect

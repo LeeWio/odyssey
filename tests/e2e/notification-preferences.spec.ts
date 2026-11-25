@@ -27,7 +27,7 @@ const endpoint = "**/api/v1/user/notifications/preferences/categories";
 test.use({ locale: "en-US" });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "preferences-test",

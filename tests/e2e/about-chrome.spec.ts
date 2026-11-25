@@ -11,8 +11,8 @@ test.describe("about page chrome", () => {
     await expect(page.getByText("About", { exact: true }).first()).toBeVisible();
     await expect(page.getByRole("heading", { name: "Lee" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Defaults" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Play" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Taste" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Play", level: 2, exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Taste", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "Read writing" })).toHaveAttribute(
       "href",
       "/chronicle"
@@ -27,7 +27,7 @@ test.describe("about page chrome", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/persona");
 
-    await page.getByRole("tab", { name: "About" }).click();
+    await page.getByRole("tab", { name: "Person", exact: true }).click();
 
     await expect(page.getByRole("list", { name: "Breadcrumbs" })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "Lee" })).toBeVisible();

@@ -115,7 +115,7 @@ for (const { modal, mode } of [
     if (modal) {
       await expect(page.getByRole("alertdialog")).toHaveCount(0);
       await page.keyboard.press("Escape");
-      await page.getByRole("button", { name: "Discard changes", exact: true }).click();
+      await page.getByRole("button", { name: "Discard draft", exact: true }).click();
       await expect(editor).toHaveCount(0);
       await page.getByRole("button", { name: "Open editor", exact: true }).click();
       await expect(editor).toBeVisible();

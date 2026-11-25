@@ -280,7 +280,7 @@ test("an admin review notification opens the matching dashboard view", async ({ 
 
   await expect(page.getByRole("dialog", { name: "Dashboard Overlay" })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Comment Governance", exact: true })
+    page.getByRole("heading", { name: "Comment governance", exact: true })
   ).toBeVisible();
 });
 

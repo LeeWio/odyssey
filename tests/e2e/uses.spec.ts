@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test";
+import messages from "../../messages/en.json";
 
 test.describe("uses toolkit", () => {
   test("lists tools, filters by category, and exposes official links", async ({ page }) => {
     await page.goto("/uses");
 
-    await expect(page.getByRole("heading", { name: "The tools behind the work." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: messages.Uses.title, level: 1 })).toBeVisible();
     await expect(page.getByText("tools on the desk")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Coding" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Open Ghostty" })).toBeVisible();
@@ -35,7 +36,7 @@ test.describe("uses toolkit", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/uses");
 
-    await expect(page.getByRole("heading", { name: "The tools behind the work." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: messages.Uses.title, level: 1 })).toBeVisible();
     await page.getByRole("searchbox", { name: "Search tools" }).fill("zzzz-no-match");
     await expect(page.getByRole("heading", { name: "No tools match" })).toBeVisible();
     await page.getByRole("button", { name: "Clear filters" }).click();

@@ -421,7 +421,9 @@ for (const width of [360, 768, 1440]) {
     await expect(like).toHaveCSS("height", `${height}px`);
     await expect(save).toHaveCSS("height", `${height}px`);
     await expect(save).toHaveCSS("width", `${height}px`);
-    const ghostForeground = await comment.evaluate((button) => getComputedStyle(button).color);
+    const ghostForeground = await like
+      .locator("svg")
+      .evaluate((icon) => getComputedStyle(icon).color);
     for (const button of [like, comment, save]) {
       const icon = button.locator("svg");
       await expect(icon).toBeVisible();
