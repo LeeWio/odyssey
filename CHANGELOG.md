@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.264.4](https://github.com/LeeWio/odyssey/compare/v1.264.3...v1.264.4) (2026-11-25)
+
+
+### Bug Fixes
+
+* **editor:** restore floating menus after draft load ([#171](https://github.com/LeeWio/odyssey/issues/171)) ([07d1e90](https://github.com/LeeWio/odyssey/commit/07d1e9077b3f9a6d059f5557fa49ad1abd4bc6e5))
+
 ## [1.264.3](https://github.com/LeeWio/odyssey/compare/v1.264.2...v1.264.3) (2026-11-25)
 
 
