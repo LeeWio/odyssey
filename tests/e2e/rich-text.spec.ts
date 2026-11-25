@@ -132,8 +132,13 @@ test("selects, reorders, duplicates and deletes blocks from the drag handle menu
 
   await paragraph.click();
   await page.keyboard.press("Shift+F10");
-  await expect(page.getByRole("menu", { name: "Block actions" })).toBeVisible();
+  const menu = page.getByRole("menu", { name: "Block actions" });
+  await expect(menu).toBeVisible();
+  await expect
+    .poll(() => menu.evaluate((element) => element.contains(document.activeElement)))
+    .toBe(true);
   await page.keyboard.press("Escape");
+  await expect(menu).toBeHidden();
 
   await paragraph.hover();
   await page.getByRole("button", { name: "Block actions" }).click({ delay: 600 });

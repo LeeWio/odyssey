@@ -108,7 +108,7 @@ test("saves an article from the feed without navigating away @smoke", async ({
     })
   );
 
-  await openFeed(page);
+  await page.goto("/chronicle?section=orbit", { waitUntil: "domcontentloaded" });
   const articleCard = page.getByRole("article", { name: "Saveable article", exact: true });
   const save = articleCard.getByRole("button", { name: "Save for later", exact: true });
 
