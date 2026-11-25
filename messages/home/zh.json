@@ -77,6 +77,10 @@
         "accessibleLabel": "公开文章按月累计趋势",
         "empty": "写作轨迹会从第一篇公开文章开始。",
         "unavailable": "暂时无法加载写作轨迹。",
+        "keyboardInstructions": "使用左右方向键查看每月累计发布量。",
+        "monthlyDetails": "查看每月累计发布量",
+        "monthTotal": "累计发布 {count, number} 篇",
+        "monthAnnouncement": "{month}，{total}",
         "tooltipLabel": "累计发布（篇）"
       }
     },

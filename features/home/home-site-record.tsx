@@ -8,11 +8,11 @@ import dataTrending from "@iconify-icons/fluent-color/data-trending-24";
 import location from "@iconify-icons/fluent-color/location-ripple-24";
 import { Icon } from "@iconify/react";
 import dynamic from "next/dynamic";
-import { useLocale, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { DeferredContent } from "@/components/layout/deferred-content";
 import { cn } from "@/lib/utils";
-import type { WritingMonth } from "./writing-history";
+import { writingMonthDate, writingMonthFormat, type WritingMonth } from "./writing-history";
 
 const WritingHistoryChart = dynamic(
   () => import("./writing-history-chart").then((module) => module.WritingHistoryChart),
@@ -61,6 +61,7 @@ export function HomeSiteRecord({
 }) {
   const t = useTranslations("Home.siteRecord");
   const locale = useLocale();
+  const format = useFormatter();
   const counts = { articles: articleCount, moments: momentCount, footprints: footprintCount };
   const latestMonth = history?.at(-1);
 
@@ -196,9 +197,30 @@ export function HomeSiteRecord({
         </figcaption>
 
         {history && latestMonth && (
-          <DeferredContent className="mt-3 w-full md:mt-0" fallback={<ChartSkeleton />}>
-            <WritingHistoryChart months={history} />
-          </DeferredContent>
+          <>
+            <DeferredContent className="mt-3 w-full md:mt-0" fallback={<ChartSkeleton />}>
+              <WritingHistoryChart months={history} />
+            </DeferredContent>
+            <div className={cn(contentRail, "mt-4")}>
+              <details className="max-w-md">
+                <summary className="focus-visible:outline-focus cursor-pointer rounded-sm text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-4">
+                  {t("chart.monthlyDetails")}
+                </summary>
+                <ul role="list" className="divide-separator mt-3 divide-y text-sm">
+                  {history.map(({ id, total }) => (
+                    <li key={id} className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-2">
+                      <time dateTime={id}>
+                        {format.dateTime(writingMonthDate(id), writingMonthFormat)}
+                      </time>
+                      <span className="text-muted tabular-nums">
+                        {t("chart.monthTotal", { count: total })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
+          </>
         )}
       </figure>
     </section>

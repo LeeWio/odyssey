@@ -18,6 +18,12 @@ export type WritingMonth = {
   total: number;
 };
 
+export const writingMonthFormat = { year: "numeric", month: "long", timeZone: "UTC" } as const;
+
+export function writingMonthDate(id: string) {
+  return new Date(`${id}-01T00:00:00Z`);
+}
+
 export function buildWritingHistory(archives: readonly ArchiveMonth[], now = new Date()) {
   const current = now.getUTCFullYear() * 12 + now.getUTCMonth();
   const counts = new Map<number, number>();

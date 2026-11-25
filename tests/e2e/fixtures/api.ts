@@ -27,6 +27,18 @@ createServer((request, response) => {
     return;
   }
   if (pathname === "/health") return send(200, { ready: true });
+  if (pathname === "/api/v1/public/blog/facets") {
+    const now = new Date();
+    const previousMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
+    return send(200, {
+      totalPublishedCount: 3,
+      archives: [
+        { year: previousMonth.getUTCFullYear(), month: previousMonth.getUTCMonth() + 1, count: 3 },
+      ],
+      categories: [],
+      tags: [],
+    });
+  }
   if (pathname === "/api/v1/public/moments/809" || pathname === "/api/v1/public/moments/810") {
     const isPublic = pathname.endsWith("/809");
     return send(200, {
