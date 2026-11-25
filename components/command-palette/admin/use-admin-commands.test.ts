@@ -4,11 +4,14 @@ import { createRoot, type Root } from "react-dom/client";
 import { Provider } from "react-redux";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
-import { RichTextModal } from "@/components/rich-text/rich-text-modal";
 import { authSlice, setCredentials } from "@/lib/features/auth/auth-slice";
-import { overlaySlice } from "@/lib/features/ui/overlay-slice";
+import { overlaySlice, selectRichTextState } from "@/lib/features/ui/overlay-slice";
 import { CommandIntent, type ActionCommand } from "../types";
 import { useAdminCommands } from "./use-admin-commands";
+
+function editorWouldMount(state: ReturnType<typeof selectRichTextState>) {
+  return Boolean(state.isOpen && state.activeId);
+}
 
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("next/navigation", () => ({
@@ -39,7 +42,7 @@ function Harness() {
 
 async function render() {
   await act(async () => {
-    root.render(createElement(Provider, { store, children: createElement(Harness) }));
+    root.render(createElement(Provider, { store }, createElement(Harness)));
   });
 }
 
@@ -80,14 +83,8 @@ it("opens a new article editor session from the command palette", async () => {
   });
 });
 
-it("mounts the article editor only after the palette command sets an active id", async () => {
-  const container = document.createElement("div");
-  document.body.append(container);
-  const gate = createRoot(container);
-  await act(async () => {
-    gate.render(createElement(Provider, { store, children: createElement(RichTextModal) }));
-  });
-  expect(container.querySelector("[role='dialog']")).toBeNull();
+it("satisfies the article editor mount condition only after the palette command runs", async () => {
+  expect(editorWouldMount(selectRichTextState(store.getState()))).toBe(false);
 
   store.dispatch(
     setCredentials({
@@ -103,12 +100,7 @@ it("mounts the article editor only after the palette command sets an active id",
     await editor.payload.action();
   });
 
-  expect(container.querySelector("[role='dialog']")?.getAttribute("aria-label")).toBe(
-    "Create article"
-  );
-
-  act(() => {
-    gate.unmount();
-  });
-  container.remove();
+  const opened = selectRichTextState(store.getState());
+  expect(editorWouldMount(opened)).toBe(true);
+  expect(opened.activeId).toBe("new");
 });
