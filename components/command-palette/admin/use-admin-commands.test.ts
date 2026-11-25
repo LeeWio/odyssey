@@ -1,11 +1,11 @@
-import { configureStore } from "@reduxjs/toolkit";
 import { act, createElement, useLayoutEffect } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { Provider } from "react-redux";
+import { Provider, type ProviderProps } from "react-redux";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
-import { authSlice, setCredentials } from "@/lib/features/auth/auth-slice";
-import { overlaySlice, selectRichTextState } from "@/lib/features/ui/overlay-slice";
+import { setCredentials } from "@/lib/features/auth/auth-slice";
+import { selectRichTextState } from "@/lib/features/ui/overlay-slice";
+import { makeStore, type AppStore } from "@/lib/store";
 import { CommandIntent, type ActionCommand } from "../types";
 import { useAdminCommands } from "./use-admin-commands";
 
@@ -20,15 +20,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-const createStore = () =>
-  configureStore({
-    reducer: {
-      auth: authSlice.reducer,
-      overlay: overlaySlice.reducer,
-    },
-  });
-
-let store: ReturnType<typeof createStore>;
+let store: AppStore;
 let root: Root;
 let commands: ReturnType<typeof useAdminCommands>;
 
@@ -42,12 +34,12 @@ function Harness() {
 
 async function render() {
   await act(async () => {
-    root.render(createElement(Provider, { store }, createElement(Harness)));
+    root.render(createElement(Provider, { store } as ProviderProps, createElement(Harness)));
   });
 }
 
 beforeEach(() => {
-  store = createStore();
+  store = makeStore();
   commands = [];
   root = createRoot(document.createElement("div"));
 });
