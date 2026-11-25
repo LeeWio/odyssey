@@ -26,6 +26,18 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.264.0](https://github.com/LeeWio/odyssey/compare/v1.263.1...v1.264.0) (2026-11-25)
+
+
+### Features
+
+* **home:** add site record and writing history ([#157](https://github.com/LeeWio/odyssey/issues/157)) ([423a3e3](https://github.com/LeeWio/odyssey/commit/423a3e39ee700491f9cc2461d3858db5907acbc4))
+
+
+### Bug Fixes
+
+* **web:** repair project source links and stream journal recommendations ([#155](https://github.com/LeeWio/odyssey/issues/155)) ([e1ce952](https://github.com/LeeWio/odyssey/commit/e1ce9522399846df847497acefbd36f7addabf5a))
+
 ## [1.263.1](https://github.com/LeeWio/odyssey/compare/v1.263.0...v1.263.1) (2026-11-24)
 
 
