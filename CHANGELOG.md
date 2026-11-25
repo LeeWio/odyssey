@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.264.2](https://github.com/LeeWio/odyssey/compare/v1.264.1...v1.264.2) (2026-11-25)
+
+
+### Bug Fixes
+
+* **web:** restore chart keyboard access and stabilize browser tests ([#164](https://github.com/LeeWio/odyssey/issues/164)) ([0a62068](https://github.com/LeeWio/odyssey/commit/0a620685421cffc42f2f2f441a0e8846f5a92173))
+
 ## [1.264.1](https://github.com/LeeWio/odyssey/compare/v1.264.0...v1.264.1) (2026-11-25)
 
 
