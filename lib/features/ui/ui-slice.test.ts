@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import overlayReducer, {
+  openRichText,
   setAuthMode,
   setLoginOpen,
   setMomentPublisherOpen,
   setSignUpOpen,
+  toggleRichText,
 } from "./overlay-slice";
 
 describe("auth dialog compatibility", () => {
@@ -36,6 +38,29 @@ describe("auth dialog compatibility", () => {
     const signup = overlayReducer(login, setAuthMode("signup"));
     expect(overlayReducer(signup, setSignUpOpen(false)).authDialogs).toEqual(closed);
     expect(overlayReducer(signup, setAuthMode(null)).authDialogs).toEqual(closed);
+  });
+});
+
+describe("rich text editor", () => {
+  it("opens a new draft with the id the editor session requires", () => {
+    const opened = overlayReducer(
+      undefined,
+      openRichText({ activeId: "new", initialValue: null, isReadOnly: false })
+    );
+
+    expect(opened.richText).toEqual({
+      isOpen: true,
+      activeId: "new",
+      initialValue: null,
+      isReadOnly: false,
+    });
+  });
+
+  it("does not give the editor a session when only the open flag is toggled", () => {
+    const toggled = overlayReducer(undefined, toggleRichText());
+
+    expect(toggled.richText.isOpen).toBe(true);
+    expect(toggled.richText.activeId).toBeNull();
   });
 });
 
