@@ -265,8 +265,9 @@ export function CommentInput({
   };
 
   const submitComment = async (): Promise<boolean> => {
-    const serialized = documentJsonRef.current || documentJson;
-    const empty = editorEmptyRef.current;
+    const submittedDraft = embedded ? documentJsonRef.current || documentJson : content;
+    const submissionContent = embedded ? submittedDraft : submittedDraft.trim();
+    const empty = !submissionContent || (embedded && editorEmptyRef.current);
     commentDebug("input:submit-called", {
       replyId,
       isAuthenticated,
@@ -290,25 +291,24 @@ export function CommentInput({
       return false;
     }
 
-    if (empty || !serialized || isSubmitting || activeSubmission.current?.scope === draftScope)
-      return false;
+    if (empty || isSubmitting || activeSubmission.current?.scope === draftScope) return false;
 
     const submission = { scope: draftScope };
     activeSubmission.current = submission;
     setPendingSubmission(submission);
-    commentDebug("input:submit-start", { replyId, contentLength: serialized.length });
+    commentDebug("input:submit-start", { replyId, contentLength: submissionContent.length });
     try {
       const typedGuestName = guestName.trim();
       if (guest && typedGuestName) {
         window.localStorage.setItem(GUEST_NAME_STORAGE_KEY, typedGuestName);
       }
-      const submitted = await onSubmit(serialized, guest);
+      const submitted = await onSubmit(submissionContent, guest);
       if (!submitted) {
         commentDebug("input:submit-not-accepted", { replyId });
         return false;
       }
       commentDebug("input:submit-resolved", { replyId });
-      if (clearDraft(serialized) && activeSubmission.current === submission) {
+      if (clearDraft(submittedDraft) && activeSubmission.current === submission) {
         clearAttachments();
         setModalOpen(false);
         onSubmitted?.();
@@ -344,7 +344,7 @@ export function CommentInput({
 
   const heading = isReply && replyTo ? t("replyTo", { name: replyTo }) : t("writeComment");
   const description = isReply ? t("replyDescription") : t("writeDescription");
-  const canSubmit = !editorEmpty;
+  const canSubmit = embedded ? !editorEmpty : content.trim().length > 0;
 
   const signatureName = postAsGuest ? guestName.trim() || t("anonymous") : composerName;
   const signatureAvatar = postAsGuest ? undefined : currentUserProfile?.avatar;
@@ -456,6 +456,7 @@ export function CommentInput({
       <div className="flex flex-col gap-3">
         <PromptInput
           layout="compact"
+          lockInputOnRun={false}
           status={isSubmitting ? "submitted" : "ready"}
           value={content}
           onSubmit={() => {

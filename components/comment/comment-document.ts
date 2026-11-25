@@ -1,14 +1,10 @@
 import type { Extensions, JSONContent } from "@tiptap/core";
-import { Link } from "@tiptap/extension-link";
-import { Underline } from "@tiptap/extension-underline";
 import { StarterKit } from "@tiptap/starter-kit";
 
 export const COMMENT_MAX_LENGTH = 1000;
 
 export const commentExtensions: Extensions = [
-  StarterKit,
-  Underline,
-  Link.configure({ openOnClick: false }),
+  StarterKit.configure({ link: { openOnClick: false } }),
 ];
 
 export const emptyCommentDocument = (): JSONContent => ({
@@ -25,7 +21,16 @@ export function parseCommentDocument(content: string): JSONContent {
     const parsed = JSON.parse(content) as JSONContent;
     if (parsed?.type === "doc") return parsed;
   } catch {
-    // Content that is not a document falls through to an empty editor.
+    // Older comments were stored as plain text.
   }
-  return emptyCommentDocument();
+  return {
+    type: "doc",
+    content: content
+      .split(/\r\n?|\n/)
+      .map((line) =>
+        line
+          ? { type: "paragraph", content: [{ type: "text", text: line }] }
+          : { type: "paragraph" }
+      ),
+  };
 }

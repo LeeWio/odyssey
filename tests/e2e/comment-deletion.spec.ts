@@ -44,7 +44,7 @@ async function openDelete(page: Page, id: number) {
 test.use({ locale: "en-US" });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "deletion-test",
@@ -144,7 +144,7 @@ test("removes a newly submitted pending comment from the local list", async ({ p
   });
   await page.getByRole("textbox", { name: "Add a comment" }).fill("Pending contribution");
   await page.getByRole("button", { name: "Send comment" }).press("Enter");
-  await expect(page.locator("#comment-200")).toContainText("Awaiting review");
+  await expect(page.locator("#comment-200")).toContainText("Pending review");
   const dialog = await openDelete(page, 200);
   await dialog.getByRole("button", { name: "Delete", exact: true }).press("Enter");
   await expect(dialog).toHaveCount(0);
