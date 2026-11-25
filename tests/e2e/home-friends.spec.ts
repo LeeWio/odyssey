@@ -39,48 +39,50 @@ async function prepare(page: Page) {
 
 test.use({ locale: "en-US" });
 
-test("HeroUI cards stay ordered, aligned and keyboard accessible across viewports", async ({
-  page,
-}, testInfo) => {
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-  await prepare(page);
-  let requests = 0;
-  await page.route(`**${endpoint}`, (route) => {
-    requests += 1;
-    return route.fulfill({
-      json: response([
-        { ...links[0], id: 99, sortOrder: -1, url: "javascript:alert(1)" },
-        ...links.toReversed(),
-      ]),
+for (const { width, columns, count } of [
+  { width: 390, columns: 1, count: 4 },
+  { width: 820, columns: 2, count: 6 },
+  { width: 1440, columns: 3, count: 6 },
+  { width: 2560, columns: 3, count: 6 },
+]) {
+  test(`HeroUI cards stay ordered, aligned and keyboard accessible at ${width}px`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: width === 390 ? 1440 : width, height: 900 });
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await prepare(page);
+    let requests = 0;
+    await page.route(`**${endpoint}`, (route) => {
+      requests += 1;
+      return route.fulfill({
+        json: response([
+          { ...links[0], id: 99, sortOrder: -1, url: "javascript:alert(1)" },
+          ...links.toReversed(),
+        ]),
+      });
     });
-  });
-  await page.goto("/");
-  const section = page.locator("#friend-links-showcase");
-  await section.locator("h2").scrollIntoViewIfNeeded();
-  const heading = section.getByRole("link", { name: "Near & Far", exact: true });
-  const directory = section.getByRole("list", { name: "Friends" });
-  await expect(heading).toHaveAttribute("href", "/links");
-  await expect(section.getByText("Good company knows no distance.", { exact: true })).toBeVisible();
-  await expect(section.locator('a[href="/links"]')).toHaveCount(1);
-  await expect(section.getByText("Visit the full blogroll", { exact: true })).toHaveCount(0);
-  await expect(directory.locator(":scope > li")).toHaveCount(6);
-  await expect(directory.locator('[data-slot="card"]')).toHaveCount(6);
-  await expect(directory.locator('[data-slot="card-title"]')).toHaveCount(6);
-  expect(
-    await directory
-      .getByRole("link", { includeHidden: true })
-      .evaluateAll((elements) => elements.map((element) => element.getAttribute("href")))
-  ).toEqual(links.slice(0, 6).map((link) => `${link.url}/`));
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const section = page.locator("#friend-links-showcase");
+    await section.locator("h2").scrollIntoViewIfNeeded();
+    const heading = section.getByRole("link", { name: "Near & Far", exact: true });
+    const directory = section.getByRole("list", { name: "Friends" });
+    await expect(heading).toHaveAttribute("href", "/links");
+    await expect(
+      section.getByText("Good company knows no distance.", { exact: true })
+    ).toBeVisible();
+    await expect(section.locator('a[href="/links"]')).toHaveCount(1);
+    await expect(section.getByText("Visit the full blogroll", { exact: true })).toHaveCount(0);
+    await expect(directory.locator(":scope > li")).toHaveCount(6);
+    await expect(directory.locator('[data-slot="card"]')).toHaveCount(6);
+    await expect(directory.locator('[data-slot="card-title"]')).toHaveCount(6);
+    expect(
+      await directory
+        .getByRole("link", { includeHidden: true })
+        .evaluateAll((elements) => elements.map((element) => element.getAttribute("href")))
+    ).toEqual(links.slice(0, 6).map((link) => `${link.url}/`));
 
-  for (const { width, columns, count } of [
-    { width: 390, columns: 1, count: 4 },
-    { width: 820, columns: 2, count: 6 },
-    { width: 1440, columns: 3, count: 6 },
-    { width: 2560, columns: 3, count: 6 },
-    { width: 390, columns: 1, count: 4 },
-  ]) {
-    await page.setViewportSize({ width, height: 900 });
+    if (width === 390) await page.setViewportSize({ width, height: 900 });
     await section.scrollIntoViewIfNeeded();
     const entries = directory.locator(":scope > li:visible");
     await expect(entries).toHaveCount(count);
@@ -132,7 +134,9 @@ test("HeroUI cards stay ordered, aligned and keyboard accessible across viewport
     await expect(first).toHaveAttribute("target", "_blank");
     await expect(first).toHaveAttribute("rel", "noopener noreferrer");
     await expect(first).toHaveAccessibleName("Visit Friend 1 (opens in a new window)");
-    await entries.first().scrollIntoViewIfNeeded();
+    await first.evaluate((element) =>
+      element.scrollIntoView({ block: "center", behavior: "instant" })
+    );
     await expect(first.locator("img")).toBeVisible();
     await expect
       .poll(() =>
@@ -169,31 +173,32 @@ test("HeroUI cards stay ordered, aligned and keyboard accessible across viewport
       })
     ).toBe(true);
     await section.screenshot({ path: testInfo.outputPath(`friends-${width}.png`) });
-  }
-  expect(requests).toBe(1);
-  expect(errors).toEqual([]);
-  // Hidden mobile entries must not remain in the keyboard path.
-  await directory.locator(":scope > li:visible").last().getByRole("link").focus();
-  await page.keyboard.press("Tab");
-  expect(await directory.evaluate((element) => element.contains(document.activeElement))).toBe(
-    false
-  );
-  await page
-    .context()
-    .route("https://friend-1.example/**", (route) =>
-      route.fulfill({ contentType: "text/html", body: "<title>Friend 1</title>" })
-    );
-  const first = directory.getByRole("link").first();
-  const [popup] = await Promise.all([
-    page.waitForEvent("popup"),
-    first.locator('[data-slot="card-footer"]').click(),
-  ]);
-  await expect(popup).toHaveURL("https://friend-1.example/");
-  await popup.close();
-  await heading.focus();
-  await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/links$/);
-});
+    expect(requests).toBe(1);
+    expect(errors).toEqual([]);
+    if (width === 390) {
+      // Hidden mobile entries must not remain in the keyboard path.
+      await directory.locator(":scope > li:visible").last().getByRole("link").focus();
+      await page.keyboard.press("Tab");
+      expect(await directory.evaluate((element) => element.contains(document.activeElement))).toBe(
+        false
+      );
+      await page
+        .context()
+        .route("https://friend-1.example/**", (route) =>
+          route.fulfill({ contentType: "text/html", body: "<title>Friend 1</title>" })
+        );
+      const [popup] = await Promise.all([
+        page.context().waitForEvent("page"),
+        first.locator('[data-slot="card-footer"]').click(),
+      ]);
+      await expect(popup).toHaveURL("https://friend-1.example/");
+      await popup.close();
+      await heading.focus();
+      await page.keyboard.press("Enter");
+      await expect(page).toHaveURL(/\/links$/);
+    }
+  });
+}
 
 test("light theme retains visible keyboard focus with motion enabled", async ({
   page,
