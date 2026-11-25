@@ -44,19 +44,21 @@ for (const collection of [
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(collection.path);
     const grid = page.getByTestId(collection.grid);
-    await expect(grid.locator(":scope > *")).toHaveCount(12);
+    const cards = grid.locator('[data-slot="card"]');
+    const cardGrid = collection.path === "/projects" ? grid.locator(":scope > .grid") : grid;
+    await expect(cards).toHaveCount(12);
     await expect(
       page.getByRole("heading", { level: 1, name: collection.copy.title })
     ).toBeVisible();
 
     for (const [index, width] of [390, 820, 1440, 1920, 2560].entries()) {
       await page.setViewportSize({ width, height: 900 });
-      const container = grid.locator("../..");
+      const container = page.locator("main > div").first();
       await expect(container).toHaveCSS("max-width", "none");
       expect((await container.boundingBox())!.width).toBe(width);
       await expect
         .poll(() =>
-          grid.evaluate((element) => {
+          cardGrid.evaluate((element) => {
             const boxes = [...element.children].map((child) => child.getBoundingClientRect());
             return boxes.filter((box) => Math.abs(box.top - boxes[0]!.top) < 1).length;
           })
@@ -71,8 +73,8 @@ for (const collection of [
 
     const search = page.getByRole("searchbox", { name: collection.copy.searchLabel });
     await search.fill("Collection item 12");
-    await expect(grid.locator(":scope > *")).toHaveCount(1);
-    expect((await grid.locator(":scope > *").first().boundingBox())!.width).toBeLessThan(500);
+    await expect(cards).toHaveCount(1);
+    expect((await cards.first().boundingBox())!.width).toBeLessThan(500);
     await page.setViewportSize({ width: 390, height: 844 });
     await search.fill("no-matching-entry");
     await expect(grid).toHaveCount(0);
@@ -87,7 +89,7 @@ for (const collection of [
           collection.path === "/projects" ? messages.Projects.showAll : messages.Links.clearSearch,
       })
       .click();
-    await expect(grid.locator(":scope > *")).toHaveCount(12);
+    await expect(cards).toHaveCount(12);
     expect(requests).toBe(1);
   });
 }
