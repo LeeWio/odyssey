@@ -228,6 +228,9 @@ export function ProjectShowcasePage({ initialSearch = "" }: { initialSearch?: st
     });
   }, [availability, deferredSearch, projects, sort]);
 
+  const featuredProject = search || availability !== "all" ? undefined : visibleProjects[0];
+  const gridProjects = featuredProject ? visibleProjects.slice(1) : visibleProjects;
+
   const previewCount = projects.filter((project) =>
     Boolean(toSafeProjectUrl(project.previewUrl))
   ).length;
@@ -419,12 +422,10 @@ export function ProjectShowcasePage({ initialSearch = "" }: { initialSearch?: st
 
               {visibleProjects.length > 0 ? (
                 <div className="mt-5 flex flex-col gap-4" data-testid="projects-grid">
-                  {visibleProjects[0] ? (
-                    <ProjectCard featured project={visibleProjects[0]} />
-                  ) : null}
-                  {visibleProjects.length > 1 ? (
+                  {featuredProject ? <ProjectCard featured project={featuredProject} /> : null}
+                  {gridProjects.length > 0 ? (
                     <div className={PROJECT_GRID}>
-                      {visibleProjects.slice(1).map((project) => (
+                      {gridProjects.map((project) => (
                         <ProjectCard key={project.id} project={project} />
                       ))}
                     </div>

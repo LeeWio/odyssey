@@ -35,6 +35,19 @@ for (const mode of ["light", "dark"] as const) {
         await test.step(kind, async () => {
           await editor.evaluate((element, kind) => {
             const editor = (element as HTMLElement & { editor: Editor }).editor;
+            if (kind === "table") {
+              const cells: number[] = [];
+              editor.state.doc.descendants((node, pos) => {
+                if (node.type.name !== "tableRow" || cells.length > 0) return;
+                node.forEach((_cell, offset) => cells.push(pos + 1 + offset));
+                return false;
+              });
+              if (!cells.length) throw new Error("Missing fixture table row");
+              editor.commands.setCellSelection({ anchorCell: cells[0], headCell: cells.at(-1) });
+              editor.commands.focus();
+              editor.commands.scrollIntoView();
+              return;
+            }
             let position: number | undefined;
             editor.state.doc.descendants((node, pos) => {
               if (position !== undefined) return false;
@@ -44,7 +57,6 @@ for (const mode of ["light", "dark"] as const) {
               if (kind === "image" && node.type.name === "image") position = pos;
               if (kind === "math" && node.type.name === "inlineMath") position = pos;
               if (kind === "columns" && node.type.name === "column") position = pos + 2;
-              if (kind === "table" && node.type.name === "tableCell") position = pos + 2;
             });
             if (position === undefined) throw new Error(`Missing fixture node: ${kind}`);
             if (kind === "image" || kind === "math") editor.commands.setNodeSelection(position);
@@ -130,18 +142,19 @@ for (const mode of ["light", "dark"] as const) {
               }
               const a = await pixels(blurred);
               const b = await pixels(clear);
-              // Sample the menu's top padding, away from nested button filters and icons.
-              function deviation({ data, width }: Awaited<ReturnType<typeof pixels>>) {
-                const values = Array.from(
-                  { length: width - 40 },
-                  (_, x) => data[(2 * width + x + 20) * 4]
-                );
-                const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
-                return Math.sqrt(
-                  values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length
+              // Compare pixels one stripe apart in the menu padding. This isolates the
+              // stripes from the larger gradients in the menu material and its shadow.
+              function stripeContrast({ data, width }: Awaited<ReturnType<typeof pixels>>) {
+                const stripe = 4;
+                const offsets = Array.from({ length: width - 40 - stripe }, (_, x) => x + 20);
+                return (
+                  offsets.reduce((total, x) => {
+                    const index = (2 * width + x) * 4;
+                    return total + Math.abs(data[index] - data[index + stripe * 4]);
+                  }, 0) / offsets.length
                 );
               }
-              return { blurred: deviation(a), clear: deviation(b) };
+              return { blurred: stripeContrast(a), clear: stripeContrast(b) };
             },
             { blurred: blurred.toString("base64"), clear: clear.toString("base64") }
           );

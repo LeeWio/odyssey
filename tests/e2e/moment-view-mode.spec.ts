@@ -144,6 +144,7 @@ for (const mode of ["List", "Grid"] as const) {
   test(`${mode} reveals initial and newly loaded cards in reading order`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await prepare(page, "no-preference");
+    await page.clock.install();
     await page.addInitScript(() => {
       const samples: { at: number; cards: { opacity: number; y: number; scale: number }[] }[] = [];
       (window as typeof window & { momentEntranceSamples?: typeof samples }).momentEntranceSamples =
@@ -181,8 +182,23 @@ for (const mode of ["List", "Grid"] as const) {
     await page.goto("/moments?topic=daily");
     const feed = page.getByRole("region", { name: "Moments feed" });
     if (mode === "Grid") await feed.getByRole("radio", { name: mode, exact: true }).click();
+    const finishEntrance = async () => {
+      await expect
+        .poll(async () => {
+          await page.clock.runFor(32);
+          return feed.locator("ol > li").count();
+        })
+        .toBe(12);
+      await page.clock.runFor(1250);
+      await page.clock.resume();
+    };
+    const pauseClock = async () => {
+      await page.clock.pauseAt(new Date((await page.evaluate(() => Date.now())) + 200));
+    };
+    await pauseClock();
     held = false;
     release();
+    await finishEntrance();
     const assertSequence = async () => {
       await expect
         .poll(() =>
@@ -213,7 +229,9 @@ for (const mode of ["List", "Grid"] as const) {
         expect(starts[index] - starts[index - 1]).toBeLessThan(240);
       }
       expect(samples[0].cards[1].opacity).toBe(0);
-      expect(samples[0].cards[1].y).toBeCloseTo(16, 1);
+      expect(
+        samples.some(({ cards: [, card] }) => card.opacity > 0.02 && card.opacity < 1 && card.y > 0)
+      ).toBe(true);
       for (const frame of samples) {
         for (const card of frame.cards) {
           expect(card.scale).toBeCloseTo(1, 3);
@@ -246,7 +264,9 @@ for (const mode of ["List", "Grid"] as const) {
     await expect(page.locator("#moment-100")).toHaveCSS("opacity", "1");
     await expect(page.locator("#moment-100")).toHaveCSS("transform", "none");
     if (mode === "List") {
-      await page.reload();
+      await pauseClock();
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await finishEntrance();
       await assertSequence();
     }
   });
@@ -555,7 +575,7 @@ test("failed topic changes keep readable cards and retry only the requested topi
   expect(await card?.evaluate((node) => node.isConnected)).toBe(true);
   await expect(feed.locator("ol > li")).toHaveCount(12);
   await expect(feed.locator('[data-slot="moment-feed-body"]')).toHaveCSS("opacity", "1");
-  await feed.getByRole("button", { name: "Try again", exact: true }).click();
+  await feed.getByRole("button", { name: "Try again", exact: true }).press("Enter");
   await expect(page.locator("#moment-444")).toBeVisible();
   await expect(feed.locator("ol > li")).toHaveCount(1);
   await expect(

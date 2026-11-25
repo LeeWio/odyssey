@@ -21,7 +21,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 for (const action of ["verify", "unsubscribe"] as const) {
-  const title = action === "verify" ? "You’re on the list." : "You’ve been unsubscribed.";
+  const title = action === "verify" ? `You're on it` : `You're off it`;
   const endpoint = `**/api/v1/public/newsletter/${action}?**`;
 
   test(`${action}: success remains visible after removing the token and reloading`, async ({

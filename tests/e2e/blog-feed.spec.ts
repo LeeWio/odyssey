@@ -48,7 +48,7 @@ async function selectFeedTab(page: Page) {
 }
 
 async function openFeed(page: Page, query = "") {
-  await page.goto(`/chronicle${query}`);
+  await page.goto(`/chronicle${query}`, { waitUntil: "domcontentloaded" });
   await selectFeedTab(page);
 }
 
@@ -303,7 +303,7 @@ test("search filters and page are restored from the URL after reload", async ({ 
     await route.fulfill({ json: result([post(2, "Systems article")], 1, 9) });
   });
 
-  await openFeed(page, "?keyword=systems&categoryId=1&page=2");
+  await openFeed(page, "?section=orbit&keyword=systems&categoryId=1&page=2");
   const results = page.locator("#all-writing");
   await expect(page.getByRole("searchbox", { name: "Search articles" })).toHaveValue("systems");
   await expect(results.getByText("Systems article", { exact: true })).toBeVisible();

@@ -29,7 +29,7 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/**", async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === "/api/v1/public/guestbook/roots/cursor") {
-      await route.fulfill({ json: cursorPage([comment(100, "Existing discussion", 1)], 90) });
+      await route.fulfill({ json: cursorPage([comment(100, "Existing discussion", 3)], 90) });
     } else if (url.pathname.endsWith("/new-count")) {
       await route.fulfill({
         json: envelope(Number(url.searchParams.get("afterId")) < 200 ? 2 : 0),
@@ -63,7 +63,7 @@ test("shows pagination progress, preserves existing comments on failure, and ret
     await expect.poll(() => cursors.length).toBe(1);
     response.resolve();
     await expect(
-      page.getByText("Couldn’t load more comments. Please try again.", { exact: true })
+      page.getByText("Couldn't load more comments. Please try again.", { exact: true })
     ).toBeVisible();
     await expect(page.getByText("Existing discussion", { exact: true })).toBeVisible();
     await expect(loadMore).toBeEnabled();
@@ -87,17 +87,25 @@ test("keeps a failed reply expansion collapsed and lets the user retry", async (
       await route.fulfill({ status: 503, json: { message: "Offline" } });
     } else {
       await route.fulfill({
-        json: cursorPage([{ ...comment(101, "Recovered reply"), parentId: 100 }]),
+        json: envelope({
+          list: ["First reply", "Second reply", "Recovered reply"].map((content, index) => ({
+            ...comment(101 + index, content),
+            parentId: 100,
+          })),
+          nextCursor: null,
+          hasMore: false,
+          total: 3,
+        }),
       });
     }
   });
   try {
-    const showReplies = page.getByRole("button", { name: "Show 1 reply", exact: true });
+    const showReplies = page.getByRole("button", { name: "Show 3 replies", exact: true });
     await showReplies.click();
     await expect(page.getByRole("button", { name: "Loading replies…" })).toBeDisabled();
     response.resolve();
     await expect(
-      page.getByText("Couldn’t load replies. Please try again.", { exact: true })
+      page.getByText("Couldn't load replies. Please try again.", { exact: true })
     ).toBeVisible();
     await expect(showReplies).toHaveAttribute("aria-expanded", "false");
     await showReplies.click();
@@ -132,7 +140,7 @@ test("preserves the new-comment baseline after failure and retries successfully"
     await expect(loadNew).toBeDisabled();
     response.resolve();
     await expect(
-      page.getByText("Couldn’t load new comments. Please try again.", { exact: true })
+      page.getByText("Couldn't load new comments. Please try again.", { exact: true })
     ).toBeVisible();
     await expect(loadNew).toBeEnabled();
     await loadNew.click();
@@ -148,6 +156,7 @@ test("preserves the new-comment baseline after failure and retries successfully"
 test("isolates a pending page from another sort order", async ({ page }) => {
   const response = Promise.withResolvers<void>();
   await page.route("**/api/v1/public/guestbook/roots/cursor?**", async (route) => {
+    if (!new URL(route.request().url()).searchParams.has("cursor")) return route.fallback();
     await response.promise;
     await route.fulfill({ json: cursorPage([comment(80, "Delayed newest page")]) });
   });
@@ -163,6 +172,7 @@ test("isolates a pending page from another sort order", async ({ page }) => {
     });
   });
   try {
+    await page.reload({ waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: "Load more", exact: true }).click();
     await expect(page.getByRole("button", { name: "Load more", exact: true })).toBeDisabled();
     await page.getByRole("button", { name: "Choose comment sort" }).click();

@@ -132,6 +132,7 @@ test("HeroUI cards stay ordered, aligned and keyboard accessible across viewport
     await expect(first).toHaveAttribute("target", "_blank");
     await expect(first).toHaveAttribute("rel", "noopener noreferrer");
     await expect(first).toHaveAccessibleName("Visit Friend 1 (opens in a new window)");
+    await entries.first().scrollIntoViewIfNeeded();
     await expect(first.locator("img")).toBeVisible();
     await expect
       .poll(() =>

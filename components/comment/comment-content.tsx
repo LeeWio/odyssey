@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Typography, toast } from "@heroui/react";
+import type { JSONContent } from "@tiptap/core";
 import { useTranslations } from "next-intl";
 import { createContext, useContext, useRef, useState } from "react";
 import { CommentBody } from "./comment-body";
@@ -18,7 +19,7 @@ interface CommentContentProps {
 
 interface CommentEditSessionValue {
   formId: string;
-  source: string;
+  source: JSONContent;
   canSave: boolean;
   isSaving: boolean;
   setDocument: (serialized: string, isEmpty: boolean) => void;
@@ -49,11 +50,13 @@ export function CommentEditSession({
   children: React.ReactNode;
 }) {
   const t = useTranslations("Comments");
-  const [editedDocument, setEditedDocument] = useState(content);
+  const [source] = useState(() => parseCommentDocument(content));
+  const initialDocument = serializeCommentDocument(source);
+  const [editedDocument, setEditedDocument] = useState(initialDocument);
   const [editorEmpty, setEditorEmpty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const saving = useRef(false);
-  const unchanged = editedDocument === content;
+  const unchanged = editedDocument === initialDocument;
 
   const setDocument = (serialized: string, isEmpty: boolean) => {
     setEditedDocument(serialized);
@@ -80,7 +83,7 @@ export function CommentEditSession({
     <CommentEditSessionContext.Provider
       value={{
         formId,
-        source: content,
+        source,
         setDocument,
         canSave: !editorEmpty && !unchanged,
         isSaving,
@@ -98,10 +101,9 @@ export function CommentEditFields() {
 
   return (
     <CommentComposerEditor
-      defaultValue={parseCommentDocument(source)}
+      defaultValue={source}
       isReadOnly={isSaving}
       placeholder={t("editComment")}
-      resetKey={source}
       onDocumentChange={(document, isEmpty) =>
         setDocument(serializeCommentDocument(document), isEmpty)
       }

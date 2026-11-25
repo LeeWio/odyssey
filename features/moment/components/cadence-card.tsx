@@ -3,9 +3,9 @@
 import { Button, Card, ColorSwatch, Meter, Skeleton, Tooltip, Typography } from "@heroui/react";
 import { Segment } from "@heroui-pro/react";
 import { Icon } from "@iconify/react";
-import { useFormatter } from "next-intl";
-import { useId, useState } from "react";
-import type { CSSProperties } from "react";
+import { useFormatter, useTranslations } from "next-intl";
+import { useId, useRef, useState } from "react";
+import type { CSSProperties, KeyboardEvent } from "react";
 import type { Key } from "react-aria-components";
 import { motion } from "motion/react";
 
@@ -86,7 +86,7 @@ export function MomentCadenceCard({
           </div>
           {rows ? (
             <div className="min-h-28">
-              <CadenceDots key={period} rows={rows} />
+              <CadenceDots key={period} periodLabel={labels[period]} rows={rows} />
             </div>
           ) : query.isError ? (
             <div className="flex min-h-28 flex-col items-start gap-2" role="status">
@@ -125,51 +125,99 @@ function CadenceMeter({
   );
 }
 
-function CadenceDots({ rows }: { rows: CadenceCell[][] }) {
+const CADENCE_NAVIGATION = {
+  ArrowLeft: -1,
+  ArrowRight: 1,
+  ArrowUp: -DOT_COLUMNS,
+  ArrowDown: DOT_COLUMNS,
+} as const;
+
+function CadenceDots({ periodLabel, rows }: { periodLabel: string; rows: CadenceCell[][] }) {
   const { reduced } = useMomentMotion();
+  const t = useTranslations("Moments");
+  const gridRef = useRef<HTMLDivElement>(null);
+  const helpId = useId();
+  const cells = rows.flat();
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const reachableIndex =
+    focusedIndex !== null && cells[focusedIndex]?.label
+      ? focusedIndex
+      : cells.findIndex((cell) => cell.label !== null);
+
+  const moveFocus = (event: KeyboardEvent<HTMLDivElement>, index: number) => {
+    const offset = CADENCE_NAVIGATION[event.key as keyof typeof CADENCE_NAVIGATION];
+    if (offset === undefined) return;
+
+    event.preventDefault();
+    const next = index + offset;
+    if (cells[next]?.label) {
+      gridRef.current?.querySelector<HTMLElement>(`[data-cadence-index="${next}"]`)?.focus();
+    }
+  };
 
   return (
-    <motion.div
-      className="flex flex-col gap-2.5"
-      data-slot="moment-cadence-dots"
-      initial={reduced ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: reduced ? 0 : 0.16, ease: pageEaseOut }}
-    >
-      {rows.map((row, rowIndex) => (
-        <div
-          key={rowIndex}
-          className="grid gap-2.5"
-          style={{ gridTemplateColumns: `repeat(${DOT_COLUMNS}, minmax(0, 1fr))` }}
-        >
-          {row.map((dot, dotIndex) => (
-            <CadenceDotView key={dotIndex} dot={dot} />
-          ))}
-        </div>
-      ))}
-    </motion.div>
-  );
-}
-
-function CadenceDotView({ dot }: { dot: CadenceCell }) {
-  if (dot.state === "none" || dot.label == null) return <span className="aspect-square" />;
-
-  return (
-    <Tooltip closeDelay={0} delay={250}>
-      <Tooltip.Trigger
-        aria-label={dot.label}
-        className="flex aspect-square cursor-help rounded-full"
+    <>
+      <p id={helpId} className="sr-only">
+        {t("cadenceKeyboard")}
+      </p>
+      <motion.div
+        ref={gridRef}
+        role="grid"
+        aria-label={t("cadenceGrid", { period: periodLabel })}
+        aria-describedby={helpId}
+        aria-colcount={DOT_COLUMNS}
+        className="flex flex-col gap-2.5"
+        data-slot="moment-cadence-dots"
+        initial={reduced ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: reduced ? 0 : 0.16, ease: pageEaseOut }}
       >
-        <ColorSwatch
-          aria-hidden="true"
-          className="pointer-events-none size-full rounded-full shadow-none"
-          color={SWATCH_COLOR}
-          size="xs"
-          style={swatchStyle(dot.state)}
-        />
-      </Tooltip.Trigger>
-      <CadenceTip label={dot.label} />
-    </Tooltip>
+        {rows.map((row, rowIndex) => (
+          <div
+            key={rowIndex}
+            role="row"
+            className="grid gap-2.5"
+            style={{ gridTemplateColumns: `repeat(${DOT_COLUMNS}, minmax(0, 1fr))` }}
+          >
+            {row.map((dot, dotIndex) => {
+              const index = rowIndex * DOT_COLUMNS + dotIndex;
+              if (dot.label == null)
+                return <span key={dotIndex} aria-hidden="true" className="aspect-square" />;
+
+              const label = t(
+                dot.state === "filled" ? "cadencePublished" : "cadenceNoPublication",
+                {
+                  date: dot.label,
+                }
+              );
+              return (
+                <Tooltip key={dotIndex} closeDelay={0} delay={250}>
+                  <Tooltip.Trigger
+                    role="gridcell"
+                    aria-label={label}
+                    aria-colindex={dotIndex + 1}
+                    className="focus-visible:outline-focus flex aspect-square cursor-help rounded-full focus-visible:outline-2 focus-visible:outline-offset-2"
+                    data-cadence-index={index}
+                    tabIndex={reachableIndex === index ? 0 : -1}
+                    onFocus={() => setFocusedIndex(index)}
+                    onKeyDown={(event) => moveFocus(event, index)}
+                  >
+                    <ColorSwatch
+                      aria-hidden="true"
+                      className="pointer-events-none size-full rounded-full shadow-none"
+                      color={SWATCH_COLOR}
+                      size="xs"
+                      style={swatchStyle(dot.state)}
+                    />
+                  </Tooltip.Trigger>
+                  <CadenceTip label={dot.label} />
+                </Tooltip>
+              );
+            })}
+          </div>
+        ))}
+      </motion.div>
+    </>
   );
 }
 

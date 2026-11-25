@@ -17,7 +17,7 @@ test.use({ locale: "en-US" });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     if (sessionStorage.getItem("reaction-test-guest")) return;
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "reaction-test",
@@ -119,9 +119,7 @@ test("restores the previous count after a failed like and permits retry", async 
     await like.press("Enter");
     await expect(card.getByRole("button", { name: "Unlike comment", exact: true })).toHaveText("5");
     response.resolve();
-    await expect(
-      page.getByText("Couldn't update comment reaction.", { exact: true })
-    ).toBeVisible();
+    await expect(page.getByText("Couldn't update the reaction.", { exact: true })).toBeVisible();
     await expect(like).toBeEnabled();
     await expect(like).toHaveText("4");
     await expect(like).toHaveAttribute("aria-pressed", "false");
@@ -165,7 +163,7 @@ test("opens login for a guest without changing the reaction or sending a write",
   page,
 }) => {
   await page.evaluate(() => {
-    sessionStorage.removeItem("odyssey_auth");
+    localStorage.removeItem("odyssey_auth");
     sessionStorage.setItem("reaction-test-guest", "1");
   });
   let writes = 0;

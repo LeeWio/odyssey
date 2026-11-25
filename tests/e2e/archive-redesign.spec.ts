@@ -36,12 +36,12 @@ test("archive uses a full-width editorial timeline with responsive controls", as
   for (const width of [390, 820, 1440, 2560]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/archive?year=2026");
-    const heading = page.getByRole("heading", { name: "Read the work in sequence.", exact: true });
+    const heading = page.getByRole("heading", { name: "All of It", level: 1, exact: true });
     const list = page.getByTestId("archive-results-list");
     const container = page.locator("main > div").first();
     await expect(heading).toBeVisible();
     await expect(list.locator(":scope > article")).toHaveCount(10);
-    await expect(page.getByRole("button", { name: /Year/ })).toBeVisible();
+    await expect(page.getByRole("grid", { name: /^Year\b/ })).toBeVisible();
     await expect(page.locator('[aria-label^="Filter "]')).toBeVisible();
     await expect(container).toHaveCSS("max-width", "none");
     expect((await container.boundingBox())!.width).toBe(width);
@@ -75,10 +75,8 @@ test("archive keeps period controls keyboard accessible", async ({ page }) => {
     })
   );
   await page.goto("/archive");
-  const year = page.getByRole("button", { name: /Year/ });
-  await year.press("Enter");
-  await expect(page.getByRole("option", { name: "2026", exact: true })).toBeVisible();
-  await page.getByRole("option", { name: "2026", exact: true }).press("Enter");
+  const years = page.getByRole("grid", { name: /^Year\b/ });
+  await years.getByRole("row", { name: "2026", exact: true }).press("Space");
   await expect(page).toHaveURL(/year=2026/);
   await expect(page.locator('[aria-label="Filter 2026 by month"]')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

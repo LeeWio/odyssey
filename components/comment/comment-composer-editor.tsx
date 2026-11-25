@@ -33,6 +33,7 @@ export function CommentComposerEditor({
   return (
     <RichTextEditor
       key={resetKey}
+      aria-label={placeholder}
       className="w-full"
       isReadOnly={isReadOnly}
       maxLength={maxLength}

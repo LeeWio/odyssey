@@ -153,7 +153,7 @@ function patchCachedCommentLikes(
       patches.push(
         dispatch(
           commentApi.util.updateQueryData(endpoint, args, (draft) => {
-            applyLikeToCommentList(draft.list, commentId, liked);
+            applyLikeToCommentList(draft?.list, commentId, liked);
           })
         )
       );
@@ -179,6 +179,7 @@ function patchCachedCommentLikes(
     patches.push(
       dispatch(
         commentApi.util.updateQueryData("getCommentAnchorContext", args, (draft) => {
+          if (!draft) return;
           applyLikeToCommentTree(draft.rootComment, commentId, liked);
           applyLikeToCommentTree(draft.targetComment, commentId, liked);
           applyLikeToCommentList(draft.repliesWindow.list, commentId, liked);
@@ -232,7 +233,7 @@ function patchCachedCommentLikeSnapshot(
     for (const args of commentApi.util.selectCachedArgsForQuery(getState(), endpoint)) {
       dispatch(
         commentApi.util.updateQueryData(endpoint, args, (draft) => {
-          applyLikeSnapshotToCommentList(draft.list, commentId, liked, likesCount);
+          applyLikeSnapshotToCommentList(draft?.list, commentId, liked, likesCount);
         })
       );
     }
@@ -254,6 +255,7 @@ function patchCachedCommentLikeSnapshot(
   )) {
     dispatch(
       commentApi.util.updateQueryData("getCommentAnchorContext", args, (draft) => {
+        if (!draft) return;
         applyLikeSnapshotToCommentTree(draft.rootComment, commentId, liked, likesCount);
         applyLikeSnapshotToCommentTree(draft.targetComment, commentId, liked, likesCount);
         applyLikeSnapshotToCommentList(draft.repliesWindow.list, commentId, liked, likesCount);

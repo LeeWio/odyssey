@@ -28,7 +28,7 @@ test("reading paths adapt density, retain navigation and recover from filters", 
   await expect(grid.locator(":scope > a")).toHaveCount(12);
   for (const [index, width] of [390, 820, 1440, 1920, 2560].entries()) {
     await page.setViewportSize({ width, height: 900 });
-    const container = grid.locator("../..");
+    const container = page.locator("main > div").first();
     await expect(container).toHaveCSS("max-width", "none");
     expect((await container.boundingBox())!.width).toBe(width);
     await expect

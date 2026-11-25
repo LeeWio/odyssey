@@ -77,6 +77,10 @@
         "accessibleLabel": "Cumulative published articles by month",
         "empty": "The timeline starts with the first published article.",
         "unavailable": "The writing history is temporarily unavailable.",
+        "keyboardInstructions": "Use the Left and Right Arrow keys to hear the monthly totals.",
+        "monthlyDetails": "Monthly totals",
+        "monthTotal": "{count, plural, one {# article published} other {# articles published}}",
+        "monthAnnouncement": "{month}, {total}",
         "tooltipLabel": "Articles published"
       }
     },

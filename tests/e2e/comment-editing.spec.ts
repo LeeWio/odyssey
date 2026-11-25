@@ -1,5 +1,14 @@
 import { expect, test as base, type Page } from "@playwright/test";
 
+function textDocument(text: string) {
+  return { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] };
+}
+
+function expectCommentPayload(payload: { content: string }, text: string) {
+  const document = JSON.parse(payload.content);
+  expect(document).toMatchObject(textDocument(text));
+}
+
 const test = base.extend<{ browserErrors: string[] }>({
   browserErrors: [
     async ({ page }, use) => {
@@ -26,7 +35,7 @@ async function openEditor(page: Page, id = 100) {
 test.use({ locale: "en-US" });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "editing-test",
@@ -107,7 +116,7 @@ test("keeps saved edits in accumulated pages when the editor is reopened", async
   await expect(card).toContainText("Updated older comment");
   await expect(page.locator("#comment-100")).toContainText(original);
   await openEditor(page, 90);
-  await expect(editor).toHaveValue("Updated older comment");
+  await expect(editor).toHaveText("Updated older comment");
 });
 
 test("keeps saved edits in newly submitted pending comments", async ({ page }) => {
@@ -116,31 +125,31 @@ test("keeps saved edits in newly submitted pending comments", async ({ page }) =
   });
   await page.route("**/api/v1/user/comments/200", async (route) => {
     expect(route.request().method()).toBe("PUT");
-    expect(route.request().postDataJSON()).toEqual({ content: "Corrected contribution" });
+    expectCommentPayload(route.request().postDataJSON(), "Corrected contribution");
     await route.fulfill({ status: 204 });
   });
   await page.getByRole("textbox", { name: "Add a comment" }).fill("Pending contribution");
   await page.getByRole("button", { name: "Send comment" }).press("Enter");
   const card = page.locator("#comment-200");
-  await expect(card).toContainText("Awaiting review");
+  await expect(card).toContainText("Pending review");
   const editor = await openEditor(page, 200);
   await editor.fill("Corrected contribution");
   await card.getByRole("button", { name: "Save", exact: true }).press("Enter");
   await expect(editor).toHaveCount(0);
   await expect(card).toContainText("Corrected contribution");
-  await expect(card).toContainText("Awaiting review");
+  await expect(card).toContainText("Pending review");
   await openEditor(page, 200);
-  await expect(editor).toHaveValue("Corrected contribution");
+  await expect(editor).toHaveText("Corrected contribution");
 });
 
 test("starts a fresh edit from the current comment after cancelling", async ({ page }) => {
   const editor = await openEditor(page);
-  await expect(editor).toHaveValue(original);
+  await expect(editor).toHaveText(original);
   await editor.fill("Discard these changes");
   await page.locator("#comment-100").getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(editor).toHaveCount(0);
   await openEditor(page);
-  await expect(editor).toHaveValue(original);
+  await expect(editor).toHaveText(original);
 });
 
 test("locks the editor while saving and preserves the draft when saving fails", async ({
@@ -166,17 +175,17 @@ test("locks the editor while saving and preserves the draft when saving fails", 
     await save.click();
     await expect(save).toBeDisabled();
     await expect(cancel).toBeDisabled();
-    await expect(editor).toHaveAttribute("readonly", "");
+    await expect(editor).toHaveAttribute("contenteditable", "false");
     await expect.poll(() => attempts).toBe(1);
     response.resolve();
-    await expect(page.getByText("Edit temporarily unavailable", { exact: true })).toBeVisible();
-    await expect(editor).toHaveValue("Keep my changes");
+    await expect(page.getByText("Couldn't update the comment.", { exact: true })).toBeVisible();
+    await expect(editor).toHaveText("Keep my changes");
     await expect(save).toBeEnabled();
     await expect(cancel).toBeEnabled();
     await editor.fill("Updated retry");
     const request = page.waitForRequest((request) => request.method() === "PUT");
     await save.click();
-    expect((await request).postDataJSON()).toEqual({ content: "Updated retry" });
+    expectCommentPayload((await request).postDataJSON(), "Updated retry");
     await expect(editor).toHaveCount(0);
     expect(attempts).toBe(2);
   } finally {
@@ -184,7 +193,9 @@ test("locks the editor while saving and preserves the draft when saving fails", 
   }
 });
 
-test("disables saving empty or unchanged text and trims a successful edit", async ({ page }) => {
+test("disables saving an empty or unchanged document and saves a rich text edit", async ({
+  page,
+}) => {
   let updatedContent = original;
   await page.route("**/api/v1/public/guestbook/roots/cursor?**", async (route) => {
     await route.fulfill({
@@ -213,17 +224,17 @@ test("disables saving empty or unchanged text and trims a successful edit", asyn
   const editor = await openEditor(page);
   const save = page.locator("#comment-100").getByRole("button", { name: "Save", exact: true });
   await expect(save).toBeDisabled();
-  await editor.fill("  \n");
+  await editor.fill("");
   await expect(save).toBeDisabled();
-  await editor.fill(`  ${original}  `);
+  await editor.fill(original);
   await expect(save).toBeDisabled();
-  await editor.fill("  Published edit  ");
+  await editor.fill("Published edit");
   await save.click();
   await expect(editor).toHaveCount(0);
   await expect(page.locator("#comment-100")).toContainText("Published edit");
-  expect(updatedContent).toBe("Published edit");
+  expectCommentPayload({ content: updatedContent }, "Published edit");
   await openEditor(page);
-  await expect(editor).toHaveValue("Published edit");
+  await expect(editor).toHaveText("Published edit");
 });
 
 test("keeps in-progress edits when another action refreshes the thread", async ({ page }) => {
@@ -256,9 +267,9 @@ test("keeps in-progress edits when another action refreshes the thread", async (
   await page.getByRole("button", { name: "Send comment" }).click();
   const card = page.locator("#comment-100");
   await expect(card.getByText("Refreshed author", { exact: true })).toBeVisible();
-  await expect(editor).toHaveValue("Work in progress");
+  await expect(editor).toHaveText("Work in progress");
   await card.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(card).toContainText("Updated on another device");
   await openEditor(page);
-  await expect(editor).toHaveValue("Updated on another device");
+  await expect(editor).toHaveText("Updated on another device");
 });

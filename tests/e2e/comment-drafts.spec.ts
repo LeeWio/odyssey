@@ -19,7 +19,7 @@ test.use({ locale: "en-US" });
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    sessionStorage.setItem(
+    localStorage.setItem(
       "odyssey_auth",
       JSON.stringify({
         accessToken: "comment-draft-test",
@@ -115,7 +115,7 @@ test("keeps the draft editable when publishing fails", async ({ page }) => {
   const input = page.getByRole("textbox", { name: "Add a comment" });
   await input.fill("Do not lose this comment");
   await page.getByRole("button", { name: "Send comment" }).click();
-  await expect(page.getByText("Please try again", { exact: true })).toBeVisible();
+  await expect(page.getByText("Failed to send", { exact: true })).toBeVisible();
   await expect(input).toHaveValue("Do not lose this comment");
   await expect(page.getByRole("button", { name: "Send comment" })).toBeEnabled();
   await input.fill("Updated after the failed attempt");
