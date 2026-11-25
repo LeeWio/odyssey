@@ -3,8 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { ChartColumnIcon, FileTextIcon } from "@/components/icons";
+import { NEW_RICH_TEXT_DRAFT_ID } from "@/components/rich-text/utils/editor-draft";
 import { selectIsAdmin } from "@/lib/features/auth";
-import { toggleRichText } from "@/lib/features/ui";
+import { openRichText } from "@/lib/features/ui";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { useDashboardNavigation } from "@/lib/hooks/use-dashboard-navigation";
 import { createActionCommand } from "../command-model";
@@ -74,7 +75,15 @@ export const useAdminCommands = (): CommandItem[] => {
         intent: CommandIntent.EXECUTE,
         payload: {
           action: () => {
-            dispatch(toggleRichText());
+            // The editor mounts only when both isOpen and activeId are set.
+            // Toggling isOpen alone leaves the session unmounted.
+            dispatch(
+              openRichText({
+                activeId: NEW_RICH_TEXT_DRAFT_ID,
+                initialValue: null,
+                isReadOnly: false,
+              })
+            );
           },
           closeOnExecute: true,
         },
