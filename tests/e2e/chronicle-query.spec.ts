@@ -112,7 +112,18 @@ test("Chronicle keeps both panels in place and restores their URL through browse
   await expect(results).toHaveAttribute("data-view", "list");
   await expect(explore).toHaveAttribute("aria-selected", "true");
 
-  await archive.click();
+  // The archive panel loads its client bundle and fetches the first page on selection.
+  await Promise.all([
+    page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname === "/api/v1/public/blog/archive" &&
+        url.searchParams.get("page") === "0" &&
+        response.ok()
+      );
+    }),
+    archive.click(),
+  ]);
   await expect(page).toHaveURL("/chronicle?section=archive");
   await expect(page.getByText("Archive page 1", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Next", exact: true }).click();

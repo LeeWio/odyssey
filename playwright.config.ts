@@ -6,6 +6,7 @@ const fixtureOrigin = "http://127.0.0.1:3181";
 const realBackend = process.env.PLAYWRIGHT_REAL_BACKEND === "1";
 const backendOrigin = process.env.PLAYWRIGHT_API_URL ?? "http://127.0.0.1:18080";
 const ci = Boolean(process.env.CI);
+const productionBuild = process.env.PLAYWRIGHT_PRODUCTION_BUILD === "1";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -53,7 +54,9 @@ export default defineConfig({
               },
             ]),
         {
-          command: "bun run dev --hostname 127.0.0.1 --port 3100",
+          command: productionBuild
+            ? "bun run build && bun run start --hostname 127.0.0.1 --port 3100"
+            : "bun run dev --hostname 127.0.0.1 --port 3100",
           env: {
             API_URL: realBackend ? backendOrigin : fixtureOrigin,
             NEXT_PUBLIC_API_BASE_URL: "",
@@ -62,7 +65,7 @@ export default defineConfig({
             ENABLE_RICH_TEXT_TEST_ROUTE: "1",
             WEB_VITALS_ENDPOINT: `${baseURL}/__test/web-vitals`,
           },
-          timeout: 120_000,
+          timeout: productionBuild ? 240_000 : 120_000,
           url: `${baseURL}/test/rich-text`,
         },
       ],
