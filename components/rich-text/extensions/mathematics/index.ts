@@ -1,1 +1,1 @@
-export { Mathematics } from "./mathematics";
+export { Mathematics, mathematicsKatexOptions } from "./mathematics";

@@ -1,18 +1,22 @@
 "use client";
 
-import { Button, Label, Popover, Surface, TextArea } from "@heroui/react";
-import { Segment } from "@heroui-pro/react";
+import { MathOperations, Text } from "@gravity-ui/icons";
+import { Button, FieldError, Label, Popover, Surface, TextArea, TextField } from "@heroui/react";
+import { Segment } from "@heroui-pro/react/segment";
 import katex from "katex";
 import type { ReactNode } from "react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { mathematicsKatexOptions } from "../extensions/mathematics";
 
 export type MathKind = "inline" | "block";
 
+const examples: Record<MathKind, string> = {
+  inline: "x^2 + y^2 = r^2",
+  block: "\\int_0^1 x^2\\,dx = \\frac{1}{3}",
+};
+
 interface MathEditorPopoverProps {
-  allowKindChange?: boolean;
   children: ReactNode;
-  initialKind?: MathKind;
-  initialLatex?: string;
   submitLabel: string;
   title: string;
   onSubmit: (value: { kind: MathKind; latex: string }) => boolean;
@@ -24,69 +28,28 @@ interface MathEditorPanelProps {
   initialKind?: MathKind;
   initialLatex?: string;
   submitLabel: string;
-  title: string;
   onCancel?: () => void;
   onDelete?: () => void;
   onSubmit: (value: { kind: MathKind; latex: string }) => boolean;
 }
 
-function MathPreview({ kind, latex }: { kind: MathKind; latex: string }) {
-  const previewRef = useRef<HTMLSpanElement>(null);
-  const normalizedLatex = latex.trim();
-
-  useEffect(() => {
-    if (!previewRef.current || !normalizedLatex) return;
-
-    katex.render(normalizedLatex, previewRef.current, {
-      displayMode: kind === "block",
-      strict: false,
-      throwOnError: false,
-    });
-  }, [kind, normalizedLatex]);
-
-  return (
-    <Surface
-      aria-label="Formula preview"
-      className="grid min-h-20 place-items-center overflow-x-auto rounded-2xl px-4 py-3 text-center"
-      variant="secondary"
-    >
-      {normalizedLatex ? (
-        <span ref={previewRef} className="max-w-full" />
-      ) : (
-        <span className="text-muted text-sm">Formula preview</span>
-      )}
-    </Surface>
-  );
-}
-
 export function MathEditorPopover({
-  allowKindChange = true,
   children,
-  initialKind = "inline",
-  initialLatex = "",
   submitLabel,
   title,
   onSubmit,
 }: MathEditorPopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleOpenChange = (nextIsOpen: boolean) => {
-    setIsOpen(nextIsOpen);
-  };
-
   return (
-    <Popover isOpen={isOpen} onOpenChange={handleOpenChange}>
+    <Popover isOpen={isOpen} onOpenChange={setIsOpen}>
       {children}
-      <Popover.Content className="w-[min(22rem,calc(100vw-2rem))]" isNonModal placement="bottom">
-        <Popover.Dialog className="flex flex-col gap-3 p-3">
-          <Popover.Arrow />
+      <Popover.Content placement="bottom end" className="w-96 max-w-[calc(100dvw-1.5rem)]">
+        <Popover.Dialog className="flex flex-col gap-3">
+          <Popover.Heading className="text-base font-semibold">{title}</Popover.Heading>
           {isOpen && (
             <MathEditorPanel
-              allowKindChange={allowKindChange}
-              initialKind={initialKind}
-              initialLatex={initialLatex}
               submitLabel={submitLabel}
-              title={title}
               onCancel={() => setIsOpen(false)}
               onSubmit={(value) => {
                 const didSubmit = onSubmit(value);
@@ -109,66 +72,130 @@ export function MathEditorPanel({
   initialKind = "inline",
   initialLatex = "",
   submitLabel,
-  title,
   onCancel,
   onDelete,
   onSubmit,
 }: MathEditorPanelProps) {
   const [kind, setKind] = useState<MathKind>(initialKind);
   const [latex, setLatex] = useState(initialLatex);
-  const inputId = useId();
+  const sourceRef = useRef<HTMLTextAreaElement>(null);
+  const normalizedLatex = latex.trim();
+  const preview = useMemo(() => {
+    try {
+      return {
+        html: katex.renderToString(normalizedLatex || examples[kind], {
+          ...mathematicsKatexOptions,
+          displayMode: kind === "block",
+          macros: { ...mathematicsKatexOptions.macros },
+          throwOnError: true,
+          trust: false,
+        }),
+        error: null,
+      };
+    } catch (error) {
+      if (!(error instanceof katex.ParseError)) throw error;
+      return { html: null, error: error.rawMessage };
+    }
+  }, [kind, normalizedLatex]);
+  const canSubmit = Boolean(normalizedLatex && !preview.error);
+
+  useEffect(() => {
+    if (!autoFocus) return;
+
+    // Let the popover establish its focus scope before focusing the editor field.
+    const frame = requestAnimationFrame(() => sourceRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [autoFocus]);
 
   const submit = () => {
-    const normalizedLatex = latex.trim();
-
-    if (!normalizedLatex) return;
-
-    onSubmit({ kind, latex: normalizedLatex });
+    if (canSubmit) onSubmit({ kind, latex: normalizedLatex });
   };
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-medium">{title}</h2>
-        {allowKindChange && (
-          <Segment
-            aria-label="Formula type"
-            selectedKey={kind}
-            size="sm"
-            onSelectionChange={(key) => setKind(String(key) as MathKind)}
-          >
-            <Segment.Item id="inline">Inline</Segment.Item>
-            <Segment.Item id="block">Block</Segment.Item>
-          </Segment>
-        )}
-      </div>
+      {allowKindChange && (
+        <Segment
+          aria-label="Formula type"
+          className="w-full"
+          selectedKey={kind}
+          size="sm"
+          onSelectionChange={(key) => {
+            if (key === "inline" || key === "block") setKind(key);
+          }}
+        >
+          <Segment.Item id="inline">
+            <Text aria-hidden="true" />
+            Inline
+          </Segment.Item>
+          <Segment.Item id="block">
+            <MathOperations aria-hidden="true" />
+            Block
+          </Segment.Item>
+        </Segment>
+      )}
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={inputId}>LaTeX</Label>
+      <TextField
+        fullWidth
+        isInvalid={preview.error !== null}
+        value={latex}
+        variant="secondary"
+        onChange={setLatex}
+      >
+        <Label>LaTeX</Label>
         <TextArea
-          autoFocus={autoFocus}
-          fullWidth
-          aria-label="LaTeX formula"
-          className="min-h-20 resize-y font-mono text-sm"
-          id={inputId}
-          placeholder="e.g. \\frac{a}{b}"
+          ref={sourceRef}
+          autoCapitalize="off"
+          autoComplete="off"
+          className="max-h-40 resize-y font-mono"
+          placeholder="Enter LaTeX"
           rows={2}
-          value={latex}
-          onChange={(event) => setLatex(event.target.value)}
+          spellCheck={false}
           onKeyDown={(event) => {
-            if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+            if (
+              !event.nativeEvent.isComposing &&
+              (event.metaKey || event.ctrlKey) &&
+              event.key === "Enter"
+            ) {
               event.preventDefault();
               submit();
             }
           }}
         />
-      </div>
-
-      <MathPreview kind={kind} latex={latex} />
+        <section aria-label="Formula preview" className="mt-2 flex min-w-0 flex-col gap-1">
+          <div className="flex min-h-8 items-center justify-between gap-2">
+            <h3 className="text-sm font-medium">Preview</h3>
+            {!normalizedLatex && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onPress={() => {
+                  setLatex(examples[kind]);
+                  sourceRef.current?.focus();
+                }}
+              >
+                Use example
+              </Button>
+            )}
+          </div>
+          <Surface className="max-h-40 min-h-24 overflow-auto rounded-2xl" variant="secondary">
+            {preview.html ? (
+              <div
+                className="data-example:text-muted grid min-h-24 w-max min-w-full place-items-center px-4 py-3"
+                data-example={!normalizedLatex || undefined}
+                dangerouslySetInnerHTML={{ __html: preview.html }}
+              />
+            ) : (
+              <div className="grid min-h-24 place-items-center px-4 py-3 text-center">
+                <FieldError>{preview.error}</FieldError>
+              </div>
+            )}
+          </Surface>
+        </section>
+      </TextField>
 
       <div className="flex items-center justify-end gap-2">
         {onDelete && (
-          <Button className="text-danger mr-auto" size="sm" variant="ghost" onPress={onDelete}>
+          <Button className="mr-auto" size="sm" variant="danger-soft" onPress={onDelete}>
             Delete
           </Button>
         )}
@@ -177,7 +204,7 @@ export function MathEditorPanel({
             Cancel
           </Button>
         )}
-        <Button isDisabled={!latex.trim()} size="sm" onPress={submit}>
+        <Button isDisabled={!canSubmit} size="sm" onPress={submit}>
           {submitLabel}
         </Button>
       </div>

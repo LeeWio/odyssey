@@ -1,6 +1,5 @@
 "use client";
 
-import { Surface } from "@heroui/react";
 import { useRichTextEditor, useRichTextEditorState } from "@heroui-pro/react/rich-text-editor";
 import { isNodeSelection } from "@tiptap/core";
 import { useCallback } from "react";
@@ -17,6 +16,8 @@ const EMPTY_MATH_SELECTION: MathSelectionState = {
   kind: null,
   latex: "",
 };
+
+const mathMenuPosition = { shift: { crossAxis: true, padding: 12 } };
 
 export function MathMenu() {
   const { editor, isReadOnly } = useRichTextEditor();
@@ -61,12 +62,17 @@ export function MathMenu() {
   );
 
   return (
-    <BubbleMenu aria-label="Formula actions" pluginKey="math-menu" shouldShow={shouldShow}>
+    <BubbleMenu
+      aria-label="Formula actions"
+      options={mathMenuPosition}
+      pluginKey="math-menu"
+      shouldShow={shouldShow}
+    >
       {mathSelection.kind && (
-        <Surface
-          aria-label="Formula editor"
-          className="w-[min(22rem,calc(100vw-2rem))] rounded-2xl p-3 shadow-lg"
-        >
+        <div className="flex max-h-[calc(100dvh-2rem)] w-88 max-w-[calc(100dvw-2rem)] flex-col gap-3 overflow-y-auto p-2">
+          <h2 className="text-base font-semibold">
+            {mathSelection.kind === "inline" ? "Edit inline formula" : "Edit block formula"}
+          </h2>
           <MathEditorPanel
             key={`${mathSelection.kind}:${mathSelection.latex}`}
             allowKindChange={false}
@@ -74,7 +80,6 @@ export function MathMenu() {
             initialKind={mathSelection.kind}
             initialLatex={mathSelection.latex}
             submitLabel="Update"
-            title={mathSelection.kind === "inline" ? "Edit inline formula" : "Edit block formula"}
             onDelete={() => editor?.chain().focus().deleteSelection().run()}
             onSubmit={({ kind, latex }) => {
               if (!editor) return false;
@@ -84,7 +89,7 @@ export function MathMenu() {
                 : editor.chain().focus().updateBlockMath({ latex }).run();
             }}
           />
-        </Surface>
+        </div>
       )}
     </BubbleMenu>
   );
