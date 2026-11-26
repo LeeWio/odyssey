@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.264.5](https://github.com/LeeWio/odyssey/compare/v1.264.4...v1.264.5) (2026-11-26)
+
+
+### Bug Fixes
+
+* **home:** restore native chart tooltip styling ([#173](https://github.com/LeeWio/odyssey/issues/173)) ([7b24899](https://github.com/LeeWio/odyssey/commit/7b24899f09ab97575d4d2a106de72dd19ac6680a))
+
 ## [1.264.4](https://github.com/LeeWio/odyssey/compare/v1.264.3...v1.264.4) (2026-11-25)
 
 
