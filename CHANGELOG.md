@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.264.6](https://github.com/LeeWio/odyssey/compare/v1.264.5...v1.264.6) (2026-11-26)
+
+
+### Bug Fixes
+
+* **moments:** load sharp photos in the feed ([#175](https://github.com/LeeWio/odyssey/issues/175)) ([9d06b05](https://github.com/LeeWio/odyssey/commit/9d06b0526b1cdbafee91b3a7b9d9e30059a26ae5))
+
 ## [1.264.5](https://github.com/LeeWio/odyssey/compare/v1.264.4...v1.264.5) (2026-11-26)
 
 
