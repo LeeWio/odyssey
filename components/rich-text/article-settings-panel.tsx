@@ -28,6 +28,7 @@ export function ArticleSettingsPanel({
   postId,
   saveError,
   scheduledAt,
+  validatePublication,
 }: {
   data: Partial<PostRequest>;
   locale: AppLocale;
@@ -45,6 +46,7 @@ export function ArticleSettingsPanel({
   postId?: number;
   saveError: string | null;
   scheduledAt?: string;
+  validatePublication: () => string | null;
 }) {
   const hasBlockingMedia = Boolean(mediaWarning?.includes("uploads"));
 
@@ -69,6 +71,7 @@ export function ArticleSettingsPanel({
             postId,
             saveError,
             scheduledAt,
+            validatePublication,
           }}
         />
       ) : null}
@@ -93,6 +96,7 @@ function SettingsMotion({
   postId,
   saveError,
   scheduledAt,
+  validatePublication,
 }: Omit<Parameters<typeof ArticleSettingsPanel>[0], "isOpen"> & {
   hasBlockingMedia: boolean;
 }) {
@@ -182,6 +186,7 @@ function SettingsMotion({
                   scheduledAt={scheduledAt}
                   status={data.status || "DRAFT"}
                   onCompleted={onWorkflowCompleted}
+                  validatePublication={validatePublication}
                   onStatusChange={(status) => onChange({ ...data, status })}
                 />
               </div>

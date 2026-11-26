@@ -279,6 +279,18 @@
     "indexPagination": "文章分页"
   },
   "EditorDraft": {
+    "conflict": "你编辑期间，服务器草稿已变更。",
+    "conflictDescription": "你的修改仍保留在编辑器中。请查看服务器草稿，再决定是否保存你的版本。",
+    "reviewServerDraft": "查看服务器草稿",
+    "refreshServerDraft": "刷新服务器草稿",
+    "serverDraftContents": "服务器草稿内容",
+    "noServerDraft": "服务器上没有草稿。",
+    "copyLocalDraft": "复制我的草稿",
+    "localDraftCopied": "已复制你的草稿。",
+    "copyDraftFailed": "无法复制草稿。请保持编辑器打开并重试。",
+    "saveLocalVersion": "保存我的版本",
+    "finishUploadsBeforeSwitch": "请先完成、重试或移除上传项，再切换语言。",
+    "publicationProblems": "请检查这些语言的正文和媒体后再发布：{languages}。",
     "saving": "正在保存草稿…",
     "saved": "草稿已保存",
     "error": "草稿保存失败。请保持编辑器打开并重试。",

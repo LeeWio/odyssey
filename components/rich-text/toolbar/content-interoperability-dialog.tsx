@@ -44,10 +44,28 @@ export function ContentInteroperabilityDialog() {
   const importContent = () => {
     if (!editor || !canImportContent(analysis) || !analysis?.document) return;
 
-    editor.commands.setContent(analysis.document, {
-      emitUpdate: true,
-      errorOnInvalidContent: true,
-    });
+    try {
+      if (
+        !editor.commands.setContent(analysis.document, {
+          emitUpdate: true,
+          errorOnInvalidContent: true,
+        })
+      )
+        throw new Error("The editor could not replace the document.");
+    } catch (error) {
+      setAnalysis({
+        ...analysis,
+        document: null,
+        warnings: [
+          {
+            code: "invalid-content",
+            blocking: true,
+            message: error instanceof Error ? error.message : "The document could not be imported.",
+          },
+        ],
+      });
+      return;
+    }
     setIsOpen(false);
     setSource("");
     setAnalysis(null);

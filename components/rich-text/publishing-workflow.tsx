@@ -23,6 +23,7 @@ interface PublishingWorkflowProps {
   isDisabled?: boolean;
   onStatusChange: (status: PostStatus) => void;
   onCompleted: () => Promise<void> | void;
+  validatePublication: () => string | null;
 }
 
 type FormAction = "schedule" | "reject" | "archive";
@@ -56,6 +57,7 @@ export function PublishingWorkflow({
   isDisabled = false,
   onStatusChange,
   onCompleted,
+  validatePublication,
 }: PublishingWorkflowProps) {
   const [formAction, setFormAction] = useState<FormAction | null>(null);
   const [scheduleValue, setScheduleValue] = useState(() => toDateTimeLocal(scheduledAt));
@@ -90,6 +92,14 @@ export function PublishingWorkflow({
 
   const runAction = async (nextStatus: PostStatus, action: () => Promise<unknown>) => {
     setError(null);
+    if (["PENDING_REVIEW", "PUBLISHED", "SCHEDULED"].includes(nextStatus)) {
+      const validationError = validatePublication();
+      if (validationError) {
+        setError(validationError);
+        if (!formAction) toast.warning(validationError);
+        return;
+      }
+    }
     try {
       await action();
       onStatusChange(nextStatus);

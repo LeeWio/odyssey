@@ -1,26 +1,8 @@
-import { TableKit as TiptapTableKit, TableView as TiptapTableView } from "@tiptap/extension-table";
+import { TableKit as TiptapTableKit } from "@tiptap/extension-table";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { CellSelection } from "@tiptap/pm/tables";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
-import type { EditorView } from "@tiptap/pm/view";
-
-class TableView extends TiptapTableView {
-  constructor(
-    node: ProseMirrorNode,
-    cellMinWidth: number,
-    view?: EditorView,
-    HTMLAttributes: Record<string, unknown> = {}
-  ) {
-    super(node, cellMinWidth, view, HTMLAttributes);
-    // 3.32.0 still builds the resize view as View(node, cellMinWidth, editorView)
-    // and drops HTMLAttributes. Apply them here until the reference View: null ships.
-    const className = HTMLAttributes.class;
-    if (!this.table.className && typeof className === "string") {
-      this.table.className = className;
-    }
-  }
-}
 
 const activeCellKey = new PluginKey("table-active-cell");
 
@@ -81,7 +63,6 @@ export const TableKit = TiptapTableKit.extend({
     handleWidth: 5,
     resizable: true,
     renderWrapper: true,
-    View: TableView,
   },
   tableRow: {},
   tableHeader: {

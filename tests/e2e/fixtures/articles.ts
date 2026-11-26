@@ -220,6 +220,19 @@ const fixtures = [
       content: [{ type: "text", text: "A very long code block\n".repeat(1500) }],
     },
   ]),
+  entranceArticle("entrance-compatibility", [
+    {
+      type: "paragraph",
+      content: [
+        { type: "text", text: "Text from an older format.", marks: [{ type: "legacyMark" }] },
+      ],
+    },
+    { type: "legacyBlock" },
+    {
+      type: "paragraph",
+      content: [{ type: "text", text: "The rest of the article remains readable." }],
+    },
+  ]),
   entranceArticle("entrance-copy", [
     {
       type: "codeBlock",

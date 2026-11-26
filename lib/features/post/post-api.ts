@@ -47,6 +47,8 @@ export const postApi = baseApi.injectEndpoints({
      * Admin: Retrieve post by ID
      */
     getAdminPostById: builder.query<PostResponse, number>({
+      // The editor needs the source fields and all translations as separate values.
+      extraOptions: { localize: false },
       query: (id) => `/api/v1/admin/posts/${id}`,
       rawResponseSchema: apiResponseSchema(PostResponseSchema),
       transformResponse: (response: ApiResponse<PostResponse>) => response.data,
@@ -428,6 +430,7 @@ export const postApi = baseApi.injectEndpoints({
     }),
 
     getEditorDraft: builder.query<PostEditorDraft | null, string>({
+      extraOptions: { localize: false },
       query: (identifier) => `/api/v1/admin/posts/editor-drafts/${identifier}`,
       rawResponseSchema: apiResponseSchema(PostEditorDraftSchema.nullable()),
       transformResponse: (response: ApiResponse<PostEditorDraft | null>) => response.data,
@@ -441,6 +444,7 @@ export const postApi = baseApi.injectEndpoints({
         revision: string | null;
       }
     >({
+      extraOptions: { localize: false },
       query: ({ identifier, ...body }) => ({
         url: `/api/v1/admin/posts/editor-drafts/${identifier}`,
         method: "PUT",

@@ -17,6 +17,16 @@ export function clampHeadingLevel(level: number): HeadingLevel {
  * Visual rhythm comes from the shared HeroUI Prose adapter.
  */
 export const Heading = TiptapHeading.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      id: { default: null, parseHTML: (element) => element.id || null },
+      "data-toc-id": {
+        default: null,
+        parseHTML: (element) => element.dataset.tocId || null,
+      },
+    };
+  },
   renderHTML({ node, HTMLAttributes }) {
     const level = clampHeadingLevel(Number(node.attrs.level));
 

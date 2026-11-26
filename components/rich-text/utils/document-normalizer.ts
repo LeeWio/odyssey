@@ -64,7 +64,7 @@ function normalizeMarks(marks: JSONContent["marks"]): JSONContent["marks"] {
       ];
     }
 
-    const href = normalizeLinkUrl(mark.attrs?.href);
+    const href = typeof mark.attrs?.href === "string" ? normalizeLinkUrl(mark.attrs.href) : null;
     if (!href) return [];
 
     const { target, ...attrs } = mark.attrs ?? {};
@@ -87,38 +87,61 @@ function normalizeMarks(marks: JSONContent["marks"]): JSONContent["marks"] {
  * Heading IDs are deterministic and shared with Nexus metadata generation.
  */
 export function normalizeRichTextDocument(content: JSONContent): JSONContent {
-  const anchorCounts = new Map<string, number>();
-
-  const headingAnchor = (node: JSONContent) => {
-    const text = (node.content ?? [])
-      .map((child) => (child.type === "text" ? (child.text ?? "") : headingText(child)))
-      .join("")
-      .trim();
-    const base =
-      text
-        .normalize("NFKD")
-        .toLocaleLowerCase()
-        .replace(/[^\p{L}\p{N}\p{Script=Han}]+/gu, "-")
-        .replace(/^-+|-+$/g, "") || "section";
-    const count = (anchorCounts.get(base) ?? 0) + 1;
-    anchorCounts.set(base, count);
-    return count === 1 ? base : `${base}-${count}`;
-  };
-
+  const reserved = new Set<string>();
+  const assigned = new Set<string>();
+  const suffixes = new Map<string, number>();
   const headingText = (node: JSONContent): string =>
-    node.type === "text" ? (node.text ?? "") : (node.content ?? []).map(headingText).join("");
+    node.text ?? (node.content ?? []).map(headingText).join("");
+
+  function storedAnchor(node: JSONContent) {
+    return [node.attrs?.["data-toc-id"], node.attrs?.id].find(
+      (id): id is string => typeof id === "string" && /^[\p{L}\p{N}_-]+$/u.test(id)
+    );
+  }
+
+  function reserve(node: JSONContent) {
+    if (node.type === "heading") {
+      const id = storedAnchor(node);
+      if (id) reserved.add(id);
+    }
+    node.content?.forEach(reserve);
+  }
+
+  reserve(content);
+
+  function headingAnchor(node: JSONContent) {
+    const stored = storedAnchor(node);
+    if (stored && !assigned.has(stored)) {
+      assigned.add(stored);
+      return stored;
+    }
+
+    const base =
+      headingText(node)
+        .trim()
+        .normalize("NFKD")
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, "-")
+        .replace(/^-+|-+$/g, "") || "section";
+    let suffix = suffixes.get(base) ?? 1;
+    let id = suffix === 1 ? base : `${base}-${suffix}`;
+    while (reserved.has(id) || assigned.has(id)) {
+      suffix++;
+      id = `${base}-${suffix}`;
+    }
+    suffixes.set(base, suffix + 1);
+    assigned.add(id);
+    return id;
+  }
 
   const normalizeNode = (node: JSONContent): JSONContent => {
+    const anchor = node.type === "heading" ? headingAnchor(node) : undefined;
     const normalizedContent = node.content?.map(normalizeNode);
     const normalizedMarks = normalizeMarks(node.marks);
     const attrs = node.attrs ? { ...node.attrs } : undefined;
 
-    if (node.type === "heading") {
+    if (anchor) {
       const level = clampHeadingLevel(Number(attrs?.level));
-      const anchor =
-        typeof attrs?.["data-toc-id"] === "string" && attrs["data-toc-id"]
-          ? attrs["data-toc-id"]
-          : headingAnchor(node);
       return {
         ...node,
         attrs: { ...attrs, level, id: anchor, "data-toc-id": anchor },
@@ -153,8 +176,12 @@ export interface MediaValidationIssue {
   nodeType: string;
 }
 
+function isPendingMediaUpload(node: JSONContent) {
+  return node.type === "imageUpload" || typeof node.attrs?.uploadId === "string";
+}
+
 export function hasPendingMediaUploads(content: JSONContent): boolean {
-  if (typeof content.attrs?.uploadId === "string") return true;
+  if (isPendingMediaUpload(content)) return true;
 
   return content.content?.some(hasPendingMediaUploads) ?? false;
 }
@@ -168,7 +195,7 @@ export function getMediaValidationIssues(content: JSONContent): MediaValidationI
     const nodeType = node.type || "unknown";
     const src = typeof node.attrs?.src === "string" ? node.attrs.src.trim() : "";
 
-    if (typeof node.attrs?.uploadId === "string") {
+    if (isPendingMediaUpload(node)) {
       issues.push({ code: "pending-upload", nodeType });
     }
 

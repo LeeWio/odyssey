@@ -1,6 +1,7 @@
 import {
   createApi,
   fetchBaseQuery,
+  type BaseQueryApi,
   type BaseQueryFn,
   type FetchArgs,
   type FetchBaseQueryError,
@@ -51,9 +52,17 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-const localizedBaseQuery = async (...args: Parameters<typeof rawBaseQuery>) => {
-  const result = await rawBaseQuery(...args);
-  if (result.data === undefined) return result;
+interface QueryOptions {
+  localize?: boolean;
+}
+
+const localizedBaseQuery = async (
+  args: string | FetchArgs,
+  api: BaseQueryApi,
+  options?: QueryOptions
+) => {
+  const result = await rawBaseQuery(args, api, options ?? {});
+  if (result.data === undefined || options?.localize === false) return result;
   return { ...result, data: localizeApiPayload(result.data) };
 };
 
@@ -85,11 +94,12 @@ const isRefreshPayload = (value: unknown): value is RefreshPayload => {
   );
 };
 
-const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
-  args,
-  api,
-  extraOptions
-) => {
+const baseQueryWithReauth: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError,
+  QueryOptions
+> = async (args, api, extraOptions) => {
   const requestCredentials = (api.getState() as AuthState).auth;
   const result = await localizedBaseQuery(args, api, extraOptions);
   if (result.error?.status !== 401) return result;

@@ -92,3 +92,83 @@ test("keeps one private draft across reload, retries a failed save, and discards
   expect(snapshot).toBeNull();
   await expect((await openEditor(page)).document).not.toContainText(marker);
 });
+
+test("preserves local edits and resolves a reviewed server revision conflict", async ({ page }) => {
+  const first = "Initial server draft";
+  const concurrent = "Server revision from another tab";
+  const doc = (text: string) => ({
+    type: "doc",
+    content: [{ type: "paragraph", content: [{ type: "text", text }] }],
+  });
+  let snapshot = {
+    content: doc(first),
+    postData: { title: "Article", content: JSON.stringify(doc(first)) },
+    revision: "revision-first",
+    savedAt: "2026-11-19T11:00:00Z",
+  };
+  const revisions: string[] = [];
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "odyssey_auth",
+      JSON.stringify({
+        accessToken: "editor-fixture",
+        username: "writer",
+        roles: ["ROLE_ADMIN"],
+        permissions: [],
+        isAuthenticated: true,
+      })
+    );
+  });
+  await page.route("**/api/v1/**", async (route) => {
+    const request = route.request();
+    const { pathname } = new URL(request.url());
+    const fulfill = (data: unknown) => route.fulfill({ json: { code: 200, message: "OK", data } });
+    if (pathname === "/api/v1/user/me") return fulfill({ id: 1, username: "writer" });
+    if (pathname !== draftPath) return route.fallback();
+    if (request.method() === "GET") return fulfill(snapshot);
+    const { revision, ...fields } = request.postDataJSON();
+    revisions.push(revision);
+    if (revision !== snapshot.revision) {
+      return route.fulfill({
+        status: 409,
+        json: { code: 409, message: "Editor draft changed", data: null },
+      });
+    }
+    snapshot = { ...snapshot, ...fields, revision: "revision-final" };
+    return fulfill(snapshot);
+  });
+
+  await page.goto(origin);
+  const { modal, document } = await openEditor(page);
+  await expect(document).toContainText(first);
+  snapshot = {
+    ...snapshot,
+    content: doc(concurrent),
+    postData: { ...snapshot.postData, content: JSON.stringify(doc(concurrent)) },
+    revision: "revision-other-tab",
+  };
+  await document.fill(marker);
+  await expect(modal.getByText("The server draft changed while you were editing.")).toBeVisible();
+  await expect(document).toContainText(marker);
+  await modal.getByRole("button", { name: "Review server draft" }).click();
+  const review = page.getByRole("dialog", { name: "Review server draft" });
+  await expect(review.getByRole("textbox")).toHaveValue(new RegExp(concurrent));
+  await review.getByRole("button", { name: "Save my version" }).click();
+  await expect(review).toBeHidden();
+  await expect(modal.getByText("Draft saved", { exact: true })).toBeVisible();
+  expect(revisions).toEqual(["revision-first", "revision-other-tab"]);
+  expect(snapshot.content).toMatchObject(doc(marker));
+
+  await modal.getByRole("button", { name: "Open settings" }).press("Enter");
+  await modal.getByRole("tab", { name: "English" }).click();
+  await modal.getByRole("button", { name: "Back to editor" }).press("Enter");
+  await expect(document).not.toContainText(marker);
+  await document.fill("English translation content");
+  await modal.getByRole("button", { name: "Close editor" }).press("Enter");
+  await expect(modal).toBeHidden();
+  expect(snapshot.content).toMatchObject(doc(marker));
+  expect(JSON.stringify(snapshot.postData)).toContain("English translation content");
+  await page.reload();
+  await expect((await openEditor(page)).document).toContainText(marker);
+});

@@ -279,6 +279,18 @@
     "indexPagination": "Article pages"
   },
   "EditorDraft": {
+    "conflict": "The server draft changed while you were editing.",
+    "conflictDescription": "Your changes are still in the editor. Review the server draft before saving your version in its place.",
+    "reviewServerDraft": "Review server draft",
+    "refreshServerDraft": "Refresh server draft",
+    "serverDraftContents": "Server draft contents",
+    "noServerDraft": "There is no draft on the server.",
+    "copyLocalDraft": "Copy my draft",
+    "localDraftCopied": "Your draft was copied.",
+    "copyDraftFailed": "Could not copy the draft. Keep the editor open and try again.",
+    "saveLocalVersion": "Save my version",
+    "finishUploadsBeforeSwitch": "Finish, retry, or remove uploads before switching languages.",
+    "publicationProblems": "Check the document and media in these languages before publishing: {languages}.",
     "saving": "Saving draft…",
     "saved": "Draft saved",
     "error": "Draft could not be saved. Keep this editor open and retry.",

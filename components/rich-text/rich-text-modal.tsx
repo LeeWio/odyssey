@@ -1,15 +1,16 @@
 "use client";
 
-import { AlertDialog, Button, Modal, Spinner, toast } from "@heroui/react";
+import { AlertDialog, Button, Modal, Spinner, TextArea, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
-import type { Editor } from "@tiptap/react";
+import type { Editor, JSONContent } from "@tiptap/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 import { getApiErrorMessage } from "@/lib/api/errors";
+import { getArticlePublicationProblems } from "./utils/publication-validation";
 import { RichText } from "@/components/rich-text/rich-text";
 import { ArticleSettingsPanel } from "@/components/rich-text/article-settings-panel";
 import { MotionButton } from "@/components/ui";
@@ -24,6 +25,7 @@ import {
   sanitizePostData,
 } from "./utils/editor-draft";
 import {
+  EMPTY_DOC,
   getMediaValidationIssues,
   hasPendingMediaUploads,
   normalizeJSONContent,
@@ -39,6 +41,7 @@ import {
   useGetAdminPostByIdQuery,
   useUpdatePostMutation,
   type PostResponse,
+  type PostEditorDraft,
   type PostRequest,
   type PostTranslation,
 } from "@/lib/features/post";
@@ -79,6 +82,7 @@ function toPostData(post: PostResponse): Partial<PostRequest> {
 
 function serializePostData(data: Partial<PostRequest>): string {
   return JSON.stringify({
+    content: data.content || "",
     title: data.title?.trim() || "",
     slug: data.slug?.trim() || "",
     summary: data.summary || "",
@@ -136,16 +140,6 @@ function compactPostTranslations(translations?: Record<string, PostTranslation>)
   return Object.keys(result).length > 0 ? result : undefined;
 }
 
-function serializeDocument(content: ProseMirrorNode | ReturnType<typeof normalizeJSONContent>) {
-  return JSON.stringify(
-    normalizeRichTextDocument("toJSON" in content ? content.toJSON() : content)
-  );
-}
-
-function draftFingerprint(content: ReturnType<Editor["getJSON"]>, postData: Partial<PostRequest>) {
-  return serializeDocument(removeTemporaryMediaAttributes(content)) + serializePostData(postData);
-}
-
 function areMediaIssuesEqual(
   currentIssues: ReturnType<typeof getMediaValidationIssues>,
   nextIssues: ReturnType<typeof getMediaValidationIssues>
@@ -185,6 +179,14 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   const [draftState, setDraftState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [isFinalizing, setIsFinalizing] = useState(false);
   const draftRevisionRef = useRef<string | null>(null);
+  const draftConflictRef = useRef(false);
+  const [draftConflict, setDraftConflict] = useState(false);
+  const [conflictReviewOpen, setConflictReviewOpen] = useState(false);
+  const [reviewedDraft, setReviewedDraft] = useState<{ snapshot: PostEditorDraft | null } | null>(
+    null
+  );
+  const [conflictLoading, setConflictLoading] = useState(false);
+  const [conflictError, setConflictError] = useState(false);
   const savedDraftRef = useRef("");
   const draftRequestRef = useRef<Promise<boolean> | null>(null);
   const latestPostDataRef = useRef(EMPTY_POST_DATA);
@@ -214,22 +216,78 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   const isPending = isCreating || isUpdating || isFinalizing;
   const hasContentSchemaError = contentSchemaError?.activeId === activeId;
 
-  async function syncDraft() {
-    if (!supportsDraft || !draftReady || hasContentSchemaError) return false;
+  // Fetch existing post data if activeId is a numeric string (existing ID)
+  const {
+    data: existingPost,
+    isLoading: isFetching,
+    refetch: refetchExistingPost,
+  } = useGetAdminPostByIdQuery(Number(activeId), {
+    skip: !isExistingPost,
+  });
+  const serverDraft = useGetEditorDraftQuery(activeId, {
+    skip: !supportsDraft,
+    refetchOnMountOrArgChange: true,
+  });
+  const existingContentIsEditable = useMemo(() => {
+    if (
+      existingPost &&
+      (existingPost.contentType !== "JSON" || !parseJSONContent(existingPost.content))
+    ) {
+      return false;
+    }
+    const activeContent = postData.translations?.[editingLocale]?.content;
+    return (
+      editingLocale === "zh" || !activeContent?.trim() || Boolean(parseJSONContent(activeContent))
+    );
+  }, [editingLocale, existingPost, postData.translations]);
+
+  const markDraftConflict = (error: unknown) => {
+    if (!error || typeof error !== "object" || !("status" in error) || error.status !== 409) {
+      return false;
+    }
+    draftConflictRef.current = true;
+    setDraftConflict(true);
+    setReviewedDraft(null);
+    return true;
+  };
+
+  const snapshotEditor = useCallback(
+    (editor: Editor, content: JSONContent = editor.getJSON()) => {
+      const normalized = normalizeRichTextDocument(removeTemporaryMediaAttributes(content));
+      const data = withLocaleContent(
+        latestPostDataRef.current,
+        editingLocale,
+        JSON.stringify(normalized)
+      );
+      return {
+        content:
+          editingLocale === "zh" ? normalized : (parseJSONContent(data.content) ?? EMPTY_DOC),
+        postData: { ...data, content: data.content || JSON.stringify(EMPTY_DOC) },
+      };
+    },
+    [editingLocale]
+  );
+
+  async function syncDraft(reviewed?: { snapshot: PostEditorDraft | null }) {
+    if (!supportsDraft || !draftReady || hasContentSchemaError || !existingContentIsEditable)
+      return false;
     while (draftRequestRef.current) await draftRequestRef.current;
+    if (draftConflictRef.current && !reviewed) return false;
 
     const editor = editorRef.current;
     if (!editor || editor.isDestroyed) return false;
+    const document = editor.state.doc;
     const content = editor.getJSON();
     if (hasPendingMediaUploads(content)) {
       setDraftState("error");
       return false;
     }
 
-    const data = latestPostDataRef.current;
-    const postData = sanitizePostData(data) ?? {};
-    const fingerprint = draftFingerprint(content, postData);
-    if (fingerprint === savedDraftRef.current) {
+    const currentData = latestPostDataRef.current;
+    const snapshot = snapshotEditor(editor, content);
+    const postData = sanitizePostData(snapshot.postData) ?? {};
+    const fingerprint = serializePostData(postData);
+    if (!reviewed && fingerprint === savedDraftRef.current) {
       setDraftState(draftRevisionRef.current ? "saved" : "idle");
       return true;
     }
@@ -237,25 +295,29 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     setDraftState("saving");
     const request = saveEditorDraft({
       identifier: activeId,
-      content: normalizeRichTextDocument(removeTemporaryMediaAttributes(content)),
+      content: snapshot.content,
       postData,
-      revision: draftRevisionRef.current,
+      revision: reviewed ? (reviewed.snapshot?.revision ?? null) : draftRevisionRef.current,
     })
       .unwrap()
       .then(
         (draft) => {
           draftRevisionRef.current = draft.revision;
           savedDraftRef.current = fingerprint;
+          draftConflictRef.current = false;
+          setDraftConflict(false);
           clearRichTextDraft(activeId);
           if (
             !editor.isDestroyed &&
-            draftFingerprint(editor.getJSON(), latestPostDataRef.current) === fingerprint
+            editor.state.doc === document &&
+            latestPostDataRef.current === currentData
           ) {
             setDraftState("saved");
           }
           return true;
         },
-        () => {
+        (error) => {
+          markDraftConflict(error);
           setDraftState("error");
           return false;
         }
@@ -268,7 +330,14 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
 
   const scheduleDraft = useDebouncedCallback(() => void syncDraft(), 900);
   const scheduleAutosave = () => {
-    if (!supportsDraft || !draftReady || isFinalizing || hasContentSchemaError) return;
+    if (
+      !supportsDraft ||
+      !draftReady ||
+      isFinalizing ||
+      hasContentSchemaError ||
+      draftConflictRef.current
+    )
+      return;
     setDraftState("saving");
     scheduleDraft();
   };
@@ -285,22 +354,6 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     });
   }, 200);
 
-  // Fetch existing post data if activeId is a numeric string (existing ID)
-  const {
-    data: existingPost,
-    isLoading: isFetching,
-    refetch: refetchExistingPost,
-  } = useGetAdminPostByIdQuery(Number(activeId), {
-    skip: !isExistingPost,
-  });
-  const serverDraft = useGetEditorDraftQuery(activeId, {
-    skip: !supportsDraft,
-    refetchOnMountOrArgChange: true,
-  });
-  const existingContentIsEditable = useMemo(() => {
-    if (!existingPost || editingLocale !== "zh") return true;
-    return existingPost.contentType === "JSON" && parseJSONContent(existingPost.content) !== null;
-  }, [editingLocale, existingPost]);
   const editorContent = useMemo(
     () =>
       normalizeJSONContent(
@@ -337,13 +390,16 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     if (editor.isDestroyed) return;
 
     const current = serverDraft.currentData;
-    const storedContent = current ? parseJSONContent(current.content) : null;
+    const storedContent = current
+      ? (parseJSONContent(current.postData.content) ?? parseJSONContent(current.content))
+      : null;
     const initial = latestPostDataRef.current;
     const data = current?.revision
       ? { ...EMPTY_POST_DATA, ...sanitizePostData(current.postData) }
       : initial;
     const local = current?.revision ? null : readRichTextDraft(activeId);
-    const baseline = draftFingerprint(editor.getJSON(), initial);
+    const baselineSnapshot = snapshotEditor(editor);
+    const baseline = serializePostData(baselineSnapshot.postData);
 
     const timer = window.setTimeout(() => {
       if (editor.isDestroyed) return;
@@ -356,7 +412,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
           setDraftReady(true);
           return;
         }
-        savedDraftRef.current = draftFingerprint(editor.getJSON(), data);
+        savedDraftRef.current = serializePostData(snapshotEditor(editor).postData);
         clearRichTextDraft(activeId);
         setDraftState("saved");
       } else if (supportsDraft && (local || storedContent)) {
@@ -378,6 +434,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     serverDraft.currentData,
     serverDraft.isFetching,
     serverDraft.isSuccess,
+    snapshotEditor,
     supportsDraft,
     t,
   ]);
@@ -413,11 +470,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   };
 
   const syncCurrentEditorContent = (editor: Editor) => {
-    if (editor.isDestroyed) return latestPostDataRef.current;
-    const content = JSON.stringify(
-      normalizeRichTextDocument(removeTemporaryMediaAttributes(editor.getJSON()))
-    );
-    const nextPostData = withLocaleContent(latestPostDataRef.current, editingLocale, content);
+    const nextPostData = snapshotEditor(editor).postData;
     latestPostDataRef.current = nextPostData;
     setPostData(nextPostData);
     setIsMetadataDirty(serializePostData(nextPostData) !== initialPostDataRef.current);
@@ -427,7 +480,14 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   const handleLocaleChange = (nextLocale: AppLocale) => {
     if (nextLocale === editingLocale) return;
     const editor = editorRef.current;
-    if (editor && !editor.isDestroyed) syncCurrentEditorContent(editor);
+    if (editor && !editor.isDestroyed && existingContentIsEditable && !hasContentSchemaError) {
+      if (hasPendingMediaUploads(editor.getJSON())) {
+        toast.warning(t("finishUploadsBeforeSwitch"));
+        return;
+      }
+      syncCurrentEditorContent(editor);
+    }
+    updateMediaIssues.cancel();
     setContentSchemaError(null);
     setReadyEditor(null);
     setIsContentDirty(false);
@@ -443,7 +503,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   }, [scheduleDraft, updateMediaIssues]);
 
   useEffect(() => {
-    if (draftState !== "saving" && draftState !== "error") return;
+    if (draftState !== "saving" && draftState !== "error" && !draftConflict) return;
     const beforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = "";
@@ -455,7 +515,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
       window.removeEventListener("beforeunload", beforeUnload);
       window.removeEventListener("online", online);
     };
-  }, [draftState, scheduleDraft]);
+  }, [draftConflict, draftState, scheduleDraft]);
 
   const closeEditor = () => {
     scheduleDraft.cancel();
@@ -487,7 +547,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   };
 
   const discardChanges = async () => {
-    if (isPending) return;
+    if (isPending || draftConflictRef.current) return;
     setIsFinalizing(true);
     scheduleDraft.cancel();
     try {
@@ -515,7 +575,63 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     scheduleDraft();
   };
 
+  const reviewServerDraft = async () => {
+    setConflictReviewOpen(true);
+    setReviewedDraft(null);
+    setConflictError(false);
+    setConflictLoading(true);
+    try {
+      const snapshot = await serverDraft.refetch().unwrap();
+      setReviewedDraft({ snapshot });
+    } catch {
+      setConflictError(true);
+    } finally {
+      setConflictLoading(false);
+    }
+  };
+
+  const copyLocalDraft = async () => {
+    const editor = editorRef.current;
+    if (!editor || editor.isDestroyed) return;
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(snapshotEditor(editor), null, 2));
+      toast.success(t("localDraftCopied"));
+    } catch {
+      toast.danger(t("copyDraftFailed"));
+    }
+  };
+
+  const saveReviewedDraft = async () => {
+    if (!reviewedDraft || isPending) return;
+    setIsFinalizing(true);
+    try {
+      if (await syncDraft(reviewedDraft)) setConflictReviewOpen(false);
+      else setConflictError(true);
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
+
+  const publicationError = (data: Partial<PostRequest>) => {
+    const problems = getArticlePublicationProblems(data);
+    if (!problems.length) return null;
+    return t("publicationProblems", {
+      languages: [...new Set(problems.map(({ locale }) => locale.toUpperCase()))].join(", "),
+    });
+  };
+
+  const validatePublication = () => {
+    const editor = editorRef.current;
+    return publicationError(
+      editor && !editor.isDestroyed ? snapshotEditor(editor).postData : latestPostDataRef.current
+    );
+  };
+
   const handleSave = async (statusOverride?: PostRequest["status"]) => {
+    if (draftConflictRef.current) {
+      void reviewServerDraft();
+      return;
+    }
     const requestedStatus = statusOverride || postData.status || "DRAFT";
     lastSaveStatusRef.current = requestedStatus;
     setSaveError(null);
@@ -548,11 +664,6 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
       return;
     }
 
-    if (statusOverride === "PUBLISHED" && nextMediaIssues.length > 0) {
-      toast.warning("Resolve the media accessibility issues before publishing.");
-      return;
-    }
-
     const title = postData.title?.trim();
     const slug = postData.slug?.trim();
     if (!title || !slug) {
@@ -561,25 +672,31 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     }
 
     const postDataWithContent = editorRef.current
-      ? syncCurrentEditorContent(editorRef.current)
+      ? snapshotEditor(editorRef.current, content).postData
       : postData;
     const payload: PostRequest = {
       ...(postDataWithContent as PostRequest),
       title,
       slug,
-      content:
-        editingLocale === "zh"
-          ? JSON.stringify(normalizeRichTextDocument(removeTemporaryMediaAttributes(content)))
-          : postDataWithContent.content || existingPost?.content || "",
+      content: postDataWithContent.content || "",
       contentType: "JSON",
       status: requestedStatus,
       translations: compactPostTranslations(postDataWithContent.translations),
     };
 
+    if (requestedStatus === "PUBLISHED") {
+      const error = publicationError(payload);
+      if (error) {
+        toast.warning(error);
+        return;
+      }
+    }
+
     setIsFinalizing(true);
     scheduleDraft.cancel();
     try {
       await draftRequestRef.current;
+      if (draftConflictRef.current) return;
       const draftRevision = draftRevisionRef.current ?? "none";
       if (isExistingPost) {
         await updatePost({ id: Number(activeId), body: payload, draftRevision }).unwrap();
@@ -589,8 +706,12 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
       clearRichTextDraft(activeId);
       closeEditor();
     } catch (error) {
-      setSaveError(getApiErrorMessage(error, "The article could not be saved. Try again."));
-      scheduleAutosave();
+      if (!markDraftConflict(error)) {
+        setSaveError(getApiErrorMessage(error, "The article could not be saved. Try again."));
+        scheduleAutosave();
+      } else {
+        setDraftState("error");
+      }
     } finally {
       setIsFinalizing(false);
     }
@@ -730,7 +851,6 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                           }}
                           onUpdate={(editor) => {
                             setSaveError(null);
-                            syncCurrentEditorContent(editor);
                             scheduleAutosave();
                             updateMediaIssues(editor);
 
@@ -770,7 +890,11 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                         isPending || hasContentSchemaError || (supportsDraft && !draftReady)
                       }
                       isWorkflowDisabled={
-                        isPending || hasContentSchemaError || isDirty || draftState !== "idle"
+                        isPending ||
+                        hasContentSchemaError ||
+                        isDirty ||
+                        draftState !== "idle" ||
+                        draftConflict
                       }
                       isExistingPost={isExistingPost}
                       isOpen={settingsOpen}
@@ -793,6 +917,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                       onRetrySave={() => void handleSave(lastSaveStatusRef.current)}
                       onSave={(status) => void handleSave(status)}
                       onWorkflowCompleted={handleRevisionRestored}
+                      validatePublication={validatePublication}
                     />
                   </div>
                 )}
@@ -800,10 +925,22 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
               {supportsDraft ? (
                 <Modal.Footer className="flex-wrap items-center justify-between">
                   <p role="status" className="text-muted text-sm">
-                    {draftReady && draftState !== "idle" ? t(draftState) : null}
+                    {draftConflict
+                      ? t("conflict")
+                      : draftReady && draftState !== "idle"
+                        ? t(draftState)
+                        : null}
                   </p>
                   <div className="flex flex-wrap items-center gap-2">
-                    {draftState === "error" ? (
+                    {draftConflict ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onPress={() => void reviewServerDraft()}
+                      >
+                        {t("reviewServerDraft")}
+                      </Button>
+                    ) : draftState === "error" ? (
                       <Button
                         size="sm"
                         variant="tertiary"
@@ -813,7 +950,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                         {t("retry")}
                       </Button>
                     ) : null}
-                    {draftReady && draftState !== "idle" ? (
+                    {draftReady && draftState !== "idle" && !draftConflict ? (
                       <Button
                         size="sm"
                         variant="tertiary"
@@ -834,6 +971,55 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                   </div>
                 </Modal.Footer>
               ) : null}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+      <Modal>
+        <Modal.Backdrop isOpen={conflictReviewOpen} onOpenChange={setConflictReviewOpen}>
+          <Modal.Container size="lg">
+            <Modal.Dialog aria-label={t("reviewServerDraft")}>
+              <Modal.Header>
+                <Modal.Heading>{t("reviewServerDraft")}</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body className="flex flex-col gap-4">
+                <p className="text-muted">{t("conflictDescription")}</p>
+                {conflictLoading && <Spinner aria-label={t("reviewServerDraft")} />}
+                {conflictError && (
+                  <Button variant="tertiary" onPress={() => void reviewServerDraft()}>
+                    {t("refreshServerDraft")}
+                  </Button>
+                )}
+                {reviewedDraft && (
+                  <TextArea
+                    aria-label={t("serverDraftContents")}
+                    rows={10}
+                    fullWidth
+                    readOnly
+                    value={
+                      reviewedDraft.snapshot
+                        ? JSON.stringify(reviewedDraft.snapshot, null, 2)
+                        : t("noServerDraft")
+                    }
+                  />
+                )}
+              </Modal.Body>
+              <Modal.Footer className="flex-wrap">
+                <Button slot="close" variant="tertiary">
+                  {t("keepEditing")}
+                </Button>
+                <Button variant="secondary" onPress={() => void copyLocalDraft()}>
+                  {t("copyLocalDraft")}
+                </Button>
+                <Button
+                  variant="primary"
+                  isDisabled={!reviewedDraft || conflictError}
+                  isPending={isFinalizing}
+                  onPress={() => void saveReviewedDraft()}
+                >
+                  {t("saveLocalVersion")}
+                </Button>
+              </Modal.Footer>
             </Modal.Dialog>
           </Modal.Container>
         </Modal.Backdrop>

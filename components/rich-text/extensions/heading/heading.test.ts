@@ -73,4 +73,29 @@ describe("heading extension", () => {
     ]);
     expect(normalized.content?.map((node) => node.attrs?.id)).toEqual(["intro", "intro-2"]);
   });
+
+  it("reserves published heading IDs before allocating same-title anchors", () => {
+    const heading = (text: string, id?: string) => ({
+      type: "heading",
+      attrs: { level: 2, "data-toc-id": id },
+      content: [{ type: "text", text }],
+    });
+    const input = {
+      type: "doc",
+      content: [
+        heading("同名"),
+        heading("同名", "同名"),
+        heading("已改名", "同名-2"),
+        heading("同名", "同名"),
+      ],
+    };
+    const document = normalizeRichTextDocument(input);
+    expect(document.content?.map((heading) => heading.attrs?.id)).toEqual([
+      "同名-3",
+      "同名",
+      "同名-2",
+      "同名-4",
+    ]);
+    expect(normalizeRichTextDocument(document)).toEqual(document);
+  });
 });
