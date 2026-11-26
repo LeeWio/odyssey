@@ -1,15 +1,20 @@
 import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
+import type { SingleCommands } from "@tiptap/core";
+import { LINE_HEIGHT_BLOCKS } from "../../../extensions/text-style-kit";
+import type { TypographyPreset } from "../typography-presets";
+
+function setBlockLineHeight(commands: SingleCommands, lineHeight: string | null) {
+  const blocksUpdated = LINE_HEIGHT_BLOCKS.map((type) =>
+    commands.updateAttributes(type, { lineHeight })
+  ).some(Boolean);
+
+  return blocksUpdated || !lineHeight || commands.setLineHeight(lineHeight);
+}
 
 export function useRichTextCommands() {
   const { editor } = useRichTextEditor();
 
   return {
-    // Formatting
-    // onBold: () => editor?.chain().focus().toggleBold().run(),
-    // onItalic: () => editor?.chain().focus().toggleItalic().run(),
-    // onUnderline: () => editor?.chain().focus().toggleUnderline().run(),
-    // onStrike: () => editor?.chain().focus().toggleStrike().run(),
-    // onCode: () => editor?.chain().focus().toggleCode().run(),
     subscript: () => editor?.chain().focus().toggleSubscript().run(),
     superscript: () => editor?.chain().focus().toggleSuperscript().run(),
 
@@ -20,15 +25,29 @@ export function useRichTextCommands() {
     alignJustify: () => editor?.chain().focus().setTextAlign("justify").run(),
 
     // Font family & Font size
-    setFontFamily: (fontFamily: string) => editor?.chain().focus().setFontFamily(fontFamily).run(),
-    unsetFontFamily: () => editor?.chain().focus().unsetFontFamily().run(),
-    setFontSize: (fontSize: string) => editor?.chain().focus().setFontSize(fontSize).run(),
+    setFontFamily: (fontFamily: string) =>
+      (fontFamily
+        ? editor?.chain().setFontFamily(fontFamily)
+        : editor?.chain().unsetFontFamily()
+      )?.run(),
+    setFontSize: (fontSize: string) => editor?.chain().setFontSize(fontSize).run(),
     unsetFontSize: () => editor?.chain().focus().unsetFontSize().run(),
-    setLineHeight: (lineHeight: string) => editor?.chain().focus().setLineHeight(lineHeight).run(),
-    unsetLineHeight: () => editor?.chain().focus().unsetLineHeight().run(),
-    setTextColor: (color: string) => editor?.chain().focus().setColor(color).run(),
+    setLineHeight: (lineHeight: string) =>
+      editor
+        ?.chain()
+        .unsetLineHeight()
+        .command(({ commands }) => setBlockLineHeight(commands, lineHeight || null))
+        .run(),
+    applyTypographyPreset: ({ fontFamily, fontSize, lineHeight }: TypographyPreset) =>
+      editor
+        ?.chain()
+        .setMark("textStyle", { fontFamily, fontSize, lineHeight: null })
+        .removeEmptyTextStyle()
+        .command(({ commands }) => setBlockLineHeight(commands, lineHeight))
+        .run(),
+    setTextColor: (color: string) => editor?.chain().setColor(color).run(),
     unsetTextColor: () => editor?.chain().focus().unsetColor().run(),
-    setBackgroundColor: (color: string) => editor?.chain().focus().setBackgroundColor(color).run(),
+    setBackgroundColor: (color: string) => editor?.chain().setBackgroundColor(color).run(),
     unsetBackgroundColor: () => editor?.chain().focus().unsetBackgroundColor().run(),
     convertSelectionToInlineMath: () => {
       if (!editor || editor.state.selection.empty) return false;

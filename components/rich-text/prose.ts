@@ -10,11 +10,14 @@ export const RICH_TEXT_PROSE_CLASS_NAME = [
   "font-sans text-base! leading-7! px-0! tracking-normal wrap-anywhere",
   "[&>*]:my-4! [&>:first-child]:mt-0! [&>:last-child]:mb-0!",
   "[&_:where(blockquote,[data-type=column],[data-type=detailsContent])>*]:my-4!",
-  "[&_h1]:text-4xl! [&_h1]:leading-10! [&_h1]:mt-8! [&_h1]:mb-4!",
-  "[&_h2]:text-3xl! [&_h2]:leading-9! [&_h2]:mt-8! [&_h2]:mb-4!",
-  "[&_h3]:text-2xl! [&_h3]:leading-8! [&_h3]:mt-6! [&_h3]:mb-4!",
+  "[&_h1]:text-4xl! [&_h1:not([style*='line-height:'])]:leading-10! [&_h1]:mt-8! [&_h1]:mb-4!",
+  "[&_h2]:text-3xl! [&_h2:not([style*='line-height:'])]:leading-9! [&_h2]:mt-8! [&_h2]:mb-4!",
+  "[&_h3]:text-2xl! [&_h3:not([style*='line-height:'])]:leading-8! [&_h3]:mt-6! [&_h3]:mb-4!",
   "[&_:is(h1,h2,h3)]:tracking-normal! [&_:is(h1,h2,h3)+:is(h1,h2,h3)]:mt-4!",
   "[&_p:not([data-slot])]:my-4 [&_li>p]:min-h-0",
+  // Work around a HeroUI Prose bug: its text-foreground rule on <strong> overrides Tiptap's inherited color.
+  // Revert this workaround once the upstream fix is included in our HeroUI version.
+  "[&_span:is([style^='color:'],[style*=';_color:'],[style*=';color:'])_strong]:text-inherit",
   "[&_li>:first-child]:mt-0! [&_li>:last-child]:mb-0!",
   "[&_li_:is(ul,ol)]:my-2! [&_li+li]:mt-2!",
   "[&_ul[data-type=taskList]]:list-none! [&_ul[data-type=taskList]]:ps-0!",

@@ -198,12 +198,23 @@ test("article modal menus keep pointer and keyboard interactions inside the focu
   const toolbar = page.getByRole("toolbar", { name: "Selection formatting toolbar", exact: true });
   await toolbar.getByRole("button", { name: "Italic", exact: true }).click();
   await expect(editor.locator("em")).toHaveText("format");
-  const fontFamily = toolbar.getByRole("button", { name: "Font family", exact: true });
+  await toolbar.getByRole("button", { name: "Block type: Text", exact: true }).focus();
+  await page.keyboard.press("ArrowRight");
+  const typographyTrigger = toolbar.getByRole("button", { name: "Typography", exact: true });
+  await expect(typographyTrigger).toBeFocused();
+  await typographyTrigger.press("Enter");
+  const typography = page.getByRole("dialog", { name: "Typography", exact: true });
+  const fontFamily = typography.getByRole("button", { name: /Font family$/ });
   await fontFamily.focus();
   await expect(fontFamily).toBeFocused();
   await fontFamily.press("Enter");
-  await page.getByRole("menuitemradio", { name: "Monospace", exact: true }).click();
+  await page.getByRole("option", { name: "Monospace", exact: true }).click();
   await expect(editor.locator('[style*="font-family: monospace"]')).toHaveText("format");
+  await expect(typography).toBeVisible();
+  await expect(fontFamily).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(typography).toBeHidden();
+  await expect(typographyTrigger).toBeFocused();
   await expect
     .poll(() =>
       page

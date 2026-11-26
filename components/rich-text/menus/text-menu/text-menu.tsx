@@ -1,129 +1,106 @@
-import { Button, Popover, useOverlayState } from "@heroui/react";
+import { Button, Tooltip } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
-import { motion } from "motion/react";
 import { BlockTypeSelector } from "../../toolbar/block-type-selector";
 import { LinkPopover } from "../../toolbar/link-popover";
-import { ToggleButtonToolbar } from "../../toolbar/toggle-button-toolbar";
-import { BgColorPicker } from "./components/bg-color-picker";
-import { FontFamilyPicker } from "./components/font-family-picker";
-import { FontSizePicker } from "./components/font-size-picker";
-import { LineHeightPicker } from "./components/line-height-picker";
-import { TextColorPicker } from "./components/text-color-picker";
+import { BubbleMenu } from "../bubble-menu";
+import { ColorFormattingPopover } from "./components/color-formatting-popover";
+import { MoreFormattingMenu } from "./components/more-formatting-menu";
+import { TypographyPopover } from "./components/typography-popover";
 import { useRichTextCommands } from "./hooks/use-rich-text-commands";
 import { useTextMenuStates } from "./hooks/use-text-menu-states";
-import { BubbleMenu } from "../bubble-menu";
+
+const bubblePosition = { shift: { padding: 6 } };
+const toolbarGroupClassName = "shrink-0 max-[380px]:gap-0";
+const toolbarDividerClassName = "max-[560px]:hidden";
 
 export function TextMenu() {
   const states = useTextMenuStates();
   const commands = useRichTextCommands();
 
-  const moreOverlayState = useOverlayState();
-
   return (
-    <BubbleMenu pluginKey="text-menu" shouldShow={states.shouldShow}>
-      <motion.div
-        layout
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="flex max-w-[calc(100vw-1rem)] scrollbar-none items-center overflow-x-auto"
+    <BubbleMenu
+      pluginKey="text-menu"
+      shouldShow={states.shouldShow}
+      options={bubblePosition}
+      toolbarProps={{
+        // The bubble provides the Glass backdrop for its ghost toggle buttons.
+        className:
+          "max-w-[calc(100dvw-1.25rem)] max-[560px]:grid! max-[560px]:grid-flow-row max-[560px]:grid-cols-2 max-[560px]:gap-x-2! [&_.toggle-button--ghost]:backdrop-filter-none!",
+      }}
+    >
+      <RichTextEditor.ToolbarGroup
+        aria-label="Typography controls"
+        className={toolbarGroupClassName}
       >
-        <RichTextEditor.ToolbarGroup aria-label="Text formatting" className="shrink-0">
-          <FontSizePicker value={states.fontSize} onChange={commands.setFontSize} />
-          <BlockTypeSelector />
-          <FontFamilyPicker value={states.fontFamily} onChange={commands.setFontFamily} />
-          <LineHeightPicker value={states.lineHeight} onChange={commands.setLineHeight} />
-        </RichTextEditor.ToolbarGroup>
+        <BlockTypeSelector compact />
+        <TypographyPopover
+          fontFamily={states.fontFamily}
+          fontSize={states.fontSize}
+          lineHeight={states.lineHeight ?? ""}
+          typographyPreset={states.typographyPreset ?? null}
+          onFontFamilyChange={commands.setFontFamily}
+          onFontSizeChange={commands.setFontSize}
+          onLineHeightChange={commands.setLineHeight}
+          onPresetChange={commands.applyTypographyPreset}
+        />
+      </RichTextEditor.ToolbarGroup>
 
-        <RichTextEditor.ToolbarSeparator />
+      <RichTextEditor.ToolbarSeparator orientation="vertical" className={toolbarDividerClassName} />
 
-        <RichTextEditor.ToolbarGroup aria-label="Text Formatting">
-          <RichTextEditor.ToggleButton command="bold" tooltip="Bold">
-            <Icon icon="gravity-ui:bold" />
-          </RichTextEditor.ToggleButton>
-          <RichTextEditor.ToggleButton command="italic" tooltip="Italic">
-            <Icon icon="gravity-ui:italic" />
-          </RichTextEditor.ToggleButton>
-          <RichTextEditor.ToggleButton command="underline" tooltip="Underline">
-            <Icon icon="gravity-ui:underline" />
-          </RichTextEditor.ToggleButton>
-          <RichTextEditor.ToggleButton command="strike" tooltip="Strike">
-            <Icon icon="gravity-ui:strikethrough" />
-          </RichTextEditor.ToggleButton>
-          <RichTextEditor.ToggleButton command="code" tooltip="Code">
-            <Icon icon="gravity-ui:code" />
-          </RichTextEditor.ToggleButton>
-          <RichTextEditor.CommandButton
-            aria-label="Convert selection to formula"
-            tooltip="Convert to formula"
-            onCommand={commands.convertSelectionToInlineMath}
+      <RichTextEditor.ToolbarGroup aria-label="Inline styles" className={toolbarGroupClassName}>
+        <RichTextEditor.ToggleButton command="bold" tooltip="Bold">
+          <Icon aria-hidden="true" icon="gravity-ui:bold" />
+        </RichTextEditor.ToggleButton>
+        <RichTextEditor.ToggleButton command="italic" tooltip="Italic">
+          <Icon aria-hidden="true" icon="gravity-ui:italic" />
+        </RichTextEditor.ToggleButton>
+        <RichTextEditor.ToggleButton command="underline" tooltip="Underline">
+          <Icon aria-hidden="true" icon="gravity-ui:underline" />
+        </RichTextEditor.ToggleButton>
+      </RichTextEditor.ToolbarGroup>
+
+      <RichTextEditor.ToolbarSeparator orientation="vertical" className={toolbarDividerClassName} />
+
+      <RichTextEditor.ToolbarGroup
+        aria-label="Additional inline formatting"
+        className={toolbarGroupClassName}
+      >
+        <RichTextEditor.ToggleButton command="strike" tooltip="Strikethrough">
+          <Icon aria-hidden="true" icon="gravity-ui:strikethrough" />
+        </RichTextEditor.ToggleButton>
+        <RichTextEditor.ToggleButton command="code" tooltip="Inline code">
+          <Icon aria-hidden="true" icon="gravity-ui:code" />
+        </RichTextEditor.ToggleButton>
+        <Tooltip>
+          <Button
+            isIconOnly
+            size="sm"
+            variant="ghost"
+            aria-label="Convert to formula"
+            onPress={commands.convertSelectionToInlineMath}
           >
             <Icon aria-hidden="true" icon="gravity-ui:function" />
-          </RichTextEditor.CommandButton>
-        </RichTextEditor.ToolbarGroup>
-
-        <RichTextEditor.ToolbarSeparator orientation="vertical" />
-
-        <TextColorPicker value={states.textColor} onChange={commands.setTextColor} />
-        <BgColorPicker value={states.backgroundColor} onChange={commands.setBackgroundColor} />
-
-        <LinkPopover />
-
-        <RichTextEditor.ToolbarSeparator orientation="vertical" />
-
-        <Popover isOpen={moreOverlayState.isOpen} onOpenChange={moreOverlayState.setOpen}>
-          <Button isIconOnly size="sm" variant="ghost" aria-label="More text formatting options">
-            <Icon icon="gravity-ui:ellipsis-vertical" aria-hidden="true" />
           </Button>
-          <Popover.Content>
-            <Popover.Dialog className="p-1">
-              <Popover.Arrow />
-              <RichTextEditor.ToolbarGroup>
-                <ToggleButtonToolbar command="subscript" onPress={moreOverlayState.close}>
-                  <Icon icon="gravity-ui:superscript" />
-                </ToggleButtonToolbar>
+          <Tooltip.Content>Convert to formula</Tooltip.Content>
+        </Tooltip>
+      </RichTextEditor.ToolbarGroup>
 
-                <ToggleButtonToolbar command="superscript" onPress={moreOverlayState.close}>
-                  <Icon icon="gravity-ui:superscript" />
-                </ToggleButtonToolbar>
+      <RichTextEditor.ToolbarSeparator orientation="vertical" className={toolbarDividerClassName} />
 
-                <RichTextEditor.ToolbarSeparator />
-
-                <ToggleButtonToolbar command="alignLeft" onPress={moreOverlayState.close}>
-                  <Icon icon="gravity-ui:text-align-left" />
-                </ToggleButtonToolbar>
-
-                <ToggleButtonToolbar command="alignCenter" onPress={moreOverlayState.close}>
-                  <Icon icon="gravity-ui:text-align-center" />
-                </ToggleButtonToolbar>
-
-                <ToggleButtonToolbar command="alignRight" onPress={moreOverlayState.close}>
-                  <Icon icon="gravity-ui:text-align-right" />
-                </ToggleButtonToolbar>
-                <ToggleButtonToolbar command="alignJustify" onPress={moreOverlayState.close}>
-                  <Icon icon="gravity-ui:text-align-justify" />
-                </ToggleButtonToolbar>
-
-                <RichTextEditor.ToolbarSeparator />
-
-                <RichTextEditor.CommandButton
-                  onCommand={commands.outdent}
-                  isDisabled={!states.canOutdent}
-                  isActive={false}
-                >
-                  <Icon icon="gravity-ui:text-outdent" />
-                </RichTextEditor.CommandButton>
-                <RichTextEditor.CommandButton
-                  onCommand={commands.indent}
-                  isDisabled={!states.canIndent}
-                  isActive={states.indent > 0}
-                >
-                  <Icon icon="gravity-ui:text-indent" />
-                </RichTextEditor.CommandButton>
-              </RichTextEditor.ToolbarGroup>
-            </Popover.Dialog>
-          </Popover.Content>
-        </Popover>
-      </motion.div>
+      <RichTextEditor.ToolbarGroup
+        aria-label="Link, color, and more"
+        className={toolbarGroupClassName}
+      >
+        <LinkPopover />
+        <ColorFormattingPopover
+          textColor={states.textColor}
+          highlightColor={states.backgroundColor}
+          onTextColorChange={commands.setTextColor}
+          onHighlightColorChange={commands.setBackgroundColor}
+        />
+        <MoreFormattingMenu states={states} commands={commands} />
+      </RichTextEditor.ToolbarGroup>
     </BubbleMenu>
   );
 }

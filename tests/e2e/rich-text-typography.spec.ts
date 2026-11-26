@@ -1,5 +1,161 @@
 import { expect, test, type Locator } from "@playwright/test";
+import type { Editor } from "@tiptap/react";
 import { THEME_MODE_STORAGE_KEY, THEME_VARIANT_STORAGE_KEY } from "../../lib/theme";
+
+test("typography presets apply and reset selected text and paragraph spacing", async ({ page }) => {
+  await page.goto("/test/rich-text?typography=1");
+  await expect(page.getByTestId("draft-status")).toHaveText("Editor ready");
+  const editor = page.locator('.ProseMirror[contenteditable="true"]');
+  await editor.evaluate((element) => {
+    const editor = (element as HTMLElement & { editor: Editor }).editor;
+    editor.commands.setContent({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Styled selection",
+              marks: [{ type: "bold" }, { type: "textStyle", attrs: { color: "#ef4444" } }],
+            },
+            { type: "text", text: " and the rest of the paragraph." },
+          ],
+        },
+        { type: "paragraph", content: [{ type: "text", text: "A separate paragraph." }] },
+      ],
+    });
+    editor.commands.focus();
+    editor.commands.setTextSelection({ from: 1, to: 17 });
+  });
+
+  const toolbar = page.getByRole("toolbar", { name: "Selection formatting toolbar" });
+  await toolbar.getByRole("button", { name: "Typography" }).click();
+  const typography = page.getByRole("dialog", { name: "Typography" });
+  await expect(typography.getByRole("heading", { name: "Custom" })).toBeVisible();
+  const presets = typography.getByRole("radiogroup", { name: "Presets" });
+  const editorial = presets.getByRole("radio", { name: "Editorial" });
+  const compact = presets.getByRole("radio", { name: "Compact" });
+  await editorial.click();
+  await expect(editorial).toBeChecked();
+  const selection = editor.getByText("Styled selection", { exact: true });
+  await expect(selection).toHaveCSS("font-family", "Georgia");
+  await expect(selection).toHaveCSS("font-size", "18px");
+
+  await compact.click();
+  await expect(compact).toBeChecked();
+  await expect(editor.locator("p").first()).toHaveCSS("line-height", "20px");
+  await expect(editor.getByText("A separate paragraph.")).toHaveCSS("line-height", "28px");
+  await typography.getByRole("button", { name: "Increase Font size" }).click();
+  await expect(compact).not.toBeChecked();
+  await expect(selection).toHaveCSS("font-size", "15px");
+
+  await presets.getByRole("radio", { name: "Default" }).click();
+  await expect(selection).toHaveCSS("font-size", "16px");
+  await expect(selection).toHaveCSS("color", "rgb(239, 68, 68)");
+  await expect(editor.locator("p").first()).toHaveCSS("line-height", "28px");
+
+  await compact.click();
+  await page.keyboard.press("Escape");
+  await expect(typography).toBeHidden();
+  await page.getByTestId("toggle-reading").click();
+  const reader = page.locator('.ProseMirror[contenteditable="false"]');
+  await expect(reader.locator("p").first()).toHaveCSS("line-height", "20px");
+  await expect(reader.getByText("Styled selection", { exact: true })).toHaveCSS(
+    "font-size",
+    "14px"
+  );
+});
+
+test("the text color picker colors formatted text in the editor and reader", async ({ page }) => {
+  await page.goto("/test/rich-text?typography=1");
+  await expect(page.getByTestId("draft-status")).toHaveText("Editor ready");
+  const editor = page.locator('.ProseMirror[contenteditable="true"]');
+  await editor.evaluate((element) => {
+    const editor = (element as HTMLElement & { editor: Editor }).editor;
+    const text = (label: string, ...marks: string[]) => ({
+      type: "text",
+      text: label,
+      marks: marks.map((type) => ({ type })),
+    });
+    const highlightedBold = (
+      label: string,
+      attrs: { backgroundColor: string; fontSize?: string }
+    ) => ({
+      type: "text",
+      text: label,
+      marks: [{ type: "bold" }, { type: "textStyle", attrs }],
+    });
+    editor.commands.setContent({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            text("Plain "),
+            text("Bold ", "bold"),
+            text("Italic ", "italic"),
+            text("Bold italic ", "bold", "italic"),
+            text("Underline ", "underline"),
+            text("Strike ", "strike"),
+            highlightedBold("Highlighted bold", { backgroundColor: "#fef08a", fontSize: "20px" }),
+          ],
+        },
+        {
+          type: "blockquote",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                text("Default bold", "bold"),
+                text(" / "),
+                highlightedBold("Highlight only", { backgroundColor: "#fef08a" }),
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    editor.commands.focus();
+    editor.commands.setTextSelection({ from: 1, to: editor.state.doc.firstChild!.nodeSize - 1 });
+  });
+
+  const toolbar = page.getByRole("toolbar", { name: "Selection formatting toolbar" });
+  await toolbar.getByRole("button", { name: "Color formatting" }).click();
+  await page
+    .getByRole("listbox", { name: "Text color presets" })
+    .getByRole("option")
+    .first()
+    .click();
+  await page.keyboard.press("Escape");
+
+  for (const root of [editor, page.locator('.ProseMirror[contenteditable="false"]')]) {
+    if (root !== editor) await page.getByTestId("toggle-reading").click();
+    for (const label of [
+      "Bold",
+      "Italic",
+      "Bold italic",
+      "Underline",
+      "Strike",
+      "Highlighted bold",
+    ]) {
+      await expect(root.getByText(label, { exact: true })).toHaveCSS("color", "rgb(239, 68, 68)");
+    }
+    await expect(root.locator("p > span").filter({ hasText: /^Plain / })).toHaveCSS(
+      "color",
+      "rgb(239, 68, 68)"
+    );
+    await expect(root.getByText("Highlighted bold")).toHaveCSS("font-size", "20px");
+    await expect(root.getByText("Highlighted bold").locator("..")).toHaveCSS(
+      "background-color",
+      "rgb(254, 240, 138)"
+    );
+    const defaultBoldColor = await root
+      .getByText("Default bold")
+      .evaluate((element) => getComputedStyle(element).color);
+    await expect(root.getByText("Highlight only")).toHaveCSS("color", defaultBoldColor);
+  }
+});
 
 async function measureBlocks(editor: Locator) {
   return editor.evaluate((root) =>

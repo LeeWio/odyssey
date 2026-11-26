@@ -1,16 +1,8 @@
-"use client";
+import { Label, ListBox, Select } from "@heroui/react";
 
-import { Button, Dropdown, Label } from "@heroui/react";
-import { Icon } from "@iconify/react";
-import { memo } from "react";
-
-interface FontFamilyPickerProps {
-  value: string;
-  onChange: (value: string) => void;
-}
-
-export const FONT_FAMILIES = [
-  { label: "Default", value: "" },
+const fontFamilies = [
+  { label: "Default", value: "default" },
+  { label: "Sans serif", value: "sans-serif" },
   { label: "Inter", value: "Inter" },
   { label: "Arial", value: "Arial" },
   { label: "Comic Sans MS", value: "Comic Sans MS, Comic Sans" },
@@ -23,41 +15,41 @@ export const FONT_FAMILIES = [
   { label: "Serif", value: "serif" },
 ];
 
-export const FontFamilyPicker = memo(function FontFamilyPicker({
+export function FontFamilyPicker({
   value,
   onChange,
-}: FontFamilyPickerProps) {
-  const currentFamily =
-    FONT_FAMILIES.find((f) => f.value.toLowerCase() === value.toLowerCase()) || FONT_FAMILIES[0];
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const current = fontFamilies.find((family) => family.value.toLowerCase() === value.toLowerCase());
+  const options = value && !current ? [...fontFamilies, { label: value, value }] : fontFamilies;
 
   return (
-    <Dropdown>
-      <Button size="sm" variant="ghost" aria-label="Font family">
-        <Label className="truncate font-normal">{currentFamily.label}</Label>
-        <Icon icon="gravity-ui:chevron-down" className="text-default-400" />
-      </Button>
-      <Dropdown.Popover>
-        <Dropdown.Menu
-          onAction={(key) => {
-            onChange(key as string);
-          }}
-          selectedKeys={new Set([currentFamily.value])}
-          selectionMode="single"
-        >
-          {FONT_FAMILIES.map((family) => (
-            <Dropdown.Item id={family.value} key={family.value} textValue={family.label}>
-              <Label
-                className={family.value ? `font-normal` : "font-normal"}
-                style={{ fontFamily: family.value }}
-              >
-                {family.label}
-              </Label>
-            </Dropdown.Item>
+    <Select
+      className="col-span-2 grid grid-cols-subgrid items-center gap-y-0"
+      fullWidth
+      variant="secondary"
+      value={current?.value ?? (value || "default")}
+      onChange={(key) => {
+        if (typeof key === "string") onChange(key === "default" ? "" : key);
+      }}
+    >
+      <Label>Font family</Label>
+      <Select.Trigger>
+        <Select.Value className="truncate" />
+        <Select.Indicator />
+      </Select.Trigger>
+      <Select.Popover>
+        <ListBox>
+          {options.map(({ label, value }) => (
+            <ListBox.Item key={value} id={value} textValue={label}>
+              <Label style={{ fontFamily: value === "default" ? undefined : value }}>{label}</Label>
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
           ))}
-        </Dropdown.Menu>
-      </Dropdown.Popover>
-    </Dropdown>
+        </ListBox>
+      </Select.Popover>
+    </Select>
   );
-});
-
-FontFamilyPicker.displayName = "FontFamilyPicker";
+}

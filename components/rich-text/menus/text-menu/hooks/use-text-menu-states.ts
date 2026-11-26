@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { isCustomNodeSelected } from "@/components/rich-text/utils/is-custom-node-selected";
 import { isTextSelected } from "@/components/rich-text/utils/is-text-selected";
 import type { ShouldShowProps } from "../../types";
+import { getSelectionTypography } from "../typography-presets";
 
 export const useTextMenuStates = () => {
   const { editor, isReadOnly } = useRichTextEditor();
@@ -19,11 +20,11 @@ export const useTextMenuStates = () => {
         fontFamily: "",
         fontSize: "",
         lineHeight: "",
+        typographyPreset: null,
         textColor: "",
         backgroundColor: "",
         canIndent: false,
         canOutdent: false,
-        indent: 0,
       };
     }
 
@@ -37,11 +38,6 @@ export const useTextMenuStates = () => {
       ? ctx.editor.can().liftListItem("listItem")
       : ctx.editor.can().outdent();
 
-    const indent =
-      ctx.editor.getAttributes("paragraph").indent ||
-      ctx.editor.getAttributes("heading").indent ||
-      0;
-
     return {
       subscript: ctx.editor.isActive("subscript"),
       superscript: ctx.editor.isActive("superscript"),
@@ -51,12 +47,11 @@ export const useTextMenuStates = () => {
       alignJustify: ctx.editor.isActive({ textAlign: "justify" }),
       fontFamily: ctx.editor.getAttributes("textStyle").fontFamily || "",
       fontSize: ctx.editor.getAttributes("textStyle").fontSize || "",
-      lineHeight: ctx.editor.getAttributes("textStyle").lineHeight || "",
+      ...getSelectionTypography(ctx.editor.state),
       textColor: ctx.editor.getAttributes("textStyle").color || "",
       backgroundColor: ctx.editor.getAttributes("textStyle").backgroundColor || "",
       canIndent,
       canOutdent,
-      indent,
     };
   });
 
