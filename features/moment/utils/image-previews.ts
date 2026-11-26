@@ -1,3 +1,4 @@
+import { getImageProps } from "next/image";
 import type { MomentImageResponse } from "@/lib/features/moment";
 
 export interface MomentImagePreview {
@@ -22,4 +23,13 @@ export function getMomentImagePreviews(
       height: hasDimensions ? (image.height ?? undefined) : undefined,
     };
   });
+}
+
+export function getMomentPhotoSource(src: string, sizes?: string) {
+  // The same-origin Nexus file route can use Next's image cache. Other media
+  // still loads directly, including assets on hosts outside our allowlist.
+  if (!/^\/api\/v1\/public\/files\/[^/?#]+$/.test(src)) return { src };
+
+  const { props } = getImageProps({ src, alt: "", width: 320, height: 320, sizes });
+  return sizes ? { src: props.src, srcSet: props.srcSet, sizes: props.sizes } : { src: props.src };
 }

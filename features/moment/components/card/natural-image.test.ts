@@ -36,10 +36,16 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-async function render(bounded = false) {
+async function render(bounded = false, originalSrc?: string) {
   await act(async () =>
     root.render(
-      createElement(NaturalImage, { src: "/photo.jpg", alt: "Photo", interactive: true, bounded })
+      createElement(NaturalImage, {
+        src: "/photo.jpg",
+        originalSrc,
+        alt: "Photo",
+        interactive: true,
+        bounded,
+      })
     )
   );
   return container.querySelector("img")!;
@@ -61,6 +67,21 @@ it("leaves multi-image natural sizing unchanged", async () => {
   const image = await render();
   expect(image.className).toContain("w-full");
   expect(image.className).not.toContain("max-h-");
+});
+
+it("loads responsive detail lazily and uses the thumbnail only after the original fails", async () => {
+  const original = "/api/v1/public/files/original.jpg";
+  const image = await render(true, original);
+  expect(image.getAttribute("loading")).toBe("lazy");
+  expect(image.getAttribute("srcset")).toContain(encodeURIComponent(original));
+  expect(image.getAttribute("sizes")).toMatch(/^auto,/);
+
+  await act(async () => image.dispatchEvent(new Event("error")));
+  expect(image.getAttribute("src")).toBe(original);
+  expect(image.hasAttribute("srcset")).toBe(false);
+
+  await act(async () => image.dispatchEvent(new Event("error")));
+  expect(image.getAttribute("src")).toBe("/photo.jpg");
 });
 
 async function load(image: HTMLImageElement) {
