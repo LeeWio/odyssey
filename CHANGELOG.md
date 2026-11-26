@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.266.1](https://github.com/LeeWio/odyssey/compare/v1.266.0...v1.266.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* **life-list:** show results for the selected filters ([#183](https://github.com/LeeWio/odyssey/issues/183)) ([54faf6d](https://github.com/LeeWio/odyssey/commit/54faf6d0c61e9341804eb247d2248ccc98d20960))
+
 ## [1.266.0](https://github.com/LeeWio/odyssey/compare/v1.265.0...v1.266.0) (2026-11-26)
 
 
