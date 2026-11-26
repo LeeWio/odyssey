@@ -24,7 +24,7 @@ import { RemoteMedia } from "@/components/ui/remote-media";
 import type { ArticleHeading } from "./article-outline";
 import { ReadingContent } from "./reading-content";
 import { READING_OPENING_SCRIPT } from "./reading-opening";
-import { CopyReadingCode } from "./copy-reading-code";
+import { ReadingCode } from "./reading-code";
 
 function textContent(node: JSONContent): string {
   return node.text ?? node.content?.map(textContent).join("") ?? "";
@@ -32,39 +32,24 @@ function textContent(node: JSONContent): string {
 
 function describeDocument(document: JSONContent) {
   const headings: ArticleHeading[] = [];
-  const usedIds = new Set<string>();
   let characters = 0;
 
-  function visit(node: JSONContent): JSONContent {
+  function visit(node: JSONContent) {
     if (node.text) characters += Array.from(node.text).length;
-    const children = node.content?.map(visit);
-    if (node.type !== "heading") return children ? { ...node, content: children } : node;
-
-    const title = textContent(node).trim();
-    if (!title) return node;
-
-    const storedId = node.attrs?.id ?? node.attrs?.["data-toc-id"];
-    const slug = title
-      .normalize("NFKC")
-      .toLowerCase()
-      .replace(/[^\p{L}\p{N}]+/gu, "-")
-      .replace(/^-|-$/g, "");
-    const baseId =
-      typeof storedId === "string" && /^[\p{L}\p{N}_-]+$/u.test(storedId)
-        ? storedId
-        : `section-${slug.slice(0, 72) || headings.length + 1}`;
-    let id = baseId;
-    for (let suffix = 2; usedIds.has(id); suffix++) id = `${baseId}-${suffix}`;
-    usedIds.add(id);
-    const level = Number(node.attrs?.level) || 1;
-    headings.push({ id, level, textContent: title });
-    return { ...node, attrs: { ...node.attrs, id, "data-toc-id": id } };
+    if (node.type === "heading") {
+      const title = textContent(node).trim();
+      const id = node.attrs?.id;
+      if (title && typeof id === "string") {
+        headings.push({ id, level: Number(node.attrs?.level) || 1, textContent: title });
+      }
+    }
+    node.content?.forEach(visit);
   }
 
-  const content = visit(document);
+  visit(document);
   const firstLevel = headings.length ? Math.min(...headings.map(({ level }) => level)) : 1;
   return {
-    content,
+    content: document,
     headings: headings.map((heading) => ({ ...heading, level: heading.level - firstLevel + 1 })),
     minutes: characters ? Math.max(1, Math.ceil(characters / 260)) : null,
   };
@@ -110,6 +95,13 @@ export function ArticleReadingDocument({
     content: document.content,
     extensions: createReadingSchema(),
     options: {
+      unhandledMark: ({ children }) => children,
+      unhandledNode: ({ children }) =>
+        children == null || (Array.isArray(children) && !children.length) ? (
+          <span className="text-muted">{fallback}</span>
+        ) : (
+          children
+        ),
       nodeMapping: {
         imageUpload: () => null,
         details: ({ node, children }) => (
@@ -174,22 +166,15 @@ export function ArticleReadingDocument({
                   alt={typeof alt === "string" ? alt : ""}
                   className="w-full"
                 />
-                {caption ? <figcaption className="mt-2 text-center">{caption}</figcaption> : null}
+                {typeof caption === "string" && caption ? (
+                  <figcaption className="mt-2 text-center">{caption}</figcaption>
+                ) : null}
               </figure>
             </div>
           );
         },
         codeBlock: ({ node }) => (
-          <div data-reading-code="" className="min-w-0">
-            <div className="flex justify-end">
-              <CopyReadingCode />
-            </div>
-            <pre className="overflow-x-auto">
-              <code className={node.attrs.language ? `language-${node.attrs.language}` : undefined}>
-                {node.textContent}
-              </code>
-            </pre>
-          </div>
+          <ReadingCode code={node.textContent} language={node.attrs.language} />
         ),
         attachment: ({ node }) =>
           isSafeLinkUrl(node.attrs.src) ? (

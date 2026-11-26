@@ -1,5 +1,6 @@
 import { generateHTML, generateJSON, type JSONContent } from "@tiptap/core";
 import type { Editor } from "@tiptap/react";
+import { marked } from "marked";
 import { parse, type DefaultTreeAdapterTypes } from "parse5";
 
 import { createConversionExtensions } from "../extensions/extension-kit";
@@ -32,6 +33,8 @@ const SUPPORTED_HTML_TAGS = new Set([
   "blockquote",
   "br",
   "code",
+  "col",
+  "colgroup",
   "del",
   "details",
   "div",
@@ -48,7 +51,10 @@ const SUPPORTED_HTML_TAGS = new Set([
   "i",
   "iframe",
   "img",
+  "input",
+  "label",
   "li",
+  "mark",
   "math",
   "ol",
   "p",
@@ -59,6 +65,7 @@ const SUPPORTED_HTML_TAGS = new Set([
   "strong",
   "sub",
   "summary",
+  "tfoot",
   "sup",
   "table",
   "tbody",
@@ -101,7 +108,9 @@ function inspectHTML(source: string): ContentInteroperabilityWarning[] {
 }
 
 function validateAgainstEditor(editor: Editor, document: JSONContent): JSONContent {
-  return editor.schema.nodeFromJSON(document).toJSON();
+  const node = editor.schema.nodeFromJSON(document);
+  node.check();
+  return node.toJSON();
 }
 
 function getMarkdownManager(editor: Editor) {
@@ -189,7 +198,13 @@ export function analyzeContentImport(
       };
     }
 
-    const htmlWarnings = inspectHTML(source);
+    const rawHtml: string[] = [];
+    if (format === "markdown") {
+      marked.walkTokens(marked.lexer(source), (token) => {
+        if (token.type === "html") rawHtml.push(token.raw);
+      });
+    }
+    const htmlWarnings = inspectHTML(format === "html" ? source : rawHtml.join(""));
     if (htmlWarnings.some((warning) => warning.blocking)) {
       return { canonicalSource: "", document: null, warnings: htmlWarnings };
     }

@@ -901,12 +901,31 @@ test("code blocks expose a copy action", async ({ page }) => {
   await openArticle(page, "entrance-copy");
 
   const codeBlock = page.locator("[data-reading-code]");
+  await expect(codeBlock.locator("code span").first()).toHaveText("const");
+  await expect(codeBlock.locator("code span").first()).toHaveAttribute("style", /--shiki-light/);
   await expect(codeBlock.getByRole("button", { name: "Copy code" })).toBeVisible();
   await codeBlock.getByRole("button", { name: "Copy code" }).click();
   await expect(page.getByText("Code copied.", { exact: true })).toBeVisible();
   await expect
     .poll(() => page.evaluate(() => window.localStorage.getItem("copied-code")))
     .toBe("const answer = 42;");
+});
+
+test("renders known text around unknown persisted rich-text types", async ({
+  browser,
+  baseURL,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, locale: "en-US", baseURL });
+  try {
+    const page = await context.newPage();
+    await page.goto("/single/entrance-compatibility");
+    const article = page.locator("[data-article-body]");
+    await expect(article).toContainText("Text from an older format.");
+    await expect(article).toContainText("The rest of the article remains readable.");
+    await expect(article.locator("span.text-muted")).toHaveCount(1);
+  } finally {
+    await context.close();
+  }
 });
 
 test("the document and stored anchors are readable without browser JavaScript", async ({

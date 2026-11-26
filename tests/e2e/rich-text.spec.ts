@@ -262,3 +262,40 @@ test("edits, formats, saves and recovers a local draft", async ({ page }) => {
   await expect(page.getByTestId("draft-status")).toHaveText("Draft restored");
   await expect(page.locator(editorSelector)).toContainText("persisted browser marker");
 });
+
+test("edits table structure from a single cell by keyboard and pointer", async ({ page }) => {
+  const editor = page.locator(editorSelector);
+  const table = editor.locator("table");
+  await table.getByRole("cell").first().click();
+  const trigger = page.getByRole("button", { name: "Table options" });
+  await expect(trigger).toBeVisible();
+  await page.keyboard.press("Alt+F10");
+  await expect(trigger).toBeFocused();
+  await page.keyboard.press("Enter");
+  const menu = page.getByRole("menu", { name: "Table options" });
+  await expect(menu).toBeVisible();
+  const rowCount = await table.getByRole("row").count();
+  await menu.getByRole("menuitem", { name: "Add row below" }).click();
+  await expect(table.getByRole("row")).toHaveCount(rowCount + 1);
+
+  await table.getByRole("cell").first().click();
+  await trigger.click();
+  await menu.getByRole("menuitem", { name: "Select column" }).click();
+  await expect(table.locator(".selectedCell")).toHaveCount(rowCount + 1);
+  await page.keyboard.press("Control+z");
+  await expect(table.getByRole("row")).toHaveCount(rowCount);
+});
+
+test("keeps the table row steady during Chinese composition", async ({ page }) => {
+  const cell = page.locator(editorSelector).locator("table").getByRole("cell").first();
+  await cell.click();
+  await page.keyboard.press("End");
+  const height = (await cell.boundingBox())!.height;
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Input.imeSetComposition", { text: "中", selectionStart: 1, selectionEnd: 1 });
+  await expect(cell).toContainText("中");
+  expect((await cell.boundingBox())!.height).toBeCloseTo(height, 0);
+  await cdp.send("Input.insertText", { text: "中文" });
+  await expect(cell).toContainText("中文");
+  expect((await cell.boundingBox())!.height).toBeCloseTo(height, 0);
+});

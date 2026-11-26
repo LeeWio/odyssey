@@ -20,14 +20,17 @@ import { TextAlign } from "./text-align";
 import { TextStyleKit } from "./text-style-kit";
 import { Typography } from "./typography";
 
-export function createReadingSchema() {
+export function createDocumentStarterKit() {
+  return StarterKit.configure({
+    bulletList: false,
+    heading: false,
+    listItem: false,
+    orderedList: false,
+  });
+}
+
+export function createDocumentExtensions() {
   return [
-    StarterKit.configure({
-      bulletList: false,
-      heading: false,
-      listItem: false,
-      orderedList: false,
-    }),
     Details,
     DetailsSummary,
     DetailsContent,
@@ -52,15 +55,11 @@ export function createReadingSchema() {
     Indent,
     Column,
     ColumnsSchema,
-    Heading.extend({
-      addAttributes() {
-        return {
-          ...this.parent?.(),
-          id: { default: null },
-          "data-toc-id": { default: null },
-        };
-      },
-    }),
+    Heading,
     TableKit.configure({ table: { renderWrapper: true, cellMinWidth: 100 } }),
   ];
+}
+
+export function createReadingSchema() {
+  return [createDocumentStarterKit(), ...createDocumentExtensions()];
 }

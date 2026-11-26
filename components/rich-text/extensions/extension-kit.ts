@@ -1,35 +1,24 @@
 import {
   Attachment,
   Audio,
-  Column,
   Columns,
   DetailsKit,
   Emoji,
-  Indent,
-  Heading,
   Image,
   ImageUpload,
-  Mathematics,
-  Mention,
   MotionKit,
-  Subscript,
-  Superscript,
   TableKit,
-  TextAlign,
-  TextStyleKit,
-  Typography,
-  Youtube,
   createTableOfContents,
 } from ".";
 import { FileHandler } from "./FileHandler";
+import type { AnyExtension } from "@tiptap/core";
 import type { TableOfContentsOptions } from "@tiptap/extension-table-of-contents";
-import { BulletList, ListItem, OrderedList, TaskItem, TaskList } from "@tiptap/extension-list";
+import { TaskItem } from "@tiptap/extension-list";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { FindAndReplace } from "@tiptap/extension-find-and-replace";
 import { Markdown } from "@tiptap/markdown";
-import StarterKit from "@tiptap/starter-kit";
 
-import { EmojiBase } from "./emoji/emoji-base";
+import { createDocumentExtensions, createDocumentStarterKit } from "./reading-schema";
 import { TaskItemNodeView } from "./task-list/task-item-node-view";
 
 const HeroUITaskItem = TaskItem.extend({
@@ -70,25 +59,14 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
     markdown = true,
   } = options;
 
-  // Clone module-level extensions so each editor gets isolated plugin state.
-  // Matches the tiptap-templates pattern of building kits via a factory call.
-  return [
-    ...DetailsKit.map((extension) => extension.configure({})),
-    (emojiSuggestion ? Emoji : EmojiBase).configure({}),
-    Heading,
-    Image.configure({}),
+  // The interactive replacements extend the same node definitions used by SSR.
+  const nodeViews: AnyExtension[] = [
+    Image,
     ImageUpload,
-    Audio.configure({}),
-    Attachment.configure({}),
-    Youtube.configure({}),
-    ...(fileHandler ? [FileHandler.configure({})] : []),
-    Mathematics.configure({}),
-    Mention.configure({}),
-    Typography.configure({}),
-    BulletList,
-    OrderedList,
-    ListItem,
-    TaskList,
+    Audio,
+    Attachment,
+    Columns,
+    TableKit,
     HeroUITaskItem.configure({
       nested: true,
       a11y: {
@@ -96,30 +74,21 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
           `${checked ? "Mark incomplete" : "Mark complete"}: ${node.textContent || "empty task"}`,
       },
     }),
-    ...(findAndReplace
-      ? [
-          FindAndReplace.configure({
-            searchDebounceMs: 0,
-          }),
-        ]
-      : []),
-    Subscript.configure({}),
-    Superscript.configure({}),
-    TextAlign.configure({}),
-    TextStyleKit.configure({}),
-    Indent.configure({}),
-    Column.configure({}),
-    Columns.configure({}),
-    ...(markdown
-      ? [
-          Markdown.configure({
-            markedOptions: {
-              gfm: true,
-            },
-          }),
-        ]
-      : []),
-    TableKit.configure({}),
+    ...(emojiSuggestion ? [Emoji] : []),
+  ];
+  const replacements = new Map(nodeViews.map((extension) => [extension.name, extension]));
+  const schema = createDocumentExtensions().map((extension) =>
+    (replacements.get(extension.name) ?? extension).configure({})
+  );
+
+  return [
+    ...schema,
+    ...DetailsKit.filter((extension) => !schema.some(({ name }) => name === extension.name)).map(
+      (extension) => extension.configure({})
+    ),
+    ...(fileHandler ? [FileHandler.configure({})] : []),
+    ...(findAndReplace ? [FindAndReplace.configure({ searchDebounceMs: 0 })] : []),
+    ...(markdown ? [Markdown.configure({ markedOptions: { gfm: true } })] : []),
     ...createTableOfContents(tableOfContents),
   ];
 }
@@ -149,14 +118,6 @@ export function createReaderExtensionKit(options: ExtensionKitOptions = {}) {
  * Extensions used by non-editor content conversion helpers.
  * RichTextEditor injects these base extensions itself at runtime.
  */
-export function createConversionExtensions(options?: ExtensionKitOptions) {
-  return [
-    StarterKit.configure({
-      bulletList: false,
-      heading: false,
-      listItem: false,
-      orderedList: false,
-    }),
-    ...createExtensionKit(options),
-  ];
+export function createConversionExtensions() {
+  return [createDocumentStarterKit(), ...createDocumentExtensions()];
 }
