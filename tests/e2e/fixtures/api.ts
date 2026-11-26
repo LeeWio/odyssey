@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 
 import { articles, designArticle } from "./articles";
 import { featured, journalFallbackPrefix, stories, story } from "./journal";
+import { lifeListCategories, lifeListFixture, lifeListPath } from "./life-list";
 
 const origin = new URL(process.env.E2E_FIXTURE_ORIGIN ?? "http://127.0.0.1:3181");
 const blogPosts = "/api/v1/public/blog/posts";
@@ -27,6 +28,8 @@ createServer((request, response) => {
     return;
   }
   if (pathname === "/health") return send(200, { ready: true });
+  if (pathname === lifeListPath) return send(200, lifeListFixture(url.searchParams));
+  if (pathname === `${lifeListPath}/categories`) return send(200, lifeListCategories);
   if (pathname === "/api/v1/public/blog/facets") {
     const now = new Date();
     const previousMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));

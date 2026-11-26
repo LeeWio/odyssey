@@ -61,12 +61,13 @@ export function LifeListPage({
   );
 
   const categories = categoriesQuery.data ?? initialCategories;
-  const page = filtered ? listQuery.data : (listQuery.data ?? initialPage);
-  const isLoading = filtered ? listQuery.isLoading : !page && listQuery.isLoading;
-  const failed = filtered ? listQuery.isError : !page && listQuery.isError;
+  const page = filtered ? listQuery.currentData : (initialPage ?? listQuery.currentData);
+  const failed = !page && listQuery.isError && !listQuery.isFetching;
+  const isLoading = !page && !failed;
 
   const items = page?.list ?? [];
-  const summary = page?.summary;
+  // The summary always counts the full public list, including during a filter change.
+  const summary = page?.summary ?? initialPage?.summary;
 
   const statusChips = useMemo(
     () =>
@@ -132,7 +133,14 @@ export function LifeListPage({
 
       {failed ? (
         <EmptyState>
-          <EmptyState.Title>{t("loadError")}</EmptyState.Title>
+          <EmptyState.Header>
+            <EmptyState.Title>{t("loadError")}</EmptyState.Title>
+          </EmptyState.Header>
+          <EmptyState.Content>
+            <Button size="sm" variant="outline" onPress={() => listQuery.refetch()}>
+              {t("retry")}
+            </Button>
+          </EmptyState.Content>
         </EmptyState>
       ) : null}
 
