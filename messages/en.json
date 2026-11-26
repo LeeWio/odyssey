@@ -1591,6 +1591,7 @@
     "empty": "Nothing is written here yet. Start with one small wish.",
     "noResults": "Nothing matches these filters.",
     "loadError": "The list could not be loaded.",
+    "retry": "Try again",
     "notFound": "This wish is private, archived, or no longer here.",
     "why": "Why this matters",
     "completedOn": "Completed {date}",
