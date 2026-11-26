@@ -179,8 +179,18 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
         .chain()
         .focus()
         .deleteRange(range)
-        .insertBlockMath({ latex: "x" })
-        .setNodeSelection(range.from)
+        .insertBlockMath({ latex: "x", pos: range.from })
+        .command(({ commands, tr }) => {
+          // The insertion can replace an empty paragraph or split a populated one.
+          let formulaPosition: number | undefined;
+          tr.mapping.maps.at(-1)?.forEach((_oldStart, _oldEnd, start, end) => {
+            tr.doc.nodesBetween(start, end, (node, pos) => {
+              if (node.type.name === "blockMath") formulaPosition = pos;
+              return formulaPosition === undefined;
+            });
+          });
+          return formulaPosition !== undefined && commands.setNodeSelection(formulaPosition);
+        })
         .run();
     },
     description: "Insert and edit a display equation",

@@ -1,3 +1,4 @@
+import { BroomMotion } from "@gravity-ui/icons";
 import { Button, Tooltip } from "@heroui/react";
 import { RichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
@@ -12,7 +13,7 @@ import { useTextMenuStates } from "./hooks/use-text-menu-states";
 
 const bubblePosition = { shift: { padding: 6 } };
 const toolbarGroupClassName = "shrink-0 max-[380px]:gap-0";
-const toolbarDividerClassName = "max-[560px]:hidden";
+const toolbarDividerClassName = "max-[600px]:hidden";
 
 export function TextMenu() {
   const states = useTextMenuStates();
@@ -26,7 +27,7 @@ export function TextMenu() {
       toolbarProps={{
         // The bubble provides the Glass backdrop for its ghost toggle buttons.
         className:
-          "max-w-[calc(100dvw-1.25rem)] max-[560px]:grid! max-[560px]:grid-flow-row max-[560px]:grid-cols-2 max-[560px]:gap-x-2! [&_.toggle-button--ghost]:backdrop-filter-none!",
+          "max-w-[calc(100dvw-1.25rem)] max-[600px]:grid! max-[600px]:grid-flow-row max-[600px]:grid-cols-2 max-[600px]:gap-x-2! [&_.toggle-button--ghost]:backdrop-filter-none!",
       }}
     >
       <RichTextEditor.ToolbarGroup
@@ -89,7 +90,7 @@ export function TextMenu() {
       <RichTextEditor.ToolbarSeparator orientation="vertical" className={toolbarDividerClassName} />
 
       <RichTextEditor.ToolbarGroup
-        aria-label="Link, color, and more"
+        aria-label="Link, color, and formatting actions"
         className={toolbarGroupClassName}
       >
         <LinkPopover />
@@ -99,6 +100,13 @@ export function TextMenu() {
           onTextColorChange={commands.setTextColor}
           onHighlightColorChange={commands.setBackgroundColor}
         />
+        <RichTextEditor.ActionButton
+          action="clearFormatting"
+          tooltip="Clear formatting"
+          variant="ghost"
+        >
+          <BroomMotion aria-hidden="true" />
+        </RichTextEditor.ActionButton>
         <MoreFormattingMenu states={states} commands={commands} />
       </RichTextEditor.ToolbarGroup>
     </BubbleMenu>

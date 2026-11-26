@@ -22,6 +22,30 @@ async function expectOnTop(menu: Locator) {
     .toBe(true);
 }
 
+test("opens the formula editor from the Equation slash command", async ({ page }) => {
+  await page.goto("/test/rich-text");
+  await expect(page.getByTestId("draft-status")).toHaveText("Editor ready");
+  const editor = page.locator(editorSelector);
+
+  for (const text of ["/equation", "Before /equation"]) {
+    await clearEditor(page);
+    await page.keyboard.type(text);
+    await page.getByRole("option", { name: /^Equation/ }).click();
+
+    const formulaEditor = page.getByRole("toolbar", { name: "Formula actions" });
+    const source = formulaEditor.getByRole("textbox", { name: "LaTeX" });
+    await expect(source).toHaveValue("x");
+    await source.fill("E = mc^2");
+    await source.press("ControlOrMeta+Enter");
+    await expect(editor.locator('[data-type="block-math"]')).toHaveAttribute(
+      "data-latex",
+      "E = mc^2"
+    );
+    await expect(editor).not.toContainText("/equation");
+    if (text.startsWith("Before")) await expect(editor).toContainText("Before");
+  }
+});
+
 for (const { modal, mode } of [
   { modal: false, mode: "dark" },
   { modal: true, mode: "dark" },

@@ -1,8 +1,8 @@
 "use client";
 
+import { Function } from "@gravity-ui/icons";
 import { Button, Tooltip } from "@heroui/react";
 import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
-import { Icon } from "@iconify/react";
 import { MathEditorPopover } from "../mathematics/math-editor-popover";
 
 export function MathInsertPopover() {
@@ -29,7 +29,7 @@ export function MathInsertPopover() {
           size="sm"
           variant="ghost"
         >
-          <Icon aria-hidden="true" className="size-4" icon="gravity-ui:function" />
+          <Function aria-hidden="true" className="size-4" />
         </Button>
         <Tooltip.Content>Insert formula</Tooltip.Content>
       </Tooltip>
