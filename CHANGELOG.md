@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.266.0](https://github.com/LeeWio/odyssey/compare/v1.265.0...v1.266.0) (2026-11-26)
+
+
+### Features
+
+* **editor:** refine formula editing and clear formatting ([#181](https://github.com/LeeWio/odyssey/issues/181)) ([53598fd](https://github.com/LeeWio/odyssey/commit/53598fd80938da59928cc1ef51ac87f2b70c5e3a))
+
 ## [1.265.0](https://github.com/LeeWio/odyssey/compare/v1.264.6...v1.265.0) (2026-11-26)
 
 
