@@ -32,14 +32,12 @@ export function WritingHistoryChart({ months }: { months: WritingMonth[] }) {
 
   function renderTooltip(id: string, total: number) {
     return (
-      <ChartTooltip className="min-w-44 gap-1.5 rounded-2xl px-3.5 py-2.5">
+      <ChartTooltip>
         <ChartTooltip.Header>{monthLabel(id)}</ChartTooltip.Header>
         <ChartTooltip.Item>
           <ChartTooltip.Indicator color={pointColor} />
           <ChartTooltip.Label>{t("tooltipLabel")}</ChartTooltip.Label>
-          <ChartTooltip.Value className="text-sm font-semibold">
-            {format.number(total)}
-          </ChartTooltip.Value>
+          <ChartTooltip.Value>{format.number(total)}</ChartTooltip.Value>
         </ChartTooltip.Item>
       </ChartTooltip>
     );
@@ -129,6 +127,8 @@ export function WritingHistoryChart({ months }: { months: WritingMonth[] }) {
             trigger={isTouch ? "click" : "hover"}
             offset={14}
             reverseDirection={{ y: true }}
+            // Keep the tooltip above the figure caption at z-10.
+            wrapperStyle={{ zIndex: 20 }}
             cursor={{ style: { stroke: pointColor, strokeDasharray: "none", strokeOpacity: 0.35 } }}
             content={({ active, label, payload }) => {
               const total = payload[0]?.value;
@@ -139,7 +139,7 @@ export function WritingHistoryChart({ months }: { months: WritingMonth[] }) {
           />
         </AreaChart>
         {showKeyboardSelection && (
-          <div className="pointer-events-none absolute end-3 top-3">
+          <div className="pointer-events-none absolute end-3 top-3 z-20">
             {renderTooltip(selected.id, selected.total)}
           </div>
         )}

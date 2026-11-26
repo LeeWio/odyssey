@@ -163,7 +163,10 @@ export function HomeSiteRecord({
         </ul>
       </div>
 
-      <figure aria-labelledby="writing-history-title" className="relative mt-10 md:mt-[4.5rem]">
+      <figure
+        aria-labelledby="writing-history-title"
+        className="relative isolate mt-10 md:mt-[4.5rem]"
+      >
         <figcaption
           className={cn(
             contentRail,
