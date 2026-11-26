@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.265.0](https://github.com/LeeWio/odyssey/compare/v1.264.6...v1.265.0) (2026-11-26)
+
+
+### Features
+
+* **editor:** refine the rich-text selection toolbar ([#177](https://github.com/LeeWio/odyssey/issues/177)) ([8be11f8](https://github.com/LeeWio/odyssey/commit/8be11f81c3b269db2ab28f5a434f5550cf406fce))
+
 ## [1.264.6](https://github.com/LeeWio/odyssey/compare/v1.264.5...v1.264.6) (2026-11-26)
 
 
