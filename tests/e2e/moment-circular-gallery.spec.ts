@@ -74,6 +74,23 @@ async function prepare(page: Page, missingPhoto = false, thumbnails = false) {
   });
   const imageRequests: string[] = [];
   const preview = thumbnails ? await sharp(fixture).resize(320).jpeg().toBuffer() : fixture;
+  if (thumbnails) {
+    await page.route("**/_next/image?**", async (route) => {
+      const query = new URL(route.request().url()).searchParams;
+      const original = query.get("url");
+      if (!original?.startsWith("/api/v1/public/files/circular-")) return route.fallback();
+      if (missingPhoto && original.endsWith("/circular-2.jpg")) {
+        return route.fulfill({ status: 404, body: "File missing" });
+      }
+      return route.fulfill({
+        contentType: "image/webp",
+        body: await sharp(fixture)
+          .resize(Number(query.get("w")))
+          .webp()
+          .toBuffer(),
+      });
+    });
+  }
   await page.route("**/api/v1/**", (route) => {
     const path = new URL(route.request().url()).pathname;
     if (path.startsWith("/api/v1/public/files/circular-")) {
@@ -82,7 +99,7 @@ async function prepare(page: Page, missingPhoto = false, thumbnails = false) {
       // but an unnecessary CORS Origin header is rejected.
       if (route.request().headers().origin)
         return route.fulfill({ status: 403, body: "Invalid CORS request" });
-      if (missingPhoto && path.endsWith("-2.jpg"))
+      if (missingPhoto && path.endsWith("/circular-2.jpg"))
         return route.fulfill({ status: 404, body: "File missing" });
       return route.fulfill({
         contentType: "image/jpeg",
@@ -172,6 +189,30 @@ test("the home gallery draws thumbnails and expands the same canvas when opened"
   await expect(showcase.locator('[data-gallery-list] [aria-current="true"]')).toBeFocused();
 });
 
+test("the Moments gallery draws resized originals and falls back for a missing original", async ({
+  page,
+}) => {
+  const requests = await prepare(page, true, true);
+  await page.goto("/moments?topic=circular-fixture");
+  const canvas = page.locator("#moment-944 canvas");
+  await canvas.scrollIntoViewIfNeeded();
+  const uploaded = () =>
+    canvas.evaluate((node) =>
+      (window.circularGalleryChecks.find(({ canvas }) => canvas === node)?.uploaded ?? []).map(
+        (source) => new URL(source).searchParams.get("url") ?? new URL(source).pathname
+      )
+    );
+  await expect
+    .poll(async () => (await uploaded()).sort())
+    .toEqual([
+      "/api/v1/public/files/circular-0.jpg",
+      "/api/v1/public/files/circular-1.jpg",
+      "/api/v1/public/files/circular-3.jpg",
+      "/api/v1/public/files/circular-thumb-2.jpg",
+    ]);
+  expect(requests).toEqual(["/api/v1/public/files/circular-thumb-2.jpg"]);
+});
+
 for (const path of ["/", "/moments?topic=circular-fixture"]) {
   test(`photos can still be opened without WebGL at ${path}`, async ({ page }) => {
     await prepare(page, false, true);
@@ -189,10 +230,20 @@ for (const path of ["/", "/moments?topic=circular-fixture"]) {
     const card = page.locator(path === "/" ? "#moments-showcase" : "#moment-944");
     await card.scrollIntoViewIfNeeded();
     const trigger = card.getByRole("button", { name: "Open image 1 of 4", exact: true });
-    const thumbnail = card.getByAltText("Photo 1", { exact: true });
+    const photo = card.getByAltText("Photo 1", { exact: true });
+    const loadedSource = () =>
+      photo.evaluate((image: HTMLImageElement) => {
+        if (!image.complete || image.naturalWidth === 0) return null;
+        const url = new URL(image.currentSrc);
+        return url.searchParams.get("url") ?? url.pathname;
+      });
     await expect
-      .poll(() => thumbnail.evaluate((node: HTMLImageElement) => node.naturalWidth))
-      .toBe(320);
+      .poll(loadedSource)
+      .toBe(
+        path === "/"
+          ? "/api/v1/public/files/circular-thumb-0.jpg"
+          : "/api/v1/public/files/circular-0.jpg"
+      );
     await expect(card.locator("canvas")).toHaveCount(0);
     await trigger.press("Enter");
     const viewer = page.getByRole("dialog", { name: "Image viewer" });
@@ -380,8 +431,10 @@ test("keyboard opening, close-button dismissal, arc and wave rendering keep the 
   await page.goto("/moments?topic=circular-fixture&view=grid");
   const canvas = page.locator("#moment-944 canvas");
   await expect(canvas).toBeVisible();
-  await expect.poll(() => requests.length).toBe(4);
-  expect(requests.every((url) => url.includes("-thumb-"))).toBe(true);
+  await expect
+    .poll(() => page.evaluate(() => window.circularGalleryChecks[0]?.uploaded.length))
+    .toBe(4);
+  expect(requests).toEqual([]);
   await expect
     .poll(() => page.evaluate(() => window.circularGalleryChecks[0]?.peakAngle))
     .toBeGreaterThan(0);
@@ -391,9 +444,7 @@ test("keyboard opening, close-button dismissal, arc and wave rendering keep the 
   await page.keyboard.press("Enter");
   const dialog = page.getByRole("dialog", { name: "Image gallery", exact: true });
   await expect(dialog.locator("canvas")).toBeVisible();
-  await expect
-    .poll(() => requests.filter((url) => !url.includes("-thumb-")))
-    .toEqual(["/api/v1/public/files/circular-0.jpg"]);
+  await expect.poll(() => requests).toEqual(["/api/v1/public/files/circular-0.jpg"]);
   await page.evaluate(() => {
     window.circularGalleryChecks[0].peakWave = 0;
   });

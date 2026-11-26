@@ -100,7 +100,11 @@ export const CardContent = ({
       )}
 
       {count >= 4 || mediaLayout === "natural" || !onCardClick ? (
-        <MomentPhotos images={images} onOpen={onCardClick} />
+        <MomentPhotos
+          images={images}
+          onOpen={onCardClick}
+          preferDetail={mediaLayout === "natural"}
+        />
       ) : count > 0 ? (
         <div className="flex w-full justify-center">
           <BounceCards

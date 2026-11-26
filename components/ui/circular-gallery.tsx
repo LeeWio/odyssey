@@ -12,6 +12,7 @@ import { CircularGalleryViewport } from "./circular-gallery-viewport";
 
 export type GalleryItem = {
   image: string;
+  fallbackImage?: string;
   originalImage?: string;
   text?: string;
   description?: string;
@@ -584,16 +585,25 @@ const CircularGallery = ({
     let lastItems: GalleryItem[] | null = null;
     let typing = false;
 
-    const textureFor = (url: string): TextureEntry => {
+    const textureFor = (url: string, fallbackUrl?: string): TextureEntry => {
       const existing = textures.get(url);
       if (existing) return existing;
       const entry: TextureEntry = { texture: null, aspect: 1, ready: 0, loaded: false };
       textures.set(url, entry);
       const image = new Image();
-      if (new URL(url, window.location.href).origin !== window.location.origin) {
-        image.crossOrigin = "anonymous";
-      }
+      const load = (src: string) => {
+        image.crossOrigin =
+          new URL(src, window.location.href).origin === window.location.origin ? null : "anonymous";
+        image.src = src;
+      };
       image.decoding = "async";
+      if (fallbackUrl && fallbackUrl !== url) {
+        image.onerror = () => {
+          if (disposed || textures.get(url) !== entry) return;
+          image.onerror = null;
+          load(fallbackUrl);
+        };
+      }
       image.onload = () => {
         if (disposed || textures.get(url) !== entry) return;
         const texture = gl.createTexture();
@@ -615,7 +625,7 @@ const CircularGallery = ({
         entry.loaded = true;
         wake();
       };
-      image.src = url;
+      load(url);
       return entry;
     };
 
@@ -674,7 +684,7 @@ const CircularGallery = ({
       const margin = Math.max(20, Math.min(view.width, view.height) * 0.06);
       const baseLabel = h * 0.072 * fontScale(fontRef.current);
       const openFrame = (item: GalleryItem): Frame => {
-        const aspect = textureFor(item.image).aspect || w / h;
+        const aspect = textureFor(item.image, item.fallbackImage).aspect || w / h;
         const titleSpace = item.text && s.showTitles ? captionSize() * 2.4 : 0;
         const captionSpace = titleSpace + (item.description ? 52 : 0);
         const width = Math.min(
@@ -693,7 +703,7 @@ const CircularGallery = ({
       for (let slot = first; slot <= lastSlot; slot++) {
         const index = wrap(slot, count);
         const item = list[index];
-        const preview = textureFor(item.image);
+        const preview = textureFor(item.image, item.fallbackImage);
         const original =
           state.openTarget > 0 && slot === state.active && item.originalImage
             ? textureFor(item.originalImage)
@@ -885,7 +895,7 @@ const CircularGallery = ({
       if (s.items !== lastItems) {
         lastItems = s.items;
         prune(s.items);
-        s.items.forEach((item) => textureFor(item.image));
+        s.items.forEach((item) => textureFor(item.image, item.fallbackImage));
       }
       const idle = now - state.lastInput > 1800;
       const auto =
@@ -1200,7 +1210,7 @@ const CircularGallery = ({
     document.addEventListener("keydown", onAnyKey, true);
     document.addEventListener("pointerdown", onAnyPointer, true);
     lastItems = settingsRef.current.items;
-    lastItems.forEach((item) => textureFor(item.image));
+    lastItems.forEach((item) => textureFor(item.image, item.fallbackImage));
     resize();
 
     const slotFor = (index: number) => {

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { DeferredContent } from "@/components/layout/deferred-content";
-import type { MomentImagePreview } from "../../utils/image-previews";
+import { getMomentPhotoSource, type MomentImagePreview } from "../../utils/image-previews";
 import { NaturalImage } from "./natural-image";
 
 const CircularGallery = dynamic(() => import("@/components/ui/circular-gallery"), {
@@ -20,9 +20,10 @@ function GalleryPlaceholder() {
 interface MomentPhotosProps {
   images: MomentImagePreview[];
   onOpen?: (index: number) => void;
+  preferDetail?: boolean;
 }
 
-export function MomentPhotos({ images, onOpen }: MomentPhotosProps) {
+export function MomentPhotos({ images, onOpen, preferDetail = false }: MomentPhotosProps) {
   const t = useTranslations("Moments");
   const [galleryUnavailable, setGalleryUnavailable] = useState(false);
   const count = images.length;
@@ -34,11 +35,16 @@ export function MomentPhotos({ images, onOpen }: MomentPhotosProps) {
       <DeferredContent className="h-80 w-full" fallback={<GalleryPlaceholder />}>
         <CircularGallery
           expandOnOpen
-          items={images.map(({ url, originalUrl, alt }) => ({
-            image: url,
-            originalImage: originalUrl,
-            alt: alt || t("imageAlt"),
-          }))}
+          items={images.map(({ url, originalUrl, alt }) => {
+            const detail =
+              preferDetail && originalUrl ? getMomentPhotoSource(originalUrl).src : url;
+            return {
+              image: detail,
+              fallbackImage: detail === url ? undefined : url,
+              originalImage: originalUrl,
+              alt: alt || t("imageAlt"),
+            };
+          })}
           onUnavailable={() => setGalleryUnavailable(true)}
         />
       </DeferredContent>
@@ -47,7 +53,7 @@ export function MomentPhotos({ images, onOpen }: MomentPhotosProps) {
 
   return (
     <div className={count >= 4 ? "grid min-w-0 grid-cols-2 gap-3" : "grid min-w-0 gap-3"}>
-      {images.map(({ url, alt, width, height }, index) => (
+      {images.map(({ url, originalUrl, alt, width, height }, index) => (
         <div key={`${url}-${index}`} className="relative isolate min-w-0">
           {onOpen ? (
             <Button
@@ -59,6 +65,7 @@ export function MomentPhotos({ images, onOpen }: MomentPhotosProps) {
           ) : null}
           <NaturalImage
             src={url}
+            originalSrc={preferDetail ? originalUrl : undefined}
             alt={alt || t("imageAlt")}
             width={width}
             height={height}

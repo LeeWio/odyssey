@@ -1,16 +1,18 @@
 "use client";
 
 import { motion, useAnimationControls } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { RemoteMedia } from "@/components/ui/remote-media";
 import { pageEaseOut } from "@/lib/motion";
+import { getMomentPhotoSource } from "../../utils/image-previews";
 import { momentLayoutTransition, useMomentMotion } from "../feed-motion";
 
 const MotionMedia = motion.create(RemoteMedia);
 
 export function NaturalImage({
   src,
+  originalSrc,
   alt,
   width,
   height,
@@ -18,6 +20,7 @@ export function NaturalImage({
   bounded = false,
 }: {
   src: string;
+  originalSrc?: string;
   alt: string;
   width?: number;
   height?: number;
@@ -27,6 +30,17 @@ export function NaturalImage({
   const { enabled, reduced } = useMomentMotion();
   const controls = useAnimationControls();
   const cached = useRef(false);
+  const [failedSource, setFailedSource] = useState<{
+    original: string;
+    stage: "optimized" | "original";
+  }>();
+  const failedStage = failedSource?.original === originalSrc ? failedSource?.stage : undefined;
+  const source =
+    originalSrc && failedStage !== "original"
+      ? failedStage === "optimized"
+        ? { src: originalSrc }
+        : getMomentPhotoSource(originalSrc, "auto, (max-width: 40rem) calc(100vw - 2rem), 640px")
+      : { src };
 
   useEffect(() => {
     if (!reduced) return;
@@ -39,7 +53,7 @@ export function NaturalImage({
       ref={(image) => {
         if (image?.complete && image.naturalWidth > 0) cached.current = true;
       }}
-      src={src}
+      {...source}
       alt={alt}
       width={width}
       height={height}
@@ -55,6 +69,13 @@ export function NaturalImage({
         duration: 0.1,
         ease: pageEaseOut,
         layout: reduced ? { duration: 0 } : momentLayoutTransition,
+      }}
+      onError={() => {
+        if (!originalSrc || source.src === src) return;
+        setFailedSource({
+          original: originalSrc,
+          stage: source.src === originalSrc ? "original" : "optimized",
+        });
       }}
       onLoad={() => {
         if (cached.current) return;
