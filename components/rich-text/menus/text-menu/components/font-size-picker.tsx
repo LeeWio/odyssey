@@ -28,7 +28,7 @@ export const FontSizePicker = memo(function FontSizePicker({
       maxValue={96}
       size="sm"
     >
-      <NumberStepper.Group className="bg-transparent">
+      <NumberStepper.Group>
         <NumberStepper.DecrementButton />
         <NumberStepper.Value />
         <NumberStepper.IncrementButton />

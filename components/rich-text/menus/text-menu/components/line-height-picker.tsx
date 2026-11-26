@@ -1,55 +1,54 @@
-"use client";
+import { Label, ListBox, Select } from "@heroui/react";
 
-import { Button, Dropdown, Label } from "@heroui/react";
-import { Icon } from "@iconify/react";
-import { memo } from "react";
-
-interface LineHeightPickerProps {
-  value: string;
-  onChange: (value: string) => void;
-}
-
-export const LINE_HEIGHTS = [
+const lineHeights = [
+  { id: "default", label: "Default" },
   { id: "1", label: "Single" },
   { id: "1.15", label: "1.15" },
+  { id: "1.25", label: "1.25" },
   { id: "1.5", label: "1.5" },
+  { id: "1.8", label: "1.8" },
   { id: "2", label: "Double" },
   { id: "2.5", label: "2.5" },
   { id: "3", label: "3" },
 ];
 
-export const LineHeightPicker = memo(function LineHeightPicker({
+export function LineHeightPicker({
   value,
   onChange,
-}: LineHeightPickerProps) {
-  const currentLineHeight =
-    LINE_HEIGHTS.find((lh) => lh.id === value) ||
-    LINE_HEIGHTS.find((lh) => lh.id === "1.15") ||
-    LINE_HEIGHTS[0];
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const options =
+    value && !lineHeights.some(({ id }) => id === value)
+      ? [...lineHeights, { id: value, label: value }]
+      : lineHeights;
 
   return (
-    <Dropdown>
-      <Button size="sm" variant="ghost" aria-label="Line height">
-        <Label className="truncate font-normal">{currentLineHeight.label}</Label>
-        <Icon icon="gravity-ui:chevron-down" className="text-default-400" />
-      </Button>
-      <Dropdown.Popover>
-        <Dropdown.Menu
-          onAction={(key) => {
-            onChange(key as string);
-          }}
-          selectedKeys={new Set([currentLineHeight.id])}
-          selectionMode="single"
-        >
-          {LINE_HEIGHTS.map((item) => (
-            <Dropdown.Item id={item.id} key={item.id} textValue={item.label}>
-              <Label className="font-normal">{item.label}</Label>
-            </Dropdown.Item>
+    <Select
+      className="col-span-2 grid grid-cols-subgrid items-center gap-y-0"
+      fullWidth
+      variant="secondary"
+      value={value || "default"}
+      onChange={(key) => {
+        if (typeof key === "string") onChange(key === "default" ? "" : key);
+      }}
+    >
+      <Label>Line height</Label>
+      <Select.Trigger>
+        <Select.Value className="tabular-nums" />
+        <Select.Indicator />
+      </Select.Trigger>
+      <Select.Popover>
+        <ListBox>
+          {options.map(({ id, label }) => (
+            <ListBox.Item key={id} id={id} textValue={label}>
+              <Label className="tabular-nums">{label}</Label>
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
           ))}
-        </Dropdown.Menu>
-      </Dropdown.Popover>
-    </Dropdown>
+        </ListBox>
+      </Select.Popover>
+    </Select>
   );
-});
-
-LineHeightPicker.displayName = "LineHeightPicker";
+}

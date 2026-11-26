@@ -1,6 +1,5 @@
 import { TableKit } from "@tiptap/extension-table";
 import { BulletList, ListItem, OrderedList, TaskItem, TaskList } from "@tiptap/extension-list";
-import { TextStyleKit } from "@tiptap/extension-text-style";
 import StarterKit from "@tiptap/starter-kit";
 import { Heading } from "./heading";
 import { ImageSchema } from "./Image/image-schema";
@@ -18,6 +17,7 @@ import { Mention } from "./mention";
 import { Subscript } from "./subscript";
 import { Superscript } from "./superscript";
 import { TextAlign } from "./text-align";
+import { TextStyleKit } from "./text-style-kit";
 import { Typography } from "./typography";
 
 export function createReadingSchema() {

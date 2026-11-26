@@ -17,7 +17,7 @@ function BlockTypeIcon({ icon }: { icon: string }) {
   return <Icon icon={icon} aria-hidden="true" className="size-4 shrink-0" />;
 }
 
-export function BlockTypeSelector() {
+export function BlockTypeSelector({ compact = false }: { compact?: boolean }) {
   const { editor, isDisabled, isReadOnly } = useRichTextEditor();
   const activeBlock = useRichTextEditorState((ctx): BlockType => {
     if (!ctx.editor) return "paragraph";
@@ -54,10 +54,15 @@ export function BlockTypeSelector() {
         aria-label={`Block type: ${activeItem.label}`}
         isDisabled={isDisabled || isReadOnly}
         size="sm"
-        variant="tertiary"
+        variant={compact ? "ghost" : "tertiary"}
+        className={compact ? "max-[380px]:w-9 max-[380px]:px-0" : undefined}
       >
         <BlockTypeIcon icon={activeItem.icon} />
-        <Label className="text-xs font-normal">{activeItem.label}</Label>
+        <Label
+          className={compact ? "text-xs font-normal max-[380px]:sr-only" : "text-xs font-normal"}
+        >
+          {activeItem.label}
+        </Label>
       </Button>
       <Dropdown.Popover placement="bottom start">
         <Dropdown.Menu
