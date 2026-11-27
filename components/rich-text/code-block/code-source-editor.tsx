@@ -58,7 +58,7 @@ export function CodeSourceEditor({
           >
             <div
               ref={highlight}
-              className="px-3 py-2 text-base/6 whitespace-pre [tab-size:4] sm:text-sm/6"
+              className="py-2 text-base/6 whitespace-pre [tab-size:4] sm:text-sm/6"
             >
               <CodeTokens code={code} tokens={tokens} />
             </div>
@@ -68,7 +68,7 @@ export function CodeSourceEditor({
           ref={textarea}
           aria-label={t("source")}
           className={
-            "relative block resize-y overflow-auto bg-transparent! font-mono leading-6 whitespace-pre! [tab-size:4] backdrop-filter-none!" +
+            "relative block resize-y scrollbar-none overflow-auto bg-transparent! px-0 font-mono leading-6 whitespace-pre! [tab-size:4] backdrop-filter-none!" +
             (hasHighlight
               ? " caret-field-foreground selection:text-field-foreground! text-transparent! forced-colors:text-[CanvasText]!"
               : "")
