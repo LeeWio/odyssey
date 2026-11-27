@@ -25,7 +25,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const document = prepareArticleReading(result.article.content, result.article.contentType);
   return (
     <ArticlePageClient
-      initialArticle={{ ...result.article, content: null, translations: undefined }}
+      initialArticle={{ ...result.article, content: null }}
       outline={
         document?.headings.length ? { label: t("onThisPage"), items: document.headings } : null
       }

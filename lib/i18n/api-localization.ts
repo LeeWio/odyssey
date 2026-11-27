@@ -2,15 +2,8 @@ import { resolveAppLocale, type AppLocale } from "@/i18n/locale";
 
 type JsonObject = Record<string, unknown>;
 
-const LOCALIZED_FIELDS = [
-  "name",
-  "description",
-  "title",
-  "summary",
-  "content",
-  "autoSummary",
-  "toc",
-];
+// Taxonomy labels can follow the interface language. Article fields are author-owned.
+const LOCALIZED_FIELDS = ["name", "description"];
 
 function localeCandidates(locale: string): string[] {
   const normalized = locale.toLowerCase();

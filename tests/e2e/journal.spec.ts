@@ -88,7 +88,11 @@ test("retired blog links permanently redirect to the journal with their filters"
   let parameters: URLSearchParams | undefined;
   await page.route(endpoint, (route) => {
     parameters = new URL(route.request().url()).searchParams;
-    return route.fulfill({ json: result([article(1, "Migrated article")], 1, 24) });
+    const original = {
+      ...article(1, "Migrated article"),
+      translations: { en: { title: "Old translated title" } },
+    };
+    return route.fulfill({ json: result([original], 1, 24) });
   });
   const response = await page.request.get("/blog", { maxRedirects: 0 });
   expect(response.status()).toBe(308);

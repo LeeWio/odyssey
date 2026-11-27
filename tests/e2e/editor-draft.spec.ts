@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { mobileArticle } from "./fixtures/articles";
 
 const origin = "/test/rich-text?modal=1&postId=new";
 const draftPath = "/api/v1/admin/posts/editor-drafts/new";
@@ -100,13 +101,21 @@ test("preserves local edits and resolves a reviewed server revision conflict", a
     type: "doc",
     content: [{ type: "paragraph", content: [{ type: "text", text }] }],
   });
+  const translations = {
+    en: { title: "Old translated title", content: JSON.stringify(doc("Old translated body")) },
+  };
   let snapshot = {
     content: doc(first),
-    postData: { title: "Article", content: JSON.stringify(doc(first)) },
+    postData: {
+      title: "Article",
+      content: JSON.stringify(doc(first)),
+      translations,
+    },
     revision: "revision-first",
     savedAt: "2026-11-19T11:00:00Z",
   };
   const revisions: string[] = [];
+  let published: Record<string, unknown> | null = null;
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
     localStorage.setItem(
@@ -125,6 +134,11 @@ test("preserves local edits and resolves a reviewed server revision conflict", a
     const { pathname } = new URL(request.url());
     const fulfill = (data: unknown) => route.fulfill({ json: { code: 200, message: "OK", data } });
     if (pathname === "/api/v1/user/me") return fulfill({ id: 1, username: "writer" });
+    if (pathname === "/api/v1/admin/posts" && request.method() === "POST") {
+      const body = request.postDataJSON();
+      published = body;
+      return fulfill({ ...mobileArticle, ...body });
+    }
     if (pathname !== draftPath) return route.fallback();
     if (request.method() === "GET") return fulfill(snapshot);
     const { revision, ...fields } = request.postDataJSON();
@@ -159,16 +173,31 @@ test("preserves local edits and resolves a reviewed server revision conflict", a
   await expect(modal.getByText("Draft saved", { exact: true })).toBeVisible();
   expect(revisions).toEqual(["revision-first", "revision-other-tab"]);
   expect(snapshot.content).toMatchObject(doc(marker));
+  expect(snapshot.postData.translations).toEqual(translations);
 
   await modal.getByRole("button", { name: "Open settings" }).press("Enter");
-  await modal.getByRole("tab", { name: "English" }).click();
+  await expect(modal.getByRole("tablist", { name: "Content language" })).toHaveCount(0);
+  await expect(modal.getByRole("textbox", { name: /^Title/ })).toHaveValue("Article");
   await modal.getByRole("button", { name: "Back to editor" }).press("Enter");
-  await expect(document).not.toContainText(marker);
-  await document.fill("English translation content");
-  await modal.getByRole("button", { name: "Close editor" }).press("Enter");
-  await expect(modal).toBeHidden();
-  expect(snapshot.content).toMatchObject(doc(marker));
-  expect(JSON.stringify(snapshot.postData)).toContain("English translation content");
+  await expect(document).toContainText(marker);
+
   await page.reload();
-  await expect((await openEditor(page)).document).toContainText(marker);
+  const reopened = await openEditor(page);
+  await expect(reopened.document).toContainText(marker);
+  const originalBody = "这篇文章用中文发布。";
+  await reopened.document.fill(originalBody);
+  await reopened.modal.getByRole("button", { name: "Open settings" }).press("Enter");
+  await reopened.modal.getByRole("textbox", { name: /^Title/ }).fill("发布原文");
+  await reopened.modal.getByRole("textbox", { name: "Summary", exact: true }).fill("文章摘要");
+  await reopened.modal.getByRole("textbox", { name: /^Slug/ }).fill("original-article");
+  await reopened.modal.getByRole("button", { name: "Publish", exact: true }).press("Enter");
+  await expect(reopened.modal).toBeHidden();
+  expect(published).toMatchObject({
+    title: "发布原文",
+    summary: "文章摘要",
+    slug: "original-article",
+    status: "PUBLISHED",
+    content: expect.stringContaining(originalBody),
+  });
+  expect(published).not.toHaveProperty("translations");
 });
