@@ -107,6 +107,33 @@ describe("getPublicArticle", () => {
     );
   });
 
+  it("loads a published article when optional translation fields are null", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_BASE_URL", "https://api.example.test");
+    const translations = {
+      en: {
+        locale: "en",
+        title: "English title",
+        summary: null,
+        content: null,
+        autoSummary: null,
+        toc: null,
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          response(200, { code: 200, message: "OK", data: { ...article, translations } })
+        )
+    );
+
+    await expect(getPublicArticle("cached essay")).resolves.toMatchObject({
+      status: "ok",
+      article: { title: "English title", summary: article.summary, content: article.content },
+    });
+  });
+
   it("distinguishes a missing article from a failed request", async () => {
     vi.stubEnv("NEXT_PUBLIC_API_BASE_URL", "https://api.example.test");
     const fetchMock = vi
