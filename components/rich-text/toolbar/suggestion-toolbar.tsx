@@ -18,6 +18,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { userApi, type UserMentionResponse } from "@/lib/features/user";
 import { useAppDispatch } from "@/lib/hooks";
 import { OPEN_YOUTUBE_DIALOG_EVENT } from "../media-insert-dialog";
+import { HIGHLIGHTED_CODE_BLOCK } from "../code-block/code-block-schema";
 
 const slashPluginKey = new PluginKey<{ active: boolean }>("slash-command-menu");
 const mentionPluginKey = new PluginKey<{ active: boolean }>("mention-menu");
@@ -131,6 +132,22 @@ const SLASH_COMMANDS: SlashCommandItem[] = [
     id: "code-block",
     keywords: ["code", "developer", "pre"],
     title: "Code block",
+  },
+  {
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertContent({ type: HIGHLIGHTED_CODE_BLOCK })
+        .run();
+    },
+    description: "Group syntax-highlighted code snippets",
+    group: "blocks",
+    icon: icon("gravity-ui:code-trunk"),
+    id: "highlighted-code-block",
+    keywords: ["code", "syntax", "snippet"],
+    title: "Highlighted code block",
   },
   {
     command: ({ editor, range }) => {

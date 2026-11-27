@@ -240,6 +240,25 @@ const fixtures = [
       content: [{ type: "text", text: "const answer = 42;" }],
     },
   ]),
+  entranceArticle("highlighted-code", [
+    {
+      type: "highlightedCodeBlock",
+      attrs: {
+        snippets: [
+          {
+            name: "Basic",
+            language: "typescript",
+            code: "export const answer: number = 42;\n\n  console.log(answer);\n",
+          },
+          {
+            name: "example.py",
+            language: "python",
+            code: `message = "${"A long line ".repeat(18)}"\nprint(message)\n`,
+          },
+        ],
+      },
+    },
+  ]),
 ];
 
 export const articles = new Map(fixtures.map((fixture) => [fixture.slug, fixture]));

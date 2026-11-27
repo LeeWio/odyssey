@@ -1,6 +1,7 @@
 "use client";
 
 import { ScrollShadow } from "@heroui/react";
+import { HIGHLIGHTED_CODE_BLOCK } from "../code-block/code-block-schema";
 import { RichTextEditor, useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import { Icon } from "@iconify/react";
 import { EmojiToolbarPicker } from "./emoji-picker";
@@ -88,6 +89,18 @@ export function FixedToolbar() {
           <RichTextEditor.ToggleButton command="codeBlock" tooltip="Code Block">
             <Icon icon="gravity-ui:curly-brackets" />
           </RichTextEditor.ToggleButton>
+          <RichTextEditor.CommandButton
+            aria-label="Insert highlighted code block"
+            tooltip="Highlighted code block"
+            isDisabled={(currentEditor) =>
+              !currentEditor.can().insertContent({ type: HIGHLIGHTED_CODE_BLOCK })
+            }
+            onCommand={(currentEditor) =>
+              currentEditor.chain().focus().insertContent({ type: HIGHLIGHTED_CODE_BLOCK }).run()
+            }
+          >
+            <Icon icon="gravity-ui:code-trunk" />
+          </RichTextEditor.CommandButton>
           <CodeLanguageSelector />
 
           <MathInsertPopover />

@@ -1,6 +1,7 @@
 import { TableKit } from "@tiptap/extension-table";
 import { BulletList, ListItem, OrderedList, TaskItem, TaskList } from "@tiptap/extension-list";
 import StarterKit from "@tiptap/starter-kit";
+import { HighlightedCodeBlockSchema } from "../code-block/code-block-schema";
 import { Heading } from "./heading";
 import { ImageSchema } from "./Image/image-schema";
 import { ImageUploadSchema } from "./ImageUpload/image-upload-schema";
@@ -31,6 +32,7 @@ export function createDocumentStarterKit() {
 
 export function createDocumentExtensions() {
   return [
+    HighlightedCodeBlockSchema,
     Details,
     DetailsSummary,
     DetailsContent,

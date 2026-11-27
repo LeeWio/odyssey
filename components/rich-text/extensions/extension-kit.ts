@@ -17,6 +17,7 @@ import { TaskItem } from "@tiptap/extension-list";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { FindAndReplace } from "@tiptap/extension-find-and-replace";
 import { Markdown } from "@tiptap/markdown";
+import { HighlightedCodeBlock } from "../code-block/code-block-extension";
 
 import { createDocumentExtensions, createDocumentStarterKit } from "./reading-schema";
 import { TaskItemNodeView } from "./task-list/task-item-node-view";
@@ -61,6 +62,7 @@ export function createExtensionKit(options: ExtensionKitOptions = {}) {
 
   // The interactive replacements extend the same node definitions used by SSR.
   const nodeViews: AnyExtension[] = [
+    HighlightedCodeBlock,
     Image,
     ImageUpload,
     Audio,

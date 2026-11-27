@@ -1,6 +1,9 @@
 import { isValidYoutubeUrl } from "@tiptap/extension-youtube";
 import type { JSONContent } from "@tiptap/react";
 
+import { readCodeBlockChrome } from "@/components/rich-text/code-block/code-block-chrome";
+import { HIGHLIGHTED_CODE_BLOCK } from "@/components/rich-text/code-block/code-block-schema";
+import { readCodeSnippets } from "@/components/rich-text/code-block/code-snippets";
 import { clampHeadingLevel } from "@/components/rich-text/extensions/heading";
 
 import { normalizeLinkUrl } from "./link-utils";
@@ -139,6 +142,10 @@ export function normalizeRichTextDocument(content: JSONContent): JSONContent {
     const normalizedContent = node.content?.map(normalizeNode);
     const normalizedMarks = normalizeMarks(node.marks);
     const attrs = node.attrs ? { ...node.attrs } : undefined;
+
+    if (node.type === HIGHLIGHTED_CODE_BLOCK && attrs?.chrome !== undefined) {
+      attrs.chrome = readCodeBlockChrome(attrs.chrome, readCodeSnippets(attrs.snippets).length);
+    }
 
     if (anchor) {
       const level = clampHeadingLevel(Number(attrs?.level));

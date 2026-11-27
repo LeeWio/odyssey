@@ -3,6 +3,9 @@ import type { JSONContent } from "@tiptap/core";
 import { Typography } from "@heroui/react";
 import katex from "katex";
 import type { CSSProperties, ReactNode } from "react";
+import { CodePreview } from "@/components/rich-text/code-block/code-preview";
+import { readCodeSnippets } from "@/components/rich-text/code-block/code-snippets";
+import { ReadingCodeWidget } from "@/components/rich-text/code-block/reading-code-widget";
 import { createReadingSchema } from "@/components/rich-text/extensions/reading-schema";
 import {
   getColumnGridTemplate,
@@ -28,6 +31,33 @@ import { ReadingCode } from "./reading-code";
 
 function textContent(node: JSONContent): string {
   return node.text ?? node.content?.map(textContent).join("") ?? "";
+}
+
+async function HighlightedReadingCode({
+  chrome,
+  frame,
+  snippets,
+  showLineNumbers,
+}: {
+  chrome: unknown;
+  frame: unknown;
+  snippets: unknown;
+  showLineNumbers: boolean;
+}) {
+  const { highlightCode } = await import("@/components/rich-text/code-block/highlight-code");
+  const panels = await Promise.all(
+    readCodeSnippets(snippets).map(async (snippet) => ({
+      ...snippet,
+      panel: (
+        <CodePreview
+          code={snippet.code}
+          tokens={await highlightCode(snippet)}
+          showLineNumbers={showLineNumbers}
+        />
+      ),
+    }))
+  );
+  return <ReadingCodeWidget chrome={chrome} frame={frame} snippets={panels} />;
 }
 
 function describeDocument(document: JSONContent) {
@@ -175,6 +205,14 @@ export function ArticleReadingDocument({
         },
         codeBlock: ({ node }) => (
           <ReadingCode code={node.textContent} language={node.attrs.language} />
+        ),
+        highlightedCodeBlock: ({ node }) => (
+          <HighlightedReadingCode
+            chrome={node.attrs.chrome}
+            frame={node.attrs.frame}
+            snippets={node.attrs.snippets}
+            showLineNumbers={node.attrs.showLineNumbers !== false}
+          />
         ),
         attachment: ({ node }) =>
           isSafeLinkUrl(node.attrs.src) ? (
