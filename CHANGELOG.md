@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.268.1](https://github.com/LeeWio/odyssey/compare/v1.268.0...v1.268.1) (2026-11-27)
+
+
+### Bug Fixes
+
+* **posts:** accept null translation fields in responses ([#190](https://github.com/LeeWio/odyssey/issues/190)) ([3efa78a](https://github.com/LeeWio/odyssey/commit/3efa78a8ec535097f8f5afbac9052aa94603ab51))
+
 ## [1.268.0](https://github.com/LeeWio/odyssey/compare/v1.267.0...v1.268.0) (2026-11-27)
 
 
