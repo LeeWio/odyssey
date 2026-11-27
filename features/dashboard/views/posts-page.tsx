@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import type { Selection } from "react-aria-components";
 
 import {
+  Archive,
   ArrowDownToLine,
   BarsDescendingAlignCenter,
   CirclePlus,
@@ -18,14 +19,18 @@ import {
   TrashBin,
 } from "@gravity-ui/icons";
 import {
+  Alert,
   AlertDialog,
   Avatar,
   Button,
   Chip,
   Dropdown,
+  Input,
   Label,
+  Modal,
   Separator,
   Spinner,
+  TextField,
   Tooltip,
 } from "@heroui/react";
 import { ActionBar, DataGrid, EmptyState } from "@heroui-pro/react";
@@ -33,7 +38,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { NEW_RICH_TEXT_DRAFT_ID } from "@/components/rich-text/utils/editor-draft";
+import { getApiErrorMessage } from "@/lib/api/errors";
+import { useArchivePostMutation } from "@/lib/features/openapi";
 import {
+  postApi,
   type PostResponse,
   type PostStatus,
   useDeletePostMutation,
@@ -89,6 +97,10 @@ const COLUMN_OPTIONS = [
   { id: "actions", label: "Row actions" },
 ] as const;
 
+function canDeletePost(status: PostStatus) {
+  return status === "DRAFT" || status === "REJECTED" || status === "ARCHIVED";
+}
+
 export function PostsPage() {
   const t = useTranslations("Dashboard");
   const locale = useLocale();
@@ -112,6 +124,10 @@ export function PostsPage() {
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation();
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<PostResponse | null>(null);
+  const [archivePost, { isLoading: isArchiving }] = useArchivePostMutation();
+  const [postToArchive, setPostToArchive] = useState<PostResponse | null>(null);
+  const [archiveReason, setArchiveReason] = useState("");
+  const [archiveError, setArchiveError] = useState<string | null>(null);
   const statusOptions = useMemo(
     () =>
       STATUS_OPTIONS.map((option) => ({
@@ -241,11 +257,67 @@ export function PostsPage() {
     [filteredPosts, selectedKeys]
   );
   const selectedCount = selectedIds.size;
+  const firstSelectedPost = filteredPosts.find((post) => selectedIds.has(String(post.id)));
+
+  const openArchiveDialog = useCallback((post: PostResponse) => {
+    setPostToArchive(post);
+    setArchiveReason("");
+    setArchiveError(null);
+  }, []);
+
+  async function confirmArchive() {
+    const reason = archiveReason.trim();
+    if (!postToArchive || !reason || isArchiving) return;
+    const { id } = postToArchive;
+    setArchiveError(null);
+    try {
+      await archivePost({ id, body: { reason } }).unwrap();
+      setPosts((current) =>
+        current.map((post) => (post.id === id ? { ...post, status: "ARCHIVED" } : post))
+      );
+      dispatch(
+        postApi.util.invalidateTags([
+          { type: "Post", id },
+          { type: "Post", id: "LIST" },
+          { type: "Post", id: "DIGEST" },
+        ])
+      );
+      setPostToArchive(null);
+    } catch (error) {
+      setArchiveError(getApiErrorMessage(error, t("posts.archiveFailed")));
+    }
+  }
 
   const columns = useMemo<DataGridColumn<PostResponse>[]>(() => {
     const visibleColumnSet =
       visibleColumns === "all" ? new Set<string>(ALL_COLUMN_IDS) : (visibleColumns as Set<string>);
     const allColumns: DataGridColumn<PostResponse>[] = [
+      {
+        align: "end",
+        allowsResizing: false,
+        cell: (post) => (
+          <PostRowMenu
+            portalContainer={portalContainer}
+            onArchive={post.status === "PUBLISHED" ? () => openArchiveDialog(post) : undefined}
+            onCopy={() => void navigator.clipboard.writeText(post.slug)}
+            onDelete={
+              canDeletePost(post.status)
+                ? () => {
+                    setPostToDelete(post);
+                    setIsDeleteAlertOpen(true);
+                  }
+                : undefined
+            }
+            onEdit={() => openEditor(post)}
+            t={t}
+          />
+        ),
+        header: "",
+        id: "actions",
+        minWidth: 48,
+        pinned: "start",
+        width: 48,
+      },
       {
         accessorKey: "title",
         allowsResizing: true,
@@ -413,31 +485,10 @@ export function PostsPage() {
         minWidth: 100,
         width: 108,
       },
-      {
-        align: "end",
-        allowsResizing: false,
-        cell: (post) => (
-          <PostRowMenu
-            portalContainer={portalContainer}
-            onCopy={() => void navigator.clipboard.writeText(post.slug)}
-            onDelete={() => {
-              setPostToDelete(post);
-              setIsDeleteAlertOpen(true);
-            }}
-            onEdit={() => openEditor(post)}
-            t={t}
-          />
-        ),
-        header: "",
-        id: "actions",
-        minWidth: 48,
-        pinned: "end",
-        width: 48,
-      },
     ];
 
     return allColumns.filter((column) => visibleColumnSet.has(column.id));
-  }, [locale, openEditor, portalContainer, statusOptions, t, visibleColumns]);
+  }, [locale, openArchiveDialog, openEditor, portalContainer, statusOptions, t, visibleColumns]);
 
   const exportPosts = (records: readonly PostResponse[]) => {
     downloadCsv("posts.csv", [
@@ -531,7 +582,7 @@ export function PostsPage() {
             aria-label={t("posts.table")}
             className="min-h-0 max-w-full min-w-0 flex-1 [&_.table__column]:sticky [&_.table__column]:top-0 [&_.table__column]:z-[3]"
             columns={columns}
-            contentClassName="w-full min-w-full"
+            contentClassName="w-max min-w-full"
             data={filteredPosts}
             getRowId={(post) => String(post.id)}
             headingHeight={40}
@@ -606,12 +657,12 @@ export function PostsPage() {
           </Button>
           <Button
             aria-label={t("common.delete")}
+            isDisabled={!firstSelectedPost || !canDeletePost(firstSelectedPost.status)}
             size="sm"
             variant="danger-soft"
             onPress={() => {
-              const first = filteredPosts.find((post) => selectedIds.has(String(post.id)));
-              if (!first) return;
-              setPostToDelete(first);
+              if (!firstSelectedPost || !canDeletePost(firstSelectedPost.status)) return;
+              setPostToDelete(firstSelectedPost);
               setIsDeleteAlertOpen(true);
             }}
           >
@@ -632,6 +683,61 @@ export function PostsPage() {
           </Button>
         </ActionBar.Suffix>
       </ActionBar>
+
+      <Modal>
+        <Modal.Backdrop
+          UNSTABLE_portalContainer={portalContainer || undefined}
+          isDismissable={!isArchiving}
+          isKeyboardDismissDisabled={isArchiving}
+          isOpen={postToArchive !== null}
+          onOpenChange={(open) => {
+            if (!open && !isArchiving) setPostToArchive(null);
+          }}
+        >
+          <Modal.Container>
+            <Modal.Dialog className="sm:max-w-md">
+              <Modal.CloseTrigger isDisabled={isArchiving} />
+              <Modal.Header>
+                <Modal.Heading>{t("posts.archiveArticle")}</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body className="flex flex-col gap-4">
+                <p className="text-sm">
+                  {t("posts.archiveArticleDescription", { title: postToArchive?.title ?? "" })}
+                </p>
+                <TextField
+                  isDisabled={isArchiving}
+                  isRequired
+                  value={archiveReason}
+                  onChange={setArchiveReason}
+                >
+                  <Label>{t("posts.archiveReason")}</Label>
+                  <Input maxLength={1000} />
+                </TextField>
+                {archiveError ? (
+                  <Alert role="alert" status="danger">
+                    <Alert.Content>
+                      <Alert.Description>{archiveError}</Alert.Description>
+                    </Alert.Content>
+                  </Alert>
+                ) : null}
+              </Modal.Body>
+              <Modal.Footer>
+                <Button isDisabled={isArchiving} slot="close" size="sm" variant="tertiary">
+                  {t("common.cancel")}
+                </Button>
+                <Button
+                  isDisabled={!archiveReason.trim()}
+                  isPending={isArchiving}
+                  size="sm"
+                  onPress={() => void confirmArchive()}
+                >
+                  {t("posts.archiveArticle")}
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
 
       <AlertDialog>
         <AlertDialog.Backdrop
@@ -770,14 +876,16 @@ function FilterMenu({
 }
 
 function PostRowMenu({
+  onArchive,
   onCopy,
   onDelete,
   onEdit,
   portalContainer,
   t,
 }: {
+  onArchive?: () => void;
   onCopy: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
   onEdit: () => void;
   portalContainer: HTMLElement | null;
   t: ReturnType<typeof useTranslations>;
@@ -801,16 +909,24 @@ function PostRowMenu({
             <Copy className="size-4" />
             <Label>{t("posts.copySlug")}</Label>
           </Dropdown.Item>
-          <Separator />
-          <Dropdown.Item
-            id="delete"
-            textValue={t("common.delete")}
-            variant="danger"
-            onAction={onDelete}
-          >
-            <TrashBin className="size-4" />
-            <Label>{t("common.delete")}</Label>
-          </Dropdown.Item>
+          {onArchive || onDelete ? <Separator /> : null}
+          {onArchive ? (
+            <Dropdown.Item id="archive" textValue={t("posts.archiveArticle")} onAction={onArchive}>
+              <Archive className="size-4" />
+              <Label>{t("posts.archiveArticle")}</Label>
+            </Dropdown.Item>
+          ) : null}
+          {onDelete ? (
+            <Dropdown.Item
+              id="delete"
+              textValue={t("common.delete")}
+              variant="danger"
+              onAction={onDelete}
+            >
+              <TrashBin className="size-4" />
+              <Label>{t("common.delete")}</Label>
+            </Dropdown.Item>
+          ) : null}
         </Dropdown.Menu>
       </Dropdown.Popover>
     </Dropdown>
