@@ -4,6 +4,7 @@ import { Button } from "@heroui/react";
 import type { Editor, JSONContent } from "@tiptap/react";
 import { useMemo, useRef, useState } from "react";
 
+import { HIGHLIGHTED_CODE_BLOCK } from "@/components/rich-text/code-block/code-block-schema";
 import { RichText } from "@/components/rich-text/rich-text";
 import { RichTextModalTestClient } from "./rich-text-modal-test-client";
 import { RICH_TEXT_DOCUMENT_FIXTURE } from "@/components/rich-text/testing/rich-text-document.fixture";
@@ -19,6 +20,64 @@ import {
 } from "@/components/rich-text/utils/editor-draft";
 
 const TEST_DRAFT_ID = "browser-smoke";
+const SEGMENT_PREVIEW_SNIPPETS = [
+  {
+    name: "Basic",
+    language: "typescript",
+    code: 'const greeting = "Hello, World!";\nconsole.log(greeting);',
+  },
+  {
+    name: "example.py",
+    language: "python",
+    code: [
+      'greeting = "Hello, World!"',
+      "",
+      "def greet(name: str) -> None:",
+      "    print(greeting)",
+      '    print(f"Welcome, {name}!")',
+      "",
+      'for name in ("Ada", "Grace", "Linus"):',
+      "    greet(name)",
+    ].join("\n"),
+  },
+];
+const WINDOW_PREVIEW_SNIPPET = {
+  name: "counter.tsx",
+  language: "tsx",
+  code: [
+    'import { useState } from "react";',
+    "",
+    "export function Counter() {",
+    "  const [count, setCount] = useState(0);",
+    "",
+    "  return <button onClick={() => setCount(count + 1)}>{count}</button>;",
+    "}",
+  ].join("\n"),
+};
+
+const HIGHLIGHTED_CODE_DOCUMENT: JSONContent = {
+  type: "doc",
+  content: [
+    { type: "paragraph" },
+    {
+      type: HIGHLIGHTED_CODE_BLOCK,
+      attrs: { snippets: SEGMENT_PREVIEW_SNIPPETS },
+    },
+    {
+      type: HIGHLIGHTED_CODE_BLOCK,
+      attrs: { frame: "solid", snippets: SEGMENT_PREVIEW_SNIPPETS },
+    },
+    {
+      type: HIGHLIGHTED_CODE_BLOCK,
+      attrs: { chrome: "windows", snippets: [WINDOW_PREVIEW_SNIPPET] },
+    },
+    {
+      type: HIGHLIGHTED_CODE_BLOCK,
+      attrs: { chrome: "none", snippets: [WINDOW_PREVIEW_SNIPPET] },
+    },
+    { type: "paragraph" },
+  ],
+};
 
 const OUTLINE_DOCUMENT: JSONContent = {
   type: "doc",
@@ -39,19 +98,23 @@ export default function RichTextTestClient({
   typography = false,
   outline = false,
   modal = false,
+  highlightedCode = false,
   postId,
 }: {
   typography?: boolean;
   outline?: boolean;
   modal?: boolean;
+  highlightedCode?: boolean;
   postId?: string;
 }) {
+  const draftId = highlightedCode ? "highlighted-code-preview" : TEST_DRAFT_ID;
   const initialContent = useMemo<JSONContent>(
     () =>
       typography
         ? RICH_TEXT_TYPOGRAPHY_FIXTURE
-        : (readRichTextDraft(TEST_DRAFT_ID)?.content ?? RICH_TEXT_DOCUMENT_FIXTURE),
-    [typography]
+        : (readRichTextDraft(draftId)?.content ??
+          (highlightedCode ? HIGHLIGHTED_CODE_DOCUMENT : RICH_TEXT_DOCUMENT_FIXTURE)),
+    [draftId, highlightedCode, typography]
   );
   const [reading, setReading] = useState(false);
   const [previewContent, setPreviewContent] = useState(initialContent);
@@ -59,12 +122,13 @@ export default function RichTextTestClient({
   const [status, setStatus] = useState("Loading editor");
   const [schemaNodes, setSchemaNodes] = useState("");
   const articleEndRef = useRef<HTMLDivElement>(null);
+  const hasReadingPreview = typography || highlightedCode;
 
   const saveDraft = () => {
     if (!editor) return;
 
-    const saved = saveRichTextDraft(TEST_DRAFT_ID, editor.getJSON(), {
-      slug: "browser-smoke",
+    const saved = saveRichTextDraft(draftId, editor.getJSON(), {
+      slug: draftId,
       status: "DRAFT",
       title: "Browser smoke test",
     });
@@ -72,7 +136,7 @@ export default function RichTextTestClient({
   };
 
   const restoreDraft = () => {
-    const draft = readRichTextDraft(TEST_DRAFT_ID);
+    const draft = readRichTextDraft(draftId);
 
     if (!editor || !draft) {
       setStatus("No draft found");
@@ -124,7 +188,7 @@ export default function RichTextTestClient({
   return (
     <main className="bg-background text-foreground mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 p-4 sm:p-6">
       <header className="flex flex-wrap items-center gap-2">
-        {typography ? (
+        {hasReadingPreview ? (
           <Button
             data-testid="toggle-reading"
             size="sm"
@@ -159,7 +223,7 @@ export default function RichTextTestClient({
           size="sm"
           variant="secondary"
           onPress={() => {
-            clearRichTextDraft(TEST_DRAFT_ID);
+            clearRichTextDraft(draftId);
             setStatus("Draft cleared");
           }}
         >
@@ -180,7 +244,7 @@ export default function RichTextTestClient({
           />
         ) : (
           <RichText
-            content={typography ? previewContent : initialContent}
+            content={hasReadingPreview ? previewContent : initialContent}
             onContentError={(error) => setStatus(`Content error: ${error.message}`)}
             onReady={(readyEditor) => {
               setEditor(readyEditor);

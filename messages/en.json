@@ -424,6 +424,35 @@
     "codeCopied": "Code copied.",
     "codeCopyFailed": "Unable to copy code."
   },
+  "CodeBlock": {
+    "snippets": "Code snippets",
+    "untitled": "Untitled",
+    "addSnippet": "Add code snippet",
+    "snippetName": "Snippet name",
+    "snippetNamePlaceholder": "e.g. Basic or example.ts",
+    "confirmAdd": "Add",
+    "save": "Save",
+    "cancel": "Cancel",
+    "removeSnippet": "Remove snippet",
+    "renameSnippet": "Rename snippet",
+    "menu": "Code block settings",
+    "showLineNumbers": "Show line numbers",
+    "chrome": "Code block appearance",
+    "chromeOptions": {
+      "segment": "Segment",
+      "windows": "Windows",
+      "none": "None"
+    },
+    "frame": "Frame",
+    "frameOptions": {
+      "inset": "Inset",
+      "solid": "Solid"
+    },
+    "source": "Source code",
+    "placeholder": "Paste or type code",
+    "plainText": "Plain text",
+    "language": "Language"
+  },
   "Library": {
     "signInTitle": "Your reading library",
     "signInDescription": "Sign in to keep your place, revisit saved articles, and manage your reading history.",

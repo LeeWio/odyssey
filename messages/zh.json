@@ -424,6 +424,35 @@
     "codeCopied": "代码已复制。",
     "codeCopyFailed": "无法复制代码。"
   },
+  "CodeBlock": {
+    "snippets": "代码片段",
+    "untitled": "未命名",
+    "addSnippet": "添加代码片段",
+    "snippetName": "片段名称",
+    "snippetNamePlaceholder": "例如 Basic 或 example.ts",
+    "confirmAdd": "添加",
+    "save": "保存",
+    "cancel": "取消",
+    "removeSnippet": "移除片段",
+    "renameSnippet": "重命名片段",
+    "menu": "代码块设置",
+    "showLineNumbers": "显示行号",
+    "chrome": "代码块外观",
+    "chromeOptions": {
+      "segment": "分段",
+      "windows": "窗口",
+      "none": "无"
+    },
+    "frame": "边框样式",
+    "frameOptions": {
+      "inset": "内嵌",
+      "solid": "贴边"
+    },
+    "source": "源代码",
+    "placeholder": "粘贴或输入代码",
+    "plainText": "纯文本",
+    "language": "语言"
+  },
   "Library": {
     "signInTitle": "你的阅读书架",
     "signInDescription": "登录后可以记住阅读位置、回看保存的文章，并管理阅读历史。",

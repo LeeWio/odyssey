@@ -4,7 +4,13 @@ import RichTextTestClient from "./rich-text-test-client";
 export default async function RichTextTestPage({
   searchParams,
 }: {
-  searchParams: Promise<{ typography?: string; outline?: string; modal?: string; postId?: string }>;
+  searchParams: Promise<{
+    typography?: string;
+    outline?: string;
+    modal?: string;
+    postId?: string;
+    preview?: string;
+  }>;
 }) {
   if (process.env.NODE_ENV !== "development" && process.env.ENABLE_RICH_TEXT_TEST_ROUTE !== "1") {
     notFound();
@@ -16,6 +22,7 @@ export default async function RichTextTestPage({
       typography={params.typography === "1"}
       outline={params.outline === "1"}
       modal={params.modal === "1"}
+      highlightedCode={params.preview === "highlighted-code"}
       postId={
         params.postId === "new"
           ? "new"
