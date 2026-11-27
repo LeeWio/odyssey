@@ -5,6 +5,7 @@ export default async function RichTextTestPage({
   searchParams,
 }: {
   searchParams: Promise<{
+    table?: string;
     typography?: string;
     outline?: string;
     modal?: string;
@@ -19,6 +20,7 @@ export default async function RichTextTestPage({
   const params = await searchParams;
   return (
     <RichTextTestClient
+      table={params.table === "1"}
       typography={params.typography === "1"}
       outline={params.outline === "1"}
       modal={params.modal === "1"}

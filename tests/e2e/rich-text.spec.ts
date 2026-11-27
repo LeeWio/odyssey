@@ -267,22 +267,24 @@ test("edits table structure from a single cell by keyboard and pointer", async (
   const editor = page.locator(editorSelector);
   const table = editor.locator("table");
   await table.getByRole("cell").first().click();
-  const trigger = page.getByRole("button", { name: "Table options" });
+  const trigger = page.getByRole("button", { name: "Row actions", exact: true });
   await expect(trigger).toBeVisible();
   await page.keyboard.press("Alt+F10");
   await expect(trigger).toBeFocused();
   await page.keyboard.press("Enter");
-  const menu = page.getByRole("menu", { name: "Table options" });
+  const menu = page.getByRole("menu", { name: "Row actions", exact: true });
   await expect(menu).toBeVisible();
   const rowCount = await table.getByRole("row").count();
-  await menu.getByRole("menuitem", { name: "Add row below" }).click();
+  await menu.getByRole("menuitem", { name: "Insert row below" }).press("Enter");
   await expect(table.getByRole("row")).toHaveCount(rowCount + 1);
 
   await table.getByRole("cell").first().click();
-  await trigger.click();
-  await menu.getByRole("menuitem", { name: "Select column" }).click();
+  await page.getByRole("button", { name: "Column actions", exact: true }).click();
+  await expect(page.getByRole("menu", { name: "Column actions", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(editor).toBeFocused();
   await expect(table.locator(".selectedCell")).toHaveCount(rowCount + 1);
-  await page.keyboard.press("Control+z");
+  await page.keyboard.press("ControlOrMeta+z");
   await expect(table.getByRole("row")).toHaveCount(rowCount);
 });
 

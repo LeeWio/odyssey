@@ -31,6 +31,17 @@ for (const mode of ["light", "dark"] as const) {
       }, RICH_TEXT_DOCUMENT_FIXTURE);
       await expect(page.locator("html")).toHaveAttribute("data-theme", `glass-${mode}`);
 
+      // React Aria rewrites the popover's inline top/left when its anchor or viewport changes.
+      // Keep the pixel probe over the editor throughout both screenshots, including those updates.
+      await page.addStyleTag({
+        content: `
+        [data-glass-probe-menu] {
+          position: absolute !important;
+          top: var(--glass-probe-top, 0px) !important;
+          left: var(--glass-probe-left, 0px) !important;
+        }
+      `,
+      });
       for (const kind of ["text", "link", "image", "math", "columns", "table"]) {
         await test.step(kind, async () => {
           await editor.evaluate((element, kind) => {
@@ -68,27 +79,32 @@ for (const mode of ["light", "dark"] as const) {
             editor.commands.scrollIntoView();
           }, kind);
 
+          if (kind === "table") await page.getByRole("button", { name: "Cell actions" }).click();
           const menus = page.locator(".rich-text-editor__bubble-menu");
           const menu =
-            kind === "link"
-              ? menus.filter({ has: page.getByRole("button", { name: /^Edit link:/ }) })
-              : menus.filter({
-                  has: page.getByRole("toolbar", {
-                    name: {
-                      text: "Selection formatting toolbar",
-                      image: "Image actions",
-                      math: "Formula actions",
-                      columns: "Column layout actions",
-                      table: "Table actions",
-                    }[kind],
-                    exact: true,
-                  }),
-                });
+            kind === "table"
+              ? menus.filter({ has: page.getByRole("menu", { name: "Cell actions", exact: true }) })
+              : kind === "link"
+                ? menus.filter({ has: page.getByRole("button", { name: /^Edit link:/ }) })
+                : menus.filter({
+                    has: page.getByRole("toolbar", {
+                      name: {
+                        text: "Selection formatting toolbar",
+                        image: "Image actions",
+                        math: "Formula actions",
+                        columns: "Column layout actions",
+                      }[kind],
+                      exact: true,
+                    }),
+                  });
           await expect(menu).toBeVisible();
+          // A dropdown starts scaled around its trigger. Sampling its opening frame would
+          // capture bare stripes when screenshot() finishes that animation at full size.
+          await expect(menu).not.toHaveAttribute("data-entering", "true");
           await expect(menu).toHaveCSS("backdrop-filter", `blur(${mode === "dark" ? 36 : 20}px)`);
           expect(
-            await menu.evaluate(
-              (element) => element.parentElement?.matches("[data-slot='modal-container']") ?? false
+            await menu.evaluate((element) =>
+              Boolean(element.closest("[data-slot='modal-container']"))
             )
           ).toBe(modal);
 
@@ -97,27 +113,45 @@ for (const mode of ["light", "dark"] as const) {
             const menu = element as HTMLElement;
             const content = document.querySelector(".rich-text-editor__content")!;
             const contentRect = content.getBoundingClientRect();
-            menu.style.setProperty("position", "absolute", "important");
-            const parentRect = (menu.offsetParent as HTMLElement).getBoundingClientRect();
+            menu.dataset.glassProbeMenu = "";
+            const origin = menu.getBoundingClientRect();
             const left = contentRect.left + 16;
             const top = contentRect.top + 16;
-            menu.style.setProperty("left", `${left - parentRect.left}px`, "important");
-            menu.style.setProperty("top", `${top - parentRect.top}px`, "important");
+            menu.style.setProperty("--glass-probe-left", `${left - origin.left}px`);
+            menu.style.setProperty("--glass-probe-top", `${top - origin.top}px`);
             const backdrop = document.createElement("div");
             backdrop.dataset.testid = "blur-probe";
             Object.assign(backdrop.style, {
               position: "absolute",
+              top: "0px",
+              left: "0px",
               width: `${menu.offsetWidth}px`,
               height: `${menu.offsetHeight}px`,
               background: "repeating-linear-gradient(90deg, black 0 4px, white 4px 8px)",
               pointerEvents: "none",
             });
             content.append(backdrop);
-            const probeParent = (backdrop.offsetParent as HTMLElement).getBoundingClientRect();
-            backdrop.style.left = `${left - probeParent.left}px`;
-            backdrop.style.top = `${top - probeParent.top}px`;
+            const probeOrigin = backdrop.getBoundingClientRect();
+            backdrop.style.left = `${left - probeOrigin.left}px`;
+            backdrop.style.top = `${top - probeOrigin.top}px`;
           });
-          await menu.scrollIntoViewIfNeeded();
+          await expect
+            .poll(
+              () =>
+                menu.evaluate((element) => {
+                  const menuRect = element.getBoundingClientRect();
+                  const probeRect = document
+                    .querySelector('[data-testid="blur-probe"]')!
+                    .getBoundingClientRect();
+                  return Math.max(
+                    Math.abs(menuRect.left - probeRect.left),
+                    Math.abs(menuRect.top - probeRect.top)
+                  );
+                }),
+              { message: `${kind} menu must cover the editor's stripe probe` }
+            )
+            .toBeLessThan(1);
+
           const clip = (await menu.boundingBox())!;
           const blurred = await page.screenshot({ clip, animations: "disabled" });
           await menu.evaluate((element) => {
@@ -166,7 +200,8 @@ for (const mode of ["light", "dark"] as const) {
           );
           await menu.evaluate((element) => {
             const menu = element as HTMLElement;
-            for (const property of ["backdrop-filter", "position", "top", "left"]) {
+            delete menu.dataset.glassProbeMenu;
+            for (const property of ["backdrop-filter", "--glass-probe-top", "--glass-probe-left"]) {
               menu.style.removeProperty(property);
             }
           });

@@ -56,26 +56,12 @@ export const useTextMenuStates = () => {
   });
 
   const shouldShow = useCallback(
-    ({ view, from }: ShouldShowProps) => {
+    ({ view }: ShouldShowProps) => {
       if (!editor || isReadOnly || !view || view.isDestroyed || editor.view.dragging) {
         return false;
       }
 
-      try {
-        const domAtPos = view.domAtPos(from || 0).node as HTMLElement;
-        const nodeDOM = view.nodeDOM(from || 0) as HTMLElement;
-        const node = nodeDOM || domAtPos;
-
-        // Avoid showing text menu when a custom node is already handled by another menu
-        if (node && isCustomNodeSelected(editor, node)) {
-          return false;
-        }
-      } catch {
-        // Safe fallback when ProseMirror's docView is null during unmounting or state updates
-        return false;
-      }
-
-      return isTextSelected({ editor });
+      return isTextSelected({ editor }) && !isCustomNodeSelected(editor);
     },
     [editor, isReadOnly]
   );

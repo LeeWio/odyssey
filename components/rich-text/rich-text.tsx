@@ -107,7 +107,8 @@ export function RichText({
               id={scrollContainerId}
               className={cn(
                 "[&_.ProseMirror-selectednode]:outline-accent/40 min-h-0 flex-1 scrollbar-none overflow-y-auto outline-none focus:outline-none [&_.ProseMirror-selectednode]:rounded-md [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-offset-2 [&_.ProseMirror.resize-cursor]:cursor-col-resize",
-                !isReadOnly && "[&_.ProseMirror]:pl-9!"
+                !isReadOnly &&
+                  "[&_.ProseMirror]:pl-9! [&_.ProseMirror_.tableWrapper]:mx-[18px] [&_.ProseMirror_.tableWrapper]:my-[18px]"
               )}
             />
           </CodeBlockMenuProvider>

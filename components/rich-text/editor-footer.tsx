@@ -34,6 +34,13 @@ const SHORTCUT_GROUPS = [
       { action: "Indent list item", keys: ["Tab"] },
     ],
   },
+  {
+    label: "Tables",
+    shortcuts: [
+      { action: "Cell actions menu", keys: ["Shift", "F10"] },
+      { action: "Focus row and column controls", keys: ["Alt", "F10"] },
+    ],
+  },
 ] as const;
 
 export function EditorFooter() {

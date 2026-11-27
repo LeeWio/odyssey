@@ -1,20 +1,7 @@
 import type { Editor } from "@tiptap/react";
 import { HIGHLIGHTED_CODE_BLOCK } from "../code-block/code-block-schema";
 
-export const isTableGripSelected = (node: HTMLElement | null) => {
-  let container: HTMLElement | null = node;
-
-  while (container && !["TD", "TH"].includes(container.tagName)) {
-    container = container.parentElement;
-  }
-
-  const gripColumn = container?.querySelector?.("a.grip-column.selected");
-  const gripRow = container?.querySelector?.("a.grip-row.selected");
-
-  return !!(gripColumn || gripRow);
-};
-
-export const isCustomNodeSelected = (editor: Editor, node: HTMLElement | null) => {
+export const isCustomNodeSelected = (editor: Editor) => {
   const customNodes = [
     "image",
     "imageUpload",
@@ -33,7 +20,5 @@ export const isCustomNodeSelected = (editor: Editor, node: HTMLElement | null) =
     "detailsContent",
   ];
 
-  const isActive = customNodes.some((type) => editor.isActive(type));
-
-  return isActive || isTableGripSelected(node);
+  return customNodes.some((type) => editor.isActive(type));
 };

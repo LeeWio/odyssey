@@ -15,10 +15,5 @@ export const isTextSelected = ({ editor }: { editor: Editor }) => {
     },
   } = editor;
 
-  // Sometimes check for `empty` is not enough.
-  // Double-clicking an empty paragraph returns a node size of 2.
-  // So we also check for an empty text size.
-  const isEmptyTextBlock = !doc.textBetween(from, to).length && isTextSelection(selection);
-
-  return !empty && !isEmptyTextBlock && editor.isEditable;
+  return isTextSelection(selection) && !empty && !!doc.textBetween(from, to) && editor.isEditable;
 };
