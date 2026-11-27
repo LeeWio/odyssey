@@ -8,6 +8,7 @@ import { HIGHLIGHTED_CODE_BLOCK } from "@/components/rich-text/code-block/code-b
 import { RichText } from "@/components/rich-text/rich-text";
 import { RichTextModalTestClient } from "./rich-text-modal-test-client";
 import { RICH_TEXT_DOCUMENT_FIXTURE } from "@/components/rich-text/testing/rich-text-document.fixture";
+import { RICH_TEXT_TABLE_FIXTURE } from "@/components/rich-text/testing/rich-text-table.fixture";
 import { RICH_TEXT_TYPOGRAPHY_FIXTURE } from "@/components/rich-text/testing/rich-text-typography.fixture";
 import { ArticleActionBar } from "@/features/blog/reader/article-actions";
 import { ArticleBody } from "@/features/blog/reader/article/article-body";
@@ -95,26 +96,36 @@ const OUTLINE_DOCUMENT: JSONContent = {
 };
 
 export default function RichTextTestClient({
+  table = false,
   typography = false,
   outline = false,
   modal = false,
   highlightedCode = false,
   postId,
 }: {
+  table?: boolean;
   typography?: boolean;
   outline?: boolean;
   modal?: boolean;
   highlightedCode?: boolean;
   postId?: string;
 }) {
-  const draftId = highlightedCode ? "highlighted-code-preview" : TEST_DRAFT_ID;
+  const draftId = table
+    ? "browser-table"
+    : highlightedCode
+      ? "highlighted-code-preview"
+      : TEST_DRAFT_ID;
   const initialContent = useMemo<JSONContent>(
     () =>
       typography
         ? RICH_TEXT_TYPOGRAPHY_FIXTURE
         : (readRichTextDraft(draftId)?.content ??
-          (highlightedCode ? HIGHLIGHTED_CODE_DOCUMENT : RICH_TEXT_DOCUMENT_FIXTURE)),
-    [draftId, highlightedCode, typography]
+          (table
+            ? RICH_TEXT_TABLE_FIXTURE
+            : highlightedCode
+              ? HIGHLIGHTED_CODE_DOCUMENT
+              : RICH_TEXT_DOCUMENT_FIXTURE)),
+    [draftId, highlightedCode, table, typography]
   );
   const [reading, setReading] = useState(false);
   const [previewContent, setPreviewContent] = useState(initialContent);
@@ -122,7 +133,7 @@ export default function RichTextTestClient({
   const [status, setStatus] = useState("Loading editor");
   const [schemaNodes, setSchemaNodes] = useState("");
   const articleEndRef = useRef<HTMLDivElement>(null);
-  const hasReadingPreview = typography || highlightedCode;
+  const hasReadingPreview = typography || highlightedCode || table;
 
   const saveDraft = () => {
     if (!editor) return;

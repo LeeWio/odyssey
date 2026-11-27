@@ -1,8 +1,8 @@
-import { TableKit as TiptapTableKit } from "@tiptap/extension-table";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { CellSelection } from "@tiptap/pm/tables";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
+import { TableSchemaKit } from "./table-schema";
 
 const activeCellKey = new PluginKey("table-active-cell");
 
@@ -34,7 +34,7 @@ function activeCellDecoration(state: {
   return DecorationSet.empty;
 }
 
-export const TableKit = TiptapTableKit.extend({
+export const TableKit = TableSchemaKit.extend({
   addExtensions() {
     return (this.parent?.() ?? []).map((extension) => {
       if (extension.name !== "table") return extension;
@@ -59,21 +59,8 @@ export const TableKit = TiptapTableKit.extend({
     HTMLAttributes: {
       class: "w-full max-w-full border-collapse",
     },
-    cellMinWidth: 100,
     handleWidth: 5,
     resizable: true,
-    renderWrapper: true,
-  },
-  tableRow: {},
-  tableHeader: {
-    HTMLAttributes: {
-      class: "text-left align-top",
-    },
-  },
-  tableCell: {
-    HTMLAttributes: {
-      class: "align-top",
-    },
   },
 });
 

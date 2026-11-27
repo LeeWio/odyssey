@@ -41,7 +41,8 @@ export const RICH_TEXT_PROSE_CLASS_NAME = [
   "[&_.tableWrapper_tr:first-child_:is(td,th).table-cell-active:last-child]:before:rounded-tr-[min(31px,calc(var(--radius)*2.5-1px))]",
   "[&_.tableWrapper_tr:last-child_:is(td,th).table-cell-active:first-child]:before:rounded-bl-[min(31px,calc(var(--radius)*2.5-1px))]",
   "[&_.tableWrapper_tr:last-child_:is(td,th).table-cell-active:last-child]:before:rounded-br-[min(31px,calc(var(--radius)*2.5-1px))]",
-  "[&_.tableWrapper_th]:border-separator/50! [&_.tableWrapper_th]:bg-surface-secondary! [&_.tableWrapper_th]:text-muted [&_.tableWrapper_th]:font-medium! [&_.tableWrapper_th]:text-start",
+  "[&_.tableWrapper_th]:border-separator/50! [&_.tableWrapper_th]:bg-surface-secondary [&_.tableWrapper_th]:text-muted [&_.tableWrapper_th]:font-medium! [&_.tableWrapper_th]:text-start",
+  "[&_.tableWrapper_:is(td,th)[style*=color]_:is(h1,h2,h3,strong)]:text-inherit!",
   // Zero every cell child, not only :first/:last. The resize handle is a trailing widget,
   // so a :last-child rule lets the paragraph margin return and the header jumps.
   "[&_:is(td,th)>*]:my-0!",

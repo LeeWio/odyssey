@@ -1,4 +1,3 @@
-import { TableKit } from "@tiptap/extension-table";
 import { BulletList, ListItem, OrderedList, TaskItem, TaskList } from "@tiptap/extension-list";
 import StarterKit from "@tiptap/starter-kit";
 import { HighlightedCodeBlockSchema } from "../code-block/code-block-schema";
@@ -18,6 +17,7 @@ import { Mention } from "./mention";
 import { Subscript } from "./subscript";
 import { Superscript } from "./superscript";
 import { TextAlign } from "./text-align";
+import { TableSchemaKit } from "./table/table-schema";
 import { TextStyleKit } from "./text-style-kit";
 import { Typography } from "./typography";
 
@@ -58,7 +58,7 @@ export function createDocumentExtensions() {
     Column,
     ColumnsSchema,
     Heading,
-    TableKit.configure({ table: { renderWrapper: true, cellMinWidth: 100 } }),
+    TableSchemaKit,
   ];
 }
 

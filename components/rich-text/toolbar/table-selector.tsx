@@ -3,7 +3,7 @@
 import { Button, Label, Popover, Surface, Tooltip, cn } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useReducedMotion } from "motion/react";
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 
 const MAX_ROWS = 10;
 const MAX_COLS = 10;
@@ -66,6 +66,23 @@ export function TableSelector({ onSelect }: TableSelectorProps) {
     }
   };
 
+  const navigateGrid = (event: KeyboardEvent<HTMLButtonElement>, row: number, col: number) => {
+    const next = {
+      ArrowUp: [Math.max(1, row - 1), col],
+      ArrowDown: [Math.min(MAX_ROWS, row + 1), col],
+      ArrowLeft: [row, Math.max(1, col - 1)],
+      ArrowRight: [row, Math.min(MAX_COLS, col + 1)],
+      Home: [row, 1],
+      End: [row, MAX_COLS],
+    }[event.key];
+    if (!next) return;
+    event.preventDefault();
+    const grid = event.currentTarget.closest('[role="grid"]');
+    grid
+      ?.querySelector<HTMLButtonElement>(`button[data-rows="${next[0]}"][data-cols="${next[1]}"]`)
+      ?.focus();
+  };
+
   return (
     <Popover isOpen={isOpen} onOpenChange={handleOpenChange}>
       <Tooltip delay={0}>
@@ -75,7 +92,7 @@ export function TableSelector({ onSelect }: TableSelectorProps) {
         <Tooltip.Content>Insert table</Tooltip.Content>
       </Tooltip>
 
-      <Popover.Content isNonModal placement="bottom">
+      <Popover.Content placement="bottom">
         <Popover.Dialog className="w-max space-y-3">
           <Popover.Arrow />
 
@@ -132,33 +149,43 @@ export function TableSelector({ onSelect }: TableSelectorProps) {
               {null}
             </Surface>
 
-            {Array.from({ length: MAX_ROWS }).map((_, row) =>
-              Array.from({ length: MAX_COLS }).map((_, col) => {
-                const rows = row + 1;
-                const cols = col + 1;
-                const isActive = row < hoveredGrid.rows && col < hoveredGrid.cols;
+            {Array.from({ length: MAX_ROWS }, (_, row) => (
+              <div key={row} role="row" className="contents">
+                {Array.from({ length: MAX_COLS }, (_, col) => {
+                  const rows = row + 1;
+                  const cols = col + 1;
+                  const isActive = row < hoveredGrid.rows && col < hoveredGrid.cols;
 
-                return (
-                  <button
-                    key={`${row}-${col}`}
-                    type="button"
-                    aria-label={`Insert ${cols} by ${rows} table`}
-                    className={cn(
-                      "relative z-10 size-5 rounded-sm border outline-none",
-                      "cursor-[var(--cursor-interactive)]",
-                      "focus-visible:ring-focus focus-visible:ring-2",
-                      isActive
-                        ? "border-accent/55 bg-accent-soft"
-                        : "border-border/60 bg-surface/40"
-                    )}
-                    data-cols={cols}
-                    data-rows={rows}
-                    onClick={() => handleSelect(rows, cols)}
-                    onMouseEnter={() => handleMouseEnter(row, col)}
-                  />
-                );
-              })
-            )}
+                  return (
+                    <div role="gridcell" key={col} className="contents">
+                      <button
+                        tabIndex={
+                          rows === (hoveredGrid.rows || 1) && cols === (hoveredGrid.cols || 1)
+                            ? 0
+                            : -1
+                        }
+                        type="button"
+                        aria-label={`Insert ${cols} by ${rows} table`}
+                        className={cn(
+                          "relative z-10 size-5 rounded-sm border outline-none",
+                          "cursor-[var(--cursor-interactive)]",
+                          "focus-visible:ring-focus focus-visible:ring-2",
+                          isActive
+                            ? "border-accent/55 bg-accent-soft"
+                            : "border-border/60 bg-surface/40"
+                        )}
+                        data-cols={cols}
+                        data-rows={rows}
+                        onKeyDown={(event) => navigateGrid(event, rows, cols)}
+                        onFocus={() => handleMouseEnter(row, col)}
+                        onClick={() => handleSelect(rows, cols)}
+                        onMouseEnter={() => handleMouseEnter(row, col)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </Surface>
         </Popover.Dialog>
       </Popover.Content>

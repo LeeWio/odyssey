@@ -2,6 +2,7 @@
 
 import { Button, Dropdown, Header, Input, Label, Modal, TextField } from "@heroui/react";
 import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
+import type { NestedOptions } from "@tiptap/extension-drag-handle";
 import DragHandle from "@tiptap/extension-drag-handle-react";
 import { NodeSelection } from "@tiptap/pm/state";
 import { Icon } from "@iconify/react";
@@ -9,9 +10,21 @@ import { useEffect, useMemo, useState } from "react";
 import { useContentItemState } from "./hooks/use-content-item-state";
 import { useContentItemActions } from "./hooks/use-content-item-actions";
 
-const NESTED_DRAG_OPTIONS = {
+const NESTED_DRAG_OPTIONS: NestedOptions = {
   edgeDetection: "left",
-} as const;
+  rules: [
+    {
+      id: "table-controls",
+      evaluate: ({ $pos, depth }) => {
+        // Keep the block grip on the whole table. Its own grips manipulate the grid.
+        for (let parent = depth - 1; parent > 0; parent--) {
+          if ($pos.node(parent).type.spec.tableRole === "table") return 1000;
+        }
+        return 0;
+      },
+    },
+  ],
+};
 
 export function ContentItemMenu() {
   const { editor, isDisabled, isReadOnly } = useRichTextEditor();
@@ -205,7 +218,7 @@ export function ContentItemMenu() {
   return (
     <>
       <DragHandle
-        className="-translate-1 translate-x-1.5 transition-[top,left,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:transition-none data-[dragging=true]:transition-none"
+        className={`-translate-y-1 transition-[top,left,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:transition-none data-[dragging=true]:transition-none ${activeBlock?.node.type.spec.tableRole === "table" ? "-translate-x-[18px]" : "translate-x-1.5"}`}
         editor={editor}
         nested={NESTED_DRAG_OPTIONS}
         onElementDragStart={() => selectBlock()}
