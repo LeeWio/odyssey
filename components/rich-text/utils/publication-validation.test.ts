@@ -9,33 +9,19 @@ const image = (alt: string) =>
   });
 
 describe("article publication validation", () => {
-  it("checks saved translations even while editing the primary language", () => {
-    expect(
-      getArticlePublicationProblems({
-        content: plain,
-        translations: { en: { title: "Draft", content: image("") } },
-      })
-    ).toEqual([{ locale: "en", code: "missing-alt" }]);
+  it("requires alternative text for published images", () => {
+    expect(getArticlePublicationProblems(image(""))).toEqual(["missing-alt"]);
+    expect(getArticlePublicationProblems(image("A flower"))).toEqual([]);
   });
 
-  it("allows optional untranslated content and reports invalid persisted nodes", () => {
-    expect(
-      getArticlePublicationProblems({
-        content: plain,
-        translations: { en: { title: "Draft", content: "" } },
-      })
-    ).toEqual([]);
-    expect(
-      getArticlePublicationProblems({
-        content: JSON.stringify({ type: "doc", content: [{ type: "legacyWidget" }] }),
-        translations: { en: { title: "Draft", content: image("A flower") } },
-      })
-    ).toEqual([{ locale: "zh", code: "invalid-document" }]);
+  it("allows valid documents and reports invalid persisted nodes", () => {
+    expect(getArticlePublicationProblems(plain)).toEqual([]);
+    const invalid = JSON.stringify({ type: "doc", content: [{ type: "legacyWidget" }] });
+    expect(getArticlePublicationProblems(invalid)).toEqual(["invalid-document"]);
   });
+
   it("blocks an unfinished image upload placeholder", () => {
     const content = JSON.stringify({ type: "doc", content: [{ type: "imageUpload" }] });
-    expect(getArticlePublicationProblems({ content })).toEqual([
-      { locale: "zh", code: "pending-upload" },
-    ]);
+    expect(getArticlePublicationProblems(content)).toEqual(["pending-upload"]);
   });
 });

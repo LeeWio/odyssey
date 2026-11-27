@@ -1,6 +1,6 @@
 import type { JSONContent } from "@tiptap/react";
 
-import type { PostRequest, PostStatus, PostTranslation } from "@/lib/features/post";
+import type { PostRequest, PostStatus } from "@/lib/features/post";
 import { parseJSONContent } from "./document-normalizer";
 
 const DRAFT_STORAGE_PREFIX = "odyssey_rich_text_draft:";
@@ -15,9 +15,14 @@ const POST_STATUSES = new Set<PostStatus>([
   "ARCHIVED",
 ]);
 
+export type DraftPostData = Partial<PostRequest> & {
+  // Older private drafts can contain translations. Keep them opaque during autosave.
+  translations?: Record<string, unknown>;
+};
+
 export interface RichTextDraft {
   content: JSONContent;
-  postData: Partial<PostRequest>;
+  postData: DraftPostData;
   savedAt: number;
   version: typeof DRAFT_VERSION;
 }
@@ -26,24 +31,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function isSourcePostLocale(locale: string) {
-  return locale === "zh";
-}
-
-export function editablePostTranslations<T>(translations?: Record<string, T>) {
-  return Object.fromEntries(
-    Object.entries(translations ?? {}).filter(([locale]) => !isSourcePostLocale(locale))
-  ) as Record<string, T>;
-}
-
 function getDraftKey(activeId: string): string {
   return `${DRAFT_STORAGE_PREFIX}${activeId}`;
 }
 
-export function sanitizePostData(value: unknown): Partial<PostRequest> | null {
+export function sanitizePostData(value: unknown): DraftPostData | null {
   if (!isRecord(value)) return null;
 
-  const data: Partial<PostRequest> = {};
+  const data: DraftPostData = {};
   const stringFields = [
     "title",
     "slug",
@@ -73,26 +68,7 @@ export function sanitizePostData(value: unknown): Partial<PostRequest> | null {
     data.tagIds = value.tagIds.filter(Number.isFinite);
   }
 
-  if (isRecord(value.translations)) {
-    const translations: Record<string, PostTranslation> = {};
-    for (const [locale, translation] of Object.entries(value.translations)) {
-      if (
-        isSourcePostLocale(locale) ||
-        !isRecord(translation) ||
-        typeof translation.title !== "string"
-      )
-        continue;
-      translations[locale] = {
-        title: translation.title,
-        summary: typeof translation.summary === "string" ? translation.summary : undefined,
-        content: typeof translation.content === "string" ? translation.content : undefined,
-        autoSummary:
-          typeof translation.autoSummary === "string" ? translation.autoSummary : undefined,
-        toc: typeof translation.toc === "string" ? translation.toc : undefined,
-      };
-    }
-    if (Object.keys(translations).length > 0) data.translations = translations;
-  }
+  if (isRecord(value.translations)) data.translations = value.translations;
 
   return data;
 }

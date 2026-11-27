@@ -14,18 +14,16 @@ import { getArticlePublicationProblems } from "./utils/publication-validation";
 import { RichText } from "@/components/rich-text/rich-text";
 import { ArticleSettingsPanel } from "@/components/rich-text/article-settings-panel";
 import { MotionButton } from "@/components/ui";
-import type { AppLocale } from "@/i18n/config";
 import { closeRichText, selectRichTextState } from "@/lib/features";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { microEaseOut } from "@/lib/motion";
 import {
   clearRichTextDraft,
-  editablePostTranslations,
   readRichTextDraft,
   sanitizePostData,
+  type DraftPostData,
 } from "./utils/editor-draft";
 import {
-  EMPTY_DOC,
   getMediaValidationIssues,
   hasPendingMediaUploads,
   normalizeJSONContent,
@@ -43,7 +41,6 @@ import {
   type PostResponse,
   type PostEditorDraft,
   type PostRequest,
-  type PostTranslation,
 } from "@/lib/features/post";
 
 const EMPTY_POST_DATA: Partial<PostRequest> = {
@@ -65,18 +62,6 @@ function toPostData(post: PostResponse): Partial<PostRequest> {
     seriesId: post.series?.id,
     seriesOrder: post.seriesOrder ?? 0,
     tagIds: post.tags?.map((tag) => tag.id) || [],
-    translations: Object.fromEntries(
-      Object.entries(editablePostTranslations(post.translations)).map(([locale, translation]) => [
-        locale,
-        {
-          title: translation.title ?? "",
-          summary: translation.summary ?? "",
-          content: translation.content ?? "",
-          autoSummary: translation.autoSummary ?? "",
-          toc: translation.toc ?? "",
-        },
-      ])
-    ),
   };
 }
 
@@ -94,50 +79,7 @@ function serializePostData(data: Partial<PostRequest>): string {
     seriesId: data.seriesId ?? null,
     seriesOrder: data.seriesOrder ?? 0,
     tagIds: [...(data.tagIds || [])].sort((a, b) => a - b),
-    translations: Object.fromEntries(
-      Object.entries(data.translations ?? {})
-        .sort(([first], [second]) => first.localeCompare(second))
-        .map(([locale, translation]) => [locale, translation])
-    ),
   });
-}
-
-function withLocaleContent(
-  data: Partial<PostRequest>,
-  locale: AppLocale,
-  content: string
-): Partial<PostRequest> {
-  if (locale === "zh") return { ...data, content };
-
-  return {
-    ...data,
-    translations: {
-      ...data.translations,
-      [locale]: {
-        title: data.translations?.[locale]?.title ?? "",
-        ...data.translations?.[locale],
-        content,
-      },
-    },
-  };
-}
-
-function compactPostTranslations(translations?: Record<string, PostTranslation>) {
-  const result: Record<string, PostTranslation> = {};
-  for (const [locale, translation] of Object.entries(editablePostTranslations(translations))) {
-    const next = {
-      ...translation,
-      title: translation.title?.trim() ?? "",
-      summary: translation.summary?.trim() || undefined,
-      content: translation.content?.trim() || undefined,
-      autoSummary: translation.autoSummary?.trim() || undefined,
-      toc: translation.toc?.trim() || undefined,
-    };
-    if (next.title || next.summary || next.content || next.autoSummary || next.toc) {
-      result[locale] = next;
-    }
-  }
-  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 function areMediaIssuesEqual(
@@ -163,7 +105,6 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   const t = useTranslations("EditorDraft");
 
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [editingLocale, setEditingLocale] = useState<AppLocale>("zh");
   const editorRef = useRef<Editor | null>(null);
   const initialEditorDocumentRef = useRef<ProseMirrorNode | null>(null);
   const initialPostDataRef = useRef(serializePostData(EMPTY_POST_DATA));
@@ -173,7 +114,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   const [confirmClose, setConfirmClose] = useState(false);
   const [legacyDraft, setLegacyDraft] = useState<{
     content: ReturnType<typeof normalizeJSONContent>;
-    postData: Partial<PostRequest>;
+    postData: DraftPostData;
   } | null>(null);
   const [draftReady, setDraftReady] = useState(false);
   const [draftState, setDraftState] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -189,7 +130,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   const [conflictError, setConflictError] = useState(false);
   const savedDraftRef = useRef("");
   const draftRequestRef = useRef<Promise<boolean> | null>(null);
-  const latestPostDataRef = useRef(EMPTY_POST_DATA);
+  const latestPostDataRef = useRef<DraftPostData>(EMPTY_POST_DATA);
   const [readyEditor, setReadyEditor] = useState<Editor | null>(null);
   const [editorInstanceVersion, setEditorInstanceVersion] = useState(0);
   const [isPostDataReady, setIsPostDataReady] = useState(false);
@@ -228,18 +169,12 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     skip: !supportsDraft,
     refetchOnMountOrArgChange: true,
   });
-  const existingContentIsEditable = useMemo(() => {
-    if (
-      existingPost &&
-      (existingPost.contentType !== "JSON" || !parseJSONContent(existingPost.content))
-    ) {
-      return false;
-    }
-    const activeContent = postData.translations?.[editingLocale]?.content;
-    return (
-      editingLocale === "zh" || !activeContent?.trim() || Boolean(parseJSONContent(activeContent))
-    );
-  }, [editingLocale, existingPost, postData.translations]);
+  const existingContentIsEditable = useMemo(
+    () =>
+      !existingPost ||
+      (existingPost.contentType === "JSON" && Boolean(parseJSONContent(existingPost.content))),
+    [existingPost]
+  );
 
   const markDraftConflict = (error: unknown) => {
     if (!error || typeof error !== "object" || !("status" in error) || error.status !== 409) {
@@ -251,22 +186,13 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     return true;
   };
 
-  const snapshotEditor = useCallback(
-    (editor: Editor, content: JSONContent = editor.getJSON()) => {
-      const normalized = normalizeRichTextDocument(removeTemporaryMediaAttributes(content));
-      const data = withLocaleContent(
-        latestPostDataRef.current,
-        editingLocale,
-        JSON.stringify(normalized)
-      );
-      return {
-        content:
-          editingLocale === "zh" ? normalized : (parseJSONContent(data.content) ?? EMPTY_DOC),
-        postData: { ...data, content: data.content || JSON.stringify(EMPTY_DOC) },
-      };
-    },
-    [editingLocale]
-  );
+  const snapshotEditor = useCallback((editor: Editor, content: JSONContent = editor.getJSON()) => {
+    const normalized = normalizeRichTextDocument(removeTemporaryMediaAttributes(content));
+    return {
+      content: normalized,
+      postData: { ...latestPostDataRef.current, content: JSON.stringify(normalized) },
+    };
+  }, []);
 
   async function syncDraft(reviewed?: { snapshot: PostEditorDraft | null }) {
     if (!supportsDraft || !draftReady || hasContentSchemaError || !existingContentIsEditable)
@@ -355,13 +281,8 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
   }, 200);
 
   const editorContent = useMemo(
-    () =>
-      normalizeJSONContent(
-        editingLocale === "zh"
-          ? postData.content || existingPost?.content
-          : postData.translations?.[editingLocale]?.content
-      ),
-    [editingLocale, existingPost?.content, postData.content, postData.translations]
+    () => normalizeJSONContent(postData.content || existingPost?.content),
+    [existingPost?.content, postData.content]
   );
   const applyDraft = useCallback(
     (content: ReturnType<typeof normalizeJSONContent>, data: Partial<PostRequest>) => {
@@ -467,32 +388,6 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     setSaveError(null);
     setIsMetadataDirty(serializePostData(nextPostData) !== initialPostDataRef.current);
     scheduleAutosave();
-  };
-
-  const syncCurrentEditorContent = (editor: Editor) => {
-    const nextPostData = snapshotEditor(editor).postData;
-    latestPostDataRef.current = nextPostData;
-    setPostData(nextPostData);
-    setIsMetadataDirty(serializePostData(nextPostData) !== initialPostDataRef.current);
-    return nextPostData;
-  };
-
-  const handleLocaleChange = (nextLocale: AppLocale) => {
-    if (nextLocale === editingLocale) return;
-    const editor = editorRef.current;
-    if (editor && !editor.isDestroyed && existingContentIsEditable && !hasContentSchemaError) {
-      if (hasPendingMediaUploads(editor.getJSON())) {
-        toast.warning(t("finishUploadsBeforeSwitch"));
-        return;
-      }
-      syncCurrentEditorContent(editor);
-    }
-    updateMediaIssues.cancel();
-    setContentSchemaError(null);
-    setReadyEditor(null);
-    setIsContentDirty(false);
-    setMediaIssues(getMediaValidationIssues(normalizeJSONContent(undefined)));
-    setEditingLocale(nextLocale);
   };
 
   useEffect(() => {
@@ -612,18 +507,15 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
     }
   };
 
-  const publicationError = (data: Partial<PostRequest>) => {
-    const problems = getArticlePublicationProblems(data);
-    if (!problems.length) return null;
-    return t("publicationProblems", {
-      languages: [...new Set(problems.map(({ locale }) => locale.toUpperCase()))].join(", "),
-    });
-  };
+  const publicationError = (content: string | undefined) =>
+    getArticlePublicationProblems(content).length ? t("publicationProblems") : null;
 
   const validatePublication = () => {
     const editor = editorRef.current;
     return publicationError(
-      editor && !editor.isDestroyed ? snapshotEditor(editor).postData : latestPostDataRef.current
+      editor && !editor.isDestroyed
+        ? snapshotEditor(editor).postData.content
+        : latestPostDataRef.current.content
     );
   };
 
@@ -649,12 +541,13 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
       return;
     }
 
-    const content = editorRef.current?.getJSON();
-    if (!content) {
+    const editor = editorRef.current;
+    if (!editor || editor.isDestroyed) {
       toast.warning("The editor is still loading. Try saving again in a moment.");
       return;
     }
 
+    const content = editor.getJSON();
     const nextMediaIssues = getMediaValidationIssues(content);
     const hasUnresolvedUpload = nextMediaIssues.some(
       (issue) => issue.code === "pending-upload" || issue.code === "missing-source"
@@ -671,21 +564,18 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
       return;
     }
 
-    const postDataWithContent = editorRef.current
-      ? snapshotEditor(editorRef.current, content).postData
-      : postData;
+    const { postData: draftData } = snapshotEditor(editor, content);
+    delete draftData.translations;
     const payload: PostRequest = {
-      ...(postDataWithContent as PostRequest),
+      ...draftData,
       title,
       slug,
-      content: postDataWithContent.content || "",
       contentType: "JSON",
       status: requestedStatus,
-      translations: compactPostTranslations(postDataWithContent.translations),
     };
 
     if (requestedStatus === "PUBLISHED") {
-      const error = publicationError(payload);
+      const error = publicationError(payload.content);
       if (error) {
         toast.warning(error);
         return;
@@ -826,7 +716,7 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                     >
                       <div className="relative min-h-0 flex-1">
                         <RichText
-                          key={`${activeId}-${existingPost?.updatedAt || "new"}-${editingLocale}-${editorInstanceVersion}`}
+                          key={`${activeId}-${existingPost?.updatedAt || "new"}-${editorInstanceVersion}`}
                           content={editorContent}
                           isDisabled={
                             hasContentSchemaError || (supportsDraft && !draftReady) || isPending
@@ -885,7 +775,6 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                     </motion.div>
                     <ArticleSettingsPanel
                       data={postData}
-                      locale={editingLocale}
                       isDisabled={
                         isPending || hasContentSchemaError || (supportsDraft && !draftReady)
                       }
@@ -913,7 +802,6 @@ function ArticleEditorSession({ activeId }: { activeId: string }) {
                       saveError={saveError}
                       scheduledAt={existingPost?.scheduledAt ?? undefined}
                       onChange={handlePostDataChange}
-                      onLocaleChange={handleLocaleChange}
                       onRetrySave={() => void handleSave(lastSaveStatusRef.current)}
                       onSave={(status) => void handleSave(status)}
                       onWorkflowCompleted={handleRevisionRestored}

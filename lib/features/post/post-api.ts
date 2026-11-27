@@ -47,7 +47,6 @@ export const postApi = baseApi.injectEndpoints({
      * Admin: Retrieve post by ID
      */
     getAdminPostById: builder.query<PostResponse, number>({
-      // The editor needs the source fields and all translations as separate values.
       extraOptions: { localize: false },
       query: (id) => `/api/v1/admin/posts/${id}`,
       rawResponseSchema: apiResponseSchema(PostResponseSchema),
