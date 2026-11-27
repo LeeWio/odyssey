@@ -85,10 +85,10 @@ export const PostResponseSchema = z.object({
       z.object({
         locale: z.string().optional(),
         title: z.string().optional(),
-        summary: z.string().optional(),
-        content: z.string().optional(),
-        autoSummary: z.string().optional(),
-        toc: z.string().optional(),
+        summary: z.string().nullish(),
+        content: z.string().nullish(),
+        autoSummary: z.string().nullish(),
+        toc: z.string().nullish(),
       })
     )
     .optional(),
