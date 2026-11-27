@@ -26,6 +26,14 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.268.3](https://github.com/LeeWio/odyssey/compare/v1.268.2...v1.268.3) (2026-11-27)
+
+
+### Bug Fixes
+
+* **dashboard:** expose article archiving in post actions ([#196](https://github.com/LeeWio/odyssey/issues/196)) ([b1c9268](https://github.com/LeeWio/odyssey/commit/b1c9268cc55900c96c65eb5288b1f6ac9588a1fd))
+* **editor:** align highlighted code input ([#195](https://github.com/LeeWio/odyssey/issues/195)) ([96dbbaa](https://github.com/LeeWio/odyssey/commit/96dbbaaa4bbe88cba940b3e951293b74388c643d))
+
 ## [1.268.2](https://github.com/LeeWio/odyssey/compare/v1.268.1...v1.268.2) (2026-11-27)
 
 
