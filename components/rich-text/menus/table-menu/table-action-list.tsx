@@ -29,7 +29,7 @@ import { Dropdown, Header, Label, Separator } from "@heroui/react";
 import { useMediaQuery } from "@mantine/hooks";
 import type { Editor } from "@tiptap/core";
 import { useLayoutEffect, useRef, useState } from "react";
-import { CellSelection } from "@tiptap/pm/tables";
+import { CellSelection, selectedRect } from "@tiptap/pm/tables";
 import {
   applyTableAction,
   type TableAction,
@@ -145,6 +145,10 @@ export function TableActionList({
   }, [page]);
   const row = kind === "row";
   const axis = kind !== "cell";
+  const rect =
+    axis && editor.state.selection instanceof CellSelection ? selectedRect(editor.state) : null;
+  const atStart = rect && (row ? rect.top === 0 : rect.left === 0);
+  const atEnd = rect && (row ? rect.bottom === rect.map.height : rect.right === rect.map.width);
 
   function item(
     action: Exclude<TableAction, FormatAction>,
@@ -275,18 +279,21 @@ export function TableActionList({
             {item("header", `Header ${kind}`, row ? LayoutHeader : LayoutHeaderColumns)}
           </Dropdown.Section>
         )}
+        {axis && <Separator />}
         {axis && (
           <Dropdown.Section aria-label="Move and insert">
-            {item(
-              "move-before",
-              row ? "Move row up" : "Move column left",
-              row ? ArrowUp : ArrowLeft
-            )}
-            {item(
-              "move-after",
-              row ? "Move row down" : "Move column right",
-              row ? ArrowDown : ArrowRight
-            )}
+            {!atStart &&
+              item(
+                "move-before",
+                row ? "Move row up" : "Move column left",
+                row ? ArrowUp : ArrowLeft
+              )}
+            {!atEnd &&
+              item(
+                "move-after",
+                row ? "Move row down" : "Move column right",
+                row ? ArrowDown : ArrowRight
+              )}
             {item("insert-before", row ? "Insert row above" : "Insert column left", Plus)}
             {item("insert-after", row ? "Insert row below" : "Insert column right", Plus)}
           </Dropdown.Section>
@@ -323,7 +330,7 @@ export function TableActionList({
                 <Label>{name}</Label>
                 <Dropdown.SubmenuIndicator />
               </Dropdown.Item>
-              <Dropdown.Popover className="pointer-events-auto max-h-[min(24rem,75dvh)] overflow-y-auto">
+              <Dropdown.Popover className="pointer-events-auto max-h-[min(24rem,75dvh)] overflow-y-auto data-[exiting=true]:pointer-events-none">
                 <Dropdown.Menu aria-label={name} className="w-48">
                   {formatSections(name)}
                 </Dropdown.Menu>

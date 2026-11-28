@@ -5,13 +5,12 @@ import type { TableTargetKind } from "../../extensions/table/actions";
 export interface MenuTarget {
   kind: TableTargetKind;
   selected: CellSelection;
-  // A column handle may be over the second track of a spanning cell. Remember the
-  // cell and track offset so inserting another column before it maps the sort key too.
-  column?: { cell: number; offset: number; index: number };
+  // Preserve the exact track of a spanning cell when the document changes.
+  anchor?: { cell: number; offset: number; index: number };
 }
 
 export function mapMenuTarget(target: MenuTarget, transactions: readonly Transaction[]) {
-  let { selected, column } = target;
+  let { selected, anchor } = target;
   for (const tr of transactions) {
     if (tr.docChanged) {
       const { $anchorCell, $headCell } = selected;
@@ -24,20 +23,22 @@ export function mapMenuTarget(target: MenuTarget, transactions: readonly Transac
       const mapped = selected.map(tr.doc, tr.mapping);
       if (!(mapped instanceof CellSelection)) return null;
       selected = mapped;
-      if (column) {
-        const cell = tr.mapping.mapResult(column.cell);
+      if (anchor) {
+        const cell = tr.mapping.mapResult(anchor.cell);
         if (cell.deleted) return null;
         const $cell = tr.doc.resolve(cell.pos);
         if (!pointsAtCell($cell) || !inSameTable(selected.$anchorCell, $cell)) return null;
         const map = TableMap.get(selected.$anchorCell.node(-1));
         const rect = map.findCell(cell.pos - selected.$anchorCell.start(-1));
-        if (rect.left + column.offset >= rect.right) return null;
-        column = { cell: cell.pos, offset: column.offset, index: rect.left + column.offset };
+        const row = target.kind === "row";
+        const index = (row ? rect.top : rect.left) + anchor.offset;
+        if (index >= (row ? rect.bottom : rect.right)) return null;
+        anchor = { cell: cell.pos, offset: anchor.offset, index };
       }
     }
     if (tr.selectionSet && !selected.eq(tr.selection)) return null;
   }
-  return selected === target.selected && column === target.column
+  return selected === target.selected && anchor === target.anchor
     ? target
-    : { kind: target.kind, selected, column };
+    : { kind: target.kind, selected, anchor };
 }

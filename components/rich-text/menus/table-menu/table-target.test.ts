@@ -17,7 +17,7 @@ const state = EditorState.create({ doc, selection });
 const target: MenuTarget = {
   kind: "column",
   selected: selection,
-  column: { cell: 2, index: 0, offset: 0 },
+  anchor: { cell: 2, index: 0, offset: 0 },
 };
 
 describe("table menu target", () => {
@@ -29,11 +29,17 @@ describe("table menu target", () => {
     beforeColumn.insert(beforeColumn.mapping.map(2 + paragraph.nodeSize + row.nodeSize), cell);
     const mapped = mapMenuTarget(target, [beforeTable, beforeColumn]);
     expect(mapped?.selected.$anchorCell.doc).toBe(beforeColumn.doc);
-    expect(mapped?.column).toEqual({
+    expect(mapped?.anchor).toEqual({
       cell: 2 + paragraph.nodeSize + cell.nodeSize,
       index: 1,
       offset: 0,
     });
+  });
+
+  it("tracks a row grip through an inserted row", () => {
+    const inserted = state.tr.insert(1, row);
+    const mapped = mapMenuTarget({ ...target, kind: "row" }, [inserted]);
+    expect(mapped?.anchor).toEqual({ cell: 2 + row.nodeSize, index: 1, offset: 0 });
   });
 
   it("dismisses a menu whose table was removed even when the next table moves into its place", () => {

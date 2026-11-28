@@ -26,15 +26,33 @@ const fixture: JSONContent = {
   ],
 };
 
+const wideFixture: JSONContent = {
+  type: "doc",
+  content: [
+    {
+      type: "table",
+      content: [0, 1].map((row) => ({
+        type: "tableRow",
+        content: Array.from({ length: 8 }, (_, column) => ({
+          type: row === 0 ? "tableHeader" : "tableCell",
+          attrs: { colwidth: [144] },
+          content: [{ type: "paragraph", content: [{ type: "text", text: `${row}-${column}` }] }],
+        })),
+      })),
+    },
+    { type: "paragraph" },
+  ],
+};
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/test/rich-text");
   await expect(page.getByTestId("draft-status")).toHaveText("Editor ready");
 });
 
-async function loadTable(page: Page) {
+async function loadTable(page: Page, content = fixture) {
   await page.locator(editorSelector).evaluate((element, content) => {
     (element as HTMLElement & { editor: Editor }).editor.commands.setContent(content);
-  }, fixture);
+  }, content);
   return page.locator(editorSelector).getByRole("table");
 }
 
@@ -130,6 +148,120 @@ test("drags the row grip to move a whole record and can undo the drop", async ({
     "First editor",
     "Second editor",
   ]);
+});
+
+test("keeps the selection on one table while the grips follow a second table", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  const source = fixture.content![1];
+  const tables = await loadTable(page, {
+    ...fixture,
+    content: [source, { type: "paragraph" }, source, { type: "paragraph" }],
+  });
+  const first = tables.first();
+  const second = tables.last();
+  const header = (await first.getByRole("columnheader", { name: "Name" }).boundingBox())!;
+  const next = (await first.getByRole("columnheader", { name: "Role" }).boundingBox())!;
+  await page.mouse.move(header.x + header.width / 2, header.y + header.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(next.x + next.width / 2, next.y + next.height / 2, { steps: 10 });
+  await page.mouse.up();
+  await expect(first.locator(".selectedCell")).toHaveCount(2);
+
+  const hovered = second.getByRole("columnheader", { name: "Name" });
+  await hovered.hover();
+  const rowGrip = page.getByRole("button", { name: "Row actions", exact: true });
+  const cellGrip = page.getByRole("button", { name: "Cell actions", exact: true });
+  const outline = page.locator("[data-table-selection-outline]");
+  await expect(outline).toBeVisible();
+  await expect(cellGrip).toBeVisible();
+  await expect(rowGrip).toBeVisible();
+  const firstBounds = (await first.boundingBox())!;
+  const secondBounds = (await second.boundingBox())!;
+  await expect
+    .poll(async () => (await rowGrip.boundingBox())?.y)
+    .toBeGreaterThanOrEqual(secondBounds.y - 1);
+  expect((await cellGrip.boundingBox())!.y).toBeLessThan(firstBounds.y + firstBounds.height);
+
+  await rowGrip.click();
+  const rowMenu = page.getByRole("menu", { name: "Row actions", exact: true });
+  await expect(rowMenu).toBeVisible();
+  await expect(page.getByRole("button", { name: "Column actions", exact: true })).toBeHidden();
+  await expect(page.getByRole("button", { name: "Add row below table" })).toBeHidden();
+  await expect(rowMenu.getByRole("menuitem", { name: "Move row up", exact: true })).toHaveCount(0);
+  await expect(rowMenu.getByRole("menuitem", { name: "Move row down", exact: true })).toBeEnabled();
+  await expect(first.locator(".selectedCell")).toHaveCount(0);
+  await expect(second.locator(".selectedCell")).toHaveCount(2);
+});
+
+for (const action of ["select", "reorder"] as const) {
+  test(`scrolls the table while dragging to ${action} columns outside the viewport`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 520, height: 800 });
+    const table = await loadTable(page, wideFixture);
+    const wrapper = page.locator(`${editorSelector} .tableWrapper`);
+    const first = table.getByRole("columnheader", { name: "0-0", exact: true });
+    await first.click();
+    const grip = page.getByRole("button", {
+      name: action === "select" ? "Cell actions" : "Column actions",
+      exact: true,
+    });
+    await expect(grip).toBeVisible();
+    const start = (await grip.boundingBox())!;
+    const viewport = (await wrapper.boundingBox())!;
+    const header = (await first.boundingBox())!;
+    await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(viewport.x + viewport.width - 6, header.y + header.height / 2, {
+      steps: 10,
+    });
+    await expect
+      .poll(() => wrapper.evaluate((el) => el.scrollWidth - el.clientWidth - el.scrollLeft))
+      .toBeLessThan(2);
+    await page.mouse.up();
+
+    if (action === "select") {
+      await expect(table.locator(".selectedCell")).toHaveCount(8);
+      await expect(table.getByRole("columnheader").first()).toHaveText("0-0");
+    } else {
+      await expect(table.getByRole("columnheader").last()).toHaveText("0-0");
+      await page.keyboard.press("ControlOrMeta+z");
+      await expect(table.getByRole("columnheader").first()).toHaveText("0-0");
+    }
+  });
+}
+
+test("resizes the last column and uses both quick-insert controls in a scrolled table", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 520, height: 800 });
+  const table = await loadTable(page, wideFixture);
+  const editor = page.locator(editorSelector);
+  const wrapper = editor.locator(".tableWrapper");
+  await wrapper.evaluate((element) => {
+    element.scrollLeft = element.scrollWidth;
+  });
+  const last = table.getByRole("columnheader", { name: "0-7", exact: true });
+  const bounds = (await last.boundingBox())!;
+  const pointer = { x: bounds.x + bounds.width - 2, y: bounds.y + bounds.height / 2 };
+  await page.mouse.move(pointer.x, pointer.y);
+  await expect(editor).toHaveClass(/resize-cursor/);
+  await page.mouse.down();
+  await page.mouse.move(pointer.x + 28, pointer.y, { steps: 8 });
+  await page.mouse.up();
+  await expect
+    .poll(async () => (await last.boundingBox())!.width)
+    .toBeGreaterThan(bounds.width + 20);
+
+  await wrapper.evaluate((element) => {
+    element.scrollLeft = element.scrollWidth;
+  });
+  await last.hover();
+  await page.getByRole("button", { name: "Add column to right of table" }).click();
+  await expect(table.getByRole("row").first().locator("th,td")).toHaveCount(9);
+  await last.hover();
+  await page.getByRole("button", { name: "Add row below table" }).click();
+  await expect(table.getByRole("row")).toHaveCount(3);
 });
 
 test("inserts the selected table dimensions using arrow keys in the toolbar grid", async ({
