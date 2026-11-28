@@ -56,7 +56,10 @@ test("expands a partial range to two rows and duplicates both records", async ({
   await expect(editor.locator(".selectedCell")).toHaveCount(8);
   const header = page.getByRole("menuitemcheckbox", { name: "Header rows", exact: true });
   await expect(header).toHaveAttribute("aria-checked", "false");
-  await expect(header.locator('[data-slot="menu-item-indicator--checkmark"]')).toHaveCount(0);
+  await expect(header.locator('[data-slot="menu-item-indicator"]')).not.toHaveAttribute(
+    "data-visible",
+    "true"
+  );
   await page.getByRole("menuitem", { name: "Duplicate 2 rows", exact: true }).click();
   await expect(editor.locator("tr")).toHaveCount(7);
   await expect(editor.locator("tr > :first-child")).toHaveText([

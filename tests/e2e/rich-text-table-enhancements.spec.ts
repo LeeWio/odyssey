@@ -3,7 +3,7 @@ import type { Editor } from "@tiptap/core";
 
 const editorName = { name: "Rich text editor", exact: true } as const;
 
-test("header toggles use the native hover background without an indicator or shifted icon", async ({
+test("header toggles show native trailing checkmarks without shifting leading icons", async ({
   page,
 }) => {
   await page.goto("/test/rich-text?table=1");
@@ -15,25 +15,36 @@ test("header toggles use the native hover background without an indicator or shi
   await header.click();
   await column.click();
   await expect(header).toHaveAttribute("aria-checked", "true");
-  await expect(header.locator('[data-slot="menu-item-indicator"]')).toHaveCount(0);
+  const indicator = header.locator('[data-slot="menu-item-indicator"]');
+  await expect(indicator).toHaveAttribute("data-visible", "true");
+  await expect(indicator.locator('[data-slot="menu-item-indicator--checkmark"]')).toHaveCount(1);
   const normal = page.getByRole("menuitem", { name: "Move column right", exact: true });
   await expect(page.locator('[data-slot="dropdown-popover"]:visible')).not.toHaveAttribute(
     "data-entering",
     "true"
   );
-  const a = (await header.locator("svg").boundingBox())!;
-  const b = (await normal.locator("svg").boundingBox())!;
+  const a = (await header.locator("svg").first().boundingBox())!;
+  const b = (await normal.locator("svg").first().boundingBox())!;
   expect(Math.abs(a.x - b.x)).toBeLessThan(0.5);
-  await normal.hover();
-  const hover = await normal.evaluate((el) => getComputedStyle(el).backgroundColor);
-  expect(hover).not.toBe("rgba(0, 0, 0, 0)");
-  await expect(header).toHaveCSS("background-color", hover);
+  const label = (await header.locator('[data-slot="label"]').boundingBox())!;
+  expect((await indicator.boundingBox())!.x).toBeGreaterThanOrEqual(label.x + label.width);
   await page.keyboard.press("Escape");
   await editor.getByRole("columnheader", { name: "Role", exact: true }).click();
-  await page.getByRole("button", { name: "Row actions", exact: true }).click();
+  const rowButton = page.getByRole("button", { name: "Row actions", exact: true });
+  await rowButton.click();
   const row = page.getByRole("menuitemcheckbox", { name: "Header row", exact: true });
   await expect(row).toHaveAttribute("aria-checked", "true");
-  await expect(row.locator(".menu-item__indicator")).toHaveCount(0);
+  await expect(row.locator('[data-slot="menu-item-indicator"]')).toHaveAttribute(
+    "data-visible",
+    "true"
+  );
+  await row.click();
+  await rowButton.click();
+  await expect(row).toHaveAttribute("aria-checked", "false");
+  await expect(row.locator('[data-slot="menu-item-indicator"]')).not.toHaveAttribute(
+    "data-visible",
+    "true"
+  );
 });
 
 test("rejected spreadsheet paste keeps content and gives persistent accessible feedback", async ({

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
 
 for (const width of [390, 1280]) {
   test(`centers the cell grip and keeps symmetric outside controls at ${width}px`, async ({
@@ -48,7 +48,7 @@ for (const width of [390, 1280]) {
   });
 }
 
-for (const width of [390, 1280]) {
+for (const width of [390, 911, 1280]) {
   test(`uses native Color and Alignment submenus without Back at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto("/test/rich-text?table=1");
@@ -59,7 +59,9 @@ for (const width of [390, 1280]) {
     const root = page.getByRole("menu", { name: "Cell actions", exact: true });
     await root.getByRole("menuitem", { name: "Alignment", exact: true }).focus();
     await page.keyboard.press("ArrowRight");
-    await expect(page.getByRole("menu", { name: "Alignment", exact: true })).toBeVisible();
+    const alignment = page.getByRole("menu", { name: "Alignment", exact: true });
+    await expect(alignment).toBeVisible();
+    await expectBalancedMenu(alignment);
     await expect(
       page.getByRole("menuitemradio", { name: "Align center", exact: true })
     ).toBeVisible();
@@ -69,10 +71,12 @@ for (const width of [390, 1280]) {
     await root.getByRole("menuitem", { name: "Color", exact: true }).click();
     const color = page.getByRole("menu", { name: "Color", exact: true });
     await expect(color).toBeVisible();
+    await expectBalancedMenu(color);
     await expect(page.getByRole("menuitem", { name: "Back", exact: true })).toHaveCount(0);
     const bounds = (await color.boundingBox())!;
     expect(bounds.x).toBeGreaterThanOrEqual(0);
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(width + 1);
+    expect(bounds.height).toBeLessThanOrEqual(384 + 1);
     await page.keyboard.press("Escape");
     await page.keyboard.press("Escape");
     await expect(root).toBeHidden();
@@ -129,3 +133,46 @@ test("the last-column grip and append control remain independently clickable", a
   await editor.press("ControlOrMeta+z");
   await expect(editor.locator("tr").first().locator("th,td")).toHaveCount(4);
 });
+
+async function expectBalancedMenu(menu: Locator) {
+  const popover = menu.locator('xpath=ancestor::*[@data-slot="dropdown-popover"]');
+  await expect(popover).not.toHaveAttribute("data-entering", "true");
+  await expect
+    .poll(() =>
+      menu.evaluate((el) => {
+        const popover = el.closest<HTMLElement>('[data-slot="dropdown-popover"]')!;
+        const panel = popover.getBoundingClientRect(),
+          box = el.getBoundingClientRect();
+        const item = el.querySelector('[role="menuitemradio"]')!.getBoundingClientRect();
+        // Exclude any native scrollbar; compare the actual menu content padding.
+        const right = panel.left + popover.clientLeft + popover.clientWidth;
+        return Math.max(
+          Math.abs(box.left - panel.left - popover.clientLeft - (right - box.right)),
+          Math.abs(item.left - box.left - (box.right - item.right))
+        );
+      })
+    )
+    .toBeLessThan(0.5);
+}
+
+for (const width of [390, 1280])
+  test(`keeps native submenu padding inside the article modal at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/test/rich-text?modal=1");
+    await page.getByRole("button", { name: "Open editor", exact: true }).click();
+    const editor = page.locator('.ProseMirror[contenteditable="true"]');
+    await expect(editor).toBeVisible();
+    await page.getByRole("button", { name: "Insert table", exact: true }).click();
+    await page.getByRole("button", { name: "Insert 3 by 2 table", exact: true }).click();
+    const cell = editor.locator("th").first();
+    await cell.click();
+    await expect(cell).toHaveClass(/table-cell-active/);
+    await editor.press("Shift+F10");
+    for (const name of ["Color", "Alignment"]) {
+      await page.getByRole("menuitem", { name, exact: true }).click();
+      await expectBalancedMenu(page.getByRole("menu", { name, exact: true }));
+      await page.keyboard.press("ArrowLeft");
+    }
+    await expect(page.getByRole("menu", { name: "Cell actions", exact: true })).toBeVisible();
+  });
