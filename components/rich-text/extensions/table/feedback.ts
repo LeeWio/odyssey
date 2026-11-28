@@ -31,7 +31,7 @@ export function tablePasteFailureMessage(failure: TablePasteFailure): string {
   }
 }
 
-const actionMessages: Record<Exclude<TableAction, { attribute: string }>, string> = {
+const actionMessages: Record<Extract<TableAction, string>, string> = {
   header: "Table headers updated.",
   "move-before": "Selection moved earlier.",
   "move-after": "Selection moved later.",
@@ -55,7 +55,9 @@ export function announceTableAction(editor: Editor, action: TableAction | "selec
     action === "selection-moved"
       ? "Selected table band moved."
       : typeof action === "object"
-        ? "Selected cell formatting updated."
+        ? "width" in action
+          ? `Selected column widths set to ${action.width} pixels.`
+          : "Selected cell formatting updated."
         : actionMessages[action];
   editor.view.dispatch(
     editor.state.tr.setMeta(TABLE_ACTION_STATUS, message).setMeta("addToHistory", false)

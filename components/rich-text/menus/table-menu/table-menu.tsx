@@ -20,6 +20,7 @@ import {
   type TableAction,
   type TableTargetKind,
 } from "../../extensions/table/actions";
+import { TableColumnWidthDialog } from "./table-column-width-dialog";
 import { TableActionList } from "./table-action-list";
 import { TableActionHandle, TableAppendHandle } from "./table-handle";
 import { mapMenuTarget, type MenuTarget } from "./table-target";
@@ -51,7 +52,13 @@ function select(editor: Editor, selected: CellSelection) {
     editor.view.dispatch(editor.state.tr.setSelection(selected));
 }
 
-function TableControls({ editor }: { editor: Editor }) {
+function TableControls({
+  editor,
+  onEditWidth,
+}: {
+  editor: Editor;
+  onEditWidth: (target: MenuTarget) => void;
+}) {
   const [layouts, setLayouts] = useState<{
     axes: TableLayout | null;
     cells: TableLayout | null;
@@ -610,6 +617,12 @@ function TableControls({ editor }: { editor: Editor }) {
               onAction={runAction}
               ownerId={menuOwner}
               onClose={dismiss}
+              onEditWidth={() => {
+                const target = menu.current;
+                if (!target || target.kind !== "column" || !editor.isEditable) return;
+                close();
+                onEditWidth(target);
+              }}
             />
           </TableActionHandle>
         );
@@ -627,9 +640,43 @@ function TableControls({ editor }: { editor: Editor }) {
   );
 }
 
+function EditableTableMenu({ editor }: { editor: Editor }) {
+  const [session, setSession] = useState<{
+    id: number;
+    target: MenuTarget;
+    isOpen: boolean;
+  } | null>(null);
+  const close = useCallback(
+    () => setSession((current) => (current ? { ...current, isOpen: false } : null)),
+    []
+  );
+  if (editor.isDestroyed) return null;
+  return (
+    <>
+      {!session?.isOpen && (
+        <TableControls
+          editor={editor}
+          onEditWidth={(target) =>
+            setSession((current) => ({ id: (current?.id ?? 0) + 1, target, isOpen: true }))
+          }
+        />
+      )}
+      {session && (
+        <TableColumnWidthDialog
+          key={session.id}
+          editor={editor}
+          target={session.target}
+          isOpen={session.isOpen}
+          onClose={close}
+        />
+      )}
+    </>
+  );
+}
+
 export function TableMenu() {
   const { editor, isDisabled, isReadOnly } = useRichTextEditor();
   return editor && !editor.isDestroyed && !isDisabled && !isReadOnly ? (
-    <TableControls editor={editor} />
+    <EditableTableMenu editor={editor} />
   ) : null;
 }

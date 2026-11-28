@@ -9,7 +9,11 @@ export interface MenuTarget {
   anchor?: { cell: number; offset: number; index: number };
 }
 
-export function mapMenuTarget(target: MenuTarget, transactions: readonly Transaction[]) {
+export function mapMenuTarget(
+  target: MenuTarget,
+  transactions: readonly Transaction[],
+  { dismissOnSelectionChange = true } = {}
+) {
   let { selected, anchor } = target;
   for (const tr of transactions) {
     if (tr.docChanged) {
@@ -36,7 +40,7 @@ export function mapMenuTarget(target: MenuTarget, transactions: readonly Transac
         anchor = { cell: cell.pos, offset: anchor.offset, index };
       }
     }
-    if (tr.selectionSet && !selected.eq(tr.selection)) return null;
+    if (dismissOnSelectionChange && tr.selectionSet && !selected.eq(tr.selection)) return null;
   }
   return selected === target.selected && anchor === target.anchor
     ? target
