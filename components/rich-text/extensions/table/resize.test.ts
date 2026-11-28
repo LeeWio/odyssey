@@ -64,3 +64,26 @@ it("cancels a live native resize when its table is deleted by another transactio
   expect(columnResizingPluginKey.getState(editor.state)!.dragging).toBeNull();
   expect(resizeColumnTarget(editor)).toBeNull();
 });
+it("keeps native resizing available after an initially disabled editor becomes editable", () => {
+  editor = new Editor({ extensions: [StarterKit, TableKit], editable: false });
+  expect(columnResizingPluginKey.getState(editor.state)).toBeDefined();
+  editor.setEditable(true);
+  editor.commands.insertTable({ rows: 2, cols: 3, withHeaderRow: true });
+  const map = TableMap.get(editor.state.doc.firstChild!);
+  editor.view.dispatch(
+    editor.state.tr.setMeta(columnResizingPluginKey, { setHandle: 1 + map.map[0] })
+  );
+  expect(resizeColumnTarget(editor)?.left).toBe(0);
+});
+it("registers one native resize plugin and honors an explicit resizable:false option", () => {
+  open();
+  expect(
+    editor.state.plugins.filter((plugin) => plugin.spec.key === columnResizingPluginKey)
+  ).toHaveLength(1);
+  editor.destroy();
+  editor = new Editor({
+    extensions: [StarterKit, TableKit.configure({ table: { resizable: false } })],
+    editable: false,
+  });
+  expect(columnResizingPluginKey.getState(editor.state)).toBeUndefined();
+});

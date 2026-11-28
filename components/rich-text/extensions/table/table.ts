@@ -3,7 +3,7 @@ import { tableResizeInteractions } from "./resize";
 import { exitTable, leaveCellSelection } from "./keyboard";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { CellSelection } from "@tiptap/pm/tables";
+import { CellSelection, columnResizing, columnResizingPluginKey } from "@tiptap/pm/tables";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { tableClipboardPlugin, type TablePasteFailure } from "./clipboard";
 import type { TableKitOptions as NativeTableKitOptions } from "@tiptap/extension-table";
@@ -59,11 +59,28 @@ export const TableKit = TableSchemaKit.extend<TableKitOptions>({
           };
         },
         addProseMirrorPlugins() {
+          const native = this.parent?.() ?? [];
+          // Tiptap omits resizing when an editor starts disabled (for example,
+          // while a modal loads a draft). Keep the native, editability-guarded
+          // plugin registered so setEditable(true) can enable it without remounting.
+          if (
+            this.options.resizable &&
+            !native.some((plugin) => plugin.spec.key === columnResizingPluginKey)
+          )
+            native.unshift(
+              columnResizing({
+                handleWidth: this.options.handleWidth,
+                cellMinWidth: this.options.cellMinWidth,
+                defaultCellMinWidth: this.options.cellMinWidth,
+                View: null,
+                lastColumnResizable: this.options.lastColumnResizable,
+              })
+            );
           return [
             tableSelectionHighlight(),
             tableResizeInteractions(this.editor),
             tableClipboardPlugin(onRejected),
-            ...(this.parent?.() ?? []),
+            ...native,
             new Plugin({
               key: activeCellKey,
               props: {

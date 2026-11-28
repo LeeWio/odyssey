@@ -4,7 +4,7 @@ import { announceTableAction } from "../../extensions/table/feedback";
 
 import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
 import type { Editor, EditorEvents } from "@tiptap/core";
-import { CellSelection, inSameTable } from "@tiptap/pm/tables";
+import { CellSelection, columnResizingPluginKey, inSameTable } from "@tiptap/pm/tables";
 import {
   useCallback,
   useEffect,
@@ -13,7 +13,7 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import {
   applyTableAction,
   moveTableAxisTo,
@@ -132,11 +132,16 @@ function TableControls({ editor }: { editor: Editor }) {
             ? axisLayout
             : tableLayout(view, selectedCell, active)
           : null;
-      setLayouts((current) =>
-        !axisLayout && !cellLayout && !current.axes && !current.cells
-          ? current
-          : { axes: axisLayout, cells: cellLayout }
-      );
+      const updateLayout = () =>
+        setLayouts((current) =>
+          !axisLayout && !cellLayout && !current.axes && !current.cells
+            ? current
+            : { axes: axisLayout, cells: cellLayout }
+        );
+      // Native resizing already changed the live DOM. Commit its overlay in this
+      // frame too, instead of letting React defer it until after the next paint.
+      if (columnResizingPluginKey.getState(view.state)?.dragging) flushSync(updateLayout);
+      else updateLayout();
       if (openMenu) {
         const position = openMenu.kind === "cell" ? cellLayout : axisLayout;
         if (!position?.boxes[openMenu.kind]) close();
@@ -166,6 +171,12 @@ function TableControls({ editor }: { editor: Editor }) {
   useEffect(() => {
     const { view } = editor;
     const scheduleHover = (event: PointerEvent) => {
+      // Native resizing previews colgroup widths without document transactions,
+      // and internal boundaries can move while the table's outer size is fixed.
+      if (columnResizingPluginKey.getState(view.state)?.dragging) {
+        refresh();
+        return;
+      }
       if (menu.current || gesture.current) return;
       const target = event.target;
       if (!(target instanceof Element) || controls.current?.contains(target)) return;
