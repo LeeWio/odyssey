@@ -1,3 +1,4 @@
+import { tableVerticalViewport } from "./table-drag-scroll";
 import { tableColumnBounds } from "../../extensions/table/column-layout";
 import type { ResolvedPos } from "@tiptap/pm/model";
 import { TextSelection } from "@tiptap/pm/state";
@@ -92,8 +93,9 @@ export function tableLayout(
   const bounds = table.getBoundingClientRect();
   const left = Math.max(0, bounds.left, wrapper.left, viewport.left);
   const right = Math.min(innerWidth, bounds.right, wrapper.right, viewport.right);
-  const top = Math.max(0, bounds.top, viewport.top);
-  const bottom = Math.min(innerHeight, bounds.bottom, viewport.bottom);
+  const vertical = tableVerticalViewport(table);
+  const top = Math.max(vertical.top, bounds.top, viewport.top);
+  const bottom = Math.min(vertical.bottom, bounds.bottom, viewport.bottom);
   if (left >= right || top >= bottom) return null;
 
   const map = grid($cell);
