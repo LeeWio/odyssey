@@ -36,7 +36,7 @@ import {
   type TableLayout,
 } from "./table-geometry";
 
-const scrollEdge = 28;
+import { scrollTableVertically, tableScrollEdge as scrollEdge } from "./table-drag-scroll";
 type TableGesture = {
   kind: TableTargetKind;
   pointerId: number;
@@ -45,6 +45,7 @@ type TableGesture = {
   selected: CellSelection;
   moving: boolean;
   destination: number | null;
+  scrollTime: number;
 };
 
 function select(editor: Editor, selected: CellSelection) {
@@ -253,6 +254,14 @@ function TableControls({
     };
 
     const dismissRoot = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && gesture.current) {
+        event.preventDefault();
+        event.stopPropagation();
+        clearGesture();
+        view.focus();
+        refresh();
+        return;
+      }
       if (event.key !== "Escape" || !menu.current || !(event.target instanceof Element)) return;
       // Native child menus own their first Escape; only dismiss this editor's root.
       const owner = event.target.closest("[data-table-menu-owner]");
@@ -272,6 +281,7 @@ function TableControls({
     };
 
     const resetHover = () => {
+      clearGesture();
       hovering.current = null;
       refresh();
     };
@@ -346,16 +356,17 @@ function TableControls({
       origin,
       moving: false,
       destination: null,
+      scrollTime: 0,
     };
   };
 
-  const updateGesture = (grip: TableGesture, point: Point) => {
+  const updateGesture = (grip: TableGesture, point: Point, now: number) => {
     if (gesture.current !== grip || editor.isDestroyed) return;
     const { view } = editor;
-    const origin = tableLayout(view, grip.origin.$cell, null);
+    let origin = tableLayout(view, grip.origin.$cell, null);
     if (!origin) return;
     const axis = grip.kind;
-    const bounds = origin.visible;
+    let bounds = origin.visible;
     // A drag can stay in the gutter while the table scrolls. Keep its hit test inside
     // the visible grid, without letting movement away from the table select a cell.
     const closeToGrid =
@@ -369,6 +380,15 @@ function TableControls({
       return;
     }
 
+    const elapsed = grip.scrollTime ? now - grip.scrollTime : 16;
+    // Accumulate subpixel time instead of stopping when a frame cannot move a whole scroll pixel.
+    if (elapsed < 4) {
+      dragFrame.current = requestAnimationFrame((time) => updateGesture(grip, point, time));
+      return;
+    }
+    grip.scrollTime = now;
+    let scrolled = axis !== "column" && scrollTableVertically(origin.table, point, elapsed);
+
     const scroller = origin.table.closest<HTMLElement>(".tableWrapper");
     if (scroller && axis !== "row" && scroller.scrollWidth > scroller.clientWidth) {
       const leftDistance = point.x - bounds.left;
@@ -377,12 +397,23 @@ function TableControls({
       const offset = scroller.scrollLeft;
       if (direction) scroller.scrollLeft += direction * 9;
       if (scroller.scrollLeft !== offset) {
-        refresh();
-        dragFrame.current = requestAnimationFrame(() => updateGesture(grip, point));
+        scrolled = true;
       }
     }
 
-    const x = Math.max(bounds.left + 2, Math.min(point.x, bounds.right - 2));
+    if (scrolled) {
+      refresh();
+      dragFrame.current = requestAnimationFrame((time) => updateGesture(grip, point, time));
+      origin = tableLayout(view, grip.origin.$cell, null);
+      if (!origin) return;
+      bounds = origin.visible;
+    }
+
+    // Row gutters project into the row center, away from clipped/rounded table corners.
+    const x =
+      axis === "row"
+        ? (bounds.left + bounds.right) / 2
+        : Math.max(bounds.left + 2, Math.min(point.x, bounds.right - 2));
     const y = Math.max(bounds.top + 2, Math.min(point.y, bounds.bottom - 2));
     const hits = document.elementsFromPoint(x, y);
     const element = hits.find((hit) => !controls.current?.contains(hit)) ?? null;
@@ -423,7 +454,8 @@ function TableControls({
     if (!grip.moving && Math.hypot(point.x - grip.start.x, point.y - grip.start.y) < 5) return;
     grip.moving = true;
     cancelAnimationFrame(dragFrame.current);
-    updateGesture(grip, point);
+    grip.scrollTime = 0;
+    dragFrame.current = requestAnimationFrame((time) => updateGesture(grip, point, time));
   };
 
   const endGesture = (event: ReactPointerEvent) => {
@@ -431,6 +463,10 @@ function TableControls({
     if (!grip || event.pointerId !== grip.pointerId) return;
     event.preventDefault();
     event.stopPropagation();
+    if (grip.moving) {
+      cancelAnimationFrame(dragFrame.current);
+      updateGesture(grip, { x: event.clientX, y: event.clientY }, event.timeStamp);
+    }
     clearGesture();
     if (!grip.moving) open(grip.kind, grip.selected, grip.origin);
     else {
