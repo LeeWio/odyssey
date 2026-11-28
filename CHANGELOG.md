@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.270.0](https://github.com/LeeWio/odyssey/compare/v1.269.2...v1.270.0) (2026-11-28)
+
+
+### Features
+
+* **editor:** add spreadsheet clipboard and batch table ranges ([#205](https://github.com/LeeWio/odyssey/issues/205)) ([6304ba2](https://github.com/LeeWio/odyssey/commit/6304ba2e7faac4ff6f38f5e66ae9849b0eaaf571))
+
 ## [1.269.2](https://github.com/LeeWio/odyssey/compare/v1.269.1...v1.269.2) (2026-11-28)
 
 
