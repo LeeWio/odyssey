@@ -9,7 +9,6 @@ import {
   BarsAscendingAlignLeftArrowDown,
   BarsDescendingAlignLeftArrowDown,
   BucketPaint,
-  Check,
   Copy,
   Eraser,
   LayoutCellsLarge,
@@ -147,6 +146,9 @@ export function TableActionList({
   const axis = kind !== "cell";
   const rect =
     axis && editor.state.selection instanceof CellSelection ? selectedRect(editor.state) : null;
+  const count = rect ? (row ? rect.bottom - rect.top : rect.right - rect.left) : 1;
+  const noun = row ? "row" : "column";
+  const scope = count > 1 ? `${count} ${noun}s` : noun;
   const atStart = rect && (row ? rect.top === 0 : rect.left === 0);
   const atEnd = rect && (row ? rect.bottom === rect.map.height : rect.right === rect.map.width);
 
@@ -167,11 +169,7 @@ export function TableActionList({
       >
         <Icon aria-hidden="true" className="size-4 shrink-0" />
         <Label>{label}</Label>
-        {action === "header" && (
-          <Dropdown.ItemIndicator>
-            <Check className="size-4" />
-          </Dropdown.ItemIndicator>
-        )}
+        {action === "header" && <Dropdown.ItemIndicator />}
       </Dropdown.Item>
     );
   }
@@ -276,7 +274,12 @@ export function TableActionList({
             selectionMode="multiple"
             selectedKeys={allHeaders ? ["header"] : []}
           >
-            {item("header", `Header ${kind}`, row ? LayoutHeader : LayoutHeaderColumns)}
+            {count > 1 && <Header>{scope} selected</Header>}
+            {item(
+              "header",
+              count > 1 ? `Header ${noun}s` : `Header ${kind}`,
+              row ? LayoutHeader : LayoutHeaderColumns
+            )}
           </Dropdown.Section>
         )}
         {axis && <Separator />}
@@ -285,13 +288,13 @@ export function TableActionList({
             {!atStart &&
               item(
                 "move-before",
-                row ? "Move row up" : "Move column left",
+                row ? `Move ${scope} up` : `Move ${scope} left`,
                 row ? ArrowUp : ArrowLeft
               )}
             {!atEnd &&
               item(
                 "move-after",
-                row ? "Move row down" : "Move column right",
+                row ? `Move ${scope} down` : `Move ${scope} right`,
                 row ? ArrowDown : ArrowRight
               )}
             {item("insert-before", row ? "Insert row above" : "Insert column left", Plus)}
@@ -338,10 +341,10 @@ export function TableActionList({
             </Dropdown.SubmenuTrigger>
           );
         })}
-        {item("clear", axis ? `Clear ${kind} contents` : "Clear contents", Eraser)}
+        {item("clear", axis ? `Clear ${scope} contents` : "Clear contents", Eraser)}
         {axis && <Separator />}
-        {axis && item("duplicate", `Duplicate ${kind}`, Copy)}
-        {axis && item("delete", `Delete ${kind}`, TrashBin, true)}
+        {axis && item("duplicate", `Duplicate ${scope}`, Copy)}
+        {axis && item("delete", `Delete ${scope}`, TrashBin, true)}
         {axis && item("delete-table", "Delete table", TrashBin, true)}
       </Dropdown.Menu>
     </div>

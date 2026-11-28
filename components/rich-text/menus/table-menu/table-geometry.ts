@@ -2,11 +2,7 @@ import type { ResolvedPos } from "@tiptap/pm/model";
 import { TextSelection } from "@tiptap/pm/state";
 import { cellAround, CellSelection, inSameTable, TableMap } from "@tiptap/pm/tables";
 import type { EditorView } from "@tiptap/pm/view";
-import {
-  axisSelection,
-  tableAxisRange,
-  type TableTargetKind,
-} from "../../extensions/table/actions";
+import { tableBandSelection, type TableTargetKind } from "../../extensions/table/actions";
 
 export type Axis = Exclude<TableTargetKind, "cell">;
 export type Box = { left: number; top: number; width: number; height: number };
@@ -31,9 +27,14 @@ function grid($cell: ResolvedPos) {
   return TableMap.get($cell.node(-1));
 }
 
-export function selectBand($cell: ResolvedPos, kind: Axis, index: number) {
-  const map = grid($cell);
-  return axisSelection($cell.doc, $cell.start(-1), map, kind, tableAxisRange(map, kind, index));
+export function selectBand(
+  $cell: ResolvedPos,
+  kind: Axis,
+  index: number,
+  active: CellSelection | null = null,
+  extend = false
+) {
+  return tableBandSelection($cell, kind, index, active, extend);
 }
 
 /** WebKit exposes zero-sized COL rects. Fixed-layout tracks follow the first row. */

@@ -1,6 +1,6 @@
 import type { Editor } from "@tiptap/core";
 import { closeHistory } from "@tiptap/pm/history";
-import { Fragment, type Node } from "@tiptap/pm/model";
+import { Fragment, type Node, type ResolvedPos } from "@tiptap/pm/model";
 import type { Transaction } from "@tiptap/pm/state";
 import {
   addColumnAfter,
@@ -96,6 +96,47 @@ export function axisSelection(
   const last =
     axis === "row" ? band.end * map.width - 1 : (map.height - 1) * map.width + band.end - 1;
   return CellSelection.create(doc, tableStart + map.map[first], tableStart + map.map[last]);
+}
+
+/** Expand a cell range to whole, merge-safe bands without losing its multi-band target. */
+export function tableBandSelection(
+  $cell: ResolvedPos,
+  axis: Axis,
+  index: number,
+  active: CellSelection | null = null,
+  extend = false
+) {
+  const table = $cell.node(-1);
+  const start = $cell.start(-1);
+  const map = TableMap.get(table);
+  const target = tableAxisRange(map, axis, index);
+  let band = target;
+  let reverse = false;
+  if (active && active.$anchorCell.node(-1) === table && active.$anchorCell.start(-1) === start) {
+    const rect = map.rectBetween(active.$anchorCell.pos - start, active.$headCell.pos - start);
+    const first = axis === "row" ? rect.top : rect.left;
+    const last = axis === "row" ? rect.bottom : rect.right;
+    if (extend) {
+      const anchor = map.findCell(active.$anchorCell.pos - start);
+      const anchorIndex = axis === "row" ? anchor.top : anchor.left;
+      const origin = tableAxisRange(map, axis, anchorIndex);
+      band = { start: Math.min(origin.start, target.start), end: Math.max(origin.end, target.end) };
+      reverse = index < anchorIndex;
+    } else if (
+      index >= first &&
+      index < last &&
+      !(axis === "row"
+        ? active.isColSelection() && !active.isRowSelection()
+        : active.isRowSelection() && !active.isColSelection())
+    ) {
+      band = {
+        start: tableAxisRange(map, axis, first).start,
+        end: tableAxisRange(map, axis, last - 1).end,
+      };
+    }
+  }
+  const selected = axisSelection($cell.doc, start, map, axis, band);
+  return reverse ? new CellSelection(selected.$headCell, selected.$anchorCell) : selected;
 }
 
 function applyAxisOrder(
