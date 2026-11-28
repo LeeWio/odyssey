@@ -155,11 +155,12 @@ export function TableActionList({
         textValue={label}
         isDisabled={!applyTableAction(editor, kind, action, false, sortColumn)}
         variant={danger ? "danger" : undefined}
-        className={action === "header" ? "data-[selected=true]:bg-default" : undefined}
+        className={action === "header" ? "ps-2.5! pe-7!" : undefined}
         onAction={() => onAction(action)}
       >
         <Icon aria-hidden="true" className="size-4 shrink-0" />
         <Label>{label}</Label>
+        {action === "header" && <Dropdown.ItemIndicator className="start-auto! end-2.5!" />}
       </Dropdown.Item>
     );
   }
@@ -279,9 +280,12 @@ export function TableActionList({
               </Dropdown.Item>
               <Dropdown.Popover
                 placement={narrow ? "bottom start" : "right top"}
-                className="pointer-events-auto max-h-[min(24rem,75dvh)] overflow-y-auto data-[exiting=true]:pointer-events-none"
+                className="pointer-events-auto max-h-[min(24rem,75dvh)] w-56 overflow-y-auto data-[exiting=true]:pointer-events-none"
               >
-                <Dropdown.Menu aria-label={name} className="w-48">
+                <Dropdown.Menu
+                  aria-label={name}
+                  className="max-h-[min(24rem,75dvh)] overflow-y-auto"
+                >
                   {formatSections(name)}
                 </Dropdown.Menu>
               </Dropdown.Popover>
