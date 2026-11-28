@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.270.1](https://github.com/LeeWio/odyssey/compare/v1.270.0...v1.270.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* **editor:** align table controls and restore native submenus ([#207](https://github.com/LeeWio/odyssey/issues/207)) ([976e982](https://github.com/LeeWio/odyssey/commit/976e982d860a460c8f960e125d06022950b4671d))
+
 ## [1.270.0](https://github.com/LeeWio/odyssey/compare/v1.269.2...v1.270.0) (2026-11-28)
 
 
