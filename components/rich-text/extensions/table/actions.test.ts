@@ -248,6 +248,8 @@ describe("table actions", () => {
     select(0, 0, 1, 1);
     expect(applyTableAction(editor, "column", "distribute-columns")).toBe(true);
     expect(viewForUpload()).toBe(dom);
+    expect(applyTableAction(editor, "column", { width: 180 })).toBe(true);
+    expect(viewForUpload()).toBe(dom);
     expect(applyTableAction(editor, "column", "reset-column-widths")).toBe(true);
     expect(viewForUpload()).toBe(dom);
     select(0, 1, 1, 1);

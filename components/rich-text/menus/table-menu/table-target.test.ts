@@ -50,3 +50,14 @@ describe("table menu target", () => {
     expect(mapMenuTarget(target, [state.tr.setSelection(TextSelection.atEnd(doc))])).toBeNull();
   });
 });
+
+it("retains a dialog-owned target across focus selection changes but still invalidates deleted cells", () => {
+  const moved = state.tr.setSelection(TextSelection.atEnd(doc));
+  expect(mapMenuTarget(target, [moved], { dismissOnSelectionChange: false })).toBe(target);
+  const shifted = state.tr.insert(0, paragraph);
+  const mapped = mapMenuTarget(target, [shifted], { dismissOnSelectionChange: false });
+  expect(mapped?.selected.$anchorCell.pos).toBe(selection.$anchorCell.pos + paragraph.nodeSize);
+  expect(
+    mapMenuTarget(target, [state.tr.delete(0, table.nodeSize)], { dismissOnSelectionChange: false })
+  ).toBeNull();
+});

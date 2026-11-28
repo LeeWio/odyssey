@@ -43,6 +43,7 @@ interface TableActionListProps {
   onAction: (action: TableAction) => void;
   ownerId: string;
   onClose: () => void;
+  onEditWidth: () => void;
 }
 
 const palette = [
@@ -127,6 +128,7 @@ export function TableActionList({
   onAction,
   ownerId,
   onClose,
+  onEditWidth,
 }: TableActionListProps) {
   const { common, allHeaders } = selectionFormat(editor);
   const narrow = useMediaQuery("(max-width: 600px)");
@@ -143,7 +145,7 @@ export function TableActionList({
   const atEnd = rect && (row ? rect.bottom === rect.map.height : rect.right === rect.map.width);
 
   function item(
-    action: Exclude<TableAction, FormatAction>,
+    action: Extract<TableAction, string>,
     label: string,
     Icon: typeof Plus,
     danger = false
@@ -256,6 +258,14 @@ export function TableActionList({
         )}
         {kind === "column" && (
           <Dropdown.Section aria-label="Column widths">
+            <Dropdown.Item
+              id="set-column-width"
+              textValue="Set column width…"
+              onAction={onEditWidth}
+            >
+              <ArrowsExpandHorizontal aria-hidden="true" className="size-4 shrink-0" />
+              <Label>Set column width…</Label>
+            </Dropdown.Item>
             {item("distribute-columns", "Distribute columns evenly", ArrowsExpandHorizontal)}
             {item("fit-columns", "Fit to content", ArrowsExpandHorizontal)}
             {item("reset-column-widths", "Reset column widths", Eraser)}

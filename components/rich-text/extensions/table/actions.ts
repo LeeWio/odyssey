@@ -31,6 +31,7 @@ type FormatAction = {
 };
 export type TableAction =
   | FormatAction
+  | { width: number }
   | "header"
   | "move-before"
   | "move-after"
@@ -365,6 +366,8 @@ export function applyTableAction(
     : undefined;
 
   if (typeof action === "object") {
+    if ("width" in action)
+      return kind === "column" && setSelectedColumnWidths(editor, rect, action.width, execute);
     const tr = state.tr;
     let changed = false;
     selection.forEachCell((cell, pos) => {
