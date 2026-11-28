@@ -155,11 +155,11 @@ export function TableActionList({
         textValue={label}
         isDisabled={!applyTableAction(editor, kind, action, false, sortColumn)}
         variant={danger ? "danger" : undefined}
+        className={action === "header" ? "data-[selected=true]:bg-default" : undefined}
         onAction={() => onAction(action)}
       >
         <Icon aria-hidden="true" className="size-4 shrink-0" />
         <Label>{label}</Label>
-        {action === "header" && <Dropdown.ItemIndicator />}
       </Dropdown.Item>
     );
   }
@@ -251,6 +251,12 @@ export function TableActionList({
           <Dropdown.Section aria-label="Sort rows">
             {item("sort-asc", "Sort column A–Z", BarsAscendingAlignLeftArrowDown)}
             {item("sort-desc", "Sort column Z–A", BarsDescendingAlignLeftArrowDown)}
+          </Dropdown.Section>
+        )}
+        {kind === "column" && (
+          <Dropdown.Section aria-label="Column widths">
+            {item("distribute-columns", "Distribute columns evenly", ArrowsExpandHorizontal)}
+            {item("reset-column-widths", "Reset column widths", Eraser)}
           </Dropdown.Section>
         )}
         {!axis && (canSplit || canMerge) && (

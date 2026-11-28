@@ -13,12 +13,17 @@ import {
 } from "@tiptap/pm/tables";
 import type { EditorView } from "@tiptap/pm/view";
 
-const maxCells = 10_000;
-const maxTextLength = 1_000_000;
+export const TABLE_PASTE_LIMITS = { cells: 10_000, textLength: 1_000_000 } as const;
+const { cells: maxCells, textLength: maxTextLength } = TABLE_PASTE_LIMITS;
+export type TablePasteFailure = { reason: "text-limit" | "cell-limit" | "invalid-format" };
+export type TableTextResult =
+  { ok: true; values: string[][] } | ({ ok: false } & TablePasteFailure);
+export const TABLE_PASTE_REJECTED = "table-paste-rejected";
 
 /** Spreadsheet TSV: quoted fields can contain tabs, line breaks, and doubled quotes. */
-export function parseTableText(text: string): string[][] | null {
-  if (!text || text.length > maxTextLength) return null;
+export function parseTableText(text: string): TableTextResult {
+  if (text.length > maxTextLength) return { ok: false, reason: "text-limit" };
+  if (!text) return { ok: false, reason: "invalid-format" };
   const rows: string[][] = [];
   let row: string[] = [];
   let field = "";
@@ -53,26 +58,29 @@ export function parseTableText(text: string): string[][] | null {
       continue;
     }
     if (char === "\t" || char === "\n" || char === "\r") {
-      if (!pushField()) return null;
+      if (!pushField()) return { ok: false, reason: "cell-limit" };
       if (char !== "\t") {
         rows.push(row);
         row = [];
         if (char === "\r" && text[index + 1] === "\n") index++;
       }
     } else {
-      if (closed) return null;
+      if (closed) return { ok: false, reason: "invalid-format" };
       field += char;
     }
   }
-  if (quoted) return null;
+  if (quoted) return { ok: false, reason: "invalid-format" };
   // A final row delimiter terminates the last record; it does not add a blank record.
   if (row.length || field || closed || !rows.length) {
-    if (!pushField()) return null;
+    if (!pushField()) return { ok: false, reason: "cell-limit" };
     rows.push(row);
   }
   const width = Math.max(...rows.map((record) => record.length));
-  if (width * rows.length > maxCells) return null;
-  return rows.map((record) => Array.from({ length: width }, (_, col) => record[col] ?? ""));
+  if (width * rows.length > maxCells) return { ok: false, reason: "cell-limit" };
+  return {
+    ok: true,
+    values: rows.map((record) => Array.from({ length: width }, (_, col) => record[col] ?? "")),
+  };
 }
 
 function quoteField(text: string) {
@@ -141,7 +149,11 @@ function spreadsheetSlice(view: EditorView, values: string[][]) {
 }
 
 /** Plain spreadsheets get grid semantics; rich HTML keeps ProseMirror's native paste. */
-export function pasteTableText(view: EditorView, event: ClipboardEvent) {
+export function pasteTableText(
+  view: EditorView,
+  event: ClipboardEvent,
+  onRejected?: (failure: TablePasteFailure) => void
+) {
   if (!view.editable || !isInTable(view.state) || !event.clipboardData) return false;
   const selection = view.state.selection;
   if (!(selection instanceof CellSelection)) {
@@ -157,10 +169,18 @@ export function pasteTableText(view: EditorView, event: ClipboardEvent) {
     !(view.state.selection instanceof CellSelection && /[\r\n]/.test(text))
   )
     return false;
-  const values = parseTableText(text);
-  if (!values) return false;
-  const slice = spreadsheetSlice(view, values);
-  if (!slice) return false;
+  const reject = (failure: TablePasteFailure) => {
+    // A handled rejection prevents the native paste fallback; no document step is created.
+    view.dispatch(
+      view.state.tr.setMeta(TABLE_PASTE_REJECTED, failure).setMeta("addToHistory", false)
+    );
+    onRejected?.(failure);
+    return true;
+  };
+  const result = parseTableText(text);
+  if (!result.ok) return reject({ reason: result.reason });
+  const slice = spreadsheetSlice(view, result.values);
+  if (!slice) return reject({ reason: "cell-limit" });
   // Isolate the one native document transaction from adjacent typing and formatting.
   view.dispatch(closeHistory(view.state.tr));
   const pasted = handlePaste(view, event, slice);
@@ -168,11 +188,11 @@ export function pasteTableText(view: EditorView, event: ClipboardEvent) {
   return pasted;
 }
 
-export function tableClipboardPlugin() {
+export function tableClipboardPlugin(onRejected?: (failure: TablePasteFailure) => void) {
   return new Plugin({
     key: new PluginKey("table-spreadsheet-clipboard"),
     props: {
-      handlePaste: pasteTableText,
+      handlePaste: (view, event) => pasteTableText(view, event, onRejected),
       // A falsy result delegates all non-cell text selections to the next serializer.
       clipboardTextSerializer: (_, view) =>
         view.state.selection instanceof CellSelection
