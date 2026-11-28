@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.269.2](https://github.com/LeeWio/odyssey/compare/v1.269.1...v1.269.2) (2026-11-28)
+
+
+### Bug Fixes
+
+* **editor:** align table selection borders and restore WebKit controls ([#203](https://github.com/LeeWio/odyssey/issues/203)) ([82b4ae6](https://github.com/LeeWio/odyssey/commit/82b4ae67891175b275f016c33b6587961a898a4b))
+
 ## [1.269.1](https://github.com/LeeWio/odyssey/compare/v1.269.0...v1.269.1) (2026-11-28)
 
 
