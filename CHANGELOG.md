@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.274.0](https://github.com/LeeWio/odyssey/compare/v1.273.0...v1.274.0) (2026-11-28)
+
+
+### Features
+
+* **editor:** autoscroll vertical table drag gestures ([#223](https://github.com/LeeWio/odyssey/issues/223)) ([6e7dfe4](https://github.com/LeeWio/odyssey/commit/6e7dfe45b7cdeb9110ba1d4f1311cf6a9fe43155))
+
 ## [1.273.0](https://github.com/LeeWio/odyssey/compare/v1.272.2...v1.273.0) (2026-11-28)
 
 
