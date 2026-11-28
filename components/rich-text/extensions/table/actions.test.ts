@@ -245,6 +245,11 @@ describe("table actions", () => {
     };
     const dom = viewForUpload();
     expect(dom).not.toBeNull();
+    select(0, 0, 1, 1);
+    expect(applyTableAction(editor, "column", "distribute-columns")).toBe(true);
+    expect(viewForUpload()).toBe(dom);
+    expect(applyTableAction(editor, "column", "reset-column-widths")).toBe(true);
+    expect(viewForUpload()).toBe(dom);
     select(0, 1, 1, 1);
     expect(applyTableAction(editor, "column", "duplicate", false)).toBe(false);
     const beforeMerge = editor.state.doc;
@@ -304,4 +309,33 @@ describe("table actions", () => {
     expect(applyTableAction(editor, "row", "delete-table")).toBe(true);
     expect(cellTexts()).toEqual([["First"]]);
   });
+});
+
+it("restores a merged/inserted/moved/deleted table through each undo and redo", () => {
+  open(
+    '<table><tr><th colwidth="120">A</th><th colwidth="180">B</th><th colwidth="220">C</th></tr><tr><td colwidth="120">1</td><td colwidth="180">2</td><td colwidth="220">3</td></tr><tr><td colwidth="120">4</td><td colwidth="180">5</td><td colwidth="220">6</td></tr></table>'
+  );
+  select(0, 0, 0, 1);
+  const snapshots = [editor.getJSON()];
+  expect(applyTableAction(editor, "cell", "merge")).toBe(true);
+  snapshots.push(editor.getJSON());
+  select(0, 2, 2, 2);
+  expect(applyTableAction(editor, "column", "insert-after")).toBe(true);
+  snapshots.push(editor.getJSON());
+  select(1, 0, 1, 3);
+  expect(applyTableAction(editor, "row", "move-after")).toBe(true);
+  snapshots.push(editor.getJSON());
+  select(0, 2, 2, 2);
+  expect(applyTableAction(editor, "column", "delete")).toBe(true);
+  snapshots.push(editor.getJSON());
+  for (let index = snapshots.length - 2; index >= 0; index--) {
+    expect(editor.commands.undo()).toBe(true);
+    expect(editor.getJSON()).toEqual(snapshots[index]);
+    expect(TableMap.get(activeTable()).problems).toBeNull();
+  }
+  for (let index = 1; index < snapshots.length; index++) {
+    expect(editor.commands.redo()).toBe(true);
+    expect(editor.getJSON()).toEqual(snapshots[index]);
+    expect(TableMap.get(activeTable()).problems).toBeNull();
+  }
 });

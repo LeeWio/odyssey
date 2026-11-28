@@ -320,12 +320,12 @@ test("draws the active and merged selection on the grid boundary", async ({ page
   await expect(table.locator("th")).toHaveCount(1);
   await expect(table.locator("th")).toHaveAttribute("colspan", "2");
   await expect(outline).toBeVisible();
-  const corner = await outline.evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
   const radius = await table.evaluate(
     (el) => getComputedStyle(el.closest(".tableWrapper")!).borderTopLeftRadius
   );
-  expect(corner).toBe(radius);
-  expect(await outline.evaluate((el) => getComputedStyle(el).borderBottomLeftRadius)).toBe("0px");
+  // The overlay follows document changes on the next animation frame.
+  await expect(outline).toHaveCSS("border-top-left-radius", radius);
+  await expect(outline).toHaveCSS("border-bottom-left-radius", "0px");
 });
 
 test("clips the real selected band instead of drawing an edge at the scroll boundary", async ({

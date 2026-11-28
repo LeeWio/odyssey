@@ -32,6 +32,8 @@ export const RICH_TEXT_PROSE_CLASS_NAME = [
   "[&_span[data-type=emoji]>img]:inline-block [&_span[data-type=emoji]>img]:size-[1em] [&_span[data-type=emoji]>img]:align-text-bottom [&_span[data-type=emoji]>img]:rounded-none",
   // Match HeroUI Table's theme-driven outer radius, including square-corner themes.
   "[&_.tableWrapper]:min-w-0 [&_.tableWrapper]:max-w-full [&_.tableWrapper]:overflow-x-auto [&_.tableWrapper]:rounded-[min(32px,calc(var(--radius)*2.5))]! [&_.tableWrapper]:border [&_.tableWrapper]:border-separator [&_.tableWrapper]:bg-surface",
+  // Cell ranges inherit local highlight styling; avoid invalidating the whole editor.
+  "[&_.selectedCell::selection]:bg-transparent [&_.selectedCell]:caret-transparent",
   // Leave a symmetric 20px editor gutter for the 16px controls and 4px clear gap.
   "[&[contenteditable=true]_.tableWrapper]:mx-5! [&[contenteditable=true]_.tableWrapper]:my-5!",
   "[&_.tableWrapper_table]:m-0! [&_.tableWrapper_table]:w-full [&_.tableWrapper_table]:max-w-full [&_.tableWrapper_table]:table-fixed [&_.tableWrapper_table]:overflow-hidden [&_.tableWrapper_table]:border-collapse! [&_.tableWrapper_table]:border-hidden!",

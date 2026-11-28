@@ -2,15 +2,15 @@
 
 import { Ellipsis, EllipsisVertical, Grip, Plus } from "@gravity-ui/icons";
 import { Button, Dropdown, Tooltip } from "@heroui/react";
-import type { PointerEventHandler, ReactNode, Ref } from "react";
+import type { KeyboardEventHandler, PointerEventHandler, ReactNode, Ref } from "react";
 import type { TableTargetKind } from "../../extensions/table/actions";
 import type { Axis, Box } from "./table-geometry";
 
 const labels = { row: "Row actions", column: "Column actions", cell: "Cell actions" } as const;
 const icons = { row: EllipsisVertical, column: Ellipsis, cell: Grip };
 const hints = {
-  row: "Row actions. Drag to reorder; Shift-click to extend selection.",
-  column: "Column actions. Drag to reorder; Shift-click to extend selection.",
+  row: "Row actions. Drag to reorder; Shift-click or Shift-arrow to extend selection.",
+  column: "Column actions. Drag to reorder; Shift-click or Shift-arrow to extend selection.",
   cell: "Cell actions. Drag to select a range.",
 };
 const hitArea = "before:absolute before:-inset-1 before:content-['']";
@@ -23,6 +23,7 @@ export function TableActionHandle({
   menuOpen,
   onOpenChange,
   onPointerDownCapture,
+  onKeyDown,
   buttonRef,
   portal,
   children,
@@ -33,6 +34,7 @@ export function TableActionHandle({
   menuOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onPointerDownCapture: PointerEventHandler<HTMLDivElement>;
+  onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
   buttonRef?: Ref<HTMLButtonElement>;
   portal: HTMLElement;
   children: ReactNode;
@@ -43,6 +45,7 @@ export function TableActionHandle({
       className={`pointer-events-auto absolute flex touch-none ${kind === "cell" ? "z-10" : ""}`}
       style={box}
       onPointerDownCapture={onPointerDownCapture}
+      onKeyDown={onKeyDown}
     >
       <Tooltip isDisabled={menuOpen}>
         <Dropdown isOpen={isOpen} onOpenChange={onOpenChange}>

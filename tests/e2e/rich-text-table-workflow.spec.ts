@@ -97,6 +97,15 @@ test("rich HTML table paste retains its native formatting and grows at the last 
 }) => {
   const editor = page.getByRole("textbox", { name: "Rich text editor", exact: true });
   await editor.getByRole("cell", { name: "Remote", exact: true }).click();
+  // Synthetic paste must wait for the browser's click selection to reach the editor model.
+  await expect
+    .poll(() =>
+      editor.evaluate(
+        (el) =>
+          (el as HTMLElement & { editor: Editor }).editor.state.selection.$from.parent.textContent
+      )
+    )
+    .toBe("Remote");
   await paste(
     editor,
     "First\tSecond\nThird\tFourth",

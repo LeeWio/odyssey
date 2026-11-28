@@ -23,9 +23,11 @@ export function TableFeedback() {
       setFeedback((current) =>
         current.text === text && current.rejected === rejected ? current : { text, rejected }
       );
-    const update = ({ transaction }: EditorEvents["transaction"]) => {
+    const update = ({ transaction, appendedTransactions }: EditorEvents["transaction"]) => {
       const rejection = transaction.getMeta(TABLE_PASTE_REJECTED) as TablePasteFailure | undefined;
-      const action = transaction.getMeta(TABLE_ACTION_STATUS) as string | undefined;
+      const action = [transaction, ...appendedTransactions]
+        .map((tr) => tr.getMeta(TABLE_ACTION_STATUS))
+        .find(Boolean) as string | undefined;
       const selected = tableSelectionStatus(editor.state);
       if (rejection) {
         const text = tablePasteFailureMessage(rejection);

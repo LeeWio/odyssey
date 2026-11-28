@@ -256,6 +256,7 @@ export function TableActionList({
         {kind === "column" && (
           <Dropdown.Section aria-label="Column widths">
             {item("distribute-columns", "Distribute columns evenly", ArrowsExpandHorizontal)}
+            {item("fit-columns", "Fit to content", ArrowsExpandHorizontal)}
             {item("reset-column-widths", "Reset column widths", Eraser)}
           </Dropdown.Section>
         )}

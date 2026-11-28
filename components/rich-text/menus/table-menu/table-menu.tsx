@@ -66,6 +66,8 @@ function TableControls({ editor }: { editor: Editor }) {
   const gesture = useRef<TableGesture | null>(null);
   const controls = useRef<HTMLDivElement>(null);
   const rowButton = useRef<HTMLButtonElement>(null);
+  const columnButton = useRef<HTMLButtonElement>(null);
+  const cellButton = useRef<HTMLButtonElement>(null);
   const frame = useRef(0);
   const dragFrame = useRef(0);
   const portal =
@@ -235,9 +237,15 @@ function TableControls({ editor }: { editor: Editor }) {
     const dismissRoot = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || !menu.current || !(event.target instanceof Element)) return;
       // Native child menus own their first Escape; only dismiss this editor's root.
+      const owner = event.target.closest("[data-table-menu-owner]");
+      // The root can be open before its overlay has moved focus. Escape still
+      // dismisses that menu instead of collapsing the editor's range underneath it.
       if (
-        event.target.closest("[data-table-menu-owner]")?.getAttribute("data-table-menu-owner") !==
-        menuOwner
+        owner?.getAttribute("data-table-menu-owner") !== menuOwner &&
+        !view.dom.contains(event.target) &&
+        !controls.current?.contains(event.target) &&
+        event.target !== document.body &&
+        event.target !== document.documentElement
       )
         return;
       event.preventDefault();
@@ -488,7 +496,92 @@ function TableControls({ editor }: { editor: Editor }) {
             isOpen={kind === targetKind}
             menuOpen={!!kind}
             portal={portal}
-            buttonRef={targetKind === "row" ? rowButton : undefined}
+            buttonRef={
+              targetKind === "row" ? rowButton : targetKind === "column" ? columnButton : cellButton
+            }
+            onKeyDown={(event) => {
+              if (
+                kind ||
+                event.altKey ||
+                event.metaKey ||
+                event.ctrlKey ||
+                origin.$cell.doc !== editor.state.doc
+              )
+                return;
+              if (event.key === "Escape") {
+                event.preventDefault();
+                editor.view.focus();
+                return;
+              }
+              const delta =
+                event.key === "ArrowDown" || event.key === "ArrowRight"
+                  ? 1
+                  : event.key === "ArrowUp" || event.key === "ArrowLeft"
+                    ? -1
+                    : 0;
+              if (!delta) return;
+              if (
+                event.shiftKey &&
+                targetKind !== "cell" &&
+                (targetKind === "row"
+                  ? /Arrow(Up|Down)/.test(event.key)
+                  : /Arrow(Left|Right)/.test(event.key))
+              ) {
+                event.preventDefault();
+                event.stopPropagation();
+                const current = activeCells(editor.view);
+                if (!current) return;
+                const anchor = origin.map.findCell(
+                  current.$anchorCell.pos - origin.$cell.start(-1)
+                );
+                const opposite =
+                  targetKind === "row"
+                    ? current.isColSelection() && !current.isRowSelection()
+                    : current.isRowSelection() && !current.isColSelection();
+                const ownsAxis =
+                  targetKind === "row" ? current.isRowSelection() : current.isColSelection();
+                const active = ownsAxis
+                  ? current
+                  : selectBand(
+                      origin.$cell,
+                      targetKind,
+                      opposite
+                        ? targetKind === "row"
+                          ? anchor.top
+                          : anchor.left
+                        : origin[targetKind],
+                      opposite ? null : current
+                    );
+                const head = origin.map.findCell(active.$headCell.pos - origin.$cell.start(-1));
+                const index =
+                  targetKind === "row"
+                    ? delta > 0
+                      ? head.bottom
+                      : head.top - 1
+                    : delta > 0
+                      ? head.right
+                      : head.left - 1;
+                const size = targetKind === "row" ? origin.map.height : origin.map.width;
+                if (index >= 0 && index < size)
+                  select(editor, selectBand(origin.$cell, targetKind, index, active, true));
+                refresh();
+              } else if (
+                !event.shiftKey &&
+                (event.key === "ArrowLeft" || event.key === "ArrowRight")
+              ) {
+                event.preventDefault();
+                event.stopPropagation();
+                const buttons = [
+                  rowButton.current,
+                  columnButton.current,
+                  cellButton.current,
+                ].filter((button): button is HTMLButtonElement => !!button);
+                const index = buttons.indexOf(event.currentTarget.querySelector("button")!);
+                buttons[(index + delta + buttons.length) % buttons.length]?.focus({
+                  preventScroll: true,
+                });
+              }
+            }}
             onPointerDownCapture={(event) => startGesture(event, targetKind, origin)}
             onOpenChange={(next) => {
               if (!next) {

@@ -15,6 +15,7 @@ import { ColumnsMenu } from "./menus/columns-menu/columns-menu";
 import { ImageMenu } from "./menus/image-menu/image-menu";
 import { LinkMenu } from "./menus/link-menu/link-menu";
 import { MathMenu } from "./menus/math-menu";
+import { TableResizeFeedback } from "./menus/table-menu/table-resize-feedback";
 import { TableFeedback } from "./menus/table-menu/table-feedback";
 import { TableMenu } from "./menus/table-menu/table-menu";
 import { TextMenu } from "./menus/text-menu/text-menu";
@@ -127,6 +128,7 @@ export function RichText({
           <>
             <SuggestionToolbar />
             <TableFeedback />
+            <TableResizeFeedback />
             <EditorFooter />
           </>
         ) : null}

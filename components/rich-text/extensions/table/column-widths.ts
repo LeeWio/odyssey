@@ -1,3 +1,4 @@
+import { contentColumnWidths } from "./content-widths";
 import type { Editor } from "@tiptap/core";
 import { closeHistory } from "@tiptap/pm/history";
 import type { TableRect } from "@tiptap/pm/tables";
@@ -7,7 +8,7 @@ import { tableColumnBounds } from "./column-layout";
 export function setSelectedColumnWidths(
   editor: Editor,
   rect: TableRect,
-  mode: "distribute" | "reset",
+  mode: "distribute" | "reset" | "fit",
   execute: boolean
 ) {
   const { table, tableStart, map, left, right } = rect;
@@ -23,6 +24,7 @@ export function setSelectedColumnWidths(
         ? (element as HTMLTableElement)
         : element.querySelector("table")
       : null;
+  if (mode === "fit" && !execute) return !!dom;
   // Measure only an actual width command, not every menu capability query.
   const bounds = mode === "distribute" && execute && dom ? tableColumnBounds(dom) : [];
   // TableView and tableEditing use the first row as the canonical track vector.
@@ -39,9 +41,13 @@ export function setSelectedColumnWidths(
   );
   const base = Math.floor(total / count);
   const remainder = total - base * count;
-  const target = Array.from({ length: count }, (_, index) =>
-    mode === "reset" ? 0 : base + (index < remainder ? 1 : 0)
-  );
+  const target =
+    mode === "fit"
+      ? contentColumnWidths(editor, rect, widths, minimum)
+      : Array.from({ length: count }, (_, index) =>
+          mode === "reset" ? 0 : base + (index < remainder ? 1 : 0)
+        );
+  if (!target) return false;
   const tr = editor.state.tr;
   let changed = false;
   const seen = new Set<number>();
