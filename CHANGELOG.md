@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.269.1](https://github.com/LeeWio/odyssey/compare/v1.269.0...v1.269.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* **editor:** refine table selection and drag interactions ([#201](https://github.com/LeeWio/odyssey/issues/201)) ([e402e1b](https://github.com/LeeWio/odyssey/commit/e402e1b2b8fee3f2068d1fca125f86751c0d96ec))
+
 ## [1.269.0](https://github.com/LeeWio/odyssey/compare/v1.268.3...v1.269.0) (2026-11-27)
 
 
