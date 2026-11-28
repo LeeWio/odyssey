@@ -30,6 +30,7 @@ import {
   cellAtElement,
   selectBand,
   tableLayout,
+  tableLayoutReader,
   type Axis,
   type Box,
   type Point,
@@ -110,6 +111,10 @@ function TableControls({
     frame.current = requestAnimationFrame(() => {
       frame.current = 0;
       if (editor.isDestroyed) return;
+      if (!editor.isEditable) {
+        setLayouts({ axes: null, cells: null });
+        return;
+      }
       const { view } = editor;
       const hover = hovering.current;
       const pointerCell = hover ? cellAtElement(view, hover.element) : null;
@@ -285,6 +290,15 @@ function TableControls({
       hovering.current = null;
       refresh();
     };
+    const editable = () => {
+      if (!editor.isEditable) {
+        clearGesture();
+        close();
+        hovering.current = null;
+        setLayouts({ axes: null, cells: null });
+      }
+    };
+    editor.on("update", editable);
     editor.on("transaction", transaction);
     view.dom.addEventListener("keydown", keys);
     document.addEventListener("keydown", dismissRoot, true);
@@ -299,6 +313,7 @@ function TableControls({
       cancelAnimationFrame(frame.current);
       cancelAnimationFrame(dragFrame.current);
       frame.current = 0;
+      editor.off("update", editable);
       editor.off("transaction", transaction);
       view.dom.removeEventListener("keydown", keys);
       document.removeEventListener("keydown", dismissRoot, true);
@@ -362,8 +377,13 @@ function TableControls({
 
   const updateGesture = (grip: TableGesture, point: Point, now: number) => {
     if (gesture.current !== grip || editor.isDestroyed) return;
+    if (!editor.isEditable) {
+      clearGesture();
+      return;
+    }
     const { view } = editor;
-    let origin = tableLayout(view, grip.origin.$cell, null);
+    let readLayout = tableLayoutReader(view);
+    let origin = readLayout(grip.origin.$cell, null);
     if (!origin) return;
     const axis = grip.kind;
     let bounds = origin.visible;
@@ -404,7 +424,8 @@ function TableControls({
     if (scrolled) {
       refresh();
       dragFrame.current = requestAnimationFrame((time) => updateGesture(grip, point, time));
-      origin = tableLayout(view, grip.origin.$cell, null);
+      readLayout = tableLayoutReader(view);
+      origin = readLayout(grip.origin.$cell, null);
       if (!origin) return;
       bounds = origin.visible;
     }
@@ -428,7 +449,8 @@ function TableControls({
     }
 
     select(editor, grip.selected);
-    const destination = tableLayout(view, target, null, point);
+    if (gesture.current !== grip || grip.selected.$anchorCell.doc !== editor.state.doc) return;
+    const destination = readLayout(target, null, point);
     if (!destination) return;
     const index = destination[axis];
     const box = destination.boxes[axis];
