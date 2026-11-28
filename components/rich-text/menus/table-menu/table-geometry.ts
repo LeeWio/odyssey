@@ -140,32 +140,40 @@ export function tableLayout(
   const colRect = columns[column];
   if (!rowRect || !colRect || !columns) return null;
 
-  const strip = 14;
-  // prosemirror-tables hit-tests 5px inside a 5px resize track to resolve the cell.
-  const resizeLane = 11;
-  const rowLeft = Math.max(viewport.left, left - strip - 2);
-  const colTop = Math.max(viewport.top, top - strip - 2);
-  const rowBox = clipped(
-    rowLeft,
-    Math.max(top, rowRect.top),
-    rowLeft + strip,
-    Math.min(bottom, rowRect.bottom)
-  );
-  const columnBox = clipped(
-    Math.max(left, colRect.left),
-    colTop,
-    Math.min(right, colRect.right),
-    colTop + strip
-  );
-  // If the viewport clips the outside gutter, put the add button inside the grid
-  // with a clear lane at its edge for ProseMirror's last-column resize handle.
-  const outsideRight = Math.min(viewport.right, innerWidth) - right;
-  const addRight = outsideRight >= strip + 2 ? right + strip + 2 : right - resizeLane;
-  const addBottom = Math.min(viewport.bottom, innerHeight, bottom + strip + 2);
+  const strip = 16;
+  const gap = 4;
+  const gutter = {
+    left: wrapper.left - gap - strip,
+    top: wrapper.top - gap - strip,
+    right: wrapper.right + gap,
+    bottom: wrapper.bottom + gap,
+  };
+  const rowBox =
+    gutter.left >= Math.max(0, viewport.left)
+      ? clipped(
+          gutter.left,
+          Math.max(top, rowRect.top),
+          gutter.left + strip,
+          Math.min(bottom, rowRect.bottom)
+        )
+      : null;
+  const columnBox =
+    gutter.top >= Math.max(0, viewport.top)
+      ? clipped(
+          Math.max(left, colRect.left),
+          gutter.top,
+          Math.min(right, colRect.right),
+          gutter.top + strip
+        )
+      : null;
   const addColumn =
-    bounds.right <= right + 1 ? clipped(addRight - strip, top, addRight, bottom) : null;
+    bounds.right <= right + 1 && gutter.right + strip <= Math.min(viewport.right, innerWidth)
+      ? clipped(gutter.right, top, gutter.right + strip, bottom)
+      : null;
   const addRow =
-    bounds.bottom <= bottom + 1 ? clipped(left, addBottom - strip, right, addBottom) : null;
+    bounds.bottom <= bottom + 1 && gutter.bottom + strip <= Math.min(viewport.bottom, innerHeight)
+      ? clipped(left, gutter.bottom, right, gutter.bottom + strip)
+      : null;
 
   const wrapperStyle = wrapperElement ? getComputedStyle(wrapperElement) : null;
   const selected =
@@ -178,17 +186,22 @@ export function tableLayout(
       Math.min(right, selected.right),
       Math.min(bottom, selected.bottom)
     );
-  // Keep the native column-resize track free, even on the currently active cell.
+  // The grip belongs to the actual selection edge, never a synthetic clipped edge.
   const gripSize = 16;
+  const edge = selected ? (selected.outer.right ?? selected.right) : 0;
+  const middle = selected ? (selected.top + selected.bottom) / 2 : 0;
   const cell =
-    outline && outline.width >= gripSize + resizeLane && outline.height >= gripSize
-      ? {
-          left: outline.left + outline.width - gripSize - resizeLane,
-          top: outline.top + (outline.height - gripSize) / 2,
-          width: gripSize,
-          height: gripSize,
-        }
+    selected &&
+    outline &&
+    edge - gripSize / 2 >= Math.max(0, viewport.left) &&
+    edge + gripSize / 2 <= Math.min(innerWidth, viewport.right) &&
+    edge <= wrapper.right &&
+    edge >= wrapper.left &&
+    middle - gripSize / 2 >= top &&
+    middle + gripSize / 2 <= bottom
+      ? { left: edge - gripSize / 2, top: middle - gripSize / 2, width: gripSize, height: gripSize }
       : null;
+
   return {
     $cell,
     row,
@@ -209,6 +222,7 @@ export function tableLayout(
             border: selectionBorder(selected, wrapperStyle, wrapper),
           }
         : null,
+    gripAnchor: selected ? { x: edge, y: middle } : null,
     visible: { left, right, top, bottom },
     boxes: { row: rowBox, column: columnBox, cell, addRow, addColumn },
   };
@@ -236,4 +250,42 @@ function selectionBorder(
     borderBottomLeftRadius: selected.corners.bottomLeft ? style?.borderBottomLeftRadius : 0,
     borderBottomRightRadius: selected.corners.bottomRight ? style?.borderBottomRightRadius : 0,
   };
+}
+
+/** Keyboard invocation reveals the real grip instead of moving it to a clipped edge. */
+export function revealSelectionGrip(layout: TableLayout) {
+  if (!layout.gripAnchor) return;
+  const point = { ...layout.gripAnchor };
+  for (
+    let node = layout.table.parentElement;
+    node && node !== document.body;
+    node = node.parentElement
+  ) {
+    const bounds = node.getBoundingClientRect();
+    const style = getComputedStyle(node);
+    if (/auto|scroll/.test(style.overflowX) && node.scrollWidth > node.clientWidth) {
+      const before = node.scrollLeft;
+      const delta =
+        point.x < bounds.left + 1
+          ? point.x - bounds.left - 1
+          : point.x > bounds.right - 1
+            ? point.x - bounds.right + 1
+            : 0;
+      node.scrollLeft += delta;
+      point.x -= node.scrollLeft - before;
+    }
+    if (/auto|scroll/.test(style.overflowY) && node.scrollHeight > node.clientHeight) {
+      const before = node.scrollTop;
+      const delta =
+        point.y < bounds.top + 8
+          ? point.y - bounds.top - 8
+          : point.y > bounds.bottom - 8
+            ? point.y - bounds.bottom + 8
+            : 0;
+      node.scrollTop += delta;
+      point.y -= node.scrollTop - before;
+    }
+  }
+  if (point.y < 8) window.scrollBy(0, point.y - 8);
+  else if (point.y > innerHeight - 8) window.scrollBy(0, point.y - innerHeight + 8);
 }

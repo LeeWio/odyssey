@@ -25,9 +25,8 @@ import {
   TrashBin,
 } from "@gravity-ui/icons";
 import { Dropdown, Header, Label, Separator } from "@heroui/react";
-import { useMediaQuery } from "@mantine/hooks";
 import type { Editor } from "@tiptap/core";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useMediaQuery } from "@mantine/hooks";
 import { CellSelection, selectedRect } from "@tiptap/pm/tables";
 import {
   applyTableAction,
@@ -42,6 +41,7 @@ interface TableActionListProps {
   kind: TableTargetKind;
   sortColumn?: number;
   onAction: (action: TableAction) => void;
+  ownerId: string;
   onClose: () => void;
 }
 
@@ -125,23 +125,11 @@ export function TableActionList({
   kind,
   sortColumn,
   onAction,
+  ownerId,
   onClose,
 }: TableActionListProps) {
   const { common, allHeaders } = selectionFormat(editor);
-  const compact = useMediaQuery("(max-width: 640px)", false, { getInitialValueInEffect: false });
-  const [page, setPage] = useState<keyof typeof formatGroups | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const restoreItem = useRef<string | null>(null);
-  const back = () => {
-    restoreItem.current = page;
-    setPage(null);
-  };
-  useLayoutEffect(() => {
-    if (!page && restoreItem.current) {
-      menuRef.current?.querySelector<HTMLElement>(`[data-key="${restoreItem.current}"]`)?.focus();
-      restoreItem.current = null;
-    }
-  }, [page]);
+  const narrow = useMediaQuery("(max-width: 600px)");
   const row = kind === "row";
   const axis = kind !== "cell";
   const rect =
@@ -149,6 +137,8 @@ export function TableActionList({
   const count = rect ? (row ? rect.bottom - rect.top : rect.right - rect.left) : 1;
   const noun = row ? "row" : "column";
   const scope = count > 1 ? `${count} ${noun}s` : noun;
+  const canSplit = !axis && applyTableAction(editor, kind, "split", false);
+  const canMerge = !axis && applyTableAction(editor, kind, "merge", false);
   const atStart = rect && (row ? rect.top === 0 : rect.left === 0);
   const atEnd = rect && (row ? rect.bottom === rect.map.height : rect.right === rect.map.width);
 
@@ -214,55 +204,11 @@ export function TableActionList({
     });
   }
 
-  if (compact && page) {
-    return (
-      <div
-        onKeyDownCapture={(event) => {
-          if (event.key === "Escape" || event.key === "ArrowLeft") {
-            event.preventDefault();
-            event.stopPropagation();
-            back();
-          }
-        }}
-      >
-        <Dropdown.Menu
-          key={page}
-          aria-label={page}
-          autoFocus="first"
-          shouldCloseOnSelect={false}
-          className="w-56 max-w-full"
-        >
-          <Dropdown.Item id="back" textValue="Back" onAction={back}>
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            <Label>Back</Label>
-          </Dropdown.Item>
-          {formatSections(page)}
-        </Dropdown.Menu>
-      </div>
-    );
-  }
-
   return (
-    <div
-      onKeyDownCapture={(event) => {
-        if (
-          event.key !== "Escape" ||
-          !(event.target instanceof Element) ||
-          event.target.closest('[role="menu"]') !== menuRef.current
-        )
-          return;
-        event.preventDefault();
-        event.stopPropagation();
-        onClose();
-        requestAnimationFrame(() => {
-          if (!editor.isDestroyed) editor.view.focus();
-        });
-      }}
-    >
+    <div data-table-menu-owner={ownerId}>
       <Dropdown.Menu
         key="actions"
-        ref={menuRef}
-        shouldCloseOnSelect={!compact}
+        shouldCloseOnSelect
         aria-label="Table actions"
         autoFocus="first"
         onClose={onClose}
@@ -307,25 +253,16 @@ export function TableActionList({
             {item("sort-desc", "Sort column Z–A", BarsDescendingAlignLeftArrowDown)}
           </Dropdown.Section>
         )}
-        {!axis && (
+        {!axis && (canSplit || canMerge) && (
           <Dropdown.Section aria-label="Cell structure">
-            {applyTableAction(editor, kind, "split", false)
+            {canSplit
               ? item("split", "Split cell", ArrowsExpandHorizontal)
               : item("merge", "Merge cells", LayoutCellsLarge)}
           </Dropdown.Section>
         )}
-        <Separator />
+        {(axis || canSplit || canMerge) && <Separator />}
         {(["Color", "Alignment"] as const).map((name) => {
           const TriggerIcon = name === "Color" ? BucketPaint : TextAlignLeft;
-          if (compact) {
-            return (
-              <Dropdown.Item key={name} id={name} textValue={name} onAction={() => setPage(name)}>
-                <TriggerIcon aria-hidden="true" className="size-4 shrink-0" />
-                <Label>{name}</Label>
-                <Dropdown.SubmenuIndicator />
-              </Dropdown.Item>
-            );
-          }
           return (
             <Dropdown.SubmenuTrigger key={name}>
               <Dropdown.Item id={name} textValue={name}>
@@ -333,7 +270,10 @@ export function TableActionList({
                 <Label>{name}</Label>
                 <Dropdown.SubmenuIndicator />
               </Dropdown.Item>
-              <Dropdown.Popover className="pointer-events-auto max-h-[min(24rem,75dvh)] overflow-y-auto data-[exiting=true]:pointer-events-none">
+              <Dropdown.Popover
+                placement={narrow ? "bottom start" : "right top"}
+                className="pointer-events-auto max-h-[min(24rem,75dvh)] overflow-y-auto data-[exiting=true]:pointer-events-none"
+              >
                 <Dropdown.Menu aria-label={name} className="w-48">
                   {formatSections(name)}
                 </Dropdown.Menu>
@@ -341,7 +281,15 @@ export function TableActionList({
             </Dropdown.SubmenuTrigger>
           );
         })}
-        {item("clear", axis ? `Clear ${scope} contents` : "Clear contents", Eraser)}
+        {item(
+          "clear",
+          axis
+            ? count > 1
+              ? `Clear contents of ${scope}`
+              : `Clear ${scope} contents`
+            : "Clear contents",
+          Eraser
+        )}
         {axis && <Separator />}
         {axis && item("duplicate", `Duplicate ${scope}`, Copy)}
         {axis && item("delete", `Delete ${scope}`, TrashBin, true)}

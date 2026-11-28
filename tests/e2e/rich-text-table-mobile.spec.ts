@@ -4,23 +4,28 @@ import { RICH_TEXT_TABLE_FIXTURE } from "../../components/rich-text/testing/rich
 
 test.use({ hasTouch: true, isMobile: true });
 
-async function expectMenuInViewport(page: Page) {
+async function expectMenuInViewport(page: Page, count = 1) {
   // The list can scroll vertically inside the surface. Measure the actual floating surface.
   const surface = page.locator('[data-slot="dropdown-popover"]:visible');
-  await expect(surface).toHaveCount(1);
-  await expect(surface).not.toHaveAttribute("data-entering", "true");
+  await expect(surface).toHaveCount(count);
+  await expect(surface.last()).not.toHaveAttribute("data-entering", "true");
   await expect
     .poll(
       () =>
-        surface.evaluate((element) => {
-          const rect = element.getBoundingClientRect();
+        surface.evaluateAll((elements) => {
           const viewport = window.visualViewport!;
           return Math.max(
-            viewport.offsetLeft - rect.left,
-            rect.right - viewport.offsetLeft - viewport.width,
-            viewport.offsetTop - rect.top,
-            rect.bottom - viewport.offsetTop - viewport.height,
-            0
+            0,
+            ...elements.map((element) => {
+              const rect = element.getBoundingClientRect();
+              return Math.max(
+                viewport.offsetLeft - rect.left,
+                rect.right - viewport.offsetLeft - viewport.width,
+                viewport.offsetTop - rect.top,
+                rect.bottom - viewport.offsetTop - viewport.height,
+                0
+              );
+            })
           );
         }),
       { message: "The whole table menu should fit within the touch viewport" }
@@ -49,21 +54,24 @@ for (const width of [320, 390]) {
     await expect(color).toBeVisible();
     await expectMenuInViewport(page);
     await color.tap();
-    await expect(back).toBeVisible();
-    await expectMenuInViewport(page);
-    await back.tap();
-    await expect(alignment).toBeVisible();
+    await expect(page.getByRole("menu", { name: "Color", exact: true })).toBeVisible();
+    await expect(back).toHaveCount(0);
+    await expectMenuInViewport(page, 2);
+    await page.touchscreen.tap(4, 4);
+    await expect(page.getByRole("menu")).toHaveCount(0);
+    await expect(editor.locator(".selectedCell")).toHaveText("London");
+    await grip.tap();
     await alignment.tap();
-    await expect(back).toBeVisible();
-    await expectMenuInViewport(page);
+    await expect(page.getByRole("menu", { name: "Alignment", exact: true })).toBeVisible();
+    await expectMenuInViewport(page, 2);
     await page.getByRole("menuitemradio", { name: "Align center", exact: true }).tap();
     await expect(cell).toHaveCSS("text-align", "center");
     await expect(other).not.toHaveCSS("text-align", "center");
 
     await grip.tap();
     await color.tap();
-    await expect(back).toBeVisible();
-    await expectMenuInViewport(page);
+    await expect(back).toHaveCount(0);
+    await expectMenuInViewport(page, 2);
     await page.getByRole("menuitemradio", { name: "Blue background", exact: true }).tap();
     await expect(cell).toHaveCSS("background-color", "rgb(191, 219, 254)");
     await expect(other).not.toHaveCSS("background-color", "rgb(191, 219, 254)");

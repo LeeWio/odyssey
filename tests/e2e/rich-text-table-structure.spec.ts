@@ -354,6 +354,9 @@ test("clips the real selected band instead of drawing an edge at the scroll boun
   const viewport = (await wrapper.boundingBox())!;
   expect(border.x + border.width).toBeGreaterThan(viewport.x + viewport.width + 100);
   await expect(page.locator("[data-table-selection-clip]")).toHaveCSS("overflow", "hidden");
+  await expect(page.getByRole("button", { name: "Cell actions", exact: true })).toBeHidden();
+  await page.keyboard.press("Shift+F10");
+  await expect(page.getByRole("menu", { name: "Cell actions", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Cell actions", exact: true })).toBeVisible();
 });
 

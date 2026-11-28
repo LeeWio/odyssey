@@ -163,6 +163,7 @@ async function measureBlocks(editor: Locator) {
       const style = getComputedStyle(element);
       return {
         tag: element.tagName,
+        table: element.classList.contains("tableWrapper"),
         marginTop: style.marginTop,
         marginBottom: style.marginBottom,
         fontSize: style.fontSize,
@@ -344,7 +345,22 @@ for (const width of [360, 768, 1440]) {
         expect(overflow).toEqual([]);
         const metrics = await measureBlocks(editor);
         if (mode === "edit") editMetrics = metrics;
-        else expect(metrics).toEqual(editMetrics);
+        else {
+          // Editing reserves space for outside controls; reading uses native prose spacing.
+          expect(metrics).toEqual(
+            editMetrics?.map((block) =>
+              block.table ? { ...block, marginTop: "16px", marginBottom: "16px" } : block
+            )
+          );
+        }
+        await expect(editor.locator(".tableWrapper")).toHaveCSS(
+          "margin-top",
+          mode === "edit" ? "20px" : "16px"
+        );
+        await expect(editor.locator(".tableWrapper")).toHaveCSS(
+          "margin-bottom",
+          mode === "edit" ? "20px" : "16px"
+        );
         await page.screenshot({
           path: testInfo.outputPath(`${mode}-${width}-${theme}.png`),
           fullPage: true,
