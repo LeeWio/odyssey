@@ -1,7 +1,7 @@
 import type { Editor } from "@tiptap/core";
 import { closeHistory } from "@tiptap/pm/history";
 import { Plugin } from "@tiptap/pm/state";
-import { columnResizingPluginKey, TableMap } from "@tiptap/pm/tables";
+import { columnResizingPluginKey, TableMap, updateColumnsOnResize } from "@tiptap/pm/tables";
 import { setSelectedColumnWidths } from "./column-widths";
 import { TABLE_ACTION_STATUS } from "./feedback";
 
@@ -142,9 +142,59 @@ export function tableResizeInteractions(editor: Editor) {
         const drag = columnResizingPluginKey.getState(view.state)?.dragging;
         if (drag && event.clientX !== drag.startX) moved = true;
       };
+      const restore = () => {
+        const target = resizeColumnTarget(editor);
+        if (target) {
+          const node = view.nodeDOM(target.tableStart - 1);
+          const table =
+            node instanceof Element
+              ? node.matches("table")
+                ? node
+                : node.querySelector("table")
+              : null;
+          const colgroup = table?.querySelector("colgroup");
+          if (table instanceof HTMLTableElement && colgroup instanceof HTMLTableColElement) {
+            const minimum =
+              editor.extensionManager.extensions.find((extension) => extension.name === "table")
+                ?.options.cellMinWidth ?? 100;
+            updateColumnsOnResize(target.table, colgroup, table, minimum);
+          }
+        }
+      };
+      const cancel = () => {
+        if (!columnResizingPluginKey.getState(view.state)?.dragging) return false;
+        restore();
+        view.dispatch(
+          view.state.tr
+            .setMeta(columnResizingPluginKey, { setHandle: -1 })
+            .setMeta(TABLE_ACTION_STATUS, "Column resize cancelled.")
+            .setMeta("addToHistory", false)
+        );
+        return true;
+      };
+      const key = (event: KeyboardEvent) => {
+        if (event.key === "Escape" && cancel()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      };
+      editor.on("destroy", cancel);
+      view.dom.addEventListener("keydown", key, true);
+      win.addEventListener("blur", cancel);
       win.addEventListener("mousemove", move);
       return {
+        update(_view, previous) {
+          if (
+            columnResizingPluginKey.getState(previous)?.dragging &&
+            !columnResizingPluginKey.getState(view.state)?.dragging
+          )
+            restore();
+          if (!view.editable) cancel();
+        },
         destroy() {
+          editor.off("destroy", cancel);
+          view.dom.removeEventListener("keydown", key, true);
+          win.removeEventListener("blur", cancel);
           win.removeEventListener("mousemove", move);
         },
       };

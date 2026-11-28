@@ -87,3 +87,18 @@ it("registers one native resize plugin and honors an explicit resizable:false op
   });
   expect(columnResizingPluginKey.getState(editor.state)).toBeUndefined();
 });
+
+it("cancels native resize state immediately when editability is revoked, even without update events", () => {
+  open();
+  const before = editor.getJSON();
+  editor.view.dispatch(
+    editor.state.tr.setMeta(columnResizingPluginKey, {
+      setDragging: { startX: 0, startWidth: 180 },
+    })
+  );
+  editor.setEditable(false, false);
+  expect(columnResizingPluginKey.getState(editor.state)!.dragging).toBeFalsy();
+  expect(editor.getJSON()).toEqual(before);
+  editor.setEditable(true);
+  expect(resizeColumnTarget(editor)).toBeNull();
+});

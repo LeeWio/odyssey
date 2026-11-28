@@ -10,6 +10,41 @@ export type Axis = Exclude<TableTargetKind, "cell">;
 export type Box = { left: number; top: number; width: number; height: number };
 export type Point = { x: number; y: number };
 
+/** One synchronous layout pass only. Never retain this snapshot across scroll, DOM preview or frames. */
+function measureTable(view: EditorView, table: HTMLTableElement) {
+  const viewport =
+    view.dom.closest("[data-slot='rich-text-editor-content']")?.getBoundingClientRect() ??
+    view.dom.getBoundingClientRect();
+  const wrapperElement = table.closest(".tableWrapper");
+  const wrapper = wrapperElement?.getBoundingClientRect() ?? viewport;
+  const bounds = table.getBoundingClientRect();
+  const vertical = tableVerticalViewport(table);
+  const columns = tableColumnBounds(table);
+  const wrapperStyle = wrapperElement ? getComputedStyle(wrapperElement) : null;
+  const rows = new Map<number, DOMRect>();
+  const rowBounds = (index: number) => {
+    let rect = rows.get(index);
+    if (!rect) {
+      rect = table.rows[index]?.getBoundingClientRect();
+      if (rect) rows.set(index, rect);
+    }
+    return rect;
+  };
+  return { viewport, wrapper, bounds, vertical, columns, wrapperStyle, rowBounds };
+}
+type TableMeasurements = ReturnType<typeof measureTable>;
+
+/** Share reads between the source/target layouts in one gesture step, with no persistent cache. */
+export function tableLayoutReader(view: EditorView) {
+  const cache = new WeakMap<HTMLTableElement, TableMeasurements>();
+  return (
+    $cell: ResolvedPos,
+    active: CellSelection | null,
+    point?: Point,
+    track?: { axis: Axis; index: number }
+  ) => tableLayout(view, $cell, active, point, track, cache);
+}
+
 export function activeCells(view: EditorView) {
   const selection = view.state.selection;
   if (selection instanceof CellSelection) return selection;
@@ -40,20 +75,20 @@ export function selectBand(
 }
 
 function selectionBox(
-  table: HTMLTableElement,
   columns: Array<{ left: number; right: number }>,
-  selection: CellSelection
+  selection: CellSelection,
+  measured: TableMeasurements
 ) {
   const { $anchorCell, $headCell } = selection;
   const map = grid($anchorCell);
   const base = $anchorCell.start(-1);
   const rect = map.rectBetween($anchorCell.pos - base, $headCell.pos - base);
-  const bounds = table.getBoundingClientRect();
+  const bounds = measured.bounds;
   return {
     left: columns[rect.left].left,
-    top: table.rows[rect.top].getBoundingClientRect().top,
+    top: measured.rowBounds(rect.top)!.top,
     right: columns[rect.right - 1].right,
-    bottom: table.rows[rect.bottom - 1].getBoundingClientRect().bottom,
+    bottom: measured.rowBounds(rect.bottom - 1)!.bottom,
     corners: {
       topLeft: rect.top === 0 && rect.left === 0,
       topRight: rect.top === 0 && rect.right === map.width,
@@ -80,20 +115,20 @@ export function tableLayout(
   $cell: ResolvedPos,
   active: CellSelection | null,
   point?: Point,
-  track?: { axis: Axis; index: number }
+  track?: { axis: Axis; index: number },
+  cache?: WeakMap<HTMLTableElement, TableMeasurements>
 ) {
   const element = view.nodeDOM($cell.pos);
   const table = element instanceof Element ? element.closest("table") : null;
   if (!table) return null;
-  const viewport =
-    view.dom.closest("[data-slot='rich-text-editor-content']")?.getBoundingClientRect() ??
-    view.dom.getBoundingClientRect();
-  const wrapperElement = table.closest(".tableWrapper");
-  const wrapper = wrapperElement?.getBoundingClientRect() ?? viewport;
-  const bounds = table.getBoundingClientRect();
+  let measured = cache?.get(table);
+  if (!measured) {
+    measured = measureTable(view, table);
+    cache?.set(table, measured);
+  }
+  const { viewport, wrapper, bounds, vertical, columns, wrapperStyle, rowBounds } = measured;
   const left = Math.max(0, bounds.left, wrapper.left, viewport.left);
   const right = Math.min(innerWidth, bounds.right, wrapper.right, viewport.right);
-  const vertical = tableVerticalViewport(table);
   const top = Math.max(vertical.top, bounds.top, viewport.top);
   const bottom = Math.min(vertical.bottom, bounds.bottom, viewport.bottom);
   if (left >= right || top >= bottom) return null;
@@ -102,15 +137,13 @@ export function tableLayout(
   const cellRect = map.findCell($cell.pos - $cell.start(-1));
   let row = cellRect.top;
   let column = cellRect.left;
-  const columns = tableColumnBounds(table);
   if (point) {
-    while (row + 1 < cellRect.bottom && table.rows[row].getBoundingClientRect().bottom <= point.y)
-      row++;
+    while (row + 1 < cellRect.bottom && rowBounds(row)!.bottom <= point.y) row++;
     while (columns && column + 1 < cellRect.right && columns[column]?.right <= point.x) column++;
   }
   if (track?.axis === "row") row = track.index;
   if (track?.axis === "column") column = track.index;
-  const rowRect = table.rows[row]?.getBoundingClientRect();
+  const rowRect = rowBounds(row);
   const colRect = columns[column];
   if (!rowRect || !colRect || !columns) return null;
 
@@ -149,9 +182,10 @@ export function tableLayout(
       ? clipped(left, gutter.bottom, right, gutter.bottom + strip)
       : null;
 
-  const wrapperStyle = wrapperElement ? getComputedStyle(wrapperElement) : null;
   const selected =
-    active && inSameTable(active.$anchorCell, $cell) ? selectionBox(table, columns, active) : null;
+    active && inSameTable(active.$anchorCell, $cell)
+      ? selectionBox(columns, active, measured)
+      : null;
   const outline =
     selected &&
     clipped(

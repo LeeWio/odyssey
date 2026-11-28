@@ -24,7 +24,7 @@ import {
   TextAlignRight,
   TrashBin,
 } from "@gravity-ui/icons";
-import { Dropdown, Header, Label, Separator } from "@heroui/react";
+import { Dropdown, Header, Label } from "@heroui/react";
 import type { Editor } from "@tiptap/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { CellSelection, selectedRect } from "@tiptap/pm/tables";
@@ -223,7 +223,7 @@ export function TableActionList({
             selectionMode="multiple"
             selectedKeys={allHeaders ? ["header"] : []}
           >
-            {count > 1 && <Header>{scope} selected</Header>}
+            <Header>{count > 1 ? `${scope} selected` : "Headers"}</Header>
             {item(
               "header",
               count > 1 ? `Header ${noun}s` : `Header ${kind}`,
@@ -231,9 +231,9 @@ export function TableActionList({
             )}
           </Dropdown.Section>
         )}
-        {axis && <Separator />}
         {axis && (
-          <Dropdown.Section aria-label="Move and insert">
+          <Dropdown.Section aria-label="Arrange">
+            <Header>Arrange</Header>
             {!atStart &&
               item(
                 "move-before",
@@ -248,16 +248,19 @@ export function TableActionList({
               )}
             {item("insert-before", row ? "Insert row above" : "Insert column left", Plus)}
             {item("insert-after", row ? "Insert row below" : "Insert column right", Plus)}
+            {item("duplicate", `Duplicate ${scope}`, Copy)}
           </Dropdown.Section>
         )}
         {kind === "column" && (
           <Dropdown.Section aria-label="Sort rows">
+            <Header>Sort rows</Header>
             {item("sort-asc", "Sort column A–Z", BarsAscendingAlignLeftArrowDown)}
             {item("sort-desc", "Sort column Z–A", BarsDescendingAlignLeftArrowDown)}
           </Dropdown.Section>
         )}
         {kind === "column" && (
           <Dropdown.Section aria-label="Column widths">
+            <Header>Column widths</Header>
             <Dropdown.Item
               id="set-column-width"
               textValue="Set column width…"
@@ -273,48 +276,57 @@ export function TableActionList({
         )}
         {!axis && (canSplit || canMerge) && (
           <Dropdown.Section aria-label="Cell structure">
+            <Header>Cell structure</Header>
             {canSplit
               ? item("split", "Split cell", ArrowsExpandHorizontal)
               : item("merge", "Merge cells", LayoutCellsLarge)}
           </Dropdown.Section>
         )}
-        {(axis || canSplit || canMerge) && <Separator />}
-        {(["Color", "Alignment"] as const).map((name) => {
-          const TriggerIcon = name === "Color" ? BucketPaint : TextAlignLeft;
-          return (
-            <Dropdown.SubmenuTrigger key={name}>
-              <Dropdown.Item id={name} textValue={name}>
-                <TriggerIcon aria-hidden="true" className="size-4 shrink-0" />
-                <Label>{name}</Label>
-                <Dropdown.SubmenuIndicator />
-              </Dropdown.Item>
-              <Dropdown.Popover
-                placement={narrow ? "bottom start" : "right top"}
-                className="pointer-events-auto max-h-[min(24rem,75dvh)] w-56 overflow-y-auto data-[exiting=true]:pointer-events-none"
-              >
-                <Dropdown.Menu
-                  aria-label={name}
-                  className="max-h-[min(24rem,75dvh)] overflow-y-auto"
+        <Dropdown.Section aria-label="Formatting">
+          <Header>Formatting</Header>
+          {(["Color", "Alignment"] as const).map((name) => {
+            const TriggerIcon = name === "Color" ? BucketPaint : TextAlignLeft;
+            return (
+              <Dropdown.SubmenuTrigger key={name}>
+                <Dropdown.Item id={name} textValue={name}>
+                  <TriggerIcon aria-hidden="true" className="size-4 shrink-0" />
+                  <Label>{name}</Label>
+                  <Dropdown.SubmenuIndicator />
+                </Dropdown.Item>
+                <Dropdown.Popover
+                  placement={narrow ? "bottom start" : "right top"}
+                  className="pointer-events-auto max-h-[min(24rem,75dvh)] w-56 overflow-y-auto data-[exiting=true]:pointer-events-none"
                 >
-                  {formatSections(name)}
-                </Dropdown.Menu>
-              </Dropdown.Popover>
-            </Dropdown.SubmenuTrigger>
-          );
-        })}
-        {item(
-          "clear",
-          axis
-            ? count > 1
-              ? `Clear contents of ${scope}`
-              : `Clear ${scope} contents`
-            : "Clear contents",
-          Eraser
+                  <Dropdown.Menu
+                    aria-label={name}
+                    className="max-h-[min(24rem,75dvh)] overflow-y-auto"
+                  >
+                    {formatSections(name)}
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown.SubmenuTrigger>
+            );
+          })}
+        </Dropdown.Section>
+        <Dropdown.Section aria-label="Contents">
+          <Header>Contents</Header>
+          {item(
+            "clear",
+            axis
+              ? count > 1
+                ? `Clear contents of ${scope}`
+                : `Clear ${scope} contents`
+              : "Clear contents",
+            Eraser
+          )}
+        </Dropdown.Section>
+        {axis && (
+          <Dropdown.Section aria-label="Delete">
+            <Header>Delete</Header>
+            {item("delete", `Delete ${scope}`, TrashBin, true)}
+            {item("delete-table", "Delete table", TrashBin, true)}
+          </Dropdown.Section>
         )}
-        {axis && <Separator />}
-        {axis && item("duplicate", `Duplicate ${scope}`, Copy)}
-        {axis && item("delete", `Delete ${scope}`, TrashBin, true)}
-        {axis && item("delete-table", "Delete table", TrashBin, true)}
       </Dropdown.Menu>
     </div>
   );

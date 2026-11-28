@@ -341,3 +341,89 @@ it("restores a merged/inserted/moved/deleted table through each undo and redo", 
     expect(TableMap.get(activeTable()).problems).toBeNull();
   }
 });
+
+it("round-trips a long mixed editing sequence through each undo/redo and keeps another table's upload intact", () => {
+  const first: JSONContent = {
+    type: "table",
+    content: Array.from({ length: 4 }, (_, row) => ({
+      type: "tableRow",
+      content: [120, 180, 220].map((width, col) => ({
+        type: row ? "tableCell" : "tableHeader",
+        attrs: { colwidth: [width] },
+        content: [{ type: "paragraph", content: [{ type: "text", text: `${row}:${col}` }] }],
+      })),
+    })),
+  };
+  open({
+    type: "doc",
+    content: [
+      first,
+      {
+        type: "table",
+        content: [
+          {
+            type: "tableRow",
+            content: [
+              {
+                type: "tableCell",
+                content: [{ type: "imageUpload" }],
+              },
+            ],
+          },
+        ],
+      },
+      { type: "paragraph" },
+    ],
+  });
+  const other = editor.state.doc.child(1);
+  const snapshots = [editor.getJSON()];
+  const apply = (
+    kind: Parameters<typeof applyTableAction>[1],
+    action: Parameters<typeof applyTableAction>[2]
+  ) => {
+    const doc = editor.state.doc;
+    applyTableAction(editor, kind, action, false);
+    expect(editor.state.doc).toBe(doc);
+    expect(applyTableAction(editor, kind, action)).toBe(true);
+    expect(TableMap.get(activeTable()).problems).toBeNull();
+    expect(editor.state.doc.child(1)).toBe(other);
+    snapshots.push(editor.getJSON());
+  };
+  select(0, 0, 0, 1);
+  apply("cell", "merge");
+  apply("cell", { attribute: "cellBackgroundColor", value: "#bbf7d0" });
+  apply("cell", "split");
+  select(0, 1, 3, 1);
+  apply("column", { width: 147 });
+  select(1, 0, 1, 2);
+  apply("row", "duplicate");
+  select(2, 0, 2, 2);
+  apply("row", "move-after");
+  select(0, 2, 4, 2);
+  apply("column", "insert-before");
+  select(0, 2, 4, 2);
+  apply("column", { attribute: "verticalAlign", value: "middle" });
+  select(4, 0, 4, 3);
+  apply("row", "delete");
+  select(0, 2, 3, 2);
+  apply("column", "delete");
+  select(1, 0, 1, 2);
+  apply("row", "header");
+  select(3, 0, 3, 2);
+  apply("row", "clear");
+  for (let index = snapshots.length - 2; index >= 0; index--) {
+    expect(editor.commands.undo()).toBe(true);
+    expect(editor.getJSON()).toEqual(snapshots[index]);
+    expect(TableMap.get(activeTable()).problems).toBeNull();
+  }
+  for (let index = 1; index < snapshots.length; index++) {
+    expect(editor.commands.redo()).toBe(true);
+    expect(editor.getJSON()).toEqual(snapshots[index]);
+    expect(TableMap.get(activeTable()).problems).toBeNull();
+  }
+  const serialized = editor.getHTML();
+  const final = editor.getJSON();
+  editor.destroy();
+  open(serialized);
+  expect(editor.getJSON()).toEqual(final);
+});
