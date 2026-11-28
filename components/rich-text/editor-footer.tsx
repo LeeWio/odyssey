@@ -39,6 +39,10 @@ const SHORTCUT_GROUPS = [
     shortcuts: [
       { action: "Cell actions menu", keys: ["Shift", "F10"] },
       { action: "Focus row and column controls", keys: ["Alt", "F10"] },
+      { action: "Extend row or column selection on a handle", keys: ["Shift", "Arrow"] },
+      { action: "Leave cell selection", keys: ["Esc"] },
+      { action: "Exit after table", keys: ["⌘/Ctrl", "Enter"] },
+      { action: "Exit before table", keys: ["⌘/Ctrl", "Shift", "Enter"] },
     ],
   },
 ] as const;

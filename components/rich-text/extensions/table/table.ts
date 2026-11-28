@@ -1,3 +1,6 @@
+import { tableSelectionHighlight } from "./selection-highlight";
+import { tableResizeInteractions } from "./resize";
+import { exitTable, leaveCellSelection } from "./keyboard";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { CellSelection } from "@tiptap/pm/tables";
@@ -47,8 +50,18 @@ export const TableKit = TableSchemaKit.extend<TableKitOptions>({
       if (extension.name !== "table") return extension;
 
       return extension.extend({
+        addKeyboardShortcuts() {
+          return {
+            ...this.parent?.(),
+            Escape: () => leaveCellSelection(this.editor),
+            "Mod-Enter": () => exitTable(this.editor),
+            "Mod-Shift-Enter": () => exitTable(this.editor, true),
+          };
+        },
         addProseMirrorPlugins() {
           return [
+            tableSelectionHighlight(),
+            tableResizeInteractions(this.editor),
             tableClipboardPlugin(onRejected),
             ...(this.parent?.() ?? []),
             new Plugin({

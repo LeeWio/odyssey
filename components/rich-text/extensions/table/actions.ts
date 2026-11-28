@@ -45,7 +45,8 @@ export type TableAction =
   | "merge"
   | "split"
   | "distribute-columns"
-  | "reset-column-widths";
+  | "reset-column-widths"
+  | "fit-columns";
 
 type Band = { start: number; end: number };
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
@@ -378,12 +379,17 @@ export function applyTableAction(
   switch (action) {
     case "distribute-columns":
     case "reset-column-widths":
+    case "fit-columns":
       return (
         kind === "column" &&
         setSelectedColumnWidths(
           editor,
           rect,
-          action === "distribute-columns" ? "distribute" : "reset",
+          action === "distribute-columns"
+            ? "distribute"
+            : action === "fit-columns"
+              ? "fit"
+              : "reset",
           execute
         )
       );

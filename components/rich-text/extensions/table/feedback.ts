@@ -47,6 +47,7 @@ const actionMessages: Record<Exclude<TableAction, { attribute: string }>, string
   split: "Cell split.",
   "distribute-columns": "Selected columns distributed evenly.",
   "reset-column-widths": "Selected column widths reset.",
+  "fit-columns": "Selected columns fitted to content.",
 };
 
 export function announceTableAction(editor: Editor, action: TableAction | "selection-moved") {
