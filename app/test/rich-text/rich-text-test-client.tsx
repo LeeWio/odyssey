@@ -97,6 +97,7 @@ const OUTLINE_DOCUMENT: JSONContent = {
 
 export default function RichTextTestClient({
   table = false,
+  multiple = false,
   typography = false,
   outline = false,
   modal = false,
@@ -104,6 +105,7 @@ export default function RichTextTestClient({
   postId,
 }: {
   table?: boolean;
+  multiple?: boolean;
   typography?: boolean;
   outline?: boolean;
   modal?: boolean;
@@ -160,6 +162,18 @@ export default function RichTextTestClient({
     });
     setStatus("Draft restored");
   };
+
+  if (multiple) {
+    return (
+      <main className="grid gap-6 p-6 md:grid-cols-2">
+        {(["First editor", "Second editor"] as const).map((label) => (
+          <section key={label} aria-label={label} className="h-[700px] min-w-0">
+            <RichText content={RICH_TEXT_TABLE_FIXTURE} />
+          </section>
+        ))}
+      </main>
+    );
+  }
 
   if (outline) {
     return (

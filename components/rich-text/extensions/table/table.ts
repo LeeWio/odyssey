@@ -2,7 +2,8 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { CellSelection } from "@tiptap/pm/tables";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
-import { tableClipboardPlugin } from "./clipboard";
+import { tableClipboardPlugin, type TablePasteFailure } from "./clipboard";
+import type { TableKitOptions as NativeTableKitOptions } from "@tiptap/extension-table";
 import { TableSchemaKit } from "./table-schema";
 
 const activeCellKey = new PluginKey("table-active-cell");
@@ -35,15 +36,20 @@ function activeCellDecoration(state: {
   return DecorationSet.empty;
 }
 
-export const TableKit = TableSchemaKit.extend({
+export interface TableKitOptions extends NativeTableKitOptions {
+  onPasteRejected?: (failure: TablePasteFailure) => void;
+}
+
+export const TableKit = TableSchemaKit.extend<TableKitOptions>({
   addExtensions() {
+    const onRejected = this.options.onPasteRejected;
     return (this.parent?.() ?? []).map((extension) => {
       if (extension.name !== "table") return extension;
 
       return extension.extend({
         addProseMirrorPlugins() {
           return [
-            tableClipboardPlugin(),
+            tableClipboardPlugin(onRejected),
             ...(this.parent?.() ?? []),
             new Plugin({
               key: activeCellKey,

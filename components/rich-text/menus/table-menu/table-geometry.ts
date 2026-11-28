@@ -1,3 +1,4 @@
+import { tableColumnBounds } from "../../extensions/table/column-layout";
 import type { ResolvedPos } from "@tiptap/pm/model";
 import { TextSelection } from "@tiptap/pm/state";
 import { cellAround, CellSelection, inSameTable, TableMap } from "@tiptap/pm/tables";
@@ -35,35 +36,6 @@ export function selectBand(
   extend = false
 ) {
   return tableBandSelection($cell, kind, index, active, extend);
-}
-
-/** WebKit exposes zero-sized COL rects. Fixed-layout tracks follow the first row. */
-function columnBounds(table: HTMLTableElement) {
-  const elements = table.querySelector(":scope > colgroup")?.children;
-  if (!elements?.length) return [];
-  const measured = Array.from(elements, (col) => col.getBoundingClientRect());
-  if (measured.every((col) => col.width > 0)) return measured;
-
-  const columns: Array<{ left: number; right: number }> = [];
-  for (const cell of table.rows[0]?.cells ?? []) {
-    const bounds = cell.getBoundingClientRect();
-    const widths = Array.from(
-      { length: cell.colSpan },
-      (_, index) => parseFloat((elements[columns.length + index] as HTMLElement).style.width) || 0
-    );
-    const total = widths.reduce((sum, width) => sum + width, 0);
-    const automatic = widths.filter((width) => !width).length;
-    let left = bounds.left;
-    widths.forEach((width, index) => {
-      const resolved = automatic
-        ? width || (bounds.width - total) / automatic
-        : (width * bounds.width) / total;
-      const right = index === widths.length - 1 ? bounds.right : left + resolved;
-      columns.push({ left, right });
-      left = right;
-    });
-  }
-  return columns;
 }
 
 function selectionBox(
@@ -128,7 +100,7 @@ export function tableLayout(
   const cellRect = map.findCell($cell.pos - $cell.start(-1));
   let row = cellRect.top;
   let column = cellRect.left;
-  const columns = columnBounds(table);
+  const columns = tableColumnBounds(table);
   if (point) {
     while (row + 1 < cellRect.bottom && table.rows[row].getBoundingClientRect().bottom <= point.y)
       row++;

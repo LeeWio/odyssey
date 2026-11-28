@@ -1,8 +1,14 @@
+import { undoDepth } from "@tiptap/pm/history";
 import { Editor } from "@tiptap/core";
 import { CellSelection, TableMap } from "@tiptap/pm/tables";
 import StarterKit from "@tiptap/starter-kit";
 import { afterEach, describe, expect, it } from "vitest";
-import { parseTableText, pasteTableText, serializeTableSelection } from "./clipboard";
+import {
+  parseTableText,
+  pasteTableText,
+  serializeTableSelection,
+  TABLE_PASTE_REJECTED,
+} from "./clipboard";
 import { TableKit } from "./table";
 
 let editor: Editor;
@@ -34,27 +40,102 @@ function rows() {
   );
 }
 
+function values(text: string) {
+  const result = parseTableText(text);
+  return result.ok ? result.values : null;
+}
+
 describe("spreadsheet text", () => {
   it("round-trips quoted delimiters, CRLF, empty fields and literal formulas", () => {
-    expect(parseTableText('"a\tb"\t"a""b"\t\r\n"line 1\r\nline 2"\t=1+2\tlast\r\n')).toEqual([
+    expect(values('"a\tb"\t"a""b"\t\r\n"line 1\r\nline 2"\t=1+2\tlast\r\n')).toEqual([
       ["a\tb", 'a"b', ""],
       ["line 1\nline 2", "=1+2", "last"],
     ]);
-    expect(parseTableText("a\tb\n\n")).toEqual([
+    expect(values("a\tb\n\n")).toEqual([
       ["a", "b"],
       ["", ""],
     ]);
-    expect(parseTableText('"unclosed\tvalue')).toBeNull();
-    expect(parseTableText('"closed"bad\tvalue')).toBeNull();
+    expect(values('"unclosed\tvalue')).toBeNull();
+    expect(values('"closed"bad\tvalue')).toBeNull();
   });
   it("bounds grid allocations and pads ragged rows without dropping empty columns", () => {
-    expect(parseTableText("a\tb\t\nc\n")).toEqual([
+    expect(values("a\tb\t\nc\n")).toEqual([
       ["a", "b", ""],
       ["c", "", ""],
     ]);
-    expect(parseTableText("x\t".repeat(10_001))).toBeNull();
-    expect(parseTableText("x".repeat(1_000_001))).toBeNull();
+    expect(values("x\t".repeat(10_001))).toBeNull();
+    expect(values("x".repeat(1_000_001))).toBeNull();
   });
+  it("distinguishes exact parser limits and invalid fields", () => {
+    expect(parseTableText("x\t".repeat(9_999) + "x").ok).toBe(true);
+    expect(parseTableText("x\t".repeat(10_000) + "x")).toEqual({ ok: false, reason: "cell-limit" });
+    expect(parseTableText("x".repeat(1_000_000)).ok).toBe(true);
+    expect(parseTableText("x".repeat(1_000_001))).toEqual({ ok: false, reason: "text-limit" });
+    expect(parseTableText('"closed"bad\tvalue')).toEqual({ ok: false, reason: "invalid-format" });
+    // Padding a ragged grid is bounded independently from its source field count.
+    expect(parseTableText("x\t".repeat(100) + "x\n" + "x\n".repeat(99))).toEqual({
+      ok: false,
+      reason: "cell-limit",
+    });
+  });
+
+  it("handles recognized rejected TSV without fallback, writes or undo entries", () => {
+    open();
+    select(0, 0);
+    const before = editor.state.doc;
+    const selection = editor.state.selection;
+    const historyDepth = undoDepth(editor.state);
+    const reported: string[] = [];
+    for (const [text, reason] of [
+      ["x\t".repeat(10_001), "cell-limit"],
+      ["x\t" + "x".repeat(1_000_000), "text-limit"],
+      ['"unclosed\tvalue', "invalid-format"],
+    ]) {
+      expect(pasteTableText(editor.view, clipboard(text), (f) => reported.push(f.reason))).toBe(
+        true
+      );
+      expect(editor.state.doc).toBe(before);
+      expect(editor.state.selection.eq(selection)).toBe(true);
+      expect(reported.at(-1)).toBe(reason);
+    }
+    expect(undoDepth(editor.state)).toBe(historyDepth);
+  });
+
+  it("rejects a resulting expanded grid over the allocation cap", () => {
+    open("<table>" + "<tr><td>a</td><td>b</td></tr>".repeat(100) + "</table>");
+    const map = TableMap.get(editor.state.doc.firstChild!);
+    editor.commands.setTextSelection(1 + map.map[199] + 1);
+    const before = editor.state.doc;
+    let reason = "";
+    editor.on("transaction", ({ transaction }) => {
+      reason = transaction.getMeta(TABLE_PASTE_REJECTED)?.reason ?? reason;
+    });
+    expect(pasteTableText(editor.view, clipboard(Array(101).fill("x").join("\t")))).toBe(true);
+    expect(reason).toBe("cell-limit");
+    expect(editor.state.doc).toBe(before);
+  });
+
+  it("reports typed failure through the configured extension callback", () => {
+    editor?.destroy();
+    const failures: string[] = [];
+    editor = new Editor({
+      extensions: [
+        StarterKit,
+        TableKit.configure({ onPasteRejected: (failure) => failures.push(failure.reason) }),
+      ],
+      content: "<table><tr><td>A</td></tr></table>",
+    });
+    select(0, 0);
+    const event = clipboard('"unclosed\tfield');
+    let handled = false;
+    editor.view.someProp("handlePaste", (callback) => {
+      handled = callback(editor.view, event, editor.state.selection.content()) === true;
+      return handled;
+    });
+    expect(handled).toBe(true);
+    expect(failures).toEqual(["invalid-format"]);
+  });
+
   it("copies logical rows in document order for a reverse selection", () => {
     open();
     select(0, 0, 1, 1, true);
@@ -72,7 +153,7 @@ describe("spreadsheet text", () => {
     select(0, 0, 1, 1);
     const text = serializeTableSelection(editor.state.selection as CellSelection);
     expect(text).toBe('"A\nB"\t\nC\tD');
-    expect(parseTableText(text)).toEqual([
+    expect(values(text)).toEqual([
       ["A\nB", ""],
       ["C", "D"],
     ]);

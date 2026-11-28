@@ -1,3 +1,4 @@
+import { setSelectedColumnWidths } from "./column-widths";
 import type { Editor } from "@tiptap/core";
 import { closeHistory } from "@tiptap/pm/history";
 import { Fragment, type Node, type ResolvedPos } from "@tiptap/pm/model";
@@ -42,7 +43,9 @@ export type TableAction =
   | "sort-asc"
   | "sort-desc"
   | "merge"
-  | "split";
+  | "split"
+  | "distribute-columns"
+  | "reset-column-widths";
 
 type Band = { start: number; end: number };
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
@@ -373,6 +376,17 @@ export function applyTableAction(
   }
 
   switch (action) {
+    case "distribute-columns":
+    case "reset-column-widths":
+      return (
+        kind === "column" &&
+        setSelectedColumnWidths(
+          editor,
+          rect,
+          action === "distribute-columns" ? "distribute" : "reset",
+          execute
+        )
+      );
     case "clear":
       return deleteCellSelection(state, dispatch);
     case "merge":

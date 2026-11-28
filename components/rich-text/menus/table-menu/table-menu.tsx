@@ -1,8 +1,8 @@
 "use client";
 
-import { Ellipsis, EllipsisVertical, Grip, Plus } from "@gravity-ui/icons";
+import { announceTableAction } from "../../extensions/table/feedback";
+
 import { useRichTextEditor } from "@heroui-pro/react/rich-text-editor";
-import { Button, Dropdown, Tooltip } from "@heroui/react";
 import type { Editor, EditorEvents } from "@tiptap/core";
 import { CellSelection, inSameTable } from "@tiptap/pm/tables";
 import {
@@ -21,6 +21,7 @@ import {
   type TableTargetKind,
 } from "../../extensions/table/actions";
 import { TableActionList } from "./table-action-list";
+import { TableActionHandle, TableAppendHandle } from "./table-handle";
 import { mapMenuTarget, type MenuTarget } from "./table-target";
 import {
   activeCells,
@@ -34,15 +35,7 @@ import {
   type TableLayout,
 } from "./table-geometry";
 
-const labels = { row: "Row actions", column: "Column actions", cell: "Cell actions" } as const;
-const icons = { row: EllipsisVertical, column: Ellipsis, cell: Grip };
-const hints = {
-  row: "Row actions. Drag to reorder; Shift-click to extend selection.",
-  column: "Column actions. Drag to reorder; Shift-click to extend selection.",
-  cell: "Cell actions. Drag to select a range.",
-};
 const scrollEdge = 28;
-const handleHitArea = "before:absolute before:-inset-1 before:content-['']";
 type TableGesture = {
   kind: TableTargetKind;
   pointerId: number;
@@ -417,7 +410,8 @@ function TableControls({ editor }: { editor: Editor }) {
     else {
       if (grip.kind !== "cell" && grip.destination !== null) {
         select(editor, grip.selected);
-        moveTableAxisTo(editor, grip.kind, grip.destination);
+        if (moveTableAxisTo(editor, grip.kind, grip.destination))
+          announceTableAction(editor, "selection-moved");
       }
       editor.view.focus();
       refresh();
@@ -429,13 +423,14 @@ function TableControls({ editor }: { editor: Editor }) {
     if (!target) return;
     close();
     select(editor, target.selected);
-    applyTableAction(
+    const changed = applyTableAction(
       editor,
       target.kind,
       action,
       true,
       target.kind === "column" ? target.anchor?.index : undefined
     );
+    if (changed) announceTableAction(editor, action);
     requestAnimationFrame(() => {
       if (!editor.isDestroyed) editor.view.focus();
     });
@@ -445,7 +440,7 @@ function TableControls({ editor }: { editor: Editor }) {
     if (!axes || axes.$cell.doc !== editor.state.doc) return;
     const last = axis === "row" ? axes.map.height - 1 : axes.map.width - 1;
     select(editor, selectBand(axes.$cell, axis, last));
-    applyTableAction(editor, axis, "insert-after");
+    if (applyTableAction(editor, axis, "insert-after")) announceTableAction(editor, "insert-after");
     editor.view.focus();
   };
 
@@ -485,93 +480,42 @@ function TableControls({ editor }: { editor: Editor }) {
           (kind && kind !== "cell" && targetKind !== kind && targetKind !== "cell")
         )
           return null;
-        const Icon = icons[targetKind];
         return (
-          <div
+          <TableActionHandle
             key={targetKind}
-            className={`pointer-events-auto absolute flex touch-none ${targetKind === "cell" ? "z-10" : ""}`}
-            style={box}
+            kind={targetKind}
+            box={box}
+            isOpen={kind === targetKind}
+            menuOpen={!!kind}
+            portal={portal}
+            buttonRef={targetKind === "row" ? rowButton : undefined}
             onPointerDownCapture={(event) => startGesture(event, targetKind, origin)}
+            onOpenChange={(next) => {
+              if (!next) {
+                if (menu.current?.kind === targetKind) dismiss();
+                return;
+              }
+              const selected = selectionFor(targetKind, origin);
+              if (selected) open(targetKind, selected, origin);
+            }}
           >
-            <Tooltip isDisabled={!!kind}>
-              <Dropdown
-                isOpen={kind === targetKind}
-                onOpenChange={(next) => {
-                  if (!next) {
-                    if (menu.current?.kind === targetKind) dismiss();
-                    return;
-                  }
-                  const selected = selectionFor(targetKind, origin);
-                  if (selected) open(targetKind, selected, origin);
-                }}
-              >
-                <Button
-                  ref={targetKind === "row" ? rowButton : undefined}
-                  aria-label={labels[targetKind]}
-                  aria-keyshortcuts={
-                    targetKind === "row"
-                      ? "Alt+F10"
-                      : targetKind === "cell"
-                        ? "Shift+F10"
-                        : undefined
-                  }
-                  isIconOnly
-                  size="sm"
-                  variant="secondary"
-                  className={`${handleHitArea} h-full! w-full! min-w-0! cursor-grab touch-none p-0! active:cursor-grabbing`}
-                >
-                  <Icon aria-hidden="true" className="m-0! size-3!" />
-                </Button>
-
-                <Dropdown.Popover
-                  placement="bottom start"
-                  offset={4}
-                  className="rich-text-editor__bubble-menu pointer-events-auto overflow-y-auto overscroll-contain data-[exiting=true]:pointer-events-none"
-                  UNSTABLE_portalContainer={portal}
-                >
-                  <TableActionList
-                    editor={editor}
-                    kind={targetKind}
-                    sortColumn={kind === "column" ? openTarget?.anchor?.index : undefined}
-                    onAction={runAction}
-                    ownerId={menuOwner}
-                    onClose={dismiss}
-                  />
-                </Dropdown.Popover>
-              </Dropdown>
-              <Tooltip.Content
-                placement={
-                  targetKind === "row" ? "left" : targetKind === "column" ? "top" : "right"
-                }
-              >
-                {hints[targetKind]}
-              </Tooltip.Content>
-            </Tooltip>
-          </div>
+            <TableActionList
+              editor={editor}
+              kind={targetKind}
+              sortColumn={kind === "column" ? openTarget?.anchor?.index : undefined}
+              onAction={runAction}
+              ownerId={menuOwner}
+              onClose={dismiss}
+            />
+          </TableActionHandle>
         );
       })}
       {!kind &&
         (["row", "column"] as const).map((axis) => {
           const box = axis === "row" ? axes?.boxes.addRow : axes?.boxes.addColumn;
           if (!box) return null;
-          const label = axis === "row" ? "Add row below table" : "Add column to right of table";
           return (
-            <Tooltip key={axis}>
-              <Button
-                aria-label={label}
-                variant="secondary"
-                isIconOnly
-                size="sm"
-                className={`${handleHitArea} pointer-events-auto absolute! min-w-0! p-0!`}
-                style={box}
-                onPress={() => append(axis)}
-              >
-                <Plus aria-hidden="true" className="m-0! size-3!" />
-              </Button>
-              <Tooltip.Content placement={axis === "row" ? "bottom" : "right"}>
-                {label}
-              </Tooltip.Content>
-            </Tooltip>
+            <TableAppendHandle key={axis} axis={axis} box={box} onPress={() => append(axis)} />
           );
         })}
     </div>,
