@@ -2,6 +2,7 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { CellSelection } from "@tiptap/pm/tables";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
+import { tableClipboardPlugin } from "./clipboard";
 import { TableSchemaKit } from "./table-schema";
 
 const activeCellKey = new PluginKey("table-active-cell");
@@ -42,6 +43,7 @@ export const TableKit = TableSchemaKit.extend({
       return extension.extend({
         addProseMirrorPlugins() {
           return [
+            tableClipboardPlugin(),
             ...(this.parent?.() ?? []),
             new Plugin({
               key: activeCellKey,

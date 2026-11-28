@@ -249,10 +249,16 @@ function TableControls({ editor }: { editor: Editor }) {
 
   if (!axes && !cells) return null;
 
-  const selectionFor = (targetKind: TableTargetKind, origin: TableLayout) => {
+  const selectionFor = (targetKind: TableTargetKind, origin: TableLayout, extend = false) => {
     if (origin.$cell.doc !== editor.state.doc) return null;
     if (targetKind === "cell") return activeCells(editor.view);
-    return selectBand(origin.$cell, targetKind, origin[targetKind]);
+    return selectBand(
+      origin.$cell,
+      targetKind,
+      origin[targetKind],
+      activeCells(editor.view),
+      extend
+    );
   };
 
   const startGesture = (
@@ -261,7 +267,7 @@ function TableControls({ editor }: { editor: Editor }) {
     origin: TableLayout
   ) => {
     if (event.button !== 0 || !event.isPrimary || kind || !controls.current) return;
-    const selected = selectionFor(targetKind, origin);
+    const selected = selectionFor(targetKind, origin, event.shiftKey);
     if (!selected) return;
     // Delay until release to distinguish drag from click. Keep capture on the overlay so
     // scrolling the source grip out of view does not interrupt the gesture.
