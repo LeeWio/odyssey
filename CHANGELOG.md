@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.275.0](https://github.com/LeeWio/odyssey/compare/v1.274.0...v1.275.0) (2026-11-28)
+
+
+### Features
+
+* **editor:** group table menus and harden editing lifecycle ([#225](https://github.com/LeeWio/odyssey/issues/225)) ([5d109c2](https://github.com/LeeWio/odyssey/commit/5d109c277976bd7d79274f78212ef7902f746ec4))
+
 ## [1.274.0](https://github.com/LeeWio/odyssey/compare/v1.273.0...v1.274.0) (2026-11-28)
 
 
