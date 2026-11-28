@@ -58,7 +58,8 @@ export function tableLayout(
   view: EditorView,
   $cell: ResolvedPos,
   active: CellSelection | null,
-  point?: Point
+  point?: Point,
+  track?: { axis: Axis; index: number }
 ) {
   const element = view.nodeDOM($cell.pos);
   const table = element instanceof Element ? element.closest("table") : null;
@@ -90,6 +91,8 @@ export function tableLayout(
     )
       column++;
   }
+  if (track?.axis === "row") row = track.index;
+  if (track?.axis === "column") column = track.index;
   const rowRect = table.rows[row]?.getBoundingClientRect();
   const colRect = columns?.[column]?.getBoundingClientRect();
   if (!rowRect || !colRect || !columns) return null;
