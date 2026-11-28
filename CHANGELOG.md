@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.272.1](https://github.com/LeeWio/odyssey/compare/v1.272.0...v1.272.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* **editor:** restore modal table resizing and align live selection ([#216](https://github.com/LeeWio/odyssey/issues/216)) ([61ac8f7](https://github.com/LeeWio/odyssey/commit/61ac8f7a410b10d733dd129bb81c3f9b7189c40a))
+
 ## [1.272.0](https://github.com/LeeWio/odyssey/compare/v1.271.0...v1.272.0) (2026-11-28)
 
 
