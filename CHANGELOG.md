@@ -26,6 +26,13 @@
 
 * **search:** restyle palette scopes and reveal results ([1c33e72](https://github.com/LeeWio/odyssey/commit/1c33e72be38bef32b69c0cf87809fa33237d6294))
 
+## [1.271.0](https://github.com/LeeWio/odyssey/compare/v1.270.1...v1.271.0) (2026-11-28)
+
+
+### Features
+
+* **editor:** strengthen table paste and column width controls ([#209](https://github.com/LeeWio/odyssey/issues/209)) ([3a2b45a](https://github.com/LeeWio/odyssey/commit/3a2b45a5b818ecbdaaa6c22e3cf8c92d01e922ec))
+
 ## [1.270.1](https://github.com/LeeWio/odyssey/compare/v1.270.0...v1.270.1) (2026-11-28)
 
 
