@@ -413,10 +413,16 @@ function TableControls({ editor }: { editor: Editor }) {
       {cells?.outline && (
         <div
           aria-hidden="true"
-          className="border-accent absolute border-2"
-          data-table-selection-outline=""
-          style={cells.outline}
-        />
+          className="absolute overflow-hidden"
+          data-table-selection-clip=""
+          style={cells.outline.clip}
+        >
+          <div
+            className="border-accent absolute box-border border-2"
+            data-table-selection-outline=""
+            style={cells.outline.border}
+          />
+        </div>
       )}
       {guide && <div aria-hidden="true" className="bg-accent absolute" style={guide} />}
       {(["row", "column", "cell"] as const).map((targetKind) => {

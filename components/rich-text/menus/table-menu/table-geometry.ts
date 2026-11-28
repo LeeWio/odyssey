@@ -36,16 +36,63 @@ export function selectBand($cell: ResolvedPos, kind: Axis, index: number) {
   return axisSelection($cell.doc, $cell.start(-1), map, kind, tableAxisRange(map, kind, index));
 }
 
-function selectionBox(table: HTMLTableElement, columns: HTMLCollection, selection: CellSelection) {
+/** WebKit exposes zero-sized COL rects. Fixed-layout tracks follow the first row. */
+function columnBounds(table: HTMLTableElement) {
+  const elements = table.querySelector(":scope > colgroup")?.children;
+  if (!elements?.length) return [];
+  const measured = Array.from(elements, (col) => col.getBoundingClientRect());
+  if (measured.every((col) => col.width > 0)) return measured;
+
+  const columns: Array<{ left: number; right: number }> = [];
+  for (const cell of table.rows[0]?.cells ?? []) {
+    const bounds = cell.getBoundingClientRect();
+    const widths = Array.from(
+      { length: cell.colSpan },
+      (_, index) => parseFloat((elements[columns.length + index] as HTMLElement).style.width) || 0
+    );
+    const total = widths.reduce((sum, width) => sum + width, 0);
+    const automatic = widths.filter((width) => !width).length;
+    let left = bounds.left;
+    widths.forEach((width, index) => {
+      const resolved = automatic
+        ? width || (bounds.width - total) / automatic
+        : (width * bounds.width) / total;
+      const right = index === widths.length - 1 ? bounds.right : left + resolved;
+      columns.push({ left, right });
+      left = right;
+    });
+  }
+  return columns;
+}
+
+function selectionBox(
+  table: HTMLTableElement,
+  columns: Array<{ left: number; right: number }>,
+  selection: CellSelection
+) {
   const { $anchorCell, $headCell } = selection;
   const map = grid($anchorCell);
   const base = $anchorCell.start(-1);
   const rect = map.rectBetween($anchorCell.pos - base, $headCell.pos - base);
+  const bounds = table.getBoundingClientRect();
   return {
-    left: columns[rect.left].getBoundingClientRect().left,
+    left: columns[rect.left].left,
     top: table.rows[rect.top].getBoundingClientRect().top,
-    right: columns[rect.right - 1].getBoundingClientRect().right,
+    right: columns[rect.right - 1].right,
     bottom: table.rows[rect.bottom - 1].getBoundingClientRect().bottom,
+    corners: {
+      topLeft: rect.top === 0 && rect.left === 0,
+      topRight: rect.top === 0 && rect.right === map.width,
+      bottomLeft: rect.bottom === map.height && rect.left === 0,
+      bottomRight: rect.bottom === map.height && rect.right === map.width,
+    },
+    // The wrapper owns the outside 1px border; the grid owns internal borders.
+    outer: {
+      left: rect.left === 0 ? bounds.left - 0.5 : undefined,
+      top: rect.top === 0 ? bounds.top - 0.5 : undefined,
+      right: rect.right === map.width ? bounds.right + 0.5 : undefined,
+      bottom: rect.bottom === map.height ? bounds.bottom + 0.5 : undefined,
+    },
   };
 }
 
@@ -67,7 +114,8 @@ export function tableLayout(
   const viewport =
     view.dom.closest("[data-slot='rich-text-editor-content']")?.getBoundingClientRect() ??
     view.dom.getBoundingClientRect();
-  const wrapper = table.closest(".tableWrapper")?.getBoundingClientRect() ?? viewport;
+  const wrapperElement = table.closest(".tableWrapper");
+  const wrapper = wrapperElement?.getBoundingClientRect() ?? viewport;
   const bounds = table.getBoundingClientRect();
   const left = Math.max(0, bounds.left, wrapper.left, viewport.left);
   const right = Math.min(innerWidth, bounds.right, wrapper.right, viewport.right);
@@ -79,22 +127,16 @@ export function tableLayout(
   const cellRect = map.findCell($cell.pos - $cell.start(-1));
   let row = cellRect.top;
   let column = cellRect.left;
-  // COL and TR expose the actual grid tracks, including lines hidden inside a spanning cell.
-  const columns = table.querySelector(":scope > colgroup")?.children;
+  const columns = columnBounds(table);
   if (point) {
     while (row + 1 < cellRect.bottom && table.rows[row].getBoundingClientRect().bottom <= point.y)
       row++;
-    while (
-      columns &&
-      column + 1 < cellRect.right &&
-      columns[column]?.getBoundingClientRect().right <= point.x
-    )
-      column++;
+    while (columns && column + 1 < cellRect.right && columns[column]?.right <= point.x) column++;
   }
   if (track?.axis === "row") row = track.index;
   if (track?.axis === "column") column = track.index;
   const rowRect = table.rows[row]?.getBoundingClientRect();
-  const colRect = columns?.[column]?.getBoundingClientRect();
+  const colRect = columns[column];
   if (!rowRect || !colRect || !columns) return null;
 
   const strip = 14;
@@ -124,6 +166,7 @@ export function tableLayout(
   const addRow =
     bounds.bottom <= bottom + 1 ? clipped(left, addBottom - strip, right, addBottom) : null;
 
+  const wrapperStyle = wrapperElement ? getComputedStyle(wrapperElement) : null;
   const selected =
     active && inSameTable(active.$anchorCell, $cell) ? selectionBox(table, columns, active) : null;
   const outline =
@@ -151,10 +194,45 @@ export function tableLayout(
     column,
     map,
     table,
-    outline: view.state.selection instanceof CellSelection ? outline : null,
+    outline:
+      selected && outline
+        ? {
+            clip: {
+              left: wrapper.left,
+              top: wrapper.top,
+              width: wrapper.width,
+              height: wrapper.height,
+              borderRadius: wrapperStyle?.borderRadius ?? "0px",
+              clipPath: `inset(${Math.max(0, -wrapper.top, viewport.top - wrapper.top)}px ${Math.max(0, wrapper.right - innerWidth, wrapper.right - viewport.right)}px ${Math.max(0, wrapper.bottom - innerHeight, wrapper.bottom - viewport.bottom)}px ${Math.max(0, -wrapper.left, viewport.left - wrapper.left)}px)`,
+            },
+            border: selectionBorder(selected, wrapperStyle, wrapper),
+          }
+        : null,
     visible: { left, right, top, bottom },
     boxes: { row: rowBox, column: columnBox, cell, addRow, addColumn },
   };
 }
 
 export type TableLayout = NonNullable<ReturnType<typeof tableLayout>>;
+
+/** Center the highlight on the existing grid lines, without shrinking a clipped selection. */
+function selectionBorder(
+  selected: NonNullable<ReturnType<typeof selectionBox>>,
+  style: CSSStyleDeclaration | null,
+  wrapper: DOMRect
+) {
+  const left = selected.outer.left ?? selected.left;
+  const top = selected.outer.top ?? selected.top;
+  const right = selected.outer.right ?? selected.right;
+  const bottom = selected.outer.bottom ?? selected.bottom;
+  return {
+    left: left - wrapper.left - 1,
+    top: top - wrapper.top - 1,
+    width: right - left + 2,
+    height: bottom - top + 2,
+    borderTopLeftRadius: selected.corners.topLeft ? style?.borderTopLeftRadius : 0,
+    borderTopRightRadius: selected.corners.topRight ? style?.borderTopRightRadius : 0,
+    borderBottomLeftRadius: selected.corners.bottomLeft ? style?.borderBottomLeftRadius : 0,
+    borderBottomRightRadius: selected.corners.bottomRight ? style?.borderBottomRightRadius : 0,
+  };
+}

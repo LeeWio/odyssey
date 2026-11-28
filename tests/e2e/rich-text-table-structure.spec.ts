@@ -290,3 +290,120 @@ test("inserts the selected table dimensions using arrow keys in the toolbar grid
   await expect(rows.first().getByRole("columnheader")).toHaveCount(3);
   await expect(rows.nth(1).getByRole("cell")).toHaveCount(3);
 });
+
+test("draws the active and merged selection on the grid boundary", async ({ page }) => {
+  const table = await loadTable(page);
+  const cell = table.locator("tr").nth(1).locator("td").last();
+  await cell.click();
+  const outline = page.locator("[data-table-selection-outline]");
+  await expect(outline).toBeVisible();
+  await expect
+    .poll(async () => {
+      const border = (await outline.boundingBox())!;
+      const grid = (await cell.boundingBox())!;
+      return Math.abs(border.x + 1 - grid.x);
+    })
+    .toBeLessThan(0.1);
+  expect(await cell.evaluate((el) => getComputedStyle(el, "::before").content)).toBe("none");
+  await page.keyboard.press("Shift+F10");
+  await expect(outline).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  const from = (await table.locator("th").first().boundingBox())!;
+  const to = (await table.locator("th").last().boundingBox())!;
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
+  await page.mouse.up();
+  await page.getByRole("button", { name: "Cell actions", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Merge cells", exact: true }).click();
+  await expect(table.locator("th")).toHaveCount(1);
+  await expect(table.locator("th")).toHaveAttribute("colspan", "2");
+  await expect(outline).toBeVisible();
+  const corner = await outline.evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
+  const radius = await table.evaluate(
+    (el) => getComputedStyle(el.closest(".tableWrapper")!).borderTopLeftRadius
+  );
+  expect(corner).toBe(radius);
+  expect(await outline.evaluate((el) => getComputedStyle(el).borderBottomLeftRadius)).toBe("0px");
+});
+
+test("clips the real selected band instead of drawing an edge at the scroll boundary", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 520, height: 800 });
+  const table = await loadTable(page, wideFixture);
+  await table.locator("th").first().click();
+  await page.getByRole("button", { name: "Row actions", exact: true }).click();
+  await expect(page.getByRole("menu", { name: "Row actions", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  const outline = page.locator("[data-table-selection-outline]");
+  await expect(outline).toBeVisible();
+  const wrapper = page.locator(`${editorSelector} .tableWrapper`);
+  await wrapper.evaluate((el) => {
+    el.scrollLeft = 200;
+  });
+  await expect
+    .poll(async () => {
+      const border = (await outline.boundingBox())!;
+      const viewport = (await wrapper.boundingBox())!;
+      return viewport.x - border.x;
+    })
+    .toBeGreaterThan(190);
+  const border = (await outline.boundingBox())!;
+  const viewport = (await wrapper.boundingBox())!;
+  expect(border.x + border.width).toBeGreaterThan(viewport.x + viewport.width + 100);
+  await expect(page.locator("[data-table-selection-clip]")).toHaveCSS("overflow", "hidden");
+  await expect(page.getByRole("button", { name: "Cell actions", exact: true })).toBeVisible();
+});
+
+test("positions column controls inside a merged header with unequal saved widths", async ({
+  page,
+}) => {
+  const widths = [130, 210, 160];
+  const table = await loadTable(page, {
+    type: "doc",
+    content: [
+      {
+        type: "table",
+        content: [
+          {
+            type: "tableRow",
+            content: [
+              {
+                type: "tableHeader",
+                attrs: { colspan: 3, colwidth: widths },
+                content: [
+                  { type: "paragraph", content: [{ type: "text", text: "Merged header" }] },
+                ],
+              },
+            ],
+          },
+          {
+            type: "tableRow",
+            content: widths.map((width, index) => ({
+              type: "tableCell",
+              attrs: { colwidth: [width] },
+              content: [
+                { type: "paragraph", content: [{ type: "text", text: `Column ${index}` }] },
+              ],
+            })),
+          },
+        ],
+      },
+      { type: "paragraph" },
+    ],
+  });
+  const second = table.locator("td").nth(1);
+  const track = (await second.boundingBox())!;
+  const header = (await table.locator("th").boundingBox())!;
+  await page.mouse.move(track.x + track.width / 2, header.y + header.height / 2);
+  const grip = page.getByRole("button", { name: "Column actions", exact: true });
+  await expect(grip).toBeVisible();
+  await expect.poll(async () => Math.abs((await grip.boundingBox())!.x - track.x)).toBeLessThan(1);
+  expect(Math.abs((await grip.boundingBox())!.width - track.width)).toBeLessThan(1);
+  await table.locator("th").click();
+  const outline = page.locator("[data-table-selection-outline]");
+  await expect(outline).toBeVisible();
+  expect((await outline.boundingBox())!.width).toBeGreaterThanOrEqual(header.width);
+});
