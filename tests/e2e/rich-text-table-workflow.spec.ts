@@ -22,7 +22,9 @@ test.beforeEach(async ({ page }) => {
 
 test("pastes and copies a spreadsheet grid and undoes it in one step @smoke", async ({ page }) => {
   const editor = page.getByRole("textbox", { name: "Rich text editor", exact: true });
-  await editor.getByRole("cell", { name: "Amy", exact: true }).click();
+  const target = editor.getByRole("cell", { name: "Amy", exact: true });
+  await target.click();
+  await expect(target).toHaveClass(/table-cell-active/);
   await paste(editor, 'Alpha\t"Beta\nsecond line"\r\nGamma\tDelta\r\n');
   await expect(editor.locator(".selectedCell")).toHaveCount(4);
   const rows = editor.locator("tr");
